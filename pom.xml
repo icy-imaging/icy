@@ -7,20 +7,124 @@
     <groupId>org.bioimageanalysis.icy</groupId>
     <artifactId>icy-kernel</artifactId>
     <version>2.0.2-SNAPSHOT</version>
+
     <packaging>jar</packaging>
 
     <name>Icy</name>
 
+    <properties>
+        <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
+        <jdk.version>1.8</jdk.version>
+
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+
+        <outputDirectory>${project.build.directory}</outputDirectory>
+
+        <stripVersion>true</stripVersion>
+        <overWriteTrue>true</overWriteTrue>
+        <overWriteFalse>true</overWriteFalse>
+
+        <overWriteReleases>true</overWriteReleases>
+        <overWriteIfNewer>true</overWriteIfNewer>
+        <overWriteSnapshots>false</overWriteSnapshots>
+    </properties>
+
     <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <sourceDirectory>src</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>ij</directory>
+                                    <targetPath>${outputDirectory}/icy/ij</targetPath>
+                                    <exclude>ij.jar</exclude>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>net.imagej</groupId>
+                                    <artifactId>ij</artifactId>
+                                    <version>1.52q</version>
+                                    <type>jar</type>
+                                    <overWrite>${overWriteTrue}</overWrite>
+                                    <outputDirectory>${outputDirectory}/icy/ij</outputDirectory>
+                                    <destFileName>ij.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>false</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <excludeGroupIds>net.imageJ</excludeGroupIds>
+                            <outputDirectory>${outputDirectory}/icy/lib</outputDirectory>
+                            <stripVersion>${stripVersion}</stripVersion>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.2</version>
                 <configuration>
-                    <source>7</source>
-                    <target>7</target>
+                    <outputDirectory>${outputDirectory}/icy</outputDirectory>
+                    <archive>
+                        <manifest>
+                            <classpathLayoutType>custom</classpathLayoutType>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <customClasspathLayout>$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>icy.main.Icy</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
-                <version>3.8.1</version>
             </plugin>
         </plugins>
     </build>
@@ -40,49 +144,49 @@
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>Icy-Bioformats</artifactId>
+            <artifactId>icy-bioformats</artifactId>
             <version>5.9.2</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>Icy-Flamingo</artifactId>
+            <artifactId>icy-flamingo</artifactId>
             <version>7.3</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>Icy-jai_core</artifactId>
+            <artifactId>icy-jai_core</artifactId>
             <version>1.1.3</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>Icy-jai_codec</artifactId>
+            <artifactId>icy-jai_codec</artifactId>
             <version>1.1.3</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>Icy-Substance</artifactId>
+            <artifactId>icy-substance</artifactId>
             <version>7.3</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>Icy-Substance_Flamingo</artifactId>
+            <artifactId>icy-substance_flamingo</artifactId>
             <version>7.3</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>Icy-Substance_Swingx</artifactId>
+            <artifactId>icy-substance_swingx</artifactId>
             <version>7.3</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>Icy-vtk</artifactId>
+            <artifactId>icy-vtk</artifactId>
             <version>1.6.0_41</version>
         </dependency>
 
@@ -133,12 +237,30 @@
             <artifactId>swingx-all</artifactId>
             <version>1.6.5-1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.insubstantial</groupId>
+            <artifactId>trident</artifactId>
+            <version>7.3</version>
+        </dependency>
     </dependencies>
 
     <repositories>
         <repository>
-            <id>icy-repository</id>
-            <url>http://localhost:8081/repository/Icy/</url>
+            <id>maven-group</id>
+            <url>http://localhost:8081/repository/icy-group/</url>
         </repository>
     </repositories>
+
+    <!-- Publication du projet
+    <distributionManagement>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://localhost:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://localhost:8081/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>-->
 </project>
