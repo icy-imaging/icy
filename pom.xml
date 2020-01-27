@@ -11,6 +11,57 @@
     <packaging>jar</packaging>
 
     <name>Icy</name>
+    <description>Icy is an open community platform for bioimage informatics</description>
+    <url>http://http://icy.bioimageanalysis.org/</url>
+    <inceptionYear>2011</inceptionYear>
+    <organization>
+        <name>Institut Pasteur</name>
+        <url>https://www.pasteur.fr/</url>
+    </organization>
+    <licenses>
+        <license>
+            <name>GNU GPLv3</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.en.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>sdallongeville</id>
+            <name>Stéphane Dallongeville</name>
+            <url>http://icy.bioimageanalysis.org/author/stef/</url>
+            <roles>
+                <role>founder</role>
+                <role>lead</role>
+                <role>developer</role>
+                <role>debugger</role>
+                <role>reviewer</role>
+                <role>support</role>
+                <role>maintainer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>atournay</id>
+            <name>Amandine Tournay</name>
+            <roles>
+                <role>developer</role>
+                <role>maintainer</role>
+            </roles>
+        </developer>
+    </developers>
+    <!--<contributors></contributors>-->
+
+    <mailingLists>
+        <mailingList>
+            <name>Icy</name>
+            <post>icy-all@pasteur.fr</post>
+        </mailingList>
+    </mailingLists>
+
+    <issueManagement>
+        <system>Gitlab</system>
+        <url>https://gitlab.pasteur.fr/bia/icy/issues</url>
+    </issueManagement>
 
     <properties>
         <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
