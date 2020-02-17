@@ -3,6 +3,6 @@
 <name>Canvas 2D</name>
 <version>1.0.0.0</version>
 <description>Default 2D canvas</description>
-<classname>plugins.plugins.kernel.canvas.Canvas2DPlugin</classname>
+<classname>plugins.kernel.canvas.Canvas2DPlugin</classname>
 <author>Kernel</author>
 </root>

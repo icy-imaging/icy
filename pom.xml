@@ -67,8 +67,8 @@
         <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
         <jdk.version>1.8</jdk.version>
 
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
         <outputDirectory>${project.build.directory}</outputDirectory>
 
@@ -83,12 +83,13 @@
 
     <build>
         <finalName>${project.artifactId}-${project.version}</finalName>
-        <sourceDirectory>src</sourceDirectory>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
+        
+<!--         <sourceDirectory>src/main/java</sourceDirectory> -->
+<!--         <resources> -->
+<!--             <resource> -->
+<!--                 <directory>src/main/resources</directory> -->
+<!--             </resource> -->
+<!--         </resources> -->
 
         <plugins>
             <plugin>

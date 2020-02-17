@@ -3,6 +3,6 @@
 <name>Bio-Formats importer</name>
 <version>1.0.0.0</version>
 <description>Bio-Formats based library importer</description>
-<classname>plugins.plugins.kernel.importer.LociImporterPlugin</classname>
+<classname>plugins.kernel.importer.LociImporterPlugin</classname>
 <author>Kernel</author>
 </root>

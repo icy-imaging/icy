@@ -69,7 +69,7 @@ public class LocalPluginSearchResultProducer extends SearchResultProducer
     @Override
     public int getOrder()
     {
-        // should be close after plugins.kernel
+        // should be close after kernel
         return 5;
     }
 

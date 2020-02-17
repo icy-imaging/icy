@@ -6,5 +6,5 @@
 Draw in with left mouse button and erase with right button and press ESC when you're done to unselect the ROI.
 You can increase or decrease the pencil size with '+' and '-' keys.
 Use the DELETE key to remove the ROI when it is selected or focused.</description>
-<classname>plugins.plugins.kernel.roi.roi2d.plugin.ROI2DAreaPlugin</classname>
+<classname>plugins.kernel.roi.roi2d.plugin.ROI2DAreaPlugin</classname>
 </root>

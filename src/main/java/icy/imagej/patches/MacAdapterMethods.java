@@ -29,7 +29,7 @@ public class MacAdapterMethods
         // prevent instantiation of utility class
     }
 
-    /** Replaces {@link MacAdapter#run(String)}. */
+    /** Replaces {@link MacAdapter#run(java.lang.String)}. */
     public static void run(final Object obj, Object event)
     {
         // do nothing

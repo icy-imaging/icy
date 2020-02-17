@@ -3,6 +3,6 @@
 <name>VTK Canvas</name>
 <version>1.1.0.0</version>
 <description>Default 3D canvas using VTK library</description>
-<classname>plugins.plugins.kernel.canvas.VtkCanvasPlugin</classname>
+<classname>plugins.kernel.canvas.VtkCanvasPlugin</classname>
 <author>Kernel</author>
 </root>

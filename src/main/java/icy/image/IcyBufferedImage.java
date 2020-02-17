@@ -1095,7 +1095,8 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         // cancel any pending loading tasks for this image
         imageDataLoader.cancelTasks(this);
         // image has been released, be sure to clear cache
-        ImageCache.remove(this);
+        if (ImageCache.isEnabled())
+            ImageCache.remove(this);
 
         // remove it from hashmap
         synchronized (images)
@@ -1129,12 +1130,22 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
+     * Same as {@link #isDataInitialized()}
+     * 
+     * @see #isDataInitialized()
+     */
+    public boolean isDataLoaded()
+    {
+        return isDataInitialized();
+    }
+
+    /**
      * Returns <code>true</code> if data is currently loaded in memory.<br>
      * It returns <code>false</code> if data has not yet be initialized (see {@link #isDataInitialized()}) or if data is cached on disk (not anymore in memory)
      */
     public boolean isDataInMemory()
     {
-        return ImageCache.isOnMemoryCache(this);
+        return (!ImageCache.isEnabled()) || ImageCache.isOnMemoryCache(this);
     }
 
     /**
@@ -4166,7 +4177,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Same as getRGB but by using the specified LUT instead of internal one
      * 
-     * @see BufferedImage#getRGB(int, int)
+     * @see java.awt.image.BufferedImage#getRGB(int, int)
      */
     public int getRGB(int x, int y, LUT lut)
     {

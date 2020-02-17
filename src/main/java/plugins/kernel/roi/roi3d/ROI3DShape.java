@@ -30,6 +30,7 @@ import icy.painter.Anchor3D.Anchor3DPositionListener;
 import icy.painter.OverlayEvent;
 import icy.painter.OverlayEvent.OverlayEventType;
 import icy.painter.OverlayListener;
+import icy.painter.VtkPainter;
 import icy.roi.ROI;
 import icy.roi.ROI3D;
 import icy.roi.ROIEvent;

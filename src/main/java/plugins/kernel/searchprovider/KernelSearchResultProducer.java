@@ -33,7 +33,7 @@ import icy.search.SearchResultProducer;
 import icy.util.StringUtil;
 
 /**
- * This class is used to provide plugins.kernel command elements to the search engine.
+ * This class is used to provide kernel command elements to the search engine.
  * 
  * @author Stephane
  */

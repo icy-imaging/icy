@@ -1050,7 +1050,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      * Pick object at specified position and return it.
      *
      * @see #getPickedObject()
-     * @see IcyVtkPanel#pick(int, int)
+     * @see icy.vtk.IcyVtkPanel#pick(int, int)
      */
     public vtkProp pickProp(int x, int y)
     {
@@ -1396,7 +1396,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     /**
-     * @see IcyVtkPanel#getPicker()
+     * @see icy.vtk.IcyVtkPanel#getPicker()
      */
     public vtkPicker getPicker()
     {
@@ -2303,7 +2303,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         {
             super("VTK canvas properties updater");
 
-            toUpdate = new LinkedBlockingQueue<Property>(256);
+            toUpdate = new LinkedBlockingQueue<VtkCanvas.Property>(256);
         }
 
         public synchronized void submit(Property prop)

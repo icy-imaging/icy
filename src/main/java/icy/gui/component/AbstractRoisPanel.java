@@ -118,7 +118,6 @@ import plugins.kernel.roi.descriptor.measure.ROIPerimeterDescriptor;
 import plugins.kernel.roi.descriptor.measure.ROISurfaceAreaDescriptor;
 import plugins.kernel.roi.descriptor.measure.ROIVolumeDescriptor;
 import plugins.kernel.roi.descriptor.property.ROIColorDescriptor;
-import plugins.kernel.roi.descriptor.property.ROIGroupIdDescriptor;
 import plugins.kernel.roi.descriptor.property.ROIIconDescriptor;
 import plugins.kernel.roi.descriptor.property.ROINameDescriptor;
 import plugins.kernel.roi.descriptor.property.ROIOpacityDescriptor;
@@ -239,6 +238,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     protected Map<ROI, ROIResults> roiResultsMap;
     protected List<ROI> filteredRoiList;
     protected List<ROIResults> filteredRoiResultsList;
+    protected List<SequenceEvent> savedSequenceEvents;
 
     // internals
     protected final XMLPreferences basePreferences;
@@ -249,6 +249,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     // complete refresh of the roiTable
     protected final Runnable roiListRefresher;
     protected final Runnable filteredRoiListRefresher;
+    protected final Runnable descriptorsValueRefresher;
     protected final Runnable tableDataStructureRefresher;
     protected final Runnable tableDataRefresher;
     protected final Runnable tableSelectionRefresher;
@@ -279,6 +280,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         roiResultsMap = new HashMap<ROI, ROIResults>();
         filteredRoiList = new ArrayList<ROI>();
         filteredRoiResultsList = new ArrayList<ROIResults>();
+        savedSequenceEvents = new ArrayList<SequenceEvent>();
         modifySelection = new Semaphore(1);
         columnInfoList = new ArrayList<ColumnInfo>();
 
@@ -300,6 +302,14 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             public void run()
             {
                 refreshFilteredRoisInternal();
+            }
+        };
+        descriptorsValueRefresher = new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                refreshDescriptorsValueInternal();
             }
         };
         tableDataStructureRefresher = new Runnable()
@@ -1053,6 +1063,39 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         refreshTableDataStructureInternal();
     }
 
+    public void refreshDescriptorsValue()
+    {
+        processor.submit(true, descriptorsValueRefresher);
+    }
+
+    protected void refreshDescriptorsValueInternal()
+    {
+        final ROIResults[] allRoiResults;
+        final List<SequenceEvent> events;
+
+        // get all ROI results
+        synchronized (roiResultsMap)
+        {
+            allRoiResults = roiResultsMap.values().toArray(new ROIResults[roiResultsMap.size()]);
+        }
+
+        // get saved events
+        synchronized (savedSequenceEvents)
+        {
+            events = new ArrayList<SequenceEvent>(savedSequenceEvents);
+            // so we know we processed them
+            savedSequenceEvents.clear();
+        }
+
+        // notify ROI results that sequence has changed
+        for (ROIResults roiResults : allRoiResults)
+            for (SequenceEvent event : events)
+                roiResults.sequenceChanged(event);
+
+        // refresh table data
+        refreshTableData();
+    }
+
     public void refreshTableDataStructure()
     {
         processor.submit(true, tableDataStructureRefresher);
@@ -1582,6 +1625,15 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                         // already handled by ROIResults directly
                         break;
                 }
+
+                // need to save event for refreshDescriptorsValue
+                synchronized (savedSequenceEvents)
+                {
+                    savedSequenceEvents.add(event);
+                }
+
+                // refresh descriptors value (as some rely on others ROIs, for instance 'Intersected ROI' descriptor)
+                refreshDescriptorsValue();
                 break;
 
             case SEQUENCE_META:
@@ -1597,20 +1649,13 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 // don't use break, we also need to send the event to descriptors
 
             case SEQUENCE_DATA:
-                final ROIResults[] allRoiResults;
-
-                // get all ROI results
-                synchronized (roiResultsMap)
+                synchronized (savedSequenceEvents)
                 {
-                    allRoiResults = roiResultsMap.values().toArray(new ROIResults[roiResultsMap.size()]);
+                    savedSequenceEvents.add(event);
                 }
 
-                // notify ROI results that sequence has changed
-                for (ROIResults roiResults : allRoiResults)
-                    roiResults.sequenceChanged(event);
-
-                // refresh table data
-                refreshTableData();
+                // refresh descriptors value (as some rely on others ROIs, for instance 'Intersected ROI' descriptor)
+                refreshDescriptorsValue();
                 break;
 
             case SEQUENCE_TYPE:
@@ -2017,7 +2062,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         {
             super("ROI " + type.toString() + " descriptor calculator");
 
-            resultsToCompute = new LinkedHashSet<ROIResults>(256);
+            resultsToCompute = new LinkedHashSet<AbstractRoisPanel.ROIResults>(256);
             this.type = type;
 
             setPriority(Thread.MIN_PRIORITY);
@@ -2288,9 +2333,9 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             if (StringUtil.equals(id, ROIColorDescriptor.ID))
                 return order;
             order++;
-            if (StringUtil.equals(id, ROIGroupIdDescriptor.ID))
-                return order;
-            order++;
+            // if (StringUtil.equals(id, ROIGroupIdDescriptor.ID))
+            // return order;
+            // order++;
             if (StringUtil.equals(id, ROINameDescriptor.ID))
                 return order;
 
@@ -2389,8 +2434,8 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 return 22;
             if (StringUtil.equals(id, ROIColorDescriptor.ID))
                 return 18;
-            if (StringUtil.equals(id, ROIGroupIdDescriptor.ID))
-                return 18;
+            // if (StringUtil.equals(id, ROIGroupIdDescriptor.ID))
+            // return 18;
             if (StringUtil.equals(id, ROINameDescriptor.ID))
                 return 60;
 
@@ -2419,8 +2464,8 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 return 22;
             if (StringUtil.equals(id, ROIColorDescriptor.ID))
                 return 18;
-            if (StringUtil.equals(id, ROIGroupIdDescriptor.ID))
-                return 18;
+            // if (StringUtil.equals(id, ROIGroupIdDescriptor.ID))
+            // return 18;
 
             return Integer.MAX_VALUE;
         }
@@ -2451,7 +2496,8 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             final String id = descriptor.getId();
 
             return (StringUtil.equals(id, ROIIconDescriptor.ID)) || (StringUtil.equals(id, ROIColorDescriptor.ID))
-                    || (StringUtil.equals(id, ROINameDescriptor.ID)) || (StringUtil.equals(id, ROIGroupIdDescriptor.ID))
+                    || (StringUtil.equals(id,
+                            ROINameDescriptor.ID)) /* || (StringUtil.equals(id, ROIGroupIdDescriptor.ID)) */
                     || (StringUtil.equals(id, ROIPositionXDescriptor.ID))
                     || (StringUtil.equals(id, ROIPositionYDescriptor.ID))
                     || (StringUtil.equals(id, ROIPositionZDescriptor.ID))
@@ -2583,8 +2629,8 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             final String id = descriptor.getId();
 
             // we don't want to display name for these descriptors
-            if (StringUtil.equals(id, ROIIconDescriptor.ID) || StringUtil.equals(id, ROIColorDescriptor.ID)
-                    || StringUtil.equals(id, ROIGroupIdDescriptor.ID))
+            if (StringUtil.equals(id, ROIIconDescriptor.ID) || StringUtil.equals(id, ROIColorDescriptor.ID))
+                // || StringUtil.equals(id, ROIGroupIdDescriptor.ID))
                 showName = false;
             else
                 showName = true;
@@ -2747,6 +2793,23 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             }
             catch (Exception e)
             {
+                // ignore this...
+                // System.err.println("ROI table column sort failed:");
+                // System.err.println(e.getMessage());
+            }
+        }
+
+        @Override
+        public int convertRowIndexToModel(int index)
+        {
+            try
+            {
+                return super.convertRowIndexToModel(index);
+            }
+            catch (Exception e)
+            {
+                return 0;
+
                 // ignore this...
                 // System.err.println("ROI table column sort failed:");
                 // System.err.println(e.getMessage());

@@ -22,6 +22,7 @@ import icy.canvas.IcyCanvas;
 import icy.common.CollapsibleEvent;
 import icy.gui.inspector.RoisPanel;
 import icy.main.Icy;
+import icy.painter.VtkPainter;
 import icy.roi.BooleanMask2D;
 import icy.roi.BooleanMask3D;
 import icy.roi.ROI;

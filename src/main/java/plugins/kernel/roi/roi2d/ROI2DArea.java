@@ -46,6 +46,7 @@ import icy.common.CollapsibleEvent;
 import icy.gui.inspector.RoisPanel;
 import icy.image.ImageUtil;
 import icy.main.Icy;
+import icy.painter.VtkPainter;
 import icy.resource.ResourceUtil;
 import icy.roi.BooleanMask2D;
 import icy.roi.ROI;
@@ -568,7 +569,7 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public void keyPressed(KeyEvent e, Double imagePoint, IcyCanvas canvas)
+        public void keyPressed(KeyEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
         {
             // send event to parent first
             super.keyPressed(e, imagePoint, canvas);
@@ -614,7 +615,7 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public void mousePressed(MouseEvent e, Double imagePoint, IcyCanvas canvas)
+        public void mousePressed(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
         {
             // send event to parent first
             super.mousePressed(e, imagePoint, canvas);
@@ -666,7 +667,7 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public void mouseReleased(MouseEvent e, Double imagePoint, IcyCanvas canvas)
+        public void mouseReleased(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
         {
             // send event to parent first
             super.mouseReleased(e, imagePoint, canvas);
@@ -715,7 +716,7 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public void mouseClick(MouseEvent e, Double imagePoint, IcyCanvas canvas)
+        public void mouseClick(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
         {
             // provide backward compatibility
             if (imagePoint != null)
@@ -778,7 +779,7 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public void mouseDrag(MouseEvent e, Double imagePoint, IcyCanvas canvas)
+        public void mouseDrag(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
         {
             // send event to parent first
             super.mouseDrag(e, imagePoint, canvas);

@@ -5,7 +5,7 @@
 <description>Ellipse type ROI (2D)
 Drag from start point to destination point and press ESC when you're done to unselect the ROI.
 Use the DELETE key to remove the ROI when it is selected or focused.</description>
-<classname>plugins.plugins.kernel.roi.roi2d.plugin.ROI2DEllipsePlugin</classname>
+<classname>plugins.kernel.roi.roi2d.plugin.ROI2DEllipsePlugin</classname>
 </root>
 
 

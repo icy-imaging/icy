@@ -6,5 +6,5 @@
 Add new point to the polygon with left click and press ESC when you're done.
 You can add new point on selected ROI by using left click while pressing CONTROL key.
 Use the DELETE key to remove a focused point or to remove the ROI when it is selected or focused.</description>
-<classname>plugins.plugins.kernel.roi.roi2d.plugin.ROI2DPolygonPlugin</classname>
+<classname>plugins.kernel.roi.roi2d.plugin.ROI2DPolygonPlugin</classname>
 </root>         

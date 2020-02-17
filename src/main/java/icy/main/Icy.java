@@ -107,7 +107,7 @@ public class Icy
     /**
      * Icy Version
      */
-    public static Version version = new Version("2.0.2.0");
+    public static Version version = new Version("2.0.4.0");
 
     /**
      * Main interface
@@ -157,6 +157,16 @@ public class Icy
      */
     static ExitFrame exitFrame = null;
     static Thread terminer = null;
+
+    /**
+     * Flag indicating cache module loading
+     */
+    private static boolean loadCache;
+
+    /**
+     * Flag indicating network module loading
+     */
+    private static boolean loadNetwork;
 
     /**
      * @param args
@@ -210,6 +220,8 @@ public class Icy
 
             // fix possible IllegalArgumentException on Swing sorting
             System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+            // set LOCI debug level (do it immediately as it can quickly show some log messages)
+            loci.common.DebugTools.enableLogging("ERROR");
 
             if (!headless && !noSplash)
             {
@@ -232,9 +244,6 @@ public class Icy
                 });
             }
 
-            // set LOCI debug level (do it immediately as it can quickly show some log messages)
-            loci.common.DebugTools.enableLogging("ERROR");
-
             // fast start
             new Thread(new Runnable()
             {
@@ -244,7 +253,7 @@ public class Icy
                     // force image cache initialization so GUI won't wait after it (need preferences init)
                     ImageCache.isEnabled();
                 }
-            }, "Initializer 1").start();
+            }, "Initializer: Cache").start();
             new Thread(new Runnable()
             {
                 @Override
@@ -253,7 +262,7 @@ public class Icy
                     // initialize network (need preferences init)
                     NetworkUtil.init();
                 }
-            }, "Initializer 2").start();
+            }, "Initializer: Network").start();
             new Thread(new Runnable()
             {
                 @Override
@@ -263,7 +272,7 @@ public class Icy
                     PluginLoader.reloadAsynch();
                     WorkspaceLoader.reloadAsynch();
                 }
-            }, "Initializer 3").start();
+            }, "Initializer: Plugin and WS").start();
 
             try
             {
@@ -348,7 +357,7 @@ public class Icy
             System.out.println("Image cache initialized (reserved memory = " + ApplicationPreferences.getCacheMemoryMB()
                     + " MB, disk cache location = " + ApplicationPreferences.getCachePath() + ")");
         }
-        else
+        else if (loadCache)
         {
             System.err.println("Couldn't initialize image cache (cache is disabled)");
             // disable virtual mode button from inspector
@@ -368,7 +377,8 @@ public class Icy
         // initialize exception handler
         IcyExceptionHandler.init();
         // initialize action manager
-        ActionManager.init();
+        if (!headless)
+            ActionManager.init();
         // prepare native library files (need preferences init)
         nativeLibrariesInit();
 
@@ -399,32 +409,11 @@ public class Icy
             GeneralPreferences.setLastUpdateCheckTime(0);
         }
 
-        // HTTPS not supported ?
-        if (!NetworkUtil.isHTTPSSupported())
-        {
-            // final String text1 = "Your version of java does not support HTTPS connection required by the future new web site.";
-            // final String text2 = "You need to upgrade java to 7u111 (Java 7) or 8u101 (Java 8) at least to be able to use online features in future.";
-            final String text1 = "Your version of java does not support HTTPS protocol which will be used soon by the new web site.";
-            final String text2 = "You need to upgrade your version of java to 7u111 (Java 7) or 8u101 (Java 8) at least to use online features (as search or plugin update) in future.";
-            // final String text2 = "You won't be able to use online features (as search or plugin update) in future until you update your version of java (Java
-            // 7u111 or Java
-            // 8u101 minimum).";
-
-            System.err.println("Warning: " + text1);
-            System.err.println(text2);
-
-            // TODO: change message when new web site is here
-            if (!Icy.getMainInterface().isHeadLess())
-                new ToolTipFrame("<html><b>WARNING:</b> " + text1 + "<br>" + text2 + "</html>", 0,
-                        "httpsNotSupportedWarning");
-            // new ToolTipFrame("<html><b>" + text1 + "<br>" + text2 + "</b></html>", 0, "httpsNotSupported");
-        }
-
         final long currentTime = System.currentTimeMillis();
         final long halfDayInterval = 1000 * 60 * 60 * 12;
 
         // check only once per 12 hours slice
-        if (currentTime > (GeneralPreferences.getLastUpdateCheckTime() + halfDayInterval))
+        if (loadNetwork && currentTime > (GeneralPreferences.getLastUpdateCheckTime() + halfDayInterval))
         {
             // check for core update
             if (GeneralPreferences.getAutomaticUpdate())
@@ -490,6 +479,8 @@ public class Icy
         startupPlugin = null;
         boolean execute = false;
         boolean headless = false;
+        loadCache = true;
+        loadNetwork = true;
 
         // save the base arguments
         Icy.args = args;
@@ -507,6 +498,10 @@ public class Icy
             // headless mode
             else if (arg.equalsIgnoreCase("--headless") || arg.equalsIgnoreCase("-hl"))
                 headless = true;
+            else if (arg.equalsIgnoreCase("--nocache") || arg.equalsIgnoreCase("-nc"))
+                loadCache = false;
+            else if (arg.equalsIgnoreCase("--nonetwork") || arg.equalsIgnoreCase("-nnt"))
+                loadNetwork = false;
             // disable splash-screen
             else if (arg.equalsIgnoreCase("--nosplash") || arg.equalsIgnoreCase("-ns"))
                 noSplash = true;
@@ -551,6 +546,27 @@ public class Icy
                 new ToolTipFrame("<html>" + text + "</html>", 15, "outdatedJavaOSX");
         }
 
+        // HTTPS not supported ?
+        if (!NetworkUtil.isHTTPSSupported())
+        {
+            // final String text1 = "Your version of java does not support HTTPS connection required by the future new web site.";
+            // final String text2 = "You need to upgrade java to 7u111 (Java 7) or 8u101 (Java 8) at least to be able to use online features in future.";
+            final String text1 = "Your version of java does not support HTTPS protocol which will be used soon by the new web site.";
+            final String text2 = "You need to upgrade your version of java to 7u111 (Java 7) or 8u101 (Java 8) at least to use online features (as search or plugin update) in future.";
+            // final String text2 = "You won't be able to use online features (as search or plugin update) in future until you update your version of java (Java
+            // 7u111 or Java
+            // 8u101 minimum).";
+
+            System.err.println("Warning: " + text1);
+            System.err.println(text2);
+
+            // TODO: change message when new web site is here
+            if (!Icy.getMainInterface().isHeadLess())
+                new ToolTipFrame("<html><b>WARNING:</b> " + text1 + "<br>" + text2 + "</html>", 0,
+                        "httpsNotSupportedWarning");
+            // new ToolTipFrame("<html><b>" + text1 + "<br>" + text2 + "</b></html>", 0, "httpsNotSupported");
+        }
+
         // detect bad memory setting
         if ((ApplicationPreferences.getMaxMemoryMB() <= 128) && (ApplicationPreferences.getMaxMemoryMBLimit() > 256))
         {
@@ -578,13 +594,13 @@ public class Icy
             // welcome tip !
             tooltip = new ToolTipFrame(
                     "<html>Access the main menu by clicking on top left icon<br>" + "<img src=\""
-                            + Icy.class.getResource("/image/help/main_menu.png") + "\" /></html>",
+                            + Icy.class.getResource("/res/image/help/main_menu.png").toString() + "\" /></html>",
                     30, "mainMenuTip");
             tooltip.setSize(456, 240);
 
             // new Image Cache !
             tooltip = new ToolTipFrame("<html>" + "<img src=\""
-                    + Icy.class.getResource("/image/help/virtual_mode.jpg") + "\" /><br>"
+                    + Icy.class.getResource("/res/image/help/virtual_mode.jpg").toString() + "\" /><br>"
                     + "This new button allow to enable/disable Icy <b>virtual mode</b>.<br><br>"
                     + "Virtual mode will force all new created images to be in <i>virtual mode</i> which mean their data can be stored on disk to spare memory.<br>"
                     + "Note that <i>virtual mode</i> is still experimental and <b>some plugins don't support it</b> (processed data can be lost) so use it carefully and only if you're running out of memory.<br>"
@@ -746,7 +762,7 @@ public class Icy
                 // mark the application as exiting
                 exiting = true;
 
-                System.out.println("Exiting...");
+                System.out.print("Exiting...");
 
                 final ImageJ ij = Icy.getMainInterface().getImageJ();
 
@@ -886,7 +902,8 @@ public class Icy
                 // save audit data
                 Audit.save();
                 // cache cleanup
-                ImageCache.end();
+                if (ImageCache.isEnabled())
+                    ImageCache.end();
 
                 // clean up native library files
                 // unPrepareNativeLibraries();
@@ -900,6 +917,8 @@ public class Icy
                 // launch updater if needed
                 if (doUpdate || restart)
                     IcyUpdater.launchUpdater(doUpdate, restart);
+
+                System.out.println(" done");
 
                 // good exit
                 System.exit(0);
@@ -945,6 +964,22 @@ public class Icy
     public static boolean isHeadLess()
     {
         return getMainInterface().isHeadLess();
+    }
+
+    /**
+     * @return {@code true} if the cache module has been loaded. {@code false} otherwise.
+     */
+    public static boolean isCacheEnabled()
+    {
+        return loadCache;
+    }
+
+    /**
+     * @return {@code true} if the network module has been loaded and set up. {@code false} otherwise.
+     */
+    public static boolean isNetworkEnabled()
+    {
+        return loadNetwork;
     }
 
     /**
@@ -1428,6 +1463,7 @@ public class Icy
         }
     }
 
+    @SuppressWarnings("unused")
     private static void loadItkLibrary(String osDir)
     {
         final String itkLibDir = osDir + FileUtil.separator + "itk";

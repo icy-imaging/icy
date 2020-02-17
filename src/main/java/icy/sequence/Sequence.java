@@ -49,7 +49,6 @@ import icy.image.IcyBufferedImageEvent;
 import icy.image.IcyBufferedImageListener;
 import icy.image.IcyBufferedImageUtil;
 import icy.image.ImageProvider;
-import icy.image.cache.ImageCache;
 import icy.image.colormap.IcyColorMap;
 import icy.image.colormodel.IcyColorModel;
 import icy.image.colormodel.IcyColorModelEvent;
@@ -342,7 +341,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         if (Double.isNaN(MetaDataUtil.getPixelSizeZ(metaData, 0, Double.NaN)))
             MetaDataUtil.setPixelSizeZ(metaData, 0, 1d);
         if (Double.isNaN(MetaDataUtil.getTimeInterval(metaData, 0, Double.NaN)))
-            MetaDataUtil.setTimeInterval(metaData, 0, 1d);
+        {
+            final double ti = MetaDataUtil.getTimeIntervalFromTimePositions(metaData, 0);
+            // we got something --> set it as the time interval
+            if (ti != 0d)
+                MetaDataUtil.setTimeInterval(metaData, 0, ti);
+            // set to 1d by default
+            else MetaDataUtil.setTimeInterval(metaData, 0, 1d);
+        }
+        
+        double result = MetaDataUtil.getTimeInterval(metaData, 0, 0d);
+
+        // not yet defined ?
+        if (result == 0d)
+        {
+            result = MetaDataUtil.getTimeIntervalFromTimePositions(metaData, 0);
+            // we got something --> set it as the time interval
+            if (result != 0d)
+                MetaDataUtil.setTimeInterval(metaData, 0, result);
+        }
+        
 
         volumetricImages = new TreeMap<Integer, VolumetricImage>();
         overlays = new HashSet<Overlay>();
@@ -446,7 +464,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     {
         // cancel any pending prefetch tasks for this sequence
         SequencePrefetcher.cancel(this);
-        
+
         try
         {
             // close image provider if needed
@@ -1348,7 +1366,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Returns the physical position [X,Y,Z] (in ï¿½m) of the image represented by this Sequence.
+     * Returns the physical position [X,Y,Z] (in µm) of the image represented by this Sequence.
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image from the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time interval
@@ -1360,7 +1378,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Returns the X physical position / offset (in ï¿½m) of the image represented by this Sequence.<br>
+     * Returns the X physical position / offset (in µm) of the image represented by this Sequence.<br>
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time interval
@@ -1372,7 +1390,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Returns the Y physical position / offset (in ï¿½m) of the image represented by this Sequence.<br>
+     * Returns the Y physical position / offset (in µm) of the image represented by this Sequence.<br>
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time interval
@@ -1384,7 +1402,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Returns the Z physical position / offset (in ï¿½m) of the image represented by this Sequence.<br>
+     * Returns the Z physical position / offset (in µm) of the image represented by this Sequence.<br>
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time interval
@@ -1426,7 +1444,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Sets the X physical position / offset (in ï¿½m) of the image represented by this Sequence.<br>
+     * Sets the X physical position / offset (in µm) of the image represented by this Sequence.<br>
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we always use value from Plane(0,0,0)
@@ -1441,7 +1459,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Sets the X physical position / offset (in ï¿½m) of the image represented by this Sequence.<br>
+     * Sets the X physical position / offset (in µm) of the image represented by this Sequence.<br>
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we always use value from Plane(0,0,0)
@@ -1456,7 +1474,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Sets the X physical position / offset (in ï¿½m) of the image represented by this Sequence.<br>
+     * Sets the X physical position / offset (in µm) of the image represented by this Sequence.<br>
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we always use value from Plane(0,0,0)
@@ -1509,7 +1527,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Returns pixel size for [X,Y,Z] dimension (in ï¿½m to be OME compatible)
+     * Returns pixel size for [X,Y,Z] dimension (in µm to be OME compatible)
      */
     public double[] getPixelSize()
     {
@@ -1517,7 +1535,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Returns X pixel size (in ï¿½m to be OME compatible)
+     * Returns X pixel size (in µm to be OME compatible)
      */
     public double getPixelSizeX()
     {
@@ -1525,7 +1543,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Returns Y pixel size (in ï¿½m to be OME compatible)
+     * Returns Y pixel size (in µm to be OME compatible)
      */
     public double getPixelSizeY()
     {
@@ -1533,7 +1551,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Returns Z pixel size (in ï¿½m to be OME compatible)
+     * Returns Z pixel size (in µm to be OME compatible)
      */
     public double getPixelSizeZ()
     {
@@ -1562,7 +1580,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Set X pixel size (in ï¿½m to be OME compatible)
+     * Set X pixel size (in µm to be OME compatible)
      */
     public void setPixelSizeX(double value)
     {
@@ -1574,7 +1592,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Set Y pixel size (in ï¿½m to be OME compatible)
+     * Set Y pixel size (in µm to be OME compatible)
      */
     public void setPixelSizeY(double value)
     {
@@ -1586,7 +1604,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Set Z pixel size (in ï¿½m to be OME compatible)
+     * Set Z pixel size (in µm to be OME compatible)
      */
     public void setPixelSizeZ(double value)
     {
@@ -1612,7 +1630,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Returns the pixel size scaling factor to convert a number of pixel/voxel unit into <code>ï¿½m</code><br/>
+     * Returns the pixel size scaling factor to convert a number of pixel/voxel unit into <code>µm</code><br/>
      * <br>
      * For instance to get the scale ration for 2D distance:<br>
      * <code>valueMicroMeter = pixelNum * getPixelSizeScaling(2, 1)</code><br>
@@ -1731,16 +1749,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * Returns the size in ï¿½m for the specified amount of sample/pixel value in the specified
+     * Returns the size in µm for the specified amount of sample/pixel value in the specified
      * dimension order.<br>
      * <br>
-     * For the perimeter in ï¿½m:<br>
+     * For the perimeter in µm:<br>
      * <code>perimeter = calculateSize(contourInPixel, 2, 1)</code><br>
-     * For a 2D surface in ï¿½m2:<br>
+     * For a 2D surface in µm2:<br>
      * <code>surface = calculateSize(interiorInPixel, 2, 2)</code><br>
-     * For a 2D surface area in ï¿½m2:<br>
+     * For a 2D surface area in µm2:<br>
      * <code>volume = calculateSize(contourInPixel, 3, 2)</code><br>
-     * For a 3D volume in ï¿½m3:<br>
+     * For a 3D volume in µm3:<br>
      * <code>volume = calculateSize(interiorInPixel, 3, 3)</code><br>
      * 
      * @param pixelNumber
@@ -3090,6 +3108,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * Return <i>true</i> if image data at given position is loaded.
+     */
+    public boolean isDataLoaded(int t, int z)
+    {
+        final IcyBufferedImage img = getImage(t, z, false);
+
+        return (img != null) && img.isDataInitialized();
+    }
+
+    /**
      * Returns the VolumetricImage at position t
      */
     public VolumetricImage getVolumetricImage(int t)
@@ -3316,9 +3344,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         final int sizeZ = getSizeZ();
         final int sizeT = getSizeT();
+        final int prefetchRange = 2;
 
         // dumb data prefetch around T
-        for (int i = -5; i < 5; i++)
+        for (int i = -prefetchRange; i <= prefetchRange; i++)
         {
             final int pt = t + i;
 
@@ -3329,7 +3358,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         if (z > 0)
         {
             // dumb data prefetch around current Z
-            for (int i = -5; i < 5; i++)
+            for (int i = -prefetchRange; i <= prefetchRange; i++)
             {
                 final int pz = z + i;
 
