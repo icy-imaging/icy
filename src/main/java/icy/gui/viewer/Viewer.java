@@ -747,7 +747,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                 if (!toolTipVirtualDone)
                 {
                     final ToolTipFrame tooltip = new ToolTipFrame("<html>" + "<img src=\""
-                            + Icy.class.getResource("/res/image/help/viewer_virtual.jpg").toString() + "\" /><br>"
+                            + Icy.class.getResource("/image/help/viewer_virtual.jpg").toString() + "\" /><br>"
                             + "<b>Your image has been made <i>virtual</i></b>.<br> This means that its data can be stored on disk to spare memory but this is at the cost of slower display / processing.<br>"
                             + "Also you should note that <b>some plugins aren't compatible with <i>virtual</i> images</b> and so the result may be inconsistent (possible data lost)."
                             + "</html>", 30, "viewerVirtual");

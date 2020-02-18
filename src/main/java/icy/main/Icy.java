@@ -594,13 +594,13 @@ public class Icy
             // welcome tip !
             tooltip = new ToolTipFrame(
                     "<html>Access the main menu by clicking on top left icon<br>" + "<img src=\""
-                            + Icy.class.getResource("/res/image/help/main_menu.png").toString() + "\" /></html>",
+                            + Icy.class.getResource("/image/help/main_menu.png").toString() + "\" /></html>",
                     30, "mainMenuTip");
             tooltip.setSize(456, 240);
 
             // new Image Cache !
             tooltip = new ToolTipFrame("<html>" + "<img src=\""
-                    + Icy.class.getResource("/res/image/help/virtual_mode.jpg").toString() + "\" /><br>"
+                    + Icy.class.getResource("/image/help/virtual_mode.jpg").toString() + "\" /><br>"
                     + "This new button allow to enable/disable Icy <b>virtual mode</b>.<br><br>"
                     + "Virtual mode will force all new created images to be in <i>virtual mode</i> which mean their data can be stored on disk to spare memory.<br>"
                     + "Note that <i>virtual mode</i> is still experimental and <b>some plugins don't support it</b> (processed data can be lost) so use it carefully and only if you're running out of memory.<br>"
