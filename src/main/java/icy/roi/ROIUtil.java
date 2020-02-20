@@ -84,8 +84,9 @@ import plugins.kernel.roi.roi3d.ROI3DStackPolygon;
 import plugins.kernel.roi.roi3d.ROI3DStackRectangle;
 import plugins.kernel.roi.roi4d.ROI4DArea;
 import plugins.kernel.roi.roi5d.ROI5DArea;
-import plugins.kernel.roi.tool.morphology.ROIDistanceTransform;
-import plugins.kernel.roi.tool.morphology.ROIWatershed;
+import plugins.kernel.roi.tool.morphology.ROIDistanceTransformCalculator;
+import plugins.kernel.roi.tool.morphology.ROIErosionCalculator;
+import plugins.kernel.roi.tool.morphology.ROIWatershedCalculator;
 
 /**
  * ROI utilities class.
@@ -2769,7 +2770,7 @@ public class ROIUtil
     public static Sequence computeDistanceMap(Collection<? extends ROI> selectedROIs, Dimension5D imageSize,
             Dimension3D pixelSize)
     {
-        ROIDistanceTransform dt = new ROIDistanceTransform(imageSize, pixelSize);
+        ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize);
         dt.addAll(selectedROIs);
         return dt.getDistanceMap();
     }
@@ -2777,22 +2778,23 @@ public class ROIUtil
     public static List<ROI> computeWatershedSeparation(Collection<? extends ROI> selectedRois,
             List<? extends ROI> seedRois, Dimension5D imageSize, Dimension3D pixelSize)
     {
-        ROIWatershed ws = new ROIWatershed(imageSize, pixelSize);
+        ROIWatershedCalculator ws = new ROIWatershedCalculator(imageSize, pixelSize);
         ws.addAll(selectedRois);
         ws.addAllSeeds(seedRois);
         ws.setAddNewBasins(seedRois.isEmpty());
         return ws.getResultRois();
     }
 
-    public static List<ROI> computeDilation(List<? extends ROI> selectedROIs, Dimension5D dimension5d,
+    public static List<ROI> computeDilation(List<? extends ROI> selectedROIs, Dimension5D imageSize,
             Dimension3D pixelSize, double distance)
     {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    public static List<ROI> computeErosion(List<? extends ROI> selectedROIs, Dimension5D dimension5d,
+    public static List<ROI> computeErosion(List<? extends ROI> selectedROIs, Dimension5D imageSize,
             Dimension3D pixelSize, double distance)
     {
-        throw new UnsupportedOperationException("Not implemented yet");
+        ROIErosionCalculator eroder = new ROIErosionCalculator(selectedROIs, imageSize, pixelSize, distance);
+        return eroder.getErosion();
     }
 }

@@ -2022,7 +2022,7 @@ public class RoiActions
             {
                 final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
                 MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
-                double distance = mainFrame.getMainRibbon().getROIRibbonTask().getRadius();
+                double distance = mainFrame.getMainRibbon().getROIRibbonTask().getDistance();
 
                 try
                 {
