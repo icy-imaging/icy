@@ -43,8 +43,9 @@ import icy.sequence.SequenceUtil;
 import icy.type.DataIteratorUtil;
 import icy.type.DataType;
 import icy.type.collection.CollectionUtil;
+import icy.type.dimension.Dimension3D;
 import icy.type.dimension.Dimension5D;
-import icy.type.geom.Line2DUtil;
+import icy.type.geom.GeomUtil;
 import icy.type.geom.Polygon2D;
 import icy.type.point.Point3D;
 import icy.type.point.Point4D;
@@ -83,6 +84,8 @@ import plugins.kernel.roi.roi3d.ROI3DStackPolygon;
 import plugins.kernel.roi.roi3d.ROI3DStackRectangle;
 import plugins.kernel.roi.roi4d.ROI4DArea;
 import plugins.kernel.roi.roi5d.ROI5DArea;
+import plugins.kernel.roi.tool.morphology.ROIDistanceTransform;
+import plugins.kernel.roi.tool.morphology.ROIWatershed;
 
 /**
  * ROI utilities class.
@@ -132,23 +135,19 @@ public class ROIUtil
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it, or if
      *         the specified Z, T or C position are not supported by the descriptor
-     * @throws InterruptedException
-     *         if the thread was interrupted during the computation of the descriptor
      */
     public static Object computeDescriptor(Collection<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi,
-            Sequence sequence) throws UnsupportedOperationException, InterruptedException
+            Sequence sequence)
     {
         return ROIDescriptor.computeDescriptor(roiDescriptors, descriptorId, roi, sequence);
     }
 
     /**
-     * @throws InterruptedException
-     * @throws UnsupportedOperationException
      * @deprecated Use {@link ROIDescriptor#computeDescriptor(Collection, String, ROI, Sequence)} instead
      */
     @Deprecated
     public static Object computeDescriptor(Set<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi,
-            Sequence sequence) throws UnsupportedOperationException, InterruptedException
+            Sequence sequence)
     {
         return ROIDescriptor.computeDescriptor(roiDescriptors, descriptorId, roi, sequence);
     }
@@ -171,11 +170,8 @@ public class ROIUtil
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it, or if
      *         the specified Z, T or C position are not supported by the descriptor
-     * @throws InterruptedException
-     *         if the thread was interrupted during the computation of the descriptor
      */
     public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence)
-            throws UnsupportedOperationException, InterruptedException
     {
         return ROIDescriptor.computeDescriptor(descriptorId, roi, sequence);
     }
@@ -1446,9 +1442,8 @@ public class ROIUtil
      * Converts the specified ROI to a ROI Point ({@link ROI2DPoint} or {@link ROI3DPoint}) representing the mass center of the input ROI.
      * 
      * @return the ROI point representing the mass center of the input ROI.
-     * @throws InterruptedException
      */
-    public static ROI convertToPoint(ROI roi) throws InterruptedException
+    public static ROI convertToPoint(ROI roi)
     {
         final ROI result;
         final Point5D pt = ROIMassCenterDescriptorsPlugin.computeMassCenter(roi);
@@ -1483,9 +1478,8 @@ public class ROIUtil
      * Converts the specified ROI to a 2D ellipse type ROI centered on the mass center of the input ROI.
      * 
      * @return the 2D ellipse ROI centered on the mass center of the input ROI.
-     * @throws InterruptedException
      */
-    public static ROI2DEllipse convertToEllipse(ROI roi, double radiusX, double radiusY) throws InterruptedException
+    public static ROI2DEllipse convertToEllipse(ROI roi, double radiusX, double radiusY)
     {
         final Point5D pt = ROIMassCenterDescriptorsPlugin.computeMassCenter(roi);
         final double x = pt.getX();
@@ -1521,9 +1515,8 @@ public class ROIUtil
      * Converts the specified ROI to a 2D rectangle type ROI centered on the mass center of the input ROI.
      * 
      * @return the 2D rectangle ROI centered on the mass center of the input ROI.
-     * @throws InterruptedException
      */
-    public static ROI2DRectangle convertToRectangle(ROI roi, double width, double height) throws InterruptedException
+    public static ROI2DRectangle convertToRectangle(ROI roi, double width, double height)
     {
         final Point5D pt = ROIMassCenterDescriptorsPlugin.computeMassCenter(roi);
         final double x = pt.getX();
@@ -1792,7 +1785,7 @@ public class ROIUtil
         // they intersect ?
         if (edgeLine.intersectsLine(line))
         {
-            final Point2D intersection = Line2DUtil.getIntersection(edgeLine, line);
+            final Point2D intersection = GeomUtil.getIntersection(edgeLine, line);
 
             // are we inside poly2 ?
             if (inner)
@@ -2771,5 +2764,35 @@ public class ROIUtil
         // copy extended properties
         for (Entry<String, String> propertyEntry : source.getProperties().entrySet())
             destination.setProperty(propertyEntry.getKey(), propertyEntry.getValue());
+    }
+
+    public static Sequence computeDistanceMap(Collection<? extends ROI> selectedROIs, Dimension5D imageSize,
+            Dimension3D pixelSize)
+    {
+        ROIDistanceTransform dt = new ROIDistanceTransform(imageSize, pixelSize);
+        dt.addAll(selectedROIs);
+        return dt.getDistanceMap();
+    }
+
+    public static List<ROI> computeWatershedSeparation(Collection<? extends ROI> selectedRois,
+            List<? extends ROI> seedRois, Dimension5D imageSize, Dimension3D pixelSize)
+    {
+        ROIWatershed ws = new ROIWatershed(imageSize, pixelSize);
+        ws.addAll(selectedRois);
+        ws.addAllSeeds(seedRois);
+        ws.setAddNewBasins(seedRois.isEmpty());
+        return ws.getResultRois();
+    }
+
+    public static List<ROI> computeDilation(List<? extends ROI> selectedROIs, Dimension5D dimension5d,
+            Dimension3D pixelSize, double distance)
+    {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    public static List<ROI> computeErosion(List<? extends ROI> selectedROIs, Dimension5D dimension5d,
+            Dimension3D pixelSize, double distance)
+    {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

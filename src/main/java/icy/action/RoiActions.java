@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.w3c.dom.Document;
 
@@ -52,6 +53,7 @@ import icy.sequence.edit.ROIAddsSequenceEdit;
 import icy.sequence.edit.ROIReplacesSequenceEdit;
 import icy.system.SystemUtil;
 import icy.type.DataIteratorUtil;
+import icy.type.dimension.Dimension3D;
 import icy.util.ClassUtil;
 import icy.util.ShapeUtil.BooleanOperator;
 import icy.util.StringUtil;
@@ -59,6 +61,7 @@ import icy.util.XLSUtil;
 import icy.util.XMLUtil;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+import plugins.kernel.roi.roi2d.ROI2DPoint;
 import plugins.kernel.roi.roi2d.ROI2DRectangle;
 import plugins.kernel.roi.roi3d.ROI3DStackRectangle;
 import plugins.kernel.roi.roi4d.ROI4DStackRectangle;
@@ -905,6 +908,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_INTERIOR), "Fill ROI(s) interior",
             "Fill interior of the selected ROI(s) with specified value", true, "Fill ROI(s) interior...")
     {
+        private static final long serialVersionUID = 4532376746365236681L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -959,6 +964,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_NOT), "Fill ROI(s) exterior",
             "Fill exterior of the selected ROI(s) with specified value", true, "Fill ROI(s) exterior...")
     {
+        private static final long serialVersionUID = 4970600052373326731L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1107,6 +1114,8 @@ public class RoiActions
     public static IcyAbstractAction settingAction = new IcyAbstractAction("Preferences",
             new IcyIcon(ResourceUtil.ICON_COG), "ROI table preferences")
     {
+        private static final long serialVersionUID = -3110113198501873416L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1127,6 +1136,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_LAYER_V2), "Convert to 3D stack ROI",
             "Convert selected 2D ROI to 3D stack ROI by stacking it along the Z axis")
     {
+        private static final long serialVersionUID = -6603561599009987184L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1192,6 +1203,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_BOOL_MASK), "Convert Shape ROI to Mask ROI",
             "Convert selected Shape ROI to Mask ROI by using their boolean mask")
     {
+        private static final long serialVersionUID = -4619275091379174088L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1255,6 +1268,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_POINT), "Convert ROI to Point ROI",
             "Converts selected ROI(s) to ROI Point (2D or 3D) representing the mass center of the input ROI(s)")
     {
+        private static final long serialVersionUID = 8651972852084710361L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1292,13 +1307,9 @@ public class RoiActions
                         sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
                                 (addedROIs.size() > 1) ? "ROIs point conversion" : "ROI point conversion"));
                 }
-                catch (UnsupportedOperationException ex1)
+                catch (UnsupportedOperationException ex)
                 {
-                    MessageDialog.showDialog("Operation not supported", ex1.toString(), MessageDialog.ERROR_MESSAGE);
-                }
-                catch (InterruptedException ex2)
-                {
-                    MessageDialog.showDialog("Operation interrupted", ex2.toString(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
                 }
                 finally
                 {
@@ -1322,6 +1333,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_OVAL), "Convert ROI to Circle ROI",
             "Converts selected ROI(s) to Circle ROI centered on the mass center of the input ROI(s)")
     {
+        private static final long serialVersionUID = 6744919240594360564L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1374,10 +1387,6 @@ public class RoiActions
                     {
                         MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
                     }
-                    catch (InterruptedException ex2)
-                    {
-                        MessageDialog.showDialog("Operation interrupted", ex2.toString(), MessageDialog.ERROR_MESSAGE);
-                    }
                     finally
                     {
                         sequence.endUpdate();
@@ -1401,6 +1410,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_RECTANGLE), "Convert ROI to Square ROI",
             "Converts selected ROI(s) to Square ROI centered on the mass center of the input ROI(s)")
     {
+        private static final long serialVersionUID = 443206519870698257L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1453,10 +1464,6 @@ public class RoiActions
                     {
                         MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
                     }
-                    catch (InterruptedException ex2)
-                    {
-                        MessageDialog.showDialog("Operation interrupted", ex2.toString(), MessageDialog.ERROR_MESSAGE);
-                    }
                     finally
                     {
                         sequence.endUpdate();
@@ -1480,6 +1487,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_POLYGON), "Convert Mask ROI to Polygon shape ROI",
             "Convert selected Mask ROI to Shape ROI using polygon approximation")
     {
+        private static final long serialVersionUID = 958781178829484L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1543,6 +1552,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_COMP), "Separate regions from selected Mask ROI(s)",
             "Separate unconnected regions from selected Mask ROI(s)")
     {
+        private static final long serialVersionUID = 5289442497372947147L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1606,6 +1617,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_UPSCALE), "Create up scaled version of selected ROI(s) (2D)",
             "Create 2x factor up scaled version of selected ROI(s) (2D)")
     {
+        private static final long serialVersionUID = 9059232719467440375L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1657,6 +1670,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_UPSCALE), "Create x2 scaled version of selected ROI(s)",
             "Create x2 factor scaled version of selected ROI(s)")
     {
+        private static final long serialVersionUID = 3796124503844829358L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1708,6 +1723,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_DOWNSCALE), "Create /2 scaled version of selected ROI(s) (2D)",
             "Create /2 factor scaled version of selected ROI(s) (2D)")
     {
+        private static final long serialVersionUID = -524220001283188724L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1759,6 +1776,8 @@ public class RoiActions
             new IcyIcon(ResourceUtil.ICON_ROI_DOWNSCALE), "Create down scaled version of selected ROI(s)",
             "Create 2x factor down scaled version of selected ROI(s)")
     {
+        private static final long serialVersionUID = -3570102897640191459L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1810,6 +1829,8 @@ public class RoiActions
             new IcyIcon("split_roi", true), "Automatic split selected ROI",
             "Automatic split selected ROI using shape and size information.")
     {
+        private static final long serialVersionUID = 3979863504572671999L;
+
         @Override
         public boolean doAction(ActionEvent e)
         {
@@ -1820,29 +1841,29 @@ public class RoiActions
                 sequence.beginUpdate();
                 try
                 {
-                    final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
+                    // final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
                     final List<ROI> removedROIs = new ArrayList<ROI>();
                     final List<ROI> addedROIs = new ArrayList<ROI>();
 
-                    for (ROI2D roi : selectedROIs)
-                    {
-                        // --> TODO
-                        // final List<ROI> components = ROIUtil.split(roi);
-                        //
-                        // nothing to do if we obtain only 1 component
-                        // if (components.size() > 1)
-                        // {
-                        // sequence.removeROI(roi);
-                        // removedROIs.add(roi);
-                        //
-                        // for (ROI component : components)
-                        // {
-                        // sequence.addROI(component);
-                        // // add to undo manager
-                        // addedROIs.add(component);
-                        // }
-                        // }
-                    }
+                    // // --> TODO
+                    // for (ROI2D roi : selectedROIs)
+                    // {
+                    // final List<ROI> components = ROIUtil.split(roi);
+                    //
+                    // // nothing to do if we obtain only 1 component
+                    // if (components.size() > 1)
+                    // {
+                    // sequence.removeROI(roi);
+                    // removedROIs.add(roi);
+                    //
+                    // for (ROI component : components)
+                    // {
+                    // sequence.addROI(component);
+                    // // add to undo manager
+                    // addedROIs.add(component);
+                    // }
+                    // }
+                    // }
 
                     if (!removedROIs.isEmpty())
                         sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
@@ -1867,6 +1888,159 @@ public class RoiActions
         public boolean isEnabled()
         {
             return super.isEnabled() && (Icy.getMainInterface().getActiveSequence() != null);
+        }
+    };
+
+    public static final IcyAbstractAction computeDistanceMapAction = new IcyAbstractAction("Distance Map",
+            new IcyIcon(ResourceUtil.ICON_ROI_DISTANCE_MAP), "Compute distance map of selected ROIs",
+            "Computes the inner distance transform of the selected ROIs.")
+    {
+        private static final long serialVersionUID = -41448258413789020L;
+
+        @Override
+        protected boolean doAction(ActionEvent e)
+        {
+            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+            if (sequence != null)
+            {
+                final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
+
+                Sequence distanceMap;
+                try
+                {
+                    Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
+                    distanceMap = ROIUtil.computeDistanceMap(selectedROIs, sequence.getDimension5D(), pixelSize);
+                }
+                catch (UnsupportedOperationException ex)
+                {
+                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    return false;
+                }
+                Icy.getMainInterface().addSequence(distanceMap);
+            }
+            return false;
+        }
+    };
+
+    public static final IcyAbstractAction computeWatershedSeparation = new IcyAbstractAction("Watershed separation",
+            new IcyIcon(ResourceUtil.ICON_ROI_COMP), "Separate in parts selected ROIs by using watersheds of the shape",
+            "Computes the separation of the selected ROIs by applying a watershed approach on the distance map of the ROIs.")
+    {
+        private static final long serialVersionUID = 5354562004015076140L;
+
+        @Override
+        protected boolean doAction(ActionEvent e)
+        {
+            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+            if (sequence != null)
+            {
+                final List<ROI2D> selectedRois = sequence.getSelectedROI2Ds().stream()
+                        .filter(r -> !(r instanceof plugins.kernel.roi.roi2d.ROI2DPoint))
+                        .collect(Collectors.<ROI2D> toList());
+
+                final List<ROI2DPoint> seedRois = sequence.getSelectedROIs(ROI2DPoint.class, false, true);
+
+                Thread thrd = new Thread(new Runnable()
+                {
+
+                    @Override
+                    public void run()
+                    {
+                        try
+                        {
+                            Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
+                            List<ROI> separationRois = ROIUtil.computeWatershedSeparation(selectedRois, seedRois,
+                                    sequence.getDimension5D(), pixelSize);
+                            sequence.beginUpdate();
+                            sequence.removeROIs(selectedRois, true);
+                            sequence.addROIs(separationRois, true);
+                            sequence.endUpdate();
+                        }
+                        catch (UnsupportedOperationException ex)
+                        {
+                            MessageDialog.showDialog("Operation not supported", ex.toString(),
+                                    MessageDialog.ERROR_MESSAGE);
+                        }
+                    }
+                }, "ROIWatershed");
+                thrd.start();
+            }
+            return false;
+        }
+    };
+
+    public static final IcyAbstractAction dilateObjectsAction = new IcyAbstractAction("Dilate",
+            new IcyIcon(ResourceUtil.ICON_ROI_DILATE), "Dilates selected ROIs",
+            "Computes the dilation of selected ROIs. If the results overlap with eachother, ROIs are merged.")
+    {
+        private static final long serialVersionUID = 5354562004015076140L;
+
+        @Override
+        protected boolean doAction(ActionEvent e)
+        {
+            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+            if (sequence != null)
+            {
+                final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
+                MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
+                double distance = mainFrame.getMainRibbon().getROIRibbonTask().getRadius();
+
+                try
+                {
+                    Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
+                    List<ROI> dilatedRois = ROIUtil.computeDilation(selectedROIs, sequence.getDimension5D(), pixelSize,
+                            distance);
+                    sequence.beginUpdate();
+                    sequence.removeROIs(selectedROIs, true);
+                    sequence.addROIs(dilatedRois, true);
+                    sequence.endUpdate();
+                }
+                catch (UnsupportedOperationException ex)
+                {
+                    MessageDialog.showDialog("Operation not supported", ex.getMessage(), MessageDialog.ERROR_MESSAGE);
+                    return false;
+                }
+            }
+            return false;
+        }
+    };
+
+    public static final IcyAbstractAction erodeObjectsAction = new IcyAbstractAction("Erode",
+            new IcyIcon(ResourceUtil.ICON_ROI_ERODE), "Erodes selected ROIs", "Computes the erotion of selected ROIs")
+    {
+        private static final long serialVersionUID = -708624356916992059L;
+
+        @Override
+        protected boolean doAction(ActionEvent e)
+        {
+            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+            if (sequence != null)
+            {
+                final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
+                MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
+                double distance = mainFrame.getMainRibbon().getROIRibbonTask().getRadius();
+
+                try
+                {
+                    Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
+                    List<ROI> dilatedRois = ROIUtil.computeErosion(selectedROIs, sequence.getDimension5D(), pixelSize,
+                            distance);
+                    sequence.beginUpdate();
+                    sequence.removeROIs(selectedROIs, true);
+                    sequence.addROIs(dilatedRois, true);
+                    sequence.endUpdate();
+                }
+                catch (UnsupportedOperationException ex)
+                {
+                    MessageDialog.showDialog("Operation not supported", ex.getMessage(), MessageDialog.ERROR_MESSAGE);
+                    return false;
+                }
+            }
+            return false;
         }
     };
 

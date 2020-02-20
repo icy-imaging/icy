@@ -43,6 +43,7 @@ import org.pushingpixels.flamingo.api.ribbon.RibbonTask;
 import org.pushingpixels.flamingo.api.ribbon.resize.CoreRibbonResizeSequencingPolicies;
 import org.pushingpixels.flamingo.internal.ui.ribbon.BasicBandControlPanelUI;
 
+import icy.action.IcyAbstractAction;
 import icy.action.RoiActions;
 import icy.gui.component.NumberTextField;
 import icy.gui.component.button.IcyButton;
@@ -502,6 +503,81 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
         }
     }
 
+    static class ROIMorphologyBand extends JRibbonBand
+    {
+        private static final long serialVersionUID = 3683589041361260009L;
+
+        public static final String BAND_NAME = "Morphology";
+
+        final IcyButton computeDistanceMapButton;
+        final IcyButton computeWatershedButton;
+        final IcyButton dilateButton;
+        final IcyButton erodeButton;
+        final NumberTextField distanceField;
+
+        public ROIMorphologyBand()
+        {
+            super(BAND_NAME, new IcyIcon(ResourceUtil.ICON_ROUND_PLUS));
+
+            computeDistanceMapButton = createIcyButton(RoiActions.computeDistanceMapAction);
+            computeWatershedButton = createIcyButton(RoiActions.computeWatershedSeparation);
+            dilateButton = createIcyButton(RoiActions.dilateObjectsAction);
+            erodeButton = createIcyButton(RoiActions.erodeObjectsAction);
+
+            distanceField = new NumberTextField();
+            distanceField.setHorizontalAlignment(SwingConstants.CENTER);
+            distanceField.setToolTipText("Distance to dilate/erode (>= 1)");
+            distanceField.setNumericValue(1d);
+
+            addButtonComponent(computeDistanceMapButton);
+            addButtonComponent(computeWatershedButton);
+            addButtonComponent(dilateButton);
+            addButtonComponent(erodeButton);
+            JRibbonComponent distanceComponent = new JRibbonComponent(distanceField);
+            distanceComponent.setResizingAware(true);
+            distanceComponent.setHorizontalAlignment(HorizontalAlignment.FILL);
+            addRibbonComponent(distanceComponent);
+
+            setToolTipText("Morphological tools for ROIs");
+            RibbonUtil.setRestrictiveResizePolicies(this);
+        }
+
+        private IcyButton createIcyButton(IcyAbstractAction action)
+        {
+            IcyButton button = new IcyButton(action);
+            button.setHorizontalAlignment(SwingConstants.LEADING);
+            button.setFlat(true);
+            return button;
+        }
+
+        private void addButtonComponent(IcyButton button)
+        {
+            JRibbonComponent comp;
+            comp = new JRibbonComponent(button);
+            comp.setResizingAware(true);
+            comp.setHorizontalAlignment(HorizontalAlignment.FILL);
+            addRibbonComponent(comp);
+        }
+
+        public double getDistance()
+        {
+            return Math.max(1d, distanceField.getNumericValue());
+        }
+
+        public void updateButtonsState()
+        {
+            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+            final boolean hasSequence = sequence != null;
+            final boolean hasRois = hasSequence && !sequence.getSelectedROIs().isEmpty();
+
+            computeWatershedButton.setEnabled(hasSequence);
+            computeDistanceMapButton.setEnabled(hasSequence);
+            dilateButton.setEnabled(hasRois);
+            erodeButton.setEnabled(hasRois);
+            distanceField.setEnabled(hasRois);
+        }
+    }
+
     // static class ROIScaleBand extends JRibbonBand
     // {
     // public static final String BAND_NAME = "Resize";
@@ -762,6 +838,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
     final ROIExtBand roiExtBand;
     final ROIConversionBand roiConversionBand;
     final ROISeparationBand roiSeparationBand;
+    final ROIMorphologyBand roiMorphologyBand;
     // final ROIScaleBand roiScaleBand;
     final ROIBooleanOpBand roiBooleanOpBand;
     final ROIFillBand roiFillBand;
@@ -780,7 +857,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
     public ROITask()
     {
         super(NAME, new ROI2DBand(), new ROI3DBand(), new ROIExtBand(), new ROIConversionBand(),
-                new ROISeparationBand(), new ROIBooleanOpBand(), new ROIFillBand(), new ROIIOBand());
+                new ROISeparationBand(), new ROIMorphologyBand(), new ROIBooleanOpBand(), new ROIFillBand(), new ROIIOBand());
         // super(NAME,, new ROIRibbonBand());
 
         setResizeSequencingPolicy(new CoreRibbonResizeSequencingPolicies.CollapseFromLast(this));
@@ -791,6 +868,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
         roiExtBand = (ROIExtBand) RibbonUtil.getBand(this, ROIExtBand.BAND_NAME);
         roiConversionBand = (ROIConversionBand) RibbonUtil.getBand(this, ROIConversionBand.BAND_NAME);
         roiSeparationBand = (ROISeparationBand) RibbonUtil.getBand(this, ROISeparationBand.BAND_NAME);
+        roiMorphologyBand = (ROIMorphologyBand) RibbonUtil.getBand(this, ROIMorphologyBand.BAND_NAME);
         // roiScaleBand = (ROIScaleBand) RibbonUtil.getBand(this, ROIScaleBand.BAND_NAME);
         roiBooleanOpBand = (ROIBooleanOpBand) RibbonUtil.getBand(this, ROIBooleanOpBand.BAND_NAME);
         roiFillBand = (ROIFillBand) RibbonUtil.getBand(this, ROIFillBand.BAND_NAME);
@@ -815,6 +893,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
                         roiExtBand.updateButtonsState();
                         roiConversionBand.updateButtonsState();
                         roiSeparationBand.updateButtonsState();
+                        roiMorphologyBand.updateButtonsState();
                         // roiScaleBand.updateButtonsState();
                         roiBooleanOpBand.updateButtonsState();
                         roiFillBand.updateButtonsState();
@@ -998,6 +1077,11 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
     public double getRadius()
     {
         return roiConversionBand.getRadius();
+    }
+
+    public double getDistance()
+    {
+        return roiMorphologyBand.getDistance();
     }
 
     public double getFillValue()
