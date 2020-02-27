@@ -34,6 +34,20 @@ public class VolumetricImageCursor
 
     }
 
+    public synchronized void set(int x, int y, int z, int c, double val)
+            throws IndexOutOfBoundsException, RuntimeException
+    {
+        getPlaneCursor(z).set(x, y, c, val);
+        volumeChanged.set(true);
+    }
+
+    public synchronized void setSafe(int x, int y, int z, int c, double val)
+            throws IndexOutOfBoundsException, RuntimeException
+    {
+        getPlaneCursor(z).setSafe(x, y, c, val);
+        volumeChanged.set(true);
+    }
+
     private IcyBufferedImageCursor currentCursor;
     private int currentZ;
 
@@ -50,20 +64,6 @@ public class VolumetricImageCursor
         return currentCursor;
     }
 
-    public synchronized void set(int x, int y, int z, int c, double val)
-            throws IndexOutOfBoundsException, RuntimeException
-    {
-        getPlaneCursor(z).set(x, y, c, val);
-        volumeChanged.set(true);
-    }
-
-    public synchronized void setSafe(int x, int y, int z, int c, double val)
-            throws IndexOutOfBoundsException, RuntimeException
-    {
-        getPlaneCursor(z).setSafe(x, y, c, val);
-        volumeChanged.set(true);
-    }
-
     public synchronized void commitChanges()
     {
         if (volumeChanged.get())
@@ -73,6 +73,7 @@ public class VolumetricImageCursor
                 if (planeCursors[i] != null)
                     planeCursors[i].commitChanges();
             }
+            volumeChanged.set(false);
         }
     }
 }

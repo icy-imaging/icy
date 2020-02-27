@@ -236,6 +236,7 @@ public class IcyBufferedImageCursor
         if (planeChanged.get())
         {
             plane.dataChanged();
+            planeChanged.set(false);
         }
     }
 
