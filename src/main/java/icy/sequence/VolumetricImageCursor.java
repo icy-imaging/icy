@@ -2,19 +2,15 @@ package icy.sequence;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import icy.image.IcyBufferedImage;
 import icy.image.IcyBufferedImageCursor;
-import icy.type.DataType;
 
 public class VolumetricImageCursor
 {
-    VolumetricImage vol;
-    int[] volSize;
-    DataType volType;
+    private VolumetricImage vol;
 
-    AtomicBoolean volumeChanged;
+    private AtomicBoolean volumeChanged;
 
-    IcyBufferedImageCursor[] planeCursors;
+    private IcyBufferedImageCursor[] planeCursors;
 
     /**
      * 
@@ -22,8 +18,6 @@ public class VolumetricImageCursor
     public VolumetricImageCursor(VolumetricImage vol)
     {
         this.vol = vol;
-        IcyBufferedImage firstPlane = vol.getFirstImage();
-        this.volType = firstPlane.getDataType_();
         planeCursors = new IcyBufferedImageCursor[vol.getSize()];
         volumeChanged = new AtomicBoolean(false);
         currentZ = -1;
@@ -64,6 +58,7 @@ public class VolumetricImageCursor
     }
 
     public synchronized void setSafe(int x, int y, int z, int c, double val)
+            throws IndexOutOfBoundsException, RuntimeException
     {
         getPlaneCursor(z).setSafe(x, y, c, val);
         volumeChanged.set(true);

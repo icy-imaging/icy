@@ -16,13 +16,13 @@ import icy.type.TypeUtil;
 public class IcyBufferedImageCursor
 {
 
-    IcyBufferedImage plane;
-    int[] planeSize;
-    DataType planeType;
+    private IcyBufferedImage plane;
+    private int sizeX;
+    private DataType planeType;
 
-    AtomicBoolean planeChanged;
+    private AtomicBoolean planeChanged;
 
-    Object planeData;
+    private Object planeData;
 
     /**
      * Creates a new cursor from the given {@code plane}.
@@ -30,7 +30,7 @@ public class IcyBufferedImageCursor
     public IcyBufferedImageCursor(IcyBufferedImage plane)
     {
         this.plane = plane;
-        this.planeSize = new int[] {plane.getSizeX(), plane.getSizeY()};
+        this.sizeX = plane.getSizeX();
         this.planeType = plane.getDataType_();
 
         plane.lockRaster();
@@ -55,8 +55,8 @@ public class IcyBufferedImageCursor
         this(seq.getImage(t, z));
     }
 
-    Object currentChannelData;
-    int currentChannel;
+    private Object currentChannelData;
+    private int currentChannel;
 
     /**
      * @param x
@@ -79,17 +79,17 @@ public class IcyBufferedImageCursor
         {
             case UBYTE:
             case BYTE:
-                return TypeUtil.toDouble(((byte[]) channelData)[x + y * planeSize[0]], planeType.isSigned());
+                return TypeUtil.toDouble(((byte[]) channelData)[x + y * sizeX], planeType.isSigned());
             case USHORT:
             case SHORT:
-                return TypeUtil.toDouble(((short[]) channelData)[x + y * planeSize[0]], planeType.isSigned());
+                return TypeUtil.toDouble(((short[]) channelData)[x + y * sizeX], planeType.isSigned());
             case UINT:
             case INT:
-                return TypeUtil.toDouble(((int[]) channelData)[x + y * planeSize[0]], planeType.isSigned());
+                return TypeUtil.toDouble(((int[]) channelData)[x + y * sizeX], planeType.isSigned());
             case FLOAT:
-                return ((float[]) channelData)[x + y * planeSize[0]];
+                return ((float[]) channelData)[x + y * sizeX];
             case DOUBLE:
-                return ((double[]) channelData)[x + y * planeSize[0]];
+                return ((double[]) channelData)[x + y * sizeX];
             default:
                 throw new RuntimeException("Unsupported data type: " + planeType);
         }
@@ -119,21 +119,21 @@ public class IcyBufferedImageCursor
         {
             case UBYTE:
             case BYTE:
-                ((byte[]) channelData)[x + y * planeSize[0]] = (byte) val;
+                ((byte[]) channelData)[x + y * sizeX] = (byte) val;
                 break;
             case USHORT:
             case SHORT:
-                ((short[]) channelData)[x + y * planeSize[0]] = (short) val;
+                ((short[]) channelData)[x + y * sizeX] = (short) val;
                 break;
             case UINT:
             case INT:
-                ((int[]) channelData)[x + y * planeSize[0]] = (int) val;
+                ((int[]) channelData)[x + y * sizeX] = (int) val;
                 break;
             case FLOAT:
-                ((float[]) channelData)[x + y * planeSize[0]] = (float) val;
+                ((float[]) channelData)[x + y * sizeX] = (float) val;
                 break;
             case DOUBLE:
-                ((double[]) channelData)[x + y * planeSize[0]] = val;
+                ((double[]) channelData)[x + y * sizeX] = val;
                 break;
             default:
                 throw new RuntimeException("Unsupported data type");
@@ -165,21 +165,21 @@ public class IcyBufferedImageCursor
         {
             case UBYTE:
             case BYTE:
-                ((byte[]) channelData)[x + y * planeSize[0]] = (byte) Math.round(getSafeValue(val));
+                ((byte[]) channelData)[x + y * sizeX] = (byte) Math.round(getSafeValue(val));
                 break;
             case USHORT:
             case SHORT:
-                ((short[]) channelData)[x + y * planeSize[0]] = (short) Math.round(getSafeValue(val));
+                ((short[]) channelData)[x + y * sizeX] = (short) Math.round(getSafeValue(val));
                 break;
             case UINT:
             case INT:
-                ((int[]) channelData)[x + y * planeSize[0]] = (int) Math.round(getSafeValue(val));
+                ((int[]) channelData)[x + y * sizeX] = (int) Math.round(getSafeValue(val));
                 break;
             case FLOAT:
-                ((float[]) channelData)[x + y * planeSize[0]] = (float) getSafeValue(val);
+                ((float[]) channelData)[x + y * sizeX] = (float) getSafeValue(val);
                 break;
             case DOUBLE:
-                ((double[]) channelData)[x + y * planeSize[0]] = val;
+                ((double[]) channelData)[x + y * sizeX] = val;
                 break;
             default:
                 throw new RuntimeException("Unsupported data type");
