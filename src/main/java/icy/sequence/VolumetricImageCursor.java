@@ -23,7 +23,6 @@ public class VolumetricImageCursor
     {
         this.vol = vol;
         IcyBufferedImage firstPlane = vol.getFirstImage();
-        this.volSize = new int[] {firstPlane.getSizeX(), firstPlane.getSizeY(), vol.getImages().size()};
         this.volType = firstPlane.getDataType_();
         planeCursors = new IcyBufferedImageCursor[vol.getSize()];
         volumeChanged = new AtomicBoolean(false);
@@ -35,7 +34,7 @@ public class VolumetricImageCursor
         this(seq.getVolumetricImage(t));
     }
 
-    public double get(int x, int y, int z, int c) throws RuntimeException
+    public double get(int x, int y, int z, int c) throws IndexOutOfBoundsException, RuntimeException
     {
         return getPlaneCursor(z).get(x, y, c);
 
@@ -44,7 +43,7 @@ public class VolumetricImageCursor
     private IcyBufferedImageCursor currentCursor;
     private int currentZ;
 
-    private synchronized IcyBufferedImageCursor getPlaneCursor(int z)
+    private synchronized IcyBufferedImageCursor getPlaneCursor(int z) throws IndexOutOfBoundsException
     {
         if (currentZ != z)
         {
@@ -57,7 +56,8 @@ public class VolumetricImageCursor
         return currentCursor;
     }
 
-    public synchronized void set(int x, int y, int z, int c, double val) throws RuntimeException
+    public synchronized void set(int x, int y, int z, int c, double val)
+            throws IndexOutOfBoundsException, RuntimeException
     {
         getPlaneCursor(z).set(x, y, c, val);
         volumeChanged.set(true);

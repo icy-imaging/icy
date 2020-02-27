@@ -2,7 +2,6 @@ package icy.image;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import icy.image.IcyBufferedImage;
 import icy.sequence.Sequence;
 import icy.type.DataType;
 import icy.type.TypeUtil;
@@ -67,52 +66,30 @@ public class IcyBufferedImageCursor
      * @param c
      *        Position on the channel axis.
      * @return Intensity of the pixel located at the given coordinates ({@code x}, {@code y}) in the channel {@code c}.
+     * @throws IndexOutOfBoundsException
+     *         If the position is not valid on the target image.
+     * @throws RuntimeException
+     *         If the format of the image is not supported.
      */
-    public synchronized double get(int x, int y, int c)
+    public double get(int x, int y, int c) throws IndexOutOfBoundsException, RuntimeException
     {
+        Object channelData = getChannelData(c);
 
-        if (currentChannel != c)
-        {
-            currentChannelData = getChannelData(c);
-            currentChannel = c;
-        }
         switch (planeType)
         {
             case UBYTE:
             case BYTE:
-                return TypeUtil.toDouble(((byte[]) currentChannelData)[x + y * planeSize[0]], planeType.isSigned());
+                return TypeUtil.toDouble(((byte[]) channelData)[x + y * planeSize[0]], planeType.isSigned());
             case USHORT:
             case SHORT:
-                return TypeUtil.toDouble(((short[]) currentChannelData)[x + y * planeSize[0]], planeType.isSigned());
+                return TypeUtil.toDouble(((short[]) channelData)[x + y * planeSize[0]], planeType.isSigned());
             case UINT:
             case INT:
-                return TypeUtil.toDouble(((int[]) currentChannelData)[x + y * planeSize[0]], planeType.isSigned());
+                return TypeUtil.toDouble(((int[]) channelData)[x + y * planeSize[0]], planeType.isSigned());
             case FLOAT:
-                return ((float[]) currentChannelData)[x + y * planeSize[0]];
+                return ((float[]) channelData)[x + y * planeSize[0]];
             case DOUBLE:
-                return ((double[]) currentChannelData)[x + y * planeSize[0]];
-            default:
-                throw new RuntimeException("Unsupported data type: " + planeType);
-        }
-    }
-
-    private Object getChannelData(int c)
-    {
-        switch (planeType)
-        {
-            case UBYTE:
-            case BYTE:
-                return ((byte[][]) planeData)[c];
-            case USHORT:
-            case SHORT:
-                return ((short[][]) planeData)[c];
-            case UINT:
-            case INT:
-                return ((int[][]) planeData)[c];
-            case FLOAT:
-                return ((float[][]) planeData)[c];
-            case DOUBLE:
-                return ((double[][]) planeData)[c];
+                return ((double[]) channelData)[x + y * planeSize[0]];
             default:
                 throw new RuntimeException("Unsupported data type: " + planeType);
         }
@@ -129,33 +106,34 @@ public class IcyBufferedImageCursor
      *        Position on the channel axis.
      * @param val
      *        Value to set.
+     * @throws IndexOutOfBoundsException
+     *         If the position is not valid on the target image.
+     * @throws RuntimeException
+     *         If the format of the image is not supported.
      */
-    public synchronized void set(int x, int y, int c, double val)
+    public synchronized void set(int x, int y, int c, double val) throws IndexOutOfBoundsException, RuntimeException
     {
-        if (currentChannel != c)
-        {
-            currentChannelData = getChannelData(c);
-            currentChannel = c;
-        }
+        Object channelData = getChannelData(c);
+
         switch (planeType)
         {
             case UBYTE:
             case BYTE:
-                ((byte[]) currentChannelData)[x + y * planeSize[0]] = (byte) val;
+                ((byte[]) channelData)[x + y * planeSize[0]] = (byte) val;
                 break;
             case USHORT:
             case SHORT:
-                ((short[]) currentChannelData)[x + y * planeSize[0]] = (short) val;
+                ((short[]) channelData)[x + y * planeSize[0]] = (short) val;
                 break;
             case UINT:
             case INT:
-                ((int[]) currentChannelData)[x + y * planeSize[0]] = (int) val;
+                ((int[]) channelData)[x + y * planeSize[0]] = (int) val;
                 break;
             case FLOAT:
-                ((float[]) currentChannelData)[x + y * planeSize[0]] = (float) val;
+                ((float[]) channelData)[x + y * planeSize[0]] = (float) val;
                 break;
             case DOUBLE:
-                ((double[]) currentChannelData)[x + y * planeSize[0]] = val;
+                ((double[]) channelData)[x + y * planeSize[0]] = val;
                 break;
             default:
                 throw new RuntimeException("Unsupported data type");
@@ -175,38 +153,72 @@ public class IcyBufferedImageCursor
      *        Position on the channel axis.
      * @param val
      *        Value to set.
+     * @throws IndexOutOfBoundsException
+     *         If the position is not valid on the target image.
+     * @throws RuntimeException
+     *         If the format of the image is not supported.
      */
-    public synchronized void setSafe(int x, int y, int c, double val)
+    public synchronized void setSafe(int x, int y, int c, double val) throws IndexOutOfBoundsException, RuntimeException
     {
-        if (currentChannel != c)
-        {
-            currentChannelData = getChannelData(c);
-            currentChannel = c;
-        }
+        Object channelData = getChannelData(c);
         switch (planeType)
         {
             case UBYTE:
             case BYTE:
-                ((byte[]) currentChannelData)[x + y * planeSize[0]] = (byte) Math.round(getSafeValue(val));
+                ((byte[]) channelData)[x + y * planeSize[0]] = (byte) Math.round(getSafeValue(val));
                 break;
             case USHORT:
             case SHORT:
-                ((short[]) currentChannelData)[x + y * planeSize[0]] = (short) Math.round(getSafeValue(val));
+                ((short[]) channelData)[x + y * planeSize[0]] = (short) Math.round(getSafeValue(val));
                 break;
             case UINT:
             case INT:
-                ((int[]) currentChannelData)[x + y * planeSize[0]] = (int) Math.round(getSafeValue(val));
+                ((int[]) channelData)[x + y * planeSize[0]] = (int) Math.round(getSafeValue(val));
                 break;
             case FLOAT:
-                ((float[]) currentChannelData)[x + y * planeSize[0]] = (float) getSafeValue(val);
+                ((float[]) channelData)[x + y * planeSize[0]] = (float) getSafeValue(val);
                 break;
             case DOUBLE:
-                ((double[]) currentChannelData)[x + y * planeSize[0]] = val;
+                ((double[]) channelData)[x + y * planeSize[0]] = val;
                 break;
             default:
                 throw new RuntimeException("Unsupported data type");
         }
         planeChanged.set(true);
+    }
+
+    private synchronized Object getChannelData(int c) throws IndexOutOfBoundsException, RuntimeException
+    {
+
+        if (currentChannel != c)
+        {
+            switch (planeType)
+            {
+                case UBYTE:
+                case BYTE:
+                    currentChannelData = ((byte[][]) planeData)[c];
+                    break;
+                case USHORT:
+                case SHORT:
+                    currentChannelData = ((short[][]) planeData)[c];
+                    break;
+                case UINT:
+                case INT:
+                    currentChannelData = ((int[][]) planeData)[c];
+                    break;
+                case FLOAT:
+                    currentChannelData = ((float[][]) planeData)[c];
+                    break;
+                case DOUBLE:
+                    currentChannelData = ((double[][]) planeData)[c];
+                    break;
+                default:
+                    throw new RuntimeException("Unsupported data type: " + planeType);
+            }
+            currentChannel = c;
+        }
+        return currentChannelData;
+
     }
 
     private double getSafeValue(double val)
