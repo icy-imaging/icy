@@ -1,4 +1,4 @@
-package plugins.kernel.roi.tool.morphology;
+package plugins.kernel.roi.tool.morphology.watershed;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -22,6 +22,7 @@ import icy.type.dimension.Dimension3D;
 import icy.type.dimension.Dimension5D;
 import icy.util.Random;
 import plugins.kernel.roi.roi2d.ROI2DArea;
+import plugins.kernel.roi.tool.morphology.ROIDistanceTransformCalculator;
 
 public class ROIWatershedCalculator
 {
