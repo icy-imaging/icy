@@ -246,15 +246,6 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
         return outputConsolePanel;
     }
 
-    /**
-     * @deprecated IRC has been removed since Icy 1.9.8.0
-     */
-    public ChatPanel getChatPanel()
-    {
-        return null;
-        // return chatPanel;
-    }
-
     public static boolean getVirtualMode()
     {
         return GeneralPreferences.getVirtualMode();

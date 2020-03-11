@@ -58,7 +58,6 @@ import icy.file.Loader;
 import icy.gui.component.ExternalizablePanel;
 import icy.gui.component.ExternalizablePanel.StateListener;
 import icy.gui.frame.IcyExternalFrame;
-import icy.gui.inspector.ChatPanel;
 import icy.gui.inspector.InspectorPanel;
 import icy.gui.menu.ApplicationMenu;
 import icy.gui.menu.MainRibbon;
@@ -512,14 +511,6 @@ public class MainFrame extends JRibbonFrame
     public MainRibbon getMainRibbon()
     {
         return mainRibbon;
-    }
-
-    /**
-     * @deprecated IRC has been removed since Icy 1.9.8.0
-     */
-    public ChatPanel getChat()
-    {
-        return inspector.getChatPanel();
     }
 
     /**
