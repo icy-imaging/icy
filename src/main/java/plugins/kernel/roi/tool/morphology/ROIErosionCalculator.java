@@ -33,21 +33,19 @@ public class ROIErosionCalculator
 
     private ROI erosionRoi;
 
-    public ROI getErosion()
+    public ROI getErosion() throws InterruptedException
     {
         if (erosionRoi == null)
             compute();
         return erosionRoi;
     }
 
-    public void compute()
+    public void compute() throws InterruptedException
     {
 
         if (roi.getBounds5D().getSizeZ() == 1)
         {
-            List<ROI> listRois = new ArrayList<ROI>();
-            listRois.add(roi);
-            Sequence dt = ROIUtil.computeDistanceMap(listRois, roi.getBounds5D().getDimension(), pixelSize, false);
+            Sequence dt = ROIUtil.computeDistanceMap(roi, roi.getBounds5D().getDimension(), pixelSize, false);
             ROI2DArea erosionRoi = new ROI2DArea();
             SequenceDataIterator dtIt = new SequenceDataIterator(dt, roi);
             while (!dtIt.done())

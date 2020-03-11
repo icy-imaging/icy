@@ -511,6 +511,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
         final IcyButton computeDistanceMapButton;
         final IcyButton computeWatershedButton;
+        final IcyButton computeSkeletonButton;
         final IcyButton dilateButton;
         final IcyButton erodeButton;
         final NumberTextField distanceField;
@@ -521,6 +522,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
             computeDistanceMapButton = createIcyButton(RoiActions.computeDistanceMapAction);
             computeWatershedButton = createIcyButton(RoiActions.computeWatershedSeparation);
+            computeSkeletonButton = createIcyButton(RoiActions.computeSkeleton);
             dilateButton = createIcyButton(RoiActions.dilateObjectsAction);
             erodeButton = createIcyButton(RoiActions.erodeObjectsAction);
 
@@ -531,6 +533,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
             addButtonComponent(computeDistanceMapButton);
             addButtonComponent(computeWatershedButton);
+            addButtonComponent(computeSkeletonButton);
             addButtonComponent(dilateButton);
             addButtonComponent(erodeButton);
             JRibbonComponent distanceComponent = new JRibbonComponent(distanceField);
@@ -570,8 +573,9 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             final boolean hasSequence = sequence != null;
             final boolean hasRois = hasSequence && !sequence.getSelectedROIs().isEmpty();
 
-            computeWatershedButton.setEnabled(hasSequence);
-            computeDistanceMapButton.setEnabled(hasSequence);
+            computeWatershedButton.setEnabled(hasRois);
+            computeDistanceMapButton.setEnabled(hasRois);
+            computeSkeletonButton.setEnabled(hasRois);
             dilateButton.setEnabled(hasRois);
             erodeButton.setEnabled(hasRois);
             distanceField.setEnabled(hasRois);

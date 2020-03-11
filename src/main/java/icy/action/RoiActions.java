@@ -51,6 +51,7 @@ import icy.sequence.SequenceDataIterator;
 import icy.sequence.edit.ROIAddSequenceEdit;
 import icy.sequence.edit.ROIAddsSequenceEdit;
 import icy.sequence.edit.ROIReplacesSequenceEdit;
+import icy.system.IcyHandledException;
 import icy.system.SystemUtil;
 import icy.type.DataIteratorUtil;
 import icy.type.dimension.Dimension3D;
@@ -1917,6 +1918,10 @@ public class RoiActions
                     MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
                     return false;
                 }
+                catch (InterruptedException ex1)
+                {
+                    throw new IcyHandledException(ex1);
+                }
                 Icy.getMainInterface().addSequence(distanceMap);
             }
             return false;
@@ -1940,7 +1945,7 @@ public class RoiActions
                         .filter(r -> !(r instanceof plugins.kernel.roi.roi2d.ROI2DPoint))
                         .collect(Collectors.<ROI2D> toList());
 
-                final List<ROI2DPoint> seedRois = sequence.getSelectedROIs(ROI2DPoint.class, false, true);
+                final List<ROI> seedRois = sequence.getSelectedROIs(ROI2DPoint.class, true);
 
                 Thread thrd = new Thread(new Runnable()
                 {
@@ -1951,17 +1956,37 @@ public class RoiActions
                         try
                         {
                             Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
-                            List<ROI> separationRois = ROIUtil.computeWatershedSeparation(selectedRois, seedRois,
-                                    sequence.getDimension5D(), pixelSize);
+                            List<ROI> separationRois;
+                            List<ROI> usedSeeds = null;
+                            if (seedRois.isEmpty())
+                            {
+                                usedSeeds = new ArrayList<ROI>();
+                                separationRois = ROIUtil.computeWatershedSeparation(selectedRois,
+                                        sequence.getDimension5D(), pixelSize, usedSeeds);
+                            }
+                            else
+                            {
+                                separationRois = ROIUtil.computeWatershedSeparation(selectedRois, seedRois,
+                                        sequence.getDimension5D(), pixelSize);
+                            }
                             sequence.beginUpdate();
+                            if (usedSeeds != null)
+                            {
+                                sequence.addROIs(usedSeeds, true);
+                            }
                             sequence.removeROIs(selectedRois, true);
                             sequence.addROIs(separationRois, true);
+
                             sequence.endUpdate();
                         }
                         catch (UnsupportedOperationException ex)
                         {
                             MessageDialog.showDialog("Operation not supported", ex.toString(),
                                     MessageDialog.ERROR_MESSAGE);
+                        }
+                        catch (InterruptedException ex1)
+                        {
+                            throw new IcyHandledException(ex1);
                         }
                     }
                 }, "ROIWatershed");
@@ -1970,10 +1995,49 @@ public class RoiActions
             return false;
         }
     };
+    public static final IcyAbstractAction computeSkeleton = new IcyAbstractAction("Compute Skeleton",
+            new IcyIcon(ResourceUtil.ICON_ROI_POLYLINE), "Computes the skeletons of selected ROIs",
+            "Computes the skeletons of selected ROIs.")
+    {
+        private static final long serialVersionUID = -708624356916992059L;
+
+        @Override
+        protected boolean doAction(ActionEvent e)
+        {
+            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+            if (sequence != null)
+            {
+                final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
+                MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
+                double distance = mainFrame.getMainRibbon().getROIRibbonTask().getDistance();
+
+                try
+                {
+                    Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
+                    List<ROI> skeletonRois = ROIUtil.computeSkeleton(selectedROIs, pixelSize, distance);
+                    sequence.beginUpdate();
+                    sequence.removeROIs(selectedROIs, true);
+                    sequence.addROIs(skeletonRois, true);
+                    sequence.endUpdate();
+                }
+                catch (UnsupportedOperationException ex)
+                {
+                    MessageDialog.showDialog("Operation not supported", ex.getMessage(), MessageDialog.ERROR_MESSAGE);
+                    return false;
+                }
+                catch (InterruptedException ex1)
+                {
+                    throw new IcyHandledException(ex1);
+                }
+            }
+            return false;
+        }
+    };
 
     public static final IcyAbstractAction dilateObjectsAction = new IcyAbstractAction("Dilate",
             new IcyIcon(ResourceUtil.ICON_ROI_DILATE), "Dilates selected ROIs",
-            "Computes the dilation of selected ROIs. If the results overlap with eachother, ROIs are merged.")
+            "Computes the dilation of selected ROIs.")
     {
         private static final long serialVersionUID = 5354562004015076140L;
 
@@ -2001,6 +2065,10 @@ public class RoiActions
                 {
                     MessageDialog.showDialog("Operation not supported", ex.getMessage(), MessageDialog.ERROR_MESSAGE);
                     return false;
+                }
+                catch (InterruptedException ex1)
+                {
+                    throw new IcyHandledException(ex1);
                 }
             }
             return false;
@@ -2036,6 +2104,10 @@ public class RoiActions
                 {
                     MessageDialog.showDialog("Operation not supported", ex.getMessage(), MessageDialog.ERROR_MESSAGE);
                     return false;
+                }
+                catch (InterruptedException ex1)
+                {
+                    throw new IcyHandledException(ex1);
                 }
             }
             return false;

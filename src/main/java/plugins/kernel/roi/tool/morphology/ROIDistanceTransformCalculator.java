@@ -50,14 +50,14 @@ public class ROIDistanceTransformCalculator
 
     Sequence distanceMap;
 
-    public Sequence getDistanceMap()
+    public Sequence getDistanceMap() throws InterruptedException
     {
         if (distanceMap == null)
             compute();
         return distanceMap;
     }
 
-    public void compute()
+    public void compute() throws InterruptedException
     {
         initializeDistanceMap();
         drawROIs();
@@ -93,10 +93,12 @@ public class ROIDistanceTransformCalculator
 
     private VolumetricImage currentVolumeImage;
 
-    private void processTimePoints()
+    private void processTimePoints() throws InterruptedException
     {
         for (int t = 0; t < imageSize.getSizeT(); t++)
         {
+            if (Thread.interrupted())
+                throw new InterruptedException();
             currentVolumeImage = distanceMap.getVolumetricImage(t);
             processCurrentVolume();
         }
@@ -112,7 +114,7 @@ public class ROIDistanceTransformCalculator
     private double squaredSizeZ;
     private double maxDistance;
 
-    private void processCurrentVolume()
+    private void processCurrentVolume() throws InterruptedException
     {
         currentVolumePlanes = new double[(int) imageSize.getSizeZ()][];
         squaredSizeY = pixelSize.getSizeY() * pixelSize.getSizeY();
@@ -123,6 +125,9 @@ public class ROIDistanceTransformCalculator
         maxDistance *= maxDistance;
         for (int k = 0; k < imageSize.getSizeZ(); k++)
         {
+            if (Thread.interrupted())
+                throw new InterruptedException();
+            
             double[] currentPlaneData = currentVolumeImage.getImage(k).getDataXYAsDouble(0);
             currentVolumePlanes[k] = currentPlaneData;
             currentK = k;
@@ -133,6 +138,9 @@ public class ROIDistanceTransformCalculator
         {
             for (int j = 0; j < imageSize.getSizeY(); j++)
             {
+                if (Thread.interrupted())
+                    throw new InterruptedException();
+                
                 currentJ = j;
                 for (int i = 0; i < imageSize.getSizeX(); i++)
                 {
@@ -143,6 +151,9 @@ public class ROIDistanceTransformCalculator
         }
         for (int k = 0; k < imageSize.getSizeZ(); k++)
         {
+            if (Thread.interrupted())
+                throw new InterruptedException();
+            
             for (int j = 0; j < imageSize.getSizeY(); j++)
             {
                 currentJ = j;

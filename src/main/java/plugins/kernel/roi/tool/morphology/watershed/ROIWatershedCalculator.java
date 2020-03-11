@@ -13,6 +13,7 @@ import icy.image.IcyBufferedImage;
 import icy.roi.BooleanMask2D;
 import icy.roi.ROI;
 import icy.sequence.Sequence;
+import icy.sequence.SequenceCursor;
 import icy.sequence.SequenceDataIterator;
 import icy.sequence.VolumetricImage;
 import icy.type.DataIteratorUtil;
@@ -20,8 +21,13 @@ import icy.type.DataType;
 import icy.type.TypeUtil;
 import icy.type.dimension.Dimension3D;
 import icy.type.dimension.Dimension5D;
+import icy.type.point.Point5D;
 import icy.util.Random;
+import plugins.kernel.image.filtering.GaussianFiltering;
+import plugins.kernel.image.filtering.LocalMaxFiltering;
+import plugins.kernel.image.filtering.convolution.ConvolutionException;
 import plugins.kernel.roi.roi2d.ROI2DArea;
+import plugins.kernel.roi.roi2d.ROI2DPoint;
 import plugins.kernel.roi.tool.morphology.ROIDistanceTransformCalculator;
 
 public class ROIWatershedCalculator
@@ -77,7 +83,7 @@ public class ROIWatershedCalculator
     private WatershedStructure watershedStructure;
     private List<ROI> resultingROIs;
 
-    public void compute()
+    public void compute() throws InterruptedException
     {
         computeDistanceTransform();
         prepareSeeds();
@@ -85,7 +91,7 @@ public class ROIWatershedCalculator
         computeFlooding();
     }
 
-    private void computeDistanceTransform()
+    private void computeDistanceTransform() throws InterruptedException
     {
         ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, true);
         dt.addAll(rois);
@@ -93,32 +99,83 @@ public class ROIWatershedCalculator
     }
 
     int seedNumber;
+    private List<ROI> usedSeeds;
 
-    private void prepareSeeds()
+    private void prepareSeeds() throws InterruptedException
     {
+        usedSeeds = new ArrayList<ROI>();
         seedNumber = 0;
-        if (!seeds.isEmpty() && !addNewBasins)
+        if (!seeds.isEmpty() && !addNewBasins) // Use seeds comming from rois.
         {
-            seedLabels = new Sequence();
-            for (int l = 0; l < imageSize.getSizeT(); l++)
-            {
-                VolumetricImage volume = new VolumetricImage();
-                for (int k = 0; k < imageSize.getSizeZ(); k++)
-                {
-                    IcyBufferedImage plane = new IcyBufferedImage((int) imageSize.getSizeX(),
-                            (int) imageSize.getSizeY(), 1, DataType.INT);
-                    volume.setImage(k, plane);
-                }
-                seedLabels.addVolumetricImage(l, volume);
-            }
+            usedSeeds.addAll(seeds);
+            initializeSeedLabelsSequence();
 
-            seedNumber = 0;
             for (ROI roi : seeds)
             {
                 seedNumber++;
                 DataIteratorUtil.set(new SequenceDataIterator(seedLabels, roi, true), seedNumber);
             }
         }
+        else if (!addNewBasins) // Find seeds on smoothed image
+        {
+            Sequence localMax = getLocalMaxima();
+            initializeSeedLabelsSequence();
+
+            SequenceCursor seedCursor = new SequenceCursor(seedLabels);
+            for (SequenceDataIterator localMaxIt = new SequenceDataIterator(localMax); !localMaxIt.done(); localMaxIt
+                    .next())
+            {
+                if (Thread.interrupted())
+                    throw new InterruptedException();
+                if (localMaxIt.get() > 0)
+                {
+                    seedNumber++;
+                    seedCursor.set(localMaxIt.getPositionX(), localMaxIt.getPositionY(), localMaxIt.getPositionZ(),
+                            localMaxIt.getPositionT(), 0, seedNumber);
+                    usedSeeds.add(
+                            new ROI2DPoint(new Point5D.Integer(localMaxIt.getPositionX(), localMaxIt.getPositionY(),
+                                    localMaxIt.getPositionZ(), localMaxIt.getPositionT(), localMaxIt.getPositionC())));
+                }
+            }
+            seedCursor.commitChanges();
+        }
+    }
+
+    private void initializeSeedLabelsSequence() throws InterruptedException
+    {
+        seedLabels = new Sequence();
+        for (int l = 0; l < imageSize.getSizeT(); l++)
+        {
+            if (Thread.interrupted())
+                throw new InterruptedException();
+
+            VolumetricImage volume = new VolumetricImage();
+            for (int k = 0; k < imageSize.getSizeZ(); k++)
+            {
+                if (Thread.interrupted())
+                    throw new InterruptedException();
+
+                IcyBufferedImage plane = new IcyBufferedImage((int) imageSize.getSizeX(), (int) imageSize.getSizeY(), 1,
+                        DataType.INT);
+                volume.setImage(k, plane);
+            }
+            seedLabels.addVolumetricImage(l, volume);
+        }
+    }
+
+    private Sequence getLocalMaxima() throws RuntimeException, InterruptedException
+    {
+        LocalMaxFiltering localMaxFiltering = LocalMaxFiltering.create(getSmoothedDistanceMap(), 3);
+        localMaxFiltering.computeFiltering();
+        return localMaxFiltering.getFilteredSequence();
+    }
+
+    private Sequence getSmoothedDistanceMap()
+            throws IllegalArgumentException, ConvolutionException, InterruptedException
+    {
+        GaussianFiltering smoothingFilter = GaussianFiltering.create(this.distanceMap, new double[] {2, 2, 2});
+        smoothingFilter.computeFiltering();
+        return smoothingFilter.getFilteredSequence();
     }
 
     private void createWatershedStructure()
@@ -128,11 +185,14 @@ public class ROIWatershedCalculator
 
     int currentT;
 
-    private void computeFlooding()
+    private void computeFlooding() throws InterruptedException
     {
         resultingROIs = new ArrayList<ROI>();
         for (currentT = 0; currentT < this.distanceMap.getSizeT(); currentT++)
         {
+            if (Thread.interrupted())
+                throw new InterruptedException();
+
             floodCurrentFrame();
             createResultingROIs();
         }
@@ -177,7 +237,7 @@ public class ROIWatershedCalculator
 
             if (node.getLabel() <= WatershedNode.NO_LABEL)
             {
-                node.setLabel(WatershedNode.MASK);
+                node.setLabel(WatershedNode.TO_BE_MARKED);
             }
 
             for (WatershedNode neighbor : node.getNeighbors())
@@ -220,7 +280,7 @@ public class ROIWatershedCalculator
                 {
                     if (neighborNode.getLabel() > WatershedNode.WATERSHED)
                     {
-                        if (currentNode.getLabel() == WatershedNode.MASK)
+                        if (currentNode.getLabel() == WatershedNode.TO_BE_MARKED)
                         {
                             if (addNewBasins)
                                 currentNode.setLabel(neighborNode.getLabel());
@@ -232,12 +292,12 @@ public class ROIWatershedCalculator
                             currentNode.setLabel(WatershedNode.WATERSHED);
                         }
                     }
-                    else if (currentNode.getLabel() == WatershedNode.MASK)
+                    else if (currentNode.getLabel() == WatershedNode.TO_BE_MARKED)
                     {
                         currentNode.setLabel(neighborNode.getLabel());
                     }
                 }
-                else if (neighborNode.getLabel() == WatershedNode.MASK && neighborNode.getDistance() == 0d)
+                else if (neighborNode.getLabel() == WatershedNode.TO_BE_MARKED && neighborNode.getDistance() == 0d)
                 {
                     neighborNode.setDistance(currentDistance + 1);
                     queue.add(neighborNode);
@@ -261,7 +321,7 @@ public class ROIWatershedCalculator
 
             currentNode.setDistance(0);
 
-            if (currentNode.getLabel() == WatershedNode.MASK)
+            if (currentNode.getLabel() == WatershedNode.TO_BE_MARKED)
             {
                 if (addNewBasins)
                     addNewBasin(currentNode);
@@ -280,6 +340,8 @@ public class ROIWatershedCalculator
     {
         currentLabel++;
         currentNode.setLabel(currentLabel);
+        usedSeeds.add(new ROI2DPoint(
+                new Point5D.Integer(currentNode.getX(), currentNode.getY(), currentNode.getZ(), currentT, 0)));
         queue.add(currentNode);
 
         while (!queue.isEmpty())
@@ -288,7 +350,7 @@ public class ROIWatershedCalculator
             List<WatershedNode> nodeNeighbors = node.getNeighbors();
             for (WatershedNode neighbor : nodeNeighbors)
             {
-                if (neighbor.getLabel() == WatershedNode.MASK)
+                if (neighbor.getLabel() == WatershedNode.TO_BE_MARKED)
                 {
                     neighbor.setLabel(currentLabel);
                     queue.add(neighbor);
@@ -311,7 +373,7 @@ public class ROIWatershedCalculator
             List<WatershedNode> nodeNeighbors = node.getNeighbors();
             for (WatershedNode neighbor : nodeNeighbors)
             {
-                if (neighbor.getLabel() == WatershedNode.MASK
+                if (neighbor.getLabel() == WatershedNode.TO_BE_MARKED
                         || (neighbor.getLabel() == WatershedNode.NO_LABEL && neighbor.getHeight() > node.getHeight()))
                 {
                     neighbor.setLabel(seedLabel);
@@ -367,12 +429,17 @@ public class ROIWatershedCalculator
         }
     }
 
-    public List<ROI> getResultRois()
+    public List<ROI> getResultRois() throws InterruptedException
     {
         if (resultingROIs == null)
             compute();
 
         return resultingROIs;
+    }
+
+    public List<ROI> getUsedSeeds()
+    {
+        return usedSeeds;
     }
 
 }

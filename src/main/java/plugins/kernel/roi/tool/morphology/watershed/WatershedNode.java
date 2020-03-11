@@ -14,7 +14,7 @@ public class WatershedNode implements Comparable<WatershedNode>
     /**
      * Node that will be taken into account during this flooding iteration.
      */
-    public static final int MASK = -2;
+    public static final int TO_BE_MARKED = -2;
     /**
      * Node that won't be handled but will serve as flag to indicate that distance must be increased on the flooding step.
      */

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import icy.main.Icy;
 import icy.roi.BooleanMask2D;
 import icy.roi.ROI;
 import icy.roi.ROIUtil;
@@ -32,7 +31,7 @@ public class ROIDilationCalculator
 
     private ROI dilationRoi;
 
-    public ROI getDilation()
+    public ROI getDilation() throws InterruptedException
     {
         if (dilationRoi == null)
             compute();
@@ -41,7 +40,7 @@ public class ROIDilationCalculator
 
     private BooleanMask2D roiBooleanMask;
 
-    private void compute()
+    private void compute() throws InterruptedException
     {
         Rectangle5D roiBounds = roi.getBounds5D();
         if (roiBounds.getSizeZ() == 1 || Double.isInfinite(roiBounds.getSizeZ()))
@@ -49,11 +48,8 @@ public class ROIDilationCalculator
             this.roiBooleanMask = roi.getBooleanMask2D(0, 0, 0, true);
             setDistanceMapRoi2D();
 
-            List<ROI> listRois = new ArrayList<ROI>();
-            listRois.add(distanceMapRoi2d);
-            Sequence dt = ROIUtil.computeDistanceMap(listRois, distanceMapRoi2d.getBounds5D().getDimension(), pixelSize,
-                    false);
-            Icy.getMainInterface().addSequence(dt);
+            Sequence dt = ROIUtil.computeDistanceMap(distanceMapRoi2d, distanceMapRoi2d.getBounds5D().getDimension(),
+                    pixelSize, false);
             boolean[] dilationMask = new boolean[distanceMapRoiMaskRect.width * distanceMapRoiMaskRect.height];
             SequenceDataIterator dtIt = new SequenceDataIterator(dt, distanceMapRoi2d);
             while (!dtIt.done())

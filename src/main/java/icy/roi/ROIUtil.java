@@ -87,6 +87,7 @@ import plugins.kernel.roi.roi5d.ROI5DArea;
 import plugins.kernel.roi.tool.morphology.ROIDilationCalculator;
 import plugins.kernel.roi.tool.morphology.ROIDistanceTransformCalculator;
 import plugins.kernel.roi.tool.morphology.ROIErosionCalculator;
+import plugins.kernel.roi.tool.morphology.skeletonization.ROISkeletonCalculator;
 import plugins.kernel.roi.tool.morphology.watershed.ROIWatershedCalculator;
 
 /**
@@ -2768,25 +2769,105 @@ public class ROIUtil
             destination.setProperty(propertyEntry.getKey(), propertyEntry.getValue());
     }
 
+    public static Sequence computeDistanceMap(ROI roi, Dimension5D imageSize, Dimension3D pixelSize,
+            boolean constrainBorders) throws InterruptedException
+    {
+        ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, constrainBorders);
+        dt.addROI(roi);
+        return dt.getDistanceMap();
+    }
+
     public static Sequence computeDistanceMap(Collection<? extends ROI> selectedROIs, Dimension5D imageSize,
-            Dimension3D pixelSize, boolean constrainBorders)
+            Dimension3D pixelSize, boolean constrainBorders) throws InterruptedException
     {
         ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, constrainBorders);
         dt.addAll(selectedROIs);
         return dt.getDistanceMap();
     }
 
+    /**
+     * @param selectedRois
+     *        ROIs that need to be separated. Note: These ROIs will be joined before watersheding.
+     * @param seedRois
+     *        Seed points used to initialize watershed.
+     * @param imageSize
+     *        Size of the image where the ROIs are located.
+     * @param pixelSize
+     *        Physical size of the pixels in the image.
+     * @return List of separated ROIs.
+     * @throws InterruptedException
+     *         If the process gets interrupted.
+     */
     public static List<ROI> computeWatershedSeparation(Collection<? extends ROI> selectedRois,
-            List<? extends ROI> seedRois, Dimension5D imageSize, Dimension3D pixelSize)
+            List<? extends ROI> seedRois, Dimension5D imageSize, Dimension3D pixelSize) throws InterruptedException
     {
         ROIWatershedCalculator ws = new ROIWatershedCalculator(imageSize, pixelSize);
         ws.addAll(selectedRois);
         ws.addAllSeeds(seedRois);
-        ws.setAddNewBasins(seedRois.isEmpty());
+        ws.setAddNewBasins(false);
+        ws.compute();
         return ws.getResultRois();
     }
 
+    /**
+     * @param selectedRois
+     * @param imageSize
+     * @param pixelSize
+     * @param usedSeedRois
+     *        collection where detected seeds will be stored.
+     * @return
+     * @throws InterruptedException
+     */
+    public static List<ROI> computeWatershedSeparation(Collection<? extends ROI> selectedRois, Dimension5D imageSize,
+            Dimension3D pixelSize, List<ROI> usedSeedRois) throws InterruptedException
+    {
+        ROIWatershedCalculator ws = new ROIWatershedCalculator(imageSize, pixelSize);
+        ws.addAll(selectedRois);
+        ws.addAllSeeds(new ArrayList<ROI>());
+        ws.setAddNewBasins(false);
+        ws.compute();
+        usedSeedRois.clear();
+        usedSeedRois.addAll(ws.getUsedSeeds());
+        return ws.getResultRois();
+    }
+
+    public static List<ROI> computeSkeleton(List<ROI2D> selectedROIs, Dimension3D pixelSize, double distance)
+            throws InterruptedException
+    {
+        List<ROI> result = new ArrayList<ROI>();
+        for (ROI roi : selectedROIs)
+        {
+            if (roi.getBounds5D().getSizeX() == 0)
+                continue;
+
+            Point5D oldPosition = new Point5D.Double();
+            oldPosition.setLocation(roi.getPosition5D());
+            roi.setPosition5D(new Point5D.Double());
+            try
+            {
+                ROISkeletonCalculator skeletonizer = new ROISkeletonCalculator(roi, pixelSize);
+                ROI skeletonRoi = skeletonizer.getSkeletonROI();
+                if (skeletonRoi != null && skeletonRoi.getBounds5D().getSizeX() > 0)
+                // TODO remove equals null
+                {
+                    Point5D skeletonPosition = skeletonRoi.getPosition5D();
+                    skeletonPosition.setX(skeletonPosition.getX() + oldPosition.getX());
+                    skeletonPosition.setY(skeletonPosition.getY() + oldPosition.getY());
+                    skeletonPosition.setZ(skeletonPosition.getZ() + oldPosition.getZ());
+                    skeletonRoi.setPosition5D(skeletonPosition);
+                    result.add(skeletonRoi);
+                }
+            }
+            finally
+            {
+                roi.setPosition5D(oldPosition);
+            }
+        }
+        return result;
+    }
+
     public static List<ROI> computeDilation(List<? extends ROI> selectedROIs, Dimension3D pixelSize, double distance)
+            throws InterruptedException
     {
         List<ROI> result = new ArrayList<ROI>();
         for (ROI roi : selectedROIs)
@@ -2819,11 +2900,6 @@ public class ROIUtil
                 ROI dilationRoi = dilator.getDilation();
                 if (dilationRoi.getBounds5D().getSizeX() > 0)
                 {
-                    // Point5D dilationPosition = dilationRoi.getPosition5D();
-                    // dilationPosition.setX(dilationPosition.getX() + oldBounds.getX());
-                    // dilationPosition.setY(dilationPosition.getY() + oldBounds.getY());
-                    // dilationPosition.setZ(dilationPosition.getZ() + oldBounds.getZ());
-                    // dilationRoi.setPosition5D(dilationPosition);
                     result.add(dilationRoi);
                 }
             }
@@ -2836,6 +2912,7 @@ public class ROIUtil
     }
 
     public static List<ROI> computeErosion(List<? extends ROI> selectedROIs, Dimension3D pixelSize, double distance)
+            throws InterruptedException
     {
         List<ROI> result = new ArrayList<ROI>();
         for (ROI roi : selectedROIs)

@@ -239,5 +239,11 @@ public class IcyBufferedImageCursor
             planeChanged.set(false);
         }
     }
+    
+    @Override
+    public String toString()
+    {
+        return "last channel=" + currentChannel;
+    }
 
 }
