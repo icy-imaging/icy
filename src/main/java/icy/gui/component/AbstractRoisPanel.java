@@ -225,8 +225,6 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
 
     // PluginDescriptors / ROIDescriptor map
     protected Map<ROIDescriptor, PluginROIDescriptor> descriptorMap;
-    // DescriptorComputer / ROIDescriptor map
-    protected Map<ROIDescriptor, DescriptorComputer> descriptorComputerMap;
 
     // Descriptor / column info (static to the class)
     protected List<ColumnInfo> columnInfoList;
@@ -256,9 +254,9 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     protected final Runnable columnInfoListRefresher;
     protected final InstanceProcessor processor;
 
-    protected final DescriptorComputer primaryDescriptorComputer;
-    protected final DescriptorComputer basicDescriptorComputer;
-    protected final DescriptorComputer advancedDescriptorComputer;
+    protected DescriptorComputer primaryDescriptorComputer;
+    protected DescriptorComputer basicDescriptorComputer;
+    protected DescriptorComputer advancedDescriptorComputer;
 
     protected long lastTableDataRefresh;
 
@@ -1001,6 +999,19 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             if (roiResults != null)
                 cancelDescriptorComputation(roiResults);
         }
+
+        // interrupt current descriptor processings
+        primaryDescriptorComputer.interrupt();
+        basicDescriptorComputer.interrupt();
+        advancedDescriptorComputer.interrupt();
+
+        // restart descriptor processing threads
+        primaryDescriptorComputer = new DescriptorComputer(DescriptorType.PRIMARY);
+        basicDescriptorComputer = new DescriptorComputer(DescriptorType.BASIC);
+        advancedDescriptorComputer = new DescriptorComputer(DescriptorType.EXTERNAL);
+        primaryDescriptorComputer.start();
+        basicDescriptorComputer.start();
+        advancedDescriptorComputer.start();
 
         // set new ROI set
         roiSet = newRoiSet;
@@ -2130,43 +2141,37 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         @Override
         public void run()
         {
-            while (!Thread.interrupted())
+            try
             {
-                final ROIResults[] roiResultsList;
-
-                synchronized (resultsToCompute)
+                while (!interrupted())
                 {
-                    try
+                    final ROIResults roiResults;
+
+                    synchronized (resultsToCompute)
                     {
                         while (resultsToCompute.isEmpty())
                             resultsToCompute.wait();
+
+                        // get first
+                        roiResults = resultsToCompute.iterator().next();
+                        // and remove it from compute list
+                        resultsToCompute.remove(roiResults);
                     }
-                    catch (InterruptedException e)
-                    {
-                        // ignore and just interrupt now
-                        Thread.currentThread().interrupt();
-                    }
 
-                    // get results to compute
-                    roiResultsList = resultsToCompute.toArray(new ROIResults[resultsToCompute.size()]);
-                    // and remove them
-                    resultsToCompute.clear();
-                }
+                    final Sequence seq = getSequence();
 
-                final Sequence seq = getSequence();
-
-                if (seq != null)
-                {
-                    // start with primaries descriptors
-                    for (ROIResults roiResults : roiResultsList)
-                    {
-                        // active sequence changed ? --> quickly discard other calculations
-                        if (seq != getSequence())
-                            break;
-
+                    if (seq != null)
                         computeROIResults(roiResults, seq);
-                    }
                 }
+            }
+            catch (InterruptedException exc)
+            {
+                // just interrupt processing thread
+            }
+            catch (Throwable t)
+            {
+                System.err.println("Error while computing ROI descriptors:");
+                System.err.println(t.getMessage());
             }
         }
 
