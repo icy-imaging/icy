@@ -127,7 +127,7 @@ public class ROIDistanceTransformCalculator
         {
             if (Thread.interrupted())
                 throw new InterruptedException();
-            
+
             double[] currentPlaneData = currentVolumeImage.getImage(k).getDataXYAsDouble(0);
             currentVolumePlanes[k] = currentPlaneData;
             currentK = k;
@@ -140,7 +140,7 @@ public class ROIDistanceTransformCalculator
             {
                 if (Thread.interrupted())
                     throw new InterruptedException();
-                
+
                 currentJ = j;
                 for (int i = 0; i < imageSize.getSizeX(); i++)
                 {
@@ -153,7 +153,7 @@ public class ROIDistanceTransformCalculator
         {
             if (Thread.interrupted())
                 throw new InterruptedException();
-            
+
             for (int j = 0; j < imageSize.getSizeY(); j++)
             {
                 currentJ = j;

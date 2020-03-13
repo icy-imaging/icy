@@ -72,6 +72,7 @@ import plugins.kernel.roi.descriptor.measure.ROIVolumeDescriptor;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import plugins.kernel.roi.roi2d.ROI2DEllipse;
 import plugins.kernel.roi.roi2d.ROI2DPoint;
+import plugins.kernel.roi.roi2d.ROI2DPolyLine;
 import plugins.kernel.roi.roi2d.ROI2DPolygon;
 import plugins.kernel.roi.roi2d.ROI2DRectShape;
 import plugins.kernel.roi.roi2d.ROI2DRectangle;
@@ -2898,8 +2899,21 @@ public class ROIUtil
             {
                 ROIDilationCalculator dilator = new ROIDilationCalculator(roi, pixelSize, distance);
                 ROI dilationRoi = dilator.getDilation();
-                if (dilationRoi.getBounds5D().getSizeX() > 0)
+                Rectangle5D dilationBounds = dilationRoi.getBounds5D();
+                if (dilationBounds.getSizeX() > 0)
                 {
+                    if (!(roi instanceof ROI2DPolygon) && !(roi instanceof ROI2DPoint)
+                            && !(roi instanceof ROI2DPolyLine))
+                    {// Recover translation does not apply for these three types of ROIS, they are already at the correct position
+                        Point5D dPos = dilationBounds.getPosition();
+                        Point5D oPos = oldBounds.getPosition();
+                        dPos.setX(dPos.getX() + oPos.getX());
+                        dPos.setY(dPos.getY() + oPos.getY());
+                        if (dilationBounds.getSizeZ() > 1)
+                            dPos.setZ(dPos.getZ() + oPos.getZ());
+
+                        dilationRoi.setPosition5D(dPos);
+                    }
                     result.add(dilationRoi);
                 }
             }

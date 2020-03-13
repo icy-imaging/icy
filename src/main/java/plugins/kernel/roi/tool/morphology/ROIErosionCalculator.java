@@ -11,6 +11,7 @@ import icy.roi.ROIUtil;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceDataIterator;
 import icy.type.dimension.Dimension3D;
+import icy.type.dimension.Dimension5D;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import plugins.kernel.roi.roi3d.ROI3DArea;
 
@@ -45,7 +46,14 @@ public class ROIErosionCalculator
 
         if (roi.getBounds5D().getSizeZ() == 1)
         {
-            Sequence dt = ROIUtil.computeDistanceMap(roi, roi.getBounds5D().getDimension(), pixelSize, false);
+            Dimension5D roiDims = roi.getBounds5D().getDimension();
+            Dimension5D dims = new Dimension5D.Integer();
+            dims.setSizeX(Math.ceil(roiDims.getSizeX()));
+            dims.setSizeY(Math.ceil(roiDims.getSizeY()));
+            dims.setSizeZ(Math.ceil(roiDims.getSizeZ()));
+            dims.setSizeT(Math.ceil(roiDims.getSizeT()));
+            dims.setSizeC(Math.ceil(roiDims.getSizeC()));
+            Sequence dt = ROIUtil.computeDistanceMap(roi, dims, pixelSize, true);
             ROI2DArea erosionRoi = new ROI2DArea();
             SequenceDataIterator dtIt = new SequenceDataIterator(dt, roi);
             while (!dtIt.done())
