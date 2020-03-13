@@ -48,9 +48,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javax.media.jai.PlanarImage;
 
@@ -74,6 +71,7 @@ import icy.preferences.GeneralPreferences;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceIdImporter;
 import icy.system.SystemUtil;
+import icy.system.thread.Processor;
 import icy.type.DataType;
 import icy.type.TypeUtil;
 import icy.type.collection.array.Array1DUtil;
@@ -239,22 +237,21 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     private static class ImageDataLoader
     {
-        final ThreadPoolExecutor executor;
+        final Processor processor;
 
         public ImageDataLoader()
         {
             super();
 
-            int numWorker = SystemUtil.getNumberOfCPUs();
-            executor = new ThreadPoolExecutor(numWorker, numWorker * 2, 5L, TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<Runnable>());
+            processor = new Processor(SystemUtil.getNumberOfCPUs() * 2);
+            processor.setThreadName("Image data loader");
         }
 
         Object loadImageData(IcyBufferedImage image) throws ExecutionException, InterruptedException
         {
             final ImageDataLoaderTask task = new ImageDataLoaderTask(new ImageDataLoaderWorker(image));
 
-            executor.execute(task);
+            processor.execute(task);
 
             try
             {
@@ -263,7 +260,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             catch (InterruptedException e)
             {
                 // process interrupted ? remove task from executor queue if possible
-                executor.remove(task);
+                processor.remove(task);
                 // cancel the task (without interrupting current running task as this close the importer)
                 task.cancel(false);
 
@@ -275,7 +272,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         void cancelTasks(IcyBufferedImage image)
         {
             final List<ImageDataLoaderTask> tasks = new ArrayList<ImageDataLoaderTask>();
-            final BlockingQueue<Runnable> queue = executor.getQueue();
+            final BlockingQueue<Runnable> queue = processor.getQueue();
 
             synchronized (queue)
             {
@@ -292,7 +289,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             // remove pending tasks for that image
             for (ImageDataLoaderTask task : tasks)
             {
-                executor.remove(task);
+                processor.remove(task);
                 task.cancel(false);
             }
         }
@@ -301,13 +298,12 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Used for image / data loading from importer
      */
-    static ImageDataLoader imageDataLoader = new ImageDataLoader();
+    static final ImageDataLoader imageDataLoader = new ImageDataLoader();
 
     /**
      * Used internally to find out an image from its identity hash code
      */
-    static Map<Integer, WeakIcyBufferedImageReference> images = new HashMap<Integer, WeakIcyBufferedImageReference>();
-    // static Map<Integer, Object> imagesMax = new HashMap<Integer, Object>();
+    static final Map<Integer, WeakIcyBufferedImageReference> images = new HashMap<Integer, WeakIcyBufferedImageReference>();
 
     /**
      * Retrieve an {@link IcyBufferedImage} from its identity hash code
@@ -1788,8 +1784,10 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         }
         catch (InterruptedException e)
         {
-            System.err.println(
-                    "IcyBufferedImage.loadDataFromImporter() warning: image loading from ImageProvider was interrupted (image data not retrieved).");
+            // FIXME: better to disable it as when we interrupt ROI descriptor computation (by switching or closing an image)
+            // then we can have a lot of those messages appearing
+            // System.err.println(
+            // "IcyBufferedImage.loadDataFromImporter() warning: image loading from ImageProvider was interrupted (image data not retrieved).");
 
             // we want to keep the interrupted state here
             Thread.currentThread().interrupt();
