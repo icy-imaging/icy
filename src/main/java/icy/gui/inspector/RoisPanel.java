@@ -68,6 +68,7 @@ public class RoisPanel extends AbstractRoisPanel
         return new CustomROIResults(roi);
     }
 
+    @Override
     protected Sequence getSequence()
     {
         return Icy.getMainInterface().getActiveSequence();
@@ -141,15 +142,13 @@ public class RoisPanel extends AbstractRoisPanel
         @Override
         public void roiChanged(ROIEvent event)
         {
-            final ROI roi = event.getSource();
+            final ROI r = event.getSource();
 
             // ROI selected ? --> propagate event to control panel
-            if (roi.isSelected())
+            if (r.isSelected())
                 roiControlPanel.roiChanged(event);
 
             super.roiChanged(event);
         }
-    }
-
-   
+    }   
 }
