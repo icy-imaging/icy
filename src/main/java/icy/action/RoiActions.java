@@ -1292,9 +1292,13 @@ public class RoiActions
                         sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
                                 (addedROIs.size() > 1) ? "ROIs point conversion" : "ROI point conversion"));
                 }
-                catch (UnsupportedOperationException ex)
+                catch (UnsupportedOperationException ex1)
                 {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex1.toString(), MessageDialog.ERROR_MESSAGE);
+                }
+                catch (InterruptedException ex2)
+                {
+                    MessageDialog.showDialog("Operation interrupted", ex2.toString(), MessageDialog.ERROR_MESSAGE);
                 }
                 finally
                 {
@@ -1370,6 +1374,10 @@ public class RoiActions
                     {
                         MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
                     }
+                    catch (InterruptedException ex2)
+                    {
+                        MessageDialog.showDialog("Operation interrupted", ex2.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
                     finally
                     {
                         sequence.endUpdate();
@@ -1444,6 +1452,10 @@ public class RoiActions
                     catch (UnsupportedOperationException ex)
                     {
                         MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    catch (InterruptedException ex2)
+                    {
+                        MessageDialog.showDialog("Operation interrupted", ex2.toString(), MessageDialog.ERROR_MESSAGE);
                     }
                     finally
                     {

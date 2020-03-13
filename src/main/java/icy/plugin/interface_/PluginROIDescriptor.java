@@ -3,12 +3,12 @@
  */
 package icy.plugin.interface_;
 
+import java.util.List;
+import java.util.Map;
+
 import icy.roi.ROI;
 import icy.roi.ROIDescriptor;
 import icy.sequence.Sequence;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Plugin interface providing the basic functionalities to compute various descriptors for regions
@@ -52,6 +52,9 @@ public interface PluginROIDescriptor extends PluginNoEDTConstructor
      * @throws UnsupportedOperationException
      *         if the type of the given ROI is not supported by this descriptor or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it.
+     * @throws InterruptedException
+     *         if the thread was interrupted during the computation of the descriptor
      */
-    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence) throws UnsupportedOperationException;
+    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException;
 }

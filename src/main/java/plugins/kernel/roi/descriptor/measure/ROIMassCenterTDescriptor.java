@@ -26,7 +26,7 @@ public class ROIMassCenterTDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return Double.valueOf(getMassCenterT(ROIMassCenterDescriptorsPlugin.computeMassCenter(roi)));
     }

@@ -43,7 +43,7 @@ public class ROIMassCenterDescriptorsPlugin extends Plugin implements PluginROID
     /**
      * Compute and returns the mass center of specified ROI.
      */
-    public static Point5D computeMassCenter(ROI roi)
+    public static Point5D computeMassCenter(ROI roi) throws InterruptedException
     {
         final Rectangle5D bounds = roi.getBounds5D();
 
@@ -66,6 +66,10 @@ public class ROIMassCenterDescriptorsPlugin extends Plugin implements PluginROID
         numPts = 0;
         while (!it.done())
         {
+            // check for interruption sometime
+            if (((numPts & 0xFFFF) == 0) && Thread.currentThread().isInterrupted())
+                throw new InterruptedException();
+
             x += it.getX();
             y += it.getY();
             z += it.getZ();
@@ -97,7 +101,7 @@ public class ROIMassCenterDescriptorsPlugin extends Plugin implements PluginROID
     }
 
     @Override
-    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence)
     {
         final Map<ROIDescriptor, Object> result = new HashMap<ROIDescriptor, Object>();
 

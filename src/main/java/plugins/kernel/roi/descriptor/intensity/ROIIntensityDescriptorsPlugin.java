@@ -60,10 +60,12 @@ public class ROIIntensityDescriptorsPlugin extends Plugin implements PluginROIDe
      * @param allowMultiChannel
      *        Allow multi channel intensity computation. If this parameter is set to <code>false</code> and the ROI
      *        number of channel is > 1 then a {@link UnsupportedOperationException} is launch.
-     * @throws Exception
-     *         If the ROI dimension changed during the descriptor computation.
      * @throws UnsupportedOperationException
      *         If the C dimension of the ROI is > 1 while allowMultiChannel parameter is set to <code>false</code>
+     * @throws InterruptedException
+     *         if the thread was interrupted during the computation of the intensity descriptor
+     * @throws Exception
+     *         If the ROI dimension changed during the descriptor computation.
      */
     public static IntensityDescriptorInfos computeIntensityDescriptors(ROI roi, Sequence sequence,
             boolean allowMultiChannel) throws Exception, UnsupportedOperationException
@@ -86,6 +88,10 @@ public class ROIIntensityDescriptorsPlugin extends Plugin implements PluginROIDe
 
         while (!it.done())
         {
+            // check for interruption sometime
+            if (((numPixels & 0xFFFF) == 0) && Thread.currentThread().isInterrupted())
+                throw new InterruptedException();
+
             final double value = it.get();
 
             if (min > value)

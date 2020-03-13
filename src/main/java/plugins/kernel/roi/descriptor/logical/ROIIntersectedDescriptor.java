@@ -42,7 +42,7 @@ public class ROIIntersectedDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence)
+    public Object compute(ROI roi, Sequence sequence) throws InterruptedException
     {
         return Double.valueOf(computeIntersectedROIs(roi, sequence));
     }
@@ -55,15 +55,20 @@ public class ROIIntersectedDescriptor extends ROIDescriptor
      * @param sequence
      *        the Sequence containing the ROIs we want to test for intersection (test against itself is automatically discarded)
      */
-    public static double computeIntersectedROIs(ROI roi, Sequence sequence)
+    public static double computeIntersectedROIs(ROI roi, Sequence sequence) throws InterruptedException
     {
         if ((roi == null) || (sequence == null))
             return 0;
 
         int result = 0;
         for (ROI r : sequence.getROIs())
+        {
+            if (Thread.currentThread().isInterrupted())
+                throw new InterruptedException();
+
             if ((r != roi) && (r != null) && (roi.intersects(r)))
                 result++;
+        }
 
         return result;
     }

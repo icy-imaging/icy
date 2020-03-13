@@ -3,6 +3,11 @@
  */
 package icy.roi;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginLauncher;
 import icy.plugin.PluginLoader;
@@ -12,12 +17,6 @@ import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.system.IcyExceptionHandler;
 import icy.util.StringUtil;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import plugins.kernel.roi.descriptor.measure.ROIBasicMeasureDescriptorsPlugin;
 
 /**
@@ -83,7 +82,7 @@ public abstract class ROIDescriptor
 
         return null;
     }
-    
+
     /**
      * Returns the descriptor identified by the given id from the given list of {@link ROIDescriptor}.<br>
      * It can return <code>null</code> if the descriptor is not found in the given list.
@@ -117,9 +116,11 @@ public abstract class ROIDescriptor
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it, or if
      *         the specified Z, T or C position are not supported by the descriptor
+     * @throws InterruptedException
+     *         if the thread was interrupted during the computation of the descriptor
      */
     public static Object computeDescriptor(Collection<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi,
-            Sequence sequence)
+            Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         final ROIDescriptor roiDescriptor = getDescriptor(roiDescriptors, descriptorId);
 
@@ -146,8 +147,11 @@ public abstract class ROIDescriptor
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it, or if
      *         the specified Z, T or C position are not supported by the descriptor
+     * @throws InterruptedException
+     *         if the thread was interrupted during the computation of the descriptor
      */
     public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
         return computeDescriptor(getDescriptors().keySet(), descriptorId, roi, sequence);
     }
@@ -273,8 +277,11 @@ public abstract class ROIDescriptor
      * @throws UnsupportedOperationException
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it
+     * @throws InterruptedException
+     *         if the thread was interrupted during the computation of the descriptor
      */
-    public abstract Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException;
+    public abstract Object compute(ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException;
 
     /*
      * We want a unique id for each {@link ROIDescriptor}
