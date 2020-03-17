@@ -87,7 +87,7 @@ import plugins.kernel.roi.roi5d.ROI5DArea;
 import plugins.kernel.roi.tool.morphology.ROIDilationCalculator;
 import plugins.kernel.roi.tool.morphology.ROIDistanceTransformCalculator;
 import plugins.kernel.roi.tool.morphology.ROIErosionCalculator;
-import plugins.kernel.roi.tool.morphology.ROIWatershedCalculator;
+import plugins.kernel.roi.tool.morphology.watershed.ROIWatershedCalculator;
 
 /**
  * ROI utilities class.
