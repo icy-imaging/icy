@@ -1,7 +1,7 @@
 /**
  * 
  */
-package plugins.kernel.roi.tool.morphology.skeletonization;
+package plugins.kernel.roi.morphology.skeletonization;
 
 import java.util.Comparator;
 import java.util.LinkedList;

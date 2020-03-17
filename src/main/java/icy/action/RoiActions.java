@@ -2036,8 +2036,8 @@ public class RoiActions
     };
 
     public static final IcyAbstractAction dilateObjectsAction = new IcyAbstractAction("Dilate",
-            new IcyIcon(ResourceUtil.ICON_ROI_DILATE), "Dilates selected ROIs",
-            "Computes the dilation of selected ROIs.")
+            new IcyIcon(ResourceUtil.ICON_ROI_DILATE), "Dilates selected 2D ROIs",
+            "Computes the dilation of selected 2D ROIs using the provided distance.")
     {
         private static final long serialVersionUID = 5354562004015076140L;
 
@@ -2076,7 +2076,8 @@ public class RoiActions
     };
 
     public static final IcyAbstractAction erodeObjectsAction = new IcyAbstractAction("Erode",
-            new IcyIcon(ResourceUtil.ICON_ROI_ERODE), "Erodes selected ROIs", "Computes the erotion of selected ROIs")
+            new IcyIcon(ResourceUtil.ICON_ROI_ERODE), "Erodes selected 2D ROIs",
+            "Computes the erotion of selected 2D ROIs using the provided distance.")
     {
         private static final long serialVersionUID = -708624356916992059L;
 

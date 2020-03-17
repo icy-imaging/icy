@@ -69,6 +69,11 @@ import plugins.kernel.roi.descriptor.measure.ROIMassCenterDescriptorsPlugin;
 import plugins.kernel.roi.descriptor.measure.ROIPerimeterDescriptor;
 import plugins.kernel.roi.descriptor.measure.ROISurfaceAreaDescriptor;
 import plugins.kernel.roi.descriptor.measure.ROIVolumeDescriptor;
+import plugins.kernel.roi.morphology.ROIDilationCalculator;
+import plugins.kernel.roi.morphology.ROIDistanceTransformCalculator;
+import plugins.kernel.roi.morphology.ROIErosionCalculator;
+import plugins.kernel.roi.morphology.skeletonization.ROISkeletonCalculator;
+import plugins.kernel.roi.morphology.watershed.ROIWatershedCalculator;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import plugins.kernel.roi.roi2d.ROI2DEllipse;
 import plugins.kernel.roi.roi2d.ROI2DPoint;
@@ -85,11 +90,6 @@ import plugins.kernel.roi.roi3d.ROI3DStackPolygon;
 import plugins.kernel.roi.roi3d.ROI3DStackRectangle;
 import plugins.kernel.roi.roi4d.ROI4DArea;
 import plugins.kernel.roi.roi5d.ROI5DArea;
-import plugins.kernel.roi.tool.morphology.ROIDilationCalculator;
-import plugins.kernel.roi.tool.morphology.ROIDistanceTransformCalculator;
-import plugins.kernel.roi.tool.morphology.ROIErosionCalculator;
-import plugins.kernel.roi.tool.morphology.skeletonization.ROISkeletonCalculator;
-import plugins.kernel.roi.tool.morphology.watershed.ROIWatershedCalculator;
 
 /**
  * ROI utilities class.
@@ -2902,7 +2902,7 @@ public class ROIUtil
                 Rectangle5D dilationBounds = dilationRoi.getBounds5D();
                 if (dilationBounds.getSizeX() > 0)
                 {
-                    if (!(roi instanceof ROI2DPolygon) && !(roi instanceof ROI2DPoint)
+                    if (!(roi instanceof ROI2DArea) && !(roi instanceof ROI2DPolygon) && !(roi instanceof ROI2DPoint)
                             && !(roi instanceof ROI2DPolyLine))
                     {// Recover translation does not apply for these three types of ROIS, they are already at the correct position
                         Point5D dPos = dilationBounds.getPosition();

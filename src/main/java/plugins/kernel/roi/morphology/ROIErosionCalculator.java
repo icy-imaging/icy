@@ -1,7 +1,7 @@
 /**
  * 
  */
-package plugins.kernel.roi.tool.morphology;
+package plugins.kernel.roi.morphology;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package plugins.kernel.roi.tool.morphology.watershed;
+package plugins.kernel.roi.morphology.watershed;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -26,9 +26,9 @@ import icy.util.Random;
 import plugins.kernel.image.filtering.GaussianFiltering;
 import plugins.kernel.image.filtering.LocalMaxFiltering;
 import plugins.kernel.image.filtering.convolution.ConvolutionException;
+import plugins.kernel.roi.morphology.ROIDistanceTransformCalculator;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import plugins.kernel.roi.roi2d.ROI2DPoint;
-import plugins.kernel.roi.tool.morphology.ROIDistanceTransformCalculator;
 
 public class ROIWatershedCalculator
 {

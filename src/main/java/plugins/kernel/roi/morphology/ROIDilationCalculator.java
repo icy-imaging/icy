@@ -1,4 +1,4 @@
-package plugins.kernel.roi.tool.morphology;
+package plugins.kernel.roi.morphology;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;

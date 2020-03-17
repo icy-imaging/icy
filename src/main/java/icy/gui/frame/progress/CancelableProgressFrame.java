@@ -94,6 +94,24 @@ public class CancelableProgressFrame extends ProgressFrame implements ActionList
             cancelBtn.setEnabled(enabled);
     }
 
+    /**
+     * @param listener
+     *        The listener triggered when the cancel button is clicked.
+     */
+    public void addCancelListener(ActionListener listener)
+    {
+        cancelBtn.addActionListener(listener);
+    }
+
+    /**
+     * @param listener
+     *        The listener to remove.
+     */
+    public void removeCancelListener(ActionListener listener)
+    {
+        cancelBtn.removeActionListener(listener);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e)
     {

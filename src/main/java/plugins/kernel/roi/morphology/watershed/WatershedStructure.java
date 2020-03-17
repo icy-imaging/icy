@@ -1,4 +1,4 @@
-package plugins.kernel.roi.tool.morphology.watershed;
+package plugins.kernel.roi.morphology.watershed;
 
 import java.util.ArrayList;
 import java.util.Collections;

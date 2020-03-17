@@ -296,7 +296,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             convertToRectangleButton.setFlat(true);
             radiusField = new NumberTextField();
             radiusField.setHorizontalAlignment(SwingConstants.CENTER);
-            radiusField.setToolTipText("Radius for Circle/Rectangle conversion");
+            radiusField.setToolTipText("Radius for Circle/Rectangle conversion in pixels");
             radiusField.setNumericValue(1);
 
             JRibbonComponent comp;
@@ -528,12 +528,12 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
             distanceField = new NumberTextField();
             distanceField.setHorizontalAlignment(SwingConstants.CENTER);
-            distanceField.setToolTipText("Distance to dilate/erode (>= 1)");
+            distanceField.setToolTipText("Distance to dilate/erode in pixels (>= 1)");
             distanceField.setNumericValue(1d);
 
             addButtonComponent(computeDistanceMapButton);
             addButtonComponent(computeWatershedButton);
-            addButtonComponent(computeSkeletonButton);
+            // addButtonComponent(computeSkeletonButton);
             addButtonComponent(dilateButton);
             addButtonComponent(erodeButton);
             JRibbonComponent distanceComponent = new JRibbonComponent(distanceField);
@@ -861,7 +861,8 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
     public ROITask()
     {
         super(NAME, new ROI2DBand(), new ROI3DBand(), new ROIExtBand(), new ROIConversionBand(),
-                new ROISeparationBand(), new ROIMorphologyBand(), new ROIBooleanOpBand(), new ROIFillBand(), new ROIIOBand());
+                new ROISeparationBand(), new ROIMorphologyBand(), new ROIBooleanOpBand(), new ROIFillBand(),
+                new ROIIOBand());
         // super(NAME,, new ROIRibbonBand());
 
         setResizeSequencingPolicy(new CoreRibbonResizeSequencingPolicies.CollapseFromLast(this));
