@@ -1910,7 +1910,7 @@ public class RoiActions
                 try
                 {
                     Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
-                    distanceMap = ROIUtil.computeDistanceMap(selectedROIs, sequence.getDimension5D(), pixelSize);
+                    distanceMap = ROIUtil.computeDistanceMap(selectedROIs, sequence.getDimension5D(), pixelSize, false);
                 }
                 catch (UnsupportedOperationException ex)
                 {
@@ -1986,13 +1986,12 @@ public class RoiActions
             {
                 final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
                 MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
-                double distance = mainFrame.getMainRibbon().getROIRibbonTask().getRadius();
+                double distance = mainFrame.getMainRibbon().getROIRibbonTask().getDistance();
 
                 try
                 {
                     Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
-                    List<ROI> dilatedRois = ROIUtil.computeDilation(selectedROIs, sequence.getDimension5D(), pixelSize,
-                            distance);
+                    List<ROI> dilatedRois = ROIUtil.computeDilation(selectedROIs, pixelSize, distance);
                     sequence.beginUpdate();
                     sequence.removeROIs(selectedROIs, true);
                     sequence.addROIs(dilatedRois, true);
@@ -2027,8 +2026,7 @@ public class RoiActions
                 try
                 {
                     Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
-                    List<ROI> dilatedRois = ROIUtil.computeErosion(selectedROIs, sequence.getDimension5D(), pixelSize,
-                            distance);
+                    List<ROI> dilatedRois = ROIUtil.computeErosion(selectedROIs, pixelSize, distance);
                     sequence.beginUpdate();
                     sequence.removeROIs(selectedROIs, true);
                     sequence.addROIs(dilatedRois, true);

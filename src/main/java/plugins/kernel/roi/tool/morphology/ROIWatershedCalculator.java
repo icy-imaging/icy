@@ -86,7 +86,7 @@ public class ROIWatershedCalculator
 
     private void computeDistanceTransform()
     {
-        ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize);
+        ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, true);
         dt.addAll(rois);
         this.distanceMap = dt.getDistanceMap();
     }

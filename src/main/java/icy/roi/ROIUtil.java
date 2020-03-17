@@ -84,6 +84,7 @@ import plugins.kernel.roi.roi3d.ROI3DStackPolygon;
 import plugins.kernel.roi.roi3d.ROI3DStackRectangle;
 import plugins.kernel.roi.roi4d.ROI4DArea;
 import plugins.kernel.roi.roi5d.ROI5DArea;
+import plugins.kernel.roi.tool.morphology.ROIDilationCalculator;
 import plugins.kernel.roi.tool.morphology.ROIDistanceTransformCalculator;
 import plugins.kernel.roi.tool.morphology.ROIErosionCalculator;
 import plugins.kernel.roi.tool.morphology.ROIWatershedCalculator;
@@ -2768,9 +2769,9 @@ public class ROIUtil
     }
 
     public static Sequence computeDistanceMap(Collection<? extends ROI> selectedROIs, Dimension5D imageSize,
-            Dimension3D pixelSize)
+            Dimension3D pixelSize, boolean constrainBorders)
     {
-        ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize);
+        ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, constrainBorders);
         dt.addAll(selectedROIs);
         return dt.getDistanceMap();
     }
@@ -2785,16 +2786,85 @@ public class ROIUtil
         return ws.getResultRois();
     }
 
-    public static List<ROI> computeDilation(List<? extends ROI> selectedROIs, Dimension5D imageSize,
-            Dimension3D pixelSize, double distance)
+    public static List<ROI> computeDilation(List<? extends ROI> selectedROIs, Dimension3D pixelSize, double distance)
     {
-        throw new UnsupportedOperationException("Not implemented yet");
+        List<ROI> result = new ArrayList<ROI>();
+        for (ROI roi : selectedROIs)
+        {
+            if (roi.getBounds5D().getSizeX() == 0)
+                continue;
+
+            Rectangle5D oldBounds = new Rectangle5D.Double(roi.getBounds5D());
+            Rectangle5D processingBounds = new Rectangle5D.Double(roi.getBounds5D());
+            processingBounds.setX(0);
+            processingBounds.setY(0);
+            processingBounds.setZ(0);
+            processingBounds.setC(0);
+            processingBounds.setT(0);
+            processingBounds.setSizeX(oldBounds.getSizeX());
+            processingBounds.setSizeY(oldBounds.getSizeY());
+            processingBounds.setSizeZ(1);
+            processingBounds.setSizeC(1);
+            processingBounds.setSizeT(1);
+            if (roi.getBounds5D().getSizeZ() > 1 && Double.isFinite(roi.getBounds5D().getSizeZ()))
+            {
+                processingBounds.setZ(0);
+                processingBounds.setSizeZ(oldBounds.getSizeZ());
+            }
+
+            roi.setBounds5D(processingBounds);
+            try
+            {
+                ROIDilationCalculator dilator = new ROIDilationCalculator(roi, pixelSize, distance);
+                ROI dilationRoi = dilator.getDilation();
+                if (dilationRoi.getBounds5D().getSizeX() > 0)
+                {
+                    // Point5D dilationPosition = dilationRoi.getPosition5D();
+                    // dilationPosition.setX(dilationPosition.getX() + oldBounds.getX());
+                    // dilationPosition.setY(dilationPosition.getY() + oldBounds.getY());
+                    // dilationPosition.setZ(dilationPosition.getZ() + oldBounds.getZ());
+                    // dilationRoi.setPosition5D(dilationPosition);
+                    result.add(dilationRoi);
+                }
+            }
+            finally
+            {
+                roi.setBounds5D(oldBounds);
+            }
+        }
+        return result;
     }
 
-    public static List<ROI> computeErosion(List<? extends ROI> selectedROIs, Dimension5D imageSize,
-            Dimension3D pixelSize, double distance)
+    public static List<ROI> computeErosion(List<? extends ROI> selectedROIs, Dimension3D pixelSize, double distance)
     {
-        ROIErosionCalculator eroder = new ROIErosionCalculator(selectedROIs, imageSize, pixelSize, distance);
-        return eroder.getErosion();
+        List<ROI> result = new ArrayList<ROI>();
+        for (ROI roi : selectedROIs)
+        {
+            if (roi.getBounds5D().getSizeX() == 0)
+                continue;
+
+            Point5D oldPosition = new Point5D.Double();
+            oldPosition.setLocation(roi.getPosition5D());
+            roi.setPosition5D(new Point5D.Double());
+            try
+            {
+                ROIErosionCalculator eroder = new ROIErosionCalculator(roi, pixelSize, distance);
+                ROI erosionRoi = eroder.getErosion();
+                if (erosionRoi.getBounds5D().getSizeX() > 0)
+                {
+                    Point5D erosionPosition = erosionRoi.getPosition5D();
+                    erosionPosition.setX(erosionPosition.getX() + oldPosition.getX());
+                    erosionPosition.setY(erosionPosition.getY() + oldPosition.getY());
+                    erosionPosition.setZ(erosionPosition.getZ() + oldPosition.getZ());
+                    erosionRoi.setPosition5D(erosionPosition);
+                    result.add(erosionRoi);
+                }
+            }
+            finally
+            {
+                roi.setPosition5D(oldPosition);
+            }
+        }
+        return result;
     }
 }

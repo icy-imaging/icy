@@ -14,16 +14,27 @@ import icy.type.DataType;
 import icy.type.dimension.Dimension3D;
 import icy.type.dimension.Dimension5D;
 
+/**
+ * This class computes the distance transform of a list containing {@link ROI}s. As a result, an area ROI is generated as a result of the size of
+ * {@code imageSize}. It can compute both 2D and 3D distance maps. The distance is computed taking into account the pixel size in three dimensions passed in
+ * {@code pixelSize}.
+ * The method for computing the distance transform is based on the algorithm proposed in the article "New Algorithms for euclidean distance transformation of an
+ * n-dimensional digitized picture with applications" by Toyofumi Saito and Jun-Ichiro Toriwaki published in Pattern Recognition Vol. 27 No. 11, 1994.
+ * 
+ * @author Daniel Felipe Gonzalez Obando
+ */
 public class ROIDistanceTransformCalculator
 {
     private Dimension5D imageSize;
     private Dimension3D pixelSize;
+    private boolean constrainBorders;
     private List<ROI> rois;
 
-    public ROIDistanceTransformCalculator(Dimension5D imageSize, Dimension3D pixelSize)
+    public ROIDistanceTransformCalculator(Dimension5D imageSize, Dimension3D pixelSize, boolean constrainBorders)
     {
         this.imageSize = imageSize;
         this.pixelSize = pixelSize;
+        this.constrainBorders = constrainBorders;
         this.rois = new ArrayList<>();
     }
 
@@ -99,12 +110,17 @@ public class ROIDistanceTransformCalculator
 
     private double squaredSizeY;
     private double squaredSizeZ;
+    private double maxDistance;
 
     private void processCurrentVolume()
     {
         currentVolumePlanes = new double[(int) imageSize.getSizeZ()][];
         squaredSizeY = pixelSize.getSizeY() * pixelSize.getSizeY();
         squaredSizeZ = pixelSize.getSizeZ() * pixelSize.getSizeZ();
+        maxDistance = Math.max(
+                Math.max(imageSize.getSizeX() * pixelSize.getSizeX(), imageSize.getSizeY() * pixelSize.getSizeY()),
+                imageSize.getSizeZ() * pixelSize.getSizeZ());
+        maxDistance *= maxDistance;
         for (int k = 0; k < imageSize.getSizeZ(); k++)
         {
             double[] currentPlaneData = currentVolumeImage.getImage(k).getDataXYAsDouble(0);
@@ -161,7 +177,7 @@ public class ROIDistanceTransformCalculator
 
     private void forwardPassCurrentRow()
     {
-        double affectedValue = 0;
+        double affectedValue = constrainBorders ? 0 : maxDistance;
 
         for (int i = 0; i < imageSize.getSizeX(); i++)
         {
@@ -179,7 +195,7 @@ public class ROIDistanceTransformCalculator
 
     private void backwardPassCurrentRow()
     {
-        double affectedValue = 0;
+        double affectedValue = constrainBorders ? 0 : maxDistance;
         for (int i = (int) imageSize.getSizeX() - 1; i >= 0; i--)
         {
             if (getValueAt(i, currentJ, currentK) != 0d)
@@ -208,28 +224,37 @@ public class ROIDistanceTransformCalculator
     private void forwardPassCurrentCol()
     {
         int a = 0;
-        for (int j = 0; j < imageSize.getSizeY(); j++)
+        for (int j = constrainBorders ? 0 : 1; j < imageSize.getSizeY(); j++)
         {
             if (a > 0)
                 a--;
             double dj = buffer[j] / squaredSizeY;
-            double dj1 = j == 0 ? 0d : buffer[j - 1] / squaredSizeY;
+            double dj1 = (j == 0) ? 0d : (buffer[j - 1] / squaredSizeY);
             if (dj > dj1 + 1d)
             {
-                int b = (int) Math.ceil((dj - dj1 - 1d) / 2d);
+                double b = Math.ceil((dj - dj1 - 1d) / 2d);
                 if (j + b > imageSize.getSizeY())
                     b = (int) imageSize.getSizeY() - j;
-                for (int n = a; n < b; n++)
+                int bi = (int) b;
+                for (int n = a; n < bi; n++)
                 {
                     int nSq = n + 1;
                     nSq *= nSq;
                     double m = dj1 + nSq;
-                    if (buffer[j + n] / squaredSizeY <= m)
-                        break;
+                    try
+                    {
+                        if (buffer[j + n] / squaredSizeY <= m)
+                            break;
+                    }
+                    catch (Exception e)
+                    {
+                        System.out.println(e);
+                        throw e;
+                    }
                     if (m < getValueAt(currentI, j + n, currentK) / squaredSizeY)
                         setValueAt(currentI, j + n, currentK, m * squaredSizeY);
                 }
-                a = b;
+                a = bi;
             }
             else
             {
@@ -241,18 +266,20 @@ public class ROIDistanceTransformCalculator
     private void backwardPassCurrentCol()
     {
         int a = 0;
-        for (int j = (int) imageSize.getSizeY() - 1; j >= 0; j--)
+        for (int j = (int) imageSize.getSizeY() - (constrainBorders ? 1 : 2); j >= 0; j--)
         {
             if (a > 0)
                 a--;
             double dj = buffer[j] / squaredSizeY;
-            double dj1 = j == (int) imageSize.getSizeY() - 1 ? 0 : buffer[j + 1] / squaredSizeY;
-            if (dj > dj1 + 1d)
+            double dj1 = (j == (int) imageSize.getSizeY() - 1) ? 0 : (buffer[j + 1] / squaredSizeY);
+            if (dj > dj1)
             {
-                int b = (int) Math.ceil((dj - dj1 - 1d) / 2d);
+                double b = Math.ceil((dj - dj1 - 1d) / 2d);
                 if (j - b < 0)
                     b = j;
-                for (int n = a; n < b; n++)
+                int bi = (int) b;
+
+                for (int n = a; n <= bi; n++)
                 {
                     double nSq = n + 1;
                     nSq *= nSq;
@@ -262,7 +289,7 @@ public class ROIDistanceTransformCalculator
                     if (m < getValueAt(currentI, j - n, currentK) / squaredSizeY)
                         setValueAt(currentI, j - n, currentK, m * squaredSizeY);
                 }
-                a = b;
+                a = bi;
             }
             else
             {
@@ -284,18 +311,19 @@ public class ROIDistanceTransformCalculator
     private void forwardPassCurrentFiber()
     {
         int a = 0;
-        for (int k = 0; k < imageSize.getSizeZ(); k++)
+        for (int k = constrainBorders ? 0 : 1; k < imageSize.getSizeZ(); k++)
         {
             if (a > 0)
                 a--;
             double dk = buffer[k] / squaredSizeZ;
-            double dk1 = k == 0 ? 0d : buffer[k - 1] / squaredSizeZ;
+            double dk1 = (k == 0) ? 0d : (buffer[k - 1] / squaredSizeZ);
             if (dk > dk1 + 1d)
             {
-                int b = (int) Math.ceil((dk - dk1 - 1d) / 2d);
+                double b = Math.ceil((dk - dk1 - 1d) / 2d);
                 if (k + b > imageSize.getSizeZ())
                     b = (int) imageSize.getSizeZ() - k;
-                for (int n = a; n < b; n++)
+                int bi = (int) b;
+                for (int n = a; n < bi; n++)
                 {
                     int nSq = n + 1;
                     nSq *= nSq;
@@ -305,7 +333,7 @@ public class ROIDistanceTransformCalculator
                     if (m < getValueAt(currentI, currentJ, k + n) / squaredSizeZ)
                         setValueAt(currentI, currentJ, k + n, m * squaredSizeZ);
                 }
-                a = b;
+                a = bi;
             }
             else
             {
@@ -318,18 +346,19 @@ public class ROIDistanceTransformCalculator
     private void backwardPassCurrentFiber()
     {
         int a = 0;
-        for (int k = (int) imageSize.getSizeZ() - 1; k >= 0; k--)
+        for (int k = (int) imageSize.getSizeZ() - (constrainBorders ? 1 : 2); k >= 0; k--)
         {
             if (a > 0)
                 a--;
             double dk = buffer[k] / squaredSizeZ;
-            double dk1 = k == (int) imageSize.getSizeZ() - 1 ? 0 : buffer[k + 1] / squaredSizeZ;
+            double dk1 = (k == (int) imageSize.getSizeZ() - 1) ? 0 : (buffer[k + 1] / squaredSizeZ);
             if (dk > dk1 + 1d)
             {
-                int b = (int) Math.ceil((dk - dk1 - 1d) / 2d);
+                double b = (int) Math.ceil((dk - dk1 - 1d) / 2d);
                 if (k - b < 0)
                     b = k;
-                for (int n = a; n < b; n++)
+                int bi = (int) b;
+                for (int n = a; n <= bi; n++)
                 {
                     double nSq = n + 1;
                     nSq *= nSq;
@@ -339,7 +368,7 @@ public class ROIDistanceTransformCalculator
                     if (m < getValueAt(currentI, currentJ, k - n) / squaredSizeZ)
                         setValueAt(currentI, currentJ, k - n, m * squaredSizeZ);
                 }
-                a = b;
+                a = bi;
             }
             else
             {

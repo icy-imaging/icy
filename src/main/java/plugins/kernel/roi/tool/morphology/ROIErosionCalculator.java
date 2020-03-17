@@ -4,7 +4,6 @@
 package plugins.kernel.roi.tool.morphology;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import icy.roi.ROI;
@@ -12,7 +11,6 @@ import icy.roi.ROIUtil;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceDataIterator;
 import icy.type.dimension.Dimension3D;
-import icy.type.dimension.Dimension5D;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import plugins.kernel.roi.roi3d.ROI3DArea;
 
@@ -22,75 +20,70 @@ import plugins.kernel.roi.roi3d.ROI3DArea;
 public class ROIErosionCalculator
 {
 
-    private List<? extends ROI> rois;
-    private Dimension5D imageSize;
+    private ROI roi;
     private Dimension3D pixelSize;
     private double distance;
-    private List<ROI> erosionRois;
 
-    public ROIErosionCalculator(List<? extends ROI> rois, Dimension5D imageSize, Dimension3D pixelSize, double distance)
+    public ROIErosionCalculator(ROI roi, Dimension3D pixelSize, double distance)
     {
-        this.rois = rois;
-        this.imageSize = imageSize;
+        this.roi = roi;
         this.pixelSize = pixelSize;
         this.distance = distance;
     }
 
-    public List<ROI> getErosion()
+    private ROI erosionRoi;
+
+    public ROI getErosion()
     {
-        if (erosionRois == null)
+        if (erosionRoi == null)
             compute();
-        return erosionRois;
+        return erosionRoi;
     }
 
     public void compute()
     {
 
-        if (imageSize.getSizeZ() == 1)
+        if (roi.getBounds5D().getSizeZ() == 1)
         {
-            Sequence dt = ROIUtil.computeDistanceMap(rois, imageSize, pixelSize);
-            erosionRois = new ArrayList<ROI>(rois.size());
-            for (ROI roi : rois)
+            List<ROI> listRois = new ArrayList<ROI>();
+            listRois.add(roi);
+            Sequence dt = ROIUtil.computeDistanceMap(listRois, roi.getBounds5D().getDimension(), pixelSize, false);
+            ROI2DArea erosionRoi = new ROI2DArea();
+            SequenceDataIterator dtIt = new SequenceDataIterator(dt, roi);
+            while (!dtIt.done())
             {
-                ROI2DArea erosionRoi = new ROI2DArea();
-                SequenceDataIterator dtIt = new SequenceDataIterator(dt, roi);
-                while (!dtIt.done())
+                double pixelValue = dtIt.get();
+                if (pixelValue > distance)
                 {
-                    double pixelValue = dtIt.get();
-                    if (pixelValue > distance)
-                    {
-                        erosionRoi.addPoint(dtIt.getPositionX(), dtIt.getPositionY());
-                    }
-                    dtIt.next();
+                    erosionRoi.addPoint(dtIt.getPositionX(), dtIt.getPositionY());
                 }
-                erosionRois.add(erosionRoi);
+                dtIt.next();
             }
+            this.erosionRoi = erosionRoi;
 
         }
-        else if (imageSize.getSizeZ() > 1)
+        else if (roi.getBounds5D().getSizeZ() > 1)
         {
-            Sequence dt = ROIUtil.computeDistanceMap(rois, imageSize, pixelSize);
-            erosionRois = new ArrayList<ROI>(rois.size());
-            for (ROI roi : rois)
+            List<ROI> listRois = new ArrayList<ROI>();
+            listRois.add(roi);
+            Sequence dt = ROIUtil.computeDistanceMap(listRois, roi.getBounds5D().getDimension(), pixelSize, true);
+            ROI3DArea erosionRoi = new ROI3DArea();
+            SequenceDataIterator dtIt = new SequenceDataIterator(dt, roi);
+            while (!dtIt.done())
             {
-                ROI3DArea erosionRoi = new ROI3DArea();
-                SequenceDataIterator dtIt = new SequenceDataIterator(dt, roi);
-                while (!dtIt.done())
+                double pixelValue = dtIt.get();
+                if (pixelValue > distance)
                 {
-                    double pixelValue = dtIt.get();
-                    if (pixelValue > distance)
-                    {
-                        erosionRoi.addPoint(dtIt.getPositionX(), dtIt.getPositionY(), dtIt.getPositionZ());
-                    }
-                    dtIt.next();
+                    erosionRoi.addPoint(dtIt.getPositionX(), dtIt.getPositionY(), dtIt.getPositionZ());
                 }
-                erosionRois.add(erosionRoi);
+                dtIt.next();
             }
+            this.erosionRoi = erosionRoi;
 
         }
         else
         {
-            erosionRois = Collections.emptyList();
+            erosionRoi = null;
         }
 
     }
