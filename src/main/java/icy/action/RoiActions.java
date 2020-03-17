@@ -1312,6 +1312,10 @@ public class RoiActions
                 {
                     MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
                 }
+                catch (InterruptedException ex)
+                {
+                    MessageDialog.showDialog("Operation interrupted", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                }
                 finally
                 {
                     sequence.endUpdate();
@@ -1387,6 +1391,10 @@ public class RoiActions
                     catch (UnsupportedOperationException ex)
                     {
                         MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    catch (InterruptedException ex)
+                    {
+                        MessageDialog.showDialog("Operation interrupted", ex.toString(), MessageDialog.ERROR_MESSAGE);
                     }
                     finally
                     {
@@ -1464,6 +1472,10 @@ public class RoiActions
                     catch (UnsupportedOperationException ex)
                     {
                         MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    catch (InterruptedException ex)
+                    {
+                        MessageDialog.showDialog("Operation interrupted", ex.toString(), MessageDialog.ERROR_MESSAGE);
                     }
                     finally
                     {

@@ -135,23 +135,26 @@ public class ROIUtil
      *        an optional sequence where the pixel size can be retrieved
      * @return the computed descriptor or <code>null</code> if the descriptor if not found in the
      *         specified set
+     * @throws InterruptedException 
      * @throws UnsupportedOperationException
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it, or if
      *         the specified Z, T or C position are not supported by the descriptor
      */
     public static Object computeDescriptor(Collection<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi,
-            Sequence sequence)
+            Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return ROIDescriptor.computeDescriptor(roiDescriptors, descriptorId, roi, sequence);
     }
 
     /**
+     * @throws InterruptedException 
+     * @throws UnsupportedOperationException 
      * @deprecated Use {@link ROIDescriptor#computeDescriptor(Collection, String, ROI, Sequence)} instead
      */
     @Deprecated
     public static Object computeDescriptor(Set<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi,
-            Sequence sequence)
+            Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return ROIDescriptor.computeDescriptor(roiDescriptors, descriptorId, roi, sequence);
     }
@@ -170,12 +173,13 @@ public class ROIUtil
      *        an optional sequence where the pixel size can be retrieved
      * @return the computed descriptor or <code>null</code> if the descriptor if not found in the
      *         specified set
+     * @throws InterruptedException 
      * @throws UnsupportedOperationException
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it, or if
      *         the specified Z, T or C position are not supported by the descriptor
      */
-    public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence)
+    public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return ROIDescriptor.computeDescriptor(descriptorId, roi, sequence);
     }
@@ -1446,8 +1450,9 @@ public class ROIUtil
      * Converts the specified ROI to a ROI Point ({@link ROI2DPoint} or {@link ROI3DPoint}) representing the mass center of the input ROI.
      * 
      * @return the ROI point representing the mass center of the input ROI.
+     * @throws InterruptedException 
      */
-    public static ROI convertToPoint(ROI roi)
+    public static ROI convertToPoint(ROI roi) throws InterruptedException
     {
         final ROI result;
         final Point5D pt = ROIMassCenterDescriptorsPlugin.computeMassCenter(roi);
@@ -1482,8 +1487,9 @@ public class ROIUtil
      * Converts the specified ROI to a 2D ellipse type ROI centered on the mass center of the input ROI.
      * 
      * @return the 2D ellipse ROI centered on the mass center of the input ROI.
+     * @throws InterruptedException 
      */
-    public static ROI2DEllipse convertToEllipse(ROI roi, double radiusX, double radiusY)
+    public static ROI2DEllipse convertToEllipse(ROI roi, double radiusX, double radiusY) throws InterruptedException
     {
         final Point5D pt = ROIMassCenterDescriptorsPlugin.computeMassCenter(roi);
         final double x = pt.getX();
@@ -1519,8 +1525,9 @@ public class ROIUtil
      * Converts the specified ROI to a 2D rectangle type ROI centered on the mass center of the input ROI.
      * 
      * @return the 2D rectangle ROI centered on the mass center of the input ROI.
+     * @throws InterruptedException 
      */
-    public static ROI2DRectangle convertToRectangle(ROI roi, double width, double height)
+    public static ROI2DRectangle convertToRectangle(ROI roi, double width, double height) throws InterruptedException
     {
         final Point5D pt = ROIMassCenterDescriptorsPlugin.computeMassCenter(roi);
         final double x = pt.getX();
