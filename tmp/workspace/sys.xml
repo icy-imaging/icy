@@ -1,9 +1,0 @@
-<root description="System workspace" name="sys">
-<task name="Plugins">
-<band name="Setup"/>
-<band name="New">
-<item classname="plugins.adufour.distancetransforms.ROIToDistanceMap" priority="top"/>
-</band>
-<band name="Others"/>
-</task>
-</root>
