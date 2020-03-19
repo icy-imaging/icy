@@ -167,6 +167,7 @@ public class ResourceUtil
     public static final Image ICON_ROI_DISTANCE_MAP = ResourceUtil.getAlphaIconAsImage("roi_distance_map.png");
     public static final Image ICON_ROI_DILATE = ResourceUtil.getAlphaIconAsImage("roi_dilate.png");
     public static final Image ICON_ROI_ERODE = ResourceUtil.getAlphaIconAsImage("roi_erode.png");
+    public static final Image ICON_ROI_SEPARATE = ResourceUtil.getAlphaIconAsImage("split_roi.png");
 
     public static final Image ICON_BOOL_MASK = ResourceUtil.getAlphaIconAsImage("boolean_mask.png");
 

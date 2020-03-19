@@ -1941,7 +1941,7 @@ public class RoiActions
     };
 
     public static final IcyAbstractAction computeWatershedSeparation = new IcyAbstractAction("Watershed separation",
-            new IcyIcon(ResourceUtil.ICON_ROI_COMP), "Separate in parts selected ROIs by using watersheds of the shape",
+            new IcyIcon(ResourceUtil.ICON_ROI_SEPARATE), "Separate in parts selected ROIs by using watersheds of the shape",
             "Computes the separation of the selected ROIs by applying a watershed approach on the distance map of the ROIs.")
     {
         private static final long serialVersionUID = 5354562004015076140L;

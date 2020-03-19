@@ -518,7 +518,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
         public ROIMorphologyBand()
         {
-            super(BAND_NAME, new IcyIcon(ResourceUtil.ICON_ROUND_PLUS));
+            super(BAND_NAME, new IcyIcon(ResourceUtil.ICON_ROI_DISTANCE_MAP));
 
             computeDistanceMapButton = createIcyButton(RoiActions.computeDistanceMapAction);
             computeWatershedButton = createIcyButton(RoiActions.computeWatershedSeparation);
