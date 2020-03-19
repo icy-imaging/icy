@@ -1,6 +1,7 @@
-/build/
-/target/
-/workspace/
-/.settings/
+/build
+/target
+/workspace
+/.settings
 /.classpath
 /.project
+setting.xml
