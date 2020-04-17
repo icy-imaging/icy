@@ -101,6 +101,10 @@ public abstract class TaskFrame extends IcyFrame
 
         remove = false;
 
+        // don't try to go further
+        if (headless)
+            return;
+
         ThreadUtil.invokeLater(new Runnable()
         {
             @Override
@@ -177,6 +181,10 @@ public abstract class TaskFrame extends IcyFrame
      */
     public void internalClose()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         super.close();
     }
 

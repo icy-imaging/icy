@@ -197,10 +197,11 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * internals
      */
-    protected final MenuCallback defaultSystemMenuCallback;
+    protected MenuCallback defaultSystemMenuCallback;
     protected SwitchStateAction switchStateAction;
     protected boolean switchStateItemVisible;
     protected IcyFrameState previousState;
+    protected final boolean headless;
 
     public IcyFrame()
     {
@@ -237,6 +238,12 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
             final boolean iconifiable, final boolean waitCreate)
     {
         super();
+
+        headless = Icy.getMainInterface().isHeadLess();
+
+        // don't try to go further
+        if (headless)
+            return;
 
         frameEventListeners = new EventListenerList();
         defaultSystemMenuCallback = new MenuCallback()
@@ -338,6 +345,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void updateSystemMenu()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -357,6 +368,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void close()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -374,6 +389,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void dispose()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -414,6 +433,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /** Set the frame to be an inner frame on the desktop pane */
     public void attach()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         if (isInternalized() || !canBeInternalized())
             return;
 
@@ -467,6 +490,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /** Set the frame to be detached in an independent frame */
     public void detach()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         if (isExternalized())
             return;
 
@@ -520,6 +547,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void stateChanged()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // refresh switch action state
         switchStateAction.refreshState();
 
@@ -536,6 +567,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /** Center frame on the desktop */
     public void center()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -556,6 +591,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void addTo(final Container c)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         if (isInternalized())
         {
             // AWT safe
@@ -575,6 +614,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void addTo(final Container c, final int index)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         if (isInternalized())
         {
             // AWT safe
@@ -595,6 +638,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     @Deprecated
     public void addTo(final Container c, final Object constraints)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -611,6 +658,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void addToDesktopPane(final Object constraints)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -630,6 +681,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void addToDesktopPane()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         addToDesktopPane(JLayeredPane.DEFAULT_LAYER);
     }
 
@@ -647,6 +702,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void add(final Component comp)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -666,6 +725,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void add(final Component comp, final Object constraints)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -685,6 +748,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void add(final String name, final Component comp)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -704,6 +771,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void removeFrom(final Container c)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -720,6 +791,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void removeAll()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -739,6 +814,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void remove(final Component comp)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -758,6 +837,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void removeFromMainDesktopPane()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         removeFrom(Icy.getMainInterface().getDesktopPane());
     }
 
@@ -766,6 +849,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void toFront()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -785,6 +872,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void toBack()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -804,6 +895,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void pack()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -820,6 +915,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     public Container getFrame()
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         if (isInternalized())
             return internalFrame;
 
@@ -851,6 +950,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setSwitchStateItemVisible(boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         if (switchStateItemVisible != value)
         {
             switchStateItemVisible = value;
@@ -864,6 +967,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public MenuCallback getSystemMenuCallback()
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         // always have same callback on each frame
         final MenuCallback result = internalFrame.getSystemMenuCallback();
 
@@ -882,6 +989,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setSystemMenuCallback(MenuCallback value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         if (value != null)
         {
             internalFrame.setSystemMenuCallback(value);
@@ -899,6 +1010,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public JMenu getDefaultSystemMenu()
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         final JMenu result;
 
         if (isInternalized())
@@ -921,6 +1036,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Container getParent()
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         if (isInternalized())
             return internalFrame.getParent();
 
@@ -932,6 +1051,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Container getContentPane()
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         if (isInternalized())
             return internalFrame.getContentPane();
 
@@ -943,6 +1066,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public JRootPane getRootPane()
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         if (isInternalized())
             return internalFrame.getRootPane();
 
@@ -951,6 +1078,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     public Border getBorder()
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         if (isInternalized())
             return internalFrame.getBorder();
 
@@ -970,6 +1101,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getMinimumSize()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         if (isInternalized())
             return internalFrame.getMinimumSize();
 
@@ -981,6 +1116,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getMinimumSizeInternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         return internalFrame.getMinimumSize();
     }
 
@@ -989,6 +1128,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getMinimumSizeExternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         return externalFrame.getMinimumSize();
     }
 
@@ -997,6 +1140,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getMaximumSize()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         if (isInternalized())
             return internalFrame.getMaximumSize();
 
@@ -1008,6 +1155,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getMaximumSizeInternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         return internalFrame.getMaximumSize();
     }
 
@@ -1016,6 +1167,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getMaximumSizeExternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         return externalFrame.getMaximumSize();
     }
 
@@ -1024,6 +1179,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getPreferredSize()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         if (isInternalized())
             return internalFrame.getPreferredSize();
 
@@ -1035,6 +1194,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getPreferredSizeInternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         return internalFrame.getPreferredSize();
     }
 
@@ -1043,6 +1206,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getPreferredSizeExternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         return externalFrame.getPreferredSize();
     }
 
@@ -1051,6 +1218,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getSize()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         if (isInternalized())
             return internalFrame.getSize();
 
@@ -1062,6 +1233,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getSizeInternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         return internalFrame.getSize();
     }
 
@@ -1070,6 +1245,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Dimension getSizeExternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Dimension();
+
         return externalFrame.getSize();
     }
 
@@ -1078,6 +1257,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getHeight()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         if (isInternalized())
             return internalFrame.getHeight();
 
@@ -1089,6 +1272,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getHeightInternal()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         return internalFrame.getHeight();
     }
 
@@ -1097,6 +1284,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getHeightExternal()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         return externalFrame.getHeight();
     }
 
@@ -1105,6 +1296,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getWidth()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         if (isInternalized())
             return internalFrame.getWidth();
 
@@ -1116,6 +1311,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getWidthInternal()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         return internalFrame.getWidth();
     }
 
@@ -1124,6 +1323,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getWidthExternal()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         return externalFrame.getWidth();
     }
 
@@ -1132,6 +1335,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getX()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         if (isInternalized())
             return internalFrame.getX();
 
@@ -1143,6 +1350,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getXInternal()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         return internalFrame.getX();
     }
 
@@ -1151,6 +1362,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getXExternal()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         return externalFrame.getX();
     }
 
@@ -1159,6 +1374,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getY()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         if (isInternalized())
             return internalFrame.getY();
 
@@ -1170,6 +1389,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getYInternal()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         return internalFrame.getY();
     }
 
@@ -1178,6 +1401,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public int getYExternal()
     {
+        // don't try to go further
+        if (headless)
+            return 0;
+
         return externalFrame.getY();
     }
 
@@ -1186,6 +1413,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Point getLocation()
     {
+        // don't try to go further
+        if (headless)
+            return new Point();
+
         if (isInternalized())
             return internalFrame.getLocation();
 
@@ -1197,6 +1428,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Point getLocationInternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Point();
+
         return internalFrame.getLocation();
     }
 
@@ -1205,6 +1440,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Point getLocationExternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Point();
+
         return externalFrame.getLocation();
     }
 
@@ -1213,6 +1452,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Rectangle getBounds()
     {
+        // don't try to go further
+        if (headless)
+            return new Rectangle();
+
         if (isInternalized())
             return internalFrame.getBounds();
 
@@ -1224,6 +1467,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Rectangle getBoundsInternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Rectangle();
+
         return internalFrame.getBounds();
     }
 
@@ -1232,6 +1479,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Rectangle getBoundsExternal()
     {
+        // don't try to go further
+        if (headless)
+            return new Rectangle();
+
         return externalFrame.getBounds();
     }
 
@@ -1240,6 +1491,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Rectangle getVisibleRect()
     {
+        // don't try to go further
+        if (headless)
+            return new Rectangle();
+
         if (isInternalized())
             return internalFrame.getVisibleRect();
 
@@ -1255,6 +1510,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public JMenuBar getJMenuBar()
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         if (isInternalized())
             return internalFrame.getJMenuBar();
 
@@ -1266,6 +1525,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public InputMap getInputMap(int condition)
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         if (isInternalized())
             return ((JPanel) internalFrame.getContentPane()).getInputMap(condition);
 
@@ -1277,6 +1540,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public ActionMap getActionMap()
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         if (isInternalized())
             return ((JPanel) internalFrame.getContentPane()).getActionMap();
 
@@ -1288,6 +1555,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Toolkit getToolkit()
     {
+        // don't try to go further
+        if (headless)
+            return null;
+
         if (isInternalized())
             return internalFrame.getToolkit();
 
@@ -1299,6 +1570,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public String getTitle()
     {
+        // don't try to go further
+        if (headless)
+            return "";
+
         if (isInternalized())
             return internalFrame.getTitle();
 
@@ -1310,6 +1585,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean getTitleBarVisible()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         if (isInternalized())
             return internalFrame.isTitleBarVisible();
 
@@ -1321,6 +1600,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isSwitchStateItemVisible()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         return switchStateItemVisible;
     }
 
@@ -1329,6 +1612,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public Point getMousePosition()
     {
+        // don't try to go further
+        if (headless)
+            return new Point();
+
         if (isInternalized())
             return internalFrame.getMousePosition();
 
@@ -1340,6 +1627,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isMinimized()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         if (isInternalized())
             return internalFrame.isIcon();
 
@@ -1351,6 +1642,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isMinimizedInternal()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         return internalFrame.isIcon();
     }
 
@@ -1359,6 +1654,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isMinimizedExternal()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         return ComponentUtil.isMinimized(externalFrame);
     }
 
@@ -1367,6 +1666,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isMaximized()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         if (isInternalized())
             return internalFrame.isMaximum();
 
@@ -1378,6 +1681,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isMaximizedInternal()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         return internalFrame.isMaximum();
     }
 
@@ -1386,6 +1693,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isMaximizedExternal()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         return ComponentUtil.isMaximized(externalFrame);
     }
 
@@ -1394,6 +1705,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isVisible()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         if (isInternalized())
             return internalFrame.isVisible();
 
@@ -1405,6 +1720,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isResizable()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         if (isInternalized())
             return internalFrame.isResizable();
 
@@ -1416,6 +1735,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isClosable()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         if (isInternalized())
             return internalFrame.isClosable();
 
@@ -1444,6 +1767,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isActive()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         if (isInternalized())
             return internalFrame.isSelected();
 
@@ -1455,6 +1782,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean isAlwaysOnTop()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         return externalFrame.isAlwaysOnTop();
     }
 
@@ -1463,6 +1794,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public boolean hasFocus()
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         if (isInternalized())
             return internalFrame.hasFocus();
 
@@ -1474,6 +1809,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setTitle(final String title)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1491,6 +1830,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setToolTipText(final String text)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1509,6 +1852,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setBackground(final Color value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1526,6 +1873,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setForeground(final Color value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1543,6 +1894,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setResizable(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1561,6 +1916,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setLocation(final Point p)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1580,6 +1939,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setLocation(final int x, final int y)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1599,6 +1962,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setLocationInternal(final Point p)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1615,6 +1982,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setLocationInternal(final int x, final int y)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1631,6 +2002,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setLocationExternal(final Point p)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1647,6 +2022,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setLocationExternal(final int x, final int y)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1663,6 +2042,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setSize(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1682,6 +2065,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setSize(final int width, final int height)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1701,6 +2088,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setSizeInternal(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1717,6 +2108,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setSizeInternal(final int width, final int height)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1733,6 +2128,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setSizeExternal(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1749,6 +2148,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setSizeExternal(final int width, final int height)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1765,6 +2168,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setPreferredSize(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1784,6 +2191,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setPreferredSizeInternal(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1800,6 +2211,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setPreferredSizeExternal(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1816,6 +2231,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMinimumSize(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1835,6 +2254,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMaximumSize(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1854,6 +2277,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMinimumSizeInternal(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1870,6 +2297,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMaximumSizeInternal(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1886,6 +2317,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMinimumSizeExternal(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1902,6 +2337,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMaximumSizeExternal(final Dimension d)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1918,6 +2357,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setBounds(final Rectangle r)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1938,6 +2381,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMaximisable(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -1955,6 +2402,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMinimized(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // only relevant if state changed
         if (isMinimized() ^ value)
         {
@@ -1978,6 +2429,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMinimizedInternal(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // only relevant if state changed
         if (internalFrame.isMinimized() ^ value)
         {
@@ -1998,6 +2453,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMinimizedExternal(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // only relevant if state changed
         if (externalFrame.isMinimized() ^ value)
         {
@@ -2018,6 +2477,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMaximized(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // only relevant if state changed
         if (isMaximized() ^ value)
         {
@@ -2041,6 +2504,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMaximizedInternal(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // only relevant if state changed
         if (internalFrame.isMaximized() ^ value)
         {
@@ -2061,6 +2528,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setMaximizedExternal(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // only relevant if state changed
         if (externalFrame.isMaximized() ^ value)
         {
@@ -2081,6 +2552,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setClosable(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2099,6 +2574,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setDefaultCloseOperation(final int operation)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2116,6 +2595,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setFocusable(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2133,6 +2616,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setVisible(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2152,6 +2639,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setAlwaysOnTop(final boolean alwaysOnTop)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2168,6 +2659,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setJMenuBar(final JMenuBar m)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2187,6 +2682,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setTitleBarVisible(final boolean value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2204,6 +2703,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setLayout(final LayoutManager layout)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2223,6 +2726,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setBorder(final Border border)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2239,6 +2746,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void setContentPane(final Container value)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2278,6 +2789,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void requestFocus()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2306,6 +2821,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void validate()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2325,6 +2844,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void revalidate()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2347,6 +2870,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void repaint()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2366,6 +2893,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void updateUI()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // AWT safe
         ThreadUtil.invoke(new Runnable()
         {
@@ -2463,6 +2994,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void addFrameListener(IcyFrameListener l)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         frameEventListeners.add(IcyFrameListener.class, l);
     }
 
@@ -2471,6 +3006,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void removeFrameListener(IcyFrameListener l)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         frameEventListeners.remove(IcyFrameListener.class, l);
     }
 
@@ -2479,6 +3018,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void addComponentListener(ComponentListener l)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         internalFrame.addComponentListener(l);
         externalFrame.addComponentListener(l);
     }
@@ -2488,6 +3031,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void removeComponentListener(ComponentListener l)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         internalFrame.removeComponentListener(l);
         externalFrame.removeComponentListener(l);
     }
@@ -2497,6 +3044,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void addKeyListener(KeyListener l)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         internalFrame.addKeyListener(l);
         externalFrame.addKeyListener(l);
     }
@@ -2506,6 +3057,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void removeKeyListener(KeyListener l)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         internalFrame.removeKeyListener(l);
         externalFrame.removeKeyListener(l);
     }
@@ -2515,6 +3070,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void frameClosed(AWTEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
         // remove listener on main frame mode change
         if (mainFrame != null)
@@ -2545,6 +3104,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      */
     public void onClosed()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // unregister from list
         synchronized (frames)
         {
@@ -2560,90 +3123,150 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     @Override
     public void internalFrameActivated(InternalFrameEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameActivated(new IcyFrameEvent(this, e, null));
     }
 
     @Override
     public void internalFrameClosed(InternalFrameEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         frameClosed(e);
     }
 
     @Override
     public void internalFrameClosing(InternalFrameEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameClosing(new IcyFrameEvent(this, e, null));
     }
 
     @Override
     public void internalFrameDeactivated(InternalFrameEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameDeactivated(new IcyFrameEvent(this, e, null));
     }
 
     @Override
     public void internalFrameDeiconified(InternalFrameEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameDeiconified(new IcyFrameEvent(this, e, null));
     }
 
     @Override
     public void internalFrameIconified(InternalFrameEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameIconified(new IcyFrameEvent(this, e, null));
     }
 
     @Override
     public void internalFrameOpened(InternalFrameEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameOpened(new IcyFrameEvent(this, e, null));
     }
 
     @Override
     public void windowActivated(WindowEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameActivated(new IcyFrameEvent(this, null, e));
     }
 
     @Override
     public void windowClosed(WindowEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         frameClosed(e);
     }
 
     @Override
     public void windowClosing(WindowEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameClosing(new IcyFrameEvent(this, null, e));
     }
 
     @Override
     public void windowDeactivated(WindowEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameDeactivated(new IcyFrameEvent(this, null, e));
     }
 
     @Override
     public void windowDeiconified(WindowEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameDeiconified(new IcyFrameEvent(this, null, e));
     }
 
     @Override
     public void windowIconified(WindowEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameIconified(new IcyFrameEvent(this, null, e));
     }
 
     @Override
     public void windowOpened(WindowEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         fireFrameOpened(new IcyFrameEvent(this, null, e));
     }
 
     @Override
     public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height)
     {
+        // don't try to go further
+        if (headless)
+            return false;
+
         if (isInternalized())
             return internalFrame.imageUpdate(img, infoflags, x, y, width, height);
 
@@ -2653,6 +3276,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     @Override
     public void propertyChange(PropertyChangeEvent evt)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         if (StringUtil.equals(evt.getPropertyName(), MainFrame.PROPERTY_DETACHEDMODE))
         {
             // window mode has been changed

@@ -105,6 +105,10 @@ public class AnnounceFrame extends TaskFrame implements ActionListener
     {
         super("");
 
+        // don't try to go further
+        if (headless)
+            return;
+
         if (liveTime != 0)
         {
             timer = new Timer("Announce timer");
@@ -163,6 +167,10 @@ public class AnnounceFrame extends TaskFrame implements ActionListener
     @Override
     public void internalClose()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // stop timer
         if (timer != null)
             timer.cancel();
@@ -173,6 +181,10 @@ public class AnnounceFrame extends TaskFrame implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         if (e.getSource() == button)
         {
             // execute action

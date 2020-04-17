@@ -45,6 +45,10 @@ public class CancelableProgressFrame extends ProgressFrame implements ActionList
 
         cancelRequested = false;
 
+        // don't try to go further
+        if (headless)
+            return;
+
         ThreadUtil.invokeLater(new Runnable()
         {
             @Override

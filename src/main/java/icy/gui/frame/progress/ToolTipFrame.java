@@ -72,6 +72,10 @@ public class ToolTipFrame extends TaskFrame
         this.liveTime = liveTime;
         this.id = id;
 
+        // don't try to go further
+        if (headless)
+            return;
+
         if (!StringUtil.isEmpty(id))
         {
             // tool tip should not be displayed ?
@@ -209,6 +213,10 @@ public class ToolTipFrame extends TaskFrame
 
     public void setText(final String text)
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         ThreadUtil.invokeLater(new Runnable()
         {
             @Override
@@ -223,6 +231,10 @@ public class ToolTipFrame extends TaskFrame
     @Override
     public void internalClose()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // stop timer
         if (timer != null)
             timer.cancel();

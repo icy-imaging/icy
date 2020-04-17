@@ -72,6 +72,10 @@ public class ProgressFrame extends TaskFrame implements ProgressListener, Runnab
         // processor = new SingleProcessor(true);
         this.message = message;
 
+        // don't try to go further
+        if (headless)
+            return;
+
         ThreadUtil.invokeLater(new Runnable()
         {
             @Override
@@ -115,6 +119,10 @@ public class ProgressFrame extends TaskFrame implements ProgressListener, Runnab
 
     protected void updateDisplay()
     {
+        // don't try to go further
+        if (headless)
+            return;
+
         // repacking need to be done on EDT
         ThreadUtil.invokeNow(new Runnable()
         {
