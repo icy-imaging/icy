@@ -347,9 +347,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             if (ti != 0d)
                 MetaDataUtil.setTimeInterval(metaData, 0, ti);
             // set to 1d by default
-            else MetaDataUtil.setTimeInterval(metaData, 0, 1d);
+            else
+                MetaDataUtil.setTimeInterval(metaData, 0, 1d);
         }
-        
+
         double result = MetaDataUtil.getTimeInterval(metaData, 0, 0d);
 
         // not yet defined ?
@@ -360,7 +361,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             if (result != 0d)
                 MetaDataUtil.setTimeInterval(metaData, 0, result);
         }
-        
 
         volumetricImages = new TreeMap<Integer, VolumetricImage>();
         overlays = new HashSet<Overlay>();
@@ -3418,6 +3418,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             // not the same image ?
             if (volImg.getImage(z) != image)
             {
+                final IcyColorModel cm = colorModel;
+
                 // this is different from removeImage as we don't remove empty VolumetricImage
                 if (image == null)
                     volImg.removeImage(z);
@@ -3432,7 +3434,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
                         icyImg = IcyBufferedImage.createFrom(image);
 
                     // possible type change ?
-                    final boolean typeChange = (colorModel == null) || isEmpty()
+                    final boolean typeChange = (cm == null) || isEmpty()
                             || ((getNumImage() == 1) && (volImg.getImage(z) != null));
 
                     // not changing type and not compatible
@@ -3443,8 +3445,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
                     // colormap eats a lot of memory so it's better to keep one global and we never
                     // use colormap for single image anyway. But it's important to preserve the colormodel for each
                     // image though as it store the channel bounds informations.
-                    if (colorModel != null)
-                        icyImg.getIcyColorModel().setColorSpace(colorModel.getIcyColorSpace());
+                    if (cm != null)
+                        icyImg.getIcyColorModel().setColorSpace(cm.getIcyColorSpace());
 
                     // set automatic channel update from sequence
                     icyImg.setAutoUpdateChannelBounds(getAutoUpdateChannelBounds());
@@ -3793,9 +3795,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     @Override
     public int getSizeC()
     {
+        final IcyColorModel cm = colorModel;
+
         // color model defined ? --> get it from color model
-        if (colorModel != null)
-            return colorModel.getNumComponents();
+        if (cm != null)
+            return cm.getNumComponents();
 
         // else try to get it from metadata
         return MetaDataUtil.getSizeC(metaData, 0);
@@ -3953,11 +3957,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public boolean isCompatible(IcyColorModel cm)
     {
+        final IcyColorModel currentCM = colorModel;
+
         // test that colorModel are compatible
-        if (colorModel == null)
+        if (currentCM == null)
             return true;
 
-        return colorModel.isCompatible(cm);
+        return currentCM.isCompatible(cm);
     }
 
     /**
@@ -4031,13 +4037,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public LUT createCompatibleLUT()
     {
+        final IcyColorModel cm = colorModel;
         final IcyColorModel result;
 
         // not yet defined ? use default one
-        if (colorModel == null)
+        if (cm == null)
             result = IcyColorModel.createInstance();
         else
-            result = IcyColorModel.createInstance(colorModel, true, true);
+            result = IcyColorModel.createInstance(cm, true, true);
 
         return new LUT(result);
     }
@@ -4051,8 +4058,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public IcyColorMap getDefaultColorMap(int channel)
     {
-        if (colorModel != null)
-            return colorModel.getColorMap(channel);
+        final IcyColorModel cm = colorModel;
+
+        if (cm != null)
+            return cm.getColorMap(channel);
 
         return getDefaultLUT().getLutChannel(channel).getColorMap();
     }
@@ -4070,8 +4079,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public void setDefaultColormap(int channel, IcyColorMap map, boolean setAlpha)
     {
-        if (colorModel != null)
-            colorModel.setColorMap(channel, map, setAlpha);
+        final IcyColorModel cm = colorModel;
+
+        if (cm != null)
+            cm.setColorMap(channel, map, setAlpha);
     }
 
     /**
@@ -4146,12 +4157,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public DataType getDataType_()
     {
-        // assume unsigned byte by default
-        if (colorModel == null)
-            // preserve UNDEFINED here for backward compatibility (Math Operation for instance)
+        final IcyColorModel cm = colorModel;
+
+        // preserve UNDEFINED here for backward compatibility (Math Operation for instance)
+        if (cm == null)
             return DataType.UNDEFINED;
 
-        return colorModel.getDataType_();
+        return cm.getDataType_();
     }
 
     /**
@@ -4162,10 +4174,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     @Deprecated
     public int getDataType()
     {
-        if (colorModel == null)
+        final IcyColorModel cm = colorModel;
+
+        // preserve UNDEFINED here for backward compatibility (Math Operation for instance)
+        if (cm == null)
             return TypeUtil.TYPE_UNDEFINED;
 
-        return colorModel.getDataType();
+        return cm.getDataType();
     }
 
     /**
@@ -4239,8 +4254,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     protected void internalUpdateChannelsBounds()
     {
+        final IcyColorModel cm = colorModel;
+
         // nothing to do...
-        if ((colorModel == null) || isEmpty())
+        if ((cm == null) || isEmpty())
             return;
 
         double[][] bounds;
@@ -4260,7 +4277,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         }
 
         // set new computed bounds
-        colorModel.setComponentsAbsBounds(bounds);
+        cm.setComponentsAbsBounds(bounds);
 
         bounds = null;
         // recalculate user bounds from all images
@@ -4277,7 +4294,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         }
 
         // set new computed bounds
-        colorModel.setComponentsUserBounds(bounds);
+        cm.setComponentsUserBounds(bounds);
     }
 
     /**
@@ -4364,10 +4381,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public double getChannelTypeMin(int channel)
     {
-        if (colorModel == null)
+        final IcyColorModel cm = colorModel;
+
+        if (cm == null)
             return 0d;
 
-        return colorModel.getComponentAbsMinValue(channel);
+        return cm.getComponentAbsMinValue(channel);
     }
 
     /**
@@ -4375,10 +4394,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public double getChannelTypeMax(int channel)
     {
-        if (colorModel == null)
+        final IcyColorModel cm = colorModel;
+
+        if (cm == null)
             return 0d;
 
-        return colorModel.getComponentAbsMaxValue(channel);
+        return cm.getComponentAbsMaxValue(channel);
     }
 
     /**
@@ -4387,10 +4408,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public double[] getChannelTypeBounds(int channel)
     {
-        if (colorModel == null)
+        final IcyColorModel cm = colorModel;
+
+        if (cm == null)
             return new double[] {0d, 0d};
 
-        return colorModel.getComponentAbsBounds(channel);
+        return cm.getComponentAbsBounds(channel);
     }
 
     /**
@@ -4505,10 +4528,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public double getChannelMax(int channel)
     {
-        if (colorModel == null)
+        final IcyColorModel cm = colorModel;
+
+        if (cm == null)
             return 0d;
 
-        return colorModel.getComponentUserMaxValue(channel);
+        return cm.getComponentUserMaxValue(channel);
     }
 
     /**
@@ -4516,7 +4541,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public double[] getChannelBounds(int channel)
     {
-        if (colorModel == null)
+        final IcyColorModel cm = colorModel;
+
+        if (cm == null)
             return new double[] {0d, 0d};
 
         // lazy channel bounds update
@@ -4527,7 +4554,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             internalUpdateChannelsBounds();
         }
 
-        return colorModel.getComponentUserBounds(channel);
+        return cm.getComponentUserBounds(channel);
     }
 
     /**
@@ -6999,6 +7026,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     {
         // we replaced the only present image
         final boolean typeChange = getNumImage() == 1;
+        final IcyColorModel cm = colorModel;
 
         beginUpdate();
         try
@@ -7006,7 +7034,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             if (typeChange)
             {
                 // colorModel not compatible ?
-                if (!colorModel.isCompatible(newImage.getIcyColorModel()))
+                if (!isCompatible(newImage.getIcyColorModel()))
                     // define it from the new image colorModel
                     setColorModel(IcyColorModel.createInstance(newImage.getIcyColorModel(), true, true));
                 // only inform about a type change if sequence sizeX and sizeY changed
@@ -7016,8 +7044,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
             // TODO: improve cleaning here
             // need that to avoid memory leak as we manually patch the image colorspace
-            if (colorModel != null)
-                colorModel.getIcyColorSpace().removeListener(oldImage.getIcyColorModel());
+            if (cm != null)
+                cm.getIcyColorSpace().removeListener(oldImage.getIcyColorModel());
             // remove listener from old image
             oldImage.removeListener(this);
             // notify about old image remove
