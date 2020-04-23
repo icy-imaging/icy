@@ -107,7 +107,7 @@
                         <configuration>
                             <resources>
                                 <resource>
-                                    <directory>ij</directory>
+                                    <directory>ext/ij</directory>
                                     <targetPath>${outputDirectory}/icy/ij</targetPath>
                                     <exclude>ij.jar</exclude>
                                 </resource>
