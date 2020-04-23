@@ -151,7 +151,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <excludeGroupIds>net.imageJ</excludeGroupIds>
+                            <excludeGroupIds>net.imagej</excludeGroupIds>
                             <outputDirectory>${outputDirectory}/icy/lib</outputDirectory>
                             <stripVersion>${stripVersion}</stripVersion>
                             <overWriteReleases>false</overWriteReleases>
