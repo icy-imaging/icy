@@ -60,9 +60,6 @@ Libraries used in Icy
     JTransforms - https://sites.google.com/site/piotrwendykier/software/jtransforms
     Xuggler - http://www.xuggle.com/xuggler/
 
-Libraries/tools integrated within the Icy website
-    phpBB - TinyMCE
-
 Development tool for profiling/debugging
     YourKit is kindly supporting open source projects with its full-featured Java Profiler.
     YourKit, LLC is the creator of innovative and intelligent tools for profiling Java and .NET applications.
