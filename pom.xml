@@ -157,7 +157,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <excludeGroupIds>net.imagej</excludeGroupIds>
+                            <excludeGroupIds>com.sun,sun.jdt,jdk.tools,net.imagej</excludeGroupIds>
                             <outputDirectory>${outputDirectory}/icy/lib</outputDirectory>
                             <stripVersion>${stripVersion}</stripVersion>
                             <overWriteReleases>false</overWriteReleases>
@@ -274,6 +274,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.swinglabs.swingx</groupId>
+            <artifactId>swingx-all</artifactId>
+            <version>1.6.5-1</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.insubstantial</groupId>
             <artifactId>laf-plugin</artifactId>
             <version>7.3</version>
@@ -283,12 +289,6 @@
             <groupId>com.github.insubstantial</groupId>
             <artifactId>laf-widget</artifactId>
             <version>7.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.swinglabs.swingx</groupId>
-            <artifactId>swingx-all</artifactId>
-            <version>1.6.5-1</version>
         </dependency>
 
         <dependency>
