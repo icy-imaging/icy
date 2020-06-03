@@ -922,7 +922,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
      */
     public void scrollTo(ROI roi)
     {
-        final int index = getRoiIndex(roi);
+        final int index = getRoiViewIndex(roi);
 
         if (index != -1)
             roiTable.scrollRowToVisible(index);
