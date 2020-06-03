@@ -139,6 +139,10 @@ public class Icy
      */
     static boolean noSplash = false;
     /**
+     * No exit on HeadLess mode (default = false)
+     */
+    static boolean noHLExit = false;
+    /**
      * Exiting flag
      */
     static boolean exiting = false;
@@ -466,7 +470,7 @@ public class Icy
         }
 
         // headless mode ? we can exit now...
-        if (headless)
+        if (headless && !noHLExit)
             exit(false);
     }
 
@@ -505,6 +509,9 @@ public class Icy
             // disable splash-screen
             else if (arg.equalsIgnoreCase("--nosplash") || arg.equalsIgnoreCase("-ns"))
                 noSplash = true;
+            // disable default exit operation in headless mode
+            else if (arg.equalsIgnoreCase("--noHLexit") || arg.equalsIgnoreCase("-nhle"))
+                noHLExit = true;
             // execute plugin
             else if (arg.equalsIgnoreCase("--execute") || arg.equalsIgnoreCase("-x"))
                 execute = true;
