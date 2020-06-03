@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Document;
@@ -19,6 +20,7 @@ import icy.preferences.ApplicationPreferences;
 import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
 import icy.system.thread.ThreadUtil;
+import icy.util.ClassUtil;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
 
@@ -156,14 +158,9 @@ public class WebInterface
 
         if (plugin != null)
         {
-            final String className = plugin.getClassName();
-
-            // add plugin informations if available
-            values.put(PARAM_PLUGINCLASSNAME, className);
-            values.put(PARAM_PLUGINVERSION, plugin.getVersion().toString());
-
+            // default
             pluginId = "Plugin " + plugin.toString();
-            // determine origin plugin
+            // determine origin plugin (default = plugin)
             PluginDescriptor originPlugin = plugin;
 
             // bundled plugin ?
@@ -179,12 +176,64 @@ public class WebInterface
                 }
                 catch (Throwable t)
                 {
-                    // miss bundle info
-                    pluginId = "Bundled plugin (could not retrieve origin plugin)";
+                    // try alternate method
+                    final List<PluginDescriptor> allPlugins = PluginLoader.getPlugins(false);
+
+                    String packageName = plugin.getPackageName();
+
+                    while (!StringUtil.isEmpty(packageName))
+                    {
+                        PluginDescriptor matchingPlugin = null;
+
+                        for (PluginDescriptor p : allPlugins)
+                        {
+                            // package name matches ? --> increase
+                            if (p.getClassName().startsWith(packageName))
+                            {
+                                // several results ? --> no need to go further
+                                if (matchingPlugin != null)
+                                {
+                                    // we use this to know that we have several matches (no way to recover origin plugin)
+                                    matchingPlugin = plugin;
+                                    // stop here
+                                    break;
+                                }
+
+                                // store matching plugin
+                                matchingPlugin = p;
+                            }
+                        }
+
+                        // several results --> cannot recover plugin id
+                        if (matchingPlugin == plugin)
+                        {
+                            // miss bundle info
+                            pluginId = "Bundled plugin (could not retrieve origin plugin)";
+                            break;
+                        }
+                        // we found the main plugin
+                        else if (matchingPlugin != null)
+                        {
+                            // get origin plugin
+                            originPlugin = matchingPlugin;
+                            // add bundle info
+                            pluginId = "Bundled in " + originPlugin.toString();
+                            break;
+                        }
+
+                        // get parent package
+                        packageName = ClassUtil.getPackageName(packageName);
+                    }
                 }
             }
 
             pluginId += "<br><br>";
+
+            final String className = originPlugin.getClassName();
+
+            // add plugin informations if available
+            values.put(PARAM_PLUGINCLASSNAME, className);
+            values.put(PARAM_PLUGINVERSION, originPlugin.getVersion().toString());
 
             if (originPlugin.getRequired().size() > 0)
             {
