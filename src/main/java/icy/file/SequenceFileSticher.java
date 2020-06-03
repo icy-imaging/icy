@@ -810,6 +810,7 @@ public class SequenceFileSticher
                     break;
             }
 
+            // TODO: would be handy to be able to ignore folder but base is used as Sequence filename :-/
             return folder + result;
         }
 
