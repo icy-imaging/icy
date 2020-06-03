@@ -18,16 +18,6 @@
  */
 package icy.gui.util;
 
-import icy.common.listener.weak.WeakListener;
-import icy.image.ImageUtil;
-import icy.preferences.GeneralPreferences;
-import icy.system.IcyExceptionHandler;
-import icy.system.SystemUtil;
-import icy.system.thread.ThreadUtil;
-import icy.util.ClassUtil;
-import icy.util.ReflectionUtil;
-import icy.util.StringUtil;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
@@ -66,6 +56,15 @@ import org.pushingpixels.substance.internal.utils.SubstanceColorSchemeUtilities;
 import org.pushingpixels.substance.internal.utils.SubstanceInternalFrameTitlePane;
 import org.pushingpixels.substance.internal.utils.SubstanceTitlePane;
 
+import icy.common.listener.weak.WeakListener;
+import icy.image.ImageUtil;
+import icy.preferences.GeneralPreferences;
+import icy.system.IcyExceptionHandler;
+import icy.system.SystemUtil;
+import icy.system.thread.ThreadUtil;
+import icy.util.ClassUtil;
+import icy.util.ReflectionUtil;
+import icy.util.StringUtil;
 import ij.util.Java2;
 
 /**
@@ -114,10 +113,17 @@ public class LookAndFeelUtil
             // so ImageJ won't change look and feel later
             ReflectionUtil.getField(Java2.class, "lookAndFeelSet", true).set(null, Boolean.valueOf(true));
         }
-        catch (Exception e)
+        catch (Throwable t1)
         {
-            // do it in another way (slower)
-            Java2.setSystemLookAndFeel();
+            try
+            {
+                // do it in another way (slower)
+                Java2.setSystemLookAndFeel();
+            }
+            catch (Throwable t2)
+            {
+                // just ignore then
+            }
         }
 
         // enable or not EDT checking in substance
@@ -418,7 +424,8 @@ public class LookAndFeelUtil
     public static SubstanceColorScheme getBackgroundColorScheme(DecorationAreaType d)
     {
         final SubstanceSkin skin = getCurrentSkin();
-        if (skin != null) return skin.getBackgroundColorScheme(d);
+        if (skin != null)
+            return skin.getBackgroundColorScheme(d);
 
         // Arrive only when using designer --> use a random color theme, we don't care
         return new LightAquaColorScheme();
@@ -427,8 +434,9 @@ public class LookAndFeelUtil
     public static SubstanceColorScheme getDisabledColorScheme(DecorationAreaType d)
     {
         final SubstanceSkin skin = getCurrentSkin();
-        if (skin != null) return skin.getDisabledColorScheme(d);
-        
+        if (skin != null)
+            return skin.getDisabledColorScheme(d);
+
         // Arrive only when using designer --> use a random color theme, we don't care
         return new LightAquaColorScheme();
     }
@@ -436,8 +444,9 @@ public class LookAndFeelUtil
     public static SubstanceColorScheme getEnabledColorScheme(DecorationAreaType d)
     {
         final SubstanceSkin skin = getCurrentSkin();
-        if (skin != null) return skin.getEnabledColorScheme(d);
-        
+        if (skin != null)
+            return skin.getEnabledColorScheme(d);
+
         // Arrive only when using designer --> use a random color theme, we don't care
         return new LightAquaColorScheme();
     }
@@ -462,7 +471,8 @@ public class LookAndFeelUtil
         return getSkin().getColorScheme(c, state);
     }
 
-    public static SubstanceColorScheme getColorScheme(Component c, ColorSchemeAssociationKind kind, ComponentState state)
+    public static SubstanceColorScheme getColorScheme(Component c, ColorSchemeAssociationKind kind,
+            ComponentState state)
     {
         return getSkin().getColorScheme(c, kind, state);
     }
