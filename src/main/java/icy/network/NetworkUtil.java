@@ -267,20 +267,23 @@ public class NetworkUtil
         internetAccess = false;
         httpsSupported = false;
 
-        // check for HTTPS "let's encrypt" certificate compatibility
-        final Version javaVersion = SystemUtil.getJavaVersionAsVersion();
-        final int javaInt = javaVersion.getMajor();
+        if (networkEnabled)
+        {
+            // check for HTTPS "let's encrypt" certificate compatibility
+            final Version javaVersion = SystemUtil.getJavaVersionAsVersion();
+            final int javaInt = javaVersion.getMajor();
 
-        if (javaInt == 7)
-            httpsSupported = javaVersion.isGreaterOrEqual(new Version("7.0.111"));
-        else if (javaInt == 8)
-            httpsSupported = javaVersion.isGreaterOrEqual(new Version("8.0.101"));
-        else
-            httpsSupported = (javaInt >= 9);
+            if (javaInt == 7)
+                httpsSupported = javaVersion.isGreaterOrEqual(new Version("7.0.111"));
+            else if (javaInt == 8)
+                httpsSupported = javaVersion.isGreaterOrEqual(new Version("8.0.101"));
+            else
+                httpsSupported = (javaInt >= 9);
 
-        updateNetworkSetting();
-        // accept all HTTPS connections by default
-        installTruster();
+            updateNetworkSetting();
+            // accept all HTTPS connections by default
+            installTruster();
+        }
 
         // String addr;
         //
