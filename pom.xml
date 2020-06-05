@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.bioimageanalysis.icy</groupId>
@@ -49,7 +49,7 @@
             </roles>
         </developer>
     </developers>
-    <!--<contributors></contributors>-->
+    <!--<contributors></contributors> -->
 
     <mailingLists>
         <mailingList>
@@ -83,14 +83,14 @@
 
     <build>
         <defaultGoal>install</defaultGoal>
-    	<directory>build</directory>
+        <directory>build</directory>
         <finalName>${project.artifactId}-${project.version}</finalName>
-<!--         <sourceDirectory>src/main/java</sourceDirectory> -->
-<!--         <resources> -->
-<!--             <resource> -->
-<!--                 <directory>src/main/resources</directory> -->
-<!--             </resource> -->
-<!--         </resources> -->
+        <!-- <sourceDirectory>src/main/java</sourceDirectory> -->
+        <!-- <resources> -->
+        <!-- <resource> -->
+        <!-- <directory>src/main/resources</directory> -->
+        <!-- </resource> -->
+        <!-- </resources> -->
 
         <plugins>
             <plugin>
@@ -126,30 +126,30 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
-<!--                     <execution> -->
-<!--                         <id>copy</id> -->
-<!--                         <phase>prepare-package</phase> -->
-<!--                         <goals> -->
-<!--                             <goal>copy</goal> -->
-<!--                         </goals> -->
-<!--                         <configuration> -->
-<!--                             <artifactItems> -->
-<!--                                 <artifactItem> -->
-<!--                                     <groupId>net.imagej</groupId> -->
-<!--                                     <artifactId>ij</artifactId> -->
-<!--                                     <version>1.52q</version> -->
-<!--                                     <type>jar</type> -->
-<!--                                     <overWrite>${overWriteTrue}</overWrite> -->
-<!--                                     <outputDirectory>${outputDirectory}/icy/ij</outputDirectory> -->
-<!--                                     <destFileName>ij.jar</destFileName> -->
-<!--                                 </artifactItem> -->
-<!--                             </artifactItems> -->
+                    <!-- <execution> -->
+                    <!-- <id>copy</id> -->
+                    <!-- <phase>prepare-package</phase> -->
+                    <!-- <goals> -->
+                    <!-- <goal>copy</goal> -->
+                    <!-- </goals> -->
+                    <!-- <configuration> -->
+                    <!-- <artifactItems> -->
+                    <!-- <artifactItem> -->
+                    <!-- <groupId>net.imagej</groupId> -->
+                    <!-- <artifactId>ij</artifactId> -->
+                    <!-- <version>1.52q</version> -->
+                    <!-- <type>jar</type> -->
+                    <!-- <overWrite>${overWriteTrue}</overWrite> -->
+                    <!-- <outputDirectory>${outputDirectory}/icy/ij</outputDirectory> -->
+                    <!-- <destFileName>ij.jar</destFileName> -->
+                    <!-- </artifactItem> -->
+                    <!-- </artifactItems> -->
 
-<!--                             <overWriteReleases>false</overWriteReleases> -->
-<!--                             <overWriteSnapshots>false</overWriteSnapshots> -->
-<!--                             <overWriteIfNewer>false</overWriteIfNewer> -->
-<!--                         </configuration> -->
-<!--                     </execution> -->
+                    <!-- <overWriteReleases>false</overWriteReleases> -->
+                    <!-- <overWriteSnapshots>false</overWriteSnapshots> -->
+                    <!-- <overWriteIfNewer>false</overWriteIfNewer> -->
+                    <!-- </configuration> -->
+                    <!-- </execution> -->
                     <execution>
                         <id>copy-dependencies</id>
                         <phase>prepare-package</phase>
@@ -165,6 +165,7 @@
                             <overWriteIfNewer>true</overWriteIfNewer>
                         </configuration>
                     </execution>
+
                     <execution>
                         <id>copy-dependencies-ij</id>
                         <phase>prepare-package</phase>
@@ -180,7 +181,7 @@
                             <overWriteIfNewer>true</overWriteIfNewer>
                         </configuration>
                     </execution>
-                    
+
                 </executions>
             </plugin>
             <plugin>
@@ -198,9 +199,9 @@
                             <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>icy.main.Icy</mainClass>
                         </manifest>
- 						<manifestEntries>
-        					<Class-Path>ij/ij.jar</Class-Path>
-      					</manifestEntries>
+                        <manifestEntries>
+                            <Class-Path>ij/ij.jar</Class-Path>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
@@ -217,37 +218,55 @@
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-bioformats</artifactId>
-            <version>5.9.2</version>
+            <version>6.3.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-flamingo</artifactId>
-            <version>7.3</version>
+            <version>7.3.7</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-substance</artifactId>
-            <version>7.3</version>
+            <version>7.3.7</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-substance_flamingo</artifactId>
-            <version>7.3</version>
+            <version>7.3.7</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-substance_swingx</artifactId>
-            <version>7.3</version>
+            <version>7.3.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-laf-plugin</artifactId>
+            <version>7.3.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-laf-widget</artifactId>
+            <version>7.3.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-trident</artifactId>
+            <version>7.3.7</version>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-vtk</artifactId>
-            <version>1.6.0_41</version>
+            <version>6.3.0.1</version>
         </dependency>
 
         <dependency>
@@ -275,15 +294,75 @@
         </dependency>
 
         <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-linux-amd64</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-linux-i586</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-macosx-universal</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-windows-amd64</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-windows-i586</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
             <version>2.1.5-01</version>
         </dependency>
 
         <dependency>
+            <groupId>org.jogamp.gluegen</groupId>
+            <artifactId>gluegen-rt-natives-linux-amd64</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jogamp.gluegen</groupId>
+            <artifactId>gluegen-rt-natives-linux-i586</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jogamp.gluegen</groupId>
+            <artifactId>gluegen-rt-natives-macosx-universal</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jogamp.gluegen</groupId>
+            <artifactId>gluegen-rt-natives-windows-amd64</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jogamp.gluegen</groupId>
+            <artifactId>gluegen-rt-natives-windows-i586</artifactId>
+            <version>2.1.5</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
-            <version>3.25.0-GA</version>
+            <version>3.22.0-GA</version>
         </dependency>
 
         <dependency>
@@ -298,30 +377,21 @@
             <version>1.6.5-1</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.insubstantial</groupId>
-            <artifactId>laf-plugin</artifactId>
-            <version>7.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.insubstantial</groupId>
-            <artifactId>laf-widget</artifactId>
-            <version>7.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.insubstantial</groupId>
-            <artifactId>trident</artifactId>
-            <version>7.3</version>
-        </dependency>
     </dependencies>
 
     <repositories>
         <repository>
-            <id>icy-release</id>
-            <url>https://nexus.pasteur.fr/repository/icy-release/</url>
+            <id>icy-dev</id>
+            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
         </repository>
+        <repository>
+            <id>icy-release</id>
+            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+        </repository>
+<!--         <repository> -->
+<!--             <id>icy-release-pasteur</id> -->
+<!--             <url>https://nexus.pasteur.fr/repository/icy-release/</url> -->
+<!--         </repository> -->
         <repository>
             <id>jai-core-repo</id>
             <url>https://packages.atlassian.com/maven-3rdparty/</url>
@@ -336,11 +406,12 @@
     <distributionManagement>
         <snapshotRepository>
             <id>nexus-snapshots</id>
-            <url>http://localhost:8081/repository/maven-snapshots/</url>
+            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
         </snapshotRepository>
         <repository>
             <id>nexus-releases</id>
-            <url>http://localhost:8081/repository/maven-releases/</url>
+            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
         </repository>
-    </distributionManagement>-->
+    </distributionManagement>
+    -->
 </project>
