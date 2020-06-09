@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Document;
@@ -13,14 +12,11 @@ import icy.main.Icy;
 import icy.math.UnitUtil;
 import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginDescriptor.PluginIdent;
-import icy.plugin.PluginLauncher;
 import icy.plugin.PluginLoader;
-import icy.plugin.interface_.PluginBundled;
 import icy.preferences.ApplicationPreferences;
 import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
 import icy.system.thread.ThreadUtil;
-import icy.util.ClassUtil;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
 
@@ -160,85 +156,38 @@ public class WebInterface
         {
             // default
             pluginId = "Plugin " + plugin.toString();
-            // determine origin plugin (default = plugin)
-            PluginDescriptor originPlugin = plugin;
+            // determine main plugin (default = plugin)
+            PluginDescriptor mainPlugin = plugin;
 
             // bundled plugin ?
             if (plugin.isBundled())
             {
-                try
+                // try to get main plugin
+                mainPlugin = plugin.getMainPlugin();
+
+                // add bundle info
+                if (mainPlugin == null)
                 {
-                    // get original plugin
-                    originPlugin = PluginLoader
-                            .getPlugin(((PluginBundled) PluginLauncher.create(plugin)).getMainPluginClassName());
-                    // add bundle info
-                    pluginId = "Bundled in " + originPlugin.toString();
+                    pluginId += " bundled (could not retrieve main plugin)";
+                    // use current plugin
+                    mainPlugin = plugin;
                 }
-                catch (Throwable t)
-                {
-                    // try alternate method
-                    final List<PluginDescriptor> allPlugins = PluginLoader.getPlugins(false);
-
-                    String packageName = plugin.getPackageName();
-
-                    while (!StringUtil.isEmpty(packageName))
-                    {
-                        PluginDescriptor matchingPlugin = null;
-
-                        for (PluginDescriptor p : allPlugins)
-                        {
-                            // package name matches ? --> increase
-                            if (p.getClassName().startsWith(packageName))
-                            {
-                                // several results ? --> no need to go further
-                                if (matchingPlugin != null)
-                                {
-                                    // we use this to know that we have several matches (no way to recover origin plugin)
-                                    matchingPlugin = plugin;
-                                    // stop here
-                                    break;
-                                }
-
-                                // store matching plugin
-                                matchingPlugin = p;
-                            }
-                        }
-
-                        // several results --> cannot recover plugin id
-                        if (matchingPlugin == plugin)
-                        {
-                            // miss bundle info
-                            pluginId = "Bundled plugin (could not retrieve origin plugin)";
-                            break;
-                        }
-                        // we found the main plugin
-                        else if (matchingPlugin != null)
-                        {
-                            // get origin plugin
-                            originPlugin = matchingPlugin;
-                            // add bundle info
-                            pluginId = "Bundled in " + originPlugin.toString();
-                            break;
-                        }
-
-                        // get parent package
-                        packageName = ClassUtil.getPackageName(packageName);
-                    }
-                }
+                else
+                    pluginId += " bundled in " + mainPlugin.toString();
             }
 
             pluginId += "<br><br>";
 
-            final String className = originPlugin.getClassName();
+            final String className = mainPlugin.getClassName();
 
             // add plugin informations if available
             values.put(PARAM_PLUGINCLASSNAME, className);
-            values.put(PARAM_PLUGINVERSION, originPlugin.getVersion().toString());
+            values.put(PARAM_PLUGINVERSION, mainPlugin.getVersion().toString());
 
-            if (originPlugin.getRequired().size() > 0)
+            if (mainPlugin.getRequired().size() > 0)
             {
                 pluginDepsId = "Dependances:<br>";
-                for (PluginIdent ident : originPlugin.getRequired())
+                for (PluginIdent ident : mainPlugin.getRequired())
                 {
                     final PluginDescriptor installed = PluginLoader.getPlugin(ident.getClassName());
 
