@@ -18,6 +18,19 @@
  */
 package icy.plugin;
 
+import java.awt.Image;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
+import javax.swing.ImageIcon;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import icy.common.Version;
 import icy.file.FileUtil;
 import icy.file.xml.XMLPersistent;
@@ -34,19 +47,6 @@ import icy.util.ClassUtil;
 import icy.util.JarUtil;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
-
-import java.awt.Image;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.ImageIcon;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 /**
  * <br>
@@ -867,6 +867,67 @@ public class PluginDescriptor implements XMLPersistent
     public Class<? extends Plugin> getPluginClass()
     {
         return pluginClass;
+    }
+
+    /**
+     * @return the <i>Main Plugin</i> descriptor if this plugin is a bundled plugin (see {@link #isBundled()}) otherwise
+     *         return the current descriptor.<br>
+     *         Note that the method may fail to recover <i>Main Plugin</i> information, in which case it will return <code>NULL</code>
+     */
+    public PluginDescriptor getMainPlugin()
+    {
+        if (!isBundled())
+            return this;
+
+        try
+        {
+            // get main plugin
+            return PluginLoader.getPlugin(((PluginBundled) PluginLauncher.create(this)).getMainPluginClassName());
+        }
+        catch (Throwable t)
+        {
+            // try alternate method
+            final List<PluginDescriptor> allPlugins = PluginLoader.getPlugins(false);
+
+            String packageName = getPackageName();
+
+            while (!StringUtil.isEmpty(packageName))
+            {
+                PluginDescriptor matchingPlugin = null;
+
+                for (PluginDescriptor p : allPlugins)
+                {
+                    // package name matches ? --> increase
+                    if (p.getClassName().startsWith(packageName))
+                    {
+                        // several results ? --> no need to go further
+                        if (matchingPlugin != null)
+                        {
+                            // we use this to know that we have several matches (no way to recover origin plugin)
+                            matchingPlugin = this;
+                            // stop here
+                            break;
+                        }
+
+                        // store matching plugin
+                        matchingPlugin = p;
+                    }
+                }
+
+                // several results --> cannot recover main plugin
+                if (matchingPlugin == this)
+                    return null;
+                // we found the main plugin --> return it
+                if (matchingPlugin != null)
+                    return matchingPlugin;
+
+                // continue with parent package
+                packageName = ClassUtil.getPackageName(packageName);
+            }
+        }
+
+        // not found
+        return null;
     }
 
     /**
