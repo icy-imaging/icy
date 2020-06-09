@@ -359,14 +359,14 @@
             <id>icy-dev</id>
             <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
         </repository>
-<!--         <repository> -->
-<!--             <id>icy-release</id> -->
-<!--             <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url> -->
-<!--         </repository> -->
-<!--         <repository> -->
-<!--             <id>icy-release-pasteur</id> -->
-<!--             <url>https://nexus.pasteur.fr/repository/icy-release/</url> -->
-<!--         </repository> -->
+        <repository>
+            <id>icy-release</id>
+            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+        </repository>
+        <!-- <repository> -->
+        <!-- <id>icy-release-pasteur</id> -->
+        <!-- <url>https://nexus.pasteur.fr/repository/icy-release/</url> -->
+        <!-- </repository> -->
         <repository>
             <id>jai-core-repo</id>
             <url>https://packages.atlassian.com/maven-3rdparty/</url>
@@ -377,16 +377,14 @@
         </repository>
     </repositories>
 
-    <!-- Publication du projet
-    <distributionManagement>
-        <snapshotRepository>
-            <id>nexus-snapshots</id>
-            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
-        </snapshotRepository>
-        <repository>
-            <id>nexus-releases</id>
-            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
-        </repository>
-    </distributionManagement>
-    -->
+    <!-- <distributionManagement> -->
+    <!-- <snapshotRepository> -->
+    <!-- <id>nexus-snapshots</id> -->
+    <!-- <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url> -->
+    <!-- </snapshotRepository> -->
+    <!-- <repository> -->
+    <!-- <id>nexus-releases</id> -->
+    <!-- <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url> -->
+    <!-- </repository> -->
+    <!-- </distributionManagement> -->
 </project>
