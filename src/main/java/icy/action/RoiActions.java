@@ -1922,7 +1922,7 @@ public class RoiActions
                 Sequence distanceMap;
                 try
                 {
-                    Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
+                    Dimension3D pixelSize = new Dimension3D.Double(1, 1, 1);
                     distanceMap = ROIUtil.computeDistanceMap(selectedROIs, sequence.getDimension5D(), pixelSize, false);
                 }
                 catch (UnsupportedOperationException ex)
@@ -1941,7 +1941,8 @@ public class RoiActions
     };
 
     public static final IcyAbstractAction computeWatershedSeparation = new IcyAbstractAction("Watershed separation",
-            new IcyIcon(ResourceUtil.ICON_ROI_SEPARATE), "Separate in parts selected ROIs by using watersheds of the shape",
+            new IcyIcon(ResourceUtil.ICON_ROI_SEPARATE),
+            "Separate in parts selected ROIs by using watersheds of the shape",
             "Computes the separation of the selected ROIs by applying a watershed approach on the distance map of the ROIs.")
     {
         private static final long serialVersionUID = 5354562004015076140L;
@@ -1967,7 +1968,7 @@ public class RoiActions
                     {
                         try
                         {
-                            Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
+                            Dimension3D pixelSize = new Dimension3D.Double(1, 1, 1);
                             List<ROI> separationRois;
                             List<ROI> usedSeeds = null;
                             if (seedRois.isEmpty())
@@ -2026,7 +2027,7 @@ public class RoiActions
 
                 try
                 {
-                    Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
+                    Dimension3D pixelSize = new Dimension3D.Double(1, 1, 1);
                     List<ROI> skeletonRois = ROIUtil.computeSkeleton(selectedROIs, pixelSize, distance);
                     sequence.beginUpdate();
                     sequence.removeROIs(selectedROIs, true);
@@ -2066,7 +2067,7 @@ public class RoiActions
 
                 try
                 {
-                    Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
+                    Dimension3D pixelSize = new Dimension3D.Double(1, 1, 1);
                     List<ROI> dilatedRois = ROIUtil.computeDilation(selectedROIs, pixelSize, distance);
                     sequence.beginUpdate();
                     sequence.removeROIs(selectedROIs, true);
@@ -2106,7 +2107,7 @@ public class RoiActions
 
                 try
                 {
-                    Dimension3D pixelSize = new Dimension3D.Double(sequence.getPixelSize());
+                    Dimension3D pixelSize = new Dimension3D.Double(1, 1, 1);
                     List<ROI> dilatedRois = ROIUtil.computeErosion(selectedROIs, pixelSize, distance);
                     sequence.beginUpdate();
                     sequence.removeROIs(selectedROIs, true);
