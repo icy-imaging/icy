@@ -168,9 +168,9 @@ public class Icy
     private static boolean loadCache;
 
     /**
-     * Flag indicating network module loading
+     * Flag indicating network module loading (important to set to true by default for Icy-Updater)
      */
-    private static boolean loadNetwork;
+    private static boolean loadNetwork = true;
 
     /**
      * @param args
