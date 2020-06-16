@@ -150,7 +150,7 @@ public class Main
                 extraArgs = extraArgs + " " + arg;
         }
 
-        // redirect stdOut and errOut
+        // redirect stdOut and errOut for update
         System.setOut(stdStream);
         System.setErr(errStream);
 
@@ -167,8 +167,11 @@ public class Main
 
             System.exit(0);
         }
-        else if (frame != null)
-            frame.setCanClose(true);
+        else
+        {
+            if (frame != null) frame.setCanClose(true);
+            else System.exit(1);
+        }
     }
 
     private static boolean process(final boolean update, final boolean start)
@@ -458,23 +461,21 @@ public class Main
         if (frame != null)
             frame.setProgressVisible(false);
 
-        // start icy
-        final Process process = SystemUtil.execJAR(ICY_JARNAME, getVMParams(), getAppParams() + extraArgs, directory);
-
-        // process not even created --> critical error
-        if (process == null)
-        {
-            System.err.println("Can't launch execJAR(" + ICY_JARNAME + ", " + getVMParams() + ", " + getAppParams()
-                    + extraArgs + "," + directory + ")");
-            return false;
-        }
-
-        // wait a bit so it has sometime to compute
-        ThreadUtil.sleep(1000);
-
         try
         {
-            if (process.exitValue() != 0)
+            // start icy
+            final Process process = SystemUtil.execJAR(ICY_JARNAME, getVMParams(), getAppParams() + extraArgs, directory);
+    
+            // process not even created --> critical error
+            if (process == null)
+            {
+                System.err.println("Can't launch execJAR(" + ICY_JARNAME + ", " + getVMParams() + ", " + getAppParams()
+                        + extraArgs + "," + directory + ")");
+                return false;
+            }
+
+            // wait a bit so it has sometime to compute
+            if (process.waitFor() != 0)
             {
                 try
                 {
@@ -486,19 +487,23 @@ public class Main
                     System.out.println();
                     System.out.println("Trying to launch without specific parameters...");
                     System.out.println();
+                    
+                    process.destroy();
                 }
                 catch (Exception e)
                 {
                     // ignore
-
                 }
 
                 return startICYSafeMode(directory);
             }
         }
-        catch (IllegalThreadStateException e)
+        catch (Exception e)
         {
-            // thread not terminated, assume it's ok...
+            System.err.println("Error while launching Icy: " + e);
+            e.printStackTrace();
+            
+            return false;
         }
 
         return true;
@@ -523,12 +528,9 @@ public class Main
             return false;
         }
 
-        // wait a bit so it has sometime to compute
-        ThreadUtil.sleep(1000);
-
         try
         {
-            if (process.exitValue() != 0)
+            if (process.waitFor() != 0)
             {
                 try
                 {
@@ -539,6 +541,8 @@ public class Main
                     System.out.println();
                     System.out.println("Try to manually launch the following command :");
                     System.out.println("java -jar updater.jar");
+                    
+                    process.destroy();
                 }
                 catch (Exception e)
                 {
@@ -549,9 +553,12 @@ public class Main
                 return false;
             }
         }
-        catch (IllegalThreadStateException e)
+        catch (Exception e)
         {
-            // thread not terminated, assume it's ok...
+            System.err.println("Error while launching Icy: " + e);
+            e.printStackTrace();
+            
+            return false;
         }
 
         return true;
@@ -575,12 +582,9 @@ public class Main
             return false;
         }
 
-        // wait a bit so it has sometime to compute
-        ThreadUtil.sleep(1000);
-
         try
         {
-            if (process.exitValue() != 0)
+            if (process.waitFor() != 0)
             {
                 try
                 {
@@ -590,6 +594,8 @@ public class Main
 
                     System.out.println();
                     System.out.println("Try to launch it manually.");
+                    
+                    process.destroy();
                 }
                 catch (Exception e)
                 {
@@ -600,11 +606,14 @@ public class Main
                 return false;
             }
         }
-        catch (IllegalThreadStateException e)
+        catch (Exception e)
         {
-            // thread not terminated, assume it's ok...
+            System.err.println("Error while launching Icy: " + e);
+            e.printStackTrace();
+            
+            return false;
         }
-
+        
         return true;
     }
 
@@ -670,25 +679,35 @@ public class Main
         NetworkUtil.report(values);
     }
 
-    private static void outputError(Process process) throws IOException
+    private static void outputError(final Process process) throws IOException
     {
-        // get error output and redirect it
-        final BufferedReader stderr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        String s;
-
-        try
+        new Thread(new Runnable()
         {
-            do
+            @Override
+            public void run()
             {
-                s = stderr.readLine();
-                if (s != null)
-                    System.err.println(s);
+                // get error output and redirect it
+                final InputStreamReader is = new InputStreamReader(process.getErrorStream());
+                final BufferedReader stderr = new BufferedReader(is);
+                String s;
+
+                try
+                {
+                    try
+                    {
+                        while(stderr.ready())
+                            System.err.println(stderr.readLine());
+                    }
+                    finally
+                    {
+                        stderr.close();
+                    }
+                }
+                catch (Exception e)
+                {
+                    // ignore
+                }
             }
-            while (s != null);
-        }
-        finally
-        {
-            stderr.close();
-        }
+        }).start();
     }
 }
