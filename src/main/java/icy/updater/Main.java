@@ -6,11 +6,14 @@ package icy.updater;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import icy.common.Version;
 import icy.file.FileUtil;
@@ -392,10 +395,12 @@ public class Main
             if (p == null)
                 return false;
 
+            // wait a bit
+            Thread.sleep(1000);
+            // output process stream
+            outputStreams(p);
             // get error code
             System.out.println(" - exit code = " + p.waitFor());
-            // output error stream
-            outputError(p);
             // wait a bit
             Thread.sleep(1000);
 
@@ -405,10 +410,12 @@ public class Main
             if (p == null)
                 return false;
 
+            // wait a bit
+            Thread.sleep(1000);
+            // output process stream
+            outputStreams(p);
             // get error code
             System.out.println(" exit code = " + p.waitFor());
-            // output error stream
-            outputError(p);
             // wait a bit
             Thread.sleep(1000);
 
@@ -461,34 +468,36 @@ public class Main
         if (frame != null)
             frame.setProgressVisible(false);
 
+        // start icy
+        final Process process = SystemUtil.execJAR(ICY_JARNAME, getVMParams(), getAppParams() + extraArgs, directory);
+
+        // process not even created --> critical error
+        if (process == null)
+        {
+            System.err.println("Can't launch execJAR(" + ICY_JARNAME + ", " + getVMParams() + ", " + getAppParams()
+                    + extraArgs + "," + directory + ")");
+            return false;
+        }
+
         try
         {
-            // start icy
-            final Process process = SystemUtil.execJAR(ICY_JARNAME, getVMParams(), getAppParams() + extraArgs, directory);
-    
-            // process not even created --> critical error
-            if (process == null)
-            {
-                System.err.println("Can't launch execJAR(" + ICY_JARNAME + ", " + getVMParams() + ", " + getAppParams()
-                        + extraArgs + "," + directory + ")");
-                return false;
-            }
+            // wait a bit that streams has been filled
+            ThreadUtil.sleep(2000);
+            // flush stream so process correctly exit on error
+            outputStreams(process);
 
-            // wait a bit so it has sometime to compute
-            if (process.waitFor() != 0)
+            // check if we got an error
+            if (process.exitValue() != 0)
             {
                 try
                 {
                     setState("Error while launching Icy", 0);
                     System.err.println("Can't launch execJAR(" + ICY_JARNAME + ", " + getVMParams() + ", "
                             + getAppParams() + extraArgs + "," + directory + ")");
-                    outputError(process);
 
                     System.out.println();
                     System.out.println("Trying to launch without specific parameters...");
                     System.out.println();
-                    
-                    process.destroy();
                 }
                 catch (Exception e)
                 {
@@ -497,6 +506,10 @@ public class Main
 
                 return startICYSafeMode(directory);
             }
+        }
+        catch (IllegalThreadStateException e)
+        {
+            // thread still active --> means Icy properly launched !
         }
         catch (Exception e)
         {
@@ -530,19 +543,22 @@ public class Main
 
         try
         {
-            if (process.waitFor() != 0)
+            // we cannot use process.waitFor() here as it hangs forever
+            ThreadUtil.sleep(2000);
+            // output process stream
+            outputStreams(process);
+
+            // got an error ?
+            if (process.exitValue() != 0)
             {
                 try
                 {
                     setState("Error while launching Icy (safe mode)", 0);
                     System.err.println("Can't launch execJAR(" + ICY_JARNAME + ", \"\", \"\", " + directory + ")");
-                    outputError(process);
 
                     System.out.println();
                     System.out.println("Try to manually launch the following command :");
                     System.out.println("java -jar updater.jar");
-                    
-                    process.destroy();
                 }
                 catch (Exception e)
                 {
@@ -552,6 +568,10 @@ public class Main
 
                 return false;
             }
+        }
+        catch (IllegalThreadStateException e)
+        {
+            // thread still active --> means Icy properly launched !
         }
         catch (Exception e)
         {
@@ -584,18 +604,21 @@ public class Main
 
         try
         {
-            if (process.waitFor() != 0)
+            // wait a bit that streams has been filled
+            ThreadUtil.sleep(2000);
+            // flush stream so process correctly exit on error
+            outputStreams(process);
+
+            // check if we got an error
+            if (process.exitValue() != 0)
             {
                 try
                 {
                     setState("Error while launching Icy", 0);
                     System.err.println("Can't launch Icy..");
-                    outputError(process);
 
                     System.out.println();
                     System.out.println("Try to launch it manually.");
-                    
-                    process.destroy();
                 }
                 catch (Exception e)
                 {
@@ -605,6 +628,10 @@ public class Main
 
                 return false;
             }
+        }
+        catch (IllegalThreadStateException e)
+        {
+            // thread still active --> means Icy properly launched !
         }
         catch (Exception e)
         {
@@ -679,35 +706,23 @@ public class Main
         NetworkUtil.report(values);
     }
 
-    private static void outputError(final Process process) throws IOException
+    private static void outputStreams(final Process process) throws IOException
     {
-        new Thread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // get error output and redirect it
-                final InputStreamReader is = new InputStreamReader(process.getErrorStream());
-                final BufferedReader stderr = new BufferedReader(is);
-                String s;
+        final BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        final OutputStream outStr = process.getOutputStream();
+        final BufferedReader inReader=  new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-                try
-                {
-                    try
-                    {
-                        while(stderr.ready())
-                            System.err.println(stderr.readLine());
-                    }
-                    finally
-                    {
-                        stderr.close();
-                    }
-                }
-                catch (Exception e)
-                {
-                    // ignore
-                }
-            }
-        }).start();
+        try
+        {
+            outStr.write((int) ' ');
+            while (errReader.ready())
+                System.err.println(errReader.readLine());
+            while (inReader.ready())
+                System.out.println(inReader.readLine());
+        }
+        catch (Exception e)
+        {
+            System.err.println(e);
+        }
     }
 }
