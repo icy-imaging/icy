@@ -166,7 +166,8 @@ public class ImageUtil
             {
                 return ImageIO.read(url);
             }
-            catch (IOException e)
+            // important to catch Exception as sometime we got NPE here (inflater closed)
+            catch (Exception e)
             {
                 if (displayError)
                     System.err.println("Can't load image from " + url);
