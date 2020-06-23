@@ -2812,7 +2812,7 @@ public class ROIUtil
         ROIWatershedCalculator ws = new ROIWatershedCalculator(imageSize, pixelSize);
         ws.addAll(selectedRois);
         ws.addAllSeeds(seedRois);
-        ws.setAddNewBasins(false);
+        ws.setNewLabelsAllowed(false);
         ws.compute();
         return ws.getResultRois();
     }
@@ -2832,7 +2832,7 @@ public class ROIUtil
         ROIWatershedCalculator ws = new ROIWatershedCalculator(imageSize, pixelSize);
         ws.addAll(selectedRois);
         ws.addAllSeeds(new ArrayList<ROI>());
-        ws.setAddNewBasins(false);
+        ws.setNewLabelsAllowed(false);
         ws.compute();
         usedSeedRois.clear();
         usedSeedRois.addAll(ws.getUsedSeeds());

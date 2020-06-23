@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import icy.image.IcyBufferedImage;
 import icy.roi.BooleanMask2D;
@@ -37,7 +39,7 @@ public class ROIWatershedCalculator
     private Dimension3D pixelSize;
     private List<ROI> rois;
     private List<ROI> seeds;
-    private boolean addNewBasins;
+    private boolean addNewLabelsAllowed;
 
     public ROIWatershedCalculator(Dimension5D imageSize, Dimension3D pixelSize)
     {
@@ -45,7 +47,7 @@ public class ROIWatershedCalculator
         this.pixelSize = pixelSize;
         this.rois = new ArrayList<ROI>();
         this.seeds = new ArrayList<ROI>();
-        this.addNewBasins = true;
+        this.addNewLabelsAllowed = true;
     }
 
     public <T extends ROI> void add(T roi)
@@ -68,82 +70,86 @@ public class ROIWatershedCalculator
         seeds.addAll(rois);
     }
 
-    public void setAddNewBasins(boolean addNewBasins)
+    public void setNewLabelsAllowed(boolean addNewLabelsAllowed)
     {
-        this.addNewBasins = addNewBasins;
+        this.addNewLabelsAllowed = addNewLabelsAllowed;
     }
 
-    public boolean isAddNewBasins()
+    public boolean isNewLabelsAllowed()
     {
-        return addNewBasins;
+        return addNewLabelsAllowed;
     }
 
-    private Sequence distanceMap;
-    private Sequence seedLabels;
-    private WatershedStructure watershedStructure;
-    private List<ROI> resultingROIs;
+    private List<ROI> resultingRois;
 
     public void compute() throws InterruptedException
     {
-        computeDistanceTransform();
+        computeDistanceMap();
         prepareSeeds();
-        createWatershedStructure();
         computeFlooding();
     }
 
-    private void computeDistanceTransform() throws InterruptedException
+    private Sequence distanceMap;
+
+    private void computeDistanceMap() throws InterruptedException
     {
         ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, true);
         dt.addAll(rois);
         this.distanceMap = dt.getDistanceMap();
     }
 
-    int seedNumber;
-    private List<ROI> usedSeeds;
+    private Sequence labels;
+    int labelCount;
+    private List<ROI> seedRois;
 
     private void prepareSeeds() throws InterruptedException
     {
-        usedSeeds = new ArrayList<ROI>();
-        seedNumber = 0;
-        if (!seeds.isEmpty() && !addNewBasins) // Use seeds comming from rois.
-        {
-            usedSeeds.addAll(seeds);
-            initializeSeedLabelsSequence();
+        seedRois = new ArrayList<ROI>();
+        labelCount = 0;
 
-            for (ROI roi : seeds)
+        initializeSeedLabels();
+        if (seeds.isEmpty())
+        {
+            if (!isNewLabelsAllowed())
             {
-                seedNumber++;
-                DataIteratorUtil.set(new SequenceDataIterator(seedLabels, roi, true), seedNumber);
+                Sequence localMax = getLocalMaxima();
+                SequenceCursor seedCursor = new SequenceCursor(labels);
+                for (SequenceDataIterator localMaxIt = new SequenceDataIterator(localMax); !localMaxIt
+                        .done(); localMaxIt.next())
+                {
+                    if (Thread.interrupted())
+                        throw new InterruptedException();
+                    if (localMaxIt.get() > 0)
+                    {
+                        labelCount++;
+                        seedCursor.set(localMaxIt.getPositionX(), localMaxIt.getPositionY(), localMaxIt.getPositionZ(),
+                                localMaxIt.getPositionT(), 0, labelCount);
+
+                        ROI seedRoi = new ROI2DPoint(new Point5D.Integer(localMaxIt.getPositionX(),
+                                localMaxIt.getPositionY(), localMaxIt.getPositionZ(), localMaxIt.getPositionT(),
+                                localMaxIt.getPositionC()));
+                        seedRoi.setName("Seed " + labelCount);
+                        seedRois.add(seedRoi);
+                    }
+                }
+                seedCursor.commitChanges();
             }
         }
-        else if (!addNewBasins) // Find seeds on smoothed image
+        else
         {
-            Sequence localMax = getLocalMaxima();
-            initializeSeedLabelsSequence();
-
-            SequenceCursor seedCursor = new SequenceCursor(seedLabels);
-            for (SequenceDataIterator localMaxIt = new SequenceDataIterator(localMax); !localMaxIt.done(); localMaxIt
-                    .next())
+            for (ROI roi : seeds)
             {
-                if (Thread.interrupted())
-                    throw new InterruptedException();
-                if (localMaxIt.get() > 0)
-                {
-                    seedNumber++;
-                    seedCursor.set(localMaxIt.getPositionX(), localMaxIt.getPositionY(), localMaxIt.getPositionZ(),
-                            localMaxIt.getPositionT(), 0, seedNumber);
-                    usedSeeds.add(
-                            new ROI2DPoint(new Point5D.Integer(localMaxIt.getPositionX(), localMaxIt.getPositionY(),
-                                    localMaxIt.getPositionZ(), localMaxIt.getPositionT(), localMaxIt.getPositionC())));
-                }
+                labelCount++;
+                DataIteratorUtil.set(new SequenceDataIterator(labels, roi, true), labelCount);
+                roi.setName("Seed " + labelCount);
+                seedRois.add(roi);
             }
-            seedCursor.commitChanges();
         }
     }
 
-    private void initializeSeedLabelsSequence() throws InterruptedException
+    private void initializeSeedLabels() throws InterruptedException
     {
-        seedLabels = new Sequence();
+        labels = new Sequence();
         for (int l = 0; l < imageSize.getSizeT(); l++)
         {
             if (Thread.interrupted())
@@ -159,7 +165,7 @@ public class ROIWatershedCalculator
                         DataType.INT);
                 volume.setImage(k, plane);
             }
-            seedLabels.addVolumetricImage(l, volume);
+            labels.addVolumetricImage(l, volume);
         }
     }
 
@@ -180,14 +186,41 @@ public class ROIWatershedCalculator
 
     private void createWatershedStructure()
     {
-        watershedStructure = new WatershedStructure(distanceMap, seedLabels);
+
+        watershedStructure = new WatershedStructure(distanceMap, labels);
     }
 
     int currentT;
 
     private void computeFlooding() throws InterruptedException
     {
-        resultingROIs = new ArrayList<ROI>();
+
+        WatershedFloodingOrderCalculator flooding = new WatershedFloodingOrderCalculator.Builder(distanceMap, labels).create();
+        for (int t = 0; t < this.distanceMap.getSizeT(); t++)
+        {
+            if (Thread.interrupted())
+                throw new InterruptedException();
+
+            try
+            {
+                computeFrameWatershed(flooding, t);
+            }
+            catch (InterruptedException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException("Error while flooding: " + e.getMessage(), e);
+            }
+        }
+
+        resultingRois = new ArrayList<>();
+        // TODO use label extractor to create ROIs
+
+        // old code
+
+        resultingRois = new ArrayList<ROI>();
         for (currentT = 0; currentT < this.distanceMap.getSizeT(); currentT++)
         {
             if (Thread.interrupted())
@@ -195,6 +228,36 @@ public class ROIWatershedCalculator
 
             floodCurrentFrame();
             createResultingROIs();
+        }
+    }
+
+    private void computeFrameWatershed(WatershedFloodingOrderCalculator floodingOrderCalulator, int t) throws InterruptedException
+    {
+        try
+        {
+            floodingOrderCalulator.setFrame(t);
+            floodingOrderCalulator.call();
+
+            floodFrame(t, floodingOrderCalulator);
+            
+        }
+        catch (InterruptedException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Exception while performing flooding: " + e.getMessage(), e);
+        }
+    }
+
+    private void floodFrame(int t, WatershedFloodingOrderCalculator floodingOrderCalulator)
+    {
+        List<Double> heights = floodingOrderCalulator.frameHeights.stream().collect(Collectors.toList());
+        Collections.reverse(heights);
+        AtomicInteger pixelIndex = new AtomicInteger();
+        for (Double currentHeight: heights) {
+            findFloodingPixels(floodingOrderCalulator, pixelIndex);
         }
     }
 
@@ -208,7 +271,7 @@ public class ROIWatershedCalculator
     private void floodCurrentFrame()
     {
         watershedStructure.computeStructureForTime(currentT);
-        currentLabel = (addNewBasins) ? WatershedNode.WATERSHED : seedNumber;
+        currentLabel = (addNewLabelsAllowed) ? WatershedNode.WATERSHED : labelCount;
 
         heightIndex1 = 0;
         heightIndex2 = 0;
@@ -282,7 +345,7 @@ public class ROIWatershedCalculator
                     {
                         if (currentNode.getLabel() == WatershedNode.TO_BE_MARKED)
                         {
-                            if (addNewBasins)
+                            if (addNewLabelsAllowed)
                                 currentNode.setLabel(neighborNode.getLabel());
                             else
                                 setBasinLabel(currentNode, neighborNode.getLabel());
@@ -323,12 +386,12 @@ public class ROIWatershedCalculator
 
             if (currentNode.getLabel() == WatershedNode.TO_BE_MARKED)
             {
-                if (addNewBasins)
+                if (addNewLabelsAllowed)
                     addNewBasin(currentNode);
                 else
                 {
-                    int seedLabel = TypeUtil.toInt(seedLabels.getData(currentT, currentNode.getZ(), 0,
-                            currentNode.getY(), currentNode.getX()));
+                    int seedLabel = TypeUtil.toInt(
+                            labels.getData(currentT, currentNode.getZ(), 0, currentNode.getY(), currentNode.getX()));
                     if (seedLabel > 0)
                         setBasinLabel(currentNode, seedLabel);
                 }
@@ -340,7 +403,7 @@ public class ROIWatershedCalculator
     {
         currentLabel++;
         currentNode.setLabel(currentLabel);
-        usedSeeds.add(new ROI2DPoint(
+        seedRois.add(new ROI2DPoint(
                 new Point5D.Integer(currentNode.getX(), currentNode.getY(), currentNode.getZ(), currentT, 0)));
         queue.add(currentNode);
 
@@ -424,22 +487,22 @@ public class ROIWatershedCalculator
                     roi.setColor(Color.WHITE);
                     roi.setOpacity(1);
                 }
-                resultingROIs.add(roi);
+                resultingRois.add(roi);
             }
         }
     }
 
     public List<ROI> getResultRois() throws InterruptedException
     {
-        if (resultingROIs == null)
+        if (resultingRois == null)
             compute();
 
-        return resultingROIs;
+        return resultingRois;
     }
 
     public List<ROI> getUsedSeeds()
     {
-        return usedSeeds;
+        return seedRois;
     }
 
 }
