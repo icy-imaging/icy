@@ -24,6 +24,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -288,6 +291,27 @@ public class TNavigationPanel extends JPanel
             loop.setIcon(new IcyIcon(ResourceUtil.ICON_ARROW_RIGHT, 16));
             loop.setSelected(false);
             loop.setToolTipText("Enable loop playback");
+        }
+        fireLoopingStateChange();
+    }
+
+    private List<ActionListener> loopingStateChangeListeners = Collections.synchronizedList(new ArrayList<>());
+
+    public void addLoopingStateChangeListener(ActionListener actionListener)
+    {
+        loopingStateChangeListeners.add(actionListener);
+    }
+
+    public void removeLoopingStateChangeListener(ActionListener actionListener)
+    {
+        loopingStateChangeListeners.remove(actionListener);
+    }
+
+    protected void fireLoopingStateChange()
+    {
+        for (ActionListener l : loopingStateChangeListeners)
+        {
+            l.actionPerformed(null);
         }
     }
 

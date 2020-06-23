@@ -22,6 +22,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -405,6 +407,7 @@ public abstract class IcyCanvas extends JPanel
     protected boolean synchMaster;
     protected boolean orderedLayersOutdated;
     private Runnable guiUpdater;
+    protected boolean isLoopingT;
 
     /**
      * Constructor
@@ -463,6 +466,16 @@ public abstract class IcyCanvas extends JPanel
                 setPositionT(tNav.getValue());
             }
         });
+        tNav.addLoopingStateChangeListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                isLoopingT = tNav.isRepeat();
+            }
+        });
+
+        isLoopingT = tNav.isRepeat();
 
         // mouse info panel
         mouseInfPanel = new MouseImageInfosPanel();
@@ -661,6 +674,11 @@ public abstract class IcyCanvas extends JPanel
     public boolean isLayersVisible()
     {
         return layersVisible;
+    }
+
+    public boolean isLoopingInT()
+    {
+        return isLoopingT;
     }
 
     /**
@@ -3707,8 +3725,8 @@ public abstract class IcyCanvas extends JPanel
                         }
                     }
                     break;
-                    
-                    // global layer
+
+                // global layer
                 case KeyEvent.VK_L:
                     if (EventUtil.isShiftDown(e, true))
                     {

@@ -2796,18 +2796,28 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
                     break;
 
                 case KeyEvent.VK_LEFT:
-                    if (EventUtil.isMenuControlDown(e, true))
-                        setPositionT(Math.max(getPositionT() - 5, 0));
+                    int amount = EventUtil.isMenuControlDown(e, true) ? 5 : 1;
+                    if (isLoopingInT())
+                    {
+                        setPositionT((getPositionT() - amount + getImageSizeT()) % getImageSizeT());
+                    }
                     else
-                        setPositionT(Math.max(getPositionT() - 1, 0));
+                    {
+                        setPositionT(Math.max(getPositionT() - amount, 0));
+                    }
                     e.consume();
                     break;
 
                 case KeyEvent.VK_RIGHT:
-                    if (EventUtil.isMenuControlDown(e, true))
-                        setPositionT(getPositionT() + 5);
+                    int amount1 = EventUtil.isMenuControlDown(e, true) ? 5 : 1;
+                    if (isLoopingInT())
+                    {
+                        setPositionT((getPositionT() + amount1) % getImageSizeT());
+                    }
                     else
-                        setPositionT(getPositionT() + 1);
+                    {
+                        setPositionT(Math.min(getPositionT() + amount1, getImageSizeT() - 1));
+                    }
                     e.consume();
                     break;
 
