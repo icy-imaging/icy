@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.bioimageanalysis.icy</groupId>
     <artifactId>icy-kernel</artifactId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>2.1.0</version>
 
     <packaging>jar</packaging>
 
@@ -211,43 +211,7 @@
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-flamingo</artifactId>
-            <version>7.3.7</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-substance</artifactId>
-            <version>7.3.7</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-substance_flamingo</artifactId>
-            <version>7.3.7</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-substance_swingx</artifactId>
-            <version>7.3.7</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-laf-plugin</artifactId>
-            <version>7.3.7</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-laf-widget</artifactId>
-            <version>7.3.7</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-trident</artifactId>
+            <artifactId>icy-insubstantial</artifactId>
             <version>7.3.7</version>
         </dependency>
 
@@ -369,35 +333,31 @@
 
     <repositories>
         <repository>
-            <id>icy-dev</id>
-            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
+            <id>jai-repo</id>
+            <url>http://maven.geomajas.org/</url>
         </repository>
         <repository>
-            <id>icy-release</id>
-            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+            <id>icy-prod</id>
+            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
+        </repository>
+        <repository>
+            <id>icy-dev</id>
+            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
         </repository>
         <!-- <repository> -->
         <!-- <id>icy-release-pasteur</id> -->
         <!-- <url>https://nexus.pasteur.fr/repository/icy-release/</url> -->
         <!-- </repository> -->
-        <repository>
-            <id>jai-core-repo</id>
-            <url>https://packages.atlassian.com/maven-3rdparty/</url>
-        </repository>
-        <repository>
-            <id>jai-codec-repo</id>
-            <url>http://maven.geomajas.org/</url>
-        </repository>
     </repositories>
 
-    <!-- <distributionManagement> -->
-    <!-- <snapshotRepository> -->
-    <!-- <id>nexus-snapshots</id> -->
-    <!-- <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url> -->
-    <!-- </snapshotRepository> -->
-    <!-- <repository> -->
-    <!-- <id>nexus-releases</id> -->
-    <!-- <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url> -->
-    <!-- </repository> -->
-    <!-- </distributionManagement> -->
+    <distributionManagement>
+        <snapshotRepository>
+            <id>icy-dev</id>
+            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
+        </snapshotRepository>
+        <repository>
+            <id>icy-prod</id>
+            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+        </repository>
+    </distributionManagement>
 </project>

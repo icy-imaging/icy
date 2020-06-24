@@ -1,7 +1,9 @@
-/build*
+/build
 /target
 /workspace
 /.settings
 /.classpath
 /.project
+.idea/
+*.iml
 setting.xml
