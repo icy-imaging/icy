@@ -27,14 +27,14 @@ public class ROIDistanceTransformCalculator
 {
     private Dimension5D imageSize;
     private Dimension3D pixelSize;
-    private boolean constrainBorders;
+    private boolean constrainImageBorders;
     private List<ROI> rois;
 
-    public ROIDistanceTransformCalculator(Dimension5D imageSize, Dimension3D pixelSize, boolean constrainBorders)
+    public ROIDistanceTransformCalculator(Dimension5D imageSize, Dimension3D pixelSize, boolean constrainImageBorders)
     {
         this.imageSize = imageSize;
         this.pixelSize = pixelSize;
-        this.constrainBorders = constrainBorders;
+        this.constrainImageBorders = constrainImageBorders;
         this.rois = new ArrayList<>();
     }
 
@@ -188,7 +188,7 @@ public class ROIDistanceTransformCalculator
 
     private void forwardPassCurrentRow()
     {
-        double affectedValue = constrainBorders ? 0 : maxDistance;
+        double affectedValue = constrainImageBorders ? 0 : maxDistance;
 
         for (int i = 0; i < imageSize.getSizeX(); i++)
         {
@@ -206,7 +206,7 @@ public class ROIDistanceTransformCalculator
 
     private void backwardPassCurrentRow()
     {
-        double affectedValue = constrainBorders ? 0 : maxDistance;
+        double affectedValue = constrainImageBorders ? 0 : maxDistance;
         for (int i = (int) imageSize.getSizeX() - 1; i >= 0; i--)
         {
             if (getValueAt(i, currentJ, currentK) != 0d)
@@ -235,7 +235,7 @@ public class ROIDistanceTransformCalculator
     private void forwardPassCurrentCol()
     {
         int a = 0;
-        for (int j = constrainBorders ? 0 : 1; j < imageSize.getSizeY(); j++)
+        for (int j = constrainImageBorders ? 0 : 1; j < imageSize.getSizeY(); j++)
         {
             if (a > 0)
                 a--;
@@ -277,7 +277,7 @@ public class ROIDistanceTransformCalculator
     private void backwardPassCurrentCol()
     {
         int a = 0;
-        for (int j = (int) imageSize.getSizeY() - (constrainBorders ? 1 : 2); j >= 0; j--)
+        for (int j = (int) imageSize.getSizeY() - (constrainImageBorders ? 1 : 2); j >= 0; j--)
         {
             if (a > 0)
                 a--;
@@ -322,7 +322,7 @@ public class ROIDistanceTransformCalculator
     private void forwardPassCurrentFiber()
     {
         int a = 0;
-        for (int k = constrainBorders ? 0 : 1; k < imageSize.getSizeZ(); k++)
+        for (int k = constrainImageBorders ? 0 : 1; k < imageSize.getSizeZ(); k++)
         {
             if (a > 0)
                 a--;
@@ -357,7 +357,7 @@ public class ROIDistanceTransformCalculator
     private void backwardPassCurrentFiber()
     {
         int a = 0;
-        for (int k = (int) imageSize.getSizeZ() - (constrainBorders ? 1 : 2); k >= 0; k--)
+        for (int k = (int) imageSize.getSizeZ() - (constrainImageBorders ? 1 : 2); k >= 0; k--)
         {
             if (a > 0)
                 a--;

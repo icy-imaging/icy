@@ -135,7 +135,7 @@ public class ROIUtil
      *        an optional sequence where the pixel size can be retrieved
      * @return the computed descriptor or <code>null</code> if the descriptor if not found in the
      *         specified set
-     * @throws InterruptedException 
+     * @throws InterruptedException
      * @throws UnsupportedOperationException
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it, or if
@@ -148,8 +148,8 @@ public class ROIUtil
     }
 
     /**
-     * @throws InterruptedException 
-     * @throws UnsupportedOperationException 
+     * @throws InterruptedException
+     * @throws UnsupportedOperationException
      * @deprecated Use {@link ROIDescriptor#computeDescriptor(Collection, String, ROI, Sequence)} instead
      */
     @Deprecated
@@ -173,13 +173,14 @@ public class ROIUtil
      *        an optional sequence where the pixel size can be retrieved
      * @return the computed descriptor or <code>null</code> if the descriptor if not found in the
      *         specified set
-     * @throws InterruptedException 
+     * @throws InterruptedException
      * @throws UnsupportedOperationException
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it, or if
      *         the specified Z, T or C position are not supported by the descriptor
      */
-    public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
+    public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
         return ROIDescriptor.computeDescriptor(descriptorId, roi, sequence);
     }
@@ -1450,7 +1451,7 @@ public class ROIUtil
      * Converts the specified ROI to a ROI Point ({@link ROI2DPoint} or {@link ROI3DPoint}) representing the mass center of the input ROI.
      * 
      * @return the ROI point representing the mass center of the input ROI.
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     public static ROI convertToPoint(ROI roi) throws InterruptedException
     {
@@ -1487,7 +1488,7 @@ public class ROIUtil
      * Converts the specified ROI to a 2D ellipse type ROI centered on the mass center of the input ROI.
      * 
      * @return the 2D ellipse ROI centered on the mass center of the input ROI.
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     public static ROI2DEllipse convertToEllipse(ROI roi, double radiusX, double radiusY) throws InterruptedException
     {
@@ -1525,7 +1526,7 @@ public class ROIUtil
      * Converts the specified ROI to a 2D rectangle type ROI centered on the mass center of the input ROI.
      * 
      * @return the 2D rectangle ROI centered on the mass center of the input ROI.
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     public static ROI2DRectangle convertToRectangle(ROI roi, double width, double height) throws InterruptedException
     {
@@ -2809,12 +2810,28 @@ public class ROIUtil
     public static List<ROI> computeWatershedSeparation(Collection<? extends ROI> selectedRois,
             List<? extends ROI> seedRois, Dimension5D imageSize, Dimension3D pixelSize) throws InterruptedException
     {
-        ROIWatershedCalculator ws = new ROIWatershedCalculator(imageSize, pixelSize);
-        ws.addAll(selectedRois);
-        ws.addAllSeeds(seedRois);
-        ws.setNewLabelsAllowed(false);
-        ws.compute();
-        return ws.getResultRois();
+        ROIWatershedCalculator.Builder wsBuilder = new ROIWatershedCalculator.Builder(imageSize, pixelSize);
+
+        wsBuilder.addObjects(selectedRois);
+        wsBuilder.addSeeds(seedRois);
+        wsBuilder.setNewBasinsAllowed(false);
+        ROIWatershedCalculator wsCalculator = wsBuilder.build();
+
+        try
+        {
+            wsCalculator.call();
+        }
+        catch (InterruptedException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Error computing watershed: " + e.getMessage(), e);
+        }
+
+        seedRois.clear();
+        return wsCalculator.getLabelRois();
     }
 
     /**
@@ -2829,14 +2846,29 @@ public class ROIUtil
     public static List<ROI> computeWatershedSeparation(Collection<? extends ROI> selectedRois, Dimension5D imageSize,
             Dimension3D pixelSize, List<ROI> usedSeedRois) throws InterruptedException
     {
-        ROIWatershedCalculator ws = new ROIWatershedCalculator(imageSize, pixelSize);
-        ws.addAll(selectedRois);
-        ws.addAllSeeds(new ArrayList<ROI>());
-        ws.setNewLabelsAllowed(false);
-        ws.compute();
+        ROIWatershedCalculator.Builder wsBuilder = new ROIWatershedCalculator.Builder(imageSize, pixelSize);
+
+        wsBuilder.addObjects(selectedRois);
+        wsBuilder.addSeeds(usedSeedRois);
+        wsBuilder.setNewBasinsAllowed(false);
+        ROIWatershedCalculator wsCalculator = wsBuilder.build();
+
+        try
+        {
+            wsCalculator.call();
+        }
+        catch (InterruptedException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Error computing watershed: " + e.getMessage(), e);
+        }
+
         usedSeedRois.clear();
-        usedSeedRois.addAll(ws.getUsedSeeds());
-        return ws.getResultRois();
+        usedSeedRois.addAll(wsCalculator.getSeeds());
+        return wsCalculator.getLabelRois();
     }
 
     public static List<ROI> computeSkeleton(List<ROI2D> selectedROIs, Dimension3D pixelSize, double distance)

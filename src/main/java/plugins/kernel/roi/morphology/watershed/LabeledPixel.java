@@ -2,22 +2,110 @@ package plugins.kernel.roi.morphology.watershed;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class LabeledPixel
+import com.google.common.util.concurrent.AtomicDouble;
+
+public class LabeledPixel implements Comparable<LabeledPixel>
 {
-    public final WatershedPixel pixel;
-    public final Integer label;
-    public final List<LabeledPixel> neighbors;
+    private static final int NO_LABEL = 0;
+    private static final int TO_BE_LABELED = -1;
 
-    public LabeledPixel(WatershedPixel pixel, Integer label)
+    private final Point3D position;
+    private final AtomicDouble height;
+    private final List<LabeledPixel> neighbors;
+    private final AtomicInteger label;
+    private final AtomicDouble distance;
+    private final AtomicInteger level;
+
+    public LabeledPixel(Point3D position, double height)
     {
-        this.pixel = pixel;
-        this.label = label;
+        this.position = position;
+        this.height = new AtomicDouble(height);
         this.neighbors = new ArrayList<>(8);
+        this.label = new AtomicInteger(0);
+        this.distance = new AtomicDouble(Double.NaN);
+        this.level = new AtomicInteger(0);
+    }
+
+    public Point3D getPosition()
+    {
+        return position;
+    }
+
+    public double getHeight()
+    {
+        return height.get();
+    }
+
+    public void setHeight(double newHeight)
+    {
+        this.height.set(newHeight);
+    }
+
+    public List<LabeledPixel> getNeighbors()
+    {
+        return neighbors;
+    }
+
+    public void addNeighbor(LabeledPixel neighbor)
+    {
+        neighbors.add(neighbor);
+    }
+
+    public int getLabel()
+    {
+        return label.get();
+    }
+
+    public void setLabel(int newLabel)
+    {
+        this.label.set(newLabel);
+    }
+
+    public double getDistance()
+    {
+        return distance.get();
+    }
+
+    public void setDistance(double newDistance)
+    {
+        this.distance.set(newDistance);
+    }
+
+    public boolean isLabeled()
+    {
+        return label.get() > NO_LABEL;
     }
     
-    public double getHeight() {
-        return this.pixel.height;
+    public boolean isNoLabel() {
+        return label.get() == NO_LABEL;
+    }
+
+    public void setToBeLabeled()
+    {
+        setLabel(TO_BE_LABELED);
+    }
+
+    public boolean isToBeLabeled()
+    {
+        return getLabel() == TO_BE_LABELED;
+    }
+
+    public void setLevel(int newLevel)
+    {
+        this.level.set(newLevel);
+    }
+
+    public int getLevel()
+    {
+        return level.get();
+    }
+
+    @Override
+    public int compareTo(LabeledPixel o)
+    {
+        return Double.compare(getHeight(), o.getHeight());
     }
 
     @Override
@@ -25,8 +113,7 @@ public class LabeledPixel
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((label == null) ? 0 : label.hashCode());
-        result = prime * result + ((pixel == null) ? 0 : pixel.hashCode());
+        result = prime * result + ((position == null) ? 0 : position.hashCode());
         return result;
     }
 
@@ -38,19 +125,12 @@ public class LabeledPixel
         if (!(obj instanceof LabeledPixel))
             return false;
         LabeledPixel other = (LabeledPixel) obj;
-        if (label == null)
+        if (position == null)
         {
-            if (other.label != null)
+            if (other.position != null)
                 return false;
         }
-        else if (!label.equals(other.label))
-            return false;
-        if (pixel == null)
-        {
-            if (other.pixel != null)
-                return false;
-        }
-        else if (!pixel.equals(other.pixel))
+        else if (!position.equals(other.position))
             return false;
         return true;
     }
@@ -58,7 +138,7 @@ public class LabeledPixel
     @Override
     public String toString()
     {
-        return "PxLbl[" + pixel + ", l=" + label + "]";
+        return "Pixel " + position + " [h=" + height + ", l=" + label + ", d=" + distance + "]";
     }
 
 }

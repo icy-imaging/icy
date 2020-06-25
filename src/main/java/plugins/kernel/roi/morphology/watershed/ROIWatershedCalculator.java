@@ -1,26 +1,28 @@
 package plugins.kernel.roi.morphology.watershed;
 
 import java.awt.Color;
-import java.awt.Rectangle;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import icy.image.IcyBufferedImage;
-import icy.roi.BooleanMask2D;
 import icy.roi.ROI;
 import icy.sequence.Sequence;
-import icy.sequence.SequenceCursor;
 import icy.sequence.SequenceDataIterator;
 import icy.sequence.VolumetricImage;
+import icy.sequence.VolumetricImageCursor;
 import icy.type.DataIteratorUtil;
 import icy.type.DataType;
-import icy.type.TypeUtil;
 import icy.type.dimension.Dimension3D;
 import icy.type.dimension.Dimension5D;
 import icy.type.point.Point5D;
@@ -31,125 +33,209 @@ import plugins.kernel.image.filtering.convolution.ConvolutionException;
 import plugins.kernel.roi.morphology.ROIDistanceTransformCalculator;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import plugins.kernel.roi.roi2d.ROI2DPoint;
+import plugins.kernel.roi.roi3d.ROI3DArea;
 
-public class ROIWatershedCalculator
+public class ROIWatershedCalculator implements Callable<Void>
 {
+    public static class Builder
+    {
+        private Dimension5D imageSize;
+        private Dimension3D pixelSize;
+        private List<ROI> rois;
+        private List<ROI> seeds;
+        private boolean newBasinsAllowed;
 
-    private Dimension5D imageSize;
+        public Builder(Dimension5D imageSize, Dimension3D pixelSize)
+        {
+            Objects.requireNonNull(imageSize);
+            Objects.requireNonNull(pixelSize);
+            this.imageSize = imageSize;
+            this.pixelSize = pixelSize;
+            this.rois = new ArrayList<ROI>();
+            this.seeds = new ArrayList<ROI>();
+            this.newBasinsAllowed = true;
+        }
+
+        public <T extends ROI> Builder addObject(T roi)
+        {
+            Objects.requireNonNull(roi);
+            this.rois.add(roi);
+            return this;
+        }
+
+        public <T extends ROI> Builder addObjects(Collection<T> rois)
+        {
+            Objects.requireNonNull(rois);
+            this.rois.addAll(rois);
+            return this;
+        }
+
+        public <T extends ROI> Builder addSeed(T roi)
+        {
+            Objects.requireNonNull(roi);
+            this.seeds.add(roi);
+            return this;
+        }
+
+        public <T extends ROI> Builder addSeeds(Collection<T> rois)
+        {
+            Objects.requireNonNull(rois);
+            this.seeds.addAll(rois);
+            return this;
+        }
+
+        public Builder setNewBasinsAllowed(boolean allow)
+        {
+            this.newBasinsAllowed = allow;
+            return this;
+        }
+
+        public ROIWatershedCalculator build()
+        {
+            ROIWatershedCalculator calculator = new ROIWatershedCalculator();
+            calculator.setImageSize(imageSize);
+            calculator.setPixelSize(pixelSize);
+            calculator.setDomainRois(rois);
+            calculator.setSeedRois(seeds);
+            calculator.setNewBasinsAllowed(newBasinsAllowed);
+            return calculator;
+        }
+    }
+
     private Dimension3D pixelSize;
-    private List<ROI> rois;
-    private List<ROI> seeds;
-    private boolean addNewLabelsAllowed;
+    private Dimension5D imageSize;
+    private List<ROI> seedRois;
+    private List<ROI> domainRois;
+    private boolean newBasinsAllowed;
 
-    public ROIWatershedCalculator(Dimension5D imageSize, Dimension3D pixelSize)
+    private ROIWatershedCalculator()
+    {
+    }
+
+    private void setImageSize(Dimension5D imageSize)
     {
         this.imageSize = imageSize;
+    }
+
+    private void setPixelSize(Dimension3D pixelSize)
+    {
         this.pixelSize = pixelSize;
-        this.rois = new ArrayList<ROI>();
-        this.seeds = new ArrayList<ROI>();
-        this.addNewLabelsAllowed = true;
     }
 
-    public <T extends ROI> void add(T roi)
+    private void setDomainRois(List<ROI> domainRois)
     {
-        rois.add(roi);
+        this.domainRois = domainRois;
     }
 
-    public <T extends ROI> void addAll(Collection<T> rois)
+    private void setSeedRois(List<ROI> seedRois)
     {
-        this.rois.addAll(rois);
+        this.seedRois = seedRois;
     }
 
-    public <T extends ROI> void addSeed(T roi)
+    private void setNewBasinsAllowed(boolean newBasinsAllowed)
     {
-        seeds.add(roi);
+        this.newBasinsAllowed = newBasinsAllowed;
     }
 
-    public <T extends ROI> void addAllSeeds(Collection<T> rois)
+    @Override
+    public Void call() throws Exception
     {
-        seeds.addAll(rois);
-    }
-
-    public void setNewLabelsAllowed(boolean addNewLabelsAllowed)
-    {
-        this.addNewLabelsAllowed = addNewLabelsAllowed;
-    }
-
-    public boolean isNewLabelsAllowed()
-    {
-        return addNewLabelsAllowed;
-    }
-
-    private List<ROI> resultingRois;
-
-    public void compute() throws InterruptedException
-    {
-        computeDistanceMap();
+        labeledRois = null;
+        computeDomainDistanceMap();
         prepareSeeds();
-        computeFlooding();
+        computeWatershedOnFrames();
+        return null;
     }
 
-    private Sequence distanceMap;
+    private Sequence domainDistanceMap;
 
-    private void computeDistanceMap() throws InterruptedException
+    private void computeDomainDistanceMap() throws InterruptedException
     {
         ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, true);
-        dt.addAll(rois);
-        this.distanceMap = dt.getDistanceMap();
+        dt.addAll(domainRois);
+        try
+        {
+            this.domainDistanceMap = dt.getDistanceMap();
+        }
+        catch (InterruptedException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Error computing domain distance map: " + e.getMessage(), e);
+        }
     }
-
-    private Sequence labels;
-    int labelCount;
-    private List<ROI> seedRois;
 
     private void prepareSeeds() throws InterruptedException
     {
-        seedRois = new ArrayList<ROI>();
-        labelCount = 0;
-
-        initializeSeedLabels();
-        if (seeds.isEmpty())
+        if (seedRois.isEmpty() && !newBasinsAllowed)
         {
-            if (!isNewLabelsAllowed())
-            {
-                Sequence localMax = getLocalMaxima();
-                SequenceCursor seedCursor = new SequenceCursor(labels);
-                for (SequenceDataIterator localMaxIt = new SequenceDataIterator(localMax); !localMaxIt
-                        .done(); localMaxIt.next())
-                {
-                    if (Thread.interrupted())
-                        throw new InterruptedException();
-                    if (localMaxIt.get() > 0)
-                    {
-                        labelCount++;
-                        seedCursor.set(localMaxIt.getPositionX(), localMaxIt.getPositionY(), localMaxIt.getPositionZ(),
-                                localMaxIt.getPositionT(), 0, labelCount);
-
-                        ROI seedRoi = new ROI2DPoint(new Point5D.Integer(localMaxIt.getPositionX(),
-                                localMaxIt.getPositionY(), localMaxIt.getPositionZ(), localMaxIt.getPositionT(),
-                                localMaxIt.getPositionC()));
-                        seedRoi.setName("Seed " + labelCount);
-                        seedRois.add(seedRoi);
-                    }
-                }
-                seedCursor.commitChanges();
-            }
+            seedRois.addAll(getDomainLocalMaximumROIs());
         }
-        else
+
+        initializeLabelSequence();
+        int seedLabel = 1;
+        for (ROI roi : seedRois)
         {
-            for (ROI roi : seeds)
-            {
-                labelCount++;
-                DataIteratorUtil.set(new SequenceDataIterator(labels, roi, true), labelCount);
-                roi.setName("Seed " + labelCount);
-                seedRois.add(roi);
-            }
+            addSeedToLabelSequence(roi, seedLabel++);
         }
     }
 
-    private void initializeSeedLabels() throws InterruptedException
+    private List<? extends ROI> getDomainLocalMaximumROIs()
+            throws IllegalArgumentException, ConvolutionException, InterruptedException
     {
-        labels = new Sequence();
+        LocalMaxFiltering localMaxFiltering = LocalMaxFiltering.create(getSmoothedDomainDistanceMap(), 3);
+        localMaxFiltering.computeFiltering();
+
+        List<ROI> localMaximaRois = new ArrayList<>();
+        for (SequenceDataIterator localMaxIt = new SequenceDataIterator(
+                localMaxFiltering.getFilteredSequence()); !localMaxIt.done(); localMaxIt.next())
+        {
+            if (Thread.interrupted())
+                throw new InterruptedException();
+
+            if (localMaxIt.get() > 0)
+            {
+                localMaximaRois
+                        .add(new ROI2DPoint(new Point5D.Integer(localMaxIt.getPositionX(), localMaxIt.getPositionY(),
+                                localMaxIt.getPositionZ(), localMaxIt.getPositionT(), localMaxIt.getPositionC())));
+            }
+        }
+        return localMaximaRois;
+    }
+
+    private Sequence getSmoothedDomainDistanceMap()
+            throws IllegalArgumentException, ConvolutionException, InterruptedException
+    {
+        GaussianFiltering smoothingFilter = GaussianFiltering.create(this.domainDistanceMap, new double[] {2, 2, 2});
+        try
+        {
+            smoothingFilter.computeFiltering();
+        }
+        catch (ConvolutionException e)
+        {
+            System.err.println("z sigma 2 too large.. trying 1");
+            try
+            {
+                smoothingFilter = GaussianFiltering.create(this.domainDistanceMap, new double[] {2, 2, 1});
+                smoothingFilter.computeFiltering();
+            }
+            catch (ConvolutionException e1)
+            {
+                System.err.println("z sigma 1 too large.. using original distance map");
+                return this.domainDistanceMap;
+            }
+        }
+
+        return smoothingFilter.getFilteredSequence();
+    }
+
+    private Sequence labelSequence;
+
+    private void initializeLabelSequence() throws InterruptedException
+    {
+        labelSequence = new Sequence("labels");
         for (int l = 0; l < imageSize.getSizeT(); l++)
         {
             if (Thread.interrupted())
@@ -165,344 +251,313 @@ public class ROIWatershedCalculator
                         DataType.INT);
                 volume.setImage(k, plane);
             }
-            labels.addVolumetricImage(l, volume);
+            labelSequence.addVolumetricImage(l, volume);
         }
     }
 
-    private Sequence getLocalMaxima() throws RuntimeException, InterruptedException
+    private void addSeedToLabelSequence(ROI seedRoi, int label)
     {
-        LocalMaxFiltering localMaxFiltering = LocalMaxFiltering.create(getSmoothedDistanceMap(), 3);
-        localMaxFiltering.computeFiltering();
-        return localMaxFiltering.getFilteredSequence();
+
+        DataIteratorUtil.set(new SequenceDataIterator(labelSequence, seedRoi, true), label);
     }
 
-    private Sequence getSmoothedDistanceMap()
-            throws IllegalArgumentException, ConvolutionException, InterruptedException
+    private Map<Integer, List<LabeledPixel>> labeledPixels;
+
+    private void computeWatershedOnFrames()
     {
-        GaussianFiltering smoothingFilter = GaussianFiltering.create(this.distanceMap, new double[] {2, 2, 2});
-        smoothingFilter.computeFiltering();
-        return smoothingFilter.getFilteredSequence();
-    }
-
-    private void createWatershedStructure()
-    {
-
-        watershedStructure = new WatershedStructure(distanceMap, labels);
-    }
-
-    int currentT;
-
-    private void computeFlooding() throws InterruptedException
-    {
-
-        WatershedFloodingOrderCalculator flooding = new WatershedFloodingOrderCalculator.Builder(distanceMap, labels).create();
-        for (int t = 0; t < this.distanceMap.getSizeT(); t++)
+        labeledPixels = new HashMap<Integer, List<LabeledPixel>>(labelSequence.getSizeT());
+        FloodingStructure.Builder floodingStructureBuilder = new FloodingStructure.Builder(domainDistanceMap,
+                labelSequence);
+        for (int frame = 0; frame < labelSequence.getSizeT(); frame++)
         {
-            if (Thread.interrupted())
-                throw new InterruptedException();
-
-            try
-            {
-                computeFrameWatershed(flooding, t);
-            }
-            catch (InterruptedException e)
-            {
-                throw e;
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException("Error while flooding: " + e.getMessage(), e);
-            }
-        }
-
-        resultingRois = new ArrayList<>();
-        // TODO use label extractor to create ROIs
-
-        // old code
-
-        resultingRois = new ArrayList<ROI>();
-        for (currentT = 0; currentT < this.distanceMap.getSizeT(); currentT++)
-        {
-            if (Thread.interrupted())
-                throw new InterruptedException();
-
-            floodCurrentFrame();
-            createResultingROIs();
+            floodingStructureBuilder.setFrame(frame);
+            FloodingStructure frameFloodingStructure = floodingStructureBuilder.build();
+            computeFrameFlooding(frameFloodingStructure, frame);
+            updateLabelSequence(frame, frameFloodingStructure);
+            labeledPixels.put(frame, frameFloodingStructure.getFloodingPixels());
         }
     }
 
-    private void computeFrameWatershed(WatershedFloodingOrderCalculator floodingOrderCalulator, int t) throws InterruptedException
+    private void computeFrameFlooding(FloodingStructure frameFloodingStructure, int frame)
     {
-        try
-        {
-            floodingOrderCalulator.setFrame(t);
-            floodingOrderCalulator.call();
+        AtomicInteger labelGenerator = new AtomicInteger(seedRois.size());
 
-            floodFrame(t, floodingOrderCalulator);
-            
-        }
-        catch (InterruptedException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException("Exception while performing flooding: " + e.getMessage(), e);
-        }
-    }
-
-    private void floodFrame(int t, WatershedFloodingOrderCalculator floodingOrderCalulator)
-    {
-        List<Double> heights = floodingOrderCalulator.frameHeights.stream().collect(Collectors.toList());
+        List<Double> heights = frameFloodingStructure.getHeights().stream().collect(Collectors.toList());
         Collections.reverse(heights);
-        AtomicInteger pixelIndex = new AtomicInteger();
-        for (Double currentHeight: heights) {
-            findFloodingPixels(floodingOrderCalulator, pixelIndex);
+        AtomicInteger heightPixelIndex = new AtomicInteger(0);
+        AtomicInteger nextPixelIndex = new AtomicInteger(0);
+        Queue<LabeledPixel> pendingPixels = new LinkedList<>();
+        for (double height : heights)
+        {
+            List<LabeledPixel> pixelsAtHeight = findPixelsAtHeight(frameFloodingStructure.getFloodingPixels(), height,
+                    heightPixelIndex);
+            pendingPixels.addAll(pixelsAtHeight);
+            extendBasins(pendingPixels);
+            finishCurrentHeight(frame, frameFloodingStructure.getFloodingPixels(), height, nextPixelIndex,
+                    labelGenerator);
         }
     }
 
-    private Queue<WatershedNode> queue = new LinkedList<WatershedNode>();
-    private int currentLabel;
-
-    private double currentHeight;
-    private int heightIndex1;
-    private int heightIndex2;
-
-    private void floodCurrentFrame()
+    private List<LabeledPixel> findPixelsAtHeight(List<LabeledPixel> floodingPixels, double height,
+            AtomicInteger startingPixelIndex)
     {
-        watershedStructure.computeStructureForTime(currentT);
-        currentLabel = (addNewLabelsAllowed) ? WatershedNode.WATERSHED : labelCount;
-
-        heightIndex1 = 0;
-        heightIndex2 = 0;
-
-        List<Double> heights = new LinkedList<Double>(watershedStructure.getHeights());
-        Collections.reverse(heights);
-        for (double currentHeight : heights)
+        List<LabeledPixel> candidatePixelsAtHeight = new LinkedList<LabeledPixel>();
+        for (int pixelIndex = startingPixelIndex.get(); pixelIndex < floodingPixels.size(); pixelIndex++)
         {
-            this.currentHeight = currentHeight;
-            findNodesForCurrentHeight();
-            extendBasins();
-            processNextHeight();
-        }
-    }
+            LabeledPixel pixel = floodingPixels.get(pixelIndex);
 
-    private void findNodesForCurrentHeight()
-    {
-        for (int nodeIndex = heightIndex1; nodeIndex < watershedStructure.size(); nodeIndex++)
-        {
-            WatershedNode node = watershedStructure.getNode(nodeIndex);
-            if (node.getHeight() != currentHeight)
+            if (pixel.getHeight() < height)
             {
-                heightIndex1 = nodeIndex;
+                startingPixelIndex.set(pixelIndex);
                 break;
             }
 
-            if (node.getLabel() <= WatershedNode.NO_LABEL)
+            if (!pixel.isLabeled())
             {
-                node.setLabel(WatershedNode.TO_BE_MARKED);
+                pixel.setToBeLabeled();
             }
 
-            for (WatershedNode neighbor : node.getNeighbors())
+            for (LabeledPixel neighborPixel : pixel.getNeighbors())
+            // Check if pixel can be labeled
             {
-                if (neighbor.getLabel() > WatershedNode.NO_LABEL)
+                if (neighborPixel.isLabeled())
+                // pixel has a labeled neighbor, thus pixel can be labeled
                 {
-                    node.setDistance(1); // TODO fix to take into account pixel size
-                    queue.add(node);
+                    // double distance = neighborPixel.getHeight() - pixel.getHeight();
+                    pixel.setLevel(1);
+                    candidatePixelsAtHeight.add(pixel);
                     break;
                 }
             }
+
         }
+        return candidatePixelsAtHeight;
     }
 
-    private void extendBasins()
+    private void extendBasins(Queue<LabeledPixel> pendingPixels)
     {
-        double currentDistance = 1; // TODO fix to take into account pixel size
-        queue.add(WatershedNode.FLAG_NODE);
+        LabeledPixel flagPixel = new LabeledPixel(new Point3D(0, 0, 0), -1);
+        pendingPixels.add(flagPixel);
+        int currentLevel = 1;
+
         while (true)
         {
-            WatershedNode currentNode = queue.poll();
+            LabeledPixel currentPixel = pendingPixels.poll();
 
-            if (currentNode.getLabel() == WatershedNode.HEIGHT_FLAG)
-            { // Finished all nodes on current distance
-                if (queue.isEmpty())
-                { // Finished queue
+            if (currentPixel == flagPixel)
+            // Finished current level
+            {
+                if (pendingPixels.isEmpty())
+                // Finished all pending pixels
+                {
                     break;
                 }
                 else
-                { // Other nodes still exist at a farther distance
-                    queue.add(WatershedNode.FLAG_NODE);
-                    currentDistance++;
-                    currentNode = queue.poll();
+                // Other pixel are still pending
+                {
+                    pendingPixels.add(flagPixel);
+                    currentLevel++;
+                    currentPixel = pendingPixels.poll();
                 }
             }
 
-            for (WatershedNode neighborNode : currentNode.getNeighbors())
+            boolean shouldExtend = false;
+            int neighborLabel = 0;
+            boolean isBasinBorder = false;
+            LabeledPixel bestNeighbor = null;
+            double bestDistance = Double.NaN;
+            for (LabeledPixel neighborPixel : currentPixel.getNeighbors())
             {
-                if (neighborNode.getDistance() <= currentDistance && neighborNode.getLabel() > WatershedNode.NO_LABEL)
+                if (neighborPixel.getLevel() <= currentLevel && neighborPixel.isLabeled())
                 {
-                    if (neighborNode.getLabel() > WatershedNode.WATERSHED)
+
+                    if (currentPixel.isToBeLabeled())
                     {
-                        if (currentNode.getLabel() == WatershedNode.TO_BE_MARKED)
-                        {
-                            if (addNewLabelsAllowed)
-                                currentNode.setLabel(neighborNode.getLabel());
-                            else
-                                setBasinLabel(currentNode, neighborNode.getLabel());
-                        }
-                        else if (currentNode.getLabel() != neighborNode.getLabel())
-                        {
-                            currentNode.setLabel(WatershedNode.WATERSHED);
-                        }
+                        shouldExtend = true;
                     }
-                    else if (currentNode.getLabel() == WatershedNode.TO_BE_MARKED)
+
+                    if (neighborLabel == 0)
                     {
-                        currentNode.setLabel(neighborNode.getLabel());
+                        neighborLabel = neighborPixel.getLabel();
                     }
+                    else if (neighborLabel != neighborPixel.getLabel())
+                    {
+                        isBasinBorder = true;
+                    }
+
+                    double distance = neighborPixel.getHeight() - currentPixel.getHeight();
+                    if (bestNeighbor == null)
+                    {
+                        bestNeighbor = neighborPixel;
+                        bestDistance = distance;
+                    }
+                    else if (distance > bestDistance)
+                    {
+                        bestNeighbor = neighborPixel;
+                        bestDistance = distance;
+                    }
+
                 }
-                else if (neighborNode.getLabel() == WatershedNode.TO_BE_MARKED && neighborNode.getDistance() == 0d)
+                else if (neighborPixel.isToBeLabeled() && neighborPixel.getLevel() == 0)
                 {
-                    neighborNode.setDistance(currentDistance + 1);
-                    queue.add(neighborNode);
+                    neighborPixel.setLevel(currentLevel + 1);
+                    pendingPixels.add(neighborPixel);
                 }
             }
 
+            if (shouldExtend || isBasinBorder)
+            {
+                currentPixel.setLabel(bestNeighbor.getLabel());
+                if (!newBasinsAllowed)
+                {
+                    floodBasin(currentPixel, bestNeighbor.getLabel());
+                }
+            }
         }
     }
 
-    private void processNextHeight()
+    private void finishCurrentHeight(int frame, List<LabeledPixel> floodingPixels, double height,
+            AtomicInteger nextPixelIndex, AtomicInteger labelGenerator)
     {
-        for (int nodeIndex = heightIndex2; nodeIndex < watershedStructure.size(); nodeIndex++)
+        VolumetricImageCursor labelCursor = new VolumetricImageCursor(labelSequence, frame);
+        for (int pixelIndex = nextPixelIndex.get(); pixelIndex < floodingPixels.size(); pixelIndex++)
         {
-            WatershedNode currentNode = watershedStructure.getNode(nodeIndex);
-
-            if (currentNode.getHeight() != currentHeight)
+            LabeledPixel pixel = floodingPixels.get(pixelIndex);
+            if (pixel.getHeight() < height)
             {
-                heightIndex2 = nodeIndex;
+                nextPixelIndex.set(pixelIndex);
                 break;
             }
 
-            currentNode.setDistance(0);
+            pixel.setLevel(0);
 
-            if (currentNode.getLabel() == WatershedNode.TO_BE_MARKED)
+            if (pixel.isToBeLabeled())
             {
-                if (addNewLabelsAllowed)
-                    addNewBasin(currentNode);
+                if (newBasinsAllowed)
+                {
+                    floodBasin(pixel, labelGenerator.incrementAndGet());
+                }
                 else
                 {
-                    int seedLabel = TypeUtil.toInt(
-                            labels.getData(currentT, currentNode.getZ(), 0, currentNode.getY(), currentNode.getX()));
-                    if (seedLabel > 0)
-                        setBasinLabel(currentNode, seedLabel);
+                    int pixelLabel = (int) labelCursor.get(pixel.getPosition().x, pixel.getPosition().y,
+                            pixel.getPosition().z, 0);
+                    if (pixelLabel > 0)
+                    {
+                        floodBasin(pixel, pixelLabel);
+                    }
                 }
             }
         }
     }
 
-    private void addNewBasin(WatershedNode currentNode)
+    private void floodBasin(LabeledPixel startPixel, int label)
     {
-        currentLabel++;
-        currentNode.setLabel(currentLabel);
-        seedRois.add(new ROI2DPoint(
-                new Point5D.Integer(currentNode.getX(), currentNode.getY(), currentNode.getZ(), currentT, 0)));
-        queue.add(currentNode);
+        startPixel.setLabel(label);
 
-        while (!queue.isEmpty())
+        Queue<LabeledPixel> pendingBasinPixels = new LinkedList<>();
+        pendingBasinPixels.add(startPixel);
+        while (!pendingBasinPixels.isEmpty())
         {
-            WatershedNode node = queue.poll();
-            List<WatershedNode> nodeNeighbors = node.getNeighbors();
-            for (WatershedNode neighbor : nodeNeighbors)
+            LabeledPixel currentPixel = pendingBasinPixels.poll();
+
+            for (LabeledPixel neighborPixel : currentPixel.getNeighbors())
             {
-                if (neighbor.getLabel() == WatershedNode.TO_BE_MARKED)
+                if (neighborPixel.isToBeLabeled()
+                        || (neighborPixel.isNoLabel() && neighborPixel.getHeight() >= currentPixel.getHeight()))
                 {
-                    neighbor.setLabel(currentLabel);
-                    queue.add(neighbor);
+                    neighborPixel.setLabel(label);
+                    neighborPixel.setLevel(startPixel.getLevel());
+                    pendingBasinPixels.add(neighborPixel);
                 }
             }
         }
     }
 
-    private Queue<WatershedNode> queue1 = new LinkedList<WatershedNode>();
-
-    private void setBasinLabel(WatershedNode currentNode, int seedLabel)
+    private void updateLabelSequence(int frame, FloodingStructure frameFloodingStructure)
     {
-        currentNode.setLabel(seedLabel);
-        currentNode.setDistance(0);
-        queue1.add(currentNode);
-
-        while (!queue1.isEmpty())
+        VolumetricImageCursor labelCursor = new VolumetricImageCursor(labelSequence, frame);
+        for (LabeledPixel labeledPixel : frameFloodingStructure.getFloodingPixels())
         {
-            WatershedNode node = queue1.poll();
-            List<WatershedNode> nodeNeighbors = node.getNeighbors();
-            for (WatershedNode neighbor : nodeNeighbors)
-            {
-                if (neighbor.getLabel() == WatershedNode.TO_BE_MARKED
-                        || (neighbor.getLabel() == WatershedNode.NO_LABEL && neighbor.getHeight() > node.getHeight()))
-                {
-                    neighbor.setLabel(seedLabel);
-                    neighbor.setDistance(0);
-                    queue1.add(neighbor);
-                }
-            }
+            labelCursor.set(labeledPixel.getPosition().x, labeledPixel.getPosition().y, labeledPixel.getPosition().z, 0,
+                    labeledPixel.getLabel());
         }
+        labelCursor.commitChanges();
     }
 
-    private void createResultingROIs()
+    public Sequence getLabelSequence()
     {
-        if (imageSize.getSizeZ() == 1)
-        {
-            ArrayList<boolean[]> masks = new ArrayList<boolean[]>(currentLabel + 1);
-            int arraySize = (int) imageSize.getSizeX() * (int) imageSize.getSizeY();
-            for (int i = 0; i < currentLabel + 1; i++)
-            {
-                masks.add(new boolean[arraySize]);
-            }
-            for (WatershedNode watershedNode : watershedStructure)
-            {
-                int maskIndex = watershedNode.getLabel() - 1;
-                if (maskIndex >= 0)
-                {
-                    masks.get(maskIndex)[watershedNode.getY() * (int) imageSize.getSizeX()
-                            + watershedNode.getX()] = true;
-
-                }
-                else if (maskIndex < -1)
-                {
-                    masks.get(currentLabel)[watershedNode.getY() * (int) imageSize.getSizeX()
-                            + watershedNode.getX()] = true;
-                }
-            }
-            for (int i = 0; i <= currentLabel; i++)
-            {
-                ROI2DArea roi = new ROI2DArea(new BooleanMask2D(
-                        new Rectangle((int) imageSize.getSizeX(), (int) imageSize.getSizeY()), masks.get(i)));
-                int r, g, b;
-                r = Random.nextInt(256);
-                g = Random.nextInt(256);
-                b = (765 - r - g) % 256;
-                if (i < currentLabel)
-                    roi.setColor(new Color(r, g, b));
-                else
-                {
-                    roi.setColor(Color.WHITE);
-                    roi.setOpacity(1);
-                }
-                resultingRois.add(roi);
-            }
-        }
+        return labelSequence;
     }
 
-    public List<ROI> getResultRois() throws InterruptedException
-    {
-        if (resultingRois == null)
-            compute();
-
-        return resultingRois;
-    }
-
-    public List<ROI> getUsedSeeds()
+    public List<ROI> getSeeds()
     {
         return seedRois;
+    }
+
+    private List<ROI> labeledRois;
+
+    public List<ROI> getLabelRois()
+    {
+        if (labeledRois == null)
+        {
+            labeledRois = new ArrayList<ROI>();
+            for (int frame = 0; frame < labelSequence.getSizeT(); frame++)
+            {
+                labeledRois.addAll(getFrameLabelRois(frame));
+            }
+        }
+        return labeledRois;
+    }
+
+    private List<ROI> getFrameLabelRois(int frame)
+    {
+        List<ROI> frameRois = new LinkedList<ROI>();
+        if (labelSequence.getSizeZ() == 1)
+        {
+            Map<Integer, ROI2DArea> rois = new HashMap<>();
+            for (LabeledPixel pixel : labeledPixels.get(frame))
+            {
+                ROI2DArea labelRoi = rois.get(pixel.getLabel());
+                if (labelRoi == null)
+                {
+                    labelRoi = new ROI2DArea(new Point(pixel.getPosition().x, pixel.getPosition().y));
+                    labelRoi.setName("" + pixel.getLabel());
+                    int r, g, b;
+                    r = Random.nextInt(256);
+                    g = Random.nextInt(256);
+                    b = (765 - r - g) % 256;
+                    labelRoi.setColor(new Color(r, g, b));
+                    rois.put(pixel.getLabel(), labelRoi);
+                }
+
+                labelRoi.addPoint(pixel.getPosition().x, pixel.getPosition().y);
+            }
+            frameRois.addAll(rois.values());
+        }
+        else
+        {
+            Map<Integer, ROI3DArea> rois = new HashMap<>();
+            for (LabeledPixel pixel : labeledPixels.get(frame))
+            {
+                ROI3DArea labelRoi = rois.get(pixel.getLabel());
+                if (labelRoi == null)
+                {
+                    labelRoi = new ROI3DArea(new icy.type.point.Point3D.Integer(pixel.getPosition().x,
+                            pixel.getPosition().y, pixel.getPosition().z));
+                    labelRoi.setName("" + pixel.getLabel());
+                    int r, g, b;
+                    r = Random.nextInt(256);
+                    g = Random.nextInt(256);
+                    b = (765 - r - g) % 256;
+                    labelRoi.setColor(new Color(r, g, b));
+                    rois.put(pixel.getLabel(), labelRoi);
+                }
+
+                labelRoi.addPoint(pixel.getPosition().x, pixel.getPosition().y, pixel.getPosition().z);
+            }
+            frameRois.addAll(rois.values());
+        }
+        return frameRois;
     }
 
 }

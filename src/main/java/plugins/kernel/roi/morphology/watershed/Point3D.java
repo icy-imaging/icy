@@ -1,19 +1,14 @@
 package plugins.kernel.roi.morphology.watershed;
 
-public class Position3D
+public class Point3D
 {
     public final int x, y, z;
 
-    public Position3D(int x, int y, int z)
+    public Point3D(int x, int y, int z)
     {
         this.x = x;
         this.y = y;
         this.z = z;
-    }
-
-    public Position3D(int x, int y)
-    {
-        this(x, y, 0);
     }
 
     @Override
@@ -32,9 +27,9 @@ public class Position3D
     {
         if (this == obj)
             return true;
-        if (!(obj instanceof Position3D))
+        if (!(obj instanceof Point3D))
             return false;
-        Position3D other = (Position3D) obj;
+        Point3D other = (Point3D) obj;
         if (x != other.x)
             return false;
         if (y != other.y)
@@ -44,13 +39,10 @@ public class Position3D
         return true;
     }
 
-    private String stringValue;
-
     @Override
     public String toString()
     {
-        if (stringValue == null)
-            stringValue = "(" + x + ", " + y + ", " + z + ")";
-        return stringValue;
+        return "(" + x + ", " + y + ", " + z + ")";
     }
+
 }
