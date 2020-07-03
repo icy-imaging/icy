@@ -1,7 +1,6 @@
 package plugins.kernel.roi.morphology.watershed;
 
 import java.awt.Color;
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -520,7 +519,7 @@ public class ROIWatershedCalculator implements Callable<Void>
                 ROI2DArea labelRoi = rois.get(pixel.getLabel());
                 if (labelRoi == null)
                 {
-                    labelRoi = new ROI2DArea(new Point(pixel.getPosition().x, pixel.getPosition().y));
+                    labelRoi = new ROI2DArea();
                     labelRoi.setName("" + pixel.getLabel());
                     int r, g, b;
                     r = Random.nextInt(256);
