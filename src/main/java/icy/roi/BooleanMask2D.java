@@ -62,7 +62,7 @@ public class BooleanMask2D implements Cloneable
         {
             final Component croot = c.root;
 
-            if (croot != root)
+            if ((c != this) && (croot != root))
             {
                 children.add(croot);
                 croot.setRoot(root);
@@ -1480,7 +1480,7 @@ public class BooleanMask2D implements Cloneable
                 {
                     if (topleft != null)
                     {
-                        // mix component
+                        // merge component
                         if ((left != null) && (left != topleft))
                             topleft.addComponent(left);
 
@@ -1488,7 +1488,7 @@ public class BooleanMask2D implements Cloneable
                     }
                     else if (top != null)
                     {
-                        // mix component
+                        // merge component
                         if ((left != null) && (left != top))
                             top.addComponent(left);
 
@@ -1506,7 +1506,7 @@ public class BooleanMask2D implements Cloneable
                 }
                 else
                 {
-                    // mix component
+                    // merge component
                     if ((left != null) && (top != null) && (left != top))
                         top.addComponent(left);
 
