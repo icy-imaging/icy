@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.bioimageanalysis.icy</groupId>
@@ -152,6 +152,7 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
+                            <excludeTransitive>true</excludeTransitive>
                         </configuration>
                     </execution>
 
@@ -168,6 +169,7 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
+                            <excludeTransitive>true</excludeTransitive>
                         </configuration>
                     </execution>
 
@@ -190,6 +192,7 @@
                         <manifestEntries>
                             <Class-Path>ij/ij.jar</Class-Path>
                         </manifestEntries>
+                        <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>
                 </configuration>
             </plugin>
@@ -338,16 +341,12 @@
         </repository>
         <repository>
             <id>icy-prod</id>
-            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
+            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
         </repository>
         <repository>
             <id>icy-dev</id>
             <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
         </repository>
-        <!-- <repository> -->
-        <!-- <id>icy-release-pasteur</id> -->
-        <!-- <url>https://nexus.pasteur.fr/repository/icy-release/</url> -->
-        <!-- </repository> -->
     </repositories>
 
     <distributionManagement>
