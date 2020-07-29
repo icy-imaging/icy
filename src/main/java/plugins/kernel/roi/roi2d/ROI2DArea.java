@@ -2605,7 +2605,7 @@ public class ROI2DArea extends ROI2D
         {
             // need to duplicate to avoid array change during XML saving (ZIP packing don't like that)
             data = maskData.clone();
-            bnds = bounds;
+            bnds = new Rectangle(bounds);
         }
 
         final int len = bnds.width * bnds.height;
