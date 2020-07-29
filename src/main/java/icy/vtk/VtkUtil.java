@@ -1121,10 +1121,10 @@ public class VtkUtil
             throw new IllegalArgumentException(
                     "VtkUtil.getBinaryImageData(vtkPolyData, ..): Object size is too large, can't allocate array (size > 2^31) !");
 
-        // compute origin
-        origin[0] = bounds[0];
-        origin[1] = bounds[2];
-        origin[2] = bounds[4];
+        // compute origin (important to add 0.5d to avoid glitches when object edge fall on pixel limit)
+        origin[0] = bounds[0] + 0.5d;
+        origin[1] = bounds[2] + 0.5d;
+        origin[2] = bounds[4] + 0.5d;
 
         whiteImage.SetSpacing(spacing);
         whiteImage.SetDimensions(dim);
