@@ -4167,7 +4167,7 @@ public class Loader
             sequence.setPixelSizeY(psy * divider);
 
             // adjust name
-            name += " - binning=" + StringUtil.toString(divider);
+            name += " - binning=" + StringUtil.toString(resolution);
         }
 
         // adjust Z Range
