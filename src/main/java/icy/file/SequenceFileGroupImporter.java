@@ -163,7 +163,14 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     public String getOpened()
     {
         if (currentGroup != null)
+        {
+            // single image in the group ? --> directly return its path
+            if (currentGroup.positions.size() == 1)
+                return currentGroup.positions.get(0).getPath();
+            
+            // return the base path of the group
             return currentGroup.ident.base;
+        }
 
         return null;
     }
@@ -542,7 +549,9 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         final SequenceFileGroup group = currentGroup;
         final SequenceIdent ident = group.ident;
         final SequenceType baseType = ident.baseType;
-        final String name = FileUtil.getFileName(ident.base, false);
+        // single image in the group ? --> directly use its path as name
+        final String name = FileUtil
+                .getFileName((group.positions.size() == 1) ? group.positions.get(0).getPath() : ident.base, false);
         final OMEXMLMetadata result = MetaDataUtil.createMetadata(name);
 
         // minimum metadata
