@@ -2070,7 +2070,7 @@ public class SequenceUtil
                     IcyBufferedImage img = source.getImage(t, z);
 
                     if (img != null)
-                        img = IcyBufferedImageUtil.getSubImage(img, region2d, startC, (endC - startC) + 1);
+                        img = IcyBufferedImageUtil.getSubImage(img, region2d, startC, endC - startC);
 
                     result.setImage(t - startT, z - startZ, img);
                 }

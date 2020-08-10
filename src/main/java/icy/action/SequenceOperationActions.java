@@ -485,7 +485,8 @@ public class SequenceOperationActions
 
     // XY plan operations
     public static IcyAbstractAction cropSequenceAction = new IcyAbstractAction("Fast crop",
-            new IcyIcon(ResourceUtil.ICON_CUT), "Fast crop image", "Crop an image from a ROI", true, "Doing image crop...")
+            new IcyIcon(ResourceUtil.ICON_CUT), "Fast crop image", "Crop an image from a ROI", true,
+            "Doing image crop...")
     {
         private static final long serialVersionUID = 2928113834852115366L;
 
@@ -540,9 +541,7 @@ public class SequenceOperationActions
                 public void run()
                 {
                     // get output viewer
-                    final Viewer vout = new Viewer(out);
-                    // copy colormap from input viewer
-                    vout.getLut().copyFrom(viewer.getLut());
+                    new Viewer(out);
                 }
             });
 
