@@ -581,7 +581,6 @@ public class ROI2DArea extends ROI2D
 
         public boolean isHovered()
         {
-            System.out.println(hovered);
             return hovered;
         }
 
