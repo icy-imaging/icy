@@ -113,6 +113,7 @@ public class ROI2DArea extends ROI2D
         protected double scaling[];
         protected WeakReference<VtkCanvas> canvas3d;
         protected int lastBuildPosZ;
+        protected boolean hovered;
 
         // internal
         protected final Point2D brushPosition;
@@ -137,6 +138,7 @@ public class ROI2DArea extends ROI2D
             needRebuild = true;
             canvas3d = new WeakReference<VtkCanvas>(null);
             lastBuildPosZ = getZ();
+            hovered = false;
         }
 
         @Override
@@ -564,8 +566,23 @@ public class ROI2DArea extends ROI2D
 
                 return focused;
             }
-
+            setHovered(contains(imagePoint.getX(), imagePoint.getY()));
             return super.updateFocus(e, imagePoint, canvas);
+        }
+
+        public void setHovered(boolean value)
+        {
+            if(hovered != value) {
+                hovered = value;
+                roiChanged(false);
+            }
+            
+        }
+
+        public boolean isHovered()
+        {
+            System.out.println(hovered);
+            return hovered;
         }
 
         @Override
@@ -898,7 +915,7 @@ public class ROI2DArea extends ROI2D
                             g2.setColor(getDisplayColor());
                             g2.draw(bounds);
                         }
-                        else
+                        else if (isFocused() || isHovered())
                         {
                             // outside border
                             g2.setStroke(new BasicStroke((float) ROI.getAdjustedStroke(canvas, stroke + 1d)));
