@@ -1657,7 +1657,7 @@ public class ROIUtil
             for (int z = (int) Math.floor(roi3d.getBounds3D().getZ()); z <= sizeZ; z++)
             {
                 BooleanMask2D mask2d = roi3d.getBooleanMask2D(z, true);
-                if (mask2d != null)
+                if (mask2d != null && !mask2d.isEmpty())
                 {
                     ROI2DArea roi2d = new ROI2DArea(mask2d);
                     roi2d.setZ(z);
