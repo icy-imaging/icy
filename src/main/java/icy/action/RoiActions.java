@@ -25,8 +25,8 @@ import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.w3c.dom.Document;
 
@@ -2022,11 +2022,9 @@ public class RoiActions
 
             if (sequence != null)
             {
-                final List<ROI2D> selectedRois = sequence.getSelectedROI2Ds().stream()
-                        .filter(r -> !(r instanceof plugins.kernel.roi.roi2d.ROI2DPoint))
-                        .collect(Collectors.<ROI2D> toList());
-
+                final List<ROI2D> selectedRois = sequence.getSelectedROI2Ds();
                 final List<ROI> seedRois = sequence.getSelectedROIs(ROI2DPoint.class, true);
+                selectedRois.removeAll(new HashSet<ROI>(seedRois));
 
                 Thread thrd = new Thread(new Runnable()
                 {
