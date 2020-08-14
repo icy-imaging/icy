@@ -1102,6 +1102,8 @@ public class SequenceUtil
                 case T:
                     result = Math.max(result, seq.getSizeT());
                     break;
+                default:
+                    throw new UnsupportedOperationException("Unsupported dimension: " + dim);
             }
         }
 
@@ -1967,6 +1969,49 @@ public class SequenceUtil
                 result.setPixelSizeX(result.getPixelSizeX() * sx);
             if ((sy != 0d) && !Double.isInfinite(sy))
                 result.setPixelSizeY(result.getPixelSizeY() * sy);
+        }
+        else
+        {
+            final int xt;
+            final int yt;
+
+            // calculate translation values
+            final int dx = width - source.getWidth();
+            switch (xAlign)
+            {
+                default:
+                case SwingConstants.LEFT:
+                    xt = 0;
+                    break;
+
+                case SwingConstants.CENTER:
+                    xt = dx / 2;
+                    break;
+
+                case SwingConstants.RIGHT:
+                    xt = dx;
+                    break;
+            }
+
+            final int dy = height - source.getHeight();
+            switch (yAlign)
+            {
+                default:
+                case SwingConstants.TOP:
+                    yt = 0;
+                    break;
+
+                case SwingConstants.CENTER:
+                    yt = dy / 2;
+                    break;
+
+                case SwingConstants.BOTTOM:
+                    yt = dy;
+                    break;
+            }
+
+            result.setPositionX(source.getPositionX() - xt * source.getPixelSizeX());
+            result.setPositionY(source.getPositionY() - yt * source.getPixelSizeY());
         }
 
         return result;

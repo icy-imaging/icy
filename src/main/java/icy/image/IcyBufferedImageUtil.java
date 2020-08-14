@@ -282,6 +282,7 @@ public class IcyBufferedImageUtil
      *        Can be set to <code>null</code> to avoid value conversion.
      * @return converted image
      */
+    @SuppressWarnings("deprecation")
     public static IcyBufferedImage convertType(IcyBufferedImage source, DataType dataType, Scaler[] scalers)
     {
         if (source == null)
@@ -1163,7 +1164,7 @@ public class IcyBufferedImageUtil
         final ArrayType arrayType = ArrayUtil.getArrayType(input);
         final Object result = ArrayUtil.allocIfNull(output, arrayType, (sizeX / 2) * (sizeY / 2));
 
-        switch (arrayType.getDataType().getJavaType())
+        switch (arrayType.getDataType().getJavaType()) // here no unsigned values should be returned
         {
             case BYTE:
                 downscaleBy2((byte[]) input, sizeX, sizeY, signed, filter, (byte[]) result);
@@ -1184,6 +1185,9 @@ public class IcyBufferedImageUtil
             case DOUBLE:
                 downscaleBy2((double[]) input, sizeX, sizeY, filter, (double[]) result);
                 break;
+            default:
+                throw new UnsupportedOperationException(
+                        "Unsupported data type: " + arrayType.getDataType().getJavaType());
         }
 
         return result;
