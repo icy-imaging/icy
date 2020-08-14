@@ -1596,6 +1596,61 @@ public class ROIUtil
     }
 
     /**
+     * Converts the specified 3D ROI to multiple 2D ROIs by unstacking it along the Z axis.
+     * 
+     * @return the converted 2D ROIs or <code>null</code> if the input ROI was null
+     */
+    public static ROI[] unstack(ROI3D roi)
+    {
+        ROI[] result = null;
+
+        if (roi instanceof ROI3DArea)
+        {
+            ROI3DArea roi3d = ((ROI3DArea) roi);
+            List<ROI> rois2d = new ArrayList<ROI>(roi3d.getSizeZ());
+            int z0 = (int) Math.floor(roi3d.getBounds3D().getZ());
+            for (int z = z0; z < z0 + roi3d.getSizeZ(); z++)
+            {
+                ROI2DArea roi2d = new ROI2DArea(roi3d.getBooleanMask2D(z, true));
+                roi2d.setZ(z);
+                roi2d.setC(roi3d.c);
+                roi2d.setT(roi3d.t);
+                rois2d.add(roi2d);
+            }
+            result = rois2d.toArray(new ROI[rois2d.size()]);
+        }
+        else if (roi != null)
+        {
+            ROI3D roi3d = ((ROI3D) roi);
+            int sizeZ = (int) Math.round(roi3d.getBounds3D().getSizeZ());
+            List<ROI> rois2d = new ArrayList<ROI>(sizeZ);
+            for (int z = (int) Math.floor(roi3d.getBounds3D().getZ()); z < sizeZ; z++)
+            {
+                ROI2DArea roi2d = new ROI2DArea(roi3d.getBooleanMask2D(z, true));
+                roi2d.setZ(z);
+                roi2d.setC(roi3d.c);
+                roi2d.setT(roi3d.t);
+                rois2d.add(roi2d);
+            }
+            result = rois2d.toArray(new ROI[rois2d.size()]);
+        }
+
+        if ((roi != null) && (result != null))
+        {
+            // unselect all control points
+            for (ROI roi2d : result)
+            {
+                roi2d.unselectAllPoints();
+                // keep original ROI informations
+                roi2d.setName(roi.getName());
+                copyROIProperties(roi, roi2d, false);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Converts the specified ROI to a boolean mask type ROI (ROI Area).
      * 
      * @return the ROI Area corresponding to the input ROI.<br>

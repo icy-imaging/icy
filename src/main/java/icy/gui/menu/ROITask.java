@@ -264,6 +264,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
         final IcyButton convertToEllipseButton;
         final IcyButton convertToRectangleButton;
         final IcyButton convertToStackButton;
+        final IcyButton unstackButton;
         final IcyButton convertToMaskButton;
         final IcyButton convertToShapeButton;
 
@@ -282,6 +283,9 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             convertToStackButton = new IcyButton(RoiActions.convertToStackAction);
             convertToStackButton.setHorizontalAlignment(SwingConstants.LEADING);
             convertToStackButton.setFlat(true);
+            unstackButton = new IcyButton(RoiActions.unstackAction);
+            unstackButton.setHorizontalAlignment(SwingConstants.LEADING);
+            unstackButton.setFlat(true);
             convertToMaskButton = new IcyButton(RoiActions.convertToMaskAction);
             convertToMaskButton.setHorizontalAlignment(SwingConstants.LEADING);
             convertToMaskButton.setFlat(true);
@@ -302,6 +306,10 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             JRibbonComponent comp;
 
             comp = new JRibbonComponent(convertToStackButton);
+            comp.setResizingAware(true);
+            comp.setHorizontalAlignment(HorizontalAlignment.FILL);
+            addRibbonComponent(comp);
+            comp = new JRibbonComponent(unstackButton);
             comp.setResizingAware(true);
             comp.setHorizontalAlignment(HorizontalAlignment.FILL);
             addRibbonComponent(comp);
@@ -345,6 +353,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             boolean convertEllipseEnable = false;
             boolean convertRectangleEnable = false;
             boolean convertStackEnable = false;
+            boolean unstackEnable = false;
             boolean convertMaskEnable = false;
             boolean convertShapeEnable = false;
             final Sequence seq = Icy.getMainInterface().getActiveSequence();
@@ -366,6 +375,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
                         convertMaskEnable = true;
                     if (roi instanceof ROI3D)
                     {
+                        unstackEnable = true;
                         if (roi instanceof ROI3DArea)
                             convertShapeEnable = true;
                     }
@@ -378,6 +388,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             convertToRectangleButton.setEnabled(convertRectangleEnable);
             radiusField.setEnabled(convertEllipseEnable || convertRectangleEnable);
             convertToStackButton.setEnabled(convertStackEnable);
+            unstackButton.setEnabled(unstackEnable);
             convertToMaskButton.setEnabled(convertMaskEnable);
             convertToShapeButton.setEnabled(convertShapeEnable);
         }

@@ -1200,6 +1200,74 @@ public class RoiActions
         }
     };
 
+    public static IcyAbstractAction unstackAction = new IcyAbstractAction("to 2D ROIs",
+            new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_V2), "Unstack 3D ROIs",
+            "Convert selected 3D ROIs to multiple 2D ROIs along the Z axis")
+    {
+        private static final long serialVersionUID = 8540151213754012800L;
+
+        @Override
+        protected boolean doAction(ActionEvent e)
+        {
+            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+            if (sequence != null)
+            {
+                // ROI Z stack conversion
+                sequence.beginUpdate();
+                try
+                {
+                    final List<ROI3D> selectedROIs = sequence.getSelectedROI3Ds();
+                    final List<ROI> removedROIs = new ArrayList<ROI>();
+                    final List<ROI> addedROIs = new ArrayList<ROI>();
+
+                    for (ROI3D roi : selectedROIs)
+                    {
+                        final ROI[] unstackedRois = ROIUtil.unstack(roi);
+
+                        if (unstackedRois != null)
+                        {
+                            sequence.removeROI(roi);
+                            // add to undo manager
+                            removedROIs.add(roi);
+                            for (ROI roi2d : unstackedRois)
+                            {
+                                // select it by default
+                                roi2d.setSelected(true);
+
+                                sequence.addROI(roi2d);
+                                // add to undo manager
+                                addedROIs.add(roi2d);
+                            }
+                        }
+                    }
+
+                    if (!addedROIs.isEmpty())
+                        sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
+                                (addedROIs.size() > 1) ? "3D ROIs unstack conversion" : "3D ROI unstack conversion"));
+                }
+                catch (UnsupportedOperationException ex)
+                {
+                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                }
+                finally
+                {
+                    sequence.endUpdate();
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        @Override
+        public boolean isEnabled()
+        {
+            return super.isEnabled() && (Icy.getMainInterface().getActiveSequence() != null);
+        }
+    };
+
     public static IcyAbstractAction convertToMaskAction = new IcyAbstractAction("to Mask",
             new IcyIcon(ResourceUtil.ICON_BOOL_MASK), "Convert Shape ROI to Mask ROI",
             "Convert selected Shape ROI to Mask ROI by using their boolean mask")
