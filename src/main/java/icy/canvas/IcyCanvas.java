@@ -3983,6 +3983,9 @@ public abstract class IcyCanvas extends JPanel
                         }
                     }
                 }
+                result.setPixelSizeX(seqIn.getPixelSizeX() / (canvasView ? getScaleX() : 1d));
+                result.setPixelSizeY(seqIn.getPixelSizeY() / (canvasView ? getScaleY() : 1d));
+                result.setPixelSizeZ(seqIn.getPixelSizeZ() / (canvasView ? getScaleZ() : 1d));
             }
             finally
             {

@@ -18,6 +18,34 @@
  */
 package icy.gui.inspector;
 
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.jdesktop.swingx.table.ColumnControlButton;
+import org.jdesktop.swingx.table.TableColumnExt;
+
 import icy.action.CanvasActions;
 import icy.canvas.CanvasLayerEvent;
 import icy.canvas.CanvasLayerListener;
@@ -31,36 +59,16 @@ import icy.gui.main.ActiveViewerListener;
 import icy.gui.viewer.Viewer;
 import icy.gui.viewer.ViewerEvent;
 import icy.gui.viewer.ViewerEvent.ViewerEventType;
+import icy.resource.ResourceUtil;
+import icy.resource.icon.IcyIcon;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
-
-import java.awt.BorderLayout;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
-
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
-import org.jdesktop.swingx.table.ColumnControlButton;
-import org.jdesktop.swingx.table.TableColumnExt;
 
 /**
  * @author Stephane
  */
-public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasLayerListener, TextChangeListener,
-        ListSelectionListener
+public class LayersPanel extends JPanel
+        implements ActiveViewerListener, CanvasLayerListener, TextChangeListener, ListSelectionListener
 {
     private class CanvasRefresher implements Runnable
     {
@@ -107,6 +115,8 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
     ListSelectionModel tableSelectionModel;
     JXTable table;
     IcyTextField nameFilter;
+    JToggleButton tglbtnLayerVisibility;
+    ActionListener visibilityToggleActionListener;
     LayerControlPanel controlPanel;
 
     // internals
@@ -157,6 +167,10 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
 
         // build GUI
         initialize();
+
+        // add show/hide listener
+        initVisibilityToggleListener();
+        tglbtnLayerVisibility.addActionListener(visibilityToggleActionListener);
 
         // build table
         tableModel = new AbstractTableModel()
@@ -229,6 +243,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
                         case 1:
                             // layer visibility
                             layer.setVisible(((Boolean) value).booleanValue());
+                            setToggleButtonState(((Boolean) value).booleanValue());
                             break;
                     }
                 }
@@ -315,9 +330,30 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
 
     private void initialize()
     {
+        JPanel panelNorth = new JPanel();
+        GridBagLayout gbl_panelNorth = new GridBagLayout();
+        gbl_panelNorth.columnWidths = new int[] {46, 22, 0};
+        gbl_panelNorth.rowHeights = new int[] {23, 0};
+        gbl_panelNorth.columnWeights = new double[] {1.0, 0.0, Double.MIN_VALUE};
+        gbl_panelNorth.rowWeights = new double[] {0.0, Double.MIN_VALUE};
+        panelNorth.setLayout(gbl_panelNorth);
+
         nameFilter = new IcyTextField();
         nameFilter.setToolTipText("Enter a string sequence to filter Layer on name");
         nameFilter.addTextChangeListener(this);
+        GridBagConstraints gbc_nameFilter = new GridBagConstraints();
+        gbc_nameFilter.fill = GridBagConstraints.HORIZONTAL;
+        gbc_nameFilter.insets = new Insets(0, 0, 0, 5);
+        gbc_nameFilter.gridx = 0;
+        gbc_nameFilter.gridy = 0;
+        panelNorth.add(nameFilter, gbc_nameFilter);
+
+        tglbtnLayerVisibility = new JToggleButton();
+        GridBagConstraints gbc_tglbtnLayerVisibility = new GridBagConstraints();
+        gbc_tglbtnLayerVisibility.anchor = GridBagConstraints.WEST;
+        gbc_tglbtnLayerVisibility.gridx = 1;
+        gbc_tglbtnLayerVisibility.gridy = 0;
+        panelNorth.add(tglbtnLayerVisibility, gbc_tglbtnLayerVisibility);
 
         table = new JXTable();
         table.setAutoStartEditOnKeyStroke(false);
@@ -331,12 +367,28 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
         controlPanel = new LayerControlPanel(this);
 
         setLayout(new BorderLayout(0, 0));
-        add(nameFilter, BorderLayout.NORTH);
+        add(panelNorth, BorderLayout.NORTH);
         add(new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
         add(controlPanel, BorderLayout.SOUTH);
 
         validate();
+    }
+
+    private void initVisibilityToggleListener()
+    {
+        visibilityToggleActionListener = new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                boolean visibilityValue = tglbtnLayerVisibility.isSelected();
+                for (Layer l : getSelectedLayers())
+                {
+                    l.setVisible(visibilityValue);
+                }
+            }
+        };
     }
 
     void buildActionMap()
@@ -481,13 +533,20 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
 
             if (newSelected != null)
             {
+                boolean allHidden = newSelected.size() > 0;
                 for (Layer layer : newSelected)
                 {
                     final int index = getLayerTableIndex(layer);
 
                     if (index > -1)
+                    {
                         tableSelectionModel.addSelectionInterval(index, index);
+                        allHidden = allHidden && !layer.isVisible();
+                    }
                 }
+
+                setToggleButtonState(!allHidden);
+
             }
         }
         finally
@@ -497,6 +556,19 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
 
         // notify selection changed
         selectionChanged();
+    }
+
+    private IcyIcon visibleIcon = new IcyIcon(ResourceUtil.ICON_VISIBLE, 15);
+    private IcyIcon notVisibleIcon = new IcyIcon(ResourceUtil.ICON_NOT_VISIBLE, 15);
+
+    private void setToggleButtonState(boolean active)
+    {
+        if (active)
+            tglbtnLayerVisibility.setIcon(visibleIcon);
+        else
+            tglbtnLayerVisibility.setIcon(notVisibleIcon);
+        
+        tglbtnLayerVisibility.setSelected(active);
     }
 
     List<Layer> filterList(List<Layer> list, String nameFilterText)
@@ -575,6 +647,18 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
      */
     protected void selectionChanged()
     {
+        ArrayList<Layer> newSelected = getSelectedLayers();
+        boolean allHidden = newSelected.size() > 0;
+        for (Layer layer : newSelected)
+        {
+            final int index = getLayerTableIndex(layer);
+            if (index > -1)
+            {
+                allHidden = allHidden && !layer.isVisible();
+            }
+        }
+
+        setToggleButtonState(!allHidden);
         // refresh control panel
         ThreadUtil.runSingle(controlPanelRefresher);
     }

@@ -141,6 +141,7 @@ public class ResourceUtil
     public static final Image ICON_LAYER_ADD_V = ResourceUtil.getAlphaIconAsImage("layers_add_v.png");
     public static final Image ICON_LAYER_INSERT_V = ResourceUtil.getAlphaIconAsImage("layers_insert_v.png");
     public static final Image ICON_LAYER_REMOVE_V = ResourceUtil.getAlphaIconAsImage("layers_remove_v.png");
+    public static final Image ICON_LAYER_REMOVE_V2 = ResourceUtil.getAlphaIconAsImage("layers_remove_v2.png");
     public static final Image ICON_LAYER_REMOVE_ADV_V = ResourceUtil.getAlphaIconAsImage("layers_remove_adv_v.png");
     public static final Image ICON_LAYER_ADJUST_HV = ResourceUtil.getAlphaIconAsImage("layers_adjust_hv.png");
 
