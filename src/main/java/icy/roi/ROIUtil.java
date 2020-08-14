@@ -85,6 +85,7 @@ import plugins.kernel.roi.roi2d.ROI2DShape;
 import plugins.kernel.roi.roi3d.ROI3DArea;
 import plugins.kernel.roi.roi3d.ROI3DPoint;
 import plugins.kernel.roi.roi3d.ROI3DShape;
+import plugins.kernel.roi.roi3d.ROI3DStack;
 import plugins.kernel.roi.roi3d.ROI3DStackEllipse;
 import plugins.kernel.roi.roi3d.ROI3DStackPolygon;
 import plugins.kernel.roi.roi3d.ROI3DStackRectangle;
@@ -1604,7 +1605,36 @@ public class ROIUtil
     {
         ROI[] result = null;
 
-        if (roi instanceof ROI3DArea)
+        if (roi instanceof ROI3DPoint)
+        {
+            ROI3DPoint roi3d = ((ROI3DPoint) roi);
+            Point3D position = roi3d.getPosition3D();
+            ROI2DPoint roi2d = new ROI2DPoint(position.getX(), position.getY());
+            roi2d.c = roi3d.c;
+            roi2d.t = roi3d.t;
+            roi2d.z = (int) Math.round(position.getZ());
+            result = new ROI[] {roi2d};
+        }
+        else if (roi instanceof ROI3DStack)
+        {
+            ROI3DStack<?> roi3d = ((ROI3DStack<?>) roi);
+            List<ROI> rois2d = new ArrayList<ROI>(roi3d.getSizeZ());
+            int z0 = (int) Math.floor(roi3d.getBounds3D().getZ());
+            for (int z = z0; z < z0 + roi3d.getSizeZ(); z++)
+            {
+                ROI2D roi2d = roi3d.getSlice(z);
+                if (roi2d != null)
+                {
+                    roi2d = (ROI2D) roi2d.getCopy();
+                    roi2d.setZ(z);
+                    roi2d.setC(roi3d.c);
+                    roi2d.setT(roi3d.t);
+                    rois2d.add(roi2d);
+                }
+            }
+            result = rois2d.toArray(new ROI[rois2d.size()]);
+        }
+        else if (roi instanceof ROI3DArea)
         {
             ROI3DArea roi3d = ((ROI3DArea) roi);
             List<ROI> rois2d = new ArrayList<ROI>(roi3d.getSizeZ());
@@ -1624,13 +1654,17 @@ public class ROIUtil
             ROI3D roi3d = ((ROI3D) roi);
             int sizeZ = (int) Math.round(roi3d.getBounds3D().getSizeZ());
             List<ROI> rois2d = new ArrayList<ROI>(sizeZ);
-            for (int z = (int) Math.floor(roi3d.getBounds3D().getZ()); z < sizeZ; z++)
+            for (int z = (int) Math.floor(roi3d.getBounds3D().getZ()); z <= sizeZ; z++)
             {
-                ROI2DArea roi2d = new ROI2DArea(roi3d.getBooleanMask2D(z, true));
-                roi2d.setZ(z);
-                roi2d.setC(roi3d.c);
-                roi2d.setT(roi3d.t);
-                rois2d.add(roi2d);
+                BooleanMask2D mask2d = roi3d.getBooleanMask2D(z, true);
+                if (mask2d != null)
+                {
+                    ROI2DArea roi2d = new ROI2DArea(mask2d);
+                    roi2d.setZ(z);
+                    roi2d.setC(roi3d.c);
+                    roi2d.setT(roi3d.t);
+                    rois2d.add(roi2d);
+                }
             }
             result = rois2d.toArray(new ROI[rois2d.size()]);
         }
