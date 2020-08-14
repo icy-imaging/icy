@@ -162,13 +162,40 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <outputDirectory>build/icy</outputDirectory>
                     <archive>
                         <manifest>
                             <mainClass>icy.updater.Main</mainClass>
                         </manifest>
+                        <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>${project.packaging}</type>
+                                    <outputDirectory>build/icy</outputDirectory>
+                                    <destFileName>updater.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -180,31 +207,62 @@
             <version>2.1.0-SNAPSHOT</version>
             <optional>true</optional>
         </dependency>
+
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-bioformats</artifactId>
+            <version>6.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-insubstantial</artifactId>
+            <version>7.3.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-vtk</artifactId>
+            <version>6.3.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.media</groupId>
+            <artifactId>jai-core</artifactId>
+            <version>1.1.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.imagej</groupId>
+            <artifactId>ij</artifactId>
+            <version>1.52q</version>
+        </dependency>
+
     </dependencies>
-    
+
     <repositories>
+        <repository>
+            <id>jai-repo</id>
+            <url>http://maven.geomajas.org/</url>
+        </repository>
+        <repository>
+            <id>icy-prod</id>
+            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+        </repository>
         <repository>
             <id>icy-dev</id>
             <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
         </repository>
-        <repository>
-            <id>icy-release</id>
-            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
-        </repository>
-        <!-- <repository> -->
-        <!-- <id>icy-release-pasteur</id> -->
-        <!-- <url>https://nexus.pasteur.fr/repository/icy-release/</url> -->
-        <!-- </repository> -->
     </repositories>
 
-    <!-- <distributionManagement> -->
-    <!-- <snapshotRepository> -->
-    <!-- <id>nexus-snapshots</id> -->
-    <!-- <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url> -->
-    <!-- </snapshotRepository> -->
-    <!-- <repository> -->
-    <!-- <id>nexus-releases</id> -->
-    <!-- <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url> -->
-    <!-- </repository> -->
-    <!-- </distributionManagement> -->
+    <distributionManagement>
+        <snapshotRepository>
+            <id>icy-dev</id>
+            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
+        </snapshotRepository>
+        <repository>
+            <id>icy-prod</id>
+            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+        </repository>
+    </distributionManagement>
 </project>
