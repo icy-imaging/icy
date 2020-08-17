@@ -39,6 +39,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
+import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
@@ -56,7 +57,9 @@ import icy.gui.component.button.ColorChooserButton;
 import icy.gui.component.button.ColorChooserButton.ColorChangeListener;
 import icy.gui.component.model.SpecialValueSpinnerModel;
 import icy.main.Icy;
+import icy.resource.icon.IcyIcon;
 import icy.math.MathUtil;
+import icy.resource.ResourceUtil;
 import icy.roi.ROI;
 import icy.roi.ROIEvent;
 import icy.roi.edit.BoundsROIEdit;
@@ -69,6 +72,7 @@ import icy.system.thread.ThreadUtil;
 import icy.type.point.Point5D;
 import icy.type.rectangle.Rectangle5D;
 import icy.util.StringUtil;
+import java.awt.Component;
 
 /**
  * @author Stephane
@@ -104,6 +108,7 @@ public class RoiControlPanel extends JPanel
     ColorChooserButton colorButton;
     JSlider alphaSlider;
     JSpinner strokeSpinner;
+    JToggleButton readOnlyToggle;
     JCheckBox displayNameCheckBox;
     JButton setAsDefaultBtn;
 
@@ -145,6 +150,7 @@ public class RoiControlPanel extends JPanel
         colorButton.addColorChangeListener(this);
         strokeSpinner.addChangeListener(this);
         alphaSlider.addChangeListener(this);
+        readOnlyToggle.addActionListener(this);
         displayNameCheckBox.addActionListener(this);
 
         posXField.addTextChangeListener(this);
@@ -234,6 +240,8 @@ public class RoiControlPanel extends JPanel
         strokeSpinner = new JSpinner();
         strokeSpinner.setToolTipText("ROI stroke size (for visualization only)");
         strokeSpinner.setModel(new SpinnerNumberModel(1.0, 1.0, 9.0, 1.0));
+        strokeSpinner.setMinimumSize(new Dimension(50, 20));
+        strokeSpinner.setPreferredSize(new Dimension(50, 20));
         GridBagConstraints gbc_strokeSpinner = new GridBagConstraints();
         gbc_strokeSpinner.fill = GridBagConstraints.HORIZONTAL;
         gbc_strokeSpinner.insets = new Insets(0, 0, 0, 5);
@@ -241,16 +249,29 @@ public class RoiControlPanel extends JPanel
         gbc_strokeSpinner.gridy = 1;
         actionPanel.add(strokeSpinner, gbc_strokeSpinner);
 
+        readOnlyToggle = new JToggleButton(new IcyIcon(ResourceUtil.ICON_LOCK_CLOSE));
+        readOnlyToggle.setIconTextGap(0);
+        readOnlyToggle.setMaximumSize(new Dimension(29, 29));
+        readOnlyToggle.setMinimumSize(new Dimension(29, 29));
+        readOnlyToggle.setPreferredSize(new Dimension(29, 29));
+        readOnlyToggle.setSelected(true);
+        readOnlyToggle.setToolTipText("Enable/Disable editing ROI properties");
+        GridBagConstraints gbc_readOnlyToggle = new GridBagConstraints();
+        gbc_readOnlyToggle.insets = new Insets(0, 0, 0, 5);
+        gbc_readOnlyToggle.gridwidth = 1;
+        gbc_readOnlyToggle.gridx = 2;
+        gbc_readOnlyToggle.gridy = 1;
+        actionPanel.add(readOnlyToggle, gbc_readOnlyToggle);
+
         displayNameCheckBox = new JCheckBox("Show name");
         displayNameCheckBox.setToolTipText("Show the ROI name");
         displayNameCheckBox.setMargin(new Insets(2, 0, 2, 2));
         displayNameCheckBox.setIconTextGap(10);
         displayNameCheckBox.setHorizontalTextPosition(SwingConstants.LEADING);
         GridBagConstraints gbc_displayNameCheckBox = new GridBagConstraints();
-        gbc_displayNameCheckBox.anchor = GridBagConstraints.WEST;
         gbc_displayNameCheckBox.insets = new Insets(0, 0, 0, 5);
-        gbc_displayNameCheckBox.gridwidth = 2;
-        gbc_displayNameCheckBox.gridx = 2;
+        gbc_displayNameCheckBox.gridwidth = 1;
+        gbc_displayNameCheckBox.gridx = 3;
         gbc_displayNameCheckBox.gridy = 1;
         actionPanel.add(displayNameCheckBox, gbc_displayNameCheckBox);
 
@@ -731,14 +752,32 @@ public class RoiControlPanel extends JPanel
                     posCSpinnerLabel.setVisible(true);
                 }
 
-                colorButton.setEnabled(hasSelected && editable);
-                strokeSpinner.setEnabled(hasSelected && editable);
+                colorButton.setEnabled(hasSelected);
+                strokeSpinner.setEnabled(hasSelected);
                 alphaSlider.setEnabled(hasSelected);
+                readOnlyToggle.setEnabled(hasSelected);
+                readOnlyToggle.setSelected(!editable);
+                updateReadOnlyButtonState();
                 displayNameCheckBox.setEnabled(hasSelected);
 
                 setAsDefaultBtn.setEnabled(hasSelected);
             }
         });
+    }
+
+    IcyIcon icon_locked = new IcyIcon(ResourceUtil.ICON_LOCK_CLOSE);
+    IcyIcon icon_unlocked = new IcyIcon(ResourceUtil.ICON_LOCK_OPEN);
+
+    private void updateReadOnlyButtonState()
+    {
+        if (readOnlyToggle.isSelected())
+        {
+            readOnlyToggle.setIcon(icon_locked);
+        }
+        else
+        {
+            readOnlyToggle.setIcon(icon_unlocked);
+        }
     }
 
     /**
@@ -1134,7 +1173,7 @@ public class RoiControlPanel extends JPanel
         if (!modifyingRoi.tryAcquire())
             return;
 
-        final List<ROI> rois = getSelectedRois(false);
+        final List<ROI> rois = getSelectedRois();
         final List<Object> oldValues = new ArrayList<Object>();
         final Color color = source.getColor();
 
@@ -1182,7 +1221,7 @@ public class RoiControlPanel extends JPanel
         {
             if (source == strokeSpinner)
             {
-                final List<ROI> rois = getSelectedRois(false);
+                final List<ROI> rois = getSelectedRois();
                 final List<Object> oldValues = new ArrayList<Object>();
                 final double stroke = ((Double) strokeSpinner.getValue()).doubleValue();
 
@@ -1207,7 +1246,7 @@ public class RoiControlPanel extends JPanel
             }
             else if (source == alphaSlider)
             {
-                final List<ROI> rois = getSelectedRois(true);
+                final List<ROI> rois = getSelectedRois();
                 final List<Object> oldValues = new ArrayList<Object>();
                 final float opacity = alphaSlider.getValue() / 100f;
 
@@ -1373,14 +1412,31 @@ public class RoiControlPanel extends JPanel
 
         try
         {
-            if (source == displayNameCheckBox)
+            if (source == readOnlyToggle)
+            {
+                for (ROI roi : getSelectedRois())
+                {
+                    roi.setReadOnly(readOnlyToggle.isSelected());
+                    roi.setSelected(true);
+                }
+
+                if (readOnlyToggle.isSelected())
+                {
+                    readOnlyToggle.setIcon(icon_locked);
+                }
+                else
+                {
+                    readOnlyToggle.setIcon(icon_unlocked);
+                }
+            }
+            else if (source == displayNameCheckBox)
             {
                 sequence.beginUpdate();
                 try
                 {
                     final boolean display = displayNameCheckBox.isSelected();
 
-                    for (ROI roi : getSelectedRois(false))
+                    for (ROI roi : getSelectedRois())
                         roi.setShowName(display);
                 }
                 finally
@@ -1437,6 +1493,9 @@ public class RoiControlPanel extends JPanel
 
             case SELECTION_CHANGED:
                 // handle externally with the setSelectedROI() method
+                break;
+
+            default:
                 break;
         }
     }
