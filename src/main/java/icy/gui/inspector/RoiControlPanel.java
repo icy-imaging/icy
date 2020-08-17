@@ -57,9 +57,9 @@ import icy.gui.component.button.ColorChooserButton;
 import icy.gui.component.button.ColorChooserButton.ColorChangeListener;
 import icy.gui.component.model.SpecialValueSpinnerModel;
 import icy.main.Icy;
-import icy.resource.icon.IcyIcon;
 import icy.math.MathUtil;
 import icy.resource.ResourceUtil;
+import icy.resource.icon.IcyIcon;
 import icy.roi.ROI;
 import icy.roi.ROIEvent;
 import icy.roi.edit.BoundsROIEdit;
@@ -72,7 +72,6 @@ import icy.system.thread.ThreadUtil;
 import icy.type.point.Point5D;
 import icy.type.rectangle.Rectangle5D;
 import icy.util.StringUtil;
-import java.awt.Component;
 
 /**
  * @author Stephane

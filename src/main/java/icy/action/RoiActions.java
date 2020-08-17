@@ -527,7 +527,7 @@ public class RoiActions
 
             if (sequence != null)
             {
-                sequence.removeSelectedROIs(false, true);
+                sequence.removeSelectedROIs(true, true);
                 return true;
             }
 
