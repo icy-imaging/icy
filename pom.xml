@@ -6,7 +6,7 @@
 
     <groupId>org.bioimageanalysis.icy</groupId>
     <artifactId>icy-kernel</artifactId>
-    <version>2.1.0</version>
+    <version>2.1.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
 
@@ -73,12 +73,10 @@
         <outputDirectory>${project.build.directory}</outputDirectory>
 
         <stripVersion>true</stripVersion>
-        <overWriteTrue>true</overWriteTrue>
-        <overWriteFalse>true</overWriteFalse>
 
-        <overWriteReleases>true</overWriteReleases>
         <overWriteIfNewer>true</overWriteIfNewer>
-        <overWriteSnapshots>false</overWriteSnapshots>
+        <overWriteSnapshots>true</overWriteSnapshots>
+        <overWriteReleases>true</overWriteReleases>
     </properties>
 
     <build>
@@ -135,6 +133,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -149,8 +148,6 @@
                             <excludeGroupIds>com.sun,sun.jdt,jdk.tools,net.imagej</excludeGroupIds>
                             <outputDirectory>${outputDirectory}/icy/lib</outputDirectory>
                             <stripVersion>${stripVersion}</stripVersion>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <excludeTransitive>true</excludeTransitive>
                         </configuration>
@@ -166,8 +163,6 @@
                             <includeArtifactIds>ij</includeArtifactIds>
                             <outputDirectory>${outputDirectory}/icy/ij</outputDirectory>
                             <stripVersion>${stripVersion}</stripVersion>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <excludeTransitive>true</excludeTransitive>
                         </configuration>
@@ -193,8 +188,8 @@
                         </configuration>
                     </execution>
                 </executions>
-
             </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -361,10 +356,16 @@
         <repository>
             <id>icy-prod</id>
             <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
         </repository>
         <repository>
             <id>icy-dev</id>
             <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
