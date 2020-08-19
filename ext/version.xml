@@ -15,29 +15,26 @@
 					<localpath>icy</localpath>
 				</file>
 				<file>
-					<localpath>osx-appfix</localpath>
+					<localpath>CHANGELOG</localpath>
 				</file>
 				<file>
-					<localpath>colormap/ametrine.xml</localpath>
+					<localpath>LICENSE</localpath>
 				</file>
 				<file>
-					<localpath>colormap/isolum.xml</localpath>
+					<localpath>README.md</localpath>
 				</file>
-				<file>
-					<localpath>colormap/morgenstemning.xml</localpath>
-				</file>
-				<file>
-					<localpath>colormap/parula.xml</localpath>
-				</file>
-				<file>
-					<localpath>CHANGELOG.txt</localpath>
-				</file>
-				<file>
-					<localpath>COPYING.txt</localpath>
-				</file>
-				<file>
-					<localpath>README.txt</localpath>
-				</file>
+                <file>
+                    <localpath>colormap/ametrine.xml</localpath>
+                </file>
+                <file>
+                    <localpath>colormap/isolum.xml</localpath>
+                </file>
+                <file>
+                    <localpath>colormap/morgenstemning.xml</localpath>
+                </file>
+                <file>
+                    <localpath>colormap/parula.xml</localpath>
+                </file>
 			</files>
 		</element>
 		<element>
@@ -67,9 +64,51 @@
 				</file>
 			</files>
 		</element>
+        <element>
+            <name>Bio Formats</name>
+            <version>6.3.1.0</version>
+            <files>
+                <file>
+                    <localpath>lib/icy-bioformats.jar</localpath>
+                </file>
+            </files>
+        </element>
+        <element>
+            <name>EHCache</name>
+            <version>2.10.6.0</version>
+            <files>
+                <file>
+                    <localpath>lib/ehcache.jar</localpath>
+                </file>
+            </files>
+        </element>
+        <element>
+            <name>GlueGen</name>
+            <version>2.1.5.0</version>
+            <files>
+                <file>
+                    <localpath>lib/gluegen-rt.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/gluegen-rt-natives-linux-amd64.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/gluegen-rt-natives-linux-i586.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/gluegen-rt-natives-macosx-universal.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/gluegen-rt-natives-windows-amd64.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/gluegen-rt-natives-windows-i586.jar</localpath>
+                </file>             
+            </files>
+        </element>
 		<element>
 			<name>ImageJ</name>
-			<version>1.5.1.18</version>
+			<version>1.5.2.17</version>
 			<files>
 				<file>
 					<localpath>ij/ij.jar</localpath>
@@ -77,29 +116,62 @@
 			</files>
 		</element>
 		<element>
-			<name>EHCache</name>
-			<version>2.10.5.0</version>
-			<files>
-				<file>
-					<localpath>lib/ehcache.jar</localpath>
-				</file>
-			</files>
-		</element>
-		<element>
 			<name>JAI</name>
 			<version>1.1.3.0</version>
 			<files>
+                <file>
+                    <localpath>lib/jai_codec.jar</localpath>
+                </file>
 				<file>
 					<localpath>lib/jai_core.jar</localpath>
 				</file>
-				<file>
-					<localpath>lib/jai_codec.jar</localpath>
-				</file>
 			</files>
 		</element>
+        <element>
+            <name>Javassist</name>
+            <version>3.22.0.2</version>
+            <files>
+                <file>
+                    <localpath>lib/javassist.jar</localpath>
+                </file>
+            </files>
+        </element>
+        <element>
+            <name>Jogl</name>
+            <version>2.1.5.0</version>
+            <files>
+                <file>
+                    <localpath>lib/jogl-all.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/jogl-all-natives-linux-amd64.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/jogl-all-natives-linux-i586.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/jogl-all-natives-macosx-universal.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/jogl-all-natives-windows-amd64.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/jogl-all-natives-windows-i586.jar</localpath>
+                </file>             
+            </files>
+        </element>
+        <element>
+            <name>JXL</name>
+            <version>2.6.12.0</version>
+            <files>
+                <file>
+                    <localpath>lib/jxl.jar</localpath>
+                </file>
+            </files>
+        </element>
 		<element>
 			<name>SwingX</name>
-			<version>1.6.4.0</version>
+			<version>1.6.5.1</version>
 			<files>
 				<file>
 					<localpath>lib/swingx-all.jar</localpath>
@@ -111,121 +183,7 @@
 			<version>7.3.8.0</version>
 			<files>
 				<file>
-					<localpath>lib/trident.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/flamingo.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/substance.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/laf-plugin.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/laf-widget.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/substance-flamingo.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/substance-swingx.jar</localpath>
-				</file>
-			</files>
-		</element>
- 		<element>
-			<name>Javassist</name>
-			<version>3.22.0.2</version>
-			<files>
-				<file>
-					<localpath>lib/javassist.jar</localpath>
-				</file>
-			</files>
-		</element>
-		<element>
-			<name>JogAmp</name>
-			<version>2.1.5.0</version>
-			<files>
-				<file>
-					<localpath>lib/gluegen-rt.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/gluegen-rt-natives-linux-amd64.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/gluegen-rt-natives-linux-i586.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/gluegen-rt-natives-macosx-universal.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/gluegen-rt-natives-windows-amd64.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/gluegen-rt-natives-windows-i586.jar</localpath>
-				</file>				
-				<file>
-					<localpath>lib/joal.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/joal-natives-linux-amd64.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/joal-natives-linux-i586.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/joal-natives-macosx-universal.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/joal-natives-windows-amd64.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/joal-natives-windows-i586.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jocl.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jocl-natives-linux-amd64.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jocl-natives-linux-i586.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jocl-natives-macosx-universal.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jocl-natives-windows-amd64.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jocl-natives-windows-i586.jar</localpath>
-				</file>				
-				<file>
-					<localpath>lib/jogl-all.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jogl-all-natives-linux-amd64.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jogl-all-natives-linux-i586.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jogl-all-natives-macosx-universal.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jogl-all-natives-windows-amd64.jar</localpath>
-				</file>
-				<file>
-					<localpath>lib/jogl-all-natives-windows-i586.jar</localpath>
-				</file>				
-			</files>
-		</element>
-		<element>
-			<name>Bio Formats</name>
-			<version>6.3.1.0</version>
-			<files>
-				<file>
-					<localpath>lib/icy-bioformats.jar</localpath>
+					<localpath>lib/icy-insubstantial.jar</localpath>
 				</file>
 			</files>
 		</element>
@@ -235,7 +193,7 @@
 			<changeslog />
 			<files>
 				<file>
-					<localpath>lib/vtk.jar</localpath>
+					<localpath>lib/icy-vtk.jar</localpath>
 				</file>
 				<file>
 					<localpath>lib/mac64/vtk</localpath>
