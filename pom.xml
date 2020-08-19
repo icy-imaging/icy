@@ -229,7 +229,7 @@
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-insubstantial</artifactId>
-            <version>7.3.7</version>
+            <version>7.3.8</version>
         </dependency>
 
         <dependency>
