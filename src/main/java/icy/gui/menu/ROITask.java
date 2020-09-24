@@ -551,6 +551,10 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             distanceComponent.setResizingAware(true);
             distanceComponent.setHorizontalAlignment(HorizontalAlignment.FILL);
             addRibbonComponent(distanceComponent);
+            computeDistanceMapButton.setEnabled(false);
+            computeWatershedButton.setEnabled(false);
+            dilateButton.setEnabled(false);
+            erodeButton.setEnabled(false);
 
             setToolTipText("Morphological tools for ROIs");
             RibbonUtil.setRestrictiveResizePolicies(this);
