@@ -229,7 +229,7 @@ public class ImageUtil
      */
     public static BufferedImage load(File file)
     {
-        return loadImage(file, true);
+        return load(file, true);
     }
 
     /**
