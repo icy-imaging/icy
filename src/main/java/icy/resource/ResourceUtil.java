@@ -25,10 +25,12 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import icy.image.ImageUtil;
 import icy.resource.icon.IcyIcon;
+import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 
 /**
@@ -332,14 +334,23 @@ public class ResourceUtil
         final URL url = ResourceUtil.class.getResource("/" + IMAGE_PATH + name);
 
         Image result = null;
-        int retry = 3;
 
+        if (url != null)
+            result = ImageUtil.load(url, false);
+        else
+            result = ImageUtil.load(new File(IMAGE_PATH + name), false);
+
+        // FIXME: we do that as in very rare occasion ImageIO.read(..) throw a NPE (inflater has been closed) 
+        // I admit this is an ugly fix but it works eventually.. 
+        int retry = 3;
         while ((result == null) && (retry-- > 0))
         {
+            ThreadUtil.sleep(1);
+
             if (url != null)
-                result = ImageUtil.load(url, true);
+                result = ImageUtil.load(url, false);
             else
-                result = ImageUtil.load(new File(IMAGE_PATH + name), true);
+                result = ImageUtil.load(new File(IMAGE_PATH + name), false);
         }
 
         if (result == null)
@@ -388,14 +399,23 @@ public class ResourceUtil
         final URL url = ResourceUtil.class.getResource("/" + ICON_PATH + name);
 
         Image result = null;
-        int retry = 3;
 
+        if (url != null)
+            result = ImageUtil.load(url, false);
+        else
+            result = ImageUtil.load(new File(ICON_PATH + name), false);
+
+        // FIXME: we do that as in very rare occasion ImageIO.read(..) throw a NPE (inflater has been closed) 
+        // I admit this is an ugly fix but it works eventually.. 
+        int retry = 3;
         while ((result == null) && (retry-- > 0))
         {
+            ThreadUtil.sleep(1);
+
             if (url != null)
-                result = ImageUtil.load(url, true);
+                result = ImageUtil.load(url, false);
             else
-                result = ImageUtil.load(new File(ICON_PATH + name), true);
+                result = ImageUtil.load(new File(ICON_PATH + name), false);
         }
 
         if (result == null)
