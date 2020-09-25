@@ -329,19 +329,18 @@ public class ResourceUtil
      */
     public static Image getImage(String name)
     {
-        final Image result;
         final URL url = ResourceUtil.class.getResource("/" + IMAGE_PATH + name);
 
-        // TODO: this actually return the image asynchronously, check it does not bring problems
-        // if (url != null)
-        // result = ImageUtil.loadAsync(url);
-        // else
-        // result = ImageUtil.loadAsync(ICON_PATH + name);
+        Image result = null;
+        int retry = 3;
 
-        if (url != null)
-            result = ImageUtil.load(url, true);
-        else
-            result = ImageUtil.load(new File(IMAGE_PATH + name), true);
+        while ((result == null) && (retry-- > 0))
+        {
+            if (url != null)
+                result = ImageUtil.load(url, true);
+            else
+                result = ImageUtil.load(new File(IMAGE_PATH + name), true);
+        }
 
         if (result == null)
         {
@@ -386,28 +385,26 @@ public class ResourceUtil
      */
     public static Image getIconAsImage(String name, int size)
     {
-        final Image image;
-
         final URL url = ResourceUtil.class.getResource("/" + ICON_PATH + name);
 
-        // TODO: this actually return the image asynchronously, check it does not bring problems
-        // if (url != null)
-        // image = ImageUtil.loadAsync(url);
-        // else
-        // image = ImageUtil.loadAsync(ICON_PATH + name);
+        Image result = null;
+        int retry = 3;
 
-        if (url != null)
-            image = ImageUtil.load(url, true);
-        else
-            image = ImageUtil.load(new File(ICON_PATH + name), true);
+        while ((result == null) && (retry-- > 0))
+        {
+            if (url != null)
+                result = ImageUtil.load(url, true);
+            else
+                result = ImageUtil.load(new File(ICON_PATH + name), true);
+        }
 
-        if (image == null)
+        if (result == null)
         {
             System.out.println("Resource name can't be found: " + name);
             return null;
         }
 
-        return scaleImage(image, size);
+        return scaleImage(result, size);
     }
 
     /**
