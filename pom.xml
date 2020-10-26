@@ -63,15 +63,34 @@
         <url>https://gitlab.pasteur.fr/bia/icy/issues</url>
     </issueManagement>
 
+    <scm>
+        <connection>scm:git:https://gitlab.pasteur.fr/bia/icy.git</connection>
+        <url>https://gitlab.pasteur.fr/bia/icy.git</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <properties>
+        <!-- Project Information -->
         <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
         <jdk.version>1.8</jdk.version>
 
+        <!-- Compile information -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <outputDirectory>${project.build.directory}</outputDirectory>
+        <!-- Icy JAR output path -->
+        <outputJar>${project.build.directory}</outputJar>
 
+        <!-- Maven Plugins version -->
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
+        <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
+        <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+
+        <!-- Maven plugin properties -->
+        <maven-source-plugin.includePom>true</maven-source-plugin.includePom>
         <stripVersion>true</stripVersion>
 
         <overWriteIfNewer>true</overWriteIfNewer>
@@ -83,18 +102,12 @@
         <defaultGoal>install</defaultGoal>
         <directory>build</directory>
         <finalName>${project.artifactId}-${project.version}</finalName>
-        <!-- <sourceDirectory>src/main/java</sourceDirectory> -->
-        <!-- <resources> -->
-        <!-- <resource> -->
-        <!-- <directory>src/main/resources</directory> -->
-        <!-- </resource> -->
-        <!-- </resources> -->
 
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -107,7 +120,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>${build-helper-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>add-resource</id>
@@ -119,11 +132,11 @@
                             <resources>
                                 <resource>
                                     <directory>ext</directory>
-                                    <targetPath>${outputDirectory}/icy</targetPath>
+                                    <targetPath>${outputJar)</targetPath>
                                 </resource>
                                 <resource>
                                     <directory>.</directory>
-                                    <targetPath>${outputDirectory}/icy</targetPath>
+                                    <targetPath>${outputJar}</targetPath>
                                     <include>CHANGELOG</include>
                                     <include>LICENSE</include>
                                     <include>README.md</include>
@@ -137,6 +150,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven-dependency-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -146,7 +160,7 @@
                         </goals>
                         <configuration>
                             <excludeGroupIds>com.sun,sun.jdt,jdk.tools,net.imagej</excludeGroupIds>
-                            <outputDirectory>${outputDirectory}/icy/lib</outputDirectory>
+                            <outputDirectory>${outputJar}/lib</outputDirectory>
                             <stripVersion>${stripVersion}</stripVersion>
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <excludeTransitive>true</excludeTransitive>
@@ -161,7 +175,7 @@
                         </goals>
                         <configuration>
                             <includeArtifactIds>ij</includeArtifactIds>
-                            <outputDirectory>${outputDirectory}/icy/ij</outputDirectory>
+                            <outputDirectory>${outputJar}/ij</outputDirectory>
                             <stripVersion>${stripVersion}</stripVersion>
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <excludeTransitive>true</excludeTransitive>
@@ -181,7 +195,7 @@
                                     <artifactId>${project.artifactId}</artifactId>
                                     <version>${project.version}</version>
                                     <type>${project.packaging}</type>
-                                    <outputDirectory>${outputDirectory}/icy</outputDirectory>
+                                    <outputDirectory>${outputJar}</outputDirectory>
                                     <destFileName>icy.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
@@ -193,7 +207,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>${maven-jar-plugin.version}</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -209,6 +223,41 @@
                         <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven-source-plugin.version}</version>
+                <configuration>
+                    <outputDirectory>${outputJar}</outputDirectory>
+                    <includePom>${maven-source-plugin.includePom}</includePom>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+                <configuration>
+                    <jarOutputDirectory>${outputJar}</jarOutputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

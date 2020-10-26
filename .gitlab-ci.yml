@@ -1,0 +1,74 @@
+default:
+  image: maven:latest
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+
+variables:
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-D maven.repo.local=.m2/repository"
+
+stages:
+  - build
+  - package
+  - test
+  - deploy
+  - release
+
+cache:
+  paths:
+    - .m2/repository
+    - target/
+
+build-job:
+  stage: build
+  script:
+    - echo "Building Artifact"
+    - mvn $MAVEN_CLI_OPTS compile jar:jar
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - target/*
+
+package-job:
+  stage: package
+  script:
+    - echo "Packaging the code"
+    - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
+  artifacts:
+    paths:
+      - target/*.jar
+  only:
+    - test-ci
+
+test-job:
+  stage: test
+  script:
+    - echo "Checking files"
+    - mvn verify
+  dependencies:
+    - build:job
+
+deploy-job:
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - echo "Deploy artifact to the Nexus"
+    - mvn $MAVEN_CLI_OPTS deploy
+  dependencies:
+    - build:job
+  only:
+    - test-ci
+
+release-job:
+  image: registry.gitlab.com/gitlab-org/release-cli
+  stage: release
+  script:
+    - echo "Creating a release for $CI_COMMIT_TAG"
+  release:
+    name: "Release $CI_COMMIT_TAG"
+    description: '$DESCRIPTION'
+    tag_name: '$CI_COMMIT_TAG'
+    ref: '$CI_COMMIT_TAG'
