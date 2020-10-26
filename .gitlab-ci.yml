@@ -7,7 +7,7 @@ workflow:
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
-  MAVEN_OPTS: "-D maven.repo.local=.m2/repository"
+  MAVEN_OPTS: ""
 
 stages:
   - build
