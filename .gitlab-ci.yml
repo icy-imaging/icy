@@ -47,18 +47,12 @@ test-job:
   script:
     - echo "Checking files"
     - mvn verify
-  dependencies:
-    - build:job
 
 deploy-job:
   stage: deploy
-  rules:
-    - if: $CI_COMMIT_TAG
   script:
     - echo "Deploy artifact to the Nexus"
     - mvn $MAVEN_CLI_OPTS deploy
-  dependencies:
-    - build:job
   only:
     - test-ci
 
