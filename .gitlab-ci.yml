@@ -6,7 +6,7 @@ default:
 #    - if: $CI_COMMIT_TAG
 
 variables:
-  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_CLI_OPTS: ""
   MAVEN_OPTS: ""
 
 stages:
@@ -30,6 +30,8 @@ build-job:
     expire_in: 1 hour
     paths:
       - target/*
+  only:
+    - test-ci
 
 package-job:
   stage: package
@@ -47,6 +49,8 @@ test-job:
   script:
     - echo "Checking files"
     - mvn verify
+  only:
+    - test-ci
 
 deploy-job:
   stage: deploy
@@ -66,3 +70,6 @@ release-job:
     description: '$DESCRIPTION'
     tag_name: '$CI_COMMIT_TAG'
     ref: '$CI_COMMIT_TAG'
+
+  only:
+    - test-ci
