@@ -1,5 +1,4 @@
-default:
-  image: maven:latest
+image: maven:latest
 
 #workflow:
 #  rules:
@@ -30,8 +29,6 @@ build-job:
     expire_in: 1 hour
     paths:
       - target/*
-  only:
-    - test-ci
 
 package-job:
   stage: package
@@ -41,16 +38,12 @@ package-job:
   artifacts:
     paths:
       - target/*.jar
-  only:
-    - test-ci
 
 test-job:
   stage: test
   script:
     - echo "Checking files"
-    - mvn verify
-  only:
-    - test-ci
+    - mvn clean verify
 
 deploy-job:
   stage: deploy
@@ -70,6 +63,5 @@ release-job:
     description: '$DESCRIPTION'
     tag_name: '$CI_COMMIT_TAG'
     ref: '$CI_COMMIT_TAG'
-
   only:
     - test-ci
