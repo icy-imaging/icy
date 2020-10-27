@@ -13,6 +13,7 @@ stages:
   - package
   - test
   - deploy
+  - documentation
   - release
 
 cache:
@@ -24,44 +25,70 @@ build-job:
   stage: build
   script:
     - echo "Building Artifact"
-    - mvn $MAVEN_CLI_OPTS compile
+    - mvn $MAVEN_CLI_OPTS clean compile
   artifacts:
+    when: on_success
     expire_in: 1 hour
     paths:
-      - target/*
+      - target/
 
 package-job:
   stage: package
+  dependencies:
+    - build-job
   script:
     - echo "Packaging the code"
     - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
   artifacts:
     paths:
-      - target/*.jar
+      - target/
 
 test-job:
   stage: test
+  dependencies:
+    - build-job
   script:
     - echo "Checking files"
     - mvn clean verify
+  artifacts:
+    when: on_success
+    expire_in: 1 hour
+    paths:
+      - target/
 
 deploy-job:
   stage: deploy
+  only:
+    - test-ci
+  dependencies:
+    - package-job
   script:
     - echo "Deploy artifact to the Nexus"
     - mvn $MAVEN_CLI_OPTS deploy
+  artifacts:
+    when: on_success
+    expire_in: 1 hour
+    paths:
+      - target/*.jar
+
+javadoc-job:
+  stage: documentation
   only:
-    - test-ci
+    - tags
+  dependencies:
+    - deploy-job
+  script: "mvn $MAVEN_CLI_OPTS javadoc:javadoc"
+  artifacts:
+    when: on_success
+    expire_in: 1 week
+    paths:
+      - target/site/apidocs/
 
 release-job:
-  image: registry.gitlab.pasteur.fr/gitlab-org/release-cli
   stage: release
-  script:
-    - echo "Creating a release for $CI_COMMIT_TAG"
-  release:
-    name: "Release $CI_COMMIT_TAG"
-    description: '$DESCRIPTION'
-    tag_name: '$CI_COMMIT_TAG'
-    ref: '$CI_COMMIT_TAG'
   only:
-    - test-ci
+    - releases
+  dependencies:
+    - deploy-job
+  script:
+    - "/tools/maven-release"
