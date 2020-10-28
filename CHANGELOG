@@ -1,3 +1,54 @@
+Icy 2.1.0.0 - 31/10/2020
+------------------------
+
+Application
+* Java 8 is now the minimum required version of Java.
+* GUI:
+ - better headless support in general
+* Metadata:
+ - better 'time interval' metadata retrieval
+* Sequence:
+ - fixed fast crop operation (wasn't correctly considering ROI channel information) 
+* Cache:
+ - added option do disable cache (through command line)
+* ROI:
+ - ROI2DArea now show its bounding box only when hovered or selected (better for visualization). 
+ - added ROI dilatation / erosion operations
+ - added ROI distance map operation
+ - added ROI watershed separation operation
+ - added ROI unstack operation (convert 3D ROI to multiple 2D ROIS, one for each slice) 
+ - added new 'Intersected' and 'Contained' ROI descriptors (number of intersected and contained ROI)
+ - added  'Internal id' ROI descriptor to retrieve internal ROI id (can be useful) 
+ - fixed ROI table focusing on double click
+ - better handling of ROI descriptors process interruption (when switching or closing an image for ex)
+ - fixed BooleanMask for tiny ROI2DShape (single pixel) 
+ - fixed area multi selection for ROI with channel position different from ALL
+* Viewer:
+ - we can now loop in a timelaps using left/right keys.
+ - fixed pixel size of sequence rendering views (snapshots) 
+* Network:
+ - added option to disable network (through command line)
+ - ignore possible error on audit process
+* Updater:
+ - fixed weird lockup on process execution error 
+* better recovery of parent / main plugin for 'Bundled Plugin'
+* many others changes, tweaks or fixes
+
+Developer
+* project migrated to maven
+* repository migrated to GitLab (Pasteur)
+* cleanup up unused dependencies / libraries (they are now distributed as plugin)
+* IcyBufferedImage:
+ - added IcyBufferedImageCursor class for easier / faster image data manipulation
+ - minor tweak on cache data management 
+* Sequence:
+ - added VolumetricImageCursor class for easier / faster 3D image data manipulation
+ - added SequenceCursor class for easier / faster sequence data manipulation
+* Plugin:
+ - added static methods to extract native library files
+ - added getMainPlugin() method to retrieve Main Plugin descriptor (Bundled Plugin) 
+
+
 Icy 2.0.3.0 - 31/10/2019
 ------------------------
 
