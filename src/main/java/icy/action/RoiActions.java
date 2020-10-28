@@ -1629,7 +1629,7 @@ public class RoiActions
         }
     };
 
-    public static IcyAbstractAction separateObjectsAction = new IcyAbstractAction("Component separation",
+    public static IcyAbstractAction separateObjectsAction = new IcyAbstractAction("Separate component",
             new IcyIcon(ResourceUtil.ICON_ROI_COMP), "Separate components from selected Mask ROI(s)",
             "Separate unconnected components from selected Mask ROI(s)")
     {
@@ -2008,7 +2008,7 @@ public class RoiActions
         }
     };
 
-    public static final IcyAbstractAction computeWatershedSeparation = new IcyAbstractAction("Watershed separation",
+    public static final IcyAbstractAction computeWatershedSeparation = new IcyAbstractAction("Separate by Watershed",
             new IcyIcon(ResourceUtil.ICON_ROI_SEPARATE),
             "Separate in parts selected ROIs by using watersheds of the shape",
             "Computes the separation of the selected ROIs by applying a watershed approach on the distance map of the ROIs.")

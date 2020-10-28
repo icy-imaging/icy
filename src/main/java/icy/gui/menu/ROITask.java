@@ -492,6 +492,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
             setToolTipText("Separation tools for ROI");
             RibbonUtil.setRestrictiveResizePolicies(this);
+            updateButtonsState();
         }
 
         public void updateButtonsState()
@@ -557,6 +558,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
             setToolTipText("Morphological tools for ROIs");
             RibbonUtil.setRestrictiveResizePolicies(this);
+            updateButtonsState();
         }
 
         private IcyButton createIcyButton(IcyAbstractAction action)
@@ -757,6 +759,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
             setToolTipText("File operations for ROI");
             RibbonUtil.setRestrictiveResizePolicies(this);
+            updateButtonsState();
         }
 
         public void updateButtonsState()
