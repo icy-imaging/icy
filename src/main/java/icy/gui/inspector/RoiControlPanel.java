@@ -183,9 +183,9 @@ public class RoiControlPanel extends JPanel
                 TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
         add(actionPanel);
         GridBagLayout gbl_actionPanel = new GridBagLayout();
-        gbl_actionPanel.columnWidths = new int[] {0, 0, 0, 60, 0, 0};
+        gbl_actionPanel.columnWidths = new int[] {0, 0, 0, 60, 0, 0, 0};
         gbl_actionPanel.rowHeights = new int[] {0, 0, 0};
-        gbl_actionPanel.columnWeights = new double[] {0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+        gbl_actionPanel.columnWeights = new double[] {0.0, 1.0, 0.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
         gbl_actionPanel.rowWeights = new double[] {0.0, 0.0, Double.MIN_VALUE};
         actionPanel.setLayout(gbl_actionPanel);
 
@@ -208,7 +208,6 @@ public class RoiControlPanel extends JPanel
 
         JLabel lblContentOpacity = new JLabel("Opacity");
         GridBagConstraints gbc_lblContentOpacity = new GridBagConstraints();
-        gbc_lblContentOpacity.anchor = GridBagConstraints.WEST;
         gbc_lblContentOpacity.insets = new Insets(0, 0, 5, 5);
         gbc_lblContentOpacity.gridx = 2;
         gbc_lblContentOpacity.gridy = 0;
@@ -219,7 +218,7 @@ public class RoiControlPanel extends JPanel
         GridBagConstraints gbc_alphaSlider = new GridBagConstraints();
         gbc_alphaSlider.gridwidth = 2;
         gbc_alphaSlider.fill = GridBagConstraints.HORIZONTAL;
-        gbc_alphaSlider.insets = new Insets(0, 0, 5, 0);
+        gbc_alphaSlider.insets = new Insets(0, 0, 5, 5);
         gbc_alphaSlider.gridx = 3;
         gbc_alphaSlider.gridy = 0;
         actionPanel.add(alphaSlider, gbc_alphaSlider);
@@ -227,6 +226,22 @@ public class RoiControlPanel extends JPanel
         alphaSlider.setMaximumSize(new Dimension(32767, 20));
         alphaSlider.setMinimumSize(new Dimension(36, 20));
         alphaSlider.setToolTipText("ROI content opacity");
+
+        readOnlyToggle = new JToggleButton(new IcyIcon(ResourceUtil.ICON_LOCK_CLOSE));
+        readOnlyToggle.setSelected(true);
+        readOnlyToggle.setBorderPainted(false);
+        readOnlyToggle.setFocusPainted(false);
+        readOnlyToggle.setIconTextGap(0);
+        readOnlyToggle.setMaximumSize(new Dimension(29, 29));
+        readOnlyToggle.setMinimumSize(new Dimension(29, 29));
+        readOnlyToggle.setPreferredSize(new Dimension(29, 29));
+        readOnlyToggle.setToolTipText("Enable/Disable ROI edition");
+        GridBagConstraints gbc_readOnlyToggle = new GridBagConstraints();
+        gbc_readOnlyToggle.insets = new Insets(0, 0, 5, 0);
+        gbc_readOnlyToggle.gridwidth = 1;
+        gbc_readOnlyToggle.gridx = 5;
+        gbc_readOnlyToggle.gridy = 0;
+        actionPanel.add(readOnlyToggle, gbc_readOnlyToggle);
 
         JLabel lblNewLabel = new JLabel("Stroke");
         GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -248,29 +263,16 @@ public class RoiControlPanel extends JPanel
         gbc_strokeSpinner.gridy = 1;
         actionPanel.add(strokeSpinner, gbc_strokeSpinner);
 
-        readOnlyToggle = new JToggleButton(new IcyIcon(ResourceUtil.ICON_LOCK_CLOSE));
-        readOnlyToggle.setIconTextGap(0);
-        readOnlyToggle.setMaximumSize(new Dimension(29, 29));
-        readOnlyToggle.setMinimumSize(new Dimension(29, 29));
-        readOnlyToggle.setPreferredSize(new Dimension(29, 29));
-        readOnlyToggle.setSelected(true);
-        readOnlyToggle.setToolTipText("Enable/Disable editing ROI properties");
-        GridBagConstraints gbc_readOnlyToggle = new GridBagConstraints();
-        gbc_readOnlyToggle.insets = new Insets(0, 0, 0, 5);
-        gbc_readOnlyToggle.gridwidth = 1;
-        gbc_readOnlyToggle.gridx = 2;
-        gbc_readOnlyToggle.gridy = 1;
-        actionPanel.add(readOnlyToggle, gbc_readOnlyToggle);
-
         displayNameCheckBox = new JCheckBox("Show name");
         displayNameCheckBox.setToolTipText("Show the ROI name");
         displayNameCheckBox.setMargin(new Insets(2, 0, 2, 2));
         displayNameCheckBox.setIconTextGap(10);
         displayNameCheckBox.setHorizontalTextPosition(SwingConstants.LEADING);
         GridBagConstraints gbc_displayNameCheckBox = new GridBagConstraints();
+        gbc_displayNameCheckBox.anchor = GridBagConstraints.WEST;
         gbc_displayNameCheckBox.insets = new Insets(0, 0, 0, 5);
-        gbc_displayNameCheckBox.gridwidth = 1;
-        gbc_displayNameCheckBox.gridx = 3;
+        gbc_displayNameCheckBox.gridwidth = 2;
+        gbc_displayNameCheckBox.gridx = 2;
         gbc_displayNameCheckBox.gridy = 1;
         actionPanel.add(displayNameCheckBox, gbc_displayNameCheckBox);
 
@@ -281,7 +283,9 @@ public class RoiControlPanel extends JPanel
         setAsDefaultBtn
                 .setToolTipText("Set the current color, opacity, stroke and show name values as the default settings");
         GridBagConstraints gbc_setAsDefaultBtn = new GridBagConstraints();
-        gbc_setAsDefaultBtn.anchor = GridBagConstraints.EAST;
+        gbc_setAsDefaultBtn.fill = GridBagConstraints.HORIZONTAL;
+        gbc_setAsDefaultBtn.gridwidth = 2;
+        gbc_setAsDefaultBtn.insets = new Insets(0, 0, 0, 5);
         gbc_setAsDefaultBtn.gridx = 4;
         gbc_setAsDefaultBtn.gridy = 1;
         actionPanel.add(setAsDefaultBtn, gbc_setAsDefaultBtn);

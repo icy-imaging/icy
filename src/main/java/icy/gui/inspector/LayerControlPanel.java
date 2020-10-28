@@ -96,6 +96,7 @@ public class LayerControlPanel extends JPanel implements ChangeListener
         opacitySlider.setPreferredSize(new Dimension(120, 23));
         opacitySlider.setFocusable(false);
         opacitySlider.setMinimumSize(new Dimension(120, 23));
+        opacitySlider.setToolTipText("Change opacity for selected layer(s)");
         GridBagConstraints gbc_opacitySlider = new GridBagConstraints();
         gbc_opacitySlider.fill = GridBagConstraints.HORIZONTAL;
         gbc_opacitySlider.insets = new Insets(0, 0, 0, 5);
@@ -162,8 +163,10 @@ public class LayerControlPanel extends JPanel implements ChangeListener
                     }
                 }
 
-                if (getParent() != null) getParent().validate();
-                else revalidate();
+                if (getParent() != null)
+                    getParent().validate();
+                else
+                    revalidate();
             }
         });
     }

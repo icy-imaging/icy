@@ -1629,9 +1629,9 @@ public class RoiActions
         }
     };
 
-    public static IcyAbstractAction separateObjectsAction = new IcyAbstractAction("Separate",
-            new IcyIcon(ResourceUtil.ICON_ROI_COMP), "Separate regions from selected Mask ROI(s)",
-            "Separate unconnected regions from selected Mask ROI(s)")
+    public static IcyAbstractAction separateObjectsAction = new IcyAbstractAction("Component separation",
+            new IcyIcon(ResourceUtil.ICON_ROI_COMP), "Separate components from selected Mask ROI(s)",
+            "Separate unconnected components from selected Mask ROI(s)")
     {
         private static final long serialVersionUID = 5289442497372947147L;
 
@@ -1972,7 +1972,7 @@ public class RoiActions
         }
     };
 
-    public static final IcyAbstractAction computeDistanceMapAction = new IcyAbstractAction("Distance Map",
+    public static final IcyAbstractAction computeDistanceMapAction = new IcyAbstractAction("Distance map",
             new IcyIcon(ResourceUtil.ICON_ROI_DISTANCE_MAP), "Compute distance map of selected ROIs",
             "Computes the inner distance transform of the selected ROIs.")
     {

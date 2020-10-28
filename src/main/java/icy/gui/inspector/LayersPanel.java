@@ -349,6 +349,8 @@ public class LayersPanel extends JPanel
         panelNorth.add(nameFilter, gbc_nameFilter);
 
         tglbtnLayerVisibility = new JToggleButton();
+        tglbtnLayerVisibility.setFocusable(false);
+        tglbtnLayerVisibility.setToolTipText("Change visibility for selected layer(s)");
         GridBagConstraints gbc_tglbtnLayerVisibility = new GridBagConstraints();
         gbc_tglbtnLayerVisibility.anchor = GridBagConstraints.WEST;
         gbc_tglbtnLayerVisibility.gridx = 1;
