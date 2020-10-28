@@ -1862,6 +1862,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         {
             creating = value;
             propertyChanged(PROPERTY_CREATING);
+//            // TODO Is this a good idea?
+//            if (!value) {
+//                setReadOnly(true);
+//            }
         }
     }
 
