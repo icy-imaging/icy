@@ -359,7 +359,7 @@ public abstract class ROI4D extends ROI
 
         final boolean cok;
 
-        if (getC() == -1)
+        if ((getC() == -1) || (sizeC == Double.POSITIVE_INFINITY))   
             cok = true;
         else
             cok = ((c + sizeC) > getC()) && (c < (getC() + 1d));
