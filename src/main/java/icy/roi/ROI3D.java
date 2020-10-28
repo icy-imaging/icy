@@ -636,11 +636,11 @@ public abstract class ROI3D extends ROI
         final boolean tok;
         final boolean cok;
 
-        if (getT() == -1)
+        if ((getT() == -1) || (sizeT == Double.POSITIVE_INFINITY))   
             tok = true;
         else
             tok = ((t + sizeT) > getT()) && (t < (getT() + 1d));
-        if (getC() == -1)
+        if ((getC() == -1) || (sizeC == Double.POSITIVE_INFINITY))   
             cok = true;
         else
             cok = ((c + sizeC) > getC()) && (c < (getC() + 1d));

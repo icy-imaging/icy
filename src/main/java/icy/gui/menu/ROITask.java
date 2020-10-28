@@ -329,7 +329,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             comp = new JRibbonComponent(convertToRectangleButton);
             comp.setResizingAware(true);
             comp.setHorizontalAlignment(HorizontalAlignment.FILL);
-            addRibbonComponent(comp);
+            //addRibbonComponent(comp);
             comp = new JRibbonComponent(radiusField);
             comp.setResizingAware(true);
             comp.setHorizontalAlignment(HorizontalAlignment.FILL);
@@ -470,6 +470,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
         public static final String BAND_NAME = "Separation";
 
         final IcyCommandButton separateObjectsButton;
+        final IcyCommandButton watershedSeparationButton;
         final IcyCommandToggleButton cutButton;
         final IcyCommandButton splitButton;
 
@@ -479,22 +480,24 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
             // conversion
             separateObjectsButton = new IcyCommandButton(RoiActions.separateObjectsAction);
+            watershedSeparationButton = new IcyCommandButton(RoiActions.computeWatershedSeparation);
             cutButton = PluginCommandButton
                     .createToggleButton(PluginLoader.getPlugin(ROILineCutterPlugin.class.getName()), false, true);
             splitButton = new IcyCommandButton(RoiActions.autoSplitAction);
             addCommandButton(separateObjectsButton, RibbonElementPriority.MEDIUM);
+            addCommandButton(watershedSeparationButton, RibbonElementPriority.MEDIUM);
             addCommandButton(cutButton, RibbonElementPriority.MEDIUM);
-            // addCommandButton(splitButton, RibbonElementPriority.MEDIUM);
 
             cutButton.setEnabled(false);
 
             setToolTipText("Separation tools for ROI");
             RibbonUtil.setRestrictiveResizePolicies(this);
+            updateButtonsState();
         }
 
         public void updateButtonsState()
         {
-            boolean separateObjEnable = false;
+            boolean separateEnable = false;
             boolean cutEnable = false;
             boolean splitEnable = false;
             final Sequence seq = Icy.getMainInterface().getActiveSequence();
@@ -504,11 +507,12 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
                 final List<ROI> selectedRois = seq.getSelectedROIs();
 
                 cutEnable = seq.hasROI();
-                separateObjEnable = !selectedRois.isEmpty();
+                separateEnable = !selectedRois.isEmpty();
                 splitEnable = !selectedRois.isEmpty();
             }
 
-            separateObjectsButton.setEnabled(separateObjEnable);
+            separateObjectsButton.setEnabled(separateEnable);
+            watershedSeparationButton.setEnabled(separateEnable);
             cutButton.setEnabled(cutEnable);
             splitButton.setEnabled(splitEnable);
         }
@@ -521,7 +525,6 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
         public static final String BAND_NAME = "Morphology";
 
         final IcyButton computeDistanceMapButton;
-        final IcyButton computeWatershedButton;
         final IcyButton computeSkeletonButton;
         final IcyButton dilateButton;
         final IcyButton erodeButton;
@@ -532,7 +535,6 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             super(BAND_NAME, new IcyIcon(ResourceUtil.ICON_ROI_DISTANCE_MAP));
 
             computeDistanceMapButton = createIcyButton(RoiActions.computeDistanceMapAction);
-            computeWatershedButton = createIcyButton(RoiActions.computeWatershedSeparation);
             computeSkeletonButton = createIcyButton(RoiActions.computeSkeleton);
             dilateButton = createIcyButton(RoiActions.dilateObjectsAction);
             erodeButton = createIcyButton(RoiActions.erodeObjectsAction);
@@ -542,22 +544,21 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             distanceField.setToolTipText("Distance to dilate/erode in pixels (>= 1)");
             distanceField.setNumericValue(1d);
 
-            addButtonComponent(computeDistanceMapButton);
-            addButtonComponent(computeWatershedButton);
-            // addButtonComponent(computeSkeletonButton);
             addButtonComponent(dilateButton);
             addButtonComponent(erodeButton);
             JRibbonComponent distanceComponent = new JRibbonComponent(distanceField);
             distanceComponent.setResizingAware(true);
             distanceComponent.setHorizontalAlignment(HorizontalAlignment.FILL);
             addRibbonComponent(distanceComponent);
+            addButtonComponent(computeDistanceMapButton);
+            // addButtonComponent(computeSkeletonButton);
             computeDistanceMapButton.setEnabled(false);
-            computeWatershedButton.setEnabled(false);
             dilateButton.setEnabled(false);
             erodeButton.setEnabled(false);
 
             setToolTipText("Morphological tools for ROIs");
             RibbonUtil.setRestrictiveResizePolicies(this);
+            updateButtonsState();
         }
 
         private IcyButton createIcyButton(IcyAbstractAction action)
@@ -588,7 +589,6 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             final boolean hasSequence = sequence != null;
             final boolean hasRois = hasSequence && !sequence.getSelectedROIs().isEmpty();
 
-            computeWatershedButton.setEnabled(hasRois);
             computeDistanceMapButton.setEnabled(hasRois);
             computeSkeletonButton.setEnabled(hasRois);
             dilateButton.setEnabled(hasRois);
@@ -759,6 +759,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
             setToolTipText("File operations for ROI");
             RibbonUtil.setRestrictiveResizePolicies(this);
+            updateButtonsState();
         }
 
         public void updateButtonsState()
