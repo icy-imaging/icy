@@ -2489,7 +2489,7 @@ public class ROIUtil
                 boolean doRescale = true;
                 boolean doRescaleZ = true;
 
-                if (scaleX != scaleY)
+                if (MathUtil.round(scaleX / scaleY, 3) != 1d)
                 {
                     doRescale = false;
                     if (ignoreErrorOnScale)
@@ -2532,7 +2532,7 @@ public class ROIUtil
                 final boolean zScaling = resDeltaZ != 0d;
 
                 // Z rescaling needed ? --> we need to have same XY and Z scale ratio
-                if (zScaling && (resDeltaZ != resDelta))
+                if (zScaling && (MathUtil.round(resDeltaZ / resDelta, 3) != 1d))
                 {
                     doRescaleZ = false;
                     if (ignoreErrorOnScale)
