@@ -58,8 +58,8 @@ test-job:
 
 deploy-job:
   stage: deploy
-  only:
-    - test-ci
+  #only:
+    #- test-ci
   dependencies:
     - package-job
   script:
@@ -73,8 +73,8 @@ deploy-job:
 
 javadoc-job:
   stage: documentation
-  only:
-    - tags
+  #only:
+    #- tags
   dependencies:
     - deploy-job
   script: "mvn $MAVEN_CLI_OPTS javadoc:javadoc"
@@ -86,8 +86,8 @@ javadoc-job:
 
 release-job:
   stage: release
-  only:
-    - releases
+  #only:
+    #- releases
   dependencies:
     - deploy-job
   script:
