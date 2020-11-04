@@ -77,7 +77,6 @@ import plugins.kernel.roi.morphology.watershed.ROIWatershedCalculator;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import plugins.kernel.roi.roi2d.ROI2DEllipse;
 import plugins.kernel.roi.roi2d.ROI2DPoint;
-import plugins.kernel.roi.roi2d.ROI2DPolyLine;
 import plugins.kernel.roi.roi2d.ROI2DPolygon;
 import plugins.kernel.roi.roi2d.ROI2DRectShape;
 import plugins.kernel.roi.roi2d.ROI2DRectangle;
@@ -3030,20 +3029,40 @@ public class ROIUtil
                 Rectangle5D dilationBounds = dilationRoi.getBounds5D();
                 if (dilationBounds.getSizeX() > 0)
                 {
-                    if (!(roi instanceof ROI2DArea) && !(roi instanceof ROI2DPolygon) && !(roi instanceof ROI2DPoint)
-                            && !(roi instanceof ROI2DPolyLine))
-                    {// Recover translation does not apply for these three types of ROIS, they are already at the correct position
-                        Point5D dPos = dilationBounds.getPosition();
-                        Point5D oPos = oldBounds.getPosition();
-                        dPos.setX(dPos.getX() + oPos.getX());
-                        dPos.setY(dPos.getY() + oPos.getY());
-                        if (dilationBounds.getSizeZ() > 1)
-                            dPos.setZ(dPos.getZ() + oPos.getZ());
-
-                        dilationRoi.setPosition5D(dPos);
+                    Point5D dPos = dilationBounds.getPosition();
+                    Point5D oPos = oldBounds.getPosition();
+                    dilationBounds.setX(dPos.getX() + oPos.getX());
+                    dilationBounds.setY(dPos.getY() + oPos.getY());
+                    if (Double.isFinite(oldBounds.getSizeZ()))
+                    {
+                        dilationBounds.setZ(dPos.getZ() + oPos.getZ());
+                        if (Double.isFinite(oldBounds.getSizeZ()) && Double.isInfinite(dilationBounds.getSizeZ()))
+                        {
+                            dilationBounds.setSizeZ(oldBounds.getSizeZ());
+                        }
                     }
-                    result.add(dilationRoi);
+
+                    if (Double.isFinite(oldBounds.getSizeT()))
+                    {
+                        dilationBounds.setT(oPos.getT());
+                        dilationBounds.setSizeT(oldBounds.getSizeT());
+                    }
+
+                    if (dilationRoi.canSetBounds())
+                        dilationRoi.setBounds5D(dilationBounds);
+                    else if (dilationRoi instanceof ROI2DArea)
+                    {
+                        ROI2DArea areaRoi = (ROI2DArea) dilationRoi;
+                        areaRoi.setC(Double.isFinite(dilationBounds.getC()) ? (int) dilationBounds.getC() : -1);
+                        areaRoi.setZ(Double.isFinite(dilationBounds.getZ()) ? (int) dilationBounds.getZ() : -1);
+                        areaRoi.setT(Double.isFinite(dilationBounds.getT()) ? (int) dilationBounds.getT() : -1);
+                        Rectangle2D bounds = areaRoi.getBounds2D();
+                        areaRoi.translate(dilationBounds.getX() - bounds.getX(), dilationBounds.getY() - bounds.getY());
+                    }
+
                 }
+                result.add(dilationRoi);
+
             }
             finally
             {
