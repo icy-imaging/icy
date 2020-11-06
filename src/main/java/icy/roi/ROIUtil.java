@@ -3020,8 +3020,11 @@ public class ROIUtil
                 processingBounds.setZ(0);
                 processingBounds.setSizeZ(oldBounds.getSizeZ());
             }
-
             roi.setBounds5D(processingBounds);
+            if (roi instanceof ROI2DArea) {
+                ((ROI2DArea) roi).setPosition2D(new Point2D.Double(0,0));
+            }
+            
             try
             {
                 ROIDilationCalculator dilator = new ROIDilationCalculator(roi, pixelSize, distance);
@@ -3067,6 +3070,9 @@ public class ROIUtil
             finally
             {
                 roi.setBounds5D(oldBounds);
+                if (roi instanceof ROI2DArea) {
+                    ((ROI2DArea) roi).setPosition2D(new Point2D.Double(oldBounds.getX(),oldBounds.getY()));
+                }
             }
         }
         return result;
