@@ -3,6 +3,7 @@
  */
 package plugins.kernel.roi.morphology;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,8 @@ import icy.sequence.Sequence;
 import icy.sequence.SequenceDataIterator;
 import icy.type.dimension.Dimension3D;
 import icy.type.dimension.Dimension5D;
+import icy.type.point.Point5D;
+import icy.type.rectangle.Rectangle5D;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import plugins.kernel.roi.roi3d.ROI3DArea;
 
@@ -41,18 +44,21 @@ public class ROIErosionCalculator
         return erosionRoi;
     }
 
+    private static Point5D positionZero = new Point5D.Double();
+    
     public void compute() throws InterruptedException
     {
-
-        if (roi.getBounds5D().getSizeZ() == 1)
+        Rectangle5D roiBounds = roi.getBounds5D();
+        if (roiBounds.getSizeZ() == 1 || Double.isInfinite(roiBounds.getSizeZ()))
         {
-            Dimension5D roiDims = roi.getBounds5D().getDimension();
+            Dimension5D roiDims = roiBounds.getDimension();
             Dimension5D dims = new Dimension5D.Integer();
             dims.setSizeX(Math.ceil(roiDims.getSizeX()));
             dims.setSizeY(Math.ceil(roiDims.getSizeY()));
-            dims.setSizeZ(Math.ceil(roiDims.getSizeZ()));
-            dims.setSizeT(Math.ceil(roiDims.getSizeT()));
-            dims.setSizeC(Math.ceil(roiDims.getSizeC()));
+            dims.setSizeZ(Double.isInfinite(roiBounds.getSizeZ())? 1: Math.ceil(roiDims.getSizeZ()));
+            dims.setSizeT(Double.isInfinite(roiBounds.getSizeT())? 1: Math.ceil(roiDims.getSizeT()));
+            dims.setSizeC(Double.isInfinite(roiBounds.getSizeC())? 1: Math.ceil(roiDims.getSizeC()));
+            roi.setPosition5D(positionZero);
             Sequence dt = ROIUtil.computeDistanceMap(roi, dims, pixelSize, true);
             ROI2DArea erosionRoi = new ROI2DArea();
             SequenceDataIterator dtIt = new SequenceDataIterator(dt, roi);
@@ -65,6 +71,9 @@ public class ROIErosionCalculator
                 }
                 dtIt.next();
             }
+            roi.setPosition5D(roiBounds.getPosition());
+            Point2D erosionPosition = erosionRoi.getPosition2D();
+            erosionPosition.setLocation(erosionPosition.getX() + roiBounds.getX(), erosionPosition.getY() + roiBounds.getY());
             this.erosionRoi = erosionRoi;
 
         }

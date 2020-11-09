@@ -45,7 +45,11 @@ public class ROIDilationCalculator
         Rectangle5D roiBounds = roi.getBounds5D();
         if (roiBounds.getSizeZ() == 1 || Double.isInfinite(roiBounds.getSizeZ()))
         {
-            this.roiBooleanMask = roi.getBooleanMask2D(0, 0, 0, true);
+            this.roiBooleanMask = roi.getBooleanMask2D(0,
+                    Double.isInfinite(roiBounds.getSizeT()) ? 0 : (int) roiBounds.getT(), 0, true);
+            Rectangle maskBounds = (Rectangle) roiBooleanMask.bounds.clone();
+            roiBooleanMask.bounds.x = 0;
+            roiBooleanMask.bounds.y = 0;
             setDistanceMapRoi2D();
 
             Sequence dt = ROIUtil.computeDistanceMap(distanceMapRoi2d, distanceMapRoi2d.getBounds5D().getDimension(),
@@ -63,7 +67,12 @@ public class ROIDilationCalculator
             }
             BooleanMask2D dilationMask2D = new BooleanMask2D(distanceMapRoiMaskRect, dilationMask);
             dilationMask2D.add(this.roiBooleanMask.bounds, this.roiBooleanMask.mask);
-            dilationRoi = new ROI2DArea(dilationMask2D);
+            dilationMask2D.bounds.x += maskBounds.x;
+            dilationMask2D.bounds.y += maskBounds.y;
+            ROI2DArea dilationRoi2d = new ROI2DArea(dilationMask2D);
+            dilationRoi2d.setZ(Double.isInfinite(roiBounds.getZ()) ? -1 : (int) roiBounds.getZ());
+            dilationRoi2d.setT(Double.isInfinite(roiBounds.getT()) ? -1 : (int) roiBounds.getT());
+            dilationRoi = dilationRoi2d;
         }
         else if (roi.getBounds5D().getSizeZ() > 1)
         {
