@@ -307,7 +307,7 @@ public class ImageDataIterator implements DataIterator
     public double get()
     {
         if (done)
-            throw new NoSuchElementException(null);
+            throw new NoSuchElementException("ImageDataIterator.get() error: no more element !");
 
         return Array1DUtil.getValue(data, imgOff, dataType);
     }
@@ -316,7 +316,7 @@ public class ImageDataIterator implements DataIterator
     public void set(double value)
     {
         if (done)
-            throw new NoSuchElementException(null);
+            throw new NoSuchElementException("ImageDataIterator.get() error: no more element !");
 
         Array1DUtil.setValue(data, imgOff, dataType, value);
         changed = true;

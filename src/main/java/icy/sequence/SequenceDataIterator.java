@@ -383,7 +383,7 @@ public class SequenceDataIterator implements DataIterator
     public double get()
     {
         if (done)
-            throw new NoSuchElementException(null);
+            throw new NoSuchElementException("SequenceDataIterator.get() error: no more element !");
 
         return imageIterator.get();
     }
@@ -392,7 +392,7 @@ public class SequenceDataIterator implements DataIterator
     public void set(double value)
     {
         if (done)
-            throw new NoSuchElementException(null);
+            throw new NoSuchElementException("SequenceDataIterator.get() error: no more element !");
 
         imageIterator.set(value);
     }
@@ -403,7 +403,7 @@ public class SequenceDataIterator implements DataIterator
     public int getPositionX()
     {
         if (imageIterator != null)
-            return imageIterator.getPositionX();
+            return imageIterator.getX();
 
         return 0;
     }
@@ -414,7 +414,7 @@ public class SequenceDataIterator implements DataIterator
     public int getPositionY()
     {
         if (imageIterator != null)
-            return imageIterator.getPositionY();
+            return imageIterator.getY();
 
         return 0;
     }
