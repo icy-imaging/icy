@@ -390,7 +390,7 @@
     <distributionManagement>
         <repository>
             <id>icy-prod</id>
-            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+            <url>{env.MAVEN_REPO_URL}/icy-core/</url>
         </repository>
         <snapshotRepository>
             <id>icy-dev</id>
