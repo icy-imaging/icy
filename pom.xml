@@ -198,6 +198,7 @@
                     <archive>
                         <manifest>
                             <classpathLayoutType>custom</classpathLayoutType>
+                            <!--suppress UnresolvedMavenProperty -->
                             <customClasspathLayout>$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
@@ -390,7 +391,8 @@
     <distributionManagement>
         <repository>
             <id>icy-prod</id>
-            <url>{env.MAVEN_REPO_URL}/icy-core/</url>
+            <!--suppress UnresolvedMavenProperty -->
+            <url>${env.MAVEN_REPO_URL}/icy-core/</url>
         </repository>
         <snapshotRepository>
             <id>icy-dev</id>
