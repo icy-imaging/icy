@@ -734,18 +734,6 @@ public class Saver
                 // create output directory
                 FileUtil.createDir(fileBaseDirectory);
 
-                // default name used --> use filename
-                if (sequence.isDefaultName())
-                    sequence.setName(fileName);
-                sequence.setFilename(fileBaseDirectory);
-                // reset origin informations as now we are saved
-                sequence.resetOriginInformation();
-                // reset image provider
-                sequence.setImageProvider(null);
-
-                // assume that is the saved sequence (used for metadata)
-                savedSequence = sequence;
-
                 for (int t = 0; t < sizeT; t++)
                 {
                     for (int z = 0; z < sizeZ; z++)
@@ -762,6 +750,18 @@ public class Saver
                         save(writer, sequence, filename, t, z, fps, saveFrame);
                     }
                 }
+
+                // default name used --> use filename
+                if (sequence.isDefaultName())
+                    sequence.setName(fileName);
+                sequence.setFilename(fileBaseDirectory);
+                // reset origin informations as now we are saved
+                sequence.resetOriginInformation();
+                // reset image provider as all data are normally loaded
+                sequence.setImageProvider(null);
+
+                // assume that is the saved sequence (used for metadata)
+                savedSequence = sequence;
 
                 // add as one item to recent file list
                 if (mainMenu != null)
