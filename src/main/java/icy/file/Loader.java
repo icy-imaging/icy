@@ -4364,7 +4364,7 @@ public class Loader
         return selectSerie(importer, path, (OMEXMLMetadata) meta, defaultSerie);
     }
 
-    static List<String> explode(List<String> paths)
+    public static List<String> explode(List<String> paths)
     {
         return FileUtil.toPaths(FileUtil.explode(FileUtil.toFiles(paths), null, true, false));
     }
