@@ -26,12 +26,13 @@ import icy.type.point.Point5D;
  * Used to define a plugin representing a specific ROI.<br>
  * The plugin will appears in the ROI list.<br>
  * 
- * @author Fab & Stephane
+ * @author Fab &amp; Stephane
  */
 public interface PluginROI extends PluginNoEDTConstructor
 {
     /**
      * Return the ROI class name (ROIClass.getClassName())
+     * @return ROI's class name
      */
     public String getROIClassName();
 

@@ -315,7 +315,7 @@ public class ExternalizablePanel extends JPanel
     }
 
     /**
-     * Switch from internalized <--> externalized state and vice versa
+     * Switch from internalized &lt;--&gt; externalized state and vice versa
      */
     public void switchState()
     {

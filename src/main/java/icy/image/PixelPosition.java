@@ -164,7 +164,7 @@ public class PixelPosition extends ChannelPosition
     }
 
     /**
-     * Return first undefined position (T -> Z -> C -> Y -> X)
+     * Return first undefined position (T -&gt; Z -&gt; C -&gt; Y -&gt; X)
      */
     @Override
     public char getFirstEmptyPos()
@@ -185,7 +185,7 @@ public class PixelPosition extends ChannelPosition
     }
 
     /**
-     * Return last undefined position (X -> Y -> C -> Z -> T)
+     * Return last undefined position (X -&gt; Y -&gt; C -&gt; Z -&gt; T)
      */
     @Override
     public char getLastEmptyPos()

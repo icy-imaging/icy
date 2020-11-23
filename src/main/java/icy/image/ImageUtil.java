@@ -178,7 +178,7 @@ public class ImageUtil
     }
 
     /**
-     * Asynchronously load an image from specified url.<br/>
+     * Asynchronously load an image from specified url.<br>
      * Use {@link #waitImageReady(Image)} to know if width and height property
      */
     public static Image loadAsync(URL url)
@@ -187,7 +187,7 @@ public class ImageUtil
     }
 
     /**
-     * Asynchronously load an image from specified path.<br/>
+     * Asynchronously load an image from specified path.<br>
      * Use {@link #waitImageReady(Image)} to know if width and height property
      */
     public static Image loadAsync(String path)
@@ -499,7 +499,7 @@ public class ImageUtil
 
     /**
      * Convert an image to a BufferedImage.<br>
-     * If <code>out</out> is null, by default a <code>BufferedImage.TYPE_INT_ARGB</code> is created.
+     * If <code>out</code>is null, by default a <code>BufferedImage.TYPE_INT_ARGB</code> is created.
      */
     public static BufferedImage convert(Image in, BufferedImage out)
     {

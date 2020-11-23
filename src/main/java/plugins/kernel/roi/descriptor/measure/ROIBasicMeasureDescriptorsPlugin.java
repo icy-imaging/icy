@@ -13,13 +13,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This {@link PluginROIDescriptor} implements the following basic measures ROI descriptors:<br/>
- * <li>Contour (in pixel)</li><br/>
- * <li>Interior (in pixel)</li><br/>
- * <li>Perimeter (pixel size unit - 2D ROI only)</li><br/>
- * <li>Surface Area (pixel size unit - 3D ROI only)</li><br/>
- * <li>Area (pixel size unit - 2D ROI only)</li><br/>
- * <li>Volume (pixel size unit - 3D ROI only)</li><br/>
+ * This {@link PluginROIDescriptor} implements the following basic measures ROI descriptors:<br>
+ * <ul>
+ * <li>Contour (in pixel)</li>
+ * <li>Interior (in pixel)</li>
+ * <li>Perimeter (pixel size unit - 2D ROI only)</li>
+ * <li>Surface Area (pixel size unit - 3D ROI only)</li>
+ * <li>Area (pixel size unit - 2D ROI only)</li>
+ * <li>Volume (pixel size unit - 3D ROI only)</li>
+ * </ul>
  * 
  * @author Stephane
  */

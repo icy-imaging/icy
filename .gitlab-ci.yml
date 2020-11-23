@@ -13,13 +13,12 @@ stages:
   - package
   - test
   - deploy
-  - documentation
   - release
 
 cache:
   paths:
     - .m2/repository
-    - target/
+    - build/
 
 build-job:
   stage: build
@@ -30,7 +29,7 @@ build-job:
     when: on_success
     expire_in: 1 hour
     paths:
-      - target/
+      - build/
 
 package-job:
   stage: package
@@ -41,7 +40,7 @@ package-job:
     - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
   artifacts:
     paths:
-      - target/
+      - build/
 
 test-job:
   stage: test
@@ -54,7 +53,7 @@ test-job:
     when: on_success
     expire_in: 1 hour
     paths:
-      - target/
+      - build/
 
 deploy-job:
   stage: deploy
@@ -69,20 +68,7 @@ deploy-job:
     when: on_success
     expire_in: 1 hour
     paths:
-      - target/*.jar
-
-javadoc-job:
-  stage: documentation
-  #only:
-    #- tags
-  dependencies:
-    - deploy-job
-  script: "mvn $MAVEN_CLI_OPTS javadoc:javadoc"
-  artifacts:
-    when: on_success
-    expire_in: 1 week
-    paths:
-      - target/site/apidocs/
+      - build/*.jar
 
 release-job:
   stage: release

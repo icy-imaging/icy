@@ -48,7 +48,7 @@ import vtk.vtkObjectBase;
 /**
  * Memory monitor.
  * 
- * @author Fab & Stephane
+ * @author Fab &amp; Stephane
  */
 public class MemoryMonitorPanel extends JPanel implements MouseListener
 {

@@ -85,7 +85,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Return Icy unique Id (-1 if not yet set)
+     * @return Return Icy unique Id (-1 if not yet set)
      */
     public static int getId()
     {
@@ -130,7 +130,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Get max memory (in MB)
+     * @return Get max memory (in MB)
      */
     public static int getMaxMemoryMB()
     {
@@ -171,7 +171,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Get stack size (in KB)
+     * @return Get stack size (in KB)
      */
     public static int getStackSizeKB()
     {
@@ -180,7 +180,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Get cache reserved memory (in % of max memory)
+     * @return Get cache reserved memory (in % of max memory)
      */
     public static int getCacheMemoryPercent()
     {
@@ -188,7 +188,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Get cache reserved memory (in MB)
+     * @return Get cache reserved memory (in MB)
      */
     public static int getCacheMemoryMB()
     {
@@ -196,7 +196,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Get cache path (folder where to create cache data, better to use fast storage)
+     * @return Get cache path (folder where to create cache data, better to use fast storage)
      */
     public static String getCachePath()
     {
@@ -204,7 +204,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Get extra JVM parameters string
+     * @return Get extra JVM parameters string
      */
     public static String getExtraVMParams()
     {
@@ -213,7 +213,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Get OS specific extra JVM parameters string
+     * @return Get OS specific extra JVM parameters string
      */
     public static String getOSExtraVMParams()
     {
@@ -231,7 +231,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Get Icy application folder
+     * @return Get Icy application folder
      */
     public static String getAppFolder()
     {
@@ -239,7 +239,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Get Icy application parameters string
+     * @return Get Icy application parameters string
      */
     public static String getAppParams()
     {
@@ -247,7 +247,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Get the stored version number (used to detect new installed version).
+     * @return Get the stored version number (used to detect new installed version).
      */
     public static Version getVersion()
     {
@@ -255,7 +255,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Set max memory (in MB)
+     * @param value Set max memory (in MB)
      */
     public static void setMaxMemoryMB(int value)
     {
@@ -263,7 +263,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Set stack size (in KB)
+     * @param value Set stack size (in KB)
      */
     public static void setStackSizeKB(int value)
     {
@@ -271,7 +271,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Set cache reserved memory (in % of max memory)
+     * @param value Set cache reserved memory (in % of max memory)
      */
     public static void setCacheMemoryPercent(int value)
     {
@@ -280,7 +280,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Set cache path (folder where to create cache data, better to use fast storage)
+     * @param value Set cache path (folder where to create cache data, better to use fast storage)
      */
     public static void setCachePath(String value)
     {
@@ -288,7 +288,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Set extra JVM parameters string
+     * @param value Set extra JVM parameters string
      */
     public static void setExtraVMParams(String value)
     {
@@ -296,7 +296,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Set OS specific extra JVM parameters string
+     * @param value Set OS specific extra JVM parameters string
      */
     public static void setOSExtraVMParams(String value)
     {
@@ -304,7 +304,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Set Icy application folder
+     * @param value Set Icy application folder
      */
     public static void setAppFolder(String value)
     {
@@ -312,7 +312,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Set ICY application parameters string
+     * @param value Set ICY application parameters string
      */
     public static void setAppParams(String value)
     {
@@ -320,7 +320,7 @@ public class ApplicationPreferences
     }
 
     /**
-     * Set the stored version number (used to detect new installed version)
+     * @param value Set the stored version number (used to detect new installed version)
      */
     public static void setVersion(Version value)
     {

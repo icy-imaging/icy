@@ -55,7 +55,7 @@ import icy.util.ClassUtil;
  * By default the constructor of a Plugin class is called in the EDT (Event Dispatch Thread).<br>
  * If the plugin implements the {@link PluginThreaded} there is no more guarantee that is the case.
  * 
- * @author Fabrice de Chaumont & Stephane
+ * @author Fabrice de Chaumont &amp; Stephane
  */
 public abstract class Plugin
 {
@@ -171,6 +171,7 @@ public abstract class Plugin
 
     /**
      * @deprecated Use {@link #getActiveViewer()} instead
+     * @return Viewer
      */
     @Deprecated
     public Viewer getFocusedViewer()
@@ -180,6 +181,7 @@ public abstract class Plugin
 
     /**
      * @deprecated Use {@link #getActiveSequence()} instead
+     * @return Sequence
      */
     @Deprecated
     public Sequence getFocusedSequence()
@@ -189,6 +191,7 @@ public abstract class Plugin
 
     /**
      * @deprecated Use {@link #getActiveImage()} instead
+     * @return Buffered image
      */
     @Deprecated
     public IcyBufferedImage getFocusedImage()
@@ -217,7 +220,7 @@ public abstract class Plugin
     }
 
     /**
-     * Return the resource URL from given resource name.<br>
+     * @return Return the resource URL from given resource name.<br>
      * Ex: <code>getResource("plugins/author/resources/def.xml");</code>
      * 
      * @param name
@@ -229,12 +232,12 @@ public abstract class Plugin
     }
 
     /**
-     * Return resources corresponding to given resource name.<br>
+     * @return Return resources corresponding to given resource name.<br>
      * Ex: <code>getResources("plugins/author/resources/def.xml");</code>
      * 
      * @param name
      *        resource name
-     * @throws IOException
+     * @throws IOException ioexception
      */
     public Enumeration<URL> getResources(String name) throws IOException
     {
@@ -242,7 +245,7 @@ public abstract class Plugin
     }
 
     /**
-     * Return the resource as data stream from given resource name.<br>
+     * @return Return the resource as data stream from given resource name.<br>
      * Ex: <code>getResourceAsStream("plugins/author/resources/def.xml");</code>
      * 
      * @param name
@@ -254,7 +257,7 @@ public abstract class Plugin
     }
 
     /**
-     * Return the image resource from given resource name
+     * @return Return the image resource from given resource name
      * Ex: <code>getResourceAsStream("plugins/author/resources/image.png");</code>
      * 
      * @param resourceName
@@ -266,7 +269,7 @@ public abstract class Plugin
     }
 
     /**
-     * Return the icon resource from given resource name
+     * @return Return the icon resource from given resource name
      * Ex: <code>getResourceAsStream("plugins/author/resources/icon.png");</code>
      * 
      * @param resourceName
@@ -278,7 +281,7 @@ public abstract class Plugin
     }
 
     /**
-     * Retrieve the preferences root for this plugin.<br>
+     * @return Retrieve the preferences root for this plugin.<br>
      */
     public XMLPreferences getPreferencesRoot()
     {
@@ -286,9 +289,10 @@ public abstract class Plugin
     }
 
     /**
-     * Retrieve the plugin preferences node for specified name.<br>
+     * @return Retrieve the plugin preferences node for specified name.<br>
      * i.e : getPreferences("window") will return node
      * "plugins.[authorPackage].[pluginClass].window"
+     * @param name string
      */
     public XMLPreferences getPreferences(String name)
     {
@@ -296,7 +300,7 @@ public abstract class Plugin
     }
 
     /**
-     * Returns the base resource path for plugin native libraries.<br/>
+     * @return Returns the base resource path for plugin native libraries.<br>
      * Depending the Operating System it can returns these values:
      * <ul>
      * <li>lib/unix32</li>
@@ -313,11 +317,12 @@ public abstract class Plugin
     }
 
     /**
-     * Return the resource URL from given resource name and class instance.<br>
+     * @return Return the resource URL from given resource name and class instance.<br>
      * Ex: <code>getResource(Plugin.class, "plugins/author/resources/def.xml");</code>
      * 
      * @param name
      *        resource name
+     * @param clazz class
      */
     public static URL getResource(Class clazz, String name)
     {
@@ -325,8 +330,8 @@ public abstract class Plugin
     }
 
     /**
-     * Load a packed native library from the JAR file.<br/>
-     * Native libraries should be packaged with the following directory & file structure:
+     * Load a packed native library from the JAR file.<br>
+     * Native libraries should be packaged with the following directory &amp; file structure:
      * 
      * <pre>
      * /lib/unix32
@@ -346,10 +351,11 @@ public abstract class Plugin
      *   ....
      * </pre>
      * 
-     * Here "xxx" is the name of the native library.<br/>
+     * Here "xxx" is the name of the native library.<br>
      * Current approach is to unpack the native library into a temporary file and load from there.
      * 
-     * @param libName
+     * @param libName string
+     * @param clazz class
      * @return true if the library was correctly loaded.
      * @see #prepareLibrary(String)
      */
@@ -368,8 +374,8 @@ public abstract class Plugin
 
     /**
      * Extract a packed native library from the JAR file to a temporary native library folder so it can be easily loaded
-     * later.<br/>
-     * Native libraries should be packaged with the following directory & file structure:
+     * later.<br>
+     * Native libraries should be packaged with the following directory &amp; file structure:
      * 
      * <pre>
      * /lib/unix32
@@ -389,9 +395,10 @@ public abstract class Plugin
      *   ....
      * </pre>
      * 
-     * Here "xxx" is the name of the native library.<br/>
+     * Here "xxx" is the name of the native library.<br>
      * 
-     * @param libName
+     * @param libName string
+     * @param clazz class
      * @return the extracted native library file.
      * @see #loadLibrary(String)
      */
@@ -450,7 +457,7 @@ public abstract class Plugin
      * @param resource
      *        the resource URL
      * @return the extracted file
-     * @throws IOException
+     * @throws IOException io exception
      */
     protected static File extractResourceTo(String outputPath, URL resource) throws IOException
     {
@@ -489,6 +496,7 @@ public abstract class Plugin
 
     /**
      * @deprecated Use {@link #getResourceNativeLibraryPath()} instead.
+     * @return string
      */
     @Deprecated
     protected String getResourceLibraryPath()
@@ -497,8 +505,8 @@ public abstract class Plugin
     }
 
     /**
-     * Load a packed native library from the JAR file.<br/>
-     * Native libraries should be packaged with the following directory & file structure:
+     * Load a packed native library from the JAR file.<br>
+     * Native libraries should be packaged with the following directory &amp; file structure:
      * 
      * <pre>
      * /lib/unix32
@@ -518,10 +526,10 @@ public abstract class Plugin
      *   ....
      * </pre>
      * 
-     * Here "xxx" is the name of the native library.<br/>
+     * Here "xxx" is the name of the native library.<br>
      * Current approach is to unpack the native library into a temporary file and load from there.
      * 
-     * @param libName
+     * @param libName string
      * @return true if the library was correctly loaded.
      * @see #prepareLibrary(String)
      */
@@ -532,8 +540,8 @@ public abstract class Plugin
 
     /**
      * Extract a packed native library from the JAR file to a temporary native library folder so it can be easily loaded
-     * later.<br/>
-     * Native libraries should be packaged with the following directory & file structure:
+     * later.<br>
+     * Native libraries should be packaged with the following directory &amp; file structure:
      * 
      * <pre>
      * /lib/unix32
@@ -553,9 +561,9 @@ public abstract class Plugin
      *   ....
      * </pre>
      * 
-     * Here "xxx" is the name of the native library.<br/>
+     * Here "xxx" is the name of the native library.<br>
      * 
-     * @param libName
+     * @param libName string
      * @return the extracted native library file.
      * @see #loadLibrary(String)
      */
@@ -566,6 +574,9 @@ public abstract class Plugin
 
     /**
      * @deprecated Use {@link #extractResourceTo(String, URL)}
+     * @param outputPath string
+     * @param resource url
+     * @return file
      */
     @Deprecated
     protected File extractResource(String outputPath, URL resource) throws IOException
@@ -574,7 +585,7 @@ public abstract class Plugin
     }
 
     /**
-     * Report an error log for this plugin (reported to Icy web site which report then to the
+     * @param errorLog Report an error log for this plugin (reported to Icy web site which report then to the
      * author of the plugin).
      * 
      * @see IcyExceptionHandler#report(PluginDescriptor, String)

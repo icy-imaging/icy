@@ -16,14 +16,14 @@ import java.util.EventListener;
 public interface ActiveSequenceListener extends EventListener
 {
     /**
-     * Sequence just get the active state.<br/>
+     * Sequence just get the active state.<br>
      * This event is generally preceded by a {@link #sequenceDeactivated(Sequence)} event describing
      * the sequence which actually lose activation.
      */
     public void sequenceActivated(Sequence sequence);
 
     /**
-     * Sequence just lost the active state.<br/>
+     * Sequence just lost the active state.<br>
      * This event is always followed by a {@link #sequenceActivated(Sequence)} event describing the
      * new activated sequence.
      */

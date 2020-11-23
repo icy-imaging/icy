@@ -16,12 +16,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This {@link PluginROIDescriptor} implements the following "intensity" ROI descriptors:<br/>
- * <li>Minimum intensity</li><br/>
- * <li>Mean intensity</li><br/>
- * <li>Maximum intensity</li><br/>
- * <li>Sum intensity</li><br/>
- * <li>Standard deviation</li><br/>
+ * This {@link PluginROIDescriptor} implements the following "intensity" ROI descriptors:<br>
+ * <ul>
+ * <li>Minimum intensity</li>
+ * <li>Mean intensity</li>
+ * <li>Maximum intensity</li>
+ * <li>Sum intensity</li>
+ * <li>Standard deviation</li>
+ * </ul>
  * 
  * @author Stephane
  */
@@ -59,9 +61,9 @@ public class ROIIntensityDescriptorsPlugin extends Plugin implements PluginROIDe
      *        the Sequence used to compute the intensity descriptors
      * @param allowMultiChannel
      *        Allow multi channel intensity computation. If this parameter is set to <code>false</code> and the ROI
-     *        number of channel is > 1 then a {@link UnsupportedOperationException} is launch.
+     *        number of channel is &gt; 1 then a {@link UnsupportedOperationException} is launch.
      * @throws UnsupportedOperationException
-     *         If the C dimension of the ROI is > 1 while allowMultiChannel parameter is set to <code>false</code>
+     *         If the C dimension of the ROI is &gt; 1 while allowMultiChannel parameter is set to <code>false</code>
      * @throws InterruptedException
      *         if the thread was interrupted during the computation of the intensity descriptor
      * @throws Exception

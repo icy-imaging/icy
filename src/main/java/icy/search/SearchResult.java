@@ -25,7 +25,7 @@ import org.pushingpixels.flamingo.api.common.RichTooltip;
 /**
  * Defines an item in the SearchResultPanel.
  * 
- * @author Thomas Provoost & Stephane Dallongeville
+ * @author Thomas Provoost &amp; Stephane Dallongeville
  */
 public abstract class SearchResult implements Comparable<SearchResult>
 {
@@ -47,27 +47,27 @@ public abstract class SearchResult implements Comparable<SearchResult>
     }
 
     /**
-     * Returns the title of the result.
+     * @return Returns the title of the result.
      */
     public abstract String getTitle();
 
     /**
-     * Returns the image of the result (can be null).
+     * @return Returns the image of the result (can be null).
      */
     public abstract Image getImage();
 
     /**
-     * Returns the description of the result.
+     * @return Returns the description of the result.
      */
     public abstract String getDescription();
 
     /**
-     * Returns the tooltip that will be displayed for this result.
+     * @return Returns the tooltip that will be displayed for this result.
      */
     public abstract String getTooltip();
 
     /**
-     * Returns enabled state of the result.
+     * @return Returns enabled state of the result.
      */
     public boolean isEnabled()
     {
@@ -90,7 +90,8 @@ public abstract class SearchResult implements Comparable<SearchResult>
     public abstract RichTooltip getRichToolTip();
 
     /**
-     * Default implementation
+     * @return Default implementation
+     * @param o search
      */
     @Override
     public int compareTo(SearchResult o)

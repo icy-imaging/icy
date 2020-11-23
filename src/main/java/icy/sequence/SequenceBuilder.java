@@ -114,6 +114,7 @@ public class SequenceBuilder
 	 * sequence building process, and no new sequence will be created.<br>
 	 * <br>
 	 * Two situations may occur:
+	 * <ul>
 	 * <li>The sequence 'target' has the same size and data-type than specified by
 	 * the arguments passed to the SequenceBuilder object. In that case, no new
 	 * buffer/image allocation is performed, and the sequence is only modified
@@ -123,7 +124,8 @@ public class SequenceBuilder
 	 * Otherwise, the sequence 'target' will be completly cleared (through a
 	 * call to the method Sequence.removeAllImages()) when first calling the
 	 * method SequenceBuilder.beginUpdate().
-	 * </li> 
+	 * </li>
+	 * </ul>
 	 */
 	public SequenceBuilder(int sizeX, int sizeY, int sizeZ, int sizeT, int sizeC, DataType dataType, Sequence target)
 	{

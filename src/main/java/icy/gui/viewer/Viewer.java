@@ -100,7 +100,7 @@ import icy.util.StringUtil;
 /**
  * Viewer send an event if the IcyCanvas change.
  * 
- * @author Fabrice de Chaumont & Stephane
+ * @author Fabrice de Chaumont &amp; Stephane
  */
 public class Viewer extends IcyFrame implements KeyListener, SequenceListener, IcyCanvasListener, PluginLoaderListener
 {

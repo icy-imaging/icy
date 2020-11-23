@@ -29,7 +29,7 @@ import icy.search.SearchResultProducer;
 public interface PluginSearchProvider extends PluginNoEDTConstructor
 {
     /**
-     * Return the Search Provider.
+     * @return Return the Search Provider.
      * 
      * @see SearchResultProducer
      */

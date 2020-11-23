@@ -92,18 +92,18 @@ public class SequenceEvent implements CollapsibleEvent
      * SourceType define the object type of <code>source</code><br>
      * <br>
      * The following source types are available:<br>
-     * <code>SEQUENCE_TYPE</code> --> source object is null<br>
-     * <code>SEQUENCE_META</code> --> source object define the meta data id (String)<br>
+     * <code>SEQUENCE_TYPE</code> --&gt; source object is null<br>
+     * <code>SEQUENCE_META</code> --&gt; source object define the meta data id (String)<br>
      * It can be <i>null</i> (consider global metadata change)<br>
-     * <code>SEQUENCE_COLORMAP</code> --> source object is an instance of IcyColorModel<br>
-     * <code>SEQUENCE_COMPONENTBOUNDS</code> --> source object is an instance of IcyColorModel<br>
-     * <code>SEQUENCE_DATA</code> --> source object is an instance of IcyBufferedImage<br>
+     * <code>SEQUENCE_COLORMAP</code> --&gt; source object is an instance of IcyColorModel<br>
+     * <code>SEQUENCE_COMPONENTBOUNDS</code> --&gt; source object is an instance of IcyColorModel<br>
+     * <code>SEQUENCE_DATA</code> --&gt; source object is an instance of IcyBufferedImage<br>
      * source object can be null when severals images has been modified<br>
-     * <code>SEQUENCE_ROI</code> --> source object is an instance of ROI<br>
+     * <code>SEQUENCE_ROI</code> --&gt; source object is an instance of ROI<br>
      * source object can be null when severals images has been modified<br>
-     * <code>SEQUENCE_OVERLAY</code> --> source object is an instance of Overlay<br>
+     * <code>SEQUENCE_OVERLAY</code> --&gt; source object is an instance of Overlay<br>
      * source object can be null when severals images has been modified<br>
-     * <code>SEQUENCE_PAINTER</code> --> source object is an instance of Painter<br>
+     * <code>SEQUENCE_PAINTER</code> --&gt; source object is an instance of Painter<br>
      * source object can be null when severals images has been modified<br>
      * <br>
      */

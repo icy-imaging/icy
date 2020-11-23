@@ -78,7 +78,7 @@ public class IcyPreferences
     }
 
     /**
-     * Get absolute root
+     * @return Get absolute root
      */
     public static XMLPreferences root()
     {
@@ -86,7 +86,7 @@ public class IcyPreferences
     }
 
     /**
-     * Get application root
+     * @return Get application root
      */
     public static XMLPreferences applicationRoot()
     {
@@ -95,6 +95,8 @@ public class IcyPreferences
 
     /**
      * @deprecated Use {@link PluginsPreferences#root(Plugin)} instead.
+     * @param plugin plugin
+     * @return XML Preferences
      */
     @Deprecated
     public static XMLPreferences pluginRoot(Plugin plugin)
@@ -104,6 +106,7 @@ public class IcyPreferences
 
     /**
      * @deprecated Use {@link PluginsPreferences#getPreferences()} instead.
+     * @return XML Preferences
      */
     @Deprecated
     public static XMLPreferences pluginsRoot()

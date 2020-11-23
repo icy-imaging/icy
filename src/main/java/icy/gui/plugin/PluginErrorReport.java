@@ -41,7 +41,7 @@ import javax.swing.text.BadLocationException;
  * This class create a report from a plugin crash and ask the
  * user if he wants to send it to the dev team of the plugin.
  * 
- * @author Fabrice de Chaumont & Stephane<br>
+ * @author Fabrice de Chaumont &amp; Stephane<br>
  */
 public class PluginErrorReport
 {

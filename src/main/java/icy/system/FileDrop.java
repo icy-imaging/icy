@@ -46,15 +46,16 @@ import javax.swing.JComponent;
 import javax.swing.border.Border;
 
 /**
+ * <p>
  * This class makes it easy to drag and drop files from the operating
  * system to a Java program. Any <tt>Component</tt> can be
  * dropped onto, but only <tt>JComponent</tt>s will indicate
  * the drop event with a changed
- * <p/>
- * To use this class, construct a new <tt>FileDrop</tt> by passing it the target component and a
+ * </p>
+ * <p>To use this class, construct a new <tt>FileDrop</tt> by passing it the target component and a
  * <tt>Listener</tt> to receive notification when file(s) have been dropped. Here is an example:
- * <p/>
- * <code><pre>
+ * </p>
+ * <code>
  *      JPanel myPanel = new JPanel();
  *      new FileDrop( myPanel, new FileDrop.Listener()
  *      {   public void filesDropped( File[] files )
@@ -63,15 +64,15 @@ import javax.swing.border.Border;
  *              ...
  *          }   // end filesDropped
  *      }); // end FileDrop.Listener
- * </pre></code>
- * <p/>
+ * </code>
+ * <p>
  * You can specify the border that will appear when files are being dragged by calling the
  * constructor with a <tt>Border</tt>. Only <tt>JComponent</tt>s will show any indication with a
- * <p/>
- * You can turn on some debugging features by passing a <tt>PrintStream</tt> object (such as
+ * </p>
+ * <p>You can turn on some debugging features by passing a <tt>PrintStream</tt> object (such as
  * <tt>System.out</tt>) into the full constructor. A <tt>null</tt> value will result in no extra
  * debugging information being output.
- * <p/>
+ * </p>
  * <p>
  * I'm releasing this code into the Public Domain. Enjoy.
  * </p>
@@ -712,7 +713,7 @@ public class FileDrop
 
     /**
      * Implement this inner interface to listen for when files are dropped. For example
-     * your class declaration may begin like this: <code><pre>
+     * your class declaration may begin like this: <code>
      *      public class MyClass implements FileDrop.Listener
      *      ...
      *      public void filesDropped( File[] files )
@@ -720,7 +721,7 @@ public class FileDrop
      *          ...
      *      }   // end filesDropped
      *      ...
-     * </pre></code>
+     * </code>
      * 
      * @since 1.1
      */
@@ -739,7 +740,7 @@ public class FileDrop
 
     /**
      * Implement this inner interface to listen for when files are dropped. For example
-     * your class declaration may begin like this: <code><pre>
+     * your class declaration may begin like this: <code>
      *      public class MyClass implements FileDrop.Listener
      *      ...
      *      public void filesDropped( File[] files )
@@ -747,7 +748,7 @@ public class FileDrop
      *          ...
      *      }   // end filesDropped
      *      ...
-     * </pre></code>
+     * </code>
      * 
      * @since 1.1
      */

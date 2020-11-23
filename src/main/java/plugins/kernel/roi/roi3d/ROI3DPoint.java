@@ -241,6 +241,8 @@ public class ROI3DPoint extends ROI3DShape
 
     /**
      * @deprecated
+     * @param pt 3D point
+     * @param cm boolean
      */
     @Deprecated
     public ROI3DPoint(Point3D pt, boolean cm)
@@ -262,6 +264,7 @@ public class ROI3DPoint extends ROI3DShape
 
     /**
      * Generic constructor for interactive mode
+     * @param pt 5D point
      */
     public ROI3DPoint(Point5D pt)
     {
@@ -302,6 +305,7 @@ public class ROI3DPoint extends ROI3DShape
 
     /**
      * Called when anchor overlay changed
+     * @param event Overlay event
      */
     @Override
     public void controlPointOverlayChanged(OverlayEvent event)
@@ -364,7 +368,7 @@ public class ROI3DPoint extends ROI3DShape
     }
 
     /**
-     * roi changed
+     * @param object roi changed
      */
     @Override
     public void onChanged(CollapsibleEvent object)

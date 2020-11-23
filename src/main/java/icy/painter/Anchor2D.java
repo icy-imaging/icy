@@ -238,9 +238,9 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * @param x
-     * @param y
-     * @param ray
+     * @param x double
+     * @param y double
+     * @param ray int
      */
     public Anchor2D(double x, double y, int ray)
     {
@@ -248,9 +248,10 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * @param x
-     * @param y
-     * @param color
+     * @param x double
+     * @param y double
+     * @param color color
+     * @param selectedColor color
      */
     public Anchor2D(double x, double y, Color color, Color selectedColor)
     {
@@ -258,9 +259,9 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * @param x
-     * @param y
-     * @param color
+     * @param x double
+     * @param y double
+     * @param color color
      */
     public Anchor2D(double x, double y, Color color)
     {
@@ -268,8 +269,8 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * @param x
-     * @param y
+     * @param x double
+     * @param y double
      */
     public Anchor2D(double x, double y)
     {
@@ -285,6 +286,10 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link #Anchor2D(double, double, int, Color, Color)} instead.
+     * @param selectedColor color
+     * @param color color
+     * @param position 2D point
+     * @param ray int
      */
     @Deprecated
     public Anchor2D(Point2D position, int ray, Color color, Color selectedColor)
@@ -294,6 +299,9 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link #Anchor2D(double, double, int, Color)} instead.
+     * @param position 2D point
+     * @param ray int
+     * @param color color
      */
     @Deprecated
     public Anchor2D(Point2D position, int ray, Color color)
@@ -303,6 +311,8 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link #Anchor2D(double, double, int)} instead.
+     * @param position 2D point
+     * @param ray int
      */
     @Deprecated
     public Anchor2D(Point2D position, int ray)
@@ -312,6 +322,9 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link #Anchor2D(double, double, Color, Color)} instead.
+     * @param position 2D point
+     * @param color color
+     * @param selectedColor color
      */
     @Deprecated
     public Anchor2D(Point2D position, Color color, Color selectedColor)
@@ -321,6 +334,8 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link #Anchor2D(double, double, Color)} instead.
+     * @param position 2D point
+     * @param color color
      */
     @Deprecated
     public Anchor2D(Point2D position, Color color)
@@ -330,6 +345,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link #Anchor2D(double, double)} instead.
+     * @param position 2D point
      */
     @Deprecated
     public Anchor2D(Point2D position)
@@ -339,6 +355,12 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(double, double, int, Color, Color)} instead.
+     * @param sequence sequence
+     * @param ray int
+     * @param x double
+     * @param y double
+     * @param color color
+     * @param selectedColor color
      */
     @Deprecated
     public Anchor2D(Sequence sequence, double x, double y, int ray, Color color, Color selectedColor)
@@ -349,6 +371,11 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(double, double, int, Color, Color)} instead.
+     * @param position 2D point
+     * @param sequence sequence
+     * @param color color
+     * @param selectedColor color
+     * @param ray int
      */
     @Deprecated
     public Anchor2D(Sequence sequence, Point2D position, int ray, Color color, Color selectedColor)
@@ -359,6 +386,10 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(Point2D, int, Color)} instead.
+     * @param sequence sequence
+     * @param position 2D point
+     * @param color color
+     * @param ray int
      */
     @Deprecated
     public Anchor2D(Sequence sequence, Point2D position, int ray, Color color)
@@ -369,6 +400,10 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(double, double, int)} instead.
+     * @param sequence sequence
+     * @param x double
+     * @param y double
+     * @param ray int
      */
     @Deprecated
     public Anchor2D(Sequence sequence, double x, double y, int ray)
@@ -379,6 +414,9 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(double, double, Color)} instead.
+     * @param sequence sequence
+     * @param position 2D position
+     * @param color color
      */
     @Deprecated
     public Anchor2D(Sequence sequence, Point2D position, Color color)
@@ -389,6 +427,9 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(double, double, int)} instead.
+     * @param position 2D point
+     * @param sequence sequence
+     * @param ray int
      */
     @Deprecated
     public Anchor2D(Sequence sequence, Point2D position, int ray)
@@ -399,6 +440,11 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(double, double, int)} instead.
+     * @param sequence sequence
+     * @param x double
+     * @param y double
+     * @param color color
+     * @param selectedColor color
      */
     @Deprecated
     public Anchor2D(Sequence sequence, double x, double y, Color color, Color selectedColor)
@@ -409,6 +455,10 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(double, double, Color, Color)} instead.
+     * @param sequence sequence
+     * @param position 2D point
+     * @param color color
+     * @param selectedColor color
      */
     @Deprecated
     public Anchor2D(Sequence sequence, Point2D position, Color color, Color selectedColor)
@@ -419,6 +469,10 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(double, double, Color, Color)} instead.
+     * @param sequence sequence
+     * @param color color
+     * @param x int
+     * @param y int
      */
     @Deprecated
     public Anchor2D(Sequence sequence, double x, double y, Color color)
@@ -429,6 +483,9 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(double, double)} instead.
+     * @param sequence sequence
+     * @param x int
+     * @param y int
      */
     @Deprecated
     public Anchor2D(Sequence sequence, double x, double y)
@@ -439,6 +496,8 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D(double, double)} instead.
+     * @param sequence sequence
+     * @param position 2D point
      */
     @Deprecated
     public Anchor2D(Sequence sequence, Point2D position)
@@ -449,6 +508,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * @deprecated Use {@link Anchor2D#Anchor2D()} instead.
+     * @param sequence sequence
      */
     @Deprecated
     public Anchor2D(Sequence sequence)
@@ -514,7 +574,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Get anchor position (return the internal reference)
+     * @return Get anchor position (return the internal reference)
      */
     public Point2D getPositionInternal()
     {
@@ -578,7 +638,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Set Z position (-1 = ALL)
+     * @param value Set Z position (-1 = ALL)
      */
     public void setZ(int value)
     {
@@ -762,7 +822,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * update 3D painter for 3D canvas (called only when VTK is loaded).
+     * @return update 3D painter for 3D canvas (called only when VTK is loaded).
      */
     protected boolean rebuildVtkObjects()
     {
@@ -898,7 +958,9 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Returns <code>true</code> if specified Point3D is over the anchor in the specified canvas
+     * @return Returns <code>true</code> if specified Point3D is over the anchor in the specified canvas
+     * @param canvas canvas
+     * @param imagePoint 2D point
      */
     public boolean isOver(IcyCanvas canvas, Point2D imagePoint)
     {
@@ -935,6 +997,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
 
     /**
      * Update internal ellipse for specified Canvas
+     * @param canvas canvas
      */
     protected void updateEllipseForCanvas(IcyCanvas canvas)
     {
@@ -1076,6 +1139,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /**
      * @deprecated Use {@link #addPositionListener(Anchor2DPositionListener)} or
      *             {@link #addOverlayListener(OverlayListener)} instead.
+     * @param listener anchor listener
      */
     @Deprecated
     public void addAnchorListener(Anchor2DListener listener)
@@ -1086,6 +1150,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /**
      * @deprecated Use {@link #removePositionListener(Anchor2DPositionListener)} or
      *             {@link #removeOverlayListener(OverlayListener)} instead.
+     * @param listener anchor listener
      */
     @Deprecated
     public void removeAnchorListener(Anchor2DListener listener)
@@ -1096,6 +1161,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /**
      * @deprecated Use {@link #addPositionListener(Anchor2DPositionListener)} or
      *             {@link #addOverlayListener(OverlayListener)} instead.
+     * @param listener anchor listener
      */
     @Deprecated
     public void addListener(Anchor2DListener listener)
@@ -1106,6 +1172,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /**
      * @deprecated Use {@link #removePositionListener(Anchor2DPositionListener)} or
      *             {@link #removeOverlayListener(OverlayListener)} instead.
+     * @param listener anchor listener
      */
     @Deprecated
     public void removeListener(Anchor2DListener listener)

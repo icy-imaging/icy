@@ -2422,8 +2422,9 @@ public class ROI2DArea extends ROI2D
      * Set the mask from a boolean array.<br>
      * r represents the region defined by the boolean array.
      * 
-     * @param r
-     * @param booleanMask
+     * @param r rectangle
+     * @param mask array
+     * @param doBoundsOptimization boolean
      */
     protected void setAsByteMask(Rectangle r, byte[] mask, boolean doBoundsOptimization)
     {

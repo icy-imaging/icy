@@ -99,9 +99,9 @@ public abstract class OnlineSearchResultProducer extends SearchResultProducer
     }
 
     /**
-     * Default implementation for the search request, override it if needed
-     * 
-     * @throws Exception
+     * @return Default implementation for the search request, override it if needed
+     * @param text string
+     * @throws Exception exception
      */
     protected Document doSearchRequest(String text) throws Exception
     {
@@ -115,6 +115,9 @@ public abstract class OnlineSearchResultProducer extends SearchResultProducer
 
     /**
      * @deprecated Use {@link #doSearch(Document, String, SearchResultConsumer)} instead
+     * @param words array of strings
+     * @param consumer search
+     * @param doc document
      */
     @Deprecated
     public void doSearch(Document doc, String[] words, SearchResultConsumer consumer)

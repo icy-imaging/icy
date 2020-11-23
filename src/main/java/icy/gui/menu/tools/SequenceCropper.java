@@ -41,6 +41,7 @@ public class SequenceCropper
 
     /**
      * @deprecated Use {@link SequenceUtil#getSubSequence(Sequence, ROI)} instead.
+     * @return boolean
      */
     @Deprecated
     public static boolean doRoiCrop()
@@ -86,6 +87,9 @@ public class SequenceCropper
 
     /**
      * @deprecated Use {@link SequenceUtil#getSubSequence(Sequence, ROI)} instead.
+     * @param roi ROI
+     * @param viewer viewer
+     * @return boolean
      */
     @Deprecated
     public static boolean doRoiCrop(final Viewer viewer, final ROI roi)

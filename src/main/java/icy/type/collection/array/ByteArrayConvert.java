@@ -28,8 +28,12 @@ import icy.type.DataType;
 public class ByteArrayConvert
 {
     /**
-     * Get maximum length in bytes for a copy from in to out with specified offset.<br>
-     * If specified length != -1 then the value is directly returned (assumed to be in bytes).
+     * @return Get maximum length in bytes for a copy from in to out with specified offset.<br>
+     * @param length If specified length != -1 then the value is directly returned (assumed to be in bytes).
+     * @param in object
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
      */
     static int getCopyLengthInBytes(Object in, int inOffset, Object out, int outOffset, int length)
     {
@@ -40,7 +44,11 @@ public class ByteArrayConvert
     }
 
     /**
-     * Get maximum length in bytes for a copy from in to out with specified offset.
+     * @return Get maximum length in bytes for a copy from in to out with specified offset.
+     * @param in object
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
      */
     public static int getCopyLengthInBytes(Object in, int inOffset, Object out, int outOffset)
     {
@@ -54,7 +62,9 @@ public class ByteArrayConvert
     }
 
     /**
-     * Get length in bytes for a copy from or to array with specified offset.
+     * @return Get length in bytes for a copy from or to array with specified offset.
+     * @param array object
+     * @param offset int
      */
     public static int getCopyLengthInBytes(Object array, int offset)
     {
@@ -62,7 +72,9 @@ public class ByteArrayConvert
     }
 
     /**
-     * Read a byte from the input byte array at specified position.
+     * @return Read a byte from the input byte array at specified position.
+     * @param array array
+     * @param offset int
      */
     public static byte readByte(byte[] array, int offset)
     {
@@ -70,7 +82,10 @@ public class ByteArrayConvert
     }
 
     /**
-     * Read a short value from the input byte array at specified position.
+     * @return Read a short value from the input byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param littleEndian boolean
      */
     public static short readShort(byte[] array, int offset, boolean littleEndian)
     {
@@ -81,7 +96,10 @@ public class ByteArrayConvert
     }
 
     /**
-     * Read a int value from the input byte array at specified position.
+     * @return Read a int value from the input byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param littleEndian boolean
      */
     public static int readInt(byte[] array, int offset, boolean littleEndian)
     {
@@ -94,7 +112,10 @@ public class ByteArrayConvert
     }
 
     /**
-     * Read a long value from the input byte array at specified position.
+     * @return Read a long value from the input byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param littleEndian boolean
      */
     public static long readLong(byte[] array, int offset, boolean littleEndian)
     {
@@ -115,7 +136,10 @@ public class ByteArrayConvert
     }
 
     /**
-     * Read a long value from the input byte array at specified position.
+     * @return Read a long value from the input byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param littleEndian boolean
      */
     public static float readFloat(byte[] array, int offset, boolean littleEndian)
     {
@@ -123,7 +147,10 @@ public class ByteArrayConvert
     }
 
     /**
-     * Read a long value from the input byte array at specified position.
+     * @return Read a long value from the input byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param littleEndian boolean
      */
     public static double readDouble(byte[] array, int offset, boolean littleEndian)
     {
@@ -132,6 +159,9 @@ public class ByteArrayConvert
 
     /**
      * Write a byte to the output byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param value byte
      */
     public static void writeByte(byte[] array, int offset, byte value)
     {
@@ -140,6 +170,10 @@ public class ByteArrayConvert
 
     /**
      * Write a short to the output byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param value short
+     * @param littleEndian boolean
      */
     public static void writeShort(byte[] array, int offset, short value, boolean littleEndian)
     {
@@ -157,6 +191,10 @@ public class ByteArrayConvert
 
     /**
      * Write a int to the output byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param value int
+     * @param littleEndian boolean
      */
     public static void writeInt(byte[] array, int offset, int value, boolean littleEndian)
     {
@@ -178,6 +216,10 @@ public class ByteArrayConvert
 
     /**
      * Write a long to the output byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param value long
+     * @param littleEndian boolean
      */
     public static void writeLong(byte[] array, int offset, long value, boolean littleEndian)
     {
@@ -213,6 +255,10 @@ public class ByteArrayConvert
 
     /**
      * Write a float to the output byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param value float
+     * @param littleEndian boolean
      */
     public static void writeFloat(byte[] array, int offset, float value, boolean littleEndian)
     {
@@ -221,6 +267,10 @@ public class ByteArrayConvert
 
     /**
      * Write a double to the output byte array at specified position.
+     * @param array array
+     * @param offset int
+     * @param value double
+     * @param littleEndian boolean
      */
     public static void writeDouble(byte[] array, int offset, double value, boolean littleEndian)
     {
@@ -228,7 +278,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -253,7 +303,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -266,7 +316,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -277,7 +327,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return  Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -311,7 +361,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -326,7 +376,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -339,7 +389,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -373,7 +423,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -388,7 +438,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -401,7 +451,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -435,7 +485,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -450,7 +500,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -463,7 +513,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in 'out' float array
+     * @return Bit transform and return the 'in' byte array in 'out' float array
      * 
      * @param in
      *        input array
@@ -497,7 +547,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -512,7 +562,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -525,7 +575,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -559,7 +609,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -574,7 +624,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -587,7 +637,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' short array as byte array
+     * @return Bit transform and return the 'in' short array as byte array
      * 
      * @param in
      *        input array
@@ -621,7 +671,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' int array as byte array
+     * @return Bit transform and return the 'in' int array as byte array
      * 
      * @param in
      *        input array
@@ -655,7 +705,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' long array as byte array
+     * @return Bit transform and return the 'in' long array as byte array
      * 
      * @param in
      *        input array
@@ -689,7 +739,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' float array as byte array
+     * @return Bit transform and return the 'in' float array as byte array
      * 
      * @param in
      *        input array
@@ -723,7 +773,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' double array as byte array
+     * @return Bit transform and return the 'in' double array as byte array
      * 
      * @param in
      *        input array
@@ -757,7 +807,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified 'out' data type array
+     * @return Bit transform and return the 'in' byte array in the specified 'out' data type array
      * 
      * @param in
      *        input array
@@ -797,7 +847,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified 'out' data type array
+     * @return Bit transform and return the 'in' byte array in the specified 'out' data type array
      * 
      * @param in
      *        input array
@@ -812,7 +862,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -850,7 +900,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -869,7 +919,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' byte array in the specified data type array
+     * @return Bit transform and return the 'in' byte array in the specified data type array
      * 
      * @param in
      *        input array
@@ -885,6 +935,12 @@ public class ByteArrayConvert
 
     /**
      * @deprecated use {@link #byteArrayTo(byte[], int , DataType , int , boolean )} instead
+     * @param in array
+     * @param inOffset int
+     * @param outDataType int
+     * @param length int
+     * @param little boolean
+     * @return object
      */
     @Deprecated
     public static Object byteArrayTo(byte[] in, int inOffset, int outDataType, int length, boolean little)
@@ -894,6 +950,10 @@ public class ByteArrayConvert
 
     /**
      * @deprecated use {@link #byteArrayTo(byte[], DataType , boolean )} instead
+     * @param in array
+     * @param outDataType int
+     * @param little boolean
+     * @return object
      */
     @Deprecated
     public static Object byteArrayTo(byte[] in, int outDataType, boolean little)
@@ -902,7 +962,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' array as byte array
+     * @return Bit transform and return the 'in' array as byte array
      * 
      * @param in
      *        input array (define input type)
@@ -939,7 +999,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' array as byte array
+     * @return Bit transform and return the 'in' array as byte array
      * 
      * @param in
      *        input array (define input type)
@@ -958,7 +1018,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' array as byte array
+     * @return Bit transform and return the 'in' array as byte array
      * 
      * @param in
      *        input array (define input type)
@@ -966,7 +1026,7 @@ public class ByteArrayConvert
      *        position where we start read data from
      * @param length
      *        number of <br>
-     *        bytes</b> to compute (-1 means we will use the maximum possible)
+     *        bytes to compute (-1 means we will use the maximum possible)
      * @param little
      *        little endian order
      */
@@ -976,7 +1036,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' array as byte array
+     * @return Bit transform and return the 'in' array as byte array
      * 
      * @param in
      *        input array (define input type)
@@ -991,7 +1051,7 @@ public class ByteArrayConvert
     }
 
     /**
-     * Bit transform and return the 'in' array as byte array
+     * @return Bit transform and return the 'in' array as byte array
      * 
      * @param in
      *        input array (define input type)

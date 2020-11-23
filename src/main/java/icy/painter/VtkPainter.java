@@ -30,7 +30,7 @@ import vtk.vtkProp;
 public interface VtkPainter
 {
     /**
-     * Returns the VTK actors for this painter.
+     * @return Returns the VTK actors for this painter.
      */
     public vtkProp[] getProps();
 }

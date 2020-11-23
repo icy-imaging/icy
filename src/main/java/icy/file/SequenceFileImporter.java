@@ -65,8 +65,10 @@ public interface SequenceFileImporter extends SequenceIdImporter
      *        Path of the image file to open.
      * @param flags
      *        operation flag:<br>
+     *        <ul>
      *        <li>{@link #FLAG_METADATA_MINIMUM} = load minimum metadata informations</li>
      *        <li>{@link #FLAG_METADATA_ALL} = load all metadata informations</li>
+     *        </ul>
      * @return <code>true</code> if the operation has succeeded and <code>false</code> otherwise.
      */
     @Override

@@ -13,12 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This {@link PluginROIDescriptor} implements the size ROI descriptors:<br/>
- * <li>Size X (in pixel)</li><br/>
- * <li>Size Y (in pixel)</li><br/>
- * <li>Size C (in pixel)</li><br/>
- * <li>Size Z (in pixel)</li><br/>
+ * This {@link PluginROIDescriptor} implements the size ROI descriptors:<br>
+ * <ul>
+ * <li>Size X (in pixel)</li>
+ * <li>Size Y (in pixel)</li>
+ * <li>Size C (in pixel)</li>
+ * <li>Size Z (in pixel)</li>
  * <li>Size T (in pixel)</li>
+ * </ul>
  * 
  * @author Stephane
  */

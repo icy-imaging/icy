@@ -52,6 +52,8 @@ public abstract class ROI3D extends ROI
 {
     /**
      * @deprecated Use {@link ROI3D#getROI3DList(List)} instead.
+     * @param rois List of ROI
+     * @return list of 3D ROI
      */
     @Deprecated
     public static ArrayList<ROI3D> getROI3DList(ArrayList<ROI> rois)
@@ -66,7 +68,8 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Return all 3D ROI from the ROI list
+     * @param rois List of ROI
+     * @return Return all 3D ROI from the ROI list
      */
     public static List<ROI3D> getROI3DList(List<ROI> rois)
     {
@@ -282,11 +285,17 @@ public abstract class ROI3D extends ROI
 
         /**
          * Draw the ROI
+         * @param sequence sequence
+         * @param canvas canvas
+         * @param g 2D graphics
          */
         public abstract void drawROI(Graphics2D g, Sequence sequence, IcyCanvas canvas);
 
         /**
          * Draw the ROI name
+         * @param canvas canvas
+         * @param g 2D graphics
+         * @param sequence sequence
          */
         public void drawName(Graphics2D g, Sequence sequence, IcyCanvas canvas)
         {
@@ -367,7 +376,8 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns true if specified ROI is on the same [T, C] position than current ROI.
+     * @return Returns true if specified ROI is on the same [T, C] position than current ROI.
+     * @param roi 3D ROI
      * 
      * @param shouldContain
      *        if <code>true</code> then current ROI should "contains" specified ROI position [T, C]
@@ -668,7 +678,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Calculate and returns the 3D bounding box of the <code>ROI</code>.<br>
+     * @return Calculate and returns the 3D bounding box of the <code>ROI</code>.<br>
      * This method is used by {@link #getBounds3D()} which should try to cache the result as the
      * bounding box calculation can take some computation time for complex ROI.
      */
@@ -737,7 +747,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns the integer ROI position which normally correspond to the <i>minimum</i> point of the
+     * @return Returns the integer ROI position which normally correspond to the <i>minimum</i> point of the
      * ROI bounds.
      * 
      * @see #getBounds()
@@ -749,7 +759,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns the high precision ROI position which normally correspond to the <i>minimum</i> point
+     * @return Returns the high precision ROI position which normally correspond to the <i>minimum</i> point
      * of the ROI bounds.<br>
      * 
      * @see #getBounds3D()
@@ -847,7 +857,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns <code>true</code> if the ROI support translate operation.
+     * @return Returns <code>true</code> if the ROI support translate operation.
      * 
      * @see #translate(double, double, double)
      */
@@ -928,7 +938,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Get the boolean bitmap mask for the specified rectangular area of the roi and for the
+     * @return Get the boolean bitmap mask for the specified rectangular area of the roi and for the
      * specified Z position.<br>
      * if the pixel (x,y) is contained in the roi Z position then result[(y * width) + x] = true<br>
      * if the pixel (x,y) is not contained in the roi Z position then result[(y * width) + x] =
@@ -957,7 +967,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Get the {@link BooleanMask2D} object representing the roi for the specified Z position.<br>
+     * @return Get the {@link BooleanMask2D} object representing the roi for the specified Z position.<br>
      * It contains the rectangle mask bounds and the associated boolean array mask.<br>
      * if the pixel (x,y) is contained in the roi Z position then result.mask[(y * w) + x] = true<br>
      * if the pixel (x,y) is not contained in the roi Z position then result.mask[(y * w) + x] =
@@ -985,7 +995,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns the {@link BooleanMask3D} object representing the XYZ volume content at specified Z,
+     * @return Returns the {@link BooleanMask3D} object representing the XYZ volume content at specified Z,
      * T, C position.<br>
      * It contains the 3D rectangle mask bounds and the associated boolean array mask.
      * 
@@ -1020,7 +1030,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Get the {@link BooleanMask3D} object representing the roi.<br>
+     * @return Get the {@link BooleanMask3D} object representing the roi.<br>
      * It contains the 3D rectangle mask bounds and the associated boolean array mask.<br>
      * 
      * @param inclusive
@@ -1066,9 +1076,10 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Compute the surface area in um2 given the pixel size informations from the specified Sequence.<br>
+     * @return Compute the surface area in um2 given the pixel size informations from the specified Sequence.<br>
      * Generic implementation of surface area computation using the number of contour point (approximation).<br>
      * This method should be overridden whenever possible to provide faster and accurate calculation.
+     * @param sequence sequence
      */
     public double computeSurfaceArea(Sequence sequence)
     {
@@ -1076,8 +1087,8 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns surface area of the 3D ROI in um2 given the pixel size informations from the specified Sequence.
-     * 
+     * @return Returns surface area of the 3D ROI in um2 given the pixel size informations from the specified Sequence.
+     * @param sequence sequence
      * @see #computeSurfaceArea(Sequence)
      * @see #getNumberOfContourPoints()
      */
@@ -1095,7 +1106,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Return surface area of the 3D ROI in pixels.<br>
+     * @return Return surface area of the 3D ROI in pixels.<br>
      * This is basically the number of pixel representing ROI edges.<br>
      * 
      * @deprecated Use {@link #getNumberOfContourPoints()} instead.
@@ -1109,7 +1120,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Return volume of the 3D ROI in pixels.<br>
+     * @return Return volume of the 3D ROI in pixels.<br>
      * This is basically the number of pixel contained in the ROI.<br>
      * 
      * @deprecated Use {@link #getNumberOfPoints()} instead.
@@ -1124,7 +1135,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns the T position.<br>
+     * @return Returns the T position.<br>
      * <code>-1</code> is a special value meaning the ROI is set on all T frames (infinite T
      * dimension).
      */
@@ -1134,7 +1145,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Sets T position of this 3D ROI.<br>
+     * @param value Sets T position of this 3D ROI.<br>
      * You cannot set the ROI on a negative T position as <code>-1</code> is a special value meaning
      * the ROI is set on all T frames (infinite T dimension).
      */
@@ -1156,7 +1167,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns the C position.<br>
+     * @return Returns the C position.<br>
      * <code>-1</code> is a special value meaning the ROI is set on all C channels (infinite C
      * dimension).
      */
@@ -1166,7 +1177,7 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Sets C position of this 3D ROI.<br>
+     * @param value Sets C position of this 3D ROI.<br>
      * You cannot set the ROI on a negative C position as <code>-1</code> is a special value meaning
      * the ROI is set on all C channels (infinite C dimension).
      */
@@ -1194,7 +1205,9 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Return true if the ROI is active for the specified T, C coordinates
+     * @param t int
+     * @param c int
+     * @return Return true if the ROI is active for the specified T, C coordinates
      */
     public boolean isActiveFor(int t, int c)
     {
@@ -1217,8 +1230,10 @@ public abstract class ROI3D extends ROI
     // }
 
     /**
-     * Returns true if specified point coordinates overlap the ROI edge.<br>
-     * Use {@link #contains(Point3D)} to test for content overlap instead.
+     * @return Returns true if specified point coordinates overlap the ROI edge.<br>
+     * @see #contains(Point3D) to test for content overlap instead.
+     * @param canvas canvas
+     * @param p 3D point
      */
     public boolean isOverEdge(IcyCanvas canvas, Point3D p)
     {
@@ -1226,9 +1241,13 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns true if specified point coordinates overlap the ROI edge.<br>
-     * Use {@link #contains(double, double, double)} to test for content overlap instead.</br>
+     * @return Returns true if specified point coordinates overlap the ROI edge.<br>
+     * @see #contains(double, double, double) to test for content overlap instead.<br>
      * We provide a default implementation to not break compatibility.
+     * @param canvas canvas
+     * @param x double
+     * @param y double
+     * @param z double
      */
     public boolean isOverEdge(IcyCanvas canvas, double x, double y, double z)
     {
@@ -1237,8 +1256,10 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns true if specified point coordinates overlap the ROI edge.<br>
-     * Use {@link #contains(Point5D)} to test for content overlap instead.
+     * @return Returns true if specified point coordinates overlap the ROI edge.<br>
+     * @see #contains(Point5D) to test for content overlap instead.
+     * @param canvas canvas
+     * @param p 5D Point
      */
     public boolean isOverEdge(IcyCanvas canvas, Point5D p)
     {
@@ -1246,9 +1267,15 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * Returns true if specified point coordinates overlap the ROI edge.<br>
-     * Use {@link #contains(double, double, double, double, double)} to test for content overlap
+     * @return Returns true if specified point coordinates overlap the ROI edge.<br>
+     * @see #contains(double, double, double, double, double) to test for content overlap
      * instead.
+     * @param canvas canvas
+     * @param z double
+     * @param y double
+     * @param x double
+     * @param t double
+     * @param c double
      */
     public boolean isOverEdge(IcyCanvas canvas, double x, double y, double z, double t, double c)
     {

@@ -31,7 +31,8 @@ import icy.type.DataType;
 public class ArrayType
 {
     /**
-     * Return the ArrayDataType for the specified array (passed as Object)
+     * @param array array
+     * @return Return the ArrayDataType for the specified array (passed as Object)
      */
     public static ArrayType getArrayInfo(Object array)
     {
@@ -56,7 +57,7 @@ public class ArrayType
     }
 
     /**
-     * Return the data type for this array
+     * @return Return the data type for this array
      */
     public DataType getDataType()
     {
@@ -64,7 +65,7 @@ public class ArrayType
     }
 
     /**
-     * Return number of dimension
+     * @return Return number of dimension
      */
     public int getDim()
     {
@@ -90,7 +91,8 @@ public class ArrayType
     }
 
     /**
-     * Return true if specified array data type is equals to current array data type
+     * @param arrayType array object
+     * @return Return true if specified array data type is equals to current array data type
      */
     public boolean isSame(ArrayType arrayType)
     {

@@ -42,7 +42,7 @@ public class ScalerPanel extends JPanel
     final ScalerViewer scalerViewer;
 
     /**
-     * associated Viewer & LUTBand
+     * associated Viewer &amp; LUTBand
      */
     protected final Viewer viewer;
     protected final LUTChannel lutChannel;

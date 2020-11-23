@@ -19,11 +19,11 @@
 package icy.gui.main;
 
 /**
- * @deprecated Use one of these interface instead:<br/>
- *             {@link GlobalViewerListener}<br/>
- *             {@link GlobalSequenceListener}<br/>
- *             {@link GlobalROIListener}<br/>
- *             {@link GlobalOverlayListener}<br/>
+ * @deprecated Use one of these interface instead:<br>
+ *             {@link GlobalViewerListener}<br>
+ *             {@link GlobalSequenceListener}<br>
+ *             {@link GlobalROIListener}<br>
+ *             {@link GlobalOverlayListener}<br>
  *             {@link GlobalPluginListener}
  */
 @Deprecated

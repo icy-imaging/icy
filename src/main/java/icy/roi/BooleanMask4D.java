@@ -349,7 +349,7 @@ public class BooleanMask4D
 
     /**
      * Build a new 4D boolean mask with specified bounds and 3D mask array.<br>
-     * The 3D mask array length should be >= to <code>bounds.getSizeT()</code>.
+     * The 3D mask array length should be &gt;= to <code>bounds.getSizeT()</code>.
      */
     public BooleanMask4D(Rectangle4D.Integer bounds, BooleanMask3D[] mask)
     {

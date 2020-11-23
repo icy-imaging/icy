@@ -57,7 +57,7 @@ import javax.swing.border.TitledBorder;
 /**
  * This class is a toolbox with many simple GUI routines.
  * 
- * @author Fabrice & Stephane
+ * @author Fabrice &amp; Stephane
  */
 public class GuiUtil
 {
@@ -358,9 +358,9 @@ public class GuiUtil
     /**
      * @param window
      *        the window to convert in IcyFrame
-     * @return an IcyFrame with the content of specified window (same properties and components)<br/>
+     * @return an IcyFrame with the content of specified window (same properties and components)<br>
      *         The returned frame windows event (opened, closing, closed) are forwarded to the original window to
-     *         maintain original event behaviors<br/>
+     *         maintain original event behaviors<br>
      *         Only the <code>closed</code> event is listened from the original window which will automatically call the
      *         close() method of the returned IcyFrame.
      */

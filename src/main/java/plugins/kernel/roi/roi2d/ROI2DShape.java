@@ -1275,7 +1275,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     /**
-     * This method give you lower level access on point remove operation but can be unsafe.<br/>
+     * This method give you lower level access on point remove operation but can be unsafe.<br>
      * Use {@link #removeSelectedPoint(IcyCanvas)} when possible.
      */
     public boolean removePoint(Anchor2D pt)

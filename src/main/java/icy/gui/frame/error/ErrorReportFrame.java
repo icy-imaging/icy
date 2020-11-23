@@ -16,7 +16,7 @@ import javax.swing.text.BadLocationException;
 public class ErrorReportFrame extends TitledFrame implements ActionListener
 {
     /**
-     * This function test if we already have an active error report frame opened.
+     * @return  This function test if we already have an active error report frame opened.
      */
     public static boolean hasErrorFrameOpened()
     {
@@ -31,6 +31,9 @@ public class ErrorReportFrame extends TitledFrame implements ActionListener
 
     /**
      * Create the frame.
+     * @param icon icon
+     * @param title string
+     * @param message string
      */
     public ErrorReportFrame(Icon icon, String title, String message)
     {
@@ -75,9 +78,9 @@ public class ErrorReportFrame extends TitledFrame implements ActionListener
     }
 
     /**
-     * Returns formatted report message (ready to send to web site).
-     * 
-     * @throws BadLocationException
+     * @return Returns formatted report message (ready to send to web site).
+     *
+     * @throws BadLocationException exceptioj
      */
     public String getReportMessage() throws BadLocationException
     {
@@ -85,7 +88,7 @@ public class ErrorReportFrame extends TitledFrame implements ActionListener
     }
 
     /**
-     * Set a specific action on the report button
+     * @param action Set a specific action on the report button
      */
     public void setReportAction(ActionListener action)
     {

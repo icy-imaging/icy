@@ -203,9 +203,9 @@ public class ErrorReportPanel extends JPanel
     }
 
     /**
-     * Returns formatted report message (ready to send to web site).
+     * @return Returns formatted report message (ready to send to web site).
      * 
-     * @throws BadLocationException
+     * @throws BadLocationException exception
      */
     public String getReportMessage() throws BadLocationException
     {

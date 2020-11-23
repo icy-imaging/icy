@@ -29,6 +29,7 @@ public interface PainterListener extends EventListener
     /**
      * @deprecated Use {@link Overlay} class and
      *             {@link OverlayListener#overlayChanged(OverlayEvent)} event instead.
+     * @param event event
      */
     @Deprecated
     public void painterChanged(PainterEvent event);

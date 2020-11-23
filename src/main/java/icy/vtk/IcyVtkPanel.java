@@ -347,7 +347,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     /**
-     * Zoom current view by specified factor (value < 1d means unzoom while value > 1d mean zoom)
+     * Zoom current view by specified factor (value &lt; 1d means unzoom while value &gt; 1d mean zoom)
      */
     public void zoomView(vtkCamera c, vtkRenderer r, double factor)
     {

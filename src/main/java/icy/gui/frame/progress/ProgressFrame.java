@@ -30,7 +30,7 @@ import javax.swing.JProgressBar;
 /**
  * A progress TaskFrame (thread safe)
  * 
- * @author fab & stephane
+ * @author fab &amp; stephane
  */
 public class ProgressFrame extends TaskFrame implements ProgressListener, Runnable
 {

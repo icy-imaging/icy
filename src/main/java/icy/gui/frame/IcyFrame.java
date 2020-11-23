@@ -70,7 +70,7 @@ import icy.util.StringUtil;
  * This class behave either as a JFrame or a JInternalFrame.<br>
  * IcyFrame should be 100% AWT safe
  * 
- * @author Fabrice de Chaumont & Stephane Dallongeville
+ * @author Fabrice de Chaumont &amp; Stephane Dallongeville
  */
 public class IcyFrame implements InternalFrameListener, WindowListener, ImageObserver, PropertyChangeListener
 {
@@ -125,7 +125,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     static ArrayList<IcyFrame> frames = new ArrayList<IcyFrame>();
 
     /**
-     * Return all active (not closed) IcyFrame
+     * @return Return all active (not closed) IcyFrame
      */
     public static ArrayList<IcyFrame> getAllFrames()
     {
@@ -136,7 +136,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Return all active IcyFrame which derive from the specified class
+     * @return Return all active IcyFrame which derive from the specified class
+     * @param frameClass class frame
      */
     public static ArrayList<IcyFrame> getAllFrames(Class<?> frameClass)
     {
@@ -157,7 +158,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Find IcyFrame corresponding to the specified JInternalFrame
+     * @return Find IcyFrame corresponding to the specified JInternalFrame
+     * @param frame internal frame
      */
     public static IcyFrame findIcyFrame(JInternalFrame frame)
     {
@@ -310,7 +312,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Permit IcyExternalFrame overriding
+     * @return Permit IcyExternalFrame overriding
+     * @param title string
      */
     protected IcyExternalFrame createExternalFrame(String title)
     {
@@ -318,7 +321,12 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Permit IcyInternalFrame overriding
+     * @return Permit IcyInternalFrame overriding
+     * @param title string
+     * @param resizable boolean
+     * @param iconifiable boolean
+     * @param maximizable boolean
+     * @param closable boolean
      */
     protected IcyInternalFrame createInternalFrame(String title, boolean resizable, boolean closable,
             boolean maximizable, boolean iconifiable)
@@ -327,7 +335,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Return true if the frame can be internalized
+     * @return Return true if the frame can be internalized
      */
     protected boolean canBeInternalized()
     {
@@ -587,7 +595,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Add to the container c
+     * @param c Add to the container c
      */
     public void addTo(final Container c)
     {
@@ -610,7 +618,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Add to the container c
+     * @param c Add to the container c
+     * @param index int
      */
     public void addTo(final Container c, final int index)
     {
@@ -634,6 +643,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * @deprecated Use {@link #addToDesktopPane()} instead.
+     * @param c container
+     * @param constraints object
      */
     @Deprecated
     public void addTo(final Container c, final Object constraints)
@@ -654,7 +665,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Add the frame to the Icy desktop pane with specified constraint.
+     * @param constraints Add the frame to the Icy desktop pane with specified constraint.
      */
     public void addToDesktopPane(final Object constraints)
     {
@@ -699,6 +710,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement add method
+     * @param comp component
      */
     public void add(final Component comp)
     {
@@ -722,6 +734,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement add method
+     * @param constraints object
+     * @param comp component
      */
     public void add(final Component comp, final Object constraints)
     {
@@ -745,6 +759,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement add method
+     * @param comp component
+     * @param name string
      */
     public void add(final String name, final Component comp)
     {
@@ -767,7 +783,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Remove from the container
+     * @param c Remove from the container
      */
     public void removeFrom(final Container c)
     {
@@ -810,7 +826,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement remove method
+     * @param comp Implement remove method
      */
     public void remove(final Component comp)
     {
@@ -946,7 +962,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Indicate if system menu show display item to switch frame state (internal / external)
+     * @param value Indicate if system menu show display item to switch frame state (internal / external)
      */
     public void setSwitchStateItemVisible(boolean value)
     {
@@ -1006,7 +1022,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Return the default system menu
+     * @return Return the default system menu
      */
     public JMenu getDefaultSystemMenu()
     {
@@ -1032,7 +1048,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getParent
+     * @return Implement getParent
      */
     public Container getParent()
     {
@@ -1047,7 +1063,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getContentPane method
+     * @return Implement getContentPane method
      */
     public Container getContentPane()
     {
@@ -1062,7 +1078,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getRootPane method
+     * @return Implement getRootPane method
      */
     public JRootPane getRootPane()
     {
@@ -1097,7 +1113,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getMinimumSize method
+     * @return Implement getMinimumSize method
      */
     public Dimension getMinimumSize()
     {
@@ -1112,7 +1128,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getMinimumSize method for internal frame only
+     * @return Implement getMinimumSize method for internal frame only
      */
     public Dimension getMinimumSizeInternal()
     {
@@ -1124,7 +1140,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getMinimumSize method for external frame only
+     * @return Implement getMinimumSize method for external frame only
      */
     public Dimension getMinimumSizeExternal()
     {
@@ -1136,7 +1152,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getMaximumSize method
+     * @return Implement getMaximumSize method
      */
     public Dimension getMaximumSize()
     {
@@ -1151,7 +1167,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getMaximumSize method for internal frame only
+     * @return Implement getMaximumSize method for internal frame only
      */
     public Dimension getMaximumSizeInternal()
     {
@@ -1163,7 +1179,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getMaximumSize method for external frame only
+     * @return Implement getMaximumSize method for external frame only
      */
     public Dimension getMaximumSizeExternal()
     {
@@ -1175,7 +1191,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getPreferredSize method
+     * @return Implement getPreferredSize method
      */
     public Dimension getPreferredSize()
     {
@@ -1190,7 +1206,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getPreferredSize method for internal frame only
+     * @return Implement getPreferredSize method for internal frame only
      */
     public Dimension getPreferredSizeInternal()
     {
@@ -1202,7 +1218,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getPreferredSize method for external frame only
+     * @return Implement getPreferredSize method for external frame only
      */
     public Dimension getPreferredSizeExternal()
     {
@@ -1214,7 +1230,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getSize method
+     * @return Implement getSize method
      */
     public Dimension getSize()
     {
@@ -1229,7 +1245,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getSize method for internal frame only
+     * @return Implement getSize method for internal frame only
      */
     public Dimension getSizeInternal()
     {
@@ -1241,7 +1257,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getSize method for external frame only
+     * @return Implement getSize method for external frame only
      */
     public Dimension getSizeExternal()
     {
@@ -1253,7 +1269,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getHeight method
+     * @return Implement getHeight method
      */
     public int getHeight()
     {
@@ -1268,7 +1284,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getHeight method for internal frame only
+     * @return Implement getHeight method for internal frame only
      */
     public int getHeightInternal()
     {
@@ -1280,7 +1296,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getHeight method for external frame only
+     * @return Implement getHeight method for external frame only
      */
     public int getHeightExternal()
     {
@@ -1292,7 +1308,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getWidth method
+     * @return Implement getWidth method
      */
     public int getWidth()
     {
@@ -1307,7 +1323,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getWidth method for internal frame only
+     * @return Implement getWidth method for internal frame only
      */
     public int getWidthInternal()
     {
@@ -1319,7 +1335,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getWidth method for external frame only
+     * @return Implement getWidth method for external frame only
      */
     public int getWidthExternal()
     {
@@ -1331,7 +1347,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getX method
+     * @return Implement getX method
      */
     public int getX()
     {
@@ -1346,7 +1362,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getX method for internal frame only
+     * @return Implement getX method for internal frame only
      */
     public int getXInternal()
     {
@@ -1358,7 +1374,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getX method for external frame only
+     * @return Implement getX method for external frame only
      */
     public int getXExternal()
     {
@@ -1370,7 +1386,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getY method
+     * @return Implement getY method
      */
     public int getY()
     {
@@ -1385,7 +1401,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getY method for internal frame only
+     * @return Implement getY method for internal frame only
      */
     public int getYInternal()
     {
@@ -1397,7 +1413,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getY method for external frame only
+     * @return Implement getY method for external frame only
      */
     public int getYExternal()
     {
@@ -1409,7 +1425,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getLocation method
+     * @return Implement getLocation method
      */
     public Point getLocation()
     {
@@ -1424,7 +1440,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getLocation method
+     * @return Implement getLocation method
      */
     public Point getLocationInternal()
     {
@@ -1436,7 +1452,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getLocation method for external frame only
+     * @return Implement getLocation method for external frame only
      */
     public Point getLocationExternal()
     {
@@ -1448,7 +1464,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getBounds method
+     * @return Implement getBounds method
      */
     public Rectangle getBounds()
     {
@@ -1463,7 +1479,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getBounds method for internal frame only
+     * @return Implement getBounds method for internal frame only
      */
     public Rectangle getBoundsInternal()
     {
@@ -1475,7 +1491,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getBounds method for external frame only
+     * @return Implement getBounds method for external frame only
      */
     public Rectangle getBoundsExternal()
     {
@@ -1487,7 +1503,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getBounds method for external frame only
+     * @return Implement getBounds method for external frame only
      */
     public Rectangle getVisibleRect()
     {
@@ -1506,7 +1522,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getJMenuBar method
+     * @return Implement getJMenuBar method
      */
     public JMenuBar getJMenuBar()
     {
@@ -1521,7 +1537,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Returns the content pane InputMap
+     * @return Returns the content pane InputMap
+     * @param condition int
      */
     public InputMap getInputMap(int condition)
     {
@@ -1536,7 +1553,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Returns the content pane InputMap
+     * @return Returns the content pane InputMap
      */
     public ActionMap getActionMap()
     {
@@ -1551,7 +1568,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getToolkit method
+     * @return Implement getToolkit method
      */
     public Toolkit getToolkit()
     {
@@ -1566,7 +1583,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement setTitle method
+     * @return Implement setTitle method
      */
     public String getTitle()
     {
@@ -1581,7 +1598,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Return true if title bar is visible
+     * @return Return true if title bar is visible
      */
     public boolean getTitleBarVisible()
     {
@@ -1608,7 +1625,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement getMousePosition method
+     * @return Implement getMousePosition method
      */
     public Point getMousePosition()
     {
@@ -1623,7 +1640,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement isMinimized method
+     * @return Implement isMinimized method
      */
     public boolean isMinimized()
     {
@@ -1638,7 +1655,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement isMinimized method for internal frame only
+     * @return Implement isMinimized method for internal frame only
      */
     public boolean isMinimizedInternal()
     {
@@ -1650,7 +1667,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement isMinimized method for external frame only
+     * @return Implement isMinimized method for external frame only
      */
     public boolean isMinimizedExternal()
     {
@@ -1662,7 +1679,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement isMaximized method
+     * @return Implement isMaximized method
      */
     public boolean isMaximized()
     {
@@ -1677,7 +1694,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement isMaximized method for internal frame only
+     * @return Implement isMaximized method for internal frame only
      */
     public boolean isMaximizedInternal()
     {
@@ -1689,7 +1706,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement isMaximized method for external frame only
+     * @return Implement isMaximized method for external frame only
      */
     public boolean isMaximizedExternal()
     {
@@ -1701,7 +1718,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement isVisible method
+     * @return Implement isVisible method
      */
     public boolean isVisible()
     {
@@ -1716,7 +1733,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement isResizable method
+     * @return Implement isResizable method
      */
     public boolean isResizable()
     {
@@ -1731,7 +1748,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement isClosable method
+     * @return Implement isClosable method
      */
     public boolean isClosable()
     {
@@ -1747,7 +1764,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * return true if frame is in internalized state
+     * @return return true if frame is in internalized state
      */
     public boolean isInternalized()
     {
@@ -1755,7 +1772,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * return true if frame is in externalized state
+     * @return return true if frame is in externalized state
      */
     public boolean isExternalized()
     {
@@ -1763,7 +1780,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * return true if frame is active
+     * @return return true if frame is active
      */
     public boolean isActive()
     {
@@ -1778,7 +1795,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement isAlwaysOnTop method (only for externalized frame)
+     * @return Implement isAlwaysOnTop method (only for externalized frame)
      */
     public boolean isAlwaysOnTop()
     {
@@ -1790,7 +1807,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * Implement hasFocus method
+     * @return Implement hasFocus method
      */
     public boolean hasFocus()
     {
@@ -1806,6 +1823,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setTitle method
+     * @param title string
      */
     public void setTitle(final String title)
     {
@@ -1827,6 +1845,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setToolTipText method (only for internalized frame)
+     * @param text string
      */
     public void setToolTipText(final String text)
     {
@@ -1849,6 +1868,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setBackground method
+     * @param value color
      */
     public void setBackground(final Color value)
     {
@@ -1870,6 +1890,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setForeground method
+     * @param value color
      */
     public void setForeground(final Color value)
     {
@@ -1891,6 +1912,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setResizable method
+     * @param value boolean
      */
     public void setResizable(final boolean value)
     {
@@ -1913,6 +1935,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setLocation method
+     * @param p point
      */
     public void setLocation(final Point p)
     {
@@ -1936,6 +1959,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setLocation method
+     * @param x int
+     * @param y int
      */
     public void setLocation(final int x, final int y)
     {
@@ -1959,6 +1984,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setLocation method for internal frame only
+     * @param p point
      */
     public void setLocationInternal(final Point p)
     {
@@ -1979,6 +2005,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setLocation method for internal frame only
+     * @param x int
+     * @param y int
      */
     public void setLocationInternal(final int x, final int y)
     {
@@ -1999,6 +2027,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setLocation method for external frame only
+     * @param p point
      */
     public void setLocationExternal(final Point p)
     {
@@ -2019,6 +2048,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setLocation method for external frame only
+     * @param x int
+     * @param y int
      */
     public void setLocationExternal(final int x, final int y)
     {
@@ -2039,6 +2070,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setSize method
+     * @param d dimension
      */
     public void setSize(final Dimension d)
     {
@@ -2062,6 +2094,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setSize method
+     * @param width int
+     * @param height int
      */
     public void setSize(final int width, final int height)
     {
@@ -2085,6 +2119,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setSize method for internal frame only
+     * @param d dimension
      */
     public void setSizeInternal(final Dimension d)
     {
@@ -2105,6 +2140,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setSize method for internal frame only
+     * @param width int
+     * @param height int
      */
     public void setSizeInternal(final int width, final int height)
     {
@@ -2125,6 +2162,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setSize method for external frame only
+     * @param d diemension
      */
     public void setSizeExternal(final Dimension d)
     {
@@ -2145,6 +2183,8 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setSize method for external frame only
+     * @param width int
+     * @param height int
      */
     public void setSizeExternal(final int width, final int height)
     {
@@ -2165,6 +2205,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setPreferredSize method
+     * @param d dimension
      */
     public void setPreferredSize(final Dimension d)
     {
@@ -2188,6 +2229,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setPreferredSize method for internal frame only
+     * @param d dimension
      */
     public void setPreferredSizeInternal(final Dimension d)
     {
@@ -2208,6 +2250,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setPreferredSize method for external frame only
+     * @param d dimension
      */
     public void setPreferredSizeExternal(final Dimension d)
     {
@@ -2228,6 +2271,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMinimumSize method
+     * @param d dimension
      */
     public void setMinimumSize(final Dimension d)
     {
@@ -2251,6 +2295,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMaximumSize method
+     * @param d dimension
      */
     public void setMaximumSize(final Dimension d)
     {
@@ -2274,6 +2319,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMinimumSize method for internal frame only
+     * @param d diemension
      */
     public void setMinimumSizeInternal(final Dimension d)
     {
@@ -2294,6 +2340,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMaximumSize method for internal frame only
+     * @param d diemension
      */
     public void setMaximumSizeInternal(final Dimension d)
     {
@@ -2314,6 +2361,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMinimumSize method for external frame only
+     * @param d dimension
      */
     public void setMinimumSizeExternal(final Dimension d)
     {
@@ -2334,6 +2382,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMaximumSize method for external frame only
+     * @param d dimension
      */
     public void setMaximumSizeExternal(final Dimension d)
     {
@@ -2354,6 +2403,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setBounds method
+     * @param r rectangle
      */
     public void setBounds(final Rectangle r)
     {
@@ -2378,6 +2428,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMaximisable method
+     * @param value boolean
      */
     public void setMaximisable(final boolean value)
     {
@@ -2399,6 +2450,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMinimized method
+     * @param value boolean
      */
     public void setMinimized(final boolean value)
     {
@@ -2426,6 +2478,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMinimized method for internal frame only
+     * @param value boolean
      */
     public void setMinimizedInternal(final boolean value)
     {
@@ -2450,6 +2503,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMinimized method for external frame only
+     * @param value boolean
      */
     public void setMinimizedExternal(final boolean value)
     {
@@ -2474,6 +2528,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMaximized method
+     * @param value boolean
      */
     public void setMaximized(final boolean value)
     {
@@ -2501,6 +2556,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMaximized method for internal frame only
+     * @param value boolean
      */
     public void setMaximizedInternal(final boolean value)
     {
@@ -2525,6 +2581,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setMaximized method for external frame only
+     * @param value boolean
      */
     public void setMaximizedExternal(final boolean value)
     {
@@ -2549,6 +2606,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setClosable method
+     * @param value boolean
      */
     public void setClosable(final boolean value)
     {
@@ -2569,6 +2627,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setDefaultCloseOperation method
+     * @param operation int
      * 
      * @see JFrame#setDefaultCloseOperation(int)
      */
@@ -2592,6 +2651,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setFocusable method
+     * @param value boolean
      */
     public void setFocusable(final boolean value)
     {
@@ -2613,6 +2673,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setVisible method
+     * @param value boolean
      */
     public void setVisible(final boolean value)
     {
@@ -2636,6 +2697,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setAlwaysOnTop method (only for externalized frame)
+     * @param alwaysOnTop boolean
      */
     public void setAlwaysOnTop(final boolean alwaysOnTop)
     {
@@ -2656,6 +2718,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setJMenuBar method
+     * @param m JmenuBar
      */
     public void setJMenuBar(final JMenuBar m)
     {
@@ -2679,6 +2742,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Hide or show the title bar (frame should not be displayable when you set this property)
+     * @param value boolean
      */
     public void setTitleBarVisible(final boolean value)
     {
@@ -2700,6 +2764,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setLayout method
+     * @param layout Layout manager
      */
     public void setLayout(final LayoutManager layout)
     {
@@ -2723,6 +2788,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setBorder method (only for internal frame)
+     * @param border border
      */
     public void setBorder(final Border border)
     {
@@ -2743,6 +2809,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setContentPane method
+     * @param value container
      */
     public void setContentPane(final Container value)
     {
@@ -2910,6 +2977,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Fire frame activated event
+     * @param e Icy frame event
      */
     private void fireFrameActivated(IcyFrameEvent e)
     {
@@ -2919,6 +2987,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Fire frame deactivated event
+     * @param e Icy frame event
      */
     private void fireFrameDeactivated(IcyFrameEvent e)
     {
@@ -2928,6 +2997,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Fire frame closing event
+     * @param e Icy frame event
      */
     private void fireFrameClosing(IcyFrameEvent e)
     {
@@ -2937,6 +3007,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Fire frame closed event
+     * @param e Icy frame event
      */
     private void fireFrameClosed(IcyFrameEvent e)
     {
@@ -2946,6 +3017,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Fire frame iconified event
+     * @param e Icy frame event
      */
     private void fireFrameIconified(IcyFrameEvent e)
     {
@@ -2955,6 +3027,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Fire frame deiconified event
+     * @param e Icy frame event
      */
     private void fireFrameDeiconified(IcyFrameEvent e)
     {
@@ -2964,6 +3037,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Fire frame opened event
+     * @param e Icy frame event
      */
     private void fireFrameOpened(IcyFrameEvent e)
     {
@@ -2973,6 +3047,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Fire frame internalized event
+     * @param e Icy frame event
      */
     void fireFrameInternalized(IcyFrameEvent e)
     {
@@ -2982,6 +3057,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Fire frame externalized event
+     * @param e Icy frame event
      */
     void fireFrameExternalized(IcyFrameEvent e)
     {
@@ -2991,6 +3067,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement addFrameListener method
+     * @param l Icy frame listener
      */
     public void addFrameListener(IcyFrameListener l)
     {
@@ -3003,6 +3080,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement removeFrameListener method
+     * @param l Icy frame listener
      */
     public void removeFrameListener(IcyFrameListener l)
     {
@@ -3015,6 +3093,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement addComponentListener method
+     * @param l Icy frame listener
      */
     public void addComponentListener(ComponentListener l)
     {
@@ -3028,6 +3107,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement removeComponentListener method
+     * @param l Icy frame listener
      */
     public void removeComponentListener(ComponentListener l)
     {
@@ -3041,6 +3121,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement addKeyListener method
+     * @param l Icy frame listener
      */
     public void addKeyListener(KeyListener l)
     {
@@ -3054,6 +3135,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement addKeyListener method
+     * @param l Icy frame listener
      */
     public void removeKeyListener(KeyListener l)
     {
@@ -3067,6 +3149,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * internal close stuff
+     * @param e event
      */
     public void frameClosed(AWTEvent e)
     {

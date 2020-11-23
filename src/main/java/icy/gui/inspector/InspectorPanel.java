@@ -55,7 +55,7 @@ import icy.system.thread.ThreadUtil;
 /**
  * This window shows all details about the current sequence.
  * 
- * @author Fabrice de Chaumont & Stephane
+ * @author Fabrice de Chaumont &amp; Stephane
  */
 public class InspectorPanel extends ExternalizablePanel implements ActiveViewerListener, ActiveSequenceListener
 {

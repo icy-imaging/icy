@@ -35,7 +35,7 @@ import javax.swing.JPanel;
 /**
  * Use it to create a Task Window on the border like the loader (Thread Safe)<br>
  * 
- * @author fab & Stephane
+ * @author fab &amp; Stephane
  */
 public abstract class TaskFrame extends IcyFrame
 {
@@ -51,7 +51,7 @@ public abstract class TaskFrame extends IcyFrame
     }
 
     /**
-     * @param title
+     * @param title string
      */
     public TaskFrame(String title)
     {
@@ -59,8 +59,8 @@ public abstract class TaskFrame extends IcyFrame
     }
 
     /**
-     * @param title
-     * @param resizable
+     * @param title string
+     * @param resizable boolean
      */
     public TaskFrame(String title, boolean resizable)
     {
@@ -68,9 +68,9 @@ public abstract class TaskFrame extends IcyFrame
     }
 
     /**
-     * @param title
-     * @param resizable
-     * @param closable
+     * @param title string
+     * @param resizable boolean
+     * @param closable boolean
      */
     public TaskFrame(String title, boolean resizable, boolean closable)
     {
@@ -78,10 +78,10 @@ public abstract class TaskFrame extends IcyFrame
     }
 
     /**
-     * @param title
-     * @param resizable
-     * @param closable
-     * @param maximizable
+     * @param title string
+     * @param resizable boolean
+     * @param closable boolean
+     * @param maximizable boolean
      */
     public TaskFrame(String title, boolean resizable, boolean closable, boolean maximizable)
     {
@@ -89,11 +89,11 @@ public abstract class TaskFrame extends IcyFrame
     }
 
     /**
-     * @param title
-     * @param resizable
-     * @param closable
-     * @param maximizable
-     * @param iconifiable
+     * @param title string
+     * @param resizable boolean
+     * @param closable boolean
+     * @param maximizable boolean
+     * @param iconifiable boolean
      */
     public TaskFrame(String title, boolean resizable, boolean closable, boolean maximizable, boolean iconifiable)
     {
@@ -189,7 +189,7 @@ public abstract class TaskFrame extends IcyFrame
     }
 
     /**
-     * Used by the TaskWindowManager to close the TaskFrame.<br>
+     * @return Used by the TaskWindowManager to close the TaskFrame.<br>
      * (internal use only)
      */
     public boolean canRemove()

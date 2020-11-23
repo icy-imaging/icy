@@ -27,9 +27,6 @@ public class SingleProcessor extends Processor
 {
     private final boolean queueEnabled;
 
-    /**
-     * 
-     */
     public SingleProcessor(boolean enableQueue, String name)
     {
         super(1, 1);
@@ -39,9 +36,6 @@ public class SingleProcessor extends Processor
         setThreadName(name);
     }
 
-    /**
-     * 
-     */
     public SingleProcessor(boolean enableQueue)
     {
         this(enableQueue, "SingleProcessor");
@@ -74,6 +68,8 @@ public class SingleProcessor extends Processor
 
     /**
      * @deprecated use {@link #submit(Runnable)} instead.
+     * @param task running task
+     * @return true if submited task is not null
      */
     @Deprecated
     public synchronized boolean requestProcess(Runnable task)
@@ -83,6 +79,9 @@ public class SingleProcessor extends Processor
 
     /**
      * @deprecated use {@link #submit(Runnable, boolean)} instead
+     * @param task running task
+     * @param onAWTEventThread thread listener
+     * @return true if submited task is not null
      */
     @Deprecated
     public synchronized boolean requestProcess(Runnable task, boolean onAWTEventThread)

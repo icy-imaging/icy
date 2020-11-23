@@ -15,7 +15,7 @@ import javax.swing.undo.UndoableEdit;
 public interface IcyUndoableEdit extends UndoableEdit
 {
     /**
-     * Retrieve source of this edit
+     * @return Retrieve source of this edit
      */
     public Object getSource();
 

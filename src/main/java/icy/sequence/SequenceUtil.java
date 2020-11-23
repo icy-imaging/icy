@@ -1118,7 +1118,7 @@ public class SequenceUtil
      * @param channels
      *        Selected channel for each sequence (<code>channels.length = sequences.length</code>)<br>
      *        If you want to select 2 or more channels from a sequence, just duplicate the sequence
-     *        entry in the <code>sequences</code> parameter :</code><br>
+     *        entry in the <code>sequences</code> parameter :<br>
      *        <code>sequences[n] = Sequence1; channels[n] = 0;</code><br>
      *        <code>sequences[n+1] = Sequence1; channels[n+1] = 2;</code><br>
      *        <code>...</code>

@@ -16,12 +16,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This {@link PluginROIDescriptor} implements the position ROI descriptors:<br/>
- * <li>Position X (in pixel)</li><br/>
- * <li>Position Y (in pixel)</li><br/>
- * <li>Position C (in pixel)</li><br/>
- * <li>Position Z (in pixel)</li><br/>
+ * This {@link PluginROIDescriptor} implements the position ROI descriptors:<br>
+ * <ul>
+ * <li>Position X (in pixel)</li>
+ * <li>Position Y (in pixel)</li>
+ * <li>Position C (in pixel)</li>
+ * <li>Position Z (in pixel)</li>
  * <li>Position T (in pixel)</li>
+ * </ul>
  * 
  * @author Stephane
  */

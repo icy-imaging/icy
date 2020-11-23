@@ -34,7 +34,7 @@ public class IcyLutBandViewer extends JPanel
      */
     private static final long serialVersionUID = 2604073326953597127L;
     /**
-     * associated Viewer & LUTBand
+     * associated Viewer &amp; LUTBand
      */
     protected final Viewer viewer;
     protected final LUTBand lutBand;

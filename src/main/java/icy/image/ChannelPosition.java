@@ -120,7 +120,7 @@ public class ChannelPosition extends ImagePosition
     }
 
     /**
-     * Return first undefined position with following priority C -> T -> Z
+     * Return first undefined position with following priority C -&gt; T -&gt; Z
      */
     public char getAlternateFirstEmptyPos()
     {
@@ -132,7 +132,7 @@ public class ChannelPosition extends ImagePosition
     }
 
     /**
-     * Return first undefined position with following priority T -> Z -> C
+     * Return first undefined position with following priority T -&gt; Z -&gt; C
      */
     @Override
     public char getFirstEmptyPos()
@@ -151,7 +151,7 @@ public class ChannelPosition extends ImagePosition
     }
 
     /**
-     * Return last undefined position with following priority Z -> T -> C
+     * Return last undefined position with following priority Z -&gt; T -&gt; C
      */
     public char getAlternateLastEmptyPos()
     {
@@ -169,7 +169,7 @@ public class ChannelPosition extends ImagePosition
     }
 
     /**
-     * Return last undefined position with following priority C -> Z -> T
+     * Return last undefined position with following priority C -&gt; Z -&gt; T
      */
     @Override
     public char getLastEmptyPos()
@@ -199,7 +199,7 @@ public class ChannelPosition extends ImagePosition
     }
 
     /**
-     * Compare to another ImagePosition with following priority T -> Z -> C
+     * Compare to another ImagePosition with following priority T -&gt; Z -&gt; C
      */
     @Override
     public int compareTo(ImagePosition o)
@@ -220,7 +220,7 @@ public class ChannelPosition extends ImagePosition
     }
 
     /**
-     * Compare to another BandPosition with following priority C -> T -> Z
+     * Compare to another BandPosition with following priority C -&gt; T -&gt; Z
      */
     public int alternateCompareTo(ChannelPosition cp)
     {

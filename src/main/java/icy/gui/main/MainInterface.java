@@ -51,7 +51,7 @@ import icy.undo.IcyUndoManager;
  * MainInterface
  * 
  * @see icy.gui.main.MainInterfaceGui
- * @author Fabrice de Chaumont & Stephane
+ * @author Fabrice de Chaumont &amp; Stephane
  */
 public interface MainInterface
 {

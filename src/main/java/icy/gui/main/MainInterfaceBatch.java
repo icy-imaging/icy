@@ -54,7 +54,7 @@ import icy.util.StringUtil;
  * Default implementation used when Icy is launched in batch mode, without any GUI
  * 
  * @see MainInterfaceGui
- * @author Nicolas HERVE & Stephane
+ * @author Nicolas HERVE &amp; Stephane
  */
 public class MainInterfaceBatch implements MainInterface
 {

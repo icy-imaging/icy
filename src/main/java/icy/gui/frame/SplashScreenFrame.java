@@ -35,7 +35,7 @@ import javax.swing.JPanel;
 /**
  * Animated ICY Logo.
  * 
- * @author Fab & Stephane
+ * @author Fab &amp; Stephane
  */
 public class SplashScreenFrame extends JFrame
 {

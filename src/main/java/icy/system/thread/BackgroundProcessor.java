@@ -27,6 +27,9 @@ public class BackgroundProcessor
 {
     /**
      * @deprecated Use {@link ThreadUtil#bgRun(Runnable, boolean)} instead
+     * @param runnable run process
+     * @param onEventThread if an event is happening to the thread
+     * @return boolean - if background process is running
      */
     @Deprecated
     public static boolean bgRun(Runnable runnable, boolean onEventThread)
@@ -36,6 +39,8 @@ public class BackgroundProcessor
 
     /**
      * @deprecated Use {@link ThreadUtil#bgRun(Runnable)} instead
+     * @param runnable run process
+     * @return boolean - if background process is running
      */
     @Deprecated
     public static boolean bgRun(Runnable runnable)
@@ -45,6 +50,7 @@ public class BackgroundProcessor
 
     /**
      * @deprecated Use {@link ThreadUtil#bgRunWait(Runnable)} instead
+     * @param runnable run process
      */
     @Deprecated
     public static void bgRunWait(Runnable runnable)
@@ -54,6 +60,7 @@ public class BackgroundProcessor
 
     /**
      * @deprecated Use {@link ThreadUtil#getActiveBgTaskCount()} instead
+     * @return active count
      */
     @Deprecated
     public static int getActiveCount()
@@ -63,6 +70,7 @@ public class BackgroundProcessor
 
     /**
      * @deprecated
+     * @return true
      */
     @Deprecated
     public static boolean hasIdleSlots()

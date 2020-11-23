@@ -56,7 +56,7 @@ public class Histogram
      * @param maxValue
      *        maximum value
      * @param nbBin
-     *        number of desired bins (should be > 0).
+     *        number of desired bins (should be &gt; 0).
      * @param integer
      *        If true the input value are considered as integer values.<br>
      *        Bins number is then clamped to values range to not bias the histogram.<br>

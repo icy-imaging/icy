@@ -24,7 +24,7 @@ import java.util.Arrays;
  * Implementation of the Hungarian / Munkres-Kuhn algorithm<br>
  * for rectangular assignment problem.
  * 
- * @author Nicolas Chenouard & Stephane
+ * @author Nicolas Chenouard &amp; Stephane
  */
 public class HungarianAlgorithm
 {

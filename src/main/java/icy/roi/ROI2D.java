@@ -1392,7 +1392,7 @@ public abstract class ROI2D extends ROI
     }
 
     /**
-     * Returns a sub part of the ROI.<br/>
+     * Returns a sub part of the ROI.<br>
      * <code>null</code> can be returned if result is empty.
      * 
      * @param z

@@ -137,7 +137,7 @@ public class ROI2DEllipse extends ROI2DRectShape
 
     /**
      * Calculating the perimeter of an ellipse is non-trivial. Here we follow the approximation
-     * proposed in:<br/>
+     * proposed in:<br>
      * Ramanujan, S., "Modular Equations and Approximations to Pi," Quart. J. Pure. Appl. Math.,
      * v.45 (1913-1914), 350-372
      * 

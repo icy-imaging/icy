@@ -135,10 +135,12 @@ public class SearchEngine implements SearchResultConsumer, PluginLoaderListener
      * @param text
      *        Text used for the search request, it can contains several words and use operators.<br>
      *        Examples:<br>
+     *        <ul>
      *        <li><i>spot detector</i> : any of word should be present</li>
      *        <li><i>+spot +detector</i> : both words should be present</li>
-     *        <li>"spot detector"</i> : the exact expression should be present</li>
+     *        <li><i>"spot detector"</i> : the exact expression should be present</li>
      *        <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
+     *        </ul>
      * @see #cancelSearch()
      */
     public void search(String text)

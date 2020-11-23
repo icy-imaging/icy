@@ -1625,8 +1625,6 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * 
      * @param reader
      *        Reader used to load the pixels
-     * @param dataType
-     *        pixel data type
      * @param rect
      *        Define the pixels rectangular region we want to load (considering current selected image resolution).<br>
      *        Should be adjusted if <i>thumbnail</i> parameter is <code>true</code>
@@ -1653,7 +1651,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * @return 1D array containing pixels data.<br>
      *         The type of the array depends from the internal image data type
      * @throws UnsupportedOperationException
-     *         if the XY plane size is >= 2^31 pixels
+     *         if the XY plane size is &gt;= 2^31 pixels
      * @throws OutOfMemoryError
      *         if there is not enough memory to open the image
      */
@@ -1787,7 +1785,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      *        converted data and to build the result image (can be <code>null</code>)
      * @return {@link IcyBufferedImage}
      * @throws UnsupportedOperationException
-     *         if the XY plane size is >= 2^31 pixels
+     *         if the XY plane size is &gt;= 2^31 pixels
      * @throws OutOfMemoryError
      *         if there is not enough memory to open the image
      */
@@ -1952,7 +1950,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      *        and to build the result image (can be <code>null</code>)
      * @return {@link IcyBufferedImage}
      * @throws UnsupportedOperationException
-     *         if the XY plane size is >= 2^31 pixels
+     *         if the XY plane size is &gt;= 2^31 pixels
      * @throws OutOfMemoryError
      *         if there is not enough memory to open the image
      */
@@ -2166,7 +2164,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      *        read the whole RGB raw data (can be <code>null</code>)
      * @return byte array containing pixels data.<br>
      * @throws UnsupportedOperationException
-     *         if the XY plane size is >= 2^31 pixels
+     *         if the XY plane size is &gt;= 2^31 pixels
      * @throws OutOfMemoryError
      *         if there is not enough memory to open the image
      */

@@ -29,6 +29,8 @@ public class InstanceProcessor extends Processor
 {
     /**
      * Create an InstanceProcessor
+     * @param maxWaiting waiting threads
+     * @param priority priority of the thread
      */
     public InstanceProcessor(int maxWaiting, int priority)
     {
@@ -39,6 +41,7 @@ public class InstanceProcessor extends Processor
 
     /**
      * Create an InstanceProcessor
+     * @param priority priority of the thread
      */
     public InstanceProcessor(int priority)
     {

@@ -14,7 +14,7 @@ public class OpenGLUtil
 {
     /**
      * Returns <code>true</code> is the specified version of OpenGL is supported by the graphics card (or by its
-     * driver).<br/>
+     * driver).<br>
      * Ex: if (isOpenGLSupported(2)) // test for OpenGL 2 compliance
      * 
      * @param version
@@ -27,9 +27,9 @@ public class OpenGLUtil
     
     /**
      * Returns <code>true</code> is the specified version of OpenGL is supported by the graphics card
-     * (or by its driver).<br/>
-     * Ex: if (isOpenGLSupported(2, true))   // test if GPU supports OpenGL 2 (hardware support)<br/>
-     *     if (isOpenGLSupported(3, false))  // test if driver support OpenGL 3 (hardware or software implementation)<br/>
+     * (or by its driver).<br>
+     * Ex: if (isOpenGLSupported(2, true))   // test if GPU supports OpenGL 2 (hardware support)<br>
+     *     if (isOpenGLSupported(3, false))  // test if driver support OpenGL 3 (hardware or software implementation)<br>
      * 
      * @param version
      *        the version of OpenGL we want to test for (1 to 4)

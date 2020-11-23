@@ -76,7 +76,7 @@ import plugins.kernel.importer.LociImporterPlugin;
 /**
  * Sequence / Image loader class.
  * 
- * @author Fabrice de Chaumont & Stephane
+ * @author Fabrice de Chaumont &amp; Stephane
  */
 public class Loader
 {
@@ -866,7 +866,7 @@ public class Loader
     }
 
     /**
-     * Check if we can open the given image plane resolution (XY size < 2^31).<br>
+     * Check if we can open the given image plane resolution (XY size &lt; 2^31).<br>
      * If the image plane is too large the method throw an exception with an informative error
      * message about the encountered limitation.
      * 
@@ -881,7 +881,7 @@ public class Loader
      * @param messageSuffix
      *        message suffix for the exception if wanted
      * @throws UnsupportedOperationException
-     *         if the XY plane size is >= 2^31 pixels
+     *         if the XY plane size is &gt;= 2^31 pixels
      * @return the number of pixels of the image plane
      */
     public static long checkOpeningPlane(int resolution, int sizeX, int sizeY, String messageSuffix)
@@ -903,7 +903,7 @@ public class Loader
     /**
      * Check if we have enough resource to open the image defined by the given size information and
      * wanted resolution.<br>
-     * If the image is too large to be displayed at full resolution (XY plane size > 2^31) or if we
+     * If the image is too large to be displayed at full resolution (XY plane size &gt; 2^31) or if we
      * don't have enough
      * memory to store the whole image the method throw an exception with an informative error
      * message about the
@@ -928,7 +928,7 @@ public class Loader
      * @param messageSuffix
      *        message suffix for the exception if wanted
      * @throws UnsupportedOperationException
-     *         if the XY plane size is >= 2^31 pixels
+     *         if the XY plane size is &gt;= 2^31 pixels
      * @throws OutOfMemoryError
      *         if there is not enough memory to open the image
      */
@@ -961,7 +961,7 @@ public class Loader
     /**
      * Check if we have enough resource to open the image defined by the given metadata information, series index and
      * wanted resolution.<br>
-     * If the image is too large to be displayed at full resolution (XY plane size > 2^31) or if we* don't have enough
+     * If the image is too large to be displayed at full resolution (XY plane size &gt; 2^31) or if we* don't have enough
      * memory to store the whole image the method throw an exception with an informative error message about the
      * encountered limitation.
      * 
@@ -981,7 +981,7 @@ public class Loader
      * @param messageSuffix
      *        message suffix for the exception if wanted
      * @throws UnsupportedOperationException
-     *         if the XY plane size is >= 2^31 pixels
+     *         if the XY plane size is &gt;= 2^31 pixels
      * @throws OutOfMemoryError
      *         if there is not enough memory to open the image
      */
@@ -996,7 +996,7 @@ public class Loader
     /**
      * Check if we have enough resource to open the image defined by the given metadata information, series index and
      * wanted resolution.<br>
-     * If the image is too large to be displayed at full resolution (XY plane size > 2^31) or if we don't have enough
+     * If the image is too large to be displayed at full resolution (XY plane size &gt; 2^31) or if we don't have enough
      * memory to store the whole image the method throw an exception with an informative error message about the
      * encountered limitation.
      * 
@@ -1012,7 +1012,7 @@ public class Loader
      * @param messageSuffix
      *        message suffix for the exception if wanted
      * @throws UnsupportedOperationException
-     *         if the XY plane size is >= 2^31 pixels
+     *         if the XY plane size is &gt;= 2^31 pixels
      * @throws OutOfMemoryError
      *         if there is not enough memory to open the image
      */

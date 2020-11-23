@@ -33,7 +33,7 @@ public class ROIIterator implements Position5DIterator
      * @param roi
      *        ROI defining the region to iterate.
      * @param region
-     *        A 5D region to limit the ROI region area to iterate for.<br/>
+     *        A 5D region to limit the ROI region area to iterate for.<br>
      *        Keep it to <code>null</code> to iterate all over the ROI.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels in the ROI are included.

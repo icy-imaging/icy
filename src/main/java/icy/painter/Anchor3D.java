@@ -266,7 +266,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Sets the X coordinate position
+     * @param value Sets the X coordinate position
      */
     public void setX(double value)
     {
@@ -282,7 +282,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Sets the Y coordinate position
+     * @param value Sets the Y coordinate position
      */
     public void setY(double value)
     {
@@ -298,7 +298,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Sets the Z coordinate position
+     * @param value Sets the Z coordinate position
      */
     public void setZ(double value)
     {
@@ -306,7 +306,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Get anchor position (return the internal reference)
+     * @return Get anchor position (return the internal reference)
      */
     public Point3D getPositionInternal()
     {
@@ -314,7 +314,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Get anchor position
+     * @return Get anchor position
      */
     public Point3D getPosition()
     {
@@ -322,7 +322,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Sets anchor position
+     * @param p Sets anchor position
      */
     public void setPosition(Point3D p)
     {
@@ -331,6 +331,9 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
 
     /**
      * Sets anchor position
+     * @param x doubke
+     * @param y double
+     * @param z double
      */
     public void setPosition(double x, double y, double z)
     {
@@ -348,6 +351,9 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
 
     /**
      * Performs a translation on the anchor position
+     * @param dx double
+     * @param dy double
+     * @param dz double
      */
     public void translate(double dx, double dy, double dz)
     {
@@ -363,7 +369,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Sets the ray
+     * @param value Sets the ray
      */
     public void setRay(int value)
     {
@@ -384,7 +390,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Sets the color
+     * @param value Sets the color
      */
     public void setColor(Color value)
     {
@@ -405,7 +411,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Sets the <code>selected</code> state color
+     * @param value Sets the <code>selected</code> state color
      */
     public void setSelectedColor(Color value)
     {
@@ -426,7 +432,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Sets the <code>selected</code> state
+     * @param value Sets the <code>selected</code> state
      */
     public void setSelected(boolean value)
     {
@@ -466,7 +472,9 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Returns <code>true</code> if specified Point3D is over the anchor in the specified canvas
+     * @return Returns <code>true</code> if specified Point3D is over the anchor in the specified canvas
+     * @param canvas canvas
+     * @param imagePoint 3D point
      */
     public boolean isOver(IcyCanvas canvas, Point3D imagePoint)
     {
@@ -502,7 +510,8 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Returns adjusted ray for specified Canvas
+     * @return Returns adjusted ray for specified Canvas
+     * @param canvas canvas
      */
     protected double getAdjRay(IcyCanvas canvas)
     {
@@ -511,7 +520,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * Update internal ellipse for specified Canvas
+     * @param canvas Update internal ellipse for specified Canvas
      */
     protected void updateEllipseForCanvas(IcyCanvas canvas)
     {
@@ -676,7 +685,7 @@ public class Anchor3D extends Overlay implements VtkPainter, Runnable
     }
 
     /**
-     * update 3D painter for 3D canvas (called only when VTK is loaded).
+     * @return update 3D painter for 3D canvas (called only when VTK is loaded).
      */
     protected boolean rebuildVtkObjects()
     {

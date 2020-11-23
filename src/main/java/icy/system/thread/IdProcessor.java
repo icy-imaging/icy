@@ -31,6 +31,8 @@ public class IdProcessor extends Processor
      * Create an IdProcessor
      * 
      * @deprecated uses default constructor instead
+     * @param maxProcess maximum of resources allocated
+     * @param maxProcessPerId maximum of resources for each id
      */
     @SuppressWarnings("unused")
     @Deprecated
@@ -41,6 +43,7 @@ public class IdProcessor extends Processor
 
     /**
      * Create an IdProcessor
+     * @param priority priority of the thread
      */
     public IdProcessor(int priority)
     {

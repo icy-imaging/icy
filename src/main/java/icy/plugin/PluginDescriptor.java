@@ -53,7 +53,7 @@ import icy.util.XMLUtil;
  * The plugin descriptor contains all the data needed to launch a plugin. <br>
  * 
  * @see PluginLauncher
- * @author Fabrice de Chaumont & Stephane
+ * @author Fabrice de Chaumont &amp; Stephane
  */
 public class PluginDescriptor implements XMLPersistent
 {

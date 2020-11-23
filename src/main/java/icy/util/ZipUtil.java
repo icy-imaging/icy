@@ -37,7 +37,7 @@ import java.util.zip.ZipFile;
 public class ZipUtil
 {
     /**
-     * Compress the specified array of byte with given level of compression and return packed data.<br/>
+     * Compress the specified array of byte with given level of compression and return packed data.<br>
      * 
      * @param packer
      *        the packer object, can be <code>null</code> in which case we create a new Deflater object

@@ -55,7 +55,7 @@ import icy.search.SearchResult;
 import icy.util.StringUtil;
 
 /**
- * @author Thomas Provoost & Stephane.
+ * @author Thomas Provoost &amp; Stephane.
  */
 public class SearchBar extends IcyTextField implements SearchEngineListener
 {
@@ -341,6 +341,7 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
     //
     /**
      * Request search for the specified text.
+     * @param text string
      * 
      * @see SearchEngine#search(String)
      */

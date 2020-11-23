@@ -78,7 +78,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * Highest  |   TOP
      * </pre>
      * 
-     * TOP level should be used to give <i>focus<i> to a specific Overlay over all other in the same
+     * TOP level should be used to give <i>focus</i> to a specific Overlay over all other in the same
      * category.
      */
     public static enum OverlayPriority
@@ -350,7 +350,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Returns <code>true</code> if the overlay is attached to the specified {@link Sequence}.
+     * @return Returns <code>true</code> if the overlay is attached to the specified {@link Sequence}.
+     * @param sequence sequence
      */
     public boolean isAttached(Sequence sequence)
     {
@@ -363,6 +364,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     /**
      * @deprecated Use {@link #getCanBeRemoved()} instead.
      * @see #setCanBeRemoved(boolean)
+     * @return boolean
      */
     @Deprecated
     public boolean isFixed()
@@ -372,6 +374,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #setCanBeRemoved(boolean)} instead.
+     * @param value boolean
      */
     @Deprecated
     public void setFixed(boolean value)
@@ -380,8 +383,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Returns <code>true</code> if the overlay can be freely removed from the Canvas where it
-     * appears and <code>false</code> otherwise.<br/>
+     * @return Returns <code>true</code> if the overlay can be freely removed from the Canvas where it
+     * appears and <code>false</code> otherwise.<br>
      * 
      * @see #setCanBeRemoved(boolean)
      */
@@ -391,9 +394,10 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Set the <code>canBeRemoved</code> property.<br/>
+     * Set the <code>canBeRemoved</code> property.<br>
      * Set it to false if you want to prevent the overlay to be removed from the Canvas where it
      * appears.
+     * @param value boolean
      */
     public void setCanBeRemoved(boolean value)
     {
@@ -405,7 +409,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Return persistent property.<br/>
+     * @return Return persistent property.<br>
      * When set to <code>true</code> the Overlay will be saved in the Sequence persistent XML data.
      */
     public boolean isPersistent()
@@ -414,8 +418,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Set persistent property.<br/>
-     * When set to <code>true</code> the Overlay will be saved in the Sequence persistent XML data
+     * Set persistent property.<br>
+     * @param value When set to <code>true</code> the Overlay will be saved in the Sequence persistent XML data
      * (default is <code>false</code>).
      */
     public void setPersistent(boolean value)
@@ -428,7 +432,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Return read only property.<br/>
+     * @return Return read only property.<br>
      * When set to <code>true</code> we cannot anymore modify overlay properties from the GUI.
      */
     public boolean isReadOnly()
@@ -437,8 +441,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Set read only property.<br/>
-     * When set to <code>true</code> we cannot anymore modify overlay properties from the GUI.
+     * Set read only property.<br>
+     * @param value When set to <code>true</code> we cannot anymore modify overlay properties from the GUI.
      */
     public void setReadOnly(boolean value)
     {
@@ -459,7 +463,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Set to <code>true</code> if you want to overlay to receive {@link KeyEvent} even when it is
+     * @param value Set to <code>true</code> if you want to overlay to receive {@link KeyEvent} even when it is
      * not visible.
      */
     public void setReceiveKeyEventOnHidden(boolean value)
@@ -483,6 +487,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     /**
      * Set to <code>true</code> if you want to overlay to receive {@link KeyEvent} even when it is
      * not visible.
+     * @param value boolean
      */
     public void setReceiveMouseEventOnHidden(boolean value)
     {
@@ -494,7 +499,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Override this method to provide an extra options panel for the overlay.<br>
+     * @return Override this method to provide an extra options panel for the overlay.<br>
      * The options panel will appears in the inspector when the layer's overlay is selected.
      */
     public JPanel getOptionsPanel()
@@ -504,6 +509,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link Sequence#addOverlay(Overlay)} instead.
+     * @param sequence sequence
      */
     @Deprecated
     public void attachTo(Sequence sequence)
@@ -514,6 +520,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link Sequence#removeOverlay(Overlay)} instead.
+     * @param sequence seuqence
      */
     @Deprecated
     public void detachFrom(Sequence sequence)
@@ -534,7 +541,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Returns all sequences where the overlay is currently attached.
+     * @return Returns all sequences where the overlay is currently attached.
      */
     public List<Sequence> getSequences()
     {
@@ -542,7 +549,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     /**
-     * Returns all canvas where the overlay is currently present as a layer.
+     * @return Returns all canvas where the overlay is currently present as a layer.
      */
     public List<IcyCanvas> getAttachedCanvas()
     {
@@ -594,6 +601,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Notify the overlay property has changed.
+     * @param propertyName string
      */
     public void propertyChanged(String propertyName)
     {
@@ -614,6 +622,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Add a listener.
+     * @param listener overlay listener
      */
     public void addOverlayListener(OverlayListener listener)
     {
@@ -622,6 +631,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Remove a listener.
+     * @param listener overlay listener
      */
     public void removeOverlayListener(OverlayListener listener)
     {
@@ -630,6 +640,9 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Paint method called to draw the overlay.
+     * @param sequence sequence
+     * @param canvas canvas
+     * @param g 2D graphics
      */
     @Override
     public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas)
@@ -639,6 +652,9 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #mousePressed(MouseEvent, Point5D.Double, IcyCanvas)} instead
+     * @param canvas canvas
+     * @param imagePoint 2D point
+     * @param e event
      */
     @Deprecated
     @Override
@@ -649,6 +665,9 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #mouseReleased(MouseEvent, Point5D.Double, IcyCanvas)} instead
+     * @param imagePoint 2D point
+     * @param e event
+     * @param canvas canvas
      */
     @Deprecated
     @Override
@@ -659,6 +678,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #mouseClick(MouseEvent, Point5D.Double, IcyCanvas)} instead
+     * @param canvas canvas
+     * @param imagePoint 2D point
      */
     @Deprecated
     @Override
@@ -669,6 +690,9 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #mouseMove(MouseEvent, Point5D.Double, IcyCanvas)} instead
+     * @param imagePoint 2D point
+     * @param canvas canvas
+     * @param e event
      */
     @Deprecated
     @Override
@@ -679,6 +703,9 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #mouseDrag(MouseEvent, Point5D.Double, IcyCanvas)} instead
+     * @param canvas canvas
+     * @param imagePoint 2D point
+     * @param e event
      */
     @Deprecated
     @Override
@@ -689,6 +716,9 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #mouseEntered(MouseEvent, Point5D.Double, IcyCanvas)} instead
+     * @param imagePoint 2D point
+     * @param e event
+     * @param canvas canvas
      */
     @Deprecated
     public void mouseEntered(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
@@ -698,6 +728,9 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #mouseExited(MouseEvent, Point5D.Double, IcyCanvas)} instead
+     * @param imagePoint 2D point
+     * @param e event
+     * @param canvas canvas
      */
     @Deprecated
     public void mouseExited(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
@@ -707,6 +740,9 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #mouseWheelMoved(MouseWheelEvent, Point5D.Double, IcyCanvas)} instead
+     * @param imagePoint 2D point
+     * @param e event
+     * @param canvas canvas
      */
     @Deprecated
     public void mouseWheelMoved(MouseWheelEvent e, Point2D imagePoint, IcyCanvas canvas)
@@ -716,6 +752,9 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #keyPressed(KeyEvent, Point5D.Double, IcyCanvas)} instead
+     * @param imagePoint 2D point
+     * @param e event
+     * @param canvas canvas
      */
     @Deprecated
     @Override
@@ -726,6 +765,9 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * @deprecated Use {@link #keyReleased(KeyEvent, Point5D.Double, IcyCanvas)} instead
+     * @param imagePoint 2D point
+     * @param e event
+     * @param canvas canvas
      */
     @Deprecated
     @Override

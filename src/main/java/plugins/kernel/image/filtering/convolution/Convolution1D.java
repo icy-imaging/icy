@@ -96,10 +96,8 @@ public class Convolution1D
      * method may return successfully though with incorrect results. Make sure your arguments follow
      * the indicated constraints.
      * 
-     * @param input_Z_XY
+     * @param array
      *        the input data buffer, given as a [Z (slice)][XY (1D offset)] double array
-     * @param output_Z_XY
-     *        the output data buffer, given as a [Z (slice)][XY (1D offset)] double array.
      * @param imageWidth
      *        the image width
      * @param imageHeight

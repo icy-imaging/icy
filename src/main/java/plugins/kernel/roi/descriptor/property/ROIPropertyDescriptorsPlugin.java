@@ -15,11 +15,13 @@ import icy.roi.ROIDescriptor;
 import icy.sequence.Sequence;
 
 /**
- * This {@link PluginROIDescriptor} implements the properties ROI descriptors:<br/>
- * <li>Name</li><br/>
- * <li>Color</li><br/>
- * <li>Opacity</li><br/>
+ * This {@link PluginROIDescriptor} implements the properties ROI descriptors:<br>
+ * <ul>
+ * <li>Name</li>
+ * <li>Color</li>
+ * <li>Opacity</li>
  * <li>Read only</li>
+ * </ul>
  * 
  * @author Stephane
  */

@@ -37,7 +37,7 @@ import ome.xml.meta.OMEXMLMetadata;
 import plugins.kernel.importer.LociImporterPlugin;
 
 /**
- * This class is an utility class aim to help in grouping a list of <i>file path</id> representing image to form a complete and valid Sequence.
+ * This class is an utility class aim to help in grouping a list of <i>file path</i> representing image to form a complete and valid Sequence.
  * 
  * @author Stephane
  */

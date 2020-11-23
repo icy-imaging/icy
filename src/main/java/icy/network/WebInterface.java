@@ -61,17 +61,21 @@ public class WebInterface
      * @param text
      *        Text used for the search request, it can contains several words and use operators.<br>
      *        Examples:<br>
+     *        <ul>
      *        <li><i>spot detector</i> : any of word should be present</li>
      *        <li><i>+spot +detector</i> : both words should be present</li>
-     *        <li>"spot detector"</i> : the exact expression should be present</li>
+     *        <li><i>"spot detector"</i> : the exact expression should be present</li>
      *        <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
+     *        </ul>
      * @param type
      *        type of resource we want to search in.<br>
      *        Accepted values are:<br>
+     *        <ul>
      *        <li>SEARCH_TYPE_PLUGIN</li>
      *        <li>SEARCH_TYPE_SCRIPT</li>
      *        <li>SEARCH_TYPE_PROTOCOL</li>
      *        <li>null (all resources)</li>
+     *        </ul>
      * @return result in XML Document format
      * @throws UnsupportedEncodingException
      */
@@ -99,10 +103,12 @@ public class WebInterface
      * @param text
      *        Text used for the search request, it can contains several words and use operators.<br>
      *        Examples:<br>
+     *        <ul>
      *        <li><i>spot detector</i> : any of word should be present</li>
      *        <li><i>+spot +detector</i> : both words should be present</li>
-     *        <li>"spot detector"</i> : the exact expression should be present</li>
+     *        <li><i>"spot detector"</i> : the exact expression should be present</li>
      *        <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
+     *        </ul>
      * @return result in XML Document format
      * @throws UnsupportedEncodingException
      */

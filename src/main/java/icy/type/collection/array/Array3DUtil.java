@@ -27,7 +27,8 @@ public class Array3DUtil
 {
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 3D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(byte[][][] array)
     {
@@ -45,7 +46,8 @@ public class Array3DUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 3D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(short[][][] array)
     {
@@ -63,7 +65,8 @@ public class Array3DUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 3D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(int[][][] array)
     {
@@ -81,7 +84,8 @@ public class Array3DUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 3D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(long[][][] array)
     {
@@ -99,7 +103,8 @@ public class Array3DUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 3D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(float[][][] array)
     {
@@ -117,7 +122,8 @@ public class Array3DUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 3D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(double[][][] array)
     {
@@ -135,7 +141,9 @@ public class Array3DUtil
     }
 
     /**
-     * Create a new 3D array with specified data type and length
+     * @param dataType object
+     * @param len int
+     * @return Create a new 3D array with specified data type and length
      */
     public static Object[][] createArray(DataType dataType, int len)
     {
@@ -160,6 +168,9 @@ public class Array3DUtil
 
     /**
      * @deprecated
+     * @param dataType int
+     * @param len int
+     * @return Create a new 3D array with specified data type and length
      */
     @Deprecated
     public static Object[][] createArray(int dataType, int len)
@@ -168,7 +179,8 @@ public class Array3DUtil
     }
 
     /**
-     * Return the multi dimension 'in' array as a single dimension byte array.
+     * @param in 3D array
+     * @return Return the multi dimension 'in' array as a single dimension byte array.
      */
     public static byte[] toByteArray1D(byte[][][] in)
     {
@@ -176,7 +188,8 @@ public class Array3DUtil
     }
 
     /**
-     * Return the multi dimension 'in' array as a single dimension short array.
+     * @param in 3D array
+     * @return Return the multi dimension 'in' array as a single dimension short array.
      */
     public static short[] toShortArray1D(short[][][] in)
     {
@@ -184,7 +197,8 @@ public class Array3DUtil
     }
 
     /**
-     * Return the multi dimension 'in' array as a single dimension int array.
+     * @param in 3D array
+     * @return Return the multi dimension 'in' array as a single dimension int array.
      */
     public static int[] toIntArray1D(int[][][] in)
     {
@@ -192,7 +206,8 @@ public class Array3DUtil
     }
 
     /**
-     * Return the multi dimension 'in' array as a single dimension float array.
+     * @param in 3D array
+     * @return Return the multi dimension 'in' array as a single dimension float array.
      */
     public static float[] toFloatArray1D(float[][][] in)
     {
@@ -200,7 +215,8 @@ public class Array3DUtil
     }
 
     /**
-     * Return the multi dimension 'in' array as a single dimension double array.
+     * @param in 3D array
+     * @return Return the multi dimension 'in' array as a single dimension double array.
      */
     public static double[] toDoubleArray1D(double[][][] in)
     {
@@ -208,9 +224,11 @@ public class Array3DUtil
     }
 
     /**
-     * Return the 3 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 3 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 3D array
+     * @param offset int
      */
     public static byte[] toByteArray1D(byte[][][] in, byte[] out, int offset)
     {
@@ -237,9 +255,11 @@ public class Array3DUtil
     }
 
     /**
-     * Return the 3 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 3 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 3D array
+     * @param offset int
      */
     public static short[] toShortArray1D(short[][][] in, short[] out, int offset)
     {
@@ -266,9 +286,11 @@ public class Array3DUtil
     }
 
     /**
-     * Return the 3 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 3 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 3D array
+     * @param offset int
      */
     public static int[] toIntArray1D(int[][][] in, int[] out, int offset)
     {
@@ -295,9 +317,11 @@ public class Array3DUtil
     }
 
     /**
-     * Return the 3 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 3 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 3D array
+     * @param offset int
      */
     public static long[] toLongArray1D(long[][][] in, long[] out, int offset)
     {
@@ -324,9 +348,11 @@ public class Array3DUtil
     }
 
     /**
-     * Return the 3 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 3 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 3D array
+     * @param offset int
      */
     public static float[] toFloatArray1D(float[][][] in, float[] out, int offset)
     {
@@ -353,9 +379,11 @@ public class Array3DUtil
     }
 
     /**
-     * Return the 3 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 3 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 3D array
+     * @param offset int
      */
     public static double[] toDoubleArray1D(double[][][] in, double[] out, int offset)
     {

@@ -92,7 +92,7 @@ public class MathUtil
 
     /**
      * Replace all values in the array by their logarithm<br>
-     * Be careful, all values should be >0 values
+     * Be careful, all values should be &gt; 0 values
      * 
      * @param array
      *        elements to logarithm
@@ -107,7 +107,7 @@ public class MathUtil
 
     /**
      * Replace all values in the array by their logarithm<br>
-     * Be careful, all values should be >0 values
+     * Be careful, all values should be &gt; 0 values
      * 
      * @param array
      *        elements to logarithm
@@ -364,7 +364,7 @@ public class MathUtil
     /**
      * Round specified value to specified number of significant digit.<br>
      * If keepInteger is true then integer part of number is entirely conserved.<br>
-     * If <i>numDigit</i> is <= 0 then the value stay unchanged.
+     * If <i>numDigit</i> is &lt;= 0 then the value stay unchanged.
      */
     public static double roundSignificant(double d, int numDigit, boolean keepInteger)
     {

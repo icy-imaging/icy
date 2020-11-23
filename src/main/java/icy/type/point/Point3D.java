@@ -31,7 +31,12 @@ import java.util.List;
 public abstract class Point3D implements Cloneable
 {
     /**
-     * Returns distance between 2 Point2D using specified scale factor for x/y/z dimension.
+     * @return Returns distance between 2 Point2D using specified scale factor for x/y/z dimension.
+     * @param pt1 3D point
+     * @param pt2 3D point
+     * @param factorX double
+     * @param factorY double
+     * @param factorZ double
      */
     public static double getDistance(Point3D pt1, Point3D pt2, double factorX, double factorY, double factorZ)
     {
@@ -42,7 +47,12 @@ public abstract class Point3D implements Cloneable
     }
 
     /**
-     * Returns total distance of the specified list of points.
+     * @return Returns total distance of the specified list of points.
+     * @param factorX double
+     * @param factorY double
+     * @param factorZ double
+     * @param points list 3D points
+     * @param connectLastPoint boolean
      */
     public static double getTotalDistance(List<Point3D> points, double factorX, double factorY, double factorZ,
             boolean connectLastPoint)
@@ -90,17 +100,17 @@ public abstract class Point3D implements Cloneable
     public abstract double getZ();
 
     /**
-     * Sets the X coordinate of this <code>Point3D</code> in <code>double</code> precision.
+     * @param x Sets the X coordinate of this <code>Point3D</code> in <code>double</code> precision.
      */
     public abstract void setX(double x);
 
     /**
-     * Sets the Y coordinate of this <code>Point3D</code> in <code>double</code> precision.
+     * @param y Sets the Y coordinate of this <code>Point3D</code> in <code>double</code> precision.
      */
     public abstract void setY(double y);
 
     /**
-     * Sets the Z coordinate of this <code>Point3D</code> in <code>double</code> precision.
+     * @param z Sets the Z coordinate of this <code>Point3D</code> in <code>double</code> precision.
      */
     public abstract void setZ(double z);
 
@@ -164,7 +174,7 @@ public abstract class Point3D implements Cloneable
     }
 
     /**
-     * Convert to 2D point
+     * @return Convert to 2D point
      */
     public abstract Point2D toPoint2D();
 
@@ -359,7 +369,7 @@ public abstract class Point3D implements Cloneable
     }
 
     /**
-     * Same as {@link #length()}
+     * @return Same as {@link #length()}
      */
     public double magnitude()
     {
@@ -492,7 +502,7 @@ public abstract class Point3D implements Cloneable
     }
 
     /**
-     * Returns a string representation of this {@code Point3D}.
+     * @return Returns a string representation of this {@code Point3D}.
      * This method is intended to be used only for informational purposes.
      */
     @Override
@@ -504,9 +514,9 @@ public abstract class Point3D implements Cloneable
     public static class Double extends Point3D
     {
         /**
-         * Create an array of Point3D.Double from the input double array.<br>
+         * @return Create an array of Point3D.Double from the input double array.<br>
          * <br>
-         * The format of the input array should be as follow:<br>
+         * @param input The format of the input array should be as follow:<br>
          * <code>input.lenght</code> = number of point * 3.<br>
          * <code>input[(pt * 3) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>input[(pt * 3) + 1]</code> = Y coordinate for point <i>pt</i><br>
@@ -524,9 +534,9 @@ public abstract class Point3D implements Cloneable
         }
 
         /**
-         * Create an array of double from the input Point3D.Double array.<br>
+         * @return Create an array of double from the input Point3D.Double array.<br>
          * <br>
-         * The format of the output array is as follow:<br>
+         * @param input The format of the output array is as follow:<br>
          * <code>result.lenght</code> = number of point * 3.<br>
          * <code>result[(pt * 3) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>result[(pt * 3) + 1]</code> = Y coordinate for point <i>pt</i><br>
@@ -632,9 +642,9 @@ public abstract class Point3D implements Cloneable
     public static class Float extends Point3D
     {
         /**
-         * Create an array of Point3D.Float from the input float array.<br>
+         * @return Create an array of Point3D.Float from the input float array.<br>
          * <br>
-         * The format of the input array should be as follow:<br>
+         * @param input The format of the input array should be as follow:<br>
          * <code>input.lenght</code> = number of point * 3.<br>
          * <code>input[(pt * 3) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>input[(pt * 3) + 1]</code> = Y coordinate for point <i>pt</i><br>
@@ -652,9 +662,9 @@ public abstract class Point3D implements Cloneable
         }
 
         /**
-         * Create an array of float from the input Point3D.Float array.<br>
+         * @return Create an array of float from the input Point3D.Float array.<br>
          * <br>
-         * The format of the output array is as follow:<br>
+         * @param input The format of the output array is as follow:<br>
          * <code>result.lenght</code> = number of point * 3.<br>
          * <code>result[(pt * 3) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>result[(pt * 3) + 1]</code> = Y coordinate for point <i>pt</i><br>
@@ -760,9 +770,9 @@ public abstract class Point3D implements Cloneable
     public static class Integer extends Point3D
     {
         /**
-         * Create an array of Point3D.Integer from the input integer array.<br>
+         * @return Create an array of Point3D.Integer from the input integer array.<br>
          * <br>
-         * The format of the input array should be as follow:<br>
+         * @param input The format of the input array should be as follow:<br>
          * <code>input.lenght</code> = number of point * 3.<br>
          * <code>input[(pt * 3) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>input[(pt * 3) + 1]</code> = Y coordinate for point <i>pt</i><br>
@@ -780,9 +790,9 @@ public abstract class Point3D implements Cloneable
         }
 
         /**
-         * Create an array of integer from the input Point3D.Integer array.<br>
+         * @return Create an array of integer from the input Point3D.Integer array.<br>
          * <br>
-         * The format of the output array is as follow:<br>
+         * @param input The format of the output array is as follow:<br>
          * <code>result.lenght</code> = number of point * 3.<br>
          * <code>result[(pt * 3) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>result[(pt * 3) + 1]</code> = Y coordinate for point <i>pt</i><br>

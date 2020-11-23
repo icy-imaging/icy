@@ -25,7 +25,7 @@ import icy.type.collection.array.ArrayUtil;
 /**
  * Class defining basic arithmetic and statistic operations on 1D double arrays.
  * 
- * @author Alexandre Dufour & Stephane
+ * @author Alexandre Dufour &amp; Stephane
  */
 public class ArrayMath
 {
