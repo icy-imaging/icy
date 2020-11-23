@@ -460,8 +460,8 @@ public class Processor extends ThreadPoolExecutor
      * @param value
      *        the default value for the returned future
      * @param <T> generic Object
-     * @return a <tt>RunnableFuture</tt> which when run will run the underlying runnable and which,
-     *         as a <tt>Future</tt>, will yield the given value as its result and provide for
+     * @return a <i>RunnableFuture</i> which when run will run the underlying runnable and which,
+     *         as a <i>Future</i>, will yield the given value as its result and provide for
      *         cancellation of the underlying task.
      */
     protected <T> FutureTaskAdapter<T> newTaskFor(boolean handledException, Runnable runnable, T value)
@@ -476,8 +476,8 @@ public class Processor extends ThreadPoolExecutor
      * @param callable
      *        the callable task being wrapped
      * @param <T> generic Object
-     * @return a <tt>RunnableFuture</tt> which when run will call the
-     *         underlying callable and which, as a <tt>Future</tt>, will yield
+     * @return a <i>RunnableFuture</i> which when run will call the
+     *         underlying callable and which, as a <i>Future</i>, will yield
      *         the callable's result as its result and provide for
      *         cancellation of the underlying task.
      */
@@ -535,8 +535,8 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * Submits a Runnable task for execution and returns a Future
-     * representing that task. The Future's <tt>get</tt> method will
-     * return <tt>null</tt> upon <em>successful</em> completion.
+     * representing that task. The Future's <i>get</i> method will
+     * return <i>null</i> upon <em>successful</em> completion.
      * 
      * @param handleException
      *        if set to <code>true</code> then any occurring exception during the runnable
@@ -560,7 +560,7 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * Submits a Runnable task for execution and returns a Future
-     * representing that task. The Future's <tt>get</tt> method will
+     * representing that task. The Future's <i>get</i> method will
      * return the given result upon successful completion.
      * 
      * @param handleException
@@ -589,11 +589,11 @@ public class Processor extends ThreadPoolExecutor
     /**
      * Submits a value-returning task for execution and returns a
      * Future representing the pending results of the task. The
-     * Future's <tt>get</tt> method will return the task's result upon
+     * Future's <i>get</i> method will return the task's result upon
      * successful completion.
      * <p>
      * If you would like to immediately block waiting for a task, you can use constructions of the form
-     * <tt>result = exec.submit(aCallable).get();</tt>
+     * <i>result = exec.submit(aCallable).get();</i>
      * <p>
      * Note: The {@link Executors} class includes a set of methods that can convert some other common closure-like
      * objects, for example, {@link java.security.PrivilegedAction} to {@link Callable} form so they can be submitted.
@@ -848,7 +848,7 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * @param task running task
-     * @return Return the number of task waiting in queue for the specified <tt>Runnable</tt> instance.
+     * @return Return the number of task waiting in queue for the specified <i>Runnable</i> instance.
      */
     public int getWaitingTasksCount(Runnable task)
     {
@@ -863,7 +863,7 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * @param task running task
-     * @return Return the number of task waiting in queue for the specified <tt>Callable</tt> instance.
+     * @return Return the number of task waiting in queue for the specified <i>Callable</i> instance.
      */
     public int getWaitingTasksCount(Callable<?> task)
     {
@@ -898,7 +898,7 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * @param task running task
-     * @return Return true if we have at least one task in queue for the specified <tt>Runnable</tt> instance.
+     * @return Return true if we have at least one task in queue for the specified <i>Runnable</i> instance.
      */
     public boolean hasWaitingTasks(Runnable task)
     {
@@ -912,7 +912,7 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * @param task called task
-     * @return Return true if we have at least one task in queue for the specified <tt>Callable</tt> instance.
+     * @return Return true if we have at least one task in queue for the specified <i>Callable</i> instance.
      */
     public boolean hasWaitingTasks(Callable<?> task)
     {
@@ -938,7 +938,7 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * @param task running task
-     * @return Remove first waiting task for the specified <tt>FutureTaskAdapter</tt> instance.
+     * @return Remove first waiting task for the specified <i>FutureTaskAdapter</i> instance.
      */
     protected boolean removeFirstWaitingTask(FutureTaskAdapter<?> task)
     {
@@ -958,7 +958,7 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * @param task running task
-     * @return Remove first waiting task for the specified <tt>Runnable</tt> instance.
+     * @return Remove first waiting task for the specified <i>Runnable</i> instance.
      */
     public boolean removeFirstWaitingTask(Runnable task)
     {
@@ -978,7 +978,7 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * @param task called task
-     * @return Remove first waiting task for the specified <tt>Callable</tt> instance.
+     * @return Remove first waiting task for the specified <i>Callable</i> instance.
      */
     public boolean removeFirstWaitingTask(Callable<?> task)
     {
@@ -1010,7 +1010,7 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * @param task running task
-     * @return Remove all waiting tasks for the specified <tt>Runnable</tt> instance.
+     * @return Remove all waiting tasks for the specified <i>Runnable</i> instance.
      */
     public boolean removeWaitingTasks(Runnable task)
     {
@@ -1028,7 +1028,7 @@ public class Processor extends ThreadPoolExecutor
 
     /**
      * @param task called task
-     * @return Remove all waiting tasks for the specified <tt>Callable</tt> instance.
+     * @return Remove all waiting tasks for the specified <i>Callable</i> instance.
      */
     public boolean removeWaitingTasks(Callable<?> task)
     {

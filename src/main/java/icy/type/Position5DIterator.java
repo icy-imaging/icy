@@ -28,7 +28,7 @@ public interface Position5DIterator
     public void next() throws NoSuchElementException;
 
     /**
-     * Returns <tt>true</tt> if the iterator has no more elements.
+     * Returns <i>true</i> if the iterator has no more elements.
      */
     public boolean done();
 

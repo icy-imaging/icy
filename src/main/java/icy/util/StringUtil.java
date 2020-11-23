@@ -620,7 +620,7 @@ public class StringUtil
     }
 
     /**
-     * Returns a <tt>String</tt> object representing the specified
+     * Returns a <i>String</i> object representing the specified
      * boolean. If the specified boolean is <code>true</code>, then
      * the string {@code "true"} will be returned, otherwise the
      * string {@code "false"} will be returned.

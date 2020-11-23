@@ -39,7 +39,7 @@ public interface DataIterator
     public void next();
 
     /**
-     * Returns <tt>true</tt> if the iterator has no more elements.
+     * Returns <i>true</i> if the iterator has no more elements.
      */
     public boolean done();
 

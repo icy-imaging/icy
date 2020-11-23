@@ -43,7 +43,7 @@ public class SingleProcessor extends Processor
 
     /**
      * Try to submit the specified task for execution and returns a Future representing that task.<br>
-     * The Future's <tt>get</tt> method will return <tt>null</tt> upon <em>successful</em>
+     * The Future's <i>get</i> method will return <i>null</i> upon <em>successful</em>
      * completion.<br>
      * Returns a <code>null</code> Future object if processor is already processing or queue is not
      * empty (depending the {@link #isQueueEnabled()} parameter) to notify the task has been
