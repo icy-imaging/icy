@@ -82,7 +82,7 @@ import vtk.vtkNativeLibrary;
 import vtk.vtkVersion;
 
 /**
- * <H1>Icy - copyright 2019 Institut Pasteur</H1>
+ * <strong>Icy - copyright 2019 Institut Pasteur</strong>
  * An open community platform for bio image analysis<br>
  * <i>http://icy.bioimageanalysis.org</i><br>
  * <br>
