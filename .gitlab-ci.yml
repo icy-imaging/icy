@@ -70,11 +70,11 @@ deploy-job:
     paths:
       - build/*.jar
 
-release-job:
-  stage: release
-  #only:
-    #- releases
-  dependencies:
-    - deploy-job
-  script:
-    - "/tools/maven-release"
+#release-job:
+#  stage: release
+#  #only:
+#    #- releases
+#  dependencies:
+#    - deploy-job
+#  script:
+#    - "/tools/maven-release"
