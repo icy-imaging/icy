@@ -94,7 +94,7 @@ public class Main
     /**
      * Updater Version
      */
-    public static Version version = new Version("2.1.0.0");
+    public static Version version = new Version("2.1.0.1");
 
     static final OutPrintStream stdStream = new OutPrintStream(System.out, false);
     static final OutPrintStream errStream = new OutPrintStream(System.err, true);
