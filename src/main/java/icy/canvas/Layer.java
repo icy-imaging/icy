@@ -236,7 +236,7 @@ public class Layer implements OverlayListener, Comparable<Layer>
 
     /**
      * Returns <code>true</code> if the layer can be freely removed from the Canvas where it
-     * appears and <code>false</code> otherwise.<br/>
+     * appears and <code>false</code> otherwise.<br>
      * 
      * @see Overlay#getCanBeRemoved()
      */
@@ -246,7 +246,7 @@ public class Layer implements OverlayListener, Comparable<Layer>
     }
 
     /**
-     * Set the <code>canBeRemoved</code> property.<br/>
+     * Set the <code>canBeRemoved</code> property.<br>
      * Set it to false if you want to prevent the layer to be removed from the Canvas where it
      * appears.
      * 

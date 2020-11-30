@@ -44,7 +44,7 @@ public class GeomUtil
     }
 
     /**
-     * Get intersection point between 2 lines.
+     * @return Get intersection point between 2 lines.
      *
      * @param lineA
      *        first line
@@ -76,8 +76,9 @@ public class GeomUtil
     }
 
     /**
-     * Returns rotation information from AffineTransform.<br>
+     * @return Returns rotation information from AffineTransform.<br>
      * <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
+     * @param transform affine transform
      */
     public static double getRotation(AffineTransform transform)
     {
@@ -127,8 +128,9 @@ public class GeomUtil
     }
 
     /**
-     * Returns rotation information from AffineTransform (fast method).<br>
+     * @return Returns rotation information from AffineTransform (fast method).<br>
      * <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
+     * @param transform affine transform
      */
     public static double getRotationFast(AffineTransform transform)
     {
@@ -156,8 +158,9 @@ public class GeomUtil
     }
 
     /**
-     * Returns uniform scale (X=Y) information from AffineTransform.<br>
+     * @return Returns uniform scale (X=Y) information from AffineTransform.<br>
      * <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
+     * @param transform affine transform
      */
     public static double getScale(AffineTransform transform)
     {
@@ -175,8 +178,9 @@ public class GeomUtil
     }
 
     /**
-     * Returns scale X information from AffineTransform.<br>
+     * @return Returns scale X information from AffineTransform.<br>
      * <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
+     * @param transform affine transform
      */
     public static double getScaleX(AffineTransform transform)
     {
@@ -188,8 +192,9 @@ public class GeomUtil
     }
 
     /**
-     * Returns scale Y information from AffineTransform.<br>
+     * @return Returns scale Y information from AffineTransform.<br>
      * <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
+     * @param transform affine transform
      */
     public static double getScaleY(AffineTransform transform)
     {

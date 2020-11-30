@@ -75,7 +75,7 @@ public class CanvasPreferences
     }
 
     /**
-     * Mouse wheel sensitivity (1-10)
+     * @return Mouse wheel sensitivity (1-10)
      */
     public static double getMouseWheelSensitivity()
     {

@@ -10,14 +10,9 @@ public interface SelectionFilter
      * neighborhood. Note that some operations require double floating-point precision, therefore
      * the input sequence will be internally converted to double precision. However the result will
      * be converted back to the same type as the given input sequence <i>with re-scaling</i>.
-     * 
-     * @param stopFlag
-     *        a flag variable that will stop the filtering process if set to true (this flag is
-     *        first set to false when starting this method)
+     *
      * @param sequence
      *        the sequence to filter (its data will be overwritten)
-     * @param filterType
-     *        the type of filter to apply
      * @param radius
      *        the neighborhood radius in each dimension (the actual neighborhood size will be
      *        <code>1+(2*radius)</code> to ensure it is centered on each pixel). If a single

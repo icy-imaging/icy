@@ -167,8 +167,8 @@ public class ClassUtil
     /**
      * Transform the specified path in qualified name.<br>
      * <br>
-     * ex : "document/class/loader.class" --> "document.class.loader.class" (unix)
-     * "document\class\loader.class" --> "document.class.loader.class" (win)
+     * ex : "document/class/loader.class" --&gt; "document.class.loader.class" (unix)
+     * "document\class\loader.class" --&gt; "document.class.loader.class" (win)
      * 
      * @param path
      */
@@ -181,7 +181,7 @@ public class ClassUtil
      * Transform the specified qualified name in path.<br>
      * Be careful, this function do not handle the file extension.<br>
      * <br>
-     * ex : "plugins.user.loader.test" --> "plugins/user/loader/test"
+     * ex : "plugins.user.loader.test" --&gt; "plugins/user/loader/test"
      */
     public static String getPathFromQualifiedName(String qualifiedName)
     {
@@ -190,7 +190,7 @@ public class ClassUtil
 
     /**
      * Get package name<br>
-     * ex : "plugin.test.myClass" --> "plugin.test"
+     * ex : "plugin.test.myClass" --&gt; "plugin.test"
      */
     public static String getPackageName(String className)
     {
@@ -204,7 +204,7 @@ public class ClassUtil
 
     /**
      * Get first package name<br>
-     * ex : "plugin.test.myClass" --> "plugin"
+     * ex : "plugin.test.myClass" --&gt; "plugin"
      */
     public static String getFirstPackageName(String className)
     {
@@ -219,7 +219,7 @@ public class ClassUtil
 
     /**
      * Get the base class name<br>
-     * ex : "plugin.myClass$InternClass$1" --> "plugin.myClass"
+     * ex : "plugin.myClass$InternClass$1" --&gt; "plugin.myClass"
      */
     public static String getBaseClassName(String className)
     {
@@ -233,7 +233,7 @@ public class ClassUtil
 
     /**
      * Get simple class name<br>
-     * ex : "plugin.test.myClass$InternClass$1" --> "myClass$InternClass$1"
+     * ex : "plugin.test.myClass$InternClass$1" --&gt; "myClass$InternClass$1"
      */
     public static String getSimpleClassName(String className)
     {

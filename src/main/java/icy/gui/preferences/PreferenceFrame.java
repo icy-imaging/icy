@@ -49,7 +49,7 @@ import icy.preferences.IcyPreferences;
 import icy.util.StringUtil;
 
 /**
- * @author fab & stephane
+ * @author fab &amp; stephane
  */
 public class PreferenceFrame extends IcyFrame implements TreeSelectionListener
 {

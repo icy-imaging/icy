@@ -1970,7 +1970,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         /**
          * Update mouse cursor
          * 
-         * @param b
+         * @param consumedByCanvas boolean
          */
         protected void updateCursor(boolean consumedByCanvas)
         {

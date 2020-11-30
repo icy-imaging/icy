@@ -581,7 +581,7 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Build a new 3D boolean mask with specified bounds and 2D mask array.<br>
-     * The 2D mask array length should be >= to <code>bounds.getSizeZ()</code>.
+     * The 2D mask array length should be &gt;= to <code>bounds.getSizeZ()</code>.
      */
     public BooleanMask3D(Rectangle3D.Integer bounds, BooleanMask2D[] mask)
     {
@@ -1230,7 +1230,7 @@ public class BooleanMask3D implements Cloneable
     }
 
     /**
-     * Computes and returns the length of the contour.<br/>
+     * Computes and returns the length of the contour.<br>
      * This is different from the number of contour point as it takes care of approximating
      * correctly distance between each contour point.
      * 

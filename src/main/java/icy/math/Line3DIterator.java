@@ -102,8 +102,6 @@ public class Line3DIterator implements Iterator<Point3D>
      *        the lien we want to iterate points
      * @param step
      *        step between each point (default = 1d)
-     * @param forceLastPoint
-     *        set to <i>true</i> if you want the last point to match the end line position
      */
     public Line3DIterator(Line3D line, double step)
     {

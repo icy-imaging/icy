@@ -142,7 +142,7 @@ public class ThreadUtil
     }
 
     /**
-     * Return true if all background runner are shutdown and terminated.
+     * @return Return true if all background runner are shutdown and terminated.
      */
     public static boolean isShutdownAndTerminated()
     {
@@ -167,7 +167,7 @@ public class ThreadUtil
     /**
      * Invoke the specified <code>Runnable</code> on the AWT event dispatching thread.<br>
      * Any exception is automatically caught by Icy exception handler.
-     * 
+     * @param runnable running task
      * @param wait
      *        If set to true, the method wait until completion, in this case you have to take
      *        attention to not cause any dead lock.
@@ -184,6 +184,7 @@ public class ThreadUtil
 
     /**
      * @deprecated Use {@link #invokeNow(Runnable)} instead
+     * @param runnable running task
      */
     @Deprecated
     public static void invokeAndWait(Runnable runnable)
@@ -197,6 +198,7 @@ public class ThreadUtil
      * Any exception is automatically caught by Icy exception handler, if you want to catch them use
      * {@link #invokeNow(Callable)} instead.<br>
      * Use this method carefully as it may lead to dead lock.
+     * @param runnable running task
      */
     public static void invokeNow(Runnable runnable)
     {
@@ -238,6 +240,7 @@ public class ThreadUtil
      * be executed later.
      * 
      * @see #invokeLater(Runnable, boolean)
+     * @param runnable running task
      */
     public static void invokeLater(Runnable runnable)
     {
@@ -248,7 +251,7 @@ public class ThreadUtil
      * Invoke the specified <code>Runnable</code> on the AWT event dispatching thread.<br>
      * Depending the <code>forceLater</code> parameter the <code>Runnable</code> can be executed
      * immediately if we are on the EDT.
-     * 
+     * @param runnable running task
      * @param forceLater
      *        If <code>true</code> the <code>Runnable</code> is forced to execute later even if we
      *        are on the Swing EDT.
@@ -264,7 +267,7 @@ public class ThreadUtil
     }
 
     /**
-     * Invoke the specified <code>Callable</code> on the AWT event dispatching thread now and return
+     * @return Invoke the specified <code>Callable</code> on the AWT event dispatching thread now and return
      * the result.<br>
      * The returned result can be <code>null</code> when a {@link Throwable} exception happen.<br>
      * Use this method carefully as it may lead to dead lock.
@@ -273,6 +276,8 @@ public class ThreadUtil
      *         if the current thread was interrupted while waiting
      * @throws Exception
      *         if the computation threw an exception
+     * @param callable called threas
+     * @param <T> generic Object
      */
     public static <T> T invokeNow(Callable<T> callable) throws Exception
     {
@@ -307,13 +312,14 @@ public class ThreadUtil
     }
 
     /**
-     * Invoke the specified {@link Callable} on the AWT event dispatching thread.<br>
+     * @return Invoke the specified {@link Callable} on the AWT event dispatching thread.<br>
      * Depending the <code>forceLater</code> parameter the <code>Callable</code> can be executed
      * immediately if we are on the EDT.
-     * 
+     * @param callable thread
      * @param forceLater
      *        If <code>true</code> the <code>Callable</code> is forced to execute later even if we
      *        are on the EDT.
+     * @param <T> generic Object
      */
     public static <T> Future<T> invokeLater(Callable<T> callable, boolean forceLater)
     {
@@ -361,6 +367,9 @@ public class ThreadUtil
     /**
      * @deprecated Use {@link #bgRun(Runnable)} instead and {@link #invokeNow(Runnable)} separately.
      * @see #bgRun(Runnable)
+     * @param runnable running task
+     * @param onEDT boolean
+     * @return true if submitted process is not null
      */
     @Deprecated
     public static boolean bgRun(Runnable runnable, boolean onEDT)
@@ -370,6 +379,7 @@ public class ThreadUtil
 
     /**
      * @deprecated Use {@link #bgRun(Runnable)} instead and check for acceptance.
+     * @param runnable thread
      */
     @Deprecated
     public static void bgRunWait(Runnable runnable)
@@ -383,6 +393,8 @@ public class ThreadUtil
      * Returns <code>false</code> if background process queue is full.<br>
      * Don't use this method for long process (more than 1 second) as the number of thread is
      * limited and others processes may be executed too late.
+     * @param runnable task
+     * @return true if submitted task is not null
      */
     public static boolean bgRun(Runnable runnable)
     {
@@ -392,6 +404,10 @@ public class ThreadUtil
     /**
      * @deprecated Use {@link #bgRun(Callable)} and {@link #invokeNow(Callable)} separately instead.
      * @see #bgRun(Callable)
+     * @param callable thread
+     * @param onEDT boolean
+     * @param <T> generic Object
+     * @return Object
      */
     @Deprecated
     public static <T> Future<T> bgRun(Callable<T> callable, boolean onEDT)
@@ -405,6 +421,9 @@ public class ThreadUtil
      * background process queue is full.<br>
      * Don't use this method for long process (more than 1 second) as the number of thread is
      * limited and others processes may be executed too late.
+     * @param callable threas
+     * @param <T> generic Object
+     * @return running process in background
      */
     public static <T> Future<T> bgRun(Callable<T> callable)
     {
@@ -414,6 +433,9 @@ public class ThreadUtil
     /**
      * @deprecated Use {@link #runSingle(Runnable)} instead and {@link #invokeNow(Runnable)} separately.
      * @see #bgRunSingle(Runnable)
+     * @param runnable running task
+     * @param onEDT boolean
+     * @return true if submitted process is not null
      */
     @Deprecated
     public static boolean bgRunSingle(Runnable runnable, boolean onEDT)
@@ -426,6 +448,10 @@ public class ThreadUtil
      * @deprecated Use {@link #runSingle(Callable)} and {@link #invokeNow(Callable)} separately
      *             instead.
      * @see #bgRunSingle(Callable)
+     * @param callable thread
+     * @param onEDT boolean
+     * @param <T> generic Object
+     * @return running thread
      */
     @Deprecated
     public static <T> Future<T> bgRunSingle(Callable<T> callable, boolean onEDT)
@@ -438,9 +464,10 @@ public class ThreadUtil
      * Adds single processing (low priority) of specified Runnable.<br>
      * If this <code>Runnable</code> instance is already pending in single processes queue then
      * nothing is done.<br>
-     * Returns <code>false</code> if single processes queue is full.<br>
+     * @return Returns <code>false</code> if single processes queue is full.<br>
      * Don't use this method for long process (more than 1 second) as the number of thread is
      * limited and others processes may be executed too late.
+     * @param runnable running thread
      */
     public static boolean bgRunSingle(Runnable runnable)
     {
@@ -452,10 +479,12 @@ public class ThreadUtil
      * Adds single processing (low priority) of specified Callable task.<br>
      * If this <code>Callable</code> instance is already pending in single processes queue then
      * nothing is done.<br>
-     * Returns a Future representing the pending result of the task or <code>null</code> if
+     * @return Returns a Future representing the pending result of the task or <code>null</code> if
      * single processes queue is full.<br>
      * Don't use this method for long process (more than 1 second) as the number of thread is
      * limited and others processes may be executed too late.
+     * @param <T> generic Object
+     * @param callable thread
      */
     public static <T> Future<T> bgRunSingle(Callable<T> callable)
     {
@@ -467,9 +496,10 @@ public class ThreadUtil
      * Add single processing (normal priority) of specified Runnable.<br>
      * If this <code>Runnable</code> instance is already pending in single processes queue then
      * nothing is done.<br>
-     * Return <code>false</code> if single processes queue is full.<br>
+     * @return Return <code>false</code> if single processes queue is full.<br>
      * Don't use this method for long process (more than 1 second) as the number of thread is
      * limited and others processes may be executed too late.
+     * @param runnable running thread
      */
     public static boolean runSingle(Runnable runnable)
     {
@@ -481,10 +511,12 @@ public class ThreadUtil
      * Add single processing (normal priority) of specified Callable task.<br>
      * If this <code>Callable</code> instance is already pending in single processes queue then
      * nothing is done.<br>
-     * Return a Future representing the pending result of the task or <code>null</code> if
+     * @return Return a Future representing the pending result of the task or <code>null</code> if
      * single processes queue is full.<br>
      * Don't use this method for long process (more than 1 second) as the number of thread is
      * limited and others processes may be executed too late.
+     * @param callable thread
+     * @param <T> generic Object
      */
     public static <T> Future<T> runSingle(Callable<T> callable)
     {
@@ -493,7 +525,8 @@ public class ThreadUtil
     }
 
     /**
-     * Return true if the specified runnable is waiting to be processed in background processing.
+     * @param runnable running thread
+     * @return Return true if the specified runnable is waiting to be processed in background processing.
      */
     public static boolean hasWaitingBgTask(Runnable runnable)
     {
@@ -501,7 +534,8 @@ public class ThreadUtil
     }
 
     /**
-     * Return true if the specified callable is waiting to be processed in background processing.
+     * @param callable thread
+     * @return Return true if the specified callable is waiting to be processed in background processing.
      */
     public static boolean hasWaitingBgTask(Callable<?> callable)
     {
@@ -509,7 +543,8 @@ public class ThreadUtil
     }
 
     /**
-     * Return true if the specified runnable is waiting to be processed<br>
+     * @param runnable running thread
+     * @return Return true if the specified runnable is waiting to be processed<br>
      * in single scheme background processing (low priority).
      */
     public static boolean hasWaitingBgSingleTask(Runnable runnable)
@@ -519,7 +554,8 @@ public class ThreadUtil
     }
 
     /**
-     * Return true if the specified callable is waiting to be processed<br>
+     * @param callable thread
+     * @return Return true if the specified callable is waiting to be processed<br>
      * in single scheme background processing (low priority).
      */
     public static boolean hasWaitingBgSingleTask(Callable<?> callable)
@@ -529,7 +565,8 @@ public class ThreadUtil
     }
 
     /**
-     * Return true if the specified runnable is waiting to be processed<br>
+     * @param runnable running thread
+     * @return Return true if the specified runnable is waiting to be processed<br>
      * in single scheme background processing (normal priority).
      */
     public static boolean hasWaitingSingleTask(Runnable runnable)
@@ -539,7 +576,8 @@ public class ThreadUtil
     }
 
     /**
-     * Return true if the specified callable is waiting to be processed<br>
+     * @param callable thread
+     * @return Return true if the specified callable is waiting to be processed<br>
      * in single scheme background processing (normal priority).
      */
     public static boolean hasWaitingSingleTask(Callable<?> callable)
@@ -549,7 +587,7 @@ public class ThreadUtil
     }
 
     /**
-     * Return the number of active background tasks.
+     * @return Return the number of active background tasks.
      */
     public static int getActiveBgTaskCount()
     {
@@ -557,9 +595,10 @@ public class ThreadUtil
     }
 
     /**
-     * Create a thread pool with the given name.<br>
+     * @return Create a thread pool with the given name.<br>
      * The number of processing thread is automatically calculated given the number of core of the
      * system.
+     * @param name thread's name
      * 
      * @see Processor#Processor(int, int, int)
      */
@@ -574,6 +613,7 @@ public class ThreadUtil
 
     /**
      * Same as {@link Thread#sleep(long)} except Exception is caught and ignored.
+     * @param milli time of sleeping process in ms
      */
     public static void sleep(long milli)
     {
@@ -590,6 +630,7 @@ public class ThreadUtil
 
     /**
      * Same as {@link Thread#sleep(long)} except Exception is caught and ignored.
+     * @param milli time of sleeping process in ms
      */
     public static void sleep(int milli)
     {

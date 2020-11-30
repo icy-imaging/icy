@@ -29,6 +29,8 @@ public class InstanceProcessor extends Processor
 {
     /**
      * Create an InstanceProcessor
+     * @param maxWaiting waiting threads
+     * @param priority priority of the thread
      */
     public InstanceProcessor(int maxWaiting, int priority)
     {
@@ -39,6 +41,7 @@ public class InstanceProcessor extends Processor
 
     /**
      * Create an InstanceProcessor
+     * @param priority priority of the thread
      */
     public InstanceProcessor(int priority)
     {
@@ -55,7 +58,7 @@ public class InstanceProcessor extends Processor
 
     /**
      * Try to submit the specified task for execution and returns a Future representing that task.<br>
-     * The Future's <tt>get</tt> method will return <tt>null</tt> upon <em>successful</em>
+     * The Future's <i>get</i> method will return <i>null</i> upon <em>successful</em>
      * completion.<br>
      * Returns a <code>null</code> Future object if processor has already this task pending in queue
      * (in this case the new task is simply ignored)..

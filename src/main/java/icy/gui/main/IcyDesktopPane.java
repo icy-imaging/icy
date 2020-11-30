@@ -61,7 +61,7 @@ import javax.swing.JInternalFrame;
  * background. First added overlays is painted first, so take care of that. Call
  * the IcyDesktopPane.repaint() method to update overlays.
  * 
- * @author Fabrice & Stephane
+ * @author Fabrice &amp; Stephane
  */
 public class IcyDesktopPane extends JDesktopPane implements ContainerListener, MouseListener, MouseMotionListener,
         MouseWheelListener

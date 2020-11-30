@@ -130,7 +130,7 @@ public class HistogramPanel extends BorderedPanel
 
     /**
      * Call this method to inform you start histogram computation (allow the panel to display
-     * "computing" message).</br>
+     * "computing" message).<br>
      * You need to call {@link #done()} when computation is done.
      * 
      * @see #done()

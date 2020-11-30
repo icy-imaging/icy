@@ -73,6 +73,16 @@ public class PathAnchor2D extends Anchor2D
     /**
      * @deprecated Uses {@link #PathAnchor2D(double, double, double, double, double, double, int, Color, Color)}
      *             instead.
+     * @param x1 double
+     * @param x2 double
+     * @param x3 double
+     * @param y1 double
+     * @param y2 double
+     * @param y3 double
+     * @param color color
+     * @param selectedColor color
+     * @param sequence sequence
+     * @param ray int
      */
     @Deprecated
     public PathAnchor2D(Sequence sequence, double x1, double y1, double x2, double y2, double x3, double y3, int ray,
@@ -119,6 +129,11 @@ public class PathAnchor2D extends Anchor2D
     /**
      * @deprecated Uses {@link #PathAnchor2D(double, double, double, double, double, double, int, Color, Color)}
      *             instead.
+     * @param x1 double
+     * @param y1 double
+     * @param color color
+     * @param selectedColor color
+     * @param ray int
      */
     @Deprecated
     public PathAnchor2D(double x1, double y1, int ray, Color color, Color selectedColor)

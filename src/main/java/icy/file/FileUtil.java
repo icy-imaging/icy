@@ -68,7 +68,7 @@ public class FileUtil
 
     /**
      * Transform any system specific path in java generic path form.<br>
-     * Ex: "C:\windows" --> "C:/windows"
+     * Ex: "C:\windows" --&gt; "C:/windows"
      */
     public static String getGenericPath(String path)
     {
@@ -100,9 +100,9 @@ public class FileUtil
     /**
      * Change path extension.<br>
      * Ex : setExtension(path, ".dat")<br>
-     * "c:\temp" --> "c:\temp.dat"
-     * "c:\file.out" --> "c:\file.dat"
-     * "" --> ""
+     * "c:\temp" --&gt; "c:\temp.dat"
+     * "c:\file.out" --&gt; "c:\file.dat"
+     * "" --&gt; ""
      */
     public static String setExtension(String path, String extension)
     {
@@ -371,10 +371,10 @@ public class FileUtil
     /**
      * Return drive / mount point from specified path<br>
      * <br>
-     * getDrive("D:/temp/file.txt") --> "D:"<br>
-     * getDrive("D:/temp") --> "D:"<br>
-     * getDrive("C:file.txt") --> "C:"<br>
-     * getDrive("file.txt") --> ""<br>
+     * getDrive("D:/temp/file.txt") --&gt; "D:"<br>
+     * getDrive("D:/temp") --&gt; "D:"<br>
+     * getDrive("C:file.txt") --&gt; "C:"<br>
+     * getDrive("file.txt") --&gt; ""<br>
      */
     public static String getDrive(String path)
     {
@@ -393,16 +393,16 @@ public class FileUtil
     /**
      * Returns directory information from specified path<br>
      * <br>
-     * getDirectory("/file.txt", true) --> "/"<br>
-     * getDirectory("D:/temp/file.txt", true) --> "D:/temp/"<br>
-     * getDirectory("D:/temp/", true) --> "D:/temp/"<br>
-     * getDirectory("D:/temp/", false) --> "D:/temp"<br>
-     * getDirectory("D:/temp", true) --> "D:/"<br>
-     * getDirectory("D:/temp", false) --> "D:"<br>
-     * getDirectory("C:file.txt") --> "C:"<br>
-     * getDirectory("file.txt") --> ""<br>
-     * getDirectory("file") --> ""<br>
-     * getDirectory(null) --> ""
+     * getDirectory("/file.txt", true) --&gt; "/"<br>
+     * getDirectory("D:/temp/file.txt", true) --&gt; "D:/temp/"<br>
+     * getDirectory("D:/temp/", true) --&gt; "D:/temp/"<br>
+     * getDirectory("D:/temp/", false) --&gt; "D:/temp"<br>
+     * getDirectory("D:/temp", true) --&gt; "D:/"<br>
+     * getDirectory("D:/temp", false) --&gt; "D:"<br>
+     * getDirectory("C:file.txt") --&gt; "C:"<br>
+     * getDirectory("file.txt") --&gt; ""<br>
+     * getDirectory("file") --&gt; ""<br>
+     * getDirectory(null) --&gt; ""
      */
     public static String getDirectory(String path, boolean wantSeparator)
     {
@@ -425,14 +425,14 @@ public class FileUtil
     /**
      * Return directory information from specified path<br>
      * <br>
-     * getDirectory("/file.txt") --> "/"<br>
-     * getDirectory("D:/temp/file.txt") --> "D:/temp/"<br>
-     * getDirectory("D:/temp/") --> "D:/temp/"<br>
-     * getDirectory("D:/temp") --> "D:/"<br>
-     * getDirectory("C:file.txt") --> "C:"<br>
-     * getDirectory("file.txt") --> ""<br>
-     * getDirectory("file") --> ""<br>
-     * getDirectory(null) --> ""
+     * getDirectory("/file.txt") --&gt; "/"<br>
+     * getDirectory("D:/temp/file.txt") --&gt; "D:/temp/"<br>
+     * getDirectory("D:/temp/") --&gt; "D:/temp/"<br>
+     * getDirectory("D:/temp") --&gt; "D:/"<br>
+     * getDirectory("C:file.txt") --&gt; "C:"<br>
+     * getDirectory("file.txt") --&gt; ""<br>
+     * getDirectory("file") --&gt; ""<br>
+     * getDirectory(null) --&gt; ""
      */
     public static String getDirectory(String path)
     {
@@ -442,11 +442,11 @@ public class FileUtil
     /**
      * Return filename information from specified path.<br>
      * <br>
-     * getFileName("/file.txt") --> "file.txt"<br>
-     * getFileName("D:/temp/file.txt") --> "file.txt"<br>
-     * getFileName("C:file.txt") --> "file.txt"<br>
-     * getFileName("file.txt") --> "file.txt"<br>
-     * getFileName(null) --> ""
+     * getFileName("/file.txt") --&gt; "file.txt"<br>
+     * getFileName("D:/temp/file.txt") --&gt; "file.txt"<br>
+     * getFileName("C:file.txt") --&gt; "file.txt"<br>
+     * getFileName("file.txt") --&gt; "file.txt"<br>
+     * getFileName(null) --&gt; ""
      */
     public static String getFileName(String path)
     {
@@ -457,11 +457,11 @@ public class FileUtil
      * Return filename information from specified path.<br>
      * Filename's extension is returned depending the withExtension flag value<br>
      * <br>
-     * getFileName("/file.txt") --> "file(.txt)"<br>
-     * getFileName("D:/temp/file.txt") --> "file(.txt)"<br>
-     * getFileName("C:file.txt") --> "file(.txt)"<br>
-     * getFileName("file.txt") --> "file(.txt)"<br>
-     * getFileName(null) --> ""
+     * getFileName("/file.txt") --&gt; "file(.txt)"<br>
+     * getFileName("D:/temp/file.txt") --&gt; "file(.txt)"<br>
+     * getFileName("C:file.txt") --&gt; "file(.txt)"<br>
+     * getFileName("file.txt") --&gt; "file(.txt)"<br>
+     * getFileName(null) --&gt; ""
      */
     public static String getFileName(String path, boolean withExtension)
     {
@@ -502,11 +502,11 @@ public class FileUtil
      * Return filename extension information from specified path<br>
      * Dot character is returned depending the withDot flag value<br>
      * <br>
-     * getFileExtension("/file.txt") --> "(.)txt)"<br>
-     * getFileExtension("D:/temp/file.txt.old") --> "(.)old"<br>
-     * getFileExtension("C:/win/dir2/file") --> ""<br>
-     * getFileExtension(".txt") --> "(.)txt)"<br>
-     * getFileExtension(null) --> ""
+     * getFileExtension("/file.txt") --&gt; "(.)txt)"<br>
+     * getFileExtension("D:/temp/file.txt.old") --&gt; "(.)old"<br>
+     * getFileExtension("C:/win/dir2/file") --&gt; ""<br>
+     * getFileExtension(".txt") --&gt; "(.)txt)"<br>
+     * getFileExtension(null) --&gt; ""
      */
     public static String getFileExtension(String path, boolean withDot)
     {

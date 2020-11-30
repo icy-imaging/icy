@@ -23,7 +23,7 @@ package icy.plugin.interface_;
  * Used to define a plugin which may contains helper methods.<br>
  * Can be shared between severals plugins.
  * 
- * @author Fabrice & Stephane
+ * @author Fabrice &amp; Stephane
  */
 public interface PluginLibrary extends PluginNoEDTConstructor
 {

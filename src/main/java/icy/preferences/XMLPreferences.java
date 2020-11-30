@@ -61,6 +61,7 @@ public class XMLPreferences
 
         /**
          * Load preferences from file
+         * @param filename string
          */
         public void load(String filename)
         {
@@ -97,6 +98,7 @@ public class XMLPreferences
 
         /**
          * Save preferences to file
+         * @param filename string
          */
         public void save(String filename)
         {
@@ -268,7 +270,8 @@ public class XMLPreferences
     }
 
     /**
-     * Return XMLPreferences of specified node.<br>
+     * @param name string
+     * @return Return XMLPreferences of specified node.<br>
      */
     public XMLPreferences node(String name)
     {
@@ -281,9 +284,10 @@ public class XMLPreferences
     }
 
     /**
-     * Return XMLPreferences of specified node using class name of specified object.<br>
+     * @return Return XMLPreferences of specified node using class name of specified object.<br>
      * <code>nodeForClass(object) == node(object.getClass().getName())</code><br>
      * Ex : <code>nodeForClass("text") == node("java.lang.String")</code>
+     * @param object object
      */
     public XMLPreferences nodeForClass(Object object)
     {
@@ -294,7 +298,7 @@ public class XMLPreferences
     }
 
     /**
-     * Return the {@link XMLPreferences} node as an XML node.
+     * @return Return the {@link XMLPreferences} node as an XML node.
      */
     public Element getXMLNode()
     {
@@ -302,7 +306,7 @@ public class XMLPreferences
     }
 
     /**
-     * Return true if current node is existing
+     * @return Return true if current node is existing
      */
     public boolean exists()
     {
@@ -329,7 +333,8 @@ public class XMLPreferences
     }
 
     /**
-     * Return true if specified node exists
+     * @param name string
+     * @return Return true if specified node exists
      */
     public boolean nodeExists(String name)
     {
@@ -337,9 +342,10 @@ public class XMLPreferences
     }
 
     /**
-     * Return true if node for specified object exists.<br>
+     * @return Return true if node for specified object exists.<br>
      * <code>nodeForClassExists(object) == nodeExists(object.getClass().getName())</code><br>
      * Ex : <code>nodeForClassExists("text") == nodeExists("java.lang.String")</code>
+     * @param object object
      */
     public boolean nodeForClassExists(Object object)
     {
@@ -419,6 +425,7 @@ public class XMLPreferences
 
     /**
      * Remove specified section
+     * @param name string
      */
     public void remove(String name)
     {

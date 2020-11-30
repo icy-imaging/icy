@@ -408,8 +408,8 @@ public class StringUtil
     /**
      * Truncate the text to a specific size, according a keyword.<br>
      * The text will be truncated around the place where the keyword is found.<br>
-     * If the string is found at the beginning, the text will be like this:<br/>
-     * <b><center>Lorem ipsum dolor sit amet, consec...</center><b/>
+     * If the string is found at the beginning, the text will be like this:<br>
+     * <b>Lorem ipsum dolor sit amet, consec...</b>
      * 
      * @param fullText
      *        : text to be truncated.
@@ -620,7 +620,7 @@ public class StringUtil
     }
 
     /**
-     * Returns a <tt>String</tt> object representing the specified
+     * Returns a <i>String</i> object representing the specified
      * boolean. If the specified boolean is <code>true</code>, then
      * the string {@code "true"} will be returned, otherwise the
      * string {@code "false"} will be returned.
@@ -693,10 +693,10 @@ public class StringUtil
 
     /**
      * Returns a string representation of the <code>double</code> argument with specified size :<br>
-     * <code>toString(1.23456, 5)</code> --> <code>"1.2345"</code><br>
-     * <code>toString(123.4567, 4)</code> --> <code>"123.4"</code><br>
-     * <code>toString(1234.567, 2)</code> --> <code>"1234"</code> as we never trunk integer part.<br>
-     * <code>toString(1234.5, 10)</code> --> <code>"1234.5"</code> as we never trunk integer part.<br>
+     * <code>toString(1.23456, 5)</code> --&gt; <code>"1.2345"</code><br>
+     * <code>toString(123.4567, 4)</code> --&gt; <code>"123.4"</code><br>
+     * <code>toString(1234.567, 2)</code> --&gt; <code>"1234"</code> as we never trunk integer part.<br>
+     * <code>toString(1234.5, 10)</code> --&gt; <code>"1234.5"</code> as we never trunk integer part.<br>
      */
     public static String toStringEx(double value, int size)
     {
@@ -765,12 +765,12 @@ public class StringUtil
      * string by inserting spaces between words starting with an upper case letter, and converts
      * upper case letters to lower case (with the exception of the first word). Note that
      * <b>consecutive upper case letters will remain grouped</b>, as they are considered to
-     * represent an acronym.<br/>
-     * <br/>
-     * <u>NOTE:</u> This method is optimized for class names that follow the Java naming convention. <br/>
-     * Examples:<br/>
-     * MyGreatClass -> "My great class"<br/>
-     * MyXYZClass -> "My XYZ class"
+     * represent an acronym.<br>
+     * <br>
+     * <u>NOTE:</u> This method is optimized for class names that follow the Java naming convention. <br>
+     * Examples:<br>
+     * MyGreatClass -&gt; "My great class"<br>
+     * MyXYZClass -&gt; "My XYZ class"
      * 
      * @param string
      *        the string to flatten
@@ -894,12 +894,14 @@ public class StringUtil
      * @param text
      *        text to split into word.<br>
      *        Example:<br>
-     *        <i>this book is named "the red cat"</i> --> <br>
+     *        <i>this book is named "the red cat"</i> --&gt; <br>
+     *        <ul>
      *        <li>this</li>
      *        <li>book</li>
      *        <li>is</li>
      *        <li>named</li>
      *        <li>the red cat</li>
+     *        </ul>
      * @return String array representing words
      */
     public static List<String> split(String text)

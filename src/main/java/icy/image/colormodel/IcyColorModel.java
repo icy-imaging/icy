@@ -712,7 +712,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Change the colorspace of the color model.<br/>
+     * Change the colorspace of the color model.<br>
      * <b>You should never use this method directly (internal use only)</b>
      */
     public void setColorSpace(IcyColorSpace colorSpace)

@@ -72,7 +72,7 @@ import icy.util.StringUtil;
 /**
  * MainInterfaceGui
  * 
- * @author Fabrice de Chaumont & Stephane
+ * @author Fabrice de Chaumont &amp; Stephane
  */
 public class MainInterfaceGui implements MainInterface
 {

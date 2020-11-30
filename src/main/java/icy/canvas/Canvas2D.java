@@ -2070,7 +2070,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
     final CanvasMap canvasMap;
 
     /**
-     * GUI & setting
+     * GUI &amp; setting
      */
     IcyToggleButton zoomFitCanvasButton;
     Color bgColor;

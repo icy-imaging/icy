@@ -350,7 +350,7 @@ public class BooleanMask5D
 
     /**
      * Build a new 4D boolean mask with specified bounds and 4D mask array.<br>
-     * The 4D mask array length should be >= to <code>bounds.getSizeT()</code>.
+     * The 4D mask array length should be &gt;= to <code>bounds.getSizeT()</code>.
      */
     public BooleanMask5D(Rectangle5D.Integer bounds, BooleanMask4D[] mask)
     {

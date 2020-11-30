@@ -156,7 +156,7 @@ public class PopupPanel extends JPanel
      * 
      * @param title
      *        Panel title
-     * @panel panel internal panel
+     * @param  panel internal panel
      * @param subPanel
      *        Determine if this is an embedded popup panel or a normal one.
      */
@@ -184,7 +184,7 @@ public class PopupPanel extends JPanel
      * 
      * @param title
      *        Panel title
-     * @panel panel internal panel
+     * @param  panel internal panel
      */
     public PopupPanel(String title, JPanel panel)
     {

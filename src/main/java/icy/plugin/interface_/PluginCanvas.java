@@ -26,12 +26,13 @@ import icy.gui.viewer.Viewer;
  * Used to define a plugin representing a specific IcyCanvas.<br>
  * The plugin will appears in the Canvas list.<br>
  * 
- * @author Fab & Stephane
+ * @author Fab &amp; Stephane
  */
 public interface PluginCanvas extends PluginNoEDTConstructor
 {
     /**
      * Return the Canvas class name (CanvasClass.getClassName())
+     * @return Class name of the canvas
      */
     public String getCanvasClassName();
 

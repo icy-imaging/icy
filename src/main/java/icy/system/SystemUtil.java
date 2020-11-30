@@ -1099,7 +1099,7 @@ public class SystemUtil
      * @param dir
      *        directory from where we want to load the native library.
      * @param name
-     *        name of the library.<br/>
+     *        name of the library.<br>
      *        The filename of the library is automatically built depending the operating system.
      */
     public static void loadLibrary(String dir, String name)

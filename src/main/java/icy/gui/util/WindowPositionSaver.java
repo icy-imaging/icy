@@ -44,7 +44,7 @@ import javax.swing.JFrame;
 /**
  * Load and Save you window position in the registry
  * 
- * @author fab & stephane
+ * @author fab &amp; stephane
  */
 public class WindowPositionSaver
 {

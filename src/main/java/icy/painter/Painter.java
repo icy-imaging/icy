@@ -38,6 +38,9 @@ public interface Painter
 {
     /**
      * Paint method called to draw the painter.
+     * @param g 2D graphics
+     * @param sequence sequence
+     * @param canvas canvas
      */
     public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas);
 

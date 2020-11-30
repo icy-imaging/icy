@@ -42,7 +42,7 @@ import javax.swing.ListCellRenderer;
  * The combo auto refresh its content regarding to the sequence opened in ICY.<br>
  * You can get it with getSequenceSelected()
  * 
- * @author Fabrice de Chaumont & Stephane<br>
+ * @author Fabrice de Chaumont &amp; Stephane<br>
  */
 
 public class SequenceChooser extends JComboBox implements GlobalSequenceListener

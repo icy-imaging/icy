@@ -25,7 +25,7 @@ import icy.util.StringUtil;
 /**
  * Unit conversion utilities class.
  * 
- * @author Thomas Provoost & Stephane Dallongeville
+ * @author Thomas Provoost &amp; Stephane Dallongeville
  */
 public class UnitUtil
 {
@@ -71,9 +71,9 @@ public class UnitUtil
 
     /**
      * Return the specified value as "bytes" string :<br>
-     * 1024 --> "1 KB"<br>
-     * 1024*1000 --> "1 MB"<br>
-     * 1024*1000*1000 --> "1 GB"<br>
+     * 1024 --&gt; "1 KB"<br>
+     * 1024*1000 --&gt; "1 MB"<br>
+     * 1024*1000*1000 --&gt; "1 GB"<br>
      * ...<br>
      */
     public static String getBytesString(double value)
@@ -98,12 +98,12 @@ public class UnitUtil
 
     /**
      * Get the best unit with the given value and {@link UnitPrefix}.<br>
-     * By best unit we adapt the output unit so the value stay between 0.1 --> 100 range (for
+     * By best unit we adapt the output unit so the value stay between 0.1 --&gt; 100 range (for
      * dimension 1).<br>
      * Be careful, this method is supposed to be used with unit in <b>decimal</b>
-     * system. For sexagesimal system, please use {@link #getBestTimeUnit(double)} or {@link TimeUnit} methods.<br/>
-     * <br/>
-     * Example: <code>getBestUnit(0.01, UnitPrefix.MILLI, 1)</code> will return <code>UnitPrefix.MICRO</code><br/>
+     * system. For sexagesimal system, please use {@link #getBestTimeUnit(double)} or {@link TimeUnit} methods.<br>
+     * <br>
+     * Example: <code>getBestUnit(0.01, UnitPrefix.MILLI, 1)</code> will return <code>UnitPrefix.MICRO</code><br>
      * 
      * @param value
      *        : value used to get the best unit.
@@ -142,10 +142,10 @@ public class UnitUtil
 
     /**
      * Get the best unit with the given value and {@link UnitPrefix}. By best unit we adapt the
-     * output unit so the value stay between 0.1 --> 100 range (for dimension 1).<br>
+     * output unit so the value stay between 0.1 --&gt; 100 range (for dimension 1).<br>
      * Be careful, this method is supposed to be used with unit in <b>decimal</b>
-     * system. For sexagesimal system, please use {@link #getBestTimeUnit(double)} or {@link TimeUnit} methods.<br/>
-     * Example: <code>getBestUnit(0.01, UnitPrefix.MILLI, 1)</code> will return <code>UnitPrefix.MICRO</code><br/>
+     * system. For sexagesimal system, please use {@link #getBestTimeUnit(double)} or {@link TimeUnit} methods.<br>
+     * Example: <code>getBestUnit(0.01, UnitPrefix.MILLI, 1)</code> will return <code>UnitPrefix.MICRO</code><br>
      * 
      * @param value
      *        : value used to get the best unit.
@@ -160,10 +160,10 @@ public class UnitUtil
     }
 
     /**
-     * Return the value from a specific unit to another unit.<br/>
+     * Return the value from a specific unit to another unit.<br>
      * Be careful, this method is supposed to be used with unit in <b>decimal</b>
-     * system. For sexagesimal system, please use {@link #getBestTimeUnit(double)} or {@link TimeUnit} methods.<br/>
-     * <b>Example:</b><br/>
+     * system. For sexagesimal system, please use {@link #getBestTimeUnit(double)} or {@link TimeUnit} methods.<br>
+     * <b>Example:</b><br>
      * <ul>
      * <li>value = 0.01</li>
      * <li>currentUnit = {@link UnitPrefix#MILLI}</li>
@@ -204,10 +204,10 @@ public class UnitUtil
     }
 
     /**
-     * Return the value from a specific unit to another unit.<br/>
+     * Return the value from a specific unit to another unit.<br>
      * Be careful, this method is supposed to be used with unit in <b>decimal</b>
-     * system. For sexagesimal system, please use {@link #getBestTimeUnit(double)} or {@link TimeUnit} methods.<br/>
-     * <b>Example:</b><br/>
+     * system. For sexagesimal system, please use {@link #getBestTimeUnit(double)} or {@link TimeUnit} methods.<br>
+     * <b>Example:</b><br>
      * <ul>
      * <li>value = 0.01</li>
      * <li>currentUnit = {@link UnitPrefix#MILLI}</li>
@@ -251,12 +251,12 @@ public class UnitUtil
 
     /**
      * Return the best unit to display the value. The best unit is chosen
-     * according to the precision. <br/>
+     * according to the precision. <br>
      * <b>Example:</b>
      * <ul>
-     * <li>62001 ms -> {@link TimeUnit#MILLISECONDS}</li>
-     * <li>62000 ms -> {@link TimeUnit#SECONDS}</li>
-     * <li>60000 ms -> {@link TimeUnit#MINUTES}</li>
+     * <li>62001 ms -&gt; {@link TimeUnit#MILLISECONDS}</li>
+     * <li>62000 ms -&gt; {@link TimeUnit#SECONDS}</li>
+     * <li>60000 ms -&gt; {@link TimeUnit#MINUTES}</li>
      * </ul>
      * 
      * @param valueInMs

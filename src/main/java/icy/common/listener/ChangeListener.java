@@ -29,6 +29,7 @@ public interface ChangeListener
 {
     /**
      * fire changed event
+     * @param event collapsible
      */
     public void onChanged(CollapsibleEvent event);
 }

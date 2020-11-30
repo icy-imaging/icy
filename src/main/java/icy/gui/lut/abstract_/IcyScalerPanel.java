@@ -34,7 +34,7 @@ public abstract class IcyScalerPanel extends JPanel
      */
     private static final long serialVersionUID = -131062293691488276L;
     /**
-     * associated Viewer & LUTBand
+     * associated Viewer &amp; LUTBand
      */
     protected final Viewer viewer;
     protected final LUTBand lutBand;

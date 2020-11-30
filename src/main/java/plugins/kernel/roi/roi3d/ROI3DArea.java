@@ -443,6 +443,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Create a 3D Area ROI type from the specified {@link BooleanMask3D}.
+     * @param mask 3D Mask
      */
     public ROI3DArea(BooleanMask3D mask)
     {
@@ -453,6 +454,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Create a copy of the specified 3D Area ROI.
+     * @param area 3D area
      */
     public ROI3DArea(ROI3DArea area)
     {
@@ -467,6 +469,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Create a 3D Area ROI type from the specified {@link BooleanMask3D}.
+     * @param mask2d 2D mask
+     * @param zMax int
+     * @param zMin int
      */
     public ROI3DArea(BooleanMask2D mask2d, int zMin, int zMax)
     {
@@ -501,6 +506,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Adds the specified point to this ROI
+     * @param x int
+     * @param y int
+     * @param z int
      */
     public void addPoint(int x, int y, int z)
     {
@@ -511,6 +519,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      * Remove a point from the mask.<br>
      * Don't forget to call optimizeBounds() after consecutive remove operation
      * to refresh the mask bounds.
+     * @param x int
+     * @param z int
+     * @param y int
      */
     public void removePoint(int x, int y, int z)
     {
@@ -521,6 +532,10 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      * Set the value for the specified point in the mask.
      * Don't forget to call optimizeBounds() after consecutive remove point operation
      * to refresh the mask bounds.
+     * @param x int
+     * @param y int
+     * @param z int
+     * @param value boolean
      */
     public void setPoint(int x, int y, int z, boolean value)
     {
@@ -532,6 +547,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Add brush point at specified position and for specified Z slice.
+     * @param z int
+     * @param pos 2D point
      */
     public void addBrush(Point2D pos, int z)
     {
@@ -542,6 +559,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      * Remove brush point from the mask at specified position and for specified Z slice.<br>
      * Don't forget to call optimizeBounds() after consecutive remove operation
      * to refresh the mask bounds.
+     * @param z int
+     * @param pos 2D point
      */
     public void removeBrush(Point2D pos, int z)
     {
@@ -552,7 +571,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * Add the specified {@link BooleanMask3D} content to this ROI3DArea
+     * @param mask Add the specified {@link BooleanMask3D} content to this ROI3DArea
      */
     public void add(BooleanMask3D mask)
     {
@@ -570,7 +589,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Add the specified BooleanMask2D with the existing slice at given Z position.<br>
-     * If there is no slice at this Z position then the method is equivalent to {@link #setSlice(int, ROI2DArea)} with
+     * If there is no slice at this Z position then the method is equivalent to setSlice(int, ROI2DArea) with
      * <code>new ROI2DArea(maskSlice)</code>
      * 
      * @param z
@@ -594,7 +613,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * Exclusively add the specified {@link BooleanMask3D} content to this ROI3DArea
+     * @param mask Exclusively add the specified {@link BooleanMask3D} content to this ROI3DArea
      */
     public void exclusiveAdd(BooleanMask3D mask)
     {
@@ -612,7 +631,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Exclusively add the specified BooleanMask2D with the existing slice at given Z position.<br>
-     * If there is no slice at this Z position then the method is equivalent to {@link #setSlice(int, ROI2DArea)} with
+     * If there is no slice at this Z position then the method is equivalent to setSlice(int, ROI2DArea) with
      * <code>new ROI2DArea(maskSlice)</code>
      * 
      * @param z
@@ -642,7 +661,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * Intersect the specified {@link BooleanMask3D} content with this ROI3DArea
+     * @param mask Intersect the specified {@link BooleanMask3D} content with this ROI3DArea
      */
     public void intersect(BooleanMask3D mask)
     {
@@ -706,7 +725,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * Subtract the specified {@link BooleanMask3D} from this ROI3DArea
+     * @param mask Subtract the specified {@link BooleanMask3D} from this ROI3DArea
      */
     public void subtract(BooleanMask3D mask)
     {
@@ -858,8 +877,13 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * @deprecated Use one of these methods instead :<br>
-     *             {@link #setSlice(int, ROI2DArea)}, {@link #setSlice(int, BooleanMask2D)},
-     *             {@link #add(int, ROI2DArea)} or {@link #add(BooleanMask3D)}
+     *             {@link ROI3DStack#setSlice(int, ROI2D)},
+     *             {@link ROI3DArea#setSlice(int, BooleanMask2D)},
+     *             {@link ROI3DStack#add(int, ROI2D)} or
+     *             {@link ROI3DArea#add(BooleanMask3D)}
+     * @param z int
+     * @param roiSlice ROI Slice
+     * @param merge boolean
      */
     @Deprecated
     public void setSlice(int z, ROI2D roiSlice, boolean merge)
@@ -923,7 +947,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     // }
 
     /**
-     * Returns true if the ROI is empty (the mask does not contains any point).
+     * @return Returns true if the ROI is empty (the mask does not contains any point).
      */
     @Override
     public boolean isEmpty()
@@ -937,6 +961,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * @deprecated Use {@link #getBooleanMask(boolean)} and {@link BooleanMask3D#getContourPoints()} instead.
+     * @return array of 3D points
+     *
      */
     @Deprecated
     public Point3D[] getEdgePoints()
@@ -946,6 +972,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * @deprecated Use {@link #getBooleanMask(boolean)} and {@link BooleanMask3D#getPoints()} instead.
+     * @return array of 3D points
      */
     @Deprecated
     public Point3D[] getPoints()
@@ -955,6 +982,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * @deprecated Use {@link #translate(double, double, double)} instead.
+     * @param dy double
+     * @param dx double
      */
     @Deprecated
     public void translate(double dx, double dy)
@@ -983,7 +1012,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * Set all 2D slices ROI to same position.<br>
+     * @param newPosition Set all 2D slices ROI to same position.<br>
      */
     public void setPosition2D(Point2D newPosition)
     {
@@ -1000,7 +1029,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * Set the mask from a BooleanMask3D object.<br>
+     * @param mask Set the mask from a BooleanMask3D object.<br>
      * If specified mask is <i>null</i> then ROI is cleared.
      */
     public void setAsBooleanMask(BooleanMask3D mask)

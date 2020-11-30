@@ -26,7 +26,8 @@ import icy.type.DataType;
 public class Array2DUtil
 {
     /**
-     * Return the total number of element of the specified array
+     * @param array 2D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(byte[][] array)
     {
@@ -44,7 +45,8 @@ public class Array2DUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 2D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(short[][] array)
     {
@@ -62,7 +64,8 @@ public class Array2DUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 2D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(int[][] array)
     {
@@ -80,7 +83,8 @@ public class Array2DUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 2D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(long[][] array)
     {
@@ -98,7 +102,8 @@ public class Array2DUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 2D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(float[][] array)
     {
@@ -117,7 +122,8 @@ public class Array2DUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array 2D array
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(double[][] array)
     {
@@ -137,6 +143,8 @@ public class Array2DUtil
     /**
      * @deprecated
      *             use {@link #getTotalLength(byte[][])} instead
+     * @param array 2D array
+     * @return int
      */
     @Deprecated
     public static int getTotalLenght(byte[][] array)
@@ -147,6 +155,8 @@ public class Array2DUtil
     /**
      * @deprecated
      *             use {@link #getTotalLength(short[][])} instead
+     * @param array 2D array
+     * @return int
      */
     @Deprecated
     public static int getTotalLenght(short[][] array)
@@ -157,6 +167,8 @@ public class Array2DUtil
     /**
      * @deprecated
      *             use {@link #getTotalLength(int[][])} instead
+     * @param array 2D array
+     * @return int
      */
     @Deprecated
     public static int getTotalLenght(int[][] array)
@@ -167,6 +179,8 @@ public class Array2DUtil
     /**
      * @deprecated
      *             use {@link #getTotalLength(float[][])} instead
+     * @param array 2D array
+     * @return int
      */
     @Deprecated
     public static int getTotalLenght(float[][] array)
@@ -177,6 +191,8 @@ public class Array2DUtil
     /**
      * @deprecated
      *             use {@link #getTotalLength(double[][])} instead
+     * @param array 2D array
+     * @return int
      */
     @Deprecated
     public static int getTotalLenght(double[][] array)
@@ -185,7 +201,9 @@ public class Array2DUtil
     }
 
     /**
-     * Create a new 2D array with specified data type and length
+     * @param dataType object
+     * @param len int
+     * @return Create a new 2D array with specified data type and length
      */
     public static Object[] createArray(DataType dataType, int len)
     {
@@ -210,6 +228,9 @@ public class Array2DUtil
 
     /**
      * @deprecated
+     * @param dataType object
+     * @param len int
+     * @return array of object
      */
     @Deprecated
     public static Object[] createArray(int dataType, int len)
@@ -218,7 +239,9 @@ public class Array2DUtil
     }
 
     /**
-     * Allocate the specified 2D array if it's defined to null with the specified len
+     * @param out 2D array
+     * @param len int
+     * @return Allocate the specified 2D array if it's defined to null with the specified len
      */
     public static byte[][] allocIfNull(byte[][] out, int len)
     {
@@ -229,7 +252,9 @@ public class Array2DUtil
     }
 
     /**
-     * Allocate the specified 2D array if it's defined to null with the specified len
+     * @param out 2D array
+     * @param len int
+     * @return Allocate the specified 2D array if it's defined to null with the specified len
      */
     public static short[][] allocIfNull(short[][] out, int len)
     {
@@ -240,7 +265,9 @@ public class Array2DUtil
     }
 
     /**
-     * Allocate the specified 2D array if it's defined to null with the specified len
+     * @param out 2D array
+     * @param len int
+     * @return Allocate the specified 2D array if it's defined to null with the specified len
      */
     public static int[][] allocIfNull(int[][] out, int len)
     {
@@ -251,7 +278,9 @@ public class Array2DUtil
     }
 
     /**
-     * Allocate the specified 2D array if it's defined to null with the specified len
+     * @param out 2D array
+     * @param len int
+     * @return Allocate the specified 2D array if it's defined to null with the specified len
      */
     public static long[][] allocIfNull(long[][] out, int len)
     {
@@ -262,7 +291,9 @@ public class Array2DUtil
     }
 
     /**
-     * Allocate the specified 2D array if it's defined to null with the specified len
+     * @param out 2D array
+     * @param len int
+     * @return Allocate the specified 2D array if it's defined to null with the specified len
      */
     public static float[][] allocIfNull(float[][] out, int len)
     {
@@ -273,7 +304,9 @@ public class Array2DUtil
     }
 
     /**
-     * Allocate the specified 2D array if it's defined to null with the specified len
+     * @param out 2D array
+     * @param len int
+     * @return Allocate the specified 2D array if it's defined to null with the specified len
      */
     public static double[][] allocIfNull(double[][] out, int len)
     {
@@ -284,7 +317,9 @@ public class Array2DUtil
     }
 
     /**
-     * Return true is the specified arrays are equals
+     * @param array1 2D array
+     * @param array2 2D array
+     * @return Return true is the specified arrays are equals
      */
     public static boolean arrayByteCompare(byte[][] array1, byte[][] array2)
     {
@@ -301,7 +336,9 @@ public class Array2DUtil
     }
 
     /**
-     * Return true is the specified arrays are equals
+     * @param array1 2D array
+     * @param array2 2D array
+     * @return Return true is the specified arrays are equals
      */
     public static boolean arrayShortCompare(short[][] array1, short[][] array2)
     {
@@ -318,7 +355,9 @@ public class Array2DUtil
     }
 
     /**
-     * Return true is the specified arrays are equals
+     * @param array1 2D array
+     * @param array2 2D array
+     * @return Return true is the specified arrays are equals
      */
     public static boolean arrayIntCompare(int[][] array1, int[][] array2)
     {
@@ -335,7 +374,9 @@ public class Array2DUtil
     }
 
     /**
-     * Return true is the specified arrays are equals
+     * @param array1 2D array
+     * @param array2 2D array
+     * @return Return true is the specified arrays are equals
      */
     public static boolean arrayLongCompare(long[][] array1, long[][] array2)
     {
@@ -352,7 +393,9 @@ public class Array2DUtil
     }
 
     /**
-     * Return true is the specified arrays are equals
+     * @param array1 2D array
+     * @param array2 2D array
+     * @return Return true is the specified arrays are equals
      */
     public static boolean arrayFloatCompare(float[][] array1, float[][] array2)
     {
@@ -369,7 +412,9 @@ public class Array2DUtil
     }
 
     /**
-     * Return true is the specified arrays are equals
+     * @param array1 2D array
+     * @param array2 2D array
+     * @return Return true is the specified arrays are equals
      */
     public static boolean arrayDoubleCompare(double[][] array1, double[][] array2)
     {
@@ -386,7 +431,8 @@ public class Array2DUtil
     }
 
     /**
-     * Return the multi dimension 'in' array as a single dimension byte array.
+     * @param in 2D array
+     * @return Return the multi dimension 'in' array as a single dimension byte array.
      */
     public static byte[] toByteArray1D(byte[][] in)
     {
@@ -394,7 +440,8 @@ public class Array2DUtil
     }
 
     /**
-     * Return the multi dimension 'in' array as a single dimension short array.
+     * @param in 2D array
+     * @return Return the multi dimension 'in' array as a single dimension short array.
      */
     public static short[] toShortArray1D(short[][] in)
     {
@@ -403,6 +450,8 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #toIntArray1D(int[][])} instead
+     * @param in 2D array
+     * @return Return the multi dimension 'in' array as a single dimension int array.
      */
     @Deprecated
     public static int[] toIntArray(int[][] in)
@@ -411,7 +460,8 @@ public class Array2DUtil
     }
 
     /**
-     * Return the multi dimension 'in' array as a single dimension int array.
+     * @param in 2D array
+     * @return Return the multi dimension 'in' array as a single dimension int array.
      */
     public static int[] toIntArray1D(int[][] in)
     {
@@ -419,7 +469,8 @@ public class Array2DUtil
     }
 
     /**
-     * Return the multi dimension 'in' array as a single dimension float array.
+     * @param in 2D array
+     * @return Return the multi dimension 'in' array as a single dimension float array.
      */
     public static float[] toFloatArray1D(float[][] in)
     {
@@ -427,7 +478,8 @@ public class Array2DUtil
     }
 
     /**
-     * Return the multi dimension 'in' array as a single dimension double array.
+     * @param in 2D array
+     * @return Return the multi dimension 'in' array as a single dimension double array.
      */
     public static double[] toDoubleArray1D(double[][] in)
     {
@@ -435,9 +487,11 @@ public class Array2DUtil
     }
 
     /**
-     * Return the 2 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 2 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 2D array
+     * @param offset int
      */
     public static byte[] toByteArray1D(byte[][] in, byte[] out, int offset)
     {
@@ -464,9 +518,11 @@ public class Array2DUtil
     }
 
     /**
-     * Return the 2 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 2 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 2D array
+     * @param offset int
      */
     public static short[] toShortArray1D(short[][] in, short[] out, int offset)
     {
@@ -493,9 +549,11 @@ public class Array2DUtil
     }
 
     /**
-     * Return the 2 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 2 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 2D array
+     * @param offset int
      */
     public static int[] toIntArray1D(int[][] in, int[] out, int offset)
     {
@@ -522,9 +580,11 @@ public class Array2DUtil
     }
 
     /**
-     * Return the 2 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 2 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 2D array
+     * @param offset int
      */
     public static long[] toLongArray1D(long[][] in, long[] out, int offset)
     {
@@ -551,9 +611,11 @@ public class Array2DUtil
     }
 
     /**
-     * Return the 2 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 2 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 2D array
+     * @param offset int
      */
     public static float[] toFloatArray1D(float[][] in, float[] out, int offset)
     {
@@ -580,9 +642,11 @@ public class Array2DUtil
     }
 
     /**
-     * Return the 2 dimensions 'in' array as a single dimension array.<br>
+     * @return Return the 2 dimensions 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in 2D array
+     * @param offset int
      */
     public static double[] toDoubleArray1D(double[][] in, double[] out, int offset)
     {
@@ -609,7 +673,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' 2D array in 'out' 2D array type.
+     * @return Convert and return the 'in' 2D array in 'out' 2D array type.
      * 
      * @param in
      *        input array
@@ -646,7 +710,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' 2D array in 'out' 2D array type.
+     * @return Convert and return the 'in' 2D array in 'out' 2D array type.
      * 
      * @param in
      *        input array
@@ -661,7 +725,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' double array in 'out' array type.<br>
+     * @return Convert and return the 'in' double array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -696,7 +760,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' double array in 'out' array type.<br>
+     * @return Convert and return the 'in' double array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -709,7 +773,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' float array in 'out' array type.<br>
+     * @return  Convert and return the 'in' float array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -744,7 +808,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' float array in 'out' array type.<br>
+     * @return  Convert and return the 'in' float array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -757,7 +821,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' long array in 'out' array type.<br>
+     * @return Convert and return the 'in' long array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -795,7 +859,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' long array in 'out' array type.<br>
+     * @return Convert and return the 'in' long array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -810,7 +874,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' integer array in 'out' array type.<br>
+     * @return Convert and return the 'in' integer array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -848,7 +912,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' integer array in 'out' array type.<br>
+     * @return Convert and return the 'in' integer array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -863,7 +927,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' short array in 'out' array type.<br>
+     * @return Convert and return the 'in' short array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -901,7 +965,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' short array in 'out' array type.<br>
+     * @return Convert and return the 'in' short array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -916,7 +980,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' byte array in 'out' array type.<br>
+     * @return Convert and return the 'in' byte array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -954,7 +1018,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' byte array in 'out' array type.<br>
+     * @return Convert and return the 'in' byte array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -969,7 +1033,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' double array.<br>
+     * @return Convert and return the 'in' array in 'out' double array.<br>
      * 
      * @param in
      *        input array
@@ -1007,7 +1071,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' double array.<br>
+     * @return Convert and return the 'in' array in 'out' double array.<br>
      * 
      * @param in
      *        input array
@@ -1022,7 +1086,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array as a double array.<br>
+     * @return Convert and return the 'in' array as a double array.<br>
      * 
      * @param in
      *        input array
@@ -1035,7 +1099,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' float array.<br>
+     * @return Convert and return the 'in' array in 'out' float array.<br>
      * 
      * @param in
      *        input array
@@ -1073,7 +1137,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' float array.<br>
+     * @return Convert and return the 'in' array in 'out' float array.<br>
      * 
      * @param in
      *        input array
@@ -1088,7 +1152,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array as a float array.<br>
+     * @return Convert and return the 'in' array as a float array.<br>
      * 
      * @param in
      *        input array
@@ -1101,7 +1165,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' int array.<br>
+     * @return Convert and return the 'in' array in 'out' int array.<br>
      * 
      * @param in
      *        input array
@@ -1139,7 +1203,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' int array.<br>
+     * @return Convert and return the 'in' array in 'out' int array.<br>
      * 
      * @param in
      *        input array
@@ -1154,7 +1218,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array as a int array.<br>
+     * @return Convert and return the 'in' array as a int array.<br>
      * 
      * @param in
      *        input array
@@ -1167,7 +1231,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' short array.<br>
+     * @return Convert and return the 'in' array in 'out' short array.<br>
      * 
      * @param in
      *        input array
@@ -1205,7 +1269,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' short array.<br>
+     * @return Convert and return the 'in' array in 'out' short array.<br>
      * 
      * @param in
      *        input array
@@ -1220,7 +1284,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array as a short array.<br>
+     * @return Convert and return the 'in' array as a short array.<br>
      * 
      * @param in
      *        input array
@@ -1233,7 +1297,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' byte array.<br>
+     * @return Convert and return the 'in' array in 'out' byte array.<br>
      * 
      * @param in
      *        input array
@@ -1268,7 +1332,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' byte array.<br>
+     * @return Convert and return the 'in' array in 'out' byte array.<br>
      * 
      * @param in
      *        input array
@@ -1281,7 +1345,7 @@ public class Array2DUtil
     }
 
     /**
-     * Convert and return the 'in' array as a byte array.<br>
+     * @return Convert and return the 'in' array as a byte array.<br>
      * 
      * @param in
      *        input array
@@ -1290,20 +1354,6 @@ public class Array2DUtil
     {
         return arrayToByteArray(in, 0, null, 0, -1);
     }
-
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
 
     public static double[][] doubleArrayToDoubleArray(double[][] in, int inOffset, double[][] out, int outOffset,
             int length)
@@ -1847,15 +1897,6 @@ public class Array2DUtil
         return byteArrayToShortArray(array, 0, null, 0, array.length, signed);
     }
 
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
     public static Object doubleArrayToSafeArray(double[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -1946,6 +1987,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #longArrayToSafeArray(long[][], int, Object, int, int, boolean, boolean)} instead.
+     * @param in 2D array
+     * @param out object
+     * @param outOffset int
+     * @param inOffset int
+     * @param length int
+     * @param signed boolean
+     * @return object
      */
     @Deprecated
     public static Object longArrayToSafeArray(long[][] in, int inOffset, Object out, int outOffset, int length,
@@ -1956,6 +2004,10 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #longArrayToSafeArray(long[][], Object, boolean, boolean)} instead.
+     * @param in 2D array
+     * @param out object
+     * @param signed boolean
+     * @return object
      */
     @Deprecated
     public static Object longArrayToSafeArray(long[][] in, Object out, boolean signed)
@@ -1992,6 +2044,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #intArrayToSafeArray(int[][], int, Object, int, int, boolean, boolean)} instead.
+     * @param in 2D array
+     * @param out object
+     * @param outOffset int
+     * @param inOffset int
+     * @param length int
+     * @param signed boolean
+     * @return object
      */
     @Deprecated
     public static Object intArrayToSafeArray(int[][] in, int inOffset, Object out, int outOffset, int length,
@@ -2002,6 +2061,10 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #intArrayToSafeArray(int[][], Object, boolean, boolean)} instead.
+     * @param in 2D array
+     * @param out object
+     * @param signed boolean
+     * @return object
      */
     @Deprecated
     public static Object intArrayToSafeArray(int[][] in, Object out, boolean signed)
@@ -2038,7 +2101,14 @@ public class Array2DUtil
     }
 
     /**
-     * @deprecated Use {@link #shortArrayToSafeArray(short[][], int, Object, int, int, boolean, boolean)} instead.
+     * @deprecated Use {@link #shortArrayToSafeArray(short[][], int, Object, int, int, boolean, boolean)} instead.* @param in 2D array
+     * @param in 2D array
+     * @param out object
+     * @param outOffset int
+     * @param inOffset int
+     * @param length int
+     * @param signed boolean
+     * @return object
      */
     @Deprecated
     public static Object shortArrayToSafeArray(short[][] in, int inOffset, Object out, int outOffset, int length,
@@ -2049,6 +2119,10 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #shortArrayToSafeArray(short[][], Object, boolean, boolean)} instead.
+     * @param in 2D array
+     * @param out object
+     * @param signed boolean
+     * @return object
      */
     @Deprecated
     public static Object shortArrayToSafeArray(short[][] in, Object out, boolean signed)
@@ -2113,6 +2187,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #arrayToSafeLongArray(Object, int, long[][], int, int, boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param outOffset int
+     * @param inOffset int
+     * @param length int
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static long[][] arrayToSafeLongArray(Object in, int inOffset, long[][] out, int outOffset, int length,
@@ -2123,6 +2204,10 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #arrayToSafeLongArray(Object, long[][], boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static long[][] arrayToSafeLongArray(Object in, long[][] out, boolean signed)
@@ -2159,6 +2244,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #arrayToSafeIntArray(Object, int, int[][], int, int, boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param outOffset int
+     * @param inOffset int
+     * @param length int
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static int[][] arrayToSafeIntArray(Object in, int inOffset, int[][] out, int outOffset, int length,
@@ -2169,6 +2261,10 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #arrayToSafeIntArray(Object, int[][], boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static int[][] arrayToSafeIntArray(Object in, int[][] out, boolean signed)
@@ -2206,6 +2302,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #arrayToSafeShortArray(Object, int, short[][], int, int, boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param outOffset int
+     * @param inOffset int
+     * @param length int
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static short[][] arrayToSafeShortArray(Object in, int inOffset, short[][] out, int outOffset, int length,
@@ -2216,6 +2319,10 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #arrayToSafeShortArray(Object, short[][], boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static short[][] arrayToSafeShortArray(Object in, short[][] out, boolean signed)
@@ -2253,6 +2360,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #arrayToSafeByteArray(Object, int, byte[][], int, int, boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param outOffset int
+     * @param inOffset int
+     * @param length int
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static byte[][] arrayToSafeByteArray(Object in, int inOffset, byte[][] out, int outOffset, int length,
@@ -2263,21 +2377,16 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #arrayToSafeByteArray(Object, byte[][], boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static byte[][] arrayToSafeByteArray(Object in, byte[][] out, boolean signed)
     {
         return arrayToSafeByteArray(in, 0, out, 0, -1, signed, signed);
     }
-
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
 
     public static long[][] doubleArrayToSafeLongArray(double[][] in, int inOffset, long[][] out, int outOffset,
             int length, boolean signed)
@@ -2437,6 +2546,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #longArrayToSafeIntArray(long[][], int, int[][], int, int, boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param outOffset int
+     * @param inOffset int
+     * @param length int
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static int[][] longArrayToSafeIntArray(long[][] in, int inOffset, int[][] out, int outOffset, int length,
@@ -2447,6 +2563,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #longArrayToSafeShortArray(long[][], int, short[][], int, int, boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static short[][] longArrayToSafeShortArray(long[][] in, int inOffset, short[][] out, int outOffset,
@@ -2458,6 +2581,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #longArrayToSafeByteArray(long[][], int, byte[][], int, int, boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static byte[][] longArrayToSafeByteArray(long[][] in, int inOffset, byte[][] out, int outOffset, int length,
@@ -2507,6 +2637,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #intArrayToSafeShortArray(int[][], int, short[][], int, int, boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static short[][] intArrayToSafeShortArray(int[][] in, int inOffset, short[][] out, int outOffset, int length,
@@ -2517,6 +2654,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #intArrayToSafeByteArray(int[][], int, byte[][], int, int, boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param outOffset int
+     * @param inOffset int
+     * @param length int
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static byte[][] intArrayToSafeByteArray(int[][] in, int inOffset, byte[][] out, int outOffset, int length,
@@ -2553,6 +2697,13 @@ public class Array2DUtil
 
     /**
      * @deprecated Use {@link #shortArrayToSafeByteArray(short[][], int, byte[][], int, int, boolean, boolean)} instead
+     * @param in object
+     * @param out object
+     * @param outOffset int
+     * @param inOffset int
+     * @param length int
+     * @param signed boolean
+     * @return 2D array
      */
     @Deprecated
     public static byte[][] shortArrayToSafeByteArray(short[][] in, int inOffset, byte[][] out, int outOffset,
@@ -2573,14 +2724,6 @@ public class Array2DUtil
 
         return outArray;
     }
-
-    //
-    //
-    //
-    //
-    //
-    //
-    //
 
     public static int[][] doubleArrayToSafeIntArray(double[][] array, boolean signed)
     {

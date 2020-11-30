@@ -79,7 +79,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     private static List<IcyColorMap> customMaps = null;
 
     /**
-     * Returns the list of default linear colormap:<br/>
+     * @return Returns the list of default linear colormap:<br>
      * GRAY, [GRAY_INV,] RED, GREEN, BLUE, MAGENTA, YELLOW, CYAN, [ALPHA]
      * 
      * @param wantGrayInverse
@@ -107,7 +107,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the list of special colormap:<br/>
+     * @return Returns the list of special colormap:<br>
      * ICE, FIRE, HSV, JET, GLOW
      */
     public static List<IcyColorMap> getSpecialColorMaps()
@@ -124,7 +124,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the list of custom colormap available in the Icy "colormap" folder
+     * @return Returns the list of custom colormap available in the Icy "colormap" folder
      */
     public static synchronized List<IcyColorMap> getCustomColorMaps()
     {
@@ -146,7 +146,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the list of all available colormaps.<br/>
+     * @return Returns the list of all available colormaps.<br>
      * The order of returned colormap map is Linear, Special and Custom.
      * 
      * @param wantGrayInverse
@@ -259,6 +259,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Create a copy of specified colormap.
+     * @param colormap color map
      */
     public IcyColorMap(IcyColorMap colormap)
     {
@@ -278,7 +279,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Return true if this color map is RGB type
+     * @return Return true if this color map is RGB type
      */
     public boolean isRGB()
     {
@@ -286,7 +287,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Return true if this color map is GRAY type
+     * @return Return true if this color map is GRAY type
      */
     public boolean isGray()
     {
@@ -294,7 +295,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Return true if this color map is ALPHA type
+     * @return Return true if this color map is ALPHA type
      */
     public boolean isAlpha()
     {
@@ -325,6 +326,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * @see IcyColorMap#setTypeFromData()
+     * @param notifyChange boolean
      */
     public void setTypeFromData(boolean notifyChange)
     {
@@ -375,6 +377,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set a red control point to specified index and value
+     * @param index int
+     * @param value int
      */
     public void setRedControlPoint(int index, int value)
     {
@@ -384,6 +388,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set a green control point to specified index and value
+     * @param index int
+     * @param value int
      */
     public void setGreenControlPoint(int index, int value)
     {
@@ -392,6 +398,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set a blue control point to specified index and value
+     * @param index int
+     * @param value int
      */
     public void setBlueControlPoint(int index, int value)
     {
@@ -400,6 +408,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set a gray control point to specified index and value
+     * @param index int
+     * @param value int
      */
     public void setGrayControlPoint(int index, int value)
     {
@@ -408,6 +418,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set a alpha control point to specified index and value
+     * @param index int
+     * @param value index
      */
     public void setAlphaControlPoint(int index, int value)
     {
@@ -416,6 +428,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set RGB control point values to specified index
+     * @param index int
+     * @param value int
      */
     public void setRGBControlPoint(int index, Color value)
     {
@@ -427,6 +441,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set ARGB control point values to specified index
+     * @param index int
+     * @param value int
      */
     public void setARGBControlPoint(int index, Color value)
     {
@@ -438,7 +454,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the blue component map.<br>
+     * @return Returns the blue component map.<br>
      * If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
      * If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
      */
@@ -453,7 +469,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the green component map.<br>
+     * @return Returns the green component map.<br>
      * If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
      * If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
      */
@@ -468,7 +484,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the red component map.<br>
+     * @return Returns the red component map.<br>
      * If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
      * If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
      */
@@ -483,7 +499,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the alpha component map.
+     * @return Returns the alpha component map.
      */
     public short[] getAlphaMap()
     {
@@ -491,7 +507,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the normalized blue component map.<br>
+     * @return Returns the normalized blue component map.<br>
      * If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
      * If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
      */
@@ -506,7 +522,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the normalized green component map.<br>
+     * @return Returns the normalized green component map.<br>
      * If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
      * If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
      */
@@ -521,7 +537,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the normalized red component map.<br>
+     * @return Returns the normalized red component map.<br>
      * If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
      * If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
      */
@@ -536,7 +552,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the normalized alpha component map.
+     * @return Returns the normalized alpha component map.
      */
     public float[] getNormalizedAlphaMap()
     {
@@ -546,7 +562,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get blue intensity from an input index
      * 
-     * @param index
+     * @param index int
      * @return blue intensity ([0..255] range)
      */
     public short getBlue(int index)
@@ -562,7 +578,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get green intensity from an input index
      * 
-     * @param index
+     * @param index int
      * @return green intensity ([0..255] range)
      */
     public short getGreen(int index)
@@ -578,7 +594,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get red intensity from an input index
      * 
-     * @param index
+     * @param index int
      * @return red intensity ([0..255] range)
      */
     public short getRed(int index)
@@ -594,7 +610,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get alpha intensity from an input index
      * 
-     * @param index
+     * @param index int
      * @return alpha intensity ([0..255] range)
      */
     public short getAlpha(int index)
@@ -605,7 +621,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get normalized blue intensity from an input index
      * 
-     * @param index
+     * @param index int
      * @return normalized blue intensity
      */
     public float getNormalizedBlue(int index)
@@ -621,7 +637,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get normalized green intensity from an input index
      * 
-     * @param index
+     * @param index int
      * @return normalized green intensity
      */
     public float getNormalizedGreen(int index)
@@ -637,7 +653,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get normalized red intensity from an input index
      * 
-     * @param index
+     * @param index int
      * @return normalized red intensity
      */
     public float getNormalizedRed(int index)
@@ -653,7 +669,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get alpha normalized intensity from an input index
      * 
-     * @param index
+     * @param index int
      * @return normalized alpha intensity
      */
     public float getNormalizedAlpha(int index)
@@ -664,7 +680,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get blue intensity from a normalized input index
      * 
-     * @param index
+     * @param index float
      * @return blue intensity ([0..255] range)
      */
     public short getBlue(float index)
@@ -675,7 +691,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get green intensity from a normalized input index
      * 
-     * @param index
+     * @param index float
      * @return green intensity ([0..255] range)
      */
     public short getGreen(float index)
@@ -686,7 +702,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get red intensity from a normalized input index
      * 
-     * @param index
+     * @param index float
      * @return red intensity ([0..255] range)
      */
     public short getRed(float index)
@@ -697,7 +713,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get alpha intensity from a normalized input index
      * 
-     * @param index
+     * @param index float
      * @return alpha intensity ([0..255] range)
      */
     public short getAlpha(float index)
@@ -708,7 +724,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get normalized blue intensity from a normalized input index
      * 
-     * @param index
+     * @param index float
      * @return normalized blue intensity
      */
     public float getNormalizedBlue(float index)
@@ -719,7 +735,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get normalized green intensity from a normalized input index
      * 
-     * @param index
+     * @param index float
      * @return normalized green intensity
      */
     public float getNormalizedGreen(float index)
@@ -730,7 +746,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get normalized red intensity from a normalized input index
      * 
-     * @param index
+     * @param index float
      * @return normalized red intensity
      */
     public float getNormalizedRed(float index)
@@ -741,7 +757,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Get normalized alpha intensity from a normalized input index
      * 
-     * @param index
+     * @param index int
      * @return normalized alpha intensity
      */
     public float getNormalizedAlpha(float index)
@@ -751,6 +767,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set red intensity to specified index
+     * @param value short
+     * @param index int
      */
     public void setRed(int index, short value)
     {
@@ -759,6 +777,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set green intensity to specified index
+     * @param index int
+     * @param value short
      */
     public void setGreen(int index, short value)
     {
@@ -767,6 +787,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set blue intensity to specified index
+     * @param index int
+     * @param value short
      */
     public void setBlue(int index, short value)
     {
@@ -775,6 +797,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set gray intensity to specified index
+     * @param index int
+     * @param value short
      */
     public void setGray(int index, short value)
     {
@@ -783,6 +807,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set alpha intensity to specified index
+     * @param index int
+     * @param value short
      */
     public void setAlpha(int index, short value)
     {
@@ -791,6 +817,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set red intensity (normalized) to specified index
+     * @param index int
+     * @param value float
      */
     public void setNormalizedRed(int index, float value)
     {
@@ -799,6 +827,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set green intensity (normalized) to specified index
+     * @param index int
+     * @param value float
      */
     public void setNormalizedGreen(int index, float value)
     {
@@ -807,6 +837,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set blue intensity (normalized) to specified index
+     * @param index int
+     * @param value float
      */
     public void setNormalizedBlue(int index, float value)
     {
@@ -815,6 +847,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set gray intensity (normalized) to specified index
+     * @param index int
+     * @param value float
      */
     public void setNormalizedGray(int index, float value)
     {
@@ -823,6 +857,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set alpha intensity (normalized) to specified index
+     * @param index int
+     * @param value float
      */
     public void setNormalizedAlpha(int index, float value)
     {
@@ -831,6 +867,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set RGB color to specified index
+     * @param index int
+     * @param rgb int
      */
     public void setRGB(int index, int rgb)
     {
@@ -843,6 +881,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set RGB color to specified index
+     * @param index int
+     * @param value color
      */
     public void setRGB(int index, Color value)
     {
@@ -851,6 +891,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set ARGB color to specified index
+     * @param index int
+     * @param argb int
      */
     public void setARGB(int index, int argb)
     {
@@ -863,6 +905,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * Set ARGB color to specified index
+     * @param index int
+     * @param value color
      */
     public void setARGB(int index, Color value)
     {
@@ -998,7 +1042,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Return the pre-multiplied RGB cache
+     * @return Return the pre-multiplied RGB cache
      */
     public int[][] getPremulRGB()
     {
@@ -1006,7 +1050,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Return the pre-multiplied RGB cache (normalized)
+     * @return Return the pre-multiplied RGB cache (normalized)
      */
     public float[][] getPremulRGBNorm()
     {
@@ -1018,6 +1062,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
      * 
      * @param copyAlpha
      *        Also copy the alpha information.
+     * @param srcColorMap color map
      */
     public void copyFrom(IcyColorMap srcColorMap, boolean copyAlpha)
     {
@@ -1044,7 +1089,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Copy data from specified source colormap
+     * @param srcColorMap Copy data from specified source colormap
      */
     public void copyFrom(IcyColorMap srcColorMap)
     {
@@ -1056,6 +1101,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
      * 
      * @param copyAlpha
      *        Also copy the alpha information.
+     * @param maps 2D array
      */
     public void copyFrom(byte[][] maps, boolean copyAlpha)
     {
@@ -1081,7 +1127,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Copy data from specified 2D byte array
+     * @param maps Copy data from specified 2D byte array
      */
     public void copyFrom(byte[][] maps)
     {
@@ -1093,6 +1139,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
      * 
      * @param copyAlpha
      *        Also copy the alpha information.
+     * @param maps 2D array
      */
     public void copyFrom(short[][] maps, boolean copyAlpha)
     {
@@ -1118,7 +1165,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Copy data from specified 2D short array.
+     * @param maps Copy data from specified 2D short array.
      */
     public void copyFrom(short[][] maps)
     {
@@ -1126,7 +1173,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Return true if this is a linear type colormap.<br>
+     * @return Return true if this is a linear type colormap.<br>
      * Linear colormap are used to display plain gray or color image.<br>
      * A non linear colormap means you usually have an indexed color image or
      * you want to enhance contrast/color in display.
@@ -1145,7 +1192,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Return true if this is a total black colormap.
+     * @return Return true if this is a total black colormap.
      */
     public boolean isBlack()
     {
@@ -1169,7 +1216,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Returns the dominant color of this colormap.<br>
+     * @return Returns the dominant color of this colormap.<br>
      * Warning: this need sometime to compute.
      */
     public Color getDominantColor()
@@ -1225,7 +1272,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Add a listener
      * 
-     * @param listener
+     * @param listener color map listener
      */
     public void addListener(IcyColorMapListener listener)
     {
@@ -1235,7 +1282,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * Remove a listener
      * 
-     * @param listener
+     * @param listener color map listener
      */
     public void removeListener(IcyColorMapListener listener)
     {
@@ -1243,7 +1290,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * fire event
+     * @param e fire event
      */
     public void fireEvent(IcyColorMapEvent e)
     {
@@ -1261,6 +1308,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
 
     /**
      * called when colormap changed
+     * @param type color map type
      */
     private void changed(IcyColorMapEventType type)
     {
@@ -1332,7 +1380,8 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     }
 
     /**
-     * Return true if the colormap has the same type and same color intensities than specified one.
+     * @param obj object
+     * @return Return true if the colormap has the same type and same color intensities than specified one.
      */
     @Override
     public boolean equals(Object obj)

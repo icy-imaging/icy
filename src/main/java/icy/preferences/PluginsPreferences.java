@@ -52,7 +52,8 @@ public class PluginsPreferences
     }
 
     /**
-     * Return root node for specified Plugin class.
+     * @return Return root node for specified Plugin class.
+     * @param pluginClass class
      */
     public static XMLPreferences root(Class<? extends Plugin> pluginClass)
     {
@@ -69,7 +70,8 @@ public class PluginsPreferences
     }
 
     /**
-     * Return root node for specified Plugin
+     * @param plugin plugin
+     * @return Return root node for specified Plugin
      */
     public static XMLPreferences root(Plugin plugin)
     {

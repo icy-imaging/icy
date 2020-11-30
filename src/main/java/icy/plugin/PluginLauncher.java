@@ -35,7 +35,7 @@ import java.util.concurrent.Callable;
  * This class launch plugins and register them to the main application.<br>
  * The launch can be in a decicated thread or in the EDT.
  * 
- * @author Fabrice de Chaumont & Stephane
+ * @author Fabrice de Chaumont &amp; Stephane
  */
 public class PluginLauncher
 {

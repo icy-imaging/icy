@@ -58,22 +58,22 @@ public abstract class Point4D implements Cloneable
     public abstract double getT();
 
     /**
-     * Sets the X coordinate of this <code>Point4D</code> in <code>double</code> precision.
+     * @param x Sets the X coordinate of this <code>Point4D</code> in <code>double</code> precision.
      */
     public abstract void setX(double x);
 
     /**
-     * Sets the Y coordinate of this <code>Point4D</code> in <code>double</code> precision.
+     * @param y Sets the Y coordinate of this <code>Point4D</code> in <code>double</code> precision.
      */
     public abstract void setY(double y);
 
     /**
-     * Sets the Z coordinate of this <code>Point4D</code> in <code>double</code> precision.
+     * @param z Sets the Z coordinate of this <code>Point4D</code> in <code>double</code> precision.
      */
     public abstract void setZ(double z);
 
     /**
-     * Sets the T coordinate of this <code>Point4D</code> in <code>double</code> precision.
+     * @param t Sets the T coordinate of this <code>Point4D</code> in <code>double</code> precision.
      */
     public abstract void setT(double t);
 
@@ -112,12 +112,12 @@ public abstract class Point4D implements Cloneable
     }
 
     /**
-     * Convert to 2D point
+     * @return Convert to 2D point
      */
     public abstract Point2D toPoint2D();
 
     /**
-     * Convert to 3D point
+     * @return Convert to 3D point
      */
     public abstract Point3D toPoint3D();
 
@@ -164,9 +164,9 @@ public abstract class Point4D implements Cloneable
     public static class Double extends Point4D
     {
         /**
-         * Create an array of Point4D.Double from the input double array.<br>
+         * @return Create an array of Point4D.Double from the input double array.<br>
          * <br>
-         * The format of the input array should be as follow:<br>
+         * @param input The format of the input array should be as follow:<br>
          * <code>input.lenght</code> = number of point * 4.<br>
          * <code>input[(pt * 4) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>input[(pt * 4) + 1]</code> = Y coordinate for point <i>pt</i><br>
@@ -185,9 +185,9 @@ public abstract class Point4D implements Cloneable
         }
 
         /**
-         * Create an array of double from the input Point4D.Double array.<br>
+         * @return Create an array of double from the input Point4D.Double array.<br>
          * <br>
-         * The format of the output array is as follow:<br>
+         * @param input The format of the output array is as follow:<br>
          * <code>result.lenght</code> = number of point * 4.<br>
          * <code>result[(pt * 4) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>result[(pt * 4) + 1]</code> = Y coordinate for point <i>pt</i><br>
@@ -318,9 +318,9 @@ public abstract class Point4D implements Cloneable
     public static class Float extends Point4D
     {
         /**
-         * Create an array of Point4D.Float from the input float array.<br>
+         * @return Create an array of Point4D.Float from the input float array.<br>
          * <br>
-         * The format of the input array should be as follow:<br>
+         * @param input The format of the input array should be as follow:<br>
          * <code>input.lenght</code> = number of point * 4.<br>
          * <code>input[(pt * 4) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>input[(pt * 4) + 1]</code> = Y coordinate for point <i>pt</i><br>
@@ -339,9 +339,9 @@ public abstract class Point4D implements Cloneable
         }
 
         /**
-         * Create an array of float from the input Point4D.Float array.<br>
+         * @return Create an array of float from the input Point4D.Float array.<br>
          * <br>
-         * The format of the output array is as follow:<br>
+         * @param input The format of the output array is as follow:<br>
          * <code>result.lenght</code> = number of point * 4.<br>
          * <code>result[(pt * 4) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>result[(pt * 4) + 1]</code> = Y coordinate for point <i>pt</i><br>
@@ -472,9 +472,9 @@ public abstract class Point4D implements Cloneable
     public static class Integer extends Point4D
     {
         /**
-         * Create an array of Point4D.Integer from the input integer array.<br>
+         * @return Create an array of Point4D.Integer from the input integer array.<br>
          * <br>
-         * The format of the input array should be as follow:<br>
+         * @param input The format of the input array should be as follow:<br>
          * <code>input.lenght</code> = number of point * 4.<br>
          * <code>input[(pt * 4) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>input[(pt * 4) + 1]</code> = Y coordinate for point <i>pt</i><br>
@@ -493,9 +493,9 @@ public abstract class Point4D implements Cloneable
         }
 
         /**
-         * Create an array of integer from the input Point4D.Integer array.<br>
+         * @return Create an array of integer from the input Point4D.Integer array.<br>
          * <br>
-         * The format of the output array is as follow:<br>
+         * @param input The format of the output array is as follow:<br>
          * <code>result.lenght</code> = number of point * 4.<br>
          * <code>result[(pt * 4) + 0]</code> = X coordinate for point <i>pt</i><br>
          * <code>result[(pt * 4) + 1]</code> = Y coordinate for point <i>pt</i><br>

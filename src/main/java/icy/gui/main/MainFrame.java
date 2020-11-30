@@ -82,7 +82,7 @@ import icy.util.StringUtil;
 import ij.IJ;
 
 /**
- * @author fab & Stephane
+ * @author fab &amp; Stephane
  */
 public class MainFrame extends JRibbonFrame
 {

@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Component to display and modify a numeric (double) value
  * 
- * @author Yoann Le Montagner & Stephane
+ * @author Yoann Le Montagner &amp; Stephane
  */
 public class NumberTextField extends IcyTextField
 {

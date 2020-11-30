@@ -57,12 +57,6 @@ public class IcySecurityManager extends SecurityManager
     }
 
     @Override
-    public boolean checkTopLevelWindow(Object window)
-    {
-        return true;
-    }
-
-    @Override
     public void checkListen(int port)
     {
         // ignore for now
@@ -135,12 +129,6 @@ public class IcySecurityManager extends SecurityManager
 
     @Override
     public void checkAccess(ThreadGroup g)
-    {
-        // ignore for now
-    }
-
-    @Override
-    public void checkMemberAccess(Class<?> clazz, int which)
     {
         // ignore for now
     }

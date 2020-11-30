@@ -88,6 +88,7 @@ public class TitledFrame extends IcyFrame
 
     /**
      * @deprecated Title always hidden now
+     * @param value boolean
      */
     @Deprecated
     public void setTitleVisible(boolean value)
@@ -97,6 +98,7 @@ public class TitledFrame extends IcyFrame
 
     /**
      * @deprecated Title always hidden now
+     * @return boolean
      */
     @Deprecated
     public boolean isTitleVisible()

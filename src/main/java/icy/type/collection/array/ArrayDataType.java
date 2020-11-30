@@ -28,6 +28,8 @@ public class ArrayDataType extends ArrayType
 {
     /**
      * @deprecated Use {@link ArrayType#getArrayInfo(Object)} instead
+     * @param array obect
+     * @return Data type of the array
      */
     @Deprecated
     public static ArrayDataType getArrayDataType(Object array)

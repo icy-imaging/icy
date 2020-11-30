@@ -40,7 +40,7 @@ public class Line3D implements Shape3D, Cloneable
     protected double z2;
 
     /**
-     * Constructs and initializes a Line with coordinates (0, 0, 0) -> (0, 0, 0).
+     * Constructs and initializes a Line with coordinates (0, 0, 0) -&gt; (0, 0, 0).
      */
     public Line3D()
     {
@@ -348,7 +348,7 @@ public class Line3D implements Shape3D, Cloneable
      *        the Y coordinate of the end point of the specified line segment
      * @param z2
      *        the Z coordinate of the end point of the specified line segment
-     * @return <true> if this line segment and the specified line segment intersect each other; <code>false</code>
+     * @return true if this line segment and the specified line segment intersect each other; <code>false</code>
      *         otherwise.
      */
     public boolean intersectsLine(double x1, double y1, double z1, double x2, double y2, double z2)

@@ -54,8 +54,8 @@ public class ROIInteriorDescriptor extends ROIDescriptor
     /**
      * Returns the interior size from a given number of interior points in the best unit (see
      * {@link Sequence#getBestPixelSizeUnit(int, int)}) for the specified sequence and dimension.<br>
-     * <ul>
      * Ex:
+     * <ul>
      * <li>computeInterior(sequence, roi, 2) return the area value</li>
      * <li>computeInterior(sequence, roi, 3) return the volume value</li>
      * </ul>

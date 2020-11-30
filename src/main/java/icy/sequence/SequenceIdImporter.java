@@ -1,18 +1,18 @@
 /*
  * Copyright 2010-2015 Institut Pasteur.
- * 
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -35,11 +35,10 @@ import icy.image.ImageProvider;
  * and {@link AbstractImageProvider} abstract class helper.
  * Note that you have {@link SequenceFileImporter} interface which allow to import {@link Sequence}
  * from file(s).
- * 
+ *
  * @author Stephane
  */
-public interface SequenceIdImporter extends ImageProvider, Closeable
-{
+public interface SequenceIdImporter extends ImageProvider, Closeable {
     public static final int FLAG_METADATA_MASK = 0x0003;
     /**
      * Flag to indicate we want to load only mandatory metadata informations (faster metadata loading)
@@ -62,14 +61,14 @@ public interface SequenceIdImporter extends ImageProvider, Closeable
      * access.<br>
      * Calling this method will automatically close the previous opened image.<br>
      * Don't forget to call {@link #close()} to close the image when you're done.<br>
-     * 
-     * @param id
-     *        Image id, it can be a file path or URL or whatever depending the internal
-     *        import method.
-     * @param flags
-     *        operation flag:<br>
-     *        <li>{@link #FLAG_METADATA_MINIMUM} = load minimum metadata informations</li>
-     *        <li>{@link #FLAG_METADATA_ALL} = load all metadata informations</li>
+     *
+     * @param id    Image id, it can be a file path or URL or whatever depending the internal
+     *              import method.
+     * @param flags operation flag:<br>
+     *             <ul>
+     *              <li>{@link #FLAG_METADATA_MINIMUM} = load minimum metadata informations</li>
+     *              <li>{@link #FLAG_METADATA_ALL} = load all metadata informations</li>
+     *             </ul>
      * @return <code>true</code> if the operation has succeeded and <code>false</code> otherwise.
      */
     public boolean open(String id, int flags) throws UnsupportedFormatException, IOException;

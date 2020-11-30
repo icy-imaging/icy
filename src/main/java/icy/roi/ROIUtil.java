@@ -106,9 +106,9 @@ public class ROIUtil
 
     /**
      * Returns all available ROI descriptors (see {@link ROIDescriptor}) and their attached plugin
-     * (see {@link PluginROIDescriptor}).<br/>
+     * (see {@link PluginROIDescriptor}).<br>
      * This list can be extended by installing new plugin(s) implementing the {@link PluginROIDescriptor}
-     * interface.<br/>
+     * interface.<br>
      * This method is an alias of {@link ROIDescriptor#getDescriptors()}
      * 
      * @see ROIDescriptor#compute(ROI, Sequence)
@@ -121,7 +121,7 @@ public class ROIUtil
 
     /**
      * Computes the specified descriptor from the input {@link ROIDescriptor} set on given ROI
-     * and returns the result (or <code>null</code> if the descriptor is not found).<br/>
+     * and returns the result (or <code>null</code> if the descriptor is not found).<br>
      * This method is an alias of {@link ROIDescriptor#computeDescriptor(Collection, String, ROI, Sequence)}
      * 
      * @param roiDescriptors
@@ -161,7 +161,7 @@ public class ROIUtil
 
     /**
      * Computes the specified descriptor on given ROI and returns the result (or <code>null</code> if the descriptor is
-     * not found).<br/>
+     * not found).<br>
      * This method is an alias of {@link ROIDescriptor#computeDescriptor(String, ROI, Sequence)}
      * 
      * @param descriptorId

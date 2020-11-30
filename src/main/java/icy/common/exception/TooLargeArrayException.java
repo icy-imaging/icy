@@ -4,7 +4,7 @@
 package icy.common.exception;
 
 /**
- * Exception when trying to allocate a too large array (length > 2^31)
+ * Exception when trying to allocate a too large array (length &gt; 2^31)
  * 
  * @author Stephane
  */

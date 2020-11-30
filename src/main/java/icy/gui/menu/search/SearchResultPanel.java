@@ -53,7 +53,7 @@ import icy.system.thread.ThreadUtil;
  * This class is the most important part of this plugin: it will handle and
  * display all local and online requests when characters are being typed in the {@link SearchBar}.
  * 
- * @author Thomas Provoost & Stephane
+ * @author Thomas Provoost &amp; Stephane
  */
 public class SearchResultPanel extends JWindow implements ListSelectionListener
 {
@@ -211,7 +211,8 @@ public class SearchResultPanel extends JWindow implements ListSelectionListener
     }
 
     /**
-     * Returns SearchResult located at specified index.
+     * @return Returns SearchResult located at specified index.
+     * @param index int
      */
     protected SearchResult getResult(int index)
     {
@@ -222,7 +223,8 @@ public class SearchResultPanel extends JWindow implements ListSelectionListener
     }
 
     /**
-     * Returns the index in the table for the specified SearchResult (-1 if not found)
+     * @return Returns the index in the table for the specified SearchResult (-1 if not found)
+     * @param result search
      */
     protected int getRowIndex(SearchResult result)
     {
@@ -237,7 +239,8 @@ public class SearchResultPanel extends JWindow implements ListSelectionListener
     }
 
     /**
-     * Returns SearchResult located at specified point position.
+     * @return Returns SearchResult located at specified point position.
+     * @param pt point
      */
     protected SearchResult getResultAtPosition(Point pt)
     {
@@ -245,7 +248,7 @@ public class SearchResultPanel extends JWindow implements ListSelectionListener
     }
 
     /**
-     * Returns selected result
+     * @return Returns selected result
      */
     public SearchResult getSelectedResult()
     {
@@ -254,6 +257,7 @@ public class SearchResultPanel extends JWindow implements ListSelectionListener
 
     /**
      * Set selected result
+     * @param result search
      */
     public void setSelectedResult(SearchResult result)
     {
@@ -276,7 +280,7 @@ public class SearchResultPanel extends JWindow implements ListSelectionListener
     }
 
     /**
-     * Calculates and returns panel height.
+     * @return Calculates and returns panel height.
      */
     int getPanelHeight()
     {
@@ -349,7 +353,7 @@ public class SearchResultPanel extends JWindow implements ListSelectionListener
 
     /**
      * Close the results panel.<br>
-     * If <code>reset</code> is true that also reset search.
+     * @param reset If <code>reset</code> is true that also reset search.
      */
     public void close(boolean reset)
     {

@@ -2047,7 +2047,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * so any modifications to one affect the other.<br>
      * if <code>(c == -1)</code> then current image is directly returned<br>
      * if <code>((c == 0) || (sizeC == 1))</code> then current image is directly returned<br>
-     * if <code>((c < 0) || (c >= sizeC))</code> then it returns <code>null</code>
+     * if <code>((c &lt; 0) || (c &gt;= sizeC))</code> then it returns <code>null</code>
      * 
      * @see IcyBufferedImageUtil#extractChannel(IcyBufferedImage, int)
      * @since version 1.0.3.3b
@@ -2863,7 +2863,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
-     * @deprecated No attached LUT to an image.<br/>
+     * @deprecated No attached LUT to an image.<br>
      *             Use {@link #createCompatibleLUT(boolean)} instead.
      */
     @Deprecated
@@ -4253,8 +4253,19 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Internal copy data from a compatible image (notify data changed)
      * 
-     * @param srcImage
+     * @param srcChannel
      *        source image
+     * @param dstChannel int
+     * @param src_db buffer
+     * @param dst_db buffer
+     * @param indices array
+     * @param band_offsets array
+     * @param pixelStride_src int
+     * @param scanlineStride_src int
+     * @param bank_offsets array
+     * @param decOffsetSrc int
+     * @param maxX int
+     * @param maxY int
      */
     protected void internalCopyData(int srcChannel, int dstChannel, DataBuffer src_db, DataBuffer dst_db, int[] indices,
             int[] band_offsets, int[] bank_offsets, int scanlineStride_src, int pixelStride_src, int maxX, int maxY,
@@ -4428,12 +4439,11 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * 
      * @param sampleModel
      *        source sample model
-     * @param raster
-     *        source writable raster to read data from
      * @param srcChannel
      *        source channel (-1 for all channels)
      * @param dstChannel
      *        destination channel (only significant if source channel != -1)
+     * @param sourceRaster WritableRaster
      * @return <code>true</code> if the copy operation succeed, <code>false</code> otherwise
      */
     public boolean copyData(ComponentSampleModel sampleModel, WritableRaster sourceRaster, int srcChannel,
@@ -4485,7 +4495,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * @param data
      *        source data array (should be same type than image data type)
      * @param dataDim
-     *        source data dimension (array length should be >= Dimension.width * Dimension.heigth)
+     *        source data dimension (array length should be &gt;= Dimension.width * Dimension.heigth)
      * @param signed
      *        if the source data array should be considered as signed data (meaningful for integer
      *        data type only)
@@ -4790,7 +4800,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
-     * Set raw data for all components from an array of byte (notify data changed).<br/>
+     * Set raw data for all components from an array of byte (notify data changed).<br>
      * Data are arranged in the following dimension order: XYC
      * 
      * @param data

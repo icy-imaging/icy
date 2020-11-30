@@ -37,6 +37,8 @@ public class ArrayUtil
 {
     /**
      * @deprecated Use {@link #getArrayType(Object)} instead
+     * @param array object
+     * @return object
      */
     @Deprecated
     public static ArrayDataType getArrayDataType(Object array)
@@ -54,7 +56,8 @@ public class ArrayUtil
     }
 
     /**
-     * Returns the {@link ArrayType} of the specified array.
+     * @param array object
+     * @return Returns the {@link ArrayType} of the specified array.
      */
     public static ArrayType getArrayType(Object array)
     {
@@ -71,7 +74,8 @@ public class ArrayUtil
     }
 
     /**
-     * Return the number of dimension of the specified array
+     * @param array object
+     * @return Return the number of dimension of the specified array
      */
     public static int getDim(Object array)
     {
@@ -88,7 +92,8 @@ public class ArrayUtil
     }
 
     /**
-     * Return the DataType (java type only) of the specified array.
+     * @param array object
+     * @return Return the DataType (java type only) of the specified array.
      * 
      * @see DataType
      */
@@ -102,7 +107,9 @@ public class ArrayUtil
     }
 
     /**
-     * Return the DataType of the specified array
+     * @param array object
+     * @param signed boolean
+     * @return Return the DataType of the specified array
      */
     public static DataType getDataType(Object array, boolean signed)
     {
@@ -127,7 +134,8 @@ public class ArrayUtil
     }
 
     /**
-     * Return the number of element of the specified array
+     * @param array object
+     * @return Return the number of element of the specified array
      */
     public static int getLength(Object array)
     {
@@ -141,6 +149,8 @@ public class ArrayUtil
     /**
      * @deprecated
      *             use {@link #getLength(Object)} instead
+     * @param array object
+     * @return int
      */
     @Deprecated
     public static int getLenght(Object array)
@@ -149,7 +159,8 @@ public class ArrayUtil
     }
 
     /**
-     * Return the total number of element of the specified array
+     * @param array object
+     * @return Return the total number of element of the specified array
      */
     public static int getTotalLength(Object array)
     {
@@ -172,6 +183,8 @@ public class ArrayUtil
     /**
      * @deprecated
      *             use {@link #getTotalLength(Object)} instead
+     * @param array object
+     * @return int
      */
     @Deprecated
     public static int getTotalLenght(Object array)
@@ -180,10 +193,12 @@ public class ArrayUtil
     }
 
     /**
-     * Create a new 1D array with specified data type and length
+     * @return Create a new 1D array with specified data type and length
      * 
      * @deprecated
      *             use {@link Array1DUtil#createArray} instead
+     * @param dataType int
+     * @param len int
      */
     @Deprecated
     public static Object createArray1D(int dataType, int len)
@@ -192,10 +207,12 @@ public class ArrayUtil
     }
 
     /**
-     * Create a new 2D array with specified data type and length
+     * @return Create a new 2D array with specified data type and length
      * 
      * @deprecated
      *             use {@link Array2DUtil#createArray} instead
+     * @param dataType int
+     * @param len int
      */
     @Deprecated
     public static Object createArray2D(int dataType, int len)
@@ -204,10 +221,12 @@ public class ArrayUtil
     }
 
     /**
-     * Create a new 3D array with specified data type and length
+     * @return Create a new 3D array with specified data type and length
      * 
      * @deprecated
      *             use {@link Array2DUtil#createArray(int, int)} instead
+     * @param len int
+     * @param dataType int
      */
     @Deprecated
     public static Object createArray3D(int dataType, int len)
@@ -216,7 +235,7 @@ public class ArrayUtil
     }
 
     /**
-     * Allocate the specified array data type with specified number of dimension.<br>
+     * @return Allocate the specified array data type with specified number of dimension.<br>
      * 
      * @param dataType
      *        array data type
@@ -233,7 +252,9 @@ public class ArrayUtil
     }
 
     /**
-     * Allocate the specified array data type with specified len for the first dimension
+     * @param arrayType array object
+     * @param len int
+     * @return Allocate the specified array data type with specified len for the first dimension
      */
     public static Object createArray(ArrayType arrayType, int len)
     {
@@ -241,7 +262,10 @@ public class ArrayUtil
     }
 
     /**
-     * Allocate the specified array if it's defined to null with the specified len
+     * @return Allocate the specified array if it's defined to null with the specified len
+     * @param array object
+     * @param arrayType object
+     * @param len int
      */
     public static Object allocIfNull(Object array, ArrayType arrayType, int len)
     {
@@ -252,7 +276,8 @@ public class ArrayUtil
     }
 
     /**
-     * Encapsulate the specified array with a single cell array of the same type.
+     * @param array object
+     * @return Encapsulate the specified array with a single cell array of the same type.
      */
     public static Object[] encapsulate(Object array)
     {
@@ -269,10 +294,12 @@ public class ArrayUtil
     }
 
     /**
-     * Get value as double from specified 1D array and offset.<br>
-     * If signed is true then any integer primitive is considered as signed data
+     * @return Get value as double from specified 1D array and offset.<br>
      * 
      * @deprecated use {@link Array1DUtil#getValue(Object, int, boolean)} instead
+     * @param array object
+     * @param signed If signed is true then any integer primitive is considered as signed data
+     * @param offset int
      */
     @Deprecated
     public static double getValue(Object array, int offset, boolean signed)
@@ -281,10 +308,13 @@ public class ArrayUtil
     }
 
     /**
-     * Get value as double from specified 1D array and offset.<br>
-     * If signed is true then any integer primitive is considered as signed data
-     * 
-     * @deprecated use {@link Array1DUtil#getValue(Object, int, int, boolean)} instead
+     * @return Get value as double from specified 1D array and offset.<br>
+     *
+     * @deprecated use {@link Array1DUtil#getValue(Object, int, boolean)} instead
+     * @param array object
+     * @param dataType object
+     * @param signed If signed is true then any integer primitive is considered as signed data
+     * @param offset int
      */
     @Deprecated
     public static double getValue(Object array, int offset, int dataType, boolean signed)
@@ -293,10 +323,12 @@ public class ArrayUtil
     }
 
     /**
-     * Get value as float from specified 1D array and offset.<br>
-     * If signed is true then any integer primitive is considered as signed data
-     * 
-     * @deprecated use {@link Array1DUtil#getValueAsFloat(Object, int, boolean)} instead
+     * @return Get value as float from specified 1D array and offset.<br>
+     *
+     * @deprecated use {@link Array1DUtil#getValue(Object, int, boolean)} instead
+     * @param array object
+     * @param signed If signed is true then any integer primitive is considered as signed data
+     * @param offset int
      */
     @Deprecated
     public static float getValueAsFloat(Object array, int offset, boolean signed)
@@ -305,10 +337,13 @@ public class ArrayUtil
     }
 
     /**
-     * Get value as float from specified 1D array and offset.<br>
-     * If signed is true then any integer primitive is considered as signed data
-     * 
-     * @deprecated use {@link Array1DUtil#getValueAsFloat(Object, int,int, boolean)} instead
+     * @return Get value as float from specified 1D array and offset.<br>
+     *
+     * @deprecated use {@link Array1DUtil#getValue(Object, int, boolean)} instead
+     * @param array object
+     * @param dataType object
+     * @param signed If signed is true then any integer primitive is considered as signed data
+     * @param offset int
      */
     @Deprecated
     public static float getValueAsFloat(Object array, int offset, int dataType, boolean signed)
@@ -317,10 +352,12 @@ public class ArrayUtil
     }
 
     /**
-     * Get value as integer from specified 1D array and offset.<br>
-     * If signed is true then any integer primitive is considered as signed data
-     * 
-     * @deprecated use {@link Array1DUtil#getValueAsInt(Object, int, boolean)} instead
+     * @return Get value as integer from specified 1D array and offset.<br>
+     *
+     * @deprecated use {@link Array1DUtil#getValue(Object, int, boolean)} instead
+     * @param array object
+     * @param signed If signed is true then any integer primitive is considered as signed data
+     * @param offset int
      */
     @Deprecated
     public static int getValueAsInt(Object array, int offset, boolean signed)
@@ -329,10 +366,13 @@ public class ArrayUtil
     }
 
     /**
-     * Get value as integer from specified 1D array and offset.<br>
-     * If signed is true then any integer primitive is considered as signed data
-     * 
-     * @deprecated use {@link Array1DUtil#getValueAsInt(Object, int, int, boolean)} instead
+     * @return Get value as integer from specified 1D array and offset.<br>
+     *
+     * @deprecated use {@link Array1DUtil#getValue(Object, int, boolean)} instead
+     * @param array object
+     * @param dataType object
+     * @param signed If signed is true then any integer primitive is considered as signed data
+     * @param offset int
      */
     @Deprecated
     public static int getValueAsInt(Object array, int offset, int dataType, boolean signed)
@@ -344,6 +384,9 @@ public class ArrayUtil
      * Set value at specified offset as double value.
      * 
      * @deprecated use {@link Array1DUtil#setValue(Object, int, double)} instead
+     * @param array object
+     * @param offset int
+     * @param value double
      */
     @Deprecated
     public static void setValue(Object array, int offset, double value)
@@ -353,8 +396,12 @@ public class ArrayUtil
 
     /**
      * Set value at specified offset as double value.
-     * 
-     * @deprecated use {@link Array1DUtil#setValue(Object, int, int,double)} instead
+     *
+     * @deprecated use {@link Array1DUtil#setValue(Object, int, double)} instead
+     * @param array object
+     * @param dataType object
+     * @param offset int
+     * @param value double
      */
     @Deprecated
     public static void setValue(Object array, int offset, int dataType, double value)
@@ -363,7 +410,9 @@ public class ArrayUtil
     }
 
     /**
-     * Return true if the specified array has the same data type<br>
+     * @param array1 object
+     * @param array2 object
+     * @return Return true if the specified array has the same data type<br>
      * and the same number of dimension.
      */
     public static boolean arrayTypeCompare(Object array1, Object array2)
@@ -372,7 +421,9 @@ public class ArrayUtil
     }
 
     /**
-     * Return true if the specified array are equals (same type, dimension and data).<br>
+     * @param array1 object
+     * @param array2 object
+     * @return Return true if the specified array are equals (same type, dimension and data).<br>
      */
     public static boolean arrayCompare(Object array1, Object array2)
     {
@@ -475,6 +526,10 @@ public class ArrayUtil
      * Same as Arrays.fill() but applied to Object array (1D only) from a double value.<br>
      * 
      * @deprecated Use {@link Array1DUtil#fill(Object, int, int, double)} instead.
+     * @param array object
+     * @param from int
+     * @param to int
+     * @param value double
      */
     @Deprecated
     public static void fill(Object array, int from, int to, double value)
@@ -487,6 +542,10 @@ public class ArrayUtil
      * i.e: without overriding any data.<br>
      * 
      * @deprecated Use {@link Array1DUtil#innerCopy(Object, int, int, int)} instead.
+     * @param array object
+     * @param from int
+     * @param to int
+     * @param cnt int
      */
     @Deprecated
     public static void innerCopy(Object array, int from, int to, int cnt)
@@ -495,9 +554,11 @@ public class ArrayUtil
     }
 
     /**
-     * Transform the multi dimension 'in' array as a single dimension array.<br>
+     * @return Transform the multi dimension 'in' array as a single dimension array.<br>
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
+     * @param in object
+     * @param offset int
      */
     public static Object toArray1D(Object in, Object out, int offset)
     {
@@ -607,8 +668,12 @@ public class ArrayUtil
     }
 
     /**
-     * Get maximum length for a copy from in to out with specified offset.<br>
-     * If specified length != -1 then the value is directly returned.
+     * @return Get maximum length for a copy from in to out with specified offset.<br>
+     * @param length If specified length != -1 then the value is directly returned.
+     * @param in object
+     * @param inOffset int
+     * @param out object
+     * @param outOffset int
      */
     static int getCopyLength(Object in, int inOffset, Object out, int outOffset, int length)
     {
@@ -619,7 +684,11 @@ public class ArrayUtil
     }
 
     /**
-     * Get maximum length for a copy from in to out with specified offset.
+     * @return Get maximum length for a copy from in to out with specified offset.
+     * @param in object
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
      */
     public static int getCopyLength(Object in, int inOffset, Object out, int outOffset)
     {
@@ -633,7 +702,9 @@ public class ArrayUtil
     }
 
     /**
-     * Get length for a copy from or to the specified array with specified offset
+     * @return Get length for a copy from or to the specified array with specified offset
+     * @param array object
+     * @param offset int
      */
     public static int getCopyLength(Object array, int offset)
     {
@@ -641,7 +712,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' array type.<br>
+     * @return Convert and return the 'in' array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -741,7 +812,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' array type.<br>
+     * @return Convert and return the 'in' array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -756,7 +827,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' double array in 'out' array type.<br>
+     * @return Convert and return the 'in' double array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -778,7 +849,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' double array in 'out' array type.<br>
+     * @return Convert and return the 'in' double array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -794,7 +865,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' float array in 'out' array type.<br>
+     * @return Convert and return the 'in' float array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -817,7 +888,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' float array in 'out' array type.<br>
+     * @return Convert and return the 'in' float array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -833,7 +904,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' integer array in 'out' array type.<br>
+     * @return Convert and return the 'in' integer array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -858,7 +929,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' integer array in 'out' array type.<br>
+     * @return Convert and return the 'in' integer array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -876,7 +947,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' short array in 'out' array type.<br>
+     * @return Convert and return the 'in' short array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -902,7 +973,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' short array in 'out' array type.<br>
+     * @return Convert and return the 'in' short array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -920,7 +991,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' byte array in 'out' array type.<br>
+     * @return Convert and return the 'in' byte array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -946,7 +1017,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 2D 'in' double array in 'out' array type.<br>
+     * @return Convert and return the 2D 'in' double array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -968,7 +1039,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 2D 'in' double array in 'out' array type.<br>
+     * @return Convert and return the 2D 'in' double array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -984,7 +1055,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 2D 'in' float array in 'out' array type.<br>
+     * @return Convert and return the 2D 'in' float array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -1007,7 +1078,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 2D 'in' float array in 'out' array type.<br>
+     * @return Convert and return the 2D 'in' float array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -1023,7 +1094,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 2D 'in' integer array in 'out' array type.<br>
+     * @return Convert and return the 2D 'in' integer array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -1049,7 +1120,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 2D 'in' integer array in 'out' array type.<br>
+     * @return Convert and return the 2D 'in' integer array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -1067,7 +1138,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 2D 'in' short array in 'out' array type.<br>
+     * @return Convert and return the 2D 'in' short array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -1093,7 +1164,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 2D 'in' short array in 'out' array type.<br>
+     * @return Convert and return the 2D 'in' short array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -1111,7 +1182,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 2D 'in' byte array in 'out' array type.<br>
+     * @return Convert and return the 2D 'in' byte array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -1137,7 +1208,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 2D 'in' byte array in 'out' array type.<br>
+     * @return Convert and return the 2D 'in' byte array in 'out' array type.<br>
      * 
      * @param in
      *        input array
@@ -1155,7 +1226,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' double array.<br>
+     * @return Convert and return the 'in' array in 'out' double array.<br>
      * 
      * @param in
      *        input array
@@ -1180,7 +1251,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' double array.<br>
+     * @return Convert and return the 'in' array in 'out' double array.<br>
      * 
      * @param in
      *        input array
@@ -1198,7 +1269,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array as a double array.<br>
+     * @return Convert and return the 'in' array as a double array.<br>
      * 
      * @param in
      *        input array
@@ -1214,7 +1285,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' double array.<br>
+     * @return Convert and return the 'in' array in 'out' double array.<br>
      * 
      * @param in
      *        input array
@@ -1239,7 +1310,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' double array.<br>
+     * @return Convert and return the 'in' array in 'out' double array.<br>
      * 
      * @param in
      *        input array
@@ -1257,7 +1328,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array as a double array.<br>
+     * @return Convert and return the 'in' array as a double array.<br>
      * 
      * @param in
      *        input array
@@ -1273,7 +1344,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' float array.<br>
+     * @return Convert and return the 'in' array in 'out' float array.<br>
      * 
      * @param in
      *        input array
@@ -1298,7 +1369,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' float array.<br>
+     * @return Convert and return the 'in' array in 'out' float array.<br>
      * 
      * @param in
      *        input array
@@ -1316,7 +1387,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array as a float array.<br>
+     * @return Convert and return the 'in' array as a float array.<br>
      * 
      * @param in
      *        input array
@@ -1332,7 +1403,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' float array.<br>
+     * @return Convert and return the 'in' array in 'out' float array.<br>
      * 
      * @param in
      *        input array
@@ -1358,7 +1429,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' float array.<br>
+     * @return Convert and return the 'in' array in 'out' float array.<br>
      * 
      * @param in
      *        input array
@@ -1376,7 +1447,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array as a float array.<br>
+     * @return Convert and return the 'in' array as a float array.<br>
      * 
      * @param in
      *        input array
@@ -1393,7 +1464,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' int array.<br>
+     * @return Convert and return the 'in' array in 'out' int array.<br>
      * 
      * @param in
      *        input array
@@ -1418,7 +1489,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' int array.<br>
+     * @return Convert and return the 'in' array in 'out' int array.<br>
      * 
      * @param in
      *        input array
@@ -1436,7 +1507,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array as a int array.<br>
+     * @return Convert and return the 'in' array as a int array.<br>
      * 
      * @param in
      *        input array
@@ -1453,7 +1524,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' int array.<br>
+     * @return Convert and return the 'in' array in 'out' int array.<br>
      * 
      * @param in
      *        input array
@@ -1479,7 +1550,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' int array.<br>
+     * @return Convert and return the 'in' array in 'out' int array.<br>
      * 
      * @param in
      *        input array
@@ -1497,7 +1568,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array as a int array.<br>
+     * @return Convert and return the 'in' array as a int array.<br>
      * 
      * @param in
      *        input array
@@ -1514,7 +1585,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' short array.<br>
+     * @return Convert and return the 'in' array in 'out' short array.<br>
      * 
      * @param in
      *        input array
@@ -1540,7 +1611,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' short array.<br>
+     * @return Convert and return the 'in' array in 'out' short array.<br>
      * 
      * @param in
      *        input array
@@ -1558,7 +1629,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array as a short array.<br>
+     * @return Convert and return the 'in' array as a short array.<br>
      * 
      * @param in
      *        input array
@@ -1575,7 +1646,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' short array.<br>
+     * @return Convert and return the 'in' array in 'out' short array.<br>
      * 
      * @param in
      *        input array
@@ -1601,7 +1672,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' short array.<br>
+     * @return Convert and return the 'in' array in 'out' short array.<br>
      * 
      * @param in
      *        input array
@@ -1619,7 +1690,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array as a short array.<br>
+     * @return Convert and return the 'in' array as a short array.<br>
      * 
      * @param in
      *        input array
@@ -1636,7 +1707,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' byte array.<br>
+     * @return Convert and return the 'in' array in 'out' byte array.<br>
      * 
      * @param in
      *        input array
@@ -1658,7 +1729,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' byte array.<br>
+     * @return Convert and return the 'in' array in 'out' byte array.<br>
      * 
      * @param in
      *        input array
@@ -1674,7 +1745,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array as a byte array.<br>
+     * @return Convert and return the 'in' array as a byte array.<br>
      * 
      * @param in
      *        input array
@@ -1689,7 +1760,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' byte array.<br>
+     * @return Convert and return the 'in' array in 'out' byte array.<br>
      * 
      * @param in
      *        input array
@@ -1712,7 +1783,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array in 'out' byte array.<br>
+     * @return Convert and return the 'in' array in 'out' byte array.<br>
      * 
      * @param in
      *        input array
@@ -1728,7 +1799,7 @@ public class ArrayUtil
     }
 
     /**
-     * Convert and return the 'in' array as a byte array.<br>
+     * @return Convert and return the 'in' array as a byte array.<br>
      * 
      * @param in
      *        input array
@@ -1741,20 +1812,6 @@ public class ArrayUtil
         return Array2DUtil.arrayToByteArray(in);
 
     }
-
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
 
     public static Object arrayToDoubleArray(Object array, boolean signed)
     {
@@ -1925,10 +1982,10 @@ public class ArrayUtil
     //
 
     /**
-     * Safely converts the input array in the output array data type.<br>
+     * @return Safely converts the input array in the output array data type.<br>
      * Output value is limited to output type limit :<br>
-     * unsigned int input = 1000 --> unsigned byte output = 255<br>
-     * int input = -1000 --> byte output = -128<br>
+     * unsigned int input = 1000 --&gt; unsigned byte output = 255<br>
+     * int input = -1000 --&gt; byte output = -128<br>
      * 
      * @param in
      *        input array we want to convert
@@ -1947,7 +2004,6 @@ public class ArrayUtil
      * @param dstSigned
      *        considers output value as signed (meaningful only for integer type array:
      *        <code>byte, short, int, long</code>)
-     * @return the output array
      */
     public static Object arrayToSafeArray(Object in, int inOffset, Object out, int outOffset, int length,
             boolean srcSigned, boolean dstSigned)
@@ -2058,6 +2114,13 @@ public class ArrayUtil
     /**
      * @deprecated Use {@link #arrayToSafeArray(Object, int, Object, int, int, boolean, boolean)}
      *             instead.
+     * @param in object
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
+     * @return object
      */
     @Deprecated
     public static Object arrayToSafeArray(Object in, int inOffset, Object out, int outOffset, int length, boolean signed)
@@ -2066,7 +2129,7 @@ public class ArrayUtil
     }
 
     /**
-     * Safely converts the input array in the output array data type.
+     * @return Safely converts the input array in the output array data type.
      * 
      * @param in
      *        input array we want to convert
@@ -2079,7 +2142,6 @@ public class ArrayUtil
      * @param dstSigned
      *        considers output value as (un)signed (meaningful only for integer type array:
      *        <code>byte, short, int, long</code>)
-     * @return the output array
      */
     public static Object arrayToSafeArray(Object in, Object out, boolean srcSigned, boolean dstSigned)
     {
@@ -2088,6 +2150,10 @@ public class ArrayUtil
 
     /**
      * @deprecated Use {@link #arrayToSafeArray(Object, Object, boolean, boolean)} instead.
+     * @param in object
+     * @param out object
+     * @param signed boolean
+     * @return object
      */
     @Deprecated
     public static Object arrayToSafeArray(Object in, Object out, boolean signed)
@@ -2096,10 +2162,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as doubleArrayToArray1D except that we clamp value to output type bounds.
+     * @return Same as doubleArrayToArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.doubleArrayToSafeArray instead
+     * @param in array
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static Object doubleArrayToSafeArray1D(double[] in, int inOffset, Object out, int outOffset, int length,
@@ -2109,10 +2181,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as doubleArrayToArray1D except that we clamp value to output type bounds.
+     * @return Same as doubleArrayToArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.doubleArrayToSafeArray instead
+     * @param in array
+     * @param out object
+     * @param signed boolean
      */
     @Deprecated
     public static Object doubleArrayToSafeArray1D(double[] in, Object out, boolean signed)
@@ -2121,10 +2196,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as doubleArrayToArray2D except that we clamp value to output type bounds.
+     * @return Same as doubleArrayToArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.doubleArrayToSafeArray instead
+     * @param in 2D array
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static Object doubleArrayToSafeArray2D(double[][] in, int inOffset, Object out, int outOffset, int length,
@@ -2135,10 +2216,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as doubleArrayToArray2D except that we clamp value to output type bounds.
+     * @return Same as doubleArrayToArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.doubleArrayToSafeArray instead
+     * @param in 2D array
+     * @param out object
+     * @param signed boolean
      */
     @Deprecated
     public static Object doubleArrayToSafeArray2D(double[][] in, Object out, boolean signed)
@@ -2147,10 +2231,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as floatArrayToArray1D except that we clamp value to output type bounds.
+     * @return Same as floatArrayToArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.floatArrayToSafeArray instead
+     * @param in array
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static Object floatArrayToSafeArray1D(float[] in, int inOffset, Object out, int outOffset, int length,
@@ -2160,10 +2250,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as floatArrayToArray1D except that we clamp value to output type bounds.
+     * @return Same as floatArrayToArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.floatArrayToSafeArray instead
+     * @param in array
+     * @param out object
+     * @param signed boolean
      */
     @Deprecated
     public static Object floatArrayToSafeArray1D(float[] in, Object out, boolean signed)
@@ -2172,10 +2265,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as floatArrayToArray2D except that we clamp value to output type bounds.
+     * @return Same as floatArrayToArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.floatArrayToSafeArray instead
+     * @param in 2D array
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static Object floatArrayToSafeArray2D(float[][] in, int inOffset, Object out, int outOffset, int length,
@@ -2186,10 +2285,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as floatArrayToArray2D except that we clamp value to output type bounds.
+     * @return Same as floatArrayToArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.floatArrayToSafeArray instead
+     * @param in 2D array
+     * @param out object
+     * @param signed boolean
      */
     @Deprecated
     public static Object floatArrayToSafeArray2D(float[][] in, Object out, boolean signed)
@@ -2199,10 +2301,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as intArrayToArray1D except that we clamp value to output type bounds.
+     * @return Same as intArrayToArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.intArrayToSafeArray instead
+     * @param in array
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static Object intArrayToSafeArray1D(int[] in, int inOffset, Object out, int outOffset, int length,
@@ -2213,10 +2321,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as intArrayToArray1D except that we clamp value to output type bounds.
+     * @return Same as intArrayToArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.intArrayToSafeArray instead
+     * @param in array
+     * @param out object
+     * @param signed boolean
      */
     @Deprecated
     public static Object intArrayToSafeArray1D(int[] in, Object out, boolean signed)
@@ -2225,10 +2336,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as intArrayToArray2D except that we clamp value to output type bounds.
+     * @return Same as intArrayToArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.intArrayToSafeArray instead
+     * @param in 2D array
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static Object intArrayToSafeArray2D(int[][] in, int inOffset, Object out, int outOffset, int length,
@@ -2239,10 +2356,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as intArrayToArray2D except that we clamp value to output type bounds.
+     * @return Same as intArrayToArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.intArrayToSafeArray instead
+     * @param in 1D array
+     * @param out object
+     * @param signed boolean
      */
     @Deprecated
     public static Object intArrayToSafeArray2D(int[][] in, Object out, boolean signed)
@@ -2252,10 +2372,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as shortArrayToArray1D except that we clamp value to output type bounds.
+     * @return Same as shortArrayToArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.shortArrayToSafeArray instead
+     * @param in array
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static Object shortArrayToSafeArray1D(short[] in, int inOffset, Object out, int outOffset, int length,
@@ -2266,10 +2392,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as shortArrayToArray1D except that we clamp value to output type bounds.
+     * @return Same as shortArrayToArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.shortArrayToSafeArray instead
+     * @param in array
+     * @param out object
+     * @param signed boolean
      */
     @Deprecated
     public static Object shortArrayToSafeArray1D(short[] in, Object out, boolean signed)
@@ -2278,10 +2407,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as shortArrayToArray2D except that we clamp value to output type bounds.
+     * @return Same as shortArrayToArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.shortArrayToSafeArray instead
+     * @param in 2D array
+     * @param out object
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static Object shortArrayToSafeArray2D(short[][] in, int inOffset, Object out, int outOffset, int length,
@@ -2292,10 +2427,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as shortArrayToArray2D except that we clamp value to output type bounds.
+     * @return Same as shortArrayToArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.shortArrayToSafeArray instead
+     * @param in 2D array
+     * @param out object
+     * @param signed boolean
      */
     @Deprecated
     public static Object shortArrayToSafeArray2D(short[][] in, Object out, boolean signed)
@@ -2305,10 +2443,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToIntArray1D except that we clamp value to output type bounds.
+     * @return Same as arrayToIntArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.arrayToSafeIntArray instead
+     * @param in object
+     * @param out array
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static int[] arrayToSafeIntArray1D(Object in, int inOffset, int[] out, int outOffset, int length,
@@ -2318,10 +2462,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToIntArray1D except that we clamp value to output type bounds.
+     * @return Same as arrayToIntArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.arrayToSafeIntArray instead
+     * @param in object
+     * @param out array
+     * @param signed boolean
      */
     @Deprecated
     public static int[] arrayToSafeIntArray1D(Object in, int[] out, boolean signed)
@@ -2330,10 +2477,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToIntArray2D except that we clamp value to output type bounds.
+     * @return Same as arrayToIntArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.arrayToSafeIntArray instead
+     * @param in object
+     * @param out 2D array
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static int[][] arrayToSafeIntArray2D(Object in, int inOffset, int[][] out, int outOffset, int length,
@@ -2344,10 +2497,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToIntArray2D except that we clamp value to output type bounds.
+     * @return Same as arrayToIntArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.arrayToSafeIntArray instead
+     * @param in object
+     * @param out 2D array
+     * @param signed boolean
      */
     @Deprecated
     public static int[][] arrayToSafeIntArray2D(Object in, int[][] out, boolean signed)
@@ -2357,10 +2513,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToShortArray1D except that we clamp value to output type bounds.
+     * @return Same as arrayToShortArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.arrayToSafeShortArray instead
+     * @param in object
+     * @param out array
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static short[] arrayToSafeShortArray1D(Object in, int inOffset, short[] out, int outOffset, int length,
@@ -2371,10 +2533,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToShortArray1D except that we clamp value to output type bounds.
+     * @return Same as arrayToShortArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.arrayToSafeShortArray instead
+     * @param in object
+     * @param out array
+     * @param signed boolean
      */
     @Deprecated
     public static short[] arrayToSafeShortArray1D(Object in, short[] out, boolean signed)
@@ -2384,10 +2549,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToShortArray2D except that we clamp value to output type bounds.
+     * @return Same as arrayToShortArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.arrayToSafeShortArray instead
+     * @param in object
+     * @param out 2D array
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static short[][] arrayToSafeShortArray2D(Object in, int inOffset, short[][] out, int outOffset, int length,
@@ -2398,10 +2569,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToShortArray2D except that we clamp value to output type bounds.
+     * @return Same as arrayToShortArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.arrayToSafeShortArray instead
+     * @param in object
+     * @param out 2D array
+     * @param signed boolean
      */
     @Deprecated
     public static short[][] arrayToSafeShortArray2D(Object in, short[][] out, boolean signed)
@@ -2411,10 +2585,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToByteArray1D except that we clamp value to output type bounds.
+     * @return Same as arrayToByteArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.arrayToSafeByteArray instead
+     * @param in object
+     * @param out array
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static byte[] arrayToSafeByteArray1D(Object in, int inOffset, byte[] out, int outOffset, int length,
@@ -2425,10 +2605,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToByteArray1D except that we clamp value to output type bounds.
+     * @return Same as arrayToByteArray1D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array1DUtil.arrayToSafeByteArray instead
+     * @param in object
+     * @param out array
+     * @param signed boolean
      */
     @Deprecated
     public static byte[] arrayToSafeByteArray1D(Object in, byte[] out, boolean signed)
@@ -2438,10 +2621,16 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToByteArray2D except that we clamp value to output type bounds.
+     * @return Same as arrayToByteArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.arrayToSafeByteArray instead
+     * @param in object
+     * @param out 2D array
+     * @param inOffset int
+     * @param outOffset int
+     * @param length int
+     * @param signed boolean
      */
     @Deprecated
     public static byte[][] arrayToSafeByteArray2D(Object in, int inOffset, byte[][] out, int outOffset, int length,
@@ -2452,10 +2641,13 @@ public class ArrayUtil
     }
 
     /**
-     * Same as arrayToByteArray2D except that we clamp value to output type bounds.
+     * @return Same as arrayToByteArray2D except that we clamp value to output type bounds.
      * 
      * @deprecated
      *             use Array2DUtil.arrayToSafeByteArray instead
+     * @param in object
+     * @param out 2D array
+     * @param signed boolean
      */
     @Deprecated
     public static byte[][] arrayToSafeByteArray2D(Object in, byte[][] out, boolean signed)
@@ -2463,15 +2655,6 @@ public class ArrayUtil
         return Array2DUtil.arrayToSafeByteArray(in, out, signed);
 
     }
-
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
 
     public static Object arrayToSafeLongArray(Object array, boolean signed)
     {
@@ -2583,25 +2766,11 @@ public class ArrayUtil
         }
     }
 
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
     /**
-     * Return the specified array as string<br>
+     * @return Return the specified array as string<br>
      * Default representation use ':' as separator character<br>
      * <br>
-     * ex : [0,1,2,3,4] --> "0:1:2:3:4"<br>
+     * ex : [0,1,2,3,4] --&gt; "0:1:2:3:4"<br>
      * 
      * @param array
      *        1D array containing values to return as string
@@ -2626,8 +2795,8 @@ public class ArrayUtil
     }
 
     /**
-     * Return the specified 1D array as string<br>
-     * ex : [0,1,2,3,4] --> "0:1:2:3:4"
+     * @return Return the specified 1D array as string<br>
+     * ex : [0,1,2,3,4] --&gt; "0:1:2:3:4"
      * 
      * @param array
      *        1D array containing values to return as string
@@ -2661,9 +2830,9 @@ public class ArrayUtil
     }
 
     /**
-     * Return the specified string containing separated values as a 1D array<br>
+     * @return Return the specified string containing separated values as a 1D array<br>
      * By default separator is assumed to be ':' character<br>
-     * ex : "0:1:2:3:4" --> [0,1,2,3,4]<br>
+     * ex : "0:1:2:3:4" --&gt; [0,1,2,3,4]<br>
      * 
      * @param value
      *        string containing value to return as 1D array
@@ -2677,6 +2846,9 @@ public class ArrayUtil
 
     /**
      * @deprecated use {@link #stringToArray1D(String, DataType)} instead
+     * @param dataType object
+     * @param value string
+     * @return object
      */
     @Deprecated
     public static Object stringToArray1D(String value, int dataType)
@@ -2685,8 +2857,8 @@ public class ArrayUtil
     }
 
     /**
-     * Return the specified string containing separated values as a 1D array<br>
-     * ex : "0:1:2:3:4" --> [0,1,2,3,4]<br>
+     * @return Return the specified string containing separated values as a 1D array<br>
+     * ex : "0:1:2:3:4" --&gt; [0,1,2,3,4]<br>
      * 
      * @param value
      *        string containing value to return as 1D array
@@ -2704,6 +2876,11 @@ public class ArrayUtil
 
     /**
      * @deprecated use {@link #stringToArray1D(String, DataType, boolean , String )} instead
+     * @param dataType object
+     * @param value string
+     * @param hexa int
+     * @param separator string
+     * @return object
      */
     @Deprecated
     public static Object stringToArray1D(String value, int dataType, boolean hexa, String separator)
@@ -2711,13 +2888,8 @@ public class ArrayUtil
         return stringToArray1D(value, DataType.getDataType(dataType), hexa, separator);
     }
 
-    //
-    //
-    //
-    //
-
     /**
-     * Creates a linear array with specified size, initial value and step. <br>
+     * @return Creates a linear array with specified size, initial value and step. <br>
      * Example: to create the array [1,3,5,7] call createLinearArray(4,1,2)
      * 
      * @param size
@@ -2742,7 +2914,7 @@ public class ArrayUtil
     }
 
     /**
-     * Creates a linear array with specified size, initial value and step. <br>
+     * @return Creates a linear array with specified size, initial value and step. <br>
      * Example: to create the array [1,3,5,7] call createLinearArray(4,1,2)
      * 
      * @param size
@@ -2767,9 +2939,10 @@ public class ArrayUtil
     }
 
     /**
-     * Convert a boolean array to a byte array (unpacked form : 1 boolean --> 1 byte)
+     * @return Convert a boolean array to a byte array (unpacked form : 1 boolean --&gt; 1 byte)
      * 
      * @deprecated use {@link Array1DUtil#toByteArray(boolean[])} instead
+     * @param array array
      */
     @Deprecated
     public static byte[] toByteArray1D(boolean[] array)
@@ -2778,11 +2951,13 @@ public class ArrayUtil
     }
 
     /**
-     * Convert a boolean array to a byte array (unpacked form : 1 boolean --> 1 byte)
+     * @return Convert a boolean array to a byte array (unpacked form : 1 boolean --&gt; 1 byte)
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
      * 
      * @deprecated use {@link Array1DUtil#toByteArray(boolean[], byte[], int)} instead
+     * @param in array
+     * @param offset int
      */
     @Deprecated
     public static byte[] toByteArray1D(boolean[] in, byte[] out, int offset)
@@ -2791,9 +2966,10 @@ public class ArrayUtil
     }
 
     /**
-     * Convert a byte array (unpacked form : 1 byte --> 1 boolean) to a boolean array
+     * @return Convert a byte array (unpacked form : 1 byte --&gt; 1 boolean) to a boolean array
      * 
      * @deprecated use {@link Array1DUtil#toBooleanArray(byte[])} instead
+     * @param array array
      */
     @Deprecated
     public static boolean[] toBooleanArray1D(byte[] array)
@@ -2802,11 +2978,13 @@ public class ArrayUtil
     }
 
     /**
-     * Convert a boolean array to a byte array (unpacked form : 1 boolean --> 1 byte)
+     * @return Convert a boolean array to a byte array (unpacked form : 1 boolean --&gt; 1 byte)
      * The resulting array is returned in 'out' and from the specified if any.<br>
-     * If (out == null) a new array is allocated.
+     * @param out If (out == null) a new array is allocated.
      * 
      * @deprecated use {@link Array1DUtil#toBooleanArray(byte[], boolean[], int)} instead
+     * @param in array
+     * @param offset int
      */
     @Deprecated
     public static boolean[] toBooleanArray1D(byte[] in, boolean[] out, int offset)

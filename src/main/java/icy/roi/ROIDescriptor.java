@@ -29,7 +29,7 @@ public abstract class ROIDescriptor
 {
     /**
      * Returns all available ROI descriptors (see {@link ROIDescriptor}) and their attached plugin
-     * (see {@link PluginROIDescriptor}).<br/>
+     * (see {@link PluginROIDescriptor}).<br>
      * This list can be extended by installing new plugin(s) implementing the {@link PluginROIDescriptor} interface.
      * 
      * @see ROIDescriptor#compute(ROI, Sequence)
@@ -181,7 +181,7 @@ public abstract class ROIDescriptor
     }
 
     /**
-     * Returns the id of this descriptor.<br/>
+     * Returns the id of this descriptor.<br>
      * By default it uses the descriptor's name but it can be overridden to be different.
      */
     public String getId()
@@ -190,7 +190,7 @@ public abstract class ROIDescriptor
     }
 
     /**
-     * Returns the name of this descriptor.<br/>
+     * Returns the name of this descriptor.<br>
      * The name is used as title (column header) in the ROI panel so keep it short and self
      * explanatory.
      */
@@ -205,9 +205,9 @@ public abstract class ROIDescriptor
     public abstract String getDescription();
 
     /**
-     * Returns the unit of this descriptor (<code>ex: "px", "mm", "µm2"...</code>).</br>
+     * Returns the unit of this descriptor (<code>ex: "px", "mm", "µm2"...</code>).<br>
      * It can return an empty or <code>null</code> string (default implementation) if there is no
-     * specific unit attached to the descriptor.<br/>
+     * specific unit attached to the descriptor.<br>
      * Note that unit is concatenated to the name to build the title (column header) in the ROI
      * panel.
      * 

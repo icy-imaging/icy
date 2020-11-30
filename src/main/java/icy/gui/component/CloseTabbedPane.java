@@ -180,7 +180,7 @@ public class CloseTabbedPane extends JTabbedPane
      * @return true if tab component at <code>index</code> can be closed (close button visible).<br>
      *         Returns false otherwise
      * @exception IndexOutOfBoundsException
-     *            if index is out of range (index < 0 || index >= tab count)
+     *            if index is out of range (index &lt; 0 || index &gt;= tab count)
      * @see #setTabClosable(int, boolean)
      */
     public boolean isTabClosable(int index)
@@ -196,7 +196,7 @@ public class CloseTabbedPane extends JTabbedPane
      * @param value
      *        true if the tab should be 'closable' (close button visible), false otherwise.
      * @exception IndexOutOfBoundsException
-     *            if index is out of range (index < 0 || index >= tab count)
+     *            if index is out of range (index &lt; 0 || index &gt;= tab count)
      * @see #isTabClosable(int)
      */
     public void setTabClosable(int index, boolean value)

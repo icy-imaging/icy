@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Manage the TaskFrame to display them on right of the window.
  * 
- * @author Fabrice de Chaumont & Stephane Dallongeville
+ * @author Fabrice de Chaumont &amp; Stephane Dallongeville
  */
 public class TaskFrameManager implements Runnable
 {

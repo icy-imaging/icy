@@ -75,7 +75,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener
     final JComboBox colormapComboBox;
 
     /**
-     * associated Viewer & LUTBand
+     * associated Viewer &amp; LUTBand
      */
     public final Viewer viewer;
     public final LUTChannel lutChannel;

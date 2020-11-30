@@ -66,6 +66,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
      * Create an AbstractPainter and attach it to the specified sequence.
      * 
      * @deprecated Uses the {@link Overlay} class instead.
+     * @param sequence sequence
      */
     @Deprecated
     public AbstractPainter(Sequence sequence)
@@ -77,7 +78,8 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
     }
 
     /**
-     * Returns <code>true</code> if the overlay is attached to the specified {@link Sequence}.
+     * @return Returns <code>true</code> if the overlay is attached to the specified {@link Sequence}.
+     * @param sequence sequence
      */
     public boolean isAttached(Sequence sequence)
     {
@@ -89,6 +91,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
 
     /**
      * @deprecated Use {@link Sequence#addPainter(Painter)} instead.
+     * @param sequence sequence
      */
     @Deprecated
     public void attachTo(Sequence sequence)
@@ -99,6 +102,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
 
     /**
      * @deprecated Use {@link Sequence#removePainter(Painter)} instead.
+     * @param sequence sequence
      */
     @Deprecated
     public void detachFrom(Sequence sequence)
@@ -142,7 +146,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
     }
 
     /**
-     * Returns all sequences where the painter/overlay is currently attached.
+     * @return Returns all sequences where the painter/overlay is currently attached.
      */
     public ArrayList<Sequence> getSequences()
     {
@@ -151,6 +155,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
 
     /**
      * @deprecated Use {@link Overlay} class instead.
+     * @param event Painter event
      */
     @Deprecated
     protected void fireChangedEvent(PainterEvent event)
@@ -161,6 +166,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
 
     /**
      * @deprecated Use {@link Overlay#addOverlayListener(OverlayListener)} instead.
+     * @param listener Painter listener
      */
     @Deprecated
     public void addPainterListener(PainterListener listener)
@@ -170,6 +176,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
 
     /**
      * @deprecated Use {@link Overlay#removeOverlayListener(OverlayListener)} instead.
+     * @param listener Painter listener
      */
     @Deprecated
     public void removePainterListener(PainterListener listener)

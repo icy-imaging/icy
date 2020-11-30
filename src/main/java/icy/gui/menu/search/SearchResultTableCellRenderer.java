@@ -39,13 +39,10 @@ import org.pushingpixels.substance.internal.utils.SubstanceColorSchemeUtilities;
 /**
  * This class is a renderer to display the filtered data.
  * 
- * @author Thomas Provoost & Stephane
+ * @author Thomas Provoost &amp; Stephane
  */
 public class SearchResultTableCellRenderer extends SubstanceDefaultTableCellRenderer
 {
-    /**
-     * 
-     */
     private static final long serialVersionUID = -6758382699884570205L;
 
     @Override

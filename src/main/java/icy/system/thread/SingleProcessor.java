@@ -27,9 +27,6 @@ public class SingleProcessor extends Processor
 {
     private final boolean queueEnabled;
 
-    /**
-     * 
-     */
     public SingleProcessor(boolean enableQueue, String name)
     {
         super(1, 1);
@@ -39,9 +36,6 @@ public class SingleProcessor extends Processor
         setThreadName(name);
     }
 
-    /**
-     * 
-     */
     public SingleProcessor(boolean enableQueue)
     {
         this(enableQueue, "SingleProcessor");
@@ -49,7 +43,7 @@ public class SingleProcessor extends Processor
 
     /**
      * Try to submit the specified task for execution and returns a Future representing that task.<br>
-     * The Future's <tt>get</tt> method will return <tt>null</tt> upon <em>successful</em>
+     * The Future's <i>get</i> method will return <i>null</i> upon <em>successful</em>
      * completion.<br>
      * Returns a <code>null</code> Future object if processor is already processing or queue is not
      * empty (depending the {@link #isQueueEnabled()} parameter) to notify the task has been
@@ -74,6 +68,8 @@ public class SingleProcessor extends Processor
 
     /**
      * @deprecated use {@link #submit(Runnable)} instead.
+     * @param task running task
+     * @return true if submited task is not null
      */
     @Deprecated
     public synchronized boolean requestProcess(Runnable task)
@@ -83,6 +79,9 @@ public class SingleProcessor extends Processor
 
     /**
      * @deprecated use {@link #submit(Runnable, boolean)} instead
+     * @param task running task
+     * @param onAWTEventThread thread listener
+     * @return true if submited task is not null
      */
     @Deprecated
     public synchronized boolean requestProcess(Runnable task, boolean onAWTEventThread)

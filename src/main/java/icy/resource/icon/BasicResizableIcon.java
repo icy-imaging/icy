@@ -32,7 +32,7 @@ import javax.swing.ImageIcon;
 import org.pushingpixels.flamingo.api.common.icon.ResizableIcon;
 
 /**
- * @author fab & stephane
+ * @author fab &amp; stephane
  */
 public class BasicResizableIcon implements ResizableIcon
 {

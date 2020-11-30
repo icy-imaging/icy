@@ -1,0 +1,80 @@
+image: maven:latest
+
+#workflow:
+#  rules:
+#    - if: $CI_COMMIT_TAG
+
+variables:
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+stages:
+  - build
+  - package
+  - test
+  - deploy
+  - release
+
+cache:
+  paths:
+    - .m2/repository
+    - build/
+
+build-job:
+  stage: build
+  script:
+    - echo "Building Artifact"
+    - mvn $MAVEN_CLI_OPTS clean compile
+  artifacts:
+    when: on_success
+    expire_in: 1 hour
+    paths:
+      - build/
+
+package-job:
+  stage: package
+  dependencies:
+    - build-job
+  script:
+    - echo "Packaging the code"
+    - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
+  artifacts:
+    paths:
+      - build/
+
+test-job:
+  stage: test
+  dependencies:
+    - build-job
+  script:
+    - echo "Checking files"
+    - mvn clean verify
+  artifacts:
+    when: on_success
+    expire_in: 1 hour
+    paths:
+      - build/
+
+deploy-job:
+  stage: deploy
+  #only:
+    #- test-ci
+  dependencies:
+    - package-job
+  script:
+    - echo "Deploy artifact to the Nexus"
+    - mvn $MAVEN_CLI_OPTS deploy
+  artifacts:
+    when: on_success
+    expire_in: 1 hour
+    paths:
+      - build/*.jar
+
+#release-job:
+#  stage: release
+#  #only:
+#    #- releases
+#  dependencies:
+#    - deploy-job
+#  script:
+#    - "/tools/maven-release"

@@ -856,7 +856,7 @@ public class VtkUtil
     }
 
     /**
-     * @deprecated Uses {@link #getBooleanMaskFromBinaryImage(vtkImageData)} then {@link ROI3DArea#ROI3DArea(BooleanMask3D)} instead.
+     * @deprecated Uses {@link ROI3DArea#ROI3DArea(BooleanMask3D)} instead.
      */
     @Deprecated
     public static ROI getROIFromBinaryImage(vtkImageData image, boolean force3DROI)

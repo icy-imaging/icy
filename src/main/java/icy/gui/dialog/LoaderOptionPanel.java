@@ -1557,7 +1557,7 @@ public class LoaderOptionPanel extends JPanel
     }
 
     /**
-     * Asynchronous image preview refresh only, ({@link #updatePreview(String)} should have be called once before to
+     * Asynchronous image preview refresh only, should have be called once before to
      * give
      * the fileId)
      */

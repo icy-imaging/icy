@@ -198,6 +198,7 @@
                     <archive>
                         <manifest>
                             <classpathLayoutType>custom</classpathLayoutType>
+                            <!--suppress UnresolvedMavenProperty -->
                             <customClasspathLayout>$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
@@ -209,6 +210,35 @@
                         <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -390,7 +420,8 @@
     <distributionManagement>
         <repository>
             <id>icy-prod</id>
-            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+            <!--suppress UnresolvedMavenProperty -->
+            <url>${env.MAVEN_REPO_URL}/icy-core/</url>
         </repository>
         <snapshotRepository>
             <id>icy-dev</id>

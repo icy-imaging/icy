@@ -166,7 +166,7 @@ public class CheckTabbedPane extends JTabbedPane
      * @return true if tab component at <code>index</code> is checked, false
      *         otherwise
      * @exception IndexOutOfBoundsException
-     *            if index is out of range (index < 0 || index >= tab count)
+     *            if index is out of range (index &lt; 0 || index &gt;= tab count)
      * @see #setTabChecked(int, boolean)
      */
     public boolean isTabChecked(int index)
@@ -182,7 +182,7 @@ public class CheckTabbedPane extends JTabbedPane
      * @param value
      *        the check state
      * @exception IndexOutOfBoundsException
-     *            if index is out of range (index < 0 || index >= tab count)
+     *            if index is out of range (index &lt; 0 || index &gt;= tab count)
      * @see #isTabChecked(int)
      */
     public void setTabChecked(int index, boolean value)

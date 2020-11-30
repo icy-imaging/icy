@@ -14,8 +14,10 @@ import java.util.List;
 public class Point2DUtil
 {
     /**
-     * Test if the 2 specified points are <code>connected</code>.<br>
-     * Points are considered connected if max(deltaX, deltaY) <= 1
+     * @return Test if the 2 specified points are <code>connected</code>.<br>
+     * Points are considered connected if max(deltaX, deltaY) &lt;= 1
+     * @param p1 2D point
+     * @param p2 2D point
      */
     public static boolean areConnected(Point2D p1, Point2D p2)
     {
@@ -23,7 +25,9 @@ public class Point2DUtil
     }
 
     /**
-     * Returns the L1 distance between 2 points
+     * @return Returns the L1 distance between 2 points
+     * @param p1 2D point
+     * @param p2 2D point
      */
     public static double getL1Distance(Point2D p1, Point2D p2)
     {
@@ -31,7 +35,9 @@ public class Point2DUtil
     }
 
     /**
-     * Returns the square of the distance between 2 points.
+     * @return Returns the square of the distance between 2 points.
+     * @param pt1 2D point
+     * @param pt2 2D point
      */
     public static double getSquareDistance(Point2D pt1, Point2D pt2)
     {
@@ -41,7 +47,9 @@ public class Point2DUtil
     }
 
     /**
-     * Returns the distance between 2 points.
+     * @return Returns the distance between 2 points.
+     * @param pt1 2D point
+     * @param pt2 2D point
      */
     public static double getDistance(Point2D pt1, Point2D pt2)
     {
@@ -49,7 +57,11 @@ public class Point2DUtil
     }
 
     /**
-     * Returns the distance between 2 points using specified scale factor for x/y dimension.
+     * @return Returns the distance between 2 points using specified scale factor for x/y dimension.
+     * @param pt1 2D point
+     * @param pt2 2D point
+     * @param factorX double
+     * @param factorY double
      */
     public static double getDistance(Point2D pt1, Point2D pt2, double factorX, double factorY)
     {
@@ -59,7 +71,11 @@ public class Point2DUtil
     }
 
     /**
-     * Returns the total distance of the specified list of points.
+     * @return Returns the total distance of the specified list of points.
+     * @param points list of 2D points
+     * @param factorX double
+     * @param factorY double
+     * @param connectLastPoint boolean
      */
     public static double getTotalDistance(List<Point2D> points, double factorX, double factorY, boolean connectLastPoint)
     {

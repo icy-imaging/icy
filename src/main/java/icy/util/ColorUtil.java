@@ -189,9 +189,9 @@ public class ColorUtil
      * B = blue level in hexadecimal (0x00-0xFF)<br>
      * sep = the specified separator<br>
      * <br>
-     * Ex : toString(Color.red, true, ":") --> "FF:FF:00:00"
+     * Ex : toString(Color.red, true, ":") --&gt; "FF:FF:00:00"
      * 
-     * @param color
+     * @param color color
      * @param hexa
      *        component level are represented in hexadecimal (2 digits)
      */
@@ -213,9 +213,9 @@ public class ColorUtil
      * B = blue level in hexadecimal (0x00-0xFF)<br>
      * sep = the specified separator<br>
      * <br>
-     * Ex : toString(0xFF00FF00, true, ":") --> "FF:00:FF:00"
+     * Ex : toString(0xFF00FF00, true, ":") --&gt; "FF:00:FF:00"
      * 
-     * @param rgb
+     * @param rgb color
      * @param hexa
      *        component level are represented in hexadecimal (2 digits)
      */
@@ -261,9 +261,9 @@ public class ColorUtil
     }
 
     /**
-     * Mix 2 colors using the following ratio for mixing:<br/>
-     * 0f means 100% of color 1 and 0% of color 2<br/>
-     * 0.5f means 50% of color 1 and 50% of color 2<br/>
+     * Mix 2 colors using the following ratio for mixing:<br>
+     * 0f means 100% of color 1 and 0% of color 2<br>
+     * 0.5f means 50% of color 1 and 50% of color 2<br>
      * 1f means 0% of color 1 and 100% of color 2
      */
     public static Color mix(Color c1, Color c2, float ratio)
@@ -597,7 +597,7 @@ public class ColorUtil
     /**
      * Compute and returns the distance between the 2 colors.<br>
      * The HSV distance returns a value between 0 and 1 where 1 is maximum distance.<br>
-     * The LAB distance returns a positive value where > 2.3 value is considered a
+     * The LAB distance returns a positive value where &gt; 2.3 value is considered a
      * significant distance.
      * 
      * @param c1
@@ -711,7 +711,7 @@ public class ColorUtil
     }
 
     /**
-     * Converts a wavelength into a {@link Color} object.<br/>
+     * Converts a wavelength into a {@link Color} object.<br>
      * Taken from Earl F. Glynn's web page:
      * <a href="http://www.efg2.com/Lab/ScienceAndEngineering/Spectra.htm">Spectra Lab Report</a>
      * 

@@ -61,7 +61,7 @@ import ome.xml.meta.OMEXMLMetadata;
  * When sequence is saved as multiple file the following naming convention is used :<br>
  * <code>filename-tttt-zzzz</code>
  * 
- * @author Stephane & Fab
+ * @author Stephane &amp; Fab
  */
 public class Saver
 {

@@ -17,12 +17,14 @@ import plugins.kernel.roi.roi2d.ROI2DPoint;
 import plugins.kernel.roi.roi3d.ROI3DPoint;
 
 /**
- * This {@link PluginROIDescriptor} implements the mass center ROI descriptors:<br/>
- * <li>Mass center X (in pixel)</li><br/>
- * <li>Mass center Y (in pixel)</li><br/>
- * <li>Mass center C (in pixel)</li><br/>
- * <li>Mass center Z (in pixel)</li><br/>
+ * This {@link PluginROIDescriptor} implements the mass center ROI descriptors:<br>
+ * <ul>
+ * <li>Mass center X (in pixel)</li>
+ * <li>Mass center Y (in pixel)</li>
+ * <li>Mass center C (in pixel)</li>
+ * <li>Mass center Z (in pixel)</li>
  * <li>Mass center T (in pixel)</li>
+ * </ul>
  * 
  * @author Stephane
  */

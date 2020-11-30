@@ -90,7 +90,7 @@ import plugins.kernel.canvas.Canvas2DPlugin;
 import plugins.kernel.canvas.VtkCanvasPlugin;
 
 /**
- * @author Fabrice de Chaumont & Stephane Dallongeville<br>
+ * @author Fabrice de Chaumont &amp; Stephane Dallongeville<br>
  *         <br>
  *         An IcyCanvas is a basic Canvas used into the viewer. It contains a visual representation
  *         of the sequence and provides some facilities as basic transformation and view
@@ -576,7 +576,7 @@ public abstract class IcyCanvas extends JPanel
     }
 
     /**
-     * Called by the viewer when canvas is closed to release some resources.<br/>
+     * Called by the viewer when canvas is closed to release some resources.<br>
      * Be careful to not restore previous state here (as the colormap) because generally <code>shutdown</code> is called
      * <b>after</b> the creation of the other canvas.
      */
@@ -815,7 +815,7 @@ public abstract class IcyCanvas extends JPanel
     }
 
     /**
-     * Returns all layers attached to this canvas.<br/>
+     * Returns all layers attached to this canvas.<br>
      * 
      * @param sorted
      *        If <code>true</code> the returned list is sorted on the layer priority.<br>
@@ -858,7 +858,7 @@ public abstract class IcyCanvas extends JPanel
     }
 
     /**
-     * Returns all layers attached to this canvas.<br/>
+     * Returns all layers attached to this canvas.<br>
      * The returned list is sorted on the layer priority.<br>
      * Sort operation is cached so the method could take sometime when cache need to be rebuild.
      */
@@ -890,7 +890,7 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Returns all visible layers (visible property set to <code>true</code>) attached to this
-     * canvas.<br/>
+     * canvas.<br>
      * The list is sorted on the layer priority.
      */
     public ArrayList<Layer> getVisibleLayers()
@@ -4207,7 +4207,7 @@ public abstract class IcyCanvas extends JPanel
     }
 
     /**
-     * Remove the layer for the specified {@link Overlay} from the canvas.<br/>
+     * Remove the layer for the specified {@link Overlay} from the canvas.<br>
      * Returns <code>true</code> if the method succeed.
      */
     public boolean removeLayer(Overlay overlay)

@@ -30,7 +30,7 @@ import java.util.List;
 public abstract class DynamicArray
 {
     /**
-     * Create a DynamicArray with specified type.<br>
+     * @return Create a DynamicArray with specified type.<br>
      * 
      * @param type
      *        DataType of the dynamic array object.
@@ -61,7 +61,8 @@ public abstract class DynamicArray
     }
 
     /**
-     * Create a DynamicArray with specified type
+     * @return Create a DynamicArray with specified type
+     * @param type object
      */
     public static DynamicArray create(DataType type)
     {
@@ -69,9 +70,10 @@ public abstract class DynamicArray
     }
 
     /**
-     * Create a DynamicArray with specified type ({@link TypeUtil} constant)
+     * @return Create a DynamicArray with specified type ({@link TypeUtil} constant)
      * 
      * @deprecated
+     * @param type int
      */
     @Deprecated
     public static DynamicArray create(int type)
@@ -427,6 +429,7 @@ public abstract class DynamicArray
 
         /**
          * @deprecated USe {@link #getAvailable()} instead.
+         * @return int
          */
         @Deprecated
         public int getFreeSpace()

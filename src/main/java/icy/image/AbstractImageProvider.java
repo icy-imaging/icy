@@ -242,10 +242,10 @@ public abstract class AbstractImageProvider implements ImageProvider
      *        C position of the image (channel) we want retrieve (-1 not accepted here).<br>
      * @param tileW
      *        width of the tile (better to use a multiple of 2).<br>
-     *        If <= 0 then tile width is automatically determined
+     *        If &lt;= 0 then tile width is automatically determined
      * @param tileH
      *        height of the tile (better to use a multiple of 2).<br>
-     *        If <= 0 then tile height is automatically determined
+     *        If &lt;= 0 then tile height is automatically determined
      * @param listener
      *        Progression listener
      * @see #getPixels(int, int, Rectangle, int, int, int)

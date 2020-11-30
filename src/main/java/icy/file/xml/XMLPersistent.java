@@ -26,12 +26,14 @@ import org.w3c.dom.Node;
 public interface XMLPersistent
 {
     /**
-     * LOAD
+     * @return LOAD
+     * @param node node
      */
     public boolean loadFromXML(Node node);
 
     /**
-     * SAVE
+     * @return SAVE
+     * @param node node
      */
     public boolean saveToXML(Node node);
 

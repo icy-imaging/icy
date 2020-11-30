@@ -63,8 +63,6 @@ public class ImageDataIterator implements DataIterator
      * 
      * @param image
      *        Image we want to iterate data from
-     * @param XYBounds
-     *        XY region to iterate (inclusive).
      * @param channel
      *        channel (C position) we want to iterate data
      */

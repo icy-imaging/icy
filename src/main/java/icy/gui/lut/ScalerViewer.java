@@ -502,7 +502,7 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
     private static final int ISOVER_DEFAULT_MARGIN = 3;
 
     /**
-     * associated viewer & lutChannel
+     * associated viewer &amp; lutChannel
      */
     Viewer viewer;
     LUTChannel lutChannel;

@@ -77,6 +77,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
 
     /**
      * Creates a new 3D ROI based on the given 2D ROI type.
+     * @param roiClass ROI class
      */
     public ROI3DStack(Class<? extends R> roiClass)
     {
@@ -100,7 +101,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Create a new empty 2D ROI slice.
+     * @return Create a new empty 2D ROI slice.
      */
     protected R createSlice()
     {
@@ -116,7 +117,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Returns <code>true</code> if the ROI directly uses the 2D slice color draw property and <code>false</code> if it
+     * @return Returns <code>true</code> if the ROI directly uses the 2D slice color draw property and <code>false</code> if it
      * uses the global 3D ROI color draw property.
      */
     @SuppressWarnings("unchecked")
@@ -126,7 +127,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Set to <code>true</code> if you want to directly use the 2D slice color draw property and <code>false</code> to
+     * @param value Set to <code>true</code> if you want to directly use the 2D slice color draw property and <code>false</code> to
      * keep the global 3D ROI color draw property.
      * 
      * @see #setColor(int, Color)
@@ -138,7 +139,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Set the painter color for the specified ROI slice.
+     * @param value Set the painter color for the specified ROI slice.
+     * @param z int
      * 
      * @see #setUseChildColor(boolean)
      */
@@ -345,7 +347,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Returns <code>true</code> if the ROI stack is empty.
+     * @return Returns <code>true</code> if the ROI stack is empty.
      */
     @Override
     public boolean isEmpty()
@@ -371,7 +373,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Returns the ROI slice at given Z position.
+     * @param z int
+     * @return Returns the ROI slice at given Z position.
      */
     public R getSlice(int z)
     {
@@ -379,7 +382,9 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Returns the ROI slice at given Z position.
+     * @param z int
+     * @param createIfNull boolean
+     * @return Returns the ROI slice at given Z position.
      */
     public R getSlice(int z, boolean createIfNull)
     {
@@ -397,6 +402,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
 
     /**
      * Sets the ROI slice for the given Z position.
+     * @param roi2d 2D ROI
+     * @param z z stack
      */
     public void setSlice(int z, R roi2d)
     {
@@ -438,7 +445,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Removes slice at the given Z position and returns it.
+     * @param z int
+     * @return Removes slice at the given Z position and returns it.
      */
     public R removeSlice(int z)
     {
@@ -487,7 +495,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Add the specified {@link ROI3DStack} content to this ROI3DStack
+     * @param roi Add the specified {@link ROI3DStack} content to this ROI3DStack
      */
     public void add(ROI3DStack<R> roi) throws UnsupportedOperationException
     {
@@ -507,7 +515,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Exclusively add the specified {@link ROI3DStack} content to this ROI3DStack
+     * @param roi Exclusively add the specified {@link ROI3DStack} content to this ROI3DStack
      */
     public void exclusiveAdd(ROI3DStack<R> roi) throws UnsupportedOperationException
     {
@@ -527,7 +535,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Process intersection of the specified {@link ROI3DStack} with this ROI3DStack.
+     * @param roi Process intersection of the specified {@link ROI3DStack} with this ROI3DStack.
      */
     public void intersect(ROI3DStack<R> roi) throws UnsupportedOperationException
     {
@@ -560,7 +568,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Remove the specified {@link ROI3DStack} from this ROI3DStack
+     * @param roi Remove the specified {@link ROI3DStack} from this ROI3DStack
      */
     public void subtract(ROI3DStack<R> roi) throws UnsupportedOperationException
     {
@@ -915,7 +923,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Called when a ROI slice has changed.
+     * @param event Called when a ROI slice has changed.
      */
     protected void sliceChanged(ROIEvent event)
     {
@@ -952,7 +960,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Called when a ROI slice overlay has changed.
+     * @param event Called when a ROI slice overlay has changed.
      */
     protected void sliceOverlayChanged(OverlayEvent event)
     {
@@ -1185,7 +1193,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * Translate the stack of specified Z position.
+     * @param z Translate the stack of specified Z position.
      */
     public void translate(int z)
     {
@@ -1364,7 +1372,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
         }
 
         /**
-         * Returns the ROI overlay at given Z position.
+         * @param z int
+         * @return Returns the ROI overlay at given Z position.
          */
         protected ROIPainter getSliceOverlay(int z)
         {
@@ -1378,6 +1387,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
 
         /**
          * @deprecated this property does not exist anymore (always return <code>false</code>)
+         * @return boolean
          */
         @Deprecated
         public boolean getUseChildColor()
@@ -1387,6 +1397,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
 
         /**
          * @deprecated this property does not exist anymore
+         * @param value boolean
          */
         @Deprecated
         public void setUseChildColor(boolean value)
@@ -1395,7 +1406,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
         }
 
         /**
-         * Set the painter color for the specified ROI slice.
+         * @param value Set the painter color for the specified ROI slice.
+         * @param z int
          * 
          * @see #setUseChildColor(boolean)
          */

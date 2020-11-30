@@ -85,6 +85,7 @@ public class GeneralPreferences
 
     /**
      * @deprecated Use {@link #getPreferences()} instead
+     * @return XML Preferences
      */
     @Deprecated
     public static XMLPreferences getPreferencesGeneral()

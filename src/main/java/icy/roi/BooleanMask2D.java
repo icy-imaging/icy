@@ -2247,7 +2247,7 @@ public class BooleanMask2D implements Cloneable
     }
 
     /**
-     * Computes and returns the length of the contour.<br/>
+     * Computes and returns the length of the contour.<br>
      * This is different from the number of contour point as it takes care of approximating
      * correctly distance between each contour point.
      * 
