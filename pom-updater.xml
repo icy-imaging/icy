@@ -4,7 +4,12 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.bioimageanalysis.icy</groupId>
+    <parent>
+        <artifactId>parent-pom-core</artifactId>
+        <groupId>org.bioimageanalysis.icy</groupId>
+        <version>1.0.1</version>
+    </parent>
+
     <artifactId>icy-updater</artifactId>
     <version>2.1.0</version>
 
@@ -12,64 +17,13 @@
 
     <name>Icy-Updater</name>
     <description>Updater / Launcher tool for Icy software</description>
-    <url>http://icy.bioimageanalysis.org/</url>
-    <inceptionYear>2011</inceptionYear>
-    <organization>
-        <name>Institut Pasteur</name>
-        <url>https://www.pasteur.fr/</url>
-    </organization>
-    <licenses>
-        <license>
-            <name>GNU GPLv3</name>
-            <url>https://www.gnu.org/licenses/gpl-3.0.en.html</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <id>sdallongeville</id>
-            <name>Stéphane Dallongeville</name>
-            <url>http://icy.bioimageanalysis.org/author/stef/</url>
-            <roles>
-                <role>founder</role>
-                <role>lead</role>
-                <role>developer</role>
-                <role>debugger</role>
-                <role>reviewer</role>
-                <role>support</role>
-                <role>maintainer</role>
-            </roles>
-        </developer>
-        <developer>
-            <id>atournay</id>
-            <name>Amandine Tournay</name>
-            <roles>
-                <role>developer</role>
-                <role>maintainer</role>
-            </roles>
-        </developer>
-    </developers>
-    <!--<contributors></contributors> -->
-
-    <mailingLists>
-        <mailingList>
-            <name>Icy</name>
-            <post>icy-all@pasteur.fr</post>
-        </mailingList>
-    </mailingLists>
-
-    <issueManagement>
-        <system>Gitlab</system>
-        <url>https://gitlab.pasteur.fr/bia/icy-updater/issues</url>
-    </issueManagement>
 
     <properties>
-        <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
         <jdk.version>1.6</jdk.version>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
 
-        <outputDirectory>${project.build.directory}</outputDirectory>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
 
         <stripVersion>true</stripVersion>
 
@@ -82,12 +36,6 @@
         <defaultGoal>install</defaultGoal>
         <directory>build-updater</directory>
         <finalName>updater-${project.version}</finalName>
-        <!-- <sourceDirectory>src/main/java</sourceDirectory> -->
-        <!-- <resources> -->
-        <!-- <resource> -->
-        <!-- <directory>src/main/resources</directory> -->
-        <!-- </resource> -->
-        <!-- </resources> -->
 
         <plugins>
             <plugin>
@@ -195,6 +143,15 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <skipSource>true</skipSource>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
