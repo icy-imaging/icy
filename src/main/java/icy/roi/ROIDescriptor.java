@@ -205,7 +205,7 @@ public abstract class ROIDescriptor
     public abstract String getDescription();
 
     /**
-     * Returns the unit of this descriptor (<code>ex: "px", "mm", "µm2"...</code>).<br>
+     * Returns the unit of this descriptor (<code>ex: "px", "mm", "\u00B5m2"...</code>).<br>
      * It can return an empty or <code>null</code> string (default implementation) if there is no
      * specific unit attached to the descriptor.<br>
      * Note that unit is concatenated to the name to build the title (column header) in the ROI

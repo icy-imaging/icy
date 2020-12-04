@@ -1027,7 +1027,7 @@ public class MetaDataUtil
      * @param metaData OME metadata
      * @param series int
      * @param defaultValue double
-     * @return Returns X pixel size (in µm) of the specified image series.
+     * @return Returns X pixel size (in &micro;m) of the specified image series.
      */
     public static double getPixelSizeX(OMEXMLMetadata metaData, int series, double defaultValue)
     {
@@ -1056,7 +1056,7 @@ public class MetaDataUtil
      * @param metaData OME metadata
      * @param series int
      * @param defaultValue double
-     * @return Returns Y pixel size (in µm) of the specified image series.
+     * @return Returns Y pixel size (in &micro;m) of the specified image series.
      */
     public static double getPixelSizeY(OMEXMLMetadata metaData, int series, double defaultValue)
     {
@@ -1085,7 +1085,7 @@ public class MetaDataUtil
      * @param metaData OME metadata
      * @param series int
      * @param defaultValue double
-     * @return Returns Z pixel size (in µm) of the specified image series.
+     * @return Returns Z pixel size (in &micro;m) of the specified image series.
      */
     public static double getPixelSizeZ(OMEXMLMetadata metaData, int series, double defaultValue)
     {
@@ -1184,7 +1184,7 @@ public class MetaDataUtil
     }
 
     /**
-     * Set X pixel size (in µm) of the specified image series.
+     * Set X pixel size (in &micro;m) of the specified image series.
      * @param metaData OME metadata
      * @param series int
      * @param value double
@@ -1207,7 +1207,7 @@ public class MetaDataUtil
     }
 
     /**
-     * Set Y pixel size (in µm) of the specified image series.
+     * Set Y pixel size (in &micro;m) of the specified image series.
      * @param metaData OME metadata
      * @param series int
      * @param value double
@@ -1230,7 +1230,7 @@ public class MetaDataUtil
     }
 
     /**
-     * Set Z pixel size (in µm) of the specified image series.
+     * Set Z pixel size (in &micro;m) of the specified image series.
      * @param metaData OME metadata
      * @param series int
      * @param value double
@@ -1282,7 +1282,7 @@ public class MetaDataUtil
      * @param c int
      * @param t int
      * @param z int
-     * @return Returns the X field position (in µm) for the image at the specified Z, T, C position.
+     * @return Returns the X field position (in &micro;m) for the image at the specified Z, T, C position.
      */
     public static double getPositionX(OMEXMLMetadata metaData, int series, int t, int z, int c, double defaultValue)
     {
@@ -1306,7 +1306,7 @@ public class MetaDataUtil
      * @param c int
      * @param t int
      * @param z int
-     * @return Returns the Y field position (in µm) for the image at the specified Z, T, C position.
+     * @return Returns the Y field position (in &micro;m) for the image at the specified Z, T, C position.
      */
     public static double getPositionY(OMEXMLMetadata metaData, int series, int t, int z, int c, double defaultValue)
     {
@@ -1330,7 +1330,7 @@ public class MetaDataUtil
      * @param c int
      * @param t int
      * @param z int
-     * @return Returns the Z field position (in µm) for the image at the specified Z, T, C position.
+     * @return Returns the Z field position (in &micro;m) for the image at the specified Z, T, C position.
      */
     public static double getPositionZ(OMEXMLMetadata metaData, int series, int t, int z, int c, double defaultValue)
     {
@@ -1509,7 +1509,7 @@ public class MetaDataUtil
     }
 
     /**
-     * Sets the X field position (in µm) for the image at the specified Z, T, C position.
+     * Sets the X field position (in &micro;m) for the image at the specified Z, T, C position.
      * @param metaData OME metadata
      * @param series int
      * @param value double
@@ -1531,7 +1531,7 @@ public class MetaDataUtil
     }
 
     /**
-     * Sets the Y field position (in µm) for the image at the specified Z, T, C position.
+     * Sets the Y field position (in &micro;m) for the image at the specified Z, T, C position.
      * @param metaData OME metadata
      * @param series int
      * @param value double
@@ -1553,7 +1553,7 @@ public class MetaDataUtil
     }
 
     /**
-     * Sets the Z field position (in µm) for the image at the specified Z, T, C position.
+     * Sets the Z field position (in &micro;m) for the image at the specified Z, T, C position.
      * @param metaData OME metadata
      * @param series int
      * @param value double
