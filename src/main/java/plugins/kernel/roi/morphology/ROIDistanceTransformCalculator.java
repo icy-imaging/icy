@@ -69,6 +69,9 @@ public class ROIDistanceTransformCalculator
     private void initializeDistanceMap()
     {
         distanceMap = new Sequence();
+        distanceMap.setPixelSizeX(pixelSize.getSizeX());
+        distanceMap.setPixelSizeY(pixelSize.getSizeY());
+        distanceMap.setPixelSizeZ(pixelSize.getSizeZ());
         for (int m = 0; m < imageSize.getSizeT(); m++)
         {
             VolumetricImage volume = new VolumetricImage();
