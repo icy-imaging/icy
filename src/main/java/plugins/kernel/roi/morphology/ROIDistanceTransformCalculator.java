@@ -6,6 +6,8 @@ import java.util.List;
 
 import icy.image.IcyBufferedImage;
 import icy.roi.ROI;
+import icy.roi.ROI2D;
+import icy.roi.ROI3D;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceDataIterator;
 import icy.sequence.VolumetricImage;
@@ -90,7 +92,35 @@ public class ROIDistanceTransformCalculator
     {
         for (ROI roi : rois)
         {
-            DataIteratorUtil.set(new SequenceDataIterator(distanceMap, roi, true), 1d);
+            synchronized (roi)
+            {
+                int oldC = 0;
+                if (roi instanceof ROI2D)
+                {
+                    oldC = ((ROI2D) roi).getC();
+                    ((ROI2D) roi).setC(0);
+                }
+                else if (roi instanceof ROI3D)
+                {
+                    oldC = ((ROI3D) roi).getC();
+                    ((ROI3D) roi).setC(0);
+                }
+                try
+                {
+                    DataIteratorUtil.set(new SequenceDataIterator(distanceMap, roi, true), 1d);
+                }
+                finally
+                {
+                    if (roi instanceof ROI2D)
+                    {
+                        ((ROI2D) roi).setC(oldC);
+                    }
+                    else if (roi instanceof ROI3D)
+                    {
+                        ((ROI3D) roi).setC(oldC);
+                    }
+                }
+            }
         }
     }
 
