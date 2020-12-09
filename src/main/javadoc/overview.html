@@ -8,7 +8,7 @@ Before getting further you need to set up your Icy development environment by fo
 
 All examples described here are available in the <a href="http://icy.bioimageanalysis.org/index.php?display=startDevWithIcy#importPluginTutorial">Plugin Tutorials</a> GitHub project and you can also download and test them in Icy by using the <i>tutorial</i> keyword in the plugin browser or search bar.<br>
 <br>
-<h3>Topics</h3>
+<h1>Topics</h1>
 &nbsp;&nbsp;<a href="#plugin">Plugin</a><br>
 &nbsp;&nbsp;<a href="#image_struc">Image structure</a><br>
 &nbsp;&nbsp;<a href="#roi">Region of Interest</a><br>
@@ -21,7 +21,7 @@ All examples described here are available in the <a href="http://icy.bioimageana
 &nbsp;&nbsp;<a href="#javadoc">Javadoc (package representation)</a><br>
 <br>
 
-<h4><a id="plugin">Plugin</a></h4>
+<h2><a id="plugin">Plugin</a></h2>
 
 Plugin is the way for developer to provide new features in the application.<br>
 For that you have to extend the base <a href="icy/plugin/abstract_/Plugin.html">Plugin</a> class so your program could be installed and used in Icy.<br>
@@ -39,7 +39,7 @@ Don't forget to check available interface for <a href="icy/plugin/abstract_/Plug
 &nbsp;&nbsp;<a href="icy/plugin/PluginInstaller.html">PluginInstaller</a> is used to install / update / remove plugin.<br>
 <br>
 
-<h4><a id="image_struc">Image structure</a></h4>
+<h2><a id="image_struc">Image structure</a></h2>
 
 The basic image classes of Icy are the <a href="icy/sequence/Sequence.html">Sequence</a> and the and <a href="icy/image/IcyBufferedImage.html">IcyBufferedImage</a>.<br>
 The <a href="icy/sequence/Sequence.html">Sequence</a> class allows the definition of an image over the 5 [XYCZT] dimensions.<br>
@@ -76,7 +76,7 @@ We also defined our own <a href="icy/image/colorspace/IcyColorSpace.html">IcyCol
 &nbsp;&nbsp;<a href="icy/image/IcyBufferedImageUtil.html">IcyBufferedUtil</a> <a href="icy/image/IcyBufferedImage.html">IcyBufferedImage</a> utilities class.<br>
 <br>
 
-<h4><a id="roi">Region of interest</a></h4>
+<h2><a id="roi">Region of interest</a></h2>
 
 Region of interest define region which can be used as input or output for any processing.<br>
 <br>
@@ -95,7 +95,7 @@ Region of interest define region which can be used as input or output for any pr
 &nbsp;&nbsp;<a href="icy/roi/RoiUtil.html">RoiUtil</a> Roi utilities class which is used to compute some basic operations.<br>
 <br>
 
-<h4><a id="overlay">Overlay</a></h4>
+<h2><a id="overlay">Overlay</a></h2>
 
 The overlays are used to interact and draw rich information on image, the base <a href="icy/painter/Overlay.html">Overlay</a> class replaces the deprecated <a href="icy/painter/AbstractPainter.html">AbstractPainter</a> class and <a href="icy/painter/Painter.html">Painter</a> interface.<br>
 <br>
@@ -110,7 +110,7 @@ The overlays are used to interact and draw rich information on image, the base <
 &nbsp;&nbsp;<a href="icy/painter/VtkPainter.html">VtkPainter</a> Interface for easier handling of overlay in a VTK Canvas (3D rendering).<br>
 <br>
 
-<h4><a id="gui">GUI</a></h4>
+<h2><a id="gui">GUI</a></h2>
 
 Icy uses the Swing API for the UI with a specific third library look and feel: Substance.<br>
 This look and feel provides a consistent and nice GUI so Icy looks exactly the same whatever is the underlying Operating System.<br>
@@ -144,7 +144,7 @@ You can see it in action in the <a href="http://icy.bioimageanalysis.org/plugin/
 &nbsp;&nbsp;<a href="icy/gui/util/package-frame.html">icy.gui.util</a> Package containing tools for GUI.<br>
 <br>
 
-<h4><a id="image_rep">Image representation</a></h4>
+<h2><a id="image_rep">Image representation</a></h2>
 
 To display an image Icy use the <a href="icy/canvas/IcyCanvas.html">IcyCanvas</a> class which actually take an image as input and render it to the screen.<br>
 <br>
@@ -161,7 +161,7 @@ depending the final representation adopted but it may eventually directly extend
 &nbsp;&nbsp;<a href="http://icy.bioimageanalysis.org/plugin/Chart1DCanvas">Chart1DCanvas</a><br>
 <br>
 
-<h4><a id="event">Event</a></h4>
+<h2><a id="event">Event</a></h2>
 
 Java as many Object Oriented language relies a lot on events and same goes for Icy which use them internally.<br>
 You may be interested in launching an action on a specific event (as "image opened" event).<br>
@@ -171,7 +171,7 @@ You may be interested in launching an action on a specific event (as "image open
 &nbsp;&nbsp;<a href="src-html/plugins/tutorial/event/ActiveSequenceListenerTutorial.html">How to listen focused image / window events in Icy</a><br>
 <br>
 
-<h4><a id="chart">Chart / Graphic</a></h4>
+<h2><a id="chart">Chart / Graphic</a></h2>
 
 You may want to present your statistical results from your analysis in graphical format, for that Icy use the very nice and comprehensive <a href="http://www.jfree.org/jfreechart/">JFreeChart</a> library to do it.<br>
 <br>
@@ -180,7 +180,7 @@ You may want to present your statistical results from your analysis in graphical
 &nbsp;&nbsp;<a href="src-html/plugins/tutorial/chart/ChartTutorial2.html">Create a deviation graph with JFreeChart in Icy</a><br>
 <br>
 
-<h4><a id="misc">Misc</a></h4>
+<h2><a id="misc">Misc</a></h2>
 
 Here are others topics which may have some interests for plugin development, be sure to check in them before reinventing the wheel !<br>
 <br> 
@@ -202,5 +202,5 @@ Here are others topics which may have some interests for plugin development, be 
 &nbsp;&nbsp;<a href="icy/util/XLSUtil.html">XLSUtil</a> General XLS utilities to build or read excel documents.<br> 
 <br>
 
-<h4><a id="javadoc">Javadoc</a></h4>
+<h2><a id="javadoc">Javadoc</a></h2>
 </body>
