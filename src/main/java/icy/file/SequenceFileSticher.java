@@ -1075,6 +1075,9 @@ public class SequenceFileSticher
         public int totalSizeT;
         public int totalSizeC;
 
+        // base path of group
+        public String basePath;
+
         /**
          * Internal use only, use {@link SequenceFileSticher#groupFiles(SequenceFileImporter, Collection, boolean, FileFrame)} instead.
          */
@@ -1091,6 +1094,8 @@ public class SequenceFileSticher
             totalSizeZ = 0;
             totalSizeT = 0;
             totalSizeC = 0;
+
+            basePath = "";
         }
 
         // void cleanFixedAbsPos()
@@ -1368,10 +1373,13 @@ public class SequenceFileSticher
             totalSizeZ = mz * sz;
             totalSizeY = my * sy;
             totalSizeX = mx * sx;
+
+            // build base path
+            basePath = buildBasePath();
         }
 
         /**
-         * Return all contained path in this group
+         * @return all contained path in this group
          */
         public List<String> getPaths()
         {
@@ -1471,9 +1479,20 @@ public class SequenceFileSticher
         }
 
         /**
-         * Return common path part from all contained path in this group
+         * @return common path part from all contained path in this group
          */
         public String getBasePath()
+        {
+            if (StringUtil.isEmpty(basePath))
+                basePath = buildBasePath();
+
+            return basePath;
+        }
+
+        /**
+         * @return common path part from all contained path in this group
+         */
+        private String buildBasePath()
         {
             if (positions.isEmpty())
                 return "";
@@ -1772,7 +1791,7 @@ public class SequenceFileSticher
     }
 
     /**
-     * Returns opened {@link SequenceFileImporter} or <i>null</i> if we can't open the given path
+     * @return opened {@link SequenceFileImporter} or <i>null</i> if we can't open the given path
      */
     @SuppressWarnings("resource")
     static SequenceFileImporter tryOpen(SequenceFileImporter importer, String path)
