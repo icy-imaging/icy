@@ -2843,6 +2843,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * If that is not the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter
      * is set to <code>false</code>, if the parameter is set to <code>true</code> the result may be returned in a new
      * created ROI.
+     * 
      * <pre>
      *     // Example:
      *      roi1 (before)     +         roi2       =    roi1 (after)
@@ -2890,6 +2891,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * If that is not the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter
      * is set to <code>false</code>, if the parameter is set to <code>true</code> the result may be returned in a new
      * created ROI.
+     * 
      * <pre>
      *     // Example:
      *     roi1 (before) intersect    roi2        =   roi1 (after)
@@ -2939,6 +2941,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter is set to
      * <code>false</code>, if the parameter is set to <code>true</code> the result may be returned
      * in a new created ROI.
+     * 
      * <pre>
      *     // Example:
      *      roi1 (before)   xor      roi2         =    roi1 (after)
@@ -3397,27 +3400,43 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @param roi
      *        Copy all properties from the given ROI.<br>
-     *        All compatible properties from the source ROI are copied into current ROI except the internal
-     *        id.<br>
-     * @return Return <code>false</code> if the operation failed
+     *        All compatible properties from the source ROI are copied into current ROI
+     * @param copyId
+     *        need to also copy internal id from source ROI
+     * @return <code>false</code> if the operation failed
      */
-    public boolean copyFrom(ROI roi)
+    public boolean copyFrom(ROI roi, boolean copyId)
     {
         // use XML persistence for cloning
         final Node node = XMLUtil.createDocument(true).getDocumentElement();
 
         // save operation can fails sometime...
-        if (roi.saveToXML(node))
-            if (loadFromXML(node, true))
-                return true;
+        if (!roi.saveToXML(node))
+            return false;
+        // can fail too (XML lib)
+        if (!loadFromXML(node))
+            return false;
 
-        return false;
-        // if (tries == 0)
-        // throw new RuntimeException("Cannot copy roi from " + roi.getName() + ": XML load
-        // operation failed !");
+        // we want to preserve id here
+        if (copyId)
+            id = roi.id;
+
+        return true;
     }
 
-    public boolean loadFromXML(Node node, boolean preserveId)
+    /**
+     * @param roi
+     *        Copy all properties from the given ROI.<br>
+     *        All compatible properties from the source ROI are copied into current ROI (even the internal id).
+     * @return <code>false</code> if the operation failed
+     */
+    public boolean copyFrom(ROI roi)
+    {
+        return copyFrom(roi, true);
+    }
+
+    @Override
+    public boolean loadFromXML(Node node)
     {
         if (node == null)
             return false;
@@ -3425,17 +3444,13 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         beginUpdate();
         try
         {
-            // FIXME : this can make duplicate id but it is also important to preserve id
-            if (!preserveId)
+            id = XMLUtil.getElementIntValue(node, ID_ID, 0);
+            propertyChanged(PROPERTY_ID);
+            synchronized (ROI.class)
             {
-                id = XMLUtil.getElementIntValue(node, ID_ID, 0);
-                propertyChanged(PROPERTY_ID);
-                synchronized (ROI.class)
-                {
-                    // avoid having same id
-                    if (id_generator <= id)
-                        id_generator = id + 1;
-                }
+                // avoid having same id
+                if (id_generator <= id)
+                    id_generator = id + 1;
             }
             setName(XMLUtil.getElementValue(node, ID_NAME, ""));
             // setGroupId(ROIGroupId.values()[XMLUtil.getElementIntValue(node, ID_GROUPID, 0)]);
@@ -3462,12 +3477,6 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         return true;
-    }
-
-    @Override
-    public boolean loadFromXML(Node node)
-    {
-        return loadFromXML(node, false);
     }
 
     @Override
