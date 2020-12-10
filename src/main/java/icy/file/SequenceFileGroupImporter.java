@@ -556,8 +556,8 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         final OMEXMLMetadata result = MetaDataUtil.createMetadata(name);
 
         // minimum metadata
-        MetaDataUtil.setMetaData(result, currentGroup.totalSizeX, currentGroup.totalSizeY, currentGroup.totalSizeC,
-                currentGroup.totalSizeZ, currentGroup.totalSizeT, baseType.dataType, true);
+        MetaDataUtil.setMetaData(result, group.totalSizeX, group.totalSizeY, group.totalSizeC,
+                group.totalSizeZ, group.totalSizeT, baseType.dataType, true);
         // pixel size & time interval
         if (baseType.pixelSizeX > 0d)
             MetaDataUtil.setPixelSizeX(result, 0, baseType.pixelSizeX);
