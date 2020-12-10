@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>icy-kernel</artifactId>
-    <version>2.1.0</version>
+    <version>2.1.1-SNAPSHOT</version>
 
     <packaging>jar</packaging>
 
@@ -335,9 +335,8 @@
     <distributionManagement>
         <repository>
             <id>icy-prod</id>
-            <!--suppress UnresolvedMavenProperty -->
-            <!-- <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url> -->
-            <url>${env.MAVEN_REPO_URL}/icy-core/</url>
+            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+<!--             <url>${env.MAVEN_REPO_URL}/icy-core/</url> -->
         </repository>
         <snapshotRepository>
             <id>icy-dev</id>
