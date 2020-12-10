@@ -58,6 +58,7 @@ import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginLoader;
 import icy.plugin.PluginLoader.PluginLoaderEvent;
 import icy.plugin.PluginLoader.PluginLoaderListener;
+import icy.plugin.interface_.PluginROI;
 import icy.resource.ResourceUtil;
 import icy.resource.icon.IcyIcon;
 import icy.roi.ROI;
@@ -236,7 +237,8 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
         public static List<PluginDescriptor> getROIPlugins()
         {
-            final List<PluginDescriptor> result = new ArrayList<PluginDescriptor>();
+            // get all ROI plugins
+            final List<PluginDescriptor> result = PluginLoader.getPlugins(PluginROI.class);
 
             // remove default 2D & 3D ROI to only keep external ROI
             result.removeAll(ROI2DBand.getROIPlugins());
