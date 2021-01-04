@@ -32,6 +32,9 @@ build-job:
     expire_in: 1 hour
     paths:
       - build/
+  only:
+    - master
+    - tags
 
 package-job:
   stage: package
@@ -43,6 +46,9 @@ package-job:
   artifacts:
     paths:
       - build/
+  only:
+    - master
+    - tags
 
 test-job:
   stage: test
@@ -56,6 +62,9 @@ test-job:
     expire_in: 1 hour
     paths:
       - build/
+  only:
+    - master
+    - tags
 
 deploy-job:
   stage: deploy
@@ -69,6 +78,9 @@ deploy-job:
     expire_in: 1 hour
     paths:
       - build/*.jar
+  only:
+    - master
+    - tags
 
 #release-job:
 #  stage: release
@@ -78,3 +90,6 @@ deploy-job:
 #    - deploy-job
 #  script:
 #    - "/tools/maven-release"
+#  only:
+    #    - master
+    #    - tags
