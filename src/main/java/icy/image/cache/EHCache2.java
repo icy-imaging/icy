@@ -145,8 +145,8 @@ public class EHCache2 extends AbstractCache
             // c.setClass(path);
 
             final long freeBytes = new File(FileUtil.getDrive(path)).getUsableSpace();
-            // subtract 200 MB to available space for safety
-            final long freeMB = (freeBytes <= 0) ? Long.MAX_VALUE : Math.max(0, (freeBytes / (1024 * 1024)) - 200);
+            // subtract 200 MB to available space for safety, use 64 MB at min (well, not realy usefull then)
+            final long freeMB = (freeBytes <= 0) ? Long.MAX_VALUE : Math.max(64, (freeBytes / (1024 * 1024)) - 200);
 
             // Stephane: we need to put a long idle / live time otherwise not eternal data
             // will be removed from cache as soon it expired on get(key) call even if the cache is not full...
