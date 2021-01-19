@@ -678,8 +678,8 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 }
                 catch (Throwable t)
                 {
-                    // not an UnsupportedOperationException --> show the error
-                    if (!(t instanceof UnsupportedOperationException))
+                    // not UnsupportedOperationException or InterruptedException ? --> show the error
+                    if (!(t instanceof UnsupportedOperationException) && !(t instanceof InterruptedException))
                         IcyExceptionHandler.handleException(t, true);
 
                     final List<ROIDescriptor> descriptors = plugin.getDescriptors();
