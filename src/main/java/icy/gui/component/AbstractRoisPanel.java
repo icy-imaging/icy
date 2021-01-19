@@ -1480,7 +1480,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                     final Object value;
 
                     if (result != null)
-                        value = results.formatValue(result.getValue(), id);
+                        value = results.formatValue(result.getValue(), id, false);
                     else
                         value = null;
 
@@ -1853,6 +1853,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
 
         public Object formatValue(Object value, String id)
         {
+            return formatValue(value, id, true);
+        }
+
+        public Object formatValue(Object value, String id, boolean truncateDouble)
+        {
             Object result = value;
 
             // format result if needed
@@ -1885,7 +1890,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                             || id.equals(ROIMassCenterTDescriptor.ID) || id.equals(ROIMassCenterCDescriptor.ID))
                         result = "ALL";
                 }
-                else
+                else if (truncateDouble)
                 {
                     // value not too large ?
                     if (Math.abs(doubleValue) < 10000000)
@@ -1909,6 +1914,18 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                     else
                         // format double value
                         result = Double.valueOf(MathUtil.roundSignificant(doubleValue, 5));
+                }
+                else
+                {
+                    if (value instanceof Long || value instanceof Integer || value instanceof Short
+                            || value instanceof Byte)
+                    {
+                        result = ((Number) value).longValue();
+                    }
+                    else
+                    {
+                        result = doubleValue;
+                    }
                 }
             }
 
