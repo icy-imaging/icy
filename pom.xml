@@ -331,7 +331,6 @@
             <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
         </repository>
     </repositories>
-
     <distributionManagement>
         <repository>
             <id>icy-prod</id>
