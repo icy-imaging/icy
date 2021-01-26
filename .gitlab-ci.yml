@@ -65,7 +65,7 @@ deploy-job:
     - package-job
   script:
     - echo "Deploy artifact to the Nexus"
-    - mvn $MAVEN_CLI_OPTS deploy
+    - mvn -X $MAVEN_CLI_OPTS deploy
   artifacts:
     when: on_success
     expire_in: 1 hour
