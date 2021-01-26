@@ -357,7 +357,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
 
             final double destAngle;
 
-            // shift action --> limit to 45° rotation
+            // shift action --> limit to 45&deg; rotation
             if (EventUtil.isShiftDown(e))
                 destAngle = Math.rint((mapStartRotationZ + angle) * (8d / (2 * Math.PI))) * ((2 * Math.PI) / 8d);
             else
@@ -1026,7 +1026,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
 
             final double destAngle;
 
-            // shift action --> limit to 45° rotation
+            // shift action --> limit to 45&deg; rotation
             if (shift)
                 destAngle = Math.rint((startRotationZ + angle) * (8d / (2 * Math.PI))) * ((2 * Math.PI) / 8d);
             else
@@ -3210,7 +3210,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
                     });
 
                     // and in canvas
-                    canvasView.setZoomMessage("Zoom : " + zoomInfo + " %", 500);
+                    canvasView.setZoomMessage("Zoom : " + zoomInfo + " \u0025", 500);
                 }
                 else if (type == IcyCanvasEventType.ROTATION_CHANGED)
                 {
@@ -3236,7 +3236,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
                     });
 
                     // and in canvas
-                    canvasView.setRotationMessage("Rotation : " + rotInfo + " °", 500);
+                    canvasView.setRotationMessage("Rotation : " + rotInfo + " \u00B0", 500);
                 }
 
                 // refresh canvas

@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import icy.gui.frame.progress.FileFrame;
 import icy.sequence.DimensionId;
@@ -780,7 +781,7 @@ public class SequenceFileSticher
 
         private static String getBase(String path)
         {
-            final String folder = FileUtil.getDirectory(path, true);
+            // final String folder = FileUtil.getDirectory(path, true);
 
             // we extract position from filename (not from the complete path)
             String result = FileUtil.getFileName(path);
@@ -788,7 +789,7 @@ public class SequenceFileSticher
 
             while (pos < result.length())
             {
-                final int st = StringUtil.getNextDigitCharIndex(result, pos);
+                int st = StringUtil.getNextDigitCharIndex(result, pos);
 
                 if (st != -1)
                 {
@@ -796,22 +797,35 @@ public class SequenceFileSticher
                     int end = StringUtil.getNextNonDigitCharIndex(result, st);
                     if (end < 0)
                         end = result.length();
-                    // final int size = end - st;
 
-                    // remove number from name if number size < 6
-                    // if (size < 6)
+                    // assume 'separator + dimension id', remove them
+                    if ((st > 1) && (Character.isLetter(result.charAt(st - 1))
+                            && " -_".contains(result.substring(st - 2, st - 1))))
+                        st -= 2;
+                    // try others combinations
+                    else if (st > 0)
+                    {
+                        // assume dimension id, remove it
+                        if (Character.isLetter(result.charAt(st - 1)))
+                            st--;
+                        // assume separator, remove it
+                        else if (" -_".contains(result.substring(st - 1, st - 0)))
+                            st--;
+                    }
+
+                    // remove number chunk
                     result = result.substring(0, st) + result.substring(end);
-                    // pass to next
-                    // else
-                    // pos = end;
+                    // next
+                    pos = st;
                 }
                 else
                     // done
                     break;
             }
 
+            return result;
             // TODO: would be handy to be able to ignore folder but base is used as Sequence filename :-/
-            return folder + result;
+            // return folder + result;
         }
 
         private static String getPositionPrefix(String text, int ind)
@@ -1061,6 +1075,9 @@ public class SequenceFileSticher
         public int totalSizeT;
         public int totalSizeC;
 
+        // base path of group
+        public String basePath;
+
         /**
          * Internal use only, use {@link SequenceFileSticher#groupFiles(SequenceFileImporter, Collection, boolean, FileFrame)} instead.
          */
@@ -1077,6 +1094,8 @@ public class SequenceFileSticher
             totalSizeZ = 0;
             totalSizeT = 0;
             totalSizeC = 0;
+
+            basePath = "";
         }
 
         // void cleanFixedAbsPos()
@@ -1354,10 +1373,13 @@ public class SequenceFileSticher
             totalSizeZ = mz * sz;
             totalSizeY = my * sy;
             totalSizeX = mx * sx;
+
+            // build base path
+            basePath = buildBasePath();
         }
 
         /**
-         * Return all contained path in this group
+         * @return all contained path in this group
          */
         public List<String> getPaths()
         {
@@ -1369,6 +1391,137 @@ public class SequenceFileSticher
             return results;
         }
 
+        private static List<String> getNumberChunks(String path)
+        {
+            final List<String> result = new ArrayList<>();
+
+            // we extract position from filename (not from the complete path)
+            String name = FileUtil.getFileName(path);
+            int pos = 0;
+
+            while (pos < name.length())
+            {
+                final int st = StringUtil.getNextDigitCharIndex(name, pos);
+
+                if (st != -1)
+                {
+                    // get ending digit char index
+                    int end = StringUtil.getNextNonDigitCharIndex(name, st);
+                    if (end < 0)
+                        end = name.length() + 1;
+
+                    // add number chunk
+                    result.add(name.substring(st, end));
+                    // next
+                    pos = end;
+                }
+                else
+                    // done
+                    break;
+            }
+
+            return result;
+        }
+
+        private static String getBase(String path, Set<Integer> acceptedNumberChunks)
+        {
+            final String folder = FileUtil.getDirectory(path, true);
+
+            // we extract position from filename (not from the complete path)
+            String result = FileUtil.getFileName(path);
+            int pos = 0;
+            int ind = 0;
+
+            while (pos < result.length())
+            {
+                int st = StringUtil.getNextDigitCharIndex(result, pos);
+
+                if (st != -1)
+                {
+                    // get ending digit char index
+                    int end = StringUtil.getNextNonDigitCharIndex(result, st);
+                    if (end < 0)
+                        end = result.length();
+
+                    // number chunk not accepted ? --> remove it
+                    if (!acceptedNumberChunks.contains(Integer.valueOf(ind++)))
+                    {
+                        // assume 'separator + dimension id', remove them
+                        if ((st > 1) && (Character.isLetter(result.charAt(st - 1))
+                                && " -_".contains(result.substring(st - 2, st - 1))))
+                            st -= 2;
+                        // try others combinations
+                        else if (st > 0)
+                        {
+                            // assume dimension id, remove it
+                            if (Character.isLetter(result.charAt(st - 1)))
+                                st--;
+                            // assume separator, remove it
+                            else if (" -_".contains(result.substring(st - 1, st - 0)))
+                                st--;
+                        }
+
+                        // remove number chunk
+                        result = result.substring(0, st) + result.substring(end);
+                        // next
+                        pos = st;
+                    }
+                    // next
+                    else
+                        pos = end;
+                }
+                else
+                    // done
+                    break;
+            }
+
+            return folder + result;
+        }
+
+        /**
+         * @return common path part from all contained path in this group
+         */
+        public String getBasePath()
+        {
+            if (StringUtil.isEmpty(basePath))
+                basePath = buildBasePath();
+
+            return basePath;
+        }
+
+        /**
+         * @return common path part from all contained path in this group
+         */
+        private String buildBasePath()
+        {
+            if (positions.isEmpty())
+                return "";
+
+            final Map<Integer, String> chunks = new HashMap<Integer, String>();
+            final SequencePosition firstPos = positions.get(0);
+
+            // fill number chunks
+            for (String chunk : getNumberChunks(firstPos.getPath()))
+                chunks.put(Integer.valueOf(chunks.size()), chunk);
+
+            // eliminate number chunk which change
+            for (SequencePosition pos : positions)
+            {
+                int ind = 0;
+
+                for (String chunk : getNumberChunks(pos.getPath()))
+                {
+                    final Integer key = Integer.valueOf(ind++);
+                    final String old = chunks.get(key);
+
+                    // value changed ? --> remove
+                    if ((old != null) && !StringUtil.equals(old, chunk))
+                        chunks.remove(key);
+                }
+            }
+
+            return getBase(firstPos.getPath(), chunks.keySet());
+        }
     }
 
     /**
@@ -1392,7 +1545,7 @@ public class SequenceFileSticher
     public static Collection<SequenceFileGroup> groupAllFiles(SequenceFileImporter importer, Collection<String> paths,
             boolean findPosition, FileFrame loadingFrame)
     {
-        final List<String> sortedPaths = Loader.cleanNonImageFile(new ArrayList<String>(paths));
+        final List<String> sortedPaths = Loader.cleanNonImageFile(Loader.explode(new ArrayList<>(paths)));
 
         if (sortedPaths.isEmpty())
             return new ArrayList<SequenceFileGroup>();
@@ -1638,7 +1791,7 @@ public class SequenceFileSticher
     }
 
     /**
-     * Returns opened {@link SequenceFileImporter} or <i>null</i> if we can't open the given path
+     * @return opened {@link SequenceFileImporter} or <i>null</i> if we can't open the given path
      */
     @SuppressWarnings("resource")
     static SequenceFileImporter tryOpen(SequenceFileImporter importer, String path)

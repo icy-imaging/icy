@@ -3967,7 +3967,7 @@ public class Loader
             if (directory)
             {
                 // get directory without last separator
-                final String fileDir = FileUtil.getDirectory(group.ident.base, false);
+                final String fileDir = FileUtil.getDirectory(group.getBasePath(), false);
 
                 // set sequence name and filename to directory
                 result.setName(FileUtil.getFileName(fileDir, false));
@@ -4364,7 +4364,7 @@ public class Loader
         return selectSerie(importer, path, (OMEXMLMetadata) meta, defaultSerie);
     }
 
-    static List<String> explode(List<String> paths)
+    public static List<String> explode(List<String> paths)
     {
         return FileUtil.toPaths(FileUtil.explode(FileUtil.toFiles(paths), null, true, false));
     }
@@ -4415,7 +4415,7 @@ public class Loader
             final SequenceIdent ident = group.ident;
 
             for (SequencePosition pos : group.positions)
-                result.add(new FilePosition(pos.getPath(), ident.base, 0, pos.getIndexT(), pos.getIndexZ(),
+                result.add(new FilePosition(pos.getPath(), group.getBasePath(), 0, pos.getIndexT(), pos.getIndexZ(),
                         pos.getIndexC()));
         }
 

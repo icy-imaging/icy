@@ -170,7 +170,7 @@ public class ImageJUtil
             cal.pixelHeight = psy;
             cal.pixelDepth = psz;
             // default unit size icy
-            cal.setUnit("µm");
+            cal.setUnit("\u00B5m");
         }
 
         final double ti = seq.getTimeInterval();

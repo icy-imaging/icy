@@ -4,72 +4,21 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.bioimageanalysis.icy</groupId>
+    <parent>
+        <artifactId>parent-pom-core</artifactId>
+        <groupId>org.bioimageanalysis.icy</groupId>
+        <version>1.0.1</version>
+    </parent>
+
     <artifactId>icy-kernel</artifactId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>2.1.1-SNAPSHOT</version>
 
     <packaging>jar</packaging>
 
     <name>Icy</name>
     <description>Icy is an open community platform for bioimage informatics</description>
-    <url>http://icy.bioimageanalysis.org/</url>
-    <inceptionYear>2011</inceptionYear>
-    <organization>
-        <name>Institut Pasteur</name>
-        <url>https://www.pasteur.fr/</url>
-    </organization>
-    <licenses>
-        <license>
-            <name>GNU GPLv3</name>
-            <url>https://www.gnu.org/licenses/gpl-3.0.en.html</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <id>sdallongeville</id>
-            <name>Stéphane Dallongeville</name>
-            <url>http://icy.bioimageanalysis.org/author/stef/</url>
-            <roles>
-                <role>founder</role>
-                <role>lead</role>
-                <role>developer</role>
-                <role>debugger</role>
-                <role>reviewer</role>
-                <role>support</role>
-                <role>maintainer</role>
-            </roles>
-        </developer>
-        <developer>
-            <id>atournay</id>
-            <name>Amandine Tournay</name>
-            <roles>
-                <role>developer</role>
-                <role>maintainer</role>
-            </roles>
-        </developer>
-    </developers>
-    <!--<contributors></contributors> -->
-
-    <mailingLists>
-        <mailingList>
-            <name>Icy</name>
-            <post>icy-all@pasteur.fr</post>
-        </mailingList>
-    </mailingLists>
-
-    <issueManagement>
-        <system>Gitlab</system>
-        <url>https://gitlab.pasteur.fr/bia/icy/issues</url>
-    </issueManagement>
 
     <properties>
-        <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
-        <jdk.version>1.8</jdk.version>
-
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-
         <outputDirectory>${project.build.directory}</outputDirectory>
 
         <stripVersion>true</stripVersion>
@@ -83,18 +32,11 @@
         <defaultGoal>install</defaultGoal>
         <directory>build</directory>
         <finalName>${project.artifactId}-${project.version}</finalName>
-        <!-- <sourceDirectory>src/main/java</sourceDirectory> -->
-        <!-- <resources> -->
-        <!-- <resource> -->
-        <!-- <directory>src/main/resources</directory> -->
-        <!-- </resource> -->
-        <!-- </resources> -->
 
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -193,8 +135,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.2</version>
                 <configuration>
+                    <excludes>
+                        <exclude>doc/doc-files</exclude>
+                    </excludes>
                     <archive>
                         <manifest>
                             <classpathLayoutType>custom</classpathLayoutType>
@@ -215,31 +159,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <configuration>
+                    <overview>${basedir}/src/main/javadoc/overview.html</overview>
+                    <stylesheetfile>${basedir}/src/main/javadoc/java7doc.css</stylesheetfile>
+                </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            
         </plugins>
     </build>
 
@@ -404,24 +329,14 @@
         <repository>
             <id>icy-prod</id>
             <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>icy-dev</id>
-            <url>https://icy-nexus-dev.pasteur.cloud/repository/Icy/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
     </repositories>
 
     <distributionManagement>
         <repository>
             <id>icy-prod</id>
-            <!--suppress UnresolvedMavenProperty -->
-            <url>${env.MAVEN_REPO_URL}/icy-core/</url>
+            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
+<!--             <url>${env.MAVEN_REPO_URL}/icy-core/</url> -->
         </repository>
         <snapshotRepository>
             <id>icy-dev</id>

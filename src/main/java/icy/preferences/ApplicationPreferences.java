@@ -208,8 +208,7 @@ public class ApplicationPreferences
      */
     public static String getExtraVMParams()
     {
-        // we want a big perm gen space for the class loader
-        return preferences.get(ID_EXTRA_VMPARAMS, "-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:MaxPermSize=128M");
+        return preferences.get(ID_EXTRA_VMPARAMS, "-XX:+UseG1GC -XX:MaxGCPauseMillis=100");
     }
 
     /**
