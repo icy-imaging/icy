@@ -18,14 +18,14 @@
  */
 package icy.roi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import icy.canvas.IcyCanvas;
 import icy.type.point.Point5D;
 import icy.type.rectangle.Rectangle3D;
 import icy.type.rectangle.Rectangle4D;
 import icy.type.rectangle.Rectangle5D;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 5D ROI base class.
@@ -139,8 +139,8 @@ public abstract class ROI5D extends ROI
         if (canTranslate())
         {
             final Point5D oldPos = getPosition5D();
-            translate(position.getX() - oldPos.getX(), position.getY() - oldPos.getY(),
-                    position.getZ() - oldPos.getZ(), position.getT() - oldPos.getT(), position.getC() - oldPos.getC());
+            translate(position.getX() - oldPos.getX(), position.getY() - oldPos.getY(), position.getZ() - oldPos.getZ(),
+                    position.getT() - oldPos.getT(), position.getC() - oldPos.getC());
         }
     }
 
@@ -192,6 +192,10 @@ public abstract class ROI5D extends ROI
             if (roi5d.isEmpty())
                 return contains(roi5d.getPosition5D());
 
+            // quick discard
+            if (!contains(roi5d.getBounds5D()))
+                return false;
+
             BooleanMask5D mask;
             BooleanMask5D roiMask;
 
@@ -227,7 +231,15 @@ public abstract class ROI5D extends ROI
     public boolean intersects(ROI roi)
     {
         if (roi instanceof ROI5D)
-            return getBooleanMask(true).intersects(((ROI5D) roi).getBooleanMask(true));
+        {
+            final ROI5D roi5d = (ROI5D) roi;
+
+            // quick discard
+            if (!intersects(roi5d.getBounds5D()))
+                return false;
+
+            return getBooleanMask(true).intersects(roi5d.getBooleanMask(true));
+        }
 
         // use default implementation
         return super.intersects(roi);
@@ -342,8 +354,8 @@ public abstract class ROI5D extends ROI
         final BooleanMask3D masks[] = new BooleanMask3D[bounds4d.sizeT];
 
         for (int i = 0; i < bounds4d.sizeT; i++)
-            masks[i] = new BooleanMask3D((Rectangle3D.Integer) bounds3d.clone(), new BooleanMask2D[] {getBooleanMask2D(
-                    z, bounds4d.t + i, c, inclusive)});
+            masks[i] = new BooleanMask3D((Rectangle3D.Integer) bounds3d.clone(),
+                    new BooleanMask2D[] {getBooleanMask2D(z, bounds4d.t + i, c, inclusive)});
 
         return new BooleanMask4D(bounds4d, masks);
     }

@@ -257,6 +257,10 @@ public abstract class ROI4D extends ROI
                 if (roi4d.isEmpty())
                     return contains(roi4d.getPosition4D());
 
+                // quick discard
+                if (!contains(roi4d.getBounds4D()))
+                    return false;
+                
                 BooleanMask4D mask;
                 BooleanMask4D roiMask;
 
@@ -379,7 +383,13 @@ public abstract class ROI4D extends ROI
             final ROI4D roi4d = (ROI4D) roi;
 
             if (onSamePos(roi4d, false))
+            {
+                // quick discard
+                if (!intersects(roi4d.getBounds4D()))
+                    return false;
+                
                 return getBooleanMask(true).intersects(roi4d.getBooleanMask(true));
+            }
         }
 
         // use default implementation

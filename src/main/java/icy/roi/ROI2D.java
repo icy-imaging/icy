@@ -775,6 +775,10 @@ public abstract class ROI2D extends ROI
                 if (roi2d.isEmpty())
                     return contains(roi2d.getPosition2D());
 
+                // quick discard
+                if (!contains(roi2d.getBounds2D()))
+                    return false;
+                
                 BooleanMask2D mask;
                 BooleanMask2D roiMask;
 
@@ -869,15 +873,15 @@ public abstract class ROI2D extends ROI
         final boolean tok;
         final boolean cok;
 
-        if ((getZ() == -1) || (sizeZ == Double.POSITIVE_INFINITY))   
+        if ((getZ() == -1) || (sizeZ == Double.POSITIVE_INFINITY))
             zok = true;
         else
             zok = ((z + sizeZ) > getZ()) && (z < (getZ() + 1d));
-        if ((getT() == -1) || (sizeT == Double.POSITIVE_INFINITY))   
+        if ((getT() == -1) || (sizeT == Double.POSITIVE_INFINITY))
             tok = true;
         else
             tok = ((t + sizeT) > getT()) && (t < (getT() + 1d));
-        if ((getC() == -1) || (sizeC == Double.POSITIVE_INFINITY))   
+        if ((getC() == -1) || (sizeC == Double.POSITIVE_INFINITY))
             cok = true;
         else
             cok = ((c + sizeC) > getC()) && (c < (getC() + 1d));
@@ -897,7 +901,13 @@ public abstract class ROI2D extends ROI
             final ROI2D roi2d = (ROI2D) roi;
 
             if (onSamePos(roi2d, false))
+            {
+                // quick discard
+                if (!intersects(roi2d.getBounds2D()))
+                    return false;
+                
                 return getBooleanMask(true).intersects(roi2d.getBooleanMask(true));
+            }
         }
 
         // use default implementation

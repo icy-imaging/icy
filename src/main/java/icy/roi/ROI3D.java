@@ -549,6 +549,10 @@ public abstract class ROI3D extends ROI
                 if (roi3d.isEmpty())
                     return contains(roi3d.getPosition3D());
 
+                // quick discard
+                if (!contains(roi3d.getBounds3D()))
+                    return false;
+                
                 BooleanMask3D mask;
                 BooleanMask3D roiMask;
 
@@ -670,7 +674,13 @@ public abstract class ROI3D extends ROI
             final ROI3D roi3d = (ROI3D) roi;
 
             if (onSamePos(roi3d, false))
+            {
+                // quick discard
+                if (!intersects(roi3d.getBounds3D()))
+                    return false;
+                
                 return getBooleanMask(true).intersects(roi3d.getBooleanMask(true));
+            }
         }
 
         // use default implementation
