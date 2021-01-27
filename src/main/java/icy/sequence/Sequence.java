@@ -26,9 +26,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
@@ -146,22 +148,33 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     @Deprecated
     public static final int TYPE_UNDEFINED = TypeUtil.TYPE_UNDEFINED;
 
+    public static final String ID_ID = "id";
     public static final String ID_NAME = "name";
-
     public static final String ID_POSITION_X = "positionX";
     public static final String ID_POSITION_Y = "positionY";
     public static final String ID_POSITION_Z = "positionZ";
     public static final String ID_POSITION_T = "positionT";
     public static final String ID_POSITION_T_OFFSET = "positionTOffset";
-
     public static final String ID_PIXEL_SIZE_X = "pixelSizeX";
     public static final String ID_PIXEL_SIZE_Y = "pixelSizeY";
     public static final String ID_PIXEL_SIZE_Z = "pixelSizeZ";
     public static final String ID_TIME_INTERVAL = "timeInterval";
-
     public static final String ID_CHANNEL_NAME = "channelName";
-
     public static final String ID_VIRTUAL = "virtual";
+
+    public static final String PROPERTY_ID = ID_ID;
+    public static final String PROPERTY_NAME = ID_NAME;
+    public static final String PROPERTY_POSITION_X = ID_POSITION_X;
+    public static final String PROPERTY_POSITION_Y = ID_POSITION_Y;
+    public static final String PROPERTY_POSITION_Z = ID_POSITION_Z;
+    public static final String PROPERTY_POSITION_T = ID_POSITION_T;
+    public static final String PROPERTY_POSITION_T_OFFSET = ID_POSITION_T_OFFSET;
+    public static final String PROPERTY_PIXEL_SIZE_X = ID_PIXEL_SIZE_X;
+    public static final String PROPERTY_PIXEL_SIZE_Y = ID_PIXEL_SIZE_Y;
+    public static final String PROPERTY_PIXEL_SIZE_Z = ID_PIXEL_SIZE_Z;
+    public static final String PROPERTY_TIME_INTERVAL = ID_TIME_INTERVAL;
+    public static final String PROPERTY_CHANNEL_NAME = ID_CHANNEL_NAME;
+    public static final String PROPERTY_VIRTUAL = ID_VIRTUAL;
 
     /**
      * id generator
@@ -243,6 +256,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     protected int originChannel;
 
     /**
+     * Extended / custom Sequence properties (saved as metadata)
+     */
+    protected final Map<String, String> properties;
+
+    /**
      * Metadata
      */
     protected OMEXMLMetadata metaData;
@@ -295,8 +313,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Creates a new empty sequence with specified meta data object and name.
-     * @param meta OME metadata
-     * @param name string
+     * 
+     * @param meta
+     *        OME metadata
+     * @param name
+     *        string
      */
     public Sequence(OMEXMLMetadata meta, String name)
     {
@@ -334,6 +355,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         originTMin = -1;
         originTMax = -1;
         originChannel = -1;
+        properties = new HashMap<String, String>();
 
         // default pixel size and time interval
         if (Double.isNaN(MetaDataUtil.getPixelSizeX(metaData, 0, Double.NaN)))
@@ -385,8 +407,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #Sequence(OMEXMLMetadata, String)} instead.
-     * @param meta OME metadata
-     * @param name string
+     * @param meta
+     *        OME metadata
+     * @param name
+     *        string
      */
     @Deprecated
     public Sequence(OMEXMLMetadataImpl meta, String name)
@@ -396,8 +420,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Creates a sequence with specified name and containing the specified image
-     * @param image image
-     * @param name string
+     * 
+     * @param image
+     *        image
+     * @param name
+     *        string
      */
     public Sequence(String name, IcyBufferedImage image)
     {
@@ -406,8 +433,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Creates a sequence with specified name and containing the specified image
-     * @param image image
-     * @param name string
+     * 
+     * @param image
+     *        image
+     * @param name
+     *        string
      */
     public Sequence(String name, BufferedImage image)
     {
@@ -418,7 +448,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #Sequence(OMEXMLMetadata)} instead.
-     * @param meta OME metadata
+     * @param meta
+     *        OME metadata
      */
     @Deprecated
     public Sequence(OMEXMLMetadataImpl meta)
@@ -428,7 +459,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Creates a new empty sequence with specified metadata.
-     * @param meta OME metadata
+     * 
+     * @param meta
+     *        OME metadata
      */
     public Sequence(OMEXMLMetadata meta)
     {
@@ -437,7 +470,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Creates a sequence containing the specified image.
-     * @param image image
+     * 
+     * @param image
+     *        image
      */
     public Sequence(IcyBufferedImage image)
     {
@@ -446,6 +481,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Creates a sequence containing the specified image.
+     * 
      * @param image
      */
     public Sequence(BufferedImage image)
@@ -457,7 +493,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Creates an empty sequence with specified name.
-     * @param name string
+     * 
+     * @param name
+     *        string
      */
     public Sequence(String name)
     {
@@ -545,7 +583,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Copy data from the specified Sequence
-     * @param source sequence
+     * 
+     * @param source
+     *        sequence
      */
     public void copyDataFrom(Sequence source)
     {
@@ -742,8 +782,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link SequenceUtil#convertToType(Sequence, DataType, boolean)} instead.
-     * @param dataType object
-     * @param rescale boolean
+     * @param dataType
+     *        object
+     * @param rescale
+     *        boolean
      * @return sequence
      */
     @Deprecated
@@ -754,8 +796,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link SequenceUtil#convertType(Sequence, DataType, Scaler[])} instead.
-     * @param dataType object
-     * @param scaler sclare
+     * @param dataType
+     *        object
+     * @param scaler
+     *        sclare
      * @return sequence
      */
     @Deprecated
@@ -766,9 +810,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link SequenceUtil#convertToType(Sequence, DataType, boolean)} instead
-     * @param dataType object
-     * @param rescale boolena
-     * @param signed boolean
+     * @param dataType
+     *        object
+     * @param rescale
+     *        boolena
+     * @param signed
+     *        boolean
      * @return sequence
      */
     @Deprecated
@@ -779,7 +826,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link SequenceUtil#extractChannel(Sequence, int)} instead.
-     * @param channelNumber int
+     * @param channelNumber
+     *        int
      * @return sequence
      */
     @Deprecated
@@ -790,7 +838,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link SequenceUtil#extractChannels(Sequence, List)} instead.
-     * @param channelNumbers list of channels
+     * @param channelNumbers
+     *        list of channels
      * @return sequence
      */
     @Deprecated
@@ -801,7 +850,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link SequenceUtil#extractChannel(Sequence, int)} instead
-     * @param bandNumber int
+     * @param bandNumber
+     *        int
      * @return sequence
      */
     @Deprecated
@@ -812,7 +862,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link SequenceUtil#extractChannels(Sequence, List)} instead
-     * @param bandNumbers list of bandNumbers
+     * @param bandNumbers
+     *        list of bandNumbers
      * @return sequence
      */
     @Deprecated
@@ -861,8 +912,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set the volatile state for this Sequence (see {@link IcyBufferedImage#setVolatile(boolean)}).<br>
-     * @param value boolean
      * 
+     * @param value
+     *        boolean
      * @throws OutOfMemoryError
      *         if there is not enough memory available to store image
      *         data when setting back to <i>non volatile</i> state
@@ -896,8 +948,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Same as {@link #setVolatile(boolean)}
-     * @param value boolean
      * 
+     * @param value
+     *        boolean
      * @throws OutOfMemoryError
      *         if there is not enough memory available to store image
      *         data when setting back to <i>non volatile</i> state
@@ -938,7 +991,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param value Sequence name
+     * @param value
+     *        Sequence name
      */
     public void setName(String value)
     {
@@ -958,9 +1012,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * Returns the origin filename for the specified image position.<br>
      * This method is useful for sequence loaded from multiple files.
      *
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return the origin filename for the given image position
      */
     public String getFilename(int t, int z, int c)
@@ -1023,7 +1080,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * When you set the <i>ImageProvider</i> you need to ensure we can use it (should be opened for {@link SequenceIdImporter}).<br>
      * Also "sub part" informations has to be correctly set (setOriginXXX(...) methods) as we may use it to retrieve sequence data from the
      * {@link ImageProvider}.
-     * @param value image
+     * 
+     * @param value
+     *        image
      */
     public void setImageProvider(ImageProvider value)
     {
@@ -1043,8 +1102,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the output base filename.<br>
-     * This function is supposed to be used internally only.
-     * 
+     *         This function is supposed to be used internally only.
      * @param folderExt
      *        If the filename of this sequence refer a folder then we extend it with 'folderExt' to build the base name.
      * @see #getOutputExtension()
@@ -1071,9 +1129,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the output filename extension (not the file extension, just extension from base name).<br>
-     * The extension is based on some internals informations as serie index and resolution level.<br>
-     * This function is supposed to be used internally only.
-     * 
+     *         The extension is based on some internals informations as serie index and resolution level.<br>
+     *         This function is supposed to be used internally only.
      * @see #getOutputBaseName(String)
      */
     public String getOutputExtension()
@@ -1139,8 +1196,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return Return the desired output filename for this Sequence.<br>
-     * It uses the origin filename and add a specific extension depending some internals properties.
-     * 
+     *         It uses the origin filename and add a specific extension depending some internals properties.
      * @param withExtension
      *        Add the original file extension is set to <code>true</code>
      * @see #getFilename()
@@ -1165,11 +1221,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the resolution level from the origin image (defined by {@link #getFilename()}).<br>
-     * By default it returns 0 if this sequence corresponds to the full resolution of the original image.<br>
-     * 1 --&gt; original resolution / 2<br>
-     * 2 --&gt; original resolution / 4<br>
-     * 3 --&gt; original resolution / 8<br>
-     * ...
+     *         By default it returns 0 if this sequence corresponds to the full resolution of the original image.<br>
+     *         1 --&gt; original resolution / 2<br>
+     *         2 --&gt; original resolution / 4<br>
+     *         3 --&gt; original resolution / 8<br>
+     *         ...
      */
     public int getOriginResolution()
     {
@@ -1178,7 +1234,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Internal use only, you should not directly use this method.
-     * @param value int
+     * 
+     * @param value
+     *        int
      * @see #getOriginResolution()
      */
     public void setOriginResolution(int value)
@@ -1188,8 +1246,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the region (X,Y) from original image if this image is a crop of the original image (in original image
-     * resolution).<br>
-     * Default value is <code>null</code> (full size).
+     *         resolution).<br>
+     *         Default value is <code>null</code> (full size).
      */
     public Rectangle getOriginXYRegion()
     {
@@ -1198,7 +1256,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Internal use only, you should not directly use this method.
-     * @param value rectangle
+     * 
+     * @param value
+     *        rectangle
      * @see #getOriginXYRegion()
      */
     public void setOriginXYRegion(Rectangle value)
@@ -1213,7 +1273,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the Z range minimum from original image if this image is a crop in Z of the original image.<br>
-     * Default value is -1 which mean we have the whole Z range.
+     *         Default value is -1 which mean we have the whole Z range.
      */
     public int getOriginZMin()
     {
@@ -1222,7 +1282,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Internal use only, you should not directly use this method.
-     * @param value int
+     * 
+     * @param value
+     *        int
      * @see #getOriginZMin()
      */
     public void setOriginZMin(int value)
@@ -1232,7 +1294,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the Z range maximum from original image if this image is a crop in Z of the original image.<br>
-     * Default value is -1 which mean we have the whole Z range.
+     *         Default value is -1 which mean we have the whole Z range.
      */
     public int getOriginZMax()
     {
@@ -1241,7 +1303,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Internal use only, you should not directly use this method.
-     * @param value int
+     * 
+     * @param value
+     *        int
      * @see #getOriginZMax()
      */
     public void setOriginZMax(int value)
@@ -1251,7 +1315,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the T range minimum from original image if this image is a crop in T of the original image.<br>
-     * Default value is -1 which mean we have the whole T range.
+     *         Default value is -1 which mean we have the whole T range.
      */
     public int getOriginTMin()
     {
@@ -1260,7 +1324,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Internal use only, you should not directly use this method.
-     * @param value int
+     * 
+     * @param value
+     *        int
      * @see #getOriginTMin()
      */
     public void setOriginTMin(int value)
@@ -1270,7 +1336,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the T range maximum from original image if this image is a crop in T of the original image.<br>
-     * Default value is -1 which mean we have the whole T range.
+     *         Default value is -1 which mean we have the whole T range.
      */
     public int getOriginTMax()
     {
@@ -1279,7 +1345,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Internal use only, you should not directly use this method.
-     * @param value int
+     * 
+     * @param value
+     *        int
      * @see #getOriginTMax()
      */
     public void setOriginTMax(int value)
@@ -1289,8 +1357,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the channel position from original image if this image is a single channel extraction of the original
-     * image.<br>
-     * Default value is -1 which mean that all channels were preserved.
+     *         image.<br>
+     *         Default value is -1 which mean that all channels were preserved.
      */
     public int getOriginChannel()
     {
@@ -1299,7 +1367,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Internal use only, you should not directly use this method.
-     * @param value int
+     * 
+     * @param value
+     *        int
      * @see #getOriginChannel()
      */
     public void setOriginChannel(int value)
@@ -1324,8 +1394,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return series index if the Sequence comes from a multi serie image.<br>
-     * By default it returns 0 if the sequence comes from a single serie image or if this is the
-     * first series image.
+     *         By default it returns 0 if the sequence comes from a single serie image or if this is the
+     *         first series image.
      */
     public int getSeries()
     {
@@ -1345,7 +1415,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set series index if the Sequence comes from a multi serie image (internal use only).
-     * @param value int
+     * 
+     * @param value
+     *        int
      */
     public void setSeries(int value)
     {
@@ -1376,7 +1448,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set the meta data object
-     * @param metaData OME metadata
+     * 
+     * @param metaData
+     *        OME metadata
      */
     public void setMetaData(OMEXMLMetadata metaData)
     {
@@ -1400,7 +1474,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #setMetaData(OMEXMLMetadata)} instead.
-     * @param metaData OME metadata
+     * @param metaData
+     *        OME metadata
      */
     @Deprecated
     public void setMetaData(OMEXMLMetadataImpl metaData)
@@ -1410,10 +1485,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the physical position [X,Y,Z] (in &micro;m) of the image represented by this Sequence.
-     * This information can be used to represent the position of the image in the original sample (microscope
-     * information) or the position of a sub image from the original image (crop operation).<br>
-     * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time interval
-     * information to compute other positions.
+     *         This information can be used to represent the position of the image in the original sample (microscope
+     *         information) or the position of a sub image from the original image (crop operation).<br>
+     *         Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
+     *         interval
+     *         information to compute other positions.
      */
     public double[] getPosition()
     {
@@ -1422,10 +1498,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the X physical position / offset (in &micro;m) of the image represented by this Sequence.<br>
-     * This information can be used to represent the position of the image in the original sample (microscope
-     * information) or the position of a sub image the original image (crop operation).<br>
-     * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time interval
-     * information to compute other positions.
+     *         This information can be used to represent the position of the image in the original sample (microscope
+     *         information) or the position of a sub image the original image (crop operation).<br>
+     *         Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
+     *         interval
+     *         information to compute other positions.
      */
     public double getPositionX()
     {
@@ -1434,10 +1511,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the Y physical position / offset (in &micro;m) of the image represented by this Sequence.<br>
-     * This information can be used to represent the position of the image in the original sample (microscope
-     * information) or the position of a sub image the original image (crop operation).<br>
-     * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time interval
-     * information to compute other positions.
+     *         This information can be used to represent the position of the image in the original sample (microscope
+     *         information) or the position of a sub image the original image (crop operation).<br>
+     *         Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
+     *         interval
+     *         information to compute other positions.
      */
     public double getPositionY()
     {
@@ -1446,10 +1524,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the Z physical position / offset (in &micro;m) of the image represented by this Sequence.<br>
-     * This information can be used to represent the position of the image in the original sample (microscope
-     * information) or the position of a sub image the original image (crop operation).<br>
-     * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time interval
-     * information to compute other positions.
+     *         This information can be used to represent the position of the image in the original sample (microscope
+     *         information) or the position of a sub image the original image (crop operation).<br>
+     *         Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
+     *         interval
+     *         information to compute other positions.
      */
     public double getPositionZ()
     {
@@ -1466,7 +1545,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the timestamp (elapsed milliseconds from the Java epoch of 1970-01-01 T00:00:00Z) of the image represented by this Sequence.
-     *
      * @see #getPositionTOffset(int, int, int)
      * @see #getTimeInterval()
      */
@@ -1477,7 +1555,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the time position offset (in second for OME compatibility) relative to first image for the image at specified (T,Z,C) position.
-     * 
      * @see #getTimeInterval()
      * @see #getTimeStamp()
      */
@@ -1491,7 +1568,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we always use value from Plane(0,0,0)
-     * @param value double
+     * 
+     * @param value
+     *        double
      */
     public void setPositionX(double value)
     {
@@ -1507,7 +1586,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we always use value from Plane(0,0,0)
-     * @param value double
+     * 
+     * @param value
+     *        double
      */
     public void setPositionY(double value)
     {
@@ -1523,7 +1604,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we always use value from Plane(0,0,0)
-     * @param value double
+     * 
+     * @param value
+     *        double
      */
     public void setPositionZ(double value)
     {
@@ -1535,8 +1618,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param value long
-     * Same as {@link #setTimeStamp(long)}
+     * @param value
+     *        long
+     *        Same as {@link #setTimeStamp(long)}
      */
     public void setPositionT(long value)
     {
@@ -1548,7 +1632,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * 
      * @see #setPositionTOffset(int, int, int, double)
      * @see #setTimeInterval(double)
-     * @param value long
+     * @param value
+     *        long
      */
     public void setTimeStamp(long value)
     {
@@ -1564,7 +1649,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * 
      * @see #setTimeInterval(double)
      * @see #setTimeStamp(long)
-     * @param value long
+     * @param value
+     *        long
      */
     public void setPositionTOffset(int t, int z, int c, double value)
     {
@@ -1609,7 +1695,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return T time interval (in second for OME compatibility)
-     * 
      * @see #getPositionTOffset(int, int, int)
      */
     public double getTimeInterval()
@@ -1630,7 +1715,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set X pixel size (in &micro;m to be OME compatible)
-     * @param value double
+     * 
+     * @param value
+     *        double
      */
     public void setPixelSizeX(double value)
     {
@@ -1643,7 +1730,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set Y pixel size (in &micro;m to be OME compatible)
-     * @param value double
+     * 
+     * @param value
+     *        double
      */
     public void setPixelSizeY(double value)
     {
@@ -1656,7 +1745,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set Z pixel size (in &micro;m to be OME compatible)
-     * @param value double
+     * 
+     * @param value
+     *        double
      */
     public void setPixelSizeZ(double value)
     {
@@ -1669,7 +1760,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set T time resolution (in second to be OME compatible)
-     * @param value double
+     * 
+     * @param value
+     *        double
      * @see #setPositionTOffset(int, int, int, double)
      */
     public void setTimeInterval(double value)
@@ -1683,14 +1776,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the pixel size scaling factor to convert a number of pixel/voxel unit into <code>\u00B5m</code><br>
-     * <br>
-     * For instance to get the scale ration for 2D distance:<br>
-     * <code>valueMicroMeter = pixelNum * getPixelSizeScaling(2, 1)</code><br>
-     * For a 2D surface:<br>
-     * <code>valueMicroMeter2 = pixelNum * getPixelSizeScaling(2, 2)</code><br>
-     * For a 3D volume:<br>
-     * <code>valueMicroMeter3 = pixelNum * getPixelSizeScaling(3, 3)</code><br>
-     * 
+     *         <br>
+     *         For instance to get the scale ration for 2D distance:<br>
+     *         <code>valueMicroMeter = pixelNum * getPixelSizeScaling(2, 1)</code><br>
+     *         For a 2D surface:<br>
+     *         <code>valueMicroMeter2 = pixelNum * getPixelSizeScaling(2, 2)</code><br>
+     *         For a 3D volume:<br>
+     *         <code>valueMicroMeter3 = pixelNum * getPixelSizeScaling(3, 3)</code><br>
      * @param dimCompute
      *        dimension order for size calculation<br>
      *        <ul>
@@ -1700,7 +1792,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        </ul>
      * @param dimResult
      *        dimension order for the result (unit)<br>
-     *         <ul>
+     *        <ul>
      *        <li>1 --&gt; distance</li>
      *        <li>2 --&gt; area</li>
      *        <li>3 or above --&gt; volume</li>
@@ -1736,50 +1828,50 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the best pixel size unit for the specified dimension order given the sequence's pixel
-     * size informations.<br>
-     * Compute a 2D distance:
+     *         size informations.<br>
+     *         Compute a 2D distance:
      * 
-     * <pre>
-     * dimCompute = 2;
-     * dimUnit = 1;
-     * valueMicroMeter = pixelNum * getPixelSizeScaling(dimCompute);
-     * bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
-     * finalValue = UnitUtil.getValueInUnit(valueMicroMeter, UnitPrefix.MICRO, bestUnit);
-     * valueString = Double.toString(finalValue) + &quot; &quot; + bestUnit.toString() + &quot;m&quot;;
-     * </pre>
+     *         <pre>
+     *         dimCompute = 2;
+     *         dimUnit = 1;
+     *         valueMicroMeter = pixelNum * getPixelSizeScaling(dimCompute);
+     *         bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
+     *         finalValue = UnitUtil.getValueInUnit(valueMicroMeter, UnitPrefix.MICRO, bestUnit);
+     *         valueString = Double.toString(finalValue) + &quot; &quot; + bestUnit.toString() + &quot;m&quot;;
+     *         </pre>
      * 
-     * Compute a 2D surface:
+     *         Compute a 2D surface:
      * 
-     * <pre>
-     * dimCompute = 2;
-     * dimUnit = 2;
-     * valueMicroMeter = pixelNum * getPixelSizeScaling(dimCompute);
-     * bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
-     * finalValue = UnitUtil.getValueInUnit(valueMicroMeter, UnitPrefix.MICRO, bestUnit);
-     * valueString = Double.toString(finalValue) + &quot; &quot; + bestUnit.toString() + &quot;m2&quot;;
-     * </pre>
+     *         <pre>
+     *         dimCompute = 2;
+     *         dimUnit = 2;
+     *         valueMicroMeter = pixelNum * getPixelSizeScaling(dimCompute);
+     *         bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
+     *         finalValue = UnitUtil.getValueInUnit(valueMicroMeter, UnitPrefix.MICRO, bestUnit);
+     *         valueString = Double.toString(finalValue) + &quot; &quot; + bestUnit.toString() + &quot;m2&quot;;
+     *         </pre>
      * 
-     * Compute a 3D volume:
+     *         Compute a 3D volume:
      * 
-     * <pre>
-     * dimCompute = 3;
-     * dimUnit = 3;
-     * valueMicroMeter = pixelNum * getPixelSizeScaling(dimCompute);
-     * bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
-     * finalValue = UnitUtil.getValueInUnit(valueMicroMeter, UnitPrefix.MICRO, bestUnit);
-     * valueString = Double.toString(finalValue) + &quot; &quot; + bestUnit.toString() + &quot;m3&quot;;
-     * </pre>
+     *         <pre>
+     *         dimCompute = 3;
+     *         dimUnit = 3;
+     *         valueMicroMeter = pixelNum * getPixelSizeScaling(dimCompute);
+     *         bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
+     *         finalValue = UnitUtil.getValueInUnit(valueMicroMeter, UnitPrefix.MICRO, bestUnit);
+     *         valueString = Double.toString(finalValue) + &quot; &quot; + bestUnit.toString() + &quot;m3&quot;;
+     *         </pre>
      * 
      * @param dimCompute
      *        dimension order for size calculation<br>
-     *            <ul>
+     *        <ul>
      *        <li>1 --&gt; pixel size X used for conversion</li>
      *        <li>2 --&gt; pixel size X and Y used for conversion</li>
      *        <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
      *        </ul>
      * @param dimResult
      *        dimension order for the result (unit)<br>
-     *            <ul>
+     *        <ul>
      *        <li>1 --&gt; distance</li>
      *        <li>2 --&gt; area</li>
      *        <li>3 or above --&gt; volume</li>
@@ -1810,29 +1902,28 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the size in &micro;m for the specified amount of sample/pixel value in the specified
-     * dimension order.<br>
-     * <br>
-     * For the perimeter in &micro;m:<br>
-     * <code>perimeter = calculateSize(contourInPixel, 2, 1)</code><br>
-     * For a 2D surface in &micro;m2:<br>
-     * <code>surface = calculateSize(interiorInPixel, 2, 2)</code><br>
-     * For a 2D surface area in &micro;m2:<br>
-     * <code>volume = calculateSize(contourInPixel, 3, 2)</code><br>
-     * For a 3D volume in &micro;m3:<br>
-     * <code>volume = calculateSize(interiorInPixel, 3, 3)</code><br>
-     * 
+     *         dimension order.<br>
+     *         <br>
+     *         For the perimeter in &micro;m:<br>
+     *         <code>perimeter = calculateSize(contourInPixel, 2, 1)</code><br>
+     *         For a 2D surface in &micro;m2:<br>
+     *         <code>surface = calculateSize(interiorInPixel, 2, 2)</code><br>
+     *         For a 2D surface area in &micro;m2:<br>
+     *         <code>volume = calculateSize(contourInPixel, 3, 2)</code><br>
+     *         For a 3D volume in &micro;m3:<br>
+     *         <code>volume = calculateSize(interiorInPixel, 3, 3)</code><br>
      * @param pixelNumber
      *        number of pixel
      * @param dimCompute
      *        dimension order for size calculation<br>
-     *            <ul>
+     *        <ul>
      *        <li>1 --&gt; pixel size X used for conversion</li>
      *        <li>2 --&gt; pixel size X and Y used for conversion</li>
      *        <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
      *        </ul>
      * @param dimResult
      *        dimension order for the result (unit)<br>
-     *            <ul>
+     *        <ul>
      *        <li>1 --&gt; distance</li>
      *        <li>2 --&gt; area</li>
      *        <li>3 or above --&gt; volume</li>
@@ -1846,53 +1937,53 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the size converted in the best unit (see {@link #getBestPixelSizeUnit(int, int)} for
-     * the specified amount of sample/pixel value in the specified dimension order.<br>
-     * Compute a 2D distance:
+     *         the specified amount of sample/pixel value in the specified dimension order.<br>
+     *         Compute a 2D distance:
      * 
-     * <pre>
-     * dimCompute = 2;
-     * dimUnit = 1;
-     * valueBestUnit = calculateSizeBestUnit(pixelNum, dimCompute, dimUnit);
-     * bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
-     * valueString = Double.toString(valueBestUnit) + &quot; &quot; + bestUnit.toString() + &quot;m&quot;;
-     * </pre>
+     *         <pre>
+     *         dimCompute = 2;
+     *         dimUnit = 1;
+     *         valueBestUnit = calculateSizeBestUnit(pixelNum, dimCompute, dimUnit);
+     *         bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
+     *         valueString = Double.toString(valueBestUnit) + &quot; &quot; + bestUnit.toString() + &quot;m&quot;;
+     *         </pre>
      * 
-     * Compute a 2D surface:
+     *         Compute a 2D surface:
      * 
-     * <pre>
-     * dimCompute = 2;
-     * dimUnit = 2;
-     * valueBestUnit = calculateSizeBestUnit(pixelNum, dimCompute, dimUnit);
-     * bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
-     * valueString = Double.toString(valueBestUnit) + &quot; &quot; + bestUnit.toString() + &quot;m2&quot;;
-     * </pre>
+     *         <pre>
+     *         dimCompute = 2;
+     *         dimUnit = 2;
+     *         valueBestUnit = calculateSizeBestUnit(pixelNum, dimCompute, dimUnit);
+     *         bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
+     *         valueString = Double.toString(valueBestUnit) + &quot; &quot; + bestUnit.toString() + &quot;m2&quot;;
+     *         </pre>
      * 
-     * Compute a 3D volume:
+     *         Compute a 3D volume:
      * 
-     * <pre>
-     * dimCompute = 3;
-     * dimUnit = 3;
-     * valueBestUnit = calculateSizeBestUnit(pixelNum, dimCompute, dimUnit);
-     * bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
-     * valueString = Double.toString(valueBestUnit) + &quot; &quot; + bestUnit.toString() + &quot;m3&quot;;
-     * </pre>
+     *         <pre>
+     *         dimCompute = 3;
+     *         dimUnit = 3;
+     *         valueBestUnit = calculateSizeBestUnit(pixelNum, dimCompute, dimUnit);
+     *         bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
+     *         valueString = Double.toString(valueBestUnit) + &quot; &quot; + bestUnit.toString() + &quot;m3&quot;;
+     *         </pre>
      * 
      * @param pixelNumber
      *        number of pixel
      * @param dimCompute
      *        dimension order for size calculation<br>
-     *            <ul>
+     *        <ul>
      *        <li>1 --&gt; pixel size X used for conversion</li>
      *        <li>2 --&gt; pixel size X and Y used for conversion</li>
      *        <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
      *        </ul>
      * @param dimResult
      *        dimension order for the result (unit)<br>
-     *            <ul>
+     *        <ul>
      *        <li>1 --&gt; distance</li>
      *        <li>2 --&gt; area</li>
      *        <li>3 or above --&gt; volume</li>
-     *            </ul>
+     *        </ul>
      * @see #calculateSize(double, int, int)
      * @see #getBestPixelSizeUnit(int, int)
      */
@@ -1905,15 +1996,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the size and appropriate unit in form of String for specified amount of sample/pixel
-     * value in the specified dimension order.<br>
-     * <br>
-     * For instance if you want to retrieve the 2D distance:<br>
-     * <code>distanceStr = calculateSize(distanceInPixel, 2, 1, 5)</code><br>
-     * For a 2D surface:<br>
-     * <code>surfaceStr = calculateSize(surfaceInPixel, 2, 2, 5)</code><br>
-     * For a 3D volume:<br>
-     * <code>volumeStr = calculateSize(volumeInPixel, 3, 3, 5)</code><br>
-     * 
+     *         value in the specified dimension order.<br>
+     *         <br>
+     *         For instance if you want to retrieve the 2D distance:<br>
+     *         <code>distanceStr = calculateSize(distanceInPixel, 2, 1, 5)</code><br>
+     *         For a 2D surface:<br>
+     *         <code>surfaceStr = calculateSize(surfaceInPixel, 2, 2, 5)</code><br>
+     *         For a 3D volume:<br>
+     *         <code>volumeStr = calculateSize(volumeInPixel, 3, 3, 5)</code><br>
      * @param pixelNumber
      *        number of pixel
      * @param dimCompute
@@ -1939,7 +2029,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param index int
+     * @param index
+     *        int
      * @return Get default name for specified channel
      */
     public String getDefaultChannelName(int index)
@@ -1948,7 +2039,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param index int
+     * @param index
+     *        int
      * @return Get name for specified channel
      */
     public String getChannelName(int index)
@@ -1958,8 +2050,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set name for specified channel
-     * @param index int
-     * @param value string
+     * 
+     * @param index
+     *        int
+     * @param value
+     *        string
      */
     public void setChannelName(int index, String value)
     {
@@ -1982,7 +2077,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #setAutoUpdateChannelBounds(boolean)} instead.
-     * @param value boolean
+     * @param value
+     *        boolean
      */
     @Deprecated
     public void setComponentAbsBoundsAutoUpdate(boolean value)
@@ -2000,11 +2096,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param value If set to <code>true</code> (default) then channel bounds will be automatically recalculated
-     * when sequence data is modified.<br>
-     * This can consume a lot of time if you make many updates on large sequence.<br>
-     * In this case you should do your updates in a {@link #beginUpdate()} ... {@link #endUpdate()} block to avoid
-     * severals recalculation.
+     * @param value
+     *        If set to <code>true</code> (default) then channel bounds will be automatically recalculated
+     *        when sequence data is modified.<br>
+     *        This can consume a lot of time if you make many updates on large sequence.<br>
+     *        In this case you should do your updates in a {@link #beginUpdate()} ... {@link #endUpdate()} block to avoid
+     *        severals recalculation.
      */
     public void setAutoUpdateChannelBounds(boolean value)
     {
@@ -2029,7 +2126,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #setAutoUpdateChannelBounds(boolean)} instead.
-     * @param value boolean
+     * @param value
+     *        boolean
      */
     @Deprecated
     public void setComponentUserBoundsAutoUpdate(boolean value)
@@ -2051,7 +2149,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * All events are dispatched on AWT when true else they are dispatched on current thread
      * 
      * @deprecated Don't use it, events should stay on current thread
-     * @param value boolean
+     * @param value
+     *        boolean
      */
     @Deprecated
     public void setAWTDispatching(boolean value)
@@ -2061,7 +2160,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Add the specified listener to listeners list
-     * @param listener sequence listener
+     * 
+     * @param listener
+     *        sequence listener
      */
     public void addListener(SequenceListener listener)
     {
@@ -2070,7 +2171,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Remove the specified listener from listeners list
-     * @param listener sequence listener
+     * 
+     * @param listener
+     *        sequence listener
      */
     public void removeListener(SequenceListener listener)
     {
@@ -2087,7 +2190,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Add the specified {@link icy.sequence.SequenceModel.SequenceModelListener} to listeners list
-     * @param listener sequence listener
+     * 
+     * @param listener
+     *        sequence listener
      */
     @Override
     public void addSequenceModelListener(SequenceModelListener listener)
@@ -2097,7 +2202,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Remove the specified {@link icy.sequence.SequenceModel.SequenceModelListener} from listeners
-     * @param listener sequence listener
+     * 
+     * @param listener
+     *        sequence listener
      */
     @Override
     public void removeSequenceModelListener(SequenceModelListener listener)
@@ -2115,7 +2222,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #contains(Overlay)} instead.
-     * @param painter Painter
+     * @param painter
+     *        Painter
      */
     @Deprecated
     public boolean contains(Painter painter)
@@ -2124,7 +2232,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param overlay overlay
+     * @param overlay
+     *        overlay
      * @return true if the sequence contains the specified overlay
      */
     public boolean contains(Overlay overlay)
@@ -2139,7 +2248,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param roi ROI
+     * @param roi
+     *        ROI
      * @return true if the sequence contains the specified ROI
      */
     public boolean contains(ROI roi)
@@ -2211,7 +2321,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #getOverlays(Class)} instead.
-     * @param painterClass class
+     * @param painterClass
+     *        class
      * @return list of Painter
      */
     @Deprecated
@@ -2312,7 +2423,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return all ROIs attached to this sequence.
-     * 
      * @param sorted
      *        If true the returned list is ordered by the ROI id (creation order).
      */
@@ -2353,7 +2463,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return all 2D ROIs attached to this sequence.
-     * 
      * @param sorted
      *        If true the returned list is ordered by the ROI id (creation order).
      */
@@ -2385,7 +2494,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return all 3D ROIs attached to this sequence.
-     * 
      * @param sorted
      *        If true the returned list is ordered by the ROI id (creation order).
      */
@@ -2416,7 +2524,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param roiClass ROI class
+     * @param roiClass
+     *        ROI class
      * @return true if the sequence contains ROI of specified ROI class.
      */
     public boolean hasROI(Class<? extends ROI> roiClass)
@@ -2432,9 +2541,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param roiClass ROI class
-     * @param <T> generic object
-     * @param sorted boolean
+     * @param roiClass
+     *        ROI class
+     * @param <T>
+     *        generic object
+     * @param sorted
+     *        boolean
      * @return ROIs of specified class attached to this sequence
      */
     @SuppressWarnings("unchecked")
@@ -2458,7 +2570,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #getROIs(Class, boolean)} instead
-     * @param roiClass ROID Class
+     * @param roiClass
+     *        ROID Class
      * @return list of ROI
      */
     @Deprecated
@@ -2477,7 +2590,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param roiClass ROI Class
+     * @param roiClass
+     *        ROI Class
      * @return the number of ROI of specified ROI class attached to the sequence.
      */
     public int getROICount(Class<? extends ROI> roiClass)
@@ -2549,7 +2663,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return all selected ROI of given class (Set format).
-     * 
      * @param roiClass
      *        ROI class restriction
      * @param wantReadOnly
@@ -2572,10 +2685,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return all selected ROI of given class (Set format).
-     * 
      * @param roiClass
      *        ROI class restriction
-     * @param <T> generic object
+     * @param <T>
+     *        generic object
      */
     @SuppressWarnings("unchecked")
     public <T extends ROI> Set<T> getSelectedROISet(Class<T> roiClass)
@@ -2611,14 +2724,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return all selected ROI of given class.
-     * 
      * @param roiClass
      *        ROI class restriction
      * @param sorted
      *        If true the returned list is ordered by the ROI id (creation order)
      * @param wantReadOnly
      *        also return ROI with read only state
-     * @param <T> generic object
+     * @param <T>
+     *        generic object
      */
     @SuppressWarnings("unchecked")
     public <T extends ROI> List<T> getSelectedROIs(Class<T> roiClass, boolean sorted, boolean wantReadOnly)
@@ -2641,7 +2754,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return all selected ROI of given class.
-     * 
      * @param roiClass
      *        ROI class restriction
      * @param wantReadOnly
@@ -2766,8 +2878,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #setSelectedROI(ROI)} instead.
-     * @param roi ROI
-     * @param exclusive boolean
+     * @param roi
+     *        ROI
+     * @param exclusive
+     *        boolean
      * @return boolean
      */
     @Deprecated
@@ -2787,7 +2901,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #setSelectedROIs(List)} instead.
-     * @param selected list of ROI
+     * @param selected
+     *        list of ROI
      */
     @Deprecated
     public void setSelectedROIs(ArrayList<ROI> selected)
@@ -2797,7 +2912,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set selected ROI (unselected all others)
-     * @param selected list of ROI
+     * 
+     * @param selected
+     *        list of ROI
      */
     public void setSelectedROIs(List<? extends ROI> selected)
     {
@@ -2845,7 +2962,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set the focused ROI
-     * @param roi ROI
+     * 
+     * @param roi
+     *        ROI
      */
     public boolean setFocusedROI(ROI roi)
     {
@@ -2906,7 +3025,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return Add the specified ROI to the sequence.
-     * 
      * @param roi
      *        ROI to attach to the sequence
      */
@@ -2950,7 +3068,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return Remove the specified ROI from the sequence.
-     * 
      * @param roi
      *        ROI to detach from the sequence
      */
@@ -3118,7 +3235,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return Return the overlay associated to the specified painter.<br>
-     * @param painter Used only for backward compatibility with {@link Painter} interface.
+     * @param painter
+     *        Used only for backward compatibility with {@link Painter} interface.
      */
     @SuppressWarnings("deprecation")
     protected Overlay getOverlay(Painter painter)
@@ -3139,7 +3257,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #addOverlay(Overlay)} instead.
-     * @param painter Painter
+     * @param painter
+     *        Painter
      * @return boolean
      */
     @Deprecated
@@ -3158,7 +3277,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #removeOverlay(Overlay)} instead.
-     * @param painter Painter
+     * @param painter
+     *        Painter
      * @return boolean
      */
     @Deprecated
@@ -3171,7 +3291,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param overlay overlay
+     * @param overlay
+     *        overlay
      * @return Add an overlay to the sequence.
      */
     public boolean addOverlay(Overlay overlay)
@@ -3193,7 +3314,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param overlay overlay
+     * @param overlay
+     *        overlay
      * @return Remove an overlay from the sequence.
      */
     public boolean removeOverlay(Overlay overlay)
@@ -3217,8 +3339,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return Return <i>true</i> if image data at given position is loaded.
      */
     public boolean isDataLoaded(int t, int z)
@@ -3229,7 +3353,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return the VolumetricImage at position t
      */
     public VolumetricImage getVolumetricImage(int t)
@@ -3303,11 +3428,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param volImg img
-     * @param t int
+     * @param volImg
+     *        img
+     * @param t
+     *        int
      * @return Add a volumetricImage at t position<br>
-     * It actually create a new volumetricImage and add it to the sequence<br>
-     * The new created volumetricImage is returned
+     *         It actually create a new volumetricImage and add it to the sequence<br>
+     *         The new created volumetricImage is returned
      */
     public VolumetricImage addVolumetricImage(int t, VolumetricImage volImg)
     {
@@ -3337,7 +3464,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #removeAllImages(int)} instead.
-     * @param t int
+     * @param t
+     *        int
      * @return boolean
      */
     @Deprecated
@@ -3347,7 +3475,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return the last image of VolumetricImage[t]
      */
     public IcyBufferedImage getLastImage(int t)
@@ -3406,15 +3535,17 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a single component image corresponding to the component c of the image
-     * at time t and depth z.<br>
-     * This actually create a new image which share its data with internal image
-     * so any modifications to one affect the other.<br>
-     * @param c if <code>(c == -1)</code> then this method is equivalent to {@link #getImage(int, int)}<br>
-     * if <code>((c == 0) || (sizeC == 1))</code> then this method is equivalent to {@link #getImage(int, int)}<br>
-     * if <code>((c &lt; 0) || (c &gt;= sizeC))</code> then it returns <code>null</code>
-     * @param t int
-     * @param z int
-     * 
+     *         at time t and depth z.<br>
+     *         This actually create a new image which share its data with internal image
+     *         so any modifications to one affect the other.<br>
+     * @param c
+     *        if <code>(c == -1)</code> then this method is equivalent to {@link #getImage(int, int)}<br>
+     *        if <code>((c == 0) || (sizeC == 1))</code> then this method is equivalent to {@link #getImage(int, int)}<br>
+     *        if <code>((c &lt; 0) || (c &gt;= sizeC))</code> then it returns <code>null</code>
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @see IcyBufferedImageUtil#extractChannel(IcyBufferedImage, int)
      * @since version 1.0.3.3b
      */
@@ -3431,11 +3562,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return image at time t and depth z.
-     * 
      * @param loadData
      *        if <code>true</code> then we ensure that image data is loaded (in case of lazy loading) before returning the image
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      */
     protected IcyBufferedImage getImage(int t, int z, boolean loadData)
     {
@@ -3455,8 +3587,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return image at time t and depth z
      */
     @Override
@@ -3494,7 +3628,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return all images at specified t position
      */
     public ArrayList<IcyBufferedImage> getImages(int t)
@@ -3510,14 +3645,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return all images of sequence in [ZT] order:<br>
      * 
-     * <pre>
+     *         <pre>
      * T=0 Z=0
      * T=0 Z=1
      * T=0 Z=2
      * ...
      * T=1 Z=0
      * ...
-     * </pre>
+     *         </pre>
      */
     public ArrayList<IcyBufferedImage> getAllImage()
     {
@@ -3534,9 +3669,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Put an image into the specified VolumetricImage at the given z location
-     * @param volImg image
-     * @param image image
-     * @param z int
+     * 
+     * @param volImg
+     *        image
+     * @param image
+     *        image
+     * @param z
+     *        int
      */
     protected void setImage(VolumetricImage volImg, int z, BufferedImage image) throws IllegalArgumentException
     {
@@ -3635,7 +3774,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Add an image (image is added in Z dimension).<br>
      * This method is equivalent to <code>setImage(max(getSizeT() - 1, 0), getSizeZ(t), image)</code>
-     * @param image image
+     * 
+     * @param image
+     *        image
      */
     public void addImage(BufferedImage image) throws IllegalArgumentException
     {
@@ -3647,8 +3788,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Add an image at specified T position.<br>
      * This method is equivalent to <code>setImage(t, getSizeZ(t), image)</code>
-     * @param image image
-     * @param t int
+     * 
+     * @param image
+     *        image
+     * @param t
+     *        int
      */
     public void addImage(int t, BufferedImage image) throws IllegalArgumentException
     {
@@ -3656,8 +3800,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return Remove the image at the specified position.
      */
     public boolean removeImage(int t, int z)
@@ -3690,7 +3836,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return Remove all images at position <code>t</code>
      */
     public boolean removeAllImages(int t)
@@ -3736,7 +3883,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #removeAllImages(int)} instead.
-     * @param t int
+     * @param t
+     *        int
      * @return true
      */
     @Deprecated
@@ -3831,7 +3979,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param index int
+     * @param index
+     *        int
      * @return true is the specified channel uses default attributed name
      */
     public boolean isDefaultChannelName(int index)
@@ -3841,8 +3990,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the number of volumetricImage in the sequence<br>
-     * Use getSizeT instead
-     * 
+     *         Use getSizeT instead
      * @see #getSizeT
      * @deprecated
      */
@@ -3869,8 +4017,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the global number of z stack in the sequence.
-     * Use getSizeZ instead
-     * 
+     *         Use getSizeZ instead
      * @see #getSizeZ
      * @deprecated
      */
@@ -3914,8 +4061,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the number of component/channel/band per image.<br>
-     * Use getSizeC instead
-     * 
+     *         Use getSizeC instead
      * @see #getSizeC
      * @deprecated
      */
@@ -4040,7 +4186,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return 2D bounds of sequence {0, 0, sizeX, sizeY}
-     * 
      * @see #getDimension2D()
      */
     public Rectangle getBounds2D()
@@ -4050,7 +4195,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return 5D bounds of sequence {0, 0, 0, 0, 0, sizeX, sizeY, sizeZ, sizeT, sizeC}
-     * 
      * @see #getDimension5D()
      */
     public Rectangle5D.Integer getBounds5D()
@@ -4070,8 +4214,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the number of sample.<br>
-     * This is equivalent to<br>
-     * <code>getSizeX() * getSizeY() * getSizeC() * getSizeZ() * getSizeT()</code>
+     *         This is equivalent to<br>
+     *         <code>getSizeX() * getSizeY() * getSizeC() * getSizeZ() * getSizeT()</code>
      */
     public int getNumSample()
     {
@@ -4079,7 +4223,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param image image
+     * @param image
+     *        image
      * @return Test if the specified image is compatible with current loaded images in sequence
      */
     public boolean isCompatible(IcyBufferedImage image)
@@ -4092,7 +4237,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param cm color model
+     * @param cm
+     *        color model
      * @return Test if the specified colorModel is compatible with sequence colorModel
      */
     public boolean isCompatible(IcyColorModel cm)
@@ -4107,7 +4253,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param lut LUT
+     * @param lut
+     *        LUT
      * @return true if specified LUT is compatible with sequence LUT
      */
     public boolean isLutCompatible(LUT lut)
@@ -4150,8 +4297,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the users LUT.<br>
-     * If user LUT is not defined then a new default LUT is returned.
-     * 
+     *         If user LUT is not defined then a new default LUT is returned.
      * @see #getDefaultLUT()
      */
     public LUT getUserLUT()
@@ -4164,7 +4310,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param lut Sets the user LUT (saved in XML persistent metadata).
+     * @param lut
+     *        Sets the user LUT (saved in XML persistent metadata).
      */
     public void setUserLUT(LUT lut)
     {
@@ -4174,7 +4321,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return Creates and returns the default LUT for this sequence.<br>
-     * If the sequence is empty it returns a default ARGB LUT.
+     *         If the sequence is empty it returns a default ARGB LUT.
      */
     public LUT createCompatibleLUT()
     {
@@ -4192,7 +4339,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return Get the default colormap for the specified channel
-     * 
      * @param channel
      *        channel we want to set the colormap
      * @see #getColorMap(int)
@@ -4242,8 +4388,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return Get the user colormap for the specified channel.<br>
-     * User colormap is saved in the XML persistent data and reloaded when opening the Sequence.
-     * 
+     *         User colormap is saved in the XML persistent data and reloaded when opening the Sequence.
      * @param channel
      *        channel we want to set the colormap
      * @see #getDefaultColorMap(int)
@@ -4309,7 +4454,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the data type of sequence
-     * 
      * @deprecated use {@link #getDataType_()} instead
      */
     @Deprecated
@@ -4341,8 +4485,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param curBounds 2D array
-     * @param bounds 2D array
+     * @param curBounds
+     *        2D array
+     * @param bounds
+     *        2D array
      * @return Internal use only.
      */
     private static double[][] adjustBounds(double[][] curBounds, double[][] bounds)
@@ -4469,8 +4615,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #updateChannelsBounds(boolean)} instead.
-     * @param adjustByteToo boolean
-     * @param forceRecalculation boolean
+     * @param adjustByteToo
+     *        boolean
+     * @param forceRecalculation
+     *        boolean
      */
     @Deprecated
     public void updateComponentsBounds(boolean forceRecalculation, boolean adjustByteToo)
@@ -4480,7 +4628,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #updateChannelsBounds(boolean)} instead.
-     * @param forceRecalculation boolean
+     * @param forceRecalculation
+     *        boolean
      */
     @Deprecated
     public void updateComponentsBounds(boolean forceRecalculation)
@@ -4523,7 +4672,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param channel int
+     * @param channel
+     *        int
      * @return Get the preferred data type minimum value in the whole sequence for the specified channel.
      */
     public double getChannelTypeMin(int channel)
@@ -4537,7 +4687,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param channel int
+     * @param channel
+     *        int
      * @return Get the preferred data type maximum value in the whole sequence for the specified channel.
      */
     public double getChannelTypeMax(int channel)
@@ -4551,9 +4702,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param channel int
+     * @param channel
+     *        int
      * @return Get the preferred data type bounds (min and max values) in the whole sequence for the
-     * specified channel.
+     *         specified channel.
      */
     public double[] getChannelTypeBounds(int channel)
     {
@@ -4567,7 +4719,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return Get the preferred data type bounds (min and max values) in the whole sequence for all
-     * channels.
+     *         channels.
      */
     public double[][] getChannelsTypeBounds()
     {
@@ -4620,7 +4772,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #getChannelTypeMin(int)} instead.
-     * @param component int
+     * @param component
+     *        int
      * @return double
      */
     @Deprecated
@@ -4631,7 +4784,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #getChannelTypeMax(int)} instead.
-     * @param component int
+     * @param component
+     *        int
      * @return double
      */
     @Deprecated
@@ -4642,7 +4796,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #getChannelTypeBounds(int)} instead.
-     * @param component int
+     * @param component
+     *        int
      * @return array of double
      */
     @Deprecated
@@ -4672,7 +4827,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param channel int
+     * @param channel
+     *        int
      * @return Get the minimum value in the whole sequence for the specified channel.
      */
     public double getChannelMin(int channel)
@@ -4684,7 +4840,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param channel int
+     * @param channel
+     *        int
      * @return Get maximum value in the whole sequence for the specified channel.
      */
     public double getChannelMax(int channel)
@@ -4698,7 +4855,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param channel int
+     * @param channel
+     *        int
      * @return Get bounds (min and max values) in the whole sequence for the specified channel.
      */
     public double[] getChannelBounds(int channel)
@@ -4759,7 +4917,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #getChannelMin(int)} instead
-     * @param component int
+     * @param component
+     *        int
      * @return double
      */
     @Deprecated
@@ -4770,7 +4929,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #getChannelMax(int)} instead.
-     * @param component int
+     * @param component
+     *        int
      * @return double
      */
     @Deprecated
@@ -4781,7 +4941,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #getChannelBounds(int)} instead.
-     * @param component int
+     * @param component
+     *        int
      * @return array of double
      */
     @Deprecated
@@ -4812,13 +4973,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param x int
-     * @param y int
-     * @param c int
-     * @param z int
-     * @param t int
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param c
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
      * @return the data value located at position (t, z, c, y, x) as double.<br>
-     * It returns 0d if value is not found.
+     *         It returns 0d if value is not found.
      */
     public double getData(int t, int z, int c, int y, int x)
     {
@@ -4831,14 +4997,19 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param x int
-     * @param y int
-     * @param c int
-     * @param z int
-     * @param t int
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param c
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
      * @return the data value located at position (t, z, c, y, x) as double.<br>
-     * The value is interpolated depending the current double (x,y,z) coordinates.<br>
-     * It returns 0d if value is out of range.
+     *         The value is interpolated depending the current double (x,y,z) coordinates.<br>
+     *         It returns 0d if value is out of range.
      */
     public double getDataInterpolated(int t, double z, int c, double y, double x)
     {
@@ -4888,7 +5059,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a direct reference to 3D array data [Z][C][XY] for specified t
      */
     public Object getDataXYCZ(int t)
@@ -4911,8 +5083,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a direct reference to 2D array data [C][XY] for specified t, z
      */
     public Object getDataXYC(int t, int z)
@@ -4926,9 +5100,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a direct reference to 1D array data [XY] for specified t, z, c
      */
     public Object getDataXY(int t, int z, int c)
@@ -4942,7 +5119,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
     public Object getDataXYZT(int c)
@@ -4965,8 +5143,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
+     * @param c
+     *        int
+     * @param t
+     *        int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
     public Object getDataXYZ(int t, int c)
@@ -4997,10 +5177,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param out object
-     * @param off int
+     * @param out
+     *        object
+     * @param off
+     *        int
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * If (out != null) then it's used to store result at the specified offset
+     *         If (out != null) then it's used to store result at the specified offset
      */
     public Object getDataCopyXYCZT(Object out, int off)
     {
@@ -5022,7 +5204,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t
      */
     public Object getDataCopyXYCZ(int t)
@@ -5031,11 +5214,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param out object
-     * @param t int
-     * @param off int
+     * @param out
+     *        object
+     * @param t
+     *        int
+     * @param off
+     *        int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * If (out != null) then it's used to store result at the specified offset
+     *         If (out != null) then it's used to store result at the specified offset
      */
     public Object getDataCopyXYCZ(int t, Object out, int off)
     {
@@ -5057,8 +5243,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
     public Object getDataCopyXYC(int t, int z)
@@ -5067,12 +5255,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param out object
-     * @param off int
-     * @param z int
-     * @param t int
+     * @param out
+     *        object
+     * @param off
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * If (out != null) then it's used to store result at the specified offset
+     *         If (out != null) then it's used to store result at the specified offset
      */
     public Object getDataCopyXYC(int t, int z, Object out, int off)
     {
@@ -5085,9 +5277,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
     public Object getDataCopyXY(int t, int z, int c)
@@ -5096,13 +5291,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param out object
-     * @param off int
-     * @param t int
-     * @param c int
-     * @param z int
+     * @param out
+     *        object
+     * @param off
+     *        int
+     * @param t
+     *        int
+     * @param c
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * If (out != null) then it's used to store result at the specified offset
+     *         If (out != null) then it's used to store result at the specified offset
      */
     public Object getDataCopyXY(int t, int z, int c, Object out, int off)
     {
@@ -5123,10 +5323,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param out object
-     * @param off int
+     * @param out
+     *        object
+     * @param off
+     *        int
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * If (out != null) then it's used to store result at the specified offset
+     *         If (out != null) then it's used to store result at the specified offset
      */
     public Object getDataCopyCXYZT(Object out, int off)
     {
@@ -5148,7 +5350,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
     public Object getDataCopyCXYZ(int t)
@@ -5157,11 +5360,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param out object
-     * @param off int
-     * @param t int
+     * @param out
+     *        object
+     * @param off
+     *        int
+     * @param t
+     *        int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * If (out != null) then it's used to store result at the specified offset
+     *         If (out != null) then it's used to store result at the specified offset
      */
     public Object getDataCopyCXYZ(int t, Object out, int off)
     {
@@ -5183,8 +5389,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
     public Object getDataCopyCXY(int t, int z)
@@ -5193,12 +5401,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param out Object
-     * @param off int
-     * @param t int
-     * @param z int
+     * @param out
+     *        Object
+     * @param off
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     * If (out != null) then it's used to store result at the specified offset
+     *         If (out != null) then it's used to store result at the specified offset
      */
     public Object getDataCopyCXY(int t, int z, Object out, int off)
     {
@@ -5211,10 +5423,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param x int
-     * @param y int
-     * @param z int
-     * @param t int
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
     public Object getDataCopyC(int t, int z, int x, int y)
@@ -5224,12 +5440,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param x int
-     * @param y int
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public Object getDataCopyC(int t, int z, int x, int y, Object out, int off)
     {
@@ -5242,7 +5464,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
     public Object getDataCopyXYZT(int c)
@@ -5251,11 +5474,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param out object
-     * @param off int
+     * @param c
+     *        int
+     * @param out
+     *        object
+     * @param off
+     *        int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * If (out != null) then it's used to store result at the specified offset
+     *         If (out != null) then it's used to store result at the specified offset
      */
     public Object getDataCopyXYZT(int c, Object out, int off)
     {
@@ -5277,8 +5503,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
+     * @param c
+     *        int
+     * @param t
+     *        int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
      */
     public Object getDataCopyXYZ(int t, int c)
@@ -5288,10 +5516,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param off int
-     * @param c int
-     * @param t int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param off
+     *        int
+     * @param c
+     *        int
+     * @param t
+     *        int
      */
     public Object getDataCopyXYZ(int t, int c, Object out, int off)
     {
@@ -5384,7 +5616,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a direct reference to 3D byte array data [Z][C][XY] for specified t
      */
     public byte[][][] getDataXYCZAsByte(int t)
@@ -5399,7 +5632,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a direct reference to 3D byte array data [Z][C][XY] for specified t
      */
     public short[][][] getDataXYCZAsShort(int t)
@@ -5414,7 +5648,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a direct reference to 3D byte array data [Z][C][XY] for specified t
      */
     public int[][][] getDataXYCZAsInt(int t)
@@ -5429,8 +5664,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * Returns a direct reference to 3D byte array data [Z][C][XY] for specified t
+     * @param t
+     *        int
+     *        Returns a direct reference to 3D byte array data [Z][C][XY] for specified t
      */
     public float[][][] getDataXYCZAsFloat(int t)
     {
@@ -5444,7 +5680,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a direct reference to 3D byte array data [Z][C][XY] for specified t
      */
     public double[][][] getDataXYCZAsDouble(int t)
@@ -5459,8 +5696,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a direct reference to 2D byte array data [C][XY] for specified t, z
      */
     public byte[][] getDataXYCAsByte(int t, int z)
@@ -5474,8 +5713,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z int
-     * @param t int
+     * @param z
+     *        int
+     * @param t
+     *        int
      * @return a direct reference to 2D byte array data [C][XY] for specified t, z
      */
     public short[][] getDataXYCAsShort(int t, int z)
@@ -5489,8 +5730,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a direct reference to 2D byte array data [C][XY] for specified t, z
      */
     public int[][] getDataXYCAsInt(int t, int z)
@@ -5504,8 +5747,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z int
-     * @param t int
+     * @param z
+     *        int
+     * @param t
+     *        int
      * @return a direct reference to 2D byte array data [C][XY] for specified t, z
      */
     public float[][] getDataXYCAsFloat(int t, int z)
@@ -5519,8 +5764,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a direct reference to 2D byte array data [C][XY] for specified t, z
      */
     public double[][] getDataXYCAsDouble(int t, int z)
@@ -5534,9 +5781,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z int
-     * @param t int
-     * @param c int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param c
+     *        int
      * @return a direct reference to 1D byte array data [XY] for specified t, z, c
      */
     public byte[] getDataXYAsByte(int t, int z, int c)
@@ -5550,9 +5800,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a direct reference to 1D byte array data [XY] for specified t, z, c
      */
     public short[] getDataXYAsShort(int t, int z, int c)
@@ -5566,9 +5819,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z int
-     * @param t int
-     * @param c int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param c
+     *        int
      * @return a direct reference to 1D byte array data [XY] for specified t, z, c
      */
     public int[] getDataXYAsInt(int t, int z, int c)
@@ -5582,9 +5838,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a direct reference to 1D byte array data [XY] for specified t, z, c
      */
     public float[] getDataXYAsFloat(int t, int z, int c)
@@ -5598,9 +5857,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z int
-     * @param t int
-     * @param c int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param c
+     *        int
      * @return a direct reference to 1D byte array data [XY] for specified t, z, c
      */
     public double[] getDataXYAsDouble(int t, int z, int c)
@@ -5614,7 +5876,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
     public byte[][][] getDataXYZTAsByte(int c)
@@ -5629,7 +5892,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
     public short[][][] getDataXYZTAsShort(int c)
@@ -5644,7 +5908,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
     public int[][][] getDataXYZTAsInt(int c)
@@ -5659,7 +5924,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
     public float[][][] getDataXYZTAsFloat(int c)
@@ -5674,7 +5940,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
     public double[][][] getDataXYZTAsDouble(int c)
@@ -5689,8 +5956,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
+     * @param c
+     *        int
+     * @param t
+     *        int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
     public byte[][] getDataXYZAsByte(int t, int c)
@@ -5705,8 +5974,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param c int
+     * @param t
+     *        int
+     * @param c
+     *        int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
     public short[][] getDataXYZAsShort(int t, int c)
@@ -5721,8 +5992,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
+     * @param c
+     *        int
+     * @param t
+     *        int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
     public int[][] getDataXYZAsInt(int t, int c)
@@ -5737,8 +6010,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param c int
+     * @param t
+     *        int
+     * @param c
+     *        int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
     public float[][] getDataXYZAsFloat(int t, int c)
@@ -5753,8 +6028,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
+     * @param c
+     *        int
+     * @param t
+     *        int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
     public double[][] getDataXYZAsDouble(int t, int c)
@@ -5778,8 +6055,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param off
+     *        int
      */
     public byte[] getDataCopyXYCZTAsByte(byte[] out, int off)
     {
@@ -5810,8 +6089,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param off
+     *        int
      */
     public short[] getDataCopyXYCZTAsShort(short[] out, int off)
     {
@@ -5842,8 +6123,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param off
+     *        int
      */
     public int[] getDataCopyXYCZTAsInt(int[] out, int off)
     {
@@ -5865,7 +6148,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @return  Returns a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]
+     * @return Returns a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]
      */
     public float[] getDataCopyXYCZTAsFloat()
     {
@@ -5874,8 +6157,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param off
+     *        int
      */
     public float[] getDataCopyXYCZTAsFloat(float[] out, int off)
     {
@@ -5906,8 +6191,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param off
+     *        int
      */
     public double[] getDataCopyXYCZTAsDouble(double[] out, int off)
     {
@@ -5929,7 +6216,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t
      */
     public byte[] getDataCopyXYCZAsByte(int t)
@@ -5939,9 +6227,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public byte[] getDataCopyXYCZAsByte(int t, byte[] out, int off)
     {
@@ -5972,9 +6263,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param off int
-     * @param t int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param off
+     *        int
+     * @param t
+     *        int
      */
     public short[] getDataCopyXYCZAsShort(int t, short[] out, int off)
     {
@@ -6005,9 +6299,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public int[] getDataCopyXYCZAsInt(int t, int[] out, int off)
     {
@@ -6030,7 +6327,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t
-     * @param t int
+     * @param t
+     *        int
      */
     public float[] getDataCopyXYCZAsFloat(int t)
     {
@@ -6039,9 +6337,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public float[] getDataCopyXYCZAsFloat(int t, float[] out, int off)
     {
@@ -6063,7 +6364,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t
      */
     public double[] getDataCopyXYCZAsDouble(int t)
@@ -6073,9 +6375,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public double[] getDataCopyXYCZAsDouble(int t, double[] out, int off)
     {
@@ -6097,8 +6402,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
     public byte[] getDataCopyXYCAsByte(int t, int z)
@@ -6108,10 +6415,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public byte[] getDataCopyXYCAsByte(int t, int z, byte[] out, int off)
     {
@@ -6124,8 +6435,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
     public short[] getDataCopyXYCAsShort(int t, int z)
@@ -6135,10 +6448,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public short[] getDataCopyXYCAsShort(int t, int z, short[] out, int off)
     {
@@ -6151,8 +6468,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
     public int[] getDataCopyXYCAsInt(int t, int z)
@@ -6162,10 +6481,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public int[] getDataCopyXYCAsInt(int t, int z, int[] out, int off)
     {
@@ -6178,8 +6501,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
     public float[] getDataCopyXYCAsFloat(int t, int z)
@@ -6189,10 +6514,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public float[] getDataCopyXYCAsFloat(int t, int z, float[] out, int off)
     {
@@ -6205,8 +6534,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
     public double[] getDataCopyXYCAsDouble(int t, int z)
@@ -6215,11 +6546,15 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @return  Returns a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param z int
-     * @param t int
-     * @param off int
+     * @return Returns a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public double[] getDataCopyXYCAsDouble(int t, int z, double[] out, int off)
     {
@@ -6232,9 +6567,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
-     * @param c int
+     * @param t
+     *        int
+     * @param z
+     *        int
+     * @param c
+     *        int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
     public byte[] getDataCopyXYAsByte(int t, int z, int c)
@@ -6244,11 +6582,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param c int
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param c
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public byte[] getDataCopyXYAsByte(int t, int z, int c, byte[] out, int off)
     {
@@ -6261,9 +6604,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
-     * @param c int
+     * @param t
+     *        int
+     * @param z
+     *        int
+     * @param c
+     *        int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
     public short[] getDataCopyXYAsShort(int t, int z, int c)
@@ -6273,11 +6619,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param c int
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param c
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public short[] getDataCopyXYAsShort(int t, int z, int c, short[] out, int off)
     {
@@ -6290,9 +6641,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
-     * @param c int
+     * @param t
+     *        int
+     * @param z
+     *        int
+     * @param c
+     *        int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
     public int[] getDataCopyXYAsInt(int t, int z, int c)
@@ -6302,11 +6656,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param c int
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param c
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public int[] getDataCopyXYAsInt(int t, int z, int c, int[] out, int off)
     {
@@ -6319,9 +6678,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
-     * @param c int
+     * @param t
+     *        int
+     * @param z
+     *        int
+     * @param c
+     *        int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
     public float[] getDataCopyXYAsFloat(int t, int z, int c)
@@ -6331,11 +6693,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param c int
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param c
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public float[] getDataCopyXYAsFloat(int t, int z, int c, float[] out, int off)
     {
@@ -6348,9 +6715,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
     public double[] getDataCopyXYAsDouble(int t, int z, int c)
@@ -6359,12 +6729,17 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z int
-     * @param t int
-     * @param c int
-     * @param off int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param c
+     *        int
+     * @param off
+     *        int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
      */
     public double[] getDataCopyXYAsDouble(int t, int z, int c, double[] out, int off)
     {
@@ -6386,8 +6761,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param off
+     *        int
      */
     public byte[] getDataCopyCXYZTAsByte(byte[] out, int off)
     {
@@ -6418,8 +6795,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param off If (out != null) then it's used to store result at the specified offset
-     * @param out int
+     * @param off
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param out
+     *        int
      */
     public short[] getDataCopyCXYZTAsShort(short[] out, int off)
     {
@@ -6450,8 +6829,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param off
+     *        int
      */
     public int[] getDataCopyCXYZTAsInt(int[] out, int off)
     {
@@ -6482,8 +6863,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param off If (out != null) then it's used to store result at the specified offset
-     * @param out int
+     * @param off
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param out
+     *        int
      */
     public float[] getDataCopyCXYZTAsFloat(float[] out, int off)
     {
@@ -6514,8 +6897,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param off
+     *        int
      */
     public double[] getDataCopyCXYZTAsDouble(double[] out, int off)
     {
@@ -6537,7 +6922,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
     public byte[] getDataCopyCXYZAsByte(int t)
@@ -6547,9 +6933,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public byte[] getDataCopyCXYZAsByte(int t, byte[] out, int off)
     {
@@ -6571,7 +6960,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
     public short[] getDataCopyCXYZAsShort(int t)
@@ -6581,9 +6971,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public short[] getDataCopyCXYZAsShort(int t, short[] out, int off)
     {
@@ -6605,7 +6998,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
     public int[] getDataCopyCXYZAsInt(int t)
@@ -6615,8 +7009,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
      */
     public int[] getDataCopyCXYZAsInt(int t, int[] out, int off)
     {
@@ -6638,7 +7034,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
     public float[] getDataCopyCXYZAsFloat(int t)
@@ -6648,9 +7045,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public float[] getDataCopyCXYZAsFloat(int t, float[] out, int off)
     {
@@ -6672,7 +7072,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
+     * @param t
+     *        int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
     public double[] getDataCopyCXYZAsDouble(int t)
@@ -6682,9 +7083,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public double[] getDataCopyCXYZAsDouble(int t, double[] out, int off)
     {
@@ -6706,8 +7110,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
     public byte[] getDataCopyCXYAsByte(int t, int z)
@@ -6717,10 +7123,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public byte[] getDataCopyCXYAsByte(int t, int z, byte[] out, int off)
     {
@@ -6733,8 +7143,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
     public short[] getDataCopyCXYAsShort(int t, int z)
@@ -6744,10 +7156,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public short[] getDataCopyCXYAsShort(int t, int z, short[] out, int off)
     {
@@ -6760,8 +7176,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
     public int[] getDataCopyCXYAsInt(int t, int z)
@@ -6770,12 +7188,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z int
-     * @param t int
-     * @param off int
-     * @param out int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
+     * @param out
+     *        int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     * If (out != null) then it's used to store result at the specified offset
+     *         If (out != null) then it's used to store result at the specified offset
      */
     public int[] getDataCopyCXYAsInt(int t, int z, int[] out, int off)
     {
@@ -6788,8 +7210,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
     public float[] getDataCopyCXYAsFloat(int t, int z)
@@ -6799,10 +7223,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public float[] getDataCopyCXYAsFloat(int t, int z, float[] out, int off)
     {
@@ -6815,8 +7243,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
     public double[] getDataCopyCXYAsDouble(int t, int z)
@@ -6826,10 +7256,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public double[] getDataCopyCXYAsDouble(int t, int z, double[] out, int off)
     {
@@ -6842,10 +7276,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
-     * @param y int
-     * @param x int
+     * @param t
+     *        int
+     * @param z
+     *        int
+     * @param y
+     *        int
+     * @param x
+     *        int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
     public byte[] getDataCopyCAsByte(int t, int z, int x, int y)
@@ -6855,12 +7293,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param x int
-     * @param y int
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public byte[] getDataCopyCAsByte(int t, int z, int x, int y, byte[] out, int off)
     {
@@ -6873,10 +7317,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
-     * @param y int
-     * @param x int
+     * @param t
+     *        int
+     * @param z
+     *        int
+     * @param y
+     *        int
+     * @param x
+     *        int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
     public short[] getDataCopyCAsShort(int t, int z, int x, int y)
@@ -6886,12 +7334,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param x int
-     * @param y int
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public short[] getDataCopyCAsShort(int t, int z, int x, int y, short[] out, int off)
     {
@@ -6904,10 +7358,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
-     * @param y int
-     * @param x int
+     * @param t
+     *        int
+     * @param z
+     *        int
+     * @param y
+     *        int
+     * @param x
+     *        int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
     public int[] getDataCopyCAsInt(int t, int z, int x, int y)
@@ -6917,12 +7375,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param x int
-     * @param y int
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public int[] getDataCopyCAsInt(int t, int z, int x, int y, int[] out, int off)
     {
@@ -6935,10 +7399,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
-     * @param y int
-     * @param x int
+     * @param t
+     *        int
+     * @param z
+     *        int
+     * @param y
+     *        int
+     * @param x
+     *        int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
     public float[] getDataCopyCAsFloat(int t, int z, int x, int y)
@@ -6948,12 +7416,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param x int
-     * @param y int
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public float[] getDataCopyCAsFloat(int t, int z, int x, int y, float[] out, int off)
     {
@@ -6966,10 +7440,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t int
-     * @param z int
-     * @param y int
-     * @param x int
+     * @param t
+     *        int
+     * @param z
+     *        int
+     * @param y
+     *        int
+     * @param x
+     *        int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
     public double[] getDataCopyCAsDouble(int t, int z, int x, int y)
@@ -6979,12 +7457,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param x int
-     * @param y int
-     * @param z int
-     * @param t int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
+     * @param off
+     *        int
      */
     public double[] getDataCopyCAsDouble(int t, int z, int x, int y, double[] out, int off)
     {
@@ -6997,7 +7481,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
     public byte[] getDataCopyXYZTAsByte(int c)
@@ -7007,9 +7492,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param c int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param c
+     *        int
+     * @param off
+     *        int
      */
     public byte[] getDataCopyXYZTAsByte(int c, byte[] out, int off)
     {
@@ -7031,7 +7519,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
     public short[] getDataCopyXYZTAsShort(int c)
@@ -7041,9 +7530,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param c int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param c
+     *        int
+     * @param off
+     *        int
      */
     public short[] getDataCopyXYZTAsShort(int c, short[] out, int off)
     {
@@ -7065,7 +7557,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
     public int[] getDataCopyXYZTAsInt(int c)
@@ -7075,9 +7568,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param c int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param c
+     *        int
+     * @param off
+     *        int
      */
     public int[] getDataCopyXYZTAsInt(int c, int[] out, int off)
     {
@@ -7099,7 +7595,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
     public float[] getDataCopyXYZTAsFloat(int c)
@@ -7109,9 +7606,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param c int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param c
+     *        int
+     * @param off
+     *        int
      */
     public float[] getDataCopyXYZTAsFloat(int c, float[] out, int off)
     {
@@ -7133,7 +7633,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
+     * @param c
+     *        int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
     public double[] getDataCopyXYZTAsDouble(int c)
@@ -7143,9 +7644,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param c int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param c
+     *        int
+     * @param off
+     *        int
      */
     public double[] getDataCopyXYZTAsDouble(int c, double[] out, int off)
     {
@@ -7167,8 +7671,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
+     * @param c
+     *        int
+     * @param t
+     *        int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
      */
     public byte[] getDataCopyXYZAsByte(int t, int c)
@@ -7178,10 +7684,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param c int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param c
+     *        int
+     * @param off
+     *        int
      */
     public byte[] getDataCopyXYZAsByte(int t, int c, byte[] out, int off)
     {
@@ -7203,8 +7713,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
+     * @param c
+     *        int
+     * @param t
+     *        int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
      */
     public short[] getDataCopyXYZAsShort(int t, int c)
@@ -7214,10 +7726,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param c int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param c
+     *        int
+     * @param off
+     *        int
      */
     public short[] getDataCopyXYZAsShort(int t, int c, short[] out, int off)
     {
@@ -7240,8 +7756,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
-     * @param c int
-     * @param t int
+     * @param c
+     *        int
+     * @param t
+     *        int
      */
     public int[] getDataCopyXYZAsInt(int t, int c)
     {
@@ -7250,10 +7768,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param c int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param c
+     *        int
+     * @param off
+     *        int
      */
     public int[] getDataCopyXYZAsInt(int t, int c, int[] out, int off)
     {
@@ -7275,8 +7797,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c int
-     * @param t int
+     * @param c
+     *        int
+     * @param t
+     *        int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
      */
     public float[] getDataCopyXYZAsFloat(int t, int c)
@@ -7286,10 +7810,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param c int
-     * @param off int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param c
+     *        int
+     * @param off
+     *        int
      */
     public float[] getDataCopyXYZAsFloat(int t, int c, float[] out, int off)
     {
@@ -7312,8 +7840,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
-     * @param c int
-     * @param t int
+     * @param c
+     *        int
+     * @param t
+     *        int
      */
     public double[] getDataCopyXYZAsDouble(int t, int c)
     {
@@ -7322,9 +7852,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out If (out != null) then it's used to store result at the specified offset
-     * @param t int
-     * @param c int
+     * @param out
+     *        If (out != null) then it's used to store result at the specified offset
+     * @param t
+     *        int
+     * @param c
+     *        int
      */
     public double[] getDataCopyXYZAsDouble(int t, int c, double[] out, int off)
     {
@@ -7347,10 +7880,15 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Sets 1D array data [XY] for specified t, z, c
-     * @param t int
-     * @param c int
-     * @param z int
-     * @param value object
+     * 
+     * @param t
+     *        int
+     * @param c
+     *        int
+     * @param z
+     *        int
+     * @param value
+     *        object
      */
     public void setDataXY(int t, int z, int c, Object value)
     {
@@ -7362,14 +7900,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Uses {@link SequenceUtil#getSubSequence(Sequence, int, int, int, int, int, int, int, int)} instead.
-     * @param startX int
-     * @param sizeZ int
-     * @param sizeT int
-     * @param sizeY int
-     * @param sizeX int
-     * @param startT int
-     * @param startY int
-     * @param startZ int
+     * @param startX
+     *        int
+     * @param sizeZ
+     *        int
+     * @param sizeT
+     *        int
+     * @param sizeY
+     *        int
+     * @param sizeX
+     *        int
+     * @param startT
+     *        int
+     * @param startY
+     *        int
+     * @param startZ
+     *        int
      * @return sequence
      */
     @Deprecated
@@ -7395,7 +7941,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use this piece of code instead :<br>
      *             <code>for(Viewer v: Icy.getMainInterface().getViewers(sequence))</code><br>
      *             <code>   v.setT(...)</code>
-     * @param t int
+     * @param t
+     *        int
      */
     @Deprecated
     public void setT(int t)
@@ -7403,6 +7950,113 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         for (Viewer viewer : Icy.getMainInterface().getViewers())
             if (viewer.getSequence() == this)
                 viewer.setT(t);
+    }
+
+    /**
+     * @return Retrieve all custom ROI properties (map of (Key,Value)).
+     */
+    public Map<String, String> getProperties()
+    {
+        return new HashMap<String, String>(properties);
+    }
+
+    /**
+     * @return Retrieve a Sequence property value.<br>
+     *         Returns <code>null</code> if the property value is empty.
+     * @param name
+     *        Property name.<br>
+     *        Note that it can be default property name (as {@value #PROPERTY_POSITION_X}) in which case the value will be
+     *        returned in String format if possible or launch an {@link IllegalArgumentException} when not possible.
+     */
+    public String getProperty(String name)
+    {
+        if (name == null)
+            return null;
+
+        // ignore case for property name
+        final String adjName = name.toLowerCase();
+
+        if (StringUtil.equals(adjName, PROPERTY_ID))
+            return Integer.toString(getId());
+        if (StringUtil.equals(adjName, PROPERTY_NAME))
+            return getName();
+        if (StringUtil.equals(adjName, PROPERTY_POSITION_X))
+            return Double.toString(getPositionX());
+        if (StringUtil.equals(adjName, PROPERTY_POSITION_Y))
+            return Double.toString(getPositionY());
+        if (StringUtil.equals(adjName, PROPERTY_POSITION_Z))
+            return Double.toString(getPositionZ());
+        if (StringUtil.equals(adjName, PROPERTY_POSITION_T))
+            return Long.toString(getPositionT());
+        if (StringUtil.equals(adjName, PROPERTY_PIXEL_SIZE_X))
+            return Double.toString(getPixelSizeX());
+        if (StringUtil.equals(adjName, PROPERTY_PIXEL_SIZE_Y))
+            return Double.toString(getPixelSizeY());
+        if (StringUtil.equals(adjName, PROPERTY_PIXEL_SIZE_Z))
+            return Double.toString(getPixelSizeZ());
+        if (StringUtil.equals(adjName, PROPERTY_TIME_INTERVAL))
+            return Double.toString(getTimeInterval());
+        if (StringUtil.equals(adjName, PROPERTY_VIRTUAL))
+            return Boolean.toString(isVirtual());
+
+        if (StringUtil.equals(adjName, PROPERTY_CHANNEL_NAME) || StringUtil.equals(adjName, PROPERTY_POSITION_T_OFFSET))
+            throw new IllegalArgumentException("Cannot return value of property '" + adjName + "' as String");
+
+        synchronized (properties)
+        {
+            return properties.get(adjName);
+        }
+    }
+
+    /**
+     * Generic way to set Sequence property value.
+     * 
+     * @param name
+     *        Property name.<br>
+     *        Note that it can be default property name (as {@value #PROPERTY_POSITION_X}) in which case the value will be
+     *        set in String format if possible or launch an {@link IllegalArgumentException} when not possible.
+     * @param value
+     *        the value to set in the property (for instance "0.0" for {@link #PROPERTY_POSITION_X})
+     */
+    public void setProperty(String name, String value)
+    {
+        if (name == null)
+            return;
+
+        // ignore case for property name
+        final String adjName = name.toLowerCase();
+
+        if (StringUtil.equals(adjName, PROPERTY_NAME))
+            setName(value);
+        if (StringUtil.equals(adjName, PROPERTY_POSITION_X))
+            setPositionX(Double.valueOf(value).doubleValue());
+        if (StringUtil.equals(adjName, PROPERTY_POSITION_Y))
+            setPositionY(Double.valueOf(value).doubleValue());
+        if (StringUtil.equals(adjName, PROPERTY_POSITION_Z))
+            setPositionZ(Double.valueOf(value).doubleValue());
+        if (StringUtil.equals(adjName, PROPERTY_POSITION_T))
+            setPositionT(Long.valueOf(value).longValue());
+        if (StringUtil.equals(adjName, PROPERTY_PIXEL_SIZE_X))
+            setPixelSizeX(Double.valueOf(value).doubleValue());
+        if (StringUtil.equals(adjName, PROPERTY_PIXEL_SIZE_Y))
+            setPixelSizeY(Double.valueOf(value).doubleValue());
+        if (StringUtil.equals(adjName, PROPERTY_PIXEL_SIZE_Z))
+            setPixelSizeZ(Double.valueOf(value).doubleValue());
+        if (StringUtil.equals(adjName, PROPERTY_TIME_INTERVAL))
+            setTimeInterval(Double.valueOf(value).doubleValue());
+        if (StringUtil.equals(adjName, PROPERTY_VIRTUAL))
+            setVirtual(Boolean.valueOf(value).booleanValue());
+
+        if (StringUtil.equals(adjName, PROPERTY_ID) || StringUtil.equals(adjName, PROPERTY_CHANNEL_NAME)
+                || StringUtil.equals(adjName, PROPERTY_POSITION_T_OFFSET))
+            throw new IllegalArgumentException("Cannot return value of property '" + adjName + "' as String");
+
+        synchronized (properties)
+        {
+            properties.put(adjName, value);
+        }
+
+        metaChanged(adjName);
     }
 
     /**
@@ -7460,7 +8114,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return true if the specified XML data node exist
-     * 
      * @param name
      *        name of node
      * @see #getNode(String)
@@ -7472,9 +8125,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return Get XML data node identified by specified name.<br>
-     * The node is created if needed.<br>
-     * Note that the following node names are reserved: <i>image, name, meta, rois, lut</i><br>
-     * 
+     *         The node is created if needed.<br>
+     *         Note that the following node names are reserved: <i>image, name, meta, rois, lut</i><br>
      * @param name
      *        name of wanted node
      * @see #isNodeExisting(String)
@@ -7491,7 +8143,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #getNode(String)} instead.
-     * @param name string
+     * @param name
+     *        string
      * @return Node
      */
     @Deprecated
@@ -7510,7 +8163,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Do common job on "image add" here
      * 
-     * @param image image
+     * @param image
+     *        image
      */
     public void onImageAdded(IcyBufferedImage image)
     {
@@ -7528,8 +8182,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Do common job on "image replaced" here
-     * @param newImage image
-     * @param oldImage image
+     * 
+     * @param newImage
+     *        image
+     * @param oldImage
+     *        image
      */
     public void onImageReplaced(IcyBufferedImage oldImage, IcyBufferedImage newImage)
     {
@@ -7574,7 +8231,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Do common job on "image remove" here
      * 
-     * @param image image
+     * @param image
+     *        image
      */
     public void onImageRemoved(IcyBufferedImage image)
     {
@@ -7595,7 +8253,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * fire change event
-     * @param e event
+     * 
+     * @param e
+     *        event
      */
     @SuppressWarnings("deprecation")
     protected void fireChangedEvent(SequenceEvent e)
@@ -7680,7 +8340,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param metaName sequence meta has changed
+     * @param metaName
+     *        sequence meta has changed
      */
     public void metaChanged(String metaName)
     {
@@ -7688,8 +8349,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param metaName sequence meta has changed
-     * @param param int
+     * @param metaName
+     *        sequence meta has changed
+     * @param param
+     *        int
      */
     public void metaChanged(String metaName, int param)
     {
@@ -7705,8 +8368,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param colorModel sequence colorMap changed
-     * @param component component
+     * @param colorModel
+     *        sequence colorMap changed
+     * @param component
+     *        component
      */
     protected void colormapChanged(IcyColorModel colorModel, int component)
     {
@@ -7714,8 +8379,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param colorModel sequence component bounds changed
-     * @param component component
+     * @param colorModel
+     *        sequence component bounds changed
+     * @param component
+     *        component
      */
     protected void componentBoundsChanged(IcyColorModel colorModel, int component)
     {
@@ -7735,7 +8402,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @deprecated Use {@link #overlayChanged(Overlay)} instead.
-     * @param painter painter
+     * @param painter
+     *        painter
      */
     @Deprecated
     public void painterChanged(Painter painter)
@@ -7746,8 +8414,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param overlay overlay painter has changed
-     * @param type sequence event
+     * @param overlay
+     *        overlay painter has changed
+     * @param type
+     *        sequence event
      */
     protected void overlayChanged(Overlay overlay, SequenceEventType type)
     {
@@ -7755,8 +8425,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param overlay Notify specified painter of overlay has changed (the sequence should contains the specified
-     * Overlay)
+     * @param overlay
+     *        Notify specified painter of overlay has changed (the sequence should contains the specified
+     *        Overlay)
      */
     public void overlayChanged(Overlay overlay)
     {
@@ -7765,8 +8436,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param event Called when an overlay has changed (internal method).<br>
-     * Use {@link #overlayChanged(Overlay)} instead.
+     * @param event
+     *        Called when an overlay has changed (internal method).<br>
+     *        Use {@link #overlayChanged(Overlay)} instead.
      */
     @Override
     public void overlayChanged(OverlayEvent event)
@@ -7790,7 +8462,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param roi Notify specified roi has changed (the sequence should contains the specified ROI)
+     * @param roi
+     *        Notify specified roi has changed (the sequence should contains the specified ROI)
      */
     public void roiChanged(ROI roi)
     {
@@ -7799,8 +8472,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param roi Notify specified roi has changed
-     * @param type sequence event
+     * @param roi
+     *        Notify specified roi has changed
+     * @param type
+     *        sequence event
      */
     protected void roiChanged(ROI roi, SequenceEventType type)
     {
@@ -7817,8 +8492,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param image data has changed
-     * @param type sequence event
+     * @param image
+     *        data has changed
+     * @param type
+     *        sequence event
      */
     protected void dataChanged(IcyBufferedImage image, SequenceEventType type)
     {
@@ -7879,7 +8556,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param e process on sequence change
+     * @param e
+     *        process on sequence change
      */
     @Override
     public void onChanged(CollapsibleEvent e)

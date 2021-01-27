@@ -18,6 +18,16 @@
  */
 package icy.sequence;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import icy.file.FileUtil;
 import icy.file.xml.XMLPersistent;
 import icy.image.lut.LUT;
@@ -26,13 +36,6 @@ import icy.roi.ROI;
 import icy.system.IcyExceptionHandler;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
-
-import java.util.LinkedList;
-import java.util.List;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 /**
  * @author Stephane
@@ -43,6 +46,7 @@ public class SequencePersistent implements XMLPersistent
     private final static String ID_ROIS = "rois";
     private final static String ID_OVERLAYS = "overlays";
     private final static String ID_LUT = "lut";
+    private static final String ID_PROPERTIES = "properties";
 
     private final Sequence sequence;
 
@@ -166,6 +170,8 @@ public class SequencePersistent implements XMLPersistent
         loadOverlaysFromXML(node);
         if (!loadLUTFromXML(node))
             result = false;
+        if (!loadPropertiesFromXML(node))
+            result = false;
 
         return result;
     }
@@ -273,6 +279,25 @@ public class SequencePersistent implements XMLPersistent
         return true;
     }
 
+    private boolean loadPropertiesFromXML(Node node)
+    {
+        final Map<String, String> properties = sequence.properties;
+
+        properties.clear();
+
+        final Node propertiesNode = XMLUtil.getElement(node, ID_PROPERTIES);
+        if (propertiesNode != null)
+        {
+            synchronized (properties)
+            {
+                for (Element element : XMLUtil.getElements(propertiesNode))
+                    properties.put(element.getNodeName(), XMLUtil.getValue(element, ""));
+            }
+        }
+
+        return true;
+    }
+
     @Override
     public boolean saveToXML(Node node)
     {
@@ -282,6 +307,7 @@ public class SequencePersistent implements XMLPersistent
         saveROIsToXML(node);
         saveOverlaysToXML(node);
         saveLUTToXML(node);
+        savePropertiesToXML(node);
 
         return true;
     }
@@ -359,6 +385,19 @@ public class SequencePersistent implements XMLPersistent
                     lut.saveToXML(nodeLut);
                 }
             }
+        }
+    }
+
+    private void savePropertiesToXML(Node node)
+    {
+        final Map<String, String> properties = sequence.properties;
+        final Element propertiesNode = XMLUtil.setElement(node, ID_PROPERTIES);
+        final Set<Entry<String, String>> entries = properties.entrySet();
+
+        synchronized (properties)
+        {
+            for (Entry<String, String> entry : entries)
+                XMLUtil.setElementValue(propertiesNode, entry.getKey(), entry.getValue());
         }
     }
 
