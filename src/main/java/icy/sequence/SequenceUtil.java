@@ -2143,7 +2143,9 @@ public class SequenceUtil
         result.setPositionY(source.getPositionY() + (region2d.y * source.getPixelSizeY()));
         result.setPositionZ(source.getPositionZ() + (startZ * source.getPixelSizeZ()));
         // adjust TimeStamp
-        result.setTimeStamp(source.getTimeStamp() + (long) (source.getPositionTOffset(startT, startZ, startC) * 1000d));
+        final double startTOffset = source.getPositionTOffset(0, 0, 0);
+        final double curTOffset = source.getPositionTOffset(startT, startZ, startC);
+        result.setTimeStamp(source.getTimeStamp() + (long) ((curTOffset - startTOffset) * 1000d));
 
         return result;
     }

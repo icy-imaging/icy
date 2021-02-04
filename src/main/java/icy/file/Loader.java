@@ -4152,8 +4152,12 @@ public class Loader
             sequence.setPositionZ(posZ + (minZ * psz));
         // adjust position T
         if (minT > 0)
-            sequence.setTimeStamp(
-                    posT + (long) (sequence.getPositionTOffset(minT, minZ, Math.max(0, channel)) * 1000d));
+        {
+            final double startTOffset = sequence.getPositionTOffset(0, 0, 0);
+            final double curTOffset = sequence.getPositionTOffset(minT, minZ, Math.max(0, channel));
+            
+            sequence.setTimeStamp(posT + (long) ((curTOffset - startTOffset) * 1000d));
+        }
 
         // using sub resolution ?
         if (resolution > 0)
