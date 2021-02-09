@@ -1,10 +1,10 @@
-Icy - copyright 2020 - Institut Pasteur
+Icy - copyright 2021 - Institut Pasteur
 An open community platform for bio image analysis - http://icy.bioimageanalysis.org
 
 Icy has been created by the Bio Image Analysis team at Institut Pasteur - https://research.pasteur.fr/fr/team/bioimage-analysis
 Icy is free and open source, it has been funded both by Institut Pasteur and the FBI consortium - https://france-bioimaging.org
 
-Source code is provided in the main application package (in the icy.jar archive file) but can also be found on the GitHub repository - https://github.com/Icy-imaging/Icy-Kernel
+Source code is available on the GitLab repository: https://gitlab.pasteur.fr/bia/icy
 
 
 Note for OSX users
@@ -25,13 +25,13 @@ Website graphic design
     Marcio de Moraes Marim
 
 Website code
-    Fabrice de Chaumont
+    Fabrice de Chaumont / Marcio de Moraes Marim 
 
 EzPlug and Protocols (as many others plugins)
     Alexandre Dufour
 
 Scripting
-    Thomas Provoost, Timothée Lecomte and Stephane Dallongeville
+    Thomas Provoost, Timothee Lecomte and Stephane Dallongeville
 
 MicroManager for Icy
     Thomas Provoost, Irsath Nguyen and Stephane Dallongeville
@@ -42,7 +42,7 @@ Head of unit
 Many thanks to beta testers and contributors
     Nicolas Chenouard
     Alexandre Dufour
-    Nicolas Hervé
+    Nicolas Herve
     Vannary Meas-Yedid
     Sorin Pop
     Thibault Lagache
@@ -54,11 +54,6 @@ Libraries used in Icy
     Bio-Formats - http://www.openmicroscopy.org/site/products/bio-formats
     VTK - http://www.vtk.org/
     Substance / Insubstancial - https://github.com/Insubstantial/insubstantial
-    Flanagan - http://www.ee.ucl.ac.uk/~mflanaga/java/
-    Jama - http://math.nist.gov/javanumerics/jama/
-    JFreeChart - http://www.jfree.org/jfreechart/
-    JTransforms - https://sites.google.com/site/piotrwendykier/software/jtransforms
-    Xuggler - http://www.xuggle.com/xuggler/
 
 Development tool for profiling/debugging
     YourKit is kindly supporting open source projects with its full-featured Java Profiler.
