@@ -12,6 +12,7 @@ Application
  - small optimization for .contains(..) and .intersects(..) methods
 * Sequence:
  - fixed timestamp metadata calculation (could generate problem when copy/pasting ROI)
+* Updated Javassist library to version 3.27 to fix issues with recent Java.
 
 Developer
 * ROI:
