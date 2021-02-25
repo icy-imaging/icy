@@ -336,7 +336,7 @@ public class GeneralActions
         public boolean doAction(ActionEvent e)
         {
             // open browser on help page
-            NetworkUtil.openBrowser(NetworkUtil.WEBSITE_URL + "support");
+            NetworkUtil.openBrowser(NetworkUtil.IMAGE_SC_ICY_URL);
             return true;
         }
     };

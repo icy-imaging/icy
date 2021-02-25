@@ -81,6 +81,9 @@ public class NetworkUtil
     public static final String WEBSITE_HOST = "icy.bioimageanalysis.org";
     public static final String WEBSITE_URL = "http://" + WEBSITE_HOST + "/";
 
+    public static final String IMAGE_SC_URL = "https://forum.image.sc";
+    public static final String IMAGE_SC_ICY_URL = IMAGE_SC_URL + "/tag/icy";
+
     /**
      * @deprecated Use {@link WebInterface#reportError(icy.plugin.PluginDescriptor, String, String)}
      */
