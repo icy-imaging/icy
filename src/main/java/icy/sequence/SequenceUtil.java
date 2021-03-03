@@ -1164,16 +1164,21 @@ public class SequenceUtil
         {
             final Sequence seq = sequences[i];
             final int c = channels[i];
-            final String channelName = seq.getChannelName(c);
-            final IcyColorMap channelColor = seq.getColorMap(c);
 
-            // not default channel name --> we keep it
-            if (!StringUtil.equals(seq.getDefaultChannelName(c), channelName))
-                result.setChannelName(i, channelName);
+            // existing channel ?
+            if (c < seq.getSizeC())
+            {
+                final String channelName = seq.getChannelName(c);
+                final IcyColorMap channelColor = seq.getColorMap(c);
 
-            // not default white color map --> we keep it
-            if (!channelColor.equals(LinearColorMap.white_))
-                result.setColormap(i, channelColor, true);
+                // not default channel name --> we keep it
+                if (!StringUtil.equals(seq.getDefaultChannelName(c), channelName))
+                    result.setChannelName(i, channelName);
+
+                // not default white color map --> we keep it
+                if (!channelColor.equals(LinearColorMap.white_))
+                    result.setColormap(i, channelColor, true);
+            }
         }
 
         return result;
