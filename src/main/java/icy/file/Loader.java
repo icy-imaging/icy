@@ -1730,7 +1730,7 @@ public class Loader
                     && (currPaths.size() == singlePaths.size());
 
             // load sequence
-            result.addAll(loadSequences(imp, currPaths, series, forceVolatile, adjSeparate, autoOrder, dir, addToRecent,
+            result.addAll(loadSequences(imp, currPaths, series, forceVolatile, separate, autoOrder, dir, addToRecent,
                     showProgress));
 
             // remove loaded files
@@ -2673,7 +2673,7 @@ public class Loader
                             && (currPaths.size() == singlePaths.size());
 
                     // load sequence
-                    final List<Sequence> sequences = loadSequences(importer, currPaths, -1, forceVolatile, adjSeparate,
+                    final List<Sequence> sequences = loadSequences(importer, currPaths, -1, forceVolatile, separate,
                             autoOrder, dir, true, showProgress);
                     // and display them
                     for (Sequence seq : sequences)
