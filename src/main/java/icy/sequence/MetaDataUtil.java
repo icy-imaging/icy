@@ -18,18 +18,17 @@
  */
 package icy.sequence;
 
-import icy.image.IcyBufferedImage;
-import icy.type.DataType;
-import icy.util.OMEUtil;
-import icy.util.StringUtil;
-import icy.util.XMLUtil;
-
 import java.awt.Color;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.joda.time.Instant;
 
+import icy.image.IcyBufferedImage;
+import icy.type.DataType;
+import icy.util.OMEUtil;
+import icy.util.StringUtil;
+import icy.util.XMLUtil;
 import loci.common.services.ServiceException;
 import loci.formats.FormatTools;
 import loci.formats.MetadataTools;
@@ -67,7 +66,8 @@ public class MetaDataUtil
 
     /**
      * @return Returns OME root element (create it if needed).
-     * @param metaData OME metadata
+     * @param metaData
+     *        OME metadata
      */
     public static OME getOME(OMEXMLMetadata metaData)
     {
@@ -84,7 +84,8 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getOME(OMEXMLMetadata)} instead
-     * @param metaData OME metadata
+     * @param metaData
+     *        OME metadata
      * @return OME
      */
     @Deprecated
@@ -95,7 +96,8 @@ public class MetaDataUtil
 
     /**
      * @return Returns the number of image series of the specified metaData description.
-     * @param metaData OME metadata
+     * @param metaData
+     *        OME metadata
      */
     public static int getNumSeries(OMEXMLMetadata metaData)
     {
@@ -105,7 +107,8 @@ public class MetaDataUtil
     /**
      * @deprecated Use {@link #getNumSeries(OMEXMLMetadata)} instead
      * @return int
-     * @param metaData OME metadata
+     * @param metaData
+     *        OME metadata
      */
     @Deprecated
     public static int getNumSerie(loci.formats.ome.OMEXMLMetadata metaData)
@@ -116,7 +119,8 @@ public class MetaDataUtil
     /**
      * @deprecated Use {@link #getNumSeries(OMEXMLMetadata)} instead
      * @return int
-     * @param metaData OME metadata
+     * @param metaData
+     *        OME metadata
      */
     @Deprecated
     public static int getNumSerie(OMEXMLMetadata metaData)
@@ -126,7 +130,8 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getNumSeries(OMEXMLMetadata)} instead
-     * @param metaData OME metadata
+     * @param metaData
+     *        OME metadata
      * @return int
      */
     @Deprecated
@@ -137,7 +142,8 @@ public class MetaDataUtil
 
     /**
      * @return Return image series object at specified index for the specified metaData description.
-     * @param metaData OME metadata
+     * @param metaData
+     *        OME metadata
      */
     public static Image getSeries(OMEXMLMetadata metaData, int index)
     {
@@ -151,8 +157,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getSeries(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param index int
+     * @param metaData
+     *        OME metadata
+     * @param index
+     *        int
      * @return Image
      */
     @Deprecated
@@ -163,8 +171,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getSeries(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param index int
+     * @param metaData
+     *        OME metadata
+     * @param index
+     *        int
      * @return Image
      */
     @Deprecated
@@ -175,8 +185,10 @@ public class MetaDataUtil
 
     /**
      * @return Ensure the image series at specified index exist for the specified metaData description.
-     * @param index int
-     * @param ome OME
+     * @param index
+     *        int
+     * @param ome
+     *        OME
      */
     public static Image ensureSeries(OME ome, int index)
     {
@@ -203,8 +215,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #ensureSeries(OME, int)} instead
-     * @param index int
-     * @param ome OME
+     * @param index
+     *        int
+     * @param ome
+     *        OME
      * @return Image
      */
     @Deprecated
@@ -215,8 +229,11 @@ public class MetaDataUtil
 
     /**
      * Set the number of image series for the specified metaData description.
-     * @param metaData OME metadata
-     * @param num int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param num
+     *        int
      */
     public static void setNumSeries(OMEXMLMetadata metaData, int num)
     {
@@ -232,8 +249,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setNumSeries(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param num int
+     * @param metaData
+     *        OME metadata
+     * @param num
+     *        int
      */
     @Deprecated
     public static void setNumSerie(OMEXMLMetadata metaData, int num)
@@ -243,8 +262,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setNumSerie(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param num int
+     * @param metaData
+     *        OME metadata
+     * @param num
+     *        int
      */
     @Deprecated
     public static void setNumSerie(OMEXMLMetadataImpl metaData, int num)
@@ -254,8 +275,10 @@ public class MetaDataUtil
 
     /**
      * @return Return pixels object at specified index for the specified metaData description.
-     * @param index int
-     * @param ome OME
+     * @param index
+     *        int
+     * @param ome
+     *        OME
      */
     public static Pixels getPixels(OME ome, int index)
     {
@@ -270,8 +293,10 @@ public class MetaDataUtil
 
     /**
      * @return Return pixels object at specified index for the specified metaData description.
-     * @param metaData OME metadata
-     * @param index int
+     * @param metaData
+     *        OME metadata
+     * @param index
+     *        int
      */
     public static Pixels getPixels(OMEXMLMetadata metaData, int index)
     {
@@ -280,8 +305,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getPixels(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param index int
+     * @param metaData
+     *        OME metadata
+     * @param index
+     *        int
      * @return Pixels
      */
     @Deprecated
@@ -292,10 +319,14 @@ public class MetaDataUtil
 
     /**
      * @return Return plane index for the specified T, Z, C position.
-     * @param pix pixel
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param pix
+     *        pixel
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      */
     public static int getPlaneIndex(Pixels pix, int t, int z, int c)
     {
@@ -365,10 +396,14 @@ public class MetaDataUtil
 
     /**
      * @return Return plane object for the specified T, Z, C position.
-     * @param pix Pixel
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param pix
+     *        Pixel
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      */
     public static Plane getPlane(Pixels pix, int t, int z, int c)
     {
@@ -377,8 +412,10 @@ public class MetaDataUtil
 
     /**
      * @return Ensure the plane at specified index exist for the specified Pixels object.
-     * @param index int
-     * @param pix Pixel
+     * @param index
+     *        int
+     * @param pix
+     *        Pixel
      */
     public static Plane ensurePlane(Pixels pix, int index)
     {
@@ -391,10 +428,14 @@ public class MetaDataUtil
 
     /**
      * @return Ensure the plane at specified T, Z, C position exist for the specified Pixels object.
-     * @param pix Pixel
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param pix
+     *        Pixel
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      */
     public static Plane ensurePlane(Pixels pix, int t, int z, int c)
     {
@@ -403,8 +444,11 @@ public class MetaDataUtil
 
     /**
      * Remove the plane at specified position.
-     * @param index int
-     * @param img image
+     * 
+     * @param index
+     *        int
+     * @param img
+     *        image
      * @return <code>true</code> if the operation succeed, <code>false</code> otherwise
      */
     public static boolean removePlane(Image img, int index)
@@ -439,10 +483,15 @@ public class MetaDataUtil
 
     /**
      * Remove the plane at specified position.
-     * @param img image
-     * @param c int
-     * @param t int
-     * @param z int
+     * 
+     * @param img
+     *        image
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return <code>true</code> if the operation succeed, <code>false</code> otherwise
      */
     public static boolean removePlane(Image img, int t, int z, int c)
@@ -456,11 +505,17 @@ public class MetaDataUtil
 
     /**
      * Remove the plane at specified position.
-     * @param metadata OME metadata
-     * @param series int
-     * @param c int
-     * @param t int
-     * @param z int
+     * 
+     * @param metadata
+     *        OME metadata
+     * @param series
+     *        int
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return <code>true</code> if the operation succeed, <code>false</code> otherwise
      */
     public static boolean removePlane(OMEXMLMetadata metadata, int series, int t, int z, int c)
@@ -474,11 +529,16 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #removePlane(OMEXMLMetadata, int, int, int, int)} instead
-     * @param metadata OME metadata
-     * @param series int
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param metadata
+     *        OME metadata
+     * @param series
+     *        int
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      */
     @Deprecated
     public static boolean removePlane(OMEXMLMetadataImpl metadata, int series, int t, int z, int c)
@@ -495,8 +555,10 @@ public class MetaDataUtil
      *        Z position where we want to remove metadata (-1 for all)
      * @param posC
      *        C position where we want to remove metadata (-1 for all)
-     * @param metadata OME metadta
-     * @param series int
+     * @param metadata
+     *        OME metadta
+     * @param series
+     *        int
      */
     public static void removePlanes(OMEXMLMetadata metadata, int series, int posT, int posZ, int posC)
     {
@@ -543,11 +605,16 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #removePlanes(OMEXMLMetadata, int, int, int, int)} instead
-     * @param metadata OME metadata
-     * @param series int
-     * @param posC int
-     * @param posT int
-     * @param posZ int
+     * @param metadata
+     *        OME metadata
+     * @param series
+     *        int
+     * @param posC
+     *        int
+     * @param posT
+     *        int
+     * @param posZ
+     *        int
      */
     @Deprecated
     public static void removePlanes(OMEXMLMetadataImpl metadata, int series, int posT, int posZ, int posC)
@@ -557,8 +624,10 @@ public class MetaDataUtil
 
     /**
      * @return Returns the data type of the specified image series.
-     * @param metaData OME metedata
-     * @param series int
+     * @param metaData
+     *        OME metedata
+     * @param series
+     *        int
      */
     public static DataType getDataType(OMEXMLMetadata metaData, int series)
     {
@@ -574,8 +643,10 @@ public class MetaDataUtil
     /**
      * @deprecated Use {@link #getDataType(OMEXMLMetadata, int)} instead
      * @return object
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      */
     @Deprecated
     public static DataType getDataType(OMEXMLMetadataImpl metaData, int series)
@@ -585,8 +656,10 @@ public class MetaDataUtil
 
     /**
      * @return Returns the width (sizeX) of the specified image series.
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      */
     public static int getSizeX(OMEXMLMetadata metaData, int series)
     {
@@ -600,8 +673,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getSizeX(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      */
     @Deprecated
     public static int getSizeX(OMEXMLMetadataImpl metaData, int series)
@@ -611,8 +686,11 @@ public class MetaDataUtil
 
     /**
      * Returns the height (sizeY) of the specified image series.
-     * @param metaData OME metadata
-     * @param series int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      */
     public static int getSizeY(OMEXMLMetadata metaData, int series)
     {
@@ -626,8 +704,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getSizeY(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      */
     @Deprecated
     public static int getSizeY(OMEXMLMetadataImpl metaData, int series)
@@ -636,8 +716,10 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return Returns the number of channel (sizeC) of the specified image series.
      */
     public static int getSizeC(OMEXMLMetadata metaData, int series)
@@ -652,8 +734,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getSizeC(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return int
      */
     @Deprecated
@@ -663,8 +747,10 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return Returns the depth (sizeZ) of the specified image series.
      */
     public static int getSizeZ(OMEXMLMetadata metaData, int series)
@@ -679,8 +765,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getSizeZ(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return int
      */
     @Deprecated
@@ -690,7 +778,8 @@ public class MetaDataUtil
     }
 
     /**
-     * @param pix Pixel
+     * @param pix
+     *        Pixel
      * @return Returns the number of frame (sizeT) of the specified Pixels object.
      */
     private static int getSizeT(Pixels pix)
@@ -699,8 +788,10 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return Returns the number of frame (sizeT) of the specified image series.
      */
     public static int getSizeT(OMEXMLMetadata metaData, int series)
@@ -715,8 +806,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getSizeT(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return int
      */
     @Deprecated
@@ -726,8 +819,10 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return Returns the total data size (in bytes) of the specified image series.
      */
     public static long getDataSize(OMEXMLMetadata metaData, int series)
@@ -737,9 +832,12 @@ public class MetaDataUtil
 
     /**
      * @return Returns the total data size (in bytes) of the specified image series
-     * @param resolution for the given resolution (0 = full, 1 = 1/2, ...)
-     * @param metaData OME metadata
-     * @param series int
+     * @param resolution
+     *        for the given resolution (0 = full, 1 = 1/2, ...)
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      */
     public static long getDataSize(OMEXMLMetadata metaData, int series, int resolution)
     {
@@ -748,11 +846,16 @@ public class MetaDataUtil
 
     /**
      * @return Returns the total data size (in bytes) of the specified image series
-     * @param resolution for the given resolution (0 = full, 1 = 1/2, ...) and size informations
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeT int
-     * @param sizeZ int
+     * @param resolution
+     *        for the given resolution (0 = full, 1 = 1/2, ...) and size informations
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeT
+     *        int
+     * @param sizeZ
+     *        int
      */
     public static long getDataSize(OMEXMLMetadata metaData, int series, int resolution, int sizeZ, int sizeT)
     {
@@ -761,12 +864,18 @@ public class MetaDataUtil
 
     /**
      * @return Returns the total data size (in bytes) of the specified image series
-     * @param resolution for the given resolution (0 = full, 1 = 1/2, ...) and size informations
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeC int
-     * @param sizeT int
-     * @param sizeZ int
+     * @param resolution
+     *        for the given resolution (0 = full, 1 = 1/2, ...) and size informations
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeC
+     *        int
+     * @param sizeT
+     *        int
+     * @param sizeZ
+     *        int
      */
     public static long getDataSize(OMEXMLMetadata metaData, int series, int resolution, int sizeZ, int sizeT, int sizeC)
     {
@@ -787,9 +896,13 @@ public class MetaDataUtil
 
     /**
      * Sets the data type of the specified image series.
-     * @param metaData OME metadata
-     * @param series int
-     * @param dataType object
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param dataType
+     *        object
      */
     public static void setDataType(OMEXMLMetadata metaData, int series, DataType dataType)
     {
@@ -798,9 +911,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setDataType(OMEXMLMetadata, int, DataType)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param dataType object
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param dataType
+     *        object
      */
     @Deprecated
     public static void setDataType(OMEXMLMetadataImpl metaData, int series, DataType dataType)
@@ -810,9 +926,13 @@ public class MetaDataUtil
 
     /**
      * Sets the width (sizeX) of the specified image series (need to be &gt;= 1).
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeX int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeX
+     *        int
      */
     public static void setSizeX(OMEXMLMetadata metaData, int series, int sizeX)
     {
@@ -821,9 +941,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setSizeX(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeX int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeX
+     *        int
      */
     @Deprecated
     public static void setSizeX(OMEXMLMetadataImpl metaData, int series, int sizeX)
@@ -833,9 +956,13 @@ public class MetaDataUtil
 
     /**
      * Sets the height (sizeY) of the specified image series (need to be &gt;= 1).
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeY int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeY
+     *        int
      */
     public static void setSizeY(OMEXMLMetadata metaData, int series, int sizeY)
     {
@@ -844,9 +971,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setSizeY(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeY int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeY
+     *        int
      */
     @Deprecated
     public static void setSizeY(OMEXMLMetadataImpl metaData, int series, int sizeY)
@@ -856,9 +986,13 @@ public class MetaDataUtil
 
     /**
      * Sets the number of channel (sizeC) of the specified image series (need to be &gt;= 1).
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeC int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeC
+     *        int
      */
     public static void setSizeC(OMEXMLMetadata metaData, int series, int sizeC)
     {
@@ -867,9 +1001,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setSizeC(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeC int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeC
+     *        int
      */
     @Deprecated
     public static void setSizeC(OMEXMLMetadataImpl metaData, int series, int sizeC)
@@ -879,9 +1016,13 @@ public class MetaDataUtil
 
     /**
      * Sets the depth (sizeZ) of the specified image series (need to be &gt;= 1).
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeZ int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeZ
+     *        int
      */
     public static void setSizeZ(OMEXMLMetadata metaData, int series, int sizeZ)
     {
@@ -890,9 +1031,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setSizeZ(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeZ int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeZ
+     *        int
      */
     @Deprecated
     public static void setSizeZ(OMEXMLMetadataImpl metaData, int series, int sizeZ)
@@ -902,9 +1046,13 @@ public class MetaDataUtil
 
     /**
      * Sets the number of frame (sizeT) of the specified image series (need to be gt;= 1).
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeT int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeT
+     *        int
      */
     public static void setSizeT(OMEXMLMetadata metaData, int series, int sizeT)
     {
@@ -913,9 +1061,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setSizeT(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param sizeT int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param sizeT
+     *        int
      */
     @Deprecated
     public static void setSizeT(OMEXMLMetadataImpl metaData, int series, int sizeT)
@@ -924,8 +1075,10 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return Returns the id of the specified image series.
      */
     public static String getImageID(OMEXMLMetadata metaData, int series)
@@ -940,8 +1093,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getImageID(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return string
      */
     @Deprecated
@@ -952,9 +1107,13 @@ public class MetaDataUtil
 
     /**
      * Set the id of the specified image series.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value string
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        string
      */
     public static void setImageID(OMEXMLMetadata metaData, int series, String value)
     {
@@ -963,9 +1122,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setImageID(OMEXMLMetadata, int, String)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param value string
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        string
      */
     @Deprecated
     public static void setImageID(OMEXMLMetadataImpl metaData, int series, String value)
@@ -974,8 +1136,10 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return Returns the name of the specified image series.
      */
     public static String getName(OMEXMLMetadata metaData, int series)
@@ -990,8 +1154,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getName(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return string
      */
     @Deprecated
@@ -1002,9 +1168,13 @@ public class MetaDataUtil
 
     /**
      * Set the name of the specified image series.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value string
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        string
      */
     public static void setName(OMEXMLMetadata metaData, int series, String value)
     {
@@ -1013,9 +1183,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setName(OMEXMLMetadata, int, String)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param value string
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        string
      */
     @Deprecated
     public static void setName(OMEXMLMetadataImpl metaData, int series, String value)
@@ -1024,9 +1197,12 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
      * @return Returns X pixel size (in &micro;m) of the specified image series.
      */
     public static double getPixelSizeX(OMEXMLMetadata metaData, int series, double defaultValue)
@@ -1041,9 +1217,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getPixelSizeX(OMEXMLMetadata, int, double)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
      * @return double
      */
     @Deprecated
@@ -1053,9 +1232,12 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
      * @return Returns Y pixel size (in &micro;m) of the specified image series.
      */
     public static double getPixelSizeY(OMEXMLMetadata metaData, int series, double defaultValue)
@@ -1070,9 +1252,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getPixelSizeY(OMEXMLMetadata, int, double)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
      * @return double
      */
     @Deprecated
@@ -1082,9 +1267,12 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
      * @return Returns Z pixel size (in &micro;m) of the specified image series.
      */
     public static double getPixelSizeZ(OMEXMLMetadata metaData, int series, double defaultValue)
@@ -1099,9 +1287,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getPixelSizeZ(OMEXMLMetadata, int, double)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
      * @return double
      */
     @Deprecated
@@ -1111,10 +1302,12 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return Computes and returns the T time interval (in second) from internal time positions.<br>
-     * If there is no internal time positions <code>0d</code> is returned.
+     *         If there is no internal time positions <code>0d</code> is returned.
      */
     public static double getTimeIntervalFromTimePositions(OMEXMLMetadata metaData, int series)
     {
@@ -1129,8 +1322,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getTimeIntervalFromTimePositions(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return double
      */
     @Deprecated
@@ -1140,8 +1335,10 @@ public class MetaDataUtil
     }
 
     /**
-     * @param pix Pixel
-     * @param defaultValue double
+     * @param pix
+     *        Pixel
+     * @param defaultValue
+     *        double
      * @return Returns T time interval (in second) for the specified image series.
      */
     private static double getTimeInterval(Pixels pix, double defaultValue)
@@ -1155,9 +1352,12 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
      * @return Returns T time interval (in second) for the specified image series.
      */
     public static double getTimeInterval(OMEXMLMetadata metaData, int series, double defaultValue)
@@ -1172,9 +1372,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getTimeInterval(OMEXMLMetadata, int, double)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
      * @return double
      */
     @Deprecated
@@ -1185,9 +1388,13 @@ public class MetaDataUtil
 
     /**
      * Set X pixel size (in &micro;m) of the specified image series.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
      */
     public static void setPixelSizeX(OMEXMLMetadata metaData, int series, double value)
     {
@@ -1196,9 +1403,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setPixelSizeX(OMEXMLMetadata, int, double)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
      */
     @Deprecated
     public static void setPixelSizeX(OMEXMLMetadataImpl metaData, int series, double value)
@@ -1208,9 +1418,13 @@ public class MetaDataUtil
 
     /**
      * Set Y pixel size (in &micro;m) of the specified image series.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
      */
     public static void setPixelSizeY(OMEXMLMetadata metaData, int series, double value)
     {
@@ -1219,9 +1433,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setPixelSizeY(OMEXMLMetadata, int, double)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
      */
     @Deprecated
     public static void setPixelSizeY(OMEXMLMetadataImpl metaData, int series, double value)
@@ -1231,9 +1448,13 @@ public class MetaDataUtil
 
     /**
      * Set Z pixel size (in &micro;m) of the specified image series.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
      */
     public static void setPixelSizeZ(OMEXMLMetadata metaData, int series, double value)
     {
@@ -1242,9 +1463,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setPixelSizeZ(OMEXMLMetadata, int, double)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
      */
     @Deprecated
     public static void setPixelSizeZ(OMEXMLMetadataImpl metaData, int series, double value)
@@ -1254,9 +1478,13 @@ public class MetaDataUtil
 
     /**
      * Set T time resolution (in second) of the specified image series.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
      */
     public static void setTimeInterval(OMEXMLMetadata metaData, int series, double value)
     {
@@ -1265,9 +1493,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setTimeInterval(OMEXMLMetadata, int, double)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
      */
     @Deprecated
     public static void setTimeInterval(OMEXMLMetadataImpl metaData, int series, double value)
@@ -1276,12 +1507,18 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return Returns the X field position (in &micro;m) for the image at the specified Z, T, C position.
      */
     public static double getPositionX(OMEXMLMetadata metaData, int series, int t, int z, int c, double defaultValue)
@@ -1300,12 +1537,18 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return Returns the Y field position (in &micro;m) for the image at the specified Z, T, C position.
      */
     public static double getPositionY(OMEXMLMetadata metaData, int series, int t, int z, int c, double defaultValue)
@@ -1324,12 +1567,18 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return Returns the Z field position (in &micro;m) for the image at the specified Z, T, C position.
      */
     public static double getPositionZ(OMEXMLMetadata metaData, int series, int t, int z, int c, double defaultValue)
@@ -1348,10 +1597,13 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
-     * @return  as {@link #getTimeStamp(OMEXMLMetadata, int, long)}
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
+     * @return as {@link #getTimeStamp(OMEXMLMetadata, int, long)}
      */
     public static double getPositionT(OMEXMLMetadata metaData, int series, long defaultValue)
     {
@@ -1359,9 +1611,12 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
      * @return Returns the time stamp (elapsed milliseconds from the Java epoch of 1970-01-01 T00:00:00Z) for the specified image.
      */
     public static long getTimeStamp(OMEXMLMetadata metaData, int series, long defaultValue)
@@ -1380,11 +1635,16 @@ public class MetaDataUtil
     }
 
     /**
-     * @param pix Pixel
-     * @param defaultValue double
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param pix
+     *        Pixel
+     * @param defaultValue
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return Returns the time position offset (in second) relative to first image for the image at the specified Z, T, C position.
      */
     private static double getPositionTOffset(Pixels pix, int t, int z, int c, double defaultValue)
@@ -1410,12 +1670,18 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return Returns the time position offset (in second) relative to first image for the image at the specified Z, T, C position.
      */
     public static double getPositionTOffset(OMEXMLMetadata metaData, int series, int t, int z, int c,
@@ -1431,12 +1697,18 @@ public class MetaDataUtil
 
     /**
      * @deprecated USe {@link #getPositionTOffset(OMEXMLMetadata, int, int, int, int, double)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return double
      */
     @Deprecated
@@ -1447,12 +1719,18 @@ public class MetaDataUtil
 
     /**
      * @deprecated USe {@link #getPositionTOffset(OMEXMLMetadata, int, int, int, int, double)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param defaultValue double
-     * @param c int
-     * @param t int
-     * @param z int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param defaultValue
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      * @return double
      */
     @Deprecated
@@ -1462,8 +1740,9 @@ public class MetaDataUtil
     }
 
     /**
-     * @param pix Pixel
-     * Computes time interval (in second) from the time position informations.<br>
+     * @param pix
+     *        Pixel
+     *        Computes time interval (in second) from the time position informations.<br>
      * @return Returns <code>0d</code> if time position informations are missing ot if we have only 1 frame in the image.
      */
     private static double computeTimeIntervalFromTimePosition(Pixels pix)
@@ -1510,12 +1789,19 @@ public class MetaDataUtil
 
     /**
      * Sets the X field position (in &micro;m) for the image at the specified Z, T, C position.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
-     * @param c int
-     * @param t int
-     * @param z int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      */
     public static void setPositionX(OMEXMLMetadata metaData, int series, int t, int z, int c, double value)
     {
@@ -1532,12 +1818,19 @@ public class MetaDataUtil
 
     /**
      * Sets the Y field position (in &micro;m) for the image at the specified Z, T, C position.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
-     * @param c int
-     * @param z int
-     * @param t int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
+     * @param c
+     *        int
+     * @param z
+     *        int
+     * @param t
+     *        int
      */
     public static void setPositionY(OMEXMLMetadata metaData, int series, int t, int z, int c, double value)
     {
@@ -1554,12 +1847,19 @@ public class MetaDataUtil
 
     /**
      * Sets the Z field position (in &micro;m) for the image at the specified Z, T, C position.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
-     * @param c int
-     * @param t int
-     * @param z int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      */
     public static void setPositionZ(OMEXMLMetadata metaData, int series, int t, int z, int c, double value)
     {
@@ -1576,9 +1876,13 @@ public class MetaDataUtil
 
     /**
      * Same as {@link #setTimeStamp(OMEXMLMetadata, int, long)}
-     * @param metaData OME metadata
-     * @param series int
-     * @param value long
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        long
      */
     public static void setPositionT(OMEXMLMetadata metaData, int series, long value)
     {
@@ -1587,9 +1891,13 @@ public class MetaDataUtil
 
     /**
      * Sets the time stamp (elapsed milliseconds from the Java epoch of 1970-01-01 T00:00:00Z) for the specified image.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value long
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        long
      */
     public static void setTimeStamp(OMEXMLMetadata metaData, int series, long value)
     {
@@ -1601,11 +1909,17 @@ public class MetaDataUtil
 
     /**
      * Sets the time position offset (in second) relative to the first image for the image at the specified Z, T, C position.
-     * @param pix Pixel
-     * @param value double
-     * @param c int
-     * @param t int
-     * @param z int
+     * 
+     * @param pix
+     *        Pixel
+     * @param value
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      */
     private static void setPositionTOffset(Pixels pix, int t, int z, int c, double value)
     {
@@ -1617,12 +1931,19 @@ public class MetaDataUtil
 
     /**
      * Sets the time position offset (in second) relative to the first image for the image at the specified Z, T, C position.
-     * @param metaData OME metadata
-     * @param series int
-     * @param value double
-     * @param c int
-     * @param t int
-     * @param z int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param value
+     *        double
+     * @param c
+     *        int
+     * @param t
+     *        int
+     * @param z
+     *        int
      */
     public static void setPositionTOffset(OMEXMLMetadata metaData, int series, int t, int z, int c, double value)
     {
@@ -1633,7 +1954,8 @@ public class MetaDataUtil
     }
 
     /**
-     * @param channel int
+     * @param channel
+     *        int
      * @return Get default name for specified channel.
      */
     public static String getDefaultChannelName(int channel)
@@ -1642,8 +1964,10 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return Returns the number of channel for the specified image series in metaData description.
      */
     public static int getNumChannel(OMEXMLMetadata metaData, int series)
@@ -1658,8 +1982,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getNumChannel(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param series int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
      * @return int
      */
     @Deprecated
@@ -1669,9 +1995,12 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param index int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param index
+     *        int
      * @return Return channel object at specified index for the specified image series.
      */
     public static Channel getChannel(OMEXMLMetadata metaData, int series, int index)
@@ -1686,9 +2015,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getChannel(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param index int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param index
+     *        int
      * @return Channel
      */
     @Deprecated
@@ -1698,9 +2030,12 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param index int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param index
+     *        int
      * @return Ensure the channel at specified index exist for the specified image series.
      */
     public static Channel ensureChannel(OMEXMLMetadata metaData, int series, int index)
@@ -1715,9 +2050,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #ensureChannel(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param index int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param index
+     *        int
      * @return Channel
      */
     @Deprecated
@@ -1727,8 +2065,10 @@ public class MetaDataUtil
     }
 
     /**
-     * @param pix Pixel
-     * @param index int
+     * @param pix
+     *        Pixel
+     * @param index
+     *        int
      * @return Ensure the channel at specified index exist for the specified image series.
      */
     public static Channel ensureChannel(Pixels pix, int index)
@@ -1742,9 +2082,13 @@ public class MetaDataUtil
 
     /**
      * Remove a channel for the specified image series.
-     * @param metaData OME metadata
-     * @param series int
-     * @param index int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param index
+     *        int
      */
     public static void removeChannel(OMEXMLMetadata metaData, int series, int index)
     {
@@ -1756,9 +2100,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #removeChannel(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param index int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param index
+     *        int
      */
     @Deprecated
     public static void removeChannel(OMEXMLMetadataImpl metaData, int series, int index)
@@ -1768,8 +2115,11 @@ public class MetaDataUtil
 
     /**
      * Remove a channel from the specified Pixels object.
-     * @param pix Pixel
-     * @param index int
+     * 
+     * @param pix
+     *        Pixel
+     * @param index
+     *        int
      */
     public static void removeChannel(Pixels pix, int index)
     {
@@ -1780,9 +2130,13 @@ public class MetaDataUtil
     /**
      * Set the number of channel for the specified image series in metaData description.<br>
      * This is different from {@link #getSizeC(OMEXMLMetadata, int)}.
-     * @param metaData OME metadata
-     * @param series int
-     * @param num int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param num
+     *        int
      */
     public static void setNumChannel(OMEXMLMetadata metaData, int series, int num)
     {
@@ -1810,9 +2164,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setNumChannel(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param num int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param num
+     *        int
      */
     @Deprecated
     public static void setNumChannel(OMEXMLMetadataImpl metaData, int series, int num)
@@ -1823,9 +2180,13 @@ public class MetaDataUtil
     /**
      * Initialize default channel name until specified index if they are missing from the meta data
      * description.
-     * @param metaData OME metadata
-     * @param series int
-     * @param channel int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param channel
+     *        int
      */
     private static void prepareMetaChannelName(OMEXMLMetadata metaData, int series, int channel)
     {
@@ -1840,9 +2201,12 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param channel int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param channel
+     *        int
      * @return Returns name of specified channel image series.
      */
     public static String getChannelName(OMEXMLMetadata metaData, int series, int channel)
@@ -1863,9 +2227,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getChannelName(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param channel int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param channel
+     *        int
      * @return string
      */
     @Deprecated
@@ -1876,10 +2243,15 @@ public class MetaDataUtil
 
     /**
      * Set name of specified channel image series.
-     * @param metaData OME metadata
-     * @param series int
-     * @param channel int
-     * @param value string
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param channel
+     *        int
+     * @param value
+     *        string
      */
     public static void setChannelName(OMEXMLMetadata metaData, int series, int channel, String value)
     {
@@ -1891,10 +2263,14 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setChannelName(OMEXMLMetadata, int, int, String)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param channel int
-     * @param value string
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param channel
+     *        int
+     * @param value
+     *        string
      */
     @Deprecated
     public static void setChannelName(OMEXMLMetadataImpl metaData, int series, int channel, String value)
@@ -1903,9 +2279,12 @@ public class MetaDataUtil
     }
 
     /**
-     * @param metaData OME metadata
-     * @param series int
-     * @param channel int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param channel
+     *        int
      * @return Returns Color of specified channel image series.
      */
     public static Color getChannelColor(OMEXMLMetadata metaData, int series, int channel)
@@ -1918,9 +2297,12 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #getChannelColor(OMEXMLMetadata, int, int)} instead
-     * @param metaData OME metadata
-     * @param series int
-     * @param channel int
+     * @param metaData
+     *        OME metadata
+     * @param series
+     *        int
+     * @param channel
+     *        int
      * @return color
      */
     @Deprecated
@@ -1930,7 +2312,8 @@ public class MetaDataUtil
     }
 
     /**
-     * @param name string
+     * @param name
+     *        string
      * @return Create and return a default (OME XML) Metadata object with default image name.
      */
     public static OMEXMLMetadata createMetadata(String name)
@@ -1948,7 +2331,8 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #createMetadata(String)} instead.
-     * @param name string
+     * @param name
+     *        string
      * @return OME Metadata
      */
     @Deprecated
@@ -1959,8 +2343,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link OMEUtil#createOMEXMLMetadata(MetadataRetrieve, int)}
-     * @param metadata metadata
-     * @param series int
+     * @param metadata
+     *        metadata
+     * @param series
+     *        int
      * @return OME metadata
      */
     @Deprecated
@@ -2071,14 +2457,22 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #setMetaData(OMEXMLMetadata, int, int, int, int, int, DataType, boolean)} instead
-     * @param metadata  OME Metadata
-     * @param dataType object
-     * @param separateChannel boolean
-     * @param sizeC int
-     * @param sizeT int
-     * @param sizeZ int
-     * @param sizeX int
-     * @param sizeY int
+     * @param metadata
+     *        OME Metadata
+     * @param dataType
+     *        object
+     * @param separateChannel
+     *        boolean
+     * @param sizeC
+     *        int
+     * @param sizeT
+     *        int
+     * @param sizeZ
+     *        int
+     * @param sizeX
+     *        int
+     * @param sizeY
+     *        int
      */
     @Deprecated
     public static void setMetaData(OMEXMLMetadataImpl metadata, int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT,
@@ -2118,13 +2512,17 @@ public class MetaDataUtil
     }
 
     /**
-     * @param dataType object
-     * @param separateChannel boolean
-     * @param sizeX int
-     * @param sizeY int
-     * @param sizeC int
+     * @param dataType
+     *        object
+     * @param separateChannel
+     *        boolean
+     * @param sizeX
+     *        int
+     * @param sizeY
+     *        int
+     * @param sizeC
+     *        int
      * @return Generates Meta Data for the given arguments.
-     * 
      * @see #setMetaData(OMEXMLMetadata, int, int, int, int, int, DataType, boolean)
      */
     public static OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, DataType dataType,
@@ -2134,10 +2532,11 @@ public class MetaDataUtil
     }
 
     /**
-     * @param separateChannel boolean
-     * @param image image
+     * @param separateChannel
+     *        boolean
+     * @param image
+     *        image
      * @return Generates Meta Data for the given BufferedImage.
-     * 
      * @see #setMetaData(OMEXMLMetadata, int, int, int, int, int, DataType, boolean)
      */
     public static OMEXMLMetadata generateMetaData(IcyBufferedImage image, boolean separateChannel)
@@ -2149,10 +2548,14 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #generateMetaData(Sequence, boolean)} instead.
-     * @param separateChannel boolean
-     * @param sequence sequence
-     * @param useT boolean
-     * @param useZ boolean
+     * @param separateChannel
+     *        boolean
+     * @param sequence
+     *        sequence
+     * @param useT
+     *        boolean
+     * @param useZ
+     *        boolean
      * @return OME Metadata
      */
     @Deprecated
@@ -2164,10 +2567,14 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #generateMetaData(Sequence, boolean)} instead.
-     * @param sequence sequence
-     * @param separateChannel boolean
-     * @param sizeT int
-     * @param sizeZ int
+     * @param sequence
+     *        sequence
+     * @param separateChannel
+     *        boolean
+     * @param sizeT
+     *        int
+     * @param sizeZ
+     *        int
      * @return OME metadata
      */
     @Deprecated
@@ -2177,10 +2584,11 @@ public class MetaDataUtil
     }
 
     /**
-     * @param sequence sequence
-     * @param separateChannel boolean
+     * @param sequence
+     *        sequence
+     * @param separateChannel
+     *        boolean
      * @return Generates Meta Data for the given Sequence.
-     * 
      * @see #setMetaData(OMEXMLMetadata, int, int, int, int, int, DataType, boolean)
      */
     public static OMEXMLMetadata generateMetaData(Sequence sequence, boolean separateChannel)
@@ -2196,8 +2604,11 @@ public class MetaDataUtil
 
     /**
      * Keep only the specified image series.
-     * @param metaData OME metadata
-     * @param num int
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param num
+     *        int
      */
     public static void keepSingleSerie(OMEXMLMetadata metaData, int num)
     {
@@ -2353,8 +2764,11 @@ public class MetaDataUtil
 
     /**
      * Keep only the specified plane metadata.
-     * @param index int
-     * @param img image
+     * 
+     * @param index
+     *        int
+     * @param img
+     *        image
      */
     public static void keepSinglePlane(Image img, int index)
     {
@@ -2412,8 +2826,10 @@ public class MetaDataUtil
 
     /**
      * @deprecated Use {@link #keepSingleSerie(OMEXMLMetadata, int)} instead
-     * @param metaData OME metadata
-     * @param num int
+     * @param metaData
+     *        OME metadata
+     * @param num
+     *        int
      */
     @Deprecated
     public static void keepSingleSerie(OMEXMLMetadataImpl metaData, int num)
@@ -2460,6 +2876,20 @@ public class MetaDataUtil
                 }
             }
         }
+
+        final int numPlane = pix.sizeOfPlaneList();
+        for (int i = 0; i < numPlane; i++)
+        {
+            final Plane plane = pix.getPlane(i);
+
+            // we keep only a single T/Z/C position ? --> fix them to 0
+            if (posT != -1)
+                plane.setTheT(OMEUtil.getNonNegativeInteger(0));
+            if (posZ != -1)
+                plane.setTheZ(OMEUtil.getNonNegativeInteger(0));
+            if (posC != -1)
+                plane.setTheC(OMEUtil.getNonNegativeInteger(0));
+        }
     }
 
     /**
@@ -2471,8 +2901,10 @@ public class MetaDataUtil
      *        keep Plane at given Z position (-1 to keep all)
      * @param posC
      *        keep Plane at given C position (-1 to keep all)
-     * @param metadata OME metadata
-     * @param series int
+     * @param metadata
+     *        OME metadata
+     * @param series
+     *        int
      */
     public static void keepPlanes(OMEXMLMetadata metadata, int series, int posT, int posZ, int posC)
     {
@@ -2544,7 +2976,9 @@ public class MetaDataUtil
 
     /**
      * Cleanup the meta data (sometime we have empty data structure sitting there)
-     * @param metaData OME metadata
+     * 
+     * @param metaData
+     *        OME metadata
      */
     public static void clean(OMEXMLMetadata metaData)
     {
