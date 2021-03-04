@@ -2198,7 +2198,7 @@ public class Loader
      * @param showProgress
      *        Show progression in loading process
      */
-    static void loadFiles(FileImporter importer, List<String> paths, boolean addToRecent, boolean showProgress)
+    public static void loadFiles(FileImporter importer, List<String> paths, boolean addToRecent, boolean showProgress)
     {
         final ApplicationMenu mainMenu;
         final FileFrame loadingFrame;
@@ -3203,7 +3203,7 @@ public class Loader
      * @param showProgress
      *        Show progression in loading process
      */
-    static List<Sequence> loadSequences(SequenceFileImporter importer, List<String> paths, int series,
+    public static List<Sequence> loadSequences(SequenceFileImporter importer, List<String> paths, int series,
             boolean forceVolatile, boolean separate, boolean autoOrder, boolean directory, boolean addToRecent,
             boolean showProgress)
     {
@@ -3754,7 +3754,7 @@ public class Loader
      *        the loading frame used to display progress of the operation (can be null)
      * @throws IOException
      */
-    static List<Sequence> internalLoadSingle(SequenceFileImporter importer, String path, int series,
+    public static List<Sequence> internalLoadSingle(SequenceFileImporter importer, String path, int series,
             boolean forceVolatile, boolean groupSeries, FileFrame loadingFrame)
             throws IOException, UnsupportedFormatException, OutOfMemoryError
     {
@@ -3930,7 +3930,7 @@ public class Loader
      *        the loading frame used to cancel / display progress of the operation (can be null)
      * @Return the loaded Sequence (or <code>null<code> if loading was canceled)
      */
-    static Sequence internalLoadGroup(SequenceFileGroup group, int resolution, Rectangle region, int minZ, int maxZ,
+    public static Sequence internalLoadGroup(SequenceFileGroup group, int resolution, Rectangle region, int minZ, int maxZ,
             int minT, int maxT, int channel, boolean forceVolatile, boolean directory, ApplicationMenu mainMenu,
             FileFrame loadingFrame) throws UnsupportedFormatException, IOException
     {
@@ -4023,7 +4023,7 @@ public class Loader
      *        the loading frame used to cancel / display progress of the operation (can be null)
      * @Return the loaded Sequence (or <code>null<code> if loading was canceled)
      */
-    static Sequence internalLoadGroup(SequenceFileGroup group, boolean forceVolatile, boolean directory,
+    public static Sequence internalLoadGroup(SequenceFileGroup group, boolean forceVolatile, boolean directory,
             ApplicationMenu mainMenu, FileFrame loadingFrame) throws UnsupportedFormatException, IOException
     {
         return internalLoadGroup(group, 0, null, -1, -1, -1, -1, -1, forceVolatile, directory, mainMenu, loadingFrame);
