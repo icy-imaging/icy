@@ -799,14 +799,14 @@ public class SequenceFileSticher
                         end = result.length();
 
                     // assume 'separator + dimension id', remove them
-                    if ((st > 1) && (Character.isLetter(result.charAt(st - 1))
+                    if ((st > 2) && (Character.isLetter(result.charAt(st - 1))
                             && " -_".contains(result.substring(st - 2, st - 1))))
                         st -= 2;
                     // try others combinations
-                    else if (st > 0)
+                    else if (st > 1)
                     {
-                        // assume dimension id, remove it
-                        if (Character.isLetter(result.charAt(st - 1)))
+                        // assume dimension id (should be preceded by a non letter), remove it
+                        if (!Character.isLetter(result.charAt(st - 2)) && Character.isLetter(result.charAt(st - 1)))
                             st--;
                         // assume separator, remove it
                         else if (" -_".contains(result.substring(st - 1, st - 0)))
@@ -1451,10 +1451,10 @@ public class SequenceFileSticher
                                 && " -_".contains(result.substring(st - 2, st - 1))))
                             st -= 2;
                         // try others combinations
-                        else if (st > 0)
+                        else if (st > 1)
                         {
-                            // assume dimension id, remove it
-                            if (Character.isLetter(result.charAt(st - 1)))
+                            // assume dimension id (should be preceded by a non letter), remove it
+                            if (!Character.isLetter(result.charAt(st - 2)) && Character.isLetter(result.charAt(st - 1)))
                                 st--;
                             // assume separator, remove it
                             else if (" -_".contains(result.substring(st - 1, st - 0)))
