@@ -1866,8 +1866,14 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 final double doubleValue = ((Number) result).doubleValue();
 
                 // replace 'infinity' by infinite symbol
-                if (doubleValue == Double.POSITIVE_INFINITY)
-                    result = MathUtil.INFINITE_STRING;
+                if (doubleValue == Double.POSITIVE_INFINITY) {
+                    // position descriptor ? negative infinite means 'ALL' here
+                    if (id.equals(ROIPositionZDescriptor.ID) || id.equals(ROIPositionTDescriptor.ID)
+                            || id.equals(ROIPositionCDescriptor.ID))
+                        result = "ALL";
+                    else
+                        result = MathUtil.INFINITE_STRING;
+                }
                 else if (doubleValue == Double.NEGATIVE_INFINITY)
                 {
                     // position descriptor ? negative infinite means 'ALL' here
