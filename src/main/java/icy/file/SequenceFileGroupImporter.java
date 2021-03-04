@@ -167,7 +167,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
             // single image in the group ? --> directly return its path
             if (currentGroup.positions.size() == 1)
                 return currentGroup.positions.get(0).getPath();
-            
+
             // return the base path of the group
             return currentGroup.getBasePath();
         }
@@ -550,14 +550,38 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         final SequenceIdent ident = group.ident;
         final SequenceType baseType = ident.baseType;
         // single image in the group ? --> directly use its path as name
-        final String name = FileUtil
-                .getFileName(
-                        (group.positions.size() == 1) ? group.positions.get(0).getPath() : group.getBasePath(), false);
-        final OMEXMLMetadata result = MetaDataUtil.createMetadata(name);
+        final String name = FileUtil.getFileName(
+                (group.positions.size() == 1) ? group.positions.get(0).getPath() : group.getBasePath(), false);
+
+        OMEXMLMetadata result = null;
+
+        // try to recover general metadata from first image
+        if ((openFlags & SequenceFileImporter.FLAG_METADATA_MASK) != SequenceFileImporter.FLAG_METADATA_MINIMUM)
+        {
+            final SequencePosition position = getCursor(0, 0, 0).position;
+
+            // do we have an image for this position ?
+            if (position != null)
+            {
+                final SequenceFileImporter imp = getImporter(position.getPath());
+
+                if (imp != null)
+                {
+                    // create from original metadata
+                    result = OMEUtil.createOMEXMLMetadata(imp.getOMEXMLMetaData(), 0);
+                    // set name
+                    MetaDataUtil.setName(result, 0, name);
+                }
+            }
+        }
+
+        // minimum metadata or couldn't be retrieved ? --> create it from scratch
+        if (result == null)
+            result = MetaDataUtil.createMetadata(name);
 
         // minimum metadata
-        MetaDataUtil.setMetaData(result, group.totalSizeX, group.totalSizeY, group.totalSizeC,
-                group.totalSizeZ, group.totalSizeT, baseType.dataType, true);
+        MetaDataUtil.setMetaData(result, group.totalSizeX, group.totalSizeY, group.totalSizeC, group.totalSizeZ,
+                group.totalSizeT, baseType.dataType, true);
         // pixel size & time interval
         if (baseType.pixelSizeX > 0d)
             MetaDataUtil.setPixelSizeX(result, 0, baseType.pixelSizeX);
@@ -589,20 +613,23 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
                         // do we have an image for this position ?
                         if (position != null)
                         {
-                            // first ZT plane ? --> fill channel data
-                            if ((z == 0) && (t == 0))
+                            final SequenceFileImporter imp = getImporter(position.getPath());
+                            // get original plane metadata
+                            Plane metaPlane = null;
+
+                            // importer ok ?
+                            if (imp != null)
                             {
-                                final SequenceFileImporter imp = getImporter(position.getPath());
-
-                                if (imp != null)
+                                try
                                 {
-                                    try
-                                    {
-                                        // get metadata for this file
-                                        final OMEXMLMetadata meta = imp.getOMEXMLMetaData();
-                                        // get OME Pixels object (easier to deal with)
-                                        final Pixels metaPixels = MetaDataUtil.getPixels(meta, 0);
+                                    // get metadata for this file
+                                    final OMEXMLMetadata meta = imp.getOMEXMLMetaData();
+                                    // get OME Pixels object (easier to deal with)
+                                    final Pixels metaPixels = MetaDataUtil.getPixels(meta, 0);
 
+                                    // first ZT plane ? --> fill channel data
+                                    if ((z == 0) && (t == 0))
+                                    {
                                         final Channel metaChannel;
 
                                         // get origin channel (or create it if needed)
@@ -616,45 +643,21 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
                                         // change the path
                                         result.setChannelID(MetadataTools.createLSID("Channel", 0, c), 0, c);
                                     }
-                                    finally
+
+                                    // retrieve the original Plane object
+                                    metaPlane = MetaDataUtil.getPlane(metaPixels, cursor.internalT, cursor.internalZ,
+                                            cursor.internalC);
+
+                                    if (metaPlane != null)
                                     {
-                                        releaseImporter(position.getPath(), imp);
+                                        // remove linked annotation from plane
+                                        for (int a = (metaPlane.sizeOfLinkedAnnotationList() - 1); a >= 0; a--)
+                                            metaPlane.unlinkAnnotation(metaPlane.getLinkedAnnotation(a));
                                     }
                                 }
-                            }
-
-                            Plane metaPlane = null;
-
-                            // first ZT plane or supplementary metadata wanted ? --> get original plane metadata
-                            if (((z == 0) && (t == 0)) || ((openFlags
-                                    & SequenceFileImporter.FLAG_METADATA_MASK) == SequenceFileImporter.FLAG_METADATA_ALL))
-                            {
-                                final SequenceFileImporter imp = getImporter(position.getPath());
-
-                                if (imp != null)
+                                finally
                                 {
-                                    try
-                                    {
-                                        // get metadata for this file
-                                        final OMEXMLMetadata meta = imp.getOMEXMLMetaData();
-                                        // get OME Pixels object (easier to deal with)
-                                        final Pixels metaPixels = MetaDataUtil.getPixels(meta, 0);
-
-                                        // retrieve the original Plane object
-                                        metaPlane = MetaDataUtil.getPlane(metaPixels, cursor.internalT,
-                                                cursor.internalZ, cursor.internalC);
-
-                                        if (metaPlane != null)
-                                        {
-                                            // remove linked annotation from plane
-                                            for (int a = (metaPlane.sizeOfLinkedAnnotationList() - 1); a >= 0; a--)
-                                                metaPlane.unlinkAnnotation(metaPlane.getLinkedAnnotation(a));
-                                        }
-                                    }
-                                    finally
-                                    {
-                                        releaseImporter(position.getPath(), imp);
-                                    }
+                                    releaseImporter(position.getPath(), imp);
                                 }
                             }
 
