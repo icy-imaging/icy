@@ -162,9 +162,14 @@
                 <configuration>
                     <overview>${basedir}/src/main/javadoc/overview.html</overview>
                     <stylesheetfile>${basedir}/src/main/javadoc/java7doc.css</stylesheetfile>
+                    <!-- disable javadoc errors for substance (too many and 
+                        we don't care really) -->
+                    <additionalOptions>
+                        <additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
                 </configuration>
             </plugin>
-            
+
         </plugins>
     </build>
 
@@ -336,7 +341,7 @@
         <repository>
             <id>icy-prod</id>
             <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
-<!--             <url>${env.MAVEN_REPO_URL}/icy-core/</url> -->
+            <!-- <url>${env.MAVEN_REPO_URL}/icy-core/</url> -->
         </repository>
         <snapshotRepository>
             <id>icy-dev</id>
