@@ -3,6 +3,14 @@
  */
 package plugins.kernel.roi.roi3d;
 
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.util.List;
+
+import org.w3c.dom.Node;
+
 import icy.canvas.IcyCanvas;
 import icy.math.Line3DIterator;
 import icy.painter.Anchor3D;
@@ -15,15 +23,6 @@ import icy.type.point.Point5D;
 import icy.type.rectangle.Rectangle3D;
 import icy.util.XMLUtil;
 import icy.vtk.IcyVtkPanel;
-
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
-import java.util.List;
-
-import org.w3c.dom.Node;
-
 import plugins.kernel.canvas.VtkCanvas;
 import vtk.vtkTubeFilter;
 
@@ -177,6 +176,12 @@ public class ROI3DLine extends ROI3DShape
     protected final Anchor3D pt1;
     protected final Anchor3D pt2;
 
+    /**
+     * @param pt1
+     *        start point
+     * @param pt2
+     *        end point
+     */
     public ROI3DLine(Point3D pt1, Point3D pt2)
     {
         super(new Line3D());
@@ -193,11 +198,23 @@ public class ROI3DLine extends ROI3DShape
         setIcon(ResourceUtil.ICON_ROI_LINE);
     }
 
+    /**
+     * Create 3D line ROI
+     * 
+     * @param line
+     *        source 3D line
+     */
     public ROI3DLine(Line3D line)
     {
         this(line.getP1(), line.getP2());
     }
 
+    /**
+     * Create 3D line ROI
+     * 
+     * @param pt
+     *        source 3D point
+     */
     public ROI3DLine(Point3D pt)
     {
         this(new Point3D.Double(pt.getX(), pt.getY(), pt.getZ()), pt);
@@ -205,6 +222,9 @@ public class ROI3DLine extends ROI3DShape
 
     /**
      * Generic constructor for interactive mode
+     * 
+     * @param pt
+     *        source 5D point
      */
     public ROI3DLine(Point5D pt)
     {
@@ -212,11 +232,30 @@ public class ROI3DLine extends ROI3DShape
         // getOverlay().setMousePos(pt);
     }
 
+    /**
+     * Create 3D line ROI
+     * 
+     * @param x1
+     *        start point X coordinate
+     * @param y1
+     *        start point Y coordinate
+     * @param z1
+     *        start point Z coordinate
+     * @param x2
+     *        end point X coordinate
+     * @param y2
+     *        end point Y coordinate
+     * @param z2
+     *        end point Z coordinate
+     */
     public ROI3DLine(double x1, double y1, double z1, double x2, double y2, double z2)
     {
         this(new Point3D.Double(x1, y1, z1), new Point3D.Double(x2, y2, z2));
     }
 
+    /**
+     * Create 3D line ROI
+     */
     public ROI3DLine()
     {
         this(new Point3D.Double(), new Point3D.Double());
@@ -234,6 +273,9 @@ public class ROI3DLine extends ROI3DShape
         return new ROI3DLinePainter();
     }
 
+    /**
+     * @return the 3D line shape
+     */
     public Line3D getLine()
     {
         return (Line3D) shape;
@@ -290,6 +332,12 @@ public class ROI3DLine extends ROI3DShape
         }
     }
 
+    /**
+     * Set ROI from shape
+     * 
+     * @param line
+     *        3D line shape
+     */
     public void setLine(Line3D line)
     {
         setBounds3D(line.getBounds());

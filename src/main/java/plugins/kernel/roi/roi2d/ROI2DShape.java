@@ -908,8 +908,8 @@ public abstract class ROI2DShape extends ROI2D implements Shape
         }
 
         /**
-         * Returns <code>true</code> if the specified bounds should be considered as "tiny" in the
-         * specified canvas / graphics context.
+         * @returns <code>true</code> if the specified bounds should be considered as "tiny" in the
+         *          specified canvas / graphics context.
          */
         protected boolean isVisible(Rectangle2D bounds, Graphics2D g, IcyCanvas canvas)
         {
@@ -917,8 +917,8 @@ public abstract class ROI2DShape extends ROI2D implements Shape
         }
 
         /**
-         * Returns <code>true</code> if the specified bounds should be considered as "tiny" in the
-         * specified canvas / graphics context.
+         * @returns <code>true</code> if the specified bounds should be considered as "tiny" in the
+         *          specified canvas / graphics context.
          */
         protected boolean isSmall(Rectangle2D bounds, Graphics2D g, IcyCanvas canvas)
         {
@@ -932,8 +932,8 @@ public abstract class ROI2DShape extends ROI2D implements Shape
         }
 
         /**
-         * Returns <code>true</code> if the specified bounds should be considered as "tiny" in the
-         * specified canvas / graphics context.
+         * @returns <code>true</code> if the specified bounds should be considered as "tiny" in the
+         *          specified canvas / graphics context.
          */
         protected boolean isTiny(Rectangle2D bounds, Graphics2D g, IcyCanvas canvas)
         {
@@ -1111,7 +1111,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     /**
-     * Return true if this ROI support adding new point
+     * @return true if this ROI support adding new point
      */
     public boolean canAddPoint()
     {
@@ -1119,7 +1119,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     /**
-     * Return true if this ROI support removing point
+     * @return true if this ROI support removing point
      */
     public boolean canRemovePoint()
     {
@@ -1136,6 +1136,11 @@ public abstract class ROI2DShape extends ROI2D implements Shape
 
     /**
      * Internal use only, use {@link #addNewPoint(Point2D, boolean)} instead.
+     * 
+     * @param pt
+     *        the point to add
+     * @param index
+     *        index where to add
      */
     public void addPoint(Anchor2D pt, int index)
     {
@@ -1170,6 +1175,12 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     /**
+     * @param pos
+     *        position of the new point
+     * @param insert
+     *        if set to <code>true</code> the new point will be inserted between the 2 closest points (in pixels
+     *        distance) else the new point is inserted at the end of the point list
+     * @return true if succeed
      * @deprecated Use {@link #addNewPoint(Point2D, boolean)} instead.
      */
     @Deprecated
@@ -1179,6 +1190,12 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     /**
+     * @param pos
+     *        position of the new point
+     * @param insert
+     *        if set to <code>true</code> the new point will be inserted between the 2 closest points (in pixels
+     *        distance) else the new point is inserted at the end of the point list
+     * @return true if succeed
      * @deprecated Use {@link #addNewPoint(Point2D, boolean)} instead.
      */
     @Deprecated
@@ -1277,6 +1294,10 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     /**
      * This method give you lower level access on point remove operation but can be unsafe.<br>
      * Use {@link #removeSelectedPoint(IcyCanvas)} when possible.
+     * 
+     * @param pt
+     *        the point to remove
+     * @return true if succeed
      */
     public boolean removePoint(Anchor2D pt)
     {
@@ -1312,6 +1333,11 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     /**
+     * @param canvas
+     *        source canvas
+     * @param imagePoint
+     *        te point to remove
+     * @return true if succeed
      * @deprecated Use {@link #removeSelectedPoint(IcyCanvas)} instead.
      */
     @Deprecated
@@ -1334,6 +1360,11 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     /**
+     * @param canvas
+     *        source canvas
+     * @param imagePoint
+     *        te point to remove
+     * @return true if succeed
      * @deprecated Use {@link #removeSelectedPoint(IcyCanvas)} instead.
      */
     @Deprecated
@@ -1344,6 +1375,10 @@ public abstract class ROI2DShape extends ROI2D implements Shape
 
     /**
      * Remove the current selected point.
+     * 
+     * @param canvas
+     *        source canvas
+     * @return true if succeed
      */
     public boolean removeSelectedPoint(IcyCanvas canvas)
     {
@@ -1558,7 +1593,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     /**
-     * Returns true if specified point coordinates overlap the ROI edge.
+     * @returns true if specified point coordinates overlap the ROI edge.
      */
     @Override
     public boolean isOverEdge(IcyCanvas canvas, double x, double y)
@@ -1595,7 +1630,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     // }
 
     /**
-     * Return the list of control points for this ROI.
+     * @return the list of control points for this ROI.
      */
     public List<Anchor2D> getControlPoints()
     {
@@ -1606,7 +1641,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     /**
-     * Return the list of positions of control points for this ROI.
+     * @return the list of positions of control points for this ROI.
      */
     public ArrayList<Point2D> getPoints()
     {
@@ -1622,8 +1657,8 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     /**
-     * Return the list of positions of control points for this ROI.<br>
-     * This is the direct internal position reference, don't modify them !
+     * @return the list of positions of control points for this ROI.<br>
+     *         This is the direct internal position reference, don't modify them !
      */
     protected ArrayList<Point2D> getPointsInternal()
     {
@@ -1894,6 +1929,9 @@ public abstract class ROI2DShape extends ROI2D implements Shape
 
     /**
      * Called when anchor position changed
+     * 
+     * @param source
+     *        source anchor
      */
     public void controlPointPositionChanged(Anchor2D source)
     {
@@ -1903,6 +1941,9 @@ public abstract class ROI2DShape extends ROI2D implements Shape
 
     /**
      * Called when anchor overlay changed
+     * 
+     * @param event
+     *        source event
      */
     public void controlPointOverlayChanged(OverlayEvent event)
     {
@@ -1921,6 +1962,9 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     /**
      * Called when anchor painter changed, provided only for backward compatibility.<br>
      * Don't use it.
+     * 
+     * @param event
+     *        source event
      */
     @SuppressWarnings({"deprecation"})
     public void painterChanged(PainterEvent event)

@@ -32,12 +32,15 @@ import icy.util.StringUtil;
  *
  * @author Stephane Dallongeville
  */
-public abstract class SearchResultProducer implements Comparable<SearchResultProducer> {
-    private class SearchRunner implements Runnable {
+public abstract class SearchResultProducer implements Comparable<SearchResultProducer>
+{
+    private class SearchRunner implements Runnable
+    {
         private final String text;
         private final SearchResultConsumer consumer;
 
-        public SearchRunner(String text, SearchResultConsumer consumer) {
+        public SearchRunner(String text, SearchResultConsumer consumer)
+        {
             super();
 
             this.text = text;
@@ -45,21 +48,27 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
         }
 
         @Override
-        public void run() {
+        public void run()
+        {
             // perform search if text is not empty
-            if (!StringUtil.isEmpty(text)) {
-                try {
+            if (!StringUtil.isEmpty(text))
+            {
+                try
+                {
                     doSearch(text, consumer);
                 }
-                catch (Throwable t) {
+                catch (Throwable t)
+                {
                     // just display the exception and continue
                     IcyExceptionHandler.showErrorMessage(t, true, true);
                 }
             }
-            else {
+            else
+            {
                 final boolean notEmpty;
 
-                synchronized (results) {
+                synchronized (results)
+                {
                     // clear the list if necessary
                     notEmpty = !results.isEmpty();
                     if (notEmpty)
@@ -76,15 +85,26 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
         }
     }
 
-    public static class SearchWord {
+    /**
+     * @author Stephane
+     */
+    public static class SearchWord
+    {
         public final String word;
         public final boolean mandatory;
         public final boolean reject;
 
-        public SearchWord(String word) {
+        /**
+         * Constructor
+         * 
+         * @param word
+         */
+        public SearchWord(String word)
+        {
             super();
 
-            if (word.startsWith("+")) {
+            if (word.startsWith("+"))
+            {
                 mandatory = true;
                 reject = false;
                 if (word.length() > 1)
@@ -92,7 +112,8 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
                 else
                     this.word = "";
             }
-            else if (word.startsWith("-")) {
+            else if (word.startsWith("-"))
+            {
                 mandatory = false;
                 reject = true;
                 if (word.length() > 1)
@@ -100,27 +121,45 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
                 else
                     this.word = "";
             }
-            else {
+            else
+            {
                 mandatory = false;
                 reject = false;
                 this.word = word;
             }
         }
 
-        public boolean isEmpty() {
+        /**
+         * @return empty state
+         */
+        public boolean isEmpty()
+        {
             return StringUtil.isEmpty(word);
         }
 
-        public int length() {
+        /**
+         * @return length
+         */
+        public int length()
+        {
             return word.length();
         }
     }
 
-    public static List<SearchWord> getSearchWords(String text) {
+    /**
+     * Take an input text and return a list of search/key word
+     * 
+     * @param text
+     *        input text
+     * @return list of search work (key word)
+     */
+    public static List<SearchWord> getSearchWords(String text)
+    {
         final List<String> words = StringUtil.split(text);
         final List<SearchWord> result = new ArrayList<SearchWord>();
 
-        for (String w : words) {
+        for (String w : words)
+        {
             final SearchWord sw = new SearchWord(w);
             if (!sw.isEmpty())
                 result.add(sw);
@@ -129,7 +168,8 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
         return result;
     }
 
-    public static boolean getShortSearch(List<SearchWord> words) {
+    public static boolean getShortSearch(List<SearchWord> words)
+    {
         return (words.size() == 1) && (words.get(0).length() <= 2);
     }
 
@@ -143,7 +183,8 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
      */
     protected final SingleProcessor processor;
 
-    public SearchResultProducer() {
+    public SearchResultProducer()
+    {
         super();
 
         results = new ArrayList<SearchResult>();
@@ -153,38 +194,45 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
     /**
      * @return Returns the result producer order
      */
-    public int getOrder() {
+    public int getOrder()
+    {
         // default
         return 10;
     }
 
     /**
-     *@return  Returns the result producer name
+     * @return Returns the result producer name
      */
     public abstract String getName();
 
     /**
      * @return Returns the tooltip displayed on the menu (in small under the label).
      */
-    public String getTooltipText() {
+    public String getTooltipText()
+    {
         return "Click to run";
     }
 
     /**
      * @return Returns the result list
      */
-    public List<SearchResult> getResults() {
+    public List<SearchResult> getResults()
+    {
         return results;
     }
 
     /**
      * @deprecated Use {@link #search(String, SearchResultConsumer)} instead.
-     * @param consumer Search
-     * @param words array of strings
+     * @param consumer
+     *        Search
+     * @param words
+     *        array of strings
      */
     @Deprecated
-    public void search(String[] words, SearchResultConsumer consumer) {
-        if (words.length > 0) {
+    public void search(String[] words, SearchResultConsumer consumer)
+    {
+        if (words.length > 0)
+        {
             String t = words[0];
 
             for (int i = 1; i < words.length; i++)
@@ -201,27 +249,35 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
      * Only one search request should be processed at one time so take care of waiting for previous
      * search request completion.
      *
-     * @param text     Search text, it can contains several words and use operators.<br>
-     *                 Examples:<br>
-     *                     <ul>
-     *                 <li><i>spot detector</i> : any of word should be present</li>
-     *                 <li><i>+spot +detector</i> : both words should be present</li>
-     *                 <li><i>"spot detector"</i> : the exact expression should be present</li>
-     *                 <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
-     *                 </ul>
-     * @param consumer Search result consumer for this search request.<br>
-     *                 The consumer should be notified of new results by using the
-     *                 {@link SearchResultConsumer#resultsChanged(SearchResultProducer)} method.
+     * @param text
+     *        Search text, it can contains several words and use operators.<br>
+     *        Examples:<br>
+     *        <ul>
+     *        <li><i>spot detector</i> : any of word should be present</li>
+     *        <li><i>+spot +detector</i> : both words should be present</li>
+     *        <li><i>"spot detector"</i> : the exact expression should be present</li>
+     *        <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
+     *        </ul>
+     * @param consumer
+     *        Search result consumer for this search request.<br>
+     *        The consumer should be notified of new results by using the
+     *        {@link SearchResultConsumer#resultsChanged(SearchResultProducer)} method.
      */
-    public void search(String text, SearchResultConsumer consumer) {
+    public void search(String text, SearchResultConsumer consumer)
+    {
         processor.submit(new SearchRunner(text, consumer));
     }
 
     /**
+     * @param words
+     *        words
+     * @param consumer
+     *        consumer
      * @deprecated Use {@link #doSearch(String, SearchResultConsumer)} instead
      */
     @Deprecated
-    public void doSearch(String[] words, SearchResultConsumer consumer) {
+    public void doSearch(String[] words, SearchResultConsumer consumer)
+    {
         // default implementation, does nothing...
     }
 
@@ -234,20 +290,23 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
      * <code>results</code> variable access should be synchronized as it can be externally accessed.<br>
      * The method could return earlier if {@link #hasWaitingSearch()} returns true.
      *
-     * @param text     Search text, it can contains several words and use operators.<br>
-     *                 Examples:<br>
-     *                 <ul>
-     *                 <li><i>spot detector</i> : any of word should be present</li>
-     *                 <li><i>+spot +detector</i> : both words should be present</li>
-     *                 <li><i>"spot detector"</i> : the exact expression should be present</li>
-     *                 <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
-     *                 </ul>
-     * @param consumer Search result consumer for this search request.<br>
-     *                 The consumer should be notified of new results by using the
-     *                 {@link SearchResultConsumer#resultsChanged(SearchResultProducer)} method.
+     * @param text
+     *        Search text, it can contains several words and use operators.<br>
+     *        Examples:<br>
+     *        <ul>
+     *        <li><i>spot detector</i> : any of word should be present</li>
+     *        <li><i>+spot +detector</i> : both words should be present</li>
+     *        <li><i>"spot detector"</i> : the exact expression should be present</li>
+     *        <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
+     *        </ul>
+     * @param consumer
+     *        Search result consumer for this search request.<br>
+     *        The consumer should be notified of new results by using the
+     *        {@link SearchResultConsumer#resultsChanged(SearchResultProducer)} method.
      * @see #hasWaitingSearch()
      */
-    public void doSearch(String text, SearchResultConsumer consumer) {
+    public void doSearch(String text, SearchResultConsumer consumer)
+    {
         // by default this implementation use separated word search for backward compatibility
         doSearch(text.split(" "), consumer);
     }
@@ -255,7 +314,8 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
     /**
      * Wait for the search request to complete.
      */
-    public void waitSearchComplete() {
+    public void waitSearchComplete()
+    {
         while (isSearching())
             ThreadUtil.sleep(1);
     }
@@ -263,27 +323,34 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
     /**
      * @return Returns true if the search result producer is currently processing a search request.
      */
-    public boolean isSearching() {
+    public boolean isSearching()
+    {
         return processor.isProcessing();
     }
 
     /**
      * @return Returns true if there is a waiting search pending.<br>
-     * This method should be called during search process to cancel it if another search is waiting.
+     *         This method should be called during search process to cancel it if another search is waiting.
      */
-    public boolean hasWaitingSearch() {
+    public boolean hasWaitingSearch()
+    {
         return processor.hasWaitingTasks();
     }
 
     /**
      * Add the SearchResult to the result list.
      *
-     * @param result   Result to add to the result list.
-     * @param consumer If not null then consumer is notified about result change
+     * @param result
+     *        Result to add to the result list.
+     * @param consumer
+     *        If not null then consumer is notified about result change
      */
-    public void addResult(SearchResult result, SearchResultConsumer consumer) {
-        if (result != null) {
-            synchronized (results) {
+    public void addResult(SearchResult result, SearchResultConsumer consumer)
+    {
+        if (result != null)
+        {
+            synchronized (results)
+            {
                 results.add(result);
             }
 
@@ -294,7 +361,8 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
     }
 
     @Override
-    public int compareTo(SearchResultProducer o) {
+    public int compareTo(SearchResultProducer o)
+    {
         // sort on order
         return getOrder() - o.getOrder();
     }

@@ -30,7 +30,6 @@ import icy.painter.Anchor3D.Anchor3DPositionListener;
 import icy.painter.OverlayEvent;
 import icy.painter.OverlayEvent.OverlayEventType;
 import icy.painter.OverlayListener;
-import icy.painter.VtkPainter;
 import icy.roi.ROI;
 import icy.roi.ROI3D;
 import icy.roi.ROIEvent;
@@ -644,9 +643,13 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
         /**
          * Draw the ROI
-         * @param canvas canvas
-         * @param g 2D grahics
-         * @param sequence sequence
+         * 
+         * @param canvas
+         *        canvas
+         * @param g
+         *        2D grahics
+         * @param sequence
+         *        sequence
          */
         @Override
         public void drawROI(Graphics2D g, Sequence sequence, IcyCanvas canvas)
@@ -753,10 +756,15 @@ public class ROI3DShape extends ROI3D implements Shape3D
         /**
          * Draw the shape in specified Graphics2D context.<br>
          * Override {@link #drawShape(Graphics2D, Sequence, IcyCanvas, boolean, boolean)} instead if possible.
-         * @param g 2D graphics
-         * @param sequence sequence
-         * @param canvas canvas
-         * @param simplified boolean
+         * 
+         * @param g
+         *        2D graphics
+         * @param sequence
+         *        sequence
+         * @param canvas
+         *        canvas
+         * @param simplified
+         *        boolean
          */
         protected void drawShape(Graphics2D g, Sequence sequence, IcyCanvas canvas, boolean simplified)
         {
@@ -766,11 +774,17 @@ public class ROI3DShape extends ROI3D implements Shape3D
         /**
          * Draw the shape in specified Graphics2D context.<br>
          * Default implementation just draw '3D' lines between all controls points
-         * @param canvas canvas
-         * @param simplified boolean
-         * @param sequence sequence
-         * @param g 2D graphics
-         * @param connectLastPoint boolean
+         * 
+         * @param canvas
+         *        canvas
+         * @param simplified
+         *        boolean
+         * @param sequence
+         *        sequence
+         * @param g
+         *        2D graphics
+         * @param connectLastPoint
+         *        boolean
          */
         protected void drawShape(Graphics2D g, Sequence sequence, IcyCanvas canvas, boolean simplified,
                 boolean connectLastPoint)
@@ -810,10 +824,13 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
         /**
          * @return Returns <code>true</code> if the specified bounds should be considered as "tiny" in the
-         * specified canvas / graphics context.
-         * @param g 2D graphics
-         * @param canvas canvas
-         * @param bounds 2D rectangle
+         *         specified canvas / graphics context.
+         * @param g
+         *        2D graphics
+         * @param canvas
+         *        canvas
+         * @param bounds
+         *        2D rectangle
          */
         protected boolean isVisible(Rectangle2D bounds, Graphics2D g, IcyCanvas canvas)
         {
@@ -822,10 +839,13 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
         /**
          * @return Returns <code>true</code> if the specified bounds should be considered as "tiny" in the
-         * specified canvas / graphics context.
-         * @param bounds 2D rectangle
-         * @param canvas canvas
-         * @param g 2D graphics
+         *         specified canvas / graphics context.
+         * @param bounds
+         *        2D rectangle
+         * @param canvas
+         *        canvas
+         * @param g
+         *        2D graphics
          */
         protected boolean isSmall(Rectangle2D bounds, Graphics2D g, IcyCanvas canvas)
         {
@@ -840,10 +860,13 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
         /**
          * @return Returns <code>true</code> if the specified bounds should be considered as "tiny" in the
-         * specified canvas / graphics context.
-         * @param bounds 2D rectangle
-         * @param canvas canvas
-         * @param g 2D graphics
+         *         specified canvas / graphics context.
+         * @param bounds
+         *        2D rectangle
+         * @param canvas
+         *        canvas
+         * @param g
+         *        2D graphics
          */
         protected boolean isTiny(Rectangle2D bounds, Graphics2D g, IcyCanvas canvas)
         {
@@ -915,11 +938,17 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
     /**
      * Draw a 3D line in specified graphics object
-     * @param sequence sequence
-     * @param canvas canvas
-     * @param g 2D graphics
-     * @param p2 3D point
-     * @param p1 3D point
+     * 
+     * @param sequence
+     *        sequence
+     * @param canvas
+     *        canvas
+     * @param g
+     *        2D graphics
+     * @param p2
+     *        3D point
+     * @param p1
+     *        3D point
      */
     protected static void drawLine3D(Graphics2D g, Sequence sequence, IcyCanvas canvas, Point3D p1, Point3D p2)
     {
@@ -954,12 +983,19 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
     /**
      * Draw a 3D line in specified graphics object
-     * @param canvasZ int
-     * @param g 2D graphics
-     * @param line2d 2D Line
-     * @param zRange double
-     * @param p1 3D point
-     * @param p2 3D point
+     * 
+     * @param canvasZ
+     *        int
+     * @param g
+     *        2D graphics
+     * @param line2d
+     *        2D Line
+     * @param zRange
+     *        double
+     * @param p1
+     *        3D point
+     * @param p2
+     *        3D point
      */
     protected static void drawSegment3D(Graphics2D g, Point3D p1, Point3D p2, double zRange, int canvasZ, Line2D line2d)
     {
@@ -1006,6 +1042,11 @@ public class ROI3DShape extends ROI3D implements Shape3D
     protected final OverlayListener anchor2DOverlayListener;
     protected boolean firstMove;
 
+    /**
+     * Create 3D shape
+     * 
+     * @param shape base shape
+     */
     public ROI3DShape(Shape3D shape)
     {
         super();
@@ -1046,7 +1087,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
     /**
      * @return build a new anchor with specified position
-     * @param pos 3D point
+     * @param pos
+     *        3D point
      */
     protected Anchor3D createAnchor(Point3D pos)
     {
@@ -1078,7 +1120,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
     }
 
     /**
-     * @param pt Internal use only
+     * @param pt
+     *        Internal use only
      */
     protected void addPoint(Anchor3D pt)
     {
@@ -1086,8 +1129,10 @@ public class ROI3DShape extends ROI3D implements Shape3D
     }
 
     /**
-     * @param pt Internal use only, use {@link #addNewPoint(Point3D, boolean)} instead.
-     * @param index int
+     * @param pt
+     *        Internal use only, use {@link #addNewPoint(Point3D, boolean)} instead.
+     * @param index
+     *        int
      */
     public void addPoint(Anchor3D pt, int index)
     {
@@ -1149,8 +1194,10 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
     /**
      * @return internal use only
-     * @param canvas canvas
-     * @param pt 3D anchor
+     * @param canvas
+     *        canvas
+     * @param pt
+     *        3D anchor
      */
     protected boolean removePoint(IcyCanvas canvas, Anchor3D pt)
     {
@@ -1187,8 +1234,9 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
     /**
      * @return This method give you lower level access on point remove operation but can be unsafe.<br>
-     * Use {@link #removeSelectedPoint(IcyCanvas)} when possible.
-     * @param pt 3D anchor
+     *         Use {@link #removeSelectedPoint(IcyCanvas)} when possible.
+     * @param pt
+     *        3D anchor
      */
     public boolean removePoint(Anchor3D pt)
     {
@@ -1225,7 +1273,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
     /**
      * @return Remove the current selected point.
-     * @param canvas canvas
+     * @param canvas
+     *        canvas
      */
     public boolean removeSelectedPoint(IcyCanvas canvas)
     {
@@ -1343,7 +1392,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
     /**
      * @return Find best insert position for specified point
-     * @param pos 3D point
+     * @param pos
+     *        3D point
      */
     protected int getInsertPointPosition(Point3D pos)
     {
@@ -1419,7 +1469,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
     /**
      * @return Return the list of positions of control points for this ROI.<br>
-     * This is the direct internal position reference, don't modify them !
+     *         This is the direct internal position reference, don't modify them !
      */
     protected List<Point3D> getPointsInternal()
     {
@@ -1526,6 +1576,9 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
     /**
      * Called when anchor position changed
+     * 
+     * @param source
+     *        source anchor
      */
     public void controlPointPositionChanged(Anchor3D source)
     {
@@ -1534,7 +1587,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
     }
 
     /**
-     * @param event Called when anchor overlay changed
+     * @param event
+     *        Called when anchor overlay changed
      */
     public void controlPointOverlayChanged(OverlayEvent event)
     {
@@ -1551,7 +1605,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
     }
 
     /**
-     * @param object roi changed
+     * @param object
+     *        roi changed
      */
     @Override
     public void onChanged(CollapsibleEvent object)

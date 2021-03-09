@@ -85,7 +85,7 @@ public abstract class SearchResult implements Comparable<SearchResult>
     public abstract void executeAlternate();
 
     /**
-     * Get the RichTooltip associated to the result.
+     * @return the RichTooltip associated to the result.
      */
     public abstract RichTooltip getRichToolTip();
 

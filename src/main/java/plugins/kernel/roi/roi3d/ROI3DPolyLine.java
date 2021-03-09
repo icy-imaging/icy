@@ -1,5 +1,14 @@
 package plugins.kernel.roi.roi3d;
 
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.geom.Line2D;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import icy.canvas.IcyCanvas;
 import icy.common.CollapsibleEvent;
 import icy.math.Line3DIterator;
@@ -15,16 +24,6 @@ import icy.type.point.Point5D;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
 import icy.vtk.IcyVtkPanel;
-
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.Line2D;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
 import plugins.kernel.canvas.VtkCanvas;
 import vtk.vtkTubeFilter;
 
@@ -35,11 +34,18 @@ import vtk.vtkTubeFilter;
  */
 public class ROI3DPolyLine extends ROI3DShape
 {
+    /**
+     * @author Stephane
+     *
+     */
     public class ROI3DPolyLinePainter extends ROI3DShapePainter
     {
         // extra VTK 3D objects
         protected vtkTubeFilter tubeFilter;
 
+        /**
+         * Constructor
+         */
         public ROI3DPolyLinePainter()
         {
             super();
@@ -168,7 +174,10 @@ public class ROI3DPolyLine extends ROI3DShape
     }
 
     /**
+     * Construct 3D polyline ROI
      * 
+     * @param pt
+     *        source 3D point
      */
     public ROI3DPolyLine(Point3D pt)
     {
@@ -189,12 +198,21 @@ public class ROI3DPolyLine extends ROI3DShape
 
     /**
      * Generic constructor for interactive mode
+     * 
+     * @param pt
+     *        source 5D point
      */
     public ROI3DPolyLine(Point5D pt)
     {
         this(pt.toPoint3D());
     }
 
+    /**
+     * Construct 3D polyline ROI
+     * 
+     * @param polyline
+     *        source polyline
+     */
     public ROI3DPolyLine(Polyline3D polyline)
     {
         this(new Point3D.Double());
@@ -202,6 +220,12 @@ public class ROI3DPolyLine extends ROI3DShape
         setPolyline3D(polyline);
     }
 
+    /**
+     * Construct 3D polyline ROI
+     * 
+     * @param points
+     *        source 3D points list
+     */
     public ROI3DPolyLine(List<Point3D> points)
     {
         this(new Point3D.Double());
@@ -209,6 +233,9 @@ public class ROI3DPolyLine extends ROI3DShape
         setPoints(points);
     }
 
+    /**
+     * Construct 3D polyline ROI
+     */
     public ROI3DPolyLine()
     {
         this(new Point3D.Double());
@@ -226,11 +253,20 @@ public class ROI3DPolyLine extends ROI3DShape
         return new ROI3DPolyLinePainter();
     }
 
+    /**
+     * @return 3D polyline shape
+     */
     public Polyline3D getPolyline3D()
     {
         return (Polyline3D) shape;
     }
 
+    /**
+     * Set ROI from lst of points
+     * 
+     * @param pts
+     *        source 3D points list
+     */
     public void setPoints(List<Point3D> pts)
     {
         beginUpdate();
@@ -246,6 +282,12 @@ public class ROI3DPolyLine extends ROI3DShape
         }
     }
 
+    /**
+     * Set ROI from shape
+     * 
+     * @param value
+     *        the source shape
+     */
     public void setPolyline3D(Polyline3D value)
     {
         beginUpdate();
@@ -286,6 +328,20 @@ public class ROI3DPolyLine extends ROI3DShape
         return result;
     }
 
+    /**
+     * Draw (print) a 3D line into the given 2D BooleanMask
+     * 
+     * @param bounds2d
+     *        boolean mask bounds
+     * @param result
+     *        boolean mask array
+     * @param z
+     *        Z position
+     * @param p1
+     *        start 3D point of line
+     * @param p2
+     *        end 3D point of line
+     */
     public static void drawLine3DInBooleanMask2D(Rectangle bounds2d, boolean[] result, int z, Point3D p1, Point3D p2)
     {
         final Line2D l = new Line2D.Double(p1.getX(), p1.getY(), p2.getX(), p2.getY());

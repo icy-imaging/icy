@@ -16,6 +16,10 @@ public class GeomUtil
     /**
      * Get intersection point between 2 lines.
      * 
+     * @param lineA
+     *        first line
+     * @param lineB
+     *        second line
      * @return the intersection point between 2 lines, it can return <code>null</code> if the 2 lines are //
      */
     public static Point2D getIntersection(Line2D lineA, Line2D lineB)
@@ -45,7 +49,6 @@ public class GeomUtil
 
     /**
      * @return Get intersection point between 2 lines.
-     *
      * @param lineA
      *        first line
      * @param lineB
@@ -77,8 +80,9 @@ public class GeomUtil
 
     /**
      * @return Returns rotation information from AffineTransform.<br>
-     * <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
-     * @param transform affine transform
+     *         <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
+     * @param transform
+     *        affine transform
      */
     public static double getRotation(AffineTransform transform)
     {
@@ -129,8 +133,9 @@ public class GeomUtil
 
     /**
      * @return Returns rotation information from AffineTransform (fast method).<br>
-     * <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
-     * @param transform affine transform
+     *         <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
+     * @param transform
+     *        affine transform
      */
     public static double getRotationFast(AffineTransform transform)
     {
@@ -159,8 +164,9 @@ public class GeomUtil
 
     /**
      * @return Returns uniform scale (X=Y) information from AffineTransform.<br>
-     * <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
-     * @param transform affine transform
+     *         <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
+     * @param transform
+     *        affine transform
      */
     public static double getScale(AffineTransform transform)
     {
@@ -179,8 +185,9 @@ public class GeomUtil
 
     /**
      * @return Returns scale X information from AffineTransform.<br>
-     * <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
-     * @param transform affine transform
+     *         <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
+     * @param transform
+     *        affine transform
      */
     public static double getScaleX(AffineTransform transform)
     {
@@ -193,8 +200,9 @@ public class GeomUtil
 
     /**
      * @return Returns scale Y information from AffineTransform.<br>
-     * <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
-     * @param transform affine transform
+     *         <b>WARNING:</b> this method may not be 100% accurate because of possible combined transformation
+     * @param transform
+     *        affine transform
      */
     public static double getScaleY(AffineTransform transform)
     {

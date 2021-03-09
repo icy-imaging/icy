@@ -10,6 +10,11 @@ import java.awt.geom.Point2D;
 public class Line2DUtil
 {
     /**
+     * @param lineA
+     *        line 1
+     * @param lineB
+     *        line 2
+     * @return intersection point
      * @deprecated Use {@link GeomUtil#getIntersection(Line2D, Line2D)} instead
      */
     @Deprecated
@@ -19,6 +24,13 @@ public class Line2DUtil
     }
 
     /**
+     * @param lineA
+     *        line 1
+     * @param lineB
+     *        line 2
+     * @param limitToSegmentA
+     * @param limitToSegmentB
+     * @return intersection point
      * @deprecated Use {@link GeomUtil#getIntersection(Line2D, Line2D)} instead
      */
     @Deprecated

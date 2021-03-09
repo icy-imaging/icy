@@ -188,6 +188,13 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
+     * @param numComponents
+     *        number of component
+     * @param dataType
+     *        data type
+     * @param signed
+     *        signed value
+     * @return color model
      * @deprecated use {@link #createInstance(int, DataType)} instead
      */
     @Deprecated
@@ -231,21 +238,38 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Create default ColorModel : 4 components, unsigned byte data type
+     * @return a new default ColorModel : 4 components, unsigned byte data type
      */
     public static IcyColorModel createInstance()
     {
         return createInstance(4, DataType.UBYTE);
     }
 
+    /**
+     * @param transferType
+     *        data type
+     * @param w
+     *        width
+     * @param h
+     *        height
+     * @param numComponent
+     *        number of component
+     * @return a compatible {@link BandedSampleModel}
+     */
     public static BandedSampleModel createCompatibleSampleModel(int transferType, int w, int h, int numComponent)
     {
         return new BandedSampleModel(transferType, w, h, numComponent);
     }
 
     /**
-     * Create a writable raster from specified data and size.<br>
-     * The Object data is internally a 2D array [][]
+     * @param data
+     *        input 2D array
+     * @param w
+     *        width of the raster
+     * @param h
+     *        height of the raster
+     * @return a new writable raster from specified data and size.<br>
+     *         The Object data is internally a 2D array [][]
      */
     public static WritableRaster createWritableRaster(Object data, int w, int h)
     {
@@ -295,7 +319,13 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Create a writable raster from specified data and size.<br>
+     * @param data
+     *        input array
+     * @param w
+     *        width of the raster
+     * @param h
+     *        height of the raster
+     * @return a new writable raster from specified data and size.<br>
      */
     public WritableRaster createWritableRaster(Object[] data, int w, int h)
     {
@@ -325,6 +355,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
 
     /**
      * Set bounds from specified {@link IcyColorModel}
+     * 
+     * @param source
+     *        source colormodel
      */
     public void setBounds(IcyColorModel source)
     {
@@ -371,6 +404,8 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
+     * @param source
+     *        source colormodel
      * @deprecated Use {@link #setBounds(IcyColorModel)} instead.
      */
     @Deprecated
@@ -381,6 +416,10 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
 
     /**
      * Return the toRGB colormap of specified RGB component
+     * 
+     * @param component
+     *        component index
+     * @return colormap
      */
     public IcyColorMap getColorMap(int component)
     {
@@ -388,6 +427,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
+     * @param component
+     *        component index
+     * @return colormap
      * @deprecated Use {@link #getColorMap(int)} instead (different case).
      */
     @Deprecated
@@ -408,6 +450,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
+     * @param source source colormodel
      * @deprecated Use {@link #setColorMaps(ColorModel)} instead (different case).
      */
     @Deprecated
@@ -417,6 +460,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
+     * @param source source colormodel
      * @deprecated Use {@link #setColorMaps(ColorModel)} instead.
      */
     @Deprecated
@@ -441,6 +485,10 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
+     * @param component
+     *        component we want to set the colormap
+     * @param map
+     *        source colormap to copy
      * @deprecated Use {@link #setColorMap(int, IcyColorMap, boolean)} instead.
      */
     @Deprecated
@@ -488,6 +536,13 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     @Override
     public abstract int getRGB(Object inData);
 
+    /**
+     * @param pixel
+     *        pixel array
+     * @param lut
+     *        LUT for color conversion
+     * @return same as {@link #getRGB(int)} but using a specific {@link LUT}
+     */
     public abstract int getRGB(Object pixel, LUT lut);
 
     /**
@@ -657,7 +712,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * 
+     * @param cm
+     *        color model to test
+     * @return if specified colormodel is compatible with the current one
      */
     public boolean isCompatible(IcyColorModel cm)
     {
@@ -714,6 +771,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     /**
      * Change the colorspace of the color model.<br>
      * <b>You should never use this method directly (internal use only)</b>
+     * 
+     * @param colorSpace
+     *        color space
      */
     public void setColorSpace(IcyColorSpace colorSpace)
     {
@@ -769,6 +829,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
 
     /**
      * @deprecated use {@link #getDataType_()} instead
+     * @return data type
      */
     @Deprecated
     public int getDataType()
@@ -777,8 +838,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Return data type for this colormodel
-     * 
+     * @return data type for this colormodel
      * @see DataType
      */
     public DataType getDataType_()
@@ -787,7 +847,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * return default component bounds for this colormodel
+     * @return default component bounds for this colormodel
      */
     public double[] getDefaultComponentBounds()
     {
@@ -795,7 +855,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Get component absolute minimum value
+     * @param component
+     *        component index
+     * @return component absolute minimum value
      */
     public double getComponentAbsMinValue(int component)
     {
@@ -804,7 +866,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Get component absolute maximum value
+     * @param component
+     *        component index
+     * @return component absolute maximum value
      */
     public double getComponentAbsMaxValue(int component)
     {
@@ -813,7 +877,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Get component absolute bounds (min and max values)
+     * @param component
+     *        component index
+     * @return component absolute bounds (min and max values)
      */
     public double[] getComponentAbsBounds(int component)
     {
@@ -826,7 +892,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Get component user minimum value
+     * @param component
+     *        component index
+     * @return component user minimum value
      */
     public double getComponentUserMinValue(int component)
     {
@@ -835,7 +903,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Get user component user maximum value
+     * @param component
+     *        component index
+     * @return user component user maximum value
      */
     public double getComponentUserMaxValue(int component)
     {
@@ -844,7 +914,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Get component user bounds (min and max values)
+     * @param component
+     *        component index
+     * @return component user bounds (min and max values)
      */
     public double[] getComponentUserBounds(int component)
     {
@@ -857,7 +929,11 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Set component absolute minimum value
+     * @param component
+     *        component index
+     *        Set component absolute minimum value
+     * @param min
+     *        minimum value
      */
     public void setComponentAbsMinValue(int component, double min)
     {
@@ -867,7 +943,11 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Set component absolute maximum value
+     * @param component
+     *        component index
+     *        Set component absolute maximum value
+     * @param max
+     *        maximum value
      */
     public void setComponentAbsMaxValue(int component, double max)
     {
@@ -877,7 +957,11 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Set component absolute bounds (min and max values)
+     * @param component
+     *        component index
+     *        Set component absolute bounds (min and max values)
+     * @param bounds
+     *        bounds value (min/max)
      */
     public void setComponentAbsBounds(int component, double[] bounds)
     {
@@ -885,7 +969,13 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Set component absolute bounds (min and max values)
+     * @param component
+     *        component index
+     *        Set component absolute bounds (min and max values)
+     * @param min
+     *        minimum value
+     * @param max
+     *        maximum value
      */
     public void setComponentAbsBounds(int component, double min, double max)
     {
@@ -896,6 +986,11 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
 
     /**
      * Set component user minimum value
+     * 
+     * @param component
+     *        component index
+     * @param min
+     *        minimum value
      */
     public void setComponentUserMinValue(int component, double min)
     {
@@ -906,6 +1001,11 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
 
     /**
      * Set component user maximum value
+     * 
+     * @param component
+     *        component index
+     * @param max
+     *        maximum value
      */
     public void setComponentUserMaxValue(int component, double max)
     {
@@ -916,6 +1016,11 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
 
     /**
      * Set component user bounds (min and max values)
+     * 
+     * @param component
+     *        component index
+     * @param bounds
+     *        bounds value (min/max)
      */
     public void setComponentUserBounds(int component, double[] bounds)
     {
@@ -924,6 +1029,13 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
 
     /**
      * Set component user bounds (min and max values)
+     * 
+     * @param component
+     *        component index
+     * @param min
+     *        minimum value
+     * @param max
+     *        maximum value
      */
     public void setComponentUserBounds(int component, double min, double max)
     {
@@ -934,6 +1046,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
 
     /**
      * Set components absolute bounds (min and max values)
+     * 
+     * @param bounds
+     *        bounds value (min/max)
      */
     public void setComponentsAbsBounds(double[][] bounds)
     {
@@ -948,6 +1063,9 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
 
     /**
      * Set components user bounds (min and max values)
+     * 
+     * @param bounds
+     *        bounds value (min/max)
      */
     public void setComponentsUserBounds(double[][] bounds)
     {
@@ -961,7 +1079,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Return true if colorModel is float data type
+     * @return true if colorModel is float data type
      */
     public boolean isFloatDataType()
     {
@@ -969,7 +1087,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Return true if colorModel data type is signed
+     * @return true if colorModel data type is signed
      */
     public boolean isSignedDataType()
     {
@@ -977,8 +1095,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * Return true if color maps associated to this {@link IcyColorModel} are all linear map.
-     * 
+     * @return true if color maps associated to this {@link IcyColorModel} are all linear map.
      * @see IcyColorMap#isLinear()
      */
     public boolean hasLinearColormaps()
@@ -1063,16 +1180,25 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
         updater.changed(new IcyColorModelEvent(this, IcyColorModelEventType.COLORMAP_CHANGED, e.getComponent()));
     }
 
+    /**
+     * start updating object
+     */
     public void beginUpdate()
     {
         updater.beginUpdate();
     }
 
+    /**
+     * end updating object
+     */
     public void endUpdate()
     {
         updater.endUpdate();
     }
 
+    /**
+     * @return updating state
+     */
     public boolean isUpdating()
     {
         return updater.isUpdating();

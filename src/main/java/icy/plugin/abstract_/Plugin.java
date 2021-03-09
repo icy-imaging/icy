@@ -154,16 +154,25 @@ public abstract class Plugin
         return ClassUtil.getPathFromQualifiedName(ClassUtil.getPackageName(getClass().getName()));
     }
 
+    /**
+     * @return current active viewer
+     */
     public Viewer getActiveViewer()
     {
         return Icy.getMainInterface().getActiveViewer();
     }
 
+    /**
+     * @return current active sequence
+     */
     public Sequence getActiveSequence()
     {
         return Icy.getMainInterface().getActiveSequence();
     }
 
+    /**
+     * @return current active image
+     */
     public IcyBufferedImage getActiveImage()
     {
         return Icy.getMainInterface().getActiveImage();
@@ -199,21 +208,42 @@ public abstract class Plugin
         return getActiveImage();
     }
 
+    /**
+     * Add a new frame to Icy desktop
+     * 
+     * @param frame
+     *        the frame to add
+     */
     public void addIcyFrame(final IcyFrame frame)
     {
         frame.addToDesktopPane();
     }
 
+    /**
+     * Display a new sequence
+     * 
+     * @param sequence
+     *        the sequence to dispay
+     */
     public void addSequence(final Sequence sequence)
     {
         Icy.getMainInterface().addSequence(sequence);
     }
 
+    /**
+     * Close / hide a sequence
+     * 
+     * @param sequence
+     *        the sequence to close
+     */
     public void removeSequence(final Sequence sequence)
     {
         sequence.close();
     }
 
+    /**
+     * @return the list of all opened/dispayed Sequence
+     */
     public ArrayList<Sequence> getSequences()
     {
         return Icy.getMainInterface().getSequences();
@@ -221,8 +251,7 @@ public abstract class Plugin
 
     /**
      * @return Return the resource URL from given resource name.<br>
-     * Ex: <code>getResource("plugins/author/resources/def.xml");</code>
-     * 
+     *         Ex: <code>getResource("plugins/author/resources/def.xml");</code>
      * @param name
      *        resource name
      */
@@ -233,11 +262,11 @@ public abstract class Plugin
 
     /**
      * @return Return resources corresponding to given resource name.<br>
-     * Ex: <code>getResources("plugins/author/resources/def.xml");</code>
-     * 
+     *         Ex: <code>getResources("plugins/author/resources/def.xml");</code>
      * @param name
      *        resource name
-     * @throws IOException ioexception
+     * @throws IOException
+     *         ioexception
      */
     public Enumeration<URL> getResources(String name) throws IOException
     {
@@ -246,8 +275,7 @@ public abstract class Plugin
 
     /**
      * @return Return the resource as data stream from given resource name.<br>
-     * Ex: <code>getResourceAsStream("plugins/author/resources/def.xml");</code>
-     * 
+     *         Ex: <code>getResourceAsStream("plugins/author/resources/def.xml");</code>
      * @param name
      *        resource name
      */
@@ -258,8 +286,7 @@ public abstract class Plugin
 
     /**
      * @return Return the image resource from given resource name
-     * Ex: <code>getResourceAsStream("plugins/author/resources/image.png");</code>
-     * 
+     *         Ex: <code>getResourceAsStream("plugins/author/resources/image.png");</code>
      * @param resourceName
      *        resource name
      */
@@ -270,8 +297,7 @@ public abstract class Plugin
 
     /**
      * @return Return the icon resource from given resource name
-     * Ex: <code>getResourceAsStream("plugins/author/resources/icon.png");</code>
-     * 
+     *         Ex: <code>getResourceAsStream("plugins/author/resources/icon.png");</code>
      * @param resourceName
      *        resource name
      */
@@ -290,9 +316,10 @@ public abstract class Plugin
 
     /**
      * @return Retrieve the plugin preferences node for specified name.<br>
-     * i.e : getPreferences("window") will return node
-     * "plugins.[authorPackage].[pluginClass].window"
-     * @param name string
+     *         i.e : getPreferences("window") will return node
+     *         "plugins.[authorPackage].[pluginClass].window"
+     * @param name
+     *        string
      */
     public XMLPreferences getPreferences(String name)
     {
@@ -301,15 +328,15 @@ public abstract class Plugin
 
     /**
      * @return Returns the base resource path for plugin native libraries.<br>
-     * Depending the Operating System it can returns these values:
-     * <ul>
-     * <li>lib/unix32</li>
-     * <li>lib/unix64</li>
-     * <li>lib/mac32</li>
-     * <li>lib/mac64</li>
-     * <li>lib/win32</li>
-     * <li>lib/win64</li>
-     * </ul>
+     *         Depending the Operating System it can returns these values:
+     *         <ul>
+     *         <li>lib/unix32</li>
+     *         <li>lib/unix64</li>
+     *         <li>lib/mac32</li>
+     *         <li>lib/mac64</li>
+     *         <li>lib/win32</li>
+     *         <li>lib/win64</li>
+     *         </ul>
      */
     protected static String getResourceNativeLibraryPath()
     {
@@ -318,11 +345,11 @@ public abstract class Plugin
 
     /**
      * @return Return the resource URL from given resource name and class instance.<br>
-     * Ex: <code>getResource(Plugin.class, "plugins/author/resources/def.xml");</code>
-     * 
+     *         Ex: <code>getResource(Plugin.class, "plugins/author/resources/def.xml");</code>
      * @param name
      *        resource name
-     * @param clazz class
+     * @param clazz
+     *        class
      */
     public static URL getResource(Class clazz, String name)
     {
@@ -354,8 +381,10 @@ public abstract class Plugin
      * Here "xxx" is the name of the native library.<br>
      * Current approach is to unpack the native library into a temporary file and load from there.
      * 
-     * @param libName string
-     * @param clazz class
+     * @param libName
+     *        string
+     * @param clazz
+     *        class
      * @return true if the library was correctly loaded.
      * @see #prepareLibrary(String)
      */
@@ -397,8 +426,10 @@ public abstract class Plugin
      * 
      * Here "xxx" is the name of the native library.<br>
      * 
-     * @param libName string
-     * @param clazz class
+     * @param libName
+     *        string
+     * @param clazz
+     *        class
      * @return the extracted native library file.
      * @see #loadLibrary(String)
      */
@@ -457,7 +488,8 @@ public abstract class Plugin
      * @param resource
      *        the resource URL
      * @return the extracted file
-     * @throws IOException io exception
+     * @throws IOException
+     *         io exception
      */
     protected static File extractResourceTo(String outputPath, URL resource) throws IOException
     {
@@ -529,7 +561,8 @@ public abstract class Plugin
      * Here "xxx" is the name of the native library.<br>
      * Current approach is to unpack the native library into a temporary file and load from there.
      * 
-     * @param libName string
+     * @param libName
+     *        string
      * @return true if the library was correctly loaded.
      * @see #prepareLibrary(String)
      */
@@ -563,7 +596,8 @@ public abstract class Plugin
      * 
      * Here "xxx" is the name of the native library.<br>
      * 
-     * @param libName string
+     * @param libName
+     *        string
      * @return the extracted native library file.
      * @see #loadLibrary(String)
      */
@@ -574,9 +608,12 @@ public abstract class Plugin
 
     /**
      * @deprecated Use {@link #extractResourceTo(String, URL)}
-     * @param outputPath string
-     * @param resource url
+     * @param outputPath
+     *        string
+     * @param resource
+     *        url
      * @return file
+     * @throws IOException
      */
     @Deprecated
     protected File extractResource(String outputPath, URL resource) throws IOException
@@ -585,9 +622,9 @@ public abstract class Plugin
     }
 
     /**
-     * @param errorLog Report an error log for this plugin (reported to Icy web site which report then to the
-     * author of the plugin).
-     * 
+     * @param errorLog
+     *        Report an error log for this plugin (reported to Icy web site which report then to the
+     *        author of the plugin).
      * @see IcyExceptionHandler#report(PluginDescriptor, String)
      */
     public void report(String errorLog)

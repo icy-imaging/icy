@@ -148,6 +148,12 @@ public class Polyline2D implements Shape, Cloneable
         calculatePath();
     }
 
+    /**
+     * Construct a new Polyline 2D
+     * 
+     * @param line
+     *        source 2D line
+     */
     public Polyline2D(Line2D line)
     {
         super();
@@ -199,6 +205,9 @@ public class Polyline2D implements Shape, Cloneable
         return pol;
     }
 
+    /**
+     * compute the path
+     */
     public void calculatePath()
     {
         path = new Path2D.Double();
@@ -240,6 +249,12 @@ public class Polyline2D implements Shape, Cloneable
         }
     }
 
+    /**
+     * Add a new Point to the polyline
+     * 
+     * @param p
+     *        the point to add
+     */
     public void addPoint(Point2D p)
     {
         addPoint(p.getX(), p.getY());
@@ -310,9 +325,11 @@ public class Polyline2D implements Shape, Cloneable
     }
 
     /**
-     * Determines whether the specified {@link Point} is inside this <code>Polyline2D</code>.
-     * This method is required to implement the Shape interface,
-     * but in the case of Line2D objects it always returns false since a line contains no area.
+     * @param p
+     *        the point to test
+     * @return whether the specified {@link Point} is inside this <code>Polyline2D</code>.
+     *         This method is required to implement the Shape interface,
+     *         but in the case of Line2D objects it always returns false since a line contains no area.
      */
     public boolean contains(Point p)
     {
@@ -320,9 +337,9 @@ public class Polyline2D implements Shape, Cloneable
     }
 
     /**
-     * Determines if the specified coordinates are inside this <code>Polyline2D</code>.
-     * This method is required to implement the Shape interface,
-     * but in the case of Line2D objects it always returns false since a line contains no area.
+     * @return <i>true</i> if the specified coordinates are inside this <code>Polyline2D</code>.
+     *         This method is required to implement the Shape interface,
+     *         but in the case of Line2D objects it always returns false since a line contains no area.
      */
     @Override
     public boolean contains(double x, double y)
@@ -331,9 +348,13 @@ public class Polyline2D implements Shape, Cloneable
     }
 
     /**
-     * Determines whether the specified coordinates are inside this <code>Polyline2D</code>.
-     * This method is required to implement the Shape interface,
-     * but in the case of Line2D objects it always returns false since a line contains no area.
+     * @param x
+     *        X coordinate of the position to test
+     * @param y
+     *        Y coordinate of the position to test
+     * @return whether the specified coordinates are inside this <code>Polyline2D</code>.
+     *         This method is required to implement the Shape interface,
+     *         but in the case of Line2D objects it always returns false since a line contains no area.
      */
     public boolean contains(int x, int y)
     {
@@ -341,9 +362,9 @@ public class Polyline2D implements Shape, Cloneable
     }
 
     /**
-     * Tests if a specified {@link Point2D} is inside the boundary of this <code>Polyline2D</code>.
-     * This method is required to implement the Shape interface,
-     * but in the case of Line2D objects it always returns false since a line contains no area.
+     * @return <i>true</i> if a specified {@link Point2D} is inside the boundary of this <code>Polyline2D</code>.
+     *         This method is required to implement the Shape interface,
+     *         but in the case of Line2D objects it always returns false since a line contains no area.
      */
     @Override
     public boolean contains(Point2D p)
@@ -417,11 +438,11 @@ public class Polyline2D implements Shape, Cloneable
         return false;
     }
 
-    /*
-     * get the associated {@link Polygon2D}.
-     * This method take care that may be the last point can
-     * be equal to the first. In that case it must not be included in the Polygon,
-     * as polygons declare their first point only once.
+    /**
+     * @return get the associated {@link Polygon2D}.
+     *         This method take care that may be the last point can
+     *         be equal to the first. In that case it must not be included in the Polygon,
+     *         as polygons declare their first point only once.
      */
     public Polygon2D getPolygon2D()
     {
