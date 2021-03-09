@@ -500,7 +500,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
             readerProcessor.setThreadName("Image tile reader");
 
-            // force working in RAM as we will do many write operations (too slow with cache) 
+            // force working in RAM as we will do many write operations (too slow with cache)
             result.setVolatile(false);
             // to avoid multiple update
             result.beginUpdate();
@@ -585,7 +585,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
             // restore volatile state
             result.setVolatile(GeneralPreferences.getVirtualMode());
-            
+
             // faster memory release
             buffers.clear();
         }
@@ -666,12 +666,23 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         openFlags = 0;
     }
 
+    protected void setReader(Class<? extends IFormatReader> readerClass) throws FormatException, IOException
+    {
+        IFormatReader newReader = internalReader;
+
+        // no reader defined or not compatible..
+        if ((newReader == null) || !readerClass.isInstance(newReader))
+            newReader = mainReader.getReader(readerClass);
+
+        setReaderInternal(newReader);
+    }
+
     protected void setReader(String path) throws FormatException, IOException
     {
         IFormatReader newReader = internalReader;
 
         // no reader defined so just get the good one
-        if (internalReader == null)
+        if (newReader == null)
             newReader = mainReader.getReader(path);
         else
         {
@@ -685,6 +696,11 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
             }
         }
 
+        setReaderInternal(newReader);
+    }
+
+    protected void setReaderInternal(IFormatReader newReader) throws FormatException, IOException
+    {
         // reader changed ?
         if (internalReader != newReader)
         {
@@ -842,6 +858,31 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     @Override
     public boolean open(String path, int flags) throws UnsupportedFormatException, IOException
     {
+        return openWith(path, flags, null);
+    }
+
+    /**
+     * Open the image designed by the specified file <code>path</code> to allow image data / metadata access.<br>
+     * Calling this method will automatically close the previous opened image.<br>
+     * Don't forget to call {@link #close()} to close the image when you're done.<br>
+     * 
+     * @param path
+     *        Path of the image file to open.
+     * @param flags
+     *        operation flag:<br>
+     *        <ul>
+     *        <li>{@link #FLAG_METADATA_MINIMUM} = load minimum metadata informations</li>
+     *        <li>{@link #FLAG_METADATA_ALL} = load all metadata informations</li>
+     *        </ul>
+     * @param readerClass
+     *        the IFormatReader class to use to open the dataset (can be null).
+     * @return <code>true</code> if the operation has succeeded and <code>false</code> otherwise.
+     * @throws UnsupportedFormatException 
+     * @throws IOException 
+     */
+    public boolean openWith(String path, int flags, Class<? extends IFormatReader> readerClass)
+            throws UnsupportedFormatException, IOException
+    {
         // already opened ?
         if (isOpen(path))
             return true;
@@ -854,8 +895,13 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
             // better for Bio-Formats to have system path format
             final String adjPath = new File(path).getAbsolutePath();
 
-            // ensure we have the correct reader
-            setReader(adjPath);
+            // force reader class
+            if (readerClass != null)
+                setReader(readerClass);
+            // determine reader from file
+            else
+                setReader(adjPath);
+
             // then open it
             openReader(reader, adjPath, flags);
 
