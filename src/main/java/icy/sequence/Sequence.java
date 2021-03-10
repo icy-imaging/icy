@@ -160,6 +160,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     public static final String ID_PIXEL_SIZE_Z = "pixelSizeZ";
     public static final String ID_TIME_INTERVAL = "timeInterval";
     public static final String ID_CHANNEL_NAME = "channelName";
+    public static final String ID_USER_NAME = "userName";
     public static final String ID_VIRTUAL = "virtual";
 
     public static final String PROPERTY_ID = ID_ID;
@@ -174,6 +175,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     public static final String PROPERTY_PIXEL_SIZE_Z = ID_PIXEL_SIZE_Z;
     public static final String PROPERTY_TIME_INTERVAL = ID_TIME_INTERVAL;
     public static final String PROPERTY_CHANNEL_NAME = ID_CHANNEL_NAME;
+    public static final String PROPERTY_USER_NAME = ID_USER_NAME;
     public static final String PROPERTY_VIRTUAL = ID_VIRTUAL;
 
     /**
@@ -625,8 +627,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public void copyMetaDataFrom(Sequence source, boolean copyName)
     {
-        // copy all metadata from source
-        metaData = OMEUtil.createOMEXMLMetadata(source.getOMEXMLMetadata());
+        // copy all metadata from source (preserve user name if we want to keep same name)
+        metaData = OMEUtil.createOMEXMLMetadata(source.getOMEXMLMetadata(), !copyName);
 
         // restore name if needed
         if (copyName)
@@ -690,7 +692,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     {
         try
         {
-            undoManager.addEdit(new MetadataSequenceEdit(OMEUtil.createOMEXMLMetadata(metaData), this, name));
+            undoManager.addEdit(new MetadataSequenceEdit(OMEUtil.createOMEXMLMetadata(metaData, false), this, name));
             return true;
         }
         catch (Throwable t)
@@ -2063,6 +2065,28 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             MetaDataUtil.setChannelName(metaData, 0, index, value);
             metaChanged(ID_CHANNEL_NAME, index);
         }
+    }
+
+    /**
+     * @return the user name of the person who created this Sequence (read only property).<br>
+     *         UserName generally refer to the user name environment variable value (logged user on the system) when the sequence has been created / acquired
+     *         on the microscope if this information is present, or later modified / generated using Icy.<br>
+     *         Note that you can have several user name as the original image may have been modified later by someone else, in which case you can use
+     *         {@link #getUserNames()} method instead
+     */
+    public String getUserName()
+    {
+        return MetaDataUtil.getUserName(metaData);
+    }
+
+    /**
+     * @return the user name(s) of the person(s) who created this Sequence (read only properties).<br>
+     *         UserName generally refer to the user name environment variable value (logged user on the system) when the sequence has been created / acquired
+     *         on the microscope if this information is present in the original metadata, or later modified / generated using Icy.<br>
+     */
+    public List<String> getUserNames()
+    {
+        return MetaDataUtil.getUserNames(metaData);
     }
 
     /**
@@ -7996,6 +8020,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             return Double.toString(getPixelSizeZ());
         if (StringUtil.equals(adjName, PROPERTY_TIME_INTERVAL))
             return Double.toString(getTimeInterval());
+        if (StringUtil.equals(adjName, PROPERTY_USER_NAME))
+            return getUserName();
         if (StringUtil.equals(adjName, PROPERTY_VIRTUAL))
             return Boolean.toString(isVirtual());
 
@@ -8049,7 +8075,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         if (StringUtil.equals(adjName, PROPERTY_ID) || StringUtil.equals(adjName, PROPERTY_CHANNEL_NAME)
                 || StringUtil.equals(adjName, PROPERTY_POSITION_T_OFFSET))
-            throw new IllegalArgumentException("Cannot return value of property '" + adjName + "' as String");
+            throw new IllegalArgumentException("Cannot set value of property '" + adjName + "'");
 
         synchronized (properties)
         {
