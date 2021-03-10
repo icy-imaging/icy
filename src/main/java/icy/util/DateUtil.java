@@ -103,10 +103,10 @@ public class DateUtil
      * @param format
      *        define the wanted format.<br>
      *        Ex :<br>
-     *        DateUtil.now("dd MMMMM yyyy");<br>
+     *        DateUtil.now("EEE d MMMMM yyyy");<br>
      *        DateUtil.now("yyyyMMdd");<br>
      *        DateUtil.now("MM/dd/yy");<br>
-     *        DateUtil.now("yyyy.MM.dd G 'at' hh:mm:ss z");<br>
+     *        DateUtil.now("yyyy.MM.dd G 'at' HH:mm:ss z");<br>
      *        DateUtil.now("H:mm:ss:SSS");<br>
      *        DateUtil.now("yyyy.MMMMM.dd GGG hh:mm aaa");<br>
      */
@@ -114,12 +114,12 @@ public class DateUtil
     {
         return new SimpleDateFormat(format).format(date);
     }
-    
+
     /**
      * Returns given time in ms in in international time String format.
      * 
      * @param valueInMs
-     *        : value in milliseconds
+     *        value in milliseconds
      * @return <b>Example:</b> "2:21:18.345" for 2h21mn, "1.543" for 1 second and 543 ms
      */
     public static String getTimeAsString(double valueInMs)
@@ -134,19 +134,22 @@ public class DateUtil
         }
         if (v >= 60000d)
         {
-            if (StringUtil.isEmpty(result)) result += ":";
+            if (StringUtil.isEmpty(result))
+                result += ":";
             result += (int) (v / 60000d);
             v %= 60000d;
         }
         if (v >= 1000d)
         {
-            if (StringUtil.isEmpty(result)) result += ":";
+            if (StringUtil.isEmpty(result))
+                result += ":";
             result += (int) (v / 1000d);
             v %= 1000d;
         }
         if (v != 0d)
         {
-            if (StringUtil.isEmpty(result)) result += ".";
+            if (StringUtil.isEmpty(result))
+                result += ".";
             result += (int) v;
         }
 
