@@ -19,7 +19,9 @@
 package icy.sequence;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.joda.time.Instant;
@@ -2296,6 +2298,75 @@ public class MetaDataUtil
     }
 
     /**
+     * @return the last Experimenter user name (it may have several experimenter)
+     * @param metaData
+     *        OME metadata
+     */
+    public static String getUserName(OMEXMLMetadata metaData)
+    {
+        if (metaData.getExperimenterCount() > 0)
+            return metaData.getExperimenterUserName(0);
+
+        return "";
+    }
+
+    /**
+     * @return the list of Experimenter user name
+     * @param metaData
+     *        OME metadata
+     */
+    public static List<String> getUserNames(OMEXMLMetadata metaData)
+    {
+        final List<String> result = new ArrayList<>();
+
+        for (int i = 0; i < metaData.getExperimenterCount(); i++)
+            result.add(metaData.getExperimenterUserName(i));
+
+        return result;
+    }
+
+    /**
+     * @param metaData
+     *        OME metadata
+     * @param userName
+     *        user name to search for
+     * @return <i>true</i> if the given user name is already existing in metadata user name list
+     */
+    public static boolean containsUserName(OMEXMLMetadata metaData, String userName)
+    {
+        for (int i = 0; i < metaData.getExperimenterCount(); i++)
+            if (StringUtil.equals(metaData.getExperimenterUserName(i), userName))
+                return true;
+
+        return false;
+    }
+
+    /**
+     * Set the Experimenter user name.<br>
+     * If we already have experimenter user name then the function will add a new experimenter user name
+     * to keep trace of <i>history</i>
+     * 
+     * @param metaData
+     *        OME metadata
+     * @param userName
+     *        user name to set
+     * @see #getUserNames(OMEXMLMetadata)
+     */
+    public static void setUserName(OMEXMLMetadata metaData, String userName)
+    {
+        // not already present ? --> add new experimenter user name
+        if (!containsUserName(metaData, userName))
+        {
+            final int ind = metaData.getExperimenterCount();
+            metaData.setExperimenterUserName(userName, ind);
+
+            // need to set an ID ?
+            if (StringUtil.isEmpty(metaData.getExperimenterID(ind)))
+                metaData.setExperimenterID("Experimenter:" + ind, ind);
+        }
+    }
+
+    /**
      * @deprecated Use {@link #getChannelColor(OMEXMLMetadata, int, int)} instead
      * @param metaData
      *        OME metadata
@@ -2593,8 +2664,8 @@ public class MetaDataUtil
      */
     public static OMEXMLMetadata generateMetaData(Sequence sequence, boolean separateChannel)
     {
-        // do a copy as we mean use several time the same source sequence metadata
-        final OMEXMLMetadata result = OMEUtil.createOMEXMLMetadata(sequence.getOMEXMLMetadata());
+        // do a copy as we mean use several time the same source sequence metadata (preserve user name here)
+        final OMEXMLMetadata result = OMEUtil.createOMEXMLMetadata(sequence.getOMEXMLMetadata(), false);
 
         setMetaData(result, sequence.getSizeX(), sequence.getSizeY(), sequence.getSizeC(), sequence.getSizeZ(),
                 sequence.getSizeT(), sequence.getDataType_(), separateChannel);
@@ -3013,4 +3084,5 @@ public class MetaDataUtil
     {
         return StringUtil.isEmpty(xmlAnnotation.getDescription()) && StringUtil.isEmpty(xmlAnnotation.getValue());
     }
+
 }
