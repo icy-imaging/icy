@@ -186,6 +186,7 @@ public class SequencePersistent implements XMLPersistent
 
         double d;
         long l;
+        String s;
 
         d = XMLUtil.getElementDoubleValue(nodeMeta, Sequence.ID_POSITION_X, Double.NaN);
         if (!Double.isNaN(d))
@@ -215,11 +216,16 @@ public class SequencePersistent implements XMLPersistent
 
         for (int c = 0; c < sequence.getSizeC(); c++)
         {
-            final String s = XMLUtil.getElementValue(nodeMeta, Sequence.ID_CHANNEL_NAME + c, "");
+            s = XMLUtil.getElementValue(nodeMeta, Sequence.ID_CHANNEL_NAME + c, "");
 
             if (!StringUtil.isEmpty(s))
                 sequence.setChannelName(c, s);
         }
+
+        s = XMLUtil.getElementValue(nodeMeta, Sequence.ID_USER_NAME, "");
+        // do it through MetaDataUtil directly as we are not supposed to be able to change it from Sequence
+        if (!StringUtil.isEmpty(s))
+            MetaDataUtil.setUserName(sequence.getOMEXMLMetadata(), s);
 
         return true;
     }
@@ -329,6 +335,8 @@ public class SequencePersistent implements XMLPersistent
 
             for (int c = 0; c < sequence.getSizeC(); c++)
                 XMLUtil.setElementValue(nodeMeta, Sequence.ID_CHANNEL_NAME + c, sequence.getChannelName(c));
+
+            XMLUtil.setElementValue(nodeMeta, Sequence.ID_USER_NAME, sequence.getUserName());
         }
     }
 
@@ -388,6 +396,7 @@ public class SequencePersistent implements XMLPersistent
         }
     }
 
+    // save custom properties
     private void savePropertiesToXML(Node node)
     {
         final Map<String, String> properties = sequence.properties;
