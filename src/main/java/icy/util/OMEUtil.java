@@ -18,17 +18,17 @@
  */
 package icy.util;
 
-import icy.image.IcyBufferedImage;
-import icy.sequence.MetaDataUtil;
-import icy.sequence.Sequence;
-import icy.system.IcyExceptionHandler;
-import icy.type.DataType;
-import icy.type.TypeUtil;
-
 import java.awt.Color;
 
 import org.w3c.dom.Document;
 
+import icy.image.IcyBufferedImage;
+import icy.sequence.MetaDataUtil;
+import icy.sequence.Sequence;
+import icy.system.IcyExceptionHandler;
+import icy.system.SystemUtil;
+import icy.type.DataType;
+import icy.type.TypeUtil;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
@@ -237,8 +237,12 @@ public class OMEUtil
 
     /**
      * Create a new OME Metadata object from the specified Metadata object.<br>
+     * 
+     * @param setUserName
+     *        set the experimenter user name from current User Name environment var
+     *        otherwise we preserve old user name (in case of simple image loading / duplicating / saving..)
      */
-    public static OMEXMLMetadata createOMEXMLMetadata(MetadataRetrieve metadata)
+    public static OMEXMLMetadata createOMEXMLMetadata(MetadataRetrieve metadata, boolean setUserName)
     {
         final OMEXMLMetadata result = createOMEXMLMetadata();
 
@@ -268,7 +272,19 @@ public class OMEUtil
                     (loci.formats.meta.MetadataStore) result);
         }
 
+        // want to set user name here ?
+        if (setUserName)
+            MetaDataUtil.setUserName(result, SystemUtil.getUserName());
+
         return result;
+    }
+
+    /**
+     * Create a new OME Metadata object from the specified Metadata object.<br>
+     */
+    public static OMEXMLMetadata createOMEXMLMetadata(MetadataRetrieve metadata)
+    {
+        return createOMEXMLMetadata(metadata, false);
     }
 
     /**
@@ -288,7 +304,8 @@ public class OMEUtil
      */
     public static OMEXMLMetadata createOMEXMLMetadata(MetadataRetrieve metadata, int serie)
     {
-        final OMEXMLMetadata result = OMEUtil.createOMEXMLMetadata(metadata);
+        // generally used on loading so preserve user name here
+        final OMEXMLMetadata result = OMEUtil.createOMEXMLMetadata(metadata, false);
 
         MetaDataUtil.keepSingleSerie(result, serie);
 
@@ -316,7 +333,7 @@ public class OMEUtil
         if (metadata instanceof OMEXMLMetadata)
             return (OMEXMLMetadata) metadata;
 
-        return createOMEXMLMetadata(metadata);
+        return createOMEXMLMetadata(metadata, false);
     }
 
     /**
