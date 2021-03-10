@@ -23,7 +23,7 @@ public abstract class ThreadedSelectionFilter implements SelectionFilter
     @Override
     public Sequence processSequence(Sequence sequence, int... radius) throws RuntimeException, InterruptedException
     {
-        Sequence out = new Sequence(OMEUtil.createOMEXMLMetadata(sequence.getOMEXMLMetadata()));
+        Sequence out = new Sequence(OMEUtil.createOMEXMLMetadata(sequence.getOMEXMLMetadata(), true));
         out.setName(sequence.getName() + "_" + getFilterName());
 
         if (radius.length == 0)

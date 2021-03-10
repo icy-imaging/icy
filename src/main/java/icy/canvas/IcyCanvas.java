@@ -3864,7 +3864,7 @@ public abstract class IcyCanvas extends JPanel
         if (seqIn != null)
         {
             // derive original metadata
-            result.setMetaData(OMEUtil.createOMEXMLMetadata(seqIn.getOMEXMLMetadata()));
+            result.setMetaData(OMEUtil.createOMEXMLMetadata(seqIn.getOMEXMLMetadata(), true));
 
             int t = getPositionT();
             int z = getPositionZ();

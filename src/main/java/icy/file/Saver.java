@@ -1218,8 +1218,8 @@ public class Saver
         // conversion LUT (use default sequence one)
         final LUT lut = sequence.getDefaultLUT();
 
-        // create compatible sequence
-        final Sequence result = new Sequence(OMEUtil.createOMEXMLMetadata(sequence.getOMEXMLMetadata()));
+        // create compatible sequence (preserve user name here)
+        final Sequence result = new Sequence(OMEUtil.createOMEXMLMetadata(sequence.getOMEXMLMetadata(), false));
 
         result.beginUpdate();
         try
