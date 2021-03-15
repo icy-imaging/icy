@@ -88,6 +88,7 @@ deploy-release-job:
       - build/*.jar
   only:
     - /^v(\d+\.)?(\d+\.)?(\d)$/
+    - tags
   except:
     - branches
     - triggers
