@@ -87,9 +87,10 @@ deploy-release-job:
     paths:
       - build/*.jar
   only:
-    - tags
-  tags:
     - /^v(\d+\.)?(\d+\.)?(\d)$/
+  except:
+    - branches
+    - triggers
 
 #package-software-job:
 #  stage: package-software
