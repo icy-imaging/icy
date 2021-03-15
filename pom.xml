@@ -319,4 +319,17 @@
         </dependency>
 
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>geomajas</id>
+            <name>Geomajas</name>
+            <url>http://maven.geomajas.org/</url>
+        </repository>
+        <repository>
+            <id>icy</id>
+            <name>Icy's Nexus</name>
+            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
+        </repository>
+    </repositories>
 </project>
