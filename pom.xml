@@ -29,7 +29,6 @@
     </properties>
 
     <build>
-        <defaultGoal>install</defaultGoal>
         <directory>build</directory>
         <finalName>${project.artifactId}-${project.version}</finalName>
 
@@ -327,20 +326,9 @@
             <url>http://maven.geomajas.org/</url>
         </repository>
         <repository>
-            <id>icy-prod</id>
+            <id>icy</id>
+            <name>Icy's Nexus</name>
             <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
         </repository>
     </repositories>
-
-    <distributionManagement>
-        <repository>
-            <id>icy-prod</id>
-            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
-<!--             <url>${env.MAVEN_REPO_URL}/icy-core/</url> -->
-        </repository>
-        <snapshotRepository>
-            <id>icy-dev</id>
-            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
