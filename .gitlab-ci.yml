@@ -65,7 +65,7 @@ deploy-dev-job:
     - package-job
   script:
     - echo "Deploy artifact to the Nexus development server"
-    - mvn $MAVEN_CLI_OPTS -P deploy-dev
+    - mvn -X $MAVEN_CLI_OPTS -P deploy-dev
   artifacts:
     when: on_success
     expire_in: 1 hour
@@ -80,7 +80,7 @@ deploy-release-job:
     - echo "Deploy artifact to the Nexus production server"
     - JAR_VERSION = $(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
     - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; then exit 0; fi
-    - mvn $MAVEN_CLI_OPTS -P deploy-release
+    - mvn -X $MAVEN_CLI_OPTS -P deploy-release
   artifacts:
     when: on_success
     expire_in: 1 hour
