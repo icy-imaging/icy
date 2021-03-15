@@ -319,16 +319,4 @@
         </dependency>
 
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>jai-repo</id>
-            <url>http://maven.geomajas.org/</url>
-        </repository>
-        <repository>
-            <id>icy</id>
-            <name>Icy's Nexus</name>
-            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
-        </repository>
-    </repositories>
 </project>
