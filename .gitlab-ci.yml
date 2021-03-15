@@ -5,7 +5,6 @@ workflow:
     - if: $CI_PIPELINE_SOURCE != "push"
       when: never
     - if: $CI_COMMIT_BRANCH == "test_ci"
-    - if: $CI_COMMIT_TAG =~ /^v(\d+\.)?(\d+\.)?(\d)$/
     - when: never
 
 variables:
@@ -16,8 +15,9 @@ stages:
   - build
   - package
   - test
-  - deploy
-  - release
+  - deploy-dev
+  - deploy-release
+  - package-software
 
 cache:
   paths:
@@ -59,27 +59,43 @@ test-job:
     paths:
       - build/
 
-deploy-job:
-  stage: deploy
+deploy-dev-job:
+  stage: deploy-dev
   dependencies:
     - package-job
   script:
-    - echo "Deploy artifact to the Nexus"
-    - mvn -X $MAVEN_CLI_OPTS deploy
+    - echo "Deploy artifact to the Nexus development server"
+    - mvn -X $MAVEN_CLI_OPTS -Pdeploy-dev
   artifacts:
     when: on_success
     expire_in: 1 hour
     paths:
       - build/*.jar
 
-#release-job:
-#  stage: release
-#  #only:
-#    #- releases
+deploy-release-job:
+  stage: deploy-release
+  dependencies:
+    - package-job
+  script:
+    - echo "Deploy artifact to the Nexus production server"
+    - JAR_VERSION = $(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
+    - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; then exit 0; fi
+    - mvn -X $MAVEN_CLI_OPTS -Pdeploy-release
+  artifacts:
+    when: on_success
+    expire_in: 1 hour
+    paths:
+      - build/*.jar
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v(\d+\.)?(\d+\.)?(\d)$/
+    - when: never
+
+#package-software-job:
+#  stage: package-software
 #  dependencies:
-#    - deploy-job
+#    - deploy-release-job
 #  script:
-#    - "/tools/maven-release"
-#  only:
-    #    - master
-    #    - tags
+#    - echo "Construct Icy Software"
+#  rules:
+#    - if: $CI_COMMIT_TAG =~ /^v(\d+\.)?(\d+\.)?(\d)$/
+#    - when: never
