@@ -86,8 +86,10 @@ deploy-release-job:
     expire_in: 1 hour
     paths:
       - build/*.jar
-  rules:
-    - if: $CI_COMMIT_TAG =~ /^v(\d+\.)?(\d+\.)?(\d)$/
+  only:
+    - tags
+  tags:
+    - /^v(\d+\.)?(\d+\.)?(\d)$/
 
 #package-software-job:
 #  stage: package-software
