@@ -19,14 +19,12 @@
 package icy.gui.sequence;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.BoxLayout;
@@ -34,8 +32,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
@@ -46,7 +42,6 @@ import icy.gui.util.ComponentUtil;
 import icy.math.UnitUtil;
 import icy.math.UnitUtil.UnitPrefix;
 import icy.sequence.Sequence;
-import icy.util.DateUtil;
 import icy.util.StringUtil;
 
 public class SequencePropertiesPanel extends JPanel
@@ -81,8 +76,9 @@ public class SequencePropertiesPanel extends JPanel
     private JComboBox posZUnitComboBox;
     private JPanel panelPixelSize;
     private JPanel panelTimeInterval;
-    private JTextField userNameField;
-    private JTextField acquisitionDateField;
+
+    // internals
+    private final int unitStartIndex;
 
     /**
      * Create the panel.
@@ -93,10 +89,15 @@ public class SequencePropertiesPanel extends JPanel
 
         // set ComboBox model
         final UnitPrefix[] upValues = UnitPrefix.values();
-        final String[] cbModel = new String[upValues.length];
+        unitStartIndex = UnitPrefix.KILO.ordinal();
+        // we don't want
+        final String[] cbModel = new String[upValues.length - unitStartIndex];
 
         for (int i = 0; i < upValues.length; ++i)
-            cbModel[i] = upValues[i].toString() + "m";
+        {
+            if (i >= unitStartIndex)
+                cbModel[i - unitStartIndex] = upValues[i].toString() + "m";
+        }
 
         initialize(cbModel);
     }
@@ -375,53 +376,6 @@ public class SequencePropertiesPanel extends JPanel
         gbc_posZUnitComboBox.gridy = 2;
         panelPosition.add(posZUnitComboBox, gbc_posZUnitComboBox);
 
-        JPanel panelAcquisitionCreation = new JPanel();
-        panelAcquisitionCreation.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"),
-                "Creation / acquisition information (read only)", TitledBorder.LEADING, TitledBorder.TOP, null,
-                new Color(0, 0, 0)));
-        panelMain.add(panelAcquisitionCreation);
-        GridBagLayout gbl_panelAcquisitionCreation = new GridBagLayout();
-        gbl_panelAcquisitionCreation.columnWidths = new int[] {60, 0, 0};
-        gbl_panelAcquisitionCreation.rowHeights = new int[] {0, 0, 0};
-        gbl_panelAcquisitionCreation.columnWeights = new double[] {0.0, 1.0, Double.MIN_VALUE};
-        gbl_panelAcquisitionCreation.rowWeights = new double[] {0.0, 0.0, Double.MIN_VALUE};
-        panelAcquisitionCreation.setLayout(gbl_panelAcquisitionCreation);
-
-        JLabel lblNewLabel = new JLabel("User name");
-        GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-        gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
-        gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-        gbc_lblNewLabel.gridx = 0;
-        gbc_lblNewLabel.gridy = 0;
-        panelAcquisitionCreation.add(lblNewLabel, gbc_lblNewLabel);
-
-        userNameField = new JTextField();
-        userNameField.setEditable(false);
-        GridBagConstraints gbc_userNameField = new GridBagConstraints();
-        gbc_userNameField.insets = new Insets(0, 0, 5, 0);
-        gbc_userNameField.fill = GridBagConstraints.HORIZONTAL;
-        gbc_userNameField.gridx = 1;
-        gbc_userNameField.gridy = 0;
-        panelAcquisitionCreation.add(userNameField, gbc_userNameField);
-        userNameField.setColumns(10);
-
-        JLabel lblNewLabel_1 = new JLabel("Date");
-        GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-        gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
-        gbc_lblNewLabel_1.insets = new Insets(0, 0, 0, 5);
-        gbc_lblNewLabel_1.gridx = 0;
-        gbc_lblNewLabel_1.gridy = 1;
-        panelAcquisitionCreation.add(lblNewLabel_1, gbc_lblNewLabel_1);
-
-        acquisitionDateField = new JTextField();
-        acquisitionDateField.setEditable(false);
-        GridBagConstraints gbc_acquisitionDateField = new GridBagConstraints();
-        gbc_acquisitionDateField.fill = GridBagConstraints.HORIZONTAL;
-        gbc_acquisitionDateField.gridx = 1;
-        gbc_acquisitionDateField.gridy = 1;
-        panelAcquisitionCreation.add(acquisitionDateField, gbc_acquisitionDateField);
-        acquisitionDateField.setColumns(10);
-
         panelChannels = new JPanel();
         panelChannels.setBorder(new TitledBorder(null, "Channels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         panelMain.add(panelChannels);
@@ -527,25 +481,6 @@ public class SequencePropertiesPanel extends JPanel
         }
 
         panelChannels.revalidate();
-
-        // acquisition user name
-        String userNames = "";
-        for (String s : sequence.getUserNames())
-        {
-            if (StringUtil.isEmpty(userNames))
-                userNames = s;
-            else
-                userNames += "; " + s;
-        }
-
-        userNameField.setText(userNames);
-
-        // acquisition time
-        final long timeStamp = sequence.getPositionT();
-        if (timeStamp != 0)
-            acquisitionDateField.setText(DateUtil.format("EEE d MMMMM yyyy - HH:mm:ss", new Date(timeStamp)));
-        else
-            acquisitionDateField.setText("");
     }
 
     public String getNameFieldValue()
@@ -560,7 +495,7 @@ public class SequencePropertiesPanel extends JPanel
 
     public UnitPrefix getPixelSizeXUnit()
     {
-        return UnitPrefix.values()[cbPxSizeX.getSelectedIndex()];
+        return UnitPrefix.values()[cbPxSizeX.getSelectedIndex() + unitStartIndex];
     }
 
     public double getPixelSizeYFieldValue()
@@ -574,9 +509,9 @@ public class SequencePropertiesPanel extends JPanel
     public UnitPrefix getPixelSizeYUnit()
     {
         if (checkLinked.isSelected())
-            return UnitPrefix.values()[cbPxSizeX.getSelectedIndex()];
+            return UnitPrefix.values()[cbPxSizeX.getSelectedIndex() + unitStartIndex];
 
-        return UnitPrefix.values()[cbPxSizeY.getSelectedIndex()];
+        return UnitPrefix.values()[cbPxSizeY.getSelectedIndex() + unitStartIndex];
     }
 
     public double getPixelSizeZFieldValue()
@@ -586,7 +521,7 @@ public class SequencePropertiesPanel extends JPanel
 
     public UnitPrefix getPixelSizeZUnit()
     {
-        return UnitPrefix.values()[cbPxSizeZ.getSelectedIndex()];
+        return UnitPrefix.values()[cbPxSizeZ.getSelectedIndex() + unitStartIndex];
     }
 
     public double getTimeIntervalFieldValue()
@@ -606,7 +541,7 @@ public class SequencePropertiesPanel extends JPanel
 
     public UnitPrefix getPositionXUnit()
     {
-        return UnitPrefix.values()[posXUnitComboBox.getSelectedIndex()];
+        return UnitPrefix.values()[posXUnitComboBox.getSelectedIndex() + unitStartIndex];
     }
 
     public double getPositionYValue()
@@ -616,7 +551,7 @@ public class SequencePropertiesPanel extends JPanel
 
     public UnitPrefix getPositionYUnit()
     {
-        return UnitPrefix.values()[posYUnitComboBox.getSelectedIndex()];
+        return UnitPrefix.values()[posYUnitComboBox.getSelectedIndex() + unitStartIndex];
     }
 
     public double getPositionZValue()
@@ -626,7 +561,7 @@ public class SequencePropertiesPanel extends JPanel
 
     public UnitPrefix getPositionZUnit()
     {
-        return UnitPrefix.values()[posZUnitComboBox.getSelectedIndex()];
+        return UnitPrefix.values()[posZUnitComboBox.getSelectedIndex() + unitStartIndex];
     }
 
     public String getChannelNameFieldValue(int index)
