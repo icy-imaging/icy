@@ -28,8 +28,8 @@ Developer
 * Added new PETA / TERA prefixes to UnitPrefix class
  
  
- Icy 2.1.2.0 - 09/02/2020
-------------------------
+ Icy 2.1.2.0 - 09/02/2021
+-------------------------
 
 Application
 * fixed Windows launcher to not require JAVA_HOME variable to be defined.
