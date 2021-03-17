@@ -32,27 +32,33 @@ public class UnitUtil
     /**
      * Constants for special characters
      */
-//    public static final char MICRO_CHAR = '\u00B5';
-//    public static final String MICRO_STRING = "\u00B5";
+    // public static final char MICRO_CHAR = '\u00B5';
+    // public static final String MICRO_STRING = "\u00B5";
     // for the sake of easy compatibility with others softwares
     public static final char MICRO_CHAR = 'u';
     public static final String MICRO_STRING = "u";
 
     public static enum UnitPrefix
     {
-        GIGA, MEGA, KILO, NONE, MILLI, MICRO, NANO, PICO;
+        PETA, TERA, GIGA, MEGA, KILO, NONE, MILLI, MICRO, NANO, PICO;
 
         @Override
         public String toString()
         {
             switch (this)
             {
+                case PETA:
+                    return "P";
+                case TERA:
+                    return "T";
                 case GIGA:
                     return "G";
-                case KILO:
-                    return "k";
                 case MEGA:
                     return "M";
+                case KILO:
+                    return "k";
+                case NONE:
+                    return "";
                 case MILLI:
                     return "m";
                 case MICRO:
@@ -61,8 +67,6 @@ public class UnitUtil
                     return "n";
                 case PICO:
                     return "p";
-                case NONE:
-                    return "";
                 default:
                     return "x";
             }
