@@ -18,6 +18,21 @@
  */
 package icy.gui.sequence;
 
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.util.Date;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import icy.file.FileUtil;
 import icy.gui.component.button.IcyButton;
 import icy.gui.frame.GenericFrame;
@@ -32,22 +47,10 @@ import icy.sequence.SequenceEvent;
 import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
 import icy.system.thread.ThreadUtil;
+import icy.util.DateUtil;
 import icy.util.EventUtil;
 import icy.util.StringUtil;
-
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import java.awt.Font;
 
 /**
  * @author Stephane
@@ -74,6 +77,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
     private JLabel pathLabel;
     JTextField pathField;
     private JTextField nameField;
+
+    private JLabel dataTypeLabel;
+    private JLabel creationDateLabel;
+    private JLabel userNameLabel;
 
     // internals
     private final Runnable infosRefresher;
@@ -107,8 +114,8 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
                 if (seq != null)
                 {
-                    final GenericFrame g = new GenericFrame(seq.getName() + " - Metadata", new SequenceMetadataPanel(
-                            seq));
+                    final GenericFrame g = new GenericFrame(seq.getName() + " - Metadata",
+                            new SequenceMetadataPanel(seq));
 
                     g.addToDesktopPane();
                     g.center();
@@ -139,13 +146,14 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
     public void initialize()
     {
         GridBagLayout gridBagLayout = new GridBagLayout();
-        gridBagLayout.columnWidths = new int[] {0, 40, 40, 40, 0};
-        gridBagLayout.rowHeights = new int[] {18, 0, 18, 18, 18, 18, 18, 18, 0};
-        gridBagLayout.columnWeights = new double[] {0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
+        gridBagLayout.columnWidths = new int[] {70, 40, 90, 40};
+        gridBagLayout.rowHeights = new int[] {18, 0, 18, 18, 18, 0, 18, 18, 0};
+        gridBagLayout.columnWeights = new double[] {0.0, 1.0, 0.0, 1.0};
         gridBagLayout.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         setLayout(gridBagLayout);
 
         JLabel lbl_name = new JLabel("Name");
+        lbl_name.setFont(new Font("Tahoma", Font.BOLD, 11));
         lbl_name.setToolTipText("Sequence name");
         GridBagConstraints gbc_lbl_name = new GridBagConstraints();
         gbc_lbl_name.anchor = GridBagConstraints.WEST;
@@ -179,6 +187,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         add(nameField, gbc_scrollPane);
 
         pathLabel = new JLabel("Path");
+        pathLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
         pathLabel.setToolTipText("Sequence file path");
         GridBagConstraints gbc_pathLabel = new GridBagConstraints();
         gbc_pathLabel.fill = GridBagConstraints.VERTICAL;
@@ -229,12 +238,13 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
         gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
         gbc_scrollPane_1.gridwidth = 3;
-        gbc_scrollPane_1.insets = new Insets(0, 0, 5, 5);
+        gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
         gbc_scrollPane_1.gridx = 1;
         gbc_scrollPane_1.gridy = 1;
         add(pathField, gbc_scrollPane_1);
 
         JLabel lbl_dim = new JLabel("Dimension");
+        lbl_dim.setFont(new Font("Tahoma", Font.BOLD, 11));
         lbl_dim.setToolTipText("Size of X, Y, Z and T dimension");
         GridBagConstraints gbc_lbl_dim = new GridBagConstraints();
         gbc_lbl_dim.anchor = GridBagConstraints.WEST;
@@ -256,7 +266,8 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         add(dimensionLabel, gbc_dimensionLabel);
 
         JLabel lbl_channel = new JLabel("Channel");
-        lbl_channel.setToolTipText("Number of channel - data type");
+        lbl_channel.setFont(new Font("Tahoma", Font.BOLD, 11));
+        lbl_channel.setToolTipText("Number of channel");
         GridBagConstraints gbc_lbl_channel = new GridBagConstraints();
         gbc_lbl_channel.anchor = GridBagConstraints.WEST;
         gbc_lbl_channel.fill = GridBagConstraints.VERTICAL;
@@ -269,14 +280,34 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         channelLabel.setText("---");
         GridBagConstraints gbc_channelLabel = new GridBagConstraints();
         gbc_channelLabel.anchor = GridBagConstraints.WEST;
-        gbc_channelLabel.gridwidth = 3;
         gbc_channelLabel.fill = GridBagConstraints.VERTICAL;
-        gbc_channelLabel.insets = new Insets(0, 0, 5, 0);
+        gbc_channelLabel.insets = new Insets(0, 0, 5, 5);
         gbc_channelLabel.gridx = 1;
         gbc_channelLabel.gridy = 3;
         add(channelLabel, gbc_channelLabel);
 
+        JLabel lblNewLabel = new JLabel("Data type");
+        lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+        lblNewLabel.setToolTipText("Data type");
+        GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+        gbc_lblNewLabel.fill = GridBagConstraints.VERTICAL;
+        gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
+        gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+        gbc_lblNewLabel.gridx = 2;
+        gbc_lblNewLabel.gridy = 3;
+        add(lblNewLabel, gbc_lblNewLabel);
+
+        dataTypeLabel = new JLabel("---");
+        GridBagConstraints gbc_dataTypeLabel = new GridBagConstraints();
+        gbc_dataTypeLabel.fill = GridBagConstraints.VERTICAL;
+        gbc_dataTypeLabel.anchor = GridBagConstraints.WEST;
+        gbc_dataTypeLabel.insets = new Insets(0, 0, 5, 0);
+        gbc_dataTypeLabel.gridx = 3;
+        gbc_dataTypeLabel.gridy = 3;
+        add(dataTypeLabel, gbc_dataTypeLabel);
+
         JLabel lbl_size = new JLabel("Size");
+        lbl_size.setFont(new Font("Tahoma", Font.BOLD, 11));
         lbl_size.setToolTipText("Size");
         GridBagConstraints gbc_lbl_size = new GridBagConstraints();
         gbc_lbl_size.anchor = GridBagConstraints.WEST;
@@ -290,21 +321,81 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         sizeLabel.setText("---");
         GridBagConstraints gbc_sizeLabel = new GridBagConstraints();
         gbc_sizeLabel.anchor = GridBagConstraints.WEST;
-        gbc_sizeLabel.gridwidth = 3;
         gbc_sizeLabel.fill = GridBagConstraints.VERTICAL;
-        gbc_sizeLabel.insets = new Insets(0, 0, 5, 0);
+        gbc_sizeLabel.insets = new Insets(0, 0, 5, 5);
         gbc_sizeLabel.gridx = 1;
         gbc_sizeLabel.gridy = 4;
         add(sizeLabel, gbc_sizeLabel);
 
+        JLabel lblNewLabel_2 = new JLabel("Owner(s)");
+        lblNewLabel_2.setFont(new Font("Tahoma", Font.BOLD, 11));
+        lblNewLabel_2.setToolTipText("Owner(s) user name (person who created, generated or modified the dataset)");
+        GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+        gbc_lblNewLabel_2.fill = GridBagConstraints.VERTICAL;
+        gbc_lblNewLabel_2.anchor = GridBagConstraints.WEST;
+        gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
+        gbc_lblNewLabel_2.gridx = 2;
+        gbc_lblNewLabel_2.gridy = 4;
+        add(lblNewLabel_2, gbc_lblNewLabel_2);
+
+        userNameLabel = new JLabel("---");
+        GridBagConstraints gbc_userNameLabel = new GridBagConstraints();
+        gbc_userNameLabel.anchor = GridBagConstraints.WEST;
+        gbc_userNameLabel.fill = GridBagConstraints.VERTICAL;
+        gbc_userNameLabel.insets = new Insets(0, 0, 5, 0);
+        gbc_userNameLabel.gridx = 3;
+        gbc_userNameLabel.gridy = 4;
+        add(userNameLabel, gbc_userNameLabel);
+
+        JLabel lblNewLabel_1 = new JLabel("Date");
+        lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 11));
+        lblNewLabel_1.setToolTipText("Creation / acquisition date");
+        GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+        gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
+        gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
+        gbc_lblNewLabel_1.gridx = 0;
+        gbc_lblNewLabel_1.gridy = 5;
+        add(lblNewLabel_1, gbc_lblNewLabel_1);
+
+        creationDateLabel = new JLabel("---");
+        GridBagConstraints gbc_creationDateLabel = new GridBagConstraints();
+        gbc_creationDateLabel.fill = GridBagConstraints.VERTICAL;
+        gbc_creationDateLabel.anchor = GridBagConstraints.WEST;
+        gbc_creationDateLabel.insets = new Insets(0, 0, 5, 5);
+        gbc_creationDateLabel.gridx = 1;
+        gbc_creationDateLabel.gridy = 5;
+        add(creationDateLabel, gbc_creationDateLabel);
+
+        JLabel lbl_time = new JLabel("Time interval");
+        lbl_time.setFont(new Font("Tahoma", Font.BOLD, 11));
+        lbl_time.setToolTipText("Time Interval");
+        GridBagConstraints gbc_lbl_time = new GridBagConstraints();
+        gbc_lbl_time.anchor = GridBagConstraints.WEST;
+        gbc_lbl_time.fill = GridBagConstraints.VERTICAL;
+        gbc_lbl_time.insets = new Insets(0, 0, 5, 5);
+        gbc_lbl_time.gridx = 2;
+        gbc_lbl_time.gridy = 5;
+        add(lbl_time, gbc_lbl_time);
+
+        resTLabel = new JLabel();
+        resTLabel.setText("---");
+        GridBagConstraints gbc_resTLabel = new GridBagConstraints();
+        gbc_resTLabel.anchor = GridBagConstraints.WEST;
+        gbc_resTLabel.fill = GridBagConstraints.VERTICAL;
+        gbc_resTLabel.insets = new Insets(0, 0, 5, 0);
+        gbc_resTLabel.gridx = 3;
+        gbc_resTLabel.gridy = 5;
+        add(resTLabel, gbc_resTLabel);
+
         JLabel lbl_psx = new JLabel("Pixel size");
+        lbl_psx.setFont(new Font("Tahoma", Font.BOLD, 11));
         lbl_psx.setToolTipText("Pixel size for X, Y, Z dimension");
         GridBagConstraints gbc_lbl_psx = new GridBagConstraints();
         gbc_lbl_psx.anchor = GridBagConstraints.WEST;
         gbc_lbl_psx.fill = GridBagConstraints.VERTICAL;
         gbc_lbl_psx.insets = new Insets(0, 0, 5, 5);
         gbc_lbl_psx.gridx = 0;
-        gbc_lbl_psx.gridy = 5;
+        gbc_lbl_psx.gridy = 6;
         add(lbl_psx, gbc_lbl_psx);
 
         resXLabel = new JLabel();
@@ -314,7 +405,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_resXLabel.fill = GridBagConstraints.VERTICAL;
         gbc_resXLabel.insets = new Insets(0, 0, 5, 5);
         gbc_resXLabel.gridx = 1;
-        gbc_resXLabel.gridy = 5;
+        gbc_resXLabel.gridy = 6;
         add(resXLabel, gbc_resXLabel);
 
         resYLabel = new JLabel();
@@ -324,7 +415,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_resYLabel.fill = GridBagConstraints.VERTICAL;
         gbc_resYLabel.insets = new Insets(0, 0, 5, 5);
         gbc_resYLabel.gridx = 2;
-        gbc_resYLabel.gridy = 5;
+        gbc_resYLabel.gridy = 6;
         add(resYLabel, gbc_resYLabel);
 
         resZLabel = new JLabel();
@@ -334,29 +425,8 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_resZLabel.fill = GridBagConstraints.VERTICAL;
         gbc_resZLabel.insets = new Insets(0, 0, 5, 0);
         gbc_resZLabel.gridx = 3;
-        gbc_resZLabel.gridy = 5;
+        gbc_resZLabel.gridy = 6;
         add(resZLabel, gbc_resZLabel);
-
-        JLabel lbl_time = new JLabel("Time interval");
-        lbl_time.setToolTipText("Time Interval");
-        GridBagConstraints gbc_lbl_time = new GridBagConstraints();
-        gbc_lbl_time.anchor = GridBagConstraints.WEST;
-        gbc_lbl_time.fill = GridBagConstraints.VERTICAL;
-        gbc_lbl_time.insets = new Insets(0, 0, 5, 5);
-        gbc_lbl_time.gridx = 0;
-        gbc_lbl_time.gridy = 6;
-        add(lbl_time, gbc_lbl_time);
-
-        resTLabel = new JLabel();
-        resTLabel.setText("---");
-        GridBagConstraints gbc_resTLabel = new GridBagConstraints();
-        gbc_resTLabel.anchor = GridBagConstraints.WEST;
-        gbc_resTLabel.gridwidth = 3;
-        gbc_resTLabel.fill = GridBagConstraints.VERTICAL;
-        gbc_resTLabel.insets = new Insets(0, 0, 5, 0);
-        gbc_resTLabel.gridx = 1;
-        gbc_resTLabel.gridy = 6;
-        add(resTLabel, gbc_resTLabel);
 
         editBtn = new IcyButton("Edit", new IcyIcon(ResourceUtil.ICON_DOCEDIT));
         editBtn.setToolTipText("Edit sequence properties");
@@ -416,28 +486,53 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
                 pathField.setText(path);
             }
             dimensionLabel.setText(sizeX + " x " + sizeY + " x " + sizeZ + " x " + sizeT);
-            channelLabel.setText(sizeC + " - " + sequence.getDataType_().toLongString());
-            sizeLabel.setText(UnitUtil.getBytesString((double) sizeX * (double) sizeY * sizeZ * sizeT * sizeC
-                    * sequence.getDataType_().getSize()));
+            channelLabel.setText(StringUtil.toString(sizeC));
+            dataTypeLabel.setText(sequence.getDataType_().toString());
+            sizeLabel.setText(UnitUtil.getBytesString(
+                    (double) sizeX * (double) sizeY * sizeZ * sizeT * sizeC * sequence.getDataType_().getSize()));
+
             resXLabel.setText(UnitUtil.getBestUnitInMeters(pxSizeX, 2, UnitPrefix.MICRO));
             resYLabel.setText(UnitUtil.getBestUnitInMeters(pxSizeY, 2, UnitPrefix.MICRO));
             resZLabel.setText(UnitUtil.getBestUnitInMeters(pxSizeZ, 2, UnitPrefix.MICRO));
+            // acquisition time
+            final long timeStamp = sequence.getPositionT();
+            if (timeStamp != 0)
+                creationDateLabel.setText(DateUtil.format("dd/MM/yyyy", new Date(timeStamp)));
+            else
+                creationDateLabel.setText("Unknow");
             resTLabel.setText(UnitUtil.displayTimeAsStringWithUnits(sequence.getTimeInterval() * 1000d, false));
+
+            // owner user name
+            String userNames = "";
+            for (String s : sequence.getUserNames())
+            {
+                if (StringUtil.isEmpty(userNames))
+                    userNames = s;
+                else
+                    userNames += "; " + s;
+            }
+            userNameLabel.setText(StringUtil.limit(userNames, 20, true));
 
             nameField.setToolTipText(sequence.getName());
             pathField.setToolTipText(path + "    (double click to see file location)");
-            dimensionLabel.setToolTipText("Size X : " + sizeX + "   Size Y : " + sizeY + "   Size Z : " + sizeZ
-                    + "   Size T : " + sizeT);
+            dimensionLabel.setToolTipText(
+                    "Size X : " + sizeX + "   Size Y : " + sizeY + "   Size Z : " + sizeZ + "   Size T : " + sizeT);
             if (sizeC > 1)
-                channelLabel.setToolTipText(sizeC + " channels - " + sequence.getDataType_());
+                channelLabel.setToolTipText(sizeC + " channels");
             else
-                channelLabel.setToolTipText(sizeC + " channel - " + sequence.getDataType_());
+                channelLabel.setToolTipText(sizeC + " channel");
+            dataTypeLabel.setToolTipText(sequence.getDataType_().toLongString());
             sizeLabel.setToolTipText(sizeLabel.getText());
 
             resXLabel.setToolTipText("X pixel resolution: " + resXLabel.getText());
             resYLabel.setToolTipText("Y pixel resolution: " + resYLabel.getText());
             resZLabel.setToolTipText("Z pixel resolution: " + resZLabel.getText());
+            if (timeStamp != 0)
+                creationDateLabel.setToolTipText(DateUtil.format("EEE d MMMMM yyyy - HH:mm:ss", new Date(timeStamp)));
+            else
+                creationDateLabel.setToolTipText("");
             resTLabel.setToolTipText("T time resolution: " + resTLabel.getText());
+            userNameLabel.setToolTipText(userNames);
 
             editBtn.setEnabled(true);
             detailBtn.setEnabled(true);
@@ -450,20 +545,26 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
             nameField.setText("-");
             dimensionLabel.setText("-");
             channelLabel.setText("-");
+            dataTypeLabel.setText("-");
             sizeLabel.setText("-");
             resXLabel.setText("-");
             resYLabel.setText("-");
             resZLabel.setText("-");
+            creationDateLabel.setText("-");
             resTLabel.setText("-");
+            userNameLabel.setText("-");
 
             nameField.setToolTipText("");
             dimensionLabel.setToolTipText("");
             channelLabel.setToolTipText("");
+            dataTypeLabel.setToolTipText("");
             sizeLabel.setToolTipText("");
             resXLabel.setToolTipText("X pixel resolution");
             resYLabel.setToolTipText("Y pixel resolution");
             resZLabel.setToolTipText("Z pixel resolution");
+            creationDateLabel.setToolTipText("");
             resTLabel.setToolTipText("T time resolution");
+            userNameLabel.setToolTipText("");
 
             editBtn.setEnabled(false);
             detailBtn.setEnabled(false);
