@@ -1,4 +1,34 @@
-Icy 2.1.2.0 - 09/02/2020
+Icy 2.1.3.0 - 17/03/2020
+------------------------
+
+Application
+* ROI:
+ - added global selection and alphabetical sorting function on descriptors selector
+ - changed 'positive infinity' to 'ALL' value representation for size Z/T/C ROI descriptors (ROI table)
+* Loader: 
+ - small fix in 'base path' determination during stiched loading from a set of image files
+* MetaData:
+ - better metadata preservation in general
+ - added 'User Name' information
+ - added 'Date' (dataset creation / acquisition date)
+* updated Forum help URL (Image.sc)
+* minors bug fixes
+
+Developer
+* Loader:
+ - added new openWith(path, flags, readerClass) method to select which reader to use (Bio-Formats importer)
+ - fixed a small issue preventing stitched loading using loadSequences(..)
+* MetaData:
+ - added T,Z,C plane position fix in MetaDataUtil.keepPlanes(..) method
+ - added plane metadata preservation in buildMetaData() from group importer
+ - added MetaDataUtil.get/setUserName(s) methods to get/set experimenter(s) user name
+ - added new OMEUtil.createOMEXMLMetadata(meta, setUserName) method to define if we set the user name in the meta data
+* Sequence:
+ - added 'user name' property (represent who created / generated the dataset)
+* Added new PETA / TERA prefixes to UnitPrefix class
+ 
+ 
+ Icy 2.1.2.0 - 09/02/2020
 ------------------------
 
 Application
