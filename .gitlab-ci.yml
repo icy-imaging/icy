@@ -93,6 +93,7 @@ deploy-release-job:
       when: on_success
     - when: never
 
+# TODO: Package Icy as a software for Windows, Mac and Linux
 #package-software-job:
 #  stage: package-software
 #  dependencies:
