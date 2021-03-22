@@ -91,6 +91,7 @@ deploy-release-job:
   rules:
     - if: $CI_COMMIT_MESSAGE =~ /^(Release\sv(\d+\.)?(\d+\.)?(\d))$/
       when: on_success
+    - when: never
 
 #package-software-job:
 #  stage: package-software
