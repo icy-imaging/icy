@@ -90,7 +90,7 @@ deploy-release-job:
       - build/*.jar
   rules:
     - if: $CI_COMMIT_MESSAGE =~ /^(Release\sv(\d+\.)?(\d+\.)?(\d))$/
-      when: never
+      when: on_success
 
 #package-software-job:
 #  stage: package-software
