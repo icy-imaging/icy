@@ -3335,6 +3335,10 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
     {
         super.sequenceTypeChanged();
 
+        // just to avoid possible NPE
+        if (previousImageSize == null)
+            return;
+
         // sequence XY dimension changed ?
         if ((previousImageSize.width != getImageSizeX()) || (previousImageSize.height != getImageSizeY()))
         {
