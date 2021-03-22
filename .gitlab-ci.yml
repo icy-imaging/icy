@@ -87,8 +87,7 @@ deploy-release-job:
     paths:
       - build/*.jar
   only:
-    variables:
-      - $CI_COMMIT_MESSAGE =~ /^(Release\sv(\d+\.)?(\d+\.)?(\d))$/
+    - $CI_COMMIT_MESSAGE =~ /^(Release\sv(\d+\.)?(\d+\.)?(\d))$/
 
 #package-software-job:
 #  stage: package-software
