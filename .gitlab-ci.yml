@@ -78,7 +78,7 @@ deploy-release-job:
     - package-job
   before_script:
     - echo "Checking POM file..."
-    - JAR_VERSION = $(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
+    - export JAR_VERSION = $(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
     - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; exit 0; fi
   script:
     - echo "Deploy artifact to the Nexus production server"
