@@ -89,7 +89,7 @@ deploy-release-job:
     paths:
       - build/*.jar
   rules:
-    - if: $CI_COMMIT_MESSAGE =~ /^(Release\sv(\d+\.)?(\d+\.)?(\d))$/
+    - if: $CI_COMMIT_TITLE =~ /^(Release\sv(\d+\.)?(\d+\.)?(\d))$/
       when: on_success
     - when: never
 
