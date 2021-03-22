@@ -79,7 +79,7 @@ deploy-release-job:
   before_script:
     - echo "Checking POM file..."
     - export JAR_VERSION=$(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
-    - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; exit 0; fi
+    - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; then exit 0; fi
   script:
     - echo "Deploy artifact to the Nexus production server"
     - mvn -X $MAVEN_CLI_OPTS -P deploy-release
