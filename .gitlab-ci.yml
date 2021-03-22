@@ -43,6 +43,7 @@ package-job:
     - echo "Packaging the code"
     - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
   artifacts:
+    expire_in: 30 days
     paths:
       - build/
 
@@ -87,11 +88,8 @@ deploy-release-job:
     paths:
       - build/*.jar
   only:
-    - /^v(\d+\.)?(\d+\.)?(\d)$/
-    - tags
-  except:
-    - branches
-    - triggers
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^(Release\sv(\d+\.)?(\d+\.)?(\d))$/
 
 #package-software-job:
 #  stage: package-software
