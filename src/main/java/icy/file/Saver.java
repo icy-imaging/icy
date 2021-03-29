@@ -18,6 +18,11 @@
  */
 package icy.file;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.text.DecimalFormat;
+
 import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.frame.progress.FileFrame;
 import icy.gui.menu.ApplicationMenu;
@@ -35,12 +40,6 @@ import icy.system.IcyExceptionHandler;
 import icy.type.DataType;
 import icy.util.OMEUtil;
 import icy.util.StringUtil;
-
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
-
 import loci.common.services.ServiceException;
 import loci.formats.FormatException;
 import loci.formats.IFormatWriter;
@@ -731,6 +730,16 @@ public class Saver
 
                 final String filePathWithoutExt = fileBaseDirectory + FileUtil.separator + fileName;
 
+                // directory already exist ?
+                if (FileUtil.exists(fileBaseDirectory))
+                {
+                    // we are probably overwriting original image so we need to load all data
+                    sequence.setVolatile(false);
+                    sequence.loadAllData();
+                    // release image provider so we can overwrite file
+                    sequence.setImageProvider(null);
+                }
+                
                 // create output directory
                 FileUtil.createDir(fileBaseDirectory);
 
@@ -778,6 +787,16 @@ public class Saver
                     fixedFilePath = filePath;
                 else
                     fixedFilePath = filePath + "." + iff.getExtensions()[0];
+
+                // file already exist ?
+                if (FileUtil.exists(fixedFilePath))
+                {
+                    // we are probably overwriting original image so we need to load all data
+                    sequence.setVolatile(false);
+                    sequence.loadAllData();
+                    // release image provider so we can overwrite file
+                    sequence.setImageProvider(null);
+                }
 
                 // default name used --> use filename
                 if (sequence.isDefaultName())

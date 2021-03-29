@@ -15,10 +15,12 @@ import icy.file.FileUtil;
 import icy.file.ImageFileFormat;
 import icy.file.Saver;
 import icy.file.SequenceFileExporter;
+import icy.image.ImageProvider;
 import icy.main.Icy;
 import icy.preferences.ApplicationPreferences;
 import icy.preferences.XMLPreferences;
 import icy.sequence.Sequence;
+import icy.sequence.SequenceIdImporter;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 import loci.formats.IFormatWriter;
@@ -113,7 +115,7 @@ public class SaverDialog extends JFileChooser
         // filename = FileUtil.getFileName(sequence.getOutputFilename(false), false);
         // else
         // {
-        
+
         // better to use internal metadata name by default as default filename
         filename = sequence.getName();
         // no specific internal name ?
@@ -121,7 +123,7 @@ public class SaverDialog extends JFileChooser
             // get filename without extension
             filename = FileUtil.getFileName(sequence.getOutputFilename(false), false);
         // }
-        
+
         // we have a default filename ?
         if (!StringUtil.isEmpty(filename))
         {
@@ -229,8 +231,35 @@ public class SaverDialog extends JFileChooser
                 // ask for confirmation as file already exists
                 if (!file.exists() || ConfirmDialog.confirm("Overwrite existing file(s) ?"))
                 {
+                    // file exists ?
                     if (file.exists())
+                    {
+                        // get sequence importer
+                        final ImageProvider imp = sequence.getImageProvider();
+
+                        // need to get importer source path
+                        if (imp instanceof SequenceIdImporter)
+                        {
+                            // get source path
+                            final String impPath = FileUtil.getGenericPath(((SequenceIdImporter) imp).getOpened());
+                            final String outPath = FileUtil.getGenericPath(outFilename);
+
+                            // same file than the one we want to save to ?
+                            if (StringUtil.equals(impPath, outPath))
+                            {
+                                // we are overwriting original image so we need to load all data first
+                                sequence.setVolatile(false);
+                                sequence.loadAllData();
+                                // then we release the image provider so we can close the file
+                                sequence.setImageProvider(null);
+                                // eventually force releasing importer
+                                System.gc();
+                            }
+                        }
+
+                        // we delete the output file
                         FileUtil.delete(file, true);
+                    }
 
                     // store current path
                     preferences.put(ID_PATH, getCurrentDirectory().getAbsolutePath());
