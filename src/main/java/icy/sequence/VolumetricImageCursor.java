@@ -130,9 +130,10 @@ public class VolumetricImageCursor
         {
             if (planeCursors[z] == null)
             {
-                currentCursor = new IcyBufferedImageCursor(vol.getImage(z));
-                planeCursors[z] = currentCursor;
+                planeCursors[z] = new IcyBufferedImageCursor(vol.getImage(z));
             }
+            currentCursor = planeCursors[z];
+            currentZ = z;
         }
         return currentCursor;
     }

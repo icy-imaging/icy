@@ -113,7 +113,11 @@ public class SequenceCursor
     {
         if (currentT != t)
         {
-            currentCursor = new VolumetricImageCursor(seq, t);
+            if (volumeCursors[t] == null) {
+                volumeCursors[t] = new VolumetricImageCursor(seq, t);
+            }
+            currentCursor = volumeCursors[t];
+            currentT = t;
         }
         return currentCursor;
     }
