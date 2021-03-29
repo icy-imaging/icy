@@ -1717,10 +1717,10 @@ public class Loader
         final boolean directory = (paths.size() == 1) && new File(paths.get(0)).isDirectory();
         // explode path list
         final List<String> singlePaths = cleanNonImageFile(explode(paths));
-        final boolean adjSeparate = (singlePaths.size() <= 1) || separate;
+        final boolean grouped = (singlePaths.size() > 1) && !separate;
         // get the sequence importers first
         final Map<SequenceFileImporter, List<String>> sequenceFileImporters = getSequenceFileImporters(importer,
-                singlePaths, !adjSeparate, false);
+                singlePaths, grouped, false);
 
         for (Entry<SequenceFileImporter, List<String>> entry : sequenceFileImporters.entrySet())
         {
@@ -2661,9 +2661,9 @@ public class Loader
                 final boolean directory = (paths.size() == 1) && new File(paths.get(0)).isDirectory();
                 // explode path list
                 final List<String> singlePaths = cleanNonImageFile(explode(paths));
-                final boolean adjSeparate = (singlePaths.size() <= 1) || separate;
+                final boolean grouped = (singlePaths.size() > 1) && !separate;
                 final Map<SequenceFileImporter, List<String>> sequenceFileImporters = getSequenceFileImporters(null,
-                        singlePaths, !adjSeparate, false);
+                        singlePaths, grouped, false);
 
                 for (Entry<SequenceFileImporter, List<String>> entry : sequenceFileImporters.entrySet())
                 {

@@ -259,7 +259,7 @@ public class MainFrame extends JRibbonFrame
             @Override
             public void filesDropped(File[] files)
             {
-                Loader.load(CollectionUtil.asList(FileUtil.toPaths(files)), false, true, true);
+                Loader.load(CollectionUtil.asList(FileUtil.toPaths(files)), files.length <= 1, true, true);
             }
         };
         final FileDropExtListener bandFileDropListener = new FileDropExtListener()
