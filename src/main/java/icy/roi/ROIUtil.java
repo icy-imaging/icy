@@ -1849,28 +1849,25 @@ public class ROIUtil
 
         if (roi instanceof ROI3D)
         {
-            // TODO: add label extractor implementation here
+            final ROI3D roi3d = (ROI3D) roi;
+            int ind = 0;
 
-            // final ROI3D roi3d = (ROI3D) roi;
-            // int ind = 0;
-            //
-            // for (BooleanMask3D component : roi3d.getBooleanMask(true).getComponents())
-            // {
-            // final ROI2DArea componentRoi = new ROI2DArea(component);
-            //
-            // if (!componentRoi.isEmpty())
-            // {
-            // // keep original ROI informations
-            // componentRoi.setName(roi.getName() + " object #" + ind++);
-            // copyROIProperties(roi, componentRoi, false);
-            //
-            // result.add(componentRoi);
-            // }
-            // }
+            for (BooleanMask3D component : roi3d.getBooleanMask(true).getComponents())
+            {
+                final ROI3DArea componentRoi = new ROI3DArea(component);
 
-            // not yet supported
-            throw new UnsupportedOperationException(
-                    "ROIUtil.getConnectedComponents(ROI): Operation not supported yet for 3D ROI.");
+                if (!componentRoi.isEmpty())
+                {
+                    // keep original ROI informations
+                    componentRoi.setName(roi.getName() + " object #" + ind++);
+                    componentRoi.setT(roi3d.t);
+                    componentRoi.setC(roi3d.c);
+                    copyROIProperties(roi, componentRoi, false);
+
+                    result.add(componentRoi);
+                }
+            }
+            return result;
         }
 
         throw new UnsupportedOperationException(
@@ -3021,10 +3018,11 @@ public class ROIUtil
                 processingBounds.setSizeZ(oldBounds.getSizeZ());
             }
             roi.setBounds5D(processingBounds);
-            if (roi instanceof ROI2DArea) {
-                ((ROI2DArea) roi).setPosition2D(new Point2D.Double(0,0));
+            if (roi instanceof ROI2DArea)
+            {
+                ((ROI2DArea) roi).setPosition2D(new Point2D.Double(0, 0));
             }
-            
+
             try
             {
                 ROIDilationCalculator dilator = new ROIDilationCalculator(roi, pixelSize, distance);
@@ -3070,8 +3068,9 @@ public class ROIUtil
             finally
             {
                 roi.setBounds5D(oldBounds);
-                if (roi instanceof ROI2DArea) {
-                    ((ROI2DArea) roi).setPosition2D(new Point2D.Double(oldBounds.getX(),oldBounds.getY()));
+                if (roi instanceof ROI2DArea)
+                {
+                    ((ROI2DArea) roi).setPosition2D(new Point2D.Double(oldBounds.getX(), oldBounds.getY()));
                 }
             }
         }

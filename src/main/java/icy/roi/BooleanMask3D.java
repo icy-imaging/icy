@@ -1,12 +1,20 @@
 package icy.roi;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
+import icy.image.IcyBufferedImage;
+import icy.sequence.Sequence;
 import icy.type.collection.array.DynamicArray;
 import icy.type.point.Point3D;
 import icy.type.rectangle.Rectangle3D;
+import plugins.kernel.roi.roi3d.ROI3DArea;
 
 /**
  * Class to define a 3D boolean mask region and make basic boolean operation between masks.<br>
@@ -16,6 +24,51 @@ import icy.type.rectangle.Rectangle3D;
  */
 public class BooleanMask3D implements Cloneable
 {
+
+    /**
+     * A temporary component structure used during the extraction process. Many such components may
+     * be extracted from the sequence, and some are fused into the final extracted ROI
+     * 
+     * @author Alexandre Dufour
+     */
+    private static class ConnectedComponent
+    {
+
+        /**
+         * final label that should replace the current label if fusion is needed
+         */
+        int targetLabel;
+
+        /**
+         * if non-null, indicates the parent object with which the current object should be fused
+         */
+        ConnectedComponent targetComponent;
+
+        /**
+         * Creates a new label with the given value. If no parent is set to this label, the given
+         * value will be the final one
+         * 
+         * @param value
+         *        the pixel value
+         * @param label
+         *        the label value
+         */
+        ConnectedComponent(int label)
+        {
+            this.targetLabel = label;
+        }
+
+        /**
+         * Retrieves the final object label (recursively)
+         * 
+         * @return
+         */
+        int getTargetLabel()
+        {
+            return targetComponent == null ? targetLabel : targetComponent.getTargetLabel();
+        }
+    }
+
     // Internal use only
     private static BooleanMask2D doUnion2D(BooleanMask2D m1, BooleanMask2D m2)
     {
@@ -79,7 +132,6 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Build resulting mask from union of the mask1 and mask2:
-     * 
      * <pre>
      *        mask1          +       mask2        =      result
      * 
@@ -145,7 +197,6 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Build resulting mask from intersection of the mask1 and mask2:
-     * 
      * <pre>
      *        mask1     intersect     mask2      =        result
      * 
@@ -206,7 +257,6 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Build resulting mask from exclusive union of the mask1 and mask2:
-     * 
      * <pre>
      *          mask1       xor      mask2        =       result
      * 
@@ -272,7 +322,6 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Build resulting mask from the subtraction of mask2 from mask1:
-     * 
      * <pre>
      *        mask1          -        mask2       =  result
      * 
@@ -1412,6 +1461,490 @@ public class BooleanMask3D implements Cloneable
             result.mask.put(entry.getKey(), (BooleanMask2D) entry.getValue().clone());
 
         return result;
+    }
+
+    /**
+     * Extract masks in the specified sequence though its connected components (8-connectivity is
+     * considered in 2D, and 26-connectivity in 3D). The algorithm uses a fast single-pass sweeping
+     * technique that builds a list of intermediate connected components which are eventually fused
+     * according to their connectivity.<br>
+     * NB: in 3D, the algorithm caches some intermediate buffers to disk to save RAM
+     * 
+     * @return List of BooleanMask3D instances (each connected component).
+     */
+    public List<BooleanMask3D> getComponents()
+    {
+        int width = bounds.sizeX;
+        int height = bounds.sizeY;
+        int slice = width * height;
+        int depth = bounds.sizeZ;
+
+        final Map<Integer, ConnectedComponent> ccs = new HashMap<>();
+        final Map<Integer, ROI3DArea> roiMap = new HashMap<>();
+
+        int[] neighborLabels = new int[13];
+        int nbNeighbors = 0;
+
+        // temporary label buffer
+        final Sequence labelSequence = new Sequence();
+        boolean virtual = false;
+
+        int[] _labelsAbove = null;
+
+        // first image pass: naive labeling with simple backward neighborhood
+        int highestKnownLabel = 0;
+
+        for (int z = 0; z < depth; z++)
+        {
+            int[] _labelsHere;
+
+            try
+            {
+                _labelsHere = new int[slice];
+            }
+            catch (OutOfMemoryError error)
+            {
+                // not enough memory --> pass in virtual mode
+                if (!virtual)
+                {
+                    labelSequence.setVolatile(true);
+                    virtual = true;
+
+                    // re-allocate (we should have enough memory now)
+                    _labelsHere = new int[slice];
+                }
+                else
+                    throw error;
+            }
+
+            // if (is3D) System.out.println("[Label Extractor] First pass (Z" + z + ")");
+
+            BooleanMask2D inputData = getMask2D(z);
+
+            for (int y = 0, maskY = bounds.y, inOffset = 0; y < height; y++, maskY++)
+            {
+                if (Thread.currentThread().isInterrupted())
+                    return new ArrayList<>();
+
+                for (int x = 0, maskX = bounds.x; x < width; x++, maskX++, inOffset++)
+                {
+                    boolean currentImageValue = inputData.contains(maskX, maskY);
+
+                    // do not process the current pixel if:
+                    // - extractUserValue is true and pixelEqualsUserValue is false
+                    // - extractUserValue is false and pixelEqualsUserValue is true
+
+                    if (!currentImageValue)
+                        continue;
+
+                    // from here on, the current pixel should be labeled
+
+                    // -> look for existing labels in its neighborhood
+
+                    // 1) define the neighborhood of interest here
+                    // NB: this is a single pass method, so backward neighborhood is sufficient
+
+                    // legend:
+                    // e = edge
+                    // x = current pixel
+                    // n = valid neighbor
+                    // . = other neighbor
+
+                    if (z == 0)
+                    {
+                        if (y == 0)
+                        {
+                            if (x == 0)
+                            {
+                                // e e e
+                                // e x .
+                                // e . .
+
+                                // do nothing
+                            }
+                            else
+                            {
+                                // e e e
+                                // n x .
+                                // . . .
+
+                                neighborLabels[0] = _labelsHere[inOffset - 1];
+                                nbNeighbors = 1;
+                            }
+                        }
+                        else
+                        {
+                            int north = inOffset - width;
+
+                            if (x == 0)
+                            {
+                                // e n n
+                                // e x .
+                                // e . .
+
+                                neighborLabels[0] = _labelsHere[north];
+                                neighborLabels[1] = _labelsHere[north + 1];
+                                nbNeighbors = 2;
+                            }
+                            else if (x == width - 1)
+                            {
+                                // n n e
+                                // n x e
+                                // . . e
+
+                                neighborLabels[0] = _labelsHere[north - 1];
+                                neighborLabels[1] = _labelsHere[north];
+                                neighborLabels[2] = _labelsHere[inOffset - 1];
+                                nbNeighbors = 3;
+                            }
+                            else
+                            {
+                                // n n n
+                                // n x .
+                                // . . .
+
+                                neighborLabels[0] = _labelsHere[north - 1];
+                                neighborLabels[1] = _labelsHere[north];
+                                neighborLabels[2] = _labelsHere[north + 1];
+                                neighborLabels[3] = _labelsHere[inOffset - 1];
+                                nbNeighbors = 4;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (y == 0)
+                        {
+                            int south = inOffset + width;
+
+                            if (x == 0)
+                            {
+                                // e e e | e e e
+                                // e n n | e x .
+                                // e n n | e . .
+
+                                neighborLabels[0] = _labelsAbove[inOffset];
+                                neighborLabels[1] = _labelsAbove[inOffset + 1];
+                                neighborLabels[2] = _labelsAbove[south];
+                                neighborLabels[3] = _labelsAbove[south + 1];
+                                nbNeighbors = 4;
+                            }
+                            else if (x == width - 1)
+                            {
+                                // e e e | e e e
+                                // n n e | n x e
+                                // n n e | . . e
+
+                                neighborLabels[0] = _labelsAbove[inOffset - 1];
+                                neighborLabels[1] = _labelsAbove[inOffset];
+                                neighborLabels[2] = _labelsAbove[south - 1];
+                                neighborLabels[3] = _labelsAbove[south];
+                                neighborLabels[4] = _labelsHere[inOffset - 1];
+                                nbNeighbors = 5;
+                            }
+                            else
+                            {
+                                // e e e | e e e
+                                // n n n | n x .
+                                // n n n | . . .
+
+                                neighborLabels[0] = _labelsAbove[inOffset - 1];
+                                neighborLabels[1] = _labelsAbove[inOffset];
+                                neighborLabels[2] = _labelsAbove[inOffset + 1];
+                                neighborLabels[3] = _labelsAbove[south - 1];
+                                neighborLabels[4] = _labelsAbove[south];
+                                neighborLabels[5] = _labelsAbove[south + 1];
+                                neighborLabels[6] = _labelsHere[inOffset - 1];
+                                nbNeighbors = 7;
+                            }
+                        }
+                        else if (y == height - 1)
+                        {
+                            int north = inOffset - width;
+
+                            if (x == 0)
+                            {
+                                // e n n | e n n
+                                // e n n | e x .
+                                // e e e | e e e
+
+                                neighborLabels[0] = _labelsAbove[north];
+                                neighborLabels[1] = _labelsAbove[north + 1];
+                                neighborLabels[2] = _labelsAbove[inOffset];
+                                neighborLabels[3] = _labelsAbove[inOffset + 1];
+                                neighborLabels[4] = _labelsHere[north];
+                                neighborLabels[5] = _labelsHere[north + 1];
+                                nbNeighbors = 6;
+                            }
+                            else if (x == width - 1)
+                            {
+                                // n n e | n n e
+                                // n n e | n x e
+                                // e e e | e e e
+
+                                neighborLabels[0] = _labelsAbove[north - 1];
+                                neighborLabels[1] = _labelsAbove[north];
+                                neighborLabels[2] = _labelsAbove[inOffset - 1];
+                                neighborLabels[3] = _labelsAbove[inOffset];
+                                neighborLabels[4] = _labelsHere[north - 1];
+                                neighborLabels[5] = _labelsHere[north];
+                                neighborLabels[6] = _labelsHere[inOffset - 1];
+                                nbNeighbors = 7;
+                            }
+                            else
+                            {
+                                // n n n | n n n
+                                // n n n | n x .
+                                // e e e | e e e
+
+                                neighborLabels[0] = _labelsAbove[north - 1];
+                                neighborLabels[1] = _labelsAbove[north];
+                                neighborLabels[2] = _labelsAbove[north + 1];
+                                neighborLabels[3] = _labelsAbove[inOffset - 1];
+                                neighborLabels[4] = _labelsAbove[inOffset];
+                                neighborLabels[5] = _labelsAbove[inOffset + 1];
+                                neighborLabels[6] = _labelsHere[north - 1];
+                                neighborLabels[7] = _labelsHere[north];
+                                neighborLabels[8] = _labelsHere[north + 1];
+                                neighborLabels[9] = _labelsHere[inOffset - 1];
+                                nbNeighbors = 10;
+                            }
+                        }
+                        else
+                        {
+                            int north = inOffset - width;
+                            int south = inOffset + width;
+
+                            if (x == 0)
+                            {
+                                // e n n | e n n
+                                // e n n | e x .
+                                // e n n | e . .
+
+                                neighborLabels[0] = _labelsAbove[north];
+                                neighborLabels[1] = _labelsAbove[north + 1];
+                                neighborLabels[2] = _labelsAbove[inOffset];
+                                neighborLabels[3] = _labelsAbove[inOffset + 1];
+                                neighborLabels[4] = _labelsAbove[south];
+                                neighborLabels[5] = _labelsAbove[south + 1];
+                                neighborLabels[6] = _labelsHere[north];
+                                neighborLabels[7] = _labelsHere[north + 1];
+                                nbNeighbors = 8;
+                            }
+                            else if (x == width - 1)
+                            {
+                                int northwest = north - 1;
+                                int west = inOffset - 1;
+
+                                // n n e | n n e
+                                // n n e | n x e
+                                // n n e | . . e
+
+                                neighborLabels[0] = _labelsAbove[northwest];
+                                neighborLabels[1] = _labelsAbove[north];
+                                neighborLabels[2] = _labelsAbove[west];
+                                neighborLabels[3] = _labelsAbove[inOffset];
+                                neighborLabels[4] = _labelsAbove[south - 1];
+                                neighborLabels[5] = _labelsAbove[south];
+                                neighborLabels[6] = _labelsHere[northwest];
+                                neighborLabels[7] = _labelsHere[north];
+                                neighborLabels[8] = _labelsHere[west];
+                                nbNeighbors = 9;
+                            }
+                            else
+                            {
+                                int northwest = north - 1;
+                                int west = inOffset - 1;
+                                int northeast = north + 1;
+                                int southwest = south - 1;
+                                int southeast = south + 1;
+
+                                // n n n | n n n
+                                // n n n | n x .
+                                // n n n | . . .
+
+                                neighborLabels[0] = _labelsAbove[northwest];
+                                neighborLabels[1] = _labelsAbove[north];
+                                neighborLabels[2] = _labelsAbove[northeast];
+                                neighborLabels[3] = _labelsAbove[west];
+                                neighborLabels[4] = _labelsAbove[inOffset];
+                                neighborLabels[5] = _labelsAbove[inOffset + 1];
+                                neighborLabels[6] = _labelsAbove[southwest];
+                                neighborLabels[7] = _labelsAbove[south];
+                                neighborLabels[8] = _labelsAbove[southeast];
+                                neighborLabels[9] = _labelsHere[northwest];
+                                neighborLabels[10] = _labelsHere[north];
+                                neighborLabels[11] = _labelsHere[northeast];
+                                neighborLabels[12] = _labelsHere[west];
+                                nbNeighbors = 13;
+                            }
+                        }
+                    }
+
+                    // 2) the neighborhood is ready, move to the labeling step
+
+                    // to avoid creating too many labels and fuse them later on,
+                    // find the minimum non-zero label in the neighborhood
+                    // and assign that minimum label right now
+
+                    int currentLabel = Integer.MAX_VALUE;
+
+                    for (int i = 0; i < nbNeighbors; i++)
+                    {
+                        int neighborLabel = neighborLabels[i];
+
+                        // "zero" neighbors belong to the background...
+                        if (neighborLabel == 0)
+                            continue;
+
+                        if (!currentImageValue)
+                            continue;
+
+                        // here, the neighbor label is valid
+                        // => check if it is lower
+                        if (neighborLabel < currentLabel)
+                        {
+                            currentLabel = neighborLabel;
+                        }
+                    }
+
+                    if (currentLabel == Integer.MAX_VALUE)
+                    {
+                        // currentLabel didn't change
+                        // => there is no lower neighbor
+                        // => register a new connected component
+                        highestKnownLabel++;
+                        currentLabel = highestKnownLabel;
+                        ccs.put(currentLabel, new ConnectedComponent(currentLabel));
+                    }
+                    else
+                    {
+                        // currentLabel has been modified
+                        // -> browse the neighborhood again
+                        // --> fuse high labels with low labels
+
+                        ConnectedComponent currentCC = ccs.get(currentLabel);
+                        int currentTargetLabel = currentCC.getTargetLabel();
+
+                        for (int i = 0; i < nbNeighbors; i++)
+                        {
+                            int neighborLabel = neighborLabels[i];
+
+                            if (neighborLabel == 0)
+                                continue; // no object in this pixel
+
+                            ConnectedComponent neighborCC = ccs.get(neighborLabel);
+                            int neighborTargetLabel = neighborCC.getTargetLabel();
+
+                            if (neighborTargetLabel == currentTargetLabel)
+                                continue;
+
+                            if (!currentImageValue)
+                                continue;
+
+                            // fuse the highest with the lowest
+                            if (neighborTargetLabel > currentTargetLabel)
+                            {
+                                ccs.get(neighborTargetLabel).targetComponent = ccs.get(currentTargetLabel);
+                            }
+                            else
+                            {
+                                ccs.get(currentTargetLabel).targetComponent = ccs.get(neighborTargetLabel);
+                            }
+                        }
+                    }
+
+                    // -> store this label in the labeled image
+                    if (currentLabel != 0)
+                        _labelsHere[inOffset] = currentLabel;
+                }
+            }
+
+            final IcyBufferedImage img = new IcyBufferedImage(width, height, _labelsHere);
+            // pass to volatile if needed
+            if (virtual)
+                img.setVolatile(true);
+
+            // store image in label sequence
+            labelSequence.setImage(0, z, img);
+            // store labels from previous slice
+            _labelsAbove = _labelsHere;
+        }
+
+        // for debugging
+        // Sequence preLabels = new Sequence();
+        // preLabels.addImage(new IcyBufferedImage(width, height, new int[][] { _labels[0] }));
+        // preLabels.getColorModel().setColorMap(0, new FireColorMap(), true);
+        // addSequence(preLabels);
+
+        // end of the first pass, all pixels have a label
+        // (though might not be unique within a given component)
+
+        if (Thread.currentThread().isInterrupted())
+            return new ArrayList<BooleanMask3D>();
+
+        // fusion strategy: fuse higher labels with lower ones
+        // "highestKnownLabel" holds the highest known label
+        // -> loop downwards from there to accumulate object size recursively
+
+        int finalLabel = 0;
+
+        for (int currentLabel = highestKnownLabel; currentLabel > 0; currentLabel--)
+        {
+            ConnectedComponent currentCC = ccs.get(currentLabel);
+
+            // if the target label is higher than or equal to the current label
+            if (currentCC.targetLabel >= currentLabel)
+            {
+                // label has same labelValue and targetLabelValue
+                // -> it cannot be fused to anything
+                // -> this is a terminal label
+
+                // -> assign its final labelValue (for the final image labeling pass)
+                finalLabel++;
+                currentCC.targetLabel = finalLabel;
+            }
+            else
+            {
+                // the current label should be fused to targetLabel
+                currentCC.targetComponent = ccs.get(currentCC.targetLabel);
+            }
+        }
+
+        // 3) second image pass: replace all labels by their final values
+
+        finalPass: for (int z = 0, zMask = 0; z < depth; z++, zMask++)
+        {
+            // get labels for that slice
+            final int[] _labelsHere = (int[]) labelSequence.getDataXY(0, z, 0);
+            for (int j = 0, jMask = bounds.y, offset = 0; j < height; j++, jMask++)
+            {
+                if (Thread.currentThread().isInterrupted())
+                    break finalPass;
+
+                for (int i = 0, iMask = bounds.x; i < width; i++, iMask++, offset++)
+                {
+                    int targetLabel = _labelsHere[offset];
+
+                    if (targetLabel == 0)
+                        continue;
+
+                    // if a fusion was indicated, retrieve the final label value
+                    targetLabel = ccs.get(targetLabel).getTargetLabel();
+
+                    // store the current pixel in the component
+                    if (!roiMap.containsKey(targetLabel))
+                    {
+                        ROI3DArea roi3D = new ROI3DArea();
+                        roi3D.setName("" + targetLabel);
+                        roiMap.put(targetLabel, roi3D);
+                    }
+                    roiMap.get(targetLabel).addPoint(iMask, jMask, zMask);
+                }
+            }
+        }
+
+        return roiMap.values().stream().map(r -> r.getBooleanMask(true)).collect(Collectors.toList());
     }
 
 }
