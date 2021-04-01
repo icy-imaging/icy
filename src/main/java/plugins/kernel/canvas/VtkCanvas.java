@@ -48,6 +48,7 @@ import icy.preferences.XMLPreferences;
 import icy.resource.ResourceUtil;
 import icy.resource.icon.IcyIcon;
 import icy.roi.ROI;
+import icy.sequence.DimensionId;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent.SequenceEventType;
 import icy.system.IcyExceptionHandler;
@@ -1919,6 +1920,62 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         propertyChange(evt.getPropertyName(), evt.getNewValue());
     }
 
+    @Override
+    public boolean isSynchronizationSupported()
+    {
+        return true;
+    }
+
+    @Override
+    protected void synchronizeCanvas(List<IcyCanvas> canvasList, IcyCanvasEvent event, boolean processAll)
+    {
+        if (isSynchOnView())
+        {
+
+            vtkRenderer ren = getRenderer();
+            double[] worldPoint = ren.GetWorldPoint();
+            double[] displayPoint = ren.GetDisplayPoint();
+
+            vtkCamera cam = getCamera();
+            double[] pos = cam.GetPosition();
+            double[] dir = cam.GetFocalPoint();
+            double[] viewUp = cam.GetViewUp();
+            int parallelProjection = cam.GetParallelProjection();
+            double viewAngle = cam.GetViewAngle();
+
+            for (IcyCanvas canvas : canvasList)
+            {
+                VtkCanvas canvasVtk = ((VtkCanvas) canvas);
+                canvasVtk.getVtkPanel().lock();
+                try
+                {
+                    vtkRenderer canvasRen = canvasVtk.getRenderer();
+                    vtkCamera canvasCam = canvasVtk.getCamera();
+
+                    canvasRen.SetWorldPoint(worldPoint);
+                    canvasRen.SetDisplayPoint(displayPoint);
+
+                    canvasCam.SetFocalPoint(dir);
+                    canvasCam.SetPosition(pos);
+                    canvasCam.SetViewUp(viewUp);
+                    canvasCam.SetParallelProjection(parallelProjection);
+                    canvasCam.SetViewAngle(viewAngle);
+
+                    canvasRen.ResetCameraClippingRange();
+
+                    if (canvasVtk.panel3D.getLightFollowCamera())
+                        IcyVtkPanel.setLightToCameraPosition(canvasVtk.panel3D.getLight(), canvasCam);
+                }
+                finally
+                {
+                    canvasVtk.panel3D.updateAxisView();
+                    canvasVtk.getVtkPanel().unlock();
+                    canvasVtk.getVtkPanel().repaint();
+                }
+            }
+        }
+    }
+
     protected class EDTTask<T> implements Callable<T>
     {
         protected Runnable task;
@@ -1970,7 +2027,8 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         /**
          * Update mouse cursor
          * 
-         * @param consumedByCanvas boolean
+         * @param consumedByCanvas
+         *        boolean
          */
         protected void updateCursor(boolean consumedByCanvas)
         {
@@ -2056,7 +2114,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
 
                 if (layer == null)
                     continue;
-                
+
                 // update VTK visibility flag
                 for (vtkProp prop : VtkUtil.getLayerProps(layer))
                 {
@@ -2143,6 +2201,8 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             final boolean consumed = e.isConsumed();
 
             super.mouseMoved(e);
+            
+            mouseImagePositionChanged(null);
 
             // refresh mouse cursor (do it after all process)
             updateCursor(!consumed && e.isConsumed());
@@ -2230,6 +2290,27 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             }
 
             super.keyPressed(e);
+        }
+
+        @Override
+        public void zoomView(vtkCamera c, vtkRenderer r, double factor)
+        {
+            super.zoomView(c, r, factor);
+            VtkCanvas.this.scaleChanged(DimensionId.NULL);
+        }
+
+        @Override
+        public void rotateView(vtkCamera c, vtkRenderer r, int dx, int dy)
+        {
+            super.rotateView(c, r, dx, dy);
+            VtkCanvas.this.rotationChanged(DimensionId.NULL);
+        }
+
+        @Override
+        public void translateView(vtkCamera c, vtkRenderer r, double dx, double dy)
+        {
+            super.translateView(c, r, dx, dy);
+            VtkCanvas.this.positionChanged(DimensionId.NULL);
         }
     }
 
