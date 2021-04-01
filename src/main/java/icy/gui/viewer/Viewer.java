@@ -96,6 +96,8 @@ import icy.system.thread.ThreadUtil;
 import icy.util.GraphicsUtil;
 import icy.util.Random;
 import icy.util.StringUtil;
+import plugins.kernel.canvas.VtkCanvas;
+import plugins.kernel.canvas.VtkCanvasPlugin;
 
 /**
  * Viewer send an event if the IcyCanvas change.
@@ -819,11 +821,32 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     public void setCanvas(String pluginClassName)
     {
         // not the same canvas ?
-        if ((canvas == null) || !canvas.getClass().getName().equals(IcyCanvas.getCanvasClassName(pluginClassName)))
+        if ((canvas == null) || !StringUtil.equals(canvas.getClass().getName(), IcyCanvas.getCanvasClassName(pluginClassName)))
         {
             try
             {
                 IcyCanvas newCanvas;
+                String className = pluginClassName;
+                
+                // VTK Canvas ?
+                if (StringUtil.equals(className, VtkCanvasPlugin.class.getName()))
+                {
+                    // VTK canvas doesn't support duplicated view
+                    for (Viewer v : Icy.getMainInterface().getViewers())
+                    {
+                        // we have another viewer with duplicated VTK view ? --> show warning at least
+                        if ((v != this) && (v.getSequence() == getSequence()) && (v.getCanvas() instanceof VtkCanvas))
+                        {
+                            if (!ConfirmDialog.confirm("Caution",
+                                    "You may experience problems using duplicated 3D containing objects (ROI). Do you want to continue ?",
+                                    ConfirmDialog.OK_CANCEL_OPTION))
+                                // use current canvas class
+                                className = canvas.getClass().getName();
+                            
+                            break;
+                        }
+                    }
+                }
 
                 settingCanvas = true;
                 // show loading message
@@ -831,7 +854,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                 try
                 {
                     // try to create the new canvas
-                    newCanvas = IcyCanvas.create(pluginClassName, this);
+                    newCanvas = IcyCanvas.create(className, this);
                 }
                 catch (Throwable e)
                 {
@@ -847,7 +870,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                     {
                         IcyExceptionHandler.handleException(
                                 new ClassNotFoundException(
-                                        "Cannot find '" + pluginClassName + "' class --> cannot create the canvas.", e),
+                                        "Cannot find '" + className + "' class --> cannot create the canvas.", e),
                                 true);
                     }
                     else
