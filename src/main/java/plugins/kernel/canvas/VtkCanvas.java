@@ -26,6 +26,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.JToolBar;
 
+import icy.canvas.Canvas2D;
 import icy.canvas.Canvas3D;
 import icy.canvas.CanvasLayerEvent;
 import icy.canvas.CanvasLayerEvent.LayersEventType;
@@ -1929,9 +1930,42 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     @Override
     protected void synchronizeCanvas(List<IcyCanvas> canvasList, IcyCanvasEvent event, boolean processAll)
     {
+        final IcyCanvasEventType type = event.getType();
+        final DimensionId dim = event.getDim();
+
+        // position synchronization
+        if (isSynchOnSlice())
+        {
+            if (processAll || (type == IcyCanvasEventType.POSITION_CHANGED))
+            {
+                // no information about dimension --> set all
+                if (processAll || (dim == DimensionId.NULL))
+                {
+                    // only support T positioning
+                    final int t = getPositionT();
+
+                    for (IcyCanvas cnv : canvasList)
+                    {
+                        if (t != -1)
+                            cnv.setPositionT(t);
+                    }
+                }
+                else
+                {
+                    for (IcyCanvas cnv : canvasList)
+                    {
+                        final int pos = getPosition(dim);
+                        if (pos != -1)
+                            cnv.setPosition(dim, pos);
+                    }
+                }
+            }
+        }
+
+        // view synchronization
         if (isSynchOnView())
         {
-
+            // always do full view synchronization here
             vtkRenderer ren = getRenderer();
             double[] worldPoint = ren.GetWorldPoint();
             double[] displayPoint = ren.GetDisplayPoint();
@@ -1946,6 +1980,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             for (IcyCanvas canvas : canvasList)
             {
                 VtkCanvas canvasVtk = ((VtkCanvas) canvas);
+                canvasVtk.beginUpdate();
                 canvasVtk.getVtkPanel().lock();
                 try
                 {
@@ -1970,7 +2005,32 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                 {
                     canvasVtk.panel3D.updateAxisView();
                     canvasVtk.getVtkPanel().unlock();
+                    canvasVtk.endUpdate();
                     canvasVtk.getVtkPanel().repaint();
+                }
+            }
+        }
+
+        // cursor synchronization
+        if (isSynchOnCursor())
+        { 
+            // mouse synchronization
+            if (processAll || (type == IcyCanvasEventType.MOUSE_IMAGE_POSITION_CHANGED))
+            {
+                // no information about dimension --> set all
+                if (processAll || (dim == DimensionId.NULL))
+                {
+                    final double mouseImagePosX = getMouseImagePosX();
+                    final double mouseImagePosY = getMouseImagePosY();
+                    final double mouseImagePosZ = getMouseImagePosZ();
+                    
+                    for (IcyCanvas cnv : canvasList)
+                        ((VtkCanvas) cnv).setMouseImagePos(mouseImagePosX, mouseImagePosY, mouseImagePosZ);
+                }
+                else
+                {
+                    for (IcyCanvas cnv : canvasList)
+                        cnv.setMouseImagePos(dim, getMouseImagePos(dim));
                 }
             }
         }
