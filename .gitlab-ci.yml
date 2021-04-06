@@ -93,13 +93,21 @@ deploy-release-job:
       when: on_success
     - when: never
 
-# TODO: Package Icy as a software for Windows, Mac and Linux
-#package-software-job:
-#  stage: package-software
-#  dependencies:
-#    - deploy-release-job
-#  script:
-#    - echo "Construct Icy Software"
-#  rules:
-#    - if: $CI_COMMIT_TAG =~ /^v(\d+\.)?(\d+\.)?(\d)$/
-#    - when: never
+package-software-job:
+  stage: package-software
+  before_script:
+    - mkdir release
+    - echo "Opening Icy... "
+    - cd build/icy && java -jar icy.jar -hl
+  script:
+    - echo "Creating Icy for Windows zip"
+    - zip -r ../../release/icy-windows.zip colormap/ ij/ lib/ CHANGELOG icy.exe icy.jar LICENSE README.md setting.xml updater.jar version.xml
+    - echo "Creating Icy for Linux zip"
+    - zip -r ../../release/icy-linux.zip colormap/ ij/ lib/ CHANGELOG icy icy.jar LICENSE README.md setting.xml updater.jar version.xml
+    - echo "Creating Icy for Mac zip"
+    - mkdir ../icy.app && cp -t ../icy.app -r Contents/ colormap/ ij/ lib/ CHANGELOG icy.jar LICENSE README.md setting.xml version.xml updater.jar && zip -r ../../release/icy-mac.zip ../icy.app/
+  artifacts:
+    when: on_success
+    expire_in: 1 hour
+    paths:
+      - release/*.zip
