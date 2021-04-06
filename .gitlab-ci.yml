@@ -34,6 +34,8 @@ prepare-job:
 
 build-job:
   stage: build
+  dependencies:
+    - prepare-job
   script:
     - echo "Building Artifact"
     - mvn $MAVEN_CLI_OPTS clean compile
@@ -58,7 +60,7 @@ package-job:
 test-job:
   stage: test
   dependencies:
-    - build-job
+    - package-job
   script:
     - echo "Checking files"
     - mvn clean verify
@@ -104,6 +106,8 @@ deploy-release-job:
 
 package-software-job:
   stage: package-software
+  dependencies:
+    - package-job
   before_script:
     - mkdir release
     - echo "Opening Icy... "
