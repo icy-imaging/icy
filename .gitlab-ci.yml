@@ -46,7 +46,7 @@ package-job:
     - echo "Installing OpenJDK 8 and Maven"
     - apt update
     - apt install -y openjdk-8-jdk maven
-    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/bin
+    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
   script:
     - echo "Packaging the code"
     - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
@@ -63,6 +63,7 @@ test-job:
     - echo "Installing OpenJDK 8 and Maven"
     - apt update
     - apt install -y openjdk-8-jdk maven
+    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
   script:
     - echo "Checking files"
     - mvn clean verify
@@ -80,6 +81,7 @@ deploy-dev-job:
     - echo "Installing OpenJDK 8 and Maven"
     - apt update
     - apt install -y openjdk-8-jdk maven
+    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
   script:
     - echo "Deploy artifact to the Nexus development server"
     - mvn -X $MAVEN_CLI_OPTS -P deploy-dev
@@ -97,6 +99,7 @@ deploy-release-job:
     - echo "Installing OpenJDK 8 and Maven"
     - apt update
     - apt install -y openjdk-8-jdk maven
+    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 
     - echo "Checking POM file..."
     - export JAR_VERSION=$(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
