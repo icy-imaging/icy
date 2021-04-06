@@ -1,4 +1,4 @@
-image: maven:latest
+image: ubuntu:latest
 
 workflow:
   rules:
@@ -11,6 +11,7 @@ variables:
   MAVEN_OPTS: '-Dargline="Xmx1024m" -Dmaven.repo.local=.m2/repository'
 
 stages:
+  - prepare-installation
   - build
   - package
   - test
@@ -22,6 +23,13 @@ cache:
   paths:
     - .m2/repository
     - build/
+
+prepare-job:
+  stage: prepare-installation
+  script:
+    - echo "Installing packages..."
+    - apt update
+    - apt install openjdk-8-jdk maven zip unzip
 
 build-job:
   stage: build
@@ -96,9 +104,6 @@ deploy-release-job:
 package-software-job:
   stage: package-software
   before_script:
-    - echo "Installing Zip package..."
-    - apk update
-    - apk add zip unzip
     - mkdir release
     - echo "Opening Icy... "
     - cd build/icy && java -jar icy.jar -hl
