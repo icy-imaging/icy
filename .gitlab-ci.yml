@@ -4,7 +4,7 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE != "push"
       when: never
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "test_ci"
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
