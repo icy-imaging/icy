@@ -329,7 +329,7 @@
     <repositories>
         <repository>
             <id>jai-repo</id>
-            <url>http://maven.geomajas.org/</url>
+            <url>https://packages.atlassian.com/maven-3rdparty/</url>
         </repository>
         <repository>
             <id>icy-prod</id>
