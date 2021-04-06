@@ -11,7 +11,6 @@ variables:
   MAVEN_OPTS: '-Dargline="Xmx1024m" -Dmaven.repo.local=.m2/repository'
 
 stages:
-  - prepare-installation
   - build
   - package
   - test
@@ -24,21 +23,12 @@ cache:
     - .m2/repository
     - build/
 
-prepare-job:
-  stage: prepare-installation
-  script:
-    - echo "Installing packages..."
-    - apt update
-    - apt install -y openjdk-8-jdk maven zip unzip
-    - mvn -version
-    - echo "export M3_HOME=/usr/local/apache-maven/apache-maven-3.6.3" >> $HOME/.bashrc
-    - echo "export PATH=$PATH:$M3_HOME/bin" >> $HOME/.bashrc
-    - source $HOME/.bashrc
-
 build-job:
   stage: build
-  dependencies:
-    - prepare-job
+  before_script:
+    - echo "Installing OpenJDK 8 and Maven"
+    - apt update
+    - apt install -y openjdk-8-jdk maven
   script:
     - echo "Building Artifact"
     - mvn $MAVEN_CLI_OPTS clean compile
@@ -52,6 +42,10 @@ package-job:
   stage: package
   dependencies:
     - build-job
+  before_script:
+    - echo "Installing OpenJDK 8 and Maven"
+    - apt update
+    - apt install -y openjdk-8-jdk maven
   script:
     - echo "Packaging the code"
     - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
@@ -64,6 +58,10 @@ test-job:
   stage: test
   dependencies:
     - package-job
+  before_script:
+    - echo "Installing OpenJDK 8 and Maven"
+    - apt update
+    - apt install -y openjdk-8-jdk maven
   script:
     - echo "Checking files"
     - mvn clean verify
@@ -77,6 +75,10 @@ deploy-dev-job:
   stage: deploy-dev
   dependencies:
     - package-job
+  before_script:
+    - echo "Installing OpenJDK 8 and Maven"
+    - apt update
+    - apt install -y openjdk-8-jdk maven
   script:
     - echo "Deploy artifact to the Nexus development server"
     - mvn -X $MAVEN_CLI_OPTS -P deploy-dev
@@ -91,6 +93,10 @@ deploy-release-job:
   dependencies:
     - package-job
   before_script:
+    - echo "Installing OpenJDK 8 and Maven"
+    - apt update
+    - apt install -y openjdk-8-jdk maven
+
     - echo "Checking POM file..."
     - export JAR_VERSION=$(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
     - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; then exit 0; else >&2 echo "Impossible to send artifact to the Nexus, the application is in SNAPSHOT version"; fi
@@ -112,6 +118,10 @@ package-software-job:
   dependencies:
     - package-job
   before_script:
+    - echo "Installing Zip"
+    - apt update
+    - apt install -y zip unzip
+
     - mkdir release
     - echo "Opening Icy... "
     - cd build/icy && java -jar icy.jar -hl
