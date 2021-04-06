@@ -46,6 +46,7 @@ package-job:
     - echo "Installing OpenJDK 8 and Maven"
     - apt update
     - apt install -y openjdk-8-jdk maven
+    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/bin/java
   script:
     - echo "Packaging the code"
     - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
