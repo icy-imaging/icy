@@ -96,12 +96,12 @@ deploy-release-job:
 package-software-job:
   stage: package-software
   before_script:
-    - echo "Installing Zip package..."
-    - apt-get install zip unzip
     - mkdir release
     - echo "Opening Icy... "
     - cd build/icy && java -jar icy.jar -hl
   script:
+    - echo "Installing Zip package..."
+    - apt-get install zip unzip
     - echo "Creating Icy for Windows zip"
     - zip -r ../../release/icy-windows.zip colormap/ ij/ lib/ CHANGELOG icy.exe icy.jar LICENSE README.md setting.xml updater.jar version.xml
     - echo "Creating Icy for Linux zip"
