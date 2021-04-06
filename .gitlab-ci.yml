@@ -31,6 +31,9 @@ prepare-job:
     - apt update
     - apt install -y openjdk-8-jdk maven zip unzip
     - mvn -version
+    - echo "export M3_HOME=/usr/local/apache-maven/apache-maven-3.6.3" >> $HOME/.bashrc
+    - echo "export PATH=$PATH:$M3_HOME/bin" >> $HOME/.bashrc
+    - source $HOME/.bashrc
 
 build-job:
   stage: build
