@@ -29,7 +29,7 @@ prepare-job:
   script:
     - echo "Installing packages..."
     - apt update
-    - apt install openjdk-8-jdk maven zip unzip
+    - apt install -y openjdk-8-jdk maven zip unzip
 
 build-job:
   stage: build
