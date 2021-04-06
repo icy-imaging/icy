@@ -98,7 +98,7 @@ package-software-job:
   before_script:
     - echo "Installing Zip package..."
     - apk update
-    - apk install -y zip unzip
+    - apk add zip unzip
     - mkdir release
     - echo "Opening Icy... "
     - cd build/icy && java -jar icy.jar -hl
