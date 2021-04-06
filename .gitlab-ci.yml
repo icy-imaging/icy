@@ -124,7 +124,7 @@ package-software-job:
   before_script:
     - echo "Installing Zip"
     - apt update
-    - apt install -y zip unzip
+    - apt install -y openjdk-8-jdk zip unzip
 
     - mkdir release
     - echo "Opening Icy... "
