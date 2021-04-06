@@ -30,6 +30,9 @@ prepare-job:
     - echo "Installing packages..."
     - apt update
     - apt install -y openjdk-8-jdk maven zip unzip
+    - echo 'export M3_HOME="/usr/share/maven"' >> /etc/profile
+    - echo 'export PATH=$PATH:$M3_HOME/bin' >> /etc/profile
+    - source /etc/profile
 
 build-job:
   stage: build
