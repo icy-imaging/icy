@@ -97,8 +97,8 @@ package-software-job:
   stage: package-software
   before_script:
     - echo "Installing Zip package..."
-    - apt update
-    - apt install -y zip unzip
+    - apk update
+    - apk install -y zip unzip
     - mkdir release
     - echo "Opening Icy... "
     - cd build/icy && java -jar icy.jar -hl
