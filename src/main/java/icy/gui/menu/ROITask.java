@@ -83,6 +83,7 @@ import plugins.kernel.roi.roi3d.plugin.ROI3DPolyLinePlugin;
 import plugins.kernel.roi.roi4d.ROI4DArea;
 import plugins.kernel.roi.roi5d.ROI5DArea;
 import plugins.kernel.roi.tool.plugin.ROILineCutterPlugin;
+import plugins.kernel.roi.tool.plugin.ROIMagicWandPlugin;
 
 /**
  * ROI dedicated task
@@ -243,8 +244,9 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             // remove default 2D & 3D ROI to only keep external ROI
             result.removeAll(ROI2DBand.getROIPlugins());
             result.removeAll(ROI3DBand.getROIPlugins());
-            // explicitly remove the ROI cutter from the list
+            // explicitly remove the ROI cutter and ROI Magic Wand from the list
             result.remove(PluginLoader.getPlugin(ROILineCutterPlugin.class.getName()));
+            result.remove(PluginLoader.getPlugin(ROIMagicWandPlugin.class.getName()));
 
             return result;
         }
@@ -255,6 +257,35 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
             for (IcyCommandToggleButton button : pluginButtons)
                 button.setEnabled(sequence != null);
+        }
+    }
+    
+    static class ROIToolBand extends JRibbonBand
+    {
+        public static final String BAND_NAME = "Tool";
+
+        final IcyCommandToggleButton magicWandButton;
+
+        public ROIToolBand()
+        {
+            super(BAND_NAME, new IcyIcon(ResourceUtil.ICON_TOOLS));
+
+            magicWandButton = PluginCommandButton
+                    .createToggleButton(PluginLoader.getPlugin(ROIMagicWandPlugin.class.getName()), false, true);
+            addCommandButton(magicWandButton, RibbonElementPriority.TOP);
+
+            magicWandButton.setEnabled(false);
+
+            setToolTipText("Advanced tools for ROI");
+            RibbonUtil.setRestrictiveResizePolicies(this);
+            updateButtonsState();
+        }
+
+        public void updateButtonsState()
+        {
+            final Sequence seq = Icy.getMainInterface().getActiveSequence();
+
+            magicWandButton.setEnabled(seq != null);
         }
     }
 
@@ -858,6 +889,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
     final ROI2DBand roi2dBand;
     final ROI3DBand roi3dBand;
     final ROIExtBand roiExtBand;
+    final ROIToolBand roiToolBand;
     final ROIConversionBand roiConversionBand;
     final ROISeparationBand roiSeparationBand;
     final ROIMorphologyBand roiMorphologyBand;
@@ -878,7 +910,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
     public ROITask()
     {
-        super(NAME, new ROI2DBand(), new ROI3DBand(), new ROIExtBand(), new ROIConversionBand(),
+        super(NAME, new ROI2DBand(), new ROI3DBand(), new ROIExtBand(), new ROIToolBand(), new ROIConversionBand(),
                 new ROISeparationBand(), new ROIMorphologyBand(), new ROIBooleanOpBand(), new ROIFillBand(),
                 new ROIIOBand());
         // super(NAME,, new ROIRibbonBand());
@@ -889,6 +921,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
         roi2dBand = (ROI2DBand) RibbonUtil.getBand(this, ROI2DBand.BAND_NAME);
         roi3dBand = (ROI3DBand) RibbonUtil.getBand(this, ROI3DBand.BAND_NAME);
         roiExtBand = (ROIExtBand) RibbonUtil.getBand(this, ROIExtBand.BAND_NAME);
+        roiToolBand = (ROIToolBand) RibbonUtil.getBand(this, ROIToolBand.BAND_NAME);
         roiConversionBand = (ROIConversionBand) RibbonUtil.getBand(this, ROIConversionBand.BAND_NAME);
         roiSeparationBand = (ROISeparationBand) RibbonUtil.getBand(this, ROISeparationBand.BAND_NAME);
         roiMorphologyBand = (ROIMorphologyBand) RibbonUtil.getBand(this, ROIMorphologyBand.BAND_NAME);
@@ -914,6 +947,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
                         roi2dBand.updateButtonsState();
                         roi3dBand.updateButtonsState();
                         roiExtBand.updateButtonsState();
+                        roiToolBand.updateButtonsState();
                         roiConversionBand.updateButtonsState();
                         roiSeparationBand.updateButtonsState();
                         roiMorphologyBand.updateButtonsState();
@@ -948,6 +982,8 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             button.addActionListener(buttonActionListener);
         for (AbstractCommandButton button : RibbonUtil.getButtons(roiExtBand))
             button.addActionListener(buttonActionListener);
+        // magic wand button act as a selector
+        roiToolBand.magicWandButton.addActionListener(buttonActionListener);
         // cut button act as a selector
         roiSeparationBand.cutButton.addActionListener(buttonActionListener);
 
@@ -957,7 +993,9 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
             buttonGroup.add((IcyCommandToggleButton) button);
         for (AbstractCommandButton button : RibbonUtil.getButtons(roiExtBand))
             buttonGroup.add((IcyCommandToggleButton) button);
-        // cut button which act as a selector
+        // magic wand button act as a selector
+        buttonGroup.add(roiToolBand.magicWandButton);
+        // cut button act as a selector
         buttonGroup.add(roiSeparationBand.cutButton);
 
         PluginLoader.addListener(this);

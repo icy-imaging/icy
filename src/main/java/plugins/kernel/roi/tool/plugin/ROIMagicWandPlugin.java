@@ -7,31 +7,30 @@ import icy.plugin.abstract_.Plugin;
 import icy.plugin.interface_.PluginROI;
 import icy.roi.ROI;
 import icy.type.point.Point5D;
-
-import plugins.kernel.roi.tool.ROILineCutter;
+import plugins.kernel.roi.tool.ROIMagicWand;
 
 /**
- * Plugin class for ROILineCutter.
+ * Plugin class for ROIMagicWand.
  * 
  * @author Stephane
  */
-public class ROILineCutterPlugin extends Plugin implements PluginROI
+public class ROIMagicWandPlugin extends Plugin implements PluginROI
 {
     @Override
     public String getROIClassName()
     {
-        return ROILineCutter.class.getName();
+        return ROIMagicWand.class.getName();
     }
 
     @Override
     public ROI createROI(Point5D pt)
     {
-        return new ROILineCutter(pt);
+        return new ROIMagicWand(pt);
     }
 
     @Override
     public ROI createROI()
     {
-        return new ROILineCutter();
+        return new ROIMagicWand();
     }
 }

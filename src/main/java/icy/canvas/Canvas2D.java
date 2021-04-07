@@ -96,7 +96,8 @@ import icy.util.EventUtil;
 import icy.util.GraphicsUtil;
 import icy.util.ShapeUtil;
 import icy.util.StringUtil;
-import plugins.kernel.roi.tool.plugin.ROILineCutterPlugin;
+import plugins.kernel.roi.tool.ROILineCutter;
+import plugins.kernel.roi.tool.ROIMagicWand;
 
 /**
  * New Canvas 2D : default ICY 2D viewer.<br>
@@ -1054,7 +1055,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
          * Internal canvas process on mousePressed event.<br>
          * Return true if event should be consumed.
          */
-        boolean onMousePressed(boolean consumed, boolean left, boolean right, boolean control)
+        boolean onMousePressed(boolean consumed, boolean left, boolean right, boolean control, boolean shift)
         {
             // not yet consumed
             if (!consumed)
@@ -1086,10 +1087,21 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
                             {
                                 roi.setCreating(true);
 
-                                // attach to sequence (hacky method to avoid undoing ROI cutting)
-                                seq.addROI(roi, !roiClassName.equals(ROILineCutterPlugin.class.getName()));
-                                // then do exclusive selection
-                                seq.setSelectedROI(roi);
+                                // a bit hacky but it need special behavior
+                                if (roi instanceof ROIMagicWand)
+                                {
+                                    ((ROIMagicWand) roi).start(getMouseImagePos5D(), getMousePos(), seq, Canvas2D.this,
+                                            shift);
+                                    // attach to sequence (hacky method to avoid undoing Magic Wand)
+                                    seq.addROI(roi, false);
+                                }
+                                else
+                                {
+                                    // attach to sequence (hacky method to avoid undoing ROI cutting)
+                                    seq.addROI(roi, !(roi instanceof ROILineCutter));
+                                    // then do exclusive selection
+                                    seq.setSelectedROI(roi);
+                                }
                             }
 
                             // consume event
@@ -1334,7 +1346,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
 
             // process
             if (onMousePressed(e.isConsumed(), EventUtil.isLeftMouseButton(e), EventUtil.isRightMouseButton(e),
-                    EventUtil.isControlDown(e)))
+                    EventUtil.isControlDown(e), EventUtil.isShiftDown(e)))
                 e.consume();
         }
 
