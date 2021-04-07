@@ -329,7 +329,8 @@
     <repositories>
         <repository>
             <id>jai-repo</id>
-            <url>http://maven.geomajas.org/</url>
+            <url>https://maven.geotoolkit.org</url>
+<!--             <url>http://maven.geomajas.org/</url> -->
         </repository>
         <repository>
             <id>icy-prod</id>
