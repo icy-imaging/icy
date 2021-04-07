@@ -360,6 +360,14 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
             seq.addListener(this);
         }
     }
+    
+    /**
+     * @return current active channel index (channel pane which has focus)
+     */
+    public int getActiveChannelIndex()
+    {
+        return bottomPane.getSelectedIndex();
+    }
 
     private boolean getPreferredAutoBounds()
     {
