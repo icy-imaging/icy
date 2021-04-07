@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='ISO-8859-1' standalone='no'?>
+<root>
+<name>Magic Wand</name>
+<version>1.0.0.0</version>
+<description>Magic Wand tool (2D)
+Move right while maintaining left mouse button down to increase value tolerance.
+Move down while maintaining left mouse button down to increase gradient tolerance. Gradient tolerance is considered only if above 0 and below value tolerance.
+
+Maintain shift button down to enable color mode (3 channels image only).
+</description>
+<classname>plugins.kernel.roi.tool.plugin.ROIMagicWandPlugin</classname>
+</root>
