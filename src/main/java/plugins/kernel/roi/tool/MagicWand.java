@@ -101,7 +101,7 @@ public class MagicWand
         int[] pixelPointers = new int[pixelPointerMask + 1];
 
         // pixel value range
-        final double grayRef = getPixel(pixels[0], dataType, xStart, yStart, width); // reference level from this pixel
+        final double grayRef = getPixel(grayPixels, dataType, xStart, yStart, width); // reference level from this pixel
         final double lowLimit = grayRef - mws.valueTolerance;
         final double highLimit = grayRef + mws.valueTolerance;
 
