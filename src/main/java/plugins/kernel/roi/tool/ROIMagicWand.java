@@ -319,11 +319,11 @@ public class ROIMagicWand extends ROI2DArea
 
         if (init)
         {
-            startValueTolerance = (channelDelta > 0d) ? channelDelta / 10d : 1d;
-//            startGradientTolerance = (channelDelta > 0d) ? channelDelta / 20d : 1d;
+            startValueTolerance = (channelDelta > 0d) ? channelDelta / 15d : 1d;
+//            startGradientTolerance = (channelDelta > 0d) ? channelDelta / 30d : 1d;
             startGradientTolerance = -10d;
         }
-        valueToleranceStep = (channelDelta > 0d) ? channelDelta / 700d : 0d;
+        valueToleranceStep = (channelDelta > 0d) ? channelDelta / 800d : 0d;
         gradientToleranceStep = (channelDelta > 0d) ? channelDelta / 1500d : 0d;
     }
 
