@@ -19,6 +19,7 @@
 package icy.preferences;
 
 import icy.common.Version;
+import icy.file.FileUtil;
 import icy.math.MathUtil;
 import icy.network.NetworkUtil;
 import icy.system.SystemUtil;
@@ -200,7 +201,12 @@ public class ApplicationPreferences
      */
     public static String getCachePath()
     {
-        return preferences.get(ID_CACHE_PATH, SystemUtil.getTempDirectory());
+        final String result = preferences.get(ID_CACHE_PATH, SystemUtil.getTempDirectory());
+        // doesn't exist ? --> use default folder as config may have changed
+        if (!FileUtil.exists(result))
+            return SystemUtil.getTempDirectory();
+
+        return result;
     }
 
     /**
@@ -254,7 +260,8 @@ public class ApplicationPreferences
     }
 
     /**
-     * @param value Set max memory (in MB)
+     * @param value
+     *        Set max memory (in MB)
      */
     public static void setMaxMemoryMB(int value)
     {
@@ -262,7 +269,8 @@ public class ApplicationPreferences
     }
 
     /**
-     * @param value Set stack size (in KB)
+     * @param value
+     *        Set stack size (in KB)
      */
     public static void setStackSizeKB(int value)
     {
@@ -270,7 +278,8 @@ public class ApplicationPreferences
     }
 
     /**
-     * @param value Set cache reserved memory (in % of max memory)
+     * @param value
+     *        Set cache reserved memory (in % of max memory)
      */
     public static void setCacheMemoryPercent(int value)
     {
@@ -279,7 +288,8 @@ public class ApplicationPreferences
     }
 
     /**
-     * @param value Set cache path (folder where to create cache data, better to use fast storage)
+     * @param value
+     *        Set cache path (folder where to create cache data, better to use fast storage)
      */
     public static void setCachePath(String value)
     {
@@ -287,7 +297,8 @@ public class ApplicationPreferences
     }
 
     /**
-     * @param value Set extra JVM parameters string
+     * @param value
+     *        Set extra JVM parameters string
      */
     public static void setExtraVMParams(String value)
     {
@@ -295,7 +306,8 @@ public class ApplicationPreferences
     }
 
     /**
-     * @param value Set OS specific extra JVM parameters string
+     * @param value
+     *        Set OS specific extra JVM parameters string
      */
     public static void setOSExtraVMParams(String value)
     {
@@ -303,7 +315,8 @@ public class ApplicationPreferences
     }
 
     /**
-     * @param value Set Icy application folder
+     * @param value
+     *        Set Icy application folder
      */
     public static void setAppFolder(String value)
     {
@@ -311,7 +324,8 @@ public class ApplicationPreferences
     }
 
     /**
-     * @param value Set ICY application parameters string
+     * @param value
+     *        Set ICY application parameters string
      */
     public static void setAppParams(String value)
     {
@@ -319,7 +333,8 @@ public class ApplicationPreferences
     }
 
     /**
-     * @param value Set the stored version number (used to detect new installed version)
+     * @param value
+     *        Set the stored version number (used to detect new installed version)
      */
     public static void setVersion(Version value)
     {

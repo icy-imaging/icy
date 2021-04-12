@@ -182,7 +182,13 @@ public class GeneralPreferences
 
     public static String getResultFolder()
     {
-        return prefGeneral.get(ID_RESULT_FOLDER, FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + "result");
+        final String result = prefGeneral.get(ID_RESULT_FOLDER,
+                FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + "result");
+        // parent doesn't exist ? --> use default folder
+        if (!FileUtil.exists(FileUtil.getDirectory(result)))
+            return FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + "result";
+
+        return result;
     }
 
     public static String getUserLogin()
