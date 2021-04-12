@@ -18,9 +18,15 @@
  */
 package icy.action;
 
+import java.awt.event.ActionEvent;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import icy.gui.preferences.GUICanvasPreferencePanel;
-import icy.gui.preferences.ChatPreferencePanel;
 import icy.gui.preferences.GeneralPreferencePanel;
+import icy.gui.preferences.MagicWandPreferencePanel;
 import icy.gui.preferences.NetworkPreferencePanel;
 import icy.gui.preferences.PluginLocalPreferencePanel;
 import icy.gui.preferences.PluginOnlinePreferencePanel;
@@ -35,12 +41,6 @@ import icy.resource.ResourceUtil;
 import icy.resource.icon.IcyIcon;
 import icy.util.ClassUtil;
 
-import java.awt.event.ActionEvent;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Preference actions.
  * 
@@ -48,8 +48,8 @@ import java.util.List;
  */
 public class PreferencesActions
 {
-    public static IcyAbstractAction preferencesAction = new IcyAbstractAction("Preferences  ", new IcyIcon(
-            ResourceUtil.ICON_TOOLS), "Show the preferences window", "Setup Icy preferences")
+    public static IcyAbstractAction preferencesAction = new IcyAbstractAction("Preferences  ",
+            new IcyIcon(ResourceUtil.ICON_TOOLS), "Show the preferences window", "Setup Icy preferences")
     {
         /**
          * 
@@ -64,8 +64,8 @@ public class PreferencesActions
         }
     };
 
-    public static IcyAbstractAction generalPreferencesAction = new IcyAbstractAction("Preferences", new IcyIcon(
-            ResourceUtil.ICON_TOOLS), "Show the general preferences window",
+    public static IcyAbstractAction generalPreferencesAction = new IcyAbstractAction("Preferences",
+            new IcyIcon(ResourceUtil.ICON_TOOLS), "Show the general preferences window",
             "Setup general setting as font size, automatic update, maximum memory...")
     {
         /**
@@ -81,8 +81,8 @@ public class PreferencesActions
         }
     };
 
-    public static IcyAbstractAction canvasPreferencesAction = new IcyAbstractAction("Canvas preferences", new IcyIcon(
-            ResourceUtil.ICON_PICTURE), "Show the canvas preferences window",
+    public static IcyAbstractAction canvasPreferencesAction = new IcyAbstractAction("Canvas preferences",
+            new IcyIcon(ResourceUtil.ICON_PICTURE), "Show the canvas preferences window",
             "Setup canvas setting as filtering, mouse wheel sensivity and reverse mouse axis...")
     {
         /**
@@ -98,22 +98,22 @@ public class PreferencesActions
         }
     };
 
-//    public static IcyAbstractAction chatPreferencesAction = new IcyAbstractAction("Chat preferences", new IcyIcon(
-//            ResourceUtil.ICON_CHAT), "Show the chat preferences window",
-//            "Setup chat setting as auto connect, real name, chat password...")
-//    {
-//        /**
-//         * 
-//         */
-//        private static final long serialVersionUID = 7557101963461320397L;
-//
-//        @Override
-//        public boolean doAction(ActionEvent e)
-//        {
-//            new PreferenceFrame(ChatPreferencePanel.NODE_NAME);
-//            return true;
-//        }
-//    };
+    public static IcyAbstractAction magicWandPreferencesAction = new IcyAbstractAction("Magic Wand preferences",
+            new IcyIcon("magic_wand", true), "Show the Magic Wand preferences window",
+            "Setup Magic Wand advanced setting as connectivity, gradient tolerance...")
+    {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 7557101963461320397L;
+
+        @Override
+        public boolean doAction(ActionEvent e)
+        {
+            new PreferenceFrame(MagicWandPreferencePanel.NODE_NAME);
+            return true;
+        }
+    };
 
     public static IcyAbstractAction networkPreferencesAction = new IcyAbstractAction("Network preferences",
             new IcyIcon(ResourceUtil.ICON_NETWORK), "Show the network preferences window",
@@ -132,8 +132,8 @@ public class PreferencesActions
         }
     };
 
-    public static IcyAbstractAction pluginPreferencesAction = new IcyAbstractAction("Plugin preferences", new IcyIcon(
-            ResourceUtil.ICON_PLUGIN), "Show the plugin preferences window",
+    public static IcyAbstractAction pluginPreferencesAction = new IcyAbstractAction("Plugin preferences",
+            new IcyIcon(ResourceUtil.ICON_PLUGIN), "Show the plugin preferences window",
             "Setup plugin setting as automatic update and enable beta version.")
     {
         /**
@@ -149,8 +149,8 @@ public class PreferencesActions
         }
     };
 
-    public static IcyAbstractAction localPluginPreferencesAction = new IcyAbstractAction("Local plugin", new IcyIcon(
-            ResourceUtil.ICON_PLUGIN), "Show the local plugin window",
+    public static IcyAbstractAction localPluginPreferencesAction = new IcyAbstractAction("Local plugin",
+            new IcyIcon(ResourceUtil.ICON_PLUGIN), "Show the local plugin window",
             "Browse, remove, update and show informations about installed plugin.")
     {
         /**
@@ -166,8 +166,9 @@ public class PreferencesActions
         }
     };
 
-    public static IcyAbstractAction onlinePluginPreferencesAction = new IcyAbstractAction("Online plugin", new IcyIcon(
-            ResourceUtil.ICON_PLUGIN), "Show the online plugin window", "Browse online plugins and install them.")
+    public static IcyAbstractAction onlinePluginPreferencesAction = new IcyAbstractAction("Online plugin",
+            new IcyIcon(ResourceUtil.ICON_PLUGIN), "Show the online plugin window",
+            "Browse online plugins and install them.")
     {
         /**
          * 
