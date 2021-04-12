@@ -12,6 +12,7 @@ import icy.canvas.Canvas2D;
 import icy.canvas.IcyCanvas;
 import icy.canvas.IcyCanvas3D;
 import icy.gui.lut.LUTViewer;
+import icy.preferences.MagicWandPreferences;
 import icy.roi.ROI;
 import icy.roi.ROI2D;
 import icy.sequence.Sequence;
@@ -207,7 +208,6 @@ public class ROIMagicWand extends ROI2DArea
 
     // parameter
     boolean force3d;
-    boolean doDebug;
 
     // internals
     MagicWandProcess processor;
@@ -219,9 +219,7 @@ public class ROIMagicWand extends ROI2DArea
 
     double channelDelta;
     double startValueTolerance;
-    double startGradientTolerance;
     double valueToleranceStep;
-    double gradientToleranceStep;
 
     ROI result;
     ROI roiAdded;
@@ -245,7 +243,7 @@ public class ROIMagicWand extends ROI2DArea
     {
         this(new Point5D.Double());
     }
-    
+
     @Override
     public String getDefaultName()
     {
@@ -277,7 +275,7 @@ public class ROIMagicWand extends ROI2DArea
 
         updateSettings(canvas, rgb, true);
         // get settings
-        lastSettings = getSettings(startValueTolerance, startGradientTolerance, (c == -1) ? 90 : -100);
+        lastSettings = getSettings(startValueTolerance, (c == -1) ? 90 : -100);
         // create new Magic Wand task
         processor = new MagicWandProcess(seq, (int) imagePoint.getX(), (int) imagePoint.getY(), z, t, c, force3d,
                 lastSettings);
@@ -317,25 +315,53 @@ public class ROIMagicWand extends ROI2DArea
         final double channelBounds[] = (c == -1) ? seq.getChannelsGlobalBounds() : seq.getChannelBounds(c);
         channelDelta = channelBounds[1] - channelBounds[0];
 
+        // init value tolerance
         if (init)
-        {
             startValueTolerance = (channelDelta > 0d) ? channelDelta / 15d : 1d;
-//            startGradientTolerance = (channelDelta > 0d) ? channelDelta / 30d : 1d;
-            startGradientTolerance = -10d;
-        }
         valueToleranceStep = (channelDelta > 0d) ? channelDelta / 800d : 0d;
-        gradientToleranceStep = (channelDelta > 0d) ? channelDelta / 1500d : 0d;
     }
 
-    static MagicWandSetting getSettings(double valueTolerance, double gradientTolerance, double colorSensitivity)
+    static MagicWandSetting getSettings(double valueTolerance, double colorSensitivity)
     {
         final MagicWandSetting settings = new MagicWandSetting();
 
         settings.colorSensitivity = colorSensitivity;
-        settings.connect4 = false;
+        settings.connectivity = MagicWandPreferences.getConnectivity();
         settings.valueTolerance = valueTolerance;
-        settings.gradientTolerance = gradientTolerance;
-        settings.includeHoles = false;
+        switch (MagicWandPreferences.getGradientToleranceMode())
+        {
+            default:
+            case DISABLED:
+                settings.gradientTolerance = 0d;
+                break;
+            case FIXED:
+                settings.gradientTolerance = MagicWandPreferences.getGradientToleranceValue();
+                break;
+            case P05:
+                settings.gradientTolerance = valueTolerance * 0.05d;
+                break;
+            case P10:
+                settings.gradientTolerance = valueTolerance * 0.10d;
+                break;
+            case P15:
+                settings.gradientTolerance = valueTolerance * 0.15d;
+                break;
+            case P20:
+                settings.gradientTolerance = valueTolerance * 0.20d;
+                break;
+            case P25:
+                settings.gradientTolerance = valueTolerance * 0.25d;
+                break;
+            case P33:
+                settings.gradientTolerance = valueTolerance * 0.33d;
+                break;
+            case P40:
+                settings.gradientTolerance = valueTolerance * 0.40d;
+                break;
+            case P50:
+                settings.gradientTolerance = valueTolerance * 0.50d;
+                break;
+        }
 
         return settings;
     }
@@ -350,13 +376,10 @@ public class ROIMagicWand extends ROI2DArea
 
         // compute tolerances from distance from starting point * toleranceStep
         final double deltaX = mousePoint.getX() - startMousePosition.getX();
-        final double deltaY = mousePoint.getY() - startMousePosition.getY();
-
         final double valueTolerance = startValueTolerance + (deltaX * valueToleranceStep);
-        final double gradientTolerance = startGradientTolerance + (deltaY * gradientToleranceStep);
 
         // get settings
-        lastSettings = getSettings(valueTolerance, gradientTolerance, (c == -1) ? 90 : -100);
+        lastSettings = getSettings(valueTolerance, (c == -1) ? 90 : -100);
         // create new Magic Wand task
         processor = new MagicWandProcess(seq, (int) startImagePosition.getX(), (int) startImagePosition.getY(), z, t, c,
                 force3d, lastSettings);
@@ -390,7 +413,7 @@ public class ROIMagicWand extends ROI2DArea
 
             // so we all have stats directly from Magic Wand
             if (roi instanceof ROI2D)
-                setAsBooleanMask(((ROI2D)roi).getBooleanMask(true));
+                setAsBooleanMask(((ROI2D) roi).getBooleanMask(true));
         }
     }
 }

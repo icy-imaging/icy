@@ -9,7 +9,6 @@ import icy.roi.ROI3D;
 import icy.sequence.Sequence;
 import icy.type.DataType;
 import icy.type.collection.array.Array1DUtil;
-import ij.IJ;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 
 /**
@@ -21,15 +20,64 @@ import plugins.kernel.roi.roi2d.ROI2DArea;
  */
 public class MagicWand
 {
-    private final static int UNKNOWN = 0, OUTSIDE = 1, INSIDE = -1; // mask pixel values
+    public static enum MagicWandConnectivity
+    {
+        CONNECT8, CONNECT4;
+
+        @Override
+        public String toString()
+        {
+            switch (this)
+            {
+                default:
+                case CONNECT4:
+                    return "4 ways";
+                case CONNECT8:
+                    return "8 ways";
+            }
+        }
+    }
+
+    public static enum MagicWandGradientToleranceMode
+    {
+        DISABLED, FIXED, P50, P40, P33, P25, P20, P15, P10, P05;
+
+        @Override
+        public String toString()
+        {
+            switch (this)
+            {
+                default:
+                case DISABLED:
+                    return "Disabled";
+                case FIXED:
+                    return "Fixed value";
+                case P50:
+                    return "50% of value tolerance";
+                case P40:
+                    return "40% of value tolerance";
+                case P33:
+                    return "33% of value tolerance";
+                case P25:
+                    return "25% of value tolerance";
+                case P20:
+                    return "20% of value tolerance";
+                case P15:
+                    return "15% of value tolerance";
+                case P10:
+                    return "10% of value tolerance";
+                case P05:
+                    return "5% of value tolerance";
+            }
+        }
+    }
 
     public static class MagicWandSetting
     {
         public double valueTolerance;
         public double gradientTolerance;
         public double colorSensitivity;
-        public boolean connect4;
-        public boolean includeHoles;
+        public MagicWandConnectivity connectivity;
 
         public MagicWandSetting()
         {
@@ -39,10 +87,11 @@ public class MagicWand
             valueTolerance = 0;
             gradientTolerance = 0;
             colorSensitivity = 0;
-            connect4 = false;
-            includeHoles = false;
+            connectivity = MagicWandConnectivity.CONNECT8;
         }
     }
+
+    private final static int UNKNOWN = 0, OUTSIDE = 1, INSIDE = -1; // mask pixel values
 
     /**
      * @param sequence
@@ -87,7 +136,7 @@ public class MagicWand
         for (int c = 0; c < sizeC; c++)
             pixels[c] = img.getDataXY(c);
 
-        final Object grayPixels = pixels[(channel != -1) && (channel < sizeC)  ? channel : 0];
+        final Object grayPixels = pixels[(channel != -1) && (channel < sizeC) ? channel : 0];
         // prepare mask (default value = 0 = UNKNOWN)
         final byte[] maskPixels = new byte[width * height];
 
@@ -195,7 +244,7 @@ public class MagicWand
                 largeGradient = (sqr(xGradient) + sqr(yGradient)) > toleranceGrayGrad2;
             }
 
-            for (int d = 0; d < 8; d += mws.connect4 ? 2 : 1)
+            for (int d = 0; d < 8; d += (mws.connectivity == MagicWandConnectivity.CONNECT4) ? 2 : 1)
             {
                 // analyze all neighbors (in 4 or 8 directions)
                 int offset2 = offset + dirOffset[d];
@@ -265,7 +314,7 @@ public class MagicWand
         final ROI2DArea result = new ROI2DArea(new BooleanMask2D(new Rectangle(0, 0, width, height), boolMask));
         // need to optimize bounds
         result.optimizeBounds();
-        
+
         return result;
     }
 
