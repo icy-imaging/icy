@@ -328,8 +328,8 @@
 
     <repositories>
         <repository>
-            <id>jai-repo</id>
-            <url>https://maven.geotoolkit.org</url>
+            <id>jboss-repo</id>
+            <url>https://repository.jboss.org</url>
 <!--             <url>http://maven.geomajas.org/</url> -->
         </repository>
         <repository>
