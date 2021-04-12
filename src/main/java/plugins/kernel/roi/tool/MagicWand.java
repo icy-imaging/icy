@@ -462,15 +462,6 @@ public class MagicWand
         }
     }
 
-    // /* normalize 3-element vector */
-    // private static void normalize(double[] v)
-    // {
-    // double norm = 1d / Math.sqrt(sqr(v[0]) + sqr(v[1]) + sqr(v[2]));
-    //
-    // for (int i = 0; i < 3; i++)
-    // v[i] *= norm;
-    // }
-
     private static double sqr(double x)
     {
         return x * x;
