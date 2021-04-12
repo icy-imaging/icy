@@ -614,6 +614,16 @@ public class Icy
                     + "Note that <i>virtual mode</i> is still experimental and <b>some plugins don't support it</b> (processed data can be lost) so use it carefully and only if you're running out of memory.<br>"
                     + "<i>You can change the image caching settings in Icy preferences</i></html>", 30, "virtualMode");
             tooltip.setSize(380, 240);
+
+            // new Magic Wand!
+            tooltip = new ToolTipFrame(
+                    "<html>" + "<img src=\""
+                            + Icy.class.getResource("/image/help/magic_wand.png").toString() + "\" /><br>"
+                            + "<b>Magic Wand</b> is now available in Icy !<br><br>" 
+                            + "You can access its settings from preferences :<br>" + "<img src=\""
+                            + Icy.class.getResource("/image/help/icy_prefs.png").toString() + "\" /></html>",
+                    30, "magicWand");
+            tooltip.setSize(300, 260);
         }
     }
 
