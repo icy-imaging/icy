@@ -106,6 +106,9 @@ public class ActionDialog extends JDialog implements ActionListener
         this(title, component, Icy.getMainInterface().getMainFrame());
     }
 
+    /**
+     * @wbp.parser.constructor
+     */
     public ActionDialog(String title)
     {
         this(title, null, Icy.getMainInterface().getMainFrame());
