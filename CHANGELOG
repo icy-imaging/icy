@@ -1,4 +1,36 @@
-Icy 2.1.3.0 - 17/03/2020
+Icy 2.1.4.0 - 15/04/2021
+------------------------
+
+Application
+* Loader:
+ - fixed 'Drag and Drop' loading of multi series or folder dataset.
+ - ignore advanced metadata parsing for image format not supporting it (faster loading)
+* Saver: 
+ - fixed overwriting an opened image (image was locked by the Image cache so it couldn't be properly saved)
+* ROI:
+ - added 3D ROI support to 'Separate component' ROI separation tool.
+ - added new Magic Wand tool and associated preferences.
+ - fixed global key action (unselect, delete and read-only mode).
+* VTK / 3D visualization:
+ - added support for view synchronization. 
+* Preferences:
+ - added a section to set advanced settings for the new Magic Wand tool.
+ - reset cache / result path if they are not anymore valid.
+* general bug fixes
+
+Developer
+* Cursor:
+ - fixed VolumetricCursor getter
+* BooleanMask3D:
+ - added getComponent() method to retrieve connected component from 3D boolean mask
+* LUT:
+ - added LUTViewer.getActiveChannelIndex() method to know which channel tab has focus
+* Loader:
+ - added hasMetadata(path) method to know if dataset designed by given path supports metadata
+* cleanup
+ 
+ 
+Icy 2.1.3.0 - 17/03/2021
 ------------------------
 
 Application
