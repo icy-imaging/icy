@@ -315,6 +315,13 @@ public class MagicWand
         // need to optimize bounds
         result.optimizeBounds();
 
+        // set specific position T for timelaps
+        if (sequence.getSizeT() > 1)
+            result.setT(t);
+        // set specific position Z for Z stack
+        if (sequence.getSizeZ() > 1)
+            result.setZ(z);
+
         return result;
     }
 
