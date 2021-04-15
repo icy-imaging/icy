@@ -2262,7 +2262,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
 
             super.mouseMoved(e);
             
-            mouseImagePositionChanged(null);
+            mouseImagePositionChanged(DimensionId.NULL);
 
             // refresh mouse cursor (do it after all process)
             updateCursor(!consumed && e.isConsumed());

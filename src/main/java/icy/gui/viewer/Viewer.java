@@ -838,7 +838,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                         if ((v != this) && (v.getSequence() == getSequence()) && (v.getCanvas() instanceof VtkCanvas))
                         {
                             if (!ConfirmDialog.confirm("Caution",
-                                    "You may experience problems using duplicated 3D containing objects (ROI). Do you want to continue ?",
+                                    "You may experience problems using duplicated 3D view containing objects (ROI). Do you want to continue ?",
                                     ConfirmDialog.OK_CANCEL_OPTION))
                                 // use current canvas class
                                 className = canvas.getClass().getName();
