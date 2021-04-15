@@ -76,6 +76,7 @@
                         <include>icy/preferences/ChatPreferences.java</include>
                         <include>icy/preferences/GeneralPreferences.java</include>
                         <include>icy/preferences/IcyPreferences.java</include>
+                        <include>icy/preferences/MagicWandPreferences.java</include>
                         <include>icy/preferences/PluginPreferences.java</include>
                         <include>icy/preferences/PluginOnlinePreferences.java</include>
                         <include>icy/preferences/PluginsPreferences.java</include>
