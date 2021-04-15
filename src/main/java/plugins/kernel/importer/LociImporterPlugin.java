@@ -950,10 +950,16 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      */
     protected void openReader(IFormatReader reader, String path, int flags) throws FormatException, IOException
     {
+        final int adjFlags;
+
         // for safety
         reader.close();
+        
+        // don't try to parse metadata on image file type which don't contains anything useful
+        if (!Loader.hasMetadata(path)) adjFlags = flags | FLAG_METADATA_MINIMUM;
+        else adjFlags = flags;
 
-        switch (flags & FLAG_METADATA_MASK)
+        switch (adjFlags & FLAG_METADATA_MASK)
         {
             case FLAG_METADATA_MINIMUM:
                 options.setMetadataLevel(MetadataLevel.MINIMUM);
