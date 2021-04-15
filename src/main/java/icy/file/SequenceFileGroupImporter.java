@@ -231,6 +231,10 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         // store flags for later
         openFlags = flags;
 
+        // don't try to parse metadata on image file type which don't contains anything useful
+        if (!Loader.hasMetadata(group.basePath))
+            openFlags |= FLAG_METADATA_MINIMUM;
+
         buildIndexes();
     }
 
@@ -597,25 +601,26 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         // allocate Plane objects
         MetaDataUtil.ensurePlane(resultPixels, group.totalSizeT - 1, group.totalSizeZ - 1, group.totalSizeC - 1);
 
-        // default metadata
-        if ((openFlags & SequenceFileImporter.FLAG_METADATA_MASK) != SequenceFileImporter.FLAG_METADATA_MINIMUM)
+        // iterate over all dimension
+        for (int c = 0; c < group.totalSizeC; c++)
         {
-            // iterate over all dimension
-            for (int c = 0; c < group.totalSizeC; c++)
+            for (int z = 0; z < group.totalSizeZ; z++)
             {
-                for (int z = 0; z < group.totalSizeZ; z++)
+                for (int t = 0; t < group.totalSizeT; t++)
                 {
-                    for (int t = 0; t < group.totalSizeT; t++)
-                    {
-                        final FileCursor cursor = getCursor(z, t, c);
-                        final SequencePosition position = cursor.position;
+                    final FileCursor cursor = getCursor(z, t, c);
+                    final SequencePosition position = cursor.position;
 
-                        // do we have an image for this position ?
-                        if (position != null)
+                    // do we have an image for this position ?
+                    if (position != null)
+                    {
+                        // get original plane metadata
+                        Plane metaPlane = null;
+
+                        // default metadata
+                        if ((openFlags & SequenceFileImporter.FLAG_METADATA_MASK) != SequenceFileImporter.FLAG_METADATA_MINIMUM)
                         {
                             final SequenceFileImporter imp = getImporter(position.getPath());
-                            // get original plane metadata
-                            Plane metaPlane = null;
 
                             // importer ok ?
                             if (imp != null)
@@ -660,24 +665,24 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
                                     releaseImporter(position.getPath(), imp);
                                 }
                             }
-
-                            // plane not retrieved from original metadata ? --> create a new empty one
-                            if (metaPlane == null)
-                                metaPlane = new Plane();
-
-                            // retrieve plane index (use FormatsTools to get it as metadata is not yet complete here)
-                            final int resultPlaneInd = FormatTools.getIndex(
-                                    result.getPixelsDimensionOrder(0).getValue(), group.totalSizeZ, group.totalSizeC,
-                                    group.totalSizeT, group.totalSizeZ * group.totalSizeC * group.totalSizeT, z, c, t);
-
-                            // set plane
-                            resultPixels.setPlane(resultPlaneInd, metaPlane);
-
-                            // adjust CZT info
-                            metaPlane.setTheC(OMEUtil.getNonNegativeInteger(c));
-                            metaPlane.setTheZ(OMEUtil.getNonNegativeInteger(z));
-                            metaPlane.setTheT(OMEUtil.getNonNegativeInteger(t));
                         }
+
+                        // plane not retrieved from original metadata ? --> create a new empty one
+                        if (metaPlane == null)
+                            metaPlane = new Plane();
+
+                        // retrieve plane index (use FormatsTools to get it as metadata is not yet complete here)
+                        final int resultPlaneInd = FormatTools.getIndex(result.getPixelsDimensionOrder(0).getValue(),
+                                group.totalSizeZ, group.totalSizeC, group.totalSizeT,
+                                group.totalSizeZ * group.totalSizeC * group.totalSizeT, z, c, t);
+
+                        // set plane
+                        resultPixels.setPlane(resultPlaneInd, metaPlane);
+
+                        // adjust CZT info
+                        metaPlane.setTheC(OMEUtil.getNonNegativeInteger(c));
+                        metaPlane.setTheZ(OMEUtil.getNonNegativeInteger(z));
+                        metaPlane.setTheT(OMEUtil.getNonNegativeInteger(t));
                     }
                 }
             }
