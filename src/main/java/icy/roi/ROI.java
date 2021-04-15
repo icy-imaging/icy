@@ -1061,60 +1061,66 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         {
             if (!e.isConsumed())
             {
+                final Sequence seq = canvas.getSequence();
+
+                switch (e.getKeyCode())
+                {
+                    case KeyEvent.VK_ESCAPE:
+                        // has selected ROI ? --> global unselect ROI
+                        if (!seq.getSelectedROIs().isEmpty())
+                            seq.setSelectedROI(null);
+
+                        // always consume to avoid unnecessary computation for ALL rois
+                        e.consume();
+                        break;
+
+                    case KeyEvent.VK_DELETE:
+                    case KeyEvent.VK_BACK_SPACE:
+                        // has selected ROI ? --> remove all selected ROI from the sequence
+                        if (!seq.getSelectedROIs().isEmpty())
+                            canvas.getSequence().removeSelectedROIs(true, true);
+                        // roi focused ? --> delete ROI
+                        else if (isFocused())
+                            canvas.getSequence().removeROI(ROI.this, true);
+
+                        // always consume to avoid unnecessary computation for ALL rois
+                        e.consume();
+                        break;
+
+                    case KeyEvent.VK_K:
+                        final List<ROI> selectedROIs = seq.getSelectedROIs();
+
+                        if (!selectedROIs.isEmpty())
+                        {
+                            int numRO = 0;
+
+                            // has selected ROI ? --> global unselect ROI
+                            for (ROI roi : selectedROIs)
+                                if (roi.isReadOnly())
+                                    numRO++;
+
+                            // more than half in RO ? --> ro
+                            final boolean ro = numRO > (selectedROIs.size() / 2);
+
+                            seq.beginUpdate();
+                            try
+                            {
+                                for (ROI roi : selectedROIs)
+                                    roi.setReadOnly(!ro);
+                            }
+                            finally
+                            {
+                                seq.endUpdate();
+                            }
+                        }
+
+                        // always consume to avoid unnecessary computation for ALL rois
+                        e.consume();
+                        break;
+                }
+
                 if (isActiveFor(canvas))
                 {
-                    switch (e.getKeyCode())
-                    {
-                        case KeyEvent.VK_ESCAPE:
-                            // roi selected ? --> global unselect ROI
-                            if (isSelected())
-                            {
-                                canvas.getSequence().setSelectedROI(null);
-                                e.consume();
-                            }
-                            break;
-
-                        case KeyEvent.VK_DELETE:
-                        case KeyEvent.VK_BACK_SPACE:
-                            if (!isReadOnly())
-                            {
-                                // roi selected ?
-                                if (isSelected())
-                                {
-                                    final boolean result;
-
-                                    // if (isFocused())
-                                    // // remove ROI from sequence
-                                    // result = canvas.getSequence().removeROI(ROI.this);
-                                    // else
-                                    // remove all selected ROI from the sequence
-                                    result = canvas.getSequence().removeSelectedROIs(false, true);
-
-                                    if (result)
-                                        e.consume();
-                                }
-                                // roi focused ? --> delete ROI
-                                else if (isFocused())
-                                {
-                                    // remove ROI from sequence
-                                    if (canvas.getSequence().removeROI(ROI.this, true))
-                                        e.consume();
-                                }
-                            }
-                            break;
-                    }
-
-                    if (isSelected())
-                    {
-                        switch (e.getKeyCode())
-                        {
-                            case KeyEvent.VK_K:
-                                setReadOnly(!isReadOnly());
-                                painterChanged();
-                                break;
-                        }
-                    }
-
                     // control modifier is used for ROI modification from keyboard
                     if (EventUtil.isMenuControlDown(e) && isSelected() && !isReadOnly())
                     {
