@@ -176,6 +176,9 @@ public class Loader
     private final static Set<String> nonImageExtensions = new HashSet<String>(
             CollectionUtil.asList(new String[] {"pdf", "doc", "docx", "rtf", "exe", "wav", "mp3", "app"}));
 
+    private final static Set<String> nonMetaExtensions = new HashSet<String>(
+            CollectionUtil.asList(new String[] {"jpg", "png", "bmp", "avi"}));
+
     // keep trace of reported / warned plugin
     private static Set<String> reportedImporterPlugins = new HashSet<String>();
     private static Set<String> warnedImporterPlugins = new HashSet<String>();
@@ -847,6 +850,18 @@ public class Loader
     public static boolean isImageFile(String path)
     {
         return isSupportedImageFile(path);
+    }
+
+    /**
+     * @return <code>true</code> if the specified path describes an image file type (from extension) which
+     *         is well known to store usable metadata for image processing (image source, pixel size...)<br>
+     *         For instance <i>jpg</i>, <i>png</i> or <i>avi</i> files doesn't not store useful metadata while <i>tif</i> does.
+     */
+    public static boolean hasMetadata(String path)
+    {
+        final String ext = FileUtil.getFileExtension(path, false).toLowerCase();
+
+        return !nonImageExtensions.contains(ext) && !nonMetaExtensions.contains(ext);
     }
 
     /**
@@ -3930,9 +3945,9 @@ public class Loader
      *        the loading frame used to cancel / display progress of the operation (can be null)
      * @Return the loaded Sequence (or <code>null<code> if loading was canceled)
      */
-    public static Sequence internalLoadGroup(SequenceFileGroup group, int resolution, Rectangle region, int minZ, int maxZ,
-            int minT, int maxT, int channel, boolean forceVolatile, boolean directory, ApplicationMenu mainMenu,
-            FileFrame loadingFrame) throws UnsupportedFormatException, IOException
+    public static Sequence internalLoadGroup(SequenceFileGroup group, int resolution, Rectangle region, int minZ,
+            int maxZ, int minT, int maxT, int channel, boolean forceVolatile, boolean directory,
+            ApplicationMenu mainMenu, FileFrame loadingFrame) throws UnsupportedFormatException, IOException
     {
         final double endStep;
         Sequence result;
@@ -4155,7 +4170,7 @@ public class Loader
         {
             final double startTOffset = sequence.getPositionTOffset(0, 0, 0);
             final double curTOffset = sequence.getPositionTOffset(minT, minZ, Math.max(0, channel));
-            
+
             sequence.setTimeStamp(posT + (long) ((curTOffset - startTOffset) * 1000d));
         }
 
