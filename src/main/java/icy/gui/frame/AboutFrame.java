@@ -18,47 +18,32 @@
  */
 package icy.gui.frame;
 
-import icy.main.Icy;
-import icy.system.thread.ThreadUtil;
-
 import javax.swing.BoxLayout;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
+import icy.main.Icy;
+import icy.system.thread.ThreadUtil;
+
 public class AboutFrame extends IcyFrame
 {
     final JTabbedPane tabbedPane;
     final JEditorPane aboutEditorPane;
-    final JEditorPane authorEditorPane;
-    final JEditorPane thanksToEditorPane;
-    final JEditorPane externalEditorPane;
     final JEditorPane changeLogEditorPane;
     final JEditorPane licenseEditorPane;
 
     public AboutFrame(int defaultTab)
     {
-        super("About ICY", false, true, false, false);
+        super("About ICY", true, true, true, false);
 
         aboutEditorPane = new JEditorPane("text/html", "");
         aboutEditorPane.setEditable(false);
         aboutEditorPane.setCaretPosition(0);
 
-        authorEditorPane = new JEditorPane("text/html", "");
-        authorEditorPane.setEditable(false);
-        authorEditorPane.setCaretPosition(0);
-
-        thanksToEditorPane = new JEditorPane("text/html", "");
-        thanksToEditorPane.setEditable(false);
-        thanksToEditorPane.setCaretPosition(0);
-
-        externalEditorPane = new JEditorPane("text/html", "");
-        externalEditorPane.setEditable(false);
-        externalEditorPane.setCaretPosition(0);
-
         changeLogEditorPane = new JEditorPane("text/html", "");
-        externalEditorPane.setEditable(false);
-        externalEditorPane.setCaretPosition(0);
+        changeLogEditorPane.setEditable(false);
+        changeLogEditorPane.setCaretPosition(0);
 
         licenseEditorPane = new JEditorPane("text/html", "");
         licenseEditorPane.setEditable(false);
@@ -66,10 +51,7 @@ public class AboutFrame extends IcyFrame
 
         tabbedPane = new JTabbedPane();
         tabbedPane.add("About", new JScrollPane(aboutEditorPane));
-        // tabbedPane.add("Authors", new JScrollPane(authorEditorPane));
-        // tabbedPane.add("Thanks to", new JScrollPane(thanksToEditorPane));
         tabbedPane.add("ChangeLog", new JScrollPane(changeLogEditorPane));
-        // tabbedPane.add("External code and library", new JScrollPane(externalEditorPane));
         tabbedPane.add("License", new JScrollPane(licenseEditorPane));
 
         // select the default tab
@@ -93,36 +75,11 @@ public class AboutFrame extends IcyFrame
             @Override
             public void run()
             {
-                final String about = "<html><center>" + "<br>" + "<br><h2>Icy " + Icy.version + "</h2>"
-                        + "<br>BioImage Analysis unit" + "<br>Institut Pasteur"
-                        + "<br>Unite d'analyse d images quantitative" + "<br>25,28 Rue du Docteur Roux\n"
-                        + "<br>75015 Paris - France" + "<br>"
-                        + "<br><a href=\"http://icy.bioimageanalysis.com\">http://icy.bioimageanalysis.com</a>"
-                        + "</html>";
-
-                final String author = "<html><center><br>" + "<br>" + "<br><font size=3><u>The AIQ Team:</u></font>"
-                        + "<br>" + "<br><b>machin</b> bidule" + "<br><b>machin</b> bidule" + "<br><b>machin</b> bidule"
-                        + "<br><b>machin</b> bidule" + "</html>";
-
-                final String thanks = "<html><center><br>"
-                        + "<br>The authors of <b>bioformat</b> <i>http://www.loci.wisc.edu/ome/formats.html</i> for their fast answer and bugfixes."
-                        + "</html>";
-
-                final String external = "<html><center><br>"
-                        + "<br>"
-                        + "<br><font size=3><u>LIBRARY:</u></font>"
-                        + "<br>"
-                        + "<br><b>BioFormat</b> - http://www.openmicroscopy.org/site/products/bio-formats"
-                        + "<br><b>Substance</b> - https://java.net/projects/substance"
-                        + "</html>";
-
+                final String about = "<html><pre>" + Icy.getReadMe() + "</pre></html>";
                 final String changelog = "<html><pre>" + Icy.getChangeLog() + "</pre></html>";
                 final String license = "<html><pre>" + Icy.getLicense() + "</pre></html>";
 
                 aboutEditorPane.setText(about);
-                authorEditorPane.setText(author);
-                thanksToEditorPane.setText(thanks);
-                externalEditorPane.setText(external);
                 changeLogEditorPane.setText(changelog);
                 licenseEditorPane.setText(license);
             }
@@ -133,5 +90,4 @@ public class AboutFrame extends IcyFrame
     {
         this(0);
     }
-
 }

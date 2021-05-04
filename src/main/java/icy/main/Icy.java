@@ -1055,34 +1055,34 @@ public class Icy
     }
 
     /**
-     * Return content of the <code>CHANGELOG.txt</code> file
+     * Return content of the <code>CHANGELOG</code> file
      */
     public static String getChangeLog()
     {
-        if (FileUtil.exists("CHANGELOG.txt"))
-            return new String(FileUtil.load("CHANGELOG.txt", false));
+        if (FileUtil.exists("CHANGELOG"))
+            return new String(FileUtil.load("CHANGELOG", false));
 
         return "";
     }
 
     /**
-     * Return content of the <code>COPYING.txt</code> file
+     * Return content of the <code>LICENSE</code> file
      */
     public static String getLicense()
     {
-        if (FileUtil.exists("COPYING.txt"))
-            return new String(FileUtil.load("COPYING.txt", false));
+        if (FileUtil.exists("LICENSE"))
+            return new String(FileUtil.load("LICENSE", false));
 
         return "";
     }
 
     /**
-     * Return content of the <code>README.txt</code> file
+     * Return content of the <code>README</code> file
      */
     public static String getReadMe()
     {
-        if (FileUtil.exists("README.txt"))
-            return new String(FileUtil.load("README.txt", false));
+        if (FileUtil.exists("README.md"))
+            return new String(FileUtil.load("README.md", false));
 
         return "";
     }
