@@ -229,6 +229,7 @@ public class Icy
             loci.common.DebugTools.enableLogging("ERROR");
 
             System.out.print(true);
+            System.out.print(true);
             
             if (!headless && !noSplash)
             {
