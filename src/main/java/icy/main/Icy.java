@@ -228,6 +228,8 @@ public class Icy
             // set LOCI debug level (do it immediately as it can quickly show some log messages)
             loci.common.DebugTools.enableLogging("ERROR");
 
+            System.out.print(true);
+            
             if (!headless && !noSplash)
             {
                 // prepare splashScreen (ok to create it here as we are not yet in substance laf)
