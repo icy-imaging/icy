@@ -28,9 +28,8 @@ You can follow instructions from the [How to publish a Protocol](http://icy.bioi
 
 ### Creating a new plugin
 
-If you are a developer and want to create your own plugin for Icy then you should give have a look to this guide:
-[Create a new plugin for Icy](http://icy.bioimageanalysis.org/developer/create-a-new-icy-plugin/)
+If you are a developer and want to create your own plugin for Icy then you should give have a look to the [Create a new plugin for Icy](http://icy.bioimageanalysis.org/developer/create-a-new-icy-plugin/) guide.
 
 ### Contributing directly to Icy or to an existing plugin (bug fixes, enhancements..)
 
-If you are a developer and want to contribute to Icy development or to a plugin hosted in the [BIA group Gitlab](https://gitlab.pasteur.fr/bia) then you should follow instructions from our (contributing to Icy development guide)[http://icy.bioimageanalysis.org/developer/contributing-icy-development]
+If you are a developer and want to contribute to Icy development or to a plugin hosted in the [BIA group Gitlab](https://gitlab.pasteur.fr/bia) then you should follow instructions from our [Contributing to Icy development](http://icy.bioimageanalysis.org/developer/contributing-icy-development) guide.
