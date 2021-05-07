@@ -48,7 +48,6 @@ If you believe someone is violating this code of conduct, you may reply to them 
 Currently, the following persons will receive your report:
 
 * Stephane Dallongeville (Icy Lead developer)
-* Marion Louveaux (Icy community manager)
 
 ## Incident reporting
 
