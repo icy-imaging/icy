@@ -2,7 +2,7 @@
 
 First off, thanks for taking the time to contribute to Icy ! :+1:
 
-The following is a set of article reference allowing you to contribute to Icy in general.
+The following is a set of article references allowing you to contribute to Icy in general.
 
 ## Code of Conduct
 
