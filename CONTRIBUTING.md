@@ -23,7 +23,8 @@ For bug report, consult our [Assistance Guide](http://icy.bioimageanalysis.org/t
 ### Publishing a script or a protocol
 
 If you developed a script or a protocol in Icy and you think it can be useful to others people then why not sharing it ??
-You can follow instructions from the [How to publish a Protocol](http://icy.bioimageanalysis.org/tutorial/how-to-publish-a-protocol/)  article. It gives you the different steps to publish a protocol on the Icy Website making it available to everyone directly through Icy, you can apply it the same way for a script.
+
+You can follow instructions from the [How to publish a Protocol](http://icy.bioimageanalysis.org/tutorial/how-to-publish-a-protocol/)  article. It gives you the different steps to publish a protocol on the Icy Website making it available to everyone directly through the appliation. The article describe the procedure for protocol but you can perfectly apply it to a script as well.
 
 ### Creating a new plugin
 
