@@ -51,7 +51,7 @@ package-job:
     - echo "Packaging the code"
     - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
   artifacts:
-    expire_in: 30 days
+    expire_in: 7 days
     paths:
       - build/
 
@@ -135,9 +135,9 @@ package-software-job:
     - echo "Creating Icy for Linux zip"
     - zip -r ../../release/icy-linux.zip colormap/ ij/ lib/ CHANGELOG icy icy.jar LICENSE README.md setting.xml updater.jar version.xml
     - echo "Creating Icy for Mac zip"
-    - mkdir ../icy.app && cp -t ../icy.app -r Contents/ colormap/ ij/ lib/ CHANGELOG icy.jar LICENSE README.md setting.xml version.xml updater.jar && zip -r ../../release/icy-mac.zip ../icy.app/
+    - mkdir -p ../icy.app && cp -t ../icy.app -r Contents/ colormap/ ij/ lib/ CHANGELOG icy.jar LICENSE README.md setting.xml version.xml updater.jar && zip -r ../../release/icy-mac.zip ../icy.app/
   artifacts:
     when: on_success
-    expire_in: 1 hour
+    expire_in: 7 days
     paths:
       - release/*.zip
