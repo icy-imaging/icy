@@ -18,13 +18,6 @@
  */
 package plugins.kernel.roi.roi2d;
 
-import icy.painter.Anchor2D;
-import icy.painter.LineAnchor2D;
-import icy.resource.ResourceUtil;
-import icy.type.geom.Polygon2D;
-import icy.type.point.Point5D;
-import icy.util.XMLUtil;
-
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.geom.Path2D;
@@ -34,6 +27,13 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import icy.painter.Anchor2D;
+import icy.painter.LineAnchor2D;
+import icy.resource.ResourceUtil;
+import icy.type.geom.Polygon2D;
+import icy.type.point.Point5D;
+import icy.util.XMLUtil;
 
 /**
  * ROI 2D polygon class.
@@ -161,9 +161,27 @@ public class ROI2DPolygon extends ROI2DShape
         beginUpdate();
         try
         {
-            removeAllPoint();
-            for (Point2D pt : pts)
-                addNewPoint(pt, false);
+            final List<Anchor2D> ctrlPts = getControlPoints();
+
+            // same number of points ?
+            if (pts.size() == ctrlPts.size())
+            {
+                for (int i = 0; i < pts.size(); i++)
+                {
+                    final Point2D newPt = pts.get(i);
+                    final Anchor2D pt = ctrlPts.get(i);
+
+                    // set new position (this allow to not throw ROI change event if no changes)
+                    pt.setPosition(newPt.getX(), newPt.getY());
+                }
+            }
+            else
+            {
+                // simpler to just remove all points and set again
+                removeAllPoint();
+                for (Point2D pt : pts)
+                    addNewPoint(pt, false);
+            }
         }
         finally
         {
@@ -187,17 +205,7 @@ public class ROI2DPolygon extends ROI2DShape
 
     public void setPolygon2D(Polygon2D polygon2D)
     {
-        beginUpdate();
-        try
-        {
-            removeAllPoint();
-            for (int i = 0; i < polygon2D.npoints; i++)
-                addNewPoint(new Point2D.Double(polygon2D.xpoints[i], polygon2D.ypoints[i]), false);
-        }
-        finally
-        {
-            endUpdate();
-        }
+        setPoints(polygon2D.getPoints());
     }
 
     public Polygon getPolygon()
@@ -207,17 +215,7 @@ public class ROI2DPolygon extends ROI2DShape
 
     public void setPolygon(Polygon polygon)
     {
-        beginUpdate();
-        try
-        {
-            removeAllPoint();
-            for (int i = 0; i < polygon.npoints; i++)
-                addNewPoint(new Point2D.Double(polygon.xpoints[i], polygon.ypoints[i]), false);
-        }
-        finally
-        {
-            endUpdate();
-        }
+        setPolygon2D(new Polygon2D(polygon));
     }
 
     @Override

@@ -18,15 +18,6 @@
  */
 package plugins.kernel.roi.roi2d;
 
-import icy.painter.Anchor2D;
-import icy.painter.LineAnchor2D;
-import icy.resource.ResourceUtil;
-import icy.roi.ROI;
-import icy.type.geom.Polyline2D;
-import icy.type.point.Point2DUtil;
-import icy.type.point.Point5D;
-import icy.util.XMLUtil;
-
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
@@ -40,6 +31,15 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import icy.painter.Anchor2D;
+import icy.painter.LineAnchor2D;
+import icy.resource.ResourceUtil;
+import icy.roi.ROI;
+import icy.type.geom.Polyline2D;
+import icy.type.point.Point2DUtil;
+import icy.type.point.Point5D;
+import icy.util.XMLUtil;
 
 /**
  * @author Stephane
@@ -76,8 +76,6 @@ public class ROI2DPolyLine extends ROI2DShape
     public static final String ID_POINTS = "points";
     public static final String ID_POINT = "point";
 
-    
-
     /**
      * @deprecated
      */
@@ -98,7 +96,7 @@ public class ROI2DPolyLine extends ROI2DShape
         point.setSelected(true);
         addPoint(point);
 
-        // set icon (default name is defined by getDefaultName()) 
+        // set icon (default name is defined by getDefaultName())
         setIcon(ResourceUtil.ICON_ROI_POLYLINE);
     }
 
@@ -136,7 +134,7 @@ public class ROI2DPolyLine extends ROI2DShape
     {
         this(new Point2D.Double());
     }
-    
+
     @Override
     public String getDefaultName()
     {
@@ -169,9 +167,27 @@ public class ROI2DPolyLine extends ROI2DShape
         beginUpdate();
         try
         {
-            removeAllPoint();
-            for (Point2D pt : pts)
-                addNewPoint(pt, false);
+            final List<Anchor2D> ctrlPts = getControlPoints();
+
+            // same number of points ?
+            if (pts.size() == ctrlPts.size())
+            {
+                for (int i = 0; i < pts.size(); i++)
+                {
+                    final Point2D newPt = pts.get(i);
+                    final Anchor2D pt = ctrlPts.get(i);
+
+                    // set new position (this allow to not throw ROI change event if no changes)
+                    pt.setPosition(newPt.getX(), newPt.getY());
+                }
+            }
+            else
+            {
+                // simpler to just remove all points and set again
+                removeAllPoint();
+                for (Point2D pt : pts)
+                    addNewPoint(pt, false);
+            }
         }
         finally
         {
@@ -195,17 +211,7 @@ public class ROI2DPolyLine extends ROI2DShape
 
     public void setPolyline2D(Polyline2D polyline2D)
     {
-        beginUpdate();
-        try
-        {
-            removeAllPoint();
-            for (int i = 0; i < polyline2D.npoints; i++)
-                addNewPoint(new Point2D.Double(polyline2D.xpoints[i], polyline2D.ypoints[i]), false);
-        }
-        finally
-        {
-            endUpdate();
-        }
+        setPoints(polyline2D.getPoints());
     }
 
     public Polygon getPolygon()
@@ -215,17 +221,7 @@ public class ROI2DPolyLine extends ROI2DShape
 
     public void setPolygon(Polygon polygon)
     {
-        beginUpdate();
-        try
-        {
-            removeAllPoint();
-            for (int i = 0; i < polygon.npoints; i++)
-                addNewPoint(new Point2D.Double(polygon.xpoints[i], polygon.ypoints[i]), false);
-        }
-        finally
-        {
-            endUpdate();
-        }
+        setPolyline2D(new Polyline2D(polygon));
     }
 
     @Override
