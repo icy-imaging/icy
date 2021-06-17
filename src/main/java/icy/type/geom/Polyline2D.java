@@ -1,6 +1,7 @@
 package icy.type.geom;
 
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -9,6 +10,8 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * 
@@ -170,6 +173,11 @@ public class Polyline2D implements Shape, Cloneable
         calculatePath();
     }
 
+    public Polyline2D(Polygon polygon)
+    {
+        this(polygon.xpoints, polygon.ypoints, polygon.npoints);
+    }
+
     /**
      * Resets this <code>Polyline2D</code> object to an empty polygon.
      * The coordinate arrays and the data in them are left untouched
@@ -212,7 +220,8 @@ public class Polyline2D implements Shape, Cloneable
     {
         path = new Path2D.Double();
 
-        path.moveTo(xpoints[0], ypoints[0]);
+        if (npoints > 0)
+            path.moveTo(xpoints[0], ypoints[0]);
         for (int i = 1; i < npoints; i++)
             path.lineTo(xpoints[i], ypoints[i]);
 
@@ -322,6 +331,19 @@ public class Polyline2D implements Shape, Cloneable
             return new Rectangle();
 
         return bounds.getBounds();
+    }
+
+    /**
+     * @return the list of points defining the polyline
+     */
+    public List<Point2D> getPoints()
+    {
+        final List<Point2D> result = new ArrayList<>();
+
+        for (int i = 0; i < npoints; i++)
+            result.add(new Point2D.Double(xpoints[i], ypoints[i]));
+
+        return result;
     }
 
     /**
