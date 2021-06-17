@@ -1038,8 +1038,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
     /**
      * internals
      */
-    protected final Anchor3DPositionListener anchor2DPositionListener;
-    protected final OverlayListener anchor2DOverlayListener;
+    protected final Anchor3DPositionListener anchor3DPositionListener;
+    protected final OverlayListener anchor3DOverlayListener;
     protected boolean firstMove;
 
     /**
@@ -1055,7 +1055,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
         controlPoints = new ArrayList<Anchor3D>();
         firstMove = true;
 
-        anchor2DPositionListener = new Anchor3DPositionListener()
+        anchor3DPositionListener = new Anchor3DPositionListener()
         {
             @Override
             public void positionChanged(Anchor3D source)
@@ -1063,7 +1063,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
                 controlPointPositionChanged(source);
             }
         };
-        anchor2DOverlayListener = new OverlayListener()
+        anchor3DOverlayListener = new OverlayListener()
         {
             @Override
             public void overlayChanged(OverlayEvent event)
@@ -1139,8 +1139,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
         // set visible state
         pt.setVisible(isSelected());
 
-        pt.addPositionListener(anchor2DPositionListener);
-        pt.addOverlayListener(anchor2DOverlayListener);
+        pt.addPositionListener(anchor3DPositionListener);
+        pt.addOverlayListener(anchor3DOverlayListener);
 
         if (index == -1)
             controlPoints.add(pt);
@@ -1203,8 +1203,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
     {
         boolean empty;
 
-        pt.removeOverlayListener(anchor2DOverlayListener);
-        pt.removePositionListener(anchor2DPositionListener);
+        pt.removeOverlayListener(anchor3DOverlayListener);
+        pt.removePositionListener(anchor3DPositionListener);
 
         synchronized (controlPoints)
         {
@@ -1263,8 +1263,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
             for (Anchor3D pt : controlPoints)
             {
-                pt.removeOverlayListener(anchor2DOverlayListener);
-                pt.removePositionListener(anchor2DPositionListener);
+                pt.removeOverlayListener(anchor3DOverlayListener);
+                pt.removePositionListener(anchor3DPositionListener);
             }
 
             controlPoints.clear();
