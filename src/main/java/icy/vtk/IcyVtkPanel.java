@@ -33,11 +33,13 @@ import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkAxesActor;
 import vtk.vtkCamera;
+import vtk.vtkCaptionActor2D;
 import vtk.vtkCellPicker;
 import vtk.vtkLight;
 import vtk.vtkPicker;
 import vtk.vtkProp;
 import vtk.vtkRenderer;
+import vtk.vtkTextActor;
 
 /**
  * Icy custom VTK panel used for VTK rendering.
@@ -94,6 +96,10 @@ public class IcyVtkPanel extends VtkJoglPanel
         axisCam = axisRenderer.GetActiveCamera();
 
         axis = new vtkAxesActor();
+        // fix caption scaling (we need that since VTK 7)
+        axis.GetXAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone();
+        axis.GetYAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone();
+        axis.GetZAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone();
         axisRenderer.AddActor(axis);
 
         // default axis offset and scale
