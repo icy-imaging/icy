@@ -655,8 +655,8 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         // we don't care about validation
         options.setValidate(false);
         // disable ND2 native chunk map to avoid some issues with ND2 file
-        // TODO: remove when fixed in Bio-formats (see images\bio\bug\nd2\3.19_1.nd2 --> should be a timelaps and not a
-        // single image)
+        // TODO: remove when fixed in Bio-formats
+        // See images\bio\bug\nd2\3.19_1.nd2 --> should be a timelaps and not an image series
         options.setBoolean(NativeND2Reader.USE_CHUNKMAP_KEY, Boolean.FALSE);
 
         originalMetadata = false;
@@ -877,8 +877,8 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * @param readerClass
      *        the IFormatReader class to use to open the dataset (can be null).
      * @return <code>true</code> if the operation has succeeded and <code>false</code> otherwise.
-     * @throws UnsupportedFormatException 
-     * @throws IOException 
+     * @throws UnsupportedFormatException
+     * @throws IOException
      */
     public boolean openWith(String path, int flags, Class<? extends IFormatReader> readerClass)
             throws UnsupportedFormatException, IOException
@@ -954,10 +954,12 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
         // for safety
         reader.close();
-        
+
         // don't try to parse metadata on image file type which don't contains anything useful
-        if (!Loader.hasMetadata(path)) adjFlags = flags | FLAG_METADATA_MINIMUM;
-        else adjFlags = flags;
+        if (!Loader.hasMetadata(path))
+            adjFlags = flags | FLAG_METADATA_MINIMUM;
+        else
+            adjFlags = flags;
 
         switch (adjFlags & FLAG_METADATA_MASK)
         {

@@ -3,7 +3,7 @@
  */
 package icy.util;
 
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GLProfile;
 
 /**
  * Utilities class for OpenGL.

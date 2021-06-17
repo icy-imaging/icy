@@ -1133,9 +1133,9 @@ public class RoiActions
         }
     };
 
-    public static IcyAbstractAction convertToStackAction = new IcyAbstractAction("to 3D stack",
-            new IcyIcon(ResourceUtil.ICON_LAYER_V2), "Convert to 3D stack ROI",
-            "Convert selected 2D ROI to 3D stack ROI by stacking it along the Z axis")
+    public static IcyAbstractAction convertTo3DAction = new IcyAbstractAction("to 3D ROI",
+            new IcyIcon(ResourceUtil.ICON_LAYER_V2), "Convert to 3D ROI",
+            "Convert selected 2D ROI to 3D ROI by extending it along the Z axis")
     {
         private static final long serialVersionUID = -6603561599009987184L;
 
@@ -1146,7 +1146,7 @@ public class RoiActions
 
             if (sequence != null)
             {
-                final int maxZ = sequence.getSizeZ() - 1;
+                final int sizeZ = sequence.getSizeZ();
 
                 // ROI Z stack conversion
                 sequence.beginUpdate();
@@ -1158,7 +1158,7 @@ public class RoiActions
 
                     for (ROI2D roi : selectedROIs)
                     {
-                        final ROI stackedRoi = ROIUtil.convertToStack(roi, 0, maxZ);
+                        final ROI stackedRoi = ROIUtil.convertTo3D(roi, 0d, sizeZ);
 
                         if (stackedRoi != null)
                         {
@@ -1200,9 +1200,9 @@ public class RoiActions
         }
     };
 
-    public static IcyAbstractAction unstackAction = new IcyAbstractAction("to 2D ROIs",
-            new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_V2), "Unstack 3D ROIs",
-            "Convert selected 3D ROIs to multiple 2D ROIs along the Z axis")
+    public static IcyAbstractAction convertTo2DAction = new IcyAbstractAction("to 2D ROIs",
+            new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_V2), "Convert to 2D ROIs",
+            "Convert selected 3D ROIs to 2D ROIs (3D stacks are converted to multiple 2D ROIs)")
     {
         private static final long serialVersionUID = 8540151213754012800L;
 
@@ -1223,7 +1223,7 @@ public class RoiActions
 
                     for (ROI3D roi : selectedROIs)
                     {
-                        final ROI[] unstackedRois = ROIUtil.unstack(roi);
+                        final ROI[] unstackedRois = ROIUtil.convertTo2D(roi);
 
                         if (unstackedRois != null)
                         {

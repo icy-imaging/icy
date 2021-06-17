@@ -156,6 +156,10 @@ public class ResourceUtil
     public static final Image ICON_ROI_RECTANGLE = ResourceUtil.getAlphaIconAsImage("roi_rectangle.png");
     public static final Image ICON_ROI_AREA = ResourceUtil.getAlphaIconAsImage("roi_area.png");
 
+    public static final Image ICON_ROI_CYLINDER = ResourceUtil.getAlphaIconAsImage("roi_cylinder.png");
+    public static final Image ICON_ROI_BOX = ResourceUtil.getAlphaIconAsImage("roi_box.png");
+    public static final Image ICON_ROI_FLATPOLYGON3D = ResourceUtil.getAlphaIconAsImage("roi_flat_polygon3D.png");
+
     public static final Image ICON_ROI_NOT = ResourceUtil.getAlphaIconAsImage("roi_not.png");
     public static final Image ICON_ROI_OR = ResourceUtil.getAlphaIconAsImage("roi_or.png");
     public static final Image ICON_ROI_AND = ResourceUtil.getAlphaIconAsImage("roi_and.png");

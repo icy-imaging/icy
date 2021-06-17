@@ -134,6 +134,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     public static final String ID_READONLY = "readOnly";
     public static final String ID_SHOWNAME = "showName";
     public static final String ID_PROPERTIES = "properties";
+    // public static final String ID_PAINTER = "painter";
 
     public static final ROIIdComparator idComparator = new ROIIdComparator();
     public static final ROINameComparator nameComparator = new ROINameComparator();
@@ -1405,6 +1406,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
             beginUpdate();
             try
             {
+                // we just load specific info from painter (not a proper XML load as it will be restored from ROI)
                 setColor(new Color(XMLUtil.getElementIntValue(node, ID_COLOR, getDefaultColor().getRGB())));
                 setStroke(XMLUtil.getElementDoubleValue(node, ID_STROKE, getDefaultStroke()));
                 setOpacity(XMLUtil.getElementFloatValue(node, ID_OPACITY, getDefaultOpacity()));
@@ -1424,6 +1426,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
             if (node == null)
                 return false;
 
+            // we just save specific info from painter (not a proper XML save as it will be restored from ROI)
             XMLUtil.setElementIntValue(node, ID_COLOR, color.getRGB());
             XMLUtil.setElementDoubleValue(node, ID_STROKE, stroke);
             XMLUtil.setElementFloatValue(node, ID_OPACITY, opacity);
@@ -3475,14 +3478,12 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                 }
             }
 
-            painter.loadFromXML(node);
+            return painter.loadFromXML(node);
         }
         finally
         {
             endUpdate();
         }
-
-        return true;
     }
 
     @Override
@@ -3507,9 +3508,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                 XMLUtil.setElementValue(propertiesNode, entry.getKey(), entry.getValue());
         }
 
-        painter.saveToXML(node);
-
-        return true;
+        return painter.saveToXML(node);
     }
 
     /**

@@ -216,6 +216,35 @@ public class Polygon2D implements Shape, Cloneable
 
     /**
      * Constructs and initializes a <code>Polygon2D</code> from the specified
+     * Polygon2D.
+     * 
+     * @param pol
+     *        the Polygon
+     * @exception NullPointerException
+     *            pol is <code>null</code>.
+     */
+    public Polygon2D(Polygon2D pol)
+    {
+        super();
+
+        if (pol == null)
+            throw new IllegalArgumentException("null Polygon");
+
+        this.npoints = pol.npoints;
+        this.xpoints = new double[pol.npoints];
+        this.ypoints = new double[pol.npoints];
+
+        for (int i = 0; i < pol.npoints; i++)
+        {
+            xpoints[i] = pol.xpoints[i];
+            ypoints[i] = pol.ypoints[i];
+        }
+
+        calculatePath();
+    }
+
+    /**
+     * Constructs and initializes a <code>Polygon2D</code> from the specified
      * parameters.
      * 
      * @param xpoints
@@ -291,21 +320,7 @@ public class Polygon2D implements Shape, Cloneable
     {
         super();
 
-        final int len = points.size();
-
-        this.npoints = len;
-        this.xpoints = new double[len];
-        this.ypoints = new double[len];
-
-        for (int i = 0; i < len; i++)
-        {
-            final Point2D pt = points.get(i);
-
-            this.xpoints[i] = pt.getX();
-            this.ypoints[i] = pt.getY();
-        }
-
-        calculatePath();
+        setPoints(points);
     }
 
     /**
@@ -336,7 +351,8 @@ public class Polygon2D implements Shape, Cloneable
     {
         path = new Path2D.Double();
 
-        path.moveTo(xpoints[0], ypoints[0]);
+        if (npoints > 0)
+            path.moveTo(xpoints[0], ypoints[0]);
         for (int i = 1; i < npoints; i++)
             path.lineTo(xpoints[i], ypoints[i]);
 
@@ -437,6 +453,25 @@ public class Polygon2D implements Shape, Cloneable
         updatePath(x, y);
     }
 
+    public void setPoints(List<Point2D> points)
+    {
+        final int len = points.size();
+
+        this.npoints = len;
+        this.xpoints = new double[len];
+        this.ypoints = new double[len];
+
+        for (int i = 0; i < len; i++)
+        {
+            final Point2D pt = points.get(i);
+
+            this.xpoints[i] = pt.getX();
+            this.ypoints[i] = pt.getY();
+        }
+
+        calculatePath();
+    }
+
     /**
      * Determines whether the specified {@link Point} is inside this <code>Polygon</code>.
      * 
@@ -483,6 +518,19 @@ public class Polygon2D implements Shape, Cloneable
     public Rectangle getBounds()
     {
         return bounds.getBounds();
+    }
+
+    /**
+     * @return the list of points defining the polygon
+     */
+    public List<Point2D> getPoints()
+    {
+        final List<Point2D> result = new ArrayList<>();
+
+        for (int i = 0; i < npoints; i++)
+            result.add(new Point2D.Double(xpoints[i], ypoints[i]));
+
+        return result;
     }
 
     /**
@@ -669,4 +717,5 @@ public class Polygon2D implements Shape, Cloneable
     {
         return getPathIterator(at);
     }
+
 }

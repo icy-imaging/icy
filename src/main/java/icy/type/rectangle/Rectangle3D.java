@@ -18,13 +18,15 @@
  */
 package icy.type.rectangle;
 
+import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
+
 import icy.type.dimension.Dimension3D;
+import icy.type.geom.BoxShape3D;
 import icy.type.geom.Line3D;
 import icy.type.geom.Shape3D;
 import icy.type.point.Point3D;
-
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
 
 /**
  * Rectangle3D class.<br>
@@ -32,7 +34,7 @@ import java.awt.geom.Rectangle2D;
  * 
  * @author Stephane
  */
-public abstract class Rectangle3D implements Shape3D, Cloneable
+public abstract class Rectangle3D extends BoxShape3D implements Shape3D, Cloneable
 {
     /**
      * Returns <code>true</code> if the specified Line3D intersects the given Rectangle3D.
@@ -90,8 +92,8 @@ public abstract class Rectangle3D implements Shape3D, Cloneable
         // multiply it by factor
         result = new Point3D.Double(result.getX() * f, result.getY() * f, result.getZ() * f);
         // return the hit position
-        return new Point3D.Double(line.getX1() + result.getX(), line.getY1() + result.getY(), line.getZ1()
-                + result.getZ());
+        return new Point3D.Double(line.getX1() + result.getX(), line.getY1() + result.getY(),
+                line.getZ1() + result.getZ());
     }
 
     static boolean inBox(Point3D hit, Rectangle3D rect, int axis)
@@ -844,22 +846,14 @@ public abstract class Rectangle3D implements Shape3D, Cloneable
     @Override
     public Object clone()
     {
-        try
-        {
-            return super.clone();
-        }
-        catch (CloneNotSupportedException e)
-        {
-            // this shouldn't happen, since we are Cloneable
-            throw new InternalError();
-        }
+        return super.clone();
     }
 
     @Override
     public String toString()
     {
-        return getClass().getName() + "[" + getX() + "," + getY() + "," + getZ() + " - " + getSizeX() + ","
-                + getSizeY() + "," + getSizeZ() + "]";
+        return getClass().getName() + "[" + getX() + "," + getY() + "," + getZ() + " - " + getSizeX() + "," + getSizeY()
+                + "," + getSizeZ() + "]";
     }
 
     public static class Double extends Rectangle3D
@@ -1013,6 +1007,18 @@ public abstract class Rectangle3D implements Shape3D, Cloneable
         public Rectangle2D toRectangle2D()
         {
             return new Rectangle2D.Double(x, y, sizeX, sizeY);
+        }
+
+        @Override
+        public void setFrame(double x, double y, double z, double sx, double sy, double sz)
+        {
+            setRect(x, y, z, sx, sy, sz);
+        }
+
+        @Override
+        public Shape getShape2D()
+        {
+            return toRectangle2D();
         }
     }
 
@@ -1198,6 +1204,18 @@ public abstract class Rectangle3D implements Shape3D, Cloneable
         public Rectangle2D toRectangle2D()
         {
             return new Rectangle2D.Float(x, y, sizeX, sizeY);
+        }
+
+        @Override
+        public void setFrame(double x, double y, double z, double sx, double sy, double sz)
+        {
+            setRect(x, y, z, sx, sy, sz);
+        }
+
+        @Override
+        public Shape getShape2D()
+        {
+            return toRectangle2D();
         }
     }
 
@@ -1433,6 +1451,17 @@ public abstract class Rectangle3D implements Shape3D, Cloneable
         {
             return new Rectangle(x, y, sizeX, sizeY);
         }
-    }
 
+        @Override
+        public void setFrame(double x, double y, double z, double sx, double sy, double sz)
+        {
+            setRect(x, y, z, sx, sy, sz);
+        }
+
+        @Override
+        public Shape getShape2D()
+        {
+            return toRectangle2D();
+        }
+    }
 }

@@ -1,5 +1,15 @@
 package icy.vtk;
 
+import java.awt.Graphics;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLJPanel;
+
 import icy.gui.dialog.IdConfirmDialog;
 import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.system.IcyExceptionHandler;
@@ -7,17 +17,6 @@ import icy.system.IcyHandledException;
 import icy.system.thread.ThreadUtil;
 import icy.util.OpenGLUtil;
 import icy.util.ReflectionUtil;
-
-import java.awt.Graphics;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLJPanel;
-
 import jogamp.opengl.GLDrawableHelper;
 import vtk.vtkCamera;
 import vtk.vtkGenericOpenGLRenderWindow;
@@ -26,9 +25,8 @@ import vtk.vtkLight;
 import vtk.vtkRenderWindow;
 import vtk.vtkRenderWindowInteractor;
 import vtk.vtkRenderer;
-import vtk.vtkTIFFWriter;
-import vtk.vtkWindowToImageFilter;
 
+// kind of custom vtkJoglPanelComponent;
 public class VtkJoglPanel extends GLJPanel
 {
     class GLEventImpl implements GLEventListener
@@ -48,7 +46,7 @@ public class VtkJoglPanel extends GLJPanel
                 // Init VTK OpenGL RenderWindow
                 rw.SetMapped(1);
                 rw.SetPosition(0, 0);
-                setSize(drawable.getWidth(), drawable.getHeight());
+                setSize(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
                 rw.OpenGLInit();
 
                 // init light
@@ -114,16 +112,23 @@ public class VtkJoglPanel extends GLJPanel
         rw.SetSupportsOpenGL(1);
         rw.SetIsCurrent(true);
 
-        // FIXME: smoothing is broken with VTK 6.3
+        // FIXME: smoothing is broken since VTK 6.3
         // rw.SetPointSmoothing(1);
         // rw.SetLineSmoothing(1);
         // rw.SetPolygonSmoothing(1);
         // rw.SetMultiSamples(4);
 
+        // Make sure when VTK internally request a Render, the Render get properly triggered
+        // rw.AddObserver("WindowFrameEvent", this, "render");
+
         // init window interactor
         wi = new vtkGenericRenderWindowInteractor();
         wi.SetRenderWindow(rw);
         wi.ConfigureEvent();
+
+        // Make sure when VTK internally request a Render, the Render get properly triggered
+        // wi.AddObserver("RenderEvent", this, "render");
+        // wi.SetEnableRender(false);
 
         ren = new vtkRenderer();
         ren.SetLightFollowCamera(1);
@@ -147,28 +152,14 @@ public class VtkJoglPanel extends GLJPanel
         rw.AddRenderer(ren);
         cam = ren.GetActiveCamera();
 
-        // super.setSize(200, 200);
-        // rw.SetSize(200, 200);
-
         // not compatible with OpenGL 3 ? (new VTK OpenGL backend require OpenGL 3.2)
         if (!OpenGLUtil.isOpenGLSupported(3))
         {
-            if (!IdConfirmDialog
-                    .confirm(
-                            "Warning",
-                            "Your graphics card driver does not support OpenGL 3, you may experience issues or crashes with VTK.\nDo you want to try anyway ?",
-                            IdConfirmDialog.YES_NO_OPTION, getClass().getName() + ".notCompatibleDialog"))
+            if (!IdConfirmDialog.confirm("Warning",
+                    "Your graphics card driver does not support OpenGL 3, you may experience issues or crashes with VTK.\nDo you want to try anyway ?",
+                    IdConfirmDialog.YES_NO_OPTION, getClass().getName() + ".notCompatibleDialog"))
                 throw new IcyHandledException("Your graphics card driver is not compatible with OpenGL 3 !");
         }
-    }
-
-    /**
-     * @deprecated Use {@link #disposeInternal()} instead
-     */
-    @Deprecated
-    public void Delete()
-    {
-        delete();
     }
 
     protected void delete()
@@ -196,6 +187,7 @@ public class VtkJoglPanel extends GLJPanel
             ren = null;
             cam = null;
             lgt = null;
+            wi = null;
 
             // On linux we prefer to have a memory leak instead of a crash
             if (!rw.GetClassName().equals("vtkXOpenGLRenderWindow"))
@@ -223,7 +215,7 @@ public class VtkJoglPanel extends GLJPanel
      * Disable method, use {@link #disposeInternal()} instead to release VTK and OpenGL resources
      */
     @Override
-    protected void dispose()
+    protected void dispose(Runnable runnable)
     {
         // prevent disposal on removeNotify as window externalization produce remove/add operation.
         // --> don't forget to call disposeInternal when needed
@@ -235,7 +227,7 @@ public class VtkJoglPanel extends GLJPanel
      */
     public void disposeInternal()
     {
-        super.dispose();
+        super.dispose(null);
 
         // remove the GL event listener to avoid memory leak
         removeGLEventListener(glEventImpl);
@@ -252,42 +244,6 @@ public class VtkJoglPanel extends GLJPanel
         {
             // ignore
         }
-    }
-
-    /**
-     * @deprecated Use {@link #lock()} instead
-     */
-    @Deprecated
-    public void Lock()
-    {
-        lock();
-    }
-
-    /**
-     * @deprecated Use {@link #unlock()} instead
-     */
-    @Deprecated
-    public void UnLock()
-    {
-        unlock();
-    }
-
-    /**
-     * @deprecated Use {@link #getRenderer()} instead
-     */
-    @Deprecated
-    public vtkRenderer GetRenderer()
-    {
-        return getRenderer();
-    }
-
-    /**
-     * @deprecated Use {@link #getRenderWindow()} instead
-     */
-    @Deprecated
-    public vtkRenderWindow GetRenderWindow()
-    {
-        return getRenderWindow();
     }
 
     public vtkRenderer getRenderer()
@@ -359,15 +315,6 @@ public class VtkJoglPanel extends GLJPanel
     }
 
     /**
-     * @deprecated Use {@link #render()} instead.
-     */
-    @Deprecated
-    public void Render()
-    {
-        render();
-    }
-
-    /**
      * Do rendering
      */
     public void render()
@@ -388,46 +335,6 @@ public class VtkJoglPanel extends GLJPanel
         }
     }
 
-    // public synchronized void Render()
-    // {
-    // // already rendering or rendering windows not defined --> exit
-    // if ((rendering) || (rw == null))
-    // return;
-    // // nothing to do --> exit
-    // if (ren.VisibleActorCount() == 0)
-    // return;
-    //
-    // rendering = true;
-    //
-    // try
-    // {
-    // if (windowset == 0)
-    // {
-    // // set the window id and the active camera
-    // cam = ren.GetActiveCamera();
-    //
-    // if (lightingset == 0)
-    // {
-    // ren.AddLight(lgt);
-    // lgt.SetPosition(cam.GetPosition());
-    // lgt.SetFocalPoint(cam.GetFocalPoint());
-    // lightingset = 1;
-    // }
-    //
-    // windowset = 1;
-    // setSize(getWidth(), getHeight());
-    // }
-    //
-    // lock();
-    // rw.Render();
-    // unlock();
-    // }
-    // finally
-    // {
-    // rendering = false;
-    // }
-    // }
-
     public boolean isWindowSet()
     {
         return windowset;
@@ -441,42 +348,6 @@ public class VtkJoglPanel extends GLJPanel
     public void unlock()
     {
         lock.unlock();
-    }
-
-    /**
-     * @deprecated do nothing now
-     */
-    @Deprecated
-    public void InteractionModeRotate()
-    {
-        //
-    }
-
-    /**
-     * @deprecated do nothing now
-     */
-    @Deprecated
-    public void InteractionModeTranslate()
-    {
-        //
-    }
-
-    /**
-     * @deprecated do nothing now
-     */
-    @Deprecated
-    public void InteractionModeZoom()
-    {
-        //
-    }
-
-    /**
-     * @deprecated Use {@link #updateLight()} instead
-     */
-    @Deprecated
-    public void UpdateLight()
-    {
-        updateLight();
     }
 
     public void updateLight()
@@ -528,36 +399,9 @@ public class VtkJoglPanel extends GLJPanel
             failed = true;
 
             new FailedAnnounceFrame("An error occured while initializing OpenGL !\n"
-                            + "You may try to update your graphics card driver to fix this issue.", 0);
+                    + "You may try to update your graphics card driver to fix this issue.", 0);
 
             IcyExceptionHandler.handleException(t, true);
         }
-    }
-
-    /**
-     * @deprecated Use {@link #doHardCopy(String, int)} instead
-     */
-    @Deprecated
-    public void HardCopy(String filename, int mag)
-    {
-        doHardCopy(filename, mag);
-    }
-
-    public void doHardCopy(String filename, int mag)
-    {
-        lock();
-
-        vtkWindowToImageFilter w2if = new vtkWindowToImageFilter();
-        w2if.SetInput(rw);
-
-        w2if.SetMagnification(mag);
-        w2if.Update();
-
-        vtkTIFFWriter writer = new vtkTIFFWriter();
-        writer.SetInputConnection(w2if.GetOutputPort());
-        writer.SetFileName(filename);
-        writer.Write();
-
-        unlock();
     }
 }

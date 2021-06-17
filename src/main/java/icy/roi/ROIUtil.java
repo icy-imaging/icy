@@ -55,6 +55,7 @@ import icy.type.rectangle.Rectangle3D;
 import icy.type.rectangle.Rectangle4D;
 import icy.type.rectangle.Rectangle5D;
 import icy.util.ShapeUtil.BooleanOperator;
+import icy.util.StringUtil;
 import plugins.kernel.roi.descriptor.intensity.ROIIntensityDescriptorsPlugin;
 import plugins.kernel.roi.descriptor.intensity.ROIMaxIntensityDescriptor;
 import plugins.kernel.roi.descriptor.intensity.ROIMeanIntensityDescriptor;
@@ -82,12 +83,16 @@ import plugins.kernel.roi.roi2d.ROI2DRectShape;
 import plugins.kernel.roi.roi2d.ROI2DRectangle;
 import plugins.kernel.roi.roi2d.ROI2DShape;
 import plugins.kernel.roi.roi3d.ROI3DArea;
+import plugins.kernel.roi.roi3d.ROI3DBox;
+import plugins.kernel.roi.roi3d.ROI3DCylinder;
+import plugins.kernel.roi.roi3d.ROI3DFlatPolygon;
 import plugins.kernel.roi.roi3d.ROI3DPoint;
 import plugins.kernel.roi.roi3d.ROI3DShape;
 import plugins.kernel.roi.roi3d.ROI3DStack;
 import plugins.kernel.roi.roi3d.ROI3DStackEllipse;
 import plugins.kernel.roi.roi3d.ROI3DStackPolygon;
 import plugins.kernel.roi.roi3d.ROI3DStackRectangle;
+import plugins.kernel.roi.roi3d.ROI3DZShape;
 import plugins.kernel.roi.roi4d.ROI4DArea;
 import plugins.kernel.roi.roi5d.ROI5DArea;
 
@@ -98,6 +103,7 @@ import plugins.kernel.roi.roi5d.ROI5DArea;
  */
 public class ROIUtil
 {
+    final public static String ZEXT_SUFFIX = " Z extended";
     final public static String STACK_SUFFIX = " stack";
     final public static String MASK_SUFFIX = " mask";
     final public static String SHAPE_SUFFIX = " shape";
@@ -1563,10 +1569,7 @@ public class ROIUtil
     }
 
     /**
-     * Converts the specified 2D ROI to 3D Stack ROI (ROI3DStack) by stacking it along the Z axis given zMin and zMax
-     * (inclusive) parameters.
-     * 
-     * @return the converted 3D stack ROI or <code>null</code> if the input ROI was null
+     * @deprecated Use {@link #convertTo3D(ROI2D, double, double)} instead.
      */
     public static ROI convertToStack(ROI2D roi, int zMin, int zMax)
     {
@@ -1596,11 +1599,67 @@ public class ROIUtil
     }
 
     /**
-     * Converts the specified 3D ROI to multiple 2D ROIs by unstacking it along the Z axis.
+     * @deprecated Use {@link #convertTo2D(ROI3D)} instead
+     */
+    public static ROI[] unstack(ROI3D roi)
+    {
+        return convertTo2D(roi);
+    }
+
+    /**
+     * Converts the specified 2D ROI to 3D ROI by elongating it along the Z axis with the given Z position and size Z parameters.
+     * 
+     * @return the converted 3D ROI
+     */
+    public static ROI convertTo3D(ROI2D roi, double z, double sizeZ)
+    {
+        ROI result = null;
+
+        if (roi instanceof ROI2DRectangle)
+            result = new ROI3DBox(roi.getBounds2D(), z, sizeZ);
+        else if (roi instanceof ROI2DEllipse)
+            result = new ROI3DCylinder(roi.getBounds2D(), z, sizeZ);
+        else if (roi instanceof ROI2DPolygon)
+            result = new ROI3DFlatPolygon(((ROI2DPolygon) roi).getPolygon2D(), z, sizeZ);
+        else
+        {
+            int zMin = (int) z;
+            int zMax = (int) (z + sizeZ);
+            // integer ? --> decrement by one
+            if ((double) zMax == (z + sizeZ))
+                zMax--;
+
+            // empty
+            if (zMin > zMax)
+                return null;
+
+            if (roi instanceof ROI2DArea)
+                result = new ROI3DArea(((ROI2DArea) roi).getBooleanMask(true), zMin, zMax);
+            else
+                result = new ROI3DArea(roi.getBooleanMask2D(roi.getZ(), roi.getT(), roi.getC(), true), zMin, zMax);
+        }
+
+        if (result != null)
+        {
+            // unselect all control points
+            result.unselectAllPoints();
+            // preserve origin name is not the default name
+            if (!roi.isDefaultName())
+                result.setName(roi.getName() + ZEXT_SUFFIX);
+            // keep original ROI informations
+            copyROIProperties(roi, result, false);
+        }
+
+        return result;
+    }
+
+    /**
+     * Converts the specified 3D ROI to 2D ROI(s).<br>
+     * 3D stack ROI are converted to multiple ROI2D representing each Z slice of the original 3D stack.
      * 
      * @return the converted 2D ROIs or <code>null</code> if the input ROI was null
      */
-    public static ROI[] unstack(ROI3D roi)
+    public static ROI[] convertTo2D(ROI3D roi)
     {
         ROI[] result = null;
 
@@ -1632,6 +1691,19 @@ public class ROIUtil
                 }
             }
             result = rois2d.toArray(new ROI[rois2d.size()]);
+        }
+        else if (roi instanceof ROI3DZShape)
+        {
+            ROI3DZShape roi3d = ((ROI3DZShape) roi);
+            ROI2DShape roi2d = roi3d.getShape2DROI();
+            if (roi2d != null)
+            {
+                roi2d = (ROI2DShape) roi2d.getCopy();
+                roi2d.setZ(-1);
+                roi2d.setC(roi3d.c);
+                roi2d.setT(roi3d.t);
+            }
+            result = new ROI[] {roi2d};
         }
         else if (roi instanceof ROI3DArea)
         {
@@ -1670,12 +1742,22 @@ public class ROIUtil
 
         if ((roi != null) && (result != null))
         {
+            String name = roi.getName();
+
+            // remove "stack" suffix is present
+            if (name.endsWith(STACK_SUFFIX))
+                name = StringUtil.removeLast(name, STACK_SUFFIX.length());
+            else if (name.endsWith(ZEXT_SUFFIX))
+                name = StringUtil.removeLast(name, ZEXT_SUFFIX.length());
+
             // unselect all control points
             for (ROI roi2d : result)
             {
                 roi2d.unselectAllPoints();
+                // preserve origin name is not the default name
+                if (!roi.isDefaultName())
+                    roi2d.setName(name);
                 // keep original ROI informations
-                roi2d.setName(roi.getName());
                 copyROIProperties(roi, roi2d, false);
             }
         }

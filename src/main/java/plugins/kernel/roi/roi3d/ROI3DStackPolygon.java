@@ -8,9 +8,7 @@ import icy.type.geom.Polygon2D;
 import plugins.kernel.roi.roi2d.ROI2DPolygon;
 
 /**
- * Class defining a 3D Stack Polygon ROI as a stack of individual 2D Polygon ROI.
- * 
- * @author Stephane
+ * @deprecated Use #ROI3DFlatPolygon instead
  */
 public class ROI3DStackPolygon extends ROI3DStackShape
 {

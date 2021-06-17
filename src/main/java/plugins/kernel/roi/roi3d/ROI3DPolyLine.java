@@ -34,10 +34,6 @@ import vtk.vtkTubeFilter;
  */
 public class ROI3DPolyLine extends ROI3DShape
 {
-    /**
-     * @author Stephane
-     *
-     */
     public class ROI3DPolyLinePainter extends ROI3DShapePainter
     {
         // extra VTK 3D objects
@@ -190,7 +186,7 @@ public class ROI3DPolyLine extends ROI3DShape
         // always select
         anchor.setSelected(true);
 
-        updatePolyline();
+        updateShape();
 
         // set icon
         setIcon(ResourceUtil.ICON_ROI_POLYLINE);
@@ -389,7 +385,7 @@ public class ROI3DPolyLine extends ROI3DShape
         {
             case ROI_CHANGED:
                 // refresh shape
-                updatePolyline();
+                updateShape();
                 break;
 
             case FOCUS_CHANGED:
@@ -440,7 +436,8 @@ public class ROI3DPolyLine extends ROI3DShape
         return false;
     }
 
-    protected void updatePolyline()
+    @Override
+    protected void updateShape()
     {
         final int len = controlPoints.size();
         final double ptsX[] = new double[len];
@@ -468,8 +465,8 @@ public class ROI3DPolyLine extends ROI3DShape
             polyline3d.calculateLines();
         }
 
-        // the shape should have been rebuilt here
-        ((ROI3DPolyLinePainter) painter).needRebuild = true;
+        // call super method after shape has been updated
+        super.updateShape();
     }
 
     @Override

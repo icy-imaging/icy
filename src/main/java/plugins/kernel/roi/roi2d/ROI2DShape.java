@@ -225,25 +225,6 @@ public abstract class ROI2DShape extends ROI2D implements Shape
             final double xs = scaling[0];
             final double ys = scaling[1];
             final double zs = scaling[2];
-            double z0, z1;
-            final double curZ = getZ();
-
-            // all slices ?
-            if (curZ == -1d)
-            {
-                // set object depth on whole volume
-                z0 = 0;
-                z1 = seq.getSizeZ() * zs;
-            }
-            // fixed Z position
-            else
-            {
-                // set Z position
-                z0 = curZ * zs;
-                z1 = (curZ + 1d) * zs;
-                // z0 = (curZ - 0.5) * scaling[2];
-                // z1 = (curZ + 0.5) * scaling[2];
-            }
 
             // update polydata object
             final List<double[]> point3DList = new ArrayList<double[]>();
@@ -251,6 +232,8 @@ public abstract class ROI2DShape extends ROI2D implements Shape
             final double[] coords = new double[6];
 
             // starting position
+            final double z0 = getMinZ(seq) * zs;
+            final double z1 = getMaxZ(seq) * zs;
             double xm = 0d;
             double ym = 0d;
             double x0 = 0d;
@@ -414,6 +397,28 @@ public abstract class ROI2DShape extends ROI2D implements Shape
                 VtkUtil.setPolyDataColor(outline, color, canvas3d.get());
             if (polyData != null)
                 VtkUtil.setPolyDataColor(polyData, color, canvas3d.get());
+        }
+
+        protected double getMinZ(Sequence seq)
+        {
+            final double curZ = getZ();
+
+            // all slices ?
+            if (curZ == -1d)
+                return 0d;
+            // fixed Z position
+            return curZ;
+        }
+
+        protected double getMaxZ(Sequence seq)
+        {
+            final double curZ = getZ();
+
+            // all slices ?
+            if (curZ == -1d)
+                return seq.getSizeZ();
+            // fixed Z position
+            return curZ + 1d;
         }
 
         @Override
