@@ -26,7 +26,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.JToolBar;
 
-import icy.canvas.Canvas2D;
 import icy.canvas.Canvas3D;
 import icy.canvas.CanvasLayerEvent;
 import icy.canvas.CanvasLayerEvent.LayersEventType;
@@ -62,7 +61,6 @@ import icy.util.StringUtil;
 import icy.vtk.IcyVtkPanel;
 import icy.vtk.VtkImageVolume;
 import icy.vtk.VtkImageVolume.VtkVolumeBlendType;
-import icy.vtk.VtkImageVolume.VtkVolumeMapperType;
 import icy.vtk.VtkUtil;
 import plugins.kernel.canvas.VtkSettingPanel.SettingChangeListener;
 import vtk.vtkActor;
@@ -75,7 +73,6 @@ import vtk.vtkImageData;
 import vtk.vtkInformation;
 import vtk.vtkInformationIntegerKey;
 import vtk.vtkLight;
-import vtk.vtkOrientationMarkerWidget;
 import vtk.vtkPicker;
 import vtk.vtkPiecewiseFunction;
 import vtk.vtkProp;
@@ -310,6 +307,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         rulerBox.SetXUnits("micro meter");
         rulerBox.GetTitleTextProperty(0).SetColor(1.0, 0.0, 0.0);
         rulerBox.GetLabelTextProperty(0).SetColor(1.0, 0.0, 0.0);
+        rulerBox.GetXAxesLinesProperty().SetColor(1.0, 0.0, 0.0);
         rulerBox.GetXAxesGridlinesProperty().SetColor(1.0, 0.0, 0.0);
         rulerBox.GetXAxesGridpolysProperty().SetColor(1.0, 0.0, 0.0);
         rulerBox.GetXAxesInnerGridlinesProperty().SetColor(1.0, 0.0, 0.0);
@@ -317,6 +315,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         rulerBox.SetYUnits("micro meter");
         rulerBox.GetTitleTextProperty(1).SetColor(0.0, 1.0, 0.0);
         rulerBox.GetLabelTextProperty(1).SetColor(0.0, 1.0, 0.0);
+        rulerBox.GetYAxesLinesProperty().SetColor(0.0, 1.0, 0.0);
         rulerBox.GetYAxesGridlinesProperty().SetColor(0.0, 1.0, 0.0);
         rulerBox.GetYAxesGridpolysProperty().SetColor(0.0, 1.0, 0.0);
         rulerBox.GetYAxesInnerGridlinesProperty().SetColor(0.0, 1.0, 0.0);
@@ -324,13 +323,10 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         rulerBox.SetZUnits("micro meter");
         rulerBox.GetTitleTextProperty(2).SetColor(0.0, 0.0, 1.0);
         rulerBox.GetLabelTextProperty(2).SetColor(0.0, 0.0, 1.0);
+        rulerBox.GetZAxesLinesProperty().SetColor(0.0, 0.0, 1.0);
         rulerBox.GetZAxesGridlinesProperty().SetColor(0.0, 0.0, 1.0);
         rulerBox.GetZAxesGridpolysProperty().SetColor(0.0, 0.0, 1.0);
         rulerBox.GetZAxesInnerGridlinesProperty().SetColor(0.0, 0.0, 1.0);
-
-        rulerBox.XAxisVisibilityOff();
-        rulerBox.YAxisVisibilityOff();
-        rulerBox.ZAxisVisibilityOff();
 
         rulerBox.SetGridLineLocation(VtkUtil.VTK_GRID_LINES_FURTHEST);
         rulerBox.SetFlyModeToOuterEdges();
@@ -375,10 +371,13 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         rulerBox.SetDrawXGridlines(gridButton.isSelected() ? 1 : 0);
         rulerBox.SetDrawYGridlines(gridButton.isSelected() ? 1 : 0);
         rulerBox.SetDrawZGridlines(gridButton.isSelected() ? 1 : 0);
+        rulerBox.SetXAxisVisibility(rulerButton.isSelected() ? 1 : 0);
         rulerBox.SetXAxisTickVisibility(rulerButton.isSelected() ? 1 : 0);
         rulerBox.SetXAxisMinorTickVisibility(rulerButton.isSelected() ? 1 : 0);
+        rulerBox.SetYAxisVisibility(rulerButton.isSelected() ? 1 : 0);
         rulerBox.SetYAxisTickVisibility(rulerButton.isSelected() ? 1 : 0);
         rulerBox.SetYAxisMinorTickVisibility(rulerButton.isSelected() ? 1 : 0);
+        rulerBox.SetZAxisVisibility(rulerButton.isSelected() ? 1 : 0);
         rulerBox.SetZAxisTickVisibility(rulerButton.isSelected() ? 1 : 0);
         rulerBox.SetZAxisMinorTickVisibility(rulerButton.isSelected() ? 1 : 0);
         rulerBox.SetXAxisLabelVisibility(rulerLabelButton.isSelected() ? 1 : 0);
@@ -601,16 +600,6 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     /**
-     * @deprecated there is no more orientation widget because of the jogl bug with multiple viewport.
-     */
-    @Deprecated
-    public vtkOrientationMarkerWidget getWidget()
-    {
-        return null;
-        // return widget;
-    }
-
-    /**
      * @return the VTK image volume object
      */
     public VtkImageVolume getImageVolume()
@@ -738,18 +727,18 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
 
         rulerBox.GetXAxesGridlinesProperty().SetColor(r, g, b);
         rulerBox.GetXAxesGridpolysProperty().SetColor(r, g, b);
-        rulerBox.GetXAxesInnerGridlinesProperty().SetColor(r, g, b);
-        rulerBox.GetXAxesLinesProperty().SetColor(r, g, b);
+        // rulerBox.GetXAxesInnerGridlinesProperty().SetColor(r, g, b);
+        // rulerBox.GetXAxesLinesProperty().SetColor(r, g, b);
 
         rulerBox.GetYAxesGridlinesProperty().SetColor(r, g, b);
         rulerBox.GetYAxesGridpolysProperty().SetColor(r, g, b);
-        rulerBox.GetYAxesInnerGridlinesProperty().SetColor(r, g, b);
-        rulerBox.GetYAxesLinesProperty().SetColor(r, g, b);
+        // rulerBox.GetYAxesInnerGridlinesProperty().SetColor(r, g, b);
+        // rulerBox.GetYAxesLinesProperty().SetColor(r, g, b);
 
         rulerBox.GetZAxesGridlinesProperty().SetColor(r, g, b);
         rulerBox.GetZAxesGridpolysProperty().SetColor(r, g, b);
-        rulerBox.GetZAxesInnerGridlinesProperty().SetColor(r, g, b);
-        rulerBox.GetZAxesLinesProperty().SetColor(r, g, b);
+        // rulerBox.GetZAxesInnerGridlinesProperty().SetColor(r, g, b);
+        // rulerBox.GetZAxesLinesProperty().SetColor(r, g, b);
 
         textProperty.SetColor(r, g, b);
     }
@@ -900,27 +889,6 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     /**
-     * @deprecated Use {@link #getGPURendering()} instead
-     */
-    @Deprecated
-    public VtkVolumeMapperType getVolumeMapperType()
-    {
-        if (getGPURendering())
-            return VtkVolumeMapperType.RAYCAST_GPU_OPENGL;
-
-        return VtkVolumeMapperType.RAYCAST_CPU_FIXEDPOINT;
-    }
-
-    /**
-     * @deprecated Use {@link #setGPURendering(boolean)} instead
-     */
-    @Deprecated
-    public void setVolumeMapperType(VtkVolumeMapperType value)
-    {
-        setGPURendering(VtkVolumeMapperType.RAYCAST_GPU_OPENGL.equals(value));
-    }
-
-    /**
      * @return visible state of the image volume object
      * @see VtkImageVolume#isVisible()
      */
@@ -970,8 +938,8 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     protected void resetCamera()
     {
         camera.SetViewUp(0, -1, 0);
-        renderer.ResetCamera();
         camera.Elevation(200);
+        renderer.ResetCamera();
         renderer.ResetCameraClippingRange();
     }
 
@@ -2013,7 +1981,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
 
         // cursor synchronization
         if (isSynchOnCursor())
-        { 
+        {
             // mouse synchronization
             if (processAll || (type == IcyCanvasEventType.MOUSE_IMAGE_POSITION_CHANGED))
             {
@@ -2023,7 +1991,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                     final double mouseImagePosX = getMouseImagePosX();
                     final double mouseImagePosY = getMouseImagePosY();
                     final double mouseImagePosZ = getMouseImagePosZ();
-                    
+
                     for (IcyCanvas cnv : canvasList)
                         ((VtkCanvas) cnv).setMouseImagePos(mouseImagePosX, mouseImagePosY, mouseImagePosZ);
                 }
@@ -2261,7 +2229,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             final boolean consumed = e.isConsumed();
 
             super.mouseMoved(e);
-            
+
             mouseImagePositionChanged(DimensionId.NULL);
 
             // refresh mouse cursor (do it after all process)
@@ -2642,10 +2610,13 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                     @Override
                     public void run()
                     {
+                        rulerBox.SetXAxisVisibility(b ? 1 : 0);
                         rulerBox.SetXAxisTickVisibility(b ? 1 : 0);
                         rulerBox.SetXAxisMinorTickVisibility(b ? 1 : 0);
+                        rulerBox.SetYAxisVisibility(b ? 1 : 0);
                         rulerBox.SetYAxisTickVisibility(b ? 1 : 0);
                         rulerBox.SetYAxisMinorTickVisibility(b ? 1 : 0);
+                        rulerBox.SetZAxisVisibility(b ? 1 : 0);
                         rulerBox.SetZAxisTickVisibility(b ? 1 : 0);
                         rulerBox.SetZAxisMinorTickVisibility(b ? 1 : 0);
                     }
