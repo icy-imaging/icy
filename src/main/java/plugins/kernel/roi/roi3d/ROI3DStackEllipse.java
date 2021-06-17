@@ -3,17 +3,14 @@
  */
 package plugins.kernel.roi.roi3d;
 
-import icy.type.rectangle.Rectangle3D;
-
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
+import icy.type.rectangle.Rectangle3D;
 import plugins.kernel.roi.roi2d.ROI2DEllipse;
 
 /**
- * Class defining a 3D Ellipse ROI as a stack of individual 2D Ellipse ROI.
- * 
- * @author Stephane
+ * @deprecated Use #ROI3DCylinder instead
  */
 public class ROI3DStackEllipse extends ROI3DStackShape
 {

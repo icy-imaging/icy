@@ -7,9 +7,7 @@ import java.awt.geom.Rectangle2D;
 import plugins.kernel.roi.roi2d.ROI2DRectangle;
 
 /**
- * Class defining a 3D Rectangle ROI as a stack of individual 2D Rectangle ROI.
- * 
- * @author Stephane
+ * @deprecated Use #ROI3DBox instead
  */
 public class ROI3DStackRectangle extends ROI3DStackShape
 {
