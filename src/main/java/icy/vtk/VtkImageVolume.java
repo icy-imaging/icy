@@ -8,9 +8,7 @@ import icy.image.lut.LUT;
 import icy.image.lut.LUT.LUTChannel;
 import icy.math.Scaler;
 import icy.type.DataType;
-
 import vtk.vtkColorTransferFunction;
-import vtk.vtkFixedPointVolumeRayCastMapper;
 import vtk.vtkGPUVolumeRayCastMapper;
 import vtk.vtkImageData;
 import vtk.vtkOpenGLGPUVolumeRayCastMapper;
@@ -19,7 +17,6 @@ import vtk.vtkRenderer;
 import vtk.vtkVolume;
 import vtk.vtkVolumeMapper;
 import vtk.vtkVolumeProperty;
-import vtk.vtkVolumeRayCastMapper;
 
 /**
  * Class to represent a 3D image as a 3D VTK volume object.
@@ -28,46 +25,6 @@ import vtk.vtkVolumeRayCastMapper;
  */
 public class VtkImageVolume
 {
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    public static enum VtkVolumeMapperType
-    {
-        RAYCAST_CPU_FIXEDPOINT
-        {
-            @Override
-            public String toString()
-            {
-                return "Raycaster (CPU)";
-            }
-        },
-        RAYCAST_GPU_OPENGL
-        {
-            @Override
-            public String toString()
-            {
-                return "Raycaster (OpenGL)";
-            }
-        },
-        TEXTURE2D_OPENGL
-        {
-            @Override
-            public String toString()
-            {
-                return "Texture 2D (OpenGL)";
-            }
-        },
-        TEXTURE3D_OPENGL
-        {
-            @Override
-            public String toString()
-            {
-                return "Texture 3D (OpenGL)";
-            }
-        };
-    }
-
     public static enum VtkVolumeBlendType
     {
         COMPOSITE
@@ -112,6 +69,7 @@ public class VtkImageVolume
     protected vtkVolume volume;
     protected vtkVolumeProperty volumeProperty;
     protected vtkImageData imageData;
+    protected vtkRenderer renderer;
 
     public VtkImageVolume()
     {
@@ -129,8 +87,7 @@ public class VtkImageVolume
         setInterpolationMode(VtkUtil.VTK_LINEAR_INTERPOLATION);
 
         // build default volume mapper
-        volumeMapper = new vtkFixedPointVolumeRayCastMapper();
-        ((vtkFixedPointVolumeRayCastMapper) volumeMapper).IntermixIntersectingGeometryOn();
+        volumeMapper = new VtkCPUVolumeMapper();
         setSampleResolution(0);
 
         // initialize volume data
@@ -289,18 +246,9 @@ public class VtkImageVolume
      */
     public double getSampleResolution()
     {
-        if (volumeMapper instanceof vtkFixedPointVolumeRayCastMapper)
+        if (volumeMapper instanceof VtkCPUVolumeMapper)
         {
-            final vtkFixedPointVolumeRayCastMapper mapper = (vtkFixedPointVolumeRayCastMapper) volumeMapper;
-
-            if (mapper.GetAutoAdjustSampleDistances() != 0)
-                return 0d;
-
-            return mapper.GetImageSampleDistance();
-        }
-        else if (volumeMapper instanceof vtkVolumeRayCastMapper)
-        {
-            final vtkVolumeRayCastMapper mapper = (vtkVolumeRayCastMapper) volumeMapper;
+            final VtkCPUVolumeMapper mapper = (VtkCPUVolumeMapper) volumeMapper;
 
             if (mapper.GetAutoAdjustSampleDistances() != 0)
                 return 0d;
@@ -339,21 +287,9 @@ public class VtkImageVolume
      */
     public void setSampleResolution(double value)
     {
-        if (volumeMapper instanceof vtkFixedPointVolumeRayCastMapper)
+        if (volumeMapper instanceof VtkCPUVolumeMapper)
         {
-            final vtkFixedPointVolumeRayCastMapper mapper = (vtkFixedPointVolumeRayCastMapper) volumeMapper;
-
-            if (value == 0d)
-                mapper.AutoAdjustSampleDistancesOn();
-            else
-            {
-                mapper.AutoAdjustSampleDistancesOff();
-                mapper.SetImageSampleDistance(value);
-            }
-        }
-        else if (volumeMapper instanceof vtkVolumeRayCastMapper)
-        {
-            final vtkVolumeRayCastMapper mapper = (vtkVolumeRayCastMapper) volumeMapper;
+            final VtkCPUVolumeMapper mapper = (VtkCPUVolumeMapper) volumeMapper;
 
             if (value == 0d)
                 mapper.AutoAdjustSampleDistancesOn();
@@ -664,8 +600,7 @@ public class VtkImageVolume
             else
             {
                 // CPU raycaster
-                newMapper = new vtkFixedPointVolumeRayCastMapper();
-                ((vtkFixedPointVolumeRayCastMapper) newMapper).IntermixIntersectingGeometryOn();
+                newMapper = new VtkCPUVolumeMapper();
             }
 
             // setup volume connection
@@ -692,15 +627,6 @@ public class VtkImageVolume
         }
 
         return false;
-    }
-
-    /**
-     * @deprecated Should always return true now.
-     */
-    @Deprecated
-    public static boolean isMapperSupported(vtkRenderer renderer)
-    {
-        return true;
     }
 
     /**
