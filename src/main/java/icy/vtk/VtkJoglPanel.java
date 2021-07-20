@@ -47,7 +47,8 @@ public class VtkJoglPanel extends GLJPanel
                 rw.SetMapped(1);
                 rw.SetPosition(0, 0);
                 setSize(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
-                rw.OpenGLInit();
+                rw.InitializeFromCurrentContext();
+                // rw.OpenGLInit();
 
                 // init light
                 if (!lightingset)
@@ -103,7 +104,7 @@ public class VtkJoglPanel extends GLJPanel
 
     public VtkJoglPanel()
     {
-        super(new GLCapabilities(GLProfile.getDefault()));
+        super(new GLCapabilities(GLProfile.getMaximum(true)));
 
         rw = new vtkGenericOpenGLRenderWindow();
 
