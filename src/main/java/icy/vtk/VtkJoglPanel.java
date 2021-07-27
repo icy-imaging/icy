@@ -114,13 +114,13 @@ public class VtkJoglPanel extends GLJPanel
         rw.SetIsCurrent(true);
 
         // FIXME: smoothing is broken since VTK 6.3
-        // rw.SetPointSmoothing(1);
-        // rw.SetLineSmoothing(1);
-        // rw.SetPolygonSmoothing(1);
-        // rw.SetMultiSamples(4);
+        rw.SetPointSmoothing(1);
+        rw.SetLineSmoothing(1);
+        rw.SetPolygonSmoothing(1);
+        rw.SetMultiSamples(4);
 
         // Make sure when VTK internally request a Render, the Render get properly triggered
-        // rw.AddObserver("WindowFrameEvent", this, "render");
+        rw.AddObserver("WindowFrameEvent", this, "render");
 
         // init window interactor
         wi = new vtkGenericRenderWindowInteractor();
@@ -128,8 +128,8 @@ public class VtkJoglPanel extends GLJPanel
         wi.ConfigureEvent();
 
         // Make sure when VTK internally request a Render, the Render get properly triggered
-        // wi.AddObserver("RenderEvent", this, "render");
-        // wi.SetEnableRender(false);
+        wi.AddObserver("RenderEvent", this, "render");
+        wi.SetEnableRender(false);
 
         ren = new vtkRenderer();
         ren.SetLightFollowCamera(1);
@@ -180,6 +180,9 @@ public class VtkJoglPanel extends GLJPanel
         {
             // prevent any further rendering
             rendering = true;
+            
+            rw.RemoveAllObservers();
+            wi.RemoveAllObservers();
 
             // if (getParent() != null)
             // getParent().remove(this);
