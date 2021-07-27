@@ -227,6 +227,9 @@ public class Icy
             System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
             // set LOCI debug level (do it immediately as it can quickly show some log messages)
             loci.common.DebugTools.enableLogging("ERROR");
+            // disable GLSL on OSX otherwise GLJPanel stay blank (error on GL state preservation)
+            if (SystemUtil.isMac())
+            	System.setProperty("jogl.gljpanel.noglsl", "true");
 
             if (!headless && !noSplash)
             {
