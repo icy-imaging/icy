@@ -227,6 +227,9 @@ public class Icy
             System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
             // set LOCI debug level (do it immediately as it can quickly show some log messages)
             loci.common.DebugTools.enableLogging("ERROR");
+            // disable GLSL on OSX otherwise GLJPanel stay blank (error on GL state preservation)
+            if (SystemUtil.isMac())
+                System.setProperty("jogl.gljpanel.noglsl", "true");
 
             if (!headless && !noSplash)
             {
@@ -617,9 +620,8 @@ public class Icy
 
             // new Magic Wand!
             tooltip = new ToolTipFrame(
-                    "<html>" + "<img src=\""
-                            + Icy.class.getResource("/image/help/magic_wand.png").toString() + "\" /><br>"
-                            + "<b>Magic Wand</b> is now available in Icy !<br><br>" 
+                    "<html>" + "<img src=\"" + Icy.class.getResource("/image/help/magic_wand.png").toString()
+                            + "\" /><br>" + "<b>Magic Wand</b> is now available in Icy !<br><br>"
                             + "You can access its settings from preferences :<br>" + "<img src=\""
                             + Icy.class.getResource("/image/help/icy_prefs.png").toString() + "\" /></html>",
                     30, "magicWand");
@@ -1206,16 +1208,10 @@ public class Icy
                 loadLibrary(vtkLibPath, "vtkglew", false);
                 loadLibrary(vtkLibPath, "vtkpugixml", false);
                 loadLibrary(vtkLibPath, "vtksqlite", false);
-                if (SystemUtil.isMac())
-                {
-                    loadLibrary(vtkLibPath, "vtkhdf5.8.2.0", false);
-                    loadLibrary(vtkLibPath, "vtkhdf5_hl.8.2.0", false);
-                }
-                else
-                {
-                    loadLibrary(vtkLibPath, "vtkhdf5", false);
-                    loadLibrary(vtkLibPath, "vtkhdf5_hl", false);
-                }
+                loadLibrary(vtkLibPath, "vtkhdf5.8.2.0", false);
+                loadLibrary(vtkLibPath, "vtkhdf5_hl.8.2.0", false);
+                loadLibrary(vtkLibPath, "vtkhdf5", false);
+                loadLibrary(vtkLibPath, "vtkhdf5_hl", false);
                 loadLibrary(vtkLibPath, "vtkNetCDF");
                 loadLibrary(vtkLibPath, "vtkNetCDF_cxx", false);
                 loadLibrary(vtkLibPath, "vtknetcdf_c++", false);
@@ -1335,7 +1331,7 @@ public class Icy
                 loadLibrary(vtkLibPath, "vtkCommonDataModelJava");
                 loadLibrary(vtkLibPath, "vtkCommonColorJava");
                 loadLibrary(vtkLibPath, "vtkCommonComputationalGeometryJava");
-                loadLibrary(vtkLibPath, "vtkCommonExecutionModelJava");                
+                loadLibrary(vtkLibPath, "vtkCommonExecutionModelJava");
                 loadLibrary(vtkLibPath, "vtkFiltersTopologyJava");
                 loadLibrary(vtkLibPath, "vtkFiltersVerdictJava");
                 loadLibrary(vtkLibPath, "vtkFiltersProgrammableJava");

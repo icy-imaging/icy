@@ -450,6 +450,9 @@ public class Main
             result += " " + PARAM_STACK_SIZE + stackSize + "k";
         if (!StringUtil.isEmpty(vmParams))
             result += " " + vmParams;
+        // Java >= 16 ? --> add permited illegal access
+        if (checkMinimumJavaVersion(16))
+            result += " --illegal-access=permit";
         if (!StringUtil.isEmpty(osVmParams))
             result += " " + osVmParams;
 
