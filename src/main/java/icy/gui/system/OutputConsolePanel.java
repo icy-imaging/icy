@@ -28,6 +28,7 @@ import icy.preferences.GeneralPreferences;
 import icy.resource.ResourceUtil;
 import icy.resource.icon.IcyIcon;
 import icy.system.IcyExceptionHandler;
+import icy.system.thread.ThreadUtil;
 import icy.util.EventUtil;
 
 import java.awt.BorderLayout;
@@ -327,35 +328,42 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
         }
     }
 
-    public void addText(String text, boolean isError)
+    public void addText(final String text, final boolean isError)
     {
-        try
+        ThreadUtil.invokeLater(new Runnable()
         {
-            nbUpdate++;
-
-            // insert text
-            synchronized (doc)
+            @Override
+            public void run()
             {
-                if (isError)
-                    doc.insertString(doc.getLength(), text, errorAttributes);
-                else
-                    doc.insertString(doc.getLength(), text, normalAttributes);
+                try
+                {
+                    nbUpdate++;
 
-                // do clean sometime..
-                if ((nbUpdate & 0x7F) == 0)
-                    limitLog();
+                    // insert text
+                    synchronized (doc)
+                    {
+                        if (isError)
+                            doc.insertString(doc.getLength(), text, errorAttributes);
+                        else
+                            doc.insertString(doc.getLength(), text, normalAttributes);
 
-                // scroll lock feature
-                if (!scrollLockButton.isSelected())
-                    textPane.setCaretPosition(doc.getLength());
+                        // do clean sometime..
+                        if ((nbUpdate & 0x7F) == 0)
+                            limitLog();
+
+                        // scroll lock feature
+                        if (!scrollLockButton.isSelected())
+                            textPane.setCaretPosition(doc.getLength());
+                    }
+                }
+                catch (Exception e)
+                {
+                    // ignore
+                }
+
+                changed(isError);
             }
-        }
-        catch (Exception e)
-        {
-            // ignore
-        }
-
-        changed(isError);
+        });
     }
 
     /**
