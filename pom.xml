@@ -87,7 +87,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <excludeGroupIds>com.sun,sun.jdt,jdk.tools,net.imagej</excludeGroupIds>
+                            <excludeGroupIds>sun.jdt,jdk.tools,net.imagej</excludeGroupIds>
                             <outputDirectory>${outputDirectory}/icy/lib</outputDirectory>
                             <stripVersion>${stripVersion}</stripVersion>
                             <overWriteIfNewer>true</overWriteIfNewer>
