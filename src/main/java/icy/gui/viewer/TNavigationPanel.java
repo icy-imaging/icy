@@ -295,7 +295,7 @@ public class TNavigationPanel extends JPanel
         fireLoopingStateChange();
     }
 
-    private List<ActionListener> loopingStateChangeListeners = Collections.synchronizedList(new ArrayList<>());
+    private List<ActionListener> loopingStateChangeListeners = Collections.synchronizedList(new ArrayList<ActionListener>());
 
     public void addLoopingStateChangeListener(ActionListener actionListener)
     {
