@@ -189,7 +189,7 @@
 		</element>
 		<element>
 			<name>VTK</name>
-			<version>6.3.0.1</version>
+			<version>8.0.1.0</version>
 			<changeslog />
 			<files>
 				<file>
@@ -199,13 +199,7 @@
 					<localpath>lib/mac64/vtk</localpath>
 				</file>
 				<file>
-					<localpath>lib/win32/vtk</localpath>
-				</file>
-				<file>
 					<localpath>lib/win64/vtk</localpath>
-				</file>
-				<file>
-					<localpath>lib/unix32/vtk</localpath>
 				</file>
 				<file>
 					<localpath>lib/unix64/vtk</localpath>
