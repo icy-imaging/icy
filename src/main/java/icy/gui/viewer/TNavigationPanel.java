@@ -80,7 +80,7 @@ public class TNavigationPanel extends JPanel
         slider.setFocusable(false);
         slider.setMaximum(0);
         slider.setMinimum(0);
-        slider.setToolTipText("Move cursor to navigate in T dimension");
+        slider.setToolTipText("Move cursor or use left/right key to navigate in T dimension");
         slider.addChangeListener(new ChangeListener()
         {
             @Override
