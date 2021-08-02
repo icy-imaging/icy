@@ -31,6 +31,7 @@ import java.util.Set;
 import icy.gui.frame.progress.FileFrame;
 import icy.sequence.DimensionId;
 import icy.sequence.MetaDataUtil;
+import icy.sequence.SequenceIdImporter;
 import icy.type.DataType;
 import icy.util.StringUtil;
 import icy.util.StringUtil.AlphanumComparator;
@@ -46,6 +47,7 @@ public class SequenceFileSticher
 {
     public static class SequenceType
     {
+        public boolean minimumMeta;
         public int sizeX;
         public int sizeY;
         public int sizeZ;
@@ -64,6 +66,7 @@ public class SequenceFileSticher
         {
             super();
 
+            minimumMeta = true;
             // undetermined
             sizeX = 0;
             sizeY = 0;
@@ -71,6 +74,9 @@ public class SequenceFileSticher
             sizeT = 0;
             sizeC = 0;
             dataType = null;
+            hc = 0;
+
+            // optional meta
             pixelSizeX = 0d;
             pixelSizeY = 0d;
             pixelSizeZ = 0d;
@@ -79,11 +85,17 @@ public class SequenceFileSticher
 
         void computeHashCode()
         {
+            // don't use optional info for hashcode
             hc = (sizeX << 0) ^ (sizeY << 4) ^ (sizeZ << 8) ^ (sizeT << 12) ^ (sizeC << 16)
-                    ^ (Float.floatToIntBits((float) pixelSizeX) << 20)
-                    ^ (Float.floatToIntBits((float) pixelSizeY) << 24) ^ (Float.floatToIntBits((float) pixelSizeZ) >> 4)
-                    ^ (Float.floatToIntBits((float) timeInterval) >> 8)
                     ^ ((dataType != null) ? (dataType.ordinal() >> 12) : 0);
+
+            // if (!minimumMeta)
+            // {
+            // hc ^= (Float.floatToIntBits((float) pixelSizeX) << 20)
+            // ^ (Float.floatToIntBits((float) pixelSizeY) << 24)
+            // ^ (Float.floatToIntBits((float) pixelSizeZ) >> 4)
+            // ^ (Float.floatToIntBits((float) timeInterval) >> 8);
+            // }
         }
 
         @Override
@@ -99,10 +111,15 @@ public class SequenceFileSticher
             {
                 final SequenceType st = (SequenceType) obj;
 
-                return (st.sizeX == sizeX) && (st.sizeY == sizeY) && (st.sizeZ == sizeZ) && (st.sizeT == sizeT)
-                        && (st.sizeC == sizeC) && (st.pixelSizeX == pixelSizeX) && (st.pixelSizeY == pixelSizeY)
-                        && (st.pixelSizeZ == pixelSizeZ) && (st.timeInterval == timeInterval)
-                        && (st.dataType == dataType);
+                boolean result = (st.sizeX == sizeX) && (st.sizeY == sizeY) && (st.sizeZ == sizeZ)
+                        && (st.sizeT == sizeT) && (st.sizeC == sizeC) && (st.dataType == dataType);
+
+                // optional meta data ?
+                if (!st.minimumMeta && !minimumMeta)
+                    result = result && (st.pixelSizeX == pixelSizeX) && (st.pixelSizeY == pixelSizeY)
+                            && (st.pixelSizeZ == pixelSizeZ) && (st.timeInterval == timeInterval);
+
+                return result;
             }
 
             return super.equals(obj);
@@ -139,12 +156,7 @@ public class SequenceFileSticher
             this.baseType = type;
             this.importer = importer;
 
-            hc = base.hashCode() ^ series;
-        }
-
-        public SequenceIdent(String base, int series)
-        {
-            this(base, series, null, null);
+            hc = base.hashCode() ^ baseType.hashCode() ^ series;
         }
 
         @Override
@@ -160,13 +172,7 @@ public class SequenceFileSticher
             {
                 final SequenceIdent ident = (SequenceIdent) obj;
 
-                boolean result = base.equals(ident.base) && (series == ident.series);
-
-                // test baseType only if defined
-                if (result && (baseType != null) && (ident.baseType != null))
-                    result &= baseType.equals(ident.baseType);
-
-                return result;
+                return base.equals(ident.base) && (series == ident.series) && baseType.equals(ident.baseType);
             }
 
             return super.equals(obj);
@@ -1793,8 +1799,7 @@ public class SequenceFileSticher
     /**
      * @return opened {@link SequenceFileImporter} or <i>null</i> if we can't open the given path
      */
-    @SuppressWarnings("resource")
-    static SequenceFileImporter tryOpen(SequenceFileImporter importer, String path)
+    static SequenceFileImporter tryOpen(SequenceFileImporter importer, String path, boolean minimumMetadata)
     {
         final boolean tryAnotherImporter;
         SequenceFileImporter imp;
@@ -1829,7 +1834,7 @@ public class SequenceFileSticher
             try
             {
                 // try to open it (require default metadata otherwise pixel size may miss)
-                imp.open(path, 0);
+                imp.open(path, minimumMetadata ? SequenceIdImporter.FLAG_METADATA_MINIMUM : 0);
             }
             catch (ClosedByInterruptException e)
             {
@@ -1840,7 +1845,7 @@ public class SequenceFileSticher
             {
                 // can't be opened... try with an other importer
                 if (tryAnotherImporter)
-                    return tryOpen(null, path);
+                    return tryOpen(null, path, minimumMetadata);
 
                 // can't open importer
                 return null;
@@ -1871,13 +1876,13 @@ public class SequenceFileSticher
     private static void addToGroup(Map<SequenceIdent, SequenceFileGroup> groups, SequencePosition position,
             SequenceFileImporter importer)
     {
-        SequenceFileGroup group = groups.get(new SequenceIdent(position.getBase(), position.getIndexS()));
+        SequenceFileGroup group = groups.get(getSequenceIdent(importer, position, true));
 
         // no group yet for this base path
         if (group == null)
         {
             // get complete ident for this position
-            final SequenceIdent ident = getSequenceIdent(importer, position);
+            final SequenceIdent ident = getSequenceIdent(importer, position, false);
 
             // can't add this position...
             if (ident == null)
@@ -1895,10 +1900,11 @@ public class SequenceFileSticher
     /**
      * Build and return sequence ident for specified {@link SequencePosition}
      */
-    private static SequenceIdent getSequenceIdent(SequenceFileImporter importer, SequencePosition position)
+    private static SequenceIdent getSequenceIdent(SequenceFileImporter importer, SequencePosition position,
+            boolean minimumMetadata)
     {
         // try to open the image
-        final SequenceFileImporter imp = tryOpen(importer, position.getPath());
+        final SequenceFileImporter imp = tryOpen(importer, position.getPath(), minimumMetadata);
 
         // can't open it (or interrupted) ? --> return null
         if (imp == null)
@@ -1917,11 +1923,17 @@ public class SequenceFileSticher
             type.sizeT = MetaDataUtil.getSizeT(meta, 0);
             type.sizeC = MetaDataUtil.getSizeC(meta, 0);
             type.dataType = MetaDataUtil.getDataType(meta, 0);
-            // use -1 as default value to detect when position is not set
-            type.pixelSizeX = MetaDataUtil.getPixelSizeX(meta, 0, 0d);
-            type.pixelSizeY = MetaDataUtil.getPixelSizeY(meta, 0, 0d);
-            type.pixelSizeZ = MetaDataUtil.getPixelSizeZ(meta, 0, 0d);
-            type.timeInterval = MetaDataUtil.getTimeInterval(meta, 0, 0d);
+
+            // populated ?
+            if (!minimumMetadata)
+            {
+                type.minimumMeta = false;
+                type.pixelSizeX = MetaDataUtil.getPixelSizeX(meta, 0, 0d);
+                type.pixelSizeY = MetaDataUtil.getPixelSizeY(meta, 0, 0d);
+                type.pixelSizeZ = MetaDataUtil.getPixelSizeZ(meta, 0, 0d);
+                type.timeInterval = MetaDataUtil.getTimeInterval(meta, 0, 0d);
+            }
+
             // can compute hash code
             type.computeHashCode();
 
