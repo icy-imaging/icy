@@ -1,3 +1,40 @@
+Icy 2.2.0.0 - 02/08/2021
+------------------------
+
+Application
+* Loader
+ - fixed images grouping (could group image of different type or dimension)
+* ROI
+ - added new 3D ROIs Rectangle3D, Cylinder3D and FlatPolygon3D which are Z extended version of ROI2DRectangle, ROI2DEllipse and ROI2DPolygon
+* VTK
+ - upgraded VTK / 3D visualization library to version 8.0.1
+ - upgraded JOAMP / JOGL library to vrsion 2.4.0-rc (fix osx crash with VTK)
+* general bug fixes
+* fixed high resolution support on OSX
+* fixed possible death locks on starting (happen only with certain OpenJDK and on Linux)
+* allow illegal-access with Java 16 or above
+* major rewrite of README file
+* added CODE-OF-CONDUCT and CONTRIBUTING
+* fixed links to LICENSE, CHANGELOG and README + tweaked About to redirect to the README.
+
+Developer
+* ROI
+ - added new 3D ROIs ROI3DRectangle, ROI3DCylinder and ROI3DFlatPolygon ROIs classes
+ - ROI3DStackEllipse, ROI3DStackRectangle and ROI3DStackPolygon are now deprecated
+ - added ROI2DShape getMinZ()/getMaxZ() methods for easier display evolution
+ - added base ROI3DZShape / ROI3DBoxShape abstract classes for easier 3D ROI implementation
+ - small fix to Polygon2D / Polyline2D and added getPoints() / setPoints(..) methods
+ - avoid throwing change event when not changed (bug touching ROIPolygon2D and ROIPolyline2D)
+ - replaced ROIUtil.convertToStack(roi) by ROIUtil.convertTo3D(roi) and updated ROIUtil.convertTo2D(..)
+ - fixed persistence (disabled Overlay persistence as ROI handle it by itself)
+* VTK
+ - lot of changes / fixes to make it work with new VTK 8.0 and also fix all issues on recent OSX
+* Overlay
+ - added base ZShape3D and BoxShape3D abstract classes.
+ - added new ZBoxAnchor3D, LineAnchor3D and RectAnchor3D classes to handle interaction with 3D objects / ROIs
+* cleanup
+
+
 Icy 2.1.4.0 - 15/04/2021
 ------------------------
 
