@@ -106,6 +106,25 @@ public class VtkJoglPanel extends GLJPanel
     {
         super(new GLCapabilities(GLProfile.getMaximum(true)));
 
+        final float scales[] = new float[2];
+
+        // check that requested pixel scale is ok (can be 0 on OSX)
+        getRequestedSurfaceScale(scales);
+        // scale = 0 ? --> set to 1
+        if ((scales[0] == 0f) || (scales[1] == 0f))
+        {
+            try
+            {
+                final float[] reqPixelScale = (float[]) ReflectionUtil.getFieldObject(this, "reqPixelScale", true);
+                reqPixelScale[0] = 1f;
+                reqPixelScale[1] = 1f;
+            }
+            catch (Exception e)
+            {
+                System.err.println("Couldn't patch GLJPanel.reqPixelScale[] field, GLJPanel may not work properly...");
+            }
+        }
+
         rw = new vtkGenericOpenGLRenderWindow();
 
         // init render window
@@ -180,7 +199,7 @@ public class VtkJoglPanel extends GLJPanel
         {
             // prevent any further rendering
             rendering = true;
-            
+
             rw.RemoveAllObservers();
             wi.RemoveAllObservers();
 
