@@ -287,18 +287,26 @@ public class Main
             setState("Updating : " + updateElementName,
                     (updateElements.indexOf(updateElement) * 60) / updateElements.size());
 
-            // update element
-            if (!Updater.udpateElement(updateElement, localElements))
+            try
             {
-                // an error happened --> take back current local elements
-                localElements = Updater.getLocalElements();
-                // remove the faulty element informations, this will force
-                // update next time.
-                Updater.clearElementInfos(updateElement, localElements);
-
-                // error while updating, no need to go further...
+                // update element
+                if (!Updater.udpateElement(updateElement, localElements))
+                {
+                    // an error happened --> take back current local elements
+                    localElements = Updater.getLocalElements();
+                    // remove the faulty element informations, this will force
+                    // update next time.
+                    Updater.clearElementInfos(updateElement, localElements);
+    
+                    // error while updating, no need to go further...
+                    result = false;
+                    break;
+                }
+            }
+            catch(InterruptedException exc)
+            {
+                System.err.println("Process interrupted !");
                 result = false;
-                break;
             }
         }
 

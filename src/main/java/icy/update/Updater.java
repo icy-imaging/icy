@@ -26,6 +26,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import icy.file.FileUtil;
+import icy.system.SystemUtil;
 import icy.update.ElementDescriptor.ElementFile;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
@@ -290,8 +291,10 @@ public class Updater
      * then modify local elements list according to changes made.
      * 
      * @return true if update succeed, false otherwise
+     * @throws InterruptedException
      */
     public static boolean udpateElement(ElementDescriptor updateElement, ArrayList<ElementDescriptor> localElements)
+            throws InterruptedException
     {
         // update all element files
         if (Updater.updateFiles(updateElement.getFiles()))
@@ -335,8 +338,10 @@ public class Updater
 
     /**
      * Update the specified files
+     * 
+     * @throws InterruptedException
      */
-    public static boolean updateFiles(ArrayList<ElementFile> files)
+    public static boolean updateFiles(ArrayList<ElementFile> files) throws InterruptedException
     {
         for (ElementFile file : files)
             // if update fails --> exit
@@ -348,8 +353,10 @@ public class Updater
 
     /**
      * Update the specified local file
+     * 
+     * @throws InterruptedException
      */
-    public static boolean updateFile(ElementFile file)
+    public static boolean updateFile(ElementFile file) throws InterruptedException
     {
         final String localPath = file.getLocalPath();
 
@@ -380,11 +387,31 @@ public class Updater
                     if (!dest.setWritable(true, false))
                         dest.setWritable(true, true);
 
+                // apply to sub files
+                if (file.isDirectory() && file.isExecutable())
+                {
+                    final String dirName = FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + localPath;
+
+                    // we need to sign library files on OSX Catalina or later otherwise we can get INVALID SIGNATURE crash on library loading
+                    if (SystemUtil.isMac())
+                    {
+                        for (String libFile : FileUtil.getFiles(dirName, "dylib", true, true))
+                            codeSign(libFile);
+                        for (String libFile : FileUtil.getFiles(dirName, "jnilib", true, true))
+                            codeSign(libFile);
+                    }
+                }
+
                 return true;
             }
         }
 
         return false;
+    }
+
+    public static boolean codeSign(String libFile) throws InterruptedException
+    {
+        return SystemUtil.exec("codesign --force --deep -s - " + FileUtil.getGenericPath(libFile)).waitFor() == 0;
     }
 
     /**
