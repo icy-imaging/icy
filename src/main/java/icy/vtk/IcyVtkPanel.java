@@ -33,13 +33,11 @@ import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkAxesActor;
 import vtk.vtkCamera;
-import vtk.vtkCaptionActor2D;
 import vtk.vtkCellPicker;
 import vtk.vtkLight;
 import vtk.vtkPicker;
 import vtk.vtkProp;
 import vtk.vtkRenderer;
-import vtk.vtkTextActor;
 
 /**
  * Icy custom VTK panel used for VTK rendering.
@@ -75,6 +73,9 @@ public class IcyVtkPanel extends VtkJoglPanel
 
         picker = new vtkCellPicker();
         picker.PickFromListOff();
+        // important to disable that one as it may cause crash on polydata picking where VTK wrongly assume texture data in some case (--> crash)
+        picker.PickTextureDataOff();
+        picker.UseVolumeGradientOpacityOff();
 
         // set ambient color to white
         lgt.SetAmbientColor(1d, 1d, 1d);
