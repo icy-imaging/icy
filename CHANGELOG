@@ -1,3 +1,9 @@
+Icy 2.2.1.0 - 09/09/2021
+------------------------
+
+Fixed possible crash when interacting with ROIs with 3D visualization (VTK).
+
+
 Icy 2.2.0.0 - 02/08/2021
 ------------------------
 
