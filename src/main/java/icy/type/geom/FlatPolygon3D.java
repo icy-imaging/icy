@@ -37,6 +37,12 @@ public class FlatPolygon3D extends ZShape3D
     }
 
     @Override
+    public Object clone()
+    {
+        return new FlatPolygon3D(polygon, z, sizeZ);
+    }
+
+    @Override
     public double getZ()
     {
         return z;

@@ -45,6 +45,12 @@ public class Cylinder3D extends BoxShape3D
     }
 
     @Override
+    public Object clone()
+    {
+        return new Cylinder3D(this);
+    }
+
+    @Override
     public double getX()
     {
         return ellipse.getX();

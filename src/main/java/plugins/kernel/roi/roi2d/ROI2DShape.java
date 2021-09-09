@@ -244,6 +244,8 @@ public abstract class ROI2DShape extends ROI2D implements Shape
 
             // use flat path
             final PathIterator path = getPathIterator(null, 0.5d);
+            // better to get 2D bounds right after
+            final Rectangle2D bounds = getBounds2D();
 
             // build point data
             while (!path.isDone())
@@ -300,29 +302,28 @@ public abstract class ROI2DShape extends ROI2D implements Shape
             ind = 0;
             for (double[] pt3D : point3DList)
                 vertices[ind++] = pt3D;
-
             ind = 0;
             for (int[] poly : polyList)
                 indexes[ind++] = poly;
 
-            final vtkCellArray previousCells = vCells;
             final vtkPoints previousPoints = vPoints;
-            vCells = VtkUtil.getCells(polyList.size(), VtkUtil.prepareCells(indexes));
-            vPoints = VtkUtil.getPoints(vertices);
-
-            final Rectangle2D bounds = getBounds2D();
+            final vtkCellArray previousCells = vCells;
+            final vtkPoints newPoints = VtkUtil.getPoints(vertices);
+            final vtkCellArray newCells = VtkUtil.getCells(polyList.size(), VtkUtil.prepareCells(indexes));
 
             // actor can be accessed in canvas3d for rendering so we need to synchronize access
             vtkPanel.lock();
             try
             {
+                vPoints = newPoints;
+                vCells = newCells;
                 // update outline data
                 VtkUtil.setOutlineBounds(outline, bounds.getMinX() * xs, bounds.getMaxX() * xs, bounds.getMinY() * ys,
                         bounds.getMaxY() * ys, z0, z1, canvas);
                 outlineMapper.Update();
                 // update polygon data from cell and points
-                polyData.SetPolys(vCells);
                 polyData.SetPoints(vPoints);
+                polyData.SetPolys(vCells);
                 polyMapper.Update();
 
                 // release previous allocated VTK objects

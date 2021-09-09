@@ -538,8 +538,11 @@ public abstract class ROI3DZShape extends ROI3DShape
     @Override
     public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, boolean inclusive)
     {
+        // better to clone to avoid changes in-between
+        final ZShape3D zShape = (ZShape3D) getZShape().clone();
+
         // require full z contains ?
-        if ((inclusive && getZShape().containsZ(z, 1d)) || getZShape().containsZ(z))
+        if ((inclusive && zShape.containsZ(z, 1d)) || zShape.containsZ(z))
             return shape2DROI.getBooleanMask(x, y, width, height, inclusive);
 
         return new boolean[width * height];
@@ -548,8 +551,11 @@ public abstract class ROI3DZShape extends ROI3DShape
     @Override
     public BooleanMask2D getBooleanMask2D(int z, boolean inclusive)
     {
+        // better to clone to avoid changes in-between
+        final ZShape3D zShape = (ZShape3D) getZShape().clone();
+
         // require full z contains ?
-        if ((inclusive && getZShape().containsZ(z, 1d)) || getZShape().containsZ(z))
+        if ((inclusive && zShape.containsZ(z, 1d)) || zShape.containsZ(z))
             return shape2DROI.getBooleanMask(inclusive);
 
         return new BooleanMask2D(new Rectangle(), new boolean[0]);
@@ -673,9 +679,14 @@ public abstract class ROI3DZShape extends ROI3DShape
             final List<int[]> polyList = new ArrayList<int[]>();
             final double[] coords = new double[6];
 
+            // better to clone to avoid changes in-between
+            final ZShape3D zShape = (ZShape3D) getZShape().clone();
+            // immediately get 3D bounds
+            final Rectangle3D bounds = getBounds3D();
+
             // starting position
-            final double z0 = getZShape().getMinZ() * zs;
-            final double z1 = getZShape().getMaxZ() * zs;
+            final double z0 = zShape.getMinZ() * zs;
+            final double z1 = zShape.getMaxZ() * zs;
             double xm = 0d;
             double ym = 0d;
             double x0 = 0d;
@@ -685,7 +696,7 @@ public abstract class ROI3DZShape extends ROI3DShape
             int ind;
 
             // use flat path
-            final PathIterator path = getZShape().get2DPathIterator(null, 0.5d);
+            final PathIterator path = zShape.get2DPathIterator(null, 0.5d);
 
             // build point data
             while (!path.isDone())
@@ -742,36 +753,35 @@ public abstract class ROI3DZShape extends ROI3DShape
             ind = 0;
             for (double[] pt3D : point3DList)
                 vertices[ind++] = pt3D;
-
             ind = 0;
             for (int[] poly : polyList)
                 indexes[ind++] = poly;
 
-            final vtkCellArray previousCells = vCells;
             final vtkPoints previousPoints = vPoints;
-            vCells = VtkUtil.getCells(polyList.size(), VtkUtil.prepareCells(indexes));
-            vPoints = VtkUtil.getPoints(vertices);
-
-            final Rectangle3D bounds = getBounds3D();
+            final vtkCellArray previousCells = vCells;
+            final vtkPoints newPoints = VtkUtil.getPoints(vertices);
+            final vtkCellArray newCells = VtkUtil.getCells(polyList.size(), VtkUtil.prepareCells(indexes));
 
             // actor can be accessed in canvas3d for rendering so we need to synchronize access
             vtkPanel.lock();
             try
             {
+                vPoints = newPoints;
+                vCells = newCells;
                 // update outline data
                 VtkUtil.setOutlineBounds(outline, bounds.getMinX() * xs, bounds.getMaxX() * xs, bounds.getMinY() * ys,
                         bounds.getMaxY() * ys, z0, z1, canvas);
                 outlineMapper.Update();
                 // update polygon data from cell and points
-                polyData.SetPolys(vCells);
                 polyData.SetPoints(vPoints);
+                polyData.SetPolys(vCells);
                 polyMapper.Update();
 
                 // release previous allocated VTK objects
-                if (previousCells != null)
-                    previousCells.Delete();
                 if (previousPoints != null)
                     previousPoints.Delete();
+                if (previousCells != null)
+                    previousCells.Delete();
             }
             finally
             {
@@ -799,11 +809,11 @@ public abstract class ROI3DZShape extends ROI3DShape
         public void setColor(Color value)
         {
             super.setColor(value);
-            
+
             // so we can distinguish them
             closeZ.setColor(ColorUtil.mix(ColorUtil.mix(value, Color.lightGray), Color.lightGray));
             farZ.setColor(ColorUtil.mix(ColorUtil.mix(value, Color.lightGray), Color.lightGray));
-            
+
             getShape2DROIOverlay().setColor(value);
         }
 

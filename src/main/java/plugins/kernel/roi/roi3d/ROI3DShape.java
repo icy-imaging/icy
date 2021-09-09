@@ -230,10 +230,11 @@ public class ROI3DShape extends ROI3D implements Shape3D
                 }
             }
 
-            final vtkCellArray previousCells = vCells;
             final vtkPoints previousPoints = vPoints;
-            vCells = VtkUtil.getCells(1, indexes);
+            final vtkCellArray previousCells = vCells;
             vPoints = VtkUtil.getPoints(vertices);
+            // single cell by default (simple line draw)
+            vCells = VtkUtil.getCells(1, indexes);
 
             // get bounds
             final Rectangle3D bounds = getBounds3D();
@@ -252,10 +253,10 @@ public class ROI3DShape extends ROI3D implements Shape3D
                 polyMapper.Update();
 
                 // release previous allocated VTK objects
-                if (previousCells != null)
-                    previousCells.Delete();
                 if (previousPoints != null)
                     previousPoints.Delete();
+                if (previousCells != null)
+                    previousCells.Delete();
             }
             finally
             {

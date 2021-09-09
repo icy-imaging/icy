@@ -11,7 +11,6 @@ import icy.type.geom.Cylinder3D;
 import icy.type.point.Point3D;
 import icy.type.point.Point5D;
 import icy.type.rectangle.Rectangle3D;
-import plugins.kernel.canvas.VtkCanvas;
 import plugins.kernel.roi.roi2d.ROI2DEllipse;
 
 /**

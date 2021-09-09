@@ -2243,7 +2243,8 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             setMousePos(e.getPoint());
 
             // get picked object (mouse move/drag event)
-            pickedObject = pick(e.getX(), e.getY());
+            // not really important on drag event after all..
+//            pickedObject = pick(e.getX(), e.getY());
 
             // send mouse event to overlays
             VtkCanvas.this.mouseDrag(e, getMouseImagePos5D());
@@ -2455,6 +2456,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
 
                 invokeOnEDT(new Runnable()
                 {
+
                     @Override
                     public void run()
                     {
@@ -2466,6 +2468,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             }
             else if (StringUtil.equals(name, VtkSettingPanel.PROPERTY_SPECULAR))
             {
+
                 final double d = ((Double) value).doubleValue();
 
                 invokeOnEDT(new Runnable()
@@ -2480,6 +2483,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                 preferences.putDouble(ID_SPECULAR, d);
             }
             else if (StringUtil.equals(name, VtkSettingPanel.PROPERTY_BG_COLOR))
+
             {
                 final Color color = (Color) value;
 
@@ -2756,7 +2760,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         {
             synchronized (propToAdd)
             {
-                propToAdd.add(prop);
+                synchronized (propToRemove)
+                {
+                    propToAdd.add(prop);
+                    propToRemove.remove(prop);
+                }
             }
         }
 
@@ -2764,7 +2772,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         {
             synchronized (propToRemove)
             {
-                propToRemove.add(prop);
+                synchronized (propToAdd)
+                {
+                    propToRemove.add(prop);
+                    propToAdd.remove(prop);
+                }
             }
         }
 
@@ -2772,7 +2784,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         {
             synchronized (propToAdd)
             {
-                propToAdd.addAll(props);
+                synchronized (propToRemove)
+                {
+                    propToAdd.addAll(props);
+                    propToRemove.removeAll(props);
+                }
             }
         }
 
@@ -2780,7 +2796,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         {
             synchronized (propToRemove)
             {
-                propToRemove.addAll(props);
+                synchronized (propToAdd)
+                {
+                    propToRemove.addAll(props);
+                    propToAdd.removeAll(props);
+                }
             }
         }
 
@@ -2788,17 +2808,29 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         {
             synchronized (propToAdd)
             {
-                for (vtkProp prop : props)
-                    propToAdd.add(prop);
+                synchronized (propToRemove)
+                {
+                    for (vtkProp prop : props)
+                    {
+                        propToAdd.add(prop);
+                        propToRemove.remove(prop);
+                    }
+                }
             }
         }
 
         public void removeProps(vtkProp[] props)
         {
-            synchronized (propToAdd)
+            synchronized (propToRemove)
             {
-                for (vtkProp prop : props)
-                    propToRemove.add(prop);
+                synchronized (propToAdd)
+                {
+                    for (vtkProp prop : props)
+                    {
+                        propToRemove.add(prop);
+                        propToAdd.remove(prop);
+                    }
+                }
             }
         }
 
@@ -2807,7 +2839,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         {
             while (!isInterrupted())
             {
-                while (!isInterrupted() && !propToAdd.isEmpty())
+                if (!propToAdd.isEmpty())
                 {
                     invokeOnEDTSilent(new Runnable()
                     {
@@ -2823,17 +2855,30 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                                 // add actor by packet of 1000
                                 while (!propToAdd.isEmpty() && (done++ < 1000))
                                 {
-                                    final vtkProp prop = propToAdd.removeFirst();
+                                    final vtkProp prop;
+
+                                    synchronized (propToAdd)
+                                    {
+                                        prop = propToAdd.removeFirst();
+                                    }
 
                                     // actor not yet present in renderer ?
-                                    if (r.HasViewProp(prop) == 0)
+                                    if ((prop != null) && (r.HasViewProp(prop) == 0))
                                     {
                                         // refresh camera property for this specific kind of actor
                                         if (prop instanceof vtkCubeAxesActor)
                                             ((vtkCubeAxesActor) prop).SetCamera(cam);
 
-                                        // add the actor to the renderer
-                                        r.AddViewProp(prop);
+                                        getVtkPanel().lock();
+                                        try
+                                        {
+                                            // add the actor to the renderer
+                                            r.AddViewProp(prop);
+                                        }
+                                        finally
+                                        {
+                                            getVtkPanel().unlock();
+                                        }
                                     }
                                 }
                             }
@@ -2846,10 +2891,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                     refresh();
                 }
 
-                while (!isInterrupted() && !propToRemove.isEmpty())
+                if (!propToRemove.isEmpty())
                 {
                     invokeOnEDTSilent(new Runnable()
                     {
+
                         @Override
                         public void run()
                         {
@@ -2861,7 +2907,27 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                             {
                                 // remove actors from renderer by packet of 1000
                                 while (!propToRemove.isEmpty() && (done++ < 1000))
-                                    r.RemoveViewProp(propToRemove.removeFirst());
+                                {
+                                    final vtkProp prop;
+
+                                    synchronized (propToRemove)
+                                    {
+                                        prop = propToRemove.removeFirst();
+                                    }
+
+                                    if (prop != null)
+                                    {
+                                        getVtkPanel().lock();
+                                        try
+                                        {
+                                            r.RemoveViewProp(prop);
+                                        }
+                                        finally
+                                        {
+                                            getVtkPanel().unlock();
+                                        }
+                                    }
+                                }
                             }
                         }
                     });
@@ -2875,10 +2941,6 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                 // sleep a bit
                 ThreadUtil.sleep(1);
             }
-
-            // help GC
-            propToAdd.clear();
-            propToRemove.clear();
         }
     }
 }

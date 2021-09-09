@@ -835,20 +835,6 @@ public abstract class Rectangle3D extends BoxShape3D implements Shape3D, Cloneab
         return (((int) bits) ^ ((int) (bits >> 32)));
     }
 
-    /**
-     * Creates a new object of the same class as this object.
-     * 
-     * @return a clone of this instance.
-     * @exception OutOfMemoryError
-     *            if there is not enough memory.
-     * @see Cloneable
-     */
-    @Override
-    public Object clone()
-    {
-        return super.clone();
-    }
-
     @Override
     public String toString()
     {
@@ -886,6 +872,12 @@ public abstract class Rectangle3D extends BoxShape3D implements Shape3D, Cloneab
         public Double()
         {
             this(0, 0, 0, 0, 0, 0);
+        }
+
+        @Override
+        public Object clone()
+        {
+            return new Rectangle3D.Double(this);
         }
 
         @Override
@@ -1053,6 +1045,12 @@ public abstract class Rectangle3D extends BoxShape3D implements Shape3D, Cloneab
         public Float()
         {
             this(0, 0, 0, 0, 0, 0);
+        }
+
+        @Override
+        public Object clone()
+        {
+            return new Rectangle3D.Float(this);
         }
 
         @Override
@@ -1254,6 +1252,12 @@ public abstract class Rectangle3D extends BoxShape3D implements Shape3D, Cloneab
         public Integer()
         {
             this(0, 0, 0, 0, 0, 0);
+        }
+
+        @Override
+        public Object clone()
+        {
+            return new Rectangle3D.Integer(this);
         }
 
         /**

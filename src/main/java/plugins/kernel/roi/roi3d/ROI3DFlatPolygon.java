@@ -276,34 +276,26 @@ public class ROI3DFlatPolygon extends ROI3DZShape
     @Override
     protected void updateShapeInternal()
     {
-        beginUpdate();
-        try
+        // will update Z coordinates
+        super.updateShapeInternal();
+        // then update polygon
+        getPolygon3D().setPoints(getPoints2D());
+        // cached properties need to be recomputed
+        boundsInvalid = true;
+
+        // update Z control points XY positions
+        final Rectangle3D bounds = getBounds3D();
+
+        closeZ.setX(bounds.getCenterX());
+        closeZ.setY(bounds.getCenterY());
+        farZ.setX(bounds.getCenterX());
+        farZ.setY(bounds.getCenterY());
+
+        synchronized (controlPoints)
         {
-            // will update Z coordinates
-            super.updateShapeInternal();
-            // then update polygon
-            getPolygon3D().setPoints(getPoints2D());
-            // cached properties need to be recomputed
-            boundsInvalid = true;
-
-            // update Z control points XY positions
-            final Rectangle3D bounds = getBounds3D();
-
-            closeZ.setX(bounds.getCenterX());
-            closeZ.setY(bounds.getCenterY());
-            farZ.setX(bounds.getCenterX());
-            farZ.setY(bounds.getCenterY());
-
-            synchronized (controlPoints)
-            {
-                // update Z position of others points
-                for (int i = 2; i < controlPoints.size(); i++)
-                    controlPoints.get(i).setZ(bounds.getCenterZ());
-            }
-        }
-        finally
-        {
-            endUpdate();
+            // update Z position of others points
+            for (int i = 2; i < controlPoints.size(); i++)
+                controlPoints.get(i).setZ(bounds.getCenterZ());
         }
     }
 
