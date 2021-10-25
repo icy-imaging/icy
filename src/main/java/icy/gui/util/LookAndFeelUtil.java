@@ -140,6 +140,17 @@ public class LookAndFeelUtil
         // UIManager.put(SubstanceLookAndFeel.USE_THEMED_DEFAULT_ICONS, Boolean.TRUE);
         // UIManager.put(SubstanceLookAndFeel.SHOW_EXTRA_WIDGETS, Boolean.TRUE);
         // UIManager.put(SubstanceLookAndFeel.WATERMARK_VISIBLE, Boolean.TRUE);
+        // UIManager.put(SubstanceLookAndFeel.COLORIZATION_FACTOR, new Double(0.4));
+        // UIManager.put(SubstanceLookAndFeel.MENU_GUTTER_FILL_KIND, MenuGutterFillKind.HARD);
+        // UIManager.put(SubstanceLookAndFeel.SCROLL_PANE_BUTTONS_POLICY, ScrollPaneButtonPolicyKind.OPPOSITE);
+        // UIManager.put(SubstanceLookAndFeel.TABBED_PANE_ROTATE_SIDE_TABS, Boolean.FALSE);
+        // UIManager.put(SubstanceLookAndFeel.WINDOW_ROUNDED_CORNERS, Boolean.FALSE);
+        // UIManager.put(SubstanceLookAndFeel.WINDOW_ROUNDED_CORNERS_PROPERTY, Boolean.FALSE);
+        // UIManager.put(SubstanceLookAndFeel.WINDOW_AUTO_DEACTIVATE, Boolean.TRUE);
+        // // JButton button = new JButton("text");
+        // // button.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.TRUE);
+        // UIManager.put(SubstanceLookAndFeel.CORNER_RADIUS, new Float(1));
+        // UIManager.put(SubstanceLookAndFeel.BUTTON_PAINT_NEVER_PROPERTY, Boolean.TRUE);
 
         // SubstanceLookAndFeel.setWidgetVisible(null, true, SubstanceWidgetType.MENU_SEARCH);
         // SubstanceLookAndFeel.setWidgetVisible(null, false,
