@@ -329,6 +329,7 @@ public class SequenceOperationActions
                     "Enable/Disable virtual mode (data streaming) for this sequence");
 
             setSelected(selected);
+            setBgProcess(true);
         }
 
         public ToggleVirtualSequenceAction()
