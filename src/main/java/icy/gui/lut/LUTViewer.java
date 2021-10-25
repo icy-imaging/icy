@@ -307,11 +307,13 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
         scaleGroup.add(logButton);
         scaleGroup.add(linearButton);
 
-        // default
+        // restore view mode
         if (pref.getBoolean(ID_LOG_VIEW, true))
             logButton.setSelected(true);
         else
             linearButton.setSelected(true);
+        // force apply selected mode (no event dispatched on setSelected)
+        scaleTypeChanged(logButton.isSelected());
 
         exportXLSButton = new IcyButton(new IcyIcon(ResourceUtil.ICON_XLS_EXPORT, 18));
         exportXLSButton.setFlat(true);
