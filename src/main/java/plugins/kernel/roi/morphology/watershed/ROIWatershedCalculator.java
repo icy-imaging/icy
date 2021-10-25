@@ -514,45 +514,63 @@ public class ROIWatershedCalculator implements Callable<Void>
         if (labelSequence.getSizeZ() == 1)
         {
             Map<Integer, ROI2DArea> rois = new HashMap<>();
-            for (LabeledPixel pixel : labeledPixels.get(frame))
+            try
             {
-                ROI2DArea labelRoi = rois.get(pixel.getLabel());
-                if (labelRoi == null)
+                for (LabeledPixel pixel : labeledPixels.get(frame))
                 {
-                    labelRoi = new ROI2DArea();
-                    labelRoi.setName("" + pixel.getLabel());
-                    int r, g, b;
-                    r = Random.nextInt(256);
-                    g = Random.nextInt(256);
-                    b = (765 - r - g) % 256;
-                    labelRoi.setColor(new Color(r, g, b));
-                    rois.put(pixel.getLabel(), labelRoi);
-                }
+                    ROI2DArea labelRoi = rois.get(pixel.getLabel());
+                    if (labelRoi == null)
+                    {
+                        labelRoi = new ROI2DArea();
+                        labelRoi.setName("" + pixel.getLabel());
+                        int r, g, b;
+                        r = Random.nextInt(256);
+                        g = Random.nextInt(256);
+                        b = (765 - r - g) % 256;
+                        labelRoi.setColor(new Color(r, g, b));
+                        labelRoi.beginUpdate();
+                        rois.put(pixel.getLabel(), labelRoi);
+                    }
 
-                labelRoi.addPoint(pixel.getPosition().x, pixel.getPosition().y);
+                    labelRoi.addPoint(pixel.getPosition().x, pixel.getPosition().y);
+                }
+            }
+            finally
+            {
+                for (ROI2DArea roi : rois.values())
+                    roi.endUpdate();
             }
             frameRois.addAll(rois.values());
         }
         else
         {
             Map<Integer, ROI3DArea> rois = new HashMap<>();
-            for (LabeledPixel pixel : labeledPixels.get(frame))
+            try
             {
-                ROI3DArea labelRoi = rois.get(pixel.getLabel());
-                if (labelRoi == null)
+                for (LabeledPixel pixel : labeledPixels.get(frame))
                 {
-                    labelRoi = new ROI3DArea(new icy.type.point.Point3D.Integer(pixel.getPosition().x,
-                            pixel.getPosition().y, pixel.getPosition().z));
-                    labelRoi.setName("" + pixel.getLabel());
-                    int r, g, b;
-                    r = Random.nextInt(256);
-                    g = Random.nextInt(256);
-                    b = (765 - r - g) % 256;
-                    labelRoi.setColor(new Color(r, g, b));
-                    rois.put(pixel.getLabel(), labelRoi);
-                }
+                    ROI3DArea labelRoi = rois.get(pixel.getLabel());
+                    if (labelRoi == null)
+                    {
+                        labelRoi = new ROI3DArea(new icy.type.point.Point3D.Integer(pixel.getPosition().x,
+                                pixel.getPosition().y, pixel.getPosition().z));
+                        labelRoi.setName("" + pixel.getLabel());
+                        int r, g, b;
+                        r = Random.nextInt(256);
+                        g = Random.nextInt(256);
+                        b = (765 - r - g) % 256;
+                        labelRoi.setColor(new Color(r, g, b));
+                        labelRoi.beginUpdate();
+                        rois.put(pixel.getLabel(), labelRoi);
+                    }
 
-                labelRoi.addPoint(pixel.getPosition().x, pixel.getPosition().y, pixel.getPosition().z);
+                    labelRoi.addPoint(pixel.getPosition().x, pixel.getPosition().y, pixel.getPosition().z);
+                }
+            }
+            finally
+            {
+                for (ROI3DArea roi : rois.values())
+                    roi.endUpdate();
             }
             frameRois.addAll(rois.values());
         }
