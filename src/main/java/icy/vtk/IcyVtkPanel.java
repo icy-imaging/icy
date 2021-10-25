@@ -18,6 +18,7 @@
  */
 package icy.vtk;
 
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -29,6 +30,7 @@ import java.awt.event.MouseWheelListener;
 import icy.preferences.CanvasPreferences;
 import icy.system.thread.ThreadUtil;
 import icy.util.EventUtil;
+import icy.util.StringUtil;
 import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkAxesActor;
@@ -52,30 +54,47 @@ public class IcyVtkPanel extends VtkJoglPanel
      */
     private static final long serialVersionUID = -8455671369400627703L;
 
+    private static enum SlicerPickState
+    {
+        PICK_NONE, PICK_VECTOR, PICK_PLANE
+    }
+
     protected Thread renderingMonitor;
-    // protected vtkPropPicker picker;
     protected vtkCellPicker picker;
+
+    // axis
     protected vtkAxesActor axis;
     protected vtkRenderer axisRenderer;
     protected vtkCamera axisCam;
     protected int axisOffset[];
     protected double axisScale;
+
+    // plane slicer
+    private final VtkArrowObject arrowClip;
+    private final VtkPlaneObject planeClip;
+    private vtkRenderer slicerRenderer;
+    private vtkCamera slicerCam;
+    private SlicerPickState slicerPickState;
+    protected int slicerOffset[];
+    protected double slicerScale;
+
     protected boolean lightFollowCamera;
     protected volatile long fineRenderingTime;
+
+    // picked object
+    protected vtkProp pickedObject;
 
     public IcyVtkPanel()
     {
         super();
-
-        // picker
-        // picker = new vtkPropPicker();
-        // picker.PickFromListOff();
 
         picker = new vtkCellPicker();
         picker.PickFromListOff();
         // important to disable that one as it may cause crash on polydata picking where VTK wrongly assume texture data in some case (--> crash)
         picker.PickTextureDataOff();
         picker.UseVolumeGradientOpacityOff();
+
+        pickedObject = null;
 
         // set ambient color to white
         lgt.SetAmbientColor(1d, 1d, 1d);
@@ -84,18 +103,25 @@ public class IcyVtkPanel extends VtkJoglPanel
         // assign default renderer to layer 0 (should be the case by default)
         ren.SetLayer(0);
 
-        // initialize axis
+        // initialize axis renderer
         axisRenderer = new vtkRenderer();
         // BUG: with OpenGL window the global render window viewport is limited to the last layer viewport dimension
         // axisRenderer.SetViewport(0.0, 0.0, 0.2, 0.2);
         axisRenderer.SetLayer(1);
         axisRenderer.InteractiveOff();
 
+        // initialize slicer renderer
+        slicerRenderer = new vtkRenderer();
+        // use current number of layer as layer index
+        slicerRenderer.SetLayer(2);
+        slicerRenderer.InteractiveOff();
+
+        // add axis and slicer renderers
         rw.AddRenderer(axisRenderer);
-        rw.SetNumberOfLayers(2);
+        rw.AddRenderer(slicerRenderer);
+        rw.SetNumberOfLayers(3);
 
-        axisCam = axisRenderer.GetActiveCamera();
-
+        // initialize axis actor
         axis = new vtkAxesActor();
         // fix caption scaling (we need that since VTK 7)
         axis.GetXAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone();
@@ -103,16 +129,53 @@ public class IcyVtkPanel extends VtkJoglPanel
         axis.GetZAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone();
         axisRenderer.AddActor(axis);
 
-        // default axis offset and scale
-        axisOffset = new int[] {124, 124};
-        axisScale = 1;
-
-        // reset camera
+        // init axis camera
+        axisCam = axisRenderer.GetActiveCamera();
         axisCam.SetViewUp(0, -1, 0);
-        axisCam.Elevation(210);
+        axisCam.Elevation(195);
         axisCam.SetParallelProjection(1);
         axisRenderer.ResetCamera();
         axisRenderer.ResetCameraClippingRange();
+
+        // default axis offset and scale
+        axisOffset = new int[] {124, 124};
+        axisScale = 1d;
+
+        // initialize slicer actors
+        arrowClip = new VtkArrowObject();
+        // bring 1,0,0 arrow orientation to 0,-1,0
+        arrowClip.getActor().SetOrientation(0d, 0d, -90d);
+        // set position to Y=0.5 so arrow cover Y range from -0.5 to 0.5
+        arrowClip.getActor().SetPosition(0d, 0.5d, 0d);
+        arrowClip.setColor(Color.green);
+        planeClip = new VtkPlaneObject();
+        planeClip.setNormal(0, -1, 0);
+        planeClip.setColor(Color.white);
+        planeClip.setEdgeColor(Color.darkGray);
+        planeClip.setEdgeVisibile(false);
+        planeClip.setWireframeMode();
+        planeClip.getActor().GetProperty().SetAmbient(0.8d);
+        planeClip.getActor().GetProperty().SetDiffuse(0.2d);
+        planeClip.getActor().GetProperty().SetLineWidth(2d);
+        slicerRenderer.AddActor(arrowClip.getActor());
+        slicerRenderer.AddActor(planeClip.getActor());
+        // not visible by default
+        arrowClip.getActor().SetVisibility(0);
+        planeClip.getActor().SetVisibility(0);
+
+        // init slicer camera
+        slicerCam = slicerRenderer.GetActiveCamera();
+        slicerCam.SetViewUp(0, -1, 0);
+        slicerCam.Elevation(170);
+        slicerCam.SetParallelProjection(1);
+        slicerRenderer.ResetCamera();
+        slicerRenderer.ResetCameraClippingRange();
+
+        // default slicer properties
+        slicerPickState = SlicerPickState.PICK_NONE;
+        // from right border
+        slicerOffset = new int[] {124, 124};
+        slicerScale = 1d;
 
         // used for restore quality rendering after a given amount of time
         fineRenderingTime = 0;
@@ -138,6 +201,17 @@ public class IcyVtkPanel extends VtkJoglPanel
         try
         {
             // release VTK objects
+            arrowClip.release();
+            planeClip.release();
+            slicerCam.Delete();
+            slicerRenderer.Delete();
+            axisCam.Delete();
+            axis.Delete();
+            axisRenderer.Delete();
+            picker.Delete();
+
+            slicerCam = null;
+            slicerRenderer = null;
             axisCam = null;
             axis = null;
             axisRenderer = null;
@@ -170,6 +244,7 @@ public class IcyVtkPanel extends VtkJoglPanel
         super.sizeChanged();
 
         updateAxisView();
+        updateSlicerView();
     }
 
     /**
@@ -178,6 +253,16 @@ public class IcyVtkPanel extends VtkJoglPanel
     public vtkPicker getPicker()
     {
         return picker;
+    }
+
+    /**
+     * Returns the picked object on the last mouse move event (can be <code>null</code> if no object was picked).
+     * 
+     * @see #pick(int, int)
+     */
+    public vtkProp getPickedObject()
+    {
+        return pickedObject;
     }
 
     /**
@@ -226,7 +311,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     /**
-     * Return true if the axis orientation display is enabled
+     * Enable/Disable the axis orientation display
      */
     public void setAxisOrientationDisplayEnable(boolean value)
     {
@@ -244,12 +329,34 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     /**
-     * Returns the scale factor (default = 1) for the axis orientation display
+     * Set the scale factor (default = 1) for the axis orientation display
      */
     public void setAxisOrientationDisplayScale(double value)
     {
         axisScale = value;
         updateAxisView();
+    }
+
+    /**
+     * Return true if the slicer is enable
+     */
+    public boolean isSlicerEnable()
+    {
+        return (arrowClip.getActor().GetVisibility() != 0) ? true : false;
+    }
+
+    /**
+     * Enable/Disable the slicer
+     */
+    public void setSlicerEnable(boolean value)
+    {
+        arrowClip.getActor().SetVisibility(value ? 1 : 0);
+        planeClip.getActor().SetVisibility(value ? 1 : 0);
+
+        updateSlicerView();
+
+        // call this when plane clip changed
+        planeClipChanged();
     }
 
     /**
@@ -264,12 +371,12 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Pick object at specified position and return it.
      */
-    public vtkProp pick(int x, int y)
+    public vtkProp pick(int x, int y, vtkRenderer renderer)
     {
         lock();
         try
         {
-            picker.Pick(x, rw.GetSize()[1] - y, 0, ren);
+            picker.Pick(x, rw.GetSize()[1] - y, 0, renderer);
         }
         finally
         {
@@ -277,6 +384,14 @@ public class IcyVtkPanel extends VtkJoglPanel
         }
 
         return picker.GetViewProp();
+    }
+
+    /**
+     * Pick object at specified position and return it.
+     */
+    public vtkProp pick(int x, int y)
+    {
+        return pick(x, y, ren);
     }
 
     /**
@@ -396,6 +511,8 @@ public class IcyVtkPanel extends VtkJoglPanel
         // adjust light position
         if (getLightFollowCamera())
             setLightToCameraPosition(lgt, cam);
+        // rotate slicer view identically
+        // rotateSlicerView(dx, dy);
         // update axis camera
         updateAxisView();
     }
@@ -409,6 +526,23 @@ public class IcyVtkPanel extends VtkJoglPanel
         zoomView(cam, ren, factor);
         // update axis camera
         updateAxisView();
+    }
+
+    /**
+     * Rotate slicer camera view
+     */
+    public void rotateSlicerView(int dx, int dy)
+    {
+        // reset slicer camera before doing interaction
+        slicerRenderer.ResetCamera();
+        slicerRenderer.ResetCameraClippingRange();
+        // rotate slicer view identically
+        rotateView(slicerCam, slicerRenderer, dx, dy);
+        // update slicer camera
+        updateSlicerView();
+
+        // volume plane clip changed
+        planeClipChanged();
     }
 
     /**
@@ -502,6 +636,125 @@ public class IcyVtkPanel extends VtkJoglPanel
             setFineRendering();
     }
 
+    public boolean isSlicerPicked()
+    {
+        return slicerPickState != SlicerPickState.PICK_NONE;
+    }
+
+    protected boolean slicerPick(MouseEvent e)
+    {
+        final SlicerPickState oldPickState = slicerPickState;
+        final int[] size = rw.GetSize();
+        final int w = size[0];
+        final int h = size[1];
+        final int x = e.getX();
+        final int y = e.getY();
+
+        // are we on the volume slicer area ?
+        if ((x > (w * (1d - (0.25d * ((double) h / (double) w))))) && (y > (h * (1d - 0.25d))))
+        {
+            // slicer plane picked ?
+            if (pick(x, y, slicerRenderer) == planeClip.getActor())
+                slicerPickState = SlicerPickState.PICK_PLANE;
+            else
+                slicerPickState = SlicerPickState.PICK_VECTOR;
+
+            // consume on slicer pick so we prevent interaction with objects located under slicer
+            e.consume();
+        }
+        else
+            slicerPickState = SlicerPickState.PICK_NONE;
+
+        if (slicerPickState == SlicerPickState.PICK_PLANE)
+        {
+            planeClip.setColor(Color.white);
+            planeClip.setSurfaceMode();
+            planeClip.setEdgeVisibile(true);
+        }
+        else
+        {
+            planeClip.setColor(Color.gray);
+            planeClip.setWireframeMode();
+            planeClip.setEdgeVisibile(false);
+        }
+
+        if (slicerPickState == SlicerPickState.PICK_VECTOR)
+            arrowClip.setColor(Color.white);
+        else
+            arrowClip.setColor(Color.green);
+
+        // pick state changed
+        return oldPickState != slicerPickState;
+    }
+
+    protected void translateSlicerPlane(int deltaX, int deltaY)
+    {
+        final double[] pos = planeClip.getActor().GetPosition();
+        final double delta;
+
+        // adjust delta depending camera rotation
+        if (Math.abs(deltaX) > Math.abs(deltaY))
+        {
+            if (slicerCam.GetOrientation()[2] < 0)
+                delta = -deltaX;
+            else
+                delta = deltaX;
+        }
+        else
+        {
+            if (Math.abs(slicerCam.GetOrientation()[2]) > 90)
+                delta = -deltaY;
+            else
+                delta = deltaY;
+        }
+
+        pos[1] += delta / 100d;
+        // we shifted from -0.1
+        if (pos[1] > 0.7d)
+            pos[1] = 0.7d;
+        else if (pos[1] < -0.7d)
+            pos[1] = -0.7d;
+
+        planeClip.getActor().SetPosition(pos);
+
+        // volume plane clip changed
+        planeClipChanged();
+    }
+
+    protected void planeClipChanged()
+    {
+        // override it
+    }
+
+    /**
+     * @return clip plane normal
+     */
+    public double[] getClipNormal()
+    {
+        // transform arrow vector
+        final double result[] = slicerCam.GetModelViewTransformObject().TransformDoubleVector(0d, -1d, 0d);
+
+        // invert X/Z axis (not sure why this is needed)
+        result[1] = -result[1];
+        result[2] = -result[2];
+
+        // System.out.println("norm=" + StringUtil.toString(result[0], 3) + "," + StringUtil.toString(result[1], 3) + ","
+        // + StringUtil.toString(result[2], 3));
+
+        return result;
+    }
+
+    /**
+     * @return Z clip position in [-0.5..0.5] range
+     */
+    public double getClipPosition()
+    {
+//        System.out.println("pos=" + StringUtil.toString(planeClip.getActor().GetPosition()[1], 3));
+
+        // use plane actor Y position
+        return planeClip.getActor().GetPosition()[1];
+    }
+
     /**
      * Update axis display depending the current scene camera view.<br>
      * You should call it after having modified camera settings.
@@ -533,6 +786,37 @@ public class IcyVtkPanel extends VtkJoglPanel
             // zoom and translate
             zoomView(axisCam, axisRenderer, axisScale * (axisCam.GetDistance() / 17d));
             translateView(axisCam, axisRenderer, -w, -h);
+        }
+        finally
+        {
+            unlock();
+        }
+    }
+
+    /**
+     * Update slicer display (call after any camera reset / change)
+     */
+    public void updateSlicerView()
+    {
+        if (!isWindowSet())
+            return;
+
+        lock();
+        try
+        {
+            final int[] size = rw.GetSize();
+            // adjust scale
+            final double scale = size[1] / 512d;
+            // adjust offset
+            final int w = (int) (size[0] - (slicerOffset[0] * scale));
+            final int h = (int) (size[1] - (slicerOffset[1] * scale));
+
+            // reset slicer camera for 1:1 ratio view
+            slicerRenderer.ResetCamera();
+            slicerRenderer.ResetCameraClippingRange();
+            // zoom and translate
+            zoomView(slicerCam, slicerRenderer, slicerScale * (slicerCam.GetDistance() / 12d));
+            translateView(slicerCam, slicerRenderer, w, -h);
         }
         finally
         {
@@ -612,6 +896,17 @@ public class IcyVtkPanel extends VtkJoglPanel
         // just save mouse position
         lastX = e.getX();
         lastY = e.getY();
+
+        // update pick state for slicer first
+        if (isSlicerEnable() && slicerPick(e))
+            repaint();
+
+        // slicer picked ? --> cannot pick other object
+        if (isSlicerEnable() && isSlicerPicked())
+            pickedObject = null;
+        else
+            // else get picked object (mouse move/drag event)
+            pickedObject = pick(lastX, lastY);
     }
 
     @Override
@@ -623,16 +918,6 @@ public class IcyVtkPanel extends VtkJoglPanel
 
         if (e.isConsumed())
             return;
-        if (ren.VisibleActorCount() == 0)
-            return;
-
-        // consume event
-        e.consume();
-
-        // want fast update
-        setCoarseRendering();
-        // abort current rendering
-        rw.SetAbortRender(1);
 
         // get current mouse position
         final int x = e.getX();
@@ -640,22 +925,47 @@ public class IcyVtkPanel extends VtkJoglPanel
         int deltaX = (lastX - x);
         int deltaY = (lastY - y);
 
-        // faster movement with control modifier
-        if (EventUtil.isControlDown(e))
-        {
-            deltaX *= 3;
-            deltaY *= 3;
-        }
+        // consume event
+        e.consume();
+        // want fast update
+        setCoarseRendering();
+        // abort current rendering
+        rw.SetAbortRender(1);
 
-        if (EventUtil.isRightMouseButton(e) || (EventUtil.isLeftMouseButton(e) && EventUtil.isShiftDown(e)))
-            // translation mode
-            translateView(-deltaX * 2, deltaY * 2);
-        else if (EventUtil.isMiddleMouseButton(e))
-            // zoom mode
-            zoomView(Math.pow(1.02, -deltaY));
+        // slicer picked ? --> interact with slicer
+        if (isSlicerEnable() && isSlicerPicked())
+        {
+            // only accept left button action
+            if (EventUtil.isLeftMouseButton(e) && !EventUtil.isShiftDown(e))
+            {
+                // rotate mode ?
+                if (slicerPickState == SlicerPickState.PICK_VECTOR)
+                    // rotation mode
+                    rotateSlicerView(deltaX, -deltaY);
+                else
+                    // slip plane adjustment
+                    translateSlicerPlane(deltaX, deltaY);
+            }
+        }
         else
-            // rotation mode
-            rotateView(deltaX, -deltaY);
+        {
+            // faster movement with control modifier
+            if (EventUtil.isControlDown(e))
+            {
+                deltaX *= 3;
+                deltaY *= 3;
+            }
+
+            if (EventUtil.isRightMouseButton(e) || (EventUtil.isLeftMouseButton(e) && EventUtil.isShiftDown(e)))
+                // translation mode
+                translateView(-deltaX * 2, deltaY * 2);
+            else if (EventUtil.isMiddleMouseButton(e))
+                // zoom mode
+                zoomView(Math.pow(1.02, -deltaY));
+            else
+                // rotation mode
+                rotateView(deltaX, -deltaY);
+        }
 
         // save mouse position
         lastX = x;
@@ -663,7 +973,6 @@ public class IcyVtkPanel extends VtkJoglPanel
 
         // request repaint
         repaint();
-
         // restore quality rendering in 1 second
         setFineRendering(1000);
     }

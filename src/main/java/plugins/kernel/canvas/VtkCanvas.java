@@ -63,18 +63,24 @@ import icy.vtk.VtkImageVolume;
 import icy.vtk.VtkImageVolume.VtkVolumeBlendType;
 import icy.vtk.VtkUtil;
 import plugins.kernel.canvas.VtkSettingPanel.SettingChangeListener;
+import vtk.vtkAbstractVolumeMapper;
 import vtk.vtkActor;
 import vtk.vtkActor2D;
 import vtk.vtkAxesActor;
 import vtk.vtkCamera;
 import vtk.vtkColorTransferFunction;
 import vtk.vtkCubeAxesActor;
+import vtk.vtkCubeSource;
+import vtk.vtkCutter;
+import vtk.vtkDelaunay2D;
 import vtk.vtkImageData;
 import vtk.vtkInformation;
 import vtk.vtkInformationIntegerKey;
 import vtk.vtkLight;
 import vtk.vtkPicker;
 import vtk.vtkPiecewiseFunction;
+import vtk.vtkPlane;
+import vtk.vtkPolyDataMapper;
 import vtk.vtkProp;
 import vtk.vtkRenderWindow;
 import vtk.vtkRenderer;
@@ -103,6 +109,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     public static final Image ICON_RULER = ResourceUtil.getAlphaIconAsImage("ruler.png");
     public static final Image ICON_RULERLABEL = ResourceUtil.getAlphaIconAsImage("ruler_label.png");
     public static final Image ICON_TARGET = ResourceUtil.getAlphaIconAsImage("target.png");
+    public static final Image ICON_SLICER = ResourceUtil.getAlphaIconAsImage("plane_slicer.png");
 
     /**
      * properties
@@ -110,12 +117,14 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     public static final String PROPERTY_AXES = "axis";
     public static final String PROPERTY_BOUNDINGBOX = "boundingBox";
     public static final String PROPERTY_BOUNDINGBOX_GRID = "boundingBoxGrid";
-    public static final String PROPERTY_BOUNDINGBOX_RULES = "boundingBoxRules";
+    public static final String PROPERTY_BOUNDINGBOX_RULERS = "boundingBoxRules";
     public static final String PROPERTY_BOUNDINGBOX_LABELS = "boundingBoxLabels";
+    public static final String PROPERTY_SLICER = "slicer";
     public static final String PROPERTY_LUT = "lut";
     public static final String PROPERTY_DATA = "data";
     public static final String PROPERTY_SCALE = "scale";
     public static final String PROPERTY_BOUNDS = "bounds";
+    public static final String PROPERTY_CLIP_PLANE = "clipPlane";
 
     /**
      * Used for outline visibility information in vtkActor
@@ -133,7 +142,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      */
     protected static final String ID_BOUNDINGBOX = PROPERTY_BOUNDINGBOX;
     protected static final String ID_BOUNDINGBOX_GRID = PROPERTY_BOUNDINGBOX_GRID;
-    protected static final String ID_BOUNDINGBOX_RULES = PROPERTY_BOUNDINGBOX_RULES;
+    protected static final String ID_BOUNDINGBOX_RULERS = PROPERTY_BOUNDINGBOX_RULERS;
     protected static final String ID_BOUNDINGBOX_LABELS = PROPERTY_BOUNDINGBOX_LABELS;
     // protected static final String ID_PICKONMOUSEMOVE = "pickOnMouseMove";
     protected static final String ID_AXES = PROPERTY_AXES;
@@ -159,7 +168,14 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     protected vtkTextActor textInfo;
     protected vtkTextProperty textProperty;
     // protected vtkOrientationMarkerWidget widget;
-    protected vtkProp pickedObject;
+    protected vtkPlane clipPlane;
+    protected vtkCubeSource clipBox;
+    protected vtkCutter clipBoxCutter;
+    protected vtkDelaunay2D clipBoxHull;
+    protected vtkPolyDataMapper clipBoxEdgeMapper;
+    protected vtkPolyDataMapper clipBoxPlaneMapper;
+    protected vtkActor clipBoxEdgeActor;
+    protected vtkActor clipBoxPlaneActor;
 
     /**
      * volume data
@@ -176,6 +192,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     protected IcyToggleButton gridButton;
     protected IcyToggleButton rulerButton;
     protected IcyToggleButton rulerLabelButton;
+    protected IcyToggleButton volumeSlicerButton;
     // protected IcyToggleButton pickOnMouseMoveButton;
 
     /**
@@ -202,8 +219,6 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         posC = -1;
         // adjust LUT alpha level for 3D view
         lut.setAlphaToLinear3D();
-
-        pickedObject = null;
 
         // create the properties and the VTK overlay updater processors
         propertiesUpdater = new PropertiesUpdater();
@@ -237,13 +252,13 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         gridButton.setToolTipText("Display grid");
         rulerButton = new IcyToggleButton(new IcyIcon(ICON_RULER));
         rulerButton.setFocusable(false);
-        rulerButton.setToolTipText("Display rules");
+        rulerButton.setToolTipText("Display rulers");
         rulerLabelButton = new IcyToggleButton(new IcyIcon(ICON_RULERLABEL));
         rulerLabelButton.setFocusable(false);
-        rulerLabelButton.setToolTipText("Display rules label");
-        // pickOnMouseMoveButton = new IcyToggleButton(new IcyIcon(ICON_TARGET));
-        // pickOnMouseMoveButton.setFocusable(false);
-        // pickOnMouseMoveButton.setToolTipText("Enabled object focus on mouse over (slow)");
+        rulerLabelButton.setToolTipText("Display rulers label");
+        volumeSlicerButton = new IcyToggleButton(new IcyIcon(ICON_SLICER));
+        volumeSlicerButton.setFocusable(false);
+        volumeSlicerButton.setToolTipText("Enable volume slicer");
 
         // set fast rendering during initialization
         panel3D.setCoarseRendering(1000);
@@ -298,7 +313,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         boundingBox.ZAxisMinorTickVisibilityOff();
         boundingBox.ZAxisTickVisibilityOff();
 
-        // initialize rules and box axis
+        // initialize rulers and box axis
         rulerBox = new vtkCubeAxesActor();
         rulerBox.SetBounds(imageVolume.getVolume().GetBounds());
         rulerBox.SetCamera(camera);
@@ -332,6 +347,45 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         rulerBox.SetFlyModeToOuterEdges();
         rulerBox.SetUseBounds(true);
 
+        clipPlane = new vtkPlane();
+        clipBox = new vtkCubeSource();
+        clipBox.SetBounds(imageVolume.getVolume().GetBounds());
+
+        clipBoxCutter = new vtkCutter();
+        clipBoxCutter.SetCutFunction(clipPlane);
+        clipBoxCutter.SetInputConnection(clipBox.GetOutputPort());
+
+        // used to display slicer clip plane
+        clipBoxHull = new vtkDelaunay2D();
+        clipBoxHull.SetInputConnection(clipBoxCutter.GetOutputPort());
+        clipBoxHull.BoundingTriangulationOff();
+        clipBoxHull.SetTolerance(0.00001);
+        clipBoxHull.SetAlpha(0);
+
+        clipBoxEdgeMapper = new vtkPolyDataMapper();
+        clipBoxEdgeMapper.SetInputConnection(clipBoxCutter.GetOutputPort());
+
+        // used to display slicer clip plane edges
+        clipBoxEdgeActor = new vtkActor();
+        clipBoxEdgeActor.SetVisibility(0);
+        clipBoxEdgeActor.GetProperty().SetColor(1d, 1d, 0d);
+        clipBoxEdgeActor.GetProperty().SetLineWidth(1.5d);
+        clipBoxEdgeActor.GetProperty().SetAmbient(1d);
+        clipBoxEdgeActor.GetProperty().SetDiffuse(0d);
+        clipBoxEdgeActor.SetMapper(clipBoxEdgeMapper);
+
+        clipBoxPlaneMapper = new vtkPolyDataMapper();
+        clipBoxPlaneMapper.SetInputConnection(clipBoxHull.GetOutputPort());
+
+        // used to display slicer clip plane surface
+        clipBoxPlaneActor = new vtkActor();
+        clipBoxPlaneActor.SetVisibility(0);
+        clipBoxPlaneActor.GetProperty().SetColor(1d, 1d, 0d);
+        clipBoxPlaneActor.GetProperty().SetAmbient(1d);
+        clipBoxPlaneActor.GetProperty().SetDiffuse(0d);
+        clipBoxPlaneActor.GetProperty().SetOpacity(0.2d);
+        clipBoxPlaneActor.SetMapper(clipBoxPlaneMapper);
+
         // restore settings
         settingPanel.setBackgroundColor(new Color(preferences.getInt(ID_BGCOLOR, 0x000000)));
         settingPanel.setVolumeBlendingMode(
@@ -348,10 +402,10 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         axesButton.setSelected(preferences.getBoolean(ID_AXES, true));
         boundingBoxButton.setSelected(preferences.getBoolean(ID_BOUNDINGBOX, true));
         gridButton.setSelected(preferences.getBoolean(ID_BOUNDINGBOX_GRID, true));
-        rulerButton.setSelected(preferences.getBoolean(ID_BOUNDINGBOX_RULES, false));
+        rulerButton.setSelected(preferences.getBoolean(ID_BOUNDINGBOX_RULERS, false));
         rulerLabelButton.setSelected(preferences.getBoolean(ID_BOUNDINGBOX_LABELS, false));
-        // pickOnMouseMoveButton.setSelected(preferences.getBoolean(ID_PICKONMOUSEMOVE, false));
         // always false by default (preferable)
+        volumeSlicerButton.setSelected(false);
         // pickOnMouseMoveButton.setSelected(false);
 
         // apply restored settings
@@ -391,6 +445,9 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         renderer.AddViewProp(boundingBox);
         renderer.AddViewProp(rulerBox);
         renderer.AddViewProp(textInfo);
+        // add slicer clip plane markers
+        renderer.AddActor(clipBoxEdgeActor);
+        renderer.AddActor(clipBoxPlaneActor);
 
         // reset camera
         resetCamera();
@@ -404,6 +461,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         gridButton.addActionListener(this);
         rulerButton.addActionListener(this);
         rulerLabelButton.addActionListener(this);
+        volumeSlicerButton.addActionListener(this);
         // pickOnMouseMoveButton.addActionListener(this);
 
         // create EDTTask object
@@ -462,11 +520,21 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                 renderer.RemoveAllViewProps();
                 // renderer.Delete();
                 // renderWindow.Delete();
+
                 imageVolume.release();
                 // widget.Delete();
                 // axes.Delete();
                 boundingBox.Delete();
                 // camera.Delete();
+
+                clipBoxPlaneActor.Delete();
+                clipBoxPlaneMapper.Delete();
+                clipBoxEdgeActor.Delete();
+                clipBoxEdgeMapper.Delete();
+                clipBoxHull.Delete();
+                clipBoxCutter.Delete();
+                clipBox.Delete();
+                clipPlane.Delete();
 
                 // dispose extra panel 3D stuff
                 panel3D.disposeInternal();
@@ -485,6 +553,14 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         // axes = null;
         boundingBox = null;
         camera = null;
+        clipBoxPlaneActor = null;
+        clipBoxPlaneMapper = null;
+        clipBoxEdgeActor = null;
+        clipBoxEdgeMapper = null;
+        clipBoxHull = null;
+        clipBoxCutter = null;
+        clipBox = null;
+        clipPlane = null;
 
         panel3D.removeKeyListener(this);
         panel3D = null;
@@ -515,7 +591,8 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         toolBar.add(gridButton);
         toolBar.add(rulerButton);
         toolBar.add(rulerLabelButton);
-        // toolBar.addSeparator();
+        toolBar.addSeparator();
+        toolBar.add(volumeSlicerButton);
         // toolBar.add(pickOnMouseMoveButton);
     }
 
@@ -689,6 +766,23 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     {
         if (rulerLabelButton.isSelected() != value)
             rulerLabelButton.doClick();
+    }
+
+    /**
+     * Returns <code>true</code> if the volume slicer is enable.
+     */
+    public boolean isVolumeSlicerEnable()
+    {
+        return volumeSlicerButton.isSelected();
+    }
+
+    /**
+     * Enable / disable volume slicer.
+     */
+    public void setVolumeSlicerEnable(boolean value)
+    {
+        if (volumeSlicerButton.isSelected() != value)
+            volumeSlicerButton.doClick();
     }
 
     /**
@@ -921,20 +1015,6 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             panel3D.repaint();
     }
 
-    // private void test()
-    // {
-    // // exemple de clipping a utiliser par la suite.
-    // if ( false )
-    // {
-    // vtkPlane plane = new vtkPlane();
-    // plane.SetOrigin(1000, 1000, 1000);
-    // plane.SetNormal( 1, 1, 0);
-    // volumeMapper.AddClippingPlane( plane );
-    // }
-    //
-    // vtkOrientationMarkerWidget ow = new vtkOrientationMarkerWidget();
-    // }
-
     protected void resetCamera()
     {
         camera.SetViewUp(0, -1, 0);
@@ -1004,7 +1084,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      */
     public vtkProp getPickedObject()
     {
-        return pickedObject;
+        return panel3D.getPickedObject();
     }
 
     /**
@@ -1258,6 +1338,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
 
         boundingBox.SetBounds(bounds);
         rulerBox.SetBounds(bounds);
+        clipBox.SetBounds(bounds);
+        
+        // slicer enable ? --> need to refresh clip plane
+        if (panel3D.isSlicerEnable())
+            propertyChange(PROPERTY_CLIP_PLANE, null);
     }
 
     /**
@@ -1308,6 +1393,10 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                     textInfo.SetVisibility(1);
             }
         }
+
+        // slicer enable ? --> refresh clip plane
+        if (panel3D.isSlicerEnable())
+            propertyChange(PROPERTY_CLIP_PLANE, null);
     }
 
     protected void updateLut()
@@ -1862,9 +1951,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         else if (source == gridButton)
             propertyChange(PROPERTY_BOUNDINGBOX_GRID, Boolean.valueOf(gridButton.isSelected()));
         else if (source == rulerButton)
-            propertyChange(PROPERTY_BOUNDINGBOX_RULES, Boolean.valueOf(rulerButton.isSelected()));
+            propertyChange(PROPERTY_BOUNDINGBOX_RULERS, Boolean.valueOf(rulerButton.isSelected()));
         else if (source == rulerLabelButton)
             propertyChange(PROPERTY_BOUNDINGBOX_LABELS, Boolean.valueOf(rulerLabelButton.isSelected()));
+        else if (source == volumeSlicerButton)
+            propertyChange(PROPERTY_SLICER, Boolean.valueOf(volumeSlicerButton.isSelected()));
         // else if (source == pickOnMouseMoveButton)
         // preferences.putBoolean(ID_PICKONMOUSEMOVE, pickOnMouseMoveButton.isSelected());
     }
@@ -2188,6 +2279,16 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
+        protected void planeClipChanged()
+        {
+            super.planeClipChanged();
+
+            // clip plane changed
+            if (isSlicerEnable())
+                propertyChange(PROPERTY_CLIP_PLANE, null);
+        }
+
+        @Override
         public void mouseEntered(MouseEvent e)
         {
             // send mouse event to overlays
@@ -2220,41 +2321,49 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             // update mouse position
             setMousePos(e.getPoint());
 
-            // get picked object (mouse move/drag event)
-            pickedObject = pick(e.getX(), e.getY());
-
-            // send mouse event to overlays
-            VtkCanvas.this.mouseMove(e, getMouseImagePos5D());
-
-            final boolean consumed = e.isConsumed();
-
+            final boolean oc = e.isConsumed();
+            // send first to canvas for picking
             super.mouseMoved(e);
+
+            // then send mouse event to overlays
+            VtkCanvas.this.mouseMove(e, getMouseImagePos5D());
 
             mouseImagePositionChanged(DimensionId.NULL);
 
             // refresh mouse cursor (do it after all process)
-            updateCursor(!consumed && e.isConsumed());
+            updateCursor(!oc && e.isConsumed());
         }
 
         @Override
         public void mouseDragged(MouseEvent e)
         {
+            final boolean oc, nc;
+
             // update mouse position
             setMousePos(e.getPoint());
 
-            // get picked object (mouse move/drag event)
-            // not really important on drag event after all..
-//            pickedObject = pick(e.getX(), e.getY());
-
-            // send mouse event to overlays
-            VtkCanvas.this.mouseDrag(e, getMouseImagePos5D());
-
-            final boolean consumed = e.isConsumed();
-
-            super.mouseDragged(e);
+            // slicer picked ?
+            if (isSlicerEnable() && isSlicerPicked())
+            {
+                oc = e.isConsumed();
+                // send event first to canvas for slicer drag operation
+                super.mouseDragged(e);
+                nc = e.isConsumed();
+                // then send mouse event to overlays
+                VtkCanvas.this.mouseDrag(e, getMouseImagePos5D());
+            }
+            else
+            {
+                // send mouse event to overlays first
+                VtkCanvas.this.mouseDrag(e, getMouseImagePos5D());
+                oc = e.isConsumed();
+                // send send to canvas for classic drag operation
+                super.mouseDragged(e);
+                nc = e.isConsumed();
+            }
 
             // refresh mouse cursor (do it after all process)
-            updateCursor(!consumed && e.isConsumed());
+            updateCursor(!oc && nc);
         }
 
         @Override
@@ -2527,6 +2636,10 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                 });
 
                 preferences.putInt(ID_MAPPER, gpuRendering ? 1 : 0);
+
+                // slicer enable ? --> need to refresh clip plane
+                if (panel3D.isSlicerEnable())
+                    propertyChange(PROPERTY_CLIP_PLANE, null);
             }
             else if (StringUtil.equals(name, VtkSettingPanel.PROPERTY_BLENDING))
             {
@@ -2605,7 +2718,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
 
                 preferences.putBoolean(ID_BOUNDINGBOX_GRID, b);
             }
-            else if (StringUtil.equals(name, PROPERTY_BOUNDINGBOX_RULES))
+            else if (StringUtil.equals(name, PROPERTY_BOUNDINGBOX_RULERS))
             {
                 final boolean b = ((Boolean) value).booleanValue();
 
@@ -2626,7 +2739,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                     }
                 });
 
-                preferences.putBoolean(ID_BOUNDINGBOX_RULES, b);
+                preferences.putBoolean(ID_BOUNDINGBOX_RULERS, b);
             }
             else if (StringUtil.equals(name, PROPERTY_BOUNDINGBOX_LABELS))
             {
@@ -2640,6 +2753,35 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                         rulerBox.SetXAxisLabelVisibility(b ? 1 : 0);
                         rulerBox.SetYAxisLabelVisibility(b ? 1 : 0);
                         rulerBox.SetZAxisLabelVisibility(b ? 1 : 0);
+                    }
+                });
+
+                preferences.putBoolean(ID_BOUNDINGBOX_LABELS, b);
+            }
+            else if (StringUtil.equals(name, PROPERTY_SLICER))
+            {
+                final boolean b = ((Boolean) value).booleanValue();
+
+                invokeOnEDT(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        panel3D.setSlicerEnable(b);
+                        clipBoxEdgeActor.SetVisibility(b ? 1 : 0);
+                        clipBoxPlaneActor.SetVisibility(b ? 1 : 0);
+
+                        final vtkAbstractVolumeMapper volumeMapper = imageVolume.getVolume().GetMapper();
+
+                        // slicer disable ?
+                        if (!b)
+                        {
+                            // remove all clip planes
+                            volumeMapper.RemoveAllClippingPlanes();
+                            volumeMapper.Update();
+                        }
+
+                        // refresh();
                     }
                 });
 
@@ -2710,8 +2852,61 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             }
             else if (StringUtil.equals(name, PROPERTY_LAYERS_VISIBLE))
             {
-                // force refresh
+                // force refresh now
                 refresh();
+            }
+            else if (StringUtil.equals(name, PROPERTY_CLIP_PLANE))
+            {
+                invokeOnEDT(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        // only if volume slicer is enabled
+                        if (isVolumeSlicerEnable())
+                        {
+                            final vtkAbstractVolumeMapper volumeMapper = imageVolume.getVolume().GetMapper();
+
+                            // get clipping plane info
+                            final double clipPos = getVtkPanel().getClipPosition();
+                            final double[] clipNormal = getVtkPanel().getClipNormal();
+                            // inverse it as
+                            clipNormal[0] = -clipNormal[0];
+                            clipNormal[1] = -clipNormal[1];
+                            clipNormal[2] = -clipNormal[2];
+                            // get volume data info
+                            final int[] extent = imageVolume.getVolumeData().GetExtent();
+                            final double[] scaling = imageVolume.getScale();
+                            final double sizeX = (extent[1] - extent[0]) * scaling[0];
+                            final double sizeY = (extent[3] - extent[2]) * scaling[1];
+                            final double sizeZ = (extent[5] - extent[4]) * scaling[2];
+                            final double centerX = (sizeX / 2d) + (clipNormal[0] * sizeX * clipPos);
+                            final double centerY = (sizeY / 2d) + (clipNormal[1] * sizeY * clipPos);
+                            final double centerZ = (sizeZ / 2d) + (clipNormal[2] * sizeZ * clipPos);
+
+                            // update clipping plane
+                            clipPlane.SetOrigin(centerX, centerY, centerZ);
+                            clipPlane.SetNormal(clipNormal);
+
+                            // update clip plane
+                            volumeMapper.RemoveAllClippingPlanes();
+                            volumeMapper.AddClippingPlane(clipPlane);
+                            volumeMapper.Update();
+
+                            // update clip plane on cutter
+                            clipBoxCutter.SetCutFunction(clipPlane);
+                            clipBoxCutter.Update();
+
+                            clipBoxEdgeActor.SetVisibility(1);
+                            clipBoxPlaneActor.SetVisibility(1);
+                        }
+                        else
+                        {
+                            clipBoxEdgeActor.SetVisibility(0);
+                            clipBoxPlaneActor.SetVisibility(0);
+                        }
+                    }
+                });
             }
         }
 
