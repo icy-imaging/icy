@@ -211,11 +211,13 @@ public class LoaderDialog extends JFileChooser implements PropertyChangeListener
                 final String firstPath = paths.get(0);
                 // get the selected importer from file filter
                 final Object importer = getSelectedImporter();
+                // all files filter selected ? detect no image file (so we can load protocol correctly when all files filter is selected)
+                final boolean noImage = (importer == null) && !Loader.isSupportedImageFile(paths.get(0));
 
                 // multiple files or folder loading
                 if ((paths.size() > 1) || FileUtil.isDirectory(firstPath))
                 {
-                    if (importer instanceof FileImporter)
+                    if ((importer instanceof FileImporter) || noImage)
                     {
                         // load selected non image file(s)
                         Loader.load((FileImporter) importer, paths, true);
@@ -248,7 +250,7 @@ public class LoaderDialog extends JFileChooser implements PropertyChangeListener
                 else
                 {
                     // single file loading
-                    if (importer instanceof FileImporter)
+                    if ((importer instanceof FileImporter) || noImage)
                     {
                         // load selected non image file
                         Loader.load((FileImporter) importer, paths, true);
