@@ -805,7 +805,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
         vtkSource.SetPhiResolution(12);
 
         polyMapper = new vtkPolyDataMapper();
-        polyMapper.SetInputConnection((vtkSource).GetOutputPort());
+        polyMapper.SetInputConnection(vtkSource.GetOutputPort());
 
         actor = new vtkActor();
         actor.SetMapper(polyMapper);
