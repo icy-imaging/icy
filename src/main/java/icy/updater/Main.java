@@ -199,21 +199,22 @@ public class Main
 
         // get Icy directory and path
         final String directory = FileUtil.getApplicationDirectory();
-        final String icyJarPath = directory + FileUtil.separatorChar + ICY_JARNAME;
-
-        // wait for lock
-        if (!waitForLock(icyJarPath))
-        {
-            System.err.println("File " + icyJarPath + " is locked, aborting udpate...");
-
-            // send report of the error
-            report(strLog);
-
-            return false;
-        }
 
         if (update)
         {
+            final String icyJarPath = directory + FileUtil.separatorChar + ICY_JARNAME;
+
+            // wait for lock
+            if (!waitForLock(icyJarPath))
+            {
+                System.err.println("File " + icyJarPath + " is locked, aborting udpate...");
+
+                // send report of the error
+                report(strLog);
+
+                return false;
+            }
+
             // do update
             if (!doUpdate())
                 return false;
