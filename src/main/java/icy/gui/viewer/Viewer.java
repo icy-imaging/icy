@@ -764,6 +764,8 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         // refresh combos
         refreshLockCombo();
         refreshCanvasCombo();
+        
+        toolBar.repaint();
     }
 
     /**
