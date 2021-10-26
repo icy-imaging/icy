@@ -1018,7 +1018,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     protected void resetCamera()
     {
         camera.SetViewUp(0, -1, 0);
-        camera.Elevation(200);
+        camera.Elevation(195);
         renderer.ResetCamera();
         renderer.ResetCameraClippingRange();
     }

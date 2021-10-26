@@ -29,6 +29,7 @@ import java.awt.event.MouseWheelListener;
 
 import icy.preferences.CanvasPreferences;
 import icy.system.thread.ThreadUtil;
+import icy.type.collection.array.ArrayUtil;
 import icy.util.EventUtil;
 import icy.util.StringUtil;
 import vtk.vtkActor;
@@ -37,9 +38,11 @@ import vtk.vtkAxesActor;
 import vtk.vtkCamera;
 import vtk.vtkCellPicker;
 import vtk.vtkLight;
+import vtk.vtkLinearTransform;
 import vtk.vtkPicker;
 import vtk.vtkProp;
 import vtk.vtkRenderer;
+import vtk.vtkTransform;
 
 /**
  * Icy custom VTK panel used for VTK rendering.
@@ -166,7 +169,7 @@ public class IcyVtkPanel extends VtkJoglPanel
         // init slicer camera
         slicerCam = slicerRenderer.GetActiveCamera();
         slicerCam.SetViewUp(0, -1, 0);
-        slicerCam.Elevation(170);
+        slicerCam.Elevation(195);
         slicerCam.SetParallelProjection(1);
         slicerRenderer.ResetCamera();
         slicerRenderer.ResetCameraClippingRange();
@@ -512,7 +515,7 @@ public class IcyVtkPanel extends VtkJoglPanel
         if (getLightFollowCamera())
             setLightToCameraPosition(lgt, cam);
         // rotate slicer view identically
-        // rotateSlicerView(dx, dy);
+        rotateSlicerView(dx, dy);
         // update axis camera
         updateAxisView();
     }
@@ -731,15 +734,33 @@ public class IcyVtkPanel extends VtkJoglPanel
      */
     public double[] getClipNormal()
     {
-        // transform arrow vector
-        final double result[] = slicerCam.GetModelViewTransformObject().TransformDoubleVector(0d, -1d, 0d);
+        // initial arrow vector
+        double result[] = new double[] {0d, -1d, 0d};
+
+        final vtkTransform camTrans = cam.GetModelViewTransformObject();
+        final vtkTransform slicerTrans = slicerCam.GetModelViewTransformObject();
+
+        // create new identity transform
+        final vtkTransform trans = new vtkTransform();
+        trans.Identity();
+        // **important to concatenate through the matrix and not the transform object directly !!**
+        trans.Concatenate(camTrans.GetMatrix());
+        trans.Inverse();
+        trans.Concatenate(slicerTrans.GetMatrix());
+
+//        System.out.println("cam =" + ArrayUtil.array1DToString(camTrans.GetOrientation(), true, false, " ", 3)
+//                + "   slicer =" + ArrayUtil.array1DToString(slicerTrans.GetOrientation(), true, false, " ", 3)
+//                + "   finale =" + ArrayUtil.array1DToString(trans.GetOrientation(), true, false, " ", 3));
+
+        // transform using merged transform
+        result = trans.TransformDoubleNormal(result);
+
+        //        System.out.println("clip plane =" + StringUtil.toString(result[0], 3) + "," + StringUtil.toString(result[1], 3)
+//                + "," + StringUtil.toString(result[2], 3));
 
         // invert X/Z axis (not sure why this is needed)
-        result[1] = -result[1];
-        result[2] = -result[2];
-
-        // System.out.println("norm=" + StringUtil.toString(result[0], 3) + "," + StringUtil.toString(result[1], 3) + ","
-        // + StringUtil.toString(result[2], 3));
+        // result[1] = -result[1];
+        // result[2] = -result[2];
 
         return result;
     }
@@ -749,7 +770,7 @@ public class IcyVtkPanel extends VtkJoglPanel
      */
     public double getClipPosition()
     {
-//        System.out.println("pos=" + StringUtil.toString(planeClip.getActor().GetPosition()[1], 3));
+        // System.out.println("pos=" + StringUtil.toString(planeClip.getActor().GetPosition()[1], 3));
 
         // use plane actor Y position
         return planeClip.getActor().GetPosition()[1];
