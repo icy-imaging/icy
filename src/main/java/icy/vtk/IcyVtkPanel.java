@@ -31,14 +31,12 @@ import icy.preferences.CanvasPreferences;
 import icy.system.thread.ThreadUtil;
 import icy.type.collection.array.ArrayUtil;
 import icy.util.EventUtil;
-import icy.util.StringUtil;
 import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkAxesActor;
 import vtk.vtkCamera;
 import vtk.vtkCellPicker;
 import vtk.vtkLight;
-import vtk.vtkLinearTransform;
 import vtk.vtkPicker;
 import vtk.vtkProp;
 import vtk.vtkRenderer;
@@ -119,10 +117,9 @@ public class IcyVtkPanel extends VtkJoglPanel
         slicerRenderer.SetLayer(2);
         slicerRenderer.InteractiveOff();
 
-        // add axis and slicer renderers
+        // add axis renderer (add slicer renderer only when slicer enable)
         rw.AddRenderer(axisRenderer);
-        rw.AddRenderer(slicerRenderer);
-        rw.SetNumberOfLayers(3);
+        rw.SetNumberOfLayers(2);
 
         // initialize axis actor
         axis = new vtkAxesActor();
@@ -162,9 +159,6 @@ public class IcyVtkPanel extends VtkJoglPanel
         planeClip.getActor().GetProperty().SetLineWidth(2d);
         slicerRenderer.AddActor(arrowClip.getActor());
         slicerRenderer.AddActor(planeClip.getActor());
-        // not visible by default
-        arrowClip.getActor().SetVisibility(0);
-        planeClip.getActor().SetVisibility(0);
 
         // init slicer camera
         slicerCam = slicerRenderer.GetActiveCamera();
@@ -345,7 +339,7 @@ public class IcyVtkPanel extends VtkJoglPanel
      */
     public boolean isSlicerEnable()
     {
-        return (arrowClip.getActor().GetVisibility() != 0) ? true : false;
+        return (rw.HasRenderer(slicerRenderer) != 0) ? true : false;
     }
 
     /**
@@ -353,8 +347,33 @@ public class IcyVtkPanel extends VtkJoglPanel
      */
     public void setSlicerEnable(boolean value)
     {
-        arrowClip.getActor().SetVisibility(value ? 1 : 0);
-        planeClip.getActor().SetVisibility(value ? 1 : 0);
+        if (!isWindowSet())
+            return;
+
+        lock();
+        try
+        {
+            if (value)
+            {
+                if (rw.HasRenderer(slicerRenderer) == 0)
+                {
+                    rw.AddRenderer(slicerRenderer);
+                    rw.SetNumberOfLayers(3);
+                }
+            }
+            else
+            {
+                if (rw.HasRenderer(slicerRenderer) == 1)
+                {
+                    rw.RemoveRenderer(slicerRenderer);
+                    rw.SetNumberOfLayers(2);
+                }
+            }
+        }
+        finally
+        {
+            unlock();
+        }
 
         updateSlicerView();
 
@@ -748,15 +767,15 @@ public class IcyVtkPanel extends VtkJoglPanel
         trans.Inverse();
         trans.Concatenate(slicerTrans.GetMatrix());
 
-//        System.out.println("cam =" + ArrayUtil.array1DToString(camTrans.GetOrientation(), true, false, " ", 3)
-//                + "   slicer =" + ArrayUtil.array1DToString(slicerTrans.GetOrientation(), true, false, " ", 3)
-//                + "   finale =" + ArrayUtil.array1DToString(trans.GetOrientation(), true, false, " ", 3));
+        // System.out.println("cam =" + ArrayUtil.array1DToString(camTrans.GetOrientation(), true, false, " ", 3)
+        // + " slicer =" + ArrayUtil.array1DToString(slicerTrans.GetOrientation(), true, false, " ", 3)
+        // + " finale =" + ArrayUtil.array1DToString(trans.GetOrientation(), true, false, " ", 3));
 
         // transform using merged transform
         result = trans.TransformDoubleNormal(result);
 
-        //        System.out.println("clip plane =" + StringUtil.toString(result[0], 3) + "," + StringUtil.toString(result[1], 3)
-//                + "," + StringUtil.toString(result[2], 3));
+        // System.out.println("clip plane =" + StringUtil.toString(result[0], 3) + "," + StringUtil.toString(result[1], 3)
+        // + "," + StringUtil.toString(result[2], 3));
 
         // invert X/Z axis (not sure why this is needed)
         // result[1] = -result[1];
