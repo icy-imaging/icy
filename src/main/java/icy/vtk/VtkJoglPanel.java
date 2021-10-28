@@ -119,9 +119,9 @@ public class VtkJoglPanel extends GLJPanel
                 reqPixelScale[0] = 1f;
                 reqPixelScale[1] = 1f;
             }
-            catch (Exception e)
+            catch (Throwable t)
             {
-                System.err.println("Couldn't patch GLJPanel.reqPixelScale[] field, GLJPanel may not work properly...");
+                System.err.println("Couldn't patch GLJPanel.reqPixelScale[] field with Java 17, try using Java 8 instead if you experience some bugs with 3D VTK view.");
             }
         }
 

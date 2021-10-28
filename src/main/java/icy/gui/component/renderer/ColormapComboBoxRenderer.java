@@ -18,16 +18,18 @@
  */
 package icy.gui.component.renderer;
 
-import icy.gui.lut.ColormapIcon;
-import icy.image.colormap.IcyColorMap;
-import icy.util.ReflectionUtil;
-
 import java.awt.Dimension;
 import java.awt.Insets;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JList;
+
+import org.pushingpixels.substance.internal.utils.SubstanceSizeUtils;
+
+import icy.gui.lut.ColormapIcon;
+import icy.image.colormap.IcyColorMap;
+import icy.util.ReflectionUtil;
 
 /**
  * @author Stephane
@@ -61,23 +63,8 @@ public class ColormapComboBoxRenderer extends CustomComboBoxRenderer
             final IcyColorMap colormap = (IcyColorMap) value;
             final JComboBox comboBox = getComboBox();
             final Dimension dim = comboBox.getSize();
-            int btnWidth;
-
-            try
-            {
-                // a bit ugly but we really want to access it
-                final JButton popBtn = (JButton) ReflectionUtil.getFieldObject(comboBox.getUI(), "arrowButton", true);
-                
-                btnWidth = popBtn.getWidth();
-                if (btnWidth <= 0)
-                    btnWidth = popBtn.getPreferredSize().width;
-                if (btnWidth <= 0)
-                    btnWidth = 20;
-            }
-            catch (Exception e)
-            {
-                btnWidth = 20;
-            }
+            // good estimation
+            final int btnWidth = SubstanceSizeUtils.getScrollBarWidth(SubstanceSizeUtils.getComponentFontSize(comboBox)) + 4;
 
             final Insets insets = getInsets();
 

@@ -170,9 +170,9 @@ public class ToolbarWrapper extends Toolbar
             evenDarkerField = ReflectionUtil.getField(this.getClass(), "evenDarker", true);
             toolColorField = ReflectionUtil.getField(this.getClass(), "toolColor", true);
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-            IcyExceptionHandler.showErrorMessage(e, false);
+            IcyExceptionHandler.showErrorMessage(t, false);
             System.err.println("Cannot restore toolbar buttons from ImageJ.");
         }
 

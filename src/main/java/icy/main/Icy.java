@@ -1149,7 +1149,7 @@ public class Icy
         }
 
         if (!SystemUtil.addToJavaLibraryPath(directories.toArray(new String[directories.size()])))
-            System.err.println("Native libraries may not load correctly.");
+            System.out.println("Native libraries may not load correctly.");
 
         // load native libraries
         loadVtkLibrary(libPathFile);

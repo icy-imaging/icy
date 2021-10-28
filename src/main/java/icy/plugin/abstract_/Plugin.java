@@ -395,7 +395,7 @@ public abstract class Plugin
         if (file == null)
             return false;
 
-        // and load it
+        // and load it from absolute path
         System.load(file.getAbsolutePath());
 
         return true;

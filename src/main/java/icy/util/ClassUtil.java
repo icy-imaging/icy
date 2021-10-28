@@ -18,12 +18,6 @@
  */
 package icy.util;
 
-import icy.file.FileUtil;
-import icy.network.URLUtil;
-import icy.plugin.PluginLoader;
-import icy.system.IcyExceptionHandler;
-import icy.system.SystemUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -42,6 +36,11 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import icy.file.FileUtil;
+import icy.plugin.PluginLoader;
+import icy.system.IcyExceptionHandler;
+import icy.system.SystemUtil;
 
 /**
  * @author stephane
@@ -64,25 +63,27 @@ public class ClassUtil
         return SystemUtil.getSystemClassLoader();
     }
 
-    /**
-     * Return the list of all loaded classes by the specified {@link ClassLoader}.<br>
-     * Warning: this function is not safe and would not always work as expected.<br>
-     * It can return <code>null</code> if an error occurred.
-     */
-    public static List<Class<?>> getLoadedClasses(ClassLoader cl)
-    {
-        try
-        {
-            final Vector classes = (Vector) ReflectionUtil.getFieldObject(cl, "classes", true);
-            return new ArrayList<Class<?>>(classes);
-        }
-        catch (Exception e)
-        {
-            IcyExceptionHandler.showErrorMessage(e, false, true);
-        }
-
-        return null;
-    }
+//    /**
+//     * @deprecated always return <i>null</i> now as it's doing unallowed operation
+//     * @return the list of all loaded classes by the specified {@link ClassLoader}.<br>
+//     *         Warning: this function is not safe and would not always work as expected.<br>
+//     *         It can return <code>null</code> if an error occurred.
+//     */
+//    @Deprecated
+//    public static List<Class<?>> getLoadedClasses(ClassLoader cl)
+//    {
+//        try
+//        {
+//            final Vector classes = (Vector) ReflectionUtil.getFieldObject(cl, "classes", true);
+//            return new ArrayList<Class<?>>(classes);
+//        }
+//        catch (Exception e)
+//        {
+//            IcyExceptionHandler.showErrorMessage(e, false, true);
+//        }
+//
+//        return null;
+//    }
 
     /**
      * @param primitiveName
@@ -257,16 +258,18 @@ public class ClassUtil
         {
             String result;
             int ind;
-            
-            // extract 
+
+            // extract
             result = url.getPath();
-            
+
             ind = result.indexOf(':');
-            if (ind != -1) result= result.substring(ind+1);
-            
+            if (ind != -1)
+                result = result.substring(ind + 1);
+
             ind = result.indexOf('!');
-            if (ind != -1) result = result.substring(0, ind);
-            
+            if (ind != -1)
+                result = result.substring(0, ind);
+
             return new File(result).getAbsolutePath();
         }
 
@@ -979,28 +982,28 @@ public class ClassUtil
     }
 
     /**
-     * @deprecated Use {@link ReflectionUtil#getMethod(Object, String, boolean, Class...)} instead
+     * @deprecated Use {@link ReflectionUtil#getMethod(Class, String, Class...)} instead
      */
     @Deprecated
     public static Method getMethod(Object object, String methodName, boolean forceAccess, Class<?>... parameterTypes)
             throws SecurityException, NoSuchMethodException
     {
-        return ReflectionUtil.getMethod(object, methodName, forceAccess, parameterTypes);
+        return ReflectionUtil.getMethod(object.getClass(), methodName, forceAccess, parameterTypes);
     }
 
     /**
-     * @deprecated Use {@link ReflectionUtil#invokeMethod(Object, String, boolean, Object...)} instead
+     * @deprecated Use {@link ReflectionUtil#invokeMethod(Object, String, Object...)} instead
      */
     @Deprecated
     public static Object invokeMethod(Object object, String methodName, boolean forceAccess, Object... args)
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
             InvocationTargetException
     {
-        return ReflectionUtil.invokeMethod(object, methodName, forceAccess, args);
+        return ReflectionUtil.invokeMethod(object.getClass(), methodName, forceAccess, args);
     }
 
     /**
-     * @deprecated Use {@link ReflectionUtil#getField(Object, String, boolean)} instead
+     * @deprecated Use {@link ReflectionUtil#getField(Class, String)} instead
      */
     @Deprecated
     public static Field getField(Object object, String fieldName, boolean forceAccess)
@@ -1010,12 +1013,12 @@ public class ClassUtil
     }
 
     /**
-     * @deprecated Use {@link ReflectionUtil#getFieldObject(Object, String, boolean)} instead
+     * @deprecated Use {@link ReflectionUtil#getFieldObject(Object, String)} instead
      */
     @Deprecated
     public static Object getFieldObject(Object object, String fieldName, boolean forceAccess)
             throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
     {
-        return ReflectionUtil.getFieldObject(object, fieldName, forceAccess);
+        return ReflectionUtil.getFieldObject(object, fieldName);
     }
 }

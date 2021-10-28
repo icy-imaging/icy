@@ -795,7 +795,6 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             }
             catch (Exception e)
             {
-                System.out.println(e.getMessage());
                 System.out.println("Warning: cannot get access to internal BufferedImage.raster field.");
                 System.out.println("         Image caching cannot be used for this image.");
 
@@ -1198,7 +1197,6 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 }
                 catch (Exception e)
                 {
-                    System.out.println(e.getMessage());
                     System.out.println("Warning: cannot get access to internal BufferedImage.raster field.");
                     System.out.println("         Image caching cannot be used for this image.");
 

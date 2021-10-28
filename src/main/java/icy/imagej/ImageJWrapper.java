@@ -102,9 +102,9 @@ public class ImageJWrapper extends ImageJ
             // patch imageJ toolbar to uses our wrapper
             ReflectionUtil.getField(this.getClass(), "toolbar", true).set(this, swingToolBar);
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-            IcyExceptionHandler.showErrorMessage(e, false);
+            IcyExceptionHandler.showErrorMessage(t, false);
             System.err.println("Cannot install ImageJ toolbar wrapper");
         }
 

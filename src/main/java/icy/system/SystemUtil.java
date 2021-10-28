@@ -1084,10 +1084,10 @@ public class SystemUtil
 
             return true;
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-            System.err.println(e.getMessage());
-            System.err.println("Cannot patch Java Library Path.");
+            System.err.println(t.getMessage());
+            System.err.println("Cannot patch Java Library Path...");
 
             return false;
         }
