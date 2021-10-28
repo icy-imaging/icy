@@ -74,13 +74,11 @@ public class CustomPopupFactory extends PopupFactory
     @Override
     public Popup getPopup(Component owner, Component contents, int x, int y)
     {
-        if (contents == null)
-        {
-            throw new IllegalArgumentException("Popup.getPopup must be passed non-null contents");
-        }
-
         if (macos && (getPopupMethod != null))
         {
+            if (contents == null)
+                throw new IllegalArgumentException("Popup.getPopup must be passed non-null contents");
+
             try
             {
                 return (Popup) getPopupMethod.invoke(this, owner, contents, Integer.valueOf(x), Integer.valueOf(y),
