@@ -28,6 +28,13 @@ import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
 import icy.util.ReflectionUtil;
 
+/**
+ * Since we use the OGL component the CustomPopupFactory isn't anymore required on OSX.<br>
+ * Also it cannot work with Java 17 as forced access from reflection are not anymore allowed.<br>
+ * Still we keep the class just in case as OpenGL will be soon removed from OSX and we may need to tweak that again then :-/
+ * 
+ * @author Stephane
+ */
 public class CustomPopupFactory extends PopupFactory
 {
     private final boolean macos;
