@@ -94,7 +94,7 @@ public class Main
     /**
      * Updater Version
      */
-    public static Version version = new Version("2.1.2.0");
+    public static Version version = new Version("2.3.0.0");
 
     static final OutPrintStream stdStream = new OutPrintStream(System.out, false);
     static final OutPrintStream errStream = new OutPrintStream(System.err, true);
@@ -460,8 +460,8 @@ public class Main
         if (!StringUtil.isEmpty(vmParams))
             result += " " + vmParams;
         // Java >= 16 ? --> add permited illegal access
-        if (checkMinimumJavaVersion(16))
-            result += " --illegal-access=permit";
+//        if (checkMinimumJavaVersion(16))
+//            result += " --illegal-access=permit";
         if (!StringUtil.isEmpty(osVmParams))
             result += " " + osVmParams;
 
