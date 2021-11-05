@@ -15,7 +15,7 @@ Application
  - small optimization on 'Erosion' / 'Watershed' process time
 * switch dataset to 'virtual' state asynchronously (as it can takes age to do so)
 * fixed ImageJ / Icy image conversion switch
-* improved Java 17 compatiblity (replacing illegal reflective access where possible)
+* improved Java 17 compatibility (replacing illegal reflective access where possible)
   Still need some work to allow the image cache engine to work with Java 17  
 * small change to 'Updater' tool
 
