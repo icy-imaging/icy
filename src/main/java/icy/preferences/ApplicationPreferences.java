@@ -214,7 +214,8 @@ public class ApplicationPreferences
      */
     public static String getExtraVMParams()
     {
-        return preferences.get(ID_EXTRA_VMPARAMS, "-XX:+UseG1GC -XX:MaxGCPauseMillis=100");
+//        return preferences.get(ID_EXTRA_VMPARAMS, "-XX:+UseG1GC -XX:MaxGCPauseMillis=100");
+        return preferences.get(ID_EXTRA_VMPARAMS, "");
     }
 
     /**
