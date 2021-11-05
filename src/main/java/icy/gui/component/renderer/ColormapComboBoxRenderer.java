@@ -63,7 +63,7 @@ public class ColormapComboBoxRenderer extends CustomComboBoxRenderer
             final IcyColorMap colormap = (IcyColorMap) value;
             final JComboBox comboBox = getComboBox();
             final Dimension dim = comboBox.getSize();
-            // good estimation
+            // good estimation (better to avoid using reflection for that)
             final int btnWidth = SubstanceSizeUtils.getScrollBarWidth(SubstanceSizeUtils.getComponentFontSize(comboBox)) + 4;
 
             final Insets insets = getInsets();
