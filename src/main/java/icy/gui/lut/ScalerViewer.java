@@ -18,6 +18,31 @@
  */
 package icy.gui.lut;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.geom.Point2D;
+import java.lang.reflect.Array;
+import java.util.EventListener;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.event.EventListenerList;
+
 import icy.gui.component.math.HistogramPanel;
 import icy.gui.component.math.HistogramPanel.HistogramPanelListener;
 import icy.gui.dialog.MessageDialog;
@@ -43,31 +68,6 @@ import icy.util.ColorUtil;
 import icy.util.EventUtil;
 import icy.util.GraphicsUtil;
 import icy.util.StringUtil;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.awt.geom.Point2D;
-import java.lang.reflect.Array;
-import java.util.EventListener;
-
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.event.EventListenerList;
 
 /**
  * @author stephane
@@ -280,6 +280,48 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
             g.fillRect(middle, y + 11, 0, h - 11);
         }
 
+        private void updateMessage(MouseEvent e)
+        {
+            final Point pos = e.getPoint();
+            final boolean shift = EventUtil.isShiftDown(e);
+            final boolean left = EventUtil.isLeftMouseButton(e);
+            String text;
+
+            if (getBinNumber() > 0)
+            {
+                final int bin = pixelToBin(pos.x);
+                double index = pixelToData(pos.x);
+                final int value = getBinSize(bin);
+
+                // use integer index with integer data type
+                if (isIntegerType())
+                    index = Math.floor(index);
+
+                final String valueText = "value : " + MathUtil.roundSignificant(index, 5, true);
+                final String pixelText = "pixel number : " + value;
+
+                text = valueText + "\n" + pixelText;
+
+                setPositionInfo(index, value, getAdjustedBinSize(bin));
+            }
+            else
+                text = "";
+
+            // info message when pressing left button or when dragging
+            if (action != actionType.NULL)
+            {
+                if (!StringUtil.isEmpty(text))
+                    text += "\n";
+
+                if (shift)
+                    text += "GLOBAL MOVE";
+                else
+                    text += "Maintain 'Shift' for global move";
+            }
+
+            setMessage(text);
+        }
+
         @Override
         public void mouseClicked(MouseEvent e)
         {
@@ -297,6 +339,7 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
         public void mouseEntered(MouseEvent e)
         {
             updateCursor(e.getPoint());
+            updateMessage(e);
         }
 
         @Override
@@ -327,15 +370,6 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
                 else if (isOverX(pos, getMiddlePos()))
                     action = actionType.MODIFY_MIDDLE;
 
-                // show message
-                if (action != actionType.NULL)
-                {
-                    if (EventUtil.isShiftDown(e))
-                        setMessage("GLOBAL MOVE");
-                    else
-                        setMessage("Maintain 'Shift' for global move");
-                }
-
                 updateCursor(e.getPoint());
                 e.consume();
             }
@@ -344,6 +378,8 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
                 showSettingPopup(pos);
                 e.consume();
             }
+
+            updateMessage(e);
         }
 
         @Override
@@ -352,11 +388,10 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
             if (EventUtil.isLeftMouseButton(e))
             {
                 action = actionType.NULL;
-
                 updateCursor(e.getPoint());
-
-                setMessage("");
             }
+
+            updateMessage(e);
         }
 
         @Override
@@ -426,36 +461,7 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
                     break;
             }
 
-            // message
-            if (action != actionType.NULL)
-            {
-                if (shift)
-                    setMessage("GLOBAL MOVE");
-                else
-                    setMessage("Maintain 'Shift' for global move");
-            }
-
-            if (getBinNumber() > 0)
-            {
-                final int bin = pixelToBin(pos.x);
-                double index = pixelToData(pos.x);
-                final int value = getBinSize(bin);
-
-                // use integer index with integer data type
-                if (isIntegerType())
-                    index = Math.floor(index);
-
-                if (action == actionType.NULL)
-                {
-                    final String valueText = "value : " + MathUtil.roundSignificant(index, 5, true);
-                    final String pixelText = "pixel number : " + value;
-
-                    setMessage(valueText + "\n" + pixelText);
-                    // setToolTipText("<html>" + valueText + "<br>" + pixelText);
-                }
-
-                setPositionInfo(index, value, getAdjustedBinSize(bin));
-            }
+            updateMessage(e);
         }
 
         @Override
@@ -466,25 +472,7 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
             mouseOnLeft = pos.x < (getWidth() / 2);
 
             updateCursor(e.getPoint());
-
-            if (getBinNumber() > 0)
-            {
-                final int bin = pixelToBin(pos.x);
-                double index = pixelToData(pos.x);
-                final int value = getBinSize(bin);
-
-                // use integer index with integer data type
-                if (isIntegerType())
-                    index = Math.round(index);
-
-                final String valueText = "value : " + MathUtil.roundSignificant(index, 5, true);
-                final String pixelText = "pixel number : " + value;
-
-                setMessage(valueText + "\n" + pixelText);
-                // setToolTipText("<html>" + valueText + "<br>" + pixelText);
-
-                setPositionInfo(index, value, getAdjustedBinSize(bin));
-            }
+            updateMessage(e);
         }
 
         @Override
@@ -800,7 +788,6 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
             repaint();
         }
     }
-
 
     /**
      * Should be called when histogram scaling type changed
