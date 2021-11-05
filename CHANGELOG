@@ -1,3 +1,31 @@
+Icy 2.3.0.0 - 05/11/2021
+------------------------
+
+Application
+* 3D / VTK
+ - added new volume slicer tool
+ - tweaked default opacity 
+* Loader
+ - fixed loading non image files from Open command with 'All files' filter selected
+* GUI
+ - fixed a minor viewer toolbar refresh bug when switching rendering mode
+ - fixed histogram log/linear display state restoration
+ - improved histogram info display to remain visible even when moving bounds
+* ROI
+ - small optimization on 'Erosion' / 'Watershed' process time
+* switch dataset to 'virtual' state asynchronously (as it can takes age to do so)
+* fixed ImageJ / Icy image conversion switch
+* improved Java 17 compatiblity (replacing illegal reflective access where possible)
+  Still need some work to allow the image cache engine to work with Java 17  
+* small change to 'Updater' tool
+
+Developer
+* 3D / VTK
+ - added new VtkArrow/Cylinder/PlaneObject classes for easy drawing of these primitives.
+* deprecated all illegal reflective access methods
+* bit of refactoring / cleanup in project structure (moved all package.html file to 'javadoc' folder)
+
+
 Icy 2.2.1.0 - 09/09/2021
 ------------------------
 
