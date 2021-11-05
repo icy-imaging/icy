@@ -76,12 +76,10 @@ public class ImageJPatcher
         hacker.insertAfterMethod("ij.IJ", "public static void showProgress(double progress)");
         hacker.insertAfterMethod("ij.IJ", "public static void showProgress(int currentIndex, int finalIndex)");
         hacker.insertAfterMethod("ij.IJ", "public static void showStatus(java.lang.String s)");
-        hacker.loadClass("ij.IJ");
 
         // override behavior of ij.ImageJ
         hacker.insertAfterMethod("ij.ImageJ", "public void showStatus(java.lang.String s)");
         hacker.replaceMethod("ij.ImageJ", "public void configureProxy()");
-        hacker.loadClass("ij.ImageJ");
 
         // override behavior of ij.Menus
         hacker.insertAfterMethod("ij.Menus",
@@ -93,7 +91,10 @@ public class ImageJPatcher
                 "public static synchronized void addOpenRecentItem(java.lang.String path)");
         hacker.insertAfterMethod("ij.Menus",
                 "public static int installPlugin(java.lang.String plugin, char menuCode, java.lang.String command, java.lang.String shortcut, ij.ImageJ ij, int result)");
-        hacker.loadClass("ij.Menus");
+
+        // override behavior of ij.WindowManager
+        hacker.insertAfterMethod("ij.WindowManager", "public static void setCurrentWindow(ij.gui.ImageWindow iw)");
+        hacker.insertAfterMethod("ij.WindowManager", "private static void removeImageWindow(ij.gui.ImageWindow iw)");
 
         // override behavior of ij.ImagePlus
         // hacker.insertAfterMethod("ij.ImagePlus", "public void updateAndDraw()");
@@ -102,21 +103,19 @@ public class ImageJPatcher
         // "public void show(java.lang.String statusMessage)");
         // hacker.insertAfterMethod("ij.ImagePlus", "public void hide()");
         // hacker.insertAfterMethod("ij.ImagePlus", "public void close()");
-        // hacker.loadClass("ij.ImagePlus");
 
         // override behavior of ij.gui.ImageWindow
         // hacker.insertMethod("ij.gui.ImageWindow", "public void setVisible(boolean vis)");
         // hacker.insertMethod("ij.gui.ImageWindow", "public void show()");
         // hacker.insertBeforeMethod("ij.gui.ImageWindow", "public void close()");
-        hacker.insertAfterMethod("ij.gui.ImageWindow", "public void windowActivated(java.awt.event.WindowEvent e)");
-        hacker.insertAfterMethod("ij.gui.ImageWindow", "public void windowClosed(java.awt.event.WindowEvent e)");
-        hacker.loadClass("ij.gui.ImageWindow");
+        // hacker.insertAfterMethod("ij.gui.ImageWindow", "public void windowActivated(java.awt.event.WindowEvent e)");
+        // hacker.insertAfterMethod("ij.gui.ImageWindow", "public void windowClosed(java.awt.event.WindowEvent e)");
 
         // override behavior of MacAdapter
         if (SystemUtil.isMac())
         {
             hacker.replaceMethod("MacAdapter", "public void run(java.lang.String arg)");
-            hacker.replaceMethod("MacAdapter", "public voi  d handleAbout(com.apple.eawt.ApplicationEvent e)");
+            hacker.replaceMethod("MacAdapter", "public void handleAbout(com.apple.eawt.ApplicationEvent e)");
             hacker.replaceMethod("MacAdapter", "public void handleOpenApplication(com.apple.eawt.ApplicationEvent e)");
             hacker.replaceMethod("MacAdapter", "public void handleOpenFile(com.apple.eawt.ApplicationEvent e)");
             hacker.replaceMethod("MacAdapter", "public void handlePreferences(com.apple.eawt.ApplicationEvent e)");
@@ -124,7 +123,34 @@ public class ImageJPatcher
             hacker.replaceMethod("MacAdapter",
                     "public void handleReOpenApplication(com.apple.eawt.ApplicationEvent e)");
             hacker.replaceMethod("MacAdapter", "public void handleQuit(com.apple.eawt.ApplicationEvent e)");
-            hacker.loadClass("MacAdapter");
         }
+
+        // load classes at the end
+        hacker.loadClass("ij.IJ", ij.IJEventListener.class);
+        try
+        {
+            hacker.loadClass("ij.ImageJ", ij.IJEventListener.class);
+        }
+        catch (LinkageError le)
+        {
+            // ignore this one with Java 9 as it will load up at same time than ij.IJ class
+            if (SystemUtil.getJavaVersionAsNumber() < 9)
+                throw le;
+        }
+        hacker.loadClass("ij.Menus", ij.IJEventListener.class);
+        hacker.loadClass("ij.WindowManager", ij.IJEventListener.class);
+        // hacker.loadClass("ij.ImagePlus");
+//        try
+//        {
+//            hacker.loadClass("ij.gui.ImageWindow", ij.gui.DialogListener.class);
+//        }
+//        catch (LinkageError le)
+//        {
+//            // ignore this one with Java 9 as it will load up at same time than ij.IJ class
+//            if (SystemUtil.getJavaVersionAsNumber() < 9)
+//                throw le;
+//        }
+        if (SystemUtil.isMac())
+            hacker.loadClass("MacAdapter", ij.IJEventListener.class);
     }
 }

@@ -18,13 +18,6 @@
  */
 package icy.imagej;
 
-import icy.gui.util.LookAndFeelUtil;
-import icy.gui.util.LookAndFeelUtil.WeakSkinChangeListener;
-import icy.system.IcyExceptionHandler;
-import icy.system.SystemUtil;
-import icy.util.ColorUtil;
-import icy.util.ReflectionUtil;
-
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Graphics;
@@ -39,6 +32,13 @@ import javax.swing.SwingConstants;
 
 import org.pushingpixels.substance.api.skin.SkinChangeListener;
 
+import icy.file.FileUtil;
+import icy.gui.util.LookAndFeelUtil;
+import icy.gui.util.LookAndFeelUtil.WeakSkinChangeListener;
+import icy.system.IcyExceptionHandler;
+import icy.system.SystemUtil;
+import icy.util.ColorUtil;
+import icy.util.ReflectionUtil;
 import ij.IJ;
 import ij.gui.Toolbar;
 import ij.plugin.MacroInstaller;
@@ -71,18 +71,11 @@ public class ToolbarWrapper extends Toolbar
         @Override
         protected void paintComponent(Graphics g)
         {
+            // paint background
+            super.paintComponent(g);
+
+            // then just paint parent toolbar buttons as is
             ToolbarWrapper.this.paint(g);
-            
-            // try
-            // {
-            // if (drawButtonsMethod != null)
-            // drawButtonsMethod.invoke(ToolbarWrapper.this, g);
-            // }
-            // catch (Exception e)
-            // {
-            // IcyExceptionHandler.showErrorMessage(e, false);
-            // System.err.println("Cannot redraw toolbar buttons from ImageJ.");
-            // }
         }
 
         @Override
@@ -101,8 +94,7 @@ public class ToolbarWrapper extends Toolbar
             }
             catch (Exception e)
             {
-                IcyExceptionHandler.showErrorMessage(e, false);
-                System.err.println("Cannot remove toolbar buttons from ImageJ.");
+                System.out.println("Warning: cannot remove toolbar buttons from ImageJ.");
             }
 
             super.removeNotify();
@@ -114,31 +106,27 @@ public class ToolbarWrapper extends Toolbar
      */
     private static final long serialVersionUID = 6546185720732862969L;
 
-    final CustomToolBar swingComponent;
-
+    protected CustomToolBar swingComponent;
     private final SkinChangeListener skinChangeListener;
 
     /**
      * leaked methods and fields
      */
-    // Method drawButtonsMethod;
-    Field grayField;
-    Field brighterField;
-    Field darkerField;
-    Field evenDarkerField;
-    Field toolColorField;
-
-    // private Color gray = ImageJ.backgroundColor;
-    // private Color brighter = gray.brighter();
-    // private Color darker = new Color(175, 175, 175);
-    // private Color evenDarker = new Color(110, 110, 110);
+    Field grayField = null;
+    Field brighterField = null;
+    Field darkerField = null;
+    Field evenDarkerField = null;
+    Field toolColorField = null;
 
     public ToolbarWrapper(ImageJWrapper ijw)
     {
         super();
 
-        swingComponent = new CustomToolBar(SwingConstants.HORIZONTAL);
+        // lazy creation (it should already exist here)
+        if (swingComponent == null)
+            swingComponent = new CustomToolBar(SwingConstants.HORIZONTAL);
 
+        // set component properties
         swingComponent.setMinimumSize(getMinimumSize());
         swingComponent.setPreferredSize(getPreferredSize());
         swingComponent.addKeyListener(ijw);
@@ -147,22 +135,6 @@ public class ToolbarWrapper extends Toolbar
 
         try
         {
-            @SuppressWarnings("rawtypes")
-            final Vector popups = (Vector) ((Vector) ReflectionUtil.getFieldObject(this, "popups", true)).clone();
-
-            // transfer all popup from original toolbar to the swing toolbar
-            for (Object obj : popups)
-            {
-                final PopupMenu popup = (PopupMenu) obj;
-
-                super.remove(popup);
-                swingComponent.add(popup);
-            }
-            
-            // get access to private methods
-            // drawButtonsMethod = ReflectionUtil.getMethod(this.getClass(), "drawButtons", true,
-            // Graphics.class);
-            
             // get access to private fields
             grayField = ReflectionUtil.getField(this.getClass(), "gray", true);
             brighterField = ReflectionUtil.getField(this.getClass(), "brighter", true);
@@ -172,8 +144,7 @@ public class ToolbarWrapper extends Toolbar
         }
         catch (Throwable t)
         {
-            IcyExceptionHandler.showErrorMessage(t, false);
-            System.err.println("Cannot restore toolbar buttons from ImageJ.");
+            System.out.println("Warning: cannot access toolbar buttons from ImageJ");
         }
 
         skinChangeListener = new SkinChangeListener()
@@ -201,6 +172,9 @@ public class ToolbarWrapper extends Toolbar
                     evenDarkerCol = ColorUtil.mix(darkerCol, evenDarkerCol);
                 }
 
+                if (grayField == null)
+                    System.out.println("Warning: cannot set background color of ImageJ toolbar.");
+
                 try
                 {
                     if (grayField != null)
@@ -225,14 +199,19 @@ public class ToolbarWrapper extends Toolbar
         };
 
         // install default tools and macros
-        new MacroInstaller().run(IJ.getDirectory("macros") + "StartupMacros.txt");
+        final String file = IJ.getDirectory("macros") + "StartupMacros.txt";
+        if (FileUtil.exists(file))
+            new MacroInstaller().run(file);
 
         LookAndFeelUtil.addSkinChangeListener(new WeakSkinChangeListener(skinChangeListener));
     }
-    
+
     @Override
     public Container getParent()
     {
+        if (swingComponent == null)
+            return null;
+
         return swingComponent.getParent();
     }
 
@@ -247,20 +226,20 @@ public class ToolbarWrapper extends Toolbar
     @Override
     public synchronized void add(PopupMenu popup)
     {
+        // lazy creation of swing component
         if (swingComponent == null)
-            super.add(popup);
-        else
-        {
-            swingComponent.add(popup);
-            swingComponent.repaint();
-        }
+            swingComponent = new CustomToolBar(SwingConstants.HORIZONTAL);
+
+        swingComponent.add(popup);
+        swingComponent.repaint();
     }
 
     @Override
     public synchronized void remove(MenuComponent popup)
     {
+        // lazy creation of swing component
         if (swingComponent == null)
-            super.remove(popup);
+            swingComponent = new CustomToolBar(SwingConstants.HORIZONTAL);
         else
         {
             swingComponent.remove(popup);
@@ -268,32 +247,20 @@ public class ToolbarWrapper extends Toolbar
         }
     }
 
-    // @Override
-    // public void itemStateChanged(ItemEvent e)
-    // {
-    // super.itemStateChanged(e);
-    //
-    // swingComponent.repaint();
-    // }
-    //
-    // @Override
-    // public void paint(Graphics g)
-    // {
-    // swingComponent.repaint();
-    // }
-
     @Override
     public Graphics getGraphics()
     {
+        if (swingComponent == null)
+            return null;
+
         return swingComponent.getGraphics();
     }
 
-    // /**
-    // * Rebuild swing toolbar component
-    // */
-    // protected void rebuild()
-    // {
-    // swingComponent.removeAll();
-    // swingComponent.validate();
-    // }
+    @Override
+    public void repaint()
+    {
+        super.repaint();
+
+        swingComponent.repaint();
+    }
 }

@@ -18,14 +18,6 @@
  */
 package icy.imagej;
 
-import icy.gui.main.MainFrame;
-import icy.gui.util.SwingUtil;
-import icy.main.Icy;
-import icy.system.IcyExceptionHandler;
-import icy.system.SystemUtil;
-import icy.system.thread.ThreadUtil;
-import icy.util.ReflectionUtil;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -43,8 +35,14 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+import icy.gui.main.MainFrame;
+import icy.gui.util.SwingUtil;
+import icy.main.Icy;
+import icy.system.SystemUtil;
+import icy.system.thread.ThreadUtil;
 import ij.ImageJ;
 import ij.gui.ImageWindow;
+import ij.gui.Toolbar;
 
 /**
  * ImageJ Wrapper class.
@@ -61,7 +59,6 @@ public class ImageJWrapper extends ImageJ
     public interface ImageJActiveImageListener
     {
         public void imageActived(ImageWindow iw);
-
     }
 
     public final static String PROPERTY_MENU = "menu";
@@ -89,29 +86,29 @@ public class ImageJWrapper extends ImageJ
 
         swingPanel = new JPanel();
         swingPanel.setLayout(new BorderLayout());
+        swingPanel.setBorder(BorderFactory.createEmptyBorder());
 
         // menubar
         swingMenuBar = null;
         updateMenu();
 
+        // remove previous toolbar
+        for (int i = 0; i < getComponentCount(); i++)
+        {
+            if (getComponent(i) instanceof Toolbar)
+            {
+                remove(i);
+                break;
+            }
+        }
+
         // toolbar
         swingToolBar = new ToolbarWrapper(this);
-        swingPanel.add(swingToolBar.getSwingComponent(), BorderLayout.CENTER);
-        try
-        {
-            // patch imageJ toolbar to uses our wrapper
-            ReflectionUtil.getField(this.getClass(), "toolbar", true).set(this, swingToolBar);
-        }
-        catch (Throwable t)
-        {
-            IcyExceptionHandler.showErrorMessage(t, false);
-            System.err.println("Cannot install ImageJ toolbar wrapper");
-        }
+        swingToolBar.setVisible(false);
 
         // status bar
         swingStatusPanel = new JPanel();
         swingStatusPanel.setLayout(new BorderLayout());
-
         swingStatusLabel = new JLabel();
         swingStatusLabel.setPreferredSize(new Dimension(420, 24));
         swingStatusLabel.setMaximumSize(new Dimension(420, 24));
@@ -129,11 +126,7 @@ public class ImageJWrapper extends ImageJ
         swingProgressBar.addMouseListener(this);
         swingStatusPanel.add(swingProgressBar, BorderLayout.EAST);
 
-        swingPanel.add(swingStatusPanel, BorderLayout.SOUTH);
-        
-        // add original toolbar (but not visible) just to detect removing of it
-        swingToolBar.setVisible(false);
-        swingPanel.add(swingToolBar, BorderLayout.EAST);
+        // automatically add/remove the swing component toolbar when original component is added/removed
         swingPanel.addContainerListener(new ContainerListener()
         {
             @Override
@@ -144,17 +137,20 @@ public class ImageJWrapper extends ImageJ
                     // remove its swing counterpart
                     swingPanel.remove(swingToolBar.getSwingComponent());
             }
-            
+
             @Override
             public void componentAdded(ContainerEvent e)
             {
                 // original toolbar was (re)added ?
                 if (e.getChild() == swingToolBar)
                     // add its swing counterpart
-                    swingPanel.add(swingToolBar.getSwingComponent());
+                    swingPanel.add(swingToolBar.getSwingComponent(), BorderLayout.CENTER);
             }
         });
 
+        swingPanel.add(swingStatusPanel, BorderLayout.SOUTH);
+        // add original toolbar (not visible) just to detect add/remove of it
+        swingPanel.add(swingToolBar, BorderLayout.EAST);
         swingPanel.validate();
 
         listeners = new ArrayList<ImageJActiveImageListener>();
@@ -198,7 +194,7 @@ public class ImageJWrapper extends ImageJ
         // notify active image changed
         fireActiveImageChanged(iw);
     }
-
+    
     public void showSwingProgress(final int currentIndex, final int finalIndex)
     {
         ThreadUtil.invokeLater(new Runnable()
@@ -266,6 +262,15 @@ public class ImageJWrapper extends ImageJ
     {
         // rebuild menu
         updateMenu();
+    }
+
+    @Override
+    public void resize()
+    {
+        super.resize();
+
+        // need to re-init toolbar
+        swingToolBar.init();
     }
 
     /**
