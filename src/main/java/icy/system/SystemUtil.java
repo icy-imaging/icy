@@ -1049,6 +1049,10 @@ public class SystemUtil
         return FileUtil.getTempDirectory() + "/lib";
     }
 
+    /**
+     * @deprecated Not allowed since Java 12 so don't use it ! 
+     */
+    @Deprecated
     public static boolean addToJavaLibraryPath(String directories[])
     {
         // can't patch library path on java 12 or above
@@ -1062,23 +1066,13 @@ public class SystemUtil
         {
             final String path_separator = System.getProperty("path.separator");
 
-            // patch user library paths...
-            final Field pathsField = ReflectionUtil.getField(ClassLoader.class, "usr_paths", true);
-            // get current user paths
-            final ArrayList<String> userPaths = CollectionUtil.asArrayList((String[]) pathsField.get(null));
             // get current system paths
             String sysPaths = System.getProperty("java.library.path");
 
             for (String dir : directories)
-            {
-                if (!userPaths.contains(dir))
-                    userPaths.add(dir);
                 if (!sysPaths.contains(dir))
                     sysPaths += path_separator + dir;
-            }
 
-            // set back user library path
-            pathsField.set(null, userPaths.toArray(new String[userPaths.size()]));
             // set back system library path
             System.setProperty("java.library.path", sysPaths);
 
