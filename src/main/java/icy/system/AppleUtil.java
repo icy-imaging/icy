@@ -58,7 +58,7 @@ public class AppleUtil
             {
                 final ClassLoader classLoader = SystemUtil.getSystemClassLoader();
                 final Class appClass = classLoader.loadClass("com.apple.eawt.Application");
-                final Object app = appClass.newInstance();
+                final Object app = appClass.getDeclaredConstructor().newInstance();
 
                 final Class listenerClass = classLoader.loadClass("com.apple.eawt.ApplicationListener");
                 final Object listener = Proxy.newProxyInstance(classLoader, new Class[] {listenerClass},

@@ -51,11 +51,10 @@
 
 package icy.system;
 
-import icy.util.StringUtil;
-
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 
+import icy.util.StringUtil;
 import javassist.CannotCompileException;
 import javassist.ClassClassPath;
 import javassist.ClassPool;
@@ -294,14 +293,21 @@ public class ClassPatcher
      * 
      * @param fullClass
      *        Fully qualified class name to load.
+     * @param neighbor
+     *        A class belonging to the same package that this
+     *        class belongs to. It is used to load the class.
      * @return the loaded class
      */
-    public Class<?> loadClass(final String fullClass)
+    public Class<?> loadClass(final String fullClass, Class<?> neighbor)
     {
         final CtClass classRef = getClass(fullClass);
         try
         {
-            return classRef.toClass();
+            if (SystemUtil.getJavaVersionAsNumber() >= 9)
+                return pool.toClass(classRef, neighbor);
+
+            // old deprecated way of doing
+            return pool.toClass(classRef);
         }
         catch (final CannotCompileException e)
         {
@@ -322,12 +328,17 @@ public class ClassPatcher
      *        Fully qualified class name to load.
      * @return the loaded class
      */
-    public Class<?> loadClass(final String fullClass, ClassLoader classLoader, ProtectionDomain protectionDomain)
+    public Class<?> loadClass(final String fullClass, Class<?> neighbor, ClassLoader classLoader,
+            ProtectionDomain protectionDomain)
     {
         final CtClass classRef = getClass(fullClass);
         try
         {
-            return classRef.toClass(classLoader, protectionDomain);
+            if (SystemUtil.getJavaVersionAsNumber() >= 9)
+                return pool.toClass(classRef, neighbor, classLoader, protectionDomain);
+
+            // old deprecated way of doing
+            return pool.toClass(classRef, classLoader, protectionDomain);
         }
         catch (final CannotCompileException e)
         {
