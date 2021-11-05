@@ -398,6 +398,14 @@ public class MainInterfaceGui implements MainInterface
     @Override
     public synchronized void setActiveViewer(Viewer viewer)
     {
+        if (viewer != null)
+        {
+            // remove focus on ImageJ image
+            final ImageJWrapper ij = Icy.getMainInterface().getImageJ();
+            if (ij != null)
+                ij.setActiveImage(null);
+        }
+
         if (activeViewer == viewer)
             return;
 
@@ -1427,17 +1435,9 @@ public class MainInterfaceGui implements MainInterface
     {
         final Sequence sequence;
 
-        // new active viewer is not null ?
+        // new active viewer is not null ? get active sequence
         if (newActive != null)
-        {
-            // remove focus on ImageJ image
-            final ImageJWrapper ij = Icy.getMainInterface().getImageJ();
-            if (ij != null)
-                ij.setActiveImage(null);
-
-            // get active sequence
             sequence = newActive.getSequence();
-        }
         else
             sequence = null;
 

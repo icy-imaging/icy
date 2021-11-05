@@ -247,6 +247,6 @@ public class ImageJTask extends RibbonTask implements PropertyChangeListener
     @Override
     public void propertyChange(PropertyChangeEvent evt)
     {
-        ijToolBand.updateButtonsState();
+        onSequenceActivationChange();
     }
 }
