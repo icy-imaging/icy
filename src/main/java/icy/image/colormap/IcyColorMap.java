@@ -959,8 +959,9 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
         {
             alpha.removeAllControlPoint();
             alpha.setControlPoint(0, 0f);
-            alpha.setControlPoint(32, 0f);
-            alpha.setControlPoint(255, 0.4f);
+            alpha.setControlPoint(16, 0f);
+            alpha.setControlPoint(32, 0.1f);
+            alpha.setControlPoint(255, 0.75f);
         }
         finally
         {
