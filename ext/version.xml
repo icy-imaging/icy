@@ -189,7 +189,7 @@
         </element>
         <element>
             <name>VTK</name>
-            <version>8.0.1.0</version>
+            <version>8.0.1.1</version>
             <changeslog />
             <files>
                 <file>
