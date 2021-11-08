@@ -411,7 +411,9 @@ public class Updater
 
     public static boolean codeSign(String libFile) throws InterruptedException
     {
-        return SystemUtil.exec("codesign --force --deep -s - " + FileUtil.getGenericPath(libFile)).waitFor() == 0;
+        return true;
+        // not a good idea to sign libraries !
+//        return SystemUtil.exec("codesign --force --deep -s - " + FileUtil.getGenericPath(libFile)).waitFor() == 0;
     }
 
     /**
