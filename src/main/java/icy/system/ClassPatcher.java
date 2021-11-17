@@ -59,10 +59,13 @@ import javassist.CannotCompileException;
 import javassist.ClassClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.LoaderClassPath;
 import javassist.NotFoundException;
+import javassist.bytecode.AccessFlag;
+import javassist.bytecode.FieldInfo;
 
 /**
  * The code hacker provides a mechanism for altering the behavior of classes
@@ -326,6 +329,11 @@ public class ClassPatcher
      * 
      * @param fullClass
      *        Fully qualified class name to load.
+     * @param neighbor
+     *        A class belonging to the same package that this
+     *        class belongs to. It is used to load the class.
+     * @param classLoader
+     * @param protectionDomain
      * @return the loaded class
      */
     public Class<?> loadClass(final String fullClass, Class<?> neighbor, ClassLoader classLoader,
@@ -346,6 +354,21 @@ public class ClassPatcher
             System.err.println("Cannot load class: " + fullClass);
             return null;
         }
+    }
+
+    /**
+     * Set the given class field to public visibility
+     * 
+     * @param fullClass
+     *        Fully qualified class name to load.
+     * @param name
+     *        Name of the field we want to set to public visibility
+     */
+    public void setFieldPublic(final String fullClass, final String name)
+    {
+        final CtField field = getField(fullClass, name);
+        final FieldInfo info = field.getFieldInfo();
+        info.setAccessFlags(AccessFlag.PUBLIC);
     }
 
     /** Gets the Javassist class object corresponding to the given class name. */
@@ -382,6 +405,19 @@ public class ClassPatcher
         catch (final NotFoundException e)
         {
             throw new IllegalArgumentException("No such method: " + methodSig, e);
+        }
+    }
+
+    private CtField getField(final String fullClass, final String name)
+    {
+        final CtClass cc = getClass(fullClass);
+        try
+        {
+            return cc.getDeclaredField(name);
+        }
+        catch (final NotFoundException e)
+        {
+            throw new IllegalArgumentException("No such field: " + name, e);
         }
     }
 
