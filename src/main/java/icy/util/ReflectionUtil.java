@@ -237,4 +237,85 @@ public class ReflectionUtil
     {
         return getField(object.getClass(), fieldName, forceAccess).get(object);
     }
+
+    /**
+     * Set the value of the object instance corresponding to the specified field name.
+     */
+    public static void setFieldValue(Object object, String fieldName, Object value)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
+    {
+        getField(object.getClass(), fieldName).set(object, value);
+    }
+
+    /**
+     * Set the value of the object instance corresponding to the specified field name.
+     */
+    public static void setFieldValue(Object object, String fieldName, boolean value)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
+    {
+        getField(object.getClass(), fieldName).setBoolean(object, value);
+    }
+
+    /**
+     * Set the value of the object instance corresponding to the specified field name.
+     */
+    public static void setFieldValue(Object object, String fieldName, byte value)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
+    {
+        getField(object.getClass(), fieldName).setByte(object, value);
+    }
+
+    /**
+     * Set the value of the object instance corresponding to the specified field name.
+     */
+    public static void setFieldValue(Object object, String fieldName, char value)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
+    {
+        getField(object.getClass(), fieldName).setChar(object, value);
+    }
+
+    /**
+     * Set the value of the object instance corresponding to the specified field name.
+     */
+    public static void setFieldValue(Object object, String fieldName, short value)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
+    {
+        getField(object.getClass(), fieldName).setShort(object, value);
+    }
+
+    /**
+     * Set the value of the object instance corresponding to the specified field name.
+     */
+    public static void setFieldValue(Object object, String fieldName, int value)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
+    {
+        getField(object.getClass(), fieldName).setInt(object, value);
+    }
+
+    /**
+     * Set the value of the object instance corresponding to the specified field name.
+     */
+    public static void setFieldValue(Object object, String fieldName, long value)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
+    {
+        getField(object.getClass(), fieldName).setLong(object, value);
+    }
+
+    /**
+     * Set the value of the object instance corresponding to the specified field name.
+     */
+    public static void setFieldValue(Object object, String fieldName, float value)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
+    {
+        getField(object.getClass(), fieldName).setFloat(object, value);
+    }
+
+    /**
+     * Set the value of the object instance corresponding to the specified field name.
+     */
+    public static void setFieldValue(Object object, String fieldName, double value)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
+    {
+        getField(object.getClass(), fieldName).setDouble(object, value);
+    }
 }
