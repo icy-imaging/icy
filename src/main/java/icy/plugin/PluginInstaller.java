@@ -951,7 +951,6 @@ public class PluginInstaller implements Runnable
             }
         }
         finally
-
         {
             // installation end
             installingPlugins.clear();
