@@ -68,7 +68,6 @@ import icy.sequence.Sequence;
 import icy.sequence.SequencePrefetcher;
 import icy.system.AppleUtil;
 import icy.system.IcyExceptionHandler;
-import icy.system.IcySecurityManager;
 import icy.system.SingleInstanceCheck;
 import icy.system.SystemUtil;
 import icy.system.audit.Audit;
@@ -380,8 +379,6 @@ public class Icy
         // initialize OSX specific GUI stuff
         if (!headless && SystemUtil.isMac())
             AppleUtil.init();
-        // initialize security
-        IcySecurityManager.init();
         // initialize exception handler
         IcyExceptionHandler.init();
         // initialize action manager
@@ -1435,25 +1432,25 @@ public class Icy
         {
             IcyExceptionHandler.showErrorMessage(e1, false, false);
 
-//            // try to load the VTK way
-//            try
-//            {
-//                System.out.print("Try to load VTK library using VTK method... ");
-//
-//                vtkLibraryLoaded = vtkNativeLibrary.LoadAllNativeLibraries();
-//
-//                if (vtkLibraryLoaded)
-//                    System.out.println("success !");
-//                else
-//                    System.out.println("failed !");
-//
-//                // redirect vtk error log to file
-//                vtkNativeLibrary.DisableOutputWindow(new File("vtk.log"));
-//            }
-//            catch (Throwable e2)
-//            {
-//                IcyExceptionHandler.showErrorMessage(e2, false, false);
-//            }
+            // // try to load the VTK way
+            // try
+            // {
+            // System.out.print("Try to load VTK library using VTK method... ");
+            //
+            // vtkLibraryLoaded = vtkNativeLibrary.LoadAllNativeLibraries();
+            //
+            // if (vtkLibraryLoaded)
+            // System.out.println("success !");
+            // else
+            // System.out.println("failed !");
+            //
+            // // redirect vtk error log to file
+            // vtkNativeLibrary.DisableOutputWindow(new File("vtk.log"));
+            // }
+            // catch (Throwable e2)
+            // {
+            // IcyExceptionHandler.showErrorMessage(e2, false, false);
+            // }
         }
 
         if (vtkLibraryLoaded)
