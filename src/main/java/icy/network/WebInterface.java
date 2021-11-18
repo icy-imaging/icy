@@ -217,9 +217,13 @@ public class WebInterface
         }
 
         // add dev id
-        if (StringUtil.isEmpty(devId))
+        if (!StringUtil.isEmpty(devId))
             values.put(PARAM_DEVELOPERID, devId);
+        else if (plugin != null)
+            // package author package name is developer id
+            values.put(PARAM_DEVELOPERID, plugin.getAuthorPackageName());
         else
+            // empty
             values.put(PARAM_DEVELOPERID, "");
 
         // add client id
