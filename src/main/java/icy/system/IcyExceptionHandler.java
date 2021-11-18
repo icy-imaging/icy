@@ -294,17 +294,25 @@ public class IcyExceptionHandler implements UncaughtExceptionHandler
         handleException(pluginDesc, t, printStackStrace);
     }
 
-    private static PluginDescriptor findMatchingLocalPlugin(List<PluginDescriptor> plugins, String text)
+    private static PluginDescriptor findMatchingLocalPlugin(List<PluginDescriptor> plugins, String className)
     {
-        String className = ClassUtil.getBaseClassName(text);
+        // cleanup class name
+        final String baseClassName = ClassUtil.getBaseClassName(className);
 
-        // get the JAR file of this class
-        final File file = ClassUtil.getFile(className);
+        // try to find plugin using the class name
+        for (PluginDescriptor p : plugins)
+        {
+            if (StringUtil.equals(p.getClassName(), baseClassName))
+                return p;
+        }
 
-        // found ?
+        // not yet found --> get the JAR file of this class
+        final File file = ClassUtil.getFile(baseClassName);
+
+        // found the attached JAR file ?
         if (file != null)
         {
-            // try to find plugin using the same JAR file (so
+            // try to find plugin using the same JAR file
             for (PluginDescriptor p : plugins)
             {
                 final String jarFileName = p.getJarFilename();
@@ -320,38 +328,26 @@ public class IcyExceptionHandler implements UncaughtExceptionHandler
             }
         }
 
-        // not found with first method so now we try on the class name
-        while (!(StringUtil.equals(className, PluginLoader.PLUGIN_PACKAGE) || StringUtil.isEmpty(className)))
-        {
-            final PluginDescriptor plugin = findMatchingLocalPluginInternal(plugins, className);
-
-            if (plugin != null)
-                return plugin;
-
-            // not found --> we test with parent package
-            className = ClassUtil.getPackageName(className);
-        }
-
         return null;
     }
 
-    private static PluginDescriptor findMatchingLocalPluginInternal(List<PluginDescriptor> plugins, String text)
-    {
-        PluginDescriptor result = null;
-
-        for (PluginDescriptor plugin : plugins)
-        {
-            if (plugin.getClassName().startsWith(text))
-            {
-                if (result != null)
-                    return null;
-
-                result = plugin;
-            }
-        }
-
-        return result;
-    }
+//    private static PluginDescriptor findMatchingLocalPluginInternal(List<PluginDescriptor> plugins, String text)
+//    {
+//        PluginDescriptor result = null;
+//
+//        for (PluginDescriptor plugin : plugins)
+//        {
+//            if (plugin.getClassName().startsWith(text))
+//            {
+//                if (result != null)
+//                    return null;
+//
+//                result = plugin;
+//            }
+//        }
+//
+//        return result;
+//    }
 
     private static PluginDescriptor findPluginFromStackTrace(List<PluginDescriptor> plugins, StackTraceElement[] st)
     {
