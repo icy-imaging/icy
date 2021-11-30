@@ -59,7 +59,9 @@ import icy.util.XMLUtil;
  * @author Stephane Dallongeville
  * @param <R>
  *        the type of 4D ROI for each slice of this 5D ROI
+ * @deprecated Try to not use {@link ROI4D} or {@link ROI5D} anymore
  */
+@Deprecated
 public class ROI5DStack<R extends ROI4D> extends ROI5D implements ROIListener, OverlayListener, Iterable<R>
 {
     public static final String PROPERTY_USECHILDCOLOR = "useChildColor";
@@ -671,7 +673,7 @@ public class ROI5DStack<R extends ROI4D> extends ROI5D implements ROIListener, O
 
     // default approximated implementation for ROI5DStack
     @Override
-    public double computeNumberOfContourPoints()
+    public double computeNumberOfContourPoints() throws InterruptedException
     {
         // 5D contour points = first slice points + inter slices contour points + last slice points
         double perimeter = 0;
@@ -703,7 +705,7 @@ public class ROI5DStack<R extends ROI4D> extends ROI5D implements ROIListener, O
     }
 
     @Override
-    public double computeNumberOfPoints()
+    public double computeNumberOfPoints() throws InterruptedException
     {
         double volume = 0;
 
@@ -801,6 +803,7 @@ public class ROI5DStack<R extends ROI4D> extends ROI5D implements ROIListener, O
 
     @Override
     public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, int c, boolean inclusive)
+            throws InterruptedException
     {
         final R roi4d = getSlice(c);
 
@@ -811,7 +814,7 @@ public class ROI5DStack<R extends ROI4D> extends ROI5D implements ROIListener, O
     }
 
     @Override
-    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         final R roi4d = getSlice(c);
 

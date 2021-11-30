@@ -1814,7 +1814,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     @Override
-    public ROI getUnion(ROI roi) throws UnsupportedOperationException
+    public ROI getUnion(ROI roi) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2DShape)
         {
@@ -1838,7 +1838,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     @Override
-    public ROI getIntersection(ROI roi) throws UnsupportedOperationException
+    public ROI getIntersection(ROI roi) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2DShape)
         {
@@ -1862,7 +1862,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     @Override
-    public ROI getExclusiveUnion(ROI roi) throws UnsupportedOperationException
+    public ROI getExclusiveUnion(ROI roi) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2DShape)
         {
@@ -1886,7 +1886,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     }
 
     @Override
-    public ROI getSubtraction(ROI roi) throws UnsupportedOperationException
+    public ROI getSubtraction(ROI roi) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2DShape)
         {

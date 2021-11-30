@@ -178,8 +178,9 @@ class ARGBImageBuilder
      * @param out
      *        destination image. Note that we access image data so it can't be volatile anymore
      *        which may result in slower drawing.
+     * @throws InterruptedException 
      */
-    public BufferedImage buildARGBImage(IcyBufferedImage image, LUT lut, BufferedImage out)
+    public BufferedImage buildARGBImage(IcyBufferedImage image, LUT lut, BufferedImage out) throws InterruptedException
     {
         // planar size
         final int imageSize = image.getSizeX() * image.getSizeY();
@@ -231,8 +232,9 @@ class ARGBImageBuilder
      *        source image
      * @param lut
      *        {@link LUT} is used for color calculation (internal lut is used if null).
+     * @throws InterruptedException 
      */
-    public BufferedImage buildARGBImage(IcyBufferedImage image, LUT lut)
+    public BufferedImage buildARGBImage(IcyBufferedImage image, LUT lut) throws InterruptedException
     {
         return buildARGBImage(image, lut, null);
     }
@@ -254,7 +256,7 @@ class ARGBImageBuilder
         return result;
     }
 
-    private void waitCompletion(List<Future<?>> futures)
+    private void waitCompletion(List<Future<?>> futures) throws InterruptedException
     {
         while (!futures.isEmpty())
         {
@@ -270,10 +272,6 @@ class ARGBImageBuilder
             {
                 // warning
                 System.out.println("ARGBImageBuilder - Warning: " + e);
-            }
-            catch (InterruptedException e)
-            {
-                // ignore
             }
 
             // remove it

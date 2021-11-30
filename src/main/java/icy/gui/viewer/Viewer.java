@@ -764,7 +764,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         // refresh combos
         refreshLockCombo();
         refreshCanvasCombo();
-        
+
         toolBar.repaint();
     }
 
@@ -823,13 +823,14 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     public void setCanvas(String pluginClassName)
     {
         // not the same canvas ?
-        if ((canvas == null) || !StringUtil.equals(canvas.getClass().getName(), IcyCanvas.getCanvasClassName(pluginClassName)))
+        if ((canvas == null)
+                || !StringUtil.equals(canvas.getClass().getName(), IcyCanvas.getCanvasClassName(pluginClassName)))
         {
             try
             {
                 IcyCanvas newCanvas;
                 String className = pluginClassName;
-                
+
                 // VTK Canvas ?
                 if (StringUtil.equals(className, VtkCanvasPlugin.class.getName()))
                 {
@@ -844,7 +845,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                                     ConfirmDialog.OK_CANCEL_OPTION))
                                 // use current canvas class
                                 className = canvas.getClass().getName();
-                            
+
                             break;
                         }
                     }
@@ -1337,9 +1338,10 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     }
 
     /**
+     * @throws InterruptedException
      * @see icy.canvas.IcyCanvas#getRenderedImage(int, int, int, boolean)
      */
-    public BufferedImage getRenderedImage(int t, int z, int c, boolean canvasView)
+    public BufferedImage getRenderedImage(int t, int z, int c, boolean canvasView) throws InterruptedException
     {
         if (canvas == null)
             return null;
@@ -1348,9 +1350,11 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     }
 
     /**
+     * @throws InterruptedException
      * @see icy.canvas.IcyCanvas#getRenderedSequence(boolean, icy.common.listener.ProgressListener)
      */
     public Sequence getRenderedSequence(boolean canvasView, ProgressListener progressListener)
+            throws InterruptedException
     {
         if (canvas == null)
             return null;

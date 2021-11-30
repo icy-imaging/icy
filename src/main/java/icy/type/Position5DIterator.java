@@ -3,9 +3,9 @@
  */
 package icy.type;
 
-import icy.type.point.Point5D;
-
 import java.util.NoSuchElementException;
+
+import icy.type.point.Point5D;
 
 /**
  * Position 5D iterator.
@@ -17,7 +17,7 @@ public interface Position5DIterator
     /**
      * Reset iterator to initial position.
      */
-    public void reset();
+    public void reset() throws InterruptedException;
 
     /**
      * Pass to the next element.
@@ -25,7 +25,7 @@ public interface Position5DIterator
      * @exception NoSuchElementException
      *            iteration has no more elements.
      */
-    public void next() throws NoSuchElementException;
+    public void next() throws NoSuchElementException, InterruptedException;
 
     /**
      * Returns <i>true</i> if the iterator has no more elements.

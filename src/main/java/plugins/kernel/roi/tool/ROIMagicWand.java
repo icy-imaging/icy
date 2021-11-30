@@ -72,7 +72,14 @@ public class ROIMagicWand extends ROI2DArea
             else
                 roi = MagicWand.doWand2D(sequence, x, y, z, t, channel, settings);
 
-            magicWandDone(roi);
+            try
+            {
+                magicWandDone(roi);
+            }
+            catch (InterruptedException e)
+            {
+                // ignore interruption
+            }
         }
     }
 
@@ -388,7 +395,7 @@ public class ROIMagicWand extends ROI2DArea
         getOverlay().painterChanged();
     }
 
-    void magicWandDone(ROI roi)
+    void magicWandDone(ROI roi) throws InterruptedException
     {
         if (roi != null)
         {

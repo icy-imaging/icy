@@ -263,7 +263,7 @@ public class ROI2DLine extends ROI2DShape
     }
 
     @Override
-    public boolean intersects(ROI r)
+    public boolean intersects(ROI r) throws InterruptedException
     {
         // special case of ROI2DLine
         if (r instanceof ROI2DLine)

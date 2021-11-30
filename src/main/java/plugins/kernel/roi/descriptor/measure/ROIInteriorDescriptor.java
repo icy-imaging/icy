@@ -34,7 +34,7 @@ public class ROIInteriorDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return Double.valueOf(computeInterior(roi));
     }
@@ -45,8 +45,9 @@ public class ROIInteriorDescriptor extends ROIDescriptor
      * @param roi
      *        the ROI on which we want to compute the number of contour point
      * @return the number of point inside the ROI
+     * @throws InterruptedException 
      */
-    public static double computeInterior(ROI roi)
+    public static double computeInterior(ROI roi) throws InterruptedException
     {
         return roi.getNumberOfPoints();
     }

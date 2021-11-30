@@ -18,10 +18,6 @@
  */
 package icy.roi;
 
-import icy.type.TypeUtil;
-import icy.type.collection.array.DynamicArray;
-import icy.type.point.Point2DUtil;
-
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -30,6 +26,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import icy.type.TypeUtil;
+import icy.type.collection.array.DynamicArray;
+import icy.type.point.Point2DUtil;
 
 /**
  * Class to define a 2D boolean mask region and make basic boolean operation between masks.<br>
@@ -445,8 +445,10 @@ public class BooleanMask2D implements Cloneable
     /**
      * Fast 2x up scaling (each point become 2x2 bloc points).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask2D upscale(BooleanMask2D mask)
+    public static BooleanMask2D upscale(BooleanMask2D mask) throws InterruptedException
     {
         final Rectangle srcBounds;
         final boolean[] srcMask;
@@ -481,6 +483,10 @@ public class BooleanMask2D implements Cloneable
                 offRes += 2;
             }
 
+            // check for interruption from time to time as this can be a long process
+            if (((y & 0xF) == 0xF) && Thread.interrupted())
+                throw new InterruptedException("BooleanMask.upscale(..) process interrupted.");
+
             // pass 1 line
             offRes += srcW * 2;
         }
@@ -494,8 +500,9 @@ public class BooleanMask2D implements Cloneable
      * 
      * @param mask
      *        the boolean mask to download
+     * @throws InterruptedException
      */
-    public static byte[] getDownscaleValues(BooleanMask2D mask)
+    public static byte[] getDownscaleValues(BooleanMask2D mask) throws InterruptedException
     {
         final Rectangle srcBounds;
         final boolean[] srcMask;
@@ -535,10 +542,15 @@ public class BooleanMask2D implements Cloneable
                 offSrc += 2;
             }
 
+            // check for interruption from time to time as this can be a long process
+            if (((y & 0xF) == 0xF) && Thread.interrupted())
+                throw new InterruptedException("BooleanMask.getDownscaleValues(..) process interrupted.");
+
             // pass 1 line
             offSrc += resW * 2;
             // fix for odd width
-            if ((srcBounds.width & 1) == 1) offSrc += 2;
+            if ((srcBounds.width & 1) == 1)
+                offSrc += 2;
         }
 
         return resMask;
@@ -554,8 +566,9 @@ public class BooleanMask2D implements Cloneable
      *        the minimum number of <code>true</code>points from a 2x2 block to give a <code>true</code> resulting
      *        point.<br>
      *        Accepted value: 1 to 4
+     * @throws InterruptedException
      */
-    public static BooleanMask2D downscale(BooleanMask2D mask, int nbPointForTrue)
+    public static BooleanMask2D downscale(BooleanMask2D mask, int nbPointForTrue) throws InterruptedException
     {
         final Rectangle srcBounds;
 
@@ -580,16 +593,20 @@ public class BooleanMask2D implements Cloneable
     /**
      * Fast 2x down scaling (each 2x2 block points become 1 point).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask2D downscale(BooleanMask2D mask)
+    public static BooleanMask2D downscale(BooleanMask2D mask) throws InterruptedException
     {
         return downscale(mask, 2);
     }
 
     /**
      * Build global boolean mask from union of all specified mask
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask2D getUnion(List<BooleanMask2D> masks)
+    public static BooleanMask2D getUnion(List<BooleanMask2D> masks) throws InterruptedException
     {
         BooleanMask2D result = null;
 
@@ -615,8 +632,10 @@ public class BooleanMask2D implements Cloneable
      * If <code>mask1</code> is <code>null</code> then a copy of <code>mask2</code> is returned.<br>
      * If <code>mask2</code> is <code>null</code> then a copy of <code>mask1</code> is returned.<br>
      * An empty mask is returned if both <code>mask1</code> and <code>mask2</code> are <code>null</code>.
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask2D getUnion(BooleanMask2D mask1, BooleanMask2D mask2)
+    public static BooleanMask2D getUnion(BooleanMask2D mask1, BooleanMask2D mask2) throws InterruptedException
     {
         if ((mask1 == null) && (mask2 == null))
             return new BooleanMask2D();
@@ -644,8 +663,11 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
     public static BooleanMask2D getUnion(Rectangle bounds1, boolean[] mask1, Rectangle bounds2, boolean[] mask2)
+            throws InterruptedException
     {
         final Rectangle union = bounds1.union(bounds2);
 
@@ -663,6 +685,10 @@ public class BooleanMask2D implements Cloneable
                 for (int x = 0; x < bounds1.width; x++)
                     mask[offDst + x] |= mask1[offSrc++];
 
+                // check for interruption from time to time as this can be a long process
+                if (((y & 0xF) == 0xF) && Thread.interrupted())
+                    throw new InterruptedException("BooleanMask.getUnion(..) process interrupted.");
+
                 offDst += union.width;
             }
 
@@ -675,6 +701,10 @@ public class BooleanMask2D implements Cloneable
                 for (int x = 0; x < bounds2.width; x++)
                     mask[offDst + x] |= mask2[offSrc++];
 
+                // check for interruption from time to time as this can be a long process
+                if (((y & 0xF) == 0xF) && Thread.interrupted())
+                    throw new InterruptedException("BooleanMask.getUnion(..) process interrupted.");
+
                 offDst += union.width;
             }
 
@@ -686,8 +716,10 @@ public class BooleanMask2D implements Cloneable
 
     /**
      * Build global boolean mask from intersection of all specified mask
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask2D getIntersection(List<BooleanMask2D> masks)
+    public static BooleanMask2D getIntersection(List<BooleanMask2D> masks) throws InterruptedException
     {
         BooleanMask2D result = null;
 
@@ -711,8 +743,10 @@ public class BooleanMask2D implements Cloneable
     /**
      * Build resulting mask from intersection of the mask1 and mask2.<br>
      * An empty mask is returned if <code>mask1</code> or <code>mask2</code> is <code>null</code>.
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask2D getIntersection(BooleanMask2D mask1, BooleanMask2D mask2)
+    public static BooleanMask2D getIntersection(BooleanMask2D mask1, BooleanMask2D mask2) throws InterruptedException
     {
         if ((mask1 == null) || (mask2 == null))
             return new BooleanMask2D();
@@ -735,8 +769,11 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####
      *     ##                                 ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
     public static BooleanMask2D getIntersection(Rectangle bounds1, boolean[] mask1, Rectangle bounds2, boolean[] mask2)
+            throws InterruptedException
     {
         final Rectangle intersect = bounds1.intersection(bounds2);
 
@@ -754,6 +791,10 @@ public class BooleanMask2D implements Cloneable
                 for (int x = 0; x < intersect.width; x++)
                     mask[off++] = mask1[off1 + x] & mask2[off2 + x];
 
+                // check for interruption from time to time as this can be a long process
+                if (((y & 0xF) == 0xF) && Thread.interrupted())
+                    throw new InterruptedException("BooleanMask.getIntersection(..) process interrupted.");
+
                 off1 += bounds1.width;
                 off2 += bounds2.width;
             }
@@ -766,8 +807,10 @@ public class BooleanMask2D implements Cloneable
 
     /**
      * Build global boolean mask from exclusive union of all specified mask
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask2D getExclusiveUnion(List<BooleanMask2D> masks)
+    public static BooleanMask2D getExclusiveUnion(List<BooleanMask2D> masks) throws InterruptedException
     {
         BooleanMask2D result = null;
 
@@ -793,8 +836,10 @@ public class BooleanMask2D implements Cloneable
      * If <code>mask1</code> is <code>null</code> then a copy of <code>mask2</code> is returned.<br>
      * If <code>mask2</code> is <code>null</code> then a copy of <code>mask1</code> is returned.<br>
      * <code>null</code> is returned if both <code>mask1</code> and <code>mask2</code> are <code>null</code>.
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask2D getExclusiveUnion(BooleanMask2D mask1, BooleanMask2D mask2)
+    public static BooleanMask2D getExclusiveUnion(BooleanMask2D mask1, BooleanMask2D mask2) throws InterruptedException
     {
         if ((mask1 == null) && (mask2 == null))
             return new BooleanMask2D();
@@ -822,9 +867,11 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
     public static BooleanMask2D getExclusiveUnion(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
-            boolean[] mask2)
+            boolean[] mask2) throws InterruptedException
     {
         final Rectangle union = bounds1.union(bounds2);
 
@@ -842,6 +889,10 @@ public class BooleanMask2D implements Cloneable
                 for (int x = 0; x < bounds1.width; x++)
                     mask[offDst + x] ^= mask1[offSrc++];
 
+                // check for interruption from time to time as this can be a long process
+                if (((y & 0xF) == 0xF) && Thread.interrupted())
+                    throw new InterruptedException("BooleanMask.getExclusiveUnion(..) process interrupted.");
+
                 offDst += union.width;
             }
 
@@ -853,6 +904,10 @@ public class BooleanMask2D implements Cloneable
             {
                 for (int x = 0; x < bounds2.width; x++)
                     mask[offDst + x] ^= mask2[offSrc++];
+
+                // check for interruption from time to time as this can be a long process
+                if (((y & 0xF) == 0xF) && Thread.interrupted())
+                    throw new InterruptedException("BooleanMask.getExclusiveUnion(..) process interrupted.");
 
                 offDst += union.width;
             }
@@ -872,8 +927,10 @@ public class BooleanMask2D implements Cloneable
      * Build resulting mask from the subtraction of mask2 from mask1.<br>
      * If <code>mask2</code> is <code>null</code> then a copy of <code>mask1</code> is returned.<br>
      * If <code>mask1</code> is <code>null</code> then a empty mask is returned.
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask2D getSubtraction(BooleanMask2D mask1, BooleanMask2D mask2)
+    public static BooleanMask2D getSubtraction(BooleanMask2D mask1, BooleanMask2D mask2) throws InterruptedException
     {
         if (mask1 == null)
             return new BooleanMask2D();
@@ -898,8 +955,11 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####     ####
      *     ##                                 ##     ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
     public static BooleanMask2D getSubtraction(Rectangle bounds1, boolean[] mask1, Rectangle bounds2, boolean[] mask2)
+            throws InterruptedException
     {
         final boolean[] mask = mask1.clone();
         final Rectangle subtract = new Rectangle(bounds1);
@@ -920,6 +980,10 @@ public class BooleanMask2D implements Cloneable
                 for (int x = 0; x < intersection.width; x++)
                     mask[offDst + x] &= !mask2[offSrc + x];
 
+                // check for interruption from time to time as this can be a long process
+                if (((y & 0xF) == 0xF) && Thread.interrupted())
+                    throw new InterruptedException("BooleanMask.getSubtraction(..) process interrupted.");
+
                 offDst += subtract.width;
                 offSrc += bounds2.width;
             }
@@ -932,19 +996,21 @@ public class BooleanMask2D implements Cloneable
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getUnion(List)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getUnionBooleanMask(List<BooleanMask2D> masks)
+    public static BooleanMask2D getUnionBooleanMask(List<BooleanMask2D> masks) throws InterruptedException
     {
         return getUnion(masks);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getUnion(List)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getUnionBooleanMask(ROI2D[] rois)
+    public static BooleanMask2D getUnionBooleanMask(ROI2D[] rois) throws InterruptedException
     {
         final List<BooleanMask2D> masks = new ArrayList<BooleanMask2D>();
 
@@ -956,68 +1022,77 @@ public class BooleanMask2D implements Cloneable
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getUnion(List)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getUnionBooleanMask(ArrayList<ROI2D> rois)
+    public static BooleanMask2D getUnionBooleanMask(ArrayList<ROI2D> rois) throws InterruptedException
     {
         return getUnionBooleanMask(rois.toArray(new ROI2D[rois.size()]));
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getUnion(BooleanMask2D, BooleanMask2D)} instead.
      */
     @Deprecated
     public static BooleanMask2D getUnionBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2)
+            throws InterruptedException
     {
         return getUnion(mask1, mask2);
 
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getUnion(Rectangle, boolean[], Rectangle, boolean[])} instead.
      */
     @Deprecated
     public static BooleanMask2D getUnionBooleanMask(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
-            boolean[] mask2)
+            boolean[] mask2) throws InterruptedException
     {
         return getUnion(bounds1, mask1, bounds2, mask2);
 
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getIntersection(List)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getIntersectionBooleanMask(List<BooleanMask2D> masks)
+    public static BooleanMask2D getIntersectionBooleanMask(List<BooleanMask2D> masks) throws InterruptedException
     {
         return getIntersection(masks);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getIntersection(BooleanMask2D, BooleanMask2D)} instead.
      */
     @Deprecated
     public static BooleanMask2D getIntersectionBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2)
+            throws InterruptedException
     {
         return getIntersection(mask1, mask2);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getIntersection(Rectangle, boolean[], Rectangle, boolean[])} instead.
      */
     @Deprecated
     public static BooleanMask2D getIntersectionBooleanMask(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
-            boolean[] mask2)
+            boolean[] mask2) throws InterruptedException
     {
         return getIntersection(bounds1, mask1, bounds2, mask2);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getIntersection(List)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getIntersectBooleanMask(ROI2D[] rois)
+    public static BooleanMask2D getIntersectBooleanMask(ROI2D[] rois) throws InterruptedException
     {
         final List<BooleanMask2D> masks = new ArrayList<BooleanMask2D>();
 
@@ -1029,47 +1104,53 @@ public class BooleanMask2D implements Cloneable
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getIntersection(List)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getIntersectBooleanMask(ArrayList<ROI2D> rois)
+    public static BooleanMask2D getIntersectBooleanMask(ArrayList<ROI2D> rois) throws InterruptedException
     {
         return getIntersectBooleanMask(rois.toArray(new ROI2D[rois.size()]));
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getIntersectionBooleanMask(BooleanMask2D, BooleanMask2D)} instead.
      */
     @Deprecated
     public static BooleanMask2D getIntersectBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2)
+            throws InterruptedException
     {
         return getIntersectionBooleanMask(mask1.bounds, mask1.mask, mask2.bounds, mask2.mask);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getIntersectionBooleanMask(Rectangle, boolean[], Rectangle, boolean[])} instead.
      */
     @Deprecated
     public static BooleanMask2D getIntersectBooleanMask(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
-            boolean[] mask2)
+            boolean[] mask2) throws InterruptedException
     {
         return getIntersectionBooleanMask(bounds1, mask1, bounds2, mask2);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(List)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getExclusiveUnionBooleanMask(List<BooleanMask2D> masks)
+    public static BooleanMask2D getExclusiveUnionBooleanMask(List<BooleanMask2D> masks) throws InterruptedException
     {
         return getExclusiveUnion(masks);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getExclusiveUnion(List)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getExclusiveUnionBooleanMask(ROI2D[] rois)
+    public static BooleanMask2D getExclusiveUnionBooleanMask(ROI2D[] rois) throws InterruptedException
     {
         final List<BooleanMask2D> masks = new ArrayList<BooleanMask2D>();
 
@@ -1081,68 +1162,76 @@ public class BooleanMask2D implements Cloneable
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getExclusiveUnion(List)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getExclusiveUnionBooleanMask(ArrayList<ROI2D> rois)
+    public static BooleanMask2D getExclusiveUnionBooleanMask(ArrayList<ROI2D> rois) throws InterruptedException
     {
         return getExclusiveUnionBooleanMask(rois.toArray(new ROI2D[rois.size()]));
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(BooleanMask2D, BooleanMask2D)} instead.
      */
     @Deprecated
     public static BooleanMask2D getExclusiveUnionBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2)
+            throws InterruptedException
     {
         return getExclusiveUnion(mask1, mask2);
 
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(Rectangle, boolean[], Rectangle, boolean[])} instead.
      */
     @Deprecated
     public static BooleanMask2D getExclusiveUnionBooleanMask(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
-            boolean[] mask2)
+            boolean[] mask2) throws InterruptedException
     {
         return getExclusiveUnion(bounds1, mask1, bounds2, mask2);
 
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnionBooleanMask(ROI2D[])} instead.
      */
     @Deprecated
-    public static BooleanMask2D getXorBooleanMask(ROI2D[] rois)
+    public static BooleanMask2D getXorBooleanMask(ROI2D[] rois) throws InterruptedException
     {
         return getExclusiveUnionBooleanMask(rois);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnionBooleanMask(List)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getXorBooleanMask(ArrayList<ROI2D> rois)
+    public static BooleanMask2D getXorBooleanMask(ArrayList<ROI2D> rois) throws InterruptedException
     {
         return getExclusiveUnionBooleanMask(rois);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnionBooleanMask(BooleanMask2D, BooleanMask2D)} instead.
      */
     @Deprecated
-    public static BooleanMask2D getXorBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2)
+    public static BooleanMask2D getXorBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2) throws InterruptedException
     {
         return getExclusiveUnionBooleanMask(mask1, mask2);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Uses {@link #getExclusiveUnionBooleanMask(Rectangle, boolean[], Rectangle, boolean[])} instead.
      */
     @Deprecated
     public static BooleanMask2D getXorBooleanMask(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
-            boolean[] mask2)
+            boolean[] mask2) throws InterruptedException
     {
         return getExclusiveUnionBooleanMask(bounds1, mask1, bounds2, mask2);
     }
@@ -1387,9 +1476,10 @@ public class BooleanMask2D implements Cloneable
      * Ymax   9
      * </pre>
      * 
+     * @throws InterruptedException
      * @see #getPointsAsIntArray()
      */
-    public Point[] getPoints()
+    public Point[] getPoints() throws InterruptedException
     {
         return TypeUtil.toPoint(getPointsAsIntArray());
     }
@@ -1407,8 +1497,10 @@ public class BooleanMask2D implements Cloneable
      *       78
      * Ymax   9
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public int[] getPointsAsIntArray()
+    public int[] getPointsAsIntArray() throws InterruptedException
     {
         if (bounds.isEmpty())
             return new int[0];
@@ -1429,6 +1521,10 @@ public class BooleanMask2D implements Cloneable
                     points[pt++] = y;
                 }
             }
+
+            // check for interruption from time to time as this can be a long process
+            if (((y & 0xF) == 0xF) && Thread.interrupted())
+                throw new InterruptedException("BooleanMask.set(..) process interrupted.");
         }
 
         final int[] result = new int[pt];
@@ -1442,8 +1538,9 @@ public class BooleanMask2D implements Cloneable
      * Return a 2D array of integer representing points of each component of the current mask.<br>
      * A component is basically an isolated object which does not touch any other objects.<br>
      * Internal use only.
+     * @throws InterruptedException 
      */
-    protected List<Component> getComponentsPointsInternal()
+    protected List<Component> getComponentsPointsInternal() throws InterruptedException
     {
         final List<Component> components = new ArrayList<Component>();
         final int w = bounds.width;
@@ -1518,6 +1615,10 @@ public class BooleanMask2D implements Cloneable
                 currLine[x + 1] = left;
             }
 
+            // check for interruption from time to time as this can be a long process
+            if (((y & 0xF) == 0xF) && Thread.interrupted())
+                throw new InterruptedException("BooleanMask.getComponentsPointsInternal() process interrupted.");
+
             Component[] pl = prevLine;
             prevLine = currLine;
             currLine = pl;
@@ -1552,10 +1653,11 @@ public class BooleanMask2D implements Cloneable
      *       78
      * Ymax   9
      *        </pre>
+     * @throws InterruptedException 
      * 
      * @see #getComponentsPointsAsIntArray()
      */
-    public Point[][] getComponentsPoints(boolean sorted)
+    public Point[][] getComponentsPoints(boolean sorted) throws InterruptedException
     {
         if (bounds.isEmpty())
             return new Point[0][0];
@@ -1610,10 +1712,11 @@ public class BooleanMask2D implements Cloneable
      * <i>c</i>.<br>
      * <code>result[c][(pt * 2) + 1]</code> = Y coordinate for point <i>pt</i> of component
      * <i>c</i>.<br>
+     * @throws InterruptedException 
      * 
      * @see #getComponentsPoints(boolean)
      */
-    public int[][] getComponentsPointsAsIntArray()
+    public int[][] getComponentsPointsAsIntArray() throws InterruptedException
     {
         if (bounds.isEmpty())
             return new int[0][0];
@@ -1632,8 +1735,9 @@ public class BooleanMask2D implements Cloneable
      * Return an array of boolean mask representing each independent component of the current
      * mask.<br>
      * A component is basically an isolated object which does not touch any other objects.
+     * @throws InterruptedException 
      */
-    public BooleanMask2D[] getComponents()
+    public BooleanMask2D[] getComponents() throws InterruptedException
     {
         if (bounds.isEmpty())
             return new BooleanMask2D[0];
@@ -1654,9 +1758,10 @@ public class BooleanMask2D implements Cloneable
      * containing disconnected objects.<br>
      * Also it may returns incorrect result if the contour is not consistent (several connected contour possible).
      * 
+     * @throws InterruptedException
      * @see #getContourPoints()
      */
-    public List<Point> getConnectedContourPoints()
+    public List<Point> getConnectedContourPoints() throws InterruptedException
     {
         final int[] intArrayPoints = getContourPointsAsIntArray();
         final List<List<Point>> allPoints = new ArrayList<List<Point>>();
@@ -2020,9 +2125,10 @@ public class BooleanMask2D implements Cloneable
      *   89
      * </pre>
      * 
+     * @throws InterruptedException
      * @see #getContourPointsAsIntArray()
      */
-    public Point[] getContourPoints()
+    public Point[] getContourPoints() throws InterruptedException
     {
         return TypeUtil.toPoint(getContourPointsAsIntArray());
     }
@@ -2041,9 +2147,10 @@ public class BooleanMask2D implements Cloneable
      *   89
      * </pre>
      * 
+     * @throws InterruptedException
      * @see #getConnectedContourPoints()
      */
-    public int[] getContourPointsAsIntArray()
+    public int[] getContourPointsAsIntArray() throws InterruptedException
     {
         if (isEmpty())
             return new int[0];
@@ -2138,6 +2245,10 @@ public class BooleanMask2D implements Cloneable
 
             for (int y = bounds.y + 1; y < maxy; y++)
             {
+                // check for interruption from time to time as this can be a long process
+                if (((y & 0xF) == 0xF) && Thread.interrupted())
+                    throw new InterruptedException("BooleanMask.getContourPointsAsIntArray() process interrupted.");
+
                 // first pixel of line
                 left = false;
                 current = mask[offset];
@@ -2238,10 +2349,11 @@ public class BooleanMask2D implements Cloneable
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getContourPoints()} instead.
      */
     @Deprecated
-    public Point[] getEdgePoints()
+    public Point[] getEdgePoints() throws InterruptedException
     {
         return TypeUtil.toPoint(getContourPointsAsIntArray());
     }
@@ -2254,8 +2366,9 @@ public class BooleanMask2D implements Cloneable
      * @author Alexandre Dufour
      * @author Stephane Dallongeville
      * @return the length of the contour
+     * @throws InterruptedException
      */
-    public double getContourLength()
+    public double getContourLength() throws InterruptedException
     {
         double perimeter = 0;
 
@@ -2422,9 +2535,10 @@ public class BooleanMask2D implements Cloneable
     /**
      * Compute intersection with specified mask and return result in a new mask.
      * 
+     * @throws InterruptedException
      * @see #intersect(BooleanMask2D)
      */
-    public BooleanMask2D getIntersection(BooleanMask2D booleanMask)
+    public BooleanMask2D getIntersection(BooleanMask2D booleanMask) throws InterruptedException
     {
         return getIntersection(this, booleanMask);
     }
@@ -2432,27 +2546,30 @@ public class BooleanMask2D implements Cloneable
     /**
      * Compute intersection with specified mask and return result in a new mask.
      * 
+     * @throws InterruptedException
      * @see #intersect(Rectangle, boolean[])
      */
-    public BooleanMask2D getIntersection(Rectangle bounds, boolean[] mask)
+    public BooleanMask2D getIntersection(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         return getIntersection(this.bounds, this.mask, bounds, mask);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getIntersection(BooleanMask2D)} instead.
      */
     @Deprecated
-    public BooleanMask2D getIntersect(BooleanMask2D booleanMask)
+    public BooleanMask2D getIntersect(BooleanMask2D booleanMask) throws InterruptedException
     {
         return getIntersection(booleanMask);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getIntersection(Rectangle, boolean[])} instead.
      */
     @Deprecated
-    public BooleanMask2D getIntersect(Rectangle bounds, boolean[] mask)
+    public BooleanMask2D getIntersect(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         return getIntersection(bounds, mask);
     }
@@ -2460,9 +2577,10 @@ public class BooleanMask2D implements Cloneable
     /**
      * Compute union with specified mask and return result in a new mask.
      * 
+     * @throws InterruptedException
      * @see #add(BooleanMask2D)
      */
-    public BooleanMask2D getUnion(BooleanMask2D booleanMask)
+    public BooleanMask2D getUnion(BooleanMask2D booleanMask) throws InterruptedException
     {
         return getUnion(this, booleanMask);
     }
@@ -2470,9 +2588,10 @@ public class BooleanMask2D implements Cloneable
     /**
      * Compute union with specified mask and return result in a new mask.
      * 
+     * @throws InterruptedException
      * @see #add(Rectangle, boolean[])
      */
-    public BooleanMask2D getUnion(Rectangle bounds, boolean[] mask)
+    public BooleanMask2D getUnion(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         return getUnion(this.bounds, this.mask, bounds, mask);
     }
@@ -2480,9 +2599,10 @@ public class BooleanMask2D implements Cloneable
     /**
      * Compute exclusive union operation with specified mask and return result in a new mask.
      * 
+     * @throws InterruptedException
      * @see #exclusiveAdd(BooleanMask2D)
      */
-    public BooleanMask2D getExclusiveUnion(BooleanMask2D booleanMask)
+    public BooleanMask2D getExclusiveUnion(BooleanMask2D booleanMask) throws InterruptedException
     {
         return getExclusiveUnion(this, booleanMask);
     }
@@ -2490,43 +2610,50 @@ public class BooleanMask2D implements Cloneable
     /**
      * Compute exclusive union operation with specified mask and return result in a new mask
      * 
+     * @throws InterruptedException
      * @see #exclusiveAdd(Rectangle, boolean[])
      */
-    public BooleanMask2D getExclusiveUnion(Rectangle bounds, boolean[] mask)
+    public BooleanMask2D getExclusiveUnion(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         return getExclusiveUnion(this.bounds, this.mask, bounds, mask);
     }
 
     /**
      * Subtract the specified mask from current and return result in a new mask.
+     * 
+     * @throws InterruptedException
      */
-    public BooleanMask2D getSubtraction(BooleanMask2D mask)
+    public BooleanMask2D getSubtraction(BooleanMask2D mask) throws InterruptedException
     {
         return getSubtraction(this, mask);
     }
 
     /**
      * Subtract the specified mask from current and return result in a new mask.
+     * 
+     * @throws InterruptedException
      */
-    public BooleanMask2D getSubtraction(Rectangle bounds, boolean[] mask)
+    public BooleanMask2D getSubtraction(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         return getSubtraction(this.bounds, this.mask, bounds, mask);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(BooleanMask2D)} instead.
      */
     @Deprecated
-    public BooleanMask2D getXor(BooleanMask2D booleanMask)
+    public BooleanMask2D getXor(BooleanMask2D booleanMask) throws InterruptedException
     {
         return getExclusiveUnion(booleanMask);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(Rectangle, boolean[])} instead.
      */
     @Deprecated
-    public BooleanMask2D getXor(Rectangle bounds, boolean[] mask)
+    public BooleanMask2D getXor(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         return getExclusiveUnion(bounds, mask);
     }
@@ -2546,8 +2673,10 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public void add(BooleanMask2D booleanMask)
+    public void add(BooleanMask2D booleanMask) throws InterruptedException
     {
         add(booleanMask.bounds, booleanMask.mask);
     }
@@ -2567,8 +2696,10 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public void add(Rectangle boundsToAdd, boolean[] maskToAdd)
+    public void add(Rectangle boundsToAdd, boolean[] maskToAdd) throws InterruptedException
     {
         // don't need to reallocate the mask
         if (bounds.contains(boundsToAdd))
@@ -2617,8 +2748,10 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####
      *     ##                                 ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public void intersect(BooleanMask2D booleanMask)
+    public void intersect(BooleanMask2D booleanMask) throws InterruptedException
     {
         intersect(booleanMask.bounds, booleanMask.mask);
     }
@@ -2638,8 +2771,10 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####
      *     ##                                 ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public void intersect(Rectangle boundsToIntersect, boolean[] maskToIntersect)
+    public void intersect(Rectangle boundsToIntersect, boolean[] maskToIntersect) throws InterruptedException
     {
         // faster to always create a new mask
         final BooleanMask2D result = getIntersection(boundsToIntersect, maskToIntersect);
@@ -2666,8 +2801,10 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public void exclusiveAdd(BooleanMask2D booleanMask)
+    public void exclusiveAdd(BooleanMask2D booleanMask) throws InterruptedException
     {
         exclusiveAdd(booleanMask.bounds, booleanMask.mask);
     }
@@ -2687,8 +2824,10 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public void exclusiveAdd(Rectangle boundsToXAdd, boolean[] maskToXAdd)
+    public void exclusiveAdd(Rectangle boundsToXAdd, boolean[] maskToXAdd) throws InterruptedException
     {
         // don't need to reallocate the mask
         if (bounds.contains(boundsToXAdd))
@@ -2740,6 +2879,8 @@ public class BooleanMask2D implements Cloneable
      *     ####                             ####     ####
      *     ##                                 ##     ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
     public void subtract(Rectangle boundsToSubtract, boolean[] maskToSubtract)
     {
@@ -2770,61 +2911,69 @@ public class BooleanMask2D implements Cloneable
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #add(BooleanMask2D)} instead.
      */
     @Deprecated
-    public void union(BooleanMask2D booleanMask)
+    public void union(BooleanMask2D booleanMask) throws InterruptedException
     {
         add(booleanMask.bounds, booleanMask.mask);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #add(BooleanMask2D)} instead.
      */
     @Deprecated
-    public void union(Rectangle bounds, boolean[] mask)
+    public void union(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         add(bounds, mask);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(BooleanMask2D)} instead.
      */
     @Deprecated
-    public void exclusiveUnion(BooleanMask2D booleanMask)
+    public void exclusiveUnion(BooleanMask2D booleanMask) throws InterruptedException
     {
         exclusiveAdd(booleanMask.bounds, booleanMask.mask);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(Rectangle, boolean[])} instead.
      */
     @Deprecated
-    public void exclusiveUnion(Rectangle bounds, boolean[] mask)
+    public void exclusiveUnion(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         exclusiveAdd(bounds, mask);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #exclusiveUnion(BooleanMask2D)} instead
      */
     @Deprecated
-    public void xor(BooleanMask2D booleanMask)
+    public void xor(BooleanMask2D booleanMask) throws InterruptedException
     {
         exclusiveAdd(booleanMask);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #exclusiveUnion(Rectangle, boolean[])} instead
      */
     @Deprecated
-    public void xor(Rectangle bounds, boolean[] mask)
+    public void xor(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         exclusiveAdd(bounds, mask);
     }
 
     /**
      * Get the smallest bounds which fit mask content.
+     * 
+     * @throws InterruptedException
      */
     public Rectangle getOptimizedBounds()
     {
@@ -2865,6 +3014,8 @@ public class BooleanMask2D implements Cloneable
 
     /**
      * Optimize mask bounds so it fit mask content.
+     * 
+     * @throws InterruptedException
      */
     public void optimizeBounds()
     {
@@ -2872,6 +3023,7 @@ public class BooleanMask2D implements Cloneable
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #moveBounds(Rectangle)} instead.
      */
     @Deprecated
@@ -2883,6 +3035,8 @@ public class BooleanMask2D implements Cloneable
     /**
      * Change the bounds of BooleanMask.<br>
      * Keep mask data intersecting from old bounds.
+     * 
+     * @throws InterruptedException
      */
     public void moveBounds(Rectangle value)
     {
@@ -2938,8 +3092,10 @@ public class BooleanMask2D implements Cloneable
     /**
      * Fast 2x up scaling (each point become 2x2 bloc point).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public BooleanMask2D upscale()
+    public BooleanMask2D upscale() throws InterruptedException
     {
         return upscale(this);
     }
@@ -2952,8 +3108,9 @@ public class BooleanMask2D implements Cloneable
      *        the minimum number of <code>true</code>points from a 2x2 block to give a <code>true</code> resulting
      *        point.<br>
      *        Accepted value: 1-4 (default is 3)
+     * @throws InterruptedException
      */
-    public BooleanMask2D downscale(int nbPointForTrue)
+    public BooleanMask2D downscale(int nbPointForTrue) throws InterruptedException
     {
         return downscale(this, nbPointForTrue);
     }
@@ -2961,8 +3118,10 @@ public class BooleanMask2D implements Cloneable
     /**
      * Fast 2x down scaling (each 2x2 block points become 1 point).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public BooleanMask2D downscale()
+    public BooleanMask2D downscale() throws InterruptedException
     {
         return downscale(this);
     }

@@ -2,9 +2,9 @@ package plugins.kernel.roi.roi5d;
 
 import icy.type.rectangle.Rectangle4D;
 import icy.type.rectangle.Rectangle5D;
-
 import plugins.kernel.roi.roi4d.ROI4DStackRectangle;
 
+@Deprecated
 public class ROI5DStackRectangle extends ROI5DStack<ROI4DStackRectangle>
 {
     public ROI5DStackRectangle()

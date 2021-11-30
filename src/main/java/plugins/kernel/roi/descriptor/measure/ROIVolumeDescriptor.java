@@ -61,7 +61,7 @@ public class ROIVolumeDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return Double.valueOf(computeVolume(roi, sequence));
     }
@@ -78,8 +78,9 @@ public class ROIVolumeDescriptor extends ROIDescriptor
      * @return the volume expressed in the unit of the descriptor (see {@link #getUnit(Sequence)})
      * @throws UnsupportedOperationException
      *         if the operation is not supported for this ROI
+     * @throws InterruptedException 
      */
-    public static double computeVolume(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public static double computeVolume(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return computeVolume(ROIInteriorDescriptor.computeInterior(roi), roi, sequence);
     }

@@ -69,8 +69,8 @@ public class ROIMassCenterDescriptorsPlugin extends Plugin implements PluginROID
         while (!it.done())
         {
             // check for interruption sometime
-            if (((numPts & 0xFFFF) == 0) && Thread.currentThread().isInterrupted())
-                throw new InterruptedException();
+            if (((numPts & 0xFFFF) == 0) && Thread.interrupted())
+                throw new InterruptedException("ROI mass center descriptor computation interrupted.");
 
             x += it.getX();
             y += it.getY();

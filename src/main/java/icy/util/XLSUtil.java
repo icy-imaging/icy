@@ -313,8 +313,9 @@ public class XLSUtil
      * Fill sheet content from CSV text.
      * 
      * @return <code>true</code> if the operation succeed
+     * @throws InterruptedException
      */
-    public static boolean setFromCSV(WritableSheet sheet, String csvContent)
+    public static boolean setFromCSV(WritableSheet sheet, String csvContent) throws InterruptedException
     {
         final BufferedReader br = new BufferedReader(new StringReader(csvContent));
 
@@ -334,6 +335,9 @@ public class XLSUtil
                 }
 
                 y++;
+                // check for interruption from time to time as this can be a long process
+                if (((y & 0xFF) == 0xFF) && Thread.interrupted())
+                    throw new InterruptedException("CSV to XLS conversion process interrupted.");
             }
 
             return true;

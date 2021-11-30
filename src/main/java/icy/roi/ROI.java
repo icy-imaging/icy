@@ -2440,8 +2440,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        WARNING: this method may be "pixel accurate" only depending the internal implementation.
      * @return <code>true</code> if the current <code>ROI</code> entirely contains the
      *         specified <code>ROI</code>; <code>false</code> otherwise.
+     * @throws InterruptedException
      */
-    public boolean contains(ROI roi)
+    public boolean contains(ROI roi) throws InterruptedException
     {
         // default implementation using BooleanMask
         final Rectangle5D.Integer bounds = getBounds5D().toInteger();
@@ -2614,8 +2615,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        Tests if the current <code>ROI</code> intersects the specified <code>ROI</code>.<br>
      *        Note that this method may be "pixel accurate" only depending the internal implementation.
      * @return <code>true</code> if <code>ROI</code> intersect, <code>false</code> otherwise.
+     * @throws InterruptedException
      */
-    public boolean intersects(ROI roi)
+    public boolean intersects(ROI roi) throws InterruptedException
     {
         // default implementation using BooleanMask
         final Rectangle5D.Integer bounds = getBounds5D().toInteger();
@@ -2703,8 +2705,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
      * @return the boolean bitmap mask
+     * @throws InterruptedException
      */
     public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, int c, boolean inclusive)
+            throws InterruptedException
     {
         final boolean[] result = new boolean[Math.max(0, width) * Math.max(0, height)];
 
@@ -2720,6 +2724,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                     result[offset] = contains(x + i, y + j, z, t, c, 1d, 1d, 1d, 1d, 1d);
                 offset++;
             }
+
+            // check for interruption from time to time as this can be a long process
+            if (((j & 0xF) == 0xF) && Thread.interrupted())
+                throw new InterruptedException("ROI.getBooleanMask2D(..) process interrupted.");
         }
 
         return result;
@@ -2741,8 +2749,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        C position we want to retrieve the boolean mask
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException
      */
     public boolean[] getBooleanMask2D(Rectangle rect, int z, int t, int c, boolean inclusive)
+            throws InterruptedException
     {
         return getBooleanMask2D(rect.x, rect.y, rect.width, rect.height, z, t, c, inclusive);
     }
@@ -2766,8 +2776,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        Set it to -1 to retrieve the mask whatever is the C position of ROI2D/ROI3D/ROI4D.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException
      */
-    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         final Rectangle bounds2D = getBounds5D().toRectangle2D().getBounds();
 
@@ -2825,9 +2836,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         and <code>allowCreate</code> parameter was set to <code>true</code>
      * @throws UnsupportedOperationException
      *         if the two ROI cannot be merged together.
+     * @throws InterruptedException
      * @see ROI#merge(ROI, BooleanOperator)
      */
-    public ROI mergeWith(ROI roi, BooleanOperator op, boolean allowCreate) throws UnsupportedOperationException
+    public ROI mergeWith(ROI roi, BooleanOperator op, boolean allowCreate)
+            throws UnsupportedOperationException, InterruptedException
     {
         switch (op)
         {
@@ -2878,9 +2891,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         and <code>allowCreate</code> parameter was set to <code>true</code>
      * @throws UnsupportedOperationException
      *         if the two ROI cannot be added together.
+     * @throws InterruptedException
      * @see #getUnion(ROI)
      */
-    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         // nothing to do
         if (roi == null)
@@ -2926,9 +2940,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         and <code>allowCreate</code> parameter was set to <code>true</code>
      * @throws UnsupportedOperationException
      *         if the two ROI cannot be intersected together.
+     * @throws InterruptedException
      * @see #getIntersection(ROI)
      */
-    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         // nothing to do
         if (roi == null)
@@ -2976,9 +2991,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         and <code>allowCreate</code> parameter was set to <code>true</code>
      * @throws UnsupportedOperationException
      *         if the two ROI cannot be exclusively added together.
+     * @throws InterruptedException
      * @see #getExclusiveUnion(ROI)
      */
-    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         // nothing to do
         if (roi == null)
@@ -3008,9 +3024,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         and <code>allowCreate</code> parameter was set to <code>true</code>
      * @throws UnsupportedOperationException
      *         if we can't subtract the specified <code>ROI</code> from this <code>ROI</code>
+     * @throws InterruptedException
      * @see #getSubtraction(ROI)
      */
-    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         // nothing to do
         if (roi == null)
@@ -3030,8 +3047,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param roi
      *        ROI
      * @return ROI
+     * @throws InterruptedException
      */
-    public ROI merge(ROI roi, BooleanOperator op) throws UnsupportedOperationException
+    public ROI merge(ROI roi, BooleanOperator op) throws UnsupportedOperationException, InterruptedException
     {
         switch (op)
         {
@@ -3053,8 +3071,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         The default implementation use <code>ROIUtil.getUnion(ROI, ROI)</code> internally but it maybe overridden.
      * @param roi
      *        ROI
+     * @throws InterruptedException
      */
-    public ROI getUnion(ROI roi) throws UnsupportedOperationException
+    public ROI getUnion(ROI roi) throws UnsupportedOperationException, InterruptedException
     {
         return ROIUtil.getUnion(this, roi);
     }
@@ -3064,8 +3083,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         The default implementation use <code>ROIUtil.getIntersection(ROI, ROI)</code> internally but it maybe overridden.
      * @param roi
      *        ROI
+     * @throws InterruptedException
      */
-    public ROI getIntersection(ROI roi) throws UnsupportedOperationException
+    public ROI getIntersection(ROI roi) throws UnsupportedOperationException, InterruptedException
     {
         return ROIUtil.getIntersection(this, roi);
     }
@@ -3075,8 +3095,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         The default implementation use <code>ROIUtil.getExclusiveUnion(ROI, ROI)</code> internally but it maybe overridden.
      * @param roi
      *        ROI
+     * @throws InterruptedException
      */
-    public ROI getExclusiveUnion(ROI roi) throws UnsupportedOperationException
+    public ROI getExclusiveUnion(ROI roi) throws UnsupportedOperationException, InterruptedException
     {
         return ROIUtil.getExclusiveUnion(this, roi);
     }
@@ -3086,8 +3107,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         The default implementation use <code>ROIUtil.getSubtraction(ROI, ROI)</code> internally but it maybe overridden.
      * @param roi
      *        ROI
+     * @throws InterruptedException
      */
-    public ROI getSubtraction(ROI roi) throws UnsupportedOperationException
+    public ROI getSubtraction(ROI roi) throws UnsupportedOperationException, InterruptedException
     {
         return ROIUtil.getSubtraction(this, roi);
     }
@@ -3098,14 +3120,15 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /*
      * Override this method to adapt and optimize for a specific ROI.
      */
-    public abstract double computeNumberOfContourPoints();
+    public abstract double computeNumberOfContourPoints() throws InterruptedException;
 
     /**
      * @return Returns the number of point (pixel) composing the ROI contour.<br>
      *         It is used to calculate the perimeter (2D) or surface area (3D) of the ROI.
+     * @throws InterruptedException
      * @see #computeNumberOfContourPoints()
      */
-    public double getNumberOfContourPoints()
+    public double getNumberOfContourPoints() throws InterruptedException
     {
         // we need to recompute the number of edge point
         if (numberOfContourPointsInvalid)
@@ -3123,13 +3146,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /*
      * Override this method to adapt and optimize for a specific ROI.
      */
-    public abstract double computeNumberOfPoints();
+    public abstract double computeNumberOfPoints() throws InterruptedException;
 
     /**
      * @return Returns the number of point (pixel) contained in the ROI.<br>
      *         It is used to calculate the area (2D) or volume (3D) of the ROI.
+     * @throws InterruptedException
      */
-    public double getNumberOfPoints()
+    public double getNumberOfPoints() throws InterruptedException
     {
         // we need to recompute the number of point
         if (numberOfPointsInvalid)
@@ -3149,9 +3173,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         Throws a UnsupportedOperationException if the operation is not supported for this ROI.
      * @param sequence
      *        sequence
+     * @throws InterruptedException
      * @see #getNumberOfContourPoints()
      */
-    public double getLength(Sequence sequence) throws UnsupportedOperationException
+    public double getLength(Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return sequence.calculateSize(getNumberOfContourPoints(), getDimension(), 1);
     }
@@ -3159,9 +3184,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @deprecated Use {@link #getLength(Sequence)} or {@link #getNumberOfContourPoints()} instead.
      * @return double
+     * @throws InterruptedException
      */
     @Deprecated
-    public double getPerimeter()
+    public double getPerimeter() throws InterruptedException
     {
         return getNumberOfContourPoints();
     }
@@ -3170,9 +3196,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @deprecated Only for ROI3D object, use {@link #getNumberOfPoints()} instead for other type of
      *             ROI.
      * @return double
+     * @throws InterruptedException
      */
     @Deprecated
-    public double getVolume()
+    public double getVolume() throws InterruptedException
     {
         return getNumberOfPoints();
     }
@@ -3300,8 +3327,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param c
      *        the specific C position (channel) we want to retrieve (<code>-1</code> to retrieve the
      *        whole ROI C dimension)
+     * @throws InterruptedException
      */
-    public ROI getSubROI(int z, int t, int c)
+    public ROI getSubROI(int z, int t, int c) throws InterruptedException
     {
         final ROI result;
 

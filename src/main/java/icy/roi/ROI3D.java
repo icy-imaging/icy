@@ -18,6 +18,18 @@
  */
 package icy.roi;
 
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.w3c.dom.Node;
+
 import icy.canvas.IcyCanvas;
 import icy.canvas.IcyCanvas2D;
 import icy.canvas.IcyCanvas3D;
@@ -33,18 +45,6 @@ import icy.util.EventUtil;
 import icy.util.GraphicsUtil;
 import icy.util.XMLUtil;
 
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.w3c.dom.Node;
-
 /**
  * 3D ROI base class
  */
@@ -52,7 +52,8 @@ public abstract class ROI3D extends ROI
 {
     /**
      * @deprecated Use {@link ROI3D#getROI3DList(List)} instead.
-     * @param rois List of ROI
+     * @param rois
+     *        List of ROI
      * @return list of 3D ROI
      */
     @Deprecated
@@ -68,7 +69,8 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * @param rois List of ROI
+     * @param rois
+     *        List of ROI
      * @return Return all 3D ROI from the ROI list
      */
     public static List<ROI3D> getROI3DList(List<ROI> rois)
@@ -285,17 +287,25 @@ public abstract class ROI3D extends ROI
 
         /**
          * Draw the ROI
-         * @param sequence sequence
-         * @param canvas canvas
-         * @param g 2D graphics
+         * 
+         * @param sequence
+         *        sequence
+         * @param canvas
+         *        canvas
+         * @param g
+         *        2D graphics
          */
         public abstract void drawROI(Graphics2D g, Sequence sequence, IcyCanvas canvas);
 
         /**
          * Draw the ROI name
-         * @param canvas canvas
-         * @param g 2D graphics
-         * @param sequence sequence
+         * 
+         * @param canvas
+         *        canvas
+         * @param g
+         *        2D graphics
+         * @param sequence
+         *        sequence
          */
         public void drawName(Graphics2D g, Sequence sequence, IcyCanvas canvas)
         {
@@ -377,8 +387,8 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Returns true if specified ROI is on the same [T, C] position than current ROI.
-     * @param roi 3D ROI
-     * 
+     * @param roi
+     *        3D ROI
      * @param shouldContain
      *        if <code>true</code> then current ROI should "contains" specified ROI position [T, C]
      */
@@ -537,7 +547,7 @@ public abstract class ROI3D extends ROI
      * for specific ROI type.
      */
     @Override
-    public boolean contains(ROI roi)
+    public boolean contains(ROI roi) throws InterruptedException
     {
         if (roi instanceof ROI3D)
         {
@@ -552,7 +562,7 @@ public abstract class ROI3D extends ROI
                 // quick discard
                 if (!contains(roi3d.getBounds3D()))
                     return false;
-                
+
                 BooleanMask3D mask;
                 BooleanMask3D roiMask;
 
@@ -650,11 +660,11 @@ public abstract class ROI3D extends ROI
         final boolean tok;
         final boolean cok;
 
-        if ((getT() == -1) || (sizeT == Double.POSITIVE_INFINITY))   
+        if ((getT() == -1) || (sizeT == Double.POSITIVE_INFINITY))
             tok = true;
         else
             tok = ((t + sizeT) > getT()) && (t < (getT() + 1d));
-        if ((getC() == -1) || (sizeC == Double.POSITIVE_INFINITY))   
+        if ((getC() == -1) || (sizeC == Double.POSITIVE_INFINITY))
             cok = true;
         else
             cok = ((c + sizeC) > getC()) && (c < (getC() + 1d));
@@ -667,7 +677,7 @@ public abstract class ROI3D extends ROI
      * Override this for specific ROI type.
      */
     @Override
-    public boolean intersects(ROI roi)
+    public boolean intersects(ROI roi) throws InterruptedException
     {
         if (roi instanceof ROI3D)
         {
@@ -678,7 +688,7 @@ public abstract class ROI3D extends ROI
                 // quick discard
                 if (!intersects(roi3d.getBounds3D()))
                     return false;
-                
+
                 return getBooleanMask(true).intersects(roi3d.getBooleanMask(true));
             }
         }
@@ -689,8 +699,8 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Calculate and returns the 3D bounding box of the <code>ROI</code>.<br>
-     * This method is used by {@link #getBounds3D()} which should try to cache the result as the
-     * bounding box calculation can take some computation time for complex ROI.
+     *         This method is used by {@link #getBounds3D()} which should try to cache the result as the
+     *         bounding box calculation can take some computation time for complex ROI.
      */
     public abstract Rectangle3D computeBounds3D();
 
@@ -758,8 +768,7 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Returns the integer ROI position which normally correspond to the <i>minimum</i> point of the
-     * ROI bounds.
-     * 
+     *         ROI bounds.
      * @see #getBounds()
      */
     public Point3D.Integer getPosition()
@@ -770,8 +779,7 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Returns the high precision ROI position which normally correspond to the <i>minimum</i> point
-     * of the ROI bounds.<br>
-     * 
+     *         of the ROI bounds.<br>
      * @see #getBounds3D()
      */
     public Point3D getPosition3D()
@@ -868,7 +876,6 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Returns <code>true</code> if the ROI support translate operation.
-     * 
      * @see #translate(double, double, double)
      */
     public boolean canTranslate()
@@ -896,7 +903,7 @@ public abstract class ROI3D extends ROI
     }
 
     @Override
-    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, int c, boolean inclusive)
+    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // not on the correct T, C position --> return empty mask
         if (!isActiveFor(t, c))
@@ -925,8 +932,9 @@ public abstract class ROI3D extends ROI
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
      * @return the boolean bitmap mask
+     * @throws InterruptedException 
      */
-    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, boolean inclusive)
+    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, boolean inclusive) throws InterruptedException
     {
         final boolean[] result = new boolean[Math.max(0, width) * Math.max(0, height)];
 
@@ -942,6 +950,10 @@ public abstract class ROI3D extends ROI
                     result[offset] = contains(x + i, y + j, z, 1d, 1d, 1d);
                 offset++;
             }
+            
+            // check for interruption from time to time as this can be a long process
+            if (((j & 0xF) == 0xF) && Thread.interrupted())
+                throw new InterruptedException("ROI3D.getBooleanMask2D(..) process interrupted.");
         }
 
         return result;
@@ -949,25 +961,25 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Get the boolean bitmap mask for the specified rectangular area of the roi and for the
-     * specified Z position.<br>
-     * if the pixel (x,y) is contained in the roi Z position then result[(y * width) + x] = true<br>
-     * if the pixel (x,y) is not contained in the roi Z position then result[(y * width) + x] =
-     * false
-     * 
+     *         specified Z position.<br>
+     *         if the pixel (x,y) is contained in the roi Z position then result[(y * width) + x] = true<br>
+     *         if the pixel (x,y) is not contained in the roi Z position then result[(y * width) + x] =
+     *         false
      * @param rect
      *        2D rectangular area we want to retrieve the boolean mask
      * @param z
      *        Z position we want to retrieve the boolean mask
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException 
      */
-    public boolean[] getBooleanMask2D(Rectangle rect, int z, boolean inclusive)
+    public boolean[] getBooleanMask2D(Rectangle rect, int z, boolean inclusive) throws InterruptedException
     {
         return getBooleanMask2D(rect.x, rect.y, rect.width, rect.height, z, inclusive);
     }
 
     @Override
-    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // not on the correct T, C position --> return empty mask
         if (!isActiveFor(t, c))
@@ -978,17 +990,17 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Get the {@link BooleanMask2D} object representing the roi for the specified Z position.<br>
-     * It contains the rectangle mask bounds and the associated boolean array mask.<br>
-     * if the pixel (x,y) is contained in the roi Z position then result.mask[(y * w) + x] = true<br>
-     * if the pixel (x,y) is not contained in the roi Z position then result.mask[(y * w) + x] =
-     * false
-     * 
+     *         It contains the rectangle mask bounds and the associated boolean array mask.<br>
+     *         if the pixel (x,y) is contained in the roi Z position then result.mask[(y * w) + x] = true<br>
+     *         if the pixel (x,y) is not contained in the roi Z position then result.mask[(y * w) + x] =
+     *         false
      * @param z
      *        Z position we want to retrieve the boolean mask
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException 
      */
-    public BooleanMask2D getBooleanMask2D(int z, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, boolean inclusive) throws InterruptedException
     {
         final Rectangle bounds = getBounds3D().toRectangle2D().getBounds();
 
@@ -1006,9 +1018,8 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Returns the {@link BooleanMask3D} object representing the XYZ volume content at specified Z,
-     * T, C position.<br>
-     * It contains the 3D rectangle mask bounds and the associated boolean array mask.
-     * 
+     *         T, C position.<br>
+     *         It contains the 3D rectangle mask bounds and the associated boolean array mask.
      * @param z
      *        Z position we want to retrieve the boolean mask or -1 to retrieve the whole Z
      *        dimension
@@ -1020,8 +1031,9 @@ public abstract class ROI3D extends ROI
      *        Set it to -1 to retrieve the mask whatever is the C position of this ROI3D.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException 
      */
-    public BooleanMask3D getBooleanMask3D(int z, int t, int c, boolean inclusive)
+    public BooleanMask3D getBooleanMask3D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // not on the correct T, C position --> return empty mask
         if (!isActiveFor(t, c))
@@ -1041,12 +1053,12 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Get the {@link BooleanMask3D} object representing the roi.<br>
-     * It contains the 3D rectangle mask bounds and the associated boolean array mask.<br>
-     * 
+     *         It contains the 3D rectangle mask bounds and the associated boolean array mask.<br>
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException 
      */
-    public BooleanMask3D getBooleanMask(boolean inclusive)
+    public BooleanMask3D getBooleanMask(boolean inclusive) throws InterruptedException
     {
         final Rectangle3D.Integer bounds = getBounds();
         final BooleanMask2D masks[] = new BooleanMask2D[bounds.sizeZ];
@@ -1063,7 +1075,7 @@ public abstract class ROI3D extends ROI
      * approximations.
      */
     @Override
-    public double computeNumberOfContourPoints()
+    public double computeNumberOfContourPoints() throws InterruptedException
     {
         return getBooleanMask(true).getContourLength();
     }
@@ -1073,7 +1085,7 @@ public abstract class ROI3D extends ROI
      * approximation. Override to optimize for specific ROI.
      */
     @Override
-    public double computeNumberOfPoints()
+    public double computeNumberOfPoints() throws InterruptedException 
     {
         double numPoints = 0;
 
@@ -1087,22 +1099,26 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Compute the surface area in um2 given the pixel size informations from the specified Sequence.<br>
-     * Generic implementation of surface area computation using the number of contour point (approximation).<br>
-     * This method should be overridden whenever possible to provide faster and accurate calculation.
-     * @param sequence sequence
+     *         Generic implementation of surface area computation using the number of contour point (approximation).<br>
+     *         This method should be overridden whenever possible to provide faster and accurate calculation.
+     * @param sequence
+     *        sequence
+     * @throws InterruptedException
      */
-    public double computeSurfaceArea(Sequence sequence)
+    public double computeSurfaceArea(Sequence sequence) throws InterruptedException
     {
         return sequence.calculateSize(getNumberOfContourPoints(), 3, 2);
     }
 
     /**
      * @return Returns surface area of the 3D ROI in um2 given the pixel size informations from the specified Sequence.
-     * @param sequence sequence
+     * @param sequence
+     *        sequence
+     * @throws InterruptedException
      * @see #computeSurfaceArea(Sequence)
      * @see #getNumberOfContourPoints()
      */
-    public double getSurfaceArea(Sequence sequence)
+    public double getSurfaceArea(Sequence sequence) throws InterruptedException
     {
         // we cannot cache surface area as result depends from sequence metadata
         return computeSurfaceArea(sequence);
@@ -1117,37 +1133,37 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Return surface area of the 3D ROI in pixels.<br>
-     * This is basically the number of pixel representing ROI edges.<br>
-     * 
+     *         This is basically the number of pixel representing ROI edges.<br>
+     * @throws InterruptedException
      * @deprecated Use {@link #getNumberOfContourPoints()} instead.
      * @see #getNumberOfContourPoints()
      * @see #computeNumberOfContourPoints()
      */
     @Deprecated
-    public double getSurfaceArea()
+    public double getSurfaceArea() throws InterruptedException
     {
         return getNumberOfContourPoints();
     }
 
     /**
      * @return Return volume of the 3D ROI in pixels.<br>
-     * This is basically the number of pixel contained in the ROI.<br>
-     * 
+     *         This is basically the number of pixel contained in the ROI.<br>
+     * @throws InterruptedException
      * @deprecated Use {@link #getNumberOfPoints()} instead.
      * @see #getNumberOfPoints()
      * @see #computeNumberOfPoints()
      */
     @Override
     @Deprecated
-    public double getVolume()
+    public double getVolume() throws InterruptedException
     {
         return getNumberOfPoints();
     }
 
     /**
      * @return Returns the T position.<br>
-     * <code>-1</code> is a special value meaning the ROI is set on all T frames (infinite T
-     * dimension).
+     *         <code>-1</code> is a special value meaning the ROI is set on all T frames (infinite T
+     *         dimension).
      */
     public int getT()
     {
@@ -1155,9 +1171,10 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * @param value Sets T position of this 3D ROI.<br>
-     * You cannot set the ROI on a negative T position as <code>-1</code> is a special value meaning
-     * the ROI is set on all T frames (infinite T dimension).
+     * @param value
+     *        Sets T position of this 3D ROI.<br>
+     *        You cannot set the ROI on a negative T position as <code>-1</code> is a special value meaning
+     *        the ROI is set on all T frames (infinite T dimension).
      */
     public void setT(int value)
     {
@@ -1178,8 +1195,8 @@ public abstract class ROI3D extends ROI
 
     /**
      * @return Returns the C position.<br>
-     * <code>-1</code> is a special value meaning the ROI is set on all C channels (infinite C
-     * dimension).
+     *         <code>-1</code> is a special value meaning the ROI is set on all C channels (infinite C
+     *         dimension).
      */
     public int getC()
     {
@@ -1187,9 +1204,10 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * @param value Sets C position of this 3D ROI.<br>
-     * You cannot set the ROI on a negative C position as <code>-1</code> is a special value meaning
-     * the ROI is set on all C channels (infinite C dimension).
+     * @param value
+     *        Sets C position of this 3D ROI.<br>
+     *        You cannot set the ROI on a negative C position as <code>-1</code> is a special value meaning
+     *        the ROI is set on all C channels (infinite C dimension).
      */
     public void setC(int value)
     {
@@ -1215,8 +1233,10 @@ public abstract class ROI3D extends ROI
     }
 
     /**
-     * @param t int
-     * @param c int
+     * @param t
+     *        int
+     * @param c
+     *        int
      * @return Return true if the ROI is active for the specified T, C coordinates
      */
     public boolean isActiveFor(int t, int c)
@@ -1242,8 +1262,10 @@ public abstract class ROI3D extends ROI
     /**
      * @return Returns true if specified point coordinates overlap the ROI edge.<br>
      * @see #contains(Point3D) to test for content overlap instead.
-     * @param canvas canvas
-     * @param p 3D point
+     * @param canvas
+     *        canvas
+     * @param p
+     *        3D point
      */
     public boolean isOverEdge(IcyCanvas canvas, Point3D p)
     {
@@ -1253,11 +1275,15 @@ public abstract class ROI3D extends ROI
     /**
      * @return Returns true if specified point coordinates overlap the ROI edge.<br>
      * @see #contains(double, double, double) to test for content overlap instead.<br>
-     * We provide a default implementation to not break compatibility.
-     * @param canvas canvas
-     * @param x double
-     * @param y double
-     * @param z double
+     *      We provide a default implementation to not break compatibility.
+     * @param canvas
+     *        canvas
+     * @param x
+     *        double
+     * @param y
+     *        double
+     * @param z
+     *        double
      */
     public boolean isOverEdge(IcyCanvas canvas, double x, double y, double z)
     {
@@ -1268,8 +1294,10 @@ public abstract class ROI3D extends ROI
     /**
      * @return Returns true if specified point coordinates overlap the ROI edge.<br>
      * @see #contains(Point5D) to test for content overlap instead.
-     * @param canvas canvas
-     * @param p 5D Point
+     * @param canvas
+     *        canvas
+     * @param p
+     *        5D Point
      */
     public boolean isOverEdge(IcyCanvas canvas, Point5D p)
     {
@@ -1279,13 +1307,19 @@ public abstract class ROI3D extends ROI
     /**
      * @return Returns true if specified point coordinates overlap the ROI edge.<br>
      * @see #contains(double, double, double, double, double) to test for content overlap
-     * instead.
-     * @param canvas canvas
-     * @param z double
-     * @param y double
-     * @param x double
-     * @param t double
-     * @param c double
+     *      instead.
+     * @param canvas
+     *        canvas
+     * @param z
+     *        double
+     * @param y
+     *        double
+     * @param x
+     *        double
+     * @param t
+     *        double
+     * @param c
+     *        double
      */
     public boolean isOverEdge(IcyCanvas canvas, double x, double y, double z, double t, double c)
     {

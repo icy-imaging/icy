@@ -78,8 +78,8 @@ public class Convolution1D
                         sequence.setDataXY(t, z, c, dest);
                     }
 
-                    if (Thread.currentThread().isInterrupted())
-                        throw new InterruptedException();
+                    if (Thread.interrupted())
+                        throw new InterruptedException("Convolution operation interrupted.");
                 }
             }
         }

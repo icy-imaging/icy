@@ -14,6 +14,15 @@
  */
 package icy.imagej;
 
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.geom.Area;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
+
 import icy.common.listener.ProgressListener;
 import icy.image.IcyBufferedImage;
 import icy.math.ArrayMath;
@@ -25,16 +34,6 @@ import icy.type.DataType;
 import icy.type.collection.array.Array1DUtil;
 import icy.type.collection.array.Array2DUtil;
 import icy.type.collection.array.ArrayUtil;
-
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.Area;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
-
 import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -119,6 +118,9 @@ public class ImageJUtil
         {
             for (int z = 0; z < sizeZ; z++)
             {
+                // interrupt task
+                if (Thread.currentThread().isInterrupted())
+                    return new ImagePlus(sequence.getName(), stack);
                 if (progressListener != null)
                     progressListener.notifyProgress(position, len);
 
@@ -233,14 +235,17 @@ public class ImageJUtil
     {
         final int[] dim = image.getDimensions(true);
 
-        return convertToIcyBufferedImage(image, z, t, dim[0], dim[1], dim[2], image.getType(), image
-                .getLocalCalibration().isSigned16Bit());
+        return convertToIcyBufferedImage(image, z, t, dim[0], dim[1], dim[2], image.getType(),
+                image.getLocalCalibration().isSigned16Bit());
     }
 
     /**
      * Convert the specified ImageJ {@link ImagePlus} object to Icy {@link Sequence}
+     * 
+     * @throws InterruptedException
      */
     public static Sequence convertToIcySequence(ImagePlus image, ProgressListener progressListener)
+            throws InterruptedException
     {
         final Sequence result = new Sequence(image.getTitle());
         final int[] dim = image.getDimensions(true);
@@ -265,6 +270,10 @@ public class ImageJUtil
             {
                 for (int z = 0; z < sizeZ; z++)
                 {
+                    // interrupt task
+                    if (Thread.currentThread().isInterrupted())
+                        return result;
+
                     if (progressListener != null)
                         progressListener.notifyProgress(position, len);
 
@@ -315,9 +324,11 @@ public class ImageJUtil
 
     /**
      * Convert the specified Icy {@link Sequence} object to ImageJ {@link ImagePlus}
+     * 
+     * @throws InterruptedException
      */
     public static ImagePlus convertToImageJImage(Sequence sequence, boolean useRoiManager,
-            ProgressListener progressListener)
+            ProgressListener progressListener) throws InterruptedException
     {
         // create the image
         final ImagePlus result = createImagePlus(sequence, progressListener);
@@ -366,16 +377,21 @@ public class ImageJUtil
 
     /**
      * Convert the specified Icy {@link Sequence} object to ImageJ {@link ImagePlus}
+     * 
+     * @throws InterruptedException
      */
     public static ImagePlus convertToImageJImage(Sequence sequence, ProgressListener progressListener)
+            throws InterruptedException
     {
         return convertToImageJImage(sequence, false, progressListener);
     }
 
     /**
      * Convert the specified ImageJ {@link Roi} object to Icy {@link ROI}.
+     * 
+     * @throws InterruptedException
      */
-    public static List<ROI2D> convertToIcyRoi(Roi roi)
+    public static List<ROI2D> convertToIcyRoi(Roi roi) throws InterruptedException
     {
         final List<ROI2D> result = new ArrayList<ROI2D>();
         final List<Point2D> pts = new ArrayList<Point2D>();
@@ -395,8 +411,8 @@ public class ImageJUtil
                 final Rectangle2D rect = roi.getFloatBounds();
                 final double x = rect.getX();
                 final double y = rect.getY();
-                result.add(new ROI2DLine(new Point2D.Double(x, y), new Point2D.Double(x + rect.getWidth(), y
-                        + rect.getHeight())));
+                result.add(new ROI2DLine(new Point2D.Double(x, y),
+                        new Point2D.Double(x + rect.getWidth(), y + rect.getHeight())));
                 break;
 
             case Roi.TRACED_ROI:
@@ -471,8 +487,10 @@ public class ImageJUtil
 
     /**
      * Convert the specified Icy {@link ROI} object to ImageJ {@link Roi}.
+     * 
+     * @throws InterruptedException
      */
-    public static Roi convertToImageJRoi(ROI2D roi)
+    public static Roi convertToImageJRoi(ROI2D roi) throws InterruptedException
     {
         final Roi result;
 

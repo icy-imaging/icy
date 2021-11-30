@@ -3,11 +3,12 @@
  */
 package icy.sequence.edit;
 
-import icy.sequence.Sequence;
-
 import java.awt.Image;
 
 import javax.swing.undo.CannotUndoException;
+
+import icy.gui.dialog.MessageDialog;
+import icy.sequence.Sequence;
 
 /**
  * Default lazy sequence data undoable edit (do a complete sequence data copy to restore previous
@@ -47,8 +48,16 @@ public class DataSequenceEdit extends AbstractSequenceEdit
     {
         super.undo();
 
-        // undo
-        getSequence().copyDataFrom(previous);
+        try
+        {
+            // undo
+            getSequence().copyDataFrom(previous);
+        }
+        catch (InterruptedException e)
+        {
+            MessageDialog.showDialog("Undo operation interrupted", e.getLocalizedMessage(),
+                    MessageDialog.ERROR_MESSAGE);
+        }
     }
 
     @Override

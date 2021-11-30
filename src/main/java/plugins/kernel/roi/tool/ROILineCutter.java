@@ -1,15 +1,5 @@
 package plugins.kernel.roi.tool;
 
-import icy.canvas.IcyCanvas;
-import icy.roi.ROI;
-import icy.roi.ROIUtil;
-import icy.sequence.Sequence;
-import icy.sequence.edit.ROIReplacesSequenceEdit;
-import icy.system.thread.ThreadUtil;
-import icy.type.point.Point5D;
-import icy.type.point.Point5D.Double;
-import icy.type.rectangle.Rectangle2DUtil;
-
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
@@ -17,6 +7,16 @@ import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import icy.canvas.IcyCanvas;
+import icy.roi.ROI;
+import icy.roi.ROIUtil;
+import icy.sequence.Sequence;
+import icy.sequence.edit.ROIReplacesSequenceEdit;
+import icy.system.IcyExceptionHandler;
+import icy.system.thread.ThreadUtil;
+import icy.type.point.Point5D;
+import icy.type.point.Point5D.Double;
+import icy.type.rectangle.Rectangle2DUtil;
 import plugins.kernel.roi.roi2d.ROI2DLine;
 
 /**
@@ -45,8 +45,19 @@ public class ROILineCutter extends ROI2DLine
                     // remove the ROI, we don't need it anymore...
                     ROILineCutter.this.remove(false);
 
-                    // and do cutting now
-                    splitOverlappedROIs(sequences);
+                    try
+                    {
+                        // and do cutting now
+                        splitOverlappedROIs(sequences);
+                    }
+                    catch (UnsupportedOperationException e)
+                    {
+                        IcyExceptionHandler.handleException(e, false);
+                    }
+                    catch (InterruptedException ie)
+                    {
+                        // just ignore
+                    }
                 }
             });
         }
@@ -98,8 +109,11 @@ public class ROILineCutter extends ROI2DLine
      * shape (line).
      * 
      * @return <code>true</code> if some ROIS were cuts
+     * @throws InterruptedException
+     * @throws UnsupportedOperationException
      */
     public boolean splitOverlappedROIs(List<Sequence> sequences)
+            throws UnsupportedOperationException, InterruptedException
     {
         boolean result = false;
 

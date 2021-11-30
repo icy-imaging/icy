@@ -1880,62 +1880,68 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Uses
      *             {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, BufferedImage, LUT)}
      *             instead.
      */
     @Deprecated
-    public BufferedImage convertToBufferedImage(BufferedImage out, LUT lut)
+    public BufferedImage convertToBufferedImage(BufferedImage out, LUT lut) throws InterruptedException
     {
         return IcyBufferedImageUtil.toBufferedImage(this, out, lut);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Uses
      *             {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, BufferedImage)}
      *             instead.
      */
     @Deprecated
-    public BufferedImage convertToBufferedImage(BufferedImage out)
+    public BufferedImage convertToBufferedImage(BufferedImage out) throws InterruptedException
     {
         return IcyBufferedImageUtil.toBufferedImage(this, out);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Uses
      *             {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, BufferedImage, LUT)}
      *             instead.
      */
     @Deprecated
-    public BufferedImage getARGBImage(LUT lut, BufferedImage out)
+    public BufferedImage getARGBImage(LUT lut, BufferedImage out) throws InterruptedException
     {
         return IcyBufferedImageUtil.getARGBImage(this, lut, out);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, BufferedImage)}
      *             instead.
      */
     @Deprecated
-    public BufferedImage getARGBImage(BufferedImage out)
+    public BufferedImage getARGBImage(BufferedImage out) throws InterruptedException
     {
         return IcyBufferedImageUtil.getARGBImage(this, out);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link IcyBufferedImageUtil#getARGBImage(IcyBufferedImage, LUT)} instead.
      */
     @Deprecated
-    public BufferedImage getARGBImage(LUT lut)
+    public BufferedImage getARGBImage(LUT lut) throws InterruptedException
     {
         return IcyBufferedImageUtil.getARGBImage(this, lut);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link IcyBufferedImageUtil#getARGBImage(IcyBufferedImage)} instead.
      */
     @Deprecated
-    public BufferedImage getARGBImage()
+    public BufferedImage getARGBImage() throws InterruptedException
     {
         return IcyBufferedImageUtil.getARGBImage(this);
     }
@@ -1985,21 +1991,23 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, int, LUT)}
      *             instead
      */
     @Deprecated
-    public BufferedImage convertToBufferedImage(LUT lut, int imageType)
+    public BufferedImage convertToBufferedImage(LUT lut, int imageType) throws InterruptedException
     {
         return IcyBufferedImageUtil.toBufferedImage(this, imageType, lut);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, int, LUT)}
      *             instead
      */
     @Deprecated
-    public BufferedImage convertToBufferedImage(int imageType, LUT lut)
+    public BufferedImage convertToBufferedImage(int imageType, LUT lut) throws InterruptedException
     {
         return IcyBufferedImageUtil.toBufferedImage(this, imageType, lut);
     }
@@ -4253,17 +4261,28 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * 
      * @param srcChannel
      *        source image
-     * @param dstChannel int
-     * @param src_db buffer
-     * @param dst_db buffer
-     * @param indices array
-     * @param band_offsets array
-     * @param pixelStride_src int
-     * @param scanlineStride_src int
-     * @param bank_offsets array
-     * @param decOffsetSrc int
-     * @param maxX int
-     * @param maxY int
+     * @param dstChannel
+     *        int
+     * @param src_db
+     *        buffer
+     * @param dst_db
+     *        buffer
+     * @param indices
+     *        array
+     * @param band_offsets
+     *        array
+     * @param pixelStride_src
+     *        int
+     * @param scanlineStride_src
+     *        int
+     * @param bank_offsets
+     *        array
+     * @param decOffsetSrc
+     *        int
+     * @param maxX
+     *        int
+     * @param maxY
+     *        int
      */
     protected void internalCopyData(int srcChannel, int dstChannel, DataBuffer src_db, DataBuffer dst_db, int[] indices,
             int[] band_offsets, int[] bank_offsets, int scanlineStride_src, int pixelStride_src, int maxX, int maxY,
@@ -4441,7 +4460,8 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      *        source channel (-1 for all channels)
      * @param dstChannel
      *        destination channel (only significant if source channel != -1)
-     * @param sourceRaster WritableRaster
+     * @param sourceRaster
+     *        WritableRaster
      * @return <code>true</code> if the copy operation succeed, <code>false</code> otherwise
      */
     public boolean copyData(ComponentSampleModel sampleModel, WritableRaster sourceRaster, int srcChannel,

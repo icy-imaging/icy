@@ -204,16 +204,23 @@ public class CanvasActions
 
             if ((sequence != null) && (canvas != null))
             {
-                final Sequence seqOut = canvas.getRenderedSequence(true, progressFrame);
-
-                if (seqOut != null)
+                try
                 {
-                    // set sequence name
-                    seqOut.setName("Screen shot of '" + sequence.getName() + "' view");
-                    // add sequence
-                    Icy.getMainInterface().addSequence(seqOut);
+                    final Sequence seqOut = canvas.getRenderedSequence(true, progressFrame);
 
-                    return true;
+                    if (seqOut != null)
+                    {
+                        // set sequence name
+                        seqOut.setName("Screen shot of '" + sequence.getName() + "' view");
+                        // add sequence
+                        Icy.getMainInterface().addSequence(seqOut);
+
+                        return true;
+                    }
+                }
+                catch (InterruptedException ex)
+                {
+                    // just ignore
                 }
             }
 
@@ -247,16 +254,23 @@ public class CanvasActions
 
             if ((sequence != null) && (canvas != null))
             {
-                final Sequence seqOut = canvas.getRenderedSequence(false, progressFrame);
-
-                if (seqOut != null)
+                try
                 {
-                    // set sequence name
-                    seqOut.setName("Rendering of '" + sequence.getName() + "' view");
-                    // add sequence
-                    Icy.getMainInterface().addSequence(seqOut);
+                    final Sequence seqOut = canvas.getRenderedSequence(false, progressFrame);
 
-                    return true;
+                    if (seqOut != null)
+                    {
+                        // set sequence name
+                        seqOut.setName("Rendering of '" + sequence.getName() + "' view");
+                        // add sequence
+                        Icy.getMainInterface().addSequence(seqOut);
+
+                        return true;
+                    }
+                }
+                catch (InterruptedException ex)
+                {
+                    // just ignore
                 }
             }
 

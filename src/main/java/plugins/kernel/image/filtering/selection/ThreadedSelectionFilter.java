@@ -133,7 +133,7 @@ public abstract class ThreadedSelectionFilter implements SelectionFilter
                         }));
 
                         if (Thread.interrupted())
-                            throw new InterruptedException();
+                            throw new InterruptedException("Selection filter process interrupted.");
 
                     } // end for(y)
 
@@ -159,7 +159,7 @@ public abstract class ThreadedSelectionFilter implements SelectionFilter
                     }
 
                     if (Thread.interrupted())
-                        throw new InterruptedException();
+                        throw new InterruptedException("Selection filter process interrupted.");
                 } // end for(z)
             } // end for(c)
         } // end for(t)

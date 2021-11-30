@@ -43,6 +43,7 @@ import icy.roi.BooleanMask2D;
 import icy.roi.ROI;
 import icy.roi.ROI3D;
 import icy.roi.ROI4D;
+import icy.roi.ROI5D;
 import icy.roi.ROIEvent;
 import icy.roi.ROIListener;
 import icy.sequence.Sequence;
@@ -59,7 +60,9 @@ import icy.util.XMLUtil;
  * @author Stephane Dallongeville
  * @param <R>
  *        the type of 3D ROI for each slice of this 4D ROI
+ * @deprecated Try to not use {@link ROI4D} or {@link ROI5D} anymore
  */
+@Deprecated
 public class ROI4DStack<R extends ROI3D> extends ROI4D implements ROIListener, OverlayListener, Iterable<R>
 {
     public static final String PROPERTY_USECHILDCOLOR = "useChildColor";
@@ -708,7 +711,7 @@ public class ROI4DStack<R extends ROI3D> extends ROI4D implements ROIListener, O
 
     // default approximated implementation for ROI4DStack
     @Override
-    public double computeNumberOfContourPoints()
+    public double computeNumberOfContourPoints() throws InterruptedException
     {
         // 4D contour points = first slice points + inter slices contour points + last slice points
         double result = 0;
@@ -740,7 +743,7 @@ public class ROI4DStack<R extends ROI3D> extends ROI4D implements ROIListener, O
     }
 
     @Override
-    public double computeNumberOfPoints()
+    public double computeNumberOfPoints() throws InterruptedException
     {
         double volume = 0;
 
@@ -837,7 +840,7 @@ public class ROI4DStack<R extends ROI3D> extends ROI4D implements ROIListener, O
     }
 
     @Override
-    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, boolean inclusive)
+    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, boolean inclusive) throws InterruptedException
     {
         final R roi3d = getSlice(t);
 
@@ -848,7 +851,7 @@ public class ROI4DStack<R extends ROI3D> extends ROI4D implements ROIListener, O
     }
 
     @Override
-    public BooleanMask2D getBooleanMask2D(int z, int t, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, int t, boolean inclusive) throws InterruptedException
     {
         final R roi3d = getSlice(t);
 

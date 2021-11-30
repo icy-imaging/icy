@@ -28,7 +28,6 @@ import org.pushingpixels.flamingo.api.common.RichTooltip;
 
 import icy.clipboard.Clipboard;
 import icy.clipboard.TransferableImage;
-import icy.gui.dialog.ConfirmDialog;
 import icy.gui.frame.AboutFrame;
 import icy.gui.main.MainFrame;
 import icy.gui.menu.search.SearchBar;
@@ -44,7 +43,6 @@ import icy.resource.icon.IcyIcon;
 import icy.sequence.Sequence;
 import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
-import icy.system.audit.Audit;
 import icy.system.thread.ThreadUtil;
 import icy.update.IcyUpdater;
 import icy.util.ClassUtil;
@@ -233,23 +231,30 @@ public class GeneralActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence seq = Icy.getMainInterface().getActiveSequence();
-
-            if (seq != null)
+            try
             {
-                final ImagePlus ip = ImageJUtil.convertToImageJImage(seq, true, progressFrame);
+                final Sequence seq = Icy.getMainInterface().getActiveSequence();
 
-                ThreadUtil.invokeLater(new Runnable()
+                if (seq != null)
                 {
-                    @Override
-                    public void run()
-                    {
-                        // show the image
-                        ip.show();
-                    }
-                });
+                    final ImagePlus ip = ImageJUtil.convertToImageJImage(seq, true, progressFrame);
 
-                return true;
+                    ThreadUtil.invokeLater(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            // show the image
+                            ip.show();
+                        }
+                    });
+
+                    return true;
+                }
+            }
+            catch (InterruptedException e1)
+            {
+                // interrupted
             }
 
             return false;
@@ -285,23 +290,30 @@ public class GeneralActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final ImagePlus ip = WindowManager.getCurrentImage();
-
-            if (ip != null)
+            try
             {
-                final Sequence seq = ImageJUtil.convertToIcySequence(ip, progressFrame);
+                final ImagePlus ip = WindowManager.getCurrentImage();
 
-                ThreadUtil.invokeLater(new Runnable()
+                if (ip != null)
                 {
-                    @Override
-                    public void run()
-                    {
-                        // show the sequence
-                        new Viewer(seq);
-                    }
-                });
+                    final Sequence seq = ImageJUtil.convertToIcySequence(ip, progressFrame);
 
-                return true;
+                    ThreadUtil.invokeLater(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            // show the sequence
+                            new Viewer(seq);
+                        }
+                    });
+
+                    return true;
+                }
+            }
+            catch (InterruptedException e1)
+            {
+                // interrupted
             }
 
             return false;
@@ -358,48 +370,48 @@ public class GeneralActions
         }
     };
 
-    //TODO: uncomment when done !
-//    public static IcyAbstractAction linkAction = new IcyAbstractAction("Link", new IcyIcon(ResourceUtil.ICON_LINK),
-//            "Link / unlink online user account",
-//            "Link / unlink with online user account.\nGive access to extra features as plugin rating")
-//    {
-//
-//        /**
-//         * 
-//         */
-//        private static final long serialVersionUID = 3449298011169150396L;
-//
-//        @Override
-//        public boolean doAction(ActionEvent e)
-//        {
-//            if (Audit.isUserLinked())
-//            {
-//                // ask for confirmation
-//                if (!Icy.getMainInterface().isHeadLess()
-//                        && !ConfirmDialog.confirm("Do you want to unlink user account ?"))
-//                    return false;
-//
-//                // unlink user
-//                Audit.unlinkUser();
-//            }
-//            else
-//            {
-//                // update link first
-//                Audit.updateUserLink();
-//
-//                // still not linked --> link user
-//                if (!Audit.isUserLinked())
-//                    Audit.linkUser();
-//            }
-//
-//            // refresh user infos (in title)
-//            final MainFrame frame = Icy.getMainInterface().getMainFrame();
-//            if (frame != null)
-//                frame.refreshTitle();
-//
-//            return true;
-//        }
-//    };
+    // TODO: uncomment when done !
+    // public static IcyAbstractAction linkAction = new IcyAbstractAction("Link", new IcyIcon(ResourceUtil.ICON_LINK),
+    // "Link / unlink online user account",
+    // "Link / unlink with online user account.\nGive access to extra features as plugin rating")
+    // {
+    //
+    // /**
+    // *
+    // */
+    // private static final long serialVersionUID = 3449298011169150396L;
+    //
+    // @Override
+    // public boolean doAction(ActionEvent e)
+    // {
+    // if (Audit.isUserLinked())
+    // {
+    // // ask for confirmation
+    // if (!Icy.getMainInterface().isHeadLess()
+    // && !ConfirmDialog.confirm("Do you want to unlink user account ?"))
+    // return false;
+    //
+    // // unlink user
+    // Audit.unlinkUser();
+    // }
+    // else
+    // {
+    // // update link first
+    // Audit.updateUserLink();
+    //
+    // // still not linked --> link user
+    // if (!Audit.isUserLinked())
+    // Audit.linkUser();
+    // }
+    //
+    // // refresh user infos (in title)
+    // final MainFrame frame = Icy.getMainInterface().getMainFrame();
+    // if (frame != null)
+    // frame.refreshTitle();
+    //
+    // return true;
+    // }
+    // };
 
     public static IcyAbstractAction checkUpdateAction = new IcyAbstractAction("Check for update",
             new IcyIcon(ResourceUtil.ICON_DOWNLOAD), "Check for updates",

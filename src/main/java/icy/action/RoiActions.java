@@ -36,6 +36,7 @@ import icy.gui.dialog.IdConfirmDialog;
 import icy.gui.dialog.MessageDialog;
 import icy.gui.dialog.OpenDialog;
 import icy.gui.dialog.SaveDialog;
+import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.inspector.RoisPanel;
 import icy.gui.main.MainFrame;
 import icy.main.Icy;
@@ -64,7 +65,7 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import plugins.kernel.roi.roi2d.ROI2DPoint;
 import plugins.kernel.roi.roi2d.ROI2DRectangle;
-import plugins.kernel.roi.roi3d.ROI3DStackRectangle;
+import plugins.kernel.roi.roi3d.ROI3DBox;
 import plugins.kernel.roi.roi4d.ROI4DStackRectangle;
 import plugins.kernel.roi.roi5d.ROI5DStackRectangle;
 
@@ -309,49 +310,58 @@ public class RoiActions
 
                 if ((rois != null) && (rois.size() > 0))
                 {
-                    final List<ROI> copyRois = new ArrayList<ROI>();
-                    sequence.beginUpdate();
                     try
                     {
-                        // unselect all rois
-                        sequence.setSelectedROI(null);
+                        final List<ROI> copyRois = new ArrayList<ROI>();
 
-                        // add copy to sequence (so we can do the paste operation severals time)
-                        for (ROI roi : rois)
+                        sequence.beginUpdate();
+                        try
                         {
-                            // final ROI newROI = roi.getCopy();
-                            final ROI newROI = ROIUtil.adjustToSequence(roi, sequenceSrc, sequence, true, true, true);
+                            // unselect all rois
+                            sequence.setSelectedROI(null);
 
-                            if (newROI != null)
+                            // add copy to sequence (so we can do the paste operation severals time)
+                            for (ROI roi : rois)
                             {
-                                copyRois.add(newROI);
+                                // final ROI newROI = roi.getCopy();
+                                final ROI newROI = ROIUtil.adjustToSequence(roi, sequenceSrc, sequence, true, true,
+                                        true);
 
-                                // select the ROI
-                                newROI.setSelected(true);
-                                // and add it
-                                sequence.addROI(newROI);
+                                if (newROI != null)
+                                {
+                                    copyRois.add(newROI);
+
+                                    // select the ROI
+                                    newROI.setSelected(true);
+                                    // and add it
+                                    sequence.addROI(newROI);
+                                }
                             }
                         }
-                    }
-                    finally
-                    {
-                        sequence.endUpdate();
-                    }
-
-                    // add to undo manager
-                    sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, copyRois)
-                    {
-                        @Override
-                        public String getPresentationName()
+                        finally
                         {
-                            if (getROIs().size() > 1)
-                                return "ROIs added from clipboard";
+                            sequence.endUpdate();
+                        }
 
-                            return "ROI added from clipboard";
-                        };
-                    });
+                        // add to undo manager
+                        sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, copyRois)
+                        {
+                            @Override
+                            public String getPresentationName()
+                            {
+                                if (getROIs().size() > 1)
+                                    return "ROIs added from clipboard";
 
-                    return true;
+                                return "ROI added from clipboard";
+                            };
+                        });
+
+                        return true;
+                    }
+                    catch (InterruptedException ie)
+                    {
+                        new FailedAnnounceFrame("ROI(s) paste operation canceled !");
+                    }
                 }
             }
 
@@ -554,95 +564,101 @@ public class RoiActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-            final RoisPanel roisPanel = Icy.getMainInterface().getRoisPanel();
-
-            if ((sequence != null) && (roisPanel != null))
+            try
             {
-                // NOT operation
-                sequence.beginUpdate();
-                try
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+                final RoisPanel roisPanel = Icy.getMainInterface().getRoisPanel();
+
+                if ((sequence != null) && (roisPanel != null))
                 {
-                    final List<ROI> selectedROI = roisPanel.getSelectedRois();
-
-                    // work only on single ROI
-                    if (selectedROI.size() != 1)
-                        return false;
-
-                    final ROI roi = selectedROI.get(0);
-                    final ROI seqRoi;
-
-                    switch (roi.getDimension())
+                    // NOT operation
+                    sequence.beginUpdate();
+                    try
                     {
-                        case 2:
-                            final ROI2D roi2d = (ROI2D) roi;
-                            final ROI2DRectangle seqRoi2d = new ROI2DRectangle(sequence.getBounds2D());
-                            // set on same position
-                            seqRoi2d.setZ(roi2d.getZ());
-                            seqRoi2d.setT(roi2d.getT());
-                            seqRoi2d.setC(roi2d.getC());
-                            seqRoi = seqRoi2d;
-                            break;
+                        final List<ROI> selectedROI = roisPanel.getSelectedRois();
 
-                        case 3:
-                            final ROI3D roi3d = (ROI3D) roi;
-                            final ROI3DStackRectangle seqRoi3d = new ROI3DStackRectangle(
-                                    sequence.getBounds5D().toRectangle3D());
-                            // set on same position
-                            seqRoi3d.setT(roi3d.getT());
-                            seqRoi3d.setC(roi3d.getC());
-                            seqRoi = seqRoi3d;
-                            break;
+                        // work only on single ROI
+                        if (selectedROI.size() != 1)
+                            return false;
 
-                        case 4:
-                            final ROI4D roi4d = (ROI4D) roi;
-                            final ROI4DStackRectangle seqRoi4d = new ROI4DStackRectangle(
-                                    sequence.getBounds5D().toRectangle4D());
-                            // set on same position
-                            seqRoi4d.setC(roi4d.getC());
-                            seqRoi = seqRoi4d;
-                            break;
+                        final ROI roi = selectedROI.get(0);
+                        final ROI seqRoi;
 
-                        case 5:
-                            seqRoi = new ROI5DStackRectangle(sequence.getBounds5D());
-                            break;
-
-                        default:
-                            seqRoi = null;
-                            break;
-                    }
-
-                    if (seqRoi != null)
-                    {
-                        // we do the NOT operation by subtracting current ROI to sequence bounds ROI
-                        final ROI mergeROI = ROIUtil.subtract(seqRoi, roi);
-
-                        if (mergeROI != null)
+                        switch (roi.getDimension())
                         {
-                            mergeROI.setName("Inverse");
+                            case 2:
+                                final ROI2D roi2d = (ROI2D) roi;
+                                final ROI2DRectangle seqRoi2d = new ROI2DRectangle(sequence.getBounds2D());
+                                // set on same position
+                                seqRoi2d.setZ(roi2d.getZ());
+                                seqRoi2d.setT(roi2d.getT());
+                                seqRoi2d.setC(roi2d.getC());
+                                seqRoi = seqRoi2d;
+                                break;
 
-                            sequence.addROI(mergeROI);
-                            sequence.setSelectedROI(mergeROI);
+                            case 3:
+                                final ROI3D roi3d = (ROI3D) roi;
+                                final ROI3DBox seqRoi3d = new ROI3DBox(sequence.getBounds5D().toRectangle3D());
+                                // set on same position
+                                seqRoi3d.setT(roi3d.getT());
+                                seqRoi3d.setC(roi3d.getC());
+                                seqRoi = seqRoi3d;
+                                break;
 
-                            // add to undo manager
-                            sequence.addUndoableEdit(new ROIAddSequenceEdit(sequence, mergeROI, "ROI Inverse"));
+                            case 4:
+                                final ROI4D roi4d = (ROI4D) roi;
+                                final ROI4DStackRectangle seqRoi4d = new ROI4DStackRectangle(
+                                        sequence.getBounds5D().toRectangle4D());
+                                // set on same position
+                                seqRoi4d.setC(roi4d.getC());
+                                seqRoi = seqRoi4d;
+                                break;
+
+                            case 5:
+                                seqRoi = new ROI5DStackRectangle(sequence.getBounds5D());
+                                break;
+
+                            default:
+                                seqRoi = null;
+                                break;
                         }
-                    }
-                    else
-                        MessageDialog.showDialog("Operation not supported", "Input ROI has incorrect dimension !",
-                                MessageDialog.ERROR_MESSAGE);
-                }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(),
-                            MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
 
-                return true;
+                        if (seqRoi != null)
+                        {
+                            // we do the NOT operation by subtracting current ROI to sequence bounds ROI
+                            final ROI mergeROI = ROIUtil.subtract(seqRoi, roi);
+
+                            if (mergeROI != null)
+                            {
+                                mergeROI.setName("Inverse");
+
+                                sequence.addROI(mergeROI);
+                                sequence.setSelectedROI(mergeROI);
+
+                                // add to undo manager
+                                sequence.addUndoableEdit(new ROIAddSequenceEdit(sequence, mergeROI, "ROI Inverse"));
+                            }
+                        }
+                        else
+                            MessageDialog.showDialog("Operation not supported", "Input ROI has incorrect dimension !",
+                                    MessageDialog.ERROR_MESSAGE);
+                    }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(),
+                                MessageDialog.ERROR_MESSAGE);
+                    }
+                    finally
+                    {
+                        sequence.endUpdate();
+                    }
+
+                    return true;
+                }
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI inversion operation canceled !");
             }
 
             return false;
@@ -689,6 +705,11 @@ public class RoiActions
                         // add to undo manager
                         sequence.addUndoableEdit(new ROIAddSequenceEdit(sequence, mergeROI, "ROI Union"));
                     }
+                }
+                catch (InterruptedException e1)
+                {
+                    MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(),
+                            MessageDialog.ERROR_MESSAGE);
                 }
                 catch (UnsupportedOperationException ex)
                 {
@@ -748,6 +769,11 @@ public class RoiActions
                         sequence.addUndoableEdit(new ROIAddSequenceEdit(sequence, mergeROI, "ROI Intersection"));
                     }
                 }
+                catch (InterruptedException e1)
+                {
+                    MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(),
+                            MessageDialog.ERROR_MESSAGE);
+                }
                 catch (UnsupportedOperationException ex)
                 {
                     MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(),
@@ -806,6 +832,11 @@ public class RoiActions
                         sequence.addUndoableEdit(new ROIAddSequenceEdit(sequence, mergeROI, "ROI Exclusive Union"));
                     }
                 }
+                catch (InterruptedException e1)
+                {
+                    MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(),
+                            MessageDialog.ERROR_MESSAGE);
+                }
                 catch (UnsupportedOperationException ex)
                 {
                     MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(),
@@ -841,58 +872,66 @@ public class RoiActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-            final RoisPanel roisPanel = Icy.getMainInterface().getRoisPanel();
-
-            if ((sequence != null) && (roisPanel != null))
+            try
             {
-                // SUB operation
-                sequence.beginUpdate();
-                try
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+                final RoisPanel roisPanel = Icy.getMainInterface().getRoisPanel();
+
+                if ((sequence != null) && (roisPanel != null))
                 {
-                    final List<ROI> selectedROI = roisPanel.getSelectedRois();
-                    final List<ROI> generatedROIs = new ArrayList<ROI>();
-
-                    // Subtraction work only when 2 ROI are selected
-                    if (selectedROI.size() != 2)
-                        return false;
-
-                    final ROI subtractAB = ROIUtil.subtract(selectedROI.get(0), selectedROI.get(1));
-                    final ROI subtractBA = ROIUtil.subtract(selectedROI.get(1), selectedROI.get(0));
-
-                    subtractAB.setName("Subtract A-B");
-                    subtractBA.setName("Subtract B-A");
-
-                    generatedROIs.add(subtractAB);
-                    generatedROIs.add(subtractBA);
-
+                    // SUB operation
                     sequence.beginUpdate();
                     try
                     {
-                        for (ROI roi : generatedROIs)
-                            sequence.addROI(roi);
+                        final List<ROI> selectedROI = roisPanel.getSelectedRois();
+                        final List<ROI> generatedROIs = new ArrayList<ROI>();
 
-                        sequence.setSelectedROIs(generatedROIs);
+                        // Subtraction work only when 2 ROI are selected
+                        if (selectedROI.size() != 2)
+                            return false;
 
-                        // add to undo manager
-                        sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, generatedROIs, "ROI Subtraction"));
+                        final ROI subtractAB = ROIUtil.subtract(selectedROI.get(0), selectedROI.get(1));
+                        final ROI subtractBA = ROIUtil.subtract(selectedROI.get(1), selectedROI.get(0));
+
+                        subtractAB.setName("Subtract A-B");
+                        subtractBA.setName("Subtract B-A");
+
+                        generatedROIs.add(subtractAB);
+                        generatedROIs.add(subtractBA);
+
+                        sequence.beginUpdate();
+                        try
+                        {
+                            for (ROI roi : generatedROIs)
+                                sequence.addROI(roi);
+
+                            sequence.setSelectedROIs(generatedROIs);
+
+                            // add to undo manager
+                            sequence.addUndoableEdit(
+                                    new ROIAddsSequenceEdit(sequence, generatedROIs, "ROI Subtraction"));
+                        }
+                        finally
+                        {
+                            sequence.endUpdate();
+                        }
+                    }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(),
+                                MessageDialog.ERROR_MESSAGE);
                     }
                     finally
                     {
                         sequence.endUpdate();
                     }
-                }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(),
-                            MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
 
-                return true;
+                    return true;
+                }
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI subtraction operation canceled !");
             }
 
             return false;
@@ -923,27 +962,36 @@ public class RoiActions
                 if (mainFrame != null)
                 {
                     final double value = mainFrame.getMainRibbon().getROIRibbonTask().getFillValue();
-                    // create undo point
-                    final boolean canUndo = sequence.createUndoDataPoint("ROI fill interior");
 
-                    // cannot backup
-                    if (!canUndo)
+                    try
                     {
-                        // ask confirmation to continue
-                        if (!IdConfirmDialog.confirm(
-                                "Not enough memory to undo the operation, do you want to continue ?",
-                                "ROIFillInteriorConfirm"))
-                            return false;
+                        // create undo point
+                        final boolean canUndo = sequence.createUndoDataPoint("ROI fill interior");
+
+                        // cannot backup
+                        if (!canUndo)
+                        {
+                            // ask confirmation to continue
+                            if (!IdConfirmDialog.confirm(
+                                    "Not enough memory to undo the operation, do you want to continue ?",
+                                    "ROIFillInteriorConfirm"))
+                                return false;
+                        }
+
+                        for (ROI roi : sequence.getSelectedROIs())
+                            DataIteratorUtil.set(new SequenceDataIterator(sequence, roi, true), value);
+
+                        sequence.dataChanged();
+
+                        // no undo, clear undo manager after modification
+                        if (!canUndo)
+                            sequence.clearUndoManager();
                     }
-
-                    for (ROI roi : sequence.getSelectedROIs())
-                        DataIteratorUtil.set(new SequenceDataIterator(sequence, roi, true), value);
-
-                    sequence.dataChanged();
-
-                    // no undo, clear undo manager after modification
-                    if (!canUndo)
-                        sequence.clearUndoManager();
+                    catch (InterruptedException e1)
+                    {
+                        MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(),
+                                MessageDialog.ERROR_MESSAGE);
+                    }
 
                     return true;
                 }
@@ -979,21 +1027,23 @@ public class RoiActions
                 if (mainFrame != null)
                 {
                     final double value = mainFrame.getMainRibbon().getROIRibbonTask().getFillValue();
-                    // create undo point
-                    final boolean canUndo = sequence.createUndoDataPoint("ROI fill exterior");
-
-                    // cannot backup
-                    if (!canUndo)
-                    {
-                        // ask confirmation to continue
-                        if (!IdConfirmDialog.confirm(
-                                "Not enough memory to undo the operation, do you want to continue ?",
-                                "ROIFillExteriorConfirm"))
-                            return false;
-                    }
+                    boolean canUndo = false;
 
                     try
                     {
+                        // create undo point
+                        canUndo = sequence.createUndoDataPoint("ROI fill exterior");
+
+                        // cannot backup
+                        if (!canUndo)
+                        {
+                            // ask confirmation to continue
+                            if (!IdConfirmDialog.confirm(
+                                    "Not enough memory to undo the operation, do you want to continue ?",
+                                    "ROIFillExteriorConfirm"))
+                                return false;
+                        }
+
                         final ROI roiUnion = ROIUtil.merge(sequence.getSelectedROIs(), BooleanOperator.OR);
                         final ROI roiSeq = new ROI5DStackRectangle(sequence.getBounds5D());
                         final ROI roi = roiSeq.getSubtraction(roiUnion);
@@ -1007,6 +1057,15 @@ public class RoiActions
                             sequence.clearUndoManager();
 
                         return true;
+                    }
+                    catch (InterruptedException e1)
+                    {
+                        // undo operation if possible
+                        if (canUndo)
+                            sequence.undo();
+
+                        MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(),
+                                MessageDialog.ERROR_MESSAGE);
                     }
                     catch (UnsupportedOperationException ex)
                     {
@@ -1142,52 +1201,59 @@ public class RoiActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            if (sequence != null)
+            try
             {
-                final int sizeZ = sequence.getSizeZ();
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
-                // ROI Z stack conversion
-                sequence.beginUpdate();
-                try
+                if (sequence != null)
                 {
-                    final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
-                    final List<ROI> removedROIs = new ArrayList<ROI>();
-                    final List<ROI> addedROIs = new ArrayList<ROI>();
+                    final int sizeZ = sequence.getSizeZ();
 
-                    for (ROI2D roi : selectedROIs)
+                    // ROI Z stack conversion
+                    sequence.beginUpdate();
+                    try
                     {
-                        final ROI stackedRoi = ROIUtil.convertTo3D(roi, 0d, sizeZ);
+                        final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
+                        final List<ROI> removedROIs = new ArrayList<ROI>();
+                        final List<ROI> addedROIs = new ArrayList<ROI>();
 
-                        if (stackedRoi != null)
+                        for (ROI2D roi : selectedROIs)
                         {
-                            // select it by default
-                            stackedRoi.setSelected(true);
+                            final ROI stackedRoi = ROIUtil.convertTo3D(roi, 0d, sizeZ);
 
-                            sequence.removeROI(roi);
-                            sequence.addROI(stackedRoi);
+                            if (stackedRoi != null)
+                            {
+                                // select it by default
+                                stackedRoi.setSelected(true);
 
-                            // add to undo manager
-                            removedROIs.add(roi);
-                            addedROIs.add(stackedRoi);
+                                sequence.removeROI(roi);
+                                sequence.addROI(stackedRoi);
+
+                                // add to undo manager
+                                removedROIs.add(roi);
+                                addedROIs.add(stackedRoi);
+                            }
                         }
+
+                        if (!addedROIs.isEmpty())
+                            sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
+                                    (addedROIs.size() > 1) ? "ROIs 3D stack conversion" : "ROI 3D stack conversion"));
+                    }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    finally
+                    {
+                        sequence.endUpdate();
                     }
 
-                    if (!addedROIs.isEmpty())
-                        sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
-                                (addedROIs.size() > 1) ? "ROIs 3D stack conversion" : "ROI 3D stack conversion"));
+                    return true;
                 }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
-
-                return true;
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI 3D conversion operation canceled !");
             }
 
             return false;
@@ -1209,53 +1275,61 @@ public class RoiActions
         @Override
         protected boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            if (sequence != null)
+            try
             {
-                // ROI Z stack conversion
-                sequence.beginUpdate();
-                try
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+                if (sequence != null)
                 {
-                    final List<ROI3D> selectedROIs = sequence.getSelectedROI3Ds();
-                    final List<ROI> removedROIs = new ArrayList<ROI>();
-                    final List<ROI> addedROIs = new ArrayList<ROI>();
-
-                    for (ROI3D roi : selectedROIs)
+                    // ROI Z stack conversion
+                    sequence.beginUpdate();
+                    try
                     {
-                        final ROI[] unstackedRois = ROIUtil.convertTo2D(roi);
+                        final List<ROI3D> selectedROIs = sequence.getSelectedROI3Ds();
+                        final List<ROI> removedROIs = new ArrayList<ROI>();
+                        final List<ROI> addedROIs = new ArrayList<ROI>();
 
-                        if (unstackedRois != null)
+                        for (ROI3D roi : selectedROIs)
                         {
-                            sequence.removeROI(roi);
-                            // add to undo manager
-                            removedROIs.add(roi);
-                            for (ROI roi2d : unstackedRois)
-                            {
-                                // select it by default
-                                roi2d.setSelected(true);
+                            final ROI[] unstackedRois = ROIUtil.convertTo2D(roi);
 
-                                sequence.addROI(roi2d);
+                            if (unstackedRois != null)
+                            {
+                                sequence.removeROI(roi);
                                 // add to undo manager
-                                addedROIs.add(roi2d);
+                                removedROIs.add(roi);
+                                for (ROI roi2d : unstackedRois)
+                                {
+                                    // select it by default
+                                    roi2d.setSelected(true);
+
+                                    sequence.addROI(roi2d);
+                                    // add to undo manager
+                                    addedROIs.add(roi2d);
+                                }
                             }
                         }
+
+                        if (!addedROIs.isEmpty())
+                            sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
+                                    (addedROIs.size() > 1) ? "3D ROIs unstack conversion"
+                                            : "3D ROI unstack conversion"));
+                    }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    finally
+                    {
+                        sequence.endUpdate();
                     }
 
-                    if (!addedROIs.isEmpty())
-                        sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
-                                (addedROIs.size() > 1) ? "3D ROIs unstack conversion" : "3D ROI unstack conversion"));
+                    return true;
                 }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
-
-                return true;
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI 2D conversion operation canceled !");
             }
 
             return false;
@@ -1277,50 +1351,57 @@ public class RoiActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            if (sequence != null)
+            try
             {
-                // ROI mask conversion
-                sequence.beginUpdate();
-                try
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+                if (sequence != null)
                 {
-                    final List<ROI> selectedROIs = sequence.getSelectedROIs();
-                    final List<ROI> removedROIs = new ArrayList<ROI>();
-                    final List<ROI> addedROIs = new ArrayList<ROI>();
-
-                    for (ROI roi : selectedROIs)
+                    // ROI mask conversion
+                    sequence.beginUpdate();
+                    try
                     {
-                        final ROI maskRoi = ROIUtil.convertToMask(roi);
+                        final List<ROI> selectedROIs = sequence.getSelectedROIs();
+                        final List<ROI> removedROIs = new ArrayList<ROI>();
+                        final List<ROI> addedROIs = new ArrayList<ROI>();
 
-                        if (maskRoi != null)
+                        for (ROI roi : selectedROIs)
                         {
-                            // select it by default
-                            maskRoi.setSelected(true);
+                            final ROI maskRoi = ROIUtil.convertToMask(roi);
 
-                            sequence.removeROI(roi);
-                            sequence.addROI(maskRoi);
+                            if (maskRoi != null)
+                            {
+                                // select it by default
+                                maskRoi.setSelected(true);
 
-                            // add to undo manager
-                            removedROIs.add(roi);
-                            addedROIs.add(maskRoi);
+                                sequence.removeROI(roi);
+                                sequence.addROI(maskRoi);
+
+                                // add to undo manager
+                                removedROIs.add(roi);
+                                addedROIs.add(maskRoi);
+                            }
                         }
+
+                        if (!addedROIs.isEmpty())
+                            sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
+                                    (addedROIs.size() > 1) ? "ROIs mask conversion" : "ROI mask conversion"));
+                    }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    finally
+                    {
+                        sequence.endUpdate();
                     }
 
-                    if (!addedROIs.isEmpty())
-                        sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
-                                (addedROIs.size() > 1) ? "ROIs mask conversion" : "ROI mask conversion"));
+                    return true;
                 }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
-
-                return true;
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI mask conversion operation canceled !");
             }
 
             return false;
@@ -1573,50 +1654,57 @@ public class RoiActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            if (sequence != null)
+            try
             {
-                // ROI shape conversion
-                sequence.beginUpdate();
-                try
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+                if (sequence != null)
                 {
-                    final List<ROI> selectedROIs = sequence.getSelectedROIs();
-                    final List<ROI> removedROIs = new ArrayList<ROI>();
-                    final List<ROI> addedROIs = new ArrayList<ROI>();
-
-                    for (ROI roi : selectedROIs)
+                    // ROI shape conversion
+                    sequence.beginUpdate();
+                    try
                     {
-                        final ROI shapeRoi = ROIUtil.convertToShape(roi, -1);
+                        final List<ROI> selectedROIs = sequence.getSelectedROIs();
+                        final List<ROI> removedROIs = new ArrayList<ROI>();
+                        final List<ROI> addedROIs = new ArrayList<ROI>();
 
-                        if (shapeRoi != null)
+                        for (ROI roi : selectedROIs)
                         {
-                            // select it by default
-                            shapeRoi.setSelected(true);
+                            final ROI shapeRoi = ROIUtil.convertToShape(roi, -1);
 
-                            sequence.removeROI(roi);
-                            sequence.addROI(shapeRoi);
+                            if (shapeRoi != null)
+                            {
+                                // select it by default
+                                shapeRoi.setSelected(true);
 
-                            // add to undo manager
-                            removedROIs.add(roi);
-                            addedROIs.add(shapeRoi);
+                                sequence.removeROI(roi);
+                                sequence.addROI(shapeRoi);
+
+                                // add to undo manager
+                                removedROIs.add(roi);
+                                addedROIs.add(shapeRoi);
+                            }
                         }
+
+                        if (!addedROIs.isEmpty())
+                            sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
+                                    (addedROIs.size() > 1) ? "ROIs shape conversion" : "ROI shape conversion"));
+                    }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    finally
+                    {
+                        sequence.endUpdate();
                     }
 
-                    if (!addedROIs.isEmpty())
-                        sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
-                                (addedROIs.size() > 1) ? "ROIs shape conversion" : "ROI shape conversion"));
+                    return true;
                 }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
-
-                return true;
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI shape conversion operation canceled !");
             }
 
             return false;
@@ -1638,50 +1726,57 @@ public class RoiActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            if (sequence != null)
+            try
             {
-                sequence.beginUpdate();
-                try
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+                if (sequence != null)
                 {
-                    final List<ROI> selectedROIs = sequence.getSelectedROIs();
-                    final List<ROI> removedROIs = new ArrayList<ROI>();
-                    final List<ROI> addedROIs = new ArrayList<ROI>();
-
-                    for (ROI roi : selectedROIs)
+                    sequence.beginUpdate();
+                    try
                     {
-                        final List<ROI> components = ROIUtil.getConnectedComponents(roi);
+                        final List<ROI> selectedROIs = sequence.getSelectedROIs();
+                        final List<ROI> removedROIs = new ArrayList<ROI>();
+                        final List<ROI> addedROIs = new ArrayList<ROI>();
 
-                        // nothing to do if we obtain only 1 component
-                        if (components.size() > 1)
+                        for (ROI roi : selectedROIs)
                         {
-                            sequence.removeROI(roi);
-                            removedROIs.add(roi);
+                            final List<ROI> components = ROIUtil.getConnectedComponents(roi);
 
-                            for (ROI component : components)
+                            // nothing to do if we obtain only 1 component
+                            if (components.size() > 1)
                             {
-                                sequence.addROI(component);
-                                // add to undo manager
-                                addedROIs.add(component);
+                                sequence.removeROI(roi);
+                                removedROIs.add(roi);
+
+                                for (ROI component : components)
+                                {
+                                    sequence.addROI(component);
+                                    // add to undo manager
+                                    addedROIs.add(component);
+                                }
                             }
                         }
+
+                        if (!removedROIs.isEmpty())
+                            sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
+                                    (removedROIs.size() > 1) ? "ROIs separate objects" : "ROI separate objects"));
+                    }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    finally
+                    {
+                        sequence.endUpdate();
                     }
 
-                    if (!removedROIs.isEmpty())
-                        sequence.addUndoableEdit(new ROIReplacesSequenceEdit(sequence, removedROIs, addedROIs,
-                                (removedROIs.size() > 1) ? "ROIs separate objects" : "ROI separate objects"));
+                    return true;
                 }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
-
-                return true;
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI objects separation operation canceled !");
             }
 
             return false;
@@ -1703,38 +1798,45 @@ public class RoiActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            if (sequence != null)
+            try
             {
-                sequence.beginUpdate();
-                try
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+                if (sequence != null)
                 {
-                    final List<ROI> selectedROIs = sequence.getSelectedROIs();
-                    final List<ROI> newROIs = new ArrayList<ROI>();
-
-                    for (ROI roi : selectedROIs)
-                        newROIs.add(ROIUtil.getUpscaled(roi, false));
-
-                    if (!newROIs.isEmpty())
+                    sequence.beginUpdate();
+                    try
                     {
-                        for (ROI roi : newROIs)
-                            sequence.addROI(roi);
+                        final List<ROI> selectedROIs = sequence.getSelectedROIs();
+                        final List<ROI> newROIs = new ArrayList<ROI>();
 
-                        sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, newROIs,
-                                (newROIs.size() > 1) ? "ROIs scale x2" : "ROI scale x2"));
+                        for (ROI roi : selectedROIs)
+                            newROIs.add(ROIUtil.getUpscaled(roi, false));
+
+                        if (!newROIs.isEmpty())
+                        {
+                            for (ROI roi : newROIs)
+                                sequence.addROI(roi);
+
+                            sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, newROIs,
+                                    (newROIs.size() > 1) ? "ROIs scale x2" : "ROI scale x2"));
+                        }
                     }
-                }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    finally
+                    {
+                        sequence.endUpdate();
+                    }
 
-                return true;
+                    return true;
+                }
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI 2x upscaling operation canceled !");
             }
 
             return false;
@@ -1756,38 +1858,45 @@ public class RoiActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            if (sequence != null)
+            try
             {
-                sequence.beginUpdate();
-                try
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+                if (sequence != null)
                 {
-                    final List<ROI> selectedROIs = sequence.getSelectedROIs();
-                    final List<ROI> newROIs = new ArrayList<ROI>();
-
-                    for (ROI roi : selectedROIs)
-                        newROIs.add(ROIUtil.getUpscaled(roi, true));
-
-                    if (!newROIs.isEmpty())
+                    sequence.beginUpdate();
+                    try
                     {
-                        for (ROI roi : newROIs)
-                            sequence.addROI(roi);
+                        final List<ROI> selectedROIs = sequence.getSelectedROIs();
+                        final List<ROI> newROIs = new ArrayList<ROI>();
 
-                        sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, newROIs,
-                                (newROIs.size() > 1) ? "ROIs scale x2" : "ROI scale x2"));
+                        for (ROI roi : selectedROIs)
+                            newROIs.add(ROIUtil.getUpscaled(roi, true));
+
+                        if (!newROIs.isEmpty())
+                        {
+                            for (ROI roi : newROIs)
+                                sequence.addROI(roi);
+
+                            sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, newROIs,
+                                    (newROIs.size() > 1) ? "ROIs scale x2" : "ROI scale x2"));
+                        }
                     }
-                }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    finally
+                    {
+                        sequence.endUpdate();
+                    }
 
-                return true;
+                    return true;
+                }
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI 2x upscaling operation canceled !");
             }
 
             return false;
@@ -1809,38 +1918,45 @@ public class RoiActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            if (sequence != null)
+            try
             {
-                sequence.beginUpdate();
-                try
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+                if (sequence != null)
                 {
-                    final List<ROI> selectedROIs = sequence.getSelectedROIs();
-                    final List<ROI> newROIs = new ArrayList<ROI>();
-
-                    for (ROI roi : newROIs)
-                        newROIs.add(ROIUtil.getDownscaled(roi, false));
-
-                    if (!newROIs.isEmpty())
+                    sequence.beginUpdate();
+                    try
                     {
-                        for (ROI roi : selectedROIs)
-                            sequence.addROI(roi);
+                        final List<ROI> selectedROIs = sequence.getSelectedROIs();
+                        final List<ROI> newROIs = new ArrayList<ROI>();
 
-                        sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, newROIs,
-                                (newROIs.size() > 1) ? "ROIs scale /2" : "ROI scale /2"));
+                        for (ROI roi : newROIs)
+                            newROIs.add(ROIUtil.getDownscaled(roi, false));
+
+                        if (!newROIs.isEmpty())
+                        {
+                            for (ROI roi : selectedROIs)
+                                sequence.addROI(roi);
+
+                            sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, newROIs,
+                                    (newROIs.size() > 1) ? "ROIs scale /2" : "ROI scale /2"));
+                        }
                     }
-                }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    finally
+                    {
+                        sequence.endUpdate();
+                    }
 
-                return true;
+                    return true;
+                }
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI 2x downscaling operation canceled !");
             }
 
             return false;
@@ -1862,38 +1978,45 @@ public class RoiActions
         @Override
         public boolean doAction(ActionEvent e)
         {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            if (sequence != null)
+            try
             {
-                sequence.beginUpdate();
-                try
+                final Sequence sequence = Icy.getMainInterface().getActiveSequence();
+
+                if (sequence != null)
                 {
-                    final List<ROI> selectedROIs = sequence.getSelectedROIs();
-                    final List<ROI> newROIs = new ArrayList<ROI>();
-
-                    for (ROI roi : selectedROIs)
-                        newROIs.add(ROIUtil.getDownscaled(roi, true));
-
-                    if (!newROIs.isEmpty())
+                    sequence.beginUpdate();
+                    try
                     {
-                        for (ROI roi : newROIs)
-                            sequence.addROI(roi);
+                        final List<ROI> selectedROIs = sequence.getSelectedROIs();
+                        final List<ROI> newROIs = new ArrayList<ROI>();
 
-                        sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, newROIs,
-                                (newROIs.size() > 1) ? "ROIs scale /2" : "ROI scale /2"));
+                        for (ROI roi : selectedROIs)
+                            newROIs.add(ROIUtil.getDownscaled(roi, true));
+
+                        if (!newROIs.isEmpty())
+                        {
+                            for (ROI roi : newROIs)
+                                sequence.addROI(roi);
+
+                            sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, newROIs,
+                                    (newROIs.size() > 1) ? "ROIs scale /2" : "ROI scale /2"));
+                        }
                     }
-                }
-                catch (UnsupportedOperationException ex)
-                {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
-                }
-                finally
-                {
-                    sequence.endUpdate();
-                }
+                    catch (UnsupportedOperationException ex)
+                    {
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    }
+                    finally
+                    {
+                        sequence.endUpdate();
+                    }
 
-                return true;
+                    return true;
+                }
+            }
+            catch (InterruptedException ie)
+            {
+                new FailedAnnounceFrame("ROI 2x downscaling operation canceled !");
             }
 
             return false;

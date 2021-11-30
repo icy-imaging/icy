@@ -56,7 +56,7 @@ public class ROISkeletonCalculator
 
     ROI2DArea distanceMapRoi2d;
 
-    private void setDistanceMapRoi2D()
+    private void setDistanceMapRoi2D() throws InterruptedException
     {
         Rectangle distanceMapRoiMaskRect = new Rectangle((int) (this.roiBooleanMask.bounds.x - Math.ceil(1)),
                 (int) (this.roiBooleanMask.bounds.y - Math.ceil(1)),

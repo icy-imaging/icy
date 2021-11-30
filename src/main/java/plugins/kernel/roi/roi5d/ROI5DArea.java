@@ -144,8 +144,10 @@ public class ROI5DArea extends ROI5DStack<ROI4DArea>
      *        <code>true</code> if the given slice should be merged with the existing slice, or
      *        <code>false</code> to
      *        replace the existing slice.
+     * @throws InterruptedException 
+     * @throws UnsupportedOperationException 
      */
-    public void setSlice(int c, ROI4D roiSlice, boolean merge)
+    public void setSlice(int c, ROI4D roiSlice, boolean merge) throws UnsupportedOperationException, InterruptedException
     {
         if (roiSlice == null)
             throw new IllegalArgumentException("Cannot add an empty slice in a 5D ROI");

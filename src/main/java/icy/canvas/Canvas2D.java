@@ -695,10 +695,11 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
             }
 
             /**
+             * @throws InterruptedException
              * @deprecated Caching is done as tiles now so it's better to use {@link #getImageAsTiles()}
              */
             @Deprecated
-            public BufferedImage getImage()
+            public BufferedImage getImage() throws InterruptedException
             {
                 // get original image
                 final IcyBufferedImage icyImage = Canvas2D.this.getImage(getPositionT(), getPositionZ(),
@@ -782,8 +783,15 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
                                 {
                                     // be sure that we don't keep that in cache (useless and waste cache space)
                                     icyTile.setVolatile(false);
-                                    // convert to buffered image
-                                    tile.image = IcyBufferedImageUtil.toBufferedImage(icyTile, tile.image, l);
+                                    try
+                                    {
+                                        // convert to buffered image
+                                        tile.image = IcyBufferedImageUtil.toBufferedImage(icyTile, tile.image, l);
+                                    }
+                                    catch (InterruptedException e)
+                                    {
+                                        // shouldn't happen here
+                                    }
                                 }
                             }
                         }
@@ -2919,8 +2927,10 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
     /**
      * Return an ARGB BufferedImage form of the image located at position [T, Z, C].<br>
      * If the 'out' image is not compatible with wanted image, a new image is returned.
+     * 
+     * @throws InterruptedException
      */
-    public BufferedImage getARGBImage(int t, int z, int c, BufferedImage out)
+    public BufferedImage getARGBImage(int t, int z, int c, BufferedImage out) throws InterruptedException
     {
         final IcyBufferedImage img = Canvas2D.this.getImage(t, z, c);
 
@@ -2940,7 +2950,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public BufferedImage getRenderedImage(int t, int z, int c, boolean cv)
+    public BufferedImage getRenderedImage(int t, int z, int c, boolean cv) throws InterruptedException
     {
         final Sequence seq = getSequence();
         if (seq == null)
@@ -3035,19 +3045,21 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use <code>getRenderedImage(t, z, -1, true)</code> instead.
      */
     @Deprecated
-    public BufferedImage getRenderedImage(int t, int z)
+    public BufferedImage getRenderedImage(int t, int z) throws InterruptedException
     {
         return getRenderedImage(t, z, -1, true);
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use <code>getRenderedImage(t, z, -1, canvasView)</code> instead.
      */
     @Deprecated
-    public BufferedImage getRenderedImage(int t, int z, boolean canvasView)
+    public BufferedImage getRenderedImage(int t, int z, boolean canvasView) throws InterruptedException
     {
         return getRenderedImage(t, z, -1, canvasView);
     }

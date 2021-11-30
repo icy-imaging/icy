@@ -18,6 +18,12 @@
  */
 package icy.roi;
 
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.w3c.dom.Node;
+
 import icy.canvas.IcyCanvas;
 import icy.type.point.Point4D;
 import icy.type.point.Point5D;
@@ -26,15 +32,12 @@ import icy.type.rectangle.Rectangle4D;
 import icy.type.rectangle.Rectangle5D;
 import icy.util.XMLUtil;
 
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.w3c.dom.Node;
-
 /**
  * 4D ROI base class.
+ * 
+ * @deprecated Try to not use {@link ROI4D} or {@link ROI5D} anymore
  */
+@Deprecated
 public abstract class ROI4D extends ROI
 {
     /**
@@ -245,7 +248,7 @@ public abstract class ROI4D extends ROI
      * Override this for specific ROI type.
      */
     @Override
-    public boolean contains(ROI roi)
+    public boolean contains(ROI roi) throws InterruptedException
     {
         if (roi instanceof ROI4D)
         {
@@ -260,7 +263,7 @@ public abstract class ROI4D extends ROI
                 // quick discard
                 if (!contains(roi4d.getBounds4D()))
                     return false;
-                
+
                 BooleanMask4D mask;
                 BooleanMask4D roiMask;
 
@@ -350,8 +353,8 @@ public abstract class ROI4D extends ROI
      *         rectangular area intersect, or are both highly likely to intersect and intersection
      *         calculations would be too expensive to perform; <code>false</code> otherwise.
      */
-    public abstract boolean intersects(double x, double y, double z, double t, double sizeX, double sizeY,
-            double sizeZ, double sizeT);
+    public abstract boolean intersects(double x, double y, double z, double t, double sizeX, double sizeY, double sizeZ,
+            double sizeT);
 
     @Override
     public boolean intersects(double x, double y, double z, double t, double c, double sizeX, double sizeY,
@@ -363,7 +366,7 @@ public abstract class ROI4D extends ROI
 
         final boolean cok;
 
-        if ((getC() == -1) || (sizeC == Double.POSITIVE_INFINITY))   
+        if ((getC() == -1) || (sizeC == Double.POSITIVE_INFINITY))
             cok = true;
         else
             cok = ((c + sizeC) > getC()) && (c < (getC() + 1d));
@@ -376,7 +379,7 @@ public abstract class ROI4D extends ROI
      * Override this for specific ROI type.
      */
     @Override
-    public boolean intersects(ROI roi)
+    public boolean intersects(ROI roi) throws InterruptedException
     {
         if (roi instanceof ROI4D)
         {
@@ -387,7 +390,7 @@ public abstract class ROI4D extends ROI
                 // quick discard
                 if (!intersects(roi4d.getBounds4D()))
                     return false;
-                
+
                 return getBooleanMask(true).intersects(roi4d.getBooleanMask(true));
             }
         }
@@ -411,8 +414,8 @@ public abstract class ROI4D extends ROI
             return new Rectangle5D.Double();
 
         final Rectangle5D.Double result = new Rectangle5D.Double(bounds4D.getX(), bounds4D.getY(), bounds4D.getZ(),
-                bounds4D.getT(), 0d, bounds4D.getSizeX(), bounds4D.getSizeY(), bounds4D.getSizeZ(),
-                bounds4D.getSizeT(), 0d);
+                bounds4D.getT(), 0d, bounds4D.getSizeX(), bounds4D.getSizeY(), bounds4D.getSizeZ(), bounds4D.getSizeT(),
+                0d);
 
         if (getC() == -1)
         {
@@ -540,8 +543,8 @@ public abstract class ROI4D extends ROI
         if (canTranslate())
         {
             final Point4D oldPos = getPosition4D();
-            translate(position.getX() - oldPos.getX(), position.getY() - oldPos.getY(),
-                    position.getZ() - oldPos.getZ(), position.getT() - oldPos.getT());
+            translate(position.getX() - oldPos.getX(), position.getY() - oldPos.getY(), position.getZ() - oldPos.getZ(),
+                    position.getT() - oldPos.getT());
         }
     }
 
@@ -593,6 +596,7 @@ public abstract class ROI4D extends ROI
 
     @Override
     public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, int c, boolean inclusive)
+            throws InterruptedException
     {
         // not on the correct C position --> return empty mask
         if (!isActiveFor(c))
@@ -622,8 +626,10 @@ public abstract class ROI4D extends ROI
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
      * @return the boolean bitmap mask
+     * @throws InterruptedException
      */
     public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, boolean inclusive)
+            throws InterruptedException
     {
         final boolean[] result = new boolean[Math.max(0, width) * Math.max(0, height)];
 
@@ -639,6 +645,10 @@ public abstract class ROI4D extends ROI
                     result[offset] = contains(x + i, y + j, z, t, 1d, 1d, 1d, 1d);
                 offset++;
             }
+
+            // check for interruption from time to time as this can be a long process
+            if (((j & 0xF) == 0xF) && Thread.interrupted())
+                throw new InterruptedException("ROI4D.getBooleanMask2D(..) process interrupted.");
         }
 
         return result;
@@ -659,14 +669,15 @@ public abstract class ROI4D extends ROI
      *        T position we want to retrieve the boolean mask
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException
      */
-    public boolean[] getBooleanMask2D(Rectangle rect, int z, int t, boolean inclusive)
+    public boolean[] getBooleanMask2D(Rectangle rect, int z, int t, boolean inclusive) throws InterruptedException
     {
         return getBooleanMask2D(rect.x, rect.y, rect.width, rect.height, z, t, inclusive);
     }
 
     @Override
-    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // not on the correct C position --> return empty mask
         if (!isActiveFor(c))
@@ -688,8 +699,9 @@ public abstract class ROI4D extends ROI
      *        T position we want to retrieve the boolean mask
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException 
      */
-    public BooleanMask2D getBooleanMask2D(int z, int t, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, int t, boolean inclusive) throws InterruptedException
     {
         final Rectangle bounds = getBounds4D().toRectangle2D().getBounds();
 
@@ -720,8 +732,9 @@ public abstract class ROI4D extends ROI
      *        Set it to -1 to retrieve the mask whatever is the C position of this ROI4D.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException 
      */
-    public BooleanMask3D getBooleanMask3D(int z, int t, int c, boolean inclusive)
+    public BooleanMask3D getBooleanMask3D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // not on the correct C position --> return empty mask
         if (!isActiveFor(c))
@@ -745,8 +758,9 @@ public abstract class ROI4D extends ROI
      * 
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException 
      */
-    public BooleanMask3D getBooleanMask3D(int t, boolean inclusive)
+    public BooleanMask3D getBooleanMask3D(int t, boolean inclusive) throws InterruptedException
     {
         final Rectangle3D.Integer bounds = getBounds4D().toRectangle3D().toInteger();
         final BooleanMask2D masks[] = new BooleanMask2D[bounds.sizeZ];
@@ -772,8 +786,9 @@ public abstract class ROI4D extends ROI
      *        Set it to -1 to retrieve the mask whatever is the C position of this ROI4D.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException 
      */
-    public BooleanMask4D getBooleanMask4D(int z, int t, int c, boolean inclusive)
+    public BooleanMask4D getBooleanMask4D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // not on the correct C position --> return empty mask
         if (!isActiveFor(c))
@@ -811,8 +826,8 @@ public abstract class ROI4D extends ROI
         final BooleanMask3D masks[] = new BooleanMask3D[bounds4d.sizeT];
 
         for (int i = 0; i < bounds4d.sizeT; i++)
-            masks[i] = new BooleanMask3D((Rectangle3D.Integer) bounds3d.clone(), new BooleanMask2D[] {getBooleanMask2D(
-                    z, bounds4d.t + i, inclusive)});
+            masks[i] = new BooleanMask3D((Rectangle3D.Integer) bounds3d.clone(),
+                    new BooleanMask2D[] {getBooleanMask2D(z, bounds4d.t + i, inclusive)});
 
         return new BooleanMask4D(bounds4d, masks);
     }
@@ -823,8 +838,9 @@ public abstract class ROI4D extends ROI
      * 
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException
      */
-    public BooleanMask4D getBooleanMask(boolean inclusive)
+    public BooleanMask4D getBooleanMask(boolean inclusive) throws InterruptedException
     {
         final Rectangle4D.Integer bounds = getBounds();
         final BooleanMask3D masks[] = new BooleanMask3D[bounds.sizeT];
@@ -841,7 +857,7 @@ public abstract class ROI4D extends ROI
      * Override to optimize for specific ROI.
      */
     @Override
-    public double computeNumberOfContourPoints()
+    public double computeNumberOfContourPoints() throws InterruptedException
     {
         // approximation by using number of point of the edge of boolean mask
         return getBooleanMask(true).getContourPointsAsIntArray().length / getDimension();
@@ -853,7 +869,7 @@ public abstract class ROI4D extends ROI
      * Override to optimize for specific ROI.
      */
     @Override
-    public double computeNumberOfPoints()
+    public double computeNumberOfPoints() throws InterruptedException
     {
         double numPoints = 0;
 

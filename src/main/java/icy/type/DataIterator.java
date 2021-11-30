@@ -31,12 +31,12 @@ public interface DataIterator
     /**
      * Reset iterator to initial position.
      */
-    public void reset();
+    public void reset() throws InterruptedException;
 
     /**
      * Pass to the next element.
      */
-    public void next();
+    public void next() throws InterruptedException;
 
     /**
      * Returns <i>true</i> if the iterator has no more elements.

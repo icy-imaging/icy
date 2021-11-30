@@ -22,7 +22,7 @@ import java.util.TreeMap;
 public class BooleanMask5D
 {
     // Internal use only
-    private static BooleanMask4D doUnion4D(BooleanMask4D m1, BooleanMask4D m2)
+    private static BooleanMask4D doUnion4D(BooleanMask4D m1, BooleanMask4D m2) throws InterruptedException
     {
         if (m1 == null)
         {
@@ -41,7 +41,7 @@ public class BooleanMask5D
     }
 
     // Internal use only
-    private static BooleanMask4D doIntersection4D(BooleanMask4D m1, BooleanMask4D m2)
+    private static BooleanMask4D doIntersection4D(BooleanMask4D m1, BooleanMask4D m2) throws InterruptedException
     {
         if ((m1 == null) || (m2 == null))
             return null;
@@ -51,7 +51,7 @@ public class BooleanMask5D
     }
 
     // Internal use only
-    private static BooleanMask4D doExclusiveUnion4D(BooleanMask4D m1, BooleanMask4D m2)
+    private static BooleanMask4D doExclusiveUnion4D(BooleanMask4D m1, BooleanMask4D m2) throws InterruptedException
     {
         if (m1 == null)
         {
@@ -70,7 +70,7 @@ public class BooleanMask5D
     }
 
     // Internal use only
-    private static BooleanMask4D doSubtraction4D(BooleanMask4D m1, BooleanMask4D m2)
+    private static BooleanMask4D doSubtraction4D(BooleanMask4D m1, BooleanMask4D m2) throws InterruptedException
     {
         if (m1 == null)
             return null;
@@ -97,8 +97,9 @@ public class BooleanMask5D
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
+     * @throws InterruptedException 
      */
-    public static BooleanMask5D getUnion(BooleanMask5D mask1, BooleanMask5D mask2)
+    public static BooleanMask5D getUnion(BooleanMask5D mask1, BooleanMask5D mask2) throws InterruptedException
     {
         if ((mask1 == null) && (mask2 == null))
             return new BooleanMask5D();
@@ -163,8 +164,9 @@ public class BooleanMask5D
      *     ####                             ####
      *     ##                                 ##
      * </pre>
+     * @throws InterruptedException 
      */
-    public static BooleanMask5D getIntersection(BooleanMask5D mask1, BooleanMask5D mask2)
+    public static BooleanMask5D getIntersection(BooleanMask5D mask1, BooleanMask5D mask2) throws InterruptedException
     {
         if ((mask1 == null) || (mask2 == null))
             return new BooleanMask5D();
@@ -224,8 +226,9 @@ public class BooleanMask5D
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
+     * @throws InterruptedException 
      */
-    public static BooleanMask5D getExclusiveUnion(BooleanMask5D mask1, BooleanMask5D mask2)
+    public static BooleanMask5D getExclusiveUnion(BooleanMask5D mask1, BooleanMask5D mask2) throws InterruptedException
     {
         if ((mask1 == null) && (mask2 == null))
             return new BooleanMask5D();
@@ -290,8 +293,9 @@ public class BooleanMask5D
      *     ####                             ####     ####
      *     ##                                 ##     ##
      * </pre>
+     * @throws InterruptedException 
      */
-    public static BooleanMask5D getSubtraction(BooleanMask5D mask1, BooleanMask5D mask2)
+    public static BooleanMask5D getSubtraction(BooleanMask5D mask1, BooleanMask5D mask2) throws InterruptedException
     {
         if (mask1 == null)
             return new BooleanMask5D();
@@ -1015,10 +1019,11 @@ public class BooleanMask5D
      * It returns all points from the first and the last C slices + contour points for intermediate
      * C
      * slices.
+     * @throws InterruptedException 
      * 
      * @see #getContourPointsAsIntArray()
      */
-    public Point5D.Integer[] getContourPoints()
+    public Point5D.Integer[] getContourPoints() throws InterruptedException
     {
         return Point5D.Integer.toPoint5D(getContourPointsAsIntArray());
     }
@@ -1037,10 +1042,11 @@ public class BooleanMask5D
      * It returns all points from the first and the last C slices + contour points for intermediate
      * C
      * slices.
+     * @throws InterruptedException 
      * 
      * @see #getContourPoints()
      */
-    public int[] getContourPointsAsIntArray()
+    public int[] getContourPointsAsIntArray() throws InterruptedException
     {
         final DynamicArray.Int result = new DynamicArray.Int(8);
 
@@ -1071,8 +1077,9 @@ public class BooleanMask5D
 
     /**
      * Return the number of points contained in this boolean mask.
+     * @throws InterruptedException 
      */
-    public int getNumberOfPoints()
+    public int getNumberOfPoints() throws InterruptedException
     {
         int result = 0;
 
@@ -1086,8 +1093,9 @@ public class BooleanMask5D
      * Return an array of {@link icy.type.point.Point5D.Integer} representing all points of the
      * current 5D mask.<br>
      * Points are returned in ascending XYZTC order.
+     * @throws InterruptedException 
      */
-    public Point5D.Integer[] getPoints()
+    public Point5D.Integer[] getPoints() throws InterruptedException
     {
         return Point5D.Integer.toPoint5D(getPointsAsIntArray());
     }
@@ -1101,8 +1109,9 @@ public class BooleanMask5D
      * <code>result[(pt * 5) + 3]</code> = T coordinate for point <i>pt</i>.<br>
      * <code>result[(pt * 5) + 4]</code> = C coordinate for point <i>pt</i>.<br>
      * Points are returned in ascending XYZTC order.
+     * @throws InterruptedException 
      */
-    public int[] getPointsAsIntArray()
+    public int[] getPointsAsIntArray() throws InterruptedException
     {
         final DynamicArray.Int result = new DynamicArray.Int(8);
 

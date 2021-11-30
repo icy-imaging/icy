@@ -77,7 +77,9 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
 
     /**
      * Creates a new 3D ROI based on the given 2D ROI type.
-     * @param roiClass ROI class
+     * 
+     * @param roiClass
+     *        ROI class
      */
     public ROI3DStack(Class<? extends R> roiClass)
     {
@@ -118,7 +120,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
 
     /**
      * @return Returns <code>true</code> if the ROI directly uses the 2D slice color draw property and <code>false</code> if it
-     * uses the global 3D ROI color draw property.
+     *         uses the global 3D ROI color draw property.
      */
     @SuppressWarnings("unchecked")
     public boolean getUseChildColor()
@@ -127,9 +129,9 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param value Set to <code>true</code> if you want to directly use the 2D slice color draw property and <code>false</code> to
-     * keep the global 3D ROI color draw property.
-     * 
+     * @param value
+     *        Set to <code>true</code> if you want to directly use the 2D slice color draw property and <code>false</code> to
+     *        keep the global 3D ROI color draw property.
      * @see #setColor(int, Color)
      */
     @SuppressWarnings("unchecked")
@@ -139,9 +141,10 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param value Set the painter color for the specified ROI slice.
-     * @param z int
-     * 
+     * @param value
+     *        Set the painter color for the specified ROI slice.
+     * @param z
+     *        int
      * @see #setUseChildColor(boolean)
      */
     @SuppressWarnings("unchecked")
@@ -373,7 +376,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param z int
+     * @param z
+     *        int
      * @return Returns the ROI slice at given Z position.
      */
     public R getSlice(int z)
@@ -382,8 +386,10 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param z int
-     * @param createIfNull boolean
+     * @param z
+     *        int
+     * @param createIfNull
+     *        boolean
      * @return Returns the ROI slice at given Z position.
      */
     public R getSlice(int z, boolean createIfNull)
@@ -402,8 +408,11 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
 
     /**
      * Sets the ROI slice for the given Z position.
-     * @param roi2d 2D ROI
-     * @param z z stack
+     * 
+     * @param roi2d
+     *        2D ROI
+     * @param z
+     *        z stack
      */
     public void setSlice(int z, R roi2d)
     {
@@ -445,7 +454,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param z int
+     * @param z
+     *        int
      * @return Removes slice at the given Z position and returns it.
      */
     public R removeSlice(int z)
@@ -495,9 +505,11 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param roi Add the specified {@link ROI3DStack} content to this ROI3DStack
+     * @param roi
+     *        Add the specified {@link ROI3DStack} content to this ROI3DStack
+     * @throws InterruptedException 
      */
-    public void add(ROI3DStack<R> roi) throws UnsupportedOperationException
+    public void add(ROI3DStack<R> roi) throws UnsupportedOperationException, InterruptedException
     {
         beginUpdate();
         try
@@ -515,9 +527,11 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param roi Exclusively add the specified {@link ROI3DStack} content to this ROI3DStack
+     * @param roi
+     *        Exclusively add the specified {@link ROI3DStack} content to this ROI3DStack
+     * @throws InterruptedException 
      */
-    public void exclusiveAdd(ROI3DStack<R> roi) throws UnsupportedOperationException
+    public void exclusiveAdd(ROI3DStack<R> roi) throws UnsupportedOperationException, InterruptedException
     {
         beginUpdate();
         try
@@ -535,9 +549,11 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param roi Process intersection of the specified {@link ROI3DStack} with this ROI3DStack.
+     * @param roi
+     *        Process intersection of the specified {@link ROI3DStack} with this ROI3DStack.
+     * @throws InterruptedException 
      */
-    public void intersect(ROI3DStack<R> roi) throws UnsupportedOperationException
+    public void intersect(ROI3DStack<R> roi) throws UnsupportedOperationException, InterruptedException
     {
         beginUpdate();
         try
@@ -568,9 +584,11 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param roi Remove the specified {@link ROI3DStack} from this ROI3DStack
+     * @param roi
+     *        Remove the specified {@link ROI3DStack} from this ROI3DStack
+     * @throws InterruptedException 
      */
-    public void subtract(ROI3DStack<R> roi) throws UnsupportedOperationException
+    public void subtract(ROI3DStack<R> roi) throws UnsupportedOperationException, InterruptedException
     {
         beginUpdate();
         try
@@ -588,7 +606,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     @Override
-    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
         {
@@ -628,7 +646,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     @Override
-    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
         {
@@ -668,7 +686,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     @Override
-    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
         {
@@ -698,17 +716,17 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
                     catch (UnsupportedOperationException e)
                     {
                         // not supported, try generic method instead
-                        return super.add(roi, allowCreate);
+                        return super.exclusiveAdd(roi, allowCreate);
                     }
                 }
             }
         }
 
-        return super.add(roi, allowCreate);
+        return super.exclusiveAdd(roi, allowCreate);
     }
 
     @Override
-    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
         {
@@ -757,10 +775,11 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
      *        the position where the slice must be merged
      * @param roiSlice
      *        the 2D ROI to merge
+     * @throws InterruptedException 
      * @throws UnsupportedOperationException
      *         if the given ROI slice cannot be added to this ROI
      */
-    public void add(int z, R roiSlice)
+    public void add(int z, R roiSlice) throws UnsupportedOperationException, InterruptedException
     {
         if (roiSlice == null)
             return;
@@ -803,10 +822,11 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
      *        the position where the slice must be merged
      * @param roiSlice
      *        the 2D ROI to merge
+     * @throws InterruptedException 
      * @throws UnsupportedOperationException
      *         if the given ROI slice cannot be exclusively added to this ROI
      */
-    public void exclusiveAdd(int z, R roiSlice)
+    public void exclusiveAdd(int z, R roiSlice) throws UnsupportedOperationException, InterruptedException
     {
         if (roiSlice == null)
             return;
@@ -849,10 +869,11 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
      *        the position where the slice must be merged
      * @param roiSlice
      *        the 2D ROI to merge
+     * @throws InterruptedException 
      * @throws UnsupportedOperationException
      *         if the given ROI slice cannot be intersected with this ROI
      */
-    public void intersect(int z, R roiSlice)
+    public void intersect(int z, R roiSlice) throws UnsupportedOperationException, InterruptedException
     {
         // better to throw an exception here than removing slice
         if (roiSlice == null)
@@ -892,8 +913,9 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
      *        the 2D ROI to subtract from Z slice
      * @throws UnsupportedOperationException
      *         if the given ROI slice cannot be subtracted from this ROI
+     * @throws InterruptedException 
      */
-    public void subtract(int z, R roiSlice) throws UnsupportedOperationException
+    public void subtract(int z, R roiSlice) throws UnsupportedOperationException, InterruptedException
     {
         if (roiSlice == null)
             return;
@@ -923,7 +945,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param event Called when a ROI slice has changed.
+     * @param event
+     *        Called when a ROI slice has changed.
      */
     protected void sliceChanged(ROIEvent event)
     {
@@ -960,7 +983,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param event Called when a ROI slice overlay has changed.
+     * @param event
+     *        Called when a ROI slice overlay has changed.
      */
     protected void sliceOverlayChanged(OverlayEvent event)
     {
@@ -1108,7 +1132,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
 
     // default approximated implementation for ROI3DStack
     @Override
-    public double computeSurfaceArea(Sequence sequence) throws UnsupportedOperationException
+    public double computeSurfaceArea(Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         // 3D contour points = first slice points + all slices perimeter + last slice points
         double result = 0;
@@ -1134,7 +1158,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
 
     // default approximated implementation for ROI3DStack
     @Override
-    public double computeNumberOfContourPoints()
+    public double computeNumberOfContourPoints() throws InterruptedException
     {
         // 3D contour points = first slice points + inter slices contour points + last slice points
         double result = 0;
@@ -1166,7 +1190,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     @Override
-    public double computeNumberOfPoints()
+    public double computeNumberOfPoints() throws InterruptedException
     {
         double volume = 0;
 
@@ -1193,7 +1217,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     /**
-     * @param z Translate the stack of specified Z position.
+     * @param z
+     *        Translate the stack of specified Z position.
      */
     public void translate(int z)
     {
@@ -1263,7 +1288,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     @Override
-    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, boolean inclusive)
+    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, boolean inclusive) throws InterruptedException
     {
         final R roi2d = getSlice(z);
 
@@ -1274,7 +1299,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     @Override
-    public BooleanMask2D getBooleanMask2D(int z, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, boolean inclusive) throws InterruptedException
     {
         final R roi2d = getSlice(z);
 
@@ -1372,7 +1397,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
         }
 
         /**
-         * @param z int
+         * @param z
+         *        int
          * @return Returns the ROI overlay at given Z position.
          */
         protected ROIPainter getSliceOverlay(int z)
@@ -1397,7 +1423,8 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
 
         /**
          * @deprecated this property does not exist anymore
-         * @param value boolean
+         * @param value
+         *        boolean
          */
         @Deprecated
         public void setUseChildColor(boolean value)
@@ -1406,9 +1433,10 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
         }
 
         /**
-         * @param value Set the painter color for the specified ROI slice.
-         * @param z int
-         * 
+         * @param value
+         *        Set the painter color for the specified ROI slice.
+         * @param z
+         *        int
          * @see #setUseChildColor(boolean)
          */
         public void setColor(int z, Color value)

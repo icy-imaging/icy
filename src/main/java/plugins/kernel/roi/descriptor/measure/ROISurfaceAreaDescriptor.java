@@ -62,7 +62,7 @@ public class ROISurfaceAreaDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return Double.valueOf(computeSurfaceArea(roi, sequence));
     }
@@ -79,8 +79,9 @@ public class ROISurfaceAreaDescriptor extends ROIDescriptor
      * @return the surface area expressed in the unit of the descriptor (see {@link #getUnit(Sequence)})
      * @throws UnsupportedOperationException
      *         if the operation is not supported for this ROI
+     * @throws InterruptedException 
      */
-    public static double computeSurfaceArea(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public static double computeSurfaceArea(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         if (!(roi instanceof ROI3D))
             throw new UnsupportedOperationException("Surface area not supported on " + roi.getDimension() + "D ROI !");

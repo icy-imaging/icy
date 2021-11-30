@@ -111,7 +111,7 @@ public class ROI2DRectangle extends ROI2DRectShape
     }
 
     @Override
-    public boolean contains(ROI roi)
+    public boolean contains(ROI roi) throws InterruptedException
     {
         // special case of ROI2DPoint
         if (roi instanceof ROI2DPoint)
@@ -127,7 +127,7 @@ public class ROI2DRectangle extends ROI2DRectShape
     }
 
     @Override
-    public boolean intersects(ROI roi)
+    public boolean intersects(ROI roi) throws InterruptedException
     {
         // special case of ROI2DPoint
         if (roi instanceof ROI2DPoint)

@@ -63,8 +63,8 @@ public class ROIContainedDescriptor extends ROIDescriptor
         int result = 0;
         for (ROI r : sequence.getROIs())
         {
-            if (Thread.currentThread().isInterrupted())
-                throw new InterruptedException();
+            if (Thread.interrupted())
+                throw new InterruptedException("ROI contained descriptor computation interrupted.");
 
             if ((r != roi) && (r != null) && (roi.contains(r)))
                 result++;

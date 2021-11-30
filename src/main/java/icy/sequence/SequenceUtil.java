@@ -1033,8 +1033,9 @@ public class SequenceUtil
      *        Source sequence
      * @param channel
      *        Channel index to remove
+     * @throws InterruptedException
      */
-    public static void removeChannel(Sequence source, int channel)
+    public static void removeChannel(Sequence source, int channel) throws InterruptedException
     {
         final int sizeC = source.getSizeC();
 
@@ -1472,8 +1473,9 @@ public class SequenceUtil
      * @param channel
      *        Channel index to extract from the source sequence.
      * @return Sequence
+     * @throws InterruptedException
      */
-    public static Sequence extractChannel(Sequence source, int channel)
+    public static Sequence extractChannel(Sequence source, int channel) throws InterruptedException
     {
         return extractChannels(source, channel);
     }
@@ -1529,8 +1531,9 @@ public class SequenceUtil
      * @param channels
      *        Channel indexes to extract from the source sequence.
      * @return Sequence
+     * @throws InterruptedException
      */
-    public static Sequence extractChannels(Sequence source, int... channels)
+    public static Sequence extractChannels(Sequence source, int... channels) throws InterruptedException
     {
         final Sequence outSequence = new Sequence(OMEUtil.createOMEXMLMetadata(source.getOMEXMLMetadata(), true));
         final int sizeT = source.getSizeT();
@@ -1541,8 +1544,16 @@ public class SequenceUtil
         try
         {
             for (int t = 0; t < sizeT; t++)
+            {
                 for (int z = 0; z < sizeZ; z++)
+                {
+                    // check for interruption
+                    if (Thread.interrupted())
+                        throw new InterruptedException("Sequence extract channels process interrupted.");
+
                     outSequence.setImage(t, z, IcyBufferedImageUtil.extractChannels(source.getImage(t, z), channels));
+                }
+            }
         }
         finally
         {
@@ -1677,8 +1688,9 @@ public class SequenceUtil
      *        Only used when <code>rescale</code> parameter is true.<br>
      *        Specify if we use the data bounds for rescaling instead of data type bounds.
      * @return converted sequence
+     * @throws InterruptedException 
      */
-    public static Sequence convertToType(Sequence source, DataType dataType, boolean rescale, boolean useDataBounds)
+    public static Sequence convertToType(Sequence source, DataType dataType, boolean rescale, boolean useDataBounds) throws InterruptedException
     {
         if (source == null)
             return null;
@@ -1723,8 +1735,9 @@ public class SequenceUtil
      * @param rescale
      *        indicate if we want to scale data value according to data type range
      * @return converted sequence
+     * @throws InterruptedException 
      */
-    public static Sequence convertToType(Sequence source, DataType dataType, boolean rescale)
+    public static Sequence convertToType(Sequence source, DataType dataType, boolean rescale) throws InterruptedException
     {
         return convertToType(source, dataType, rescale, false);
     }
@@ -1783,8 +1796,9 @@ public class SequenceUtil
      *        scalers for scaling internal data during conversion (1 scaler per channel).<br>
      *        Can be set to <code>null</code> to avoid value conversion.
      * @return converted image
+     * @throws InterruptedException 
      */
-    public static Sequence convertType(Sequence source, DataType dataType, Scaler[] scalers)
+    public static Sequence convertType(Sequence source, DataType dataType, Scaler[] scalers) throws InterruptedException
     {
         final Sequence output = new Sequence(OMEUtil.createOMEXMLMetadata(source.getOMEXMLMetadata(), true));
 
@@ -1795,6 +1809,10 @@ public class SequenceUtil
             {
                 for (int z = 0; z < source.getSizeZ(); z++)
                 {
+                    // check for interruption
+                    if (Thread.interrupted())
+                        throw new InterruptedException("Sequence convert type process interrupted.");
+
                     final IcyBufferedImage converted = IcyBufferedImageUtil.convertType(source.getImage(t, z), dataType,
                             scalers);
 
@@ -2188,8 +2206,9 @@ public class SequenceUtil
      *        the returned sequence is created by using the ROI rectangular bounds.<br>
      *        if <code>nullValue</code> is different of <code>Double.NaN</code> then any pixel
      *        outside the ROI region will be set to <code>nullValue</code>
+     * @throws InterruptedException
      */
-    public static Sequence getSubSequence(Sequence source, ROI roi, double nullValue)
+    public static Sequence getSubSequence(Sequence source, ROI roi, double nullValue) throws InterruptedException
     {
         final Rectangle5D.Integer bounds = roi.getBounds5D().toInteger();
         final Sequence result = getSubSequence(source, bounds);
@@ -2218,6 +2237,10 @@ public class SequenceUtil
                     {
                         for (int c = 0; c < sizeC; c++)
                         {
+                            // interrupted ? --> cancel
+                            if (Thread.interrupted())
+                                throw new InterruptedException("Sequence get sub region process interrupted.");
+
                             final BooleanMask2D mask = roi.getBooleanMask2D(z + offZ, t + offT, c + offC, false);
                             final IcyBufferedImage img = result.getImage(t, z);
 
@@ -2249,12 +2272,15 @@ public class SequenceUtil
         }
 
         return result;
+
     }
 
     /**
      * Creates a new sequence which is a sub part of the source sequence defined by the specified {@link ROI} bounds.
+     * 
+     * @throws InterruptedException
      */
-    public static Sequence getSubSequence(Sequence source, ROI roi)
+    public static Sequence getSubSequence(Sequence source, ROI roi) throws InterruptedException
     {
         return getSubSequence(source, roi, Double.NaN);
     }
@@ -2272,8 +2298,10 @@ public class SequenceUtil
      *        Warning: by doing that the Overlay will retain the result sequence as long the source sequence is alive.
      * @param nameSuffix
      *        add the suffix <i>" (copy)"</i> to the new Sequence name to distinguish it
+     * @throws InterruptedException
      */
     public static Sequence getCopy(Sequence source, boolean copyROI, boolean copyOverlay, boolean nameSuffix)
+            throws InterruptedException
     {
         final Sequence result = new Sequence(OMEUtil.createOMEXMLMetadata(source.getOMEXMLMetadata(), true));
 
@@ -2316,32 +2344,40 @@ public class SequenceUtil
     /**
      * Creates and return a copy of the sequence.<br>
      * Note that only data and metadata are copied, overlays and ROIs are not preserved.
+     * 
+     * @throws InterruptedException
      */
-    public static Sequence getCopy(Sequence source)
+    public static Sequence getCopy(Sequence source) throws InterruptedException
     {
         return getCopy(source, false, false, true);
     }
 
     /**
      * Convert the specified sequence to gray sequence (single channel)
+     * 
+     * @throws InterruptedException
      */
-    public static Sequence toGray(Sequence source)
+    public static Sequence toGray(Sequence source) throws InterruptedException
     {
         return convertColor(source, BufferedImage.TYPE_BYTE_GRAY, null);
     }
 
     /**
      * Convert the specified sequence to RGB sequence (3 channels)
+     * 
+     * @throws InterruptedException
      */
-    public static Sequence toRGB(Sequence source)
+    public static Sequence toRGB(Sequence source) throws InterruptedException
     {
         return convertColor(source, BufferedImage.TYPE_INT_RGB, null);
     }
 
     /**
      * Convert the specified sequence to ARGB sequence (4 channels)
+     * 
+     * @throws InterruptedException
      */
-    public static Sequence toARGB(Sequence source)
+    public static Sequence toARGB(Sequence source) throws InterruptedException
     {
         return convertColor(source, BufferedImage.TYPE_INT_ARGB, null);
     }
@@ -2359,8 +2395,9 @@ public class SequenceUtil
      *        BufferedImage.TYPE_BYTE_GRAY (1 channel)<br>
      * @param lut
      *        lut used for color calculation (source sequence lut is used if null)
+     * @throws InterruptedException
      */
-    public static Sequence convertColor(Sequence source, int imageType, LUT lut)
+    public static Sequence convertColor(Sequence source, int imageType, LUT lut) throws InterruptedException
     {
         final Sequence result = new Sequence(OMEUtil.createOMEXMLMetadata(source.getOMEXMLMetadata(), true));
         // image receiver
@@ -2370,8 +2407,16 @@ public class SequenceUtil
         try
         {
             for (int t = 0; t < source.getSizeT(); t++)
+            {
                 for (int z = 0; z < source.getSizeZ(); z++)
+                {
+                    // check for interruption
+                    if (Thread.interrupted())
+                        throw new InterruptedException("Sequence convert color process interrupted.");
+
                     result.setImage(t, z, IcyBufferedImageUtil.toBufferedImage(source.getImage(t, z), imgOut, lut));
+                }
+            }
 
             // rename channels and set final name
             switch (imageType)

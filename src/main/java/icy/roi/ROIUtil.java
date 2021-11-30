@@ -307,48 +307,53 @@ public class ROIUtil
      * @param c
      *        The specific C position (channel) where we want to compute the number of pixel or <code>-1</code> to use
      *        the ROI C dimension information.
+     * @throws InterruptedException
      */
-    public static long getNumPixel(Sequence sequence, ROI roi, int z, int t, int c)
+    public static long getNumPixel(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
     {
         return DataIteratorUtil.count(new SequenceDataIterator(sequence, roi, false, z, t, c));
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMinIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static double getMinIntensity(Sequence sequence, ROI roi, int z, int t, int c)
+    public static double getMinIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
     {
         return DataIteratorMath.min(new SequenceDataIterator(sequence, roi, false, z, t, c));
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMaxIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static double getMaxIntensity(Sequence sequence, ROI roi, int z, int t, int c)
+    public static double getMaxIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
     {
         return DataIteratorMath.max(new SequenceDataIterator(sequence, roi, false, z, t, c));
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMeanIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static double getMeanIntensity(Sequence sequence, ROI roi, int z, int t, int c)
+    public static double getMeanIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
     {
         return DataIteratorMath.mean(new SequenceDataIterator(sequence, roi, false, z, t, c));
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROISumIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static double getSumIntensity(Sequence sequence, ROI roi, int z, int t, int c)
+    public static double getSumIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
     {
         return DataIteratorMath.sum(new SequenceDataIterator(sequence, roi, false, z, t, c));
     }
@@ -375,58 +380,65 @@ public class ROIUtil
 
     /**
      * Returns the number of sequence pixels contained in the specified ROI.
+     * 
+     * @throws InterruptedException
      */
-    public static long getNumPixel(Sequence sequence, ROI roi)
+    public static long getNumPixel(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getNumPixel(sequence, roi, -1, -1, -1);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMinIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static double getMinIntensity(Sequence sequence, ROI roi)
+    public static double getMinIntensity(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getMinIntensity(sequence, roi, -1, -1, -1);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMaxIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static double getMaxIntensity(Sequence sequence, ROI roi)
+    public static double getMaxIntensity(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getMaxIntensity(sequence, roi, -1, -1, -1);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMeanIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static double getMeanIntensity(Sequence sequence, ROI roi)
+    public static double getMeanIntensity(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getMeanIntensity(sequence, roi, -1, -1, -1);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROISumIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static double getSumIntensity(Sequence sequence, ROI roi)
+    public static double getSumIntensity(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getSumIntensity(sequence, roi, -1, -1, -1);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
     @Deprecated
-    public static Point5D getMassCenter(ROI roi)
+    public static Point5D getMassCenter(ROI roi) throws InterruptedException
     {
         switch (roi.getDimension())
         {
@@ -454,11 +466,12 @@ public class ROIUtil
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
     @Deprecated
-    public static Point2D getMassCenter(ROI2D roi)
+    public static Point2D getMassCenter(ROI2D roi) throws InterruptedException
     {
         double x = 0, y = 0;
         long len = 0;
@@ -493,11 +506,12 @@ public class ROIUtil
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
     @Deprecated
-    public static Point3D getMassCenter(ROI3D roi)
+    public static Point3D getMassCenter(ROI3D roi) throws InterruptedException
     {
         double x = 0, y = 0, z = 0;
         long len = 0;
@@ -541,11 +555,12 @@ public class ROIUtil
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
     @Deprecated
-    public static Point4D getMassCenter(ROI4D roi)
+    public static Point4D getMassCenter(ROI4D roi) throws InterruptedException
     {
         final BooleanMask4D mask4d = roi.getBooleanMask(true);
         double x = 0, y = 0, z = 0, t = 0;
@@ -599,11 +614,12 @@ public class ROIUtil
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
     @Deprecated
-    public static Point5D getMassCenter(ROI5D roi)
+    public static Point5D getMassCenter(ROI5D roi) throws InterruptedException
     {
         final BooleanMask5D mask5d = roi.getBooleanMask(true);
         double x = 0, y = 0, z = 0, t = 0, c = 0;
@@ -746,19 +762,22 @@ public class ROIUtil
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIContourDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated
     public static String getContourSize(Sequence sequence, ROI roi, int dim, int roundSignificant)
+            throws InterruptedException
     {
         return getContourSize(sequence, roi.getNumberOfContourPoints(), roi, dim, roundSignificant);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIContourDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated
-    public static String getContourSize(Sequence sequence, ROI roi, int dim)
+    public static String getContourSize(Sequence sequence, ROI roi, int dim) throws InterruptedException
     {
         return getContourSize(sequence, roi, dim, 0);
     }
@@ -782,97 +801,108 @@ public class ROIUtil
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIInteriorDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
     public static String getInteriorSize(Sequence sequence, ROI roi, int dim, int roundSignificant)
+            throws InterruptedException
     {
         return getInteriorSize(sequence, roi.getNumberOfPoints(), roi, dim, roundSignificant);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIInteriorDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static String getInteriorSize(Sequence sequence, ROI roi, int dim)
+    public static String getInteriorSize(Sequence sequence, ROI roi, int dim) throws InterruptedException
     {
         return getInteriorSize(sequence, roi, dim, 0);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIPerimeterDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static String getPerimeter(Sequence sequence, ROI roi, int roundSignificant)
+    public static String getPerimeter(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
     {
         return getContourSize(sequence, roi, 2, roundSignificant);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIPerimeterDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static String getPerimeter(Sequence sequence, ROI roi)
+    public static String getPerimeter(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getPerimeter(sequence, roi, 0);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated
-    public static String getArea(Sequence sequence, ROI roi, int roundSignificant)
+    public static String getArea(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
     {
         return getInteriorSize(sequence, roi, 2, roundSignificant);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated
-    public static String getArea(Sequence sequence, ROI roi)
+    public static String getArea(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getArea(sequence, roi, 0);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROISurfaceAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static String getSurfaceArea(Sequence sequence, ROI roi, int roundSignificant)
+    public static String getSurfaceArea(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
     {
         return getContourSize(sequence, roi, 3, roundSignificant);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROISurfaceAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated
-    public static String getSurfaceArea(Sequence sequence, ROI roi)
+    public static String getSurfaceArea(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getSurfaceArea(sequence, roi, 0);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIVolumeDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated
-    public static String getVolume(Sequence sequence, ROI roi, int roundSignificant)
+    public static String getVolume(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
     {
         return getInteriorSize(sequence, roi, 3, roundSignificant);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link ROIVolumeDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated
-    public static String getVolume(Sequence sequence, ROI roi)
+    public static String getVolume(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getVolume(sequence, roi, 0);
     }
@@ -1119,8 +1149,10 @@ public class ROIUtil
 
     /**
      * Computes union of specified <code>ROI</code> and return result in a new <code>ROI</code>.
+     * 
+     * @throws InterruptedException
      */
-    public static ROI getUnion(ROI roi1, ROI roi2) throws UnsupportedOperationException
+    public static ROI getUnion(ROI roi1, ROI roi2) throws UnsupportedOperationException, InterruptedException
     {
         // null checking
         if (roi1 == null)
@@ -1182,8 +1214,10 @@ public class ROIUtil
 
     /**
      * Computes intersection of specified <code>ROI</code> and return result in a new <code>ROI</code>.
+     * 
+     * @throws InterruptedException
      */
-    public static ROI getIntersection(ROI roi1, ROI roi2) throws UnsupportedOperationException
+    public static ROI getIntersection(ROI roi1, ROI roi2) throws UnsupportedOperationException, InterruptedException
     {
         // null checking
         if ((roi1 == null) || (roi2 == null))
@@ -1242,8 +1276,10 @@ public class ROIUtil
 
     /**
      * Compute exclusive union of specified <code>ROI</code> and return result in a new <code>ROI</code>.
+     * 
+     * @throws InterruptedException
      */
-    public static ROI getExclusiveUnion(ROI roi1, ROI roi2) throws UnsupportedOperationException
+    public static ROI getExclusiveUnion(ROI roi1, ROI roi2) throws UnsupportedOperationException, InterruptedException
     {
         // null checking
         if (roi1 == null)
@@ -1305,8 +1341,10 @@ public class ROIUtil
 
     /**
      * Computes the subtraction of roi1 - roi2 and returns result in a new <code>ROI</code>.
+     * 
+     * @throws InterruptedException
      */
-    public static ROI getSubtraction(ROI roi1, ROI roi2) throws UnsupportedOperationException
+    public static ROI getSubtraction(ROI roi1, ROI roi2) throws UnsupportedOperationException, InterruptedException
     {
         // return empty ROI
         if (roi1 == null)
@@ -1369,8 +1407,10 @@ public class ROIUtil
      * @param operator
      *        {@link BooleanOperator} to apply.
      * @return {@link ROI} representing the result of the merge operation.
+     * @throws InterruptedException
      */
-    public static ROI merge(List<? extends ROI> rois, BooleanOperator operator) throws UnsupportedOperationException
+    public static ROI merge(List<? extends ROI> rois, BooleanOperator operator)
+            throws UnsupportedOperationException, InterruptedException
     {
         if (rois.size() == 0)
             return null;
@@ -1384,15 +1424,30 @@ public class ROIUtil
             {
                 case AND:
                     for (int i = 1; i < rois.size(); i++)
+                    {
+                        // interrupt task
+                        if (Thread.currentThread().interrupted())
+                            throw new InterruptedException("ROI AND merging process interrupted.");
                         result = result.intersect(rois.get(i), true);
+                    }
                     break;
                 case OR:
                     for (int i = 1; i < rois.size(); i++)
+                    {
+                        // interrupt task
+                        if (Thread.currentThread().interrupted())
+                            throw new InterruptedException("ROI OR merging process interrupted.");
                         result = result.add(rois.get(i), true);
+                    }
                     break;
                 case XOR:
                     for (int i = 1; i < rois.size(); i++)
+                    {
+                        // interrupt task
+                        if (Thread.currentThread().interrupted())
+                            throw new InterruptedException("ROI XOR merging process interrupted.");
                         result = result.exclusiveAdd(rois.get(i), true);
+                    }
                     break;
             }
         }
@@ -1416,28 +1471,37 @@ public class ROIUtil
         // }
 
         return result;
+
     }
 
     /**
      * Builds and returns a ROI corresponding to the union of the specified ROI list.
+     * 
+     * @throws InterruptedException
      */
-    public static ROI getUnion(List<? extends ROI> rois) throws UnsupportedOperationException
+    public static ROI getUnion(List<? extends ROI> rois) throws UnsupportedOperationException, InterruptedException
     {
         return merge(rois, BooleanOperator.OR);
     }
 
     /**
      * Builds and returns a ROI corresponding to the exclusive union of the specified ROI list.
+     * 
+     * @throws InterruptedException
      */
-    public static ROI getExclusiveUnion(List<? extends ROI> rois) throws UnsupportedOperationException
+    public static ROI getExclusiveUnion(List<? extends ROI> rois)
+            throws UnsupportedOperationException, InterruptedException
     {
         return merge(rois, BooleanOperator.XOR);
     }
 
     /**
      * Builds and returns a ROI corresponding to the intersection of the specified ROI list.
+     * 
+     * @throws InterruptedException
      */
-    public static ROI getIntersection(List<? extends ROI> rois) throws UnsupportedOperationException
+    public static ROI getIntersection(List<? extends ROI> rois)
+            throws UnsupportedOperationException, InterruptedException
     {
         return merge(rois, BooleanOperator.AND);
     }
@@ -1447,8 +1511,9 @@ public class ROIUtil
      * This is equivalent to: <code>roi1.getSubtraction(roi2)</code>
      * 
      * @return {@link ROI} representing the result of subtraction.
+     * @throws InterruptedException
      */
-    public static ROI subtract(ROI roi1, ROI roi2) throws UnsupportedOperationException
+    public static ROI subtract(ROI roi1, ROI roi2) throws UnsupportedOperationException, InterruptedException
     {
         return roi1.getSubtraction(roi2);
     }
@@ -1569,9 +1634,10 @@ public class ROIUtil
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #convertTo3D(ROI2D, double, double)} instead.
      */
-    public static ROI convertToStack(ROI2D roi, int zMin, int zMax)
+    public static ROI convertToStack(ROI2D roi, int zMin, int zMax) throws InterruptedException
     {
         ROI result = null;
 
@@ -1599,9 +1665,10 @@ public class ROIUtil
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #convertTo2D(ROI3D)} instead
      */
-    public static ROI[] unstack(ROI3D roi)
+    public static ROI[] unstack(ROI3D roi) throws InterruptedException
     {
         return convertTo2D(roi);
     }
@@ -1610,8 +1677,9 @@ public class ROIUtil
      * Converts the specified 2D ROI to 3D ROI by elongating it along the Z axis with the given Z position and size Z parameters.
      * 
      * @return the converted 3D ROI
+     * @throws InterruptedException
      */
-    public static ROI convertTo3D(ROI2D roi, double z, double sizeZ)
+    public static ROI convertTo3D(ROI2D roi, double z, double sizeZ) throws InterruptedException
     {
         ROI result = null;
 
@@ -1658,8 +1726,9 @@ public class ROIUtil
      * 3D stack ROI are converted to multiple ROI2D representing each Z slice of the original 3D stack.
      * 
      * @return the converted 2D ROIs or <code>null</code> if the input ROI was null
+     * @throws InterruptedException
      */
-    public static ROI[] convertTo2D(ROI3D roi)
+    public static ROI[] convertTo2D(ROI3D roi) throws InterruptedException
     {
         ROI[] result = null;
 
@@ -1770,8 +1839,9 @@ public class ROIUtil
      * 
      * @return the ROI Area corresponding to the input ROI.<br>
      *         If the ROI is already of boolean mask type then it's directly returned without any conversion.
+     * @throws InterruptedException
      */
-    public static ROI convertToMask(ROI roi)
+    public static ROI convertToMask(ROI roi) throws InterruptedException
     {
         // no conversion needed
         if ((roi instanceof ROI2DArea) || (roi instanceof ROI3DArea) || (roi instanceof ROI4DArea)
@@ -1842,8 +1912,10 @@ public class ROIUtil
      *        Use <code>-1</code> for automatic maximum deviation calculation.
      * @return the ROI Polygon or ROI Mesh corresponding to the input ROI.<br>
      *         If the ROI is already of shape type then it's directly returned without any conversion.
+     * @throws InterruptedException
      */
-    public static ROI convertToShape(ROI roi, double maxDeviation) throws UnsupportedOperationException
+    public static ROI convertToShape(ROI roi, double maxDeviation)
+            throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2DShape)
             return roi;
@@ -1902,8 +1974,10 @@ public class ROIUtil
 
     /**
      * Returns connected component from specified ROI as a list of ROI (Area type).
+     * 
+     * @throws InterruptedException
      */
-    public static List<ROI> getConnectedComponents(ROI roi) throws UnsupportedOperationException
+    public static List<ROI> getConnectedComponents(ROI roi) throws UnsupportedOperationException, InterruptedException
     {
         final List<ROI> result = new ArrayList<ROI>();
 
@@ -2002,8 +2076,11 @@ public class ROIUtil
      * Cut the specified ROI with the given Line2D (extended to ROI bounds) and return the 2 resulting ROI in a
      * list.<br>
      * If the specified ROI cannot be cut by the given Line2D then <code>null</code> is returned.
+     * 
+     * @throws InterruptedException
+     * @throws UnsupportedOperationException
      */
-    public static List<ROI> split(ROI roi, Line2D line)
+    public static List<ROI> split(ROI roi, Line2D line) throws UnsupportedOperationException, InterruptedException
     {
         final Rectangle2D bounds2d = roi.getBounds5D().toRectangle2D();
         // need to enlarge bounds a bit to avoid roundness issues on line intersection
@@ -2084,9 +2161,10 @@ public class ROIUtil
      * @param label
      *        if set to <code>true</code> then each ROI will be draw as a separate label (value) in the sequence
      *        starting from 1.
+     * @throws InterruptedException
      */
     public static Sequence convertToSequence(List<ROI> inputRois, int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT,
-            DataType dataType, boolean label)
+            DataType dataType, boolean label) throws InterruptedException
     {
         final List<ROI> rois = new ArrayList<ROI>();
         final Rectangle5D bounds = new Rectangle5D.Double();
@@ -2198,8 +2276,10 @@ public class ROIUtil
      * @param label
      *        if set to <code>true</code> then each ROI will be draw as a separate label (value) in the sequence
      *        starting from 1.
+     * @throws InterruptedException
      */
     public static Sequence convertToSequence(List<ROI> inputRois, Sequence sequence, boolean label)
+            throws InterruptedException
     {
         if (sequence == null)
             return convertToSequence(inputRois, 0, 0, 0, 0, 0,
@@ -2218,8 +2298,9 @@ public class ROIUtil
      *        the sequence used to define the wanted sequence dimension in return.<br>
      *        If this field is <code>null</code> then the global ROI bounds will be used to define the Sequence
      *        dimension
+     * @throws InterruptedException
      */
-    public static Sequence convertToSequence(ROI inputRoi, Sequence sequence)
+    public static Sequence convertToSequence(ROI inputRoi, Sequence sequence) throws InterruptedException
     {
         return convertToSequence(CollectionUtil.createArrayList(inputRoi), sequence, false);
     }
@@ -2352,8 +2433,10 @@ public class ROIUtil
      *        Set to <code>true</code> for down scaling and <code>false</code> for up scaling operation
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D (up scaling not supported for these ROI)
+     * @throws InterruptedException
      */
-    public static ROI get2XScaled(ROI roi, boolean scaleOnZ, boolean down) throws UnsupportedOperationException
+    public static ROI get2XScaled(ROI roi, boolean scaleOnZ, boolean down)
+            throws UnsupportedOperationException, InterruptedException
     {
         if (roi == null)
             return null;
@@ -2497,8 +2580,9 @@ public class ROIUtil
      *        Set to <code>true</code> to scale as well on Z dimension (XY dimension only otherwise)
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D (up scaling not supported for these ROI)
+     * @throws InterruptedException
      */
-    public static ROI getUpscaled(ROI roi, boolean scaleOnZ) throws UnsupportedOperationException
+    public static ROI getUpscaled(ROI roi, boolean scaleOnZ) throws UnsupportedOperationException, InterruptedException
     {
         return get2XScaled(roi, scaleOnZ, false);
     }
@@ -2514,8 +2598,10 @@ public class ROIUtil
      *        Set to <code>true</code> to scale as well on Z dimension (XY dimension only otherwise)
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D (up scaling not supported for these ROI)
+     * @throws InterruptedException
      */
-    public static ROI getDownscaled(ROI roi, boolean scaleOnZ) throws UnsupportedOperationException
+    public static ROI getDownscaled(ROI roi, boolean scaleOnZ)
+            throws UnsupportedOperationException, InterruptedException
     {
         return get2XScaled(roi, scaleOnZ, true);
     }
@@ -2543,9 +2629,10 @@ public class ROIUtil
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D while scaling is required (scaling not supported for these ROI) and <code>ignoreErrorOnScale</code> is set to
      *         <code>FALSE</code>
+     * @throws InterruptedException
      */
     public static ROI adjustToSequence(ROI roi, Sequence source, Sequence destination, boolean translate, boolean scale,
-            boolean ignoreErrorOnScale) throws UnsupportedOperationException
+            boolean ignoreErrorOnScale) throws UnsupportedOperationException, InterruptedException
     {
         if (roi == null)
             return null;
@@ -2726,9 +2813,10 @@ public class ROIUtil
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D while scaling is required (scaling not supported for these ROI) and <code>ignoreErrorOnScale</code> is set to
      *         <code>FALSE</code>
+     * @throws InterruptedException
      */
     public static ROI adjustToSequence(ROI roi, Sequence source, Sequence destination, boolean translate, boolean scale)
-            throws UnsupportedOperationException
+            throws UnsupportedOperationException, InterruptedException
     {
         return adjustToSequence(roi, source, destination, translate, scale, false);
     }
@@ -2749,9 +2837,10 @@ public class ROIUtil
      * @return adjusted ROI
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D while scaling is required (scaling not supported for these ROI)
+     * @throws InterruptedException
      */
     public static ROI adjustToSequence(ROI roi, Sequence source, Sequence destination)
-            throws UnsupportedOperationException
+            throws UnsupportedOperationException, InterruptedException
     {
         return adjustToSequence(roi, source, destination, true, true);
     }

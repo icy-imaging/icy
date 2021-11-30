@@ -61,7 +61,7 @@ public class ROIAreaDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return Double.valueOf(computeArea(roi, sequence));
     }
@@ -78,8 +78,9 @@ public class ROIAreaDescriptor extends ROIDescriptor
      * @return the area expressed in the unit of the descriptor (see {@link #getUnit(Sequence)})
      * @throws UnsupportedOperationException
      *         if the operation is not supported for this ROI
+     * @throws InterruptedException 
      */
-    public static double computeArea(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public static double computeArea(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return computeArea(ROIInteriorDescriptor.computeInterior(roi), roi, sequence);
     }

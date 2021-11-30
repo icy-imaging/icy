@@ -88,7 +88,7 @@ public class ROIDistanceTransformCalculator
         buffer = new double[Math.max((int) imageSize.getSizeY(), (int) imageSize.getSizeZ())];
     }
 
-    private void drawROIs()
+    private void drawROIs() throws InterruptedException
     {
         for (ROI roi : rois)
         {
@@ -131,7 +131,7 @@ public class ROIDistanceTransformCalculator
         for (int t = 0; t < imageSize.getSizeT(); t++)
         {
             if (Thread.interrupted())
-                throw new InterruptedException();
+                throw new InterruptedException("ROI distance transform descriptor computation interrupted.");
             currentVolumeImage = distanceMap.getVolumetricImage(t);
             processCurrentVolume();
         }
@@ -159,7 +159,7 @@ public class ROIDistanceTransformCalculator
         for (int k = 0; k < imageSize.getSizeZ(); k++)
         {
             if (Thread.interrupted())
-                throw new InterruptedException();
+                throw new InterruptedException("ROI distance transform descriptor computation interrupted.");
 
             double[] currentPlaneData = currentVolumeImage.getImage(k).getDataXYAsDouble(0);
             currentVolumePlanes[k] = currentPlaneData;
@@ -172,7 +172,7 @@ public class ROIDistanceTransformCalculator
             for (int j = 0; j < imageSize.getSizeY(); j++)
             {
                 if (Thread.interrupted())
-                    throw new InterruptedException();
+                    throw new InterruptedException("ROI distance transform descriptor computation interrupted.");
 
                 currentJ = j;
                 for (int i = 0; i < imageSize.getSizeX(); i++)
@@ -185,7 +185,7 @@ public class ROIDistanceTransformCalculator
         for (int k = 0; k < imageSize.getSizeZ(); k++)
         {
             if (Thread.interrupted())
-                throw new InterruptedException();
+                throw new InterruptedException("ROI distance transform descriptor computation interrupted.");
 
             for (int j = 0; j < imageSize.getSizeY(); j++)
             {

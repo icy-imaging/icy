@@ -444,21 +444,21 @@ public abstract class ROI3DZShape extends ROI3DShape
     }
 
     @Override
-    public double computeNumberOfContourPoints()
+    public double computeNumberOfContourPoints() throws InterruptedException
     {
         // 3D contour points = first slice points + all slices perimeter + last slice points
         return (shape2DROI.getNumberOfPoints() * 2) + (shape2DROI.getNumberOfContourPoints() * getZShape().getSizeZ());
     }
 
     @Override
-    public double computeNumberOfPoints()
+    public double computeNumberOfPoints() throws InterruptedException
     {
         return shape2DROI.getNumberOfPoints() * getZShape().getSizeZ();
     }
 
     // default approximated implementation for ROI3DZShape
     @Override
-    public double computeSurfaceArea(Sequence sequence) throws UnsupportedOperationException
+    public double computeSurfaceArea(Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         final double psx = sequence.getPixelSizeX();
         final double psy = sequence.getPixelSizeY();
@@ -549,7 +549,7 @@ public abstract class ROI3DZShape extends ROI3DShape
     }
 
     @Override
-    public BooleanMask2D getBooleanMask2D(int z, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, boolean inclusive) throws InterruptedException
     {
         // better to clone to avoid changes in-between
         final ZShape3D zShape = (ZShape3D) getZShape().clone();

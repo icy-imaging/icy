@@ -1373,20 +1373,20 @@ public class ROI3DShape extends ROI3D implements Shape3D
     }
 
     @Override
-    public double getLength(Sequence sequence)
+    public double getLength(Sequence sequence) 
     {
         return getTotalDistance(getPointsInternal(), sequence.getPixelSizeX(), sequence.getPixelSizeY(),
                 sequence.getPixelSizeZ());
     }
 
     @Override
-    public double computeSurfaceArea(Sequence sequence)
+    public double computeSurfaceArea(Sequence sequence) throws InterruptedException
     {
         return 0d;
     }
 
     @Override
-    public double computeNumberOfContourPoints()
+    public double computeNumberOfContourPoints() throws InterruptedException
     {
         return getTotalDistance(getPointsInternal(), 1d, 1d, 1d);
     }
@@ -1667,7 +1667,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
     }
 
     @Override
-    public double computeNumberOfPoints()
+    public double computeNumberOfPoints() throws InterruptedException
     {
         return 0d;
     }

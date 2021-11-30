@@ -34,7 +34,7 @@ public class ROIContourDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return Double.valueOf(computeContour(roi));
     }
@@ -45,8 +45,9 @@ public class ROIContourDescriptor extends ROIDescriptor
      * @param roi
      *        the ROI on which we want to compute the number of contour point
      * @return the number of contour point
+     * @throws InterruptedException 
      */
-    public static double computeContour(ROI roi)
+    public static double computeContour(ROI roi) throws InterruptedException
     {
         return roi.getNumberOfContourPoints();
     }

@@ -3,14 +3,15 @@
  */
 package icy.sequence.edit;
 
-import icy.painter.Overlay;
-import icy.roi.ROI;
-import icy.sequence.Sequence;
-
 import java.awt.Image;
 import java.util.Set;
 
 import javax.swing.undo.CannotUndoException;
+
+import icy.gui.dialog.MessageDialog;
+import icy.painter.Overlay;
+import icy.roi.ROI;
+import icy.sequence.Sequence;
 
 /**
  * Default lazy sequence undoable edit (do a complete sequence copy to restore previous state).<br>
@@ -46,12 +47,12 @@ public class DefaultSequenceEdit extends AbstractSequenceEdit
 
         // undo
         final Sequence sequence = getSequence();
-        // restore data & metadata
-        sequence.copyFrom(previous, true);
-
         sequence.beginUpdate();
         try
         {
+            // restore data & metadata
+            sequence.copyFrom(previous, true);
+
             // restore ROIs
             for (ROI roi : previousRois)
                 if (!sequence.contains(roi))
@@ -67,6 +68,11 @@ public class DefaultSequenceEdit extends AbstractSequenceEdit
             for (Overlay overlay : sequence.getOverlays())
                 if (!previousOverlays.contains(overlay))
                     sequence.removeOverlay(overlay);
+        }
+        catch (InterruptedException e)
+        {
+            MessageDialog.showDialog("Undo operation interrupted", e.getLocalizedMessage(),
+                    MessageDialog.ERROR_MESSAGE);
         }
         finally
         {

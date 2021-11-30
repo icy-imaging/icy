@@ -91,8 +91,8 @@ public class ROIIntensityDescriptorsPlugin extends Plugin implements PluginROIDe
         while (!it.done())
         {
             // check for interruption sometime
-            if (((numPixels & 0xFFFF) == 0) && Thread.currentThread().isInterrupted())
-                throw new InterruptedException();
+            if (((numPixels & 0xFFFF) == 0) && Thread.interrupted())
+                throw new InterruptedException("ROI intensity descriptor computation interrupted.");
 
             final double value = it.get();
 

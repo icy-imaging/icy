@@ -65,8 +65,9 @@ public class SequenceDataIterator implements DataIterator
      *        Sequence we want to iterate data from
      * @param bounds5D
      *        the 5D rectangular region we want to iterate
+     * @throws InterruptedException 
      */
-    public SequenceDataIterator(Sequence sequence, Integer bounds5D)
+    public SequenceDataIterator(Sequence sequence, Integer bounds5D) throws InterruptedException
     {
         super();
 
@@ -117,29 +118,32 @@ public class SequenceDataIterator implements DataIterator
      *        T position (time) we want to iterate data
      * @param c
      *        C position (channel) we want to iterate data
+     * @throws InterruptedException 
      */
-    public SequenceDataIterator(Sequence sequence, Rectangle XYBounds, int z, int t, int c)
+    public SequenceDataIterator(Sequence sequence, Rectangle XYBounds, int z, int t, int c) throws InterruptedException
     {
         this(sequence, new Integer(XYBounds.x, XYBounds.y, z, t, c, (XYBounds.x + XYBounds.width) - 1,
                 (XYBounds.y + XYBounds.height) - 1, 1, 1, 1));
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #SequenceDataIterator(Sequence, Integer)} instead
      */
     @Deprecated
     public SequenceDataIterator(Sequence sequence, int startX, int endX, int startY, int endY, int startC, int endC,
-            int startZ, int endZ, int startT, int endT)
+            int startZ, int endZ, int startT, int endT) throws InterruptedException
     {
         this(sequence, new Integer(startX, startY, startZ, startT, startC, (endX - startX) + 1,
                 (endY - startY) + 1, (endZ - startZ) + 1, (endT - startT) + 1, (endC - startC) + 1));
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #SequenceDataIterator(Sequence, Rectangle, int, int, int)} instead
      */
     @Deprecated
-    public SequenceDataIterator(Sequence sequence, int startX, int endX, int startY, int endY, int c, int z, int t)
+    public SequenceDataIterator(Sequence sequence, int startX, int endX, int startY, int endY, int c, int z, int t) throws InterruptedException
     {
         this(sequence,
                 new Integer(startX, startY, z, t, c, (endX - startX) + 1, (endY - startY) + 1, 1, 1, 1));
@@ -156,8 +160,9 @@ public class SequenceDataIterator implements DataIterator
      *        T position (time) we want to iterate data
      * @param c
      *        C position (channel) we want to iterate data
+     * @throws InterruptedException 
      */
-    public SequenceDataIterator(Sequence sequence, int z, int t, int c)
+    public SequenceDataIterator(Sequence sequence, int z, int t, int c) throws InterruptedException
     {
         this(sequence, new Integer(0, 0, z, t, c, sequence.getSizeX(), sequence.getSizeY(), 1, 1, 1));
     }
@@ -167,8 +172,9 @@ public class SequenceDataIterator implements DataIterator
      * 
      * @param sequence
      *        Sequence we want to iterate data from.
+     * @throws InterruptedException 
      */
-    public SequenceDataIterator(Sequence sequence)
+    public SequenceDataIterator(Sequence sequence) throws InterruptedException
     {
         this(sequence, new Integer(0, 0, 0, 0, 0, sequence.getSizeX(), sequence.getSizeY(),
                 sequence.getSizeZ(), sequence.getSizeT(), sequence.getSizeC()));
@@ -192,8 +198,9 @@ public class SequenceDataIterator implements DataIterator
      * @param c
      *        The specific C position (channel) we want to iterate or <code>-1</code> to iterate
      *        over the whole ROI C dimension.
+     * @throws InterruptedException 
      */
-    public SequenceDataIterator(Sequence sequence, ROI roi, boolean inclusive, int z, int t, int c)
+    public SequenceDataIterator(Sequence sequence, ROI roi, boolean inclusive, int z, int t, int c) throws InterruptedException
     {
         super();
 
@@ -258,8 +265,9 @@ public class SequenceDataIterator implements DataIterator
      *        ROI defining the region to iterate.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels in the ROI are included.
+     * @throws InterruptedException 
      */
-    public SequenceDataIterator(Sequence sequence, ROI roi, boolean inclusive)
+    public SequenceDataIterator(Sequence sequence, ROI roi, boolean inclusive) throws InterruptedException
     {
         this(sequence, roi, inclusive, -1, -1, -1);
     }
@@ -271,14 +279,15 @@ public class SequenceDataIterator implements DataIterator
      *        Sequence we want to iterate data from.
      * @param roi
      *        ROI defining the region to iterate.
+     * @throws InterruptedException 
      */
-    public SequenceDataIterator(Sequence sequence, ROI roi)
+    public SequenceDataIterator(Sequence sequence, ROI roi) throws InterruptedException
     {
         this(sequence, roi, false);
     }
 
     @Override
-    public void reset()
+    public void reset() throws InterruptedException
     {
         done = (sequence == null) || (startT > endT) || (startZ > endZ) || (startC > endC);
 
@@ -302,8 +311,9 @@ public class SequenceDataIterator implements DataIterator
 
     /**
      * Prepare data for XY iteration.
+     * @throws InterruptedException 
      */
-    protected void prepareDataXY()
+    protected void prepareDataXY() throws InterruptedException
     {
         // flush previous dataXY
         flushDataXY();
@@ -340,7 +350,7 @@ public class SequenceDataIterator implements DataIterator
     }
 
     @Override
-    public void next()
+    public void next() throws InterruptedException
     {
         imageIterator.next();
         nextImageifNeeded();
@@ -348,8 +358,9 @@ public class SequenceDataIterator implements DataIterator
 
     /**
      * Advance one image position.
+     * @throws InterruptedException 
      */
-    protected void nextImageifNeeded()
+    protected void nextImageifNeeded() throws InterruptedException
     {
         while (imageIterator.done() && !done)
         {

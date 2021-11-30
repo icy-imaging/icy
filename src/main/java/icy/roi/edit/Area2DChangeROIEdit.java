@@ -21,7 +21,7 @@ public class Area2DChangeROIEdit extends AbstractROIEdit
     BooleanMask2D oldMask;
     BooleanMask2D newMask;
 
-    public Area2DChangeROIEdit(ROI2DArea roi, BooleanMask2D oldMask, String name)
+    public Area2DChangeROIEdit(ROI2DArea roi, BooleanMask2D oldMask, String name) throws InterruptedException
     {
         super(roi, name);
 
@@ -30,7 +30,7 @@ public class Area2DChangeROIEdit extends AbstractROIEdit
         this.newMask = roi.getBooleanMask(true);
     }
 
-    public Area2DChangeROIEdit(ROI2DArea roi, BooleanMask2D oldMask)
+    public Area2DChangeROIEdit(ROI2DArea roi, BooleanMask2D oldMask) throws InterruptedException
     {
         this(roi, oldMask, "ROI mask changed");
     }

@@ -18,6 +18,10 @@
  */
 package icy.math;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
+
 import icy.file.FileUtil;
 import icy.gui.dialog.MessageDialog;
 import icy.gui.dialog.SaveDialog;
@@ -25,11 +29,6 @@ import icy.type.TypeUtil;
 import icy.type.collection.array.ArrayUtil;
 import icy.util.StringUtil;
 import icy.util.XLSUtil;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
-
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
@@ -172,11 +171,19 @@ public class Histogram
             final WritableWorkbook workbook = XLSUtil.createWorkbook(path);
             final WritableSheet sheet = XLSUtil.createNewPage(workbook, "ROIS");
 
-            if (XLSUtil.setFromCSV(sheet, csvContent))
-                XLSUtil.saveAndClose(workbook);
-            else
+            try
             {
-                MessageDialog.showDialog("Error", "Error while exporting ROIs table content to XLS file.",
+                if (XLSUtil.setFromCSV(sheet, csvContent))
+                    XLSUtil.saveAndClose(workbook);
+                else
+                {
+                    MessageDialog.showDialog("Error", "Error while exporting ROIs table content to XLS file.",
+                            MessageDialog.ERROR_MESSAGE);
+                }
+            }
+            catch (InterruptedException e1)
+            {
+                MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(),
                         MessageDialog.ERROR_MESSAGE);
             }
         }

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import icy.image.IcyBufferedImage;
 import icy.sequence.Sequence;
@@ -70,7 +69,7 @@ public class BooleanMask3D implements Cloneable
     }
 
     // Internal use only
-    private static BooleanMask2D doUnion2D(BooleanMask2D m1, BooleanMask2D m2)
+    private static BooleanMask2D doUnion2D(BooleanMask2D m1, BooleanMask2D m2) throws InterruptedException
     {
         if (m1 == null)
         {
@@ -89,7 +88,7 @@ public class BooleanMask3D implements Cloneable
     }
 
     // Internal use only
-    private static BooleanMask2D doIntersection2D(BooleanMask2D m1, BooleanMask2D m2)
+    private static BooleanMask2D doIntersection2D(BooleanMask2D m1, BooleanMask2D m2) throws InterruptedException
     {
         if ((m1 == null) || (m2 == null))
             return null;
@@ -99,7 +98,7 @@ public class BooleanMask3D implements Cloneable
     }
 
     // Internal use only
-    private static BooleanMask2D doExclusiveUnion2D(BooleanMask2D m1, BooleanMask2D m2)
+    private static BooleanMask2D doExclusiveUnion2D(BooleanMask2D m1, BooleanMask2D m2) throws InterruptedException
     {
         if (m1 == null)
         {
@@ -118,7 +117,7 @@ public class BooleanMask3D implements Cloneable
     }
 
     // Internal use only
-    private static BooleanMask2D doSubtraction2D(BooleanMask2D m1, BooleanMask2D m2)
+    private static BooleanMask2D doSubtraction2D(BooleanMask2D m1, BooleanMask2D m2) throws InterruptedException
     {
         if (m1 == null)
             return null;
@@ -132,6 +131,7 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Build resulting mask from union of the mask1 and mask2:
+     * 
      * <pre>
      *        mask1          +       mask2        =      result
      * 
@@ -144,8 +144,10 @@ public class BooleanMask3D implements Cloneable
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask3D getUnion(BooleanMask3D mask1, BooleanMask3D mask2)
+    public static BooleanMask3D getUnion(BooleanMask3D mask1, BooleanMask3D mask2) throws InterruptedException
     {
         if ((mask1 == null) && (mask2 == null))
             return new BooleanMask3D();
@@ -197,6 +199,7 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Build resulting mask from intersection of the mask1 and mask2:
+     * 
      * <pre>
      *        mask1     intersect     mask2      =        result
      * 
@@ -209,8 +212,10 @@ public class BooleanMask3D implements Cloneable
      *     ####                             ####
      *     ##                                 ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask3D getIntersection(BooleanMask3D mask1, BooleanMask3D mask2)
+    public static BooleanMask3D getIntersection(BooleanMask3D mask1, BooleanMask3D mask2) throws InterruptedException
     {
         if ((mask1 == null) || (mask2 == null))
             return new BooleanMask3D();
@@ -257,6 +262,7 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Build resulting mask from exclusive union of the mask1 and mask2:
+     * 
      * <pre>
      *          mask1       xor      mask2        =       result
      * 
@@ -269,8 +275,10 @@ public class BooleanMask3D implements Cloneable
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask3D getExclusiveUnion(BooleanMask3D mask1, BooleanMask3D mask2)
+    public static BooleanMask3D getExclusiveUnion(BooleanMask3D mask1, BooleanMask3D mask2) throws InterruptedException
     {
         if ((mask1 == null) && (mask2 == null))
             return new BooleanMask3D();
@@ -322,6 +330,7 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Build resulting mask from the subtraction of mask2 from mask1:
+     * 
      * <pre>
      *        mask1          -        mask2       =  result
      * 
@@ -334,8 +343,10 @@ public class BooleanMask3D implements Cloneable
      *     ####                             ####     ####
      *     ##                                 ##     ##
      * </pre>
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask3D getSubtraction(BooleanMask3D mask1, BooleanMask3D mask2)
+    public static BooleanMask3D getSubtraction(BooleanMask3D mask1, BooleanMask3D mask2) throws InterruptedException
     {
         if (mask1 == null)
             return new BooleanMask3D();
@@ -386,8 +397,10 @@ public class BooleanMask3D implements Cloneable
     /**
      * Fast 2x up scaling (each point become 2x2x2 bloc points).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask3D upscale(BooleanMask3D mask)
+    public static BooleanMask3D upscale(BooleanMask3D mask) throws InterruptedException
     {
         final TreeMap<Integer, BooleanMask2D> srcMask = mask.mask;
         final TreeMap<Integer, BooleanMask2D> resMask = new TreeMap<Integer, BooleanMask2D>();
@@ -423,9 +436,11 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Internal use only
+     * 
+     * @throws InterruptedException
      */
     protected static BooleanMask2D mergeForDownscale(TreeMap<Integer, BooleanMask2D> masks, int destZ,
-            int nbPointForTrue)
+            int nbPointForTrue) throws InterruptedException
     {
         final BooleanMask2D bm1 = masks.get(Integer.valueOf((destZ * 2) + 0));
         final BooleanMask2D bm2 = masks.get(Integer.valueOf((destZ * 2) + 1));
@@ -484,8 +499,9 @@ public class BooleanMask3D implements Cloneable
      *        the minimum number of <code>true</code>points from a 2x2x2 block to give a <code>true</code> resulting
      *        point.<br>
      *        Accepted value: 1 to 8 (default is 5)
+     * @throws InterruptedException
      */
-    public static BooleanMask3D downscale(BooleanMask3D mask, int nbPointForTrue)
+    public static BooleanMask3D downscale(BooleanMask3D mask, int nbPointForTrue) throws InterruptedException
     {
         final TreeMap<Integer, BooleanMask2D> srcMask = mask.mask;
         final TreeMap<Integer, BooleanMask2D> resMask = new TreeMap<Integer, BooleanMask2D>();
@@ -515,8 +531,10 @@ public class BooleanMask3D implements Cloneable
     /**
      * Fast 2x down scaling (each 2x2x2 block points become 1 point).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask3D downscale(BooleanMask3D mask)
+    public static BooleanMask3D downscale(BooleanMask3D mask) throws InterruptedException
     {
         return downscale(mask, 5);
     }
@@ -525,8 +543,10 @@ public class BooleanMask3D implements Cloneable
      * Fast 2x up scaling (each point become 2x2 bloc points).<br>
      * 2D version (down scale is done on XY dimension only).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask3D upscale2D(BooleanMask3D mask)
+    public static BooleanMask3D upscale2D(BooleanMask3D mask) throws InterruptedException
     {
         final TreeMap<Integer, BooleanMask2D> srcMask = mask.mask;
         final TreeMap<Integer, BooleanMask2D> resMask = new TreeMap<Integer, BooleanMask2D>();
@@ -564,8 +584,9 @@ public class BooleanMask3D implements Cloneable
      *        the minimum number of <code>true</code>points from a 2x2 block to give a <code>true</code> resulting
      *        point.<br>
      *        Accepted value: 1 to 4 (default is 3)
+     * @throws InterruptedException
      */
-    public static BooleanMask3D downscale2D(BooleanMask3D mask, int nbPointForTrue)
+    public static BooleanMask3D downscale2D(BooleanMask3D mask, int nbPointForTrue) throws InterruptedException
     {
         final TreeMap<Integer, BooleanMask2D> srcMask = mask.mask;
         final TreeMap<Integer, BooleanMask2D> resMask = new TreeMap<Integer, BooleanMask2D>();
@@ -597,8 +618,10 @@ public class BooleanMask3D implements Cloneable
      * Fast 2x down scaling (each 2x2 block points become 1 point).<br>
      * 2D version (down scale is done on XY dimension only).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public static BooleanMask3D downscale2D(BooleanMask3D mask)
+    public static BooleanMask3D downscale2D(BooleanMask3D mask) throws InterruptedException
     {
         return downscale2D(mask, 2);
     }
@@ -719,6 +742,8 @@ public class BooleanMask3D implements Cloneable
 
     /**
      * Build a new boolean mask from the specified array of {@link Point3D}.<br>
+     * 
+     * @throws InterruptedException
      */
     public BooleanMask3D(Point3D[] points)
     {
@@ -1104,8 +1129,10 @@ public class BooleanMask3D implements Cloneable
     /**
      * Fast 2x up scaling (each point become 2x2x2 bloc point).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public BooleanMask3D upscale()
+    public BooleanMask3D upscale() throws InterruptedException
     {
         return upscale(this);
     }
@@ -1118,8 +1145,9 @@ public class BooleanMask3D implements Cloneable
      *        the minimum number of <code>true</code>points from a 2x2x2 block to give a <code>true</code> resulting
      *        point.<br>
      *        Accepted value: 1-8 (default is 5).
+     * @throws InterruptedException
      */
-    public BooleanMask3D downscale(int nbPointForTrue)
+    public BooleanMask3D downscale(int nbPointForTrue) throws InterruptedException
     {
         return downscale(this, nbPointForTrue);
     }
@@ -1127,8 +1155,10 @@ public class BooleanMask3D implements Cloneable
     /**
      * Fast 2x down scaling (each 2x2x2 block points become 1 point).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public BooleanMask3D downscale()
+    public BooleanMask3D downscale() throws InterruptedException
     {
         return downscale(this);
     }
@@ -1137,8 +1167,10 @@ public class BooleanMask3D implements Cloneable
      * Fast 2x up scaling (each point become 2x2 bloc point).<br>
      * 2D version (down scale is done on XY dimension only).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public BooleanMask3D upscale2D()
+    public BooleanMask3D upscale2D() throws InterruptedException
     {
         return upscale2D(this);
     }
@@ -1152,8 +1184,9 @@ public class BooleanMask3D implements Cloneable
      *        the minimum number of <code>true</code>points from a 2x2 block to give a <code>true</code> resulting
      *        point.<br>
      *        Accepted value: 1-4 (default is 3).
+     * @throws InterruptedException
      */
-    public BooleanMask3D downscale2D(int nbPointForTrue)
+    public BooleanMask3D downscale2D(int nbPointForTrue) throws InterruptedException
     {
         return downscale2D(this, nbPointForTrue);
     }
@@ -1162,8 +1195,10 @@ public class BooleanMask3D implements Cloneable
      * Fast 2x down scaling (each 2x2 block points become 1 point).<br>
      * 2D version (down scale is done on XY dimension only).<br>
      * This method create a new boolean mask.
+     * 
+     * @throws InterruptedException
      */
-    public BooleanMask3D downscale2D()
+    public BooleanMask3D downscale2D() throws InterruptedException
     {
         return downscale2D(this);
     }
@@ -1190,12 +1225,17 @@ public class BooleanMask3D implements Cloneable
     /**
      * Return the number of points contained in this boolean mask.
      */
-    public int getNumberOfPoints()
+    public int getNumberOfPoints() throws InterruptedException
     {
         int result = 0;
 
         for (BooleanMask2D mask2d : mask.values())
+        {
+            if (Thread.interrupted())
+                throw new InterruptedException("BooleanMask.getNumberOfPoints() computation interrupted !");
+
             result += mask2d.getNumberOfPoints();
+        }
 
         return result;
     }
@@ -1204,8 +1244,10 @@ public class BooleanMask3D implements Cloneable
      * Return an array of {@link icy.type.point.Point3D.Integer} representing all points of the
      * current 3D mask.<br>
      * Points are returned in ascending XYZ order.
+     * 
+     * @throws InterruptedException
      */
-    public Point3D.Integer[] getPoints()
+    public Point3D.Integer[] getPoints() throws InterruptedException
     {
         return Point3D.Integer.toPoint3D(getPointsAsIntArray());
     }
@@ -1218,12 +1260,17 @@ public class BooleanMask3D implements Cloneable
      * <code>result[(pt * 3) + 2]</code> = Z coordinate for point <i>pt</i>.<br>
      * Points are returned in ascending XYZ order.
      */
-    public int[] getPointsAsIntArray()
+    public int[] getPointsAsIntArray() throws InterruptedException
     {
         final DynamicArray.Int result = new DynamicArray.Int(8);
 
         for (Entry<Integer, BooleanMask2D> entry : mask.entrySet())
+        {
+            if (Thread.interrupted())
+                throw new InterruptedException("BooleanMask.getPointsAsIntArray() computation interrupted !");
+
             result.add(toInt3D(entry.getValue().getPointsAsIntArray(), entry.getKey().intValue()));
+        }
 
         return result.asArray();
     }
@@ -1237,9 +1284,10 @@ public class BooleanMask3D implements Cloneable
      * It returns all points from the first and the last Z slices + contour points for intermediate
      * Z slices.
      * 
+     * @throws InterruptedException
      * @see #getContourPointsAsIntArray()
      */
-    public Point3D.Integer[] getContourPoints()
+    public Point3D.Integer[] getContourPoints() throws InterruptedException
     {
         return Point3D.Integer.toPoint3D(getContourPointsAsIntArray());
     }
@@ -1256,9 +1304,10 @@ public class BooleanMask3D implements Cloneable
      * It returns all points from the first and the last Z slices + contour points for intermediate
      * Z slices.
      * 
+     * @throws InterruptedException
      * @see #getContourPoints()
      */
-    public int[] getContourPointsAsIntArray()
+    public int[] getContourPointsAsIntArray() throws InterruptedException
     {
         final DynamicArray.Int result = new DynamicArray.Int(8);
 
@@ -1294,8 +1343,9 @@ public class BooleanMask3D implements Cloneable
      * @author Alexandre Dufour
      * @author Stephane Dallongeville
      * @return the length of the contour
+     * @throws InterruptedException
      */
-    public double getContourLength()
+    public double getContourLength() throws InterruptedException
     {
         double result = 0;
 
@@ -1472,7 +1522,7 @@ public class BooleanMask3D implements Cloneable
      * 
      * @return List of BooleanMask3D instances (each connected component).
      */
-    public List<BooleanMask3D> getComponents()
+    public List<BooleanMask3D> getComponents() throws InterruptedException
     {
         int width = bounds.sizeX;
         int height = bounds.sizeY;
@@ -1944,7 +1994,12 @@ public class BooleanMask3D implements Cloneable
             }
         }
 
-        return roiMap.values().stream().map(r -> r.getBooleanMask(true)).collect(Collectors.toList());
+        final List<BooleanMask3D> result = new ArrayList<>();
+
+        for (ROI3DArea roi : roiMap.values())
+            result.add(roi.getBooleanMask(true));
+
+        return result;
     }
 
 }

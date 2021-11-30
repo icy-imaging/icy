@@ -94,20 +94,27 @@ public class SequenceOperationActions
 
                 if (sequence != null)
                 {
-                    final Sequence out = SequenceUtil.convertToType(Icy.getMainInterface().getActiveSequence(),
-                            dataType, scaled);
-
-                    ThreadUtil.invokeLater(new Runnable()
+                    try
                     {
-                        @Override
-                        public void run()
+                        final Sequence out = SequenceUtil.convertToType(Icy.getMainInterface().getActiveSequence(),
+                                dataType, scaled);
+
+                        ThreadUtil.invokeLater(new Runnable()
                         {
-                            // get output viewer
-                            final Viewer vout = new Viewer(out);
-                            // restore colormap from input viewer
-                            vout.getLut().setColorMaps(viewer.getLut(), false);
-                        }
-                    });
+                            @Override
+                            public void run()
+                            {
+                                // get output viewer
+                                final Viewer vout = new Viewer(out);
+                                // restore colormap from input viewer
+                                vout.getLut().setColorMaps(viewer.getLut(), false);
+                            }
+                        });
+                    }
+                    catch (InterruptedException e1)
+                    {
+                        // ignore
+                    }
 
                     return true;
                 }
@@ -167,9 +174,17 @@ public class SequenceOperationActions
 
                 if (sequence != null)
                 {
-                    // convert the sequence
-                    final Sequence out = SequenceUtil.convertColor(sequence, imageType, viewer.getLut());
-                    Icy.getMainInterface().addSequence(out);
+                    try
+                    {
+                        // convert the sequence
+                        final Sequence out = SequenceUtil.convertColor(sequence, imageType, viewer.getLut());
+                        Icy.getMainInterface().addSequence(out);
+                    }
+                    catch (InterruptedException e1)
+                    {
+                        // ignore
+                    }
+
                     return true;
                 }
             }
@@ -211,13 +226,20 @@ public class SequenceOperationActions
 
             if (sequence != null)
             {
-                if (channel == -1)
+                try
                 {
-                    for (int c = 0; c < sequence.getSizeC(); c++)
-                        Icy.getMainInterface().addSequence(SequenceUtil.extractChannel(sequence, c));
+                    if (channel == -1)
+                    {
+                        for (int c = 0; c < sequence.getSizeC(); c++)
+                            Icy.getMainInterface().addSequence(SequenceUtil.extractChannel(sequence, c));
+                    }
+                    else
+                        Icy.getMainInterface().addSequence(SequenceUtil.extractChannel(sequence, channel));
                 }
-                else
-                    Icy.getMainInterface().addSequence(SequenceUtil.extractChannel(sequence, channel));
+                catch (InterruptedException e1)
+                {
+                    // ignore
+                }
 
                 return true;
             }
@@ -255,23 +277,31 @@ public class SequenceOperationActions
 
             if (sequence != null)
             {
-                // create undo point
-                final boolean canUndo = sequence.createUndoPoint("Channel " + channel + "removed");
-
-                // cannot backup
-                if (!canUndo)
+                try
                 {
-                    // ask confirmation to continue
-                    if (!IdConfirmDialog.confirm("Not enough memory to undo the operation, do you want to continue ?",
-                            "ChannelRemoveNoUndoConfirm"))
-                        return false;
+                    // create undo point
+                    final boolean canUndo = sequence.createUndoPoint("Channel " + channel + "removed");
+
+                    // cannot backup
+                    if (!canUndo)
+                    {
+                        // ask confirmation to continue
+                        if (!IdConfirmDialog.confirm(
+                                "Not enough memory to undo the operation, do you want to continue ?",
+                                "ChannelRemoveNoUndoConfirm"))
+                            return false;
+                    }
+
+                    SequenceUtil.removeChannel(sequence, channel);
+
+                    // no undo, clear undo manager after modification
+                    if (!canUndo)
+                        sequence.clearUndoManager();
                 }
-
-                SequenceUtil.removeChannel(sequence, channel);
-
-                // no undo, clear undo manager after modification
-                if (!canUndo)
-                    sequence.clearUndoManager();
+                catch (InterruptedException e1)
+                {
+                    // ignore
+                }
 
                 return true;
             }
@@ -435,20 +465,27 @@ public class SequenceOperationActions
             if (seq == null)
                 return false;
 
-            // create output sequence
-            final Sequence out = SequenceUtil.getCopy(seq);
-
-            ThreadUtil.invokeLater(new Runnable()
+            try
             {
-                @Override
-                public void run()
+                // create output sequence
+                final Sequence out = SequenceUtil.getCopy(seq);
+
+                ThreadUtil.invokeLater(new Runnable()
                 {
-                    // get output viewer
-                    final Viewer vout = new Viewer(out);
-                    // copy colormap from input viewer
-                    vout.getLut().copyFrom(viewer.getLut());
-                }
-            });
+                    @Override
+                    public void run()
+                    {
+                        // get output viewer
+                        final Viewer vout = new Viewer(out);
+                        // copy colormap from input viewer
+                        vout.getLut().copyFrom(viewer.getLut());
+                    }
+                });
+            }
+            catch (InterruptedException e1)
+            {
+                // just ignore...
+            }
 
             return true;
         }
@@ -533,18 +570,25 @@ public class SequenceOperationActions
 
             final ROI roi = rois.get(0);
 
-            // create output sequence
-            final Sequence out = SequenceUtil.getSubSequence(seq, roi);
-
-            ThreadUtil.invokeLater(new Runnable()
+            try
             {
-                @Override
-                public void run()
+                // create output sequence
+                final Sequence out = SequenceUtil.getSubSequence(seq, roi);
+
+                ThreadUtil.invokeLater(new Runnable()
                 {
-                    // get output viewer
-                    new Viewer(out);
-                }
-            });
+                    @Override
+                    public void run()
+                    {
+                        // get output viewer
+                        new Viewer(out);
+                    }
+                });
+            }
+            catch (InterruptedException e1)
+            {
+                // just ignore...
+            }
 
             return true;
         }
@@ -1111,10 +1155,18 @@ public class SequenceOperationActions
 
                 if (mainFrame != null)
                 {
-                    final double value = mainFrame.getMainRibbon().getSequenceOperationTask().getFillValue();
+                    final double value = Icy.getMainInterface().getROIRibbonTask().getFillValue();
 
-                    for (ROI roi : sequence.getSelectedROIs())
-                        DataIteratorUtil.set(new SequenceDataIterator(sequence, roi, true), value);
+                    try
+                    {
+                        for (ROI roi : sequence.getSelectedROIs())
+                            DataIteratorUtil.set(new SequenceDataIterator(sequence, roi, true), value);
+                    }
+                    catch (InterruptedException e1)
+                    {
+                        MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(),
+                                MessageDialog.ERROR_MESSAGE);
+                    }
 
                     sequence.dataChanged();
 

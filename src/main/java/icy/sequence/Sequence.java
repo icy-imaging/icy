@@ -576,8 +576,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        the source sequence to copy data from
      * @param copyName
      *        if set to <code>true</code> it will also copy the name from the source sequence
+     * @throws InterruptedException
      */
-    public void copyFrom(Sequence source, boolean copyName)
+    public void copyFrom(Sequence source, boolean copyName) throws InterruptedException
     {
         copyDataFrom(source);
         copyMetaDataFrom(source, copyName);
@@ -588,8 +589,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * 
      * @param source
      *        sequence
+     * @throws InterruptedException
      */
-    public void copyDataFrom(Sequence source)
+    public void copyDataFrom(Sequence source) throws InterruptedException
     {
         final int sizeT = source.getSizeT();
         final int sizeZ = source.getSizeZ();
@@ -602,6 +604,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             {
                 for (int z = 0; z < sizeZ; z++)
                 {
+                    // check for interruption
+                    if (Thread.interrupted())
+                        throw new InterruptedException("Sequence copy data process interrupted.");
+
                     final IcyBufferedImage img = source.getImage(t, z);
 
                     if (img != null)
@@ -644,14 +650,19 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param name
      *        restore point name (visible in the History panel)
      * @return false if for some reason the operation failed (out of memory for instance)
+     * @throws InterruptedException
      * @see #undo()
      */
-    public boolean createUndoPoint(String name)
+    public boolean createUndoPoint(String name) throws InterruptedException
     {
         try
         {
             undoManager.addEdit(new DefaultSequenceEdit(SequenceUtil.getCopy(this, false, false, false), this));
             return true;
+        }
+        catch (InterruptedException t)
+        {
+            throw t;
         }
         catch (Throwable t)
         {
@@ -665,14 +676,19 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param name
      *        restore point name (visible in the History panel)
      * @return false if for some reason the operation failed (out of memory for instance)
+     * @throws InterruptedException
      * @see #undo()
      */
-    public boolean createUndoDataPoint(String name)
+    public boolean createUndoDataPoint(String name) throws InterruptedException
     {
         try
         {
             undoManager.addEdit(new DataSequenceEdit(SequenceUtil.getCopy(this, false, false, false), this, name));
             return true;
+        }
+        catch (InterruptedException t)
+        {
+            throw t;
         }
         catch (Throwable t)
         {
@@ -789,9 +805,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param rescale
      *        boolean
      * @return sequence
+     * @throws InterruptedException
      */
     @Deprecated
-    public Sequence convertToType(DataType dataType, boolean rescale)
+    public Sequence convertToType(DataType dataType, boolean rescale) throws InterruptedException
     {
         return SequenceUtil.convertToType(this, dataType, rescale);
     }
@@ -819,9 +836,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param signed
      *        boolean
      * @return sequence
+     * @throws InterruptedException
      */
     @Deprecated
-    public Sequence convertToType(int dataType, boolean signed, boolean rescale)
+    public Sequence convertToType(int dataType, boolean signed, boolean rescale) throws InterruptedException
     {
         return convertToType(DataType.getDataType(dataType, signed), rescale);
     }
@@ -831,9 +849,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param channelNumber
      *        int
      * @return sequence
+     * @throws InterruptedException
      */
     @Deprecated
-    public Sequence extractChannel(int channelNumber)
+    public Sequence extractChannel(int channelNumber) throws InterruptedException
     {
         return SequenceUtil.extractChannel(this, channelNumber);
     }
@@ -855,9 +874,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param bandNumber
      *        int
      * @return sequence
+     * @throws InterruptedException
      */
     @Deprecated
-    public Sequence extractBand(int bandNumber)
+    public Sequence extractBand(int bandNumber) throws InterruptedException
     {
         return extractChannel(bandNumber);
     }
@@ -7952,9 +7972,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @deprecated Use {@link SequenceUtil#getCopy(Sequence)} instead.
      * @return sequence
+     * @throws InterruptedException
      */
     @Deprecated
-    public Sequence getCopy()
+    public Sequence getCopy() throws InterruptedException
     {
         return SequenceUtil.getCopy(this);
     }

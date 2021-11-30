@@ -186,12 +186,13 @@ public class ImageDataIterator implements DataIterator
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #ImageDataIterator(IcyBufferedImage, BooleanMask2D, int)} instead.
      *             You can use the {@link ROI#getBooleanMask2D(int, int, int, boolean)} method to
      *             retrieve the boolean mask from the ROI.
      */
     @Deprecated
-    public ImageDataIterator(IcyBufferedImage image, ROI roi)
+    public ImageDataIterator(IcyBufferedImage image, ROI roi) throws InterruptedException
     {
         this(image, roi.getBooleanMask2D(0, 0, 0, false));
     }

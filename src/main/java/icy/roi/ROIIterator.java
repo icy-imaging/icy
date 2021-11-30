@@ -3,11 +3,11 @@
  */
 package icy.roi;
 
+import java.util.NoSuchElementException;
+
 import icy.type.Position5DIterator;
 import icy.type.point.Point5D;
 import icy.type.rectangle.Rectangle5D;
-
-import java.util.NoSuchElementException;
 
 /**
  * ROI iterator.<br>
@@ -37,8 +37,9 @@ public class ROIIterator implements Position5DIterator
      *        Keep it to <code>null</code> to iterate all over the ROI.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels in the ROI are included.
+     * @throws InterruptedException 
      */
-    public ROIIterator(ROI roi, Rectangle5D region, boolean inclusive)
+    public ROIIterator(ROI roi, Rectangle5D region, boolean inclusive) throws InterruptedException
     {
         super();
 
@@ -78,8 +79,9 @@ public class ROIIterator implements Position5DIterator
      *        ROI defining the region to iterate.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels in the ROI are included.
+     * @throws InterruptedException 
      */
-    public ROIIterator(ROI roi, boolean inclusive)
+    public ROIIterator(ROI roi, boolean inclusive) throws InterruptedException
     {
         this(roi, null, inclusive);
     }
@@ -115,7 +117,7 @@ public class ROIIterator implements Position5DIterator
     }
 
     @Override
-    public void reset()
+    public void reset() throws InterruptedException
     {
         done = bounds.isEmpty();
 
@@ -132,14 +134,15 @@ public class ROIIterator implements Position5DIterator
 
     /**
      * Prepare for XY iteration.
+     * @throws InterruptedException 
      */
-    protected void prepareXY()
+    protected void prepareXY() throws InterruptedException
     {
         maskIterator = new BooleanMask2DIterator(roi.getBooleanMask2D(z, t, c, inclusive));
     }
 
     @Override
-    public void next()
+    public void next() throws InterruptedException
     {
         if (done)
             throw new NoSuchElementException();
@@ -150,8 +153,9 @@ public class ROIIterator implements Position5DIterator
 
     /**
      * Advance one image position.
+     * @throws InterruptedException 
      */
-    protected void nextXYIfNeeded()
+    protected void nextXYIfNeeded() throws InterruptedException
     {
         while (maskIterator.done() && !done)
         {

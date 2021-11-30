@@ -412,7 +412,7 @@ public class ROI3DLine extends ROI3DShape
     }
 
     @Override
-    public boolean intersects(ROI r)
+    public boolean intersects(ROI r) throws InterruptedException
     {
         // special case of ROI3DLine
         if (r instanceof ROI3DLine)

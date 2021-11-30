@@ -329,7 +329,7 @@ public class ROI3DPoint extends ROI3DShape
     }
 
     @Override
-    public boolean intersects(ROI r)
+    public boolean intersects(ROI r) throws InterruptedException
     {
         // special case of ROI3DPoint
         if (r instanceof ROI3DPoint)

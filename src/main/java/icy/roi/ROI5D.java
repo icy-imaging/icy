@@ -29,7 +29,10 @@ import icy.type.rectangle.Rectangle5D;
 
 /**
  * 5D ROI base class.
+ * 
+ * @deprecated Try to not use {@link ROI4D} or {@link ROI5D} anymore
  */
+@Deprecated
 public abstract class ROI5D extends ROI
 {
     /**
@@ -182,7 +185,7 @@ public abstract class ROI5D extends ROI
      * Override this for specific ROI type.
      */
     @Override
-    public boolean contains(ROI roi)
+    public boolean contains(ROI roi) throws InterruptedException
     {
         if (roi instanceof ROI5D)
         {
@@ -228,7 +231,7 @@ public abstract class ROI5D extends ROI
      * Override this for specific ROI type.
      */
     @Override
-    public boolean intersects(ROI roi)
+    public boolean intersects(ROI roi) throws InterruptedException
     {
         if (roi instanceof ROI5D)
         {
@@ -246,7 +249,7 @@ public abstract class ROI5D extends ROI
     }
 
     @Override
-    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         final BooleanMask2D result = super.getBooleanMask2D(z, t, c, inclusive);
 
@@ -270,8 +273,9 @@ public abstract class ROI5D extends ROI
      *        C position we want to retrieve the boolean mask.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException
      */
-    public BooleanMask3D getBooleanMask3D(int z, int t, int c, boolean inclusive)
+    public BooleanMask3D getBooleanMask3D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // whole Z dimension
         if (z == -1)
@@ -292,8 +296,9 @@ public abstract class ROI5D extends ROI
      * 
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException
      */
-    public BooleanMask3D getBooleanMask3D(int t, int c, boolean inclusive)
+    public BooleanMask3D getBooleanMask3D(int t, int c, boolean inclusive) throws InterruptedException
     {
         final Rectangle3D.Integer bounds = getBounds5D().toRectangle3D().toInteger();
         final BooleanMask2D masks[] = new BooleanMask2D[bounds.sizeZ];
@@ -318,8 +323,9 @@ public abstract class ROI5D extends ROI
      *        C position we want to retrieve the boolean mask.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException
      */
-    public BooleanMask4D getBooleanMask4D(int z, int t, int c, boolean inclusive)
+    public BooleanMask4D getBooleanMask4D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // whole Z dimension
         if (z == -1)
@@ -366,8 +372,9 @@ public abstract class ROI5D extends ROI
      * 
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException
      */
-    public BooleanMask4D getBooleanMask4D(int c, boolean inclusive)
+    public BooleanMask4D getBooleanMask4D(int c, boolean inclusive) throws InterruptedException
     {
         final Rectangle4D.Integer bounds = getBounds5D().toRectangle4D().toInteger();
         final BooleanMask3D masks[] = new BooleanMask3D[bounds.sizeT];
@@ -393,8 +400,9 @@ public abstract class ROI5D extends ROI
      *        dimension
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException
      */
-    public BooleanMask5D getBooleanMask5D(int z, int t, int c, boolean inclusive)
+    public BooleanMask5D getBooleanMask5D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // whole Z dimension
         if (z == -1)
@@ -479,8 +487,9 @@ public abstract class ROI5D extends ROI
      * 
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException
      */
-    public BooleanMask5D getBooleanMask(boolean inclusive)
+    public BooleanMask5D getBooleanMask(boolean inclusive) throws InterruptedException
     {
         final Rectangle5D.Integer bounds = getBounds();
         final BooleanMask4D masks[] = new BooleanMask4D[bounds.sizeC];
@@ -497,7 +506,7 @@ public abstract class ROI5D extends ROI
      * Override to optimize for specific ROI.
      */
     @Override
-    public double computeNumberOfContourPoints()
+    public double computeNumberOfContourPoints() throws InterruptedException
     {
         // approximation by using number of point of the edge of boolean mask
         return getBooleanMask(true).getContourPointsAsIntArray().length / getDimension();
@@ -509,7 +518,7 @@ public abstract class ROI5D extends ROI
      * Override to optimize for specific ROI.
      */
     @Override
-    public double computeNumberOfPoints()
+    public double computeNumberOfPoints() throws InterruptedException
     {
         double numPoints = 0;
 

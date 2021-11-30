@@ -18,6 +18,13 @@
  */
 package icy.gui.sequence.tools;
 
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+
+import javax.swing.BorderFactory;
+
 import icy.gui.dialog.ActionDialog;
 import icy.gui.dialog.IdConfirmDialog;
 import icy.gui.frame.progress.ProgressFrame;
@@ -30,13 +37,6 @@ import icy.sequence.SequenceUtil;
 import icy.sequence.SequenceUtil.AddTHelper;
 import icy.sequence.SequenceUtil.AddZHelper;
 import icy.system.thread.ThreadUtil;
-
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-
-import javax.swing.BorderFactory;
 
 /**
  * @author Stephane
@@ -158,37 +158,45 @@ public class SequenceDimensionExtendFrame extends ActionDialog
                         final Sequence sequence = SequenceDimensionExtendFrame.this.sequence;
                         final ProgressFrame pf = new ProgressFrame("Extending sequence...");
 
-                        // create undo point
-                        final boolean canUndo = sequence.createUndoDataPoint("Dimension " + getDimensionId().toString()
-                                + " extended");
+                        try
+                        { // create undo point
+                            final boolean canUndo = sequence
+                                    .createUndoDataPoint("Dimension " + getDimensionId().toString() + " extended");
 
-                        // cannot backup
-                        if (!canUndo)
-                        {
-                            // ask confirmation to continue
-                            if (!IdConfirmDialog.confirm(
-                                    "Not enough memory to undo the operation, do you want to continue ?",
-                                    "AddZTNoUndoConfirm"))
-                                return;
+                            // cannot backup
+                            if (!canUndo)
+                            {
+                                // ask confirmation to continue
+                                if (!IdConfirmDialog.confirm(
+                                        "Not enough memory to undo the operation, do you want to continue ?",
+                                        "AddZTNoUndoConfirm"))
+                                    return;
+                            }
+
+                            switch (getDimensionId())
+                            {
+                                default:
+                                case Z:
+                                    SequenceUtil.addZ(sequence, extendPanel.getInsertPosition(),
+                                            extendPanel.getNewSize() - sequence.getSizeZ(),
+                                            extendPanel.getDuplicateNumber());
+                                    break;
+
+                                case T:
+                                    SequenceUtil.addT(sequence, extendPanel.getInsertPosition(),
+                                            extendPanel.getNewSize() - sequence.getSizeT(),
+                                            extendPanel.getDuplicateNumber());
+                                    break;
+                            }
+
+                            // no undo, clear undo manager after modification
+                            if (!canUndo)
+                                sequence.clearUndoManager();
                         }
-
-                        switch (getDimensionId())
+                        catch (InterruptedException ex)
                         {
-                            default:
-                            case Z:
-                                SequenceUtil.addZ(sequence, extendPanel.getInsertPosition(), extendPanel.getNewSize()
-                                        - sequence.getSizeZ(), extendPanel.getDuplicateNumber());
-                                break;
-
-                            case T:
-                                SequenceUtil.addT(sequence, extendPanel.getInsertPosition(), extendPanel.getNewSize()
-                                        - sequence.getSizeT(), extendPanel.getDuplicateNumber());
-                                break;
+                            // just ignore
                         }
-
-                        // no undo, clear undo manager after modification
-                        if (!canUndo)
-                            sequence.clearUndoManager();
 
                         pf.close();
                     }

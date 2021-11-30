@@ -18,6 +18,8 @@
  */
 package icy.gui.menu.tools;
 
+import java.util.List;
+
 import icy.gui.dialog.MessageDialog;
 import icy.gui.viewer.Viewer;
 import icy.main.Icy;
@@ -25,8 +27,6 @@ import icy.roi.ROI;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceUtil;
 import icy.system.thread.ThreadUtil;
-
-import java.util.List;
 
 /**
  * @deprecated Use {@link SequenceUtil#getSubSequence(Sequence, ROI)} instead.
@@ -87,8 +87,10 @@ public class SequenceCropper
 
     /**
      * @deprecated Use {@link SequenceUtil#getSubSequence(Sequence, ROI)} instead.
-     * @param roi ROI
-     * @param viewer viewer
+     * @param roi
+     *        ROI
+     * @param viewer
+     *        viewer
      * @return boolean
      */
     @Deprecated
@@ -103,21 +105,27 @@ public class SequenceCropper
             @Override
             public void run()
             {
-
-                // create output sequence
-                final Sequence out = SequenceUtil.getSubSequence(seq, roi);
-
-                ThreadUtil.invokeLater(new Runnable()
+                try
                 {
-                    @Override
-                    public void run()
+                    // create output sequence
+                    final Sequence out = SequenceUtil.getSubSequence(seq, roi);
+
+                    ThreadUtil.invokeLater(new Runnable()
                     {
-                        // get output viewer
-                        final Viewer vout = new Viewer(out);
-                        // copy colormap from input viewer
-                        vout.getLut().copyFrom(viewer.getLut());
-                    }
-                });
+                        @Override
+                        public void run()
+                        {
+                            // get output viewer
+                            final Viewer vout = new Viewer(out);
+                            // copy colormap from input viewer
+                            vout.getLut().copyFrom(viewer.getLut());
+                        }
+                    });
+                }
+                catch (InterruptedException e1)
+                {
+                    // ignore
+                }
             }
         });
 

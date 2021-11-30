@@ -3804,21 +3804,23 @@ public abstract class IcyCanvas extends JPanel
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated use {@link #getRenderedImage(int, int, int, boolean)} instead
      */
     @Deprecated
-    public final BufferedImage getRenderedImage(int t, int z, int c, int imageType, boolean canvasView)
+    public final BufferedImage getRenderedImage(int t, int z, int c, int imageType, boolean canvasView) throws InterruptedException
     {
         return getRenderedImage(t, z, c, canvasView);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated use {@link #getRenderedSequence(boolean)} instead
      */
     @Deprecated
-    public final Sequence getRenderedSequence(int imageType, boolean canvasView)
+    public final Sequence getRenderedSequence(int imageType, boolean canvasView) throws InterruptedException
     {
-        return getRenderedSequence(canvasView);
+        return getRenderedSequence(canvasView, null);
     }
 
     /**
@@ -3834,14 +3836,16 @@ public abstract class IcyCanvas extends JPanel
      *        C position of wanted image (-1 for all channels)
      * @param canvasView
      *        render with canvas view if true else use default sequence dimension
+     * @throws InterruptedException
      */
-    public abstract BufferedImage getRenderedImage(int t, int z, int c, boolean canvasView);
+    public abstract BufferedImage getRenderedImage(int t, int z, int c, boolean canvasView) throws InterruptedException;
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getRenderedImage(int, int, int, boolean)} instead.
      */
     @Deprecated
-    public BufferedImage getRenderedImage(int t, int z, int c)
+    public BufferedImage getRenderedImage(int t, int z, int c) throws InterruptedException
     {
         return getRenderedImage(t, z, c, true);
     }
@@ -3854,8 +3858,10 @@ public abstract class IcyCanvas extends JPanel
      *        render with canvas view if true else use default sequence dimension
      * @param progressListener
      *        progress listener which receive notifications about progression
+     * @throws InterruptedException
      */
     public Sequence getRenderedSequence(boolean canvasView, ProgressListener progressListener)
+            throws InterruptedException
     {
         final Sequence seqIn = getSequence();
         // create output sequence
@@ -3897,6 +3903,10 @@ public abstract class IcyCanvas extends JPanel
                         {
                             for (z = 0; z < sizeZ; z++)
                             {
+                                // check for interruption
+                                if (Thread.currentThread().isInterrupted())
+                                    throw new InterruptedException("Canvas rendering interrupted..");
+
                                 if (c != -1)
                                 {
                                     final List<BufferedImage> images = new ArrayList<BufferedImage>();
@@ -3998,19 +4008,21 @@ public abstract class IcyCanvas extends JPanel
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getRenderedSequence(boolean, ProgressListener)} instead.
      */
     @Deprecated
-    public Sequence getRenderedSequence(boolean canvasView)
+    public Sequence getRenderedSequence(boolean canvasView) throws InterruptedException
     {
         return getRenderedSequence(canvasView, null);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getRenderedSequence(boolean, ProgressListener)} instead.
      */
     @Deprecated
-    public Sequence getRenderedSequence()
+    public Sequence getRenderedSequence() throws InterruptedException
     {
         return getRenderedSequence(true, null);
     }

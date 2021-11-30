@@ -18,11 +18,21 @@
  */
 package plugins.kernel.roi.roi3d;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import icy.canvas.IcyCanvas;
 import icy.common.CollapsibleEvent;
 import icy.gui.inspector.RoisPanel;
 import icy.main.Icy;
-import icy.painter.VtkPainter;
 import icy.roi.BooleanMask2D;
 import icy.roi.BooleanMask3D;
 import icy.roi.ROI;
@@ -37,18 +47,6 @@ import icy.type.rectangle.Rectangle3D;
 import icy.util.StringUtil;
 import icy.vtk.IcyVtkPanel;
 import icy.vtk.VtkUtil;
-
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
-import java.lang.ref.WeakReference;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import plugins.kernel.canvas.VtkCanvas;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import vtk.vtkActor;
@@ -168,8 +166,11 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
         /**
          * rebuild VTK objects (called only when VTK canvas is selected).
+         * 
+         * @throws InterruptedException
+         * @throws IllegalArgumentException
          */
-        protected void rebuildVtkObjects()
+        protected void rebuildVtkObjects() throws IllegalArgumentException, InterruptedException
         {
             final VtkCanvas canvas = canvas3d.get();
             // canvas was closed
@@ -420,7 +421,19 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
         @Override
         public void run()
         {
-            rebuildVtkObjects();
+            try
+            {
+                rebuildVtkObjects();
+            }
+            catch (IllegalArgumentException e)
+            {
+                System.err.println("Error: couldn't rebuild VTK objects");
+                System.err.println(e.getMessage());
+            }
+            catch (InterruptedException ie)
+            {
+                // ignore
+            }
         }
     }
 
@@ -443,7 +456,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Create a 3D Area ROI type from the specified {@link BooleanMask3D}.
-     * @param mask 3D Mask
+     * 
+     * @param mask
+     *        3D Mask
      */
     public ROI3DArea(BooleanMask3D mask)
     {
@@ -454,7 +469,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Create a copy of the specified 3D Area ROI.
-     * @param area 3D area
+     * 
+     * @param area
+     *        3D area
      */
     public ROI3DArea(ROI3DArea area)
     {
@@ -469,9 +486,13 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Create a 3D Area ROI type from the specified {@link BooleanMask3D}.
-     * @param mask2d 2D mask
-     * @param zMax int
-     * @param zMin int
+     * 
+     * @param mask2d
+     *        2D mask
+     * @param zMax
+     *        int
+     * @param zMin
+     *        int
      */
     public ROI3DArea(BooleanMask2D mask2d, int zMin, int zMax)
     {
@@ -506,9 +527,13 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Adds the specified point to this ROI
-     * @param x int
-     * @param y int
-     * @param z int
+     * 
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param z
+     *        int
      */
     public void addPoint(int x, int y, int z)
     {
@@ -519,9 +544,13 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      * Remove a point from the mask.<br>
      * Don't forget to call optimizeBounds() after consecutive remove operation
      * to refresh the mask bounds.
-     * @param x int
-     * @param z int
-     * @param y int
+     * 
+     * @param x
+     *        int
+     * @param z
+     *        int
+     * @param y
+     *        int
      */
     public void removePoint(int x, int y, int z)
     {
@@ -532,10 +561,15 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      * Set the value for the specified point in the mask.
      * Don't forget to call optimizeBounds() after consecutive remove point operation
      * to refresh the mask bounds.
-     * @param x int
-     * @param y int
-     * @param z int
-     * @param value boolean
+     * 
+     * @param x
+     *        int
+     * @param y
+     *        int
+     * @param z
+     *        int
+     * @param value
+     *        boolean
      */
     public void setPoint(int x, int y, int z, boolean value)
     {
@@ -547,8 +581,11 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Add brush point at specified position and for specified Z slice.
-     * @param z int
-     * @param pos 2D point
+     * 
+     * @param z
+     *        int
+     * @param pos
+     *        2D point
      */
     public void addBrush(Point2D pos, int z)
     {
@@ -559,8 +596,11 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      * Remove brush point from the mask at specified position and for specified Z slice.<br>
      * Don't forget to call optimizeBounds() after consecutive remove operation
      * to refresh the mask bounds.
-     * @param z int
-     * @param pos 2D point
+     * 
+     * @param z
+     *        int
+     * @param pos
+     *        2D point
      */
     public void removeBrush(Point2D pos, int z)
     {
@@ -571,7 +611,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * @param mask Add the specified {@link BooleanMask3D} content to this ROI3DArea
+     * @param mask
+     *        Add the specified {@link BooleanMask3D} content to this ROI3DArea
      */
     public void add(BooleanMask3D mask)
     {
@@ -613,7 +654,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * @param mask Exclusively add the specified {@link BooleanMask3D} content to this ROI3DArea
+     * @param mask
+     *        Exclusively add the specified {@link BooleanMask3D} content to this ROI3DArea
      */
     public void exclusiveAdd(BooleanMask3D mask)
     {
@@ -661,9 +703,12 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * @param mask Intersect the specified {@link BooleanMask3D} content with this ROI3DArea
+     * @param mask
+     *        Intersect the specified {@link BooleanMask3D} content with this ROI3DArea
+     * @throws InterruptedException
+     * @throws UnsupportedOperationException
      */
-    public void intersect(BooleanMask3D mask)
+    public void intersect(BooleanMask3D mask) throws UnsupportedOperationException, InterruptedException
     {
         beginUpdate();
         try
@@ -697,8 +742,10 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      *        the position where the slice must be set
      * @param maskSlice
      *        the 2D boolean mask to merge
+     * @throws InterruptedException
+     * @throws UnsupportedOperationException
      */
-    public void intersect(int z, BooleanMask2D maskSlice)
+    public void intersect(int z, BooleanMask2D maskSlice) throws UnsupportedOperationException, InterruptedException
     {
         // better to throw an exception here than removing slice
         if (maskSlice == null)
@@ -725,7 +772,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * @param mask Subtract the specified {@link BooleanMask3D} from this ROI3DArea
+     * @param mask
+     *        Subtract the specified {@link BooleanMask3D} from this ROI3DArea
      */
     public void subtract(BooleanMask3D mask)
     {
@@ -768,7 +816,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     @Override
-    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
         {
@@ -790,7 +838,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     @Override
-    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
         {
@@ -812,7 +860,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     @Override
-    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
         {
@@ -834,7 +882,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     @Override
-    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
         {
@@ -881,12 +929,16 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      *             {@link ROI3DArea#setSlice(int, BooleanMask2D)},
      *             {@link ROI3DStack#add(int, ROI2D)} or
      *             {@link ROI3DArea#add(BooleanMask3D)}
-     * @param z int
-     * @param roiSlice ROI Slice
-     * @param merge boolean
+     * @param z
+     *        int
+     * @param roiSlice
+     *        ROI Slice
+     * @param merge
+     *        boolean
+     * @throws InterruptedException
      */
     @Deprecated
-    public void setSlice(int z, ROI2D roiSlice, boolean merge)
+    public void setSlice(int z, ROI2D roiSlice, boolean merge) throws InterruptedException
     {
         if (roiSlice == null)
             throw new IllegalArgumentException("Cannot add an empty slice in a 3D ROI");
@@ -962,10 +1014,10 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     /**
      * @deprecated Use {@link #getBooleanMask(boolean)} and {@link BooleanMask3D#getContourPoints()} instead.
      * @return array of 3D points
-     *
+     * @throws InterruptedException
      */
     @Deprecated
-    public Point3D[] getEdgePoints()
+    public Point3D[] getEdgePoints() throws InterruptedException
     {
         return getBooleanMask(true).getContourPoints();
     }
@@ -973,17 +1025,20 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     /**
      * @deprecated Use {@link #getBooleanMask(boolean)} and {@link BooleanMask3D#getPoints()} instead.
      * @return array of 3D points
+     * @throws InterruptedException
      */
     @Deprecated
-    public Point3D[] getPoints()
+    public Point3D[] getPoints() throws InterruptedException
     {
         return getBooleanMask(true).getPoints();
     }
 
     /**
      * @deprecated Use {@link #translate(double, double, double)} instead.
-     * @param dy double
-     * @param dx double
+     * @param dy
+     *        double
+     * @param dx
+     *        double
      */
     @Deprecated
     public void translate(double dx, double dy)
@@ -1012,7 +1067,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * @param newPosition Set all 2D slices ROI to same position.<br>
+     * @param newPosition
+     *        Set all 2D slices ROI to same position.<br>
      */
     public void setPosition2D(Point2D newPosition)
     {
@@ -1029,8 +1085,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     }
 
     /**
-     * @param mask Set the mask from a BooleanMask3D object.<br>
-     * If specified mask is <i>null</i> then ROI is cleared.
+     * @param mask
+     *        Set the mask from a BooleanMask3D object.<br>
+     *        If specified mask is <i>null</i> then ROI is cleared.
      */
     public void setAsBooleanMask(BooleanMask3D mask)
     {
@@ -1080,8 +1137,10 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
 
     /**
      * Fast up scaling by a factor of 2 (each point become a 2x2x2 block points)
+     * 
+     * @throws InterruptedException
      */
-    public void upscale()
+    public void upscale() throws InterruptedException
     {
         setAsBooleanMask(getBooleanMask(true).upscale());
     }
@@ -1093,16 +1152,19 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      *        the minimum number of <code>true</code>points from a 2x2x2 block to give a <code>true</code> resulting
      *        point.<br>
      *        Accepted value: 1 to 5 (default is 5)
+     * @throws InterruptedException
      */
-    public void downscale(int nbPointForTrue)
+    public void downscale(int nbPointForTrue) throws InterruptedException
     {
         setAsBooleanMask(getBooleanMask(true).downscale(nbPointForTrue));
     }
 
     /**
      * Fast 2x down scaling (each 2x2x2 block points become 1 point).<br>
+     * 
+     * @throws InterruptedException
      */
-    public void downscale()
+    public void downscale() throws InterruptedException
     {
         setAsBooleanMask(getBooleanMask(true).downscale());
     }
@@ -1110,8 +1172,10 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     /**
      * Fast up scaling by a factor of 2 (each point become a 2x2 block points)
      * 2D version (down scale is done on XY dimension only).<br>
+     * 
+     * @throws InterruptedException
      */
-    public void upscale2D()
+    public void upscale2D() throws InterruptedException
     {
         setAsBooleanMask(getBooleanMask(true).upscale2D());
     }
@@ -1124,8 +1188,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      *        the minimum number of <code>true</code>points from a 2x2 block to give a <code>true</code> resulting
      *        point.<br>
      *        Accepted value: 1 to 4
+     * @throws InterruptedException
      */
-    public void downscale2D(int nbPointForTrue)
+    public void downscale2D(int nbPointForTrue) throws InterruptedException
     {
         setAsBooleanMask(getBooleanMask(true).downscale2D(nbPointForTrue));
     }
@@ -1133,8 +1198,10 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
     /**
      * Fast 2x down scaling (each 2x2 block points become 1 point).<br>
      * 2D version (down scale is done on XY dimension only).<br>
+     * 
+     * @throws InterruptedException
      */
-    public void downscale2D()
+    public void downscale2D() throws InterruptedException
     {
         setAsBooleanMask(getBooleanMask(true).downscale2D());
     }

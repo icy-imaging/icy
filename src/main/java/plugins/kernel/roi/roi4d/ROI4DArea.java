@@ -148,8 +148,10 @@ public class ROI4DArea extends ROI4DStack<ROI3DArea>
      *        <code>true</code> if the given slice should be merged with the existing slice, or
      *        <code>false</code> to
      *        replace the existing slice.
+     * @throws InterruptedException 
+     * @throws UnsupportedOperationException 
      */
-    public void setSlice(int t, ROI3D roiSlice, boolean merge)
+    public void setSlice(int t, ROI3D roiSlice, boolean merge) throws UnsupportedOperationException, InterruptedException
     {
         if (roiSlice == null)
             throw new IllegalArgumentException("Cannot add an empty slice in a 4D ROI");

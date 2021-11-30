@@ -18,14 +18,6 @@
  */
 package icy.gui.component.sequence;
 
-import icy.image.IcyBufferedImage;
-import icy.image.IcyBufferedImageUtil;
-import icy.sequence.SequenceModel;
-import icy.sequence.SequenceModel.SequenceModelListener;
-import icy.system.thread.ThreadUtil;
-import icy.util.GraphicsUtil;
-import icy.util.StringUtil;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -44,6 +36,14 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import icy.image.IcyBufferedImage;
+import icy.image.IcyBufferedImageUtil;
+import icy.sequence.SequenceModel;
+import icy.sequence.SequenceModel.SequenceModelListener;
+import icy.system.thread.ThreadUtil;
+import icy.util.GraphicsUtil;
+import icy.util.StringUtil;
 
 public class SequencePreviewPanel extends JPanel implements ChangeListener, SequenceModelListener
 {
@@ -143,10 +143,17 @@ public class SequencePreviewPanel extends JPanel implements ChangeListener, Sequ
             // rebuild cache and repaint
             final BufferedImage img = getImage();
 
-            if (img instanceof IcyBufferedImage)
-                cache = IcyBufferedImageUtil.toBufferedImage((IcyBufferedImage) img, BufferedImage.TYPE_INT_ARGB);
-            else
-                cache = img;
+            try
+            {
+                if (img instanceof IcyBufferedImage)
+                    cache = IcyBufferedImageUtil.toBufferedImage((IcyBufferedImage) img, BufferedImage.TYPE_INT_ARGB);
+                else
+                    cache = img;
+            }
+            catch (InterruptedException ex)
+            {
+                // do try..
+            }
 
             repaint();
         }

@@ -61,7 +61,7 @@ public class ROIPerimeterDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return Double.valueOf(computePerimeter(roi, sequence));
     }
@@ -78,8 +78,9 @@ public class ROIPerimeterDescriptor extends ROIDescriptor
      * @return the perimeter expressed in the unit of the descriptor (see {@link #getUnit(Sequence)})
      * @throws UnsupportedOperationException
      *         if the operation is not supported for this ROI
+     * @throws InterruptedException 
      */
-    public static double computePerimeter(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public static double computePerimeter(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         if (sequence == null)
             throw new UnsupportedOperationException("Cannot compute Perimeter with null Sequence parameter !");

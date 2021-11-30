@@ -1795,7 +1795,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             }
         }
 
-        public ROI getRoiForChannel(int channel)
+        public ROI getRoiForChannel(int channel) throws InterruptedException
         {
             final Integer key = Integer.valueOf(channel);
             WeakReference<ROI> reference;

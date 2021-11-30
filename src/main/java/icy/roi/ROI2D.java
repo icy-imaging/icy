@@ -93,10 +93,13 @@ public abstract class ROI2D extends ROI
     }
 
     /**
+     * @throws InterruptedException
+     * @throws UnsupportedOperationException
      * @deprecated Use {@link ROIUtil#merge(List, icy.util.ShapeUtil.BooleanOperator)} instead.
      */
     @Deprecated
     public static ROI2D merge(ROI2D[] rois, ShapeOperation operation)
+            throws UnsupportedOperationException, InterruptedException
     {
         final List<ROI> list = new ArrayList<ROI>();
 
@@ -107,19 +110,21 @@ public abstract class ROI2D extends ROI
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link ROI#getSubtraction(ROI)} instead.
      */
     @Deprecated
-    public static ROI2D substract(ROI2D roi1, ROI2D roi2)
+    public static ROI2D substract(ROI2D roi1, ROI2D roi2) throws InterruptedException
     {
         return subtract(roi1, roi2);
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link ROI#getSubtraction(ROI)} instead.
      */
     @Deprecated
-    public static ROI2D subtract(ROI2D roi1, ROI2D roi2)
+    public static ROI2D subtract(ROI2D roi1, ROI2D roi2) throws InterruptedException
     {
         ROI result = roi1.getSubtraction(roi2);
 
@@ -763,7 +768,7 @@ public abstract class ROI2D extends ROI
      * Override this for specific ROI type.
      */
     @Override
-    public boolean contains(ROI roi)
+    public boolean contains(ROI roi) throws InterruptedException
     {
         if (roi instanceof ROI2D)
         {
@@ -778,7 +783,7 @@ public abstract class ROI2D extends ROI
                 // quick discard
                 if (!contains(roi2d.getBounds2D()))
                     return false;
-                
+
                 BooleanMask2D mask;
                 BooleanMask2D roiMask;
 
@@ -894,7 +899,7 @@ public abstract class ROI2D extends ROI
      * Override this for specific ROI type.
      */
     @Override
-    public boolean intersects(ROI roi)
+    public boolean intersects(ROI roi) throws InterruptedException
     {
         if (roi instanceof ROI2D)
         {
@@ -905,7 +910,7 @@ public abstract class ROI2D extends ROI
                 // quick discard
                 if (!intersects(roi2d.getBounds2D()))
                     return false;
-                
+
                 return getBooleanMask(true).intersects(roi2d.getBooleanMask(true));
             }
         }
@@ -1152,7 +1157,7 @@ public abstract class ROI2D extends ROI
     }
 
     @Override
-    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, int c, boolean inclusive)
+    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // not on the correct Z, T, C position --> return empty mask
         if (!isActiveFor(z, t, c))
@@ -1177,8 +1182,9 @@ public abstract class ROI2D extends ROI
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
      * @return the boolean bitmap mask
+     * @throws InterruptedException
      */
-    public boolean[] getBooleanMask(int x, int y, int width, int height, boolean inclusive)
+    public boolean[] getBooleanMask(int x, int y, int width, int height, boolean inclusive) throws InterruptedException
     {
         final boolean[] result = new boolean[Math.max(0, width) * Math.max(0, height)];
 
@@ -1194,16 +1200,21 @@ public abstract class ROI2D extends ROI
                     result[offset] = contains(x + i, y + j, 1d, 1d);
                 offset++;
             }
+
+            // check for interruption from time to time as this can be a long process
+            if (((j & 0xF) == 0xF) && Thread.interrupted())
+                throw new InterruptedException("ROI2D.getBooleanMask(..) process interrupted.");
         }
 
         return result;
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(int, int, int, int, boolean)} instead
      */
     @Deprecated
-    public boolean[] getBooleanMask(int x, int y, int width, int height)
+    public boolean[] getBooleanMask(int x, int y, int width, int height) throws InterruptedException
     {
         return getBooleanMask(x, y, width, height, false);
     }
@@ -1217,23 +1228,25 @@ public abstract class ROI2D extends ROI
      *        area we want to retrieve the boolean mask
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException 
      */
-    public boolean[] getBooleanMask(Rectangle rect, boolean inclusive)
+    public boolean[] getBooleanMask(Rectangle rect, boolean inclusive) throws InterruptedException
     {
         return getBooleanMask(rect.x, rect.y, rect.width, rect.height, inclusive);
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(Rectangle, boolean)} instead
      */
     @Deprecated
-    public boolean[] getBooleanMask(Rectangle rect)
+    public boolean[] getBooleanMask(Rectangle rect) throws InterruptedException
     {
         return getBooleanMask(rect, false);
     }
 
     @Override
-    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive) throws InterruptedException
     {
         // not on the correct Z, T, C position --> return empty mask
         if (!isActiveFor(z, t, c))
@@ -1250,8 +1263,9 @@ public abstract class ROI2D extends ROI
      * 
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @throws InterruptedException 
      */
-    public BooleanMask2D getBooleanMask(boolean inclusive)
+    public BooleanMask2D getBooleanMask(boolean inclusive) throws InterruptedException
     {
         final Rectangle bounds = getBounds();
 
@@ -1263,64 +1277,71 @@ public abstract class ROI2D extends ROI
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(boolean)} instead.
      */
     @Deprecated
-    public BooleanMask2D getBooleanMask()
+    public BooleanMask2D getBooleanMask() throws InterruptedException
     {
         return getBooleanMask(false);
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(boolean)} instead.
      */
     @Deprecated
-    public BooleanMask2D getAsBooleanMask(boolean inclusive)
+    public BooleanMask2D getAsBooleanMask(boolean inclusive) throws InterruptedException
     {
         return getBooleanMask(inclusive);
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(Rectangle, boolean)} instead.
      */
     @Deprecated
-    public boolean[] getAsBooleanMask(Rectangle rect, boolean inclusive)
+    public boolean[] getAsBooleanMask(Rectangle rect, boolean inclusive) throws InterruptedException
     {
         return getBooleanMask(rect, inclusive);
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(int, int, int, int, boolean)} instead.
      */
     @Deprecated
-    public boolean[] getAsBooleanMask(int x, int y, int w, int h, boolean inclusive)
+    public boolean[] getAsBooleanMask(int x, int y, int w, int h, boolean inclusive) throws InterruptedException
     {
         return getBooleanMask(x, y, w, h, inclusive);
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(boolean)} instead.
      */
     @Deprecated
-    public BooleanMask2D getAsBooleanMask()
+    public BooleanMask2D getAsBooleanMask() throws InterruptedException
     {
         return getBooleanMask();
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(boolean)} instead.
      */
     @Deprecated
-    public boolean[] getAsBooleanMask(Rectangle rect)
+    public boolean[] getAsBooleanMask(Rectangle rect) throws InterruptedException
     {
         return getBooleanMask(rect);
     }
 
     /**
+     * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(boolean)} instead.
      */
     @Deprecated
-    public boolean[] getAsBooleanMask(int x, int y, int w, int h)
+    public boolean[] getAsBooleanMask(int x, int y, int w, int h) throws InterruptedException
     {
         return getBooleanMask(x, y, w, h);
     }
@@ -1331,7 +1352,7 @@ public abstract class ROI2D extends ROI
      * approximations.
      */
     @Override
-    public double computeNumberOfContourPoints()
+    public double computeNumberOfContourPoints() throws InterruptedException
     {
         return getBooleanMask(true).getContourLength();
     }
@@ -1340,9 +1361,10 @@ public abstract class ROI2D extends ROI
      * Generic implementation for ROI2D using the BooleanMask object so the result is just an
      * approximation. This method should be overridden whenever possible to provide more optimal
      * approximations.
+     * @throws InterruptedException 
      */
     @Override
-    public double computeNumberOfPoints()
+    public double computeNumberOfPoints() throws InterruptedException
     {
         double numPoints = 0;
 
@@ -1355,19 +1377,22 @@ public abstract class ROI2D extends ROI
     }
 
     /**
+     * @throws InterruptedException
+     * @throws UnsupportedOperationException
      * @deprecated Perimeter computation cannot be cached so directly use #getLength(Sequence) instead.
      */
     @Deprecated
-    public double computePerimeter(Sequence sequence)
+    public double computePerimeter(Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return getLength(sequence);
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getLength(Sequence)} instead
      */
     @Deprecated
-    public double getPerimeter(Sequence sequence) throws UnsupportedOperationException
+    public double getPerimeter(Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return getLength(sequence);
     }
@@ -1376,13 +1401,14 @@ public abstract class ROI2D extends ROI
      * Return perimeter of the 2D ROI in pixels.<br>
      * This is basically the number of pixel representing ROI contour.<br>
      * 
+     * @throws InterruptedException
      * @deprecated Use {@link #getNumberOfContourPoints()} instead.
      * @see #getNumberOfContourPoints()
      * @see #computeNumberOfContourPoints()
      */
     @Override
     @Deprecated
-    public double getPerimeter()
+    public double getPerimeter() throws InterruptedException
     {
         return getNumberOfContourPoints();
     }
@@ -1391,12 +1417,13 @@ public abstract class ROI2D extends ROI
      * Return area of the 2D ROI in pixels.<br>
      * This is basically the number of pixel contained in the ROI.<br>
      * 
+     * @throws InterruptedException
      * @deprecated Use {@link #getNumberOfPoints()} instead.
      * @see #getNumberOfPoints()
      * @see #computeNumberOfPoints()
      */
     @Deprecated
-    public double getArea()
+    public double getArea() throws InterruptedException
     {
         return getNumberOfPoints();
     }

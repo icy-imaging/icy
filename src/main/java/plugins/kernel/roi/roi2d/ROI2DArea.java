@@ -46,7 +46,6 @@ import icy.common.CollapsibleEvent;
 import icy.gui.inspector.RoisPanel;
 import icy.image.ImageUtil;
 import icy.main.Icy;
-import icy.painter.VtkPainter;
 import icy.resource.ResourceUtil;
 import icy.roi.BooleanMask2D;
 import icy.roi.ROI;
@@ -210,8 +209,11 @@ public class ROI2DArea extends ROI2D
 
         /**
          * rebuild VTK objects (called only when VTK canvas is selected).
+         * 
+         * @throws InterruptedException
+         * @throws IllegalArgumentException
          */
-        protected void rebuildVtkObjects()
+        protected void rebuildVtkObjects() throws IllegalArgumentException, InterruptedException
         {
             final VtkCanvas canvas = canvas3d.get();
             // canvas was closed
@@ -572,11 +574,12 @@ public class ROI2DArea extends ROI2D
 
         public void setHovered(boolean value)
         {
-            if(hovered != value) {
+            if (hovered != value)
+            {
                 hovered = value;
                 roiChanged(false);
             }
-            
+
         }
 
         public boolean isHovered()
@@ -651,8 +654,15 @@ public class ROI2DArea extends ROI2D
                 {
                     // keep trace of roi changes from user mouse action
                     roiModifiedByMouse = false;
-                    // save current ROI
-                    undoSave = getBooleanMask(true);
+                    try
+                    {
+                        // save current ROI
+                        undoSave = getBooleanMask(true);
+                    }
+                    catch (InterruptedException e1)
+                    {
+                        undoSave = null;
+                    }
 
                     ROI2DArea.this.beginUpdate();
                     try
@@ -721,7 +731,13 @@ public class ROI2DArea extends ROI2D
                     {
                         // can't create undo operation, show message and clear undo manager
                         System.out.println("Warning: not enough memory to create undo point for ROI area change");
-                        sequence.clearUndoManager();
+                        if (sequence != null)
+                            sequence.clearUndoManager();
+                    }
+                    catch (InterruptedException e1)
+                    {
+                        // can't create undo operation, show message and clear undo manager
+                        System.out.println("Warning: interrupted undo point creation for ROI area change");
                     }
 
                     // release save
@@ -1043,7 +1059,19 @@ public class ROI2DArea extends ROI2D
         @Override
         public void run()
         {
-            rebuildVtkObjects();
+            try
+            {
+                rebuildVtkObjects();
+            }
+            catch (IllegalArgumentException e)
+            {
+                System.err.println("Error: couldn't rebuild VTK objects");
+                System.err.println(e.getMessage());
+            }
+            catch (InterruptedException ie)
+            {
+                // ignore
+            }
         }
     }
 
@@ -2050,7 +2078,7 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2D)
         {
@@ -2074,7 +2102,7 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2D)
         {
@@ -2097,7 +2125,7 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2D)
         {
@@ -2119,7 +2147,7 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2D)
         {
@@ -2304,7 +2332,7 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public boolean[] getBooleanMask(int x, int y, int w, int h, boolean inclusive)
+    public boolean[] getBooleanMask(int x, int y, int w, int h, boolean inclusive) throws InterruptedException
     {
         final boolean[] result = new boolean[Math.max(0, w) * Math.max(0, h)];
         final byte[] data;
@@ -2342,6 +2370,10 @@ public class ROI2DArea extends ROI2D
         {
             for (int i = 0; i < intersect.width; i++)
                 result[offDst++] = (data[offSrc++] != 0);
+
+            // check for interruption from time to time as this can be a long process
+            if (((j & 0xF) == 0xF) && Thread.interrupted())
+                throw new InterruptedException("ROI2DArea.getBooleanMask(..) process interrupted.");
 
             offSrc += bnds.width - intersect.width;
             offDst += w - intersect.width;
@@ -2422,9 +2454,12 @@ public class ROI2DArea extends ROI2D
      * Set the mask from a boolean array.<br>
      * r represents the region defined by the boolean array.
      * 
-     * @param r rectangle
-     * @param mask array
-     * @param doBoundsOptimization boolean
+     * @param r
+     *        rectangle
+     * @param mask
+     *        array
+     * @param doBoundsOptimization
+     *        boolean
      */
     protected void setAsByteMask(Rectangle r, byte[] mask, boolean doBoundsOptimization)
     {
@@ -2495,8 +2530,10 @@ public class ROI2DArea extends ROI2D
 
     /**
      * Fast up scaling by a factor of 2 (each point become a 2x2 block points)
+     * 
+     * @throws InterruptedException
      */
-    public void upscale()
+    public void upscale() throws InterruptedException
     {
         setAsBooleanMask(getBooleanMask(true).upscale());
     }
@@ -2508,16 +2545,19 @@ public class ROI2DArea extends ROI2D
      *        the minimum number of <code>true</code>points from a 2x2 block to give a <code>true</code> resulting
      *        point.<br>
      *        Accepted value: 1 to 4
+     * @throws InterruptedException
      */
-    public void downscale(int nbPointForTrue)
+    public void downscale(int nbPointForTrue) throws InterruptedException
     {
         setAsBooleanMask(getBooleanMask(true).downscale(nbPointForTrue));
     }
 
     /**
      * Fast 2x down scaling (each 2x2 block points become 1 point).<br>
+     * 
+     * @throws InterruptedException
      */
-    public void downscale()
+    public void downscale() throws InterruptedException
     {
         setAsBooleanMask(getBooleanMask(true).downscale());
     }

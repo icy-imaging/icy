@@ -217,7 +217,7 @@ public class ROI2DPath extends ROI2DShape
     }
 
     @Override
-    public boolean contains(ROI roi)
+    public boolean contains(ROI roi) throws InterruptedException
     {
         // not closed --> do not contains anything
         if (!ShapeUtil.isClosed(shape))
@@ -227,7 +227,7 @@ public class ROI2DPath extends ROI2DShape
     }
 
     @Override
-    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2DShape)
         {
@@ -272,7 +272,7 @@ public class ROI2DPath extends ROI2DShape
     }
 
     @Override
-    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2DShape)
         {
@@ -316,7 +316,7 @@ public class ROI2DPath extends ROI2DShape
     }
 
     @Override
-    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2DShape)
         {
@@ -361,7 +361,7 @@ public class ROI2DPath extends ROI2DShape
     }
 
     @Override
-    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException
+    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI2DShape)
         {

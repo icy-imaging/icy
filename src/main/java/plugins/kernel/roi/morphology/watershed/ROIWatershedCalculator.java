@@ -192,7 +192,7 @@ public class ROIWatershedCalculator implements Callable<Void>
                 localMaxFiltering.getFilteredSequence()); !localMaxIt.done(); localMaxIt.next())
         {
             if (Thread.interrupted())
-                throw new InterruptedException();
+                throw new InterruptedException("ROI local maxima computation interrupted.");
 
             if (localMaxIt.get() > 0)
             {
@@ -238,13 +238,13 @@ public class ROIWatershedCalculator implements Callable<Void>
         for (int l = 0; l < imageSize.getSizeT(); l++)
         {
             if (Thread.interrupted())
-                throw new InterruptedException();
+                throw new InterruptedException("ROI watershed descriptor computation interrupted.");
 
             VolumetricImage volume = new VolumetricImage();
             for (int k = 0; k < imageSize.getSizeZ(); k++)
             {
                 if (Thread.interrupted())
-                    throw new InterruptedException();
+                    throw new InterruptedException("ROI watershed descriptor computation interrupted.");
 
                 IcyBufferedImage plane = new IcyBufferedImage((int) imageSize.getSizeX(), (int) imageSize.getSizeY(), 1,
                         DataType.INT);
@@ -254,9 +254,8 @@ public class ROIWatershedCalculator implements Callable<Void>
         }
     }
 
-    private void addSeedToLabelSequence(ROI seedRoi, int label)
+    private void addSeedToLabelSequence(ROI seedRoi, int label) throws InterruptedException
     {
-
         DataIteratorUtil.set(new SequenceDataIterator(labelSequence, seedRoi, true), label);
     }
 

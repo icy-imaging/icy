@@ -88,8 +88,10 @@ public class IcyBufferedImageUtil
      *        destination image
      * @param lut
      *        {@link LUT} is used for color calculation (internal lut is used if null).
+     * @throws InterruptedException
      */
     public static BufferedImage toBufferedImage(IcyBufferedImage source, BufferedImage dest, LUT lut)
+            throws InterruptedException
     {
         final BufferedImage result;
 
@@ -116,8 +118,9 @@ public class IcyBufferedImageUtil
      *        source image
      * @param dest
      *        destination image
+     * @throws InterruptedException
      */
-    public static BufferedImage toBufferedImage(IcyBufferedImage source, BufferedImage dest)
+    public static BufferedImage toBufferedImage(IcyBufferedImage source, BufferedImage dest) throws InterruptedException
     {
         return toBufferedImage(source, dest, null);
     }
@@ -136,8 +139,10 @@ public class IcyBufferedImageUtil
      * @param lut
      *        lut used for color calculation (source image lut is used if null)
      * @return BufferedImage
+     * @throws InterruptedException
      */
     public static BufferedImage toBufferedImage(IcyBufferedImage source, int imageType, LUT lut)
+            throws InterruptedException
     {
         if (source == null)
             return null;
@@ -161,8 +166,9 @@ public class IcyBufferedImageUtil
      *        BufferedImage.TYPE_INT_RGB<br>
      *        BufferedImage.TYPE_BYTE_GRAY<br>
      * @return BufferedImage
+     * @throws InterruptedException 
      */
-    public static BufferedImage toBufferedImage(IcyBufferedImage source, int imageType)
+    public static BufferedImage toBufferedImage(IcyBufferedImage source, int imageType) throws InterruptedException
     {
         return toBufferedImage(source, imageType, null);
     }
@@ -184,10 +190,12 @@ public class IcyBufferedImageUtil
      *        which may result in slower drawing
      * @param lut
      *        {@link LUT} is used for color calculation (internal lut is used if null).
+     * @throws InterruptedException
      * @deprecated Use {@link #toBufferedImage(IcyBufferedImage, BufferedImage, LUT)} instead.
      */
     @Deprecated
     public static BufferedImage getARGBImage(IcyBufferedImage source, LUT lut, BufferedImage dest)
+            throws InterruptedException
     {
         if (source == null)
             return null;
@@ -220,10 +228,11 @@ public class IcyBufferedImageUtil
      * @param dest
      *        destination image. Note that we access image data so it can't be volatile anymore
      *        which may result in slower drawing
+     * @throws InterruptedException
      * @deprecated Use {@link #toBufferedImage(IcyBufferedImage, BufferedImage)} instead.
      */
     @Deprecated
-    public static BufferedImage getARGBImage(IcyBufferedImage source, BufferedImage dest)
+    public static BufferedImage getARGBImage(IcyBufferedImage source, BufferedImage dest) throws InterruptedException
     {
         return getARGBImage(source, null, dest);
     }
@@ -237,8 +246,9 @@ public class IcyBufferedImageUtil
      *        source image
      * @param lut
      *        {@link LUT} is used for color calculation (internal lut is used if null).
+     * @throws InterruptedException
      */
-    public static BufferedImage getARGBImage(IcyBufferedImage source, LUT lut)
+    public static BufferedImage getARGBImage(IcyBufferedImage source, LUT lut) throws InterruptedException
     {
         if (source == null)
             return null;
@@ -263,8 +273,9 @@ public class IcyBufferedImageUtil
      * 
      * @param source
      *        source image
+     * @throws InterruptedException
      */
-    public static BufferedImage getARGBImage(IcyBufferedImage source)
+    public static BufferedImage getARGBImage(IcyBufferedImage source) throws InterruptedException
     {
         return getARGBImage(source, (LUT) null);
     }

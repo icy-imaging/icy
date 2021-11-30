@@ -29,10 +29,11 @@ import icy.type.DataIteratorUtil;
 public class DataIteratorMath
 {
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link DataIteratorUtil#count(DataIterator)} instead.
      */
     @Deprecated
-    public static long count(DataIterator it)
+    public static long count(DataIterator it) throws InterruptedException
     {
         return DataIteratorUtil.count(it);
     }
@@ -40,8 +41,10 @@ public class DataIteratorMath
     /**
      * Returns the sum of all values contained in the specified {@link DataIterator}.
      * Returns <code>0</code> if no value in <code>DataIterator</code>.
+     * 
+     * @throws InterruptedException
      */
-    public static double sum(DataIterator it)
+    public static double sum(DataIterator it) throws InterruptedException
     {
         double result = 0;
 
@@ -59,8 +62,9 @@ public class DataIteratorMath
     /**
      * Returns the minimum value found in the specified {@link DataIterator}.
      * Returns <code>Double.MAX_VALUE</code> if no value in <code>DataIterator</code>.
+     * @throws InterruptedException 
      */
-    public static double min(DataIterator it)
+    public static double min(DataIterator it) throws InterruptedException
     {
         double result = Double.MAX_VALUE;
 
@@ -80,8 +84,9 @@ public class DataIteratorMath
     /**
      * Returns the maximum value found in the specified {@link DataIterator}.
      * Returns <code>Double.MIN_VALUE</code> if no value in <code>DataIterator</code>.
+     * @throws InterruptedException 
      */
-    public static double max(DataIterator it)
+    public static double max(DataIterator it) throws InterruptedException
     {
         double result = -Double.MAX_VALUE;
 
@@ -101,8 +106,9 @@ public class DataIteratorMath
     /**
      * Returns the mean value found in the specified {@link DataIterator}.
      * Returns <code>0</code> if no value in <code>DataIterator</code>.
+     * @throws InterruptedException 
      */
-    public static double mean(DataIterator it)
+    public static double mean(DataIterator it) throws InterruptedException
     {
         double result = 0;
         long numSample = 0;

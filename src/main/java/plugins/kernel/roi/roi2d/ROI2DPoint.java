@@ -360,7 +360,7 @@ public class ROI2DPoint extends ROI2DShape
     }
 
     @Override
-    public boolean intersects(ROI r)
+    public boolean intersects(ROI r) throws InterruptedException
     {
         // special case of ROI2DPoint
         if (r instanceof ROI2DPoint)

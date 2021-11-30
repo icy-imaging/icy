@@ -1007,8 +1007,10 @@ public class VtkUtil
      *        used).
      * @param t
      *        the T position we want to retrieve the 3D mask data
+     * @throws InterruptedException
      */
-    public static vtkImageData getBinaryImageData(ROI roi, int sz, int t) throws IllegalArgumentException
+    public static vtkImageData getBinaryImageData(ROI roi, int sz, int t)
+            throws IllegalArgumentException, InterruptedException
     {
         final vtkImageData result;
 

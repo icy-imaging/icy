@@ -63,8 +63,8 @@ public class ROIIntersectedDescriptor extends ROIDescriptor
         int result = 0;
         for (ROI r : sequence.getROIs())
         {
-            if (Thread.currentThread().isInterrupted())
-                throw new InterruptedException();
+            if (Thread.interrupted())
+                throw new InterruptedException("ROI intersected descriptor computation interrupted.");
 
             if ((r != roi) && (r != null) && (roi.intersects(r)))
                 result++;

@@ -739,7 +739,7 @@ public class Saver
                     // release image provider so we can overwrite file
                     sequence.setImageProvider(null);
                 }
-                
+
                 // create output directory
                 FileUtil.createDir(fileBaseDirectory);
 
@@ -990,9 +990,12 @@ public class Saver
      * @throws ServiceException
      * @throws IOException
      * @throws FormatException
+     * @throws InterruptedException
+     * @throws IllegalArgumentException
      */
     private static Sequence save(IFormatWriter writer, Sequence sequence, String filePath, int posT, int posZ, int fps,
-            FileFrame saveFrame) throws ServiceException, FormatException, IOException
+            FileFrame saveFrame)
+            throws ServiceException, FormatException, IOException, IllegalArgumentException, InterruptedException
     {
         // TODO: temporary fix for the "incorrect close operation" bug in Bio-Formats
         // with OME TIF writer, remove it when fixed.
@@ -1174,8 +1177,11 @@ public class Saver
      * @param posZ
      *        slice index to keep (-1 for all slice)
      * @return the compatible sequence for given Writer
+     * @throws InterruptedException
+     * @throws IllegalArgumentException
      */
     public static Sequence getCompatibleSequenceForWriter(IFormatWriter writer, Sequence sequence, int posT, int posZ)
+            throws IllegalArgumentException, InterruptedException
     {
         final int sizeC = sequence.getSizeC();
         final DataType dataType = sequence.getDataType_();

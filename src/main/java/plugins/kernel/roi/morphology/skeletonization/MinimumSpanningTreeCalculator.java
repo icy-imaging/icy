@@ -163,7 +163,7 @@ public class MinimumSpanningTreeCalculator
             while (!queue.isEmpty())
             {
                 if (Thread.interrupted())
-                    throw new InterruptedException();
+                    throw new InterruptedException("ROI minimum spanning tree computation interrupted.");
 
                 CostElement currentElement = queue.poll();
                 visitPosition(currentElement.getPosition());
@@ -175,8 +175,9 @@ public class MinimumSpanningTreeCalculator
 
     /**
      * @return Seed position with maximal positive distance on the distance map. Null if no maximal seed is found.
+     * @throws InterruptedException 
      */
-    private Point3D findSeed()
+    private Point3D findSeed() throws InterruptedException
     {
         Point3D seedPoint = new Point3D.Double(-1, -1, -1);
         double maxValue = Double.NEGATIVE_INFINITY;
