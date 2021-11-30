@@ -1108,7 +1108,7 @@ public class Icy
         // add base local native library path to user library paths
         directories.add(libPathFile.getAbsolutePath());
         // add base temporary native library path to user library paths
-        directories.add(SystemUtil.getTempLibraryDirectory());
+        directories.add(new File(SystemUtil.getTempLibraryDirectory()).getAbsolutePath());
 
         for (File f : files)
         {
@@ -1124,24 +1124,24 @@ public class Icy
         // add lib folder for unix system
         if (SystemUtil.isUnix())
         {
-            directories.add("/lib");
-            directories.add("/usr/lib");
+            directories.add(new File("/lib").getAbsolutePath());
+            directories.add(new File("/usr/lib").getAbsolutePath());
 
             if (SystemUtil.is64bits())
             {
-                directories.add("/lib64");
-                directories.add("/lib/x86_64");
-                directories.add("/lib/x86_64-linux-gnu");
-                directories.add("/usr/lib64");
-                directories.add("/usr/lib/x86_64");
-                directories.add("/usr/lib/x86_64-linux-gnu");
+                directories.add(new File("/lib64").getAbsolutePath());
+                directories.add(new File("/lib/x86_64").getAbsolutePath());
+                directories.add(new File("/lib/x86_64-linux-gnu").getAbsolutePath());
+                directories.add(new File("/usr/lib64").getAbsolutePath());
+                directories.add(new File("/usr/lib/x86_64").getAbsolutePath());
+                directories.add(new File("/usr/lib/x86_64-linux-gnu").getAbsolutePath());
             }
             else
             {
-                directories.add("/lib/x86");
-                directories.add("/lib/x86-linux-gnu");
-                directories.add("/usr/lib/x86");
-                directories.add("/usr/lib/x86-linux-gnu");
+                directories.add(new File("/lib/x86").getAbsolutePath());
+                directories.add(new File("/lib/x86-linux-gnu").getAbsolutePath());
+                directories.add(new File("/usr/lib/x86").getAbsolutePath());
+                directories.add(new File("/usr/lib/x86-linux-gnu").getAbsolutePath());
             }
         }
 
