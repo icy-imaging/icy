@@ -18,12 +18,6 @@
  */
 package icy.action;
 
-import icy.gui.frame.progress.ProgressFrame;
-import icy.main.Icy;
-import icy.resource.icon.IcyIcon;
-import icy.system.thread.ThreadUtil;
-import icy.util.StringUtil;
-
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -33,6 +27,12 @@ import javax.swing.JLabel;
 import javax.swing.KeyStroke;
 
 import org.pushingpixels.flamingo.api.common.RichTooltip;
+
+import icy.gui.frame.progress.CancelableProgressFrame;
+import icy.main.Icy;
+import icy.resource.icon.IcyIcon;
+import icy.system.thread.ThreadUtil;
+import icy.util.StringUtil;
 
 /**
  * Icy basic AbstractAction class.
@@ -81,7 +81,7 @@ public abstract class IcyAbstractAction extends AbstractAction
     protected boolean bgProcess;
     protected boolean processing;
     protected String processMessage;
-    protected ProgressFrame progressFrame;
+    protected CancelableProgressFrame progressFrame;
 
     public IcyAbstractAction(String name, IcyIcon icon, String description, String longDescription, int keyCode,
             int modifiers, boolean bgProcess, String processMessage)
@@ -333,6 +333,15 @@ public abstract class IcyAbstractAction extends AbstractAction
      * @return true if action is currently processing.<br>
      *         Meaningful only when {@link #setBgProcess(boolean)} is set to true)
      */
+    public boolean isInterrupted()
+    {
+        return processing;
+    }
+
+    /**
+     * @return true if action is currently processing.<br>
+     *         Meaningful only when {@link #setBgProcess(boolean)} is set to true)
+     */
     public boolean isProcessing()
     {
         return processing;
@@ -419,46 +428,7 @@ public abstract class IcyAbstractAction extends AbstractAction
     {
         setProcessing(true);
 
-        // background execution ?
-        if (isBgProcess())
-        {
-            final ActionEvent event = e;
-
-            ThreadUtil.bgRun(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    final String mess = getProcessMessage();
-
-                    if (!StringUtil.isEmpty(mess) && !Icy.getMainInterface().isHeadLess())
-                        progressFrame = new ProgressFrame(mess);
-                    else
-                        progressFrame = null;
-
-                    try
-                    {
-                        doAction(event);
-                    }
-                    finally
-                    {
-                        if (progressFrame != null)
-                            progressFrame.close();
-
-                        // need to be done on the EDT (can change the enabled state)
-                        ThreadUtil.invokeLater(new Runnable()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                setProcessing(false);
-                            }
-                        });
-                    }
-                }
-            });
-        }
-        else
+        if (!isBgProcess())
         {
             try
             {
@@ -468,7 +438,74 @@ public abstract class IcyAbstractAction extends AbstractAction
             {
                 setProcessing(false);
             }
+
+            // done !
+            return;
         }
+
+        // background processing...
+        final ActionEvent event = e;
+        final String mess = StringUtil.isEmpty(getProcessMessage()) ? "Processing..." : getProcessMessage();
+        if (!Icy.getMainInterface().isHeadLess())
+            progressFrame = new CancelableProgressFrame(mess);
+        else
+            progressFrame = null;
+
+        // BG processing thread
+        final Thread bgProcessThread = new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    doAction(event);
+                }
+                finally
+                {
+                    if (progressFrame != null)
+                    {
+                        progressFrame.close();
+                        progressFrame = null;
+                    }
+
+                    // need to be done on the EDT (can change the enabled state)
+                    ThreadUtil.invokeLater(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            setProcessing(false);
+                        }
+                    });
+                }
+            }
+        }, "BG task: " + mess);
+
+        // start processing
+        bgProcessThread.start();
+
+        // check for cancelation
+        ThreadUtil.bgRun(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                CancelableProgressFrame pf;
+
+                do
+                {
+                    pf = progressFrame;
+                    // don't spent too much time on it
+                    ThreadUtil.sleep(10);
+                }
+                while ((pf != null) && !pf.isCancelRequested());
+
+                // action canceled ? --> interrupt process
+                if (pf != null)
+                    bgProcessThread.interrupt();
+            }
+        });
     }
 
     /**
