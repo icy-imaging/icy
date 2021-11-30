@@ -1050,36 +1050,37 @@ public class SystemUtil
     }
 
     /**
-     * @deprecated Not allowed since Java 12 so don't use it ! 
+     * @deprecated Not allowed since Java 12 so don't use it !
      */
     @Deprecated
     public static boolean addToJavaLibraryPath(String directories[])
     {
-        // can't patch library path on java 12 or above
-        if (getJavaVersionAsNumber() >= 12d)
-        {
-            System.out.println("Java 12 (or above) don't support patching java library path.");
-            return false;
-        }
-
         try
         {
             final String path_separator = System.getProperty("path.separator");
-
-            // get current system paths
-            String sysPaths = System.getProperty("java.library.path");
+            // patch user library paths (no need to patch system ones)
+            final Field pathsField = ReflectionUtil.getField(ClassLoader.class, "usr_paths", true);
+            // get current user paths
+            final ArrayList<String> userPaths = CollectionUtil.asArrayList((String[]) pathsField.get(null));
 
             for (String dir : directories)
-                if (!sysPaths.contains(dir))
-                    sysPaths += path_separator + dir;
+                if (!userPaths.contains(dir))
+                    userPaths.add(dir);
 
-            // set back system library path
-            System.setProperty("java.library.path", sysPaths);
+            // set back user library path
+            pathsField.set(null, userPaths.toArray(new String[userPaths.size()]));
 
             return true;
         }
         catch (Throwable t)
         {
+            // can't patch library path on java 12 or above
+            if (getJavaVersionAsNumber() >= 12d)
+            {
+                System.out.println("Java 12 (or above) don't support patching java library path.");
+                return false;
+            }
+
             System.err.println(t.getMessage());
             System.err.println("Cannot patch Java Library Path...");
 
