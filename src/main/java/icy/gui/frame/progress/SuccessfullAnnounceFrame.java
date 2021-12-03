@@ -41,6 +41,10 @@ public class SuccessfullAnnounceFrame extends AnnounceFrame
     {
         super(message, liveTime);
 
+        // don't try to go further
+        if (headless)
+            return;
+
         ThreadUtil.invokeLater(new Runnable()
         {
             @Override
