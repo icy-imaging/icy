@@ -54,6 +54,7 @@ public class ROIContainedDescriptor extends ROIDescriptor
      *        the ROI on which we want to compute the number of contained ROIs
      * @param sequence
      *        the Sequence containing the ROIs we want to test for <i>contain</i> operation (test against itself is automatically discarded)
+     * @throws InterruptedException
      */
     public static double computeContainedROIs(ROI roi, Sequence sequence) throws InterruptedException
     {

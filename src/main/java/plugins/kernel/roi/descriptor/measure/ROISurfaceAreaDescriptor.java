@@ -84,9 +84,11 @@ public class ROISurfaceAreaDescriptor extends ROIDescriptor
     public static double computeSurfaceArea(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         if (!(roi instanceof ROI3D))
-            throw new UnsupportedOperationException("Surface area not supported on " + roi.getDimension() + "D ROI !");
+            throw new UnsupportedOperationException("Can't process " + ID + " calculation for on " + roi.getDimension()
+            + "D ROI: '" + roi.getName() + "'");
         if (sequence == null)
-            throw new UnsupportedOperationException("Cannot compute Surface area with null Sequence parameter !");
+            throw new UnsupportedOperationException(
+                    "Can't process " + ID + " calculation with null Sequence parameter !");
 
         final UnitPrefix bestUnit = sequence.getBestPixelSizeUnit(3, 2);
         final double surfaceArea = ((ROI3D) roi).getSurfaceArea(sequence);

@@ -36,19 +36,12 @@ public class ROIContainedDescriptorPlugin extends Plugin implements PluginROIDes
     }
 
     @Override
-    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
         final Map<ROIDescriptor, Object> result = new HashMap<ROIDescriptor, Object>();
 
-        try
-        {
-            result.put(containedDescriptor, containedDescriptor.compute(roi, sequence));
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException(
-                    getClass().getSimpleName() + ": cannot compute descriptors for '" + roi.getName() + "'", e);
-        }
+        result.put(containedDescriptor, containedDescriptor.compute(roi, sequence));
 
         return result;
     }

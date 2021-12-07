@@ -42,7 +42,7 @@ public class ROIMaxIntensityDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return Double.valueOf(computeMaxIntensity(roi, sequence));
     }
@@ -55,19 +55,15 @@ public class ROIMaxIntensityDescriptor extends ROIDescriptor
      *        the ROI on which we want to compute the maximum intensity
      * @param sequence
      *        the sequence used to compute the pixel intensity
+     * @return the maximum intensity for the specified ROI on given sequence.<br>
+     *         It may returns <code>Double.Nan</code> if the operation is not supported for that ROI.
      * @throws UnsupportedOperationException
      *         if the operation is not supported for this ROI
+     * @throws InterruptedException
      */
-    public static double computeMaxIntensity(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public static double computeMaxIntensity(ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
-        try
-        {
-            return ROIIntensityDescriptorsPlugin.computeIntensityDescriptors(roi, sequence, false).max;
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException(ROIMaxIntensityDescriptor.class.getSimpleName()
-                    + ": cannot compute descriptors for '" + roi.getName() + "'", e);
-        }
+        return ROIIntensityDescriptorsPlugin.computeIntensityDescriptors(roi, sequence, false).max;
     }
 }

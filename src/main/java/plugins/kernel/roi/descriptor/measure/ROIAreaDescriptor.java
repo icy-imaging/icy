@@ -78,9 +78,10 @@ public class ROIAreaDescriptor extends ROIDescriptor
      * @return the area expressed in the unit of the descriptor (see {@link #getUnit(Sequence)})
      * @throws UnsupportedOperationException
      *         if the operation is not supported for this ROI
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
-    public static double computeArea(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
+    public static double computeArea(ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
         return computeArea(ROIInteriorDescriptor.computeInterior(roi), roi, sequence);
     }
@@ -104,18 +105,14 @@ public class ROIAreaDescriptor extends ROIDescriptor
     public static double computeArea(double interiorPoints, ROI roi, Sequence sequence)
             throws UnsupportedOperationException
     {
-        try
-        {
-            // we restrict to ROI2D only
-            if (!(roi instanceof ROI2D))
-                throw new UnsupportedOperationException();
+        // we restrict to ROI2D only
+        if (!(roi instanceof ROI2D))
+            throw new UnsupportedOperationException("Can't process " + ID + " calculation for on " + roi.getDimension()
+                    + "D ROI: '" + roi.getName() + "'");
+        if (sequence == null)
+            throw new UnsupportedOperationException(
+                    "Can't process " + ID + " calculation with null Sequence parameter !");
 
-            return ROIInteriorDescriptor.computeInterior(interiorPoints, roi, sequence, 2);
-        }
-        catch (UnsupportedOperationException e)
-        {
-            throw new UnsupportedOperationException("Can't process " + ID + " calculation for ROI: '" + roi.getName()
-                    + "'");
-        }
+        return ROIInteriorDescriptor.computeInterior(interiorPoints, roi, sequence, 2);
     }
 }

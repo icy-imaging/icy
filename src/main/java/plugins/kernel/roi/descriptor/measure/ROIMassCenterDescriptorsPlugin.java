@@ -103,26 +103,18 @@ public class ROIMassCenterDescriptorsPlugin extends Plugin implements PluginROID
     }
 
     @Override
-    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence)
+    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence) throws InterruptedException
     {
         final Map<ROIDescriptor, Object> result = new HashMap<ROIDescriptor, Object>();
 
-        try
-        {
-            // compute mass center descriptors
-            final Point5D massCenter = computeMassCenter(roi);
+        // compute mass center descriptors
+        final Point5D massCenter = computeMassCenter(roi);
 
-            result.put(massCenterXDescriptor, Double.valueOf(ROIMassCenterXDescriptor.getMassCenterX(massCenter)));
-            result.put(massCenterYDescriptor, Double.valueOf(ROIMassCenterYDescriptor.getMassCenterY(massCenter)));
-            result.put(massCenterZDescriptor, Double.valueOf(ROIMassCenterZDescriptor.getMassCenterZ(massCenter)));
-            result.put(massCenterTDescriptor, Double.valueOf(ROIMassCenterTDescriptor.getMassCenterT(massCenter)));
-            result.put(massCenterCDescriptor, Double.valueOf(ROIMassCenterCDescriptor.getMassCenterC(massCenter)));
-        }
-        catch (Exception e)
-        {
-            final String mess = getClass().getSimpleName() + ": cannot compute descriptors for '" + roi.getName() + "'";
-            throw new UnsupportedOperationException(mess, e);
-        }
+        result.put(massCenterXDescriptor, Double.valueOf(ROIMassCenterXDescriptor.getMassCenterX(massCenter)));
+        result.put(massCenterYDescriptor, Double.valueOf(ROIMassCenterYDescriptor.getMassCenterY(massCenter)));
+        result.put(massCenterZDescriptor, Double.valueOf(ROIMassCenterZDescriptor.getMassCenterZ(massCenter)));
+        result.put(massCenterTDescriptor, Double.valueOf(ROIMassCenterTDescriptor.getMassCenterT(massCenter)));
+        result.put(massCenterCDescriptor, Double.valueOf(ROIMassCenterCDescriptor.getMassCenterC(massCenter)));
 
         return result;
     }

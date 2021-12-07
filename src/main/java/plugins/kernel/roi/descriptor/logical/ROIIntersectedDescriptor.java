@@ -54,6 +54,7 @@ public class ROIIntersectedDescriptor extends ROIDescriptor
      *        the ROI on which we want to compute the number of intersected ROIs
      * @param sequence
      *        the Sequence containing the ROIs we want to test for intersection (test against itself is automatically discarded)
+     * @throws InterruptedException
      */
     public static double computeIntersectedROIs(ROI roi, Sequence sequence) throws InterruptedException
     {

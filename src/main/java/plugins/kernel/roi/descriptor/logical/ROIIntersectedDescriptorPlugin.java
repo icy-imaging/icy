@@ -36,19 +36,12 @@ public class ROIIntersectedDescriptorPlugin extends Plugin implements PluginROID
     }
 
     @Override
-    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
         final Map<ROIDescriptor, Object> result = new HashMap<ROIDescriptor, Object>();
 
-        try
-        {
-            result.put(intersectedDescriptor, intersectedDescriptor.compute(roi, sequence));
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException(
-                    getClass().getSimpleName() + ": cannot compute descriptors for '" + roi.getName() + "'", e);
-        }
+        result.put(intersectedDescriptor, intersectedDescriptor.compute(roi, sequence));
 
         return result;
     }

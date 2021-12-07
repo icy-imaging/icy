@@ -42,7 +42,7 @@ public class ROISumIntensityDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return Double.valueOf(computeSumIntensity(roi, sequence));
     }
@@ -57,17 +57,11 @@ public class ROISumIntensityDescriptor extends ROIDescriptor
      *        the sequence used to compute the pixel intensity
      * @throws UnsupportedOperationException
      *         if the operation is not supported for this ROI
+     * @throws InterruptedException
      */
-    public static double computeSumIntensity(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public static double computeSumIntensity(ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
-        try
-        {
-            return ROIIntensityDescriptorsPlugin.computeIntensityDescriptors(roi, sequence, false).sum;
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException(ROISumIntensityDescriptor.class.getSimpleName()
-                    + ": cannot compute descriptors for '" + roi.getName() + "'", e);
-        }
+        return ROIIntensityDescriptorsPlugin.computeIntensityDescriptors(roi, sequence, false).sum;
     }
 }

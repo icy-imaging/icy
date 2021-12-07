@@ -42,7 +42,7 @@ public class ROIStandardDeviationDescriptor extends ROIDescriptor
     }
 
     @Override
-    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return Double.valueOf(computeStandardDeviation(roi, sequence));
     }
@@ -57,17 +57,10 @@ public class ROIStandardDeviationDescriptor extends ROIDescriptor
      *        the sequence used to compute the pixel intensity
      * @throws UnsupportedOperationException
      *         if the operation is not supported for this ROI
+     * @throws InterruptedException 
      */
-    public static double computeStandardDeviation(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public static double computeStandardDeviation(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
-        try
-        {
-            return ROIIntensityDescriptorsPlugin.computeIntensityDescriptors(roi, sequence, false).deviation;
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException(ROIStandardDeviationDescriptor.class.getSimpleName() + ": cannot compute descriptors for '"
-                    + roi.getName() + "'", e);
-        }
+        return ROIIntensityDescriptorsPlugin.computeIntensityDescriptors(roi, sequence, false).deviation;
     }
 }

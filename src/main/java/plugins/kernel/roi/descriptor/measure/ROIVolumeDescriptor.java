@@ -78,9 +78,10 @@ public class ROIVolumeDescriptor extends ROIDescriptor
      * @return the volume expressed in the unit of the descriptor (see {@link #getUnit(Sequence)})
      * @throws UnsupportedOperationException
      *         if the operation is not supported for this ROI
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
-    public static double computeVolume(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
+    public static double computeVolume(ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
         return computeVolume(ROIInteriorDescriptor.computeInterior(roi), roi, sequence);
     }
@@ -104,18 +105,13 @@ public class ROIVolumeDescriptor extends ROIDescriptor
     public static double computeVolume(double interiorPoints, ROI roi, Sequence sequence)
             throws UnsupportedOperationException
     {
-        try
-        {
-            // we restrict to ROI3D only
-            if (!(roi instanceof ROI3D))
-                throw new UnsupportedOperationException();
+        if (!(roi instanceof ROI3D))
+            throw new UnsupportedOperationException("Can't process " + ID + " calculation for on " + roi.getDimension()
+                    + "D ROI: '" + roi.getName() + "'");
+        if (sequence == null)
+            throw new UnsupportedOperationException(
+                    "Can't process " + ID + " calculation with null Sequence parameter !");
 
-            return ROIInteriorDescriptor.computeInterior(interiorPoints, roi, sequence, 3);
-        }
-        catch (UnsupportedOperationException e)
-        {
-            throw new UnsupportedOperationException("Can't process " + ID + " calculation for ROI: '" + roi.getName()
-                    + "'");
-        }
+        return ROIInteriorDescriptor.computeInterior(interiorPoints, roi, sequence, 3);
     }
 }

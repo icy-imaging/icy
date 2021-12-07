@@ -3,17 +3,17 @@
  */
 package plugins.kernel.roi.descriptor.intensity;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import icy.plugin.abstract_.Plugin;
 import icy.plugin.interface_.PluginROIDescriptor;
 import icy.roi.ROI;
 import icy.roi.ROIDescriptor;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceDataIterator;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This {@link PluginROIDescriptor} implements the following "intensity" ROI descriptors:<br>
@@ -70,7 +70,7 @@ public class ROIIntensityDescriptorsPlugin extends Plugin implements PluginROIDe
      *         If the ROI dimension changed during the descriptor computation.
      */
     public static IntensityDescriptorInfos computeIntensityDescriptors(ROI roi, Sequence sequence,
-            boolean allowMultiChannel) throws Exception, UnsupportedOperationException
+            boolean allowMultiChannel) throws UnsupportedOperationException, InterruptedException
     {
         if (!allowMultiChannel && (roi.getBounds5D().getSizeC() > 1d))
             throw new UnsupportedOperationException(
@@ -147,7 +147,8 @@ public class ROIIntensityDescriptorsPlugin extends Plugin implements PluginROIDe
     }
 
     @Override
-    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence) throws UnsupportedOperationException
+    public Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
         final Map<ROIDescriptor, Object> result = new HashMap<ROIDescriptor, Object>();
         try
@@ -163,8 +164,8 @@ public class ROIIntensityDescriptorsPlugin extends Plugin implements PluginROIDe
         }
         catch (Exception e)
         {
-            throw new UnsupportedOperationException(getClass().getSimpleName() + ": cannot compute descriptors for '"
-                    + roi.getName() + "'", e);
+            throw new UnsupportedOperationException(
+                    getClass().getSimpleName() + ": cannot compute descriptors for '" + roi.getName() + "'", e);
         }
 
         return result;
