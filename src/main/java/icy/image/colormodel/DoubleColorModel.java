@@ -18,6 +18,9 @@
  */
 package icy.image.colormodel;
 
+import java.awt.color.ColorSpace;
+
+import icy.image.colorspace.IcyColorSpace;
 import icy.image.lut.LUT;
 import icy.type.DataType;
 
@@ -36,6 +39,18 @@ public class DoubleColorModel extends IcyColorModel
     public DoubleColorModel(int numComponents, int[] bits)
     {
         super(numComponents, DataType.DOUBLE, bits);
+    }
+
+    /**
+     * Create a new {@link DoubleColorModel} with given {@link IcyColorSpace}
+     * 
+     * @param colorSpace
+     *        {@link ColorSpace} instance
+     * @param bits
+     */
+    public DoubleColorModel(IcyColorSpace colorSpace, int[] bits)
+    {
+        super(colorSpace, DataType.DOUBLE, bits);
     }
 
     @Override

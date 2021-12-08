@@ -18,6 +18,9 @@
  */
 package icy.image.colormodel;
 
+import java.awt.color.ColorSpace;
+
+import icy.image.colorspace.IcyColorSpace;
 import icy.image.lut.LUT;
 import icy.type.DataType;
 import icy.type.TypeUtil;
@@ -37,6 +40,18 @@ public class ULongColorModel extends IcyColorModel
     public ULongColorModel(int numComponents, int[] bits)
     {
         super(numComponents, DataType.ULONG, bits);
+    }
+
+    /**
+     * Create a new {@link ULongColorModel} with given {@link IcyColorSpace}
+     * 
+     * @param colorSpace
+     *        {@link ColorSpace} instance
+     * @param bits
+     */
+    public ULongColorModel(IcyColorSpace colorSpace, int[] bits)
+    {
+        super(colorSpace, DataType.ULONG, bits);
     }
 
     @Override

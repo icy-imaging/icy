@@ -18,6 +18,7 @@
  */
 package icy.image.colormodel;
 
+import java.awt.color.ColorSpace;
 import java.awt.image.BandedSampleModel;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentSampleModel;
@@ -89,16 +90,15 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     /**
      * Default constructor
      */
-    IcyColorModel(int numComponents, DataType dataType, int[] bits)
+    IcyColorModel(IcyColorSpace colorSpace, DataType dataType, int[] bits)
     {
-        super(dataType.getBitSize(), bits, new IcyColorSpace(numComponents), true, false, TRANSLUCENT,
-                dataType.toDataBufferType());
+        super(dataType.getBitSize(), bits, colorSpace, true, false, TRANSLUCENT, dataType.toDataBufferType());
 
-        if (numComponents == 0)
+        if (colorSpace.getNumComponents() == 0)
             throw new IllegalArgumentException("Number of components should be > 0");
 
         // overridden variable
-        this.numComponents = numComponents;
+        this.numComponents = colorSpace.getNumComponents();
 
         listeners = new ArrayList<IcyColorModelListener>();
         updater = new UpdateEventHandler(this, false);
@@ -132,12 +132,75 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
+     * Default constructor
+     */
+    IcyColorModel(int numComponents, DataType dataType, int[] bits)
+    {
+        this(new IcyColorSpace(numComponents), dataType, bits);
+    }
+
+    /**
      * @deprecated use {@link #IcyColorModel(int, DataType, int[])} instead
      */
     @Deprecated
     IcyColorModel(int numComponents, int dataType, boolean signed, int[] bits)
     {
         this(numComponents, DataType.getDataType(dataType, signed), bits);
+    }
+
+    /**
+     * Creates a new ColorModel from source colorModel
+     * 
+     * @param colorModel
+     *        source color model
+     * @param shareColorSpace
+     *        set to <i>true</i> to share the source colorModel.colorSpace instance
+     * @return a IcyColorModel object
+     */
+    static IcyColorModel createInstance(IcyColorModel colorModel, boolean shareColorSpace)
+    {
+        final int numComponents = colorModel.getNumComponents();
+        final DataType dataType = colorModel.getDataType_();
+
+        if (!shareColorSpace)
+            return createInstance(colorModel.getNumComponents(), dataType);
+
+        // get colorSpace
+        final IcyColorSpace colorSpace = colorModel.getIcyColorSpace();
+        // define bits size
+        final int bits = dataType.getBitSize();
+        // we have to fake one more extra component for alpha in ColorModel class
+        final int numComponentFixed = numComponents + 1;
+        final int[] componentBits = new int[numComponentFixed];
+
+        for (int i = 0; i < numComponentFixed; i++)
+            componentBits[i] = bits;
+
+        switch (dataType)
+        {
+            case UBYTE:
+                return new UByteColorModel(colorSpace, componentBits);
+            case BYTE:
+                return new ByteColorModel(colorSpace, componentBits);
+            case USHORT:
+                return new UShortColorModel(colorSpace, componentBits);
+            case SHORT:
+                return new ShortColorModel(colorSpace, componentBits);
+            case UINT:
+                return new UIntColorModel(colorSpace, componentBits);
+            case INT:
+                return new IntColorModel(colorSpace, componentBits);
+            case ULONG:
+                return new ULongColorModel(colorSpace, componentBits);
+            case LONG:
+                return new LongColorModel(colorSpace, componentBits);
+            case FLOAT:
+                return new FloatColorModel(colorSpace, componentBits);
+            case DOUBLE:
+                return new DoubleColorModel(colorSpace, componentBits);
+            default:
+                throw new IllegalArgumentException("Unsupported data type !");
+        }
     }
 
     /**
@@ -238,7 +301,27 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * @return a new default ColorModel : 4 components, unsigned byte data type
+     * Creates a new ColorModel from a given {@link IcyColorModel} using a shared {@link IcyColorSpace} instance
+     * 
+     * @param colorModel
+     *        icyColorModel source {@link IcyColorModel}
+     * @param copyBounds
+     *        flag to indicate if we want to copy bounds from the given icyColorModel
+     * @return a IcyColorModel object which shared the same {@link ColorSpace} instance than the input {@link IcyColorModel}
+     */
+    public static IcyColorModel createSharedCSInstance(IcyColorModel colorModel, boolean copyBounds)
+    {
+        final IcyColorModel result = IcyColorModel.createInstance(colorModel, true);
+
+        // copy bounds from colorModel ?
+        if (copyBounds)
+            result.setBounds(colorModel);
+
+        return result;
+    }
+
+    /**
+     * @return a new default ColorModel: 4 components, unsigned byte data type
      */
     public static IcyColorModel createInstance()
     {
@@ -354,6 +437,39 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
+     * @param w
+     *        width of the raster
+     * @param h
+     *        height of the raster
+     * @return a new dummy (empty data) writable raster from specified data and size.<br>
+     */
+    public WritableRaster createDummyWritableRaster(int w, int h)
+    {
+        final SampleModel sm = createCompatibleSampleModel(w, h);
+
+        switch (dataType)
+        {
+            case UBYTE:
+            case BYTE:
+                return Raster.createWritableRaster(sm, new DataBufferByte(0, numComponents), null);
+            case SHORT:
+                return Raster.createWritableRaster(sm, new DataBufferShort(0, numComponents), null);
+            case USHORT:
+                return Raster.createWritableRaster(sm, new DataBufferUShort(0, numComponents), null);
+            case UINT:
+            case INT:
+                return Raster.createWritableRaster(sm, new DataBufferInt(0, numComponents), null);
+            case FLOAT:
+                return Raster.createWritableRaster(sm, new DataBufferFloat(0, numComponents), null);
+            case DOUBLE:
+                return Raster.createWritableRaster(sm, new DataBufferDouble(0, numComponents), null);
+            default:
+                throw new IllegalArgumentException(
+                        "IcyColorModel.createWritableRaster(..) error : unsupported data type : " + dataType);
+        }
+    }
+
+    /**
      * Set bounds from specified {@link IcyColorModel}
      * 
      * @param source
@@ -450,7 +566,8 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * @param source source colormodel
+     * @param source
+     *        source colormodel
      * @deprecated Use {@link #setColorMaps(ColorModel)} instead (different case).
      */
     @Deprecated
@@ -460,7 +577,8 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     }
 
     /**
-     * @param source source colormodel
+     * @param source
+     *        source colormodel
      * @deprecated Use {@link #setColorMaps(ColorModel)} instead.
      */
     @Deprecated

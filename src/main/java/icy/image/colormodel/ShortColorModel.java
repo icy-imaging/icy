@@ -18,6 +18,9 @@
  */
 package icy.image.colormodel;
 
+import java.awt.color.ColorSpace;
+
+import icy.image.colorspace.IcyColorSpace;
 import icy.image.lut.LUT;
 import icy.type.DataType;
 
@@ -36,6 +39,18 @@ public class ShortColorModel extends IcyColorModel
     public ShortColorModel(int numComponents, int[] bits)
     {
         super(numComponents, DataType.SHORT, bits);
+    }
+
+    /**
+     * Create a new {@link ShortColorModel} with given {@link IcyColorSpace}
+     * 
+     * @param colorSpace
+     *        {@link ColorSpace} instance
+     * @param bits
+     */
+    public ShortColorModel(IcyColorSpace colorSpace, int[] bits)
+    {
+        super(colorSpace, DataType.SHORT, bits);
     }
 
     @Override
