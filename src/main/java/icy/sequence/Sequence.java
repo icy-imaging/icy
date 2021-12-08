@@ -44,6 +44,7 @@ import icy.common.UpdateEventHandler;
 import icy.common.exception.TooLargeArrayException;
 import icy.common.listener.ChangeListener;
 import icy.file.FileUtil;
+import icy.file.Loader;
 import icy.file.SequenceFileGroupImporter;
 import icy.gui.viewer.Viewer;
 import icy.image.IcyBufferedImage;
@@ -941,11 +942,30 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *         if there is not enough memory available to store image
      *         data when setting back to <i>non volatile</i> state
      * @throws UnsupportedOperationException
-     *         if cache engine is not initialized (error at initialization).
+     *         if cache engine is not enabled
      */
     public void setVolatile(boolean value) throws OutOfMemoryError, UnsupportedOperationException
     {
         final boolean vol = isVolatile();
+
+        // switching from volatile to not volatile ?
+        if (vol && !value)
+        {
+            try
+            {
+                // check that can open the image
+                Loader.checkOpening(0, getSizeX(), getSizeY(), getSizeC(), getSizeZ(), getSizeT(), getDataType_(), "");
+            }
+            catch (OutOfMemoryError e)
+            {
+                // better to keep trace of that in console...
+                System.err.println(
+                        "Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
+                
+                throw new OutOfMemoryError(
+                        "Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
+            }
+        }
 
         try
         {
@@ -3756,7 +3776,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
                     // use colormap for single image anyway. But it's important to preserve the colormodel for each
                     // image though as it store the channel bounds informations.
                     if (cm != null)
-                        icyImg.getIcyColorModel().setColorSpace(cm.getIcyColorSpace());
+                        icyImg.setColorModel(IcyColorModel.createSharedCSInstance(cm, true));
 
                     // set automatic channel update from sequence
                     icyImg.setAutoUpdateChannelBounds(getAutoUpdateChannelBounds());
