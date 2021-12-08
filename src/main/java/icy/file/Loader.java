@@ -46,6 +46,7 @@ import icy.image.ChannelPosition;
 import icy.image.IcyBufferedImage;
 import icy.image.ImagePosition;
 import icy.image.ImageProvider;
+import icy.image.cache.ImageCache;
 import icy.main.Icy;
 import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginLauncher;
@@ -3642,7 +3643,7 @@ public class Loader
             adjMaxT = Math.min(maxT, sizeT - 1);
 
         // we want volatile image
-        boolean volatileImage = forceVolatile || GeneralPreferences.getVirtualMode();
+        boolean volatileImage = (forceVolatile && ImageCache.isEnabled()) || GeneralPreferences.getVirtualMode();
 
         try
         {
@@ -3658,6 +3659,9 @@ public class Loader
         }
         catch (OutOfMemoryError e)
         {
+            if (!ImageCache.isEnabled())
+                throw new OutOfMemoryError("Not enough memory to load the dataset, enable the Virtual Mode and retry.");
+
             // force volatile image if we don't have enough memory to open the image
             volatileImage = true;
         }
