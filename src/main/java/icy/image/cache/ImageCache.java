@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import icy.image.IcyBufferedImage;
-import icy.main.Icy;
-import icy.preferences.ApplicationPreferences;
+import icy.system.IcyExceptionHandler;
 
 /**
  * Image Cache static util class.<br>
@@ -21,14 +20,65 @@ import icy.preferences.ApplicationPreferences;
  */
 public class ImageCache
 {
-    public final static AbstractCache cache;
+    public static AbstractCache cache = null;
 
-    static
+    public static synchronized boolean init(int cacheSizeMB, String path)
     {
-        cache = Icy.isCacheEnabled()
-                ? new EHCache2(ApplicationPreferences.getCacheMemoryMB(),
-                        ApplicationPreferences.getCachePath() + "/icy_cache")
-                : null;
+        if (cache == null)
+        {
+            try
+            {
+                cache = new EHCache2(cacheSizeMB, path + "/icy_cache");
+
+                System.out.println("Image cache initialized (reserved memory = " + cacheSizeMB
+                        + " MB, disk cache location = '" + path + "/icy_cache')");
+            }
+            catch (Exception e)
+            {
+                System.err.println("Error while initialize image cache:");
+                IcyExceptionHandler.showErrorMessage(e, false, true);
+            }
+        }
+
+        return cache != null;
+    }
+
+    /**
+     * Called when we want to shutdown the cache when no anymore in use
+     * 
+     * @return false if cache still contains data so it cannot be shutdown
+     */
+    public static synchronized boolean shutDownIfEmpty()
+    {
+        if (cache != null)
+        {
+            // clean the cache
+            cache.clean();
+            // not empty ? --> cannot shutdown
+            if (!cache.isEmpty())
+                return false;
+
+            shutDown();
+        }
+
+        return true;
+    }
+
+    /**
+     * Called when the cache is no longer used (Releasing all resources and performing cleanup).
+     * 
+     * @throws RuntimeException
+     *         If the cache module has not been loaded.
+     */
+    public static synchronized void shutDown()
+    {
+        if (cache != null)
+        {
+            cache.end();
+            cache = null;
+
+            System.out.println("Image cache shutdown..");
+        }
     }
 
     /**
@@ -206,18 +256,6 @@ public class ImageCache
     private static Integer getKey(IcyBufferedImage image)
     {
         return Integer.valueOf(System.identityHashCode(image));
-    }
-
-    /**
-     * Called when the cache is no longer used (Releasing all resources and performing cleanup).
-     * 
-     * @throws RuntimeException
-     *         If the cache module has not been loaded.
-     */
-    public static void end() throws RuntimeException
-    {
-        checkCacheLoaded();
-        cache.end();
     }
 
     private static void checkCacheLoaded() throws RuntimeException
