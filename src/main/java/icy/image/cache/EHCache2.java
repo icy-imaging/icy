@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import icy.file.FileUtil;
-import icy.system.IcyExceptionHandler;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
@@ -109,7 +109,6 @@ public class EHCache2 extends AbstractCache
     final Set<Integer> eternalStoredKeys;
     CacheManager cacheManager;
     Cache cache;
-    boolean enabled;
 
     public EHCache2(int cacheSizeMB, String path)
     {
@@ -134,60 +133,59 @@ public class EHCache2 extends AbstractCache
         // delete previous cache file
         FileUtil.delete(path, true);
 
-        try
-        {
-            final DiskStoreConfiguration diskConfig = new DiskStoreConfiguration().path(path);
-            final Configuration cacheManagerConfig = new Configuration().diskStore(diskConfig);
+        final DiskStoreConfiguration diskConfig = new DiskStoreConfiguration().path(path);
+        final Configuration cacheManagerConfig = new Configuration().diskStore(diskConfig);
 
-            final PersistenceConfiguration persistenceConfig = new PersistenceConfiguration()
-                    .strategy(Strategy.LOCALTEMPSWAP);
-            // CacheWriterFactoryConfiguration c = new CacheWriterFactoryConfiguration();
-            // c.setClass(path);
+        final PersistenceConfiguration persistenceConfig = new PersistenceConfiguration()
+                .strategy(Strategy.LOCALTEMPSWAP);
+        // CacheWriterFactoryConfiguration c = new CacheWriterFactoryConfiguration();
+        // c.setClass(path);
 
-            final long freeBytes = new File(FileUtil.getDrive(path)).getUsableSpace();
-            // subtract 200 MB to available space for safety, use 64 MB at min (well, not realy usefull then)
-            final long freeMB = (freeBytes <= 0) ? Long.MAX_VALUE : Math.max(64, (freeBytes / (1024 * 1024)) - 200);
+        final long freeBytes = new File(FileUtil.getDrive(path)).getUsableSpace();
+        // subtract 200 MB to available space for safety, use 64 MB at min (well, not realy usefull then)
+        final long freeMB = (freeBytes <= 0) ? Long.MAX_VALUE : Math.max(64, (freeBytes / (1024 * 1024)) - 200);
 
-            // Stephane: we need to put a long idle / live time otherwise not eternal data
-            // will be removed from cache as soon it expired on get(key) call even if the cache is not full...
-            final CacheConfiguration cacheConfig = new CacheConfiguration().name("ehCache2")
-                    .maxBytesLocalHeap(cacheSizeMB, MemoryUnit.MEGABYTES)
-                    // .maxBytesLocalOffHeap(cacheSizeMB, MemoryUnit.MEGABYTES)
-                    .maxBytesLocalDisk(Math.min(freeMB, 500000L), MemoryUnit.MEGABYTES)
-                    // we want the disk write buffer to be at least 32 MB and 256 MB max
-                    .diskSpoolBufferSizeMB(Math.max(32, Math.min(256, cacheSizeMB / 16)))
-                    // .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU).timeToIdleSeconds(2).timeToLiveSeconds(5)
-                    // .diskExpiryThreadIntervalSeconds(10).persistence(persistenceConfig);
-                    .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU).timeToIdleSeconds(60 * 5)
-                    .timeToLiveSeconds(60 * 60).diskExpiryThreadIntervalSeconds(120).persistence(persistenceConfig);
-            // .pinning(new PinningConfiguration().store(Store.INCACHE));
-            // .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU).timeToIdleSeconds(2).timeToLiveSeconds(2)
+        // Stephane: we need to put a long idle / live time otherwise not eternal data
+        // will be removed from cache as soon it expired on get(key) call even if the cache is not full...
+        final CacheConfiguration cacheConfig = new CacheConfiguration().name("ehCache2")
+                .maxBytesLocalHeap(cacheSizeMB, MemoryUnit.MEGABYTES)
+                // .maxBytesLocalOffHeap(cacheSizeMB, MemoryUnit.MEGABYTES)
+                .maxBytesLocalDisk(Math.min(freeMB, 500000L), MemoryUnit.MEGABYTES)
+                // we want the disk write buffer to be at least 32 MB and 256 MB max
+                .diskSpoolBufferSizeMB(Math.max(32, Math.min(256, cacheSizeMB / 16)))
+                // .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU).timeToIdleSeconds(2).timeToLiveSeconds(5)
+                // .diskExpiryThreadIntervalSeconds(10).persistence(persistenceConfig);
+                .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU).timeToIdleSeconds(60 * 5)
+                .timeToLiveSeconds(60 * 60).diskExpiryThreadIntervalSeconds(120).persistence(persistenceConfig);
+        // .pinning(new PinningConfiguration().store(Store.INCACHE));
+        // .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU).timeToIdleSeconds(2).timeToLiveSeconds(2)
 
-            cacheManagerConfig.addCache(cacheConfig);
+        cacheManagerConfig.addCache(cacheConfig);
 
-            // singleton cache manager creation
-            cacheManager = CacheManager.create(cacheManagerConfig);
+        // singleton cache manager creation
+        cacheManager = CacheManager.create(cacheManagerConfig);
 
-            // get the cache
-            cache = cacheManager.getCache("ehCache2");
-            // // add the custom Tile cache loader to it
-            // cache.registerCacheLoader(new ImageCacheLoader());
+        // get the cache
+        cache = cacheManager.getCache("ehCache2");
+        // // add the custom Tile cache loader to it
+        // cache.registerCacheLoader(new ImageCacheLoader());
 
-            cache.getCacheEventNotificationService().registerListener(new CustomCacheEventListener());
-            enabled = true;
-        }
-        catch (Exception e)
-        {
-            System.err.println("Error while initialize image cache:");
-            IcyExceptionHandler.showErrorMessage(e, false, true);
-            enabled = false;
-        }
+        cache.getCacheEventNotificationService().registerListener(new CustomCacheEventListener());
     }
 
     @Override
-    public boolean isEnabled()
+    public void end()
     {
-        return enabled;
+        try
+        {
+            clear();
+        }
+        catch (CacheException e)
+        {
+            System.err.println(e.getMessage());
+        }
+
+        cacheManager.shutdown();
     }
 
     @SuppressWarnings("deprecation")
@@ -253,6 +251,13 @@ public class EHCache2 extends AbstractCache
             if (profiling)
                 endProf();
         }
+    }
+
+    @Override
+    public boolean isEmpty()
+    {
+        // fast empty check
+        return cache.getKeysNoDuplicateCheck().size() == 0;
     }
 
     @SuppressWarnings("unchecked")
@@ -345,6 +350,26 @@ public class EHCache2 extends AbstractCache
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public void clean()
+    {
+        System.gc();
+        cache.evictExpiredElements();
+        System.gc();
+        cache.evictExpiredElements();
+
+        // get all keys stored in cache
+        final List<Integer> keys = cache.getKeysNoDuplicateCheck();
+        // remove all eternal keys from the list
+        keys.removeAll(eternalStoredKeys);
+        // then remove all keys with expiration time from cache
+        cache.removeAll(keys);
+
+        // GC
+        System.gc();
+    }
+
     @Override
     public void clear() throws CacheException
     {
@@ -404,15 +429,9 @@ public class EHCache2 extends AbstractCache
     }
 
     @Override
-    public void end()
-    {
-        eternalStoredKeys.clear();
-        cacheManager.shutdown();
-    }
-
-    @Override
     public String getName()
     {
         return "EHCache 2";
     }
+
 }
