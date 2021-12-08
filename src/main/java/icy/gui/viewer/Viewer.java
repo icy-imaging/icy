@@ -52,6 +52,7 @@ import javax.swing.WindowConstants;
 import javax.swing.event.EventListenerList;
 
 import icy.action.CanvasActions;
+import icy.action.IcyAbstractAction;
 import icy.action.CanvasActions.ToggleLayersAction;
 import icy.action.SequenceOperationActions.ToggleVirtualSequenceAction;
 import icy.action.ViewerActions;
@@ -737,6 +738,8 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         final boolean virtual = (seq != null) && seq.isVirtual();
         // update virtual state
         virtualButton.setSelected(virtual);
+        // update enable state of the button
+        ((IcyAbstractAction) virtualButton.getAction()).enabledChanged();
         if (!ImageCache.isEnabled())
             virtualButton.setToolTipText("Image cache is disabled, cannot use virtual sequence");
         else

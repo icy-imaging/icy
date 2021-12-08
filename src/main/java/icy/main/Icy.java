@@ -107,7 +107,7 @@ public class Icy
     /**
      * Icy Version
      */
-    public static Version version = new Version("2.3.1.0");
+    public static Version version = new Version("2.4.0.0");
 
     /**
      * Main interface
@@ -163,14 +163,14 @@ public class Icy
     static Thread terminer = null;
 
     /**
-     * Flag indicating cache module loading
+     * Flag indicating that cache module is disabled
      */
-    private static boolean loadCache;
+    private static boolean disableCache = false;
 
     /**
-     * Flag indicating network module loading (important to set to true by default for Icy-Updater)
+     * Flag indicating that network module is disabled (important to set to true by default for Icy-Updater)
      */
-    private static boolean loadNetwork = true;
+    private static boolean disableNetwork = false;
 
     /**
      * @param args
@@ -358,20 +358,20 @@ public class Icy
         System.out.println("System total memory : " + UnitUtil.getBytesString(SystemUtil.getTotalMemory()));
         System.out.println("System available memory : " + UnitUtil.getBytesString(SystemUtil.getFreeMemory()));
         System.out.println("Max java memory : " + UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory()));
-        // image cache
-        if (ImageCache.isEnabled())
+
+        // image cache disabled from command line ?
+        if (isCacheDisabled())
         {
-            System.out.println("Image cache initialized (reserved memory = " + ApplicationPreferences.getCacheMemoryMB()
-                    + " MB, disk cache location = " + ApplicationPreferences.getCachePath() + ")");
-        }
-        else if (loadCache)
-        {
-            System.err.println("Couldn't initialize image cache (cache is disabled)");
+            System.out.println("Image cache is disabled.");
             // disable virtual mode button from inspector
             final InspectorPanel inspector = getMainInterface().getInspector();
             if (inspector != null)
                 inspector.imageCacheDisabled();
         }
+        // virtual mode enabled ? --> initialize image cache
+        else if (InspectorPanel.getVirtualMode())
+            ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
+        
         if (headless)
             System.out.println("Headless mode.");
         System.out.println();
@@ -418,7 +418,7 @@ public class Icy
         final long halfDayInterval = 1000 * 60 * 60 * 12;
 
         // check only once per 12 hours slice
-        if (loadNetwork && currentTime > (GeneralPreferences.getLastUpdateCheckTime() + halfDayInterval))
+        if (!isNetworkDisabled() && (currentTime > (GeneralPreferences.getLastUpdateCheckTime() + halfDayInterval)))
         {
             // check for core update
             if (GeneralPreferences.getAutomaticUpdate())
@@ -484,8 +484,8 @@ public class Icy
         startupPlugin = null;
         boolean execute = false;
         boolean headless = false;
-        loadCache = true;
-        loadNetwork = true;
+        disableCache = false;
+        disableNetwork = false;
 
         // save the base arguments
         Icy.args = args;
@@ -504,9 +504,9 @@ public class Icy
             else if (arg.equalsIgnoreCase("--headless") || arg.equalsIgnoreCase("-hl"))
                 headless = true;
             else if (arg.equalsIgnoreCase("--nocache") || arg.equalsIgnoreCase("-nc"))
-                loadCache = false;
+                disableCache = true;
             else if (arg.equalsIgnoreCase("--nonetwork") || arg.equalsIgnoreCase("-nnt"))
-                loadNetwork = false;
+                disableNetwork = true;
             // disable splash-screen
             else if (arg.equalsIgnoreCase("--nosplash") || arg.equalsIgnoreCase("-ns"))
                 noSplash = true;
@@ -919,8 +919,7 @@ public class Icy
                 // save audit data
                 Audit.save();
                 // cache cleanup
-                if (ImageCache.isEnabled())
-                    ImageCache.end();
+                ImageCache.shutDown();
 
                 // clean up native library files
                 // unPrepareNativeLibraries();
@@ -984,19 +983,37 @@ public class Icy
     }
 
     /**
-     * @return {@code true} if the cache module has been loaded. {@code false} otherwise.
+     * @deprecated Use {@link #isCacheDisabled()} instead
      */
+    @Deprecated
     public static boolean isCacheEnabled()
     {
-        return loadCache;
+        return !isCacheDisabled();
     }
 
     /**
-     * @return {@code true} if the network module has been loaded and set up. {@code false} otherwise.
+     * @deprecated Use {@link #isNetworkDisabled()} instead
      */
+    @Deprecated
     public static boolean isNetworkEnabled()
     {
-        return loadNetwork;
+        return !isNetworkDisabled();
+    }
+
+    /**
+     * @return {@code true} if the cache module is disabled (not loaded).
+     */
+    public static boolean isCacheDisabled()
+    {
+        return disableCache;
+    }
+
+    /**
+     * @return {@code true} if the network module is disabled (not loaded).
+     */
+    public static boolean isNetworkDisabled()
+    {
+        return disableNetwork;
     }
 
     /**
@@ -1146,7 +1163,7 @@ public class Icy
         }
 
         if (!SystemUtil.addToJavaLibraryPath(directories.toArray(new String[directories.size()])))
-            System.out.println("Native libraries may not load correctly.");
+            System.out.println("Some native libraries may not load correctly.");
 
         // load native libraries
         loadVtkLibrary(libPathFile);

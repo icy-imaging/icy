@@ -36,6 +36,7 @@ import javax.swing.event.ChangeListener;
 import icy.gui.component.ExtTabbedPanel;
 import icy.gui.component.ExternalizablePanel;
 import icy.gui.component.button.IcyToggleButton;
+import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.main.ActiveSequenceListener;
 import icy.gui.main.ActiveViewerListener;
 import icy.gui.main.MainFrame;
@@ -44,7 +45,9 @@ import icy.gui.system.OutputConsolePanel;
 import icy.gui.system.OutputConsolePanel.OutputConsoleChangeListener;
 import icy.gui.viewer.Viewer;
 import icy.gui.viewer.ViewerEvent;
+import icy.image.cache.ImageCache;
 import icy.main.Icy;
+import icy.preferences.ApplicationPreferences;
 import icy.preferences.GeneralPreferences;
 import icy.resource.ResourceUtil;
 import icy.resource.icon.IcyIcon;
@@ -107,13 +110,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                // switch virtual mode state
-                GeneralPreferences.setVirtualMode(!GeneralPreferences.getVirtualMode());
-
-                // refresh title (display virtual mode or not)
-                final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
-                if (mainFrame != null)
-                    mainFrame.refreshTitle();
+                setVirtualModeInternal(!GeneralPreferences.getVirtualMode());
             }
         });
 
@@ -254,7 +251,50 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     public void setVirtualMode(boolean value)
     {
         virtualModeBtn.setSelected(value);
+
+        setVirtualModeInternal(value);
+    }
+
+    boolean setVirtualModeInternal(boolean value)
+    {
+        boolean ok = false;
+        try
+        {
+            // start / end image cache
+            if (value)
+                ok = ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
+            else
+                ok = ImageCache.shutDownIfEmpty();
+        }
+        catch (Exception e)
+        {
+            System.err.println(e.getMessage());
+        }
+
+        // failed to change virtual mode state ?
+        if (!ok)
+        {
+            // trying to disable cache ? --> show a message so user can understand why it didn't worked
+            if (!value)
+                new FailedAnnounceFrame(
+                        "Cannot disable Image cache now. Some open images or sequences are using it.");
+
+            // restore button state
+            virtualModeBtn.setSelected(!value);
+            return false;
+        }
+
+        // switch virtual mode state
         GeneralPreferences.setVirtualMode(value);
+        // refresh viewers toolbar
+        for (Viewer viewer : Icy.getMainInterface().getViewers())
+            viewer.refreshToolBar();
+        // refresh title (display virtual mode or not)
+        final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
+        if (mainFrame != null)
+            mainFrame.refreshTitle();
+
+        return true;
     }
 
     /**
