@@ -43,9 +43,9 @@ public abstract class AbstractCache
     }
 
     /**
-     * Returns true if the cache is enabled
+     * @return <i>true</i> if cache is empty
      */
-    public abstract boolean isEnabled();
+    public abstract boolean isEmpty();
 
     /**
      * Test presence of a key in the cache
@@ -88,6 +88,11 @@ public abstract class AbstractCache
     public abstract void set(Integer key, Object object, boolean eternal) throws CacheException;
 
     /**
+     * Clean the cache (evict all no eternal data) 
+     */
+    public abstract void clean();
+
+    /**
      * Clear the cache
      */
     public abstract void clear() throws CacheException;
@@ -101,4 +106,5 @@ public abstract class AbstractCache
      * Call it when you're done with the cache (release resources and cleanup)
      */
     public abstract void end();
+
 }
