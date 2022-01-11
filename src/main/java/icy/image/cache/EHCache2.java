@@ -55,10 +55,10 @@ public class EHCache2 extends AbstractCache
             // eternal element eviction ?
             if (element.isEternal())
             {
-                System.out.println("Warning: eternal element " + element.getObjectKey() + " evicted from cache");
-                System.out.println("Trying to put it back...");
+//                System.out.println("Warning: eternal element " + element.getObjectKey() + " evicted from cache");
+//                System.out.println("Trying to put it back...");
                 // try to force GC and put it back in cache
-                System.gc();
+//                System.gc();
                 cache.put(new Element(element.getObjectKey(), element.getObjectValue(), true));
             }
             // else
@@ -72,8 +72,8 @@ public class EHCache2 extends AbstractCache
             // eternal element expiration ?
             if (element.isEternal())
             {
-                System.out.println("Warning: eternal element " + element.getObjectKey() + " marked as expired..");
-                System.out.println("Trying to put it back...");
+//                System.out.println("Warning: eternal element " + element.getObjectKey() + " marked as expired..");
+//                System.out.println("Trying to put it back...");
                 cache.put(new Element(element.getObjectKey(), element.getObjectValue(), true));
             }
             // else
