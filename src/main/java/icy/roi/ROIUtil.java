@@ -3086,7 +3086,6 @@ public class ROIUtil
             throw new RuntimeException("Error computing watershed: " + e.getMessage(), e);
         }
 
-        seedRois.clear();
         return wsCalculator.getLabelRois();
     }
 
