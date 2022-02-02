@@ -52,8 +52,8 @@ import javax.swing.WindowConstants;
 import javax.swing.event.EventListenerList;
 
 import icy.action.CanvasActions;
-import icy.action.IcyAbstractAction;
 import icy.action.CanvasActions.ToggleLayersAction;
+import icy.action.IcyAbstractAction;
 import icy.action.SequenceOperationActions.ToggleVirtualSequenceAction;
 import icy.action.ViewerActions;
 import icy.action.WindowActions;
@@ -63,6 +63,8 @@ import icy.canvas.IcyCanvasEvent;
 import icy.canvas.IcyCanvasListener;
 import icy.common.MenuCallback;
 import icy.common.listener.ProgressListener;
+import icy.file.FileUtil;
+import icy.file.SequenceFileGroupImporter;
 import icy.gui.component.button.IcyButton;
 import icy.gui.component.button.IcyToggleButton;
 import icy.gui.component.renderer.LabelComboBoxRenderer;
@@ -1481,6 +1483,8 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     protected void positionChanged(DimensionId dim)
     {
         fireViewerChanged(ViewerEventType.POSITION_CHANGED, dim);
+
+        refreshViewerTitle();
     }
 
     /**
@@ -1553,7 +1557,28 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     {
         // have to test this as we release sequence reference on closed
         if (sequence != null)
-            setTitle(sequence.getName());
+        {
+            final int posZ = getPositionZ();
+            final int posT = getPositionT();
+
+            // dataset name
+            String title = sequence.getName();
+
+            // grouped dataset with a 2D viewer ?
+            if ((canvas != null) && (posZ != -1) && (posT != -1) && (sequence.getImageProvider() instanceof SequenceFileGroupImporter))
+            {
+                final String subName = FileUtil.getFileName(sequence.getFilename(posT, posZ, 0), false);
+
+                // add current displayed image name
+                if (!StringUtil.isEmpty(subName))
+                    title += " - " + subName;
+            }
+
+            // update title
+            setTitle(title);
+        }
+        else
+            setTitle("no image");
     }
 
     @Override
