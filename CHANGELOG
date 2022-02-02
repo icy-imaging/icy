@@ -1,3 +1,40 @@
+Icy 2.4.0.0 - 02/02/2022
+------------------------
+
+Application
+* Viewer
+ - added current image name in viewer title
+* ImageCache
+ - image cache can now be initialized and shutdown at runtime (better performance and better memory usage)
+* Updater
+ - OSX: removed automatic native library signature
+* System
+ - fixed and improved automatic bug report plugin detection
+ - re-introduced library path patching for Java version supporting it (still marked as deprecated but better to keep it when supported)  
+ - added general 'interruptible' background process actions
+ - improved interrupted process handling
+ - small fixes for headless mode
+ - fixed exe launcher to accept Java 12 or above
+- several bug fixes and tweaks.
+
+Developer
+* Image
+ - implemented proper ColorSpace sharing on IcyColorModel (not anymore using illegal reflection)
+* ImageCache
+ - reworked image cache so it does not anymore require usage of illegal reflection
+ - better handling of volatile image on loading process
+ - removed Cache.isEnabled() method (higher level now)
+ - added Cache.clean() and Cache.isEmpty() methods
+ - improved Cache.end() implementation
+* ROI
+ - fixed a small bug with ROIUtil.computeWatershedSeparation(..)
+* System / advanced
+ - added ReflectionUtil.setFieldValue(..) methods
+ - added ClassPatcher.getField(..) and ClassPatcher.setFieldPublic(..) methods
+ - removed IcySecurityManager (deprecated with Java 14 or >)
+ - improved 'InterruptedException' throw / propagation and handling
+
+
 Icy 2.3.0.0 - 05/11/2021
 ------------------------
 
