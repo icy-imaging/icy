@@ -961,7 +961,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
                 // better to keep trace of that in console...
                 System.err.println(
                         "Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
-                
+
                 throw new OutOfMemoryError(
                         "Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
             }
@@ -8303,16 +8303,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      */
     public void onImageRemoved(IcyBufferedImage image)
     {
-        // no more image ? --> releasethe global colorModel
-        if (isEmpty())
-            setColorModel(null);
-
         // TODO: improve cleaning here
         // need that to avoid memory leak as we manually patch the image colorspace
         if (colorModel != null)
             colorModel.getIcyColorSpace().removeListener(image.getIcyColorModel());
         // remove listener from image
         image.removeListener(this);
+
+        // no more image ? --> release the global colorModel
+        if (isEmpty())
+            setColorModel(null);
 
         // notify changed
         dataChanged(image, SequenceEventType.REMOVED);
