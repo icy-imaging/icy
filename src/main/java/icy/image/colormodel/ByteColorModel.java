@@ -50,7 +50,7 @@ public class ByteColorModel extends IcyColorModel
      */
     public ByteColorModel(IcyColorSpace colorSpace, int[] bits)
     {
-        super(colorSpace, DataType.UBYTE, bits);
+        super(colorSpace, DataType.BYTE, bits);
     }
 
     @Override
