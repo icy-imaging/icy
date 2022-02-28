@@ -3512,13 +3512,17 @@ public class Loader
             dsz = onZ ? dest.getSizeZ() : 0;
         }
 
-        // put 'dest' in update state to avoid useless recalculations
-        if (!dest.isUpdating())
-            dest.beginUpdate();
-
-        for (int t = 0; t < sst; t++)
-            for (int z = 0; z < ssz; z++)
-                dest.setImage(t + dst, z + dsz, src.getImage(t, z));
+        dest.beginUpdate();
+        try
+        {
+            for (int t = 0; t < sst; t++)
+                for (int z = 0; z < ssz; z++)
+                    dest.setImage(t + dst, z + dsz, src.getImage(t, z));
+        }
+        finally
+        {
+            dest.endUpdate();
+        }
 
         return dest;
     }
