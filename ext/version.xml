@@ -66,7 +66,7 @@
         </element>
         <element>
             <name>Bio Formats</name>
-            <version>6.7.0.0</version>
+            <version>6.9.1.0</version>
             <files>
                 <file>
                     <localpath>lib/icy-bioformats.jar</localpath>

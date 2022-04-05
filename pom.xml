@@ -189,7 +189,7 @@
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-bioformats</artifactId>
-            <version>6.7.0</version>
+            <version>6.9.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
@@ -220,6 +220,12 @@
             <groupId>net.imagej</groupId>
             <artifactId>ij</artifactId>
             <version>1.52r</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun</groupId>
+                    <artifactId>tools</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
