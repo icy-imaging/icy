@@ -116,17 +116,7 @@ public class RoiActions
                 {
                     final List<ROI> rois = ROI.loadROIsFromXML(XMLUtil.getRootElement(doc));
 
-                    sequence.beginUpdate();
-                    try
-                    {
-                        // add to sequence
-                        for (ROI roi : rois)
-                            sequence.addROI(roi);
-                    }
-                    finally
-                    {
-                        sequence.endUpdate();
-                    }
+                    sequence.addROIs(rois, false);
 
                     // add to undo manager
                     sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, rois)
