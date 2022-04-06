@@ -1878,8 +1878,8 @@ public class Loader
         try
         {
             // we want only one group
-            final SequenceFileGroup group = SequenceFileSticher.groupFiles(importer, cleanNonImageFile(paths),
-                    showProgress, loadingFrame);
+            final SequenceFileGroup group = SequenceFileSticher.groupFiles(importer, cleanNonImageFile(paths), true,
+                    loadingFrame);
             // do group loading
             result = internalLoadGroup(group, false, false, mainMenu, loadingFrame);
             // load sequence XML data
@@ -2915,7 +2915,8 @@ public class Loader
             if (mainMenu != null)
                 mainMenu.addRecentLoadedFile(new File(FileUtil.getGenericPath(path)));
 
-            // TODO: restore colormap --> try to recover colormap
+            // set default colormaps if none defined
+            SequenceUtil.setDefaultColormaps(result, false);
 
             // load sequence XML data
             if (GeneralPreferences.getSequencePersistence())
@@ -3438,8 +3439,6 @@ public class Loader
                 // }
             }
 
-            // TODO: restore colormap --> try to recover colormap
-
             if (remainingFiles.size() > 0)
             {
                 System.err.println("Cannot open the following file(s) (format not supported):");
@@ -3452,6 +3451,10 @@ public class Loader
                             "Some file(s) could not be opened (format not supported). See the console output for more details.");
                 }
             }
+
+            // set default colormaps if none defined
+            for (Sequence sequence : result)
+                SequenceUtil.setDefaultColormaps(sequence, false);
 
             // load sequence XML data
             if (GeneralPreferences.getSequencePersistence())
