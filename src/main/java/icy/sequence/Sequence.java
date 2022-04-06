@@ -3072,10 +3072,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         {
             final List<ROI> addedRois = new ArrayList<ROI>();
 
-            for (ROI roi : rois)
+            beginUpdate();
+            try
             {
-                if (addROI(roi, false))
-                    addedRois.add(roi);
+                for (ROI roi : rois)
+                {
+                    if (addROI(roi, false))
+                        addedRois.add(roi);
+                }
+            }
+            finally
+            {
+                endUpdate();
             }
 
             if (canUndo && !addedRois.isEmpty())
