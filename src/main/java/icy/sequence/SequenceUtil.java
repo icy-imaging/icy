@@ -37,6 +37,7 @@ import icy.image.IcyBufferedImageUtil;
 import icy.image.IcyBufferedImageUtil.FilterType;
 import icy.image.colormap.IcyColorMap;
 import icy.image.colormap.LinearColorMap;
+import icy.image.colorspace.IcyColorSpace;
 import icy.image.lut.LUT;
 import icy.math.Scaler;
 import icy.painter.Overlay;
@@ -1688,9 +1689,10 @@ public class SequenceUtil
      *        Only used when <code>rescale</code> parameter is true.<br>
      *        Specify if we use the data bounds for rescaling instead of data type bounds.
      * @return converted sequence
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
-    public static Sequence convertToType(Sequence source, DataType dataType, boolean rescale, boolean useDataBounds) throws InterruptedException
+    public static Sequence convertToType(Sequence source, DataType dataType, boolean rescale, boolean useDataBounds)
+            throws InterruptedException
     {
         if (source == null)
             return null;
@@ -1735,9 +1737,10 @@ public class SequenceUtil
      * @param rescale
      *        indicate if we want to scale data value according to data type range
      * @return converted sequence
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
-    public static Sequence convertToType(Sequence source, DataType dataType, boolean rescale) throws InterruptedException
+    public static Sequence convertToType(Sequence source, DataType dataType, boolean rescale)
+            throws InterruptedException
     {
         return convertToType(source, dataType, rescale, false);
     }
@@ -1796,7 +1799,7 @@ public class SequenceUtil
      *        scalers for scaling internal data during conversion (1 scaler per channel).<br>
      *        Can be set to <code>null</code> to avoid value conversion.
      * @return converted image
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     public static Sequence convertType(Sequence source, DataType dataType, Scaler[] scalers) throws InterruptedException
     {
@@ -2609,5 +2612,50 @@ public class SequenceUtil
             result.setLocation(result.x + region.x, result.y + region.y);
 
         return result;
+    }
+
+    /**
+     * Set default colormap for the specified Sequence depending the number of channel.
+     * 
+     * @param sequence
+     * @param overwrite
+     *        if set to <i>true</i> the we override current Sequence colormap even if they are not all gray
+     */
+    public static void setDefaultColormaps(Sequence sequence, boolean overwrite)
+    {
+        final int sizeC = sequence.getSizeC();
+        boolean allGray = true;
+
+        if (!overwrite)
+        {
+            for (int c = 0; c < sizeC; c++)
+            {
+                if (!sequence.getDefaultColorMap(c).equals(LinearColorMap.gray_))
+                {
+                    allGray = false;
+                    break;
+                }
+            }
+        }
+
+        // all gray ? --> set it to default
+        if (allGray)
+        {
+            // get default color space
+            final IcyColorSpace cs = new IcyColorSpace(sizeC);
+
+            // affect colormap
+            sequence.beginUpdate();
+            try
+            {
+                // set colormaps
+                for (int c = 0; c < sizeC; c++)
+                    sequence.setDefaultColormap(c, cs.getColorMap(c), true);
+            }
+            finally
+            {
+                sequence.endUpdate();
+            }
+        }
     }
 }
