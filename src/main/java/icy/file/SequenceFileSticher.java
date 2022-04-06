@@ -534,7 +534,7 @@ public class SequenceFileSticher
 
         public int getIndexS()
         {
-            int result = filePosition.getValue(DimensionId.NULL);
+            int result = filePosition.getValue(DimensionId.NULL, true);
 
             // if not defined then series = 0
             if (result == -1)
@@ -630,7 +630,7 @@ public class SequenceFileSticher
             // if (result == null)
             DimensionId result = filePosition.getDifference(sp.filePosition, false);
             if (result == null)
-                result = indPos.getDifference(indPos);
+                result = indPos.getDifference(sp.indPos);
 
             return result;
         }
@@ -721,7 +721,9 @@ public class SequenceFileSticher
             private static DimensionId getDim(String prefix, String prefixes[], DimensionId d)
             {
                 for (String p : prefixes)
-                    if (prefix.endsWith(p))
+                    // better to just test on equality
+                    if (prefix.equals(p))
+//                    if (prefix.endsWith(p))
                         return d;
 
                 return null;
@@ -874,9 +876,9 @@ public class SequenceFileSticher
             return removeChunk(getChunk(dim, true));
         }
 
-        public int getValue(DimensionId dim)
+        public int getValue(DimensionId dim, boolean fromUnknow)
         {
-            final PositionChunk chunk = getChunk(dim, true);
+            final PositionChunk chunk = getChunk(dim, fromUnknow);
 
             if (chunk != null)
                 return chunk.value;
@@ -895,7 +897,7 @@ public class SequenceFileSticher
             if (dim != null)
             {
                 for (PositionChunk chunk : chunks)
-                    if (chunk.dim == dim)
+                    if (dim.equals(chunk.dim))
                         return chunk;
 
                 if (allowUnknown)
@@ -1004,7 +1006,9 @@ public class SequenceFileSticher
 
             // compare on series path position
             if (result == 0)
-                result = SequenceFileSticher.compare(getValue(DimensionId.NULL), ipb.getValue(DimensionId.NULL));
+                result = SequenceFileSticher.compare(getValue(DimensionId.NULL, false), ipb.getValue(DimensionId.NULL, false));
+            if (result == 0)
+                result = SequenceFileSticher.compare(getValue(DimensionId.NULL, true), ipb.getValue(DimensionId.NULL, true));
 
             return result;
         }
@@ -1017,16 +1021,29 @@ public class SequenceFileSticher
             if (compareSeries)
                 result = compareSeries(ipb);
 
+            // from identified dimensions first
             if (result == 0)
-                result = SequenceFileSticher.compare(getValue(DimensionId.T), ipb.getValue(DimensionId.T));
+                result = SequenceFileSticher.compare(getValue(DimensionId.T, false), ipb.getValue(DimensionId.T, false));
             if (result == 0)
-                result = SequenceFileSticher.compare(getValue(DimensionId.Z), ipb.getValue(DimensionId.Z));
+                result = SequenceFileSticher.compare(getValue(DimensionId.Z, false), ipb.getValue(DimensionId.Z, false));
             if (result == 0)
-                result = SequenceFileSticher.compare(getValue(DimensionId.C), ipb.getValue(DimensionId.C));
+                result = SequenceFileSticher.compare(getValue(DimensionId.C, false), ipb.getValue(DimensionId.C, false));
             if (result == 0)
-                result = SequenceFileSticher.compare(getValue(DimensionId.Y), ipb.getValue(DimensionId.Y));
+                result = SequenceFileSticher.compare(getValue(DimensionId.Y, false), ipb.getValue(DimensionId.Y, false));
             if (result == 0)
-                result = SequenceFileSticher.compare(getValue(DimensionId.X), ipb.getValue(DimensionId.X));
+                result = SequenceFileSticher.compare(getValue(DimensionId.X, false), ipb.getValue(DimensionId.X, false));
+
+            // then from unidentified dimensions
+            if (result == 0)
+                result = SequenceFileSticher.compare(getValue(DimensionId.T, true), ipb.getValue(DimensionId.T, true));
+            if (result == 0)
+                result = SequenceFileSticher.compare(getValue(DimensionId.Z, true), ipb.getValue(DimensionId.Z, true));
+            if (result == 0)
+                result = SequenceFileSticher.compare(getValue(DimensionId.C, true), ipb.getValue(DimensionId.C, true));
+            if (result == 0)
+                result = SequenceFileSticher.compare(getValue(DimensionId.Y, true), ipb.getValue(DimensionId.Y, true));
+            if (result == 0)
+                result = SequenceFileSticher.compare(getValue(DimensionId.X, true), ipb.getValue(DimensionId.X, true));
 
             return result;
         }
@@ -1040,15 +1057,28 @@ public class SequenceFileSticher
                     return DimensionId.NULL;
             }
 
-            if (SequenceFileSticher.compare(getValue(DimensionId.T), ipb.getValue(DimensionId.T)) != 0)
+            // from identified dimensions first
+            if (SequenceFileSticher.compare(getValue(DimensionId.T, false), ipb.getValue(DimensionId.T, false)) != 0)
                 return DimensionId.T;
-            if (SequenceFileSticher.compare(getValue(DimensionId.Z), ipb.getValue(DimensionId.Z)) != 0)
+            if (SequenceFileSticher.compare(getValue(DimensionId.Z, false), ipb.getValue(DimensionId.Z, false)) != 0)
                 return DimensionId.Z;
-            if (SequenceFileSticher.compare(getValue(DimensionId.C), ipb.getValue(DimensionId.C)) != 0)
+            if (SequenceFileSticher.compare(getValue(DimensionId.C, false), ipb.getValue(DimensionId.C, false)) != 0)
                 return DimensionId.C;
-            if (SequenceFileSticher.compare(getValue(DimensionId.Y), ipb.getValue(DimensionId.Y)) != 0)
+            if (SequenceFileSticher.compare(getValue(DimensionId.Y, false), ipb.getValue(DimensionId.Y, false)) != 0)
                 return DimensionId.Y;
-            if (SequenceFileSticher.compare(getValue(DimensionId.X), ipb.getValue(DimensionId.X)) != 0)
+            if (SequenceFileSticher.compare(getValue(DimensionId.X, false), ipb.getValue(DimensionId.X, false)) != 0)
+                return DimensionId.X;
+
+            // then from unidentified dimensions
+            if (SequenceFileSticher.compare(getValue(DimensionId.T, true), ipb.getValue(DimensionId.T, true)) != 0)
+                return DimensionId.T;
+            if (SequenceFileSticher.compare(getValue(DimensionId.Z, true), ipb.getValue(DimensionId.Z, true)) != 0)
+                return DimensionId.Z;
+            if (SequenceFileSticher.compare(getValue(DimensionId.C, true), ipb.getValue(DimensionId.C, true)) != 0)
+                return DimensionId.C;
+            if (SequenceFileSticher.compare(getValue(DimensionId.Y, true), ipb.getValue(DimensionId.Y, true)) != 0)
+                return DimensionId.Y;
+            if (SequenceFileSticher.compare(getValue(DimensionId.X, true), ipb.getValue(DimensionId.X, true)) != 0)
                 return DimensionId.X;
 
             return null;
@@ -1063,9 +1093,9 @@ public class SequenceFileSticher
         @Override
         public String toString()
         {
-            return "FilePosition [S:" + getValue(DimensionId.NULL) + " C:" + getValue(DimensionId.C) + " T:"
-                    + getValue(DimensionId.T) + " Z:" + getValue(DimensionId.Z) + " Y:" + getValue(DimensionId.Y)
-                    + " X:" + getValue(DimensionId.X) + "]";
+            return "FilePosition [S:" + getValue(DimensionId.NULL, true) + " C:" + getValue(DimensionId.C, true) + " T:"
+                    + getValue(DimensionId.T, true) + " Z:" + getValue(DimensionId.Z, true) + " Y:" + getValue(DimensionId.Y, true)
+                    + " X:" + getValue(DimensionId.X, true) + "]";
         }
     }
 
@@ -1172,9 +1202,9 @@ public class SequenceFileSticher
 
                     if (idPos != null)
                     {
-                        if (idPos.getValue(DimensionId.T) != -1)
+                        if (idPos.getValue(DimensionId.T, true) != -1)
                             tSet = true;
-                        if (idPos.getValue(DimensionId.Z) != -1)
+                        if (idPos.getValue(DimensionId.Z, true) != -1)
                             zSet = true;
 
                         if (!idPos.isUnknowDim(DimensionId.T))
@@ -1965,7 +1995,7 @@ public class SequenceFileSticher
         int value = -1;
         for (FilePosition position : filePositions)
         {
-            final int v = position.getValue(dim);
+            final int v = position.getValue(dim, true);
 
             if (v != -1)
             {
@@ -1985,7 +2015,7 @@ public class SequenceFileSticher
         {
             for (FilePosition position : filePositions)
             {
-                if (position.getValue(dim) != -1)
+                if (position.getValue(dim, true) != -1)
                     position.removeChunk(dim);
             }
 
