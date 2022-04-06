@@ -656,7 +656,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         options.setValidate(false);
         // disable ND2 native chunk map to avoid some issues with ND2 file
         // TODO: remove when fixed in Bio-formats
-        // See images\bio\bug\nd2\3.19_1.nd2 --> should be a timelaps and not an image series
+        // See images\bio\format\nd2\droplet\ko --> should be a timelaps and not an image series
         options.setBoolean(NativeND2Reader.USE_CHUNKMAP_KEY, Boolean.FALSE);
 
         originalMetadata = false;
