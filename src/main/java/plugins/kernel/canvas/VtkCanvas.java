@@ -2240,7 +2240,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                     // image layer is not impacted by global layer visibility
                     if (layer == imageLayer)
                     {
-                        // we have a no empty image --> display it if layer is visible
+                        // we have a non empty image --> display it if layer is visible
                         if (layer.isVisible() && (seq != null) && !seq.isEmpty())
                             prop.SetVisibility(1);
                         else
