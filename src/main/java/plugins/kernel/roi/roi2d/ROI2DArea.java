@@ -577,9 +577,8 @@ public class ROI2DArea extends ROI2D
             if (hovered != value)
             {
                 hovered = value;
-                roiChanged(false);
+                painterChanged();
             }
-
         }
 
         public boolean isHovered()
