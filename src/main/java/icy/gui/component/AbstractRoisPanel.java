@@ -1093,14 +1093,35 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         // get saved events
         synchronized (savedSequenceEvents)
         {
-            events = new ArrayList<SequenceEvent>(savedSequenceEvents);
+            events = new ArrayList<>(savedSequenceEvents);
             // so we know we processed them
             savedSequenceEvents.clear();
         }
 
+        final List<SequenceEvent> cleanedEvents = new ArrayList<>(events.size());
+
+        // only keep meaningful events (ROI events are directly handled from ROI change event)
+        for (SequenceEvent event : events)
+        {
+            switch (event.getSourceType())
+            {
+                case SEQUENCE_DATA:
+                case SEQUENCE_META:
+                    cleanedEvents.add(event);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        // nothing to do
+        if (cleanedEvents.isEmpty())
+            return;
+
         // notify ROI results that sequence has changed
         for (ROIResults roiResults : allRoiResults)
-            for (SequenceEvent event : events)
+            for (SequenceEvent event : cleanedEvents)
                 roiResults.sequenceChanged(event);
 
         // refresh table data
@@ -1866,7 +1887,8 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 final double doubleValue = ((Number) result).doubleValue();
 
                 // replace 'infinity' by infinite symbol
-                if (doubleValue == Double.POSITIVE_INFINITY) {
+                if (doubleValue == Double.POSITIVE_INFINITY)
+                {
                     // position descriptor ? negative infinite means 'ALL' here
                     if (id.equals(ROIPositionZDescriptor.ID) || id.equals(ROIPositionTDescriptor.ID)
                             || id.equals(ROIPositionCDescriptor.ID))

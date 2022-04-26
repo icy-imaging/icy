@@ -89,7 +89,6 @@ import icy.sequence.DimensionId;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent.SequenceEventType;
 import icy.system.thread.SingleProcessor;
-import icy.system.thread.ThreadUtil;
 import icy.type.rectangle.Rectangle2DUtil;
 import icy.type.rectangle.Rectangle5D;
 import icy.util.EventUtil;
@@ -133,8 +132,8 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
      * Possible rounded zoom factor : 0.01 --> 100
      */
     final static double[] zoomRoundedFactors = new double[] {0.01d, 0.02d, 0.0333d, 0.05d, 0.075d, 0.1d, 0.15d, 0.2d,
-            0.25d, 0.333d, 0.5d, 0.66d, 0.75d, 1d, 1.25d, 1.5d, 1.75d, 2d, 2.5d, 3d, 4d, 5d, 6.6d, 7.5d, 10d, 15d, 20d,
-            30d, 50d, 66d, 75d, 100d};
+        0.25d, 0.333d, 0.5d, 0.66d, 0.75d, 1d, 1.25d, 1.5d, 1.75d, 2d, 2.5d, 3d, 4d, 5d, 6.6d, 7.5d, 10d, 15d, 20d, 30d,
+        50d, 66d, 75d, 100d};
 
     /**
      * Image overlay to encapsulate image display in a canvas layer
@@ -825,6 +824,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
         private final SmoothMover rotationInfoAlphaMover;
         private String zoomMessage;
         private String rotationMessage;
+        private SingleProcessor cursorUpdator;
         Dimension lastSize;
         boolean actived;
         boolean handlingMouseMoveEvent;
@@ -890,6 +890,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
             zoomInfoTimer.setRepeats(false);
             rotationInfoTimer = new Timer(1000, this);
             rotationInfoTimer.setRepeats(false);
+            cursorUpdator = new SingleProcessor(true);
 
             addComponentListener(new ComponentAdapter()
             {
@@ -1679,59 +1680,67 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
          */
         protected void updateCursor()
         {
-            // final Cursor cursor = getCursor();
-            //
-            // // save previous cursor if different from HAND
-            // if (cursor.getType() != Cursor.HAND_CURSOR)
-            // previousCursor = cursor;
-            //
-            if (isDragging())
+            // as it can take a bit of time we do it asynchronously
+            cursorUpdator.submit(new Runnable()
             {
-                GuiUtil.setCursor(this, Cursor.HAND_CURSOR);
-                return;
-            }
-
-            if (areaSelection)
-            {
-                GuiUtil.setCursor(this, Cursor.CROSSHAIR_CURSOR);
-                return;
-            }
-
-            final Sequence seq = getSequence();
-
-            if (seq != null)
-            {
-                final ROI overlappedRoi = seq.getFocusedROI();
-
-                // overlapping an ROI ?
-                if (overlappedRoi != null)
+                @Override
+                public void run()
                 {
-                    final Layer layer = getLayer(overlappedRoi);
-
-                    if ((layer != null) && layer.isVisible())
+                    // final Cursor cursor = getCursor();
+                    //
+                    // // save previous cursor if different from HAND
+                    // if (cursor.getType() != Cursor.HAND_CURSOR)
+                    // previousCursor = cursor;
+                    //
+                    if (isDragging())
                     {
-                        GuiUtil.setCursor(this, Cursor.HAND_CURSOR);
+                        GuiUtil.setCursor(CanvasView.this, Cursor.HAND_CURSOR);
                         return;
                     }
-                }
 
-                final List<ROI> selectedRois = seq.getSelectedROIs();
-
-                // search if we are overriding ROI control points
-                for (ROI selectedRoi : selectedRois)
-                {
-                    final Layer layer = getLayer(selectedRoi);
-
-                    if ((layer != null) && layer.isVisible() && selectedRoi.hasSelectedPoint())
+                    if (areaSelection)
                     {
-                        GuiUtil.setCursor(this, Cursor.HAND_CURSOR);
+                        GuiUtil.setCursor(CanvasView.this, Cursor.CROSSHAIR_CURSOR);
                         return;
                     }
-                }
-            }
 
-            // setCursor(previousCursor);
-            GuiUtil.setCursor(this, Cursor.DEFAULT_CURSOR);
+                    final Sequence seq = getSequence();
+
+                    if (seq != null)
+                    {
+                        final ROI overlappedRoi = seq.getFocusedROI();
+
+                        // overlapping an ROI ?
+                        if (overlappedRoi != null)
+                        {
+                            final Layer layer = getLayer(overlappedRoi);
+
+                            if ((layer != null) && layer.isVisible())
+                            {
+                                GuiUtil.setCursor(CanvasView.this, Cursor.HAND_CURSOR);
+                                return;
+                            }
+                        }
+
+                        final List<ROI> selectedRois = seq.getSelectedROIs();
+
+                        // search if we are overriding ROI control points
+                        for (ROI selectedRoi : selectedRois)
+                        {
+                            final Layer layer = getLayer(selectedRoi);
+
+                            if ((layer != null) && layer.isVisible() && selectedRoi.hasSelectedPoint())
+                            {
+                                GuiUtil.setCursor(CanvasView.this, Cursor.HAND_CURSOR);
+                                return;
+                            }
+                        }
+                    }
+
+                    // setCursor(previousCursor);
+                    GuiUtil.setCursor(CanvasView.this, Cursor.DEFAULT_CURSOR);
+                }
+            });
         }
 
         public void refresh()
@@ -1871,11 +1880,6 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
         public Canvas2DSmoothMover(int size, SmoothMoveType type)
         {
             super(size, type);
-        }
-
-        public Canvas2DSmoothMover(int size)
-        {
-            super(size);
         }
 
         @Override
@@ -2168,6 +2172,9 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
             @Override
             public void moveEnded(MultiSmoothMover source, int index, double value)
             {
+                // just to allow correct set mouse position update
+                valueChanged(source, index, value, 100);
+                
                 // scale move ended, we can fix notify canvas transformation has changed
                 switch (index)
                 {
@@ -3045,7 +3052,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
     }
 
     /**
-     * @throws InterruptedException 
+     * @throws InterruptedException
      * @deprecated Use <code>getRenderedImage(t, z, -1, true)</code> instead.
      */
     @Deprecated
@@ -3055,7 +3062,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
     }
 
     /**
-     * @throws InterruptedException 
+     * @throws InterruptedException
      * @deprecated Use <code>getRenderedImage(t, z, -1, canvasView)</code> instead.
      */
     @Deprecated
@@ -3207,59 +3214,22 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
             case OFFSET_CHANGED:
             case SCALE_CHANGED:
             case ROTATION_CHANGED:
-                // update mouse image position from mouse canvas position
-                setMouseImagePos(canvasToImage(getMousePos()));
+                // update mouse image position from mouse canvas position only at end of movement
+                // as it can take sometime when we have *many* layers
+                if (!smoothTransform.isMoving())
+                    setMouseImagePos(canvasToImage(getMousePos()));
 
                 // display info message
                 if (type == IcyCanvasEventType.SCALE_CHANGED)
                 {
                     final String zoomInfo = Integer.toString((int) (getScaleX() * 100));
-
-                    ThreadUtil.invokeLater(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            // in panel
-                            modifyingZoom = true;
-                            try
-                            {
-                                getCanvasSettingPanel().updateZoomState(zoomInfo);
-                            }
-                            finally
-                            {
-                                modifyingZoom = false;
-                            }
-                        }
-                    });
-
-                    // and in canvas
+                    // set canvas message
                     canvasView.setZoomMessage("Zoom : " + zoomInfo + " \u0025", 500);
                 }
                 else if (type == IcyCanvasEventType.ROTATION_CHANGED)
                 {
                     final String rotInfo = Integer.toString((int) Math.round(getRotation() * 180d / Math.PI));
-
-                    ThreadUtil.invokeLater(new Runnable()
-                    {
-
-                        @Override
-                        public void run()
-                        {
-                            // in panel
-                            modifyingRotation = true;
-                            try
-                            {
-                                getCanvasSettingPanel().updateRotationState(rotInfo);
-                            }
-                            finally
-                            {
-                                modifyingRotation = false;
-                            }
-                        }
-                    });
-
-                    // and in canvas
+                    // set canvas message
                     canvasView.setRotationMessage("Rotation : " + rotInfo + " \u00B0", 500);
                 }
 
@@ -3271,7 +3241,6 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
                 // mouse position changed outside mouse move event ?
                 if (!canvasView.handlingMouseMoveEvent && !canvasView.isDragging() && !isSynchSlave())
                 {
-
                     // mouse position in canvas
                     final Point mousePos = getMousePos();
                     final Point mouseAbsolutePos = getMousePos();
@@ -3294,7 +3263,6 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
                 if (!canvasView.hasMouseFocus)
                     canvasView.refresh();
                 break;
-
         }
     }
 
