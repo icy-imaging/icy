@@ -85,6 +85,8 @@ import icy.preferences.XMLPreferences;
 import icy.resource.ResourceUtil;
 import icy.resource.icon.IcyIcon;
 import icy.roi.ROI;
+import icy.roi.ROI2D;
+import icy.roi.ROI3D;
 import icy.sequence.DimensionId;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent.SequenceEventType;
@@ -1110,6 +1112,25 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
                                     seq.addROI(roi, !(roi instanceof ROILineCutter));
                                     // then do exclusive selection
                                     seq.setSelectedROI(roi);
+                                }
+
+                                // attach to current position
+                                if (shift)
+                                {
+                                    // attach to current Z ?
+                                    if (getPositionZ() != -1)
+                                    {
+                                        if (roi instanceof ROI2D)
+                                            ((ROI2D) roi).setZ(getPositionZ());
+                                    }
+                                    // attach to current T ?
+                                    if (getPositionT() != -1)
+                                    {
+                                        if (roi instanceof ROI2D)
+                                            ((ROI2D) roi).setT(getPositionT());
+                                        else if (roi instanceof ROI3D)
+                                            ((ROI3D) roi).setT(getPositionT());
+                                    }
                                 }
                             }
 
@@ -2174,7 +2195,7 @@ public class Canvas2D extends IcyCanvas2D implements ROITaskListener
             {
                 // just to allow correct set mouse position update
                 valueChanged(source, index, value, 100);
-                
+
                 // scale move ended, we can fix notify canvas transformation has changed
                 switch (index)
                 {
