@@ -1,3 +1,24 @@
+Icy 2.4.1.0 - 28/04/2022
+------------------------
+
+Application
+* fixed a regression on signed byte image creation
+* fixed possible memory leak on colormodel listener release
+* updated Bio-Formats to 6.9.0 + added custom patch to fix ND2 file loading
+* general better performance when dealing with many ROIs
+* Loader
+ - fixed a bug making a new loaded image 'irresponsive' in some situation
+ - better colormap restoration on group loading
+ - improved image paths parsing for image grouping operation 
+* ROI
+ - added shift modifier to link new created ROI to current T and Z position
+ - added Shift+T and Shift+Z shortcuts to attach ROI to current T and Z pos
+- others smalls bug fixes and tweaks.
+
+Developer
+* added SequenceUtil.setDefaultColormaps(..) method
+
+
 Icy 2.4.0.0 - 02/02/2022
 ------------------------
 
