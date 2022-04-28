@@ -242,9 +242,9 @@ public class PluginLoader
             // we only want to load classes from 'plugins' package
             if (!className.startsWith(PLUGIN_PACKAGE))
                 continue;
-            // filter incorrect named classes (Jython classes for instances)
-            if (className.contains("$"))
-                continue;
+            // internal plugin classes can contains '$' (as some MathOperation block classes) so *don't* filter them
+//            if (className.contains("$"))
+//                continue;
 
             // no need to complete loading...
             if (processor.hasWaitingTasks())
