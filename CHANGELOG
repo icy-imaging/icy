@@ -7,7 +7,7 @@ Application
 * updated Bio-Formats to 6.9.0 + added custom patch to fix ND2 file loading
 * general better performance when dealing with many ROIs
 * Loader
- - fixed a bug making a new loaded image 'irresponsive' in some situation
+ - fixed a bug making a new loaded image irresponsive in some situation
  - better colormap restoration on group loading
  - improved image paths parsing for image grouping operation 
 * ROI
