@@ -57,7 +57,7 @@
         </element>
         <element>
             <name>ICY Updater</name>
-            <version>2.4.0.0</version>
+            <version>2.4.1.0</version>
             <files>
                 <file>
                     <localpath>updater.jar</localpath>
