@@ -53,6 +53,7 @@ import icy.preferences.GeneralPreferences;
 import icy.resource.ResourceUtil;
 import icy.roi.ROIEvent.ROIEventType;
 import icy.roi.ROIEvent.ROIPointEventType;
+import icy.roi.edit.PositionROIEdit;
 import icy.sequence.Sequence;
 import icy.system.IcyExceptionHandler;
 import icy.type.point.Point5D;
@@ -1120,136 +1121,193 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                         break;
                 }
 
-                if (isActiveFor(canvas))
+                // only for selected and modifiable ROIs not necessary visible
+                if (isSelected() && !isReadOnly())
                 {
-                    // control modifier is used for ROI modification from keyboard
-                    if (EventUtil.isMenuControlDown(e) && isSelected() && !isReadOnly())
+                    // shift modifier is used for ROI special actions
+                    if (EventUtil.isShiftDown(e))
                     {
                         switch (e.getKeyCode())
                         {
-                            case KeyEvent.VK_LEFT:
-                                if (EventUtil.isAltDown(e))
+                            case KeyEvent.VK_T:
+                                // attach to current T position
+                                if (imagePoint.getT() != -1)
                                 {
-                                    // resize
-                                    if (canSetBounds())
+                                    final int t = (int) imagePoint.getT();
+                                    final Point5D savePos = getPosition5D();
+
+                                    if ((ROI.this instanceof ROI2D) && (((ROI2D) ROI.this).getT() != t))
                                     {
-                                        final Rectangle5D bnd = getBounds5D();
-                                        if (EventUtil.isShiftDown(e))
-                                            bnd.setSizeX(Math.max(1, bnd.getSizeX() - 10));
-                                        else
-                                            bnd.setSizeX(Math.max(1, bnd.getSizeX() - 1));
-                                        setBounds5D(bnd);
-                                        e.consume();
+                                        ((ROI2D) ROI.this).setT(t);
+                                        // add position change to undo manager
+                                        Icy.getMainInterface().getUndoManager()
+                                                .addEdit(new PositionROIEdit(ROI.this, savePos, false));
                                     }
-                                }
-                                else
-                                {
-                                    // move
-                                    if (canSetPosition())
+                                    else if ((ROI.this instanceof ROI3D) && (((ROI3D) ROI.this).getT() != t))
                                     {
-                                        final Point5D pos = getPosition5D();
-                                        if (EventUtil.isShiftDown(e))
-                                            pos.setX(pos.getX() - 10);
-                                        else
-                                            pos.setX(pos.getX() - 1);
-                                        setPosition5D(pos);
-                                        e.consume();
+                                        ((ROI3D) ROI.this).setT(t);
+                                        // add position change to undo manager
+                                        Icy.getMainInterface().getUndoManager()
+                                                .addEdit(new PositionROIEdit(ROI.this, savePos, false));
                                     }
                                 }
                                 break;
 
-                            case KeyEvent.VK_RIGHT:
-                                if (EventUtil.isAltDown(e))
+                            case KeyEvent.VK_Z:
+                                // attach to current Z position
+                                if (imagePoint.getZ() != -1)
                                 {
-                                    // resize
-                                    if (canSetBounds())
-                                    {
-                                        final Rectangle5D bnd = getBounds5D();
-                                        if (EventUtil.isShiftDown(e))
-                                            bnd.setSizeX(Math.max(1, bnd.getSizeX() + 10));
-                                        else
-                                            bnd.setSizeX(Math.max(1, bnd.getSizeX() + 1));
-                                        setBounds5D(bnd);
-                                        e.consume();
-                                    }
-                                }
-                                else
-                                {
-                                    // move
-                                    if (canSetPosition())
-                                    {
-                                        final Point5D pos = getPosition5D();
-                                        if (EventUtil.isShiftDown(e))
-                                            pos.setX(pos.getX() + 10);
-                                        else
-                                            pos.setX(pos.getX() + 1);
-                                        setPosition5D(pos);
-                                        e.consume();
-                                    }
-                                }
-                                break;
+                                    final int z = (int) imagePoint.getZ();
 
-                            case KeyEvent.VK_UP:
-                                if (EventUtil.isAltDown(e))
-                                {
-                                    // resize
-                                    if (canSetBounds())
+                                    if ((ROI.this instanceof ROI2D) && (((ROI2D) ROI.this).getZ() != z))
                                     {
-                                        final Rectangle5D bnd = getBounds5D();
-                                        if (EventUtil.isShiftDown(e))
-                                            bnd.setSizeY(Math.max(1, bnd.getSizeY() - 10));
-                                        else
-                                            bnd.setSizeY(Math.max(1, bnd.getSizeY() - 1));
-                                        setBounds5D(bnd);
-                                        e.consume();
-                                    }
-                                }
-                                else
-                                {
-                                    // move
-                                    if (canSetPosition())
-                                    {
-                                        final Point5D pos = getPosition5D();
-                                        if (EventUtil.isShiftDown(e))
-                                            pos.setY(pos.getY() - 10);
-                                        else
-                                            pos.setY(pos.getY() - 1);
-                                        setPosition5D(pos);
-                                        e.consume();
+                                        final Point5D savePos = getPosition5D();
+                                        ((ROI2D) ROI.this).setZ(z);
+                                        // add position change to undo manager
+                                        Icy.getMainInterface().getUndoManager()
+                                                .addEdit(new PositionROIEdit(ROI.this, savePos, false));
                                     }
                                 }
                                 break;
+                        }
+                    }
+                }
 
-                            case KeyEvent.VK_DOWN:
-                                if (EventUtil.isAltDown(e))
-                                {
-                                    // resize
-                                    if (canSetBounds())
+                // only if ROI is visible / active for current position
+                if (isActiveFor(canvas))
+                {
+                    // only for selected and modifiable ROIs
+                    if (isSelected() && !isReadOnly())
+                    {
+                        // control modifier is used for ROI modification from keyboard
+                        if (EventUtil.isMenuControlDown(e))
+                        {
+                            switch (e.getKeyCode())
+                            {
+                                case KeyEvent.VK_LEFT:
+                                    if (EventUtil.isAltDown(e))
                                     {
-                                        final Rectangle5D bnd = getBounds5D();
-                                        if (EventUtil.isShiftDown(e))
-                                            bnd.setSizeY(Math.max(1, bnd.getSizeY() + 10));
-                                        else
-                                            bnd.setSizeY(Math.max(1, bnd.getSizeY() + 1));
-                                        setBounds5D(bnd);
-                                        e.consume();
+                                        // resize
+                                        if (canSetBounds())
+                                        {
+                                            final Rectangle5D bnd = getBounds5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                bnd.setSizeX(Math.max(1, bnd.getSizeX() - 10));
+                                            else
+                                                bnd.setSizeX(Math.max(1, bnd.getSizeX() - 1));
+                                            setBounds5D(bnd);
+                                            e.consume();
+                                        }
                                     }
-                                }
-                                else
-                                {
-                                    // move
-                                    if (canSetPosition())
+                                    else
                                     {
-                                        final Point5D pos = getPosition5D();
-                                        if (EventUtil.isShiftDown(e))
-                                            pos.setY(pos.getY() + 10);
-                                        else
-                                            pos.setY(pos.getY() + 1);
-                                        setPosition5D(pos);
-                                        e.consume();
+                                        // move
+                                        if (canSetPosition())
+                                        {
+                                            final Point5D pos = getPosition5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                pos.setX(pos.getX() - 10);
+                                            else
+                                                pos.setX(pos.getX() - 1);
+                                            setPosition5D(pos);
+                                            e.consume();
+                                        }
                                     }
-                                }
-                                break;
+                                    break;
+
+                                case KeyEvent.VK_RIGHT:
+                                    if (EventUtil.isAltDown(e))
+                                    {
+                                        // resize
+                                        if (canSetBounds())
+                                        {
+                                            final Rectangle5D bnd = getBounds5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                bnd.setSizeX(Math.max(1, bnd.getSizeX() + 10));
+                                            else
+                                                bnd.setSizeX(Math.max(1, bnd.getSizeX() + 1));
+                                            setBounds5D(bnd);
+                                            e.consume();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // move
+                                        if (canSetPosition())
+                                        {
+                                            final Point5D pos = getPosition5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                pos.setX(pos.getX() + 10);
+                                            else
+                                                pos.setX(pos.getX() + 1);
+                                            setPosition5D(pos);
+                                            e.consume();
+                                        }
+                                    }
+                                    break;
+
+                                case KeyEvent.VK_UP:
+                                    if (EventUtil.isAltDown(e))
+                                    {
+                                        // resize
+                                        if (canSetBounds())
+                                        {
+                                            final Rectangle5D bnd = getBounds5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                bnd.setSizeY(Math.max(1, bnd.getSizeY() - 10));
+                                            else
+                                                bnd.setSizeY(Math.max(1, bnd.getSizeY() - 1));
+                                            setBounds5D(bnd);
+                                            e.consume();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // move
+                                        if (canSetPosition())
+                                        {
+                                            final Point5D pos = getPosition5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                pos.setY(pos.getY() - 10);
+                                            else
+                                                pos.setY(pos.getY() - 1);
+                                            setPosition5D(pos);
+                                            e.consume();
+                                        }
+                                    }
+                                    break;
+
+                                case KeyEvent.VK_DOWN:
+                                    if (EventUtil.isAltDown(e))
+                                    {
+                                        // resize
+                                        if (canSetBounds())
+                                        {
+                                            final Rectangle5D bnd = getBounds5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                bnd.setSizeY(Math.max(1, bnd.getSizeY() + 10));
+                                            else
+                                                bnd.setSizeY(Math.max(1, bnd.getSizeY() + 1));
+                                            setBounds5D(bnd);
+                                            e.consume();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // move
+                                        if (canSetPosition())
+                                        {
+                                            final Point5D pos = getPosition5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                pos.setY(pos.getY() + 10);
+                                            else
+                                                pos.setY(pos.getY() + 1);
+                                            setPosition5D(pos);
+                                            e.consume();
+                                        }
+                                    }
+                                    break;
+                            }
                         }
                     }
                 }
