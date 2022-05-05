@@ -5,7 +5,6 @@ import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -15,8 +14,6 @@ import icy.file.FileImporter;
 import icy.file.FileUtil;
 import icy.file.Loader;
 import icy.file.SequenceFileImporter;
-import icy.file.SequenceFileSticher;
-import icy.file.SequenceFileSticher.SequenceFileGroup;
 import icy.gui.dialog.LoaderOptionPanel.LoaderLoadingType;
 import icy.main.Icy;
 import icy.preferences.ApplicationPreferences;
@@ -117,8 +114,7 @@ public class LoaderDialog extends JFileChooser implements PropertyChangeListener
         fileImporters = Loader.getFileImporters();
 
         // create option panel
-        optionPanel = new LoaderOptionPanel(
-                LoaderLoadingType.values()[preferences.getInt(ID_LOADTYPE, LoaderLoadingType.GROUP.ordinal())]);
+        optionPanel = new LoaderOptionPanel(LoaderLoadingType.values()[preferences.getInt(ID_LOADTYPE, LoaderLoadingType.GROUP.ordinal())]);
 
         // we can only store dimension for JFileChooser
         setPreferredSize(new Dimension(preferences.getInt(ID_WIDTH, 600), preferences.getInt(ID_HEIGTH, 400)));
@@ -212,7 +208,7 @@ public class LoaderDialog extends JFileChooser implements PropertyChangeListener
                 // get the selected importer from file filter
                 final Object importer = getSelectedImporter();
                 // all files filter selected ? detect no image file (so we can load protocol correctly when all files filter is selected)
-                final boolean noImage = (importer == null) && !Loader.isSupportedImageFile(paths.get(0));
+                final boolean noImage = (importer == null) && !Loader.isSupportedImageFile(firstPath);
 
                 // multiple files or folder loading
                 if ((paths.size() > 1) || FileUtil.isDirectory(firstPath))
@@ -229,21 +225,11 @@ public class LoaderDialog extends JFileChooser implements PropertyChangeListener
                             Loader.load((SequenceFileImporter) importer, paths, true, false, true);
                         else
                         {
-                            // build groups
-                            final Collection<SequenceFileGroup> groups = SequenceFileSticher
-                                    .groupAllFiles((SequenceFileImporter) importer, paths, isAutoOrderSelected(), null);
-
-                            // then load them
-                            for (SequenceFileGroup group : groups)
-                            {
-                                // we don't have series for image grouped loading
-                                Loader.load(group, optionPanel.getResolutionLevel(), optionPanel.getXYRegion(),
-                                        optionPanel.getFullZRange() ? -1 : optionPanel.getZMin(),
-                                        optionPanel.getFullZRange() ? -1 : optionPanel.getZMax(),
-                                        optionPanel.getFullTRange() ? -1 : optionPanel.getTMin(),
-                                        optionPanel.getFullTRange() ? -1 : optionPanel.getTMax(),
-                                        optionPanel.getChannel(), false, true, true);
-                            }
+                            // load image file(s) with grouping
+                            Loader.load((SequenceFileImporter) importer, paths, isAutoOrderSelected(), optionPanel.getResolutionLevel(),
+                                    optionPanel.getXYRegion(), optionPanel.getFullZRange() ? -1 : optionPanel.getZMin(),
+                                    optionPanel.getFullZRange() ? -1 : optionPanel.getZMax(), optionPanel.getFullTRange() ? -1 : optionPanel.getTMin(),
+                                    optionPanel.getFullTRange() ? -1 : optionPanel.getTMax(), optionPanel.getChannel(), false, true, true);
                         }
                     }
                 }
@@ -258,20 +244,19 @@ public class LoaderDialog extends JFileChooser implements PropertyChangeListener
                     else
                     {
                         // load selected image file with advanced option
-                        Loader.load((SequenceFileImporter) importer, firstPath, optionPanel.getSeries(),
-                                optionPanel.getResolutionLevel(), optionPanel.getXYRegion(),
-                                optionPanel.getFullZRange() ? -1 : optionPanel.getZMin(),
-                                optionPanel.getFullZRange() ? -1 : optionPanel.getZMax(),
-                                optionPanel.getFullTRange() ? -1 : optionPanel.getTMin(),
-                                optionPanel.getFullTRange() ? -1 : optionPanel.getTMax(), optionPanel.getChannel(),
-                                isSeparateSequenceSelected(), true, true);
+                        Loader.load((SequenceFileImporter) importer, firstPath, optionPanel.getSeries(), optionPanel.getResolutionLevel(),
+                                optionPanel.getXYRegion(), optionPanel.getFullZRange() ? -1 : optionPanel.getZMin(),
+                                optionPanel.getFullZRange() ? -1 : optionPanel.getZMax(), optionPanel.getFullTRange() ? -1 : optionPanel.getTMin(),
+                                optionPanel.getFullTRange() ? -1 : optionPanel.getTMax(), optionPanel.getChannel(), isSeparateSequenceSelected(), true, true);
                     }
                 }
             }
         }
 
         // store interface option
-        preferences.putInt(ID_WIDTH, getWidth());
+        preferences.putInt(ID_WIDTH,
+
+                getWidth());
         preferences.putInt(ID_HEIGTH, getHeight());
     }
 
