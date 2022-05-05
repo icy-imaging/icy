@@ -48,14 +48,17 @@ public interface ImageProvider
      * {@link MetaDataUtil#getPositionTOffset(OMEXMLMetadata, int, int, int, int, double)}<br>
      * <br>
      * and many others informations depending the available metadata in the image format.
+     * 
+     * @throws InterruptedException
      */
-    public OMEXMLMetadata getOMEXMLMetaData() throws UnsupportedFormatException, IOException;
+    public OMEXMLMetadata getOMEXMLMetaData() throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
+     * @throws InterruptedException
      * @deprecated Use {@link #getOMEXMLMetaData()} instead.
      */
     @Deprecated
-    public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException;
+    public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Returns the (optimal) tile width for the specified series of the image.<br>
@@ -67,8 +70,9 @@ public interface ImageProvider
      * @param series
      *        Series index for multi series image (use 0 if unsure).
      * @return optimal tile width
+     * @throws InterruptedException
      */
-    public int getTileWidth(int series) throws UnsupportedFormatException, IOException;
+    public int getTileWidth(int series) throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Returns the (optimal) tile height for the specified series of the image.<br>
@@ -80,8 +84,9 @@ public interface ImageProvider
      * @param series
      *        Series index for multi series image (use 0 if unsure).
      * @return optimal tile height
+     * @throws InterruptedException
      */
-    public int getTileHeight(int series) throws UnsupportedFormatException, IOException;
+    public int getTileHeight(int series) throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Returns <code>true</code> if the given sub resolution is available from this series.<br>
@@ -108,9 +113,9 @@ public interface ImageProvider
      * @param series
      *        Series index for multi series image (use 0 if unsure).
      * @return thumbnail image.
+     * @throws InterruptedException
      */
-    public IcyBufferedImage getThumbnail(int series)
-            throws UnsupportedFormatException, IOException;
+    public IcyBufferedImage getThumbnail(int series) throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Returns the pixel data located for specified position of the image.<br>
@@ -134,10 +139,11 @@ public interface ImageProvider
      * @param c
      *        C position of the image (channel) we want retrieve (-1 is not accepted here).
      * @return native type array containing image pixel data.<br>
+     * @throws InterruptedException
      * @see #isResolutionAvailable(int, int)
      */
     public Object getPixels(int series, int resolution, Rectangle region, int z, int t, int c)
-            throws UnsupportedFormatException, IOException;
+            throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Returns the image located at specified position.
@@ -159,10 +165,11 @@ public interface ImageProvider
      * @param c
      *        C position of the image (channel) we want retrieve (-1 means all channel).
      * @return image
+     * @throws InterruptedException
      * @see #isResolutionAvailable(int, int)
      */
     public IcyBufferedImage getImage(int series, int resolution, Rectangle region, int z, int t, int c)
-            throws UnsupportedFormatException, IOException;
+            throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Returns the image located at specified position.
@@ -182,10 +189,11 @@ public interface ImageProvider
      * @param t
      *        T position of the image (frame) we want retrieve
      * @return image
+     * @throws InterruptedException
      * @see #isResolutionAvailable(int, int)
      */
     public IcyBufferedImage getImage(int series, int resolution, Rectangle region, int z, int t)
-            throws UnsupportedFormatException, IOException;
+            throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Returns the image located at specified position.
@@ -204,10 +212,10 @@ public interface ImageProvider
      * @param c
      *        C position of the image (channel) we want retrieve (-1 means all channel).
      * @return image
+     * @throws InterruptedException
      * @see #isResolutionAvailable(int, int)
      */
-    public IcyBufferedImage getImage(int series, int resolution, int z, int t, int c)
-            throws UnsupportedFormatException, IOException;
+    public IcyBufferedImage getImage(int series, int resolution, int z, int t, int c) throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Returns the image located at specified position.
@@ -224,10 +232,10 @@ public interface ImageProvider
      * @param t
      *        T position of the image (frame) we want retrieve
      * @return image
+     * @throws InterruptedException
      * @see #isResolutionAvailable(int, int)
      */
-    public IcyBufferedImage getImage(int series, int resolution, int z, int t)
-            throws UnsupportedFormatException, IOException;
+    public IcyBufferedImage getImage(int series, int resolution, int z, int t) throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Returns the image located at specified position.
@@ -239,9 +247,9 @@ public interface ImageProvider
      * @param t
      *        T position of the image (frame) we want retrieve
      * @return image
+     * @throws InterruptedException
      */
-    public IcyBufferedImage getImage(int series, int z, int t)
-            throws UnsupportedFormatException, IOException;
+    public IcyBufferedImage getImage(int series, int z, int t) throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Returns the image located at specified position.
@@ -251,6 +259,7 @@ public interface ImageProvider
      * @param t
      *        T position of the image (frame) we want retrieve
      * @return image
+     * @throws InterruptedException
      */
-    public IcyBufferedImage getImage(int z, int t) throws UnsupportedFormatException, IOException;
+    public IcyBufferedImage getImage(int z, int t) throws UnsupportedFormatException, IOException, InterruptedException;
 }

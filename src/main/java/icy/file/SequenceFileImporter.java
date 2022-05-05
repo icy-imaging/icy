@@ -72,7 +72,7 @@ public interface SequenceFileImporter extends SequenceIdImporter
      * @return <code>true</code> if the operation has succeeded and <code>false</code> otherwise.
      */
     @Override
-    public boolean open(String path, int flags) throws UnsupportedFormatException, IOException;
+    public boolean open(String path, int flags) throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Return the supported FileFilter for this importer.

@@ -423,9 +423,10 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable
      * 
      * @throws IOException
      * @throws UnsupportedFormatException
+     * @throws InterruptedException 
      */
     public SeriesSelectionDialog(SequenceFileImporter importer, String id)
-            throws UnsupportedFormatException, IOException
+            throws UnsupportedFormatException, IOException, InterruptedException
     {
         this(importer, id, Loader.getOMEXMLMetaData(importer, id));
     }

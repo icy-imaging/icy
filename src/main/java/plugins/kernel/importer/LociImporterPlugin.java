@@ -1289,7 +1289,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
     @SuppressWarnings("resource")
     @Override
-    public IcyBufferedImage getThumbnail(int series) throws UnsupportedFormatException, IOException
+    public IcyBufferedImage getThumbnail(int series) throws UnsupportedFormatException, IOException, InterruptedException
     {
         // no image currently opened
         if (getOpened() == null)

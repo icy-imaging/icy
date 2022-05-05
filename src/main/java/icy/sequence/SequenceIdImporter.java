@@ -38,7 +38,8 @@ import icy.image.ImageProvider;
  *
  * @author Stephane
  */
-public interface SequenceIdImporter extends ImageProvider, Closeable {
+public interface SequenceIdImporter extends ImageProvider, Closeable
+{
     public static final int FLAG_METADATA_MASK = 0x0003;
     /**
      * Flag to indicate we want to load only mandatory metadata informations (faster metadata loading)
@@ -62,16 +63,18 @@ public interface SequenceIdImporter extends ImageProvider, Closeable {
      * Calling this method will automatically close the previous opened image.<br>
      * Don't forget to call {@link #close()} to close the image when you're done.<br>
      *
-     * @param id    Image id, it can be a file path or URL or whatever depending the internal
-     *              import method.
-     * @param flags operation flag:<br>
-     *             <ul>
-     *              <li>{@link #FLAG_METADATA_MINIMUM} = load minimum metadata informations</li>
-     *              <li>{@link #FLAG_METADATA_ALL} = load all metadata informations</li>
-     *             </ul>
+     * @param id
+     *        Image id, it can be a file path or URL or whatever depending the internal
+     *        import method.
+     * @param flags
+     *        operation flag:<br>
+     *        <ul>
+     *        <li>{@link #FLAG_METADATA_MINIMUM} = load minimum metadata informations</li>
+     *        <li>{@link #FLAG_METADATA_ALL} = load all metadata informations</li>
+     *        </ul>
      * @return <code>true</code> if the operation has succeeded and <code>false</code> otherwise.
      */
-    public boolean open(String id, int flags) throws UnsupportedFormatException, IOException;
+    public boolean open(String id, int flags) throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Close the image which has been previously opened with {@link #open(String, int)} method.<br>
