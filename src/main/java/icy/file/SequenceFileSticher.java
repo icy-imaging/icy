@@ -18,20 +18,32 @@
  */
 package icy.file;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.stream.ImageInputStream;
 
 import icy.gui.frame.progress.FileFrame;
 import icy.sequence.DimensionId;
 import icy.sequence.MetaDataUtil;
 import icy.sequence.SequenceIdImporter;
+import icy.system.IcyExceptionHandler;
+import icy.system.thread.Processor;
 import icy.type.DataType;
 import icy.util.StringUtil;
 import icy.util.StringUtil.AlphanumComparator;
@@ -86,8 +98,7 @@ public class SequenceFileSticher
         void computeHashCode()
         {
             // don't use optional info for hashcode
-            hc = (sizeX << 0) ^ (sizeY << 4) ^ (sizeZ << 8) ^ (sizeT << 12) ^ (sizeC << 16)
-                    ^ ((dataType != null) ? (dataType.ordinal() >> 12) : 0);
+            hc = (sizeX << 0) ^ (sizeY << 4) ^ (sizeZ << 8) ^ (sizeT << 12) ^ (sizeC << 16) ^ ((dataType != null) ? (dataType.ordinal() >> 12) : 0);
 
             // if (!minimumMeta)
             // {
@@ -111,13 +122,13 @@ public class SequenceFileSticher
             {
                 final SequenceType st = (SequenceType) obj;
 
-                boolean result = (st.sizeX == sizeX) && (st.sizeY == sizeY) && (st.sizeZ == sizeZ)
-                        && (st.sizeT == sizeT) && (st.sizeC == sizeC) && (st.dataType == dataType);
+                boolean result = (st.sizeX == sizeX) && (st.sizeY == sizeY) && (st.sizeZ == sizeZ) && (st.sizeT == sizeT) && (st.sizeC == sizeC)
+                        && (st.dataType == dataType);
 
                 // optional meta data ?
                 if (!st.minimumMeta && !minimumMeta)
-                    result = result && (st.pixelSizeX == pixelSizeX) && (st.pixelSizeY == pixelSizeY)
-                            && (st.pixelSizeZ == pixelSizeZ) && (st.timeInterval == timeInterval);
+                    result = result && (st.pixelSizeX == pixelSizeX) && (st.pixelSizeY == pixelSizeY) && (st.pixelSizeZ == pixelSizeZ)
+                            && (st.timeInterval == timeInterval);
 
                 return result;
             }
@@ -145,14 +156,16 @@ public class SequenceFileSticher
          */
         public final SequenceFileImporter importer;
 
+        SequencePosition pos;
         private final int hc;
 
-        public SequenceIdent(String base, int series, SequenceType type, SequenceFileImporter importer)
+        public SequenceIdent(SequencePosition position, SequenceType type, SequenceFileImporter importer)
         {
             super();
 
-            this.base = base;
-            this.series = series;
+            this.pos = position;
+            this.base = position.getBase();
+            this.series = position.getIndexS();
             this.baseType = type;
             this.importer = importer;
 
@@ -337,9 +350,8 @@ public class SequenceFileSticher
 
         public void computeHashCode()
         {
-            hc = Float.floatToIntBits((float) indX) ^ (Float.floatToIntBits((float) indY) << 8)
-                    ^ (Float.floatToIntBits((float) indZ) << 16) ^ (Float.floatToIntBits((float) indT) << 24)
-                    ^ Float.floatToIntBits((float) posX) ^ (Float.floatToIntBits((float) posY) >> 8)
+            hc = Float.floatToIntBits((float) indX) ^ (Float.floatToIntBits((float) indY) << 8) ^ (Float.floatToIntBits((float) indZ) << 16)
+                    ^ (Float.floatToIntBits((float) indT) << 24) ^ Float.floatToIntBits((float) posX) ^ (Float.floatToIntBits((float) posY) >> 8)
                     ^ (Float.floatToIntBits((float) posZ) >> 16) ^ (Float.floatToIntBits((float) posT) >> 24);
         }
 
@@ -455,6 +467,29 @@ public class SequenceFileSticher
         public int compareTo(SequenceIndexPosition sip)
         {
             return compare(sip);
+        }
+    }
+
+    public static class SequenceIdentGetter implements Callable<SequenceIdent>
+    {
+        final SequencePosition pos;
+        final SequenceFileImporter importer;
+        final boolean minimumMetadata;
+
+        public SequenceIdentGetter(SequenceFileImporter importer, SequencePosition pos, boolean minimumMetadata)
+        {
+            super();
+
+            this.importer = importer;
+            this.pos = pos;
+            this.minimumMetadata = minimumMetadata;
+        }
+
+        @Override
+        public SequenceIdent call() throws Exception
+        {
+            // clone importer for each task instance
+            return getSequenceIdent(Loader.cloneSequenceFileImporter(importer), pos, minimumMetadata);
         }
     }
 
@@ -652,8 +687,8 @@ public class SequenceFileSticher
         @Override
         public String toString()
         {
-            return "Path=" + getPath() + " Position=[S:" + getIndexS() + " T:" + getIndexT() + " Z:" + getIndexZ()
-                    + " C:" + getIndexC() + " Y:" + getIndexY() + " X:" + getIndexX() + "]";
+            return "Path=" + getPath() + " Position=[S:" + getIndexS() + " T:" + getIndexT() + " Z:" + getIndexZ() + " C:" + getIndexC() + " Y:" + getIndexY()
+                    + " X:" + getIndexX() + "]";
         }
     }
 
@@ -723,7 +758,7 @@ public class SequenceFileSticher
                 for (String p : prefixes)
                     // better to just test on equality
                     if (prefix.equals(p))
-//                    if (prefix.endsWith(p))
+                        // if (prefix.endsWith(p))
                         return d;
 
                 return null;
@@ -807,8 +842,7 @@ public class SequenceFileSticher
                         end = result.length();
 
                     // assume 'separator + dimension id', remove them
-                    if ((st > 2) && (Character.isLetter(result.charAt(st - 1))
-                            && " -_".contains(result.substring(st - 2, st - 1))))
+                    if ((st > 2) && (Character.isLetter(result.charAt(st - 1)) && " -_".contains(result.substring(st - 2, st - 1))))
                         st -= 2;
                     // try others combinations
                     else if (st > 1)
@@ -1093,9 +1127,8 @@ public class SequenceFileSticher
         @Override
         public String toString()
         {
-            return "FilePosition [S:" + getValue(DimensionId.NULL, true) + " C:" + getValue(DimensionId.C, true) + " T:"
-                    + getValue(DimensionId.T, true) + " Z:" + getValue(DimensionId.Z, true) + " Y:" + getValue(DimensionId.Y, true)
-                    + " X:" + getValue(DimensionId.X, true) + "]";
+            return "FilePosition [S:" + getValue(DimensionId.NULL, true) + " C:" + getValue(DimensionId.C, true) + " T:" + getValue(DimensionId.T, true) + " Z:"
+                    + getValue(DimensionId.Z, true) + " Y:" + getValue(DimensionId.Y, true) + " X:" + getValue(DimensionId.X, true) + "]";
         }
     }
 
@@ -1399,8 +1432,7 @@ public class SequenceFileSticher
             if ((mt * mz * mc * my * mx) != size)
             {
                 // note that this can happen when thread is interrupted so just put a warning here
-                System.err.println("Warning: SequenceFileSticher - number of image doesn't match: " + size
-                        + " (expected = " + (mt * mz * mc * my * mx) + ")");
+                System.err.println("Warning: SequenceFileSticher - number of image doesn't match: " + size + " (expected = " + (mt * mz * mc * my * mx) + ")");
             }
 
             // store final sequence dimension
@@ -1483,8 +1515,7 @@ public class SequenceFileSticher
                     if (!acceptedNumberChunks.contains(Integer.valueOf(ind++)))
                     {
                         // assume 'separator + dimension id', remove them
-                        if ((st > 1) && (Character.isLetter(result.charAt(st - 1))
-                                && " -_".contains(result.substring(st - 2, st - 1))))
+                        if ((st > 1) && (Character.isLetter(result.charAt(st - 1)) && " -_".contains(result.substring(st - 2, st - 1))))
                             st -= 2;
                         // try others combinations
                         else if (st > 1)
@@ -1576,10 +1607,11 @@ public class SequenceFileSticher
      *        if true we try to determine the X, Y, Z, T and C image position otherwise a simple ascending T ordering is done
      * @param loadingFrame
      *        Loading dialog if any to show progress
+     * @throws ClosedByInterruptException
      * @see #groupFiles(SequenceFileImporter, Collection, boolean, FileFrame)
      */
-    public static Collection<SequenceFileGroup> groupAllFiles(SequenceFileImporter importer, Collection<String> paths,
-            boolean findPosition, FileFrame loadingFrame)
+    public static Collection<SequenceFileGroup> groupAllFiles(SequenceFileImporter importer, Collection<String> paths, boolean findPosition,
+            FileFrame loadingFrame) throws InterruptedException, ClosedByInterruptException
     {
         final List<String> sortedPaths = Loader.cleanNonImageFile(Loader.explode(new ArrayList<>(paths)));
 
@@ -1625,9 +1657,7 @@ public class SequenceFileSticher
             // filePositions.add(filePosition);
         }
 
-        final Map<SequenceIdent, SequenceFileGroup> result = new HashMap<SequenceIdent, SequenceFileGroup>();
-
-        // clean FilePosition grouped by base path and add them to group
+        // clean FilePosition grouped by base path
         for (List<FilePosition> positions : pathPositionsMap.values())
         {
             // remove position information which never change
@@ -1643,10 +1673,47 @@ public class SequenceFileSticher
                 ;
             while (cleanPositions(positions, DimensionId.X))
                 ;
+        }
 
-            // add position to group(s)
+        final Map<SequenceIdent, SequenceFileGroup> result = new HashMap<SequenceIdent, SequenceFileGroup>();
+
+        // add FilePosition grouped by base path to group
+        for (List<FilePosition> positions : pathPositionsMap.values())
+        {
+            final Processor processor = new Processor(positions.size(), Processor.DEFAULT_MAX_PROCESSING);
+            final List<Future<SequenceIdent>> tasks = new ArrayList<>();
+
+            // add tasks
             for (FilePosition pos : positions)
-                addToGroup(result, new SequencePosition(pos), importer);
+                tasks.add(processor.submit(new SequenceIdentGetter(importer, new SequencePosition(pos), true)));
+
+            boolean exception = false;
+            for (Future<SequenceIdent> task : tasks)
+            {
+                try
+                {
+                    // build groups
+                    addToGroup(result, task.get(), importer);
+                }
+                catch (InterruptedException ex)
+                {
+                    // stop now
+                    processor.removeAllWaitingTasks();
+                    processor.shutdownNow();
+
+                    // re-throw it
+                    throw new InterruptedException("Files grouping process interrupted");
+                }
+                catch (ExecutionException e)
+                {
+                    // display it only once
+                    if (!exception)
+                    {
+                        e.getCause().printStackTrace();
+                        exception = true;
+                    }
+                }
+            }
         }
 
         /*
@@ -1794,10 +1861,12 @@ public class SequenceFileSticher
      *        if true we try to determine the X, Y, Z, T and C image position otherwise a simple ascending T ordering is done
      * @param loadingFrame
      *        Loading dialog if any to show progress
+     * @throws InterruptedException
+     * @throws ClosedByInterruptException
      * @see #groupAllFiles(SequenceFileImporter, Collection, boolean, FileFrame)
      */
-    public static SequenceFileGroup groupFiles(SequenceFileImporter importer, Collection<String> paths,
-            boolean findPosition, FileFrame loadingFrame)
+    public static SequenceFileGroup groupFiles(SequenceFileImporter importer, Collection<String> paths, boolean findPosition, FileFrame loadingFrame)
+            throws InterruptedException, ClosedByInterruptException
     {
         SequenceFileGroup result = null;
 
@@ -1828,8 +1897,11 @@ public class SequenceFileSticher
 
     /**
      * @return opened {@link SequenceFileImporter} or <i>null</i> if we can't open the given path
+     * @throws ClosedByInterruptException
+     * @throws InterruptedException
      */
     static SequenceFileImporter tryOpen(SequenceFileImporter importer, String path, boolean minimumMetadata)
+            throws ClosedByInterruptException, InterruptedException
     {
         final boolean tryAnotherImporter;
         SequenceFileImporter imp;
@@ -1866,18 +1938,18 @@ public class SequenceFileSticher
                 // try to open it (require default metadata otherwise pixel size may miss)
                 imp.open(path, minimumMetadata ? SequenceIdImporter.FLAG_METADATA_MINIMUM : 0);
             }
-            catch (ClosedByInterruptException e)
-            {
-                // interrupted --> just return null
-                return null;
-            }
             catch (Throwable t)
             {
+                if (t instanceof InterruptedException)
+                    throw (InterruptedException) t;
+                if (t instanceof ClosedByInterruptException)
+                    throw (ClosedByInterruptException) t;
+
                 // can't be opened... try with an other importer
                 if (tryAnotherImporter)
                     return tryOpen(null, path, minimumMetadata);
 
-                // can't open importer
+                // can't open --> return null
                 return null;
             }
         }
@@ -1903,40 +1975,137 @@ public class SequenceFileSticher
     // group.positions.add(position);
     // }
 
-    private static void addToGroup(Map<SequenceIdent, SequenceFileGroup> groups, SequencePosition position,
-            SequenceFileImporter importer)
+    private static void addToGroup(Map<SequenceIdent, SequenceFileGroup> groups, SequenceIdent ident, SequenceFileImporter importer)
+            throws ClosedByInterruptException, InterruptedException
     {
-        SequenceFileGroup group = groups.get(getSequenceIdent(importer, position, true));
+        if (ident == null)
+            return;
+
+        SequenceFileGroup group = groups.get(ident);
 
         // no group yet for this base path
         if (group == null)
         {
             // get complete ident for this position
-            final SequenceIdent ident = getSequenceIdent(importer, position, false);
+            final SequenceIdent completeIdent = getSequenceIdent(importer, ident.pos, false);
 
-            // can't add this position...
-            if (ident == null)
+            // can't add this position ? stop here
+            if (completeIdent == null)
                 return;
 
             // create and add it
-            group = new SequenceFileGroup(ident);
-            groups.put(ident, group);
+            group = new SequenceFileGroup(completeIdent);
+            groups.put(completeIdent, group);
         }
 
         // add to the group
-        group.positions.add(position);
+        group.positions.add(ident.pos);
+    }
+
+    // private static void addToGroup(Map<SequenceIdent, SequenceFileGroup> groups, SequencePosition position, SequenceFileImporter importer)
+    // throws ClosedByInterruptException, InterruptedException
+    // {
+    // SequenceFileGroup group = groups.get(getSequenceIdent(importer, position, true));
+    //
+    // // no group yet for this base path
+    // if (group == null)
+    // {
+    // // get complete ident for this position
+    // final SequenceIdent ident = getSequenceIdent(importer, position, false);
+    //
+    // // can't add this position ? stop here
+    // if (ident != null)
+    // return;
+    //
+    // // create and add it
+    // group = new SequenceFileGroup(ident);
+    // groups.put(ident, group);
+    // }
+    //
+    // // add to the group
+    // group.positions.add(position);
+    // }
+
+    private static SequenceType getSequenceTypeFast(String path)
+    {
+        final String fileExt = FileUtil.getFileExtension(path, false).toLowerCase();
+
+        // better to not try with TIF files (can be OME-TIF)
+        if (StringUtil.equals("tif", fileExt))
+            return null;
+        if (StringUtil.equals("tiff", fileExt))
+            return null;
+
+        final SequenceType result = new SequenceType();
+        final Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(fileExt);
+
+        while (readers.hasNext())
+        {
+            try
+            {
+                final ImageReader reader = readers.next();
+                final ImageInputStream is = ImageIO.createImageInputStream(new File(path));
+
+                try
+                {
+                    reader.setInput(is, false, true);
+
+                    ImageTypeSpecifier type = reader.getRawImageType(0);
+                    if (type == null)
+                        type = reader.getImageTypes(0).next();
+
+                    result.sizeC = type.getNumComponents();
+                    result.sizeX = reader.getWidth(0);
+                    result.sizeY = reader.getHeight(0);
+                    result.sizeT = reader.getNumImages(true);
+                    result.sizeZ = 1;
+                    result.dataType = (type.getBitsPerBand(0) == 16) ? DataType.USHORT : DataType.UBYTE;
+
+                    result.computeHashCode();
+
+                    return result;
+                }
+                finally
+                {
+                    reader.dispose();
+                    is.close();
+                }
+            }
+            catch (IOException e)
+            {
+                // error, try next...
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+
     }
 
     /**
      * Build and return sequence ident for specified {@link SequencePosition}
+     * 
+     * @throws InterruptedException
+     * @throws ClosedByInterruptException
      */
-    private static SequenceIdent getSequenceIdent(SequenceFileImporter importer, SequencePosition position,
-            boolean minimumMetadata)
+    static SequenceIdent getSequenceIdent(SequenceFileImporter importer, SequencePosition position, boolean minimumMetadata)
+            throws ClosedByInterruptException, InterruptedException
     {
-        // try to open the image
-        final SequenceFileImporter imp = tryOpen(importer, position.getPath(), minimumMetadata);
+        final String path = position.getPath();
 
-        // can't open it (or interrupted) ? --> return null
+        // we want minimal metadata ?
+        if (minimumMetadata)
+        {
+            // try the fast method
+            final SequenceType type = getSequenceTypeFast(path);
+            if (type != null)
+                return new SequenceIdent(position, type, importer);
+        }
+
+        // try to open the image
+        final SequenceFileImporter imp = tryOpen(importer, path, minimumMetadata);
+
+        // can't open it ? --> return null
         if (imp == null)
             return null;
 
@@ -1967,12 +2136,16 @@ public class SequenceFileSticher
             // can compute hash code
             type.computeHashCode();
 
-            return new SequenceIdent(position.getBase(), position.getIndexS(), type, imp);
+            return new SequenceIdent(position, type, imp);
         }
         catch (Throwable t)
         {
-            // error while retrieve metadata
-            t.printStackTrace();
+            if (t instanceof InterruptedException)
+                throw (InterruptedException) t;
+            if (t instanceof ClosedByInterruptException)
+                throw (ClosedByInterruptException) t;
+
+            IcyExceptionHandler.showErrorMessage(t, true);
             return null;
         }
         finally
