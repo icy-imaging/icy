@@ -142,40 +142,39 @@ public class SequencePrefetcher extends Thread
     @Override
     public void run()
     {
-        while (!interrupted())
+        try
         {
-            final PrefetchEntry entry;
-
-            synchronized (prefetchSet)
+            while (!interrupted())
             {
-                entry = prefetchQueue.pollFirst();
-                if (entry != null)
-                    prefetchSet.remove(entry);
-            }
+                final PrefetchEntry entry;
 
-            // need to prefetch something ?
-            if (entry != null)
-            {
-                // we use weak reference to not retain Sequence with prefetch process..
-                final Sequence entrySeq = entry.sequence.get();
-
-                // prefetch data
-                if (entrySeq != null)
-                    entrySeq.getImage(entry.t, entry.z, true);
-            }
-            else
-            {
-                // nothing to do..
-                try
+                synchronized (prefetchSet)
                 {
-                    // sleep a bit
+                    entry = prefetchQueue.pollFirst();
+                    if (entry != null)
+                        prefetchSet.remove(entry);
+                }
+
+                // need to prefetch something ?
+                if (entry != null)
+                {
+                    // we use weak reference to not retain Sequence with prefetch process..
+                    final Sequence entrySeq = entry.sequence.get();
+
+                    // prefetch data
+                    if (entrySeq != null)
+                        entrySeq.getImage(entry.t, entry.z, true);
+                }
+                else
+                {
+                    // nothing to do, sleep a bit
                     sleep(1);
                 }
-                catch (InterruptedException e)
-                {
-                    // ignore safely
-                }
             }
+        }
+        catch (InterruptedException e)
+        {
+            // stop here...
         }
     }
 }
