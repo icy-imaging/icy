@@ -21,6 +21,7 @@ package icy.file;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -101,6 +102,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     // position index array (stored in XYZTC order) to quickly find an image given its (XY)ZTC position
     protected SequencePosition[] positions;
 
+    protected boolean ordering;
     protected int openFlags;
 
     // internals
@@ -121,7 +123,19 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
         currentGroup = null;
         currentMetadata = null;
+        // default
+        ordering = true;
         importersPool = new HashMap<String, SequenceFileImporter>();
+    }
+
+    public void setOrdering(boolean ordering)
+    {
+        this.ordering = ordering;
+    }
+
+    public boolean getOrdering()
+    {
+        return ordering;
     }
 
     @Override
@@ -184,11 +198,12 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     /**
+     * @throws InterruptedException
      * @deprecated Better to use {@link #open(Collection, int)} or {@link #open(SequenceFileGroup, int)} for this importer
      */
     @Deprecated
     @Override
-    public boolean open(String path, int flags) throws UnsupportedFormatException, IOException
+    public boolean open(String path, int flags) throws UnsupportedFormatException, IOException, InterruptedException
     {
         open(CollectionUtil.createArrayList(path), flags);
 
@@ -196,13 +211,17 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     /**
-     * Open a list of ids
+     * Open a list of ids.<br>
+     * Prefer to use {@link SequenceFileSticher#groupFiles(SequenceFileImporter, Collection, boolean, icy.gui.frame.progress.FileFrame)
+     * then use #open(SequenceFileGroup, int) instead.
      * 
      * @param ids
+     * @throws InterruptedException
+     * @throws ClosedByInterruptException
      */
-    public void open(Collection<String> ids, int flags)
+    public void open(Collection<String> ids, int flags) throws InterruptedException, ClosedByInterruptException
     {
-        open(SequenceFileSticher.groupFiles(null, ids, true, null), flags);
+        open(SequenceFileSticher.groupFiles(null, ids, ordering, null), flags);
     }
 
     /**
@@ -243,10 +262,10 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
      * 
      * @throws IOException
      * @throws UnsupportedFormatException
+     * @throws InterruptedException
      * @see #releaseImporter(String, SequenceFileImporter)
      */
-    protected boolean openImporter(SequenceFileImporter result, String path)
-            throws UnsupportedFormatException, IOException
+    protected boolean openImporter(SequenceFileImporter result, String path) throws UnsupportedFormatException, IOException, InterruptedException
     {
         // importer is already opened ? --> close it first
         if (!StringUtil.isEmpty(result.getOpened()))
@@ -261,9 +280,11 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     /**
      * Create and open a new importer for the given path (internal use only)
+     * 
+     * @throws InterruptedException
      */
     protected SequenceFileImporter createImporter(String path)
-            throws InstantiationException, IllegalAccessException, UnsupportedFormatException, IOException
+            throws InstantiationException, IllegalAccessException, UnsupportedFormatException, IOException, InterruptedException
     {
         if (!isOpen())
             return null;
@@ -322,10 +343,11 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
      * 
      * @throws IOException
      * @throws UnsupportedFormatException
+     * @throws InterruptedException
      * @see #releaseImporter(String, SequenceFileImporter)
      */
     @SuppressWarnings("resource")
-    public SequenceFileImporter getImporter(String path) throws IOException, UnsupportedFormatException
+    public SequenceFileImporter getImporter(String path) throws IOException, UnsupportedFormatException, InterruptedException
     {
         if (StringUtil.isEmpty(path))
             return null;
@@ -408,8 +430,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         for (SequencePosition pos : currentGroup.positions)
         {
             // compute index
-            final int ind = getIdIndex(pos.getIndexX(), pos.getIndexY(), pos.getIndexZ(), pos.getIndexT(),
-                    pos.getIndexC());
+            final int ind = getIdIndex(pos.getIndexX(), pos.getIndexY(), pos.getIndexZ(), pos.getIndexT(), pos.getIndexC());
             // set path for this index
             positions[ind] = pos;
         }
@@ -424,8 +445,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
             return false;
 
         // if total size XY != single image size XY --> we have a stitched image
-        return (currentGroup.totalSizeX != currentGroup.ident.baseType.sizeX)
-                || (currentGroup.totalSizeY != currentGroup.ident.baseType.sizeY);
+        return (currentGroup.totalSizeX != currentGroup.ident.baseType.sizeX) || (currentGroup.totalSizeY != currentGroup.ident.baseType.sizeY);
     }
 
     /**
@@ -529,13 +549,13 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     @SuppressWarnings("deprecation")
     @Override
-    public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException
+    public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException, InterruptedException
     {
         return (OMEXMLMetadataImpl) getOMEXMLMetaData();
     }
 
     @Override
-    public OMEXMLMetadata getOMEXMLMetaData() throws UnsupportedFormatException, IOException
+    public OMEXMLMetadata getOMEXMLMetaData() throws UnsupportedFormatException, IOException, InterruptedException
     {
         if (!isOpen())
             return null;
@@ -548,14 +568,13 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     @SuppressWarnings({"static-access", "resource"})
-    protected OMEXMLMetadata buildMetaData() throws UnsupportedFormatException, IOException
+    protected OMEXMLMetadata buildMetaData() throws UnsupportedFormatException, IOException, InterruptedException
     {
         final SequenceFileGroup group = currentGroup;
         final SequenceIdent ident = group.ident;
         final SequenceType baseType = ident.baseType;
         // single image in the group ? --> directly use its path as name
-        final String name = FileUtil.getFileName(
-                (group.positions.size() == 1) ? group.positions.get(0).getPath() : group.getBasePath(), false);
+        final String name = FileUtil.getFileName((group.positions.size() == 1) ? group.positions.get(0).getPath() : group.getBasePath(), false);
 
         OMEXMLMetadata result = null;
 
@@ -584,8 +603,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
             result = MetaDataUtil.createMetadata(name);
 
         // minimum metadata
-        MetaDataUtil.setMetaData(result, group.totalSizeX, group.totalSizeY, group.totalSizeC, group.totalSizeZ,
-                group.totalSizeT, baseType.dataType, true);
+        MetaDataUtil.setMetaData(result, group.totalSizeX, group.totalSizeY, group.totalSizeC, group.totalSizeZ, group.totalSizeT, baseType.dataType, true);
         // pixel size & time interval
         if (baseType.pixelSizeX > 0d)
             MetaDataUtil.setPixelSizeX(result, 0, baseType.pixelSizeX);
@@ -650,8 +668,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
                                     }
 
                                     // retrieve the original Plane object
-                                    metaPlane = MetaDataUtil.getPlane(metaPixels, cursor.internalT, cursor.internalZ,
-                                            cursor.internalC);
+                                    metaPlane = MetaDataUtil.getPlane(metaPixels, cursor.internalT, cursor.internalZ, cursor.internalC);
 
                                     if (metaPlane != null)
                                     {
@@ -672,9 +689,8 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
                             metaPlane = new Plane();
 
                         // retrieve plane index (use FormatsTools to get it as metadata is not yet complete here)
-                        final int resultPlaneInd = FormatTools.getIndex(result.getPixelsDimensionOrder(0).getValue(),
-                                group.totalSizeZ, group.totalSizeC, group.totalSizeT,
-                                group.totalSizeZ * group.totalSizeC * group.totalSizeT, z, c, t);
+                        final int resultPlaneInd = FormatTools.getIndex(result.getPixelsDimensionOrder(0).getValue(), group.totalSizeZ, group.totalSizeC,
+                                group.totalSizeT, group.totalSizeZ * group.totalSizeC * group.totalSizeT, z, c, t);
 
                         // set plane
                         resultPixels.setPlane(resultPlaneInd, metaPlane);
@@ -693,7 +709,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     @SuppressWarnings("resource")
     @Override
-    public int getTileHeight(int series) throws UnsupportedFormatException, IOException
+    public int getTileHeight(int series) throws UnsupportedFormatException, IOException, InterruptedException
     {
         if (!isOpen())
             return 0;
@@ -728,7 +744,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     @SuppressWarnings("resource")
     @Override
-    public int getTileWidth(int series) throws UnsupportedFormatException, IOException
+    public int getTileWidth(int series) throws UnsupportedFormatException, IOException, InterruptedException
     {
         if (!isOpen())
             return 0;
@@ -763,14 +779,13 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     // internal use only
     @SuppressWarnings("resource")
-    private Object getPixelsInternal(SequencePosition pos, int series, int resolution, Rectangle region, int z, int t,
-            int c) throws UnsupportedFormatException, IOException
+    private Object getPixelsInternal(SequencePosition pos, int series, int resolution, Rectangle region, int z, int t, int c)
+            throws UnsupportedFormatException, IOException, InterruptedException
     {
         if (pos == null)
         {
             final SequenceType bt = currentGroup.ident.baseType;
-            System.err.println("SequenceIdGroupImporter.getPixelsInternal: no image for tile [" + (region.x / bt.sizeX)
-                    + "," + (region.y / bt.sizeY) + "] !");
+            System.err.println("SequenceIdGroupImporter.getPixelsInternal: no image for tile [" + (region.x / bt.sizeX) + "," + (region.y / bt.sizeY) + "] !");
             return null;
         }
 
@@ -779,8 +794,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
         if (imp == null)
         {
-            System.err.println("SequenceIdGroupImporter.getPixelsInternal: cannot get importer for image '"
-                    + pos.getPath() + "' !");
+            System.err.println("SequenceIdGroupImporter.getPixelsInternal: cannot get importer for image '" + pos.getPath() + "' !");
             return null;
         }
 
@@ -798,7 +812,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     @Override
     public Object getPixels(int series, int resolution, Rectangle rectangle, int z, int t, int c)
-            throws UnsupportedFormatException, IOException
+            throws UnsupportedFormatException, IOException, InterruptedException
     {
         if (!isOpen())
             return null;
@@ -818,12 +832,11 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
         // single tile ?
         if (tiles.size() == 1)
-            return getPixelsInternal(positions[cursor.index + tiles.get(0).index], series, resolution, region,
-                    cursor.internalZ, cursor.internalT, cursor.internalC);
+            return getPixelsInternal(positions[cursor.index + tiles.get(0).index], series, resolution, region, cursor.internalZ, cursor.internalT,
+                    cursor.internalC);
 
         // define XY region to load (wanted resolution)
-        final Rectangle finalRegion = new Rectangle(region.x >> resolution, region.y >> resolution,
-                region.width >> resolution, region.height >> resolution);
+        final Rectangle finalRegion = new Rectangle(region.x >> resolution, region.y >> resolution, region.width >> resolution, region.height >> resolution);
 
         // multiple tiles, create result buffer
         final Object result = Array1DUtil.createArray(baseType.dataType, finalRegion.width * finalRegion.height);
@@ -838,16 +851,16 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
             // adjusted tile region
             final Rectangle tileRegion = tile.region.intersection(region);
             // get tile pixels
-            final Object pixels = getPixelsInternal(positions[cursor.index + tile.index], series, resolution,
-                    tileRegion, cursor.internalZ, cursor.internalT, cursor.internalC);
+            final Object pixels = getPixelsInternal(positions[cursor.index + tile.index], series, resolution, tileRegion, cursor.internalZ, cursor.internalT,
+                    cursor.internalC);
 
             // cannot retrieve pixels for this tile ? --> ignore
             if (pixels == null)
                 continue;
 
             // tile region (wanted resolution)
-            final Rectangle finalTileRegion = new Rectangle(tileRegion.x >> resolution, tileRegion.y >> resolution,
-                    tileRegion.width >> resolution, tileRegion.height >> resolution);
+            final Rectangle finalTileRegion = new Rectangle(tileRegion.x >> resolution, tileRegion.y >> resolution, tileRegion.width >> resolution,
+                    tileRegion.height >> resolution);
             // destination
             final Point pt = finalTileRegion.getLocation();
             pt.translate(dx, dy);
@@ -861,14 +874,13 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     // internal use only
-    private IcyBufferedImage getImageInternal(SequencePosition pos, int series, int resolution, Rectangle region, int z,
-            int t, int c) throws UnsupportedFormatException, IOException
+    private IcyBufferedImage getImageInternal(SequencePosition pos, int series, int resolution, Rectangle region, int z, int t, int c)
+            throws UnsupportedFormatException, IOException, InterruptedException
     {
         if (pos == null)
         {
             final SequenceType bt = currentGroup.ident.baseType;
-            System.err.println("SequenceIdGroupImporter.getImageInternal: no image for tile [" + (region.x / bt.sizeX)
-                    + "," + (region.y / bt.sizeY) + "] !");
+            System.err.println("SequenceIdGroupImporter.getImageInternal: no image for tile [" + (region.x / bt.sizeX) + "," + (region.y / bt.sizeY) + "] !");
             return null;
         }
 
@@ -877,8 +889,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
         if (imp == null)
         {
-            System.err.println("SequenceIdGroupImporter.getImageInternal: cannot get importer for image '"
-                    + pos.getPath() + "' !");
+            System.err.println("SequenceIdGroupImporter.getImageInternal: cannot get importer for image '" + pos.getPath() + "' !");
             return null;
         }
 
@@ -896,7 +907,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     // internal use only, at this point c cannot be -1
     private IcyBufferedImage getImageInternal(int series, int resolution, Rectangle rectangle, int z, int t, int c)
-            throws UnsupportedFormatException, IOException
+            throws UnsupportedFormatException, IOException, InterruptedException
     {
         if (!isOpen())
             return null;
@@ -916,16 +927,14 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
         // single tile ?
         if (tiles.size() == 1)
-            return getImageInternal(positions[cursor.index + tiles.get(0).index], series, resolution, region,
-                    cursor.internalZ, cursor.internalT, cursor.internalC);
+            return getImageInternal(positions[cursor.index + tiles.get(0).index], series, resolution, region, cursor.internalZ, cursor.internalT,
+                    cursor.internalC);
 
         // define XY region to load (wanted resolution)
-        final Rectangle finalRegion = new Rectangle(region.x >> resolution, region.y >> resolution,
-                region.width >> resolution, region.height >> resolution);
+        final Rectangle finalRegion = new Rectangle(region.x >> resolution, region.y >> resolution, region.width >> resolution, region.height >> resolution);
 
         // multiple tiles, create result image
-        final IcyBufferedImage result = new IcyBufferedImage(finalRegion.width, finalRegion.height, 1,
-                baseType.dataType);
+        final IcyBufferedImage result = new IcyBufferedImage(finalRegion.width, finalRegion.height, 1, baseType.dataType);
         // colormap save
         IcyColorMap colormap = null;
         // deltas to put tile to region origin
@@ -938,8 +947,8 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
             // adjusted tile region
             final Rectangle tileRegion = tile.region.intersection(region);
             // get tile pixels
-            final IcyBufferedImage image = getImageInternal(positions[cursor.index + tile.index], series, resolution,
-                    tileRegion, cursor.internalZ, cursor.internalT, cursor.internalC);
+            final IcyBufferedImage image = getImageInternal(positions[cursor.index + tile.index], series, resolution, tileRegion, cursor.internalZ,
+                    cursor.internalT, cursor.internalC);
 
             // cannot retrieve pixels for this tile ? --> ignore
             if (image == null)
@@ -967,7 +976,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     @Override
     public IcyBufferedImage getImage(int series, int resolution, Rectangle rectangle, int z, int t, int c)
-            throws UnsupportedFormatException, IOException
+            throws UnsupportedFormatException, IOException, InterruptedException
     {
         if (!isOpen())
             return null;
@@ -1013,7 +1022,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     @SuppressWarnings("resource")
     @Override
-    public IcyBufferedImage getThumbnail(int series) throws UnsupportedFormatException, IOException
+    public IcyBufferedImage getThumbnail(int series) throws UnsupportedFormatException, IOException, InterruptedException
     {
         final OMEXMLMetadata meta = getOMEXMLMetaData();
 
