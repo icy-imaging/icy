@@ -1,3 +1,20 @@
+Icy 2.4.2.0 - 09/05/2022
+------------------------
+
+Application
+* Loader
+ - fixed unresponsive UI when loading large group of file
+ - improved performance on file group loading
+ - faster preview refresh
+ - fixed others smalls issues with file loading in general
+
+Developer
+* fixed a small bug where embedded sub class plugin couldn't be found in PluginLoader plugin list
+* AbstractImageProvider: added InterruptedException + small fix on process interruption (we were removing interruption state)
+* SequencePrefetcher: fixed incorrect InterruptedException handling
+* SequenceFileGroupImporter: added 'ordering' parameter (when directly opening a list of file)
+
+
 Icy 2.4.1.0 - 28/04/2022
 ------------------------
 
