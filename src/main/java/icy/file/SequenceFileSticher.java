@@ -1981,21 +1981,27 @@ public class SequenceFileSticher
         if (ident == null)
             return;
 
-        SequenceFileGroup group = groups.get(ident);
+        SequenceFileGroup group;
 
-        // no group yet for this base path
-        if (group == null)
+        // multi-thread access here --> synchronize
+        synchronized (groups)
         {
-            // get complete ident for this position
-            final SequenceIdent completeIdent = getSequenceIdent(importer, ident.pos, false);
+            group = groups.get(ident);
 
-            // can't add this position ? stop here
-            if (completeIdent == null)
-                return;
+            // no group yet for this base path
+            if (group == null)
+            {
+                // get complete ident for this position
+                final SequenceIdent completeIdent = getSequenceIdent(importer, ident.pos, false);
 
-            // create and add it
-            group = new SequenceFileGroup(completeIdent);
-            groups.put(completeIdent, group);
+                // can't add this position ? stop here
+                if (completeIdent == null)
+                    return;
+
+                // create and add it
+                group = new SequenceFileGroup(completeIdent);
+                groups.put(completeIdent, group);
+            }
         }
 
         // add to the group
