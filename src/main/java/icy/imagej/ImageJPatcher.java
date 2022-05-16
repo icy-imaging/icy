@@ -82,13 +82,10 @@ public class ImageJPatcher
         hacker.replaceMethod("ij.ImageJ", "public void configureProxy()");
 
         // override behavior of ij.Menus
-        hacker.insertAfterMethod("ij.Menus",
-                "public void installUserPlugin(java.lang.String className, boolean force)");
+        hacker.insertAfterMethod("ij.Menus", "public void installUserPlugin(java.lang.String className, boolean force)");
         hacker.insertAfterMethod("ij.Menus", "public static void updateMenus()");
-        hacker.insertAfterMethod("ij.Menus",
-                "public static synchronized void updateWindowMenuItem(java.lang.String oldLabel, java.lang.String newLabel)");
-        hacker.insertAfterMethod("ij.Menus",
-                "public static synchronized void addOpenRecentItem(java.lang.String path)");
+        hacker.insertAfterMethod("ij.Menus", "public static synchronized void updateWindowMenuItem(java.lang.String oldLabel, java.lang.String newLabel)");
+        hacker.insertAfterMethod("ij.Menus", "public static synchronized void addOpenRecentItem(java.lang.String path)");
         hacker.insertAfterMethod("ij.Menus",
                 "public static int installPlugin(java.lang.String plugin, char menuCode, java.lang.String command, java.lang.String shortcut, ij.ImageJ ij, int result)");
 
@@ -114,15 +111,26 @@ public class ImageJPatcher
         // override behavior of MacAdapter
         if (SystemUtil.isMac())
         {
-            hacker.replaceMethod("MacAdapter", "public void run(java.lang.String arg)");
-            hacker.replaceMethod("MacAdapter", "public void handleAbout(com.apple.eawt.ApplicationEvent e)");
-            hacker.replaceMethod("MacAdapter", "public void handleOpenApplication(com.apple.eawt.ApplicationEvent e)");
-            hacker.replaceMethod("MacAdapter", "public void handleOpenFile(com.apple.eawt.ApplicationEvent e)");
-            hacker.replaceMethod("MacAdapter", "public void handlePreferences(com.apple.eawt.ApplicationEvent e)");
-            hacker.replaceMethod("MacAdapter", "public void handlePrintFile(com.apple.eawt.ApplicationEvent e)");
-            hacker.replaceMethod("MacAdapter",
-                    "public void handleReOpenApplication(com.apple.eawt.ApplicationEvent e)");
-            hacker.replaceMethod("MacAdapter", "public void handleQuit(com.apple.eawt.ApplicationEvent e)");
+            if (SystemUtil.getJavaVersionAsNumber() >= 9)
+            {
+                hacker.replaceMethod("ij.plugin.MacAdapter9", "public void run()");
+                hacker.replaceMethod("ij.plugin.MacAdapter9", "public void run(java.lang.String arg)");
+                hacker.replaceMethod("ij.plugin.MacAdapter9", "public void handleAbout(java.awt.desktop.AboutEvent e)");
+                hacker.replaceMethod("ij.plugin.MacAdapter9", "public void openFiles(java.awt.desktop.OpenFilesEvent e)");
+                hacker.replaceMethod("ij.plugin.MacAdapter9",
+                        "public void handleQuitRequestWith(java.awt.desktop.QuitEvent e, java.awt.desktop.QuitResponse r)");
+            }
+            else
+            {
+                hacker.replaceMethod("ij.plugin.MacAdapter", "public void run(java.lang.String arg)");
+                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleAbout(com.apple.eawt.ApplicationEvent e)");
+                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleOpenApplication(com.apple.eawt.ApplicationEvent e)");
+                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleOpenFile(com.apple.eawt.ApplicationEvent e)");
+                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handlePreferences(com.apple.eawt.ApplicationEvent e)");
+                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handlePrintFile(com.apple.eawt.ApplicationEvent e)");
+                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleReOpenApplication(com.apple.eawt.ApplicationEvent e)");
+                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleQuit(com.apple.eawt.ApplicationEvent e)");
+            }
         }
 
         // load classes at the end
@@ -140,17 +148,22 @@ public class ImageJPatcher
         hacker.loadClass("ij.Menus", ij.IJEventListener.class);
         hacker.loadClass("ij.WindowManager", ij.IJEventListener.class);
         // hacker.loadClass("ij.ImagePlus");
-//        try
-//        {
-//            hacker.loadClass("ij.gui.ImageWindow", ij.gui.DialogListener.class);
-//        }
-//        catch (LinkageError le)
-//        {
-//            // ignore this one with Java 9 as it will load up at same time than ij.IJ class
-//            if (SystemUtil.getJavaVersionAsNumber() < 9)
-//                throw le;
-//        }
+        // try
+        // {
+        // hacker.loadClass("ij.gui.ImageWindow", ij.gui.DialogListener.class);
+        // }
+        // catch (LinkageError le)
+        // {
+        // // ignore this one with Java 9 as it will load up at same time than ij.IJ class
+        // if (SystemUtil.getJavaVersionAsNumber() < 9)
+        // throw le;
+        // }
         if (SystemUtil.isMac())
-            hacker.loadClass("MacAdapter", ij.IJEventListener.class);
+        {
+            if (SystemUtil.getJavaVersionAsNumber() >= 9)
+                hacker.loadClass("ij.plugin.MacAdapter9", ij.IJEventListener.class);
+            else
+                hacker.loadClass("ij.plugin.MacAdapter", ij.IJEventListener.class);
+        }
     }
 }

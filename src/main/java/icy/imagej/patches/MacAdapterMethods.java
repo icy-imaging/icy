@@ -18,6 +18,7 @@
  */
 package icy.imagej.patches;
 
+import ij.plugin.MacAdapter;
 
 /**
  * @author Stephane
@@ -29,42 +30,42 @@ public class MacAdapterMethods
         // prevent instantiation of utility class
     }
 
-    public static void run(final Object obj, Object event)
+    public static void run(final MacAdapter obj, String arg)
     {
         // do nothing
     }
 
-    public static void handleAbout(final Object obj, Object event)
+    public static void handleAbout(final MacAdapter obj, Object event)
     {
         // do nothing
     }
 
-    public static void handleOpenApplication(final Object obj, Object event)
+    public static void handleOpenApplication(final MacAdapter obj, Object event)
     {
         // do nothing
     }
 
-    public static void handleOpenFile(final Object obj, Object event)
+    public static void handleOpenFile(final MacAdapter obj, Object event)
     {
         // do nothing
     }
 
-    public static void handlePreferences(final Object obj, Object event)
+    public static void handlePreferences(final MacAdapter obj, Object event)
     {
         // do nothing
     }
 
-    public static void handlePrintFile(final Object obj, Object event)
+    public static void handlePrintFile(final MacAdapter obj, Object event)
     {
         // do nothing
     }
 
-    public static void handleQuit(final Object obj, Object event)
+    public static void handleQuit(final MacAdapter obj, Object event)
     {
         // do nothing
     }
 
-    public static void handleReOpenApplication(final Object obj, Object event)
+    public static void handleReOpenApplication(final MacAdapter obj, Object event)
     {
         // do nothing
     }
