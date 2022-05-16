@@ -1,4 +1,7 @@
-//--version--1.4
+//--version--1.6
+// 1.6 adds the '?' button that points to the wiki page
+//     panel labels are now drawn on an overlay
+//     added overlay commands and copy to system clipboard to the rightclick menu
 // Montage tools for easy montage manipulation
 // jerome.mutterer at ibmp.fr
 
@@ -9,7 +12,7 @@ function versionCheck() {
 }
 
 macro "Auto Montage Action Tool - C00fF0077C0f0F9977Cf00F9077C888F0977" {
-    
+
     setBatchMode(true);
     b=bitDepth;
     if ((b!=24)&&(nSlices==1)) 	{ exit("Stack, Composite, or RGB image required.");}
@@ -51,7 +54,7 @@ macro "Select Panels Tool - Cf00R0077R9077C888R9977R0977"{
     id=getImageID;
     t=getTitle;
     selectImage(id);
-     xn = info("xMontage");
+    xn = info("xMontage");
     yn = info("yMontage");
     if ((xn==0)||(yn==0)) {exit;}
     xc = floor(x/(w/xn));
@@ -80,7 +83,7 @@ macro "Extract Selected Panels"{
     pw = getWidth/xn;
     ph = getHeight/yn;
     run("Duplicate...", "title=[Extract of "+t+"]");
-    setMetadata("xMontage="+getWidth/pw+"\nyMontage="+getHeight/ph+"\n");
+    setMetadata("Info","xMontage="+getWidth/pw+"\nyMontage="+getHeight/ph+"\n");
 }
 
 
@@ -109,9 +112,8 @@ macro "Montage Shuffler Tool - C888R0077R9977C03fR0977R9077"{
         if (y>h) yext=1;
         if ((xext>0)||(yext>0)) {
             run("Canvas Size...", "width="+w+xext*(w/xn)+" height="+h+yext*(h/yn)+" position=Top-Left zero");
-	
-            setMetadata("xMontage="+(parseInt(xn)+parseInt(xext))+"\nyMontage="+(parseInt(yn)+parseInt(yext))+"\n");
-	exit;
+            setMetadata("Info","xMontage="+(parseInt(xn)+parseInt(xext))+"\nyMontage="+(parseInt(yn)+parseInt(yext))+"\n");
+            exit;
         }
         sc = floor(xstart/(w/xn));
         tc = floor(x/(w/xn));
@@ -127,7 +129,9 @@ var str="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 var lcas=false;
 var antialiasedLabels = true;
 var n=0;
-var offset=0.05;
+var xoffset=0.05;
+var yoffset=0.05;
+var pos="Clicked quadrant";
 
 macro "Annot Tool - C000 T2709A T8709B T1f09C T8f09D" {
     xn = info("xMontage");
@@ -139,19 +143,27 @@ macro "Annot Tool - C000 T2709A T8709B T1f09C T8f09D" {
     
     co = floor(x/iw);
     li = floor(y/ih);
+
     fontsize = ih/10;
     if (fontsize<12) fontsize=12;
     marque = substring(str,n,n+1);
     if (lcas==1) marque= toLowerCase(marque);
     opt="";
 
+    if (pos == "Clicked quadrant") {
+    xoffset=0.05; yoffset=0.05; 
+    if (x>((co+0.5)*iw)) xoffset=0.90; 
+    if (y<((li+0.5)*ih)) yoffset=0.85; 
+    }
+
     if (antialiasedLabels==true) opt=opt+"antialiased";
     setFont("SanSerif",fontsize, opt);
-    setForegroundColor(0,0,0);
-    drawString(marque ,co*iw+offset*iw,(li+1)*ih-offset*ih);
-    setForegroundColor(255,255,255);
-    drawString(marque ,co*iw+offset*iw+1,(li+1)*ih-offset*ih+1);
-    n++; if (n>25) n=0;
+    fg = getValue("rgb.foreground");
+    makeText(marque ,co*iw+xoffset*iw,(li+1)*ih-yoffset*ih-getValue("font.height"));
+    Roi.setStrokeColor(fg&0xff0000>>16,fg&0x00ff00>>8,fg&0x0000ff);
+    Overlay.addSelection("",0);
+    run("Select None");
+    n++; if (n>lengthOf(str)) n=0;
 }
 
 macro "Annot Tool Options" {
@@ -161,16 +173,19 @@ macro "Annot Tool Options" {
     Dialog.addCheckbox("Lowercase labels",lcas);
     Dialog.addCheckbox("Reset label counter",true);
     Dialog.addCheckbox("Antialiased",true);
-    // Dialog.addCheckbox("Auto font size, or",true);
-    // Dialog.addNumber("Font size (pixels)",10);
-    // Dialog.addCheckbox("Auto Offset, or",true);
-    // Dialog.addNumber("Offset (pixels)",5);
+    Dialog.addChoice("Position",newArray("Clicked quadrant","Lower left","Lower right","Upper right","Upper left"),pos);
     Dialog.show;
     str  = Dialog.getString;
     lcas = Dialog.getCheckbox;
     resetCounter = Dialog.getCheckbox;
     if (resetCounter==true)	n=0;
     antialiasedLabels = Dialog.getCheckbox;
+    pos=Dialog.getChoice();
+    if (pos=="Lower left") {xoffset=0.05; yoffset=0.05;}
+    else if (pos=="Lower right") {xoffset=0.90; yoffset=0.05;}
+    else if (pos=="Upper left") {xoffset=0.05; yoffset=0.85;}
+    else if (pos=="Upper right") {xoffset=0.90; yoffset=0.85;}
+
 }
 
 
@@ -187,8 +202,9 @@ macro "Montage Sync Tool - C000L48d8L838d" {
     yc = floor(y/(h/yn));
     x0 = x-xc*w/xn;
     y0 = y-yc*h/yn;
-    xp =newArray(xn*yn);
-    yp =newArray(xn*yn);
+    np = 1*xn*yn;
+    xp =newArray(np);
+    yp =newArray(np);
     for (i=0;i<xn;i++) {
         for (j=0;j<yn;j++) {
             xp[j*xn+i] = x0+i*(w/xn);
@@ -200,9 +216,9 @@ macro "Montage Sync Tool - C000L48d8L838d" {
 
 
 function info(key) {
-  i = getMetadata;
-  List.setList(i);
-  return List.get(key);
+	i = getMetadata("info");
+	List.setList(i);
+	return List.getValue(key);
 }
 
 
@@ -252,9 +268,9 @@ macro "bar Action Tool - C000L060bLe6ebL09e9L08e8"{
     doCommand("Scale Bar...");
 }
 
-// macro "Magic Montage Help Action Tool - C000T3f15?"{
-//     run("URL...", "url=http://imagejdocu.tudor.lu/Members/jmutterer/Magic_Montage/");
-// }
+macro "Magic Montage Help Action Tool - C000T3f15?"{
+     run("URL...", "url=http://imagejdocu.tudor.lu/doku.php?id=howto:working:work_with_magic_montage");
+}
 
 
 macro "Add Panel to Manager [F1]" {
@@ -339,7 +355,7 @@ macro "Fit Clipboard content into panel [F4]" {
 }
 
 macro "Fill Panel with Clipboard content [F5]" {
-    
+
     getSelectionBounds(x,y,sw,sh);
     id=getImageID;
     setBatchMode(true);
@@ -370,7 +386,7 @@ macro "Set Montage Layout [F12]" {
     Dialog.show;
     mw = Dialog.getNumber;
     mh = Dialog.getNumber;
-    setMetadata("xMontage="+mw+"\nyMontage="+mh+"\n");
+    setMetadata("Info","xMontage="+mw+"\nyMontage="+mh+"\n");
 }
 
 var pmCmds = newMenu("Popup Menu",
@@ -379,8 +395,9 @@ var pmCmds = newMenu("Popup Menu",
         "Extract Selected Panels","-",
         "Add Panel to Manager [F1]", "Selected panels to stack [F2]","-","Crop Montage [F3]","-",
         "Fit Clipboard content into panel [F4]","Fill Panel with Clipboard content [F5]","-",
-        "Set Montage Layout [F12]",
-        "Help..."));
+        "Set Montage Layout [F12]","-",
+        "Hide Overlay","Show Overlay", "Remove Overlay","-",
+        "Copy to System"));
 
 macro "Popup Menu" {
     cmd = getArgument;

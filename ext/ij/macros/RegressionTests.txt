@@ -1,27 +1,33 @@
 // Macro language regression tests
 
-  startTime = getTime;
-  runMacro("RegressionTests.js"); // run JavaScript regression tests
-  runMacro("FilterTester"); // run Michael Schmid's filter tests
-  test = "null";
-  roiManagerSelect();
-  measure();
-  binary();
-  logic("Logic");
-  math("Math");
-  functionCalls("FunctionCall");
-  images("Image");
-  setBatchMode(true); images("BatchImage"); setBatchMode(false);
-  benchmarks("Benchmark");
-  analyzeParticles();
-  duplication(false); duplication(true);
-  imageActivation(false); imageActivation(true);
-
-  showStatus("Regression tests done ("+d2s((getTime-startTime)/1000,2)+" seconds)");
+  n = 1;  // Iterations
+  t0 = getTime;
+  for (i=1; i<=n; i++) {
+    runMacro("RegressionTests.js"); // run JavaScript regression tests
+    if (i==1)
+       runMacro("FilterTester"); // run Michael Schmid's filter tests
+    test = "null";
+    roiManagerTest(true); roiManagerTest(false);
+    measure();
+    binary();
+    logic("Logic");
+    math("Math");
+    functionCalls("FunctionCall");
+    images("Image");
+    setBatchMode(true); images("BatchImage"); setBatchMode(false);
+    benchmarks("Benchmark");
+    analyzeParticles();
+    duplication(false); duplication(true);
+     imageActivation(false); imageActivation(true);
+    tableTests(false); tableTests(true);
+    metadata(false); metadata(true);
+    particleAnalyzer();
+  }
   beep;
+  time = d2s((getTime-t0)/1000,2);
+  showStatus("Regression tests done ("+time+" seconds)");
   wait(4000);
   exit();
-
 
 // Logic tests
 function logic(thisTest) {
@@ -40,7 +46,6 @@ function logic(thisTest) {
 }
 
 // Math tests
-// Requires ImageJ 1.34b or later 
 function math(thisTest) {
     test = thisTest;
     n = 10;
@@ -244,7 +249,6 @@ function processEmbryos() {
     setBatchMode(false);
   }
 
-  // requires ImageJ 1.38k or later
   function measure2() {
      newImage("Test Image", "8-bit White", 500, 500, 1);
      id = getImageID;
@@ -265,7 +269,7 @@ function processEmbryos() {
      minor = getResult("Minor",0);
      if (area!=39395) fail(1);
      if (abs(feret-229)>1) fail(2);
-     if (abs(circularity-0.9997)>0.0001) fail(3);
+     if (abs(circularity-0.9994)>0.0001) fail(3); // 0.9997 before 1.52m11
      if (abs(minor-219.0134)>0.0001) fail(4);
      run("Duplicate...", "title=temp");
      run("Restore Selection");
@@ -321,9 +325,12 @@ function processEmbryos() {
   }
 
  
-function roiManagerSelect() {
-   test = "Roi Manager";
-   setBatchMode(true);
+function roiManagerTest(batchMode) {
+   if (batchMode)
+      test = "Roi Manager (batch mode)";
+   else
+      test = "Roi Manager";
+   setBatchMode(batchMode);
    newImage("Untitled", "8-bit", 2000, 2000, 1);
    width = getWidth();
    height = getHeight();
@@ -336,8 +343,8 @@ function roiManagerSelect() {
    for (i=0; i<n; i++) {
        w[i] = round(random()*width/2+1);
        h[i] = round(random()*width/2+1);
-       x[i] = round(random()*width-w/2);
-       y[i] = round(random()*height-h/2);
+       x[i] = round(random()*(width-1));
+       y[i] = round(random()*(height-1));
        makeRectangle(x[i], y[i], w[i], h[i]);
        roiManager("add");
    }
@@ -345,9 +352,11 @@ function roiManagerSelect() {
    for (i=0; i<n; i++) {
        roiManager("select", i);
        getSelectionBounds(x2, y2, w2, h2);
-       if (x2!=x[i] || y2!=y[i] || w2!=w[i] || h2!=h[i])
-           fail(1);
-   }
+       if (x2!=x[i] || y2!=y[i] || w2!=w[i] || h2!=h[i]) {
+          fail(1);
+          print(i, x[i], y[i], w[i], h[i]);
+       }
+    }
    close;
    setBatchMode(false);
    if (isOpen("ROI Manager")) {
@@ -474,8 +483,253 @@ function duplication(batchMode) {
     if (getTitle!="blobs.gif") fail2(11,getTitle+" blobs.gif");
   }
 
+function tableTests(batchMode) {
+    saveSettings;
+    if (batchMode)
+       test = "Tables (batch)";
+    else
+       test = "Tables";
+    setBatchMode(batchMode);
+    setOption("ExpandableArrays", true);
+    tables = newArray;
+    tableCount = 0;
 
+   Table.reset("Results");
+   if ("Results"!=Table.title) fail(1);
+   for (row=0, n=0; n<=2*PI; row++, n+=0.1) {
+     Table.set("n", row, n);
+     Table.set("sin(n)", row, sin(n));
+     Table.set("cos(n)", row, cos(n));
+   }
+   Table.update;
+   if ("Results"!=Table.title) fail(2);
+   tables[tableCount++] = Table.title;
 
+  // Duplicate
+   table1 = "Sine/Cosine Table";
+  Table.create(table1);
+  if (table1!=Table.title) fail(3);
+  for (n=0,row=0; n<=2*PI; n+=0.1,row++) {
+     Table.set("n", row, n);
+     Table.set("sin(n)", row, sin(n));
+     Table.set("cos(n)", row, cos(n));
+  }
+  Table.update;
+  if (Table.size()!=63) failt(4);
+  tables[tableCount++] = table1;
+
+  table2 = table1 +" Copy";
+  Table.create(table2);
+  headings = split(Table.headings(table1));
+  for (row=0; row<Table.size(table1); row++) {
+     for (col=0; col<headings.length; col++) {
+        value = Table.get(headings[col], row, table1);
+        Table.set(headings[col], row, value, table2);
+     }
+  }
+  Table.update(table2);
+  tables[tableCount++] = table2;
+  if (Table.size(table1)!=Table.size(table2)) fail(5);
+  if (Table.get("n",11,table1)!=Table.get("n",11,table2)) fail(6);
+
+  // Access plot data
+   if (!batchMode) {
+     yValues = newArray(0, 0.7, 2.3, 2.8, 1, 0.5);
+     Plot.create("Simple Plot", "X", "Y", yValues);
+     Plot.show;
+     Plot.showValues("Data");
+     for (i=0; i<Table.size; i++) {
+         x = Table.get("X", i);
+         y = Table.get("Y", i);
+         Table.set("Sum", i, x+y);
+     }
+     Table.update;
+     tables[tableCount++] = "Data";
+   }
+
+   // Access plot data using title
+   if (!batchMode) {
+      yValues = newArray(0, 0.7, 2.3, 2.8, 1, 0.5);
+      Plot.create("Simple Plot", "X", "Y", yValues);
+      Plot.show;
+      title= "Data";
+      Plot.showValues(title);
+      if ("Data"!=Table.title(title)) fail(7);
+      for (i=0; i<Table.size(title); i++) {
+          x = Table.get("X", i,title);
+          y = Table.get("Y", i,title);
+          Table.set("Sum", i, x+y,title);
+      }
+      Table.update(title);
+      close("Data");
+   }
+
+  // Access "Summary" table
+  run("T1 Head (2.4M, 16-bits)");
+  setSlice(64);
+  setAutoThreshold("Default dark");
+  run("Analyze Particles...", "summarize stack");
+  title = Table.title;
+  if (!startsWith(title,"Summary of")) fail(8);
+  if (Table.size<129) fail(9);
+  if (Table.get("Count",8)!=3) fail(10);
+  tables[tableCount++] = Table.title;
+
+  // Access "Overlay Elements" table
+  run("Image with Overlay");
+  run("List Elements");
+  if (!startsWith(Table.title,"Overlay Elements")) {
+     fail(11);
+     print("   ", nImages, getTitle, Overlay.size, Table.title);
+  }
+  if (Table.size!=13) fail(12);
+  if (Table.get("Width",0)!=110) fail(13);
+  color = Table.getString("Color", 0);
+  if (color!="red") fail(14);
+  if (""+Table.getString("Type", 0)!="Traced") fail(15);
+  if ("Traced"!=Table.getString("Type", 0)) fail(16);
+  tables[tableCount++] = Table.title;
+
+  // Measurements
+  Table.reset("Results");
+   if ("Results"!=Table.title) fail(17);
+   newImage("Untitled", "16-bit black", 100, 100, 1);
+   setOption("Area", true);
+   makeRectangle(42, 38, 42, 42);
+   run("Measure");
+   if (Table.get("Area", 0)!=1764) fail(18);
+   makeOval(18, 16, 70, 72);
+   run("Measure");
+   if (Table.get("Area", 1)!=3968) fail(19);
+   makePolygon(18,41,73,17,79,79);
+   run("Measure");
+   if (Table.get("Area", 2)!=1778) fail(20);  //1776 before 1.52m11
+
+  // ApplyMacro and duplicate, rename and delete columns
+  run("Blobs (25K)");
+  run("Set Measurements...", "area mean centroid feret's");
+  setAutoThreshold("Default");
+  Table.reset("Results");
+  run("Analyze Particles...", "display include in_situ");
+  code = "FeretMinimum=MinFeret; FeretMaximum=Feret;"
+    +"FeretAngleCopy=FeretAngle; FeretStartX=FeretX;"
+    +"FeretStartY=FeretY";
+  Table.applyMacro(code);
+  Table.deleteColumn("MinFeret");
+  Table.deleteColumn("Feret");
+  Table.deleteColumn("FeretAngle");
+  Table.deleteColumn("FeretX");
+  Table.deleteColumn("FeretY");
+  Table.renameColumn("FeretAngleCopy", "FeretAngle");
+  Table.update;
+  if (Table.get("FeretStartX",63)!=66) fail(21);
+  if (!isNaN(Table.get("Feret",0))) fail(22);
+
+  for (i=0; i<tableCount; i++)
+     close(tables[i]);
+  close("*");
+  restoreSettings;
+
+} //tableTests
+
+ function metadata(batchMode) {
+    if (batchMode)
+       test = "Metadata (batch)";
+    else
+       test = "Metadata";
+    setBatchMode(batchMode);
+    newImage("Untitled", "8-bit ramp", 100, 100, 1);
+    info1 = "Info1";
+    setMetadata("Info", info1);
+    data1 = "metadata1";
+    setMetadata("label", data1);
+    if (getMetadata("Label")!=data1) fail(1);
+    run("Add Slice");
+    data2 = "metadata2";
+    setMetadata("label", data2);
+    if (getSliceNumber()!=2) fail(2);
+    if (getMetadata("Label")!=data2) fail(3);
+    if (getSliceNumber()!=2) fail(4);
+    if (getMetadata("Info")!=info1) fail(5);
+    run("Duplicate...", " ");
+    if (getSliceNumber()!=1) fail(6);
+    if (getMetadata("Label")!=data2) fail(7);
+    if (getMetadata("Info")!=info1) fail(8);
+    close;
+    run("Duplicate...", "duplicate");
+    setSlice(1);
+    if (getSliceNumber()!=1) fail(9);
+    if (getMetadata("Label")!=data1) fail(10);
+    setSlice(2);
+    if (getMetadata("Label")!=data2) fail(11);
+    run("Delete Slice");
+    if (getSliceNumber()!=1) fail(12);
+    if (nSlices!=1) fail(13);
+    if (getMetadata("Label")!=data1) fail(14);
+    if (getMetadata("Info")!=info1) fail(15);
+
+    // Test versions missing "info" and "label" args
+    newImage("Untitled", "8-bit ramp", 100, 100, 1);
+    info1 = "Info1";
+    setMetadata(info1);
+    if (getMetadata()!=info1) fail(16);
+    info2 = "Info2";
+    setMetadata(info2);
+    if (getMetadata()!=info2) fail(17);
+    run("Add Slice");
+    label1 = "label1";
+    setMetadata(label1);
+    if (getMetadata()!=label1) fail(18);
+    if (getMetadata("info")!=info2) fail(19);
+    if (getMetadata("label")!=label1) fail(20);
+    newImage("Untitled", "8-bit ramp", 100, 100, 10);
+    for (i=1; i<10; i++) {
+      setSlice(i);
+      label = "label"+i;
+      setMetadata(label);
+    }
+    for (i=1; i<10; i++) {
+      setSlice(i);
+      label = "label"+i;
+      if (getMetadata()!=label) fail(21);
+    }
+   close("*");
+} 
+
+function particleAnalyzer() {
+  saveSettings;
+  test = "Particle Analyzer";
+  labels = newArray("Area","Mean","StdDev","Mode","Min","Max", "X","Y",
+    "XM","YM","Perim.","BX","BY","Width","Height","Major","Minor","Angle",
+    "Circ.","Feret","IntDen","Median","Skew","Kurt","RawIntDen","FeretX",
+    "FeretY","FeretAngle","MinFeret","AR","Round","Solidity");
+  results = newArray("347.55","187.73","28.47","203.38","128.00","230.38","130.29","127.44",
+    "130.25","127.42","67.90","120.58","116.64","19.34","21.61","23.91","16.50","82.02",
+    "0.83","24.87","67786.25","193.50","NaN","NaN","67786.25","123.83",
+    "131.11","85.31","16.97","1.62","0.71","0.93");  //16.82 in 1.52m11
+  run("Blobs (25K)");
+  setAutoThreshold("Default no-reset");
+  options = "area mean standard modal min centroid center perimeter"
+    + " bounding fit shape feret's integrated median skewness kurtosis"
+    + " area_fraction display redirect=None decimal=3";
+  run("Set Measurements...", options);
+  run("Analyze Particles...", "display clear");
+  run("Summarize");  
+  if (nResults()-4!=64)
+     fail(1);
+  for (i=0; i<labels.length; i++)
+     compare(i);
+  close("*");
+  close("Results");
+  restoreSettings;
+}
+
+  function compare(i) {
+     value = getResult(labels[i], nResults-4);
+     if (d2s(value,2)!=results[i]) {
+        fail2(i+2, labels[i]);
+     }
+  }
 
 
 

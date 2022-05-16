@@ -219,7 +219,7 @@
         <dependency>
             <groupId>net.imagej</groupId>
             <artifactId>ij</artifactId>
-            <version>1.52r</version>
+            <version>1.53r</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.sun</groupId>

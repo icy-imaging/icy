@@ -5,16 +5,18 @@
 
 // The "AutoRun" macro has been replaced by the Edit>Options>Startup command.
 
-  macro "Command Finder Built-in Tool" {}
   macro "Developer Menu Built-in Tool" {}
   macro "Brush Built-in Tool" {}
   macro "Flood Filler Built-in Tool" {}
   macro "Arrow Built-in Tool" {}
 
+  // Defines the commands in the long-click contextual
+  // image menu, replacing the ones in IJ_Props.txt.
   var pmCmds = newMenu("Popup Menu",
-       newArray("Help...", "Rename...", "Duplicate...", "Original Scale", 
-       "Paste Control...", "-", "Record...", "Capture Screen ", "Monitor Memory...", 
-       "List Commands...", "Control Panel...", "Startup Macros...", "Search..."));
+       newArray("Show Info...", "Properties...", "Measure", 
+       "Histogram", "Duplicate...", "Original Scale",
+       "-", "Record...", "Capture Screen ", "Monitor Memory...", 
+       "Find Commands...", "Help..."));
 
   macro "Popup Menu" {
       cmd = getArgument();
@@ -25,7 +27,7 @@
           run(cmd);
   }
 
- macro "-" {} //menu divider
+ //macro "-" {} //menu divider
 
   macro "About Startup Macros..." {
       path = getDirectory("macros")+"About Startup Macros";
@@ -36,12 +38,12 @@
 
   // This example macro demonstrates how to create a
   // custom command with a keyboard shortcut.
-  macro "Save As JPEG... [j]" {
-     quality = call("ij.plugin.JpegWriter.getQuality");
-     quality = getNumber("JPEG quality (0-100):", quality);
-     run("Input/Output...", "jpeg="+quality);
-     saveAs("Jpeg");
-  }
+  // macro "Save As JPEG... [j]" {
+  //   quality = call("ij.plugin.JpegWriter.getQuality");
+  //   quality = getNumber("JPEG quality (0-100):", quality);
+  //   run("Input/Output...", "jpeg="+quality);
+  //   saveAs("Jpeg");
+  //}
 
 
 

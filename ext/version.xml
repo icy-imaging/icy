@@ -132,7 +132,7 @@
         </element>
         <element>
             <name>ImageJ</name>
-            <version>1.5.2.17</version>
+            <version>1.5.3.17</version>
             <files>
                 <file>
                     <localpath>ij/ij.jar</localpath>
