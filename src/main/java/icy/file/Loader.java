@@ -3244,18 +3244,20 @@ public class Loader
             loadingFrame = new FileFrame("Loading", null);
         else
             loadingFrame = null;
+        
+        final List<String> cleanedPaths = cleanNonImageFile(explode(paths));        
 
         try
         {
-            final List<String> remainingFiles = new ArrayList<String>(paths);
+            final List<String> remainingFiles = new ArrayList<String>(cleanedPaths);
 
             // load each file in a separate sequence
-            if (separate || (paths.size() <= 1))
+            if (separate || (cleanedPaths.size() <= 1))
             {
                 if (loadingFrame != null)
                 {
                     // each file can contains several image so we use 100 "inter-step"
-                    loadingFrame.setLength(paths.size() * 100d);
+                    loadingFrame.setLength(cleanedPaths.size() * 100d);
                     loadingFrame.setPosition(0d);
                 }
 
@@ -3264,7 +3266,7 @@ public class Loader
                     ((LociImporterPlugin) importer).setGroupFiles(false);
 
                 // load each file in a separate sequence
-                for (String path : paths)
+                for (String path : cleanedPaths)
                 {
                     // load the file (need to clone the importer so each sequence has its own importer)
                     final List<Sequence> sequences = internalLoadSingle(cloneSequenceFileImporter(importer), path, series, forceVolatile, !separate,
@@ -3302,7 +3304,7 @@ public class Loader
             else
             {
                 // get file group
-                final Collection<SequenceFileGroup> groups = SequenceFileSticher.groupAllFiles(importer, paths, autoOrder, loadingFrame);
+                final Collection<SequenceFileGroup> groups = SequenceFileSticher.groupAllFiles(importer, cleanedPaths, autoOrder, loadingFrame);
 
                 for (SequenceFileGroup group : groups)
                 {
