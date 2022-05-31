@@ -265,7 +265,7 @@ public class SaverDialog extends JFileChooser
                     preferences.put(ID_PATH, getCurrentDirectory().getAbsolutePath());
 
                     // overwrite sequence name with filename
-                    if (isOverwriteNameEnabled())
+                    if (isOverwriteMetadataEnabled())
                         sequence.setName(FileUtil.getFileName(file.getAbsolutePath(), false));
 
                     final Sequence s = sequence;
@@ -398,7 +398,7 @@ public class SaverDialog extends JFileChooser
     /**
      * Returns <code>true</code> if user chosen to overwrite the sequence internal name by filename.
      */
-    public boolean isOverwriteNameEnabled()
+    public boolean isOverwriteMetadataEnabled()
     {
         return settingPanel.isOverwriteMetadataVisible() && settingPanel.getOverwriteMetadata();
     }

@@ -68,30 +68,28 @@ public class Saver
      * @deprecated use {@link OMEUtil#generateMetaData(int, int, int, int, int, DataType, boolean)} instead
      */
     @Deprecated
-    public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int sizeZ,
-            int sizeT, DataType dataType) throws ServiceException
+    public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT, DataType dataType)
+            throws ServiceException
     {
-        return (loci.formats.ome.OMEXMLMetadata) OMEUtil.generateMetaData(sizeX, sizeY, sizeC, sizeZ, sizeT, dataType,
-                false);
+        return (loci.formats.ome.OMEXMLMetadata) OMEUtil.generateMetaData(sizeX, sizeY, sizeC, sizeZ, sizeT, dataType, false);
     }
 
     /**
      * @deprecated use {@link OMEUtil#generateMetaData(int, int, int, int, int, DataType, boolean)} instead
      */
     @Deprecated
-    public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int sizeZ,
-            int sizeT, int dataType, boolean signedDataType) throws ServiceException
+    public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT, int dataType, boolean signedDataType)
+            throws ServiceException
     {
-        return (loci.formats.ome.OMEXMLMetadata) OMEUtil.generateMetaData(sizeX, sizeY, sizeC, sizeZ, sizeT,
-                DataType.getDataType(dataType, signedDataType), false);
+        return (loci.formats.ome.OMEXMLMetadata) OMEUtil.generateMetaData(sizeX, sizeY, sizeC, sizeZ, sizeT, DataType.getDataType(dataType, signedDataType),
+                false);
     }
 
     /**
      * @deprecated use {@link OMEUtil#generateMetaData(int, int, int, DataType, boolean)} instead
      */
     @Deprecated
-    public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, DataType dataType)
-            throws ServiceException
+    public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, DataType dataType) throws ServiceException
     {
         return (loci.formats.ome.OMEXMLMetadata) OMEUtil.generateMetaData(sizeX, sizeY, sizeC, 1, 1, dataType, false);
     }
@@ -100,11 +98,10 @@ public class Saver
      * @deprecated use {@link OMEUtil#generateMetaData(int, int, int, DataType, boolean)} instead
      */
     @Deprecated
-    public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int dataType,
-            boolean signedDataType) throws ServiceException
+    public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int dataType, boolean signedDataType)
+            throws ServiceException
     {
-        return (loci.formats.ome.OMEXMLMetadata) OMEUtil.generateMetaData(sizeX, sizeY, sizeC,
-                DataType.getDataType(dataType, signedDataType), false);
+        return (loci.formats.ome.OMEXMLMetadata) OMEUtil.generateMetaData(sizeX, sizeY, sizeC, DataType.getDataType(dataType, signedDataType), false);
     }
 
     /**
@@ -298,8 +295,7 @@ public class Saver
      * @param dataType
      *        image data type
      */
-    public static IcyColorModel getCompatibleColorModel(ImageFileFormat imageFileFormat, int numChannel,
-            DataType dataType)
+    public static IcyColorModel getCompatibleColorModel(ImageFileFormat imageFileFormat, int numChannel, DataType dataType)
     {
         final DataType outDataType;
         final int outNumChannel;
@@ -379,8 +375,7 @@ public class Saver
      * @param dataType
      *        image data type
      */
-    public static boolean isCompatible(ImageFileFormat imageFileFormat, int numChannel, boolean alpha,
-            DataType dataType)
+    public static boolean isCompatible(ImageFileFormat imageFileFormat, int numChannel, boolean alpha, DataType dataType)
     {
         return isCompatible(imageFileFormat, IcyColorModel.createInstance(numChannel, dataType));
     }
@@ -581,8 +576,7 @@ public class Saver
      * @deprecated Use {@link #save(Sequence, File, int, boolean, boolean)} instead.
      */
     @Deprecated
-    public static void save(Sequence sequence, File file, int zMin, int zMax, int tMin, int tMax, int fps,
-            boolean multipleFiles)
+    public static void save(Sequence sequence, File file, int zMin, int zMax, int tMin, int tMax, int fps, boolean multipleFiles)
     {
         save(sequence, file, zMin, zMax, tMin, tMax, fps, multipleFiles, true);
     }
@@ -591,8 +585,7 @@ public class Saver
      * @deprecated Use {@link #save(Sequence, File, int, boolean, boolean)} instead.
      */
     @Deprecated
-    public static void save(Sequence sequence, File file, int zMin, int zMax, int tMin, int tMax, int fps,
-            boolean multipleFile, boolean showProgress)
+    public static void save(Sequence sequence, File file, int zMin, int zMax, int tMin, int tMax, int fps, boolean multipleFile, boolean showProgress)
     {
         save(null, sequence, file, fps, multipleFile, showProgress, true);
     }
@@ -623,8 +616,8 @@ public class Saver
      * @deprecated Use {@link #save(IFormatWriter, Sequence, File, int, boolean, boolean, boolean)} instead.
      */
     @Deprecated
-    public static void save(IFormatWriter formatWriter, Sequence sequence, File file, int zMin, int zMax, int tMin,
-            int tMax, int fps, boolean multipleFile, boolean showProgress)
+    public static void save(IFormatWriter formatWriter, Sequence sequence, File file, int zMin, int zMax, int tMin, int tMax, int fps, boolean multipleFile,
+            boolean showProgress)
     {
         save(formatWriter, sequence, file, fps, multipleFile, showProgress, true);
     }
@@ -633,8 +626,8 @@ public class Saver
      * @deprecated Use {@link #save(IFormatWriter, Sequence, File, int, boolean, boolean, boolean)} instead.
      */
     @Deprecated
-    public static void save(IFormatWriter formatWriter, Sequence sequence, File file, int zMin, int zMax, int tMin,
-            int tMax, int fps, boolean multipleFile, boolean showProgress, boolean addToRecent)
+    public static void save(IFormatWriter formatWriter, Sequence sequence, File file, int zMin, int zMax, int tMin, int tMax, int fps, boolean multipleFile,
+            boolean showProgress, boolean addToRecent)
     {
         save(formatWriter, sequence, file, fps, multipleFile, showProgress, addToRecent);
     }
@@ -669,8 +662,7 @@ public class Saver
      * @param addToRecent
      *        add the saved sequence to recent opened sequence list
      */
-    public static void save(IFormatWriter formatWriter, Sequence sequence, File file, int fps, boolean multipleFile,
-            boolean showProgress, boolean addToRecent)
+    public static void save(IFormatWriter formatWriter, Sequence sequence, File file, int fps, boolean multipleFile, boolean showProgress, boolean addToRecent)
     {
         final String filePath = FileUtil.cleanPath(FileUtil.getGenericPath(file.getAbsolutePath()));
         final int sizeT = sequence.getSizeT();
@@ -796,6 +788,8 @@ public class Saver
                     sequence.loadAllData();
                     // release image provider so we can overwrite file
                     sequence.setImageProvider(null);
+                    // eventually force releasing importer
+                    System.gc();
                 }
 
                 // default name used --> use filename
@@ -836,8 +830,8 @@ public class Saver
     /**
      * Save a single image from bytes buffer to the specified file.
      */
-    private static void saveImage(IFormatWriter formatWriter, byte[] data, int width, int height, int numChannel,
-            boolean separateChannel, DataType dataType, File file, boolean force) throws FormatException, IOException
+    private static void saveImage(IFormatWriter formatWriter, byte[] data, int width, int height, int numChannel, boolean separateChannel, DataType dataType,
+            File file, boolean force) throws FormatException, IOException
     {
         final String filePath = FileUtil.cleanPath(FileUtil.getGenericPath(file.getAbsolutePath()));
 
@@ -864,8 +858,7 @@ public class Saver
             try
             {
                 separateCh = getSeparateChannelFlag(writer, numChannel, dataType);
-                writer.setMetadataRetrieve((MetadataRetrieve) MetaDataUtil.generateMetaData(width, height, numChannel,
-                        dataType, separateCh));
+                writer.setMetadataRetrieve((MetadataRetrieve) MetaDataUtil.generateMetaData(width, height, numChannel, dataType, separateCh));
             }
             catch (ServiceException e)
             {
@@ -919,8 +912,8 @@ public class Saver
     /**
      * Save a single image from bytes buffer to the specified file.
      */
-    public static void saveImage(byte[] data, int width, int height, int numChannel, DataType dataType, File file,
-            boolean force) throws FormatException, IOException
+    public static void saveImage(byte[] data, int width, int height, int numChannel, DataType dataType, File file, boolean force)
+            throws FormatException, IOException
     {
         saveImage(null, data, width, height, numChannel, false, dataType, file, force);
     }
@@ -929,8 +922,8 @@ public class Saver
      * @deprecated Use {@link #saveImage(byte[], int, int, int, DataType, File, boolean)} instead
      */
     @Deprecated
-    public static void saveImage(byte[] data, int width, int height, int numChannel, int dataType,
-            boolean signedDataType, File file, boolean force) throws FormatException, IOException
+    public static void saveImage(byte[] data, int width, int height, int numChannel, int dataType, boolean signedDataType, File file, boolean force)
+            throws FormatException, IOException
     {
         saveImage(data, width, height, numChannel, DataType.getDataType(dataType, signedDataType), file, force);
     }
@@ -964,8 +957,8 @@ public class Saver
         // get byte order
         final boolean littleEndian = !writer.getMetadataRetrieve().getPixelsBinDataBigEndian(0, 0).booleanValue();
         // then save the image
-        saveImage(writer, image.getRawData(littleEndian), image.getSizeX(), image.getSizeY(), image.getSizeC(),
-                separateChannel, image.getDataType_(), file, force);
+        saveImage(writer, image.getRawData(littleEndian), image.getSizeX(), image.getSizeY(), image.getSizeC(), separateChannel, image.getDataType_(), file,
+                force);
     }
 
     /**
@@ -993,8 +986,7 @@ public class Saver
      * @throws InterruptedException
      * @throws IllegalArgumentException
      */
-    private static Sequence save(IFormatWriter writer, Sequence sequence, String filePath, int posT, int posZ, int fps,
-            FileFrame saveFrame)
+    private static Sequence save(IFormatWriter writer, Sequence sequence, String filePath, int posT, int posZ, int fps, FileFrame saveFrame)
             throws ServiceException, FormatException, IOException, IllegalArgumentException, InterruptedException
     {
         // TODO: temporary fix for the "incorrect close operation" bug in Bio-Formats
@@ -1091,8 +1083,11 @@ public class Saver
                 ((TiffWriter) writer).setBigTiff(true);
         }
 
-        // set settings
-        writer.setFramesPerSecond(fps);
+        // set frame rate
+        if ((saveFormat == ImageFileFormat.AVI) && (fps != 0))
+            // cannot use writer.setFramesPerSecond(fps) anymore, need to properly set the time interval in metadata
+            MetaDataUtil.setTimeInterval(metadata, 0, 1d / (double) fps);
+        
         // generate metadata
         writer.setMetadataRetrieve((MetadataRetrieve) metadata);
         // no interleave (XP default viewer want interleaved channel to correctly read image)
@@ -1101,6 +1096,9 @@ public class Saver
         writer.setId(filePath);
         // init
         writer.setSeries(0);
+        // need to be done *after setId(..)* so we properly overwrite it
+        // not used anyway as header is directly written on setId(..)
+        // writer.setFramesPerSecond(fps);
         // usually give better save performance
         writer.setWriteSequentially(true);
 
