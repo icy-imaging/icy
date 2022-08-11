@@ -1,14 +1,10 @@
-image: ubuntu:latest
+image: registry-gitlab.pasteur.fr/bia/icy:latest
 
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE != "push"
       when: never
     - if: $CI_COMMIT_BRANCH == "master"
-
-variables:
-  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
-  MAVEN_OPTS: '-Dargline="Xmx1024m" -Dmaven.repo.local=.m2/repository'
 
 stages:
   - build
@@ -25,10 +21,6 @@ cache:
 
 build-job:
   stage: build
-  before_script:
-    - echo "Installing OpenJDK 8 and Maven"
-    - apt update
-    - apt install -y openjdk-8-jdk maven
   script:
     - echo "Building Artifact"
     - mvn $MAVEN_CLI_OPTS clean compile
@@ -42,11 +34,6 @@ package-job:
   stage: package
   dependencies:
     - build-job
-  before_script:
-    - echo "Installing OpenJDK 8 and Maven"
-    - apt update
-    - apt install -y openjdk-8-jdk maven
-    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
   script:
     - echo "Packaging the code"
     - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
@@ -59,11 +46,6 @@ test-job:
   stage: test
   dependencies:
     - package-job
-  before_script:
-    - echo "Installing OpenJDK 8 and Maven"
-    - apt update
-    - apt install -y openjdk-8-jdk maven
-    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
   script:
     - echo "Checking files"
     - mvn clean verify
@@ -77,14 +59,9 @@ deploy-dev-job:
   stage: deploy-dev
   dependencies:
     - package-job
-  before_script:
-    - echo "Installing OpenJDK 8 and Maven"
-    - apt update
-    - apt install -y openjdk-8-jdk maven
-    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
   script:
     - echo "Deploy artifact to the Nexus development server"
-    - mvn -X $MAVEN_CLI_OPTS -P deploy-dev
+    - mvn -X $MAVEN_CLI_OPTS -P icy-kernel-deploy
   artifacts:
     when: on_success
     expire_in: 1 hour
@@ -96,17 +73,12 @@ deploy-release-job:
   dependencies:
     - package-job
   before_script:
-    - echo "Installing OpenJDK 8 and Maven"
-    - apt update
-    - apt install -y openjdk-8-jdk maven
-    - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
-
     - echo "Checking POM file..."
     - export JAR_VERSION=$(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
     - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; then exit 0; else >&2 echo "Impossible to send artifact to the Nexus, the application is in SNAPSHOT version"; fi
   script:
     - echo "Deploy artifacts to the Nexus production server"
-    - mvn -X $MAVEN_CLI_OPTS -P deploy-release
+    - mvn -X $MAVEN_CLI_OPTS -P icy-kernel-deploy
   artifacts:
     when: on_success
     expire_in: 1 hour
@@ -122,10 +94,6 @@ package-software-job:
   dependencies:
     - package-job
   before_script:
-    - echo "Installing Zip"
-    - apt update
-    - apt install -y openjdk-8-jdk zip unzip
-
     - mkdir release
     - echo "Opening Icy... "
     - cd build/icy && java -jar icy.jar -hl
