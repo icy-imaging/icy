@@ -23,7 +23,7 @@ build-job:
   stage: build
   script:
     - echo "Building Artifact"
-    - mvn $MAVEN_CLI_OPTS clean compile
+    - mvn -X $MAVEN_CLI_OPTS clean compile
   artifacts:
     when: on_success
     expire_in: 1 hour
@@ -36,7 +36,7 @@ package-job:
     - build-job
   script:
     - echo "Packaging the code"
-    - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
+    - mvn -X $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
   artifacts:
     expire_in: 7 days
     paths:
