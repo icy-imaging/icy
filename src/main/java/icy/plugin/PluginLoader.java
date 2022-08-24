@@ -242,7 +242,7 @@ public class PluginLoader
             // we only want to load classes from 'plugins' package
             if (!className.startsWith(PLUGIN_PACKAGE))
                 continue;
-            // by-pass jython wrapper classes and a specific MM classes that can't be loaded at this point
+            // by-pass jython wrapper classes and some specific MM classes that can't be loaded at this point
             if (className.endsWith("$py") || className.endsWith("$ImageAnalyser") || className.endsWith("$CustomEventCallback"))
                 continue;
 
