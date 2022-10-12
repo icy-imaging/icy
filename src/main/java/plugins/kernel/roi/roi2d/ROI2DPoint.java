@@ -18,6 +18,16 @@
  */
 package plugins.kernel.roi.roi2d;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.event.InputEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+
+import org.w3c.dom.Node;
+
 import icy.canvas.IcyCanvas;
 import icy.canvas.IcyCanvas2D;
 import icy.common.CollapsibleEvent;
@@ -32,16 +42,6 @@ import icy.type.point.Point5D;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
 import icy.vtk.IcyVtkPanel;
-
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-
-import org.w3c.dom.Node;
-
 import plugins.kernel.canvas.VtkCanvas;
 import vtk.vtkActor;
 import vtk.vtkPolyDataMapper;
@@ -107,8 +107,7 @@ public class ROI2DPoint extends ROI2DShape
                 {
                     final Point2D pos = getPoint();
                     final double ray = getAdjustedStroke(canvas);
-                    final Ellipse2D ellipse = new Ellipse2D.Double(pos.getX() - ray, pos.getY() - ray, ray * 2,
-                            ray * 2);
+                    final Ellipse2D ellipse = new Ellipse2D.Double(pos.getX() - ray, pos.getY() - ray, ray * 2, ray * 2);
 
                     // draw shape
                     g2.setColor(getDisplayColor());
@@ -126,7 +125,7 @@ public class ROI2DPoint extends ROI2DShape
         protected void initVtkObjects()
         {
             super.initVtkObjects();
-            
+
             // init 3D painters stuff
             vtkSource = new vtkSphereSource();
             vtkSource.SetRadius(getStroke());
@@ -138,7 +137,7 @@ public class ROI2DPoint extends ROI2DShape
                 actor.Delete();
             if (polyMapper != null)
                 polyMapper.Delete();
-            
+
             polyMapper = new vtkPolyDataMapper();
             polyMapper.SetInputConnection((vtkSource).GetOutputPort());
 
@@ -233,6 +232,23 @@ public class ROI2DPoint extends ROI2DShape
             // need to repaint
             painterChanged();
         }
+
+        @Override
+        protected boolean updateFocus(InputEvent e, Point5D imagePoint, IcyCanvas canvas)
+        {
+            // specific VTK canvas processing
+            if (canvas instanceof VtkCanvas)
+            {
+                // mouse is over the ROI actor ? --> focus the ROI
+                final boolean focus = (actor != null) && (actor == ((VtkCanvas) canvas).getPickedObject());
+
+                setFocused(focus);
+
+                return focus;
+            }
+
+            return super.updateFocus(e, imagePoint, canvas);
+        }
     }
 
     public static final String ID_POSITION = "position";
@@ -321,12 +337,26 @@ public class ROI2DPoint extends ROI2DShape
         if (event.getType() == OverlayEventType.PAINTER_CHANGED)
         {
             // here we want to have ROI focused when point is selected (special case for ROIPoint)
-            if (hasSelectedPoint())
-                setFocused(true);
+            // Stephane: not a good idea if we selected several ROI points as setFocused is *exclusive*
+            // if (hasSelectedPoint())
+            // setFocused(true);
 
             // anchor changed --> ROI painter changed
             getOverlay().painterChanged();
         }
+    }
+
+    /**
+     * @returns true if specified point coordinates overlap the ROI edge.
+     */
+    @Override
+    public boolean isOverEdge(IcyCanvas canvas, double x, double y)
+    {
+        // selected ? --> use control point isOver(..)
+        if (isSelected())
+            return position.isOver(canvas, x, y);
+
+        return super.isOverEdge(canvas, x, y);
     }
 
     @Override

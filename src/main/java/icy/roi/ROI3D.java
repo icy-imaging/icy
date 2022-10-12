@@ -104,11 +104,11 @@ public abstract class ROI3D extends ROI
                 return false;
 
             // test on canvas has already be done, don't do it again
-            final boolean focused = isOverEdge(canvas, imagePoint.getX(), imagePoint.getY(), imagePoint.getZ());
+            final boolean focus = isOverEdge(canvas, imagePoint.getX(), imagePoint.getY(), imagePoint.getZ());
 
-            setFocused(focused);
+            setFocused(focus);
 
-            return focused;
+            return focus;
         }
 
         @Override

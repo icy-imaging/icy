@@ -244,8 +244,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
             try
             {
                 // update outline data
-                VtkUtil.setOutlineBounds(outline, bounds.getMinX() * xs, bounds.getMaxX() * xs, bounds.getMinY() * ys,
-                        bounds.getMaxY() * ys, bounds.getMinZ() * zs, bounds.getMaxZ() * zs, canvas);
+                VtkUtil.setOutlineBounds(outline, bounds.getMinX() * xs, bounds.getMaxX() * xs, bounds.getMinY() * ys, bounds.getMaxY() * ys,
+                        bounds.getMinZ() * zs, bounds.getMaxZ() * zs, canvas);
                 outlineMapper.Update();
                 // update polygon data from cell and points
                 polyData.SetPoints(vPoints);
@@ -334,11 +334,11 @@ public class ROI3DShape extends ROI3D implements Shape3D
             if (canvas instanceof VtkCanvas)
             {
                 // mouse is over the ROI actor ? --> focus the ROI
-                final boolean focused = (actor != null) && (actor == ((VtkCanvas) canvas).getPickedObject());
+                final boolean focus = (actor != null) && (actor == ((VtkCanvas) canvas).getPickedObject());
 
-                setFocused(focused);
+                setFocused(focus);
 
-                return focused;
+                return focus;
             }
 
             return super.updateFocus(e, imagePoint, canvas);
@@ -380,8 +380,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
                                         // add undo operation
                                         if (sequence != null)
-                                            sequence.addUndoableEdit(new Point3DRemovedROIEdit(ROI3DShape.this,
-                                                    controlPoints, selectedPoint));
+                                            sequence.addUndoableEdit(new Point3DRemovedROIEdit(ROI3DShape.this, controlPoints, selectedPoint));
                                     }
                                     break;
                             }
@@ -477,8 +476,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
                                                 // add undo operation
                                                 if (sequence != null)
-                                                    sequence.addUndoableEdit(
-                                                            new Point3DAddedROIEdit(ROI3DShape.this, point));
+                                                    sequence.addUndoableEdit(new Point3DAddedROIEdit(ROI3DShape.this, point));
                                             }
                                         }
                                     }
@@ -594,10 +592,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
                                 pt.mouseDrag(e, imagePoint, canvas);
 
                                 // position changed and undo supported --> add undo operation
-                                if ((sequence != null) && (savedPosition != null)
-                                        && !savedPosition.equals(pt.getPosition()))
-                                    sequence.addUndoableEdit(
-                                            new Point3DMovedROIEdit(ROI3DShape.this, pt, savedPosition));
+                                if ((sequence != null) && (savedPosition != null) && !savedPosition.equals(pt.getPosition()))
+                                    sequence.addUndoableEdit(new Point3DMovedROIEdit(ROI3DShape.this, pt, savedPosition));
                             }
                         }
                     }
@@ -787,8 +783,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
          * @param connectLastPoint
          *        boolean
          */
-        protected void drawShape(Graphics2D g, Sequence sequence, IcyCanvas canvas, boolean simplified,
-                boolean connectLastPoint)
+        protected void drawShape(Graphics2D g, Sequence sequence, IcyCanvas canvas, boolean simplified, boolean connectLastPoint)
         {
             final List<Point3D> points = getPointsInternal();
             final Graphics2D g2 = (Graphics2D) g.create();
@@ -797,8 +792,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
             if (!simplified && !isSelected())
             {
                 // draw border
-                g2.setStroke(new BasicStroke((float) ROI.getAdjustedStroke(canvas, stroke + 1d), BasicStroke.CAP_BUTT,
-                        BasicStroke.JOIN_MITER));
+                g2.setStroke(new BasicStroke((float) ROI.getAdjustedStroke(canvas, stroke + 1d), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
                 g2.setColor(Color.black);
 
                 for (int i = 1; i < points.size(); i++)
@@ -809,9 +803,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
             }
 
             // then draw shape
-            g2.setStroke(new BasicStroke(
-                    (float) ROI.getAdjustedStroke(canvas, (!simplified && isSelected()) ? stroke + 1 : stroke),
-                    BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            g2.setStroke(new BasicStroke((float) ROI.getAdjustedStroke(canvas, (!simplified && isSelected()) ? stroke + 1 : stroke), BasicStroke.CAP_BUTT,
+                    BasicStroke.JOIN_MITER));
             g2.setColor(getDisplayColor());
 
             for (int i = 1; i < points.size(); i++)
@@ -1046,7 +1039,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
     /**
      * Create 3D shape
      * 
-     * @param shape base shape
+     * @param shape
+     *        base shape
      */
     public ROI3DShape(Shape3D shape)
     {
@@ -1373,10 +1367,9 @@ public class ROI3DShape extends ROI3D implements Shape3D
     }
 
     @Override
-    public double getLength(Sequence sequence) 
+    public double getLength(Sequence sequence)
     {
-        return getTotalDistance(getPointsInternal(), sequence.getPixelSizeX(), sequence.getPixelSizeY(),
-                sequence.getPixelSizeZ());
+        return getTotalDistance(getPointsInternal(), sequence.getPixelSizeX(), sequence.getPixelSizeY(), sequence.getPixelSizeZ());
     }
 
     @Override
@@ -1493,8 +1486,13 @@ public class ROI3DShape extends ROI3D implements Shape3D
     {
         // use bigger stroke for isOver test for easier intersection
         final double strk = painter.getAdjustedStroke(canvas) * 3;
-        final Rectangle3D rect = new Rectangle3D.Double(x - (strk * 0.5), y - (strk * 0.5), z - (strk * 0.5), strk,
-                strk, strk);
+        final Rectangle3D rect = new Rectangle3D.Double(x - (strk * 0.5), y - (strk * 0.5), z - (strk * 0.5), strk, strk, strk);
+        final Rectangle3D roiBounds = getBounds3D();
+
+        // special test for empty object (point or orthogonal line)
+        if (roiBounds.isEmpty())
+            return rect.intersectsLine(roiBounds.getMinX(), roiBounds.getMinY(), roiBounds.getMinZ(), roiBounds.getMaxX(), roiBounds.getMaxY(),
+                    roiBounds.getMaxZ());
 
         return intersects(rect);
     }

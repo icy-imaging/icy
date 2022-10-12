@@ -3,6 +3,15 @@
  */
 package plugins.kernel.roi.roi3d;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.event.InputEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+
+import org.w3c.dom.Node;
+
 import icy.canvas.IcyCanvas;
 import icy.canvas.IcyCanvas2D;
 import icy.common.CollapsibleEvent;
@@ -16,19 +25,11 @@ import icy.sequence.Sequence;
 import icy.type.geom.Line3D;
 import icy.type.point.Point3D;
 import icy.type.point.Point5D;
+import icy.type.rectangle.Rectangle3D;
 import icy.util.GraphicsUtil;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
 import icy.vtk.IcyVtkPanel;
-
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
-
-import org.w3c.dom.Node;
-
 import plugins.kernel.canvas.VtkCanvas;
 import vtk.vtkActor;
 import vtk.vtkPolyDataMapper;
@@ -93,8 +94,7 @@ public class ROI3DPoint extends ROI3DShape
                 {
                     final Point3D pos = getPoint();
                     final double ray = getAdjustedStroke(canvas);
-                    final Ellipse2D ellipse = new Ellipse2D.Double(pos.getX() - ray, pos.getY() - ray, ray * 2,
-                            ray * 2);
+                    final Ellipse2D ellipse = new Ellipse2D.Double(pos.getX() - ray, pos.getY() - ray, ray * 2, ray * 2);
 
                     // get canvas Z position
                     final int cnvZ = canvas.getPositionZ();
@@ -132,7 +132,7 @@ public class ROI3DPoint extends ROI3DShape
         protected void initVtkObjects()
         {
             super.initVtkObjects();
-            
+
             // init 3D painters stuff
             vtkSource = new vtkSphereSource();
             vtkSource.SetRadius(getStroke());
@@ -144,7 +144,7 @@ public class ROI3DPoint extends ROI3DShape
                 actor.Delete();
             if (polyMapper != null)
                 polyMapper.Delete();
-            
+
             polyMapper = new vtkPolyDataMapper();
             polyMapper.SetInputConnection((vtkSource).GetOutputPort());
 
@@ -233,6 +233,23 @@ public class ROI3DPoint extends ROI3DShape
             // need to repaint
             painterChanged();
         }
+
+        @Override
+        protected boolean updateFocus(InputEvent e, Point5D imagePoint, IcyCanvas canvas)
+        {
+            // specific VTK canvas processing
+            if (canvas instanceof VtkCanvas)
+            {
+                // mouse is over the ROI actor ? --> focus the ROI
+                final boolean focus = (actor != null) && (actor == ((VtkCanvas) canvas).getPickedObject());
+
+                setFocused(focus);
+
+                return focus;
+            }
+
+            return super.updateFocus(e, imagePoint, canvas);
+        }
     }
 
     public static final String ID_POSITION = "position";
@@ -241,8 +258,10 @@ public class ROI3DPoint extends ROI3DShape
 
     /**
      * @deprecated
-     * @param pt 3D point
-     * @param cm boolean
+     * @param pt
+     *        3D point
+     * @param cm
+     *        boolean
      */
     @Deprecated
     public ROI3DPoint(Point3D pt, boolean cm)
@@ -264,7 +283,9 @@ public class ROI3DPoint extends ROI3DShape
 
     /**
      * Generic constructor for interactive mode
-     * @param pt 5D point
+     * 
+     * @param pt
+     *        5D point
      */
     public ROI3DPoint(Point5D pt)
     {
@@ -305,7 +326,9 @@ public class ROI3DPoint extends ROI3DShape
 
     /**
      * Called when anchor overlay changed
-     * @param event Overlay event
+     * 
+     * @param event
+     *        Overlay event
      */
     @Override
     public void controlPointOverlayChanged(OverlayEvent event)
@@ -314,14 +337,28 @@ public class ROI3DPoint extends ROI3DShape
         if (event.getType() == OverlayEventType.PAINTER_CHANGED)
         {
             // here we want to have ROI focused when point is selected (special case for ROIPoint)
-            if (hasSelectedPoint())
-                setFocused(true);
+            // Stephane: not a good idea if we selected several ROI points as setFocused is *exclusive*
+            // if (hasSelectedPoint())
+            // setFocused(true);
 
             // anchor changed --> ROI painter changed
             getOverlay().painterChanged();
         }
     }
-    
+
+    /**
+     * @return Returns true if specified point coordinates overlap the ROI edge.
+     */
+    @Override
+    public boolean isOverEdge(IcyCanvas canvas, double x, double y, double z)
+    {
+        // selected ? --> use control point isOver(..)
+        if (isSelected())
+            return position.isOver(canvas, new Point3D.Double(x, y, z));
+        
+        return super.isOverEdge(canvas, x, y, z);
+    }
+
     @Override
     public boolean contains(ROI roi)
     {
@@ -368,7 +405,8 @@ public class ROI3DPoint extends ROI3DShape
     }
 
     /**
-     * @param object roi changed
+     * @param object
+     *        roi changed
      */
     @Override
     public void onChanged(CollapsibleEvent object)

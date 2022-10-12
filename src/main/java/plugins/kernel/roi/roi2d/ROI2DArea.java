@@ -561,14 +561,15 @@ public class ROI2DArea extends ROI2D
             if (canvas instanceof VtkCanvas)
             {
                 // mouse is over the ROI actor ? --> focus the ROI
-                final boolean focused = (surfaceActor != null)
-                        && (surfaceActor == ((VtkCanvas) canvas).getPickedObject());
+                final boolean focus = (surfaceActor != null) && (surfaceActor == ((VtkCanvas) canvas).getPickedObject());
 
-                setFocused(focused);
+                setFocused(focus);
 
-                return focused;
+                return focus;
             }
+            
             setHovered(contains(imagePoint.getX(), imagePoint.getY()));
+            
             return super.updateFocus(e, imagePoint, canvas);
         }
 

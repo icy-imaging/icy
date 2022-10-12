@@ -429,11 +429,11 @@ public abstract class ROI2DShape extends ROI2D implements Shape
             if (canvas instanceof VtkCanvas)
             {
                 // mouse is over the ROI actor ? --> focus the ROI
-                final boolean focused = (actor != null) && (actor == ((VtkCanvas) canvas).getPickedObject());
+                final boolean focus = (actor != null) && (actor == ((VtkCanvas) canvas).getPickedObject());
 
-                setFocused(focused);
+                setFocused(focus);
 
-                return focused;
+                return focus;
             }
 
             return super.updateFocus(e, imagePoint, canvas);
