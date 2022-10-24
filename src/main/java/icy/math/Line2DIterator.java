@@ -26,7 +26,7 @@ public class Line2DIterator implements Iterator<Point2D>
      * Create the Line2D Iterator.
      * 
      * @param line
-     *        the lien we want to iterate points
+     *        the line we want to iterate points
      * @param step
      *        step between each point (default = 1d)
      * @param forceLastPoint
@@ -84,7 +84,7 @@ public class Line2DIterator implements Iterator<Point2D>
      * Create the Line2D Iterator.
      * 
      * @param line
-     *        the lien we want to iterate points
+     *        the line we want to iterate points
      * @param step
      *        step between each point (default = 1d)
      */
@@ -97,7 +97,7 @@ public class Line2DIterator implements Iterator<Point2D>
      * Create the Line2D Iterator.
      * 
      * @param line
-     *        the lien we want to iterate points
+     *        the line we want to iterate points
      */
     public Line2DIterator(Line2D line)
     {
