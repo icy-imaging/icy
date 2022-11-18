@@ -226,9 +226,9 @@ public class PluginLoader
 
         try
         {
-            // search for plugins in "Plugins" package (needed when working from JAR archive)
+            // search all classes in "Plugins" package (needed when working from JAR archive)
             ClassUtil.findClassNamesInPackage(PLUGIN_PACKAGE, true, classes);
-            // search for plugins in "Plugins" directory with default plugin package name
+            // search all classes in "Plugins" directory with default plugin package name
             ClassUtil.findClassNamesInPath(PLUGIN_PATH, PLUGIN_PACKAGE, true, classes);
         }
         catch (IOException e)
