@@ -1,19 +1,23 @@
-Icy 2.4.3.0  - 28/10/2022
+Icy 2.4.3.0 - XX/11/2022
 ------------------------
 
 **Application**
-* Fixed invalid warning report on load
-* Updated ImageJ to version 1.53r
-* Updated MacOS app launcher
-* Switched to Markdown for CHANGELOG file
+* fixed invalid warning report on load
+* updated ImageJ to version 1.53r
+* updated MacOS app launcher
+* switched to Markdown for CHANGELOG file
 * Saver
-  - Fixed FPS setting on AVI file saving
+  - fixed FPS setting on AVI file saving
 * Loader
-   - fixed small bug on multiple files loading
+  - fixed small bug on multiple files loading
 - Canvas
-  - Added `+` / `-` shortcuts to zoom IN / OUT in 2D canvas view
+  - added `+` / `-` shortcuts to zoom IN / OUT in 2D canvas view
 - ROI
-  - Fixed ROI2DPoint / ROI3DPoint focused state
+  - fixed ROI2DPoint / ROI3DPoint focused state
+  
+**Developper**
+* added new PluginScriptFactory interface for plugin providing ScriptEngineFactory
+  
 
 Icy 2.4.2.0 - 09/05/2022
 ------------------------
