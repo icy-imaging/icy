@@ -26,7 +26,8 @@ import icy.main.Icy;
 import icy.resource.ResourceUtil;
 import icy.system.thread.ThreadUtil;
 
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -56,56 +57,70 @@ public class AppleUtil
         {
             try
             {
-                final ClassLoader classLoader = SystemUtil.getSystemClassLoader();
-                final Class appClass = classLoader.loadClass("com.apple.eawt.Application");
-                final Object app = appClass.getDeclaredConstructor().newInstance();
-                
-                // TODO: update to use com.apple.eawt.Application.setHandler(..)
-                // https://www.tabnine.com/code/java/methods/org.jdesktop.application.utils.OSXAdapter/setHandler
-                
-                final Class listenerClass = classLoader.loadClass("com.apple.eawt.ApplicationListener");
-                final Object listener = Proxy.newProxyInstance(classLoader, new Class[] {listenerClass},
-                        new InvocationHandler()
-                        {
-                            @Override
-                            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
-                            {
-                                final Object applicationEvent = args[0];
-                                final Class appEventClass = applicationEvent.getClass();
-                                final Method m = appEventClass.getMethod("setHandled", boolean.class);
+                if (SystemUtil.getJavaVersionAsNumber() < 9.d) {
+                    final ClassLoader classLoader = SystemUtil.getSystemClassLoader();
+                    final Class appClass = classLoader.loadClass("com.apple.eawt.Application");
+                    final Object app = appClass.getDeclaredConstructor().newInstance();
 
-                                if (method.getName().equals("handleQuit"))
-                                {
-                                    m.invoke(applicationEvent, Boolean.valueOf(Icy.exit(false)));
-                                }
-                                if (method.getName().equals("handleAbout"))
-                                {
-                                    new AboutFrame();
-                                    m.invoke(applicationEvent, Boolean.valueOf(true));
-                                }
-                                if (method.getName().equals("handleOpenFile"))
-                                {
-                                    new LoaderDialog();
-                                    m.invoke(applicationEvent, Boolean.valueOf(true));
-                                }
-                                if (method.getName().equals("handlePreferences"))
-                                {
-                                    new PreferenceFrame(GeneralPreferencePanel.NODE_NAME);
-                                    m.invoke(applicationEvent, Boolean.valueOf(true));
-                                }
+                    // TODO: update to use com.apple.eawt.Application.setHandler(..)
+                    // https://www.tabnine.com/code/java/methods/org.jdesktop.application.utils.OSXAdapter/setHandler
 
-                                return null;
-                            }
-                        });
+                    final Class listenerClass = classLoader.loadClass("com.apple.eawt.ApplicationListener");
+                    final Object listener = Proxy.newProxyInstance(classLoader, new Class[]{listenerClass},
+                            new InvocationHandler() {
+                                @Override
+                                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                                    final Object applicationEvent = args[0];
+                                    final Class appEventClass = applicationEvent.getClass();
+                                    final Method m = appEventClass.getMethod("setHandled", boolean.class);
 
-                Method m;
+                                    if (method.getName().equals("handleQuit")) {
+                                        m.invoke(applicationEvent, Boolean.valueOf(Icy.exit(false)));
+                                    }
+                                    if (method.getName().equals("handleAbout")) {
+                                        new AboutFrame();
+                                        m.invoke(applicationEvent, Boolean.valueOf(true));
+                                    }
+                                    if (method.getName().equals("handleOpenFile")) {
+                                        new LoaderDialog();
+                                        m.invoke(applicationEvent, Boolean.valueOf(true));
+                                    }
+                                    if (method.getName().equals("handlePreferences")) {
+                                        new PreferenceFrame(GeneralPreferencePanel.NODE_NAME);
+                                        m.invoke(applicationEvent, Boolean.valueOf(true));
+                                    }
 
-                m = appClass.getMethod("addApplicationListener", listenerClass);
-                m.invoke(app, listener);
-                m = appClass.getMethod("setDockIconImage", java.awt.Image.class);
-                m.invoke(app, ResourceUtil.IMAGE_ICY_256);
-                m = appClass.getMethod("addPreferencesMenuItem");
-                m.invoke(app);
+                                    return null;
+                                }
+                            });
+
+                    Method m;
+
+                    m = appClass.getMethod("addApplicationListener", listenerClass);
+                    m.invoke(app, listener);
+                    m = appClass.getMethod("setDockIconImage", java.awt.Image.class);
+                    m.invoke(app, ResourceUtil.IMAGE_ICY_256);
+                    m = appClass.getMethod("addPreferencesMenuItem");
+                    m.invoke(app);
+                }
+                else if (SystemUtil.getJavaVersionAsNumber() >= 9.d) {
+                    Desktop desktop = Desktop.getDesktop();
+                    Taskbar taskbar = Taskbar.getTaskbar();
+                    taskbar.setIconImage(ResourceUtil.IMAGE_ICY_256);
+
+                    desktop.setAboutHandler(e -> {
+                        new AboutFrame();
+                    });
+                    desktop.setPreferencesHandler(e -> {
+                        new PreferenceFrame(GeneralPreferencePanel.NODE_NAME);
+                    });
+                    desktop.setQuitHandler((e, r) -> {
+                        Icy.exit(false);
+                    });
+                    desktop.setOpenFileHandler(e -> {
+                        new LoaderDialog();
+                    });
+                }
 
                 // set menu bar name
                 SystemUtil.setProperty("com.apple.mrj.application.apple.menu.about.name", "Icy");
