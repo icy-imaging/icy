@@ -143,7 +143,7 @@ public class AppleUtil
                                             new LoaderDialog();
                                             break;
 
-                                        case "handleAbout​":
+                                        case "handleAbout":
                                             new AboutFrame();
                                             break;
 
@@ -156,9 +156,9 @@ public class AppleUtil
                                             Icy.exit(false);
                                             
 //                                            if (!Icy.exit(false))
-//                                                ReflectionUtil.invokeMethod(args[1], "cancelQuit​");
+//                                                ReflectionUtil.invokeMethod(args[1], "cancelQuit");
 //                                            else
-//                                                ReflectionUtil.invokeMethod(args[1], "performQuit​");
+//                                                ReflectionUtil.invokeMethod(args[1], "performQuit");
                                             break;
 
                                         default:
