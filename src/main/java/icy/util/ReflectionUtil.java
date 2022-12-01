@@ -32,7 +32,37 @@ public class ReflectionUtil
     /**
      * @return the Method object corresponding to the specified method name and parameters.
      */
-    public static Method getMethod(Class<?> objectClass, String methodName, Class<?>... parameterTypes)
+    public static Method getMethod(Class<?> objectClass, String methodName, Class<?>... parameterTypes) throws SecurityException, NoSuchMethodException
+    {
+        Class<?> clazz = objectClass;
+        Method result = null;
+
+        while ((clazz != null) && (result == null))
+        {
+            try
+            {
+                result = clazz.getDeclaredMethod(methodName, parameterTypes);
+            }
+            catch (NoSuchMethodException e)
+            {
+                // ignore
+            }
+
+            clazz = clazz.getSuperclass();
+        }
+
+        if (result == null)
+            throw new NoSuchMethodException("Method " + methodName + "(..) not found in class " + objectClass.getName());
+
+        return result;
+    }
+
+    /**
+     * @deprecated using <i>forceAccess</i> is not anymore possible with Java17 so we have to stop doing that.<br>
+     *             Use {@link #getMethod(Class, String, Class...)} instead.
+     */
+    @Deprecated
+    public static Method getMethod(Class<?> objectClass, String methodName, boolean forceAccess, Class<?>... parameterTypes)
             throws SecurityException, NoSuchMethodException
     {
         Class<?> clazz = objectClass;
@@ -53,40 +83,7 @@ public class ReflectionUtil
         }
 
         if (result == null)
-            throw new NoSuchMethodException(
-                    "Method " + methodName + "(..) not found in class " + objectClass.getName());
-
-        return result;
-    }
-
-    /**
-     * @deprecated using <i>forceAccess</i> is not anymore possible with Java17 so we have to stop doing that.<br>
-     *             Use {@link #getMethod(Class, String, Class...)} instead.
-     */
-    @Deprecated
-    public static Method getMethod(Class<?> objectClass, String methodName, boolean forceAccess,
-            Class<?>... parameterTypes) throws SecurityException, NoSuchMethodException
-    {
-        Class<?> clazz = objectClass;
-        Method result = null;
-
-        while ((clazz != null) && (result == null))
-        {
-            try
-            {
-                result = clazz.getDeclaredMethod(methodName, parameterTypes);
-            }
-            catch (NoSuchMethodException e)
-            {
-                // ignore
-            }
-
-            clazz = clazz.getSuperclass();
-        }
-
-        if (result == null)
-            throw new NoSuchMethodException(
-                    "Method " + methodName + "(..) not found in class " + objectClass.getName());
+            throw new NoSuchMethodException("Method " + methodName + "(..) not found in class " + objectClass.getName());
 
         if (forceAccess)
             result.setAccessible(true);
@@ -109,8 +106,8 @@ public class ReflectionUtil
      * Invoke the method of <code>object</code> corresponding to the specified name and with
      * specified parameters values.
      */
-    public static Object invokeMethod(Object object, String methodName, Object... args) throws SecurityException,
-            NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException
+    public static Object invokeMethod(Object object, String methodName, Object... args)
+            throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException
     {
         final Class<?>[] parameterTypes = new Class<?>[args.length];
 
@@ -118,8 +115,8 @@ public class ReflectionUtil
         for (int i = 0; i < args.length; i++)
             parameterTypes[i] = args[i].getClass();
 
-        // get method
         final Method method = getMethod(object.getClass(), methodName, parameterTypes);
+
         // invoke method
         return method.invoke(object, args);
     }
@@ -130,8 +127,7 @@ public class ReflectionUtil
      */
     @Deprecated
     public static Object invokeMethod(Object object, String methodName, boolean forceAccess, Object... args)
-            throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException
+            throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException
     {
         final Class<?>[] parameterTypes = new Class<?>[args.length];
 
@@ -178,8 +174,7 @@ public class ReflectionUtil
      *             Use {@link #getField(Class, String)} instead
      */
     @Deprecated
-    public static Field getField(Class<?> objectClass, String fieldName, boolean forceAccess)
-            throws SecurityException, NoSuchFieldException
+    public static Field getField(Class<?> objectClass, String fieldName, boolean forceAccess) throws SecurityException, NoSuchFieldException
     {
         Class<?> clazz = objectClass;
         Field result = null;
@@ -212,8 +207,7 @@ public class ReflectionUtil
      *             Use {@link #getField(Class, String)} instead.
      */
     @Deprecated
-    public static Field getField(Object object, String fieldName, boolean forceAccess)
-            throws SecurityException, NoSuchFieldException
+    public static Field getField(Object object, String fieldName, boolean forceAccess) throws SecurityException, NoSuchFieldException
     {
         return getField(object.getClass(), fieldName, forceAccess);
     }

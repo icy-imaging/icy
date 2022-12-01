@@ -50,7 +50,7 @@ public class MacAdapter9Methods
         // do nothing
     }
 
-    public static void handleQuitRequestWith(final MacAdapter9 obj, Object event)
+    public static void handleQuitRequestWith(final MacAdapter9 obj, Object event, Object response)
     {
         // do nothing
     }

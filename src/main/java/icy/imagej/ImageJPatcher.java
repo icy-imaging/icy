@@ -111,25 +111,32 @@ public class ImageJPatcher
         // override behavior of MacAdapter
         if (SystemUtil.isMac())
         {
-            if (SystemUtil.getJavaVersionAsNumber() >= 9)
+            try
             {
-                hacker.replaceMethod("ij.plugin.MacAdapter9", "public void run()");
-                hacker.replaceMethod("ij.plugin.MacAdapter9", "public void run(java.lang.String arg)");
-                hacker.replaceMethod("ij.plugin.MacAdapter9", "public void handleAbout(java.awt.desktop.AboutEvent e)");
-                hacker.replaceMethod("ij.plugin.MacAdapter9", "public void openFiles(java.awt.desktop.OpenFilesEvent e)");
-                hacker.replaceMethod("ij.plugin.MacAdapter9",
-                        "public void handleQuitRequestWith(java.awt.desktop.QuitEvent e, java.awt.desktop.QuitResponse r)");
+                if (SystemUtil.getJavaVersionAsNumber() >= 9)
+                {
+                    hacker.replaceMethod("ij.plugin.MacAdapter9", "public void run()");
+                    hacker.replaceMethod("ij.plugin.MacAdapter9", "public void run(java.lang.String arg)");
+                    hacker.replaceMethod("ij.plugin.MacAdapter9", "public void handleAbout(java.awt.desktop.AboutEvent e)");
+                    hacker.replaceMethod("ij.plugin.MacAdapter9", "public void openFiles(java.awt.desktop.OpenFilesEvent e)");
+                    hacker.replaceMethod("ij.plugin.MacAdapter9", "public void handleQuitRequestWith(java.awt.desktop.QuitEvent e, java.awt.desktop.QuitResponse r)");
+                }
+                else
+                {
+                    hacker.replaceMethod("ij.plugin.MacAdapter", "public void run(java.lang.String arg)");
+                    hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleAbout(com.apple.eawt.ApplicationEvent e)");
+                    hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleOpenApplication(com.apple.eawt.ApplicationEvent e)");
+                    hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleOpenFile(com.apple.eawt.ApplicationEvent e)");
+                    hacker.replaceMethod("ij.plugin.MacAdapter", "public void handlePreferences(com.apple.eawt.ApplicationEvent e)");
+                    hacker.replaceMethod("ij.plugin.MacAdapter", "public void handlePrintFile(com.apple.eawt.ApplicationEvent e)");
+                    hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleReOpenApplication(com.apple.eawt.ApplicationEvent e)");
+                    hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleQuit(com.apple.eawt.ApplicationEvent e)");
+                }
             }
-            else
+            catch (Throwable t)
             {
-                hacker.replaceMethod("ij.plugin.MacAdapter", "public void run(java.lang.String arg)");
-                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleAbout(com.apple.eawt.ApplicationEvent e)");
-                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleOpenApplication(com.apple.eawt.ApplicationEvent e)");
-                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleOpenFile(com.apple.eawt.ApplicationEvent e)");
-                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handlePreferences(com.apple.eawt.ApplicationEvent e)");
-                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handlePrintFile(com.apple.eawt.ApplicationEvent e)");
-                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleReOpenApplication(com.apple.eawt.ApplicationEvent e)");
-                hacker.replaceMethod("ij.plugin.MacAdapter", "public void handleQuit(com.apple.eawt.ApplicationEvent e)");
+                // not so important...
+                System.err.println("Error while patching ImageJ MacAdapter class:" + t.getMessage());
             }
         }
 
@@ -160,10 +167,18 @@ public class ImageJPatcher
         // }
         if (SystemUtil.isMac())
         {
-            if (SystemUtil.getJavaVersionAsNumber() >= 9)
-                hacker.loadClass("ij.plugin.MacAdapter9", ij.IJEventListener.class);
-            else
-                hacker.loadClass("ij.plugin.MacAdapter", ij.IJEventListener.class);
+            try
+            {
+                if (SystemUtil.getJavaVersionAsNumber() >= 9)
+                    hacker.loadClass("ij.plugin.MacAdapter9", ij.plugin.PlugIn.class);
+                else
+                    hacker.loadClass("ij.plugin.MacAdapter", ij.plugin.PlugIn.class);
+            }
+            catch (Throwable t)
+            {
+                // not so important...
+                System.err.println("Error while patching ImageJ MacAdapter class:" + t.getMessage());
+            }
         }
     }
 }

@@ -19,6 +19,7 @@
 package icy.system;
 
 import java.awt.Desktop;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationHandler;
@@ -101,7 +102,7 @@ public class AppleUtil
                     });
 
                     Method m;
-
+                    
                     m = appClass.getMethod("addApplicationListener", listenerClass);
                     m.invoke(app, listener);
                     m = appClass.getMethod("setDockIconImage", java.awt.Image.class);
@@ -113,6 +114,7 @@ public class AppleUtil
                 else
                 {
                     final Desktop desktop = Desktop.getDesktop();
+                    final Class<?> desktopClass = desktop.getClass();
 
                     // desktop.setAboutHandler(e -> { new AboutFrame(); });
                     // desktop.setPreferencesHandler(e -> { new PreferenceFrame(GeneralPreferencePanel.NODE_NAME); });
@@ -120,7 +122,7 @@ public class AppleUtil
                     // desktop.setOpenFileHandler(e -> { new LoaderDialog(); });
 
                     // use reflection so we can compile with Java 8
-                    final ClassLoader classLoader = desktop.getClass().getClassLoader();
+                    final ClassLoader classLoader = desktopClass.getClassLoader();
                     final Class<?> aboutHandlerClass = ClassUtil.findClass("java.awt.desktop.AboutHandler");
                     final Class<?> preferencesHandlerClass = ClassUtil.findClass("java.awt.desktop.PreferencesHandler");
                     final Class<?> quitHandlerClass = ClassUtil.findClass("java.awt.desktop.QuitHandler");
@@ -150,10 +152,13 @@ public class AppleUtil
                                             break;
 
                                         case "handleQuitRequestWith":
-                                            if (!Icy.exit(false))
-                                                ReflectionUtil.invokeMethod(args[1], "cancelQuit​", new Object[] {});
-                                            else
-                                                ReflectionUtil.invokeMethod(args[1], "performQuit​", new Object[] {});
+                                            // just exit
+                                            Icy.exit(false);
+                                            
+//                                            if (!Icy.exit(false))
+//                                                ReflectionUtil.invokeMethod(args[1], "cancelQuit​");
+//                                            else
+//                                                ReflectionUtil.invokeMethod(args[1], "performQuit​");
                                             break;
 
                                         default:
@@ -169,20 +174,26 @@ public class AppleUtil
                     // desktop.setPreferencesHandler(e -> { new PreferenceFrame(GeneralPreferencePanel.NODE_NAME); });
                     // desktop.setQuitHandler((e, r) -> { Icy.exit(false); });
                     // desktop.setOpenFileHandler(e -> { new LoaderDialog(); });
-                    ReflectionUtil.invokeMethod(desktop, "setAboutHandler", new Object[] {proxyHandler});
-                    ReflectionUtil.invokeMethod(desktop, "setPreferencesHandler", new Object[] {proxyHandler});
-                    ReflectionUtil.invokeMethod(desktop, "setQuitHandler", new Object[] {proxyHandler});
-                    ReflectionUtil.invokeMethod(desktop, "setOpenFileHandler", new Object[] {proxyHandler});
+                    
+                    Method m;
+
+                    m = ReflectionUtil.getMethod(desktopClass, "setAboutHandler", aboutHandlerClass);
+                    m.invoke(desktop, proxyHandler);
+                    m = ReflectionUtil.getMethod(desktopClass, "setPreferencesHandler", preferencesHandlerClass);
+                    m.invoke(desktop, proxyHandler);
+                    m = ReflectionUtil.getMethod(desktopClass, "setQuitHandler", quitHandlerClass);
+                    m.invoke(desktop, proxyHandler);
+                    m = ReflectionUtil.getMethod(desktopClass, "setOpenFileHandler", openFilesHandlerClass);
+                    m.invoke(desktop, proxyHandler);
 
                     // final TaskBar taskbar = Taskbar.getTaskBar();
                     // taskbar.setIconImage(ResourceUtil.IMAGE_ICY_256);
 
-                    // get taskbar (use reflection so it can build with Java 8 too)
                     final Class<?> taskBarClass = ClassUtil.findClass("java.awt.Taskbar");
-                    final Object taskBar = ReflectionUtil.getMethod(taskBarClass, "getTaskBar", new Class<?>[] {}).invoke(null, new Object[] {});
+                    final Object taskBar = taskBarClass.getDeclaredMethod("getTaskbar").invoke(null);
 
-                    // taskbar.setIconImage(ResourceUtil.IMAGE_ICY_256);
-                    ReflectionUtil.invokeMethod(taskBar, "setIconImage", new Object[] {ResourceUtil.IMAGE_ICY_256});
+                    m = ReflectionUtil.getMethod(taskBarClass, "setIconImage", Image.class);
+                    m.invoke(taskBar, ResourceUtil.IMAGE_ICY_256);
                 }
 
                 // set menu bar name
@@ -192,6 +203,8 @@ public class AppleUtil
             catch (Exception e)
             {
                 System.err.println("Warning: can't install OSX application wrapper...");
+                System.err.println(e.getMessage());
+                e.printStackTrace();
             }
         }
 

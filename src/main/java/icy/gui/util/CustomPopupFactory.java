@@ -62,21 +62,12 @@ public class CustomPopupFactory extends PopupFactory
             }
             catch (Throwable t)
             {
-                IcyExceptionHandler.showErrorMessage(t, false);
+                // can safely ignore it, it was made for old macos version
                 getPopupMethod = null;
                 heavy = 0;
             }
         }
     }
-
-    // private static Window getWindow(Component component)
-    // {
-    // Object obj;
-    // for (obj = component; !(obj instanceof Window) && obj != null; obj = ((Component)
-    // (obj)).getParent())
-    // ;
-    // return (Window) obj;
-    // }
 
     @Override
     public Popup getPopup(Component owner, Component contents, int x, int y)
