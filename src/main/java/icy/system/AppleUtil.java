@@ -1,18 +1,18 @@
 /*
  * Copyright 2010-2015 Institut Pasteur.
- * 
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -38,7 +38,7 @@ import icy.util.ReflectionUtil;
 
 /**
  * OSX application compatibility class
- * 
+ *
  * @author stephane
  */
 public class AppleUtil
@@ -102,7 +102,7 @@ public class AppleUtil
                     });
 
                     Method m;
-                    
+
                     m = appClass.getMethod("addApplicationListener", listenerClass);
                     m.invoke(app, listener);
                     m = appClass.getMethod("setDockIconImage", java.awt.Image.class);
@@ -127,6 +127,7 @@ public class AppleUtil
                     final Class<?> preferencesHandlerClass = ClassUtil.findClass("java.awt.desktop.PreferencesHandler");
                     final Class<?> quitHandlerClass = ClassUtil.findClass("java.awt.desktop.QuitHandler");
                     final Class<?> openFilesHandlerClass = ClassUtil.findClass("java.awt.desktop.OpenFilesHandler");
+                    final Class<?> quitResponseClass = ClassUtil.findClass("java.awt.desktop.QuitResponse");
 
                     final Object proxyHandler = Proxy.newProxyInstance(classLoader,
                             new Class<?>[] {aboutHandlerClass, preferencesHandlerClass, quitHandlerClass, openFilesHandlerClass}, new InvocationHandler()
@@ -135,7 +136,6 @@ public class AppleUtil
                                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
                                 {
                                     final String methodName = method.getName();
-                                    // final Class<?>[] parameterTypes = method.getParameterTypes();
 
                                     switch (methodName)
                                     {
@@ -152,13 +152,10 @@ public class AppleUtil
                                             break;
 
                                         case "handleQuitRequestWith":
-                                            // just exit
-                                            Icy.exit(false);
-                                            
-//                                            if (!Icy.exit(false))
-//                                                ReflectionUtil.invokeMethod(args[1], "cancelQuit");
-//                                            else
-//                                                ReflectionUtil.invokeMethod(args[1], "performQuit");
+                                            if (!Icy.exit(false))
+                                                ReflectionUtil.getMethod(quitResponseClass, "cancelQuit").invoke(args[1]);
+                                            else
+                                                ReflectionUtil.getMethod(quitResponseClass, "performQuit").invoke(args[1]);
                                             break;
 
                                         default:
@@ -174,7 +171,7 @@ public class AppleUtil
                     // desktop.setPreferencesHandler(e -> { new PreferenceFrame(GeneralPreferencePanel.NODE_NAME); });
                     // desktop.setQuitHandler((e, r) -> { Icy.exit(false); });
                     // desktop.setOpenFileHandler(e -> { new LoaderDialog(); });
-                    
+
                     Method m;
 
                     m = ReflectionUtil.getMethod(desktopClass, "setAboutHandler", aboutHandlerClass);
@@ -204,7 +201,6 @@ public class AppleUtil
             {
                 System.err.println("Warning: can't install OSX application wrapper...");
                 System.err.println(e.getMessage());
-                e.printStackTrace();
             }
         }
 
