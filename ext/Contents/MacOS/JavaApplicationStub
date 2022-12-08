@@ -20,4 +20,4 @@ AppIconPath="${AppResourcesFolder}"/icy.icns
 
 cd $AppPackageFolder
 
-exec "java" -Xdock:icon=$AppIconPath -Xdock:name="Icy" -jar updater.jar
+/usr/libexec/java_home -v 1.8 --exec java -Xdock:icon=$AppIconPath -Xdock:name="Icy" -jar updater.jar
