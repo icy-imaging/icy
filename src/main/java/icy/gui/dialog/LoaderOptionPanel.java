@@ -1021,8 +1021,7 @@ public class LoaderOptionPanel extends JPanel
             @Override
             public void stateChanged(ChangeEvent e)
             {
-                if (!resolutionSlider.getValueIsAdjusting())
-                    updateFinaleResolution();
+                updateFinaleResolution();
             }
         });
 
