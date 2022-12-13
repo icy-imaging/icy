@@ -1021,7 +1021,8 @@ public class LoaderOptionPanel extends JPanel
             @Override
             public void stateChanged(ChangeEvent e)
             {
-                updateFinaleResolution();
+                if (!resolutionSlider.getValueIsAdjusting())
+                    updateFinaleResolution();
             }
         });
 
@@ -1281,7 +1282,7 @@ public class LoaderOptionPanel extends JPanel
             final int s = getSelectedSeries();
             final int sizeC = Math.max(MetaDataUtil.getSizeC(metadata, s), 1);
 
-            channelSpinner.setModel(new SpecialValueSpinnerModel(-1, -1, sizeC - 1, 1, -1, "ALL"));
+            channelSpinner.setModel(new SpecialValueSpinnerModel(Math.min(getChannel(), sizeC - 1), -1, sizeC - 1, 1, -1, "ALL"));
             channelSpinner.setEnabled(canUseAdvancedSetting() && (sizeC > 1));
         }
         else
@@ -1297,7 +1298,7 @@ public class LoaderOptionPanel extends JPanel
         {
             final int numSeries = Math.max(MetaDataUtil.getNumSeries(metadata), 1);
 
-            seriesSpinner.setModel(new SpecialValueSpinnerModel(getSeries(), -1, numSeries - 1, 1, -1, "ALL"));
+            seriesSpinner.setModel(new SpecialValueSpinnerModel(Math.min(getSeries(), numSeries - 1), -1, numSeries - 1, 1, -1, "ALL"));
             seriesSpinner.setEnabled(canUseAdvancedSetting() && (numSeries > 1));
         }
         else
@@ -1345,7 +1346,8 @@ public class LoaderOptionPanel extends JPanel
         // apply
         resolutionSlider.setMinimum(minRes);
         resolutionSlider.setMaximum(maxRes);
-        resolutionSlider.setValue(minRes);
+        // preserve current value
+        // resolutionSlider.setValue(minRes);
 
         // no need to enable it
         resolutionSlider.setEnabled(canUseAdvancedSetting() && (maxRes > 0));
@@ -1460,7 +1462,7 @@ public class LoaderOptionPanel extends JPanel
 
     public int getResolutionLevel()
     {
-        if (resolutionSlider.isVisible())
+        if (resolutionSlider.isVisible() && resolutionSlider.isEnabled())
             return resolutionSlider.getValue();
 
         return 0;
