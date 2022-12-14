@@ -263,7 +263,7 @@ public class Main
             System.err.println("New version of Icy requires Java 8 or above, please update your java version.");
             System.err.println();
             System.err.println("You can download Java 8 here:");
-            System.err.println("http://icy.bioimageanalysis.org/download/");
+            System.err.println("https://icy.bioimageanalysis.org/download/");
 
             return false;
         }
