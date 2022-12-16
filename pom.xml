@@ -55,9 +55,10 @@
                                 <resource>
                                     <directory>.</directory>
                                     <targetPath>${outputDirectory}/icy</targetPath>
-                                    <include>CHANGELOG</include>
+                                    <include>CHANGELOG.md</include>
                                     <include>LICENSE</include>
                                     <include>README.md</include>
+                                    <include>CONTRIBUTING.md</include>
                                 </resource>
                             </resources>
                         </configuration>
