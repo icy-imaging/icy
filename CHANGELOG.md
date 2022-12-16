@@ -14,6 +14,7 @@ Icy 2.4.3.0 - 16/12/2022
 * fixed some issues with old internal HTTP address
 * fixed invalid warning report on load
 * fixed several issues with MacOS app integration
+* updated Bio-Formats to version 6.11.0
 * updated ImageJ to version 1.53r
 * updated MacOS app launcher
 * switched to Markdown for CHANGELOG file
