@@ -1075,8 +1075,8 @@ public class Icy
      */
     public static String getChangeLog()
     {
-        if (FileUtil.exists("CHANGELOG"))
-            return new String(FileUtil.load("CHANGELOG", false));
+        if (FileUtil.exists("CHANGELOG.md"))
+            return new String(FileUtil.load("CHANGELOG.md", false));
 
         return "";
     }
