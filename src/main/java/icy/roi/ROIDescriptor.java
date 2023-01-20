@@ -16,6 +16,7 @@ import icy.roi.ROIEvent.ROIEventType;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.system.IcyExceptionHandler;
+import icy.util.ClassUtil;
 import icy.util.StringUtil;
 import plugins.kernel.roi.descriptor.measure.ROIBasicMeasureDescriptorsPlugin;
 
@@ -119,8 +120,8 @@ public abstract class ROIDescriptor
      * @throws InterruptedException
      *         if the thread was interrupted during the computation of the descriptor
      */
-    public static Object computeDescriptor(Collection<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi,
-            Sequence sequence) throws UnsupportedOperationException, InterruptedException
+    public static Object computeDescriptor(Collection<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
         final ROIDescriptor roiDescriptor = getDescriptor(roiDescriptors, descriptorId);
 
@@ -150,8 +151,7 @@ public abstract class ROIDescriptor
      * @throws InterruptedException
      *         if the thread was interrupted during the computation of the descriptor
      */
-    public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence)
-            throws UnsupportedOperationException, InterruptedException
+    public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return computeDescriptor(getDescriptors().keySet(), descriptorId, roi, sequence);
     }
@@ -231,6 +231,69 @@ public abstract class ROIDescriptor
     };
 
     /**
+     * Returns the null value for this descriptor
+     * 
+     * @see #compute(ROI, Sequence)
+     */
+    public Object getNullValue()
+    {
+        if (ClassUtil.isSubClass(type, Number.class))
+        {
+            try
+            {
+                // y to return in correct type
+                return type.getMethod("valueOf", type).invoke(null, Double.valueOf(0));
+            }
+            catch (Exception e)
+            {
+                // ok, just return as Double
+                return Double.valueOf(0d);
+            }
+        }
+
+        if (type == String.class)
+            return "";
+
+        return null;
+    };
+
+    /**
+     * Returns the minimum allowed value for this descriptor (used mainly for Number type descriptor)
+     * 
+     * @see #compute(ROI, Sequence)
+     */
+    public Object getMinValue()
+    {
+        // default
+        Object result = getNullValue();
+
+        // avoid null here
+        if (result == null)
+            return result = "";
+
+        return result;
+    }
+
+    /**
+     * Returns the maximum allowed value for this descriptor (used mainly for Number type descriptor)
+     * 
+     * @see #compute(ROI, Sequence)
+     */
+    public Object getMaxValue()
+    {
+        if (type == Integer.class)
+            return Integer.valueOf(Integer.MAX_VALUE);
+        if (type == Long.class)
+            return Long.valueOf(Long.MAX_VALUE);
+        if (type == Float.class)
+            return Float.valueOf(1f);
+        if (type == Double.class)
+            return Double.valueOf(1d);
+
+        return "";
+    };
+
+    /**
      * Returns <code>true</code> if this descriptor compute its result on {@link Sequence} data and *per channel* (as
      * pixel intensity information).<br>
      * By default it returns <code>false</code>, override this method if a descriptor require per channel computation.
@@ -280,8 +343,7 @@ public abstract class ROIDescriptor
      * @throws InterruptedException
      *         if the thread was interrupted during the computation of the descriptor
      */
-    public abstract Object compute(ROI roi, Sequence sequence)
-            throws UnsupportedOperationException, InterruptedException;
+    public abstract Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException;
 
     /*
      * We want a unique id for each {@link ROIDescriptor}
