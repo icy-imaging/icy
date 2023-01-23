@@ -18,6 +18,38 @@
  */
 package icy.gui.main;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.HeadlessException;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JInternalFrame;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+
+import org.pushingpixels.flamingo.api.ribbon.JRibbon;
+import org.pushingpixels.flamingo.api.ribbon.JRibbonFrame;
+
 import icy.action.FileActions;
 import icy.action.GeneralActions;
 import icy.action.SequenceOperationActions;
@@ -28,40 +60,32 @@ import icy.gui.component.ExternalizablePanel.StateListener;
 import icy.gui.frame.IcyExternalFrame;
 import icy.gui.inspector.InspectorPanel;
 import icy.gui.menu.ApplicationMenu;
-import icy.gui.menu.ApplicationMenuBar;
 import icy.gui.menu.MainRibbon;
 import icy.gui.menu.search.SearchBar;
 import icy.gui.util.ComponentUtil;
 import icy.gui.util.WindowPositionSaver;
 import icy.gui.viewer.Viewer;
 import icy.image.cache.ImageCache;
+import icy.imagej.ImageJWrapper;
 import icy.main.Icy;
 import icy.math.HungarianAlgorithm;
 import icy.preferences.GeneralPreferences;
 import icy.resource.ResourceUtil;
+import icy.resource.icon.IcyApplicationIcon;
 import icy.system.FileDrop;
 import icy.system.FileDrop.FileDropExtListener;
 import icy.system.FileDrop.FileDropListener;
 import icy.system.SystemUtil;
+import icy.system.thread.ThreadUtil;
 import icy.type.collection.CollectionUtil;
 import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.swing.IconFontSwing;
-
-import javax.swing.*;
-import javax.swing.border.LineBorder;
-import java.awt.*;
-//import java.awt.dnd.DropTargetDropEvent;
-import java.awt.event.*;
-import java.awt.geom.Point2D;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import ij.IJ;
 
 /**
  * @author fab &amp; Stephane
  */
-public class MainFrame extends JFrame
+@Deprecated
+public class MainFrameOLD extends JRibbonFrame
 {
     private static Rectangle getDefaultBounds()
     {
@@ -77,7 +101,7 @@ public class MainFrame extends JFrame
 
     /**
      * Returns the list of internal viewers.
-     *
+     * 
      * @param bounds
      *        If not null only viewers visible in the specified bounds are returned.
      * @param wantNotVisible
@@ -107,7 +131,7 @@ public class MainFrame extends JFrame
 
     /**
      * Returns the list of internal viewers.
-     *
+     * 
      * @param wantNotVisible
      *        Also return not visible viewers
      * @param wantIconized
@@ -117,6 +141,11 @@ public class MainFrame extends JFrame
     {
         return getExternalViewers(null, wantNotVisible, wantIconized);
     }
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1113003570969611614L;
 
     public static final String TITLE = "Icy";
 
@@ -128,7 +157,7 @@ public class MainFrame extends JFrame
 
     public static final String ID_PREVIOUS_STATE = "previousState";
 
-    //final MainRibbon mainRibbon;
+    final MainRibbon mainRibbon;
     JSplitPane mainPane;
     private final JPanel centerPanel;
     private final IcyDesktopPane desktopPane;
@@ -148,7 +177,7 @@ public class MainFrame extends JFrame
     /**
      * @throws HeadlessException
      */
-    public MainFrame() throws HeadlessException
+    public MainFrameOLD() throws HeadlessException
     {
         super(TITLE);
 
@@ -158,7 +187,7 @@ public class MainFrame extends JFrame
         // ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
 
         // FIXME : remove this when Ribbon with have fixed KeyTipLayer component
-        //getRootPane().getLayeredPane().getComponent(0).setVisible(false);
+        getRootPane().getLayeredPane().getComponent(0).setVisible(false);
 
         // SubstanceRibbonFrameTitlePane titlePane = (SubstanceRibbonFrameTitlePane)
         // LookAndFeelUtil.getTitlePane(this);
@@ -181,27 +210,14 @@ public class MainFrame extends JFrame
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
         // build ribbon
-        //mainRibbon = new MainRibbon(getRibbon());
+        mainRibbon = new MainRibbon(getRibbon());
 
         // set application icons
         setIconImages(ResourceUtil.getIcyIconImages());
-        //setApplicationIcon(new IcyApplicationIcon());
+        setApplicationIcon(new IcyApplicationIcon());
 
         // set minimized state
-        //getRibbon().setMinimized(GeneralPreferences.getRibbonMinimized());
-
-        // Application menubar
-        setJMenuBar(new ApplicationMenuBar());
-
-        // Toolbars
-        JPanel panelToolbars = new JPanel(new GridLayout(1, 1));
-        panelToolbars.setBorder(new LineBorder(Color.darkGray.darker()));
-        add(panelToolbars, BorderLayout.NORTH);
-
-        panelToolbars.add(createSequenceToolbar());
-
-        // TODO remove this once JMenuBar complete
-        panelToolbars.setVisible(false);
+        getRibbon().setMinimized(GeneralPreferences.getRibbonMinimized());
 
         // main center pane (contains desktop pane)
         centerPanel = new JPanel();
@@ -247,45 +263,50 @@ public class MainFrame extends JFrame
                 Loader.load(CollectionUtil.asList(FileUtil.toPaths(files)), (files.length <= 1) && !files[0].isDirectory(), true, true);
             }
         };
-        final FileDropExtListener bandFileDropListener = (evt, files) -> {
-            /*if (getRibbon().getSelectedTask() == mainRibbon.getImageJTask())
+        final FileDropExtListener bandFileDropListener = new FileDropExtListener()
+        {
+            @Override
+            public void filesDropped(DropTargetDropEvent evt, File[] files)
             {
-                final ImageJWrapper imageJ = mainRibbon.getImageJTask().getImageJ();
-                final JPanel imageJPanel = imageJ.getSwingPanel();
-
-                // drop point was inside ImageJ ?
-                if (imageJPanel.contains(ComponentUtil.convertPoint(getRibbon(), evt.getLocation(), imageJPanel)))
+                if (getRibbon().getSelectedTask() == mainRibbon.getImageJTask())
                 {
-                    if (files.length > 0)
+                    final ImageJWrapper imageJ = mainRibbon.getImageJTask().getImageJ();
+                    final JPanel imageJPanel = imageJ.getSwingPanel();
+
+                    // drop point was inside ImageJ ?
+                    if (imageJPanel.contains(ComponentUtil.convertPoint(getRibbon(), evt.getLocation(), imageJPanel)))
                     {
-                        final String file = files[0].getAbsolutePath();
-
-                        ThreadUtil.bgRun(new Runnable()
+                        if (files.length > 0)
                         {
-                            @Override
-                            public void run()
+                            final String file = files[0].getAbsolutePath();
+
+                            ThreadUtil.bgRun(new Runnable()
                             {
-                                IJ.open(file);
-                            }
-                        });
+                                @Override
+                                public void run()
+                                {
+                                    IJ.open(file);
+                                }
+                            });
+                        }
+
+                        return;
                     }
-
-                    return;
                 }
-            }
 
-            // classic file loading
-            Loader.load(CollectionUtil.asList(FileUtil.toPaths(files)), false, true, true);*/
+                // classic file loading
+                Loader.load(CollectionUtil.asList(FileUtil.toPaths(files)), false, true, true);
+            }
         };
 
         // handle file drop in desktop pane and in ribbon pane
-        new FileDrop(desktopPane, BorderFactory.createLineBorder(Color.cyan.brighter(), 2), false,
+        new FileDrop(desktopPane, BorderFactory.createLineBorder(Color.blue.brighter(), 2), false,
                 desktopFileDropListener);
-        /*new FileDrop(getRibbon(), BorderFactory.createLineBorder(Color.blue.brighter(), 1), false,
-                bandFileDropListener);*/
+        new FileDrop(getRibbon(), BorderFactory.createLineBorder(Color.blue.brighter(), 1), false,
+                bandFileDropListener);
 
         // listen ribbon minimization event
-        /*getRibbon().addPropertyChangeListener(JRibbon.PROPERTY_MINIMIZED, new PropertyChangeListener()
+        getRibbon().addPropertyChangeListener(JRibbon.PROPERTY_MINIMIZED, new PropertyChangeListener()
         {
             @Override
             public void propertyChange(PropertyChangeEvent evt)
@@ -299,7 +320,7 @@ public class MainFrame extends JFrame
                 // save state in preference
                 GeneralPreferences.setRibbonMinimized(value);
             }
-        });*/
+        });
     }
 
     /**
@@ -400,7 +421,7 @@ public class MainFrame extends JFrame
         validate();
 
         // initialize now some stuff that need main frame to be initialized
-        //mainRibbon.init();
+        mainRibbon.init();
         // refresh title
         refreshTitle();
 
@@ -435,8 +456,7 @@ public class MainFrame extends JFrame
 
     public ApplicationMenu getApplicationMenu()
     {
-        //return (ApplicationMenu) getRibbon().getApplicationMenu();
-        return null;
+        return (ApplicationMenu) getRibbon().getApplicationMenu();
     }
 
     /**
@@ -453,8 +473,8 @@ public class MainFrame extends JFrame
      */
     public SearchBar getSearchBar()
     {
-        /*if (mainRibbon != null)
-            return mainRibbon.getSearchBar();*/
+        if (mainRibbon != null)
+            return mainRibbon.getSearchBar();
 
         return null;
     }
@@ -491,8 +511,7 @@ public class MainFrame extends JFrame
      */
     public MainRibbon getMainRibbon()
     {
-        //return mainRibbon;
-        return null;
+        return mainRibbon;
     }
 
     /**
@@ -961,22 +980,4 @@ public class MainFrame extends JFrame
     //
     // super.setMaximizedBounds(bnds);
     // }
-
-    private JToolBar createSequenceToolbar() {
-        final JToolBar toolBar = new JToolBar("Sequence", JToolBar.HORIZONTAL);
-        //panelToolbar.setPreferredSize(new Dimension(0, 30));
-
-        final JButton buttonDuplicate = new JButton(IconFontSwing.buildIcon(GoogleMaterialDesignIcons.CONTENT_COPY, 16f, Color.WHITE));
-        buttonDuplicate.setToolTipText("Create a copy of the active sequence");
-        toolBar.add(buttonDuplicate);
-
-        final JComboBox<String> comboConversion = new JComboBox<>();
-        final String[] listConversion = new String[1];
-        listConversion[0] = "Unsigned Byte (8bits)";
-        final ComboBoxModel<String> modelConversion = new DefaultComboBoxModel<>(listConversion);
-        comboConversion.setModel(modelConversion);
-        toolBar.add(comboConversion);
-
-        return toolBar;
-    }
 }

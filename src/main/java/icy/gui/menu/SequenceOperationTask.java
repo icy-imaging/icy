@@ -48,6 +48,7 @@ import icy.util.StringUtil;
 /**
  * @author Stephane
  */
+@Deprecated
 public class SequenceOperationTask extends RibbonTask
 {
     public static class FileBand extends JRibbonBand

@@ -60,6 +60,9 @@ public class AppleUtil
         {
             try
             {
+                // set quit strategy for OSX
+                System.setProperty("apple.eawt.quitStrategy", "CLOSE_ALL_WINDOWS");
+
                 // java 8 or <
                 if (SystemUtil.getJavaVersionAsNumber() < 9d)
                 {
@@ -79,7 +82,8 @@ public class AppleUtil
 
                             if (method.getName().equals("handleQuit"))
                             {
-                                m.invoke(applicationEvent, Boolean.valueOf(Icy.exit(false)));
+                                Icy.exit(false);
+                                m.invoke(applicationEvent, Boolean.valueOf(true));
                             }
                             if (method.getName().equals("handleAbout"))
                             {
@@ -152,10 +156,11 @@ public class AppleUtil
                                             break;
 
                                         case "handleQuitRequestWith":
-                                            if (!Icy.exit(false))
-                                                ReflectionUtil.getMethod(quitResponseClass, "cancelQuit").invoke(args[1]);
-                                            else
-                                                ReflectionUtil.getMethod(quitResponseClass, "performQuit").invoke(args[1]);
+                                            Icy.exit(false);
+                                            // let Icy handle quit
+                                            ReflectionUtil.getMethod(quitResponseClass, "cancelQuit").invoke(args[1]);
+                                            //else
+                                            // ReflectionUtil.getMethod(quitResponseClass, "performQuit").invoke(args[1]);
                                             break;
 
                                         default:

@@ -34,7 +34,7 @@ import org.pushingpixels.substance.api.skin.SkinChangeListener;
 
 import icy.file.FileUtil;
 import icy.gui.util.LookAndFeelUtil;
-import icy.gui.util.LookAndFeelUtil.WeakSkinChangeListener;
+//import icy.gui.util.LookAndFeelUtil.WeakSkinChangeListener;
 import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
 import icy.util.ColorUtil;
@@ -203,7 +203,7 @@ public class ToolbarWrapper extends Toolbar
         if (FileUtil.exists(file))
             new MacroInstaller().run(file);
 
-        LookAndFeelUtil.addSkinChangeListener(new WeakSkinChangeListener(skinChangeListener));
+        //LookAndFeelUtil.addSkinChangeListener(new WeakSkinChangeListener(skinChangeListener));
     }
 
     @Override

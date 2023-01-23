@@ -204,8 +204,8 @@ public class ROIMagicWand extends ROI2DArea
         public void drawText(Graphics2D g, Canvas2D canvas2d, String text, float alpha)
         {
             final Rectangle2D rect = GraphicsUtil.getStringBounds(g, text);
-            final int w = (int) rect.getWidth();
-            final int h = (int) rect.getHeight();
+            //final int w = (int) rect.getWidth();
+            //final int h = (int) rect.getHeight();
             final int x = (int) (canvas2d.getWidth() - (rect.getWidth() + 20));
             final int y = (int) (canvas2d.getHeight() - (rect.getHeight() + 30));
 
@@ -319,7 +319,7 @@ public class ROIMagicWand extends ROI2DArea
         }
 
         // compute tolerances start/step from min and max
-        final double channelBounds[] = (c == -1) ? seq.getChannelsGlobalBounds() : seq.getChannelBounds(c);
+        final double[] channelBounds = (c == -1) ? seq.getChannelsGlobalBounds() : seq.getChannelBounds(c);
         channelDelta = channelBounds[1] - channelBounds[0];
 
         // init value tolerance

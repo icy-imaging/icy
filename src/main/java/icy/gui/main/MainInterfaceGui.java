@@ -867,7 +867,8 @@ public class MainInterfaceGui implements MainInterface
         if (mainFrame == null)
             return null;
 
-        return mainFrame.getMainRibbon().getImageJ();
+        //return mainFrame.getMainRibbon().getImageJ();
+        return null;
     }
 
     @Override
@@ -876,14 +877,15 @@ public class MainInterfaceGui implements MainInterface
         if (mainFrame == null)
             return null;
 
-        return getROIRibbonTask().getSelected();
+        //return getROIRibbonTask().getSelected();
+        return "";
     }
 
     @Override
     public void setSelectedTool(String command)
     {
-        if (mainFrame != null)
-            getROIRibbonTask().setSelected(command);
+        /*if (mainFrame != null)
+            getROIRibbonTask().setSelected(command);*/
     }
 
     @Override
@@ -892,7 +894,8 @@ public class MainInterfaceGui implements MainInterface
         if (mainFrame == null)
             return null;
 
-        return mainFrame.getMainRibbon().getROIRibbonTask();
+        //return mainFrame.getMainRibbon().getROIRibbonTask();
+        return null;
     }
 
     @Deprecated
@@ -902,7 +905,8 @@ public class MainInterfaceGui implements MainInterface
         if (mainFrame == null)
             return null;
 
-        return mainFrame.getMainRibbon().getToolRibbon();
+        //return mainFrame.getMainRibbon().getToolRibbon();
+        return null;
     }
 
     @Override

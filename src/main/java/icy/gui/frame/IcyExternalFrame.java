@@ -40,25 +40,15 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JRootPane;
 
-import org.pushingpixels.substance.internal.utils.SubstanceTitlePane;
+//import org.pushingpixels.substance.internal.utils.SubstanceTitlePane;
 
 /**
  * @author Stephane
  */
 public class IcyExternalFrame extends JFrame
 {
-    /**
-      * 
-      */
-    private static final long serialVersionUID = 9130936218505070807L;
-
     private class CloseAction extends IcyAbstractAction
     {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 4933605299188863452L;
-
         public CloseAction()
         {
             super("Close", new IcyIcon(ResourceUtil.ICON_CLOSE, 20), "Close window", KeyEvent.VK_F4, SystemUtil
@@ -76,7 +66,7 @@ public class IcyExternalFrame extends JFrame
     /**
      * internals
      */
-    private SubstanceTitlePane titlePane;
+    //private SubstanceTitlePane titlePane;
     // private JMenuBar systemMenuBar;
     MenuCallback systemMenuCallback;
     private boolean titleBarVisible;
@@ -123,7 +113,8 @@ public class IcyExternalFrame extends JFrame
 
         systemMenuCallback = null;
         closeItemVisible = true;
-        updateTitlePane(LookAndFeelUtil.getTitlePane(this));
+        //updateTitlePane(LookAndFeelUtil.getTitlePane(this));
+        updateSystemMenu();
 
         titleBarVisible = true;
         initialized = true;
@@ -132,7 +123,7 @@ public class IcyExternalFrame extends JFrame
     /**
      * update internals informations linked to title pane with specified pane
      */
-    protected void updateTitlePane(final SubstanceTitlePane pane)
+    /*protected void updateTitlePane(final SubstanceTitlePane pane)
     {
         // update pane save
         if (pane != null)
@@ -142,7 +133,7 @@ public class IcyExternalFrame extends JFrame
         // systemMenuBar = titlePane.getMenuBar();
         // refresh system menu whatever
         updateSystemMenu();
-    }
+    }*/
 
     /**
      * update internals informations linked to title pane
@@ -152,7 +143,7 @@ public class IcyExternalFrame extends JFrame
         if (initialized)
         {
             // title pane can have changed
-            updateTitlePane(LookAndFeelUtil.getTitlePane(this));
+            //updateTitlePane(LookAndFeelUtil.getTitlePane(this));
 
             if (!titleBarVisible)
                 setTitleBarVisible(false);
@@ -164,8 +155,8 @@ public class IcyExternalFrame extends JFrame
      */
     public void updateSystemMenu()
     {
-        if (titlePane != null)
-        {
+        /*if (titlePane != null)
+        {*/
             final JMenu menu;
 
             if (systemMenuCallback != null)
@@ -177,11 +168,11 @@ public class IcyExternalFrame extends JFrame
             menu.getPopupMenu().setLightWeightPopupEnabled(false);
 
             // rebuild menu
-            titlePane.setSystemMenu(menu);
+            //titlePane.setSystemMenu(menu);
             // systemMenuBar.removeAll();
             // systemMenuBar.add(menu);
             // systemMenuBar.validate();
-        }
+        //}
     }
 
     public void setTitleBarVisible(boolean value)

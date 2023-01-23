@@ -951,7 +951,8 @@ public class RoiActions
 
                 if (mainFrame != null)
                 {
-                    final double value = mainFrame.getMainRibbon().getROIRibbonTask().getFillValue();
+                    //final double value = mainFrame.getMainRibbon().getROIRibbonTask().getFillValue();
+                    final double value = 0d; // TODO: 23/01/2023 Change this when ROI toolbar is set
 
                     try
                     {
@@ -1016,7 +1017,8 @@ public class RoiActions
 
                 if (mainFrame != null)
                 {
-                    final double value = mainFrame.getMainRibbon().getROIRibbonTask().getFillValue();
+                    //final double value = mainFrame.getMainRibbon().getROIRibbonTask().getFillValue();
+                    final double value = 0d; // TODO: 23/01/2023 Change this when ROI toolbar is set
                     boolean canUndo = false;
 
                     try
@@ -1490,7 +1492,8 @@ public class RoiActions
 
                 if (mainFrame != null)
                 {
-                    final double radius = mainFrame.getMainRibbon().getROIRibbonTask().getRadius();
+                    //final double radius = mainFrame.getMainRibbon().getROIRibbonTask().getRadius();
+                    final double radius = 1d; // TODO: 23/01/2023 Change this when ROI toolbar is set
 
                     // ROI point conversion
                     sequence.beginUpdate();
@@ -1571,7 +1574,8 @@ public class RoiActions
 
                 if (mainFrame != null)
                 {
-                    final double size = mainFrame.getMainRibbon().getROIRibbonTask().getRadius() * 2;
+                    //final double size = mainFrame.getMainRibbon().getROIRibbonTask().getRadius() * 2;
+                    final double size = 1d * 2; // TODO: 23/01/2023 Change this when ROI toolbar is set
 
                     // ROI point conversion
                     sequence.beginUpdate();
@@ -2202,7 +2206,8 @@ public class RoiActions
             {
                 final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
                 MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
-                double distance = mainFrame.getMainRibbon().getROIRibbonTask().getDistance();
+                //double distance = mainFrame.getMainRibbon().getROIRibbonTask().getDistance();
+                double distance = 1d; // TODO: 23/01/2023 Change this when ROI toolbar is set
 
                 try
                 {
@@ -2242,7 +2247,8 @@ public class RoiActions
             {
                 final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
                 MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
-                double distance = mainFrame.getMainRibbon().getROIRibbonTask().getDistance();
+                //double distance = mainFrame.getMainRibbon().getROIRibbonTask().getDistance();
+                double distance = 1d; // TODO: 23/01/2023 Change this when ROI toolbar is set
 
                 try
                 {
@@ -2282,7 +2288,8 @@ public class RoiActions
             {
                 final List<ROI2D> selectedROIs = sequence.getSelectedROI2Ds();
                 MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
-                double distance = mainFrame.getMainRibbon().getROIRibbonTask().getDistance();
+                //double distance = mainFrame.getMainRibbon().getROIRibbonTask().getDistance();
+                double distance = 1d; // TODO: 23/01/2023 Change this when ROI toolbar is set
 
                 try
                 {

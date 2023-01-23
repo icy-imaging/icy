@@ -32,6 +32,7 @@ import javax.swing.JMenuItem;
 /**
  * This class represent a MenuItem which launch a plugin when pressed.
  */
+@Deprecated
 public class PluginMenuItem extends JMenuItem implements ActionListener
 {
     private static final long serialVersionUID = 2508924050709990008L;

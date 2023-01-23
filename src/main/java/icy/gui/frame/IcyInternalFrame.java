@@ -38,7 +38,7 @@ import javax.swing.JMenu;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
-import org.pushingpixels.substance.internal.utils.SubstanceInternalFrameTitlePane;
+//import org.pushingpixels.substance.internal.utils.SubstanceInternalFrameTitlePane;
 
 /**
  * @author Stephane
@@ -52,10 +52,6 @@ public class IcyInternalFrame extends JInternalFrame
 
     private class CloseAction extends IcyAbstractAction
     {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 4933605299188863452L;
 
         public CloseAction()
         {
@@ -74,7 +70,7 @@ public class IcyInternalFrame extends JInternalFrame
     /**
      * internals
      */
-    SubstanceInternalFrameTitlePane titlePane = null;
+    //SubstanceInternalFrameTitlePane titlePane = null;
     // JMenu systemMenu;
     MenuCallback systemMenuCallback;
     private boolean titleBarVisible;
@@ -125,7 +121,8 @@ public class IcyInternalFrame extends JInternalFrame
 
         systemMenuCallback = null;
         closeItemVisible = closable;
-        updateTitlePane(LookAndFeelUtil.getTitlePane(this));
+        //updateTitlePane(LookAndFeelUtil.getTitlePane(this));
+        updateSystemMenu();
 
         titleBarVisible = true;
         initialized = true;
@@ -134,7 +131,7 @@ public class IcyInternalFrame extends JInternalFrame
     /**
      * update internals informations linked to title pane with specified pane
      */
-    protected void updateTitlePane(final SubstanceInternalFrameTitlePane pane)
+    /*protected void updateTitlePane(final SubstanceInternalFrameTitlePane pane)
     {
         // update pane save
         if (pane != null)
@@ -144,7 +141,7 @@ public class IcyInternalFrame extends JInternalFrame
         // systemMenuBar = titlePane.getMenuBar();
         // refresh system menu whatever
         updateSystemMenu();
-    }
+    }*/
 
     /**
      * update internals informations linked to title pane and title pane state
@@ -154,7 +151,7 @@ public class IcyInternalFrame extends JInternalFrame
         if (initialized)
         {
             // title pane can have changed
-            updateTitlePane(LookAndFeelUtil.getTitlePane(this));
+            //updateTitlePane(LookAndFeelUtil.getTitlePane(this));
 
             if (!titleBarVisible)
                 setTitleBarVisible(false);
@@ -166,7 +163,7 @@ public class IcyInternalFrame extends JInternalFrame
      */
     public void updateSystemMenu()
     {
-        if ((titlePane != null) && !isClosed())
+        if (/*(titlePane != null) && */!isClosed())
         {
             final JMenu menu;
 
@@ -179,7 +176,7 @@ public class IcyInternalFrame extends JInternalFrame
             menu.getPopupMenu().setLightWeightPopupEnabled(false);
 
             // rebuild menu
-            titlePane.setSystemMenu(menu);
+            //titlePane.setSystemMenu(menu);
             // systemMenuBar.removeAll();
             // systemMenuBar.add(menu);
             // systemMenuBar.validate();
@@ -309,10 +306,10 @@ public class IcyInternalFrame extends JInternalFrame
      */
     public void setTitleBarVisible(boolean value)
     {
-        if (value)
+        /*if (value)
             LookAndFeelUtil.setTitlePane(this, titlePane);
         else
-            LookAndFeelUtil.setTitlePane(this, null);
+            LookAndFeelUtil.setTitlePane(this, null);*/
 
         revalidate();
 

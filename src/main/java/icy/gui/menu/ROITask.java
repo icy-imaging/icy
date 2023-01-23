@@ -90,6 +90,7 @@ import plugins.kernel.roi.tool.plugin.ROIMagicWandPlugin;
  * 
  * @author Stephane
  */
+@Deprecated
 public class ROITask extends RibbonTask implements PluginLoaderListener
 {
     public static final String NAME = "Region Of Interest";

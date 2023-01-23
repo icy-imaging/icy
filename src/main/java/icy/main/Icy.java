@@ -77,6 +77,8 @@ import icy.util.StringUtil;
 import icy.workspace.WorkspaceInstaller;
 import icy.workspace.WorkspaceLoader;
 import ij.ImageJ;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import jiconfont.swing.IconFontSwing;
 import vtk.vtkNativeLibrary;
 import vtk.vtkVersion;
 
@@ -229,6 +231,10 @@ public class Icy
             // disable GLSL on OSX otherwise GLJPanel stay blank (error on GL state preservation)
             if (SystemUtil.isMac())
                 System.setProperty("jogl.gljpanel.noglsl", "true");
+            if (!headless && SystemUtil.isMac())
+                System.setProperty("apple.laf.useScreenMenuBar", "false"); // FIXME change behaviour on detached mode
+            if (!headless)
+                IconFontSwing.register(GoogleMaterialDesignIcons.getIconFont());
 
             if (!headless && !noSplash)
             {

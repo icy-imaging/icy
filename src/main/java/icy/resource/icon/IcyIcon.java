@@ -40,8 +40,11 @@ import org.pushingpixels.flamingo.api.common.icon.ResizableIcon;
  * 
  * @author Stephane
  */
+// TODO: 19/01/2023 Remove ResizableIcon
+// TODO: 19/01/2023 Add getDefaultIconSize from LookAndFeelUtil
 public class IcyIcon implements ResizableIcon
 {
+    @Deprecated
     public static final int DEFAULT_SIZE = 20;
 
     protected Image image;

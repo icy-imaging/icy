@@ -105,6 +105,7 @@ import plugins.kernel.canvas.VtkCanvasPlugin;
  *         <br>
  *         (Canvas2D and Canvas3D derives from IcyCanvas)<br>
  */
+// TODO: 23/01/2023 Should be in gui package (extends JPanel)
 public abstract class IcyCanvas extends JPanel
         implements KeyListener, ViewerListener, SequenceListener, LUTListener, ChangeListener, LayerListener
 {

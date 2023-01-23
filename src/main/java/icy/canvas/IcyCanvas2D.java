@@ -41,6 +41,7 @@ import javax.swing.JComponent;
 /**
  * @author Stephane
  */
+// TODO: 23/01/2023 Should be in gui package (extends JPanel)
 public abstract class IcyCanvas2D extends IcyCanvas
 {
     /**

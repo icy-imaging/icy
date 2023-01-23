@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
+ * Copyright 2010-2023 Institut Pasteur.
  * 
  * This file is part of Icy.
  * 
@@ -14,70 +14,268 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.util;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Image;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Map;
-
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.PopupFactory;
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.plaf.ColorUIResource;
-import javax.swing.plaf.InternalFrameUI;
-
-import org.pushingpixels.flamingo.api.common.CommandToggleButtonGroup;
-import org.pushingpixels.flamingo.api.common.JCommandToggleMenuButton;
-import org.pushingpixels.flamingo.api.common.popup.JCommandPopupMenu;
-import org.pushingpixels.substance.api.ColorSchemeAssociationKind;
-import org.pushingpixels.substance.api.ComponentState;
-import org.pushingpixels.substance.api.DecorationAreaType;
-import org.pushingpixels.substance.api.SubstanceColorScheme;
-import org.pushingpixels.substance.api.SubstanceLookAndFeel;
-import org.pushingpixels.substance.api.SubstanceSkin;
-import org.pushingpixels.substance.api.colorscheme.LightAquaColorScheme;
-import org.pushingpixels.substance.api.fonts.FontPolicy;
-import org.pushingpixels.substance.api.fonts.FontSet;
-import org.pushingpixels.substance.api.fonts.SubstanceFontUtilities;
-import org.pushingpixels.substance.api.skin.SkinChangeListener;
-import org.pushingpixels.substance.api.skin.SkinInfo;
-import org.pushingpixels.substance.internal.ui.SubstanceInternalFrameUI;
-import org.pushingpixels.substance.internal.utils.SubstanceColorSchemeUtilities;
-import org.pushingpixels.substance.internal.utils.SubstanceInternalFrameTitlePane;
-import org.pushingpixels.substance.internal.utils.SubstanceTitlePane;
-
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.FlatLightLaf;
+import icy.common.listener.SkinChangeListener;
 import icy.common.listener.weak.WeakListener;
 import icy.image.ImageUtil;
 import icy.preferences.GeneralPreferences;
 import icy.system.IcyExceptionHandler;
-import icy.system.SystemUtil;
 import icy.system.thread.ThreadUtil;
-import icy.util.ClassUtil;
 import icy.util.StringUtil;
 import ij.util.Java2;
 
+import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
+import java.awt.*;
+import java.util.*;
+import java.util.List;
+
+import com.formdev.flatlaf.intellijthemes.*;
+import org.pushingpixels.substance.api.DecorationAreaType;
+import org.pushingpixels.substance.api.SubstanceColorScheme;
+
 /**
- * @author Stephane
+ * LookAndFeelUtil class. Use to install all skins used by Icy and helps manipulating UI manager.
+ * @author Thomas MUSSET
  */
-public class LookAndFeelUtil
-{
+// TODO: 18/01/2023 Add setFontSize(float)
+public final class LookAndFeelUtil {
+    private static final Set<SkinChangeListener> listeners = new HashSet<>();
+    private static final List<FlatLaf> SKINS = new ArrayList<>();
+    private static FlatLaf currentSkin = null;
+    private static UIDefaults defaults = null;
+
+    public static void init() {
+        try {
+            // so ImageJ won't try to change the look and feel later
+            Java2.setSystemLookAndFeel();
+        }
+        catch (Throwable t) {
+            // just ignore the error here
+        }
+
+        // enabled LAF decoration instead of native ones
+        JFrame.setDefaultLookAndFeelDecorated(true);
+        JDialog.setDefaultLookAndFeelDecorated(true);
+
+        // Default themes
+        addSkin(new FlatLightLaf());
+        addSkin(new FlatDarkLaf());
+
+        // Extra themes
+        addSkin(new FlatArcIJTheme());
+        addSkin(new FlatArcOrangeIJTheme());
+        addSkin(new FlatArcDarkIJTheme());
+        addSkin(new FlatArcDarkOrangeIJTheme());
+        addSkin(new FlatCarbonIJTheme());
+        addSkin(new FlatCobalt2IJTheme());
+        addSkin(new FlatCyanLightIJTheme());
+        addSkin(new FlatDarkFlatIJTheme());
+        addSkin(new FlatDarkPurpleIJTheme());
+        addSkin(new FlatDraculaIJTheme());
+        addSkin(new FlatGradiantoDarkFuchsiaIJTheme());
+        addSkin(new FlatGradiantoDeepOceanIJTheme());
+        addSkin(new FlatGradiantoMidnightBlueIJTheme());
+        addSkin(new FlatGradiantoNatureGreenIJTheme());
+        addSkin(new FlatGrayIJTheme());
+        addSkin(new FlatGruvboxDarkHardIJTheme());
+        addSkin(new FlatGruvboxDarkMediumIJTheme());
+        addSkin(new FlatGruvboxDarkSoftIJTheme());
+        addSkin(new FlatHiberbeeDarkIJTheme());
+        addSkin(new FlatHighContrastIJTheme());
+        addSkin(new FlatLightFlatIJTheme());
+        addSkin(new FlatMaterialDesignDarkIJTheme());
+        addSkin(new FlatMonocaiIJTheme());
+        addSkin(new FlatMonokaiProIJTheme());
+        addSkin(new FlatNordIJTheme());
+        addSkin(new FlatOneDarkIJTheme());
+        addSkin(new FlatSolarizedDarkIJTheme());
+        addSkin(new FlatSolarizedLightIJTheme());
+        addSkin(new FlatSpacegrayIJTheme());
+        addSkin(new FlatVuesionIJTheme());
+        addSkin(new FlatXcodeDarkIJTheme());
+
+        // sort skin to put light skins first
+        SKINS.sort((o1, o2) -> Boolean.compare(o1.isDark(), o2.isDark()));
+
+        // get saved skin, if not found, get default skin and save it
+        setSkin(GeneralPreferences.getGuiSkin());
+    }
+
+    private static void addSkin(FlatLaf skin) {
+        SKINS.add(skin);
+    }
+
     /**
-     * Weak listener wrapper for SkinChangeListener.
-     * 
-     * @author Stephane
+     * @return the skins list
      */
-    public static class WeakSkinChangeListener extends WeakListener<SkinChangeListener> implements SkinChangeListener
-    {
+    public static List<FlatLaf> getSkins() {
+        return SKINS;
+    }
+
+    private static void setUIDefaults(UIDefaults d) {
+        defaults = d;
+    }
+
+    public static UIDefaults getUIDefaults() {
+        return defaults;
+    }
+
+    public static Color getForeground() {
+        if (defaults == null)
+            return null;
+        return defaults.getColor("MenuItem.foreground");
+    }
+
+    public static Color getDisabledForeground() {
+        if (defaults == null)
+            return null;
+        return defaults.getColor("MenuItem.disabledForeground");
+    }
+
+    public static Color getSelectionForeground() {
+        if (defaults == null)
+            return null;
+        return defaults.getColor("MenuItem.selectionForeground");
+    }
+
+    /**
+     * Get skin by its name
+     * @param name the skin name.
+     * @return the skin if found, otherwise returns null.
+     */
+    public static FlatLaf getSkinByName(String name) {
+        for (FlatLaf skin : SKINS)
+            if (skin.getName().equals(name))
+                return skin;
+        return null;
+    }
+
+    /**
+     * Get skin by its classname
+     * @param className the skin classname in String.
+     * @return the skin if found, otherwise returns null.
+     */
+    public static FlatLaf getSkinByClassName(String className) {
+        for (FlatLaf skin : SKINS)
+            if (skin.getClass().getName().equals(className))
+                return skin;
+        return null;
+    }
+
+    /**
+     * @return the currently used skin. May be null if called before {@link #init()}.
+     */
+    public static FlatLaf getCurrentSkin() {
+        return currentSkin;
+    }
+
+    /**
+     * @return the currently used skin display name. May be empty if called before {@link #init()}.
+     * @see #getCurrentSkin()
+     */
+    public static String getCurrentSkinName() {
+        final FlatLaf skin = getCurrentSkin();
+        return (skin != null) ? skin.getName() : "";
+    }
+
+    /**
+     * @return the default skin name.
+     */
+    public static String getDefaultSkinName() {
+        return FlatLightLaf.NAME;
+    }
+
+    /**
+     * @return the default font size.
+     */
+    // FIXME: 18/01/2023 does nothing with FlatLaf
+    public static int getDefaultFontSize() {
+        return 13;
+    }
+
+    public static float getDefaultIconSize() {
+        return 20f;
+    }
+
+    /**
+     * Switch to specified skin. Do nothing if new skin equals actual skin.
+     * @param skin the skin to use.
+     * @see #fireSkinChangeListeners()
+     */
+    public static void setSkin(FlatLaf skin) {
+        if ((getCurrentSkin() == null || !skin.getClass().equals(getCurrentSkin().getClass())) && SKINS.contains(skin)) {
+            ThreadUtil.invokeLater(() -> {
+                try {
+                    UIManager.setLookAndFeel(skin);
+
+                    FlatLaf.updateUI();
+
+                    setUIDefaults(skin.getDefaults());
+                    currentSkin = skin;
+                    GeneralPreferences.setGuiSkin(skin.getName());
+
+                    fireSkinChangeListeners();
+                }
+                catch (Exception e) {
+                    System.err.println("LookAndFeelUtil.setSkin(" + skin.getName() + ") error :");
+                    IcyExceptionHandler.showErrorMessage(e, false);
+                }
+            });
+        }
+    }
+
+    /**
+     * Switch to specified skin name. Do nothing if new skin name equals actual skin name.
+     * @param skinName the skin name.
+     * @see #setSkin(FlatLaf)
+     */
+    public static void setSkin(final String skinName) {
+        if (!StringUtil.equals(skinName, getCurrentSkinName()))
+            try {
+                for (FlatLaf skin : SKINS)
+                    if (skinName.equals(skin.getName()))
+                        setSkin(skin);
+            }
+            catch (Exception e) {
+                System.err.println("LookAndFeelUtil.setSkin(" + skinName + ") error :");
+                IcyExceptionHandler.showErrorMessage(e, false);
+            }
+    }
+
+    /**
+     * @param listener the listener to add.
+     */
+    public static void addListener(SkinChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * @param listener the listener to remove.
+     */
+    public static void removeListener(SkinChangeListener listener) {
+        listeners.remove(listener);
+    }
+
+    /**
+     * Fire all the listeners.
+     */
+    private static void fireSkinChangeListeners() {
+        for (SkinChangeListener listener : listeners)
+            listener.skinChanged();
+    }
+
+    /**
+     * @deprecated use {@link icy.common.listener.weak.WeakSkinChangeListener} instead.
+     */
+    @Deprecated
+    public static class WeakSkinChangeListener extends WeakListener<SkinChangeListener> implements SkinChangeListener {
         public WeakSkinChangeListener(SkinChangeListener listener)
         {
             super(listener);
@@ -86,7 +284,7 @@ public class LookAndFeelUtil
         @Override
         public void removeListener(Object source)
         {
-            removeSkinChangeListener(this);
+            LookAndFeelUtil.removeListener(this);
         }
 
         @Override
@@ -99,503 +297,24 @@ public class LookAndFeelUtil
         }
     }
 
-    static int defaultFontSize;
-    static Map<String, SkinInfo> map;
-    private static ArrayList<SkinInfo> skins;
-
-    static int currentFontSize;
-
-    public static void init()
-    {
-        try
-        {
-            // so ImageJ won't try to change the look and feel later
-            Java2.setSystemLookAndFeel();
-        }
-        catch (Throwable t)
-        {
-            // just ignore the error here
-        }
-
-        // enable or not EDT checking in substance
-        SystemUtil.setProperty("insubstantial.checkEDT", "false");
-        SystemUtil.setProperty("insubstantial.logEDT", "true");
-
-        // funny features of substance
-
-        // AnimationConfigurationManager.getInstance().allowAnimations(AnimationFacet.FOCUS_LOOP_ANIMATION);
-        // AnimationConfigurationManager.getInstance().allowAnimations(AnimationFacet.GHOSTING_BUTTON_PRESS);
-        // AnimationConfigurationManager.getInstance().allowAnimations(AnimationFacet.GHOSTING_ICON_ROLLOVER);
-        // AnimationConfigurationManager.getInstance().allowAnimations(AnimationFacet.ICON_GLOW);
-
-        // UIManager.put(SubstanceLookAndFeel.USE_THEMED_DEFAULT_ICONS, Boolean.TRUE);
-        // UIManager.put(SubstanceLookAndFeel.SHOW_EXTRA_WIDGETS, Boolean.TRUE);
-        // UIManager.put(SubstanceLookAndFeel.WATERMARK_VISIBLE, Boolean.TRUE);
-        // UIManager.put(SubstanceLookAndFeel.COLORIZATION_FACTOR, new Double(0.4));
-        // UIManager.put(SubstanceLookAndFeel.MENU_GUTTER_FILL_KIND, MenuGutterFillKind.HARD);
-        // UIManager.put(SubstanceLookAndFeel.SCROLL_PANE_BUTTONS_POLICY, ScrollPaneButtonPolicyKind.OPPOSITE);
-        // UIManager.put(SubstanceLookAndFeel.TABBED_PANE_ROTATE_SIDE_TABS, Boolean.FALSE);
-        // UIManager.put(SubstanceLookAndFeel.WINDOW_ROUNDED_CORNERS, Boolean.FALSE);
-        // UIManager.put(SubstanceLookAndFeel.WINDOW_ROUNDED_CORNERS_PROPERTY, Boolean.FALSE);
-        // UIManager.put(SubstanceLookAndFeel.WINDOW_AUTO_DEACTIVATE, Boolean.TRUE);
-        // // JButton button = new JButton("text");
-        // // button.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.TRUE);
-        // UIManager.put(SubstanceLookAndFeel.CORNER_RADIUS, new Float(1));
-        // UIManager.put(SubstanceLookAndFeel.BUTTON_PAINT_NEVER_PROPERTY, Boolean.TRUE);
-
-        // SubstanceLookAndFeel.setWidgetVisible(null, true, SubstanceWidgetType.MENU_SEARCH);
-        // SubstanceLookAndFeel.setWidgetVisible(null, false,
-        // SubstanceWidgetType.TITLE_PANE_HEAP_STATUS);
-
-        // enabled LAF decoration instead of native ones
-        JFrame.setDefaultLookAndFeelDecorated(true);
-        JDialog.setDefaultLookAndFeelDecorated(true);
-
-        map = SubstanceLookAndFeel.getAllSkins();
-        skins = new ArrayList<SkinInfo>(map.values());
-
-        final LookAndFeelInfo[] lafInfos = new LookAndFeelInfo[skins.size()];
-
-        // install Substance look and feel
-        for (int i = 0; i < skins.size(); i++)
-        {
-            final SkinInfo skin = skins.get(i);
-            final String className = skin.getClassName();
-            final String simpleName = ClassUtil.getSimpleClassName(className);
-            final int len = simpleName.length();
-            // remove the "skin" suffix from simple name
-            final String lafClassName = ClassUtil.getPackageName(className) + ".Substance"
-                    + simpleName.substring(0, len - 4) + "LookAndFeel";
-
-            lafInfos[i] = new LookAndFeelInfo(skin.getDisplayName(), lafClassName);
-        }
-
-        // replace system LAF by substance LAF
-        UIManager.setInstalledLookAndFeels(lafInfos);
-        // set default skin
-        setSkin(GeneralPreferences.getGuiSkin());
-
-        // get default font size
-        final FontPolicy fontPolicy = SubstanceFontUtilities.getDefaultFontPolicy();
-        final FontSet fontSet = fontPolicy.getFontSet("Substance", null);
-
-        defaultFontSize = fontSet.getMessageFont().getSize();
-        currentFontSize = defaultFontSize;
-
-        // set default font size
-        setFontSize(GeneralPreferences.getGuiFontSize());
-
-        // Define custom PopupFactory :
-        // That fix Ribbon repaint bugs on Medium Weight components for OSX
-        PopupFactory.setSharedInstance(new CustomPopupFactory());
-    }
-
+    /* OLD FUNCTIONS */
     /**
-     * Add skin change listener (automatically add weak listener)
+     * Return the foreground color for the specified component
      */
-    public static void addSkinChangeListener(SkinChangeListener listener)
-    {
-        SubstanceLookAndFeel.registerSkinChangeListener(listener);
-    }
+    public static Color getForeground(Component c) {
+        if (c != null)
+            return c.getForeground();
 
-    /**
-     * Remove skin change listener
-     */
-    public static void removeSkinChangeListener(SkinChangeListener listener)
-    {
-        SubstanceLookAndFeel.unregisterSkinChangeListener(listener);
-    }
-
-    /**
-     * get current Substance skin
-     */
-    public static SubstanceSkin getCurrentSkin()
-    {
-        return SubstanceLookAndFeel.getCurrentSkin();
-    }
-
-    /**
-     * get current Substance skin display name
-     */
-    public static String getCurrentSkinName()
-    {
-        final SubstanceSkin skin = getCurrentSkin();
-
-        if (skin != null)
-            return skin.getDisplayName();
-
-        return null;
-    }
-
-    // /**
-    // * get current Look And Feel
-    // */
-    // public static LookAndFeel getLookAndFeel()
-    // {
-    // return UIManager.getLookAndFeel();
-    // }
-    //
-    // /**
-    // * get current Look And Feel name
-    // */
-    // public static String getLookAndFeelName()
-    // {
-    // final LookAndFeel laf = getLookAndFeel();
-    //
-    // if (laf instanceof SubstanceLookAndFeel)
-    // return SubstanceLookAndFeel.getCurrentSkin().getDisplayName();
-    //
-    // return UIManager.getLookAndFeel().getName();
-    // }
-
-    public static JCommandPopupMenu getLookAndFeelMenu()
-    {
-        final JCommandPopupMenu result = new JCommandPopupMenu();
-
-        final CommandToggleButtonGroup buttonGroup = new CommandToggleButtonGroup();
-        final String currentSkinName = getCurrentSkinName();
-
-        for (SkinInfo skin : skins)
-        {
-            final String skinName = skin.getDisplayName();
-
-            final JCommandToggleMenuButton button = new JCommandToggleMenuButton(skinName, null);
-
-            button.addActionListener(new ActionListener()
-            {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    // set LAF
-                    LookAndFeelUtil.setSkin(skinName);
-                    // and save to preferences
-                    GeneralPreferences.setGuiSkin(skinName);
-                }
-            });
-
-            result.addMenuButton(button);
-
-            // TODO: why this is needed ? ribbon bug ?
-            button.getUI().installUI(button);
-
-            buttonGroup.add(button);
-            buttonGroup.setSelected(button, button.getText().equals(currentSkinName));
-        }
-
-        return result;
-    }
-
-    /**
-     * get default Look And Feel font size
-     */
-    public static int getDefaultFontSize()
-    {
-        return defaultFontSize;
-    }
-
-    /**
-     * get default Substance skin
-     */
-    public static String getDefaultSkin()
-    {
-        // should be Cerulean
-        return skins.get(4).getDisplayName();
-    }
-
-    // /**
-    // * get default Look And Feel
-    // */
-    // public static String getDefaultLookAndFeel()
-    // {
-    // return "org.pushingpixels.substance.api.skin.SubstanceCremeCoffeeLookAndFeel";
-    // // return UIManager.getSystemLookAndFeelClassName();
-    // }
-
-    /**
-     * Get current LookAndFeel font size
-     */
-    public static int getFontSize()
-    {
-        return currentFontSize;
-    }
-
-    /**
-     * Set LookAndFeel font size
-     */
-    public static void setFontSize(final int size)
-    {
-        if (size != currentFontSize)
-        {
-            ThreadUtil.invokeLater(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    final float scaleFactor = (float) size / (float) defaultFontSize;
-
-                    try
-                    {
-                        // will fail here if look and feel is not a substance one
-                        SubstanceLookAndFeel.setFontPolicy(SubstanceFontUtilities.getScaledFontPolicy(scaleFactor));
-                        currentFontSize = size;
-                    }
-                    catch (Exception e)
-                    {
-                        System.err.println("LookAndFeelUtil.setFontSize(...) error :");
-                        IcyExceptionHandler.showErrorMessage(e, false);
-                    }
-                }
-            });
-        }
-    }
-
-    /**
-     * Set the specified LookAndFeel skin (skin display name)
-     */
-    public static void setSkin(final String skinName)
-    {
-        if (!StringUtil.equals(skinName, getCurrentSkinName()))
-        {
-            ThreadUtil.invokeLater(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    try
-                    {
-                        SubstanceLookAndFeel.setSkin(map.get(skinName).getClassName());
-                    }
-                    catch (Exception e)
-                    {
-                        System.err.println("LookAndFeelUtil.setSkin(...) error :");
-                        IcyExceptionHandler.showErrorMessage(e, false);
-                    }
-                }
-            });
-        }
-    }
-
-    /**
-     * Return a foreground component color image depending original alpha intensity image
-     */
-    public static Image getForegroundImageFromAlphaImage(Component c, Image alphaImage)
-    {
-        return paintForegroundImageFromAlphaImage(c, alphaImage, null);
-    }
-
-    /**
-     * Return a background component color image depending original alpha intensity image
-     */
-    public static Image getBackgroundImageFromAlphaImage(Component c, Image alphaImage)
-    {
-        return paintBackgroundImageFromAlphaImage(c, alphaImage, null);
+        //return Color.white;
+        return getForeground();
     }
 
     /**
      * Paint foreground component color in 'out' image<br>
      * depending original alpha intensity from 'alphaImage'
      */
-    public static Image paintForegroundImageFromAlphaImage(Component c, Image alphaImage, Image out)
-    {
+    public static Image paintForegroundImageFromAlphaImage(Component c, Image alphaImage, Image out) {
         return ImageUtil.paintColorImageFromAlphaImage(alphaImage, out, getForeground(c));
-    }
-
-    /**
-     * Paint background component color in 'out' image<br>
-     * depending original alpha intensity from 'alphaImage'
-     */
-    public static Image paintBackgroundImageFromAlphaImage(Component c, Image alphaImage, Image out)
-    {
-        return ImageUtil.paintColorImageFromAlphaImage(alphaImage, out, getBackground(c));
-    }
-
-    public static SubstanceColorScheme getActiveColorScheme(DecorationAreaType d)
-    {
-        return getCurrentSkin().getActiveColorScheme(d);
-    }
-
-    /**
-     * @deprecated Use {@link #getActiveColorScheme(DecorationAreaType)} instead.
-     */
-    @Deprecated
-    public static SubstanceColorScheme getActiveColorSheme(DecorationAreaType d)
-    {
-        return getActiveColorScheme(d);
-    }
-
-    public static SubstanceColorScheme getBackgroundColorScheme(DecorationAreaType d)
-    {
-        final SubstanceSkin skin = getCurrentSkin();
-        if (skin != null)
-            return skin.getBackgroundColorScheme(d);
-
-        // Arrive only when using designer --> use a random color theme, we don't care
-        return new LightAquaColorScheme();
-    }
-
-    public static SubstanceColorScheme getDisabledColorScheme(DecorationAreaType d)
-    {
-        final SubstanceSkin skin = getCurrentSkin();
-        if (skin != null)
-            return skin.getDisabledColorScheme(d);
-
-        // Arrive only when using designer --> use a random color theme, we don't care
-        return new LightAquaColorScheme();
-    }
-
-    public static SubstanceColorScheme getEnabledColorScheme(DecorationAreaType d)
-    {
-        final SubstanceSkin skin = getCurrentSkin();
-        if (skin != null)
-            return skin.getEnabledColorScheme(d);
-
-        // Arrive only when using designer --> use a random color theme, we don't care
-        return new LightAquaColorScheme();
-    }
-
-    public static SubstanceSkin getSkin()
-    {
-        return SubstanceLookAndFeel.getCurrentSkin();
-    }
-
-    public static SubstanceSkin getSkin(Component c)
-    {
-        return SubstanceLookAndFeel.getCurrentSkin(c);
-    }
-
-    public static DecorationAreaType getDecoration(Component c)
-    {
-        return SubstanceLookAndFeel.getDecorationType(c);
-    }
-
-    public static SubstanceColorScheme getColorScheme(Component c, ComponentState state)
-    {
-        return getSkin().getColorScheme(c, state);
-    }
-
-    public static SubstanceColorScheme getColorScheme(Component c, ColorSchemeAssociationKind kind,
-            ComponentState state)
-    {
-        return getSkin().getColorScheme(c, kind, state);
-    }
-
-    public static SubstanceColorScheme getActiveColorScheme(Component c)
-    {
-        final SubstanceSkin skin = getSkin(c);
-        final DecorationAreaType decoration = getDecoration(c);
-
-        if ((skin != null) && (decoration != null))
-            return skin.getActiveColorScheme(decoration);
-
-        return null;
-    }
-
-    public static SubstanceColorScheme getActiveColorScheme(Component c, ComponentState state)
-    {
-        return SubstanceColorSchemeUtilities.getActiveColorScheme(c, state);
-    }
-
-    /**
-     * @deprecated Use {@link #getActiveColorScheme(Component)} instead.
-     */
-    @Deprecated
-    public static SubstanceColorScheme getActiveColorSheme(Component c)
-    {
-        return getActiveColorScheme(c);
-    }
-
-    /**
-     * @deprecated Use {@link #getActiveColorScheme(Component, ComponentState)} instead.
-     */
-    @Deprecated
-    public static SubstanceColorScheme getActiveColorSheme(Component c, ComponentState state)
-    {
-        return getActiveColorScheme(c, state);
-    }
-
-    public static SubstanceColorScheme getBackgroundColorScheme(Component c)
-    {
-        final SubstanceSkin skin = getSkin(c);
-        final DecorationAreaType decoration = getDecoration(c);
-
-        if ((skin != null) && (decoration != null))
-            return skin.getBackgroundColorScheme(decoration);
-
-        return null;
-    }
-
-    public static SubstanceColorScheme getDisabledColorScheme(Component c)
-    {
-        final SubstanceSkin skin = getSkin(c);
-        final DecorationAreaType decoration = getDecoration(c);
-
-        if ((skin != null) && (decoration != null))
-            return skin.getDisabledColorScheme(decoration);
-
-        return null;
-    }
-
-    public static SubstanceColorScheme getEnabledColorScheme(Component c)
-    {
-        final SubstanceSkin skin = getSkin(c);
-        final DecorationAreaType decoration = getDecoration(c);
-
-        if ((skin != null) && (decoration != null))
-            return skin.getEnabledColorScheme(decoration);
-
-        return null;
-    }
-
-    /**
-     * Return the foreground color for the specified component
-     */
-    public static Color getForeground(Component c)
-    {
-        SubstanceColorScheme colorScheme;
-
-        if (c == null)
-            colorScheme = getEnabledColorScheme(DecorationAreaType.GENERAL);
-        else if (c.isEnabled())
-            colorScheme = getEnabledColorScheme(c);
-        else
-            colorScheme = getDisabledColorScheme(c);
-
-        if (colorScheme == null)
-            getEnabledColorScheme(DecorationAreaType.GENERAL);
-
-        if (colorScheme != null)
-            return new ColorUIResource(colorScheme.getForegroundColor());
-
-        if (c != null)
-            return c.getForeground();
-
-        return Color.white;
-    }
-
-    /**
-     * Return the selected foreground color for the specified component
-     */
-    public static Color getSelectedForeground(Component c)
-    {
-        SubstanceColorScheme colorScheme;
-
-        if (c == null)
-            colorScheme = getEnabledColorScheme(DecorationAreaType.GENERAL);
-        else if (c.isEnabled())
-            colorScheme = getEnabledColorScheme(c);
-        else
-            colorScheme = getDisabledColorScheme(c);
-
-        if (colorScheme == null)
-            getEnabledColorScheme(DecorationAreaType.GENERAL);
-
-        if (colorScheme != null)
-            return new ColorUIResource(colorScheme.getSelectionForegroundColor());
-
-        if (c != null)
-            return c.getForeground();
-
-        return Color.gray;
     }
 
     /**
@@ -603,73 +322,10 @@ public class LookAndFeelUtil
      */
     public static Color getBackground(Component c)
     {
-        SubstanceColorScheme colorScheme;
-
-        if (c == null)
-            colorScheme = getEnabledColorScheme(DecorationAreaType.GENERAL);
-        else if (c.isEnabled())
-            colorScheme = getEnabledColorScheme(c);
-        else
-            colorScheme = getDisabledColorScheme(c);
-
-        if (colorScheme == null)
-            getEnabledColorScheme(DecorationAreaType.GENERAL);
-
-        if (colorScheme != null)
-            return new ColorUIResource(colorScheme.getBackgroundFillColor());
-
         if (c != null)
             return c.getBackground();
 
-        return Color.lightGray;
-    }
-
-    /**
-     * Return the selected background color for the specified component
-     */
-    public static Color getSelectedBackground(Component c)
-    {
-        SubstanceColorScheme colorScheme;
-
-        if (c == null)
-            colorScheme = getEnabledColorScheme(DecorationAreaType.GENERAL);
-        else if (c.isEnabled())
-            colorScheme = getEnabledColorScheme(c);
-        else
-            colorScheme = getDisabledColorScheme(c);
-
-        if (colorScheme == null)
-            getEnabledColorScheme(DecorationAreaType.GENERAL);
-
-        if (colorScheme != null)
-            return new ColorUIResource(colorScheme.getSelectionBackgroundColor());
-
-        if (c != null)
-            return c.getBackground();
-
-        return Color.darkGray;
-    }
-
-    public static SubstanceTitlePane getTitlePane(Window window)
-    {
-        return (SubstanceTitlePane) SubstanceLookAndFeel.getTitlePaneComponent(window);
-    }
-
-    public static SubstanceInternalFrameTitlePane getTitlePane(JInternalFrame frame)
-    {
-        final InternalFrameUI ui = frame.getUI();
-
-        if (ui instanceof SubstanceInternalFrameUI)
-            return ((SubstanceInternalFrameUI) ui).getTitlePane();
-
-        return null;
-    }
-
-    public static void setTitlePane(JInternalFrame frame, SubstanceInternalFrameTitlePane titlePane)
-    {
-        final InternalFrameUI ui = frame.getUI();
-
-        if (ui instanceof SubstanceInternalFrameUI)
-            ((SubstanceInternalFrameUI) ui).setNorthPane(titlePane);
+        //return Color.lightGray;
+        return getUIDefaults().getColor("Panel.background");
     }
 }

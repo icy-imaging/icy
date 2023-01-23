@@ -4,7 +4,6 @@
 package icy.canvas;
 
 import icy.gui.component.button.ColorChooserButton;
-import icy.gui.component.button.ColorChooserButton.ColorChangeListener;
 import icy.gui.component.button.IcyButton;
 import icy.gui.util.ComponentUtil;
 import icy.resource.ResourceUtil;
@@ -17,8 +16,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -31,20 +28,16 @@ import javax.swing.JPanel;
  * 
  * @author Stephane
  */
-public class Canvas2DSettingPanel extends JPanel
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -6747952036222386920L;
+// TODO: 23/01/2023 Should be in gui package
+public class Canvas2DSettingPanel extends JPanel {
 
     final Canvas2D canvas2D;
 
     /**
      * gui
      */
-    JComboBox zoomComboBox;
-    JComboBox rotationComboBox;
+    JComboBox<String> zoomComboBox;
+    JComboBox<String> rotationComboBox;
 
     private IcyButton zoomFitImageButton;
     private IcyButton centerImageButton;
@@ -54,8 +47,7 @@ public class Canvas2DSettingPanel extends JPanel
     private IcyButton rotateClock;
     ColorChooserButton bgColorButton;
 
-    public Canvas2DSettingPanel(Canvas2D cnv)
-    {
+    public Canvas2DSettingPanel(Canvas2D cnv) {
         super();
 
         this.canvas2D = cnv;
@@ -67,133 +59,74 @@ public class Canvas2DSettingPanel extends JPanel
         bgColorButton.setColor(new Color(canvas2D.preferences.getInt(Canvas2D.ID_BG_COLOR, 0xFFFFFF)));
         bgColorButton.setSelected(canvas2D.preferences.getBoolean(Canvas2D.ID_BG_COLOR_ENABLED, false));
 
-        zoomComboBox.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                if (!canvas2D.modifyingZoom)
-                {
-                    try
-                    {
-                        final double scale = Double.parseDouble((String) zoomComboBox.getSelectedItem()) / 100;
+        zoomComboBox.addActionListener(e -> {
+            if (!canvas2D.modifyingZoom) {
+                try {
+                    final String selectedItem = (String) zoomComboBox.getSelectedItem();
+                    if (selectedItem != null) {
+                        final double scale = Double.parseDouble(selectedItem) / 100;
 
                         // set mouse position on view center
                         canvas2D.centerMouseOnView();
                         // set new scale
                         canvas2D.setScale(scale, scale, true, true);
                     }
-                    catch (NumberFormatException E)
-                    {
-                        // ignore change
-                    }
+                }
+                catch (NumberFormatException E) {
+                    // ignore change
                 }
             }
         });
-        rotationComboBox.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                if (!canvas2D.modifyingRotation)
-                {
-                    try
-                    {
-                        final double angle = Double.parseDouble((String) rotationComboBox.getSelectedItem());
-                        // we first apply modulo
-                        canvas2D.setRotation(canvas2D.getRotation(), false);
-                        // then set new angle
-                        canvas2D.setRotation((angle * Math.PI) / 180d, true);
-                    }
-                    catch (NumberFormatException E)
-                    {
-                        // ignore change
-                    }
+        rotationComboBox.addActionListener(e -> {
+            if (!canvas2D.modifyingRotation) {
+                try {
+                    final String selectedItem = (String) rotationComboBox.getSelectedItem();
+                     if (selectedItem != null) {
+                         final double angle = Double.parseDouble(selectedItem);
+                         // we first apply modulo
+                         canvas2D.setRotation(canvas2D.getRotation(), false);
+                         // then set new angle
+                         canvas2D.setRotation((angle * Math.PI) / 180d, true);
+                     }
+                }
+                catch (NumberFormatException E) {
+                    // ignore change
                 }
             }
         });
-        zoomPlus.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                final double scale = canvas2D.smoothTransform.getDestValue(Canvas2D.SCALE_X) * 1.25;
+        zoomPlus.addActionListener(e -> {
+            final double scale = canvas2D.smoothTransform.getDestValue(Canvas2D.SCALE_X) * 1.25;
 
-                // set mouse position on view center
-                canvas2D.centerMouseOnView();
-                // apply scale
-                canvas2D.setScale(scale, scale, true, true);
-            }
+            // set mouse position on view center
+            canvas2D.centerMouseOnView();
+            // apply scale
+            canvas2D.setScale(scale, scale, true, true);
         });
-        zoomMinus.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                final double scale = canvas2D.smoothTransform.getDestValue(Canvas2D.SCALE_X) * 0.8;
+        zoomMinus.addActionListener(e -> {
+            final double scale = canvas2D.smoothTransform.getDestValue(Canvas2D.SCALE_X) * 0.8;
 
-                // set mouse position on view center
-                canvas2D.centerMouseOnView();
-                // apply scale
-                canvas2D.setScale(scale, scale, true, true);
-            }
+            // set mouse position on view center
+            canvas2D.centerMouseOnView();
+            // apply scale
+            canvas2D.setScale(scale, scale, true, true);
         });
-        rotateUnclock.addActionListener(new ActionListener()
-        {
+        rotateUnclock.addActionListener(e -> canvas2D.setRotation(canvas2D.smoothTransform.getDestValue(Canvas2D.ROT) + (Math.PI / 8), true));
+        rotateClock.addActionListener(e -> canvas2D.setRotation(canvas2D.smoothTransform.getDestValue(Canvas2D.ROT) - (Math.PI / 8), true));
+        zoomFitImageButton.addActionListener(e -> canvas2D.fitCanvasToImage());
+        centerImageButton.addActionListener(e -> canvas2D.centerImage());
+        bgColorButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                canvas2D.setRotation(canvas2D.smoothTransform.getDestValue(Canvas2D.ROT) + (Math.PI / 8), true);
-            }
-        });
-        rotateClock.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                canvas2D.setRotation(canvas2D.smoothTransform.getDestValue(Canvas2D.ROT) - (Math.PI / 8), true);
-            }
-        });
-        zoomFitImageButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                canvas2D.fitCanvasToImage();
-            }
-        });
-        centerImageButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                canvas2D.centerImage();
-            }
-        });
-        bgColorButton.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (EventUtil.isRightMouseButton(e))
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (EventUtil.isRightMouseButton(e)) {
                     bgColorButton.setSelected(!bgColorButton.isSelected());
                     canvas2D.backgroundColorEnabledChanged();
                 }
-            };
-        });
-        bgColorButton.addColorChangeListener(new ColorChangeListener()
-        {
-            @Override
-            public void colorChanged(ColorChooserButton source)
-            {
-                canvas2D.backgroundColorChanged();
             }
         });
+        bgColorButton.addColorChangeListener(source -> canvas2D.backgroundColorChanged());
     }
 
-    private void initialize()
-    {
+    private void initialize() {
         // subPanel.add(GuiUtil.createLineBoxPanel(Box.createHorizontalStrut(4),
         // GuiUtil.createFixedWidthBoldLabel("Zoom", 70), zoomComboBox,
         // GuiUtil.createFixedWidthBoldLabel("\u0025", 20), Box.createHorizontalGlue(), zoomMinus,
@@ -224,7 +157,7 @@ public class Canvas2DSettingPanel extends JPanel
         gbc_label_1.gridy = 0;
         panel.add(label_1, gbc_label_1);
 
-        zoomComboBox = new JComboBox(new String[] {"10", "50", "100", "200", "400", "1000"});
+        zoomComboBox = new JComboBox<>(new String[] {"10", "50", "100", "200", "400", "1000"});
         zoomComboBox.setEditable(true);
         zoomComboBox.setToolTipText("Select zoom factor");
         zoomComboBox.setSelectedIndex(2);
@@ -272,7 +205,7 @@ public class Canvas2DSettingPanel extends JPanel
         gbc_label_3.gridy = 1;
         panel.add(label_3, gbc_label_3);
 
-        rotationComboBox = new JComboBox(new String[] {"0", "45", "90", "135", "180", "225", "270", "315"});
+        rotationComboBox = new JComboBox<>(new String[] {"0", "45", "90", "135", "180", "225", "270", "315"});
         ComponentUtil.setFixedWidth(rotationComboBox, 64);
         rotationComboBox.setEditable(true);
         rotationComboBox.setToolTipText("Select rotation angle");
@@ -284,7 +217,8 @@ public class Canvas2DSettingPanel extends JPanel
         gbc_rotationComboBox.gridy = 1;
         panel.add(rotationComboBox, gbc_rotationComboBox);
 
-        JLabel label_4 = new JLabel("\u00B0");
+        //JLabel label_4 = new JLabel("\u00B0"); // Does not need to be escaped in unicode
+        JLabel label_4 = new JLabel("°");
         label_4.setFont(new Font("Tahoma", Font.BOLD, 11));
         GridBagConstraints gbc_label_4 = new GridBagConstraints();
         gbc_label_4.anchor = GridBagConstraints.WEST;
@@ -329,8 +263,7 @@ public class Canvas2DSettingPanel extends JPanel
         panel.add(centerImageButton, gbc_centerImageButton);
 
         bgColorButton = new ColorChooserButton();
-        bgColorButton
-                .setToolTipText("Left click to change background color, right click to enable/disable background color");
+        bgColorButton.setToolTipText("Left click to change background color, right click to enable/disable background color");
         GridBagConstraints gbc_bgColorButton = new GridBagConstraints();
         gbc_bgColorButton.gridwidth = 2;
         gbc_bgColorButton.fill = GridBagConstraints.HORIZONTAL;
@@ -341,35 +274,29 @@ public class Canvas2DSettingPanel extends JPanel
 
     }
 
-    public void updateZoomState(String zoom)
-    {
+    public void updateZoomState(String zoom) {
         // try to select current zoom level
         zoomComboBox.setSelectedItem(zoom);
     }
 
-    public void updateRotationState(String rotInfo)
-    {
+    public void updateRotationState(String rotInfo) {
         // try to select current rotation angle
         rotationComboBox.setSelectedItem(rotInfo);
     }
 
-    public boolean isBackgroundColorEnabled()
-    {
+    public boolean isBackgroundColorEnabled() {
         return bgColorButton.isSelected();
     }
 
-    public void setBackgroundColorEnabled(boolean value)
-    {
+    public void setBackgroundColorEnabled(boolean value) {
         bgColorButton.setSelected(value);
     }
 
-    public Color getBackgroundColor()
-    {
+    public Color getBackgroundColor() {
         return bgColorButton.getColor();
     }
 
-    public void setBackgroundColor(Color color)
-    {
+    public void setBackgroundColor(Color color) {
         bgColorButton.setColor(color);
     }
 }

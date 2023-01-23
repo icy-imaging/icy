@@ -31,7 +31,7 @@ import icy.gui.main.ActiveSequenceListener;
 import icy.gui.main.MainFrame;
 import icy.gui.menu.search.SearchBar;
 import icy.gui.plugin.PluginCommandButton;
-import icy.gui.util.LookAndFeelUtil;
+import icy.gui.util.LookAndFeelUtilOLD;
 import icy.gui.util.RibbonUtil;
 import icy.gui.viewer.Viewer;
 import icy.imagej.ImageJWrapper;
@@ -90,6 +90,7 @@ import org.pushingpixels.flamingo.api.ribbon.resize.CoreRibbonResizeSequencingPo
  * 
  * @author Stephane
  */
+@Deprecated
 public class MainRibbon implements PluginLoaderListener, ActiveSequenceListener
 {
     /**
@@ -826,7 +827,7 @@ public class MainRibbon implements PluginLoaderListener, ActiveSequenceListener
                     {
                         // better to build it on request as it takes a bit of time
                         // and we want to speed up the initial loading
-                        return LookAndFeelUtil.getLookAndFeelMenu();
+                        return LookAndFeelUtilOLD.getLookAndFeelMenu();
                     }
                 });
                 result.addMenuButton(lafButton);

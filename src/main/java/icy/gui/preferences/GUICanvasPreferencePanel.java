@@ -158,7 +158,7 @@ public class GUICanvasPreferencePanel extends PreferencePanel
         GeneralPreferences.setAlwaysOnTop(booleanValue);
 
         int intValue = ((Integer) uiFontSizeSpinner.getValue()).intValue();
-        LookAndFeelUtil.setFontSize(intValue);
+        //LookAndFeelUtil.setFontSize(intValue);
         GeneralPreferences.setGuiFontSize(intValue);
     }
 }

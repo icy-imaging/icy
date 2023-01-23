@@ -343,7 +343,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             }
         };
 
-        LookAndFeelUtil.addSkinChangeListener(new SkinChangeListener()
+        /*LookAndFeelUtil.addSkinChangeListener(new SkinChangeListener()
         {
             @Override
             public void skinChanged()
@@ -365,7 +365,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 // modify highlighter
                 roiTable.setHighlighters(HighlighterFactory.createSimpleStriping());
             }
-        });
+        });*/
 
         processor = new InstanceProcessor();
         processor.setThreadName("ROI panel GUI refresher");
