@@ -16,7 +16,6 @@ import icy.roi.ROIEvent.ROIEventType;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.system.IcyExceptionHandler;
-import icy.util.ClassUtil;
 import icy.util.StringUtil;
 import plugins.kernel.roi.descriptor.measure.ROIBasicMeasureDescriptorsPlugin;
 
@@ -231,66 +230,26 @@ public abstract class ROIDescriptor
     };
 
     /**
-     * Returns the null value for this descriptor
+     * Returns the [minimum, maximum] allowed value for this descriptor [(useful only for Number type descriptor)
      * 
      * @see #compute(ROI, Sequence)
      */
-    public Object getNullValue()
+    public Object[] getBounds()
     {
-        if (ClassUtil.isSubClass(type, Number.class))
-        {
-            try
-            {
-                // y to return in correct type
-                return type.getMethod("valueOf", type).invoke(null, Double.valueOf(0));
-            }
-            catch (Exception e)
-            {
-                // ok, just return as Double
-                return Double.valueOf(0d);
-            }
-        }
-
-        if (type == String.class)
-            return "";
+        if (type == Byte.class)
+            return new Object[] {Byte.valueOf((byte) 0), Byte.valueOf(Byte.MAX_VALUE)};
+        if (type == Short.class)
+            return new Object[] {Short.valueOf((short) 0), Long.valueOf(Short.MAX_VALUE)};
+        if (type == Integer.class)
+            return new Object[] {Integer.valueOf(0), Integer.valueOf(Integer.MAX_VALUE)};
+        if (type == Long.class)
+            return new Object[] {Long.valueOf(0), Long.valueOf(Long.MAX_VALUE)};
+        if (type == Float.class)
+            return new Object[] {Float.valueOf(0f), Float.valueOf(1f)};
+        if (type == Double.class)
+            return new Object[] {Double.valueOf(0d), Double.valueOf(1d)};
 
         return null;
-    };
-
-    /**
-     * Returns the minimum allowed value for this descriptor (used mainly for Number type descriptor)
-     * 
-     * @see #compute(ROI, Sequence)
-     */
-    public Object getMinValue()
-    {
-        // default
-        Object result = getNullValue();
-
-        // avoid null here
-        if (result == null)
-            return result = "";
-
-        return result;
-    }
-
-    /**
-     * Returns the maximum allowed value for this descriptor (used mainly for Number type descriptor)
-     * 
-     * @see #compute(ROI, Sequence)
-     */
-    public Object getMaxValue()
-    {
-        if (type == Integer.class)
-            return Integer.valueOf(Integer.MAX_VALUE);
-        if (type == Long.class)
-            return Long.valueOf(Long.MAX_VALUE);
-        if (type == Float.class)
-            return Float.valueOf(1f);
-        if (type == Double.class)
-            return Double.valueOf(1d);
-
-        return "";
     };
 
     /**
