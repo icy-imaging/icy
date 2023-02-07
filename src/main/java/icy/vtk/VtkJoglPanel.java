@@ -136,7 +136,10 @@ public class VtkJoglPanel extends GLJPanel
         rw.SetPointSmoothing(1);
         rw.SetLineSmoothing(1);
         rw.SetPolygonSmoothing(1);
-        rw.SetMultiSamples(4);
+        // for use with deeph peeling (allow transparent geometry to intersect with volume)
+        rw.SetAlphaBitPlanes(1);
+        rw.SetMultiSamples(0);
+//        rw.SetMultiSamples(4);
 
         // Make sure when VTK internally request a Render, the Render get properly triggered
         rw.AddObserver("WindowFrameEvent", this, "render");
@@ -152,6 +155,8 @@ public class VtkJoglPanel extends GLJPanel
 
         ren = new vtkRenderer();
         ren.SetLightFollowCamera(1);
+        ren.UseDepthPeelingOn();
+        ren.UseDepthPeelingForVolumesOn();
 
         cam = null;
 
