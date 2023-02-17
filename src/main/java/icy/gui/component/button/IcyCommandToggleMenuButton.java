@@ -155,7 +155,7 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton {
 
             if (value != null) {
                 // set tooltip
-                setActionRichTooltip(action.getRichToolTip());
+                //setActionRichTooltip(action.getRichToolTip());
 
                 // add listeners
                 addActionListener(value);

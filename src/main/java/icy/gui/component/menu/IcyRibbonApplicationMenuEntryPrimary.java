@@ -47,7 +47,7 @@ public class IcyRibbonApplicationMenuEntryPrimary extends RibbonApplicationMenuE
         this.action = action;
 
         // set tooltip
-        setActionRichTooltip(action.getRichToolTip());
+        //setActionRichTooltip(action.getRichToolTip());
     }
 
     @Override

@@ -160,7 +160,7 @@ public class IcyCommandMenuButton extends JCommandMenuButton {
 
             if (value != null) {
                 // set tooltip
-                setActionRichTooltip(action.getRichToolTip());
+                //setActionRichTooltip(action.getRichToolTip());
 
                 // add listeners
                 addActionListener(value);

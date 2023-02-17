@@ -34,8 +34,6 @@ import icy.gui.main.ActiveViewerListener;
 import icy.gui.viewer.Viewer;
 import icy.gui.viewer.ViewerEvent;
 import icy.main.Icy;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.sequence.Sequence;
 import icy.util.ClassUtil;
 
@@ -45,10 +43,10 @@ import icy.util.ClassUtil;
  * @author Stephane
  * @author Thomas MUSSET
  */
-public class CanvasActions {
-    public static class ToggleLayersAction extends IcyAbstractAction implements ActiveViewerListener {
-        public ToggleLayersAction(boolean selected) {
-            super("Layers", (IcyIcon) null, "Show/Hide layers", KeyEvent.VK_L);
+public final class CanvasActions {
+    public static final class ToggleLayersAction extends IcyAbstractAction implements ActiveViewerListener {
+        public ToggleLayersAction(final boolean selected) {
+            super("Layers", "Show/Hide layers", KeyEvent.VK_L);
 
             setSelected(selected);
             if (selected)
@@ -64,7 +62,7 @@ public class CanvasActions {
         }
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             final IcyCanvas canvas = (viewer != null) ? viewer.getCanvas() : null;
 
@@ -90,29 +88,28 @@ public class CanvasActions {
         }
 
         @Override
-        public void viewerActivated(Viewer viewer) {
+        public void viewerActivated(final Viewer viewer) {
             // notify enabled change
             enabledChanged();
         }
 
         @Override
-        public void viewerDeactivated(Viewer viewer) {
+        public void viewerDeactivated(final Viewer viewer) {
         }
 
         @Override
-        public void activeViewerChanged(ViewerEvent event) {
+        public void activeViewerChanged(final ViewerEvent event) {
         }
     }
 
-    public static class GlobalToggleLayersAction extends IcyAbstractAction implements ActiveViewerListener {
-        public GlobalToggleLayersAction(boolean selected) {
+    public static final class GlobalToggleLayersAction extends IcyAbstractAction implements ActiveViewerListener {
+        public GlobalToggleLayersAction(final boolean selected) {
             super(
                     "LAyers (global)",
-                    new IcyIcon(ResourceUtil.ICON_LAYER_H2),
+                    //new IcyIcon(ResourceUtil.ICON_LAYER_H2),
                     "Show/Hide layers (global)",
                     KeyEvent.VK_L,
-                    // TODO: 27/01/2023 Remove this comment
-                    //InputEvent.SHIFT_MASK
+                    //InputEvent.SHIFT_MASK // TODO: 27/01/2023 SHIFT_MASK deprecated, use SHIFT_DOWN_MASK instead
                     InputEvent.SHIFT_DOWN_MASK
             );
 
@@ -130,10 +127,10 @@ public class CanvasActions {
         }
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             Boolean change = null;
 
-            for (Viewer viewer : Icy.getMainInterface().getViewers()) {
+            for (final Viewer viewer : Icy.getMainInterface().getViewers()) {
                 if (viewer != null) {
                     final IcyCanvas canvas = viewer.getCanvas();
 
@@ -164,29 +161,28 @@ public class CanvasActions {
         }
 
         @Override
-        public void viewerActivated(Viewer viewer) {
+        public void viewerActivated(final Viewer viewer) {
             // notify enabled change
             enabledChanged();
         }
 
         @Override
-        public void viewerDeactivated(Viewer viewer) {
+        public void viewerDeactivated(final Viewer viewer) {
         }
 
         @Override
-        public void activeViewerChanged(ViewerEvent event) {
+        public void activeViewerChanged(final ViewerEvent event) {
         }
     }
 
-    public static IcyAbstractAction screenShotAction = new IcyAbstractAction(
+    public static final IcyAbstractAction screenShotAction = new IcyAbstractAction(
             "Screeshot (view)",
-            null,
             "Take a screenshot of current view",
             true,
             "Rendering..."
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             // so it won't change during process
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             final IcyCanvas canvas = (viewer != null) ? viewer.getCanvas() : null;
@@ -219,15 +215,14 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction screenShotAlternateAction = new IcyAbstractAction(
+    public static final IcyAbstractAction screenShotAlternateAction = new IcyAbstractAction(
             "Screenshot (global)",
-            null,
             "Take a screenshot of current view with original sequence dimension",
             true,
             "Rendering..."
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             // so it won't change during process
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             final IcyCanvas canvas = (viewer != null) ? viewer.getCanvas() : null;
@@ -260,14 +255,13 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction unselectAction = new IcyAbstractAction(
+    public static final IcyAbstractAction unselectAction = new IcyAbstractAction(
             "Unselect",
-            (IcyIcon) null,
             "Unselect layer(s)",
             KeyEvent.VK_ESCAPE
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final LayersPanel layersPanel = Icy.getMainInterface().getLayersPanel();
 
             if (layersPanel != null) {
@@ -285,14 +279,14 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction deleteLayersAction = new IcyAbstractAction(
+    public final static IcyAbstractAction deleteLayersAction = new IcyAbstractAction(
             "Delete",
-            new IcyIcon(ResourceUtil.ICON_DELETE),
+            //new IcyIcon(ResourceUtil.ICON_DELETE),
             "Delete selected layer(s)",
             KeyEvent.VK_DELETE
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
 
             if (viewer != null) {
@@ -335,37 +329,35 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction toggleLayersAction = new ToggleLayersAction();
-    public static IcyAbstractAction globalToggleLayersAction = new GlobalToggleLayersAction();
+    public static final IcyAbstractAction toggleLayersAction = new ToggleLayersAction();
+    public static final IcyAbstractAction globalToggleLayersAction = new GlobalToggleLayersAction();
 
-    public static IcyAbstractAction globalDisableSyncAction = new IcyAbstractAction(
+    public static final IcyAbstractAction globalDisableSyncAction = new IcyAbstractAction(
             "Disabled (all)",
-            new IcyIcon(ResourceUtil.ICON_LOCK_OPEN),
+            //new IcyIcon(ResourceUtil.ICON_LOCK_OPEN),
             "Synchronization disabled on all viewers",
             KeyEvent.VK_0,
-            // TODO: 27/01/2023 Remove this comment
-            //InputEvent.SHIFT_MASK
+            //InputEvent.SHIFT_MASK // TODO: 27/01/2023 SHIFT_MASK deprecated, use SHIFT_DOWN_MASK instead
             InputEvent.SHIFT_DOWN_MASK
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             Icy.getMainInterface().setGlobalViewSyncId(0);
 
             return true;
         }
     };
 
-    public static IcyAbstractAction globalSyncGroup1Action = new IcyAbstractAction(
+    public static final IcyAbstractAction globalSyncGroup1Action = new IcyAbstractAction(
             "Group 1 (all)",
-            new IcyIcon(ResourceUtil.getLockedImage(1)),
+            //new IcyIcon(ResourceUtil.getLockedImage(1)),
             "All viewers set to full synchronization group 1 (view and Z/T position)",
             KeyEvent.VK_1,
-            // TODO: 27/01/2023 Remove this comment
-            //InputEvent.SHIFT_MASK
+            //InputEvent.SHIFT_MASK // TODO: 27/01/2023 SHIFT_MASK deprecated, use SHIFT_DOWN_MASK instead
             InputEvent.SHIFT_DOWN_MASK
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             Icy.getMainInterface().setGlobalViewSyncId(1);
 
             return true;
@@ -378,17 +370,16 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction globalSyncGroup2Action = new IcyAbstractAction(
+    public static final IcyAbstractAction globalSyncGroup2Action = new IcyAbstractAction(
             "Group 2 (all)",
-            new IcyIcon(ResourceUtil.getLockedImage(2)),
+            //new IcyIcon(ResourceUtil.getLockedImage(2)),
             "All viewers set to full synchronization group 2 (view and Z/T position)",
             KeyEvent.VK_2,
-            // TODO: 27/01/2023 Remove this comment
-            //InputEvent.SHIFT_MASK
+            //InputEvent.SHIFT_MASK // TODO: 27/01/2023 SHIFT_MASK deprecated, use SHIFT_DOWN_MASK instead
             InputEvent.SHIFT_DOWN_MASK
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             Icy.getMainInterface().setGlobalViewSyncId(2);
 
             return true;
@@ -401,17 +392,16 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction globalSyncGroup3Action = new IcyAbstractAction(
+    public static final IcyAbstractAction globalSyncGroup3Action = new IcyAbstractAction(
             "Group 3 (all)",
-            new IcyIcon(ResourceUtil.getLockedImage(3)),
+            //new IcyIcon(ResourceUtil.getLockedImage(3)),
             "All viewers set to view synchronization group (view synched but not Z/T position)",
             KeyEvent.VK_3,
-            // TODO: 27/01/2023 Remove this comment
-            //InputEvent.SHIFT_MASK
+            //InputEvent.SHIFT_MASK // TODO: 27/01/2023 SHIFT_MASK deprecated, use SHIFT_DOWN_MASK instead
             InputEvent.SHIFT_DOWN_MASK
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             Icy.getMainInterface().setGlobalViewSyncId(3);
 
             return true;
@@ -424,17 +414,16 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction globalSyncGroup4Action = new IcyAbstractAction(
+    public static final IcyAbstractAction globalSyncGroup4Action = new IcyAbstractAction(
             "Group 4 (all)",
-            new IcyIcon(ResourceUtil.getLockedImage(4)),
+            //new IcyIcon(ResourceUtil.getLockedImage(4)),
             "All viewers set to navigation synchronization group (Z/T position synched but not view)",
             KeyEvent.VK_4,
-            // TODO: 27/01/2023 Remove this comment
-            //InputEvent.SHIFT_MASK
+            //InputEvent.SHIFT_MASK // TODO: 27/01/2023 SHIFT_MASK deprecated, use SHIFT_DOWN_MASK instead
             InputEvent.SHIFT_DOWN_MASK
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             Icy.getMainInterface().setGlobalViewSyncId(4);
 
             return true;
@@ -447,14 +436,14 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction disableSyncAction = new IcyAbstractAction(
+    public static final IcyAbstractAction disableSyncAction = new IcyAbstractAction(
             "disabled",
-            new IcyIcon(ResourceUtil.ICON_LOCK_OPEN),
+            //new IcyIcon(ResourceUtil.ICON_LOCK_OPEN),
             "Synchronization disabled (global)",
             KeyEvent.VK_0
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             final IcyCanvas canvas = (viewer != null) ? viewer.getCanvas() : null;
 
@@ -473,14 +462,14 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction syncGroup1Action = new IcyAbstractAction(
+    public static final IcyAbstractAction syncGroup1Action = new IcyAbstractAction(
             "Group 1",
-            new IcyIcon(ResourceUtil.getLockedImage(1)),
+            //new IcyIcon(ResourceUtil.getLockedImage(1)),
             "Full synchronization group 1 (view and Z/T position)",
             KeyEvent.VK_1
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             final IcyCanvas canvas = (viewer != null) ? viewer.getCanvas() : null;
 
@@ -503,14 +492,14 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction syncGroup2Action = new IcyAbstractAction(
+    public static final IcyAbstractAction syncGroup2Action = new IcyAbstractAction(
             "Group 2",
-            new IcyIcon(ResourceUtil.getLockedImage(2)),
+            //new IcyIcon(ResourceUtil.getLockedImage(2)),
             "Full synchronization group 2 (view and Z/T position)",
             KeyEvent.VK_2
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             final IcyCanvas canvas = (viewer != null) ? viewer.getCanvas() : null;
 
@@ -533,14 +522,14 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction syncGroup3Action = new IcyAbstractAction(
+    public static final IcyAbstractAction syncGroup3Action = new IcyAbstractAction(
             "Group 3",
-            new IcyIcon(ResourceUtil.getLockedImage(3)),
+            //new IcyIcon(ResourceUtil.getLockedImage(3)),
             "View synchronization group (view synched but not Z/T position)",
             KeyEvent.VK_3
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             final IcyCanvas canvas = (viewer != null) ? viewer.getCanvas() : null;
 
@@ -563,14 +552,14 @@ public class CanvasActions {
         }
     };
 
-    public static IcyAbstractAction syncGroup4Action = new IcyAbstractAction(
+    public static final IcyAbstractAction syncGroup4Action = new IcyAbstractAction(
             "Group 4",
-            new IcyIcon(ResourceUtil.getLockedImage(4)),
+            //new IcyIcon(ResourceUtil.getLockedImage(4)),
             "Navigation synchronization group (Z/T position synched but not view)",
             KeyEvent.VK_4
     ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             final IcyCanvas canvas = (viewer != null) ? viewer.getCanvas() : null;
 
@@ -599,7 +588,7 @@ public class CanvasActions {
     public static List<IcyAbstractAction> getAllActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
-        for (Field field : CanvasActions.class.getFields()) {
+        for (final Field field : CanvasActions.class.getFields()) {
             final Class<?> type = field.getType();
 
             try {

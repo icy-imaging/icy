@@ -18,7 +18,6 @@
  */
 package icy.action;
 
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -42,8 +41,6 @@ import icy.gui.sequence.tools.SequenceResizeFrame;
 import icy.gui.viewer.Viewer;
 import icy.image.cache.ImageCache;
 import icy.main.Icy;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.roi.ROI;
 import icy.sequence.DimensionId;
 import icy.sequence.Sequence;
@@ -62,22 +59,27 @@ import icy.util.ClassUtil;
  * @author Stephane
  * @author Thomas MUSSET
  */
-public class SequenceOperationActions {
-    static class SequenceConvertAction extends IcyAbstractAction {
+public final class SequenceOperationActions {
+    static final class SequenceConvertAction extends IcyAbstractAction {
         final DataType dataType;
         final boolean scaled;
 
-        public SequenceConvertAction(DataType dataType, boolean scaled) {
-            super(dataType.toString(true), new IcyIcon(ResourceUtil.ICON_BAND_RIGHT),
-                    "Convert to " + dataType.toString(true), "Convert sequence data type to " + dataType.toString(true),
-                    true, "Converting sequence to " + dataType.toString(false) + " ...");
+        public SequenceConvertAction(final DataType dataType, final boolean scaled) {
+            super(
+                    dataType.toString(true),
+                    //new IcyIcon(ResourceUtil.ICON_BAND_RIGHT),
+                    "Convert to " + dataType.toString(true),
+                    "Convert sequence data type to " + dataType.toString(true),
+                    true,
+                    "Converting sequence to " + dataType.toString(false) + " ..."
+            );
 
             this.dataType = dataType;
             this.scaled = scaled;
         }
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
 
             if (viewer != null) {
@@ -112,34 +114,65 @@ public class SequenceOperationActions {
         }
     }
 
-    static class SequenceColorAction extends IcyAbstractAction {
-        private static final Image[] images = {null, ResourceUtil.ICON_RGB_COLOR, ResourceUtil.ICON_ARGB_COLOR, null,
-                null, null, null, null, null, null, ResourceUtil.ICON_GRAY_COLOR, null, null, null, null, null};
-        private static final String[] names = {null, "RGB image", "ARGB image", null, null, null, null, null, null,
-                null, "Gray image", null, null, null, null, null};
-        private static final String[] titles = {null, "Build RGB image", "Build ARGB image", null, null, null, null,
-                null, null, null, "Build gray image", null, null, null, null, null};
-        private static final String[] tooltips = {null,
+    static final class SequenceColorAction extends IcyAbstractAction {
+        /*private static final Image[] images = {
+                null,
+                ResourceUtil.ICON_RGB_COLOR,
+                ResourceUtil.ICON_ARGB_COLOR,
+                null, null, null, null, null, null, null,
+                ResourceUtil.ICON_GRAY_COLOR,
+                null, null, null, null, null
+        };*/
+        private static final String[] names = {
+                null,
+                "RGB image",
+                "ARGB image",
+                null, null, null, null, null, null, null,
+                "Gray image",
+                null, null, null, null, null
+        };
+        private static final String[] titles = {
+                null,
+                "Build RGB image",
+                "Build ARGB image",
+                null, null, null, null, null, null, null,
+                "Build gray image",
+                null, null, null, null, null
+        };
+        private static final String[] tooltips = {
+                null,
                 "Create a RGB color rendered version of the current sequence.\nResulting sequence is 3 channels with unsigned byte (8 bits) data type.",
                 "Create an ARGB color (support transparency) rendered version of the current sequence.\nResulting sequence is 4 channels with unsigned byte (8 bits) data type.",
                 null, null, null, null, null, null, null,
                 "Create a gray rendered version of the current sequence.\nResulting sequence is single channel with unsigned byte (8 bits) data type.",
-                null, null, null, null, null};
-        private static final String[] processMessages = {null, "Converting to RGB image...",
-                "Converting to ARGB image...", null, null, null, null, null, null, null, "Converting to gray image...",
-                null, null, null, null, null};
+                null, null, null, null, null
+        };
+        private static final String[] processMessages = {
+                null,
+                "Converting to RGB image...",
+                "Converting to ARGB image...",
+                null, null, null, null, null, null, null,
+                "Converting to gray image...",
+                null, null, null, null, null
+        };
 
         final int imageType;
 
-        public SequenceColorAction(int imageType) {
-            super(names[imageType], new IcyIcon(images[imageType], false), titles[imageType], tooltips[imageType], true,
-                    processMessages[imageType]);
+        public SequenceColorAction(final int imageType) {
+            super(
+                    names[imageType],
+                    //new IcyIcon(images[imageType], false),
+                    titles[imageType],
+                    tooltips[imageType],
+                    true,
+                    processMessages[imageType]
+            );
 
             this.imageType = imageType;
         }
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
 
             if (viewer != null) {
@@ -170,22 +203,24 @@ public class SequenceOperationActions {
         }
     }
 
-    public static class ExtractChannelAction extends IcyAbstractAction {
+    public static final class ExtractChannelAction extends IcyAbstractAction {
         final int channel;
 
-        public ExtractChannelAction(int channel) {
-            super((channel == -1) ? "all channels" : "channel " + channel,
-                    new IcyIcon(ResourceUtil.ICON_INDENT_DECREASE),
+        public ExtractChannelAction(final int channel) {
+            super(
+                    (channel == -1) ? "all channels" : "channel " + channel,
+                    //new IcyIcon(ResourceUtil.ICON_INDENT_DECREASE),
                     (channel == -1) ? "Extract all channels" : "Extract channel " + channel,
-                    (channel == -1) ? "Separate all channels of active sequence"
-                            : "Create a new single channel sequence from channel " + channel + " of active sequence",
-                    true, (channel == -1) ? "Extracting channel(s)..." : "Extracting channel " + channel + "...");
+                    (channel == -1) ? "Separate all channels of active sequence" : "Create a new single channel sequence from channel " + channel + " of active sequence",
+                    true,
+                    (channel == -1) ? "Extracting channel(s)..." : "Extracting channel " + channel + "..."
+            );
 
             this.channel = channel;
         }
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -215,18 +250,24 @@ public class SequenceOperationActions {
         }
     }
 
-    public static class RemoveChannelAction extends IcyAbstractAction {
+    public static final class RemoveChannelAction extends IcyAbstractAction {
         final int channel;
 
-        public RemoveChannelAction(int channel) {
-            super("channel " + channel, new IcyIcon(ResourceUtil.ICON_INDENT_REMOVE), "Remove channel " + channel,
-                    "Remove channel " + channel + " from active sequence", true, "Removing channel " + channel + "...");
+        public RemoveChannelAction(final int channel) {
+            super(
+                    "channel " + channel,
+                    //new IcyIcon(ResourceUtil.ICON_INDENT_REMOVE),
+                    "Remove channel " + channel,
+                    "Remove channel " + channel + " from active sequence",
+                    true,
+                    "Removing channel " + channel + "..."
+            );
 
             this.channel = channel;
         }
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -267,34 +308,44 @@ public class SequenceOperationActions {
         }
     }
 
-    public static class MergeDimensionAction extends IcyAbstractAction {
-        private static final String[] titles = {null, null, null, "Merge channels", "Merge Z slices", "Merge T frames"};
-        private static final String[] tooltips = {null, null, null,
+    public static final class MergeDimensionAction extends IcyAbstractAction {
+        private static final String[] titles = {
+                null, null, null,
+                "Merge channels",
+                "Merge Z slices",
+                "Merge T frames"
+        };
+        private static final String[] tooltips = {
+                null, null, null,
                 "Merge channels from severals input sequences to build a new sequence.",
                 "Merge Z slices from severals input sequences to build a new sequence.",
-                "Merge T frames from severals input sequences to build a new sequence."};
+                "Merge T frames from severals input sequences to build a new sequence."
+        };
 
         final DimensionId dim;
 
         public MergeDimensionAction(DimensionId dim) {
-            super("Merge...", new IcyIcon(ResourceUtil.ICON_INDENT_INCREASE), titles[dim.ordinal()],
-                    tooltips[dim.ordinal()]);
+            super(
+                    "Merge...",
+                    //new IcyIcon(ResourceUtil.ICON_INDENT_INCREASE),
+                    titles[dim.ordinal()],
+                    tooltips[dim.ordinal()]
+            );
 
             this.dim = dim;
         }
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             new SequenceDimensionMergeFrame(dim);
             return true;
         }
     }
 
-    public static class ToggleVirtualSequenceAction extends IcyAbstractAction {
-        public ToggleVirtualSequenceAction(boolean selected) {
+    public static final class ToggleVirtualSequenceAction extends IcyAbstractAction {
+        public ToggleVirtualSequenceAction(final boolean selected) {
             super(
                     "Virtual",
-                    (IcyIcon) null,
                     "Enable/Disable virtual mode (data streaming) for this sequence"
             );
 
@@ -307,7 +358,7 @@ public class SequenceOperationActions {
         }
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final JToggleButton btn = (e.getSource() instanceof JToggleButton) ? (JToggleButton) e.getSource() : null;
             final boolean value = (btn != null) ? btn.isSelected() : isSelected();
 
@@ -375,12 +426,17 @@ public class SequenceOperationActions {
         }
     }
 
-    public static IcyAbstractAction cloneSequenceAction = new IcyAbstractAction("Duplicate",
-            new IcyIcon(ResourceUtil.ICON_COPY), "Duplicate sequence", "Create a fresh copy of the sequence", true,
-            "Duplicating sequence...") {
+    public static final IcyAbstractAction cloneSequenceAction = new IcyAbstractAction(
+            "Duplicate",
+            //new IcyIcon(ResourceUtil.ICON_COPY),
+            "Duplicate sequence",
+            "Create a fresh copy of the sequence",
+            true,
+            "Duplicating sequence..."
+    ) {
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             if (viewer == null)
                 return false;
@@ -413,36 +469,39 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction convertUByteScaledSequenceAction = new SequenceConvertAction(DataType.UBYTE, true);
-    public static IcyAbstractAction convertUByteSequenceAction = new SequenceConvertAction(DataType.UBYTE, false);
-    public static IcyAbstractAction convertByteScaledSequenceAction = new SequenceConvertAction(DataType.BYTE, true);
-    public static IcyAbstractAction convertByteSequenceAction = new SequenceConvertAction(DataType.BYTE, false);
-    public static IcyAbstractAction convertUShortScaledSequenceAction = new SequenceConvertAction(DataType.USHORT,
-            true);
-    public static IcyAbstractAction convertUShortSequenceAction = new SequenceConvertAction(DataType.USHORT, false);
-    public static IcyAbstractAction convertShortScaledSequenceAction = new SequenceConvertAction(DataType.SHORT, true);
-    public static IcyAbstractAction convertShortSequenceAction = new SequenceConvertAction(DataType.SHORT, false);
-    public static IcyAbstractAction convertUIntScaledSequenceAction = new SequenceConvertAction(DataType.UINT, true);
-    public static IcyAbstractAction convertUIntSequenceAction = new SequenceConvertAction(DataType.UINT, false);
-    public static IcyAbstractAction convertIntScaledSequenceAction = new SequenceConvertAction(DataType.INT, true);
-    public static IcyAbstractAction convertIntSequenceAction = new SequenceConvertAction(DataType.INT, false);
-    public static IcyAbstractAction convertFloatScaledSequenceAction = new SequenceConvertAction(DataType.FLOAT, true);
-    public static IcyAbstractAction convertFloatSequenceAction = new SequenceConvertAction(DataType.FLOAT, false);
-    public static IcyAbstractAction convertDoubleScaledSequenceAction = new SequenceConvertAction(DataType.DOUBLE,
-            true);
-    public static IcyAbstractAction convertDoubleSequenceAction = new SequenceConvertAction(DataType.DOUBLE, false);
+    public static final IcyAbstractAction convertUByteScaledSequenceAction = new SequenceConvertAction(DataType.UBYTE, true);
+    public static final IcyAbstractAction convertUByteSequenceAction = new SequenceConvertAction(DataType.UBYTE, false);
+    public static final IcyAbstractAction convertByteScaledSequenceAction = new SequenceConvertAction(DataType.BYTE, true);
+    public static final IcyAbstractAction convertByteSequenceAction = new SequenceConvertAction(DataType.BYTE, false);
+    public static final IcyAbstractAction convertUShortScaledSequenceAction = new SequenceConvertAction(DataType.USHORT, true);
+    public static final IcyAbstractAction convertUShortSequenceAction = new SequenceConvertAction(DataType.USHORT, false);
+    public static final IcyAbstractAction convertShortScaledSequenceAction = new SequenceConvertAction(DataType.SHORT, true);
+    public static final IcyAbstractAction convertShortSequenceAction = new SequenceConvertAction(DataType.SHORT, false);
+    public static final IcyAbstractAction convertUIntScaledSequenceAction = new SequenceConvertAction(DataType.UINT, true);
+    public static final IcyAbstractAction convertUIntSequenceAction = new SequenceConvertAction(DataType.UINT, false);
+    public static final IcyAbstractAction convertIntScaledSequenceAction = new SequenceConvertAction(DataType.INT, true);
+    public static final IcyAbstractAction convertIntSequenceAction = new SequenceConvertAction(DataType.INT, false);
+    public static final IcyAbstractAction convertFloatScaledSequenceAction = new SequenceConvertAction(DataType.FLOAT, true);
+    public static final IcyAbstractAction convertFloatSequenceAction = new SequenceConvertAction(DataType.FLOAT, false);
+    public static final IcyAbstractAction convertDoubleScaledSequenceAction = new SequenceConvertAction(DataType.DOUBLE, true);
+    public static final IcyAbstractAction convertDoubleSequenceAction = new SequenceConvertAction(DataType.DOUBLE, false);
 
     // color operations
-    public static IcyAbstractAction argbSequenceAction = new SequenceColorAction(BufferedImage.TYPE_INT_ARGB);
-    public static IcyAbstractAction rgbSequenceAction = new SequenceColorAction(BufferedImage.TYPE_INT_RGB);
-    public static IcyAbstractAction graySequenceAction = new SequenceColorAction(BufferedImage.TYPE_BYTE_GRAY);
+    public static final IcyAbstractAction argbSequenceAction = new SequenceColorAction(BufferedImage.TYPE_INT_ARGB);
+    public static final IcyAbstractAction rgbSequenceAction = new SequenceColorAction(BufferedImage.TYPE_INT_RGB);
+    public static final IcyAbstractAction graySequenceAction = new SequenceColorAction(BufferedImage.TYPE_BYTE_GRAY);
 
     // XY plan operations
-    public static IcyAbstractAction cropSequenceAction = new IcyAbstractAction("Fast crop",
-            new IcyIcon(ResourceUtil.ICON_CUT), "Fast crop image", "Crop an image from a ROI", true,
-            "Doing image crop...") {
+    public static final IcyAbstractAction cropSequenceAction = new IcyAbstractAction(
+            "Fast crop",
+            //new IcyIcon(ResourceUtil.ICON_CUT),
+            "Fast crop image",
+            "Crop an image from a ROI",
+            true,
+            "Doing image crop..."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             if (viewer == null)
                 return false;
@@ -500,10 +559,14 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction canvasResizeAction = new IcyAbstractAction("Canvas size...",
-            new IcyIcon(ResourceUtil.ICON_CROP), "Canvas resize", "Resize the canvas without changing image size.") {
+    public static final IcyAbstractAction canvasResizeAction = new IcyAbstractAction(
+            "Canvas size...",
+            //new IcyIcon(ResourceUtil.ICON_CROP),
+            "Canvas resize",
+            "Resize the canvas without changing image size."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -520,10 +583,14 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction imageResizeAction = new IcyAbstractAction("Image size...",
-            new IcyIcon(ResourceUtil.ICON_FIT_CANVAS), "Image resize", "Resize the image.") {
+    public static final IcyAbstractAction imageResizeAction = new IcyAbstractAction(
+            "Image size...",
+            //new IcyIcon(ResourceUtil.ICON_FIT_CANVAS),
+            "Image resize",
+            "Resize the image."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -541,21 +608,36 @@ public class SequenceOperationActions {
     };
 
     // channel operations
-    public static IcyAbstractAction extractAllChannelAction = new ExtractChannelAction(-1);
-    public static IcyAbstractAction[] extractChannelActions = {new ExtractChannelAction(0), new ExtractChannelAction(1),
-            new ExtractChannelAction(2), new ExtractChannelAction(3), new ExtractChannelAction(4),
-            new ExtractChannelAction(5)};
-    public static IcyAbstractAction[] removeChannelActions = {new RemoveChannelAction(0), new RemoveChannelAction(1),
-            new RemoveChannelAction(2), new RemoveChannelAction(3), new RemoveChannelAction(4),
-            new RemoveChannelAction(5)};
-    public static IcyAbstractAction mergeChannelsAction = new MergeDimensionAction(DimensionId.C);
+    public static final IcyAbstractAction extractAllChannelAction = new ExtractChannelAction(-1);
+    public static final IcyAbstractAction[] extractChannelActions = {
+            new ExtractChannelAction(0),
+            new ExtractChannelAction(1),
+            new ExtractChannelAction(2),
+            new ExtractChannelAction(3),
+            new ExtractChannelAction(4),
+            new ExtractChannelAction(5)
+    };
+    public static final IcyAbstractAction[] removeChannelActions = {
+            new RemoveChannelAction(0),
+            new RemoveChannelAction(1),
+            new RemoveChannelAction(2),
+            new RemoveChannelAction(3),
+            new RemoveChannelAction(4),
+            new RemoveChannelAction(5)
+    };
+    public static final IcyAbstractAction mergeChannelsAction = new MergeDimensionAction(DimensionId.C);
 
     // Z operations
-    public static IcyAbstractAction reverseSlicesAction = new IcyAbstractAction("Reverse order",
-            new IcyIcon(ResourceUtil.ICON_LAYER_REVERSE_V), "Reverse Z slices", "Reverse Z slices order", true,
-            "Reversing slices...") {
+    public static final IcyAbstractAction reverseSlicesAction = new IcyAbstractAction(
+            "Reverse order",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_REVERSE_V),
+            "Reverse Z slices",
+            "Reverse Z slices order",
+            true,
+            "Reversing slices..."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -567,11 +649,16 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction extractSliceAction = new IcyAbstractAction("Extract slice",
-            new IcyIcon(ResourceUtil.ICON_LAYER_EXTRACT_V), "Extract current Z slice",
-            "Create a new sequence by extracting current Z slice of active sequence.", false, "Extracting slice...") {
+    public static final IcyAbstractAction extractSliceAction = new IcyAbstractAction(
+            "Extract slice",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_EXTRACT_V),
+            "Extract current Z slice",
+            "Create a new sequence by extracting current Z slice of active sequence.",
+            false,
+            "Extracting slice..."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
 
             if (viewer != null) {
@@ -607,11 +694,16 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction removeSliceAction = new IcyAbstractAction("Remove slice",
-            new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_V), "Remove current Z slice",
-            "Remove the current Z slice of active sequence.", false, "Removing slice...") {
+    public static final IcyAbstractAction removeSliceAction = new IcyAbstractAction(
+            "Remove slice",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_V),
+            "Remove current Z slice",
+            "Remove the current Z slice of active sequence.",
+            false,
+            "Removing slice..."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             final int z = (viewer == null) ? -1 : viewer.getPositionZ();
 
@@ -632,11 +724,14 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction addSlicesAction = new IcyAbstractAction("Add...",
-            new IcyIcon(ResourceUtil.ICON_LAYER_ADD_V), "Add slice(s)",
-            "Extends Z dimension by adding empty or duplicating slices.") {
+    public static final IcyAbstractAction addSlicesAction = new IcyAbstractAction(
+            "Add...",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_ADD_V),
+            "Add slice(s)",
+            "Extends Z dimension by adding empty or duplicating slices."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -655,13 +750,16 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction mergeSlicesAction = new MergeDimensionAction(DimensionId.Z);
+    public static final IcyAbstractAction mergeSlicesAction = new MergeDimensionAction(DimensionId.Z);
 
-    public static IcyAbstractAction removeSlicesAction = new IcyAbstractAction("Remove...",
-            new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_ADV_V), "Advanced slice remove",
-            "Advanced Z slice remove operation.") {
+    public static final IcyAbstractAction removeSlicesAction = new IcyAbstractAction(
+            "Remove...",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_ADV_V),
+            "Advanced slice remove",
+            "Advanced Z slice remove operation."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -679,11 +777,16 @@ public class SequenceOperationActions {
     };
 
     // T operations
-    public static IcyAbstractAction reverseFramesAction = new IcyAbstractAction("Reverse order",
-            new IcyIcon(ResourceUtil.ICON_LAYER_REVERSE_H), "Reverse T frames", "Reverse T frames order", true,
-            "Reversing frames...") {
+    public static final IcyAbstractAction reverseFramesAction = new IcyAbstractAction(
+            "Reverse order",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_REVERSE_H),
+            "Reverse T frames",
+            "Reverse T frames order",
+            true,
+            "Reversing frames..."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -700,11 +803,16 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction extractFrameAction = new IcyAbstractAction("Extract frame",
-            new IcyIcon(ResourceUtil.ICON_LAYER_EXTRACT_H), "Extract current T frame",
-            "Create a new sequence by extracting current T frame of active sequence.", false, "Extracting frame...") {
+    public static final IcyAbstractAction extractFrameAction = new IcyAbstractAction(
+            "Extract frame",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_EXTRACT_H),
+            "Extract current T frame",
+            "Create a new sequence by extracting current T frame of active sequence.",
+            false,
+            "Extracting frame..."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
 
             if (viewer != null) {
@@ -740,11 +848,16 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction removeFrameAction = new IcyAbstractAction("Remove frame",
-            new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_H), "Remove current T frame",
-            "Remove the current T frame of active sequence.", false, "Removing frame...") {
+    public static final IcyAbstractAction removeFrameAction = new IcyAbstractAction(
+            "Remove frame",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_H),
+            "Remove current T frame",
+            "Remove the current T frame of active sequence.",
+            false,
+            "Removing frame..."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
             final int t = (viewer == null) ? -1 : viewer.getPositionT();
 
@@ -765,11 +878,14 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction addFramesAction = new IcyAbstractAction("Add...",
-            new IcyIcon(ResourceUtil.ICON_LAYER_ADD_H), "Add frame(s)",
-            "Extends T dimension by adding empty or duplicating frames.") {
+    public static final IcyAbstractAction addFramesAction = new IcyAbstractAction(
+            "Add...",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_ADD_H),
+            "Add frame(s)",
+            "Extends T dimension by adding empty or duplicating frames."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -788,13 +904,16 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction mergeFramesAction = new MergeDimensionAction(DimensionId.T);
+    public static final IcyAbstractAction mergeFramesAction = new MergeDimensionAction(DimensionId.T);
 
-    public static IcyAbstractAction removeFramesAction = new IcyAbstractAction("Remove...",
-            new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_ADV_H), "Advanced frame remove",
-            "Advanced T frame remove operation.") {
+    public static final IcyAbstractAction removeFramesAction = new IcyAbstractAction(
+            "Remove...",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_ADV_H),
+            "Advanced frame remove",
+            "Advanced T frame remove operation."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -812,11 +931,16 @@ public class SequenceOperationActions {
     };
 
     // ZT conversion
-    public static IcyAbstractAction convertToSlicesAction = new IcyAbstractAction("Convert to stack",
-            new IcyIcon(ResourceUtil.ICON_LAYER_V1), "Convert to stack", "Set all images in Z dimension.", true,
-            "Converting to stack...") {
+    public static final IcyAbstractAction convertToSlicesAction = new IcyAbstractAction(
+            "Convert to stack",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_V1),
+            "Convert to stack",
+            "Set all images in Z dimension.",
+            true,
+            "Converting to stack..."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
 
             if (viewer != null) {
@@ -839,11 +963,16 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction convertToFramesAction = new IcyAbstractAction("Convert to time",
-            new IcyIcon(ResourceUtil.ICON_LAYER_H1), "Convert to time sequence", "Set all images in T dimension.", true,
-            "Converting to time...") {
+    public static final IcyAbstractAction convertToFramesAction = new IcyAbstractAction(
+            "Convert to time",
+            //new IcyIcon(ResourceUtil.ICON_LAYER_H1),
+            "Convert to time sequence",
+            "Set all images in T dimension.",
+            true,
+            "Converting to time..."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
 
             if (viewer != null) {
@@ -866,11 +995,14 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction advancedZTConvertAction = new IcyAbstractAction("Advanced...",
-            new IcyIcon(ResourceUtil.ICON_COG), "Advanced dimension conversion",
-            "Advanced dimension conversion operation.") {
+    public static final IcyAbstractAction advancedZTConvertAction = new IcyAbstractAction(
+            "Advanced...",
+            //new IcyIcon(ResourceUtil.ICON_COG),
+            "Advanced dimension conversion",
+            "Advanced dimension conversion operation."
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -894,11 +1026,16 @@ public class SequenceOperationActions {
      */
 
     @Deprecated
-    public static IcyAbstractAction fillSequenceAction = new IcyAbstractAction("Fill",
-            new IcyIcon(ResourceUtil.ICON_BRUSH), "Fill ROI content",
-            "Fill content of the selected ROI with specified value", true, "Fill ROI content") {
+    public static final IcyAbstractAction fillSequenceAction = new IcyAbstractAction(
+            "Fill",
+            //new IcyIcon(ResourceUtil.ICON_BRUSH),
+            "Fill ROI content",
+            "Fill content of the selected ROI with specified value",
+            true,
+            "Fill ROI content"
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if (sequence != null) {
@@ -933,7 +1070,7 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction getConvertSequenceAction(DataType dataType, boolean scaled) {
+    public static IcyAbstractAction getConvertSequenceAction(final DataType dataType, final boolean scaled) {
         switch (dataType) {
             case UBYTE:
                 if (scaled)
@@ -981,10 +1118,15 @@ public class SequenceOperationActions {
         }
     }
 
-    public static IcyAbstractAction undoAction = new IcyAbstractAction("Undo", new IcyIcon(ResourceUtil.ICON_UNDO),
-            "Undo last operation (Ctrl+Z)", KeyEvent.VK_Z, SystemUtil.getMenuCtrlMask()) {
+    public static final IcyAbstractAction undoAction = new IcyAbstractAction(
+            "Undo",
+            //new IcyIcon(ResourceUtil.ICON_UNDO),
+            "Undo last operation (Ctrl+Z)",
+            KeyEvent.VK_Z,
+            SystemUtil.getMenuCtrlMask()
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             return Icy.getMainInterface().undo();
         }
 
@@ -999,10 +1141,15 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction redoAction = new IcyAbstractAction("Redo", new IcyIcon(ResourceUtil.ICON_REDO),
-            "Redo last operation (Ctrl+Y)", KeyEvent.VK_Y, SystemUtil.getMenuCtrlMask()) {
+    public static final IcyAbstractAction redoAction = new IcyAbstractAction(
+            "Redo",
+            //new IcyIcon(ResourceUtil.ICON_REDO),
+            "Redo last operation (Ctrl+Y)",
+            KeyEvent.VK_Y,
+            SystemUtil.getMenuCtrlMask()
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             return Icy.getMainInterface().redo();
         }
 
@@ -1017,10 +1164,13 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction undoClearAction = new IcyAbstractAction("Clear history",
-            new IcyIcon(ResourceUtil.ICON_TRASH), "Clear all history (will release some memory") {
+    public static final IcyAbstractAction undoClearAction = new IcyAbstractAction(
+            "Clear history",
+            //new IcyIcon(ResourceUtil.ICON_TRASH),
+            "Clear all history (will release some memory)"
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final IcyUndoManager undoManager = Icy.getMainInterface().getUndoManager();
 
             if (undoManager != null) {
@@ -1042,11 +1192,13 @@ public class SequenceOperationActions {
         }
     };
 
-    public static IcyAbstractAction undoClearAllButLastAction = new IcyAbstractAction("Clear all but last",
-            new IcyIcon(ResourceUtil.ICON_CLEAR_BEFORE),
-            "Clear all history but the last operation (can release some memory)") {
+    public static final IcyAbstractAction undoClearAllButLastAction = new IcyAbstractAction(
+            "Clear all but last",
+            //new IcyIcon(ResourceUtil.ICON_CLEAR_BEFORE),
+            "Clear all history but the last operation (can release some memory)"
+    ) {
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             final IcyUndoManager undoManager = Icy.getMainInterface().getUndoManager();
 
             if (undoManager != null) {
@@ -1075,7 +1227,7 @@ public class SequenceOperationActions {
     public static List<IcyAbstractAction> getAllActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
-        for (Field field : SequenceOperationActions.class.getFields()) {
+        for (final Field field : SequenceOperationActions.class.getFields()) {
             final Class<?> type = field.getType();
 
             try {

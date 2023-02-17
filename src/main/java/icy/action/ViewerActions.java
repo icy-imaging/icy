@@ -22,7 +22,6 @@ import icy.canvas.IcyCanvas;
 import icy.gui.viewer.Viewer;
 import icy.image.lut.LUT;
 import icy.main.Icy;
-import icy.resource.icon.IcyIcon;
 import icy.sequence.Sequence;
 import icy.system.thread.ThreadUtil;
 import icy.util.ClassUtil;
@@ -42,16 +41,15 @@ import plugins.kernel.canvas.VtkCanvas;
  * @author Stephane
  * @author Thomas MUSSET
  */
-public class ViewerActions {
-    public static IcyAbstractAction duplicateAction = new IcyAbstractAction(
+public final class ViewerActions {
+    public static final IcyAbstractAction duplicateAction = new IcyAbstractAction(
             "Duplicate view",
-            (IcyIcon) null,
             "Duplicate view (no data duplication)",
             KeyEvent.VK_F2
     ) {
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             ThreadUtil.invokeLater(() -> {
                 // so it won't change during process
                 final Viewer viewer = Icy.getMainInterface().getActiveViewer();
@@ -89,7 +87,7 @@ public class ViewerActions {
     public static List<IcyAbstractAction> getAllActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
-        for (Field field : ViewerActions.class.getFields()) {
+        for (final Field field : ViewerActions.class.getFields()) {
             final Class<?> type = field.getType();
 
             try {

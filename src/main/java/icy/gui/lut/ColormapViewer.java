@@ -184,7 +184,6 @@ public class ColormapViewer extends BorderedPanel implements MouseListener, Mous
                 "delete",
                 new IcyAbstractAction(
                         "delete",
-                        (IcyIcon) null,
                         "Delete control point",
                         KeyEvent.VK_DELETE,
                 0

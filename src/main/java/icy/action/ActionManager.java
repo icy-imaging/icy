@@ -1,5 +1,20 @@
-/**
- * 
+/*
+ * Copyright 2010-2023 Institut Pasteur.
+ *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.action;
 
@@ -13,23 +28,18 @@ import java.util.List;
 
 /**
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class ActionManager
-{
+public final class ActionManager {
     /**
      * All registered action
      */
     public static List<IcyAbstractAction> actions = null;
 
-    // internals
-    private static ActiveSequenceListener activeSequenceListener;
-
-    public static synchronized void init()
-    {
+    public static synchronized void init() {
         // init actions
-        if (actions == null)
-        {
-            actions = new ArrayList<IcyAbstractAction>();
+        if (actions == null) {
+            actions = new ArrayList<>();
 
             // add all kernels actions
             actions.addAll(FileActions.getAllActions());
@@ -41,25 +51,21 @@ public class ActionManager
             actions.addAll(ViewerActions.getAllActions());
             actions.addAll(WindowActions.getAllActions());
 
-            activeSequenceListener = new ActiveSequenceListener()
-            {
+            final ActiveSequenceListener activeSequenceListener = new ActiveSequenceListener() {
                 @Override
-                public void sequenceDeactivated(Sequence sequence)
-                {
+                public void sequenceDeactivated(Sequence sequence) {
                     // nothing here
                 }
 
                 @Override
-                public void sequenceActivated(Sequence sequence)
-                {
+                public void sequenceActivated(Sequence sequence) {
                     // force action components refresh
                     for (IcyAbstractAction action : actions)
                         action.enabledChanged();
                 }
 
                 @Override
-                public void activeSequenceChanged(SequenceEvent event)
-                {
+                public void activeSequenceChanged(SequenceEvent event) {
                     // nothing here
                 }
             };

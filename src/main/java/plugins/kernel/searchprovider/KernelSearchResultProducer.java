@@ -130,16 +130,17 @@ public class KernelSearchResultProducer extends SearchResultProducer
             action.execute();
         }
 
+        @Deprecated
         @Override
         public RichTooltip getRichToolTip()
         {
-            final String longDesc = action.getLongDescription();
+            /*final String longDesc = action.getLongDescription();
 
             if (!StringUtil.isEmpty(longDesc))
             {
                 if (longDesc.split("\n").length > 1)
                     return action.getRichToolTip();
-            }
+            }*/
 
             return null;
         }
