@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.frame;
 
@@ -61,59 +61,40 @@ import icy.common.MenuCallback;
 import icy.gui.main.MainFrame;
 import icy.gui.util.ComponentUtil;
 import icy.main.Icy;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 
 /**
  * This class behave either as a JFrame or a JInternalFrame.<br>
  * IcyFrame should be 100% AWT safe
- * 
- * @author Fabrice de Chaumont &amp; Stephane Dallongeville
+ *
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
+ * @author Thomas MUSSET
  */
-public class IcyFrame implements InternalFrameListener, WindowListener, ImageObserver, PropertyChangeListener
-{
-    private class SwitchStateAction extends IcyAbstractAction
-    {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -4433831471426743128L;
-
-        final IcyIcon detachIcon;
-        final IcyIcon attachIcon;
-
-        public SwitchStateAction()
-        {
+public class IcyFrame implements InternalFrameListener, WindowListener, ImageObserver, PropertyChangeListener {
+    private class SwitchStateAction extends IcyAbstractAction {
+        public SwitchStateAction() {
             super("");
 
-            detachIcon = new IcyIcon(ResourceUtil.ICON_WINDOW_EXPAND, 20);
-            attachIcon = new IcyIcon(ResourceUtil.ICON_WINDOW_COLLAPSE, 20);
             setAccelerator(KeyEvent.VK_F3);
 
             refreshState();
         }
 
         @Override
-        public boolean doAction(ActionEvent e)
-        {
+        public boolean doAction(ActionEvent e) {
             switchState();
             return true;
         }
 
-        void refreshState()
-        {
-            if (isInternalized())
-            {
+        void refreshState() {
+            if (isInternalized()) {
                 setName("Detach");
-                setIcon(detachIcon);
                 setDescription("Externalize the window");
             }
-            else
-            {
+            else {
                 setName("Attach");
-                setIcon(attachIcon);
                 setDescription("Internalize the window");
             }
         }
@@ -122,31 +103,26 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * list containing all active frames
      */
-    static ArrayList<IcyFrame> frames = new ArrayList<IcyFrame>();
+    static ArrayList<IcyFrame> frames = new ArrayList<>();
 
     /**
      * @return Return all active (not closed) IcyFrame
      */
-    public static ArrayList<IcyFrame> getAllFrames()
-    {
-        synchronized (frames)
-        {
-            return new ArrayList<IcyFrame>(frames);
+    public static ArrayList<IcyFrame> getAllFrames() {
+        synchronized (frames) {
+            return new ArrayList<>(frames);
         }
     }
 
     /**
-     * @return Return all active IcyFrame which derive from the specified class
      * @param frameClass class frame
+     * @return Return all active IcyFrame which derive from the specified class
      */
-    public static ArrayList<IcyFrame> getAllFrames(Class<?> frameClass)
-    {
-        final ArrayList<IcyFrame> result = new ArrayList<IcyFrame>();
+    public static ArrayList<IcyFrame> getAllFrames(Class<?> frameClass) {
+        final ArrayList<IcyFrame> result = new ArrayList<>();
 
-        if (frameClass != null)
-        {
-            synchronized (frames)
-            {
+        if (frameClass != null) {
+            synchronized (frames) {
                 for (IcyFrame frame : frames)
                     if (frameClass.isInstance(frame))
                         result.add(frame);
@@ -158,13 +134,11 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * @return Find IcyFrame corresponding to the specified JInternalFrame
      * @param frame internal frame
+     * @return Find IcyFrame corresponding to the specified JInternalFrame
      */
-    public static IcyFrame findIcyFrame(JInternalFrame frame)
-    {
-        synchronized (frames)
-        {
+    public static IcyFrame findIcyFrame(JInternalFrame frame) {
+        synchronized (frames) {
             for (IcyFrame f : frames)
                 if (f.getInternalFrame() == frame)
                     return f;
@@ -173,8 +147,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
         }
     }
 
-    public enum IcyFrameState
-    {
+    public enum IcyFrameState {
         INTERNALIZED, EXTERNALIZED
     }
 
@@ -205,40 +178,33 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     protected IcyFrameState previousState;
     protected final boolean headless;
 
-    public IcyFrame()
-    {
+    public IcyFrame() {
         this("", false, true, false, false, true);
     }
 
-    public IcyFrame(String title)
-    {
+    public IcyFrame(String title) {
         this(title, false, true, false, false, true);
     }
 
-    public IcyFrame(String title, boolean resizable)
-    {
+    public IcyFrame(String title, boolean resizable) {
         this(title, resizable, true, false, false, true);
     }
 
-    public IcyFrame(String title, boolean resizable, boolean closable)
-    {
+    public IcyFrame(String title, boolean resizable, boolean closable) {
         this(title, resizable, closable, false, false, true);
     }
 
-    public IcyFrame(String title, boolean resizable, boolean closable, boolean maximizable)
-    {
+    public IcyFrame(String title, boolean resizable, boolean closable, boolean maximizable) {
         this(title, resizable, closable, maximizable, false, true);
     }
 
     public IcyFrame(final String title, final boolean resizable, final boolean closable, final boolean maximizable,
-            final boolean iconifiable)
-    {
+                    final boolean iconifiable) {
         this(title, resizable, closable, maximizable, iconifiable, true);
     }
 
     public IcyFrame(final String title, final boolean resizable, final boolean closable, final boolean maximizable,
-            final boolean iconifiable, final boolean waitCreate)
-    {
+                    final boolean iconifiable, final boolean waitCreate) {
         super();
 
         headless = Icy.getMainInterface().isHeadLess();
@@ -248,14 +214,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
             return;
 
         frameEventListeners = new EventListenerList();
-        defaultSystemMenuCallback = new MenuCallback()
-        {
-            @Override
-            public JMenu getMenu()
-            {
-                return getDefaultSystemMenu();
-            }
-        };
+        defaultSystemMenuCallback = this::getDefaultSystemMenu;
 
         syncProcess = false;
 
@@ -273,35 +232,29 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
         switchStateAction = new SwitchStateAction();
         switchStateAction.setEnabled(canBeInternalized());
 
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                externalFrame = createExternalFrame(title);
-                // redirect frame / window events
-                externalFrame.addWindowListener(IcyFrame.this);
-                externalFrame.setLocationRelativeTo(null);
-                externalFrame.setResizable(resizable);
-                externalFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                // default size
-                externalFrame.setSize(480, 400);
+        ThreadUtil.invoke(() -> {
+            externalFrame = createExternalFrame(title);
+            // redirect frame / window events
+            externalFrame.addWindowListener(IcyFrame.this);
+            externalFrame.setLocationRelativeTo(null);
+            externalFrame.setResizable(resizable);
+            externalFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            // default size
+            externalFrame.setSize(480, 400);
 
-                internalFrame = createInternalFrame(title, resizable, closable, maximizable, iconifiable);
-                // redirect frame / window events
-                internalFrame.addInternalFrameListener(IcyFrame.this);
-                // default size
-                internalFrame.setSize(480, 400);
+            internalFrame = createInternalFrame(title, resizable, closable, maximizable, iconifiable);
+            // redirect frame / window events
+            internalFrame.addInternalFrameListener(IcyFrame.this);
+            // default size
+            internalFrame.setSize(480, 400);
 
-                // default system menu callback
-                externalFrame.setSystemMenuCallback(defaultSystemMenuCallback);
-                internalFrame.setSystemMenuCallback(defaultSystemMenuCallback);
+            // default system menu callback
+            externalFrame.setSystemMenuCallback(defaultSystemMenuCallback);
+            internalFrame.setSystemMenuCallback(defaultSystemMenuCallback);
 
-                // register to the list
-                synchronized (frames)
-                {
-                    frames.add(IcyFrame.this);
-                }
+            // register to the list
+            synchronized (frames) {
+                frames.add(IcyFrame.this);
             }
         }, waitCreate);
 
@@ -312,33 +265,30 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * @return Permit IcyExternalFrame overriding
      * @param title string
+     * @return Permit IcyExternalFrame overriding
      */
-    protected IcyExternalFrame createExternalFrame(String title)
-    {
+    protected IcyExternalFrame createExternalFrame(String title) {
         return new IcyExternalFrame(title);
     }
 
     /**
-     * @return Permit IcyInternalFrame overriding
-     * @param title string
-     * @param resizable boolean
+     * @param title       string
+     * @param resizable   boolean
      * @param iconifiable boolean
      * @param maximizable boolean
-     * @param closable boolean
+     * @param closable    boolean
+     * @return Permit IcyInternalFrame overriding
      */
     protected IcyInternalFrame createInternalFrame(String title, boolean resizable, boolean closable,
-            boolean maximizable, boolean iconifiable)
-    {
+                                                   boolean maximizable, boolean iconifiable) {
         return new IcyInternalFrame(title, resizable, closable, maximizable, iconifiable);
     }
 
     /**
      * @return Return true if the frame can be internalized
      */
-    protected boolean canBeInternalized()
-    {
+    protected boolean canBeInternalized() {
         final MainFrame frame = Icy.getMainInterface().getMainFrame();
 
         // internalization possible only in single window mode
@@ -351,96 +301,82 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * Refresh system menu
      */
-    public void updateSystemMenu()
-    {
+    public void updateSystemMenu() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.updateSystemMenu();
-                else
-                    externalFrame.updateSystemMenu();
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.updateSystemMenu();
+            else
+                externalFrame.updateSystemMenu();
         }, syncProcess);
     }
 
     /**
      * Close frame (send closing event)
      */
-    public void close()
-    {
+    public void close() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.close(true);
-                externalFrame.close();
-            }
+        ThreadUtil.invoke(() -> {
+            internalFrame.close(true);
+            externalFrame.close();
         }, syncProcess);
     }
 
     /**
      * Dispose frame (send closed event)
      */
-    public void dispose()
-    {
+    public void dispose() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.dispose();
-                else
-                    externalFrame.dispose();
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.dispose();
+            else
+                externalFrame.dispose();
         }, syncProcess);
     }
 
-    /** go from detached to attached and opposite */
-    public void switchState()
-    {
+    /**
+     * go from detached to attached and opposite
+     */
+    public void switchState() {
         if (isInternalized())
             detach();
         else
             attach();
     }
 
-    /** set the frame to be an inner frame on the desktop pane */
-    public void internalize()
-    {
+    /**
+     * set the frame to be an inner frame on the desktop pane
+     */
+    public void internalize() {
         if (isExternalized())
             attach();
     }
 
-    /** the frame becomes detached in an independent frame */
-    public void externalize()
-    {
+    /**
+     * the frame becomes detached in an independent frame
+     */
+    public void externalize() {
         if (isInternalized())
             detach();
     }
 
-    /** Set the frame to be an inner frame on the desktop pane */
-    public void attach()
-    {
+    /**
+     * Set the frame to be an inner frame on the desktop pane
+     */
+    public void attach() {
         // don't try to go further
         if (headless)
             return;
@@ -449,55 +385,48 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // save current visible state
-                final boolean visible = externalFrame.isVisible();
+        ThreadUtil.invoke(() -> {
+            // save current visible state
+            final boolean visible = externalFrame.isVisible();
 
-                // hide external frame
-                if (visible)
-                    externalFrame.setVisible(false);
+            // hide external frame
+            if (visible)
+                externalFrame.setVisible(false);
 
-                final JMenuBar menuBar = externalFrame.getJMenuBar();
-                final Container content = externalFrame.getContentPane();
+            final JMenuBar menuBar = externalFrame.getJMenuBar();
+            final Container content = externalFrame.getContentPane();
 
-                // remove components from external frame
-                externalFrame.setJMenuBar(null);
-                externalFrame.setContentPane(new JPanel());
-                externalFrame.validate();
+            // remove components from external frame
+            externalFrame.setJMenuBar(null);
+            externalFrame.setContentPane(new JPanel());
+            externalFrame.validate();
 
-                internalFrame.setJMenuBar(menuBar);
-                internalFrame.setContentPane(content);
-                internalFrame.validate();
+            internalFrame.setJMenuBar(menuBar);
+            internalFrame.setContentPane(content);
+            internalFrame.validate();
 
-                // show internal frame
-                if (visible)
-                {
-                    internalFrame.setVisible(true);
-                    try
-                    {
-                        internalFrame.setSelected(true);
-                    }
-                    catch (PropertyVetoException e)
-                    {
-                        // ignore
-                    }
+            // show internal frame
+            if (visible) {
+                internalFrame.setVisible(true);
+                try {
+                    internalFrame.setSelected(true);
                 }
-
-                state = IcyFrameState.INTERNALIZED;
-
-                // notify state change
-                stateChanged();
+                catch (PropertyVetoException e) {
+                    // ignore
+                }
             }
+
+            state = IcyFrameState.INTERNALIZED;
+
+            // notify state change
+            stateChanged();
         }, syncProcess);
     }
 
-    /** Set the frame to be detached in an independent frame */
-    public void detach()
-    {
+    /**
+     * Set the frame to be detached in an independent frame
+     */
+    public void detach() {
         // don't try to go further
         if (headless)
             return;
@@ -506,55 +435,48 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // save current visible state
-                final boolean visible = internalFrame.isVisible();
+        ThreadUtil.invoke(() -> {
+            // save current visible state
+            final boolean visible = internalFrame.isVisible();
 
-                // hide internal frame
-                if (visible)
-                    internalFrame.setVisible(false);
+            // hide internal frame
+            if (visible)
+                internalFrame.setVisible(false);
 
-                final JMenuBar menuBar = internalFrame.getJMenuBar();
-                final Container content = internalFrame.getContentPane();
+            final JMenuBar menuBar = internalFrame.getJMenuBar();
+            final Container content = internalFrame.getContentPane();
 
-                // remove components from internal frame
-                internalFrame.setJMenuBar(null);
-                internalFrame.setContentPane(new JPanel());
-                internalFrame.validate();
+            // remove components from internal frame
+            internalFrame.setJMenuBar(null);
+            internalFrame.setContentPane(new JPanel());
+            internalFrame.validate();
 
-                externalFrame.setJMenuBar(menuBar);
-                externalFrame.setContentPane(content);
-                externalFrame.validate();
+            externalFrame.setJMenuBar(menuBar);
+            externalFrame.setContentPane(content);
+            externalFrame.validate();
 
-                // show external frame
-                if (visible)
-                {
-                    externalFrame.setVisible(true);
-                    externalFrame.requestFocus();
-                }
-
-                // TODO : we have to force a refresh with resizing or we get a refresh bug on
-                // scrollbar (OSX only ?)
-                // externalFrame.setSize(externalFrame.getWidth(), externalFrame.getHeight() - 1);
-                // externalFrame.setSize(externalFrame.getWidth(), externalFrame.getHeight() + 1);
-
-                state = IcyFrameState.EXTERNALIZED;
-
-                // notify state change
-                stateChanged();
+            // show external frame
+            if (visible) {
+                externalFrame.setVisible(true);
+                externalFrame.requestFocus();
             }
+
+            // TODO : we have to force a refresh with resizing or we get a refresh bug on
+            // scrollbar (OSX only ?)
+            // externalFrame.setSize(externalFrame.getWidth(), externalFrame.getHeight() - 1);
+            // externalFrame.setSize(externalFrame.getWidth(), externalFrame.getHeight() + 1);
+
+            state = IcyFrameState.EXTERNALIZED;
+
+            // notify state change
+            stateChanged();
         }, syncProcess);
     }
 
     /**
      * Called on state (internalized / externalized) change
      */
-    public void stateChanged()
-    {
+    public void stateChanged() {
         // don't try to go further
         if (headless)
             return;
@@ -572,126 +494,89 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
             fireFrameExternalized(new IcyFrameEvent(IcyFrame.this, null, null));
     }
 
-    /** Center frame on the desktop */
-    public void center()
-    {
+    /**
+     * Center frame on the desktop
+     */
+    public void center() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    ComponentUtil.center(internalFrame);
-                else
-                    ComponentUtil.center(externalFrame);
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                ComponentUtil.center(internalFrame);
+            else
+                ComponentUtil.center(externalFrame);
 
-            }
         }, syncProcess);
     }
 
     /**
      * @param c Add to the container c
      */
-    public void addTo(final Container c)
-    {
+    public void addTo(final Container c) {
         // don't try to go further
         if (headless)
             return;
 
-        if (isInternalized())
-        {
+        if (isInternalized()) {
             // AWT safe
-            ThreadUtil.invoke(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    c.add(internalFrame);
-                }
-            }, syncProcess);
+            ThreadUtil.invoke(() -> c.add(internalFrame), syncProcess);
         }
     }
 
     /**
-     * @param c Add to the container c
+     * @param c     Add to the container c
      * @param index int
      */
-    public void addTo(final Container c, final int index)
-    {
+    public void addTo(final Container c, final int index) {
         // don't try to go further
         if (headless)
             return;
 
-        if (isInternalized())
-        {
+        if (isInternalized()) {
             // AWT safe
-            ThreadUtil.invoke(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    c.add(internalFrame, index);
-                }
-            }, syncProcess);
+            ThreadUtil.invoke(() -> c.add(internalFrame, index), syncProcess);
         }
     }
 
     /**
-     * @deprecated Use {@link #addToDesktopPane()} instead.
-     * @param c container
+     * @param c           container
      * @param constraints object
+     * @deprecated Use {@link #addToDesktopPane()} instead.
      */
     @Deprecated
-    public void addTo(final Container c, final Object constraints)
-    {
+    public void addTo(final Container c, final Object constraints) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                c.add(internalFrame, constraints);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> c.add(internalFrame, constraints), syncProcess);
     }
 
     /**
      * @param constraints Add the frame to the Icy desktop pane with specified constraint.
      */
-    public void addToDesktopPane(final Object constraints)
-    {
+    public void addToDesktopPane(final Object constraints) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                final JDesktopPane desktop = Icy.getMainInterface().getDesktopPane();
+        ThreadUtil.invoke(() -> {
+            final JDesktopPane desktop = Icy.getMainInterface().getDesktopPane();
 
-                if (desktop != null)
-                    desktop.add(internalFrame, constraints);
-            }
+            if (desktop != null)
+                desktop.add(internalFrame, constraints);
         }, syncProcess);
     }
 
     /**
      * Add the frame to the Icy desktop pane
      */
-    public void addToDesktopPane()
-    {
+    public void addToDesktopPane() {
         // don't try to go further
         if (headless)
             return;
@@ -703,156 +588,119 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      * @deprecated Use {@link #addToDesktopPane()} instead.
      */
     @Deprecated
-    public void addToMainDesktopPane()
-    {
+    public void addToMainDesktopPane() {
         addToDesktopPane();
     }
 
     /**
      * Implement add method
+     *
      * @param comp component
      */
-    public void add(final Component comp)
-    {
+    public void add(final Component comp) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.add(comp);
-                else
-                    externalFrame.add(comp);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.add(comp);
+            else
+                externalFrame.add(comp);
         }, syncProcess);
     }
 
     /**
      * Implement add method
+     *
      * @param constraints object
-     * @param comp component
+     * @param comp        component
      */
-    public void add(final Component comp, final Object constraints)
-    {
+    public void add(final Component comp, final Object constraints) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.add(comp, constraints);
-                else
-                    externalFrame.add(comp, constraints);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.add(comp, constraints);
+            else
+                externalFrame.add(comp, constraints);
         }, syncProcess);
     }
 
     /**
      * Implement add method
+     *
      * @param comp component
      * @param name string
      */
-    public void add(final String name, final Component comp)
-    {
+    public void add(final String name, final Component comp) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.add(name, comp);
-                else
-                    externalFrame.add(name, comp);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.add(name, comp);
+            else
+                externalFrame.add(name, comp);
         }, syncProcess);
     }
 
     /**
      * @param c Remove from the container
      */
-    public void removeFrom(final Container c)
-    {
+    public void removeFrom(final Container c) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                c.remove(internalFrame);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> c.remove(internalFrame), syncProcess);
     }
 
     /**
      * Implement removeAll method
      */
-    public void removeAll()
-    {
+    public void removeAll() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.removeAll();
-                else
-                    externalFrame.removeAll();
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.removeAll();
+            else
+                externalFrame.removeAll();
         }, syncProcess);
     }
 
     /**
      * @param comp Implement remove method
      */
-    public void remove(final Component comp)
-    {
+    public void remove(final Component comp) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.remove(comp);
-                else
-                    externalFrame.remove(comp);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.remove(comp);
+            else
+                externalFrame.remove(comp);
         }, syncProcess);
     }
 
     /**
      * Remove the frame from the main pane of ICY
      */
-    public void removeFromMainDesktopPane()
-    {
+    public void removeFromMainDesktopPane() {
         // don't try to go further
         if (headless)
             return;
@@ -863,74 +711,55 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * Implement toFront method
      */
-    public void toFront()
-    {
+    public void toFront() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.toFront();
-                else
-                    externalFrame.toFront();
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.toFront();
+            else
+                externalFrame.toFront();
         }, syncProcess);
     }
 
     /**
      * Implement toBack method
      */
-    public void toBack()
-    {
+    public void toBack() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.toBack();
-                else
-                    externalFrame.toBack();
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.toBack();
+            else
+                externalFrame.toBack();
         }, syncProcess);
     }
 
     /**
      * Implement pack method
      */
-    public void pack()
-    {
+    public void pack() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.pack();
-                else
-                    externalFrame.pack();
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.pack();
+            else
+                externalFrame.pack();
         }, syncProcess);
     }
 
-    public Container getFrame()
-    {
+    public Container getFrame() {
         // don't try to go further
         if (headless)
             return null;
@@ -941,37 +770,31 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
         return externalFrame;
     }
 
-    public IcyInternalFrame getIcyInternalFrame()
-    {
+    public IcyInternalFrame getIcyInternalFrame() {
         return internalFrame;
     }
 
-    public IcyExternalFrame getIcyExternalFrame()
-    {
+    public IcyExternalFrame getIcyExternalFrame() {
         return externalFrame;
     }
 
-    public JInternalFrame getInternalFrame()
-    {
+    public JInternalFrame getInternalFrame() {
         return internalFrame;
     }
 
-    public JFrame getExternalFrame()
-    {
+    public JFrame getExternalFrame() {
         return externalFrame;
     }
 
     /**
      * @param value Indicate if system menu show display item to switch frame state (internal / external)
      */
-    public void setSwitchStateItemVisible(boolean value)
-    {
+    public void setSwitchStateItemVisible(boolean value) {
         // don't try to go further
         if (headless)
             return;
 
-        if (switchStateItemVisible != value)
-        {
+        if (switchStateItemVisible != value) {
             switchStateItemVisible = value;
             switchStateAction.setEnabled(value);
             updateSystemMenu();
@@ -981,8 +804,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return the systemMenuCallback
      */
-    public MenuCallback getSystemMenuCallback()
-    {
+    public MenuCallback getSystemMenuCallback() {
         // don't try to go further
         if (headless)
             return null;
@@ -999,23 +821,19 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Set the system menu callback (this allow modification of system menu)
-     * 
-     * @param value
-     *        the systemMenuCallback to set
+     *
+     * @param value the systemMenuCallback to set
      */
-    public void setSystemMenuCallback(MenuCallback value)
-    {
+    public void setSystemMenuCallback(MenuCallback value) {
         // don't try to go further
         if (headless)
             return;
 
-        if (value != null)
-        {
+        if (value != null) {
             internalFrame.setSystemMenuCallback(value);
             externalFrame.setSystemMenuCallback(value);
         }
-        else
-        {
+        else {
             internalFrame.setSystemMenuCallback(defaultSystemMenuCallback);
             externalFrame.setSystemMenuCallback(defaultSystemMenuCallback);
         }
@@ -1024,8 +842,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Return the default system menu
      */
-    public JMenu getDefaultSystemMenu()
-    {
+    public JMenu getDefaultSystemMenu() {
         // don't try to go further
         if (headless)
             return null;
@@ -1037,8 +854,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
         else
             result = externalFrame.getDefaultSystemMenu();
 
-        if (switchStateItemVisible)
-        {
+        if (switchStateItemVisible) {
             result.insert(switchStateAction, 0);
             if (result.getMenuComponentCount() > 1)
                 result.insertSeparator(1);
@@ -1050,8 +866,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getParent
      */
-    public Container getParent()
-    {
+    public Container getParent() {
         // don't try to go further
         if (headless)
             return null;
@@ -1065,8 +880,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getContentPane method
      */
-    public Container getContentPane()
-    {
+    public Container getContentPane() {
         // don't try to go further
         if (headless)
             return null;
@@ -1080,8 +894,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getRootPane method
      */
-    public JRootPane getRootPane()
-    {
+    public JRootPane getRootPane() {
         // don't try to go further
         if (headless)
             return null;
@@ -1092,8 +905,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
         return externalFrame.getRootPane();
     }
 
-    public Border getBorder()
-    {
+    public Border getBorder() {
         // don't try to go further
         if (headless)
             return null;
@@ -1107,16 +919,14 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return the switchStateAction
      */
-    public SwitchStateAction getSwitchStateAction()
-    {
+    public SwitchStateAction getSwitchStateAction() {
         return switchStateAction;
     }
 
     /**
      * @return Implement getMinimumSize method
      */
-    public Dimension getMinimumSize()
-    {
+    public Dimension getMinimumSize() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1130,8 +940,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getMinimumSize method for internal frame only
      */
-    public Dimension getMinimumSizeInternal()
-    {
+    public Dimension getMinimumSizeInternal() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1142,8 +951,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getMinimumSize method for external frame only
      */
-    public Dimension getMinimumSizeExternal()
-    {
+    public Dimension getMinimumSizeExternal() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1154,8 +962,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getMaximumSize method
      */
-    public Dimension getMaximumSize()
-    {
+    public Dimension getMaximumSize() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1169,8 +976,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getMaximumSize method for internal frame only
      */
-    public Dimension getMaximumSizeInternal()
-    {
+    public Dimension getMaximumSizeInternal() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1181,8 +987,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getMaximumSize method for external frame only
      */
-    public Dimension getMaximumSizeExternal()
-    {
+    public Dimension getMaximumSizeExternal() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1193,8 +998,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getPreferredSize method
      */
-    public Dimension getPreferredSize()
-    {
+    public Dimension getPreferredSize() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1208,8 +1012,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getPreferredSize method for internal frame only
      */
-    public Dimension getPreferredSizeInternal()
-    {
+    public Dimension getPreferredSizeInternal() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1220,8 +1023,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getPreferredSize method for external frame only
      */
-    public Dimension getPreferredSizeExternal()
-    {
+    public Dimension getPreferredSizeExternal() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1232,8 +1034,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getSize method
      */
-    public Dimension getSize()
-    {
+    public Dimension getSize() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1247,8 +1048,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getSize method for internal frame only
      */
-    public Dimension getSizeInternal()
-    {
+    public Dimension getSizeInternal() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1259,8 +1059,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getSize method for external frame only
      */
-    public Dimension getSizeExternal()
-    {
+    public Dimension getSizeExternal() {
         // don't try to go further
         if (headless)
             return new Dimension();
@@ -1271,8 +1070,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getHeight method
      */
-    public int getHeight()
-    {
+    public int getHeight() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1286,8 +1084,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getHeight method for internal frame only
      */
-    public int getHeightInternal()
-    {
+    public int getHeightInternal() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1298,8 +1095,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getHeight method for external frame only
      */
-    public int getHeightExternal()
-    {
+    public int getHeightExternal() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1310,8 +1106,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getWidth method
      */
-    public int getWidth()
-    {
+    public int getWidth() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1325,8 +1120,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getWidth method for internal frame only
      */
-    public int getWidthInternal()
-    {
+    public int getWidthInternal() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1337,8 +1131,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getWidth method for external frame only
      */
-    public int getWidthExternal()
-    {
+    public int getWidthExternal() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1349,8 +1142,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getX method
      */
-    public int getX()
-    {
+    public int getX() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1364,8 +1156,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getX method for internal frame only
      */
-    public int getXInternal()
-    {
+    public int getXInternal() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1376,8 +1167,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getX method for external frame only
      */
-    public int getXExternal()
-    {
+    public int getXExternal() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1388,8 +1178,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getY method
      */
-    public int getY()
-    {
+    public int getY() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1403,8 +1192,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getY method for internal frame only
      */
-    public int getYInternal()
-    {
+    public int getYInternal() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1415,8 +1203,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getY method for external frame only
      */
-    public int getYExternal()
-    {
+    public int getYExternal() {
         // don't try to go further
         if (headless)
             return 0;
@@ -1427,8 +1214,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getLocation method
      */
-    public Point getLocation()
-    {
+    public Point getLocation() {
         // don't try to go further
         if (headless)
             return new Point();
@@ -1442,8 +1228,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getLocation method
      */
-    public Point getLocationInternal()
-    {
+    public Point getLocationInternal() {
         // don't try to go further
         if (headless)
             return new Point();
@@ -1454,8 +1239,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getLocation method for external frame only
      */
-    public Point getLocationExternal()
-    {
+    public Point getLocationExternal() {
         // don't try to go further
         if (headless)
             return new Point();
@@ -1466,8 +1250,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getBounds method
      */
-    public Rectangle getBounds()
-    {
+    public Rectangle getBounds() {
         // don't try to go further
         if (headless)
             return new Rectangle();
@@ -1481,8 +1264,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getBounds method for internal frame only
      */
-    public Rectangle getBoundsInternal()
-    {
+    public Rectangle getBoundsInternal() {
         // don't try to go further
         if (headless)
             return new Rectangle();
@@ -1493,8 +1275,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getBounds method for external frame only
      */
-    public Rectangle getBoundsExternal()
-    {
+    public Rectangle getBoundsExternal() {
         // don't try to go further
         if (headless)
             return new Rectangle();
@@ -1505,8 +1286,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getBounds method for external frame only
      */
-    public Rectangle getVisibleRect()
-    {
+    public Rectangle getVisibleRect() {
         // don't try to go further
         if (headless)
             return new Rectangle();
@@ -1524,8 +1304,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getJMenuBar method
      */
-    public JMenuBar getJMenuBar()
-    {
+    public JMenuBar getJMenuBar() {
         // don't try to go further
         if (headless)
             return null;
@@ -1537,11 +1316,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     /**
-     * @return Returns the content pane InputMap
      * @param condition int
+     * @return Returns the content pane InputMap
      */
-    public InputMap getInputMap(int condition)
-    {
+    public InputMap getInputMap(int condition) {
         // don't try to go further
         if (headless)
             return null;
@@ -1555,8 +1333,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Returns the content pane InputMap
      */
-    public ActionMap getActionMap()
-    {
+    public ActionMap getActionMap() {
         // don't try to go further
         if (headless)
             return null;
@@ -1570,8 +1347,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getToolkit method
      */
-    public Toolkit getToolkit()
-    {
+    public Toolkit getToolkit() {
         // don't try to go further
         if (headless)
             return null;
@@ -1585,8 +1361,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement setTitle method
      */
-    public String getTitle()
-    {
+    public String getTitle() {
         // don't try to go further
         if (headless)
             return "";
@@ -1600,8 +1375,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Return true if title bar is visible
      */
-    public boolean getTitleBarVisible()
-    {
+    public boolean getTitleBarVisible() {
         // don't try to go further
         if (headless)
             return false;
@@ -1615,8 +1389,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return the displaySwitchStateItem
      */
-    public boolean isSwitchStateItemVisible()
-    {
+    public boolean isSwitchStateItemVisible() {
         // don't try to go further
         if (headless)
             return false;
@@ -1627,8 +1400,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement getMousePosition method
      */
-    public Point getMousePosition()
-    {
+    public Point getMousePosition() {
         // don't try to go further
         if (headless)
             return new Point();
@@ -1642,8 +1414,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement isMinimized method
      */
-    public boolean isMinimized()
-    {
+    public boolean isMinimized() {
         // don't try to go further
         if (headless)
             return false;
@@ -1657,8 +1428,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement isMinimized method for internal frame only
      */
-    public boolean isMinimizedInternal()
-    {
+    public boolean isMinimizedInternal() {
         // don't try to go further
         if (headless)
             return false;
@@ -1669,8 +1439,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement isMinimized method for external frame only
      */
-    public boolean isMinimizedExternal()
-    {
+    public boolean isMinimizedExternal() {
         // don't try to go further
         if (headless)
             return false;
@@ -1681,8 +1450,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement isMaximized method
      */
-    public boolean isMaximized()
-    {
+    public boolean isMaximized() {
         // don't try to go further
         if (headless)
             return false;
@@ -1696,8 +1464,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement isMaximized method for internal frame only
      */
-    public boolean isMaximizedInternal()
-    {
+    public boolean isMaximizedInternal() {
         // don't try to go further
         if (headless)
             return false;
@@ -1708,8 +1475,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement isMaximized method for external frame only
      */
-    public boolean isMaximizedExternal()
-    {
+    public boolean isMaximizedExternal() {
         // don't try to go further
         if (headless)
             return false;
@@ -1720,8 +1486,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement isVisible method
      */
-    public boolean isVisible()
-    {
+    public boolean isVisible() {
         // don't try to go further
         if (headless)
             return false;
@@ -1735,8 +1500,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement isResizable method
      */
-    public boolean isResizable()
-    {
+    public boolean isResizable() {
         // don't try to go further
         if (headless)
             return false;
@@ -1750,8 +1514,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement isClosable method
      */
-    public boolean isClosable()
-    {
+    public boolean isClosable() {
         // don't try to go further
         if (headless)
             return false;
@@ -1766,24 +1529,21 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return return true if frame is in internalized state
      */
-    public boolean isInternalized()
-    {
+    public boolean isInternalized() {
         return (state == IcyFrameState.INTERNALIZED);
     }
 
     /**
      * @return return true if frame is in externalized state
      */
-    public boolean isExternalized()
-    {
+    public boolean isExternalized() {
         return (state == IcyFrameState.EXTERNALIZED);
     }
 
     /**
      * @return return true if frame is active
      */
-    public boolean isActive()
-    {
+    public boolean isActive() {
         // don't try to go further
         if (headless)
             return false;
@@ -1797,8 +1557,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement isAlwaysOnTop method (only for externalized frame)
      */
-    public boolean isAlwaysOnTop()
-    {
+    public boolean isAlwaysOnTop() {
         // don't try to go further
         if (headless)
             return false;
@@ -1809,8 +1568,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @return Implement hasFocus method
      */
-    public boolean hasFocus()
-    {
+    public boolean hasFocus() {
         // don't try to go further
         if (headless)
             return false;
@@ -1823,1111 +1581,817 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement setTitle method
+     *
      * @param title string
      */
-    public void setTitle(final String title)
-    {
+    public void setTitle(final String title) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setTitle(title);
-                externalFrame.setTitle(title);
-            }
+        ThreadUtil.invoke(() -> {
+            internalFrame.setTitle(title);
+            externalFrame.setTitle(title);
         }, syncProcess);
     }
 
     /**
      * Implement setToolTipText method (only for internalized frame)
+     *
      * @param text string
      */
-    public void setToolTipText(final String text)
-    {
+    public void setToolTipText(final String text) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // only internal frame support it
-                internalFrame.setToolTipText(text);
-                // externalFrame.setToolTipText(text);
-            }
+        ThreadUtil.invoke(() -> {
+            // only internal frame support it
+            internalFrame.setToolTipText(text);
+            // externalFrame.setToolTipText(text);
         }, syncProcess);
     }
 
     /**
      * Implement setBackground method
+     *
      * @param value color
      */
-    public void setBackground(final Color value)
-    {
+    public void setBackground(final Color value) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setBackground(value);
-                externalFrame.setBackground(value);
-            }
+        ThreadUtil.invoke(() -> {
+            internalFrame.setBackground(value);
+            externalFrame.setBackground(value);
         }, syncProcess);
     }
 
     /**
      * Implement setForeground method
+     *
      * @param value color
      */
-    public void setForeground(final Color value)
-    {
+    public void setForeground(final Color value) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setForeground(value);
-                externalFrame.setForeground(value);
-            }
+        ThreadUtil.invoke(() -> {
+            internalFrame.setForeground(value);
+            externalFrame.setForeground(value);
         }, syncProcess);
     }
 
     /**
      * Implement setResizable method
+     *
      * @param value boolean
      */
-    public void setResizable(final boolean value)
-    {
+    public void setResizable(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setResizable(value);
-                externalFrame.setResizable(value);
-            }
+        ThreadUtil.invoke(() -> {
+            internalFrame.setResizable(value);
+            externalFrame.setResizable(value);
         }, syncProcess);
 
     }
 
     /**
      * Implement setLocation method
+     *
      * @param p point
      */
-    public void setLocation(final Point p)
-    {
+    public void setLocation(final Point p) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setLocation(p);
-                else
-                    externalFrame.setLocation(p);
-            }
-        }, syncProcess);
-    }
-
-    /**
-     * Implement setLocation method
-     * @param x int
-     * @param y int
-     */
-    public void setLocation(final int x, final int y)
-    {
-        // don't try to go further
-        if (headless)
-            return;
-
-        // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setLocation(x, y);
-                else
-                    externalFrame.setLocation(x, y);
-            }
-        }, syncProcess);
-    }
-
-    /**
-     * Implement setLocation method for internal frame only
-     * @param p point
-     */
-    public void setLocationInternal(final Point p)
-    {
-        // don't try to go further
-        if (headless)
-            return;
-
-        // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
                 internalFrame.setLocation(p);
-            }
+            else
+                externalFrame.setLocation(p);
+        }, syncProcess);
+    }
+
+    /**
+     * Implement setLocation method
+     *
+     * @param x int
+     * @param y int
+     */
+    public void setLocation(final int x, final int y) {
+        // don't try to go further
+        if (headless)
+            return;
+
+        // AWT safe
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.setLocation(x, y);
+            else
+                externalFrame.setLocation(x, y);
         }, syncProcess);
     }
 
     /**
      * Implement setLocation method for internal frame only
-     * @param x int
-     * @param y int
-     */
-    public void setLocationInternal(final int x, final int y)
-    {
-        // don't try to go further
-        if (headless)
-            return;
-
-        // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setLocation(x, y);
-            }
-        }, syncProcess);
-    }
-
-    /**
-     * Implement setLocation method for external frame only
+     *
      * @param p point
      */
-    public void setLocationExternal(final Point p)
-    {
+    public void setLocationInternal(final Point p) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                externalFrame.setLocation(p);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> internalFrame.setLocation(p), syncProcess);
+    }
+
+    /**
+     * Implement setLocation method for internal frame only
+     *
+     * @param x int
+     * @param y int
+     */
+    public void setLocationInternal(final int x, final int y) {
+        // don't try to go further
+        if (headless)
+            return;
+
+        // AWT safe
+        ThreadUtil.invoke(() -> internalFrame.setLocation(x, y), syncProcess);
     }
 
     /**
      * Implement setLocation method for external frame only
+     *
+     * @param p point
+     */
+    public void setLocationExternal(final Point p) {
+        // don't try to go further
+        if (headless)
+            return;
+
+        // AWT safe
+        ThreadUtil.invoke(() -> externalFrame.setLocation(p), syncProcess);
+    }
+
+    /**
+     * Implement setLocation method for external frame only
+     *
      * @param x int
      * @param y int
      */
-    public void setLocationExternal(final int x, final int y)
-    {
+    public void setLocationExternal(final int x, final int y) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                externalFrame.setLocation(x, y);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> externalFrame.setLocation(x, y), syncProcess);
     }
 
     /**
      * Implement setSize method
+     *
      * @param d dimension
      */
-    public void setSize(final Dimension d)
-    {
+    public void setSize(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setSize(d);
-                else
-                    externalFrame.setSize(d);
-            }
-        }, syncProcess);
-    }
-
-    /**
-     * Implement setSize method
-     * @param width int
-     * @param height int
-     */
-    public void setSize(final int width, final int height)
-    {
-        // don't try to go further
-        if (headless)
-            return;
-
-        // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setSize(width, height);
-                else
-                    externalFrame.setSize(width, height);
-            }
-        }, syncProcess);
-    }
-
-    /**
-     * Implement setSize method for internal frame only
-     * @param d dimension
-     */
-    public void setSizeInternal(final Dimension d)
-    {
-        // don't try to go further
-        if (headless)
-            return;
-
-        // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
                 internalFrame.setSize(d);
-            }
+            else
+                externalFrame.setSize(d);
         }, syncProcess);
     }
 
     /**
-     * Implement setSize method for internal frame only
-     * @param width int
+     * Implement setSize method
+     *
+     * @param width  int
      * @param height int
      */
-    public void setSizeInternal(final int width, final int height)
-    {
+    public void setSize(final int width, final int height) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
                 internalFrame.setSize(width, height);
-            }
+            else
+                externalFrame.setSize(width, height);
         }, syncProcess);
+    }
+
+    /**
+     * Implement setSize method for internal frame only
+     *
+     * @param d dimension
+     */
+    public void setSizeInternal(final Dimension d) {
+        // don't try to go further
+        if (headless)
+            return;
+
+        // AWT safe
+        ThreadUtil.invoke(() -> internalFrame.setSize(d), syncProcess);
+    }
+
+    /**
+     * Implement setSize method for internal frame only
+     *
+     * @param width  int
+     * @param height int
+     */
+    public void setSizeInternal(final int width, final int height) {
+        // don't try to go further
+        if (headless)
+            return;
+
+        // AWT safe
+        ThreadUtil.invoke(() -> internalFrame.setSize(width, height), syncProcess);
     }
 
     /**
      * Implement setSize method for external frame only
+     *
      * @param d diemension
      */
-    public void setSizeExternal(final Dimension d)
-    {
+    public void setSizeExternal(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                externalFrame.setSize(d);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> externalFrame.setSize(d), syncProcess);
     }
 
     /**
      * Implement setSize method for external frame only
-     * @param width int
+     *
+     * @param width  int
      * @param height int
      */
-    public void setSizeExternal(final int width, final int height)
-    {
+    public void setSizeExternal(final int width, final int height) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                externalFrame.setSize(width, height);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> externalFrame.setSize(width, height), syncProcess);
     }
 
     /**
      * Implement setPreferredSize method
+     *
      * @param d dimension
      */
-    public void setPreferredSize(final Dimension d)
-    {
+    public void setPreferredSize(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setPreferredSize(d);
-                else
-                    externalFrame.setPreferredSize(d);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.setPreferredSize(d);
+            else
+                externalFrame.setPreferredSize(d);
         }, syncProcess);
     }
 
     /**
      * Implement setPreferredSize method for internal frame only
+     *
      * @param d dimension
      */
-    public void setPreferredSizeInternal(final Dimension d)
-    {
+    public void setPreferredSizeInternal(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setPreferredSize(d);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> internalFrame.setPreferredSize(d), syncProcess);
     }
 
     /**
      * Implement setPreferredSize method for external frame only
+     *
      * @param d dimension
      */
-    public void setPreferredSizeExternal(final Dimension d)
-    {
+    public void setPreferredSizeExternal(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                externalFrame.setPreferredSize(d);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> externalFrame.setPreferredSize(d), syncProcess);
     }
 
     /**
      * Implement setMinimumSize method
+     *
      * @param d dimension
      */
-    public void setMinimumSize(final Dimension d)
-    {
+    public void setMinimumSize(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setMinimumSize(d);
-                else
-                    externalFrame.setMinimumSize(d);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.setMinimumSize(d);
+            else
+                externalFrame.setMinimumSize(d);
         }, syncProcess);
     }
 
     /**
      * Implement setMaximumSize method
+     *
      * @param d dimension
      */
-    public void setMaximumSize(final Dimension d)
-    {
+    public void setMaximumSize(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setMaximumSize(d);
-                else
-                    externalFrame.setMaximumSize(d);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.setMaximumSize(d);
+            else
+                externalFrame.setMaximumSize(d);
         }, syncProcess);
     }
 
     /**
      * Implement setMinimumSize method for internal frame only
+     *
      * @param d diemension
      */
-    public void setMinimumSizeInternal(final Dimension d)
-    {
+    public void setMinimumSizeInternal(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setMinimumSize(d);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> internalFrame.setMinimumSize(d), syncProcess);
     }
 
     /**
      * Implement setMaximumSize method for internal frame only
+     *
      * @param d diemension
      */
-    public void setMaximumSizeInternal(final Dimension d)
-    {
+    public void setMaximumSizeInternal(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setMaximumSize(d);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> internalFrame.setMaximumSize(d), syncProcess);
     }
 
     /**
      * Implement setMinimumSize method for external frame only
+     *
      * @param d dimension
      */
-    public void setMinimumSizeExternal(final Dimension d)
-    {
+    public void setMinimumSizeExternal(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                externalFrame.setMinimumSize(d);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> externalFrame.setMinimumSize(d), syncProcess);
     }
 
     /**
      * Implement setMaximumSize method for external frame only
+     *
      * @param d dimension
      */
-    public void setMaximumSizeExternal(final Dimension d)
-    {
+    public void setMaximumSizeExternal(final Dimension d) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                externalFrame.setMaximumSize(d);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> externalFrame.setMaximumSize(d), syncProcess);
     }
 
     /**
      * Implement setBounds method
+     *
      * @param r rectangle
      */
-    public void setBounds(final Rectangle r)
-    {
+    public void setBounds(final Rectangle r) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setBounds(r);
-                else
-                    externalFrame.setBounds(r);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.setBounds(r);
+            else
+                externalFrame.setBounds(r);
         }, syncProcess);
 
     }
 
     /**
      * Implement setMaximisable method
+     *
      * @param value boolean
      */
-    public void setMaximisable(final boolean value)
-    {
+    public void setMaximisable(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // only for internal frame
-                internalFrame.setMaximizable(value);
-            }
+        ThreadUtil.invoke(() -> {
+            // only for internal frame
+            internalFrame.setMaximizable(value);
         }, syncProcess);
     }
 
     /**
      * Implement setMinimized method
+     *
      * @param value boolean
      */
-    public void setMinimized(final boolean value)
-    {
+    public void setMinimized(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // only relevant if state changed
-        if (isMinimized() ^ value)
-        {
+        if (isMinimized() ^ value) {
             // AWT safe
-            ThreadUtil.invoke(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    if (isInternalized())
-                        internalFrame.setMinimized(value);
-                    else
-                        externalFrame.setMinimized(value);
-                }
+            ThreadUtil.invoke(() -> {
+                if (isInternalized())
+                    internalFrame.setMinimized(value);
+                else
+                    externalFrame.setMinimized(value);
             }, syncProcess);
         }
     }
 
     /**
      * Implement setMinimized method for internal frame only
+     *
      * @param value boolean
      */
-    public void setMinimizedInternal(final boolean value)
-    {
+    public void setMinimizedInternal(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // only relevant if state changed
-        if (internalFrame.isMinimized() ^ value)
-        {
+        if (internalFrame.isMinimized() ^ value) {
             // AWT safe
-            ThreadUtil.invoke(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    internalFrame.setMinimized(value);
-                }
-            }, syncProcess);
+            ThreadUtil.invoke(() -> internalFrame.setMinimized(value), syncProcess);
         }
     }
 
     /**
      * Implement setMinimized method for external frame only
+     *
      * @param value boolean
      */
-    public void setMinimizedExternal(final boolean value)
-    {
+    public void setMinimizedExternal(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // only relevant if state changed
-        if (externalFrame.isMinimized() ^ value)
-        {
+        if (externalFrame.isMinimized() ^ value) {
             // AWT safe
-            ThreadUtil.invoke(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    externalFrame.setMinimized(value);
-                }
-            }, syncProcess);
+            ThreadUtil.invoke(() -> externalFrame.setMinimized(value), syncProcess);
         }
     }
 
     /**
      * Implement setMaximized method
+     *
      * @param value boolean
      */
-    public void setMaximized(final boolean value)
-    {
+    public void setMaximized(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // only relevant if state changed
-        if (isMaximized() ^ value)
-        {
+        if (isMaximized() ^ value) {
             // AWT safe
-            ThreadUtil.invoke(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    if (isInternalized())
-                        internalFrame.setMaximized(value);
-                    else
-                        externalFrame.setMaximized(value);
-                }
+            ThreadUtil.invoke(() -> {
+                if (isInternalized())
+                    internalFrame.setMaximized(value);
+                else
+                    externalFrame.setMaximized(value);
             }, syncProcess);
         }
     }
 
     /**
      * Implement setMaximized method for internal frame only
+     *
      * @param value boolean
      */
-    public void setMaximizedInternal(final boolean value)
-    {
+    public void setMaximizedInternal(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // only relevant if state changed
-        if (internalFrame.isMaximized() ^ value)
-        {
+        if (internalFrame.isMaximized() ^ value) {
             // AWT safe
-            ThreadUtil.invoke(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    internalFrame.setMaximized(value);
-                }
-            }, syncProcess);
+            ThreadUtil.invoke(() -> internalFrame.setMaximized(value), syncProcess);
         }
     }
 
     /**
      * Implement setMaximized method for external frame only
+     *
      * @param value boolean
      */
-    public void setMaximizedExternal(final boolean value)
-    {
+    public void setMaximizedExternal(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // only relevant if state changed
-        if (externalFrame.isMaximized() ^ value)
-        {
+        if (externalFrame.isMaximized() ^ value) {
             // AWT safe
-            ThreadUtil.invoke(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    externalFrame.setMaximized(value);
-                }
-            }, syncProcess);
+            ThreadUtil.invoke(() -> externalFrame.setMaximized(value), syncProcess);
         }
     }
 
     /**
      * Implement setClosable method
+     *
      * @param value boolean
      */
-    public void setClosable(final boolean value)
-    {
+    public void setClosable(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setClosable(value);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> internalFrame.setClosable(value), syncProcess);
     }
 
     /**
      * Implement setDefaultCloseOperation method
+     *
      * @param operation int
-     * 
      * @see JFrame#setDefaultCloseOperation(int)
      */
-    public void setDefaultCloseOperation(final int operation)
-    {
+    public void setDefaultCloseOperation(final int operation) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setDefaultCloseOperation(operation);
-                externalFrame.setDefaultCloseOperation(operation);
-            }
+        ThreadUtil.invoke(() -> {
+            internalFrame.setDefaultCloseOperation(operation);
+            externalFrame.setDefaultCloseOperation(operation);
         }, syncProcess);
     }
 
     /**
      * Implement setFocusable method
+     *
      * @param value boolean
      */
-    public void setFocusable(final boolean value)
-    {
+    public void setFocusable(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setFocusable(value);
-                externalFrame.setFocusable(value);
-            }
+        ThreadUtil.invoke(() -> {
+            internalFrame.setFocusable(value);
+            externalFrame.setFocusable(value);
         }, syncProcess);
     }
 
     /**
      * Implement setVisible method
+     *
      * @param value boolean
      */
-    public void setVisible(final boolean value)
-    {
+    public void setVisible(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setVisible(value);
-                else
-                    externalFrame.setVisible(value);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.setVisible(value);
+            else
+                externalFrame.setVisible(value);
         }, syncProcess);
     }
 
     /**
      * Implement setAlwaysOnTop method (only for externalized frame)
+     *
      * @param alwaysOnTop boolean
      */
-    public void setAlwaysOnTop(final boolean alwaysOnTop)
-    {
+    public void setAlwaysOnTop(final boolean alwaysOnTop) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                externalFrame.setAlwaysOnTop(alwaysOnTop);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> externalFrame.setAlwaysOnTop(alwaysOnTop), syncProcess);
     }
 
     /**
      * Implement setJMenuBar method
+     *
      * @param m JmenuBar
      */
-    public void setJMenuBar(final JMenuBar m)
-    {
+    public void setJMenuBar(final JMenuBar m) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setJMenuBar(m);
-                else
-                    externalFrame.setJMenuBar(m);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.setJMenuBar(m);
+            else
+                externalFrame.setJMenuBar(m);
         }, syncProcess);
     }
 
     /**
      * Hide or show the title bar (frame should not be displayable when you set this property)
+     *
      * @param value boolean
      */
-    public void setTitleBarVisible(final boolean value)
-    {
+    public void setTitleBarVisible(final boolean value) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setTitleBarVisible(value);
-                externalFrame.setTitleBarVisible(value);
-            }
+        ThreadUtil.invoke(() -> {
+            internalFrame.setTitleBarVisible(value);
+            externalFrame.setTitleBarVisible(value);
         }, syncProcess);
     }
 
     /**
      * Implement setLayout method
+     *
      * @param layout Layout manager
      */
-    public void setLayout(final LayoutManager layout)
-    {
+    public void setLayout(final LayoutManager layout) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setLayout(layout);
-                else
-                    externalFrame.setLayout(layout);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.setLayout(layout);
+            else
+                externalFrame.setLayout(layout);
         }, syncProcess);
     }
 
     /**
      * Implement setBorder method (only for internal frame)
+     *
      * @param border border
      */
-    public void setBorder(final Border border)
-    {
+    public void setBorder(final Border border) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.setBorder(border);
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> internalFrame.setBorder(border), syncProcess);
     }
 
     /**
      * Implement setContentPane method
+     *
      * @param value container
      */
-    public void setContentPane(final Container value)
-    {
+    public void setContentPane(final Container value) {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.setContentPane(value);
-                else
-                    externalFrame.setContentPane(value);
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.setContentPane(value);
+            else
+                externalFrame.setContentPane(value);
         }, syncProcess);
     }
 
     /**
      * @return the syncProcess
      */
-    public boolean isSyncProcess()
-    {
+    public boolean isSyncProcess() {
         return syncProcess;
     }
 
     /**
      * By default IcyFrame does asych processing, you can force sync processing<br>
      * with this property
-     * 
-     * @param syncProcess
-     *        the syncProcess to set
+     *
+     * @param syncProcess the syncProcess to set
      */
-    public void setSyncProcess(boolean syncProcess)
-    {
+    public void setSyncProcess(boolean syncProcess) {
         this.syncProcess = syncProcess;
     }
 
     /**
      * Frame becomes the active/focused frame
      */
-    public void requestFocus()
-    {
+    public void requestFocus() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                {
-                    try
-                    {
-                        internalFrame.setSelected(true);
-                    }
-                    catch (PropertyVetoException e)
-                    {
-                        // ignore
-                    }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized()) {
+                try {
+                    internalFrame.setSelected(true);
                 }
-                else
-                    externalFrame.requestFocus();
+                catch (PropertyVetoException e) {
+                    // ignore
+                }
             }
+            else
+                externalFrame.requestFocus();
         }, syncProcess);
     }
 
     /**
      * Implement validate
      */
-    public void validate()
-    {
+    public void validate() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.validate();
-                else
-                    externalFrame.validate();
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.validate();
+            else
+                externalFrame.validate();
         }, syncProcess);
     }
 
     /**
      * Implement revalidate
      */
-    public void revalidate()
-    {
+    public void revalidate() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.revalidate();
-                else
-                {
-                    externalFrame.invalidate();
-                    externalFrame.repaint();
-                }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.revalidate();
+            else {
+                externalFrame.invalidate();
+                externalFrame.repaint();
             }
         }, syncProcess);
     }
@@ -2935,142 +2399,128 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * Implement repaint
      */
-    public void repaint()
-    {
+    public void repaint() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (isInternalized())
-                    internalFrame.repaint();
-                else
-                    externalFrame.repaint();
-            }
+        ThreadUtil.invoke(() -> {
+            if (isInternalized())
+                internalFrame.repaint();
+            else
+                externalFrame.repaint();
         }, syncProcess);
     }
 
     /**
      * Implement updateUI
      */
-    public void updateUI()
-    {
+    public void updateUI() {
         // don't try to go further
         if (headless)
             return;
 
         // AWT safe
-        ThreadUtil.invoke(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                internalFrame.updateUI();
-            }
-        }, syncProcess);
+        ThreadUtil.invoke(() -> internalFrame.updateUI(), syncProcess);
     }
 
     /**
      * Fire frame activated event
+     *
      * @param e Icy frame event
      */
-    private void fireFrameActivated(IcyFrameEvent e)
-    {
+    private void fireFrameActivated(IcyFrameEvent e) {
         for (IcyFrameListener l : frameEventListeners.getListeners(IcyFrameListener.class))
             l.icyFrameActivated(e);
     }
 
     /**
      * Fire frame deactivated event
+     *
      * @param e Icy frame event
      */
-    private void fireFrameDeactivated(IcyFrameEvent e)
-    {
+    private void fireFrameDeactivated(IcyFrameEvent e) {
         for (IcyFrameListener l : frameEventListeners.getListeners(IcyFrameListener.class))
             l.icyFrameDeactivated(e);
     }
 
     /**
      * Fire frame closing event
+     *
      * @param e Icy frame event
      */
-    private void fireFrameClosing(IcyFrameEvent e)
-    {
+    private void fireFrameClosing(IcyFrameEvent e) {
         for (IcyFrameListener l : frameEventListeners.getListeners(IcyFrameListener.class))
             l.icyFrameClosing(e);
     }
 
     /**
      * Fire frame closed event
+     *
      * @param e Icy frame event
      */
-    private void fireFrameClosed(IcyFrameEvent e)
-    {
+    private void fireFrameClosed(IcyFrameEvent e) {
         for (IcyFrameListener l : frameEventListeners.getListeners(IcyFrameListener.class))
             l.icyFrameClosed(e);
     }
 
     /**
      * Fire frame iconified event
+     *
      * @param e Icy frame event
      */
-    private void fireFrameIconified(IcyFrameEvent e)
-    {
+    private void fireFrameIconified(IcyFrameEvent e) {
         for (IcyFrameListener l : frameEventListeners.getListeners(IcyFrameListener.class))
             l.icyFrameIconified(e);
     }
 
     /**
      * Fire frame deiconified event
+     *
      * @param e Icy frame event
      */
-    private void fireFrameDeiconified(IcyFrameEvent e)
-    {
+    private void fireFrameDeiconified(IcyFrameEvent e) {
         for (IcyFrameListener l : frameEventListeners.getListeners(IcyFrameListener.class))
             l.icyFrameDeiconified(e);
     }
 
     /**
      * Fire frame opened event
+     *
      * @param e Icy frame event
      */
-    private void fireFrameOpened(IcyFrameEvent e)
-    {
+    private void fireFrameOpened(IcyFrameEvent e) {
         for (IcyFrameListener l : frameEventListeners.getListeners(IcyFrameListener.class))
             l.icyFrameOpened(e);
     }
 
     /**
      * Fire frame internalized event
+     *
      * @param e Icy frame event
      */
-    void fireFrameInternalized(IcyFrameEvent e)
-    {
+    void fireFrameInternalized(IcyFrameEvent e) {
         for (IcyFrameListener l : frameEventListeners.getListeners(IcyFrameListener.class))
             l.icyFrameInternalized(e);
     }
 
     /**
      * Fire frame externalized event
+     *
      * @param e Icy frame event
      */
-    void fireFrameExternalized(IcyFrameEvent e)
-    {
+    void fireFrameExternalized(IcyFrameEvent e) {
         for (IcyFrameListener l : frameEventListeners.getListeners(IcyFrameListener.class))
             l.icyFrameExternalized(e);
     }
 
     /**
      * Implement addFrameListener method
+     *
      * @param l Icy frame listener
      */
-    public void addFrameListener(IcyFrameListener l)
-    {
+    public void addFrameListener(IcyFrameListener l) {
         // don't try to go further
         if (headless)
             return;
@@ -3080,10 +2530,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement removeFrameListener method
+     *
      * @param l Icy frame listener
      */
-    public void removeFrameListener(IcyFrameListener l)
-    {
+    public void removeFrameListener(IcyFrameListener l) {
         // don't try to go further
         if (headless)
             return;
@@ -3093,10 +2543,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement addComponentListener method
+     *
      * @param l Icy frame listener
      */
-    public void addComponentListener(ComponentListener l)
-    {
+    public void addComponentListener(ComponentListener l) {
         // don't try to go further
         if (headless)
             return;
@@ -3107,10 +2557,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement removeComponentListener method
+     *
      * @param l Icy frame listener
      */
-    public void removeComponentListener(ComponentListener l)
-    {
+    public void removeComponentListener(ComponentListener l) {
         // don't try to go further
         if (headless)
             return;
@@ -3121,10 +2571,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement addKeyListener method
+     *
      * @param l Icy frame listener
      */
-    public void addKeyListener(KeyListener l)
-    {
+    public void addKeyListener(KeyListener l) {
         // don't try to go further
         if (headless)
             return;
@@ -3135,10 +2585,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * Implement addKeyListener method
+     *
      * @param l Icy frame listener
      */
-    public void removeKeyListener(KeyListener l)
-    {
+    public void removeKeyListener(KeyListener l) {
         // don't try to go further
         if (headless)
             return;
@@ -3149,10 +2599,10 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
 
     /**
      * internal close stuff
+     *
      * @param e event
      */
-    public void frameClosed(AWTEvent e)
-    {
+    public void frameClosed(AWTEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3165,14 +2615,12 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
         externalFrame.removeWindowListener(IcyFrame.this);
         internalFrame.removeInternalFrameListener(IcyFrame.this);
 
-        if (e instanceof InternalFrameEvent)
-        {
+        if (e instanceof InternalFrameEvent) {
             fireFrameClosed(new IcyFrameEvent(this, (InternalFrameEvent) e, null));
             // don't forget to close external frame
             externalFrame.dispose();
         }
-        else if (e instanceof WindowEvent)
-        {
+        else if (e instanceof WindowEvent) {
             fireFrameClosed(new IcyFrameEvent(this, null, (WindowEvent) e));
             // don't forget to close internal frame
             internalFrame.dispose();
@@ -3185,15 +2633,13 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * easy onClosed job
      */
-    public void onClosed()
-    {
+    public void onClosed() {
         // don't try to go further
         if (headless)
             return;
 
         // unregister from list
-        synchronized (frames)
-        {
+        synchronized (frames) {
             frames.remove(this);
         }
 
@@ -3204,8 +2650,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void internalFrameActivated(InternalFrameEvent e)
-    {
+    public void internalFrameActivated(InternalFrameEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3214,8 +2659,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void internalFrameClosed(InternalFrameEvent e)
-    {
+    public void internalFrameClosed(InternalFrameEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3224,8 +2668,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void internalFrameClosing(InternalFrameEvent e)
-    {
+    public void internalFrameClosing(InternalFrameEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3234,8 +2677,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void internalFrameDeactivated(InternalFrameEvent e)
-    {
+    public void internalFrameDeactivated(InternalFrameEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3244,8 +2686,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void internalFrameDeiconified(InternalFrameEvent e)
-    {
+    public void internalFrameDeiconified(InternalFrameEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3254,8 +2695,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void internalFrameIconified(InternalFrameEvent e)
-    {
+    public void internalFrameIconified(InternalFrameEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3264,8 +2704,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void internalFrameOpened(InternalFrameEvent e)
-    {
+    public void internalFrameOpened(InternalFrameEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3274,8 +2713,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void windowActivated(WindowEvent e)
-    {
+    public void windowActivated(WindowEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3284,8 +2722,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void windowClosed(WindowEvent e)
-    {
+    public void windowClosed(WindowEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3294,8 +2731,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void windowClosing(WindowEvent e)
-    {
+    public void windowClosing(WindowEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3304,8 +2740,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void windowDeactivated(WindowEvent e)
-    {
+    public void windowDeactivated(WindowEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3314,8 +2749,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void windowDeiconified(WindowEvent e)
-    {
+    public void windowDeiconified(WindowEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3324,8 +2758,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void windowIconified(WindowEvent e)
-    {
+    public void windowIconified(WindowEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3334,8 +2767,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void windowOpened(WindowEvent e)
-    {
+    public void windowOpened(WindowEvent e) {
         // don't try to go further
         if (headless)
             return;
@@ -3344,8 +2776,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height)
-    {
+    public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
         // don't try to go further
         if (headless)
             return false;
@@ -3357,20 +2788,17 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt)
-    {
+    public void propertyChange(PropertyChangeEvent evt) {
         // don't try to go further
         if (headless)
             return;
 
-        if (StringUtil.equals(evt.getPropertyName(), MainFrame.PROPERTY_DETACHEDMODE))
-        {
+        if (StringUtil.equals(evt.getPropertyName(), MainFrame.PROPERTY_DETACHEDMODE)) {
             // window mode has been changed
             final boolean detachedMode = ((Boolean) evt.getNewValue()).booleanValue();
 
             // detached mode set --> externalize
-            if (detachedMode)
-            {
+            if (detachedMode) {
                 // save previous state
                 previousState = state;
                 externalize();
@@ -3378,8 +2806,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
                 if (switchStateAction != null)
                     switchStateAction.setEnabled(false);
             }
-            else
-            {
+            else {
                 // restore previous state
                 if (previousState == IcyFrameState.INTERNALIZED)
                     internalize();

@@ -1,25 +1,25 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify it under the terms of the GNU General
  * Public License as
  * published by the Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
  * implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with Icy. If not, see
- * <http://www.gnu.org/licenses/>.
+ * <https://www.gnu.org/licenses/>.
  */
 package icy.gui.lut;
 
 import icy.gui.component.CheckTabbedPane;
-import icy.gui.component.button.IcyButton;
+import icy.gui.component.button.IcyButtonNew;
 import icy.gui.dialog.MessageDialog;
 import icy.gui.lut.abstract_.IcyLutViewer;
 import icy.gui.util.GuiUtil;
@@ -34,18 +34,15 @@ import icy.image.lut.LUT.LUTChannel;
 import icy.math.Scaler;
 import icy.preferences.ApplicationPreferences;
 import icy.preferences.XMLPreferences;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.sequence.SequenceListener;
 import icy.system.thread.ThreadUtil;
 import icy.type.DataType;
 import icy.util.StringUtil;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,13 +52,12 @@ import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, SequenceListener
-{
-    private static final long serialVersionUID = 8385018166371243663L;
-
+/**
+ * @author Thomas MUSSET
+ */
+@SuppressWarnings("deprecation") // TODO: 13/02/2023 Check deprecated extension
+public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, SequenceListener {
     /**
      * pref id
      */
@@ -81,7 +77,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     final ButtonGroup scaleGroup;
     final JRadioButton logButton;
     final JRadioButton linearButton;
-    final IcyButton exportXLSButton;
+    final IcyButtonNew exportXLSButton;
 
     /**
      * data
@@ -98,98 +94,75 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     final Runnable channelEnableUpdater;
     final Runnable channelTabColorUpdater;
 
-    public LUTViewer(Viewer viewer, LUT lut)
-    {
+    public LUTViewer(final Viewer viewer, final LUT lut) {
         super(viewer, lut);
 
         pref = ApplicationPreferences.getPreferences().node(PREF_ID_HISTO);
 
-        boundsUpdater = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                final Sequence sequence = getSequence();
+        boundsUpdater = () -> {
+            final Sequence sequence = getSequence();
 
-                if (sequence != null)
-                {
-                    double[][] typeBounds = sequence.getChannelsTypeBounds();
-                    double[][] bounds = sequence.getChannelsBounds();
+            if (sequence != null) {
+                double[][] typeBounds = sequence.getChannelsTypeBounds();
+                double[][] bounds = sequence.getChannelsBounds();
 
-                    for (int i = 0; i < Math.min(getLut().getNumChannel(), typeBounds.length); i++)
-                    {
-                        double[] tb = typeBounds[i];
-                        double[] b = bounds[i];
+                for (int i = 0; i < Math.min(getLut().getNumChannel(), typeBounds.length); i++) {
+                    double[] tb = typeBounds[i];
+                    double[] b = bounds[i];
 
-                        final Scaler scaler = getLut().getLutChannel(i).getScaler();
+                    final Scaler scaler = getLut().getLutChannel(i).getScaler();
 
-                        scaler.setAbsLeftRightIn(tb[0], tb[1]);
-                        scaler.setLeftRightIn(b[0], b[1]);
-                    }
+                    scaler.setAbsLeftRightIn(tb[0], tb[1]);
+                    scaler.setLeftRightIn(b[0], b[1]);
                 }
             }
         };
-        channelEnableUpdater = new Runnable()
-        {
+        channelEnableUpdater = new Runnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 for (int c = 0; c < Math.min(getLut().getNumChannel(), bottomPane.getTabCount()); c++)
                     bottomPane.setTabChecked(c, getLut().getLutChannel(c).isEnabled());
             }
         };
-        channelTabColorUpdater = new Runnable()
-        {
+        channelTabColorUpdater = new Runnable() {
             @Override
-            public void run()
-            {
-                for (int c = 0; c < Math.min(getLut().getNumChannel(), bottomPane.getTabCount()); c++)
-                {
+            public void run() {
+                for (int c = 0; c < Math.min(getLut().getNumChannel(), bottomPane.getTabCount()); c++) {
                     final IcyColorMap colormap = getLut().getLutChannel(c).getColorMap();
                     bottomPane.setBackgroundAt(c, colormap.getDominantColor());
                 }
             }
         };
-        channelNameUpdater = new Runnable()
-        {
+        channelNameUpdater = new Runnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 final Sequence sequence = getSequence();
 
-                if (sequence != null)
-                {
+                if (sequence != null) {
                     // need to be done on EDT
-                    ThreadUtil.invokeNow(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            for (int c = 0; c < Math.min(sequence.getSizeC(), bottomPane.getTabCount()); c++)
-                            {
-                                final String channelName = sequence.getChannelName(c);
+                    ThreadUtil.invokeNow(() -> {
+                        for (int c = 0; c < Math.min(sequence.getSizeC(), bottomPane.getTabCount()); c++) {
+                            final String channelName = sequence.getChannelName(c);
 
-                                bottomPane.setTitleAt(c, StringUtil.limit(channelName, 10));
-                                if (sequence.getDefaultChannelName(c).equals(channelName))
-                                    bottomPane.setToolTipTextAt(c, "Channel " + c);
-                                else
-                                    bottomPane.setToolTipTextAt(c, channelName + " (channel " + c + ")");
-                            }
+                            bottomPane.setTitleAt(c, StringUtil.limit(channelName, 10));
+                            if (sequence.getDefaultChannelName(c).equals(channelName))
+                                bottomPane.setToolTipTextAt(c, "Channel " + c);
+                            else
+                                bottomPane.setToolTipTextAt(c, channelName + " (channel " + c + ")");
                         }
                     });
                 }
             }
         };
 
-        lutChannelViewers = new ArrayList<LUTChannelViewer>();
+        lutChannelViewers = new ArrayList<>();
 
         // build GUI
         bottomPane = new CheckTabbedPane(SwingConstants.BOTTOM, true);
         bottomPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
         // add tab for each channel
-        for (int c = 0; c < lut.getNumChannel(); c++)
-        {
+        for (int c = 0; c < lut.getNumChannel(); c++) {
             final LUTChannel lutChannel = lut.getLutChannel(c);
             final LUTChannelViewer lbv = new LUTChannelViewer(viewer, lutChannel);
 
@@ -199,85 +172,63 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
             bottomPane.addTab("ch " + c, lbv);
         }
 
-        bottomPane.addChangeListener(new ChangeListener()
-        {
-            @Override
-            public void stateChanged(ChangeEvent e)
-            {
-                final int size = lutChannelViewers.size();
-                boolean changedState[] = new boolean[size];
-                boolean enabledState[] = new boolean[size];
+        bottomPane.addChangeListener(e -> {
+            final int size = lutChannelViewers.size();
+            boolean[] changedState = new boolean[size];
+            boolean[] enabledState = new boolean[size];
 
-                for (int i = 0; i < size; i++)
-                {
-                    try
-                    {
-                        // null pointer exception can sometime happen here, normal
-                        enabledState[i] = bottomPane.isTabChecked(i);
-                        changedState[i] = lutChannelViewers.get(i).getLutChannel().isEnabled() != enabledState[i];
-                    }
-                    catch (Exception exc)
-                    {
-                        enabledState[i] = true;
-                        changedState[i] = false;
-                    }
+            for (int i = 0; i < size; i++) {
+                try {
+                    // null pointer exception can sometime happen here, normal
+                    enabledState[i] = bottomPane.isTabChecked(i);
+                    changedState[i] = lutChannelViewers.get(i).getLutChannel().isEnabled() != enabledState[i];
                 }
+                catch (Exception exc) {
+                    enabledState[i] = true;
+                    changedState[i] = false;
+                }
+            }
 
-                // we really want to only set state which changed here and not the one which has
-                // been set from a "setEnabled" event
-                for (int i = 0; i < size; i++)
-                {
-                    if (changedState[i])
-                    {
-                        lutChannelViewers.get(i).getLutChannel().setEnabled(enabledState[i]);
-                    }
+            // we really want to only set state which changed here and not the one which has
+            // been set from a "setEnabled" event
+            for (int i = 0; i < size; i++) {
+                if (changedState[i]) {
+                    lutChannelViewers.get(i).getLutChannel().setEnabled(enabledState[i]);
                 }
             }
         });
 
         autoRefreshHistoCheckBox = new JCheckBox("Refresh", pref.getBoolean(ID_AUTO_REFRESH, true));
         autoRefreshHistoCheckBox.setToolTipText("Automatically refresh histogram when data is modified");
-        autoRefreshHistoCheckBox.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                final boolean value = autoRefreshHistoCheckBox.isSelected();
-                if (value)
-                    refreshAllHistogram();
-                pref.putBoolean(ID_AUTO_REFRESH, value);
-            }
+        autoRefreshHistoCheckBox.addActionListener(e -> {
+            final boolean value = autoRefreshHistoCheckBox.isSelected();
+            if (value)
+                refreshAllHistogram();
+            pref.putBoolean(ID_AUTO_REFRESH, value);
         });
         if (autoRefreshHistoCheckBox.isSelected())
             refreshAllHistogram();
 
         autoBoundsCheckBox = new JCheckBox("Auto bounds", getPreferredAutoBounds());
         autoBoundsCheckBox.setToolTipText("Automatically ajdust bounds when data is modified");
-        autoBoundsCheckBox.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                final boolean value = autoBoundsCheckBox.isSelected();
+        autoBoundsCheckBox.addActionListener(e -> {
+            final boolean value = autoBoundsCheckBox.isSelected();
 
-                if (value)
-                {
-                    ThreadUtil.runSingle(boundsUpdater);
-                    refreshAllHistogram();
-                    autoRefreshHistoCheckBox.setSelected(true);
-                    autoRefreshHistoCheckBox.setEnabled(false);
-                }
-                else
-                {
-                    final boolean refreshValue = pref.getBoolean(ID_AUTO_REFRESH, true);
-                    if (refreshValue)
-                        refreshAllHistogram();
-                    autoRefreshHistoCheckBox.setSelected(refreshValue);
-                    autoRefreshHistoCheckBox.setEnabled(true);
-                }
-
-                pref.putBoolean(ID_AUTO_BOUNDS, value);
+            if (value) {
+                ThreadUtil.runSingle(boundsUpdater);
+                refreshAllHistogram();
+                autoRefreshHistoCheckBox.setSelected(true);
+                autoRefreshHistoCheckBox.setEnabled(false);
             }
+            else {
+                final boolean refreshValue = pref.getBoolean(ID_AUTO_REFRESH, true);
+                if (refreshValue)
+                    refreshAllHistogram();
+                autoRefreshHistoCheckBox.setSelected(refreshValue);
+                autoRefreshHistoCheckBox.setEnabled(true);
+            }
+
+            pref.putBoolean(ID_AUTO_BOUNDS, value);
         });
 
         final Sequence seq = getSequence();
@@ -285,24 +236,10 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
         scaleGroup = new ButtonGroup();
         logButton = new JRadioButton("log");
         logButton.setToolTipText("Display histogram in a logarithm form");
-        logButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                scaleTypeChanged(true);
-            }
-        });
+        logButton.addActionListener(e -> scaleTypeChanged(true));
         linearButton = new JRadioButton("linear");
         linearButton.setToolTipText("Display histogram in a linear form");
-        linearButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                scaleTypeChanged(false);
-            }
-        });
+        linearButton.addActionListener(e -> scaleTypeChanged(false));
 
         scaleGroup.add(logButton);
         scaleGroup.add(linearButton);
@@ -315,31 +252,23 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
         // force apply selected mode (no event dispatched on setSelected)
         scaleTypeChanged(logButton.isSelected());
 
-        exportXLSButton = new IcyButton(new IcyIcon(ResourceUtil.ICON_XLS_EXPORT, 18));
-        exportXLSButton.setFlat(true);
+        exportXLSButton = new IcyButtonNew(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
         exportXLSButton.setToolTipText("Export histogram data into an excel file");
-        exportXLSButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                try
-                {
-                    // export current visible histogram
-                    lutChannelViewers.get(bottomPane.getSelectedIndex()).getScalerPanel().getScalerViewer()
-                            .getHistogram().getHistogram().doXLSExport();
-                }
-                catch (Exception e1)
-                {
-                    MessageDialog.showDialog("Error", e1.getMessage(), MessageDialog.ERROR_MESSAGE);
-                }
+        exportXLSButton.addActionListener(e -> {
+            try {
+                // export current visible histogram
+                lutChannelViewers.get(bottomPane.getSelectedIndex()).getScalerPanel().getScalerViewer()
+                        .getHistogram().getHistogram().doXLSExport();
+            }
+            catch (Exception e1) {
+                MessageDialog.showDialog("Error", e1.getMessage(), MessageDialog.ERROR_MESSAGE);
             }
         });
 
         setLayout(new BorderLayout());
 
         add(GuiUtil.createLineBoxPanel(autoRefreshHistoCheckBox, autoBoundsCheckBox, Box.createHorizontalGlue(),
-                Box.createHorizontalStrut(4), logButton, linearButton, Box.createHorizontalStrut(4), exportXLSButton),
+                        Box.createHorizontalStrut(4), logButton, linearButton, Box.createHorizontalStrut(4), exportXLSButton),
                 BorderLayout.NORTH);
         add(bottomPane, BorderLayout.CENTER);
 
@@ -349,10 +278,8 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
         channelTabColorUpdater.run();
         channelNameUpdater.run();
 
-        if (seq != null)
-        {
-            if (!seq.hasUserLUT() && autoBoundsCheckBox.isSelected())
-            {
+        if (seq != null) {
+            if (!seq.hasUserLUT() && autoBoundsCheckBox.isSelected()) {
                 ThreadUtil.runSingle(boundsUpdater);
                 refreshAllHistogram();
                 autoRefreshHistoCheckBox.setSelected(true);
@@ -362,17 +289,15 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
             seq.addListener(this);
         }
     }
-    
+
     /**
      * @return current active channel index (channel pane which has focus)
      */
-    public int getActiveChannelIndex()
-    {
+    public int getActiveChannelIndex() {
         return bottomPane.getSelectedIndex();
     }
 
-    private boolean getPreferredAutoBounds()
-    {
+    private boolean getPreferredAutoBounds() {
         boolean result = pref.getBoolean(ID_AUTO_BOUNDS, true);
 
         if (!result)
@@ -380,11 +305,9 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
 
         final Sequence sequence = getSequence();
 
-        if (sequence != null)
-        {
+        if (sequence != null) {
             // byte data type ?
-            if (sequence.getDataType_() == DataType.UBYTE)
-            {
+            if (sequence.getDataType_() == DataType.UBYTE) {
                 final int numChannel = getLut().getNumChannel();
 
                 // custom colormaps --> cannot use auto bounds
@@ -392,8 +315,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
                     if (!getLut().getLutChannel(c).getColorMap().isLinear())
                         return false;
 
-                if ((numChannel == 3) || (numChannel == 4))
-                {
+                if ((numChannel == 3) || (numChannel == 4)) {
                     boolean rgb;
 
                     // check if we have classic RGB
@@ -406,8 +328,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
                         rgb &= (getLut().getLutChannel(3).getColorMap().getType() == IcyColorMapType.ALPHA);
 
                     // do not use auto bounds for classic (A)RGB images
-                    if (rgb)
-                        return false;
+                    return !rgb;
                 }
             }
         }
@@ -416,69 +337,57 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     }
 
     @Override
-    public Sequence getSequence()
-    {
+    public Sequence getSequence() {
         return super.getSequence();
     }
 
     @Override
-    public LUT getLut()
-    {
+    public LUT getLut() {
         return super.getLut();
     }
 
-    public boolean getAutoBounds()
-    {
+    public boolean getAutoBounds() {
         return autoBoundsCheckBox.isSelected();
     }
 
-    public void setAutoBound(boolean value)
-    {
+    public void setAutoBound(final boolean value) {
         autoBoundsCheckBox.setSelected(value);
     }
 
-    public boolean getAutoRefreshHistogram()
-    {
+    public boolean getAutoRefreshHistogram() {
         return autoRefreshHistoCheckBox.isSelected();
     }
 
-    public void setAutoRefreshHistogram(boolean value)
-    {
+    public void setAutoRefreshHistogram(final boolean value) {
         autoRefreshHistoCheckBox.setSelected(value);
     }
 
-    public boolean getLogScale()
-    {
+    public boolean getLogScale() {
         return logButton.isSelected();
     }
 
-    public void setLogScale(boolean value)
-    {
+    public void setLogScale(final boolean value) {
         if (value)
             logButton.setSelected(true);
         else
             linearButton.setSelected(true);
     }
 
-    void refreshAllHistogram()
-    {
-        for (int i = 0; i < lutChannelViewers.size(); i++)
-            lutChannelViewers.get(i).getScalerPanel().refreshHistogram();
+    void refreshAllHistogram() {
+        for (LUTChannelViewer lutChannelViewer : lutChannelViewers)
+            lutChannelViewer.getScalerPanel().refreshHistogram();
     }
 
-    void scaleTypeChanged(boolean log)
-    {
+    void scaleTypeChanged(final boolean log) {
         pref.putBoolean(ID_LOG_VIEW, log);
         // change histogram scale type
-        for (int i = 0; i < lutChannelViewers.size(); i++)
-            lutChannelViewers.get(i).getScalerPanel().getScalerViewer().scaleTypeChanged(log);
+        for (LUTChannelViewer lutChannelViewer : lutChannelViewers)
+            lutChannelViewer.getScalerPanel().getScalerViewer().scaleTypeChanged(log);
     }
 
     @Override
-    public void colorMapChanged(IcyColorMapEvent e)
-    {
-        switch (e.getType())
-        {
+    public void colorMapChanged(final IcyColorMapEvent e) {
+        switch (e.getType()) {
             case ENABLED_CHANGED:
                 ThreadUtil.runSingle(channelEnableUpdater);
                 break;
@@ -492,8 +401,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
         }
     }
 
-    public void dispose()
-    {
+    public void dispose() {
         removeAll();
 
         Sequence seq = getSequence();
@@ -502,12 +410,8 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     }
 
     @Override
-    public void sequenceChanged(SequenceEvent sequenceEvent)
-    {
-        final SequenceEvent e = sequenceEvent;
-
-        switch (e.getSourceType())
-        {
+    public void sequenceChanged(final SequenceEvent sequenceEvent) {
+        switch (sequenceEvent.getSourceType()) {
             case SEQUENCE_META:
                 ThreadUtil.runSingle(channelNameUpdater);
                 break;
@@ -520,8 +424,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     }
 
     @Override
-    public void sequenceClosed(Sequence sequence)
-    {
+    public void sequenceClosed(Sequence sequence) {
 
     }
 }

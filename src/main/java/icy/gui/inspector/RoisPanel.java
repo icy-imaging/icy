@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.inspector;
 
@@ -34,24 +34,22 @@ import javax.swing.event.ListSelectionEvent;
 /**
  * ROI Panel component displayed in the Icy inspector.<br>
  * Use the {@link AbstractRoisPanel} if you want to embed the ROI table in your own component.
- * 
+ *
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class RoisPanel extends AbstractRoisPanel
-{
+public class RoisPanel extends AbstractRoisPanel {
     protected static final String PREF_ID = "ROIPanel";
 
     // GUI
     protected RoiControlPanel roiControlPanel;
 
-    public RoisPanel()
-    {
+    public RoisPanel() {
         super(GeneralPreferences.getPreferences().node(PREF_ID));
     }
 
     @Override
-    protected void initialize()
-    {
+    protected void initialize() {
         super.initialize();
 
         // build control panel
@@ -63,20 +61,17 @@ public class RoisPanel extends AbstractRoisPanel
     }
 
     @Override
-    protected ROIResults createNewROIResults(ROI roi)
-    {
+    protected ROIResults createNewROIResults(ROI roi) {
         return new CustomROIResults(roi);
     }
 
     @Override
-    protected Sequence getSequence()
-    {
+    protected Sequence getSequence() {
         return Icy.getMainInterface().getActiveSequence();
     }
 
     @Override
-    protected void refreshTableDataStructureInternal()
-    {
+    protected void refreshTableDataStructureInternal() {
         super.refreshTableDataStructureInternal();
 
         // notify the ROI control panel that selection changed
@@ -84,8 +79,7 @@ public class RoisPanel extends AbstractRoisPanel
     }
 
     @Override
-    protected void refreshTableDataInternal()
-    {
+    protected void refreshTableDataInternal() {
         super.refreshTableDataInternal();
 
         // notify the ROI control panel that selection changed (force data refresh)
@@ -93,8 +87,7 @@ public class RoisPanel extends AbstractRoisPanel
     }
 
     @Override
-    protected void refreshTableSelectionInternal()
-    {
+    protected void refreshTableSelectionInternal() {
         super.refreshTableSelectionInternal();
 
         // notify the ROI control panel that selection changed
@@ -103,8 +96,7 @@ public class RoisPanel extends AbstractRoisPanel
 
     // called when selection changed in the ROI roiTable
     @Override
-    public void valueChanged(ListSelectionEvent e)
-    {
+    public void valueChanged(ListSelectionEvent e) {
         super.valueChanged(e);
 
         // currently changing the selection ? --> exit
@@ -122,8 +114,7 @@ public class RoisPanel extends AbstractRoisPanel
     }
 
     @Override
-    public void activeSequenceChanged(SequenceEvent event)
-    {
+    public void activeSequenceChanged(SequenceEvent event) {
         super.activeSequenceChanged(event);
 
         // if data changed (more or less Z, T or C) we need to refresh action
@@ -132,16 +123,13 @@ public class RoisPanel extends AbstractRoisPanel
             roiControlPanel.refreshROIActions();
     }
 
-    protected class CustomROIResults extends ROIResults
-    {
-        protected CustomROIResults(ROI roi)
-        {
+    protected class CustomROIResults extends ROIResults {
+        protected CustomROIResults(ROI roi) {
             super(roi);
         }
 
         @Override
-        public void roiChanged(ROIEvent event)
-        {
+        public void roiChanged(ROIEvent event) {
             final ROI r = event.getSource();
 
             // ROI selected ? --> propagate event to control panel
@@ -150,5 +138,5 @@ public class RoisPanel extends AbstractRoisPanel
 
             super.roiChanged(event);
         }
-    }   
+    }
 }

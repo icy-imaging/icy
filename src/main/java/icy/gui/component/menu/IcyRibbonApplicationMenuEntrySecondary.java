@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.component.menu;
 
@@ -29,23 +29,20 @@ import org.pushingpixels.flamingo.api.ribbon.RibbonApplicationMenuEntrySecondary
 
 /**
  * @author Stephane
+ * @deprecated Will be removed with Substance.
  */
-public class IcyRibbonApplicationMenuEntrySecondary extends RibbonApplicationMenuEntrySecondary
-{
+@Deprecated
+public class IcyRibbonApplicationMenuEntrySecondary extends RibbonApplicationMenuEntrySecondary {
     private final IcyAbstractAction action;
 
-    public IcyRibbonApplicationMenuEntrySecondary(ResizableIcon icon, String text, ActionListener mainActionListener,
-            CommandButtonKind entryKind)
-    {
+    public IcyRibbonApplicationMenuEntrySecondary(ResizableIcon icon, String text, ActionListener mainActionListener, CommandButtonKind entryKind) {
         super(icon, text, mainActionListener, entryKind);
 
         action = null;
     }
 
-    public IcyRibbonApplicationMenuEntrySecondary(IcyAbstractAction action)
-    {
-        super((action.getIcon() != null) ? new IcyIcon(action.getIcon()) : null, action.getName(), action,
-                CommandButtonKind.ACTION_ONLY);
+    public IcyRibbonApplicationMenuEntrySecondary(IcyAbstractAction action) {
+        super((action.getIcon() != null) ? new IcyIcon(action.getIcon()) : null, action.getName(), action, CommandButtonKind.ACTION_ONLY);
 
         this.action = action;
 
@@ -54,14 +51,12 @@ public class IcyRibbonApplicationMenuEntrySecondary extends RibbonApplicationMen
     }
 
     @Override
-    public boolean isEnabled()
-    {
+    public boolean isEnabled() {
         return super.isEnabled() && ((action == null) || action.isEnabled());
     }
 
     @Override
-    public void setEnabled(boolean b)
-    {
+    public void setEnabled(boolean b) {
         final boolean oldValue = isEnabled();
 
         super.setEnabled(b);

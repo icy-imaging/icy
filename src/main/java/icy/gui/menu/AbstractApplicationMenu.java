@@ -1,80 +1,43 @@
+/*
+ * Copyright 2010-2023 Institut Pasteur.
+ *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
 package icy.gui.menu;
 
-import icy.common.listener.SkinChangeListener;
 import icy.gui.main.ActiveSequenceListener;
 import icy.gui.main.GlobalROIListener;
 import icy.gui.main.GlobalSequenceListener;
-import icy.gui.util.LookAndFeelUtil;
 import icy.main.Icy;
 import icy.plugin.PluginLoader;
 import icy.plugin.PluginLoader.PluginLoaderEvent;
 import icy.plugin.PluginLoader.PluginLoaderListener;
-import icy.resource.icon.IcyIconFont;
-import icy.resource.icon.IcyIconFont.State;
 import icy.roi.ROI;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
-import jiconfont.IconCode;
 
 import javax.swing.*;
-import java.util.HashSet;
-import java.util.Set;
 
-public abstract class AbstractApplicationMenu extends JMenu implements SkinChangeListener, GlobalSequenceListener, PluginLoaderListener, ActiveSequenceListener, GlobalROIListener {
-    protected final Set<JMenuItem> items = new HashSet<>();
+/**
+ * @author Thomas MUSSET
+ */
+public abstract class AbstractApplicationMenu extends JMenu implements GlobalSequenceListener, PluginLoaderListener, ActiveSequenceListener, GlobalROIListener {
 
     public AbstractApplicationMenu(final String text) {
         super(text);
-    }
-
-    protected final void setIcon(final JMenuItem item, final IconCode iconCode) {
-        if (item == null || iconCode == null)
-            return;
-
-        item.setIcon(new IcyIconFont(iconCode, State.FOREGROUND));
-        item.setDisabledIcon(new IcyIconFont(iconCode, State.DISABLED));
-        item.setSelectedIcon(new IcyIconFont(iconCode, State.SELECTED));
-
-        items.add(item);
-    }
-
-    protected final void removeIcon(final JMenuItem item) {
-        if (item == null)
-            return;
-
-        item.setIcon(null);
-        item.setDisabledIcon(null);
-        item.setSelectedIcon(null);
-
-        items.remove(item);
-    }
-
-    private void reloadIcon(final JMenuItem item) {
-        if (item == null)
-            return;
-
-        final Icon icon = item.getIcon();
-        final Icon iconDisabled = item.getDisabledIcon();
-        final Icon iconSelected = item.getSelectedIcon();
-        if (!(icon instanceof IcyIconFont) || !(iconDisabled instanceof IcyIconFont) || !(iconSelected instanceof IcyIconFont))
-            return;
-
-        ((IcyIconFont) icon).updateIcon();
-        ((IcyIconFont) iconDisabled).updateIcon();
-        ((IcyIconFont) iconSelected).updateIcon();
-    }
-
-    private void reloadIcons() {
-        for (JMenuItem item : items)
-            reloadIcon(item);
-    }
-
-    protected final void addSkinChangeListener() {
-        LookAndFeelUtil.addListener(this);
-    }
-
-    protected final void removeSkinChangeListener() {
-        LookAndFeelUtil.removeListener(this);
     }
 
     protected final void addGlobalSequenceListener() {
@@ -107,11 +70,6 @@ public abstract class AbstractApplicationMenu extends JMenu implements SkinChang
 
     protected final void removeGlobalROIListener() {
         Icy.getMainInterface().removeGlobalROIListener(this);
-    }
-
-    @Override
-    public final void skinChanged() {
-        reloadIcons();
     }
 
     @Override

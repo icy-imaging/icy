@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.plugin;
 
@@ -35,7 +35,6 @@ import icy.util.Random;
 import icy.util.StringUtil;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
@@ -60,18 +59,11 @@ import javax.swing.event.HyperlinkListener;
 
 /**
  * @author stephane
+ * @author Thomas MUSSET
  */
-public class PluginDetailPanel extends IcyFrame implements HyperlinkListener
-{
-    private class ExecuteActionButton extends JButton implements ActionListener
-    {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 3096619820228575930L;
-
-        public ExecuteActionButton()
-        {
+public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
+    private class ExecuteActionButton extends JButton implements ActionListener {
+        public ExecuteActionButton() {
             super("Execute");
 
             setVisible(plugin.isActionable());
@@ -80,29 +72,20 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener
         }
 
         @Override
-        public void actionPerformed(ActionEvent e)
-        {
+        public void actionPerformed(ActionEvent e) {
             PluginLauncher.start(plugin);
         }
     }
 
-    private class CloseActionButton extends JButton implements ActionListener
-    {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 4912851751410749786L;
-
-        public CloseActionButton()
-        {
+    private class CloseActionButton extends JButton implements ActionListener {
+        public CloseActionButton() {
             super("Close");
 
             addActionListener(this);
         }
 
         @Override
-        public void actionPerformed(ActionEvent e)
-        {
+        public void actionPerformed(ActionEvent e) {
             close();
         }
     }
@@ -128,8 +111,8 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener
     /**
      * @param plugin
      */
-    public PluginDetailPanel(PluginDescriptor plugin)
-    {
+    // FIXME: 31/01/2023 Textpane strange behaviour when skin change
+    public PluginDetailPanel(PluginDescriptor plugin) {
         super(plugin.getName() + " " + plugin.getVersion(), false, true);
 
         this.plugin = plugin;
@@ -164,25 +147,20 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener
 
         // center panel
         pluginPathLabel = new JLabel();
-        pluginPathLabel.addMouseListener(new MouseAdapter()
-        {
+        pluginPathLabel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 if (e.isConsumed())
                     return;
 
-                if (EventUtil.isLeftMouseButton(e) && (e.getClickCount() == 2))
-                {
+                if (EventUtil.isLeftMouseButton(e) && (e.getClickCount() == 2)) {
                     final String path = pluginPathLabel.getText();
 
-                    try
-                    {
+                    try {
                         if (!StringUtil.isEmpty(path) && !path.equals("---"))
                             SystemUtil.openFolder(FileUtil.getDirectory(path));
                     }
-                    catch (IOException e1)
-                    {
+                    catch (IOException e1) {
                         IcyExceptionHandler.showErrorMessage(e1, false, false);
                     }
 
@@ -192,16 +170,13 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener
         });
         pluginAuthorLabel = new JLabel();
         pluginWebsiteLabel = new JLabel();
-        pluginWebsiteLabel.addMouseListener(new MouseAdapter()
-        {
+        pluginWebsiteLabel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 if (e.isConsumed())
                     return;
 
-                if (EventUtil.isLeftMouseButton(e) && (e.getClickCount() == 2))
-                {
+                if (EventUtil.isLeftMouseButton(e) && (e.getClickCount() == 2)) {
                     final String url = pluginWebsiteLabel.getText();
 
                     if (!StringUtil.isEmpty(url) && !url.equals("---"))
@@ -287,31 +262,17 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener
         requestFocus();
 
         // some parts of the descriptor are not loaded --> async update
-        if (!plugin.isAllLoaded())
-        {
-            ThreadUtil.bgRun(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    PluginDetailPanel.this.plugin.loadAll();
+        if (!plugin.isAllLoaded()) {
+            ThreadUtil.bgRun(() -> {
+                PluginDetailPanel.this.plugin.loadAll();
 
-                    // rebuild interface
-                    ThreadUtil.invokeLater(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            updateGui();
-                        }
-                    });
-                }
+                // rebuild interface
+                ThreadUtil.invokeLater(this::updateGui);
             });
         }
     }
 
-    void updateGui()
-    {
+    void updateGui() {
         final Font sysFont = pluginAuthorLabel.getFont();
         final Image img = plugin.getImage();
         final String description = plugin.getDescription();
@@ -323,8 +284,7 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener
         String jarPath = plugin.getPluginJarPath();
 
         // can't get JAR path ?
-        if (StringUtil.isEmpty(jarPath))
-        {
+        if (StringUtil.isEmpty(jarPath)) {
             // try to get the local plugin (we were probably using the online descriptor)
             final PluginDescriptor localPlugin = PluginLoader.getPlugin(plugin.getClassName());
 
@@ -339,8 +299,7 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener
 
         if (StringUtil.isEmpty(description))
             pluginDescriptionText.setText("No description");
-        else
-        {
+        else {
             if (StringUtil.containHtmlCR(description))
                 pluginDescriptionText.setText(StringUtil.removeCR(description));
             else
@@ -349,53 +308,44 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener
             pluginDescriptionText.setCaretPosition(0);
         }
 
-        ComponentUtil.setJTextPaneFont(pluginDescriptionText, sysFont, Color.black);
+        ComponentUtil.setJTextPaneFont(pluginDescriptionText, sysFont);
 
         if (StringUtil.isEmpty(changesLog))
             pluginChangeLogText.setText("---");
-        else
-        {
+        else {
             pluginChangeLogText.setText(StringUtil.toHtmlCR(changesLog));
             pluginChangeLogText.setCaretPosition(0);
         }
-        ComponentUtil.setJTextPaneFont(pluginChangeLogText, new Font("courier", Font.PLAIN, 11), Color.black);
-        if (StringUtil.isEmpty(jarPath))
-        {
+        ComponentUtil.setJTextPaneFont(pluginChangeLogText, new Font("courier", Font.PLAIN, 11));
+        if (StringUtil.isEmpty(jarPath)) {
             pluginPathLabel.setText("---");
             pluginPathLabel.setToolTipText("");
         }
-        else
-        {
+        else {
             pluginPathLabel.setText(jarPath);
             pluginPathLabel.setToolTipText(jarPath + "  (double click to see file location)");
         }
-        if (StringUtil.isEmpty(author))
-        {
+        if (StringUtil.isEmpty(author)) {
             pluginAuthorLabel.setText("---");
             pluginAuthorLabel.setToolTipText("");
         }
-        else
-        {
+        else {
             pluginAuthorLabel.setText(author);
             pluginAuthorLabel.setToolTipText(author);
         }
-        if (StringUtil.isEmpty(email))
-        {
+        if (StringUtil.isEmpty(email)) {
             pluginEmailLabel.setText("---");
             pluginEmailLabel.setToolTipText("");
         }
-        else
-        {
+        else {
             pluginEmailLabel.setText(email);
             pluginEmailLabel.setToolTipText(email);
         }
-        if (StringUtil.isEmpty(web))
-        {
+        if (StringUtil.isEmpty(web)) {
             pluginWebsiteLabel.setText("---");
             pluginWebsiteLabel.setToolTipText("");
         }
-        else
-        {
+        else {
             pluginWebsiteLabel.setText(web);
             pluginWebsiteLabel.setToolTipText(web + "  (double click to open in browser)");
         }
@@ -404,8 +354,7 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener
     }
 
     @Override
-    public void hyperlinkUpdate(HyperlinkEvent e)
-    {
+    public void hyperlinkUpdate(HyperlinkEvent e) {
         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
             NetworkUtil.openBrowser(e.getURL());
     }

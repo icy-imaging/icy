@@ -1,7 +1,27 @@
+/*
+ * Copyright 2010-2023 Institut Pasteur.
+ *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
 package icy.gui.menu;
 
 import icy.action.RoiActions;
 import icy.common.listener.ROIToolChangeListener;
+import icy.gui.component.menu.IcyMenu;
+import icy.gui.component.menu.IcyMenuItem;
 import icy.main.Icy;
 import icy.plugin.interface_.PluginROI;
 import icy.roi.ROI;
@@ -21,7 +41,6 @@ import plugins.kernel.roi.roi3d.plugin.ROI3DPolyLinePlugin;
 import plugins.kernel.roi.tool.plugin.ROILineCutterPlugin;
 import plugins.kernel.roi.tool.plugin.ROIMagicWandPlugin;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -29,207 +48,189 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @author Thomas MUSSET
+ */
 public final class ApplicationMenuROI extends AbstractApplicationMenu {
     private static final Set<ROIToolChangeListener> listeners = new HashSet<>();
 
-    private final JMenu menuDraw2D;
-    private final JMenu menuDraw3D;
-
-    private final JMenuItem itemLoadROI;
-    private final JMenuItem itemSaveROI;
-    private final JMenuItem itemExportExcelROI;
-    private final JMenuItem itemDraw2DArea;
-    private final JMenuItem itemDraw2DPoint;
-    private final JMenuItem itemDraw2DLine;
-    private final JMenuItem itemDraw2DPolyline;
-    private final JMenuItem itemDraw2DRectangle;
-    private final JMenuItem itemDraw2DEllipse;
-    private final JMenuItem itemDraw2DPolygon;
-    private final JMenuItem itemDraw3DPoint;
-    private final JMenuItem itemDraw3DLine;
-    private final JMenuItem itemDraw3DPolyline;
-    private final JMenuItem itemMagicWand;
-    private final JMenuItem item2DTo3D;
-    private final JMenuItem item3DTo2D;
-    private final JMenuItem itemToEllipse;
-    private final JMenuItem itemToShape;
-    private final JMenuItem itemToMask;
-    private final JMenuItem itemSeparateComponent;
-    private final JMenuItem itemSeparateWatershed;
-    private final JMenuItem itemROICutter;
-    private final JMenuItem itemDilate;
-    private final JMenuItem itemErode;
-    private final JMenuItem itemDistanceMap;
-    private final JMenuItem itemOperationUnion;
-    private final JMenuItem itemOperationIntersection;
-    private final JMenuItem itemOperationInversion;
-    private final JMenuItem itemOperationExclusiveUnion;
-    private final JMenuItem itemOperationSubstraction;
-    private final JMenuItem itemFillInterior;
-    private final JMenuItem itemFillExterior;
+    private final IcyMenuItem item2DTo3D;
+    private final IcyMenuItem item3DTo2D;
+    private final IcyMenuItem itemToEllipse;
+    private final IcyMenuItem itemToShape;
+    private final IcyMenuItem itemToMask;
+    private final IcyMenuItem itemSeparateComponent;
+    private final IcyMenuItem itemSeparateWatershed;
+    private final IcyMenuItem itemROICutter;
+    private final IcyMenuItem itemDilate;
+    private final IcyMenuItem itemErode;
+    private final IcyMenuItem itemDistanceMap;
+    private final IcyMenuItem itemOperationUnion;
+    private final IcyMenuItem itemOperationIntersection;
+    private final IcyMenuItem itemOperationInversion;
+    private final IcyMenuItem itemOperationExclusiveUnion;
+    private final IcyMenuItem itemOperationSubstraction;
 
     private final List<ROI> lastROISelection = new ArrayList<>();
 
     public ApplicationMenuROI() {
         super("Region of Interest");
 
-        itemLoadROI = new JMenuItem("Load ROI...");
+        final IcyMenuItem itemLoadROI = new IcyMenuItem("Load ROI...");
         itemLoadROI.addActionListener(RoiActions.loadAction);
         add(itemLoadROI);
 
-        itemSaveROI = new JMenuItem("Save ROI As...");
+        final IcyMenuItem itemSaveROI = new IcyMenuItem("Save ROI As...");
         itemSaveROI.addActionListener(RoiActions.saveAction);
         add(itemSaveROI);
 
-        itemExportExcelROI = new JMenuItem("Export ROI As Excel...");
+        final IcyMenuItem itemExportExcelROI = new IcyMenuItem("Export ROI As Excel...");
         itemExportExcelROI.addActionListener(RoiActions.xlsExportAction);
         add(itemExportExcelROI);
 
         addSeparator();
 
-        menuDraw2D = new JMenu("Draw 2D");
+        final IcyMenu menuDraw2D = new IcyMenu("Draw 2D");
         add(menuDraw2D);
 
-        itemDraw2DPoint = new JMenuItem("Point");
+        final IcyMenuItem itemDraw2DPoint = new IcyMenuItem("Point");
         addPluginAction(itemDraw2DPoint, new ROI2DPointPlugin());
         menuDraw2D.add(itemDraw2DPoint);
 
-        itemDraw2DLine = new JMenuItem("Line");
+        final IcyMenuItem itemDraw2DLine = new IcyMenuItem("Line");
         addPluginAction(itemDraw2DLine, new ROI2DLinePlugin());
         menuDraw2D.add(itemDraw2DLine);
 
-        itemDraw2DPolyline = new JMenuItem("Polyline");
+        final IcyMenuItem itemDraw2DPolyline = new IcyMenuItem("Polyline");
         addPluginAction(itemDraw2DPolyline, new ROI2DPolyLinePlugin());
         menuDraw2D.add(itemDraw2DPolyline);
 
         menuDraw2D.addSeparator();
 
-        itemDraw2DRectangle = new JMenuItem("Rectangle");
+        final IcyMenuItem itemDraw2DRectangle = new IcyMenuItem("Rectangle");
         addPluginAction(itemDraw2DRectangle, new ROI2DRectanglePlugin());
         menuDraw2D.add(itemDraw2DRectangle);
 
-        itemDraw2DEllipse = new JMenuItem("Ellipse");
+        final IcyMenuItem itemDraw2DEllipse = new IcyMenuItem("Ellipse");
         addPluginAction(itemDraw2DEllipse, new ROI2DEllipsePlugin());
         menuDraw2D.add(itemDraw2DEllipse);
 
-        itemDraw2DPolygon = new JMenuItem("Polygon");
+        final IcyMenuItem itemDraw2DPolygon = new IcyMenuItem("Polygon");
         addPluginAction(itemDraw2DPolygon, new ROI2DPolygonPlugin());
         menuDraw2D.add(itemDraw2DPolygon);
 
         menuDraw2D.addSeparator();
 
-        itemDraw2DArea = new JMenuItem("Area");
+        final IcyMenuItem itemDraw2DArea = new IcyMenuItem("Area");
         addPluginAction(itemDraw2DArea, new ROI2DAreaPlugin());
         menuDraw2D.add(itemDraw2DArea);
 
-        menuDraw3D = new JMenu("Draw 3D");
+        final IcyMenu menuDraw3D = new IcyMenu("Draw 3D");
         add(menuDraw3D);
 
-        itemDraw3DPoint = new JMenuItem("Dot");
+        final IcyMenuItem itemDraw3DPoint = new IcyMenuItem("Dot");
         addPluginAction(itemDraw3DPoint, new ROI3DPointPlugin());
         menuDraw3D.add(itemDraw3DPoint);
 
-        itemDraw3DLine = new JMenuItem("Line");
+        final IcyMenuItem itemDraw3DLine = new IcyMenuItem("Line");
         addPluginAction(itemDraw3DLine, new ROI3DLinePlugin());
         menuDraw3D.add(itemDraw3DLine);
 
-        itemDraw3DPolyline = new JMenuItem("Polyline");
+        final IcyMenuItem itemDraw3DPolyline = new IcyMenuItem("Polyline");
         addPluginAction(itemDraw3DPolyline, new ROI3DPolyLinePlugin());
         menuDraw3D.add(itemDraw3DPolyline);
 
         addSeparator();
 
-        itemMagicWand = new JMenuItem("Magic Wand");
+        final IcyMenuItem itemMagicWand = new IcyMenuItem("Magic Wand");
         addPluginAction(itemMagicWand, new ROIMagicWandPlugin());
         add(itemMagicWand);
 
         addSeparator();
 
-        item2DTo3D = new JMenuItem("2D to 3D");
+        item2DTo3D = new IcyMenuItem("2D to 3D");
         item2DTo3D.addActionListener(RoiActions.convertTo3DAction);
         add(item2DTo3D);
 
-        item3DTo2D = new JMenuItem("3D to 2D");
+        item3DTo2D = new IcyMenuItem("3D to 2D");
         item3DTo2D.addActionListener(RoiActions.convertTo2DAction);
         add(item3DTo2D);
 
-        itemToEllipse = new JMenuItem("Convert to Ellipse");
+        itemToEllipse = new IcyMenuItem("Convert to Ellipse");
         itemToEllipse.addActionListener(RoiActions.convertToEllipseAction);
         add(itemToEllipse);
 
-        itemToShape = new JMenuItem("Convert to Shape");
+        itemToShape = new IcyMenuItem("Convert to Shape");
         itemToShape.addActionListener(RoiActions.convertToShapeAction);
         add(itemToShape);
 
-        itemToMask = new JMenuItem("Convert to Mask");
+        itemToMask = new IcyMenuItem("Convert to Mask");
         itemToMask.addActionListener(RoiActions.convertToMaskAction);
         add(itemToMask);
 
         addSeparator();
 
-        itemSeparateComponent = new JMenuItem("Separate Component");
+        itemSeparateComponent = new IcyMenuItem("Separate Component");
         itemSeparateComponent.addActionListener(RoiActions.separateObjectsAction);
         add(itemSeparateComponent);
 
-        itemSeparateWatershed = new JMenuItem("Separate by Watershed");
+        itemSeparateWatershed = new IcyMenuItem("Separate by Watershed");
         itemSeparateWatershed.addActionListener(RoiActions.computeWatershedSeparation);
         add(itemSeparateWatershed);
 
-        itemROICutter = new JMenuItem("ROI Cutter");
+        itemROICutter = new IcyMenuItem("ROI Cutter");
         addPluginAction(itemROICutter, new ROILineCutterPlugin());
         add(itemROICutter);
 
         addSeparator();
 
-        itemDilate = new JMenuItem("Dilate");
+        itemDilate = new IcyMenuItem("Dilate");
         itemDilate.addActionListener(RoiActions.dilateObjectsAction);
         add(itemDilate);
 
-        itemErode = new JMenuItem("Erode");
+        itemErode = new IcyMenuItem("Erode");
         itemErode.addActionListener(RoiActions.erodeObjectsAction);
         add(itemErode);
 
-        itemDistanceMap = new JMenuItem("Distance Map");
+        itemDistanceMap = new IcyMenuItem("Distance Map");
         itemDistanceMap.addActionListener(RoiActions.computeDistanceMapAction);
         add(itemDistanceMap);
 
         addSeparator();
 
-        itemOperationUnion = new JMenuItem("Union");
+        itemOperationUnion = new IcyMenuItem("Union");
         itemOperationUnion.addActionListener(RoiActions.boolOrAction);
         add(itemOperationUnion);
 
-        itemOperationIntersection = new JMenuItem("Intersection");
+        itemOperationIntersection = new IcyMenuItem("Intersection");
         itemOperationIntersection.addActionListener(RoiActions.boolAndAction);
         add(itemOperationIntersection);
 
-        itemOperationInversion = new JMenuItem("Inversion");
+        itemOperationInversion = new IcyMenuItem("Inversion");
         itemOperationInversion.addActionListener(RoiActions.boolNotAction);
         add(itemOperationInversion);
 
-        itemOperationExclusiveUnion = new JMenuItem("Exclusive Union");
+        itemOperationExclusiveUnion = new IcyMenuItem("Exclusive Union");
         itemOperationExclusiveUnion.addActionListener(RoiActions.boolXorAction);
         add(itemOperationExclusiveUnion);
 
-        itemOperationSubstraction = new JMenuItem("Substraction");
+        itemOperationSubstraction = new IcyMenuItem("Substraction");
         itemOperationSubstraction.addActionListener(RoiActions.boolSubtractAction);
         add(itemOperationSubstraction);
 
         addSeparator();
 
         // FIXME: 17/01/2023 change fill value
-        itemFillInterior = new JMenuItem("Fill Interior");
+        final IcyMenuItem itemFillInterior = new IcyMenuItem("Fill Interior");
         itemFillInterior.addActionListener(RoiActions.fillInteriorAction);
         add(itemFillInterior);
 
-        itemFillExterior = new JMenuItem("Fill Exterior");
+        final  IcyMenuItem itemFillExterior = new IcyMenuItem("Fill Exterior");
         itemFillExterior.addActionListener(RoiActions.fillExteriorAction);
         add(itemFillExterior);
 
         reloadROIMenu();
 
-        // TODO: 19/01/2023 Add SkinChangeListener when icons are set
-        // addSkinChangeListener();
         addActiveSequenceListener();
         addGlobalROIListener();
     }
@@ -309,13 +310,13 @@ public final class ApplicationMenuROI extends AbstractApplicationMenu {
         });
     }
 
-    private void addPluginAction(final JMenuItem item, final PluginROI plugin) {
+    private void addPluginAction(final IcyMenuItem item, final PluginROI plugin) {
         if (item == null || plugin == null)
             return;
         addAction(item, e -> changeTool(plugin));
     }
 
-    private void addAction(final JMenuItem item, final ActionListener listener) {
+    private void addAction(final IcyMenuItem item, final ActionListener listener) {
         if (item == null)
             return;
         for (ActionListener al : item.getActionListeners())

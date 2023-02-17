@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
+ * Copyright 2010-2023 Institut Pasteur.
  * 
  * This file is part of Icy.
  * 
@@ -14,7 +14,7 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.sequence;
 
@@ -22,26 +22,20 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Date;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import icy.file.FileUtil;
-import icy.gui.component.button.IcyButton;
+import icy.gui.component.button.IcyButtonNew;
 import icy.gui.frame.GenericFrame;
 import icy.gui.main.ActiveSequenceListener;
 import icy.main.Icy;
 import icy.math.UnitUtil;
 import icy.math.UnitUtil.UnitPrefix;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.system.IcyExceptionHandler;
@@ -50,18 +44,15 @@ import icy.system.thread.ThreadUtil;
 import icy.util.DateUtil;
 import icy.util.EventUtil;
 import icy.util.StringUtil;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+
 import java.awt.Font;
 
 /**
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -6123324347914804260L;
-
+public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener {
     // GUI
     private JLabel dimensionLabel;
     private JLabel resXLabel;
@@ -71,8 +62,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
     private JLabel sizeLabel;
     private JLabel channelLabel;
 
-    private IcyButton editBtn;
-    private IcyButton detailBtn;
+    //private IcyButton editBtn;
+    private IcyButtonNew editBtn;
+    //private IcyButton detailBtn;
+    private IcyButtonNew detailBtn;
 
     private JLabel pathLabel;
     JTextField pathField;
@@ -85,66 +78,39 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
     // internals
     private final Runnable infosRefresher;
 
-    public SequenceInfosPanel()
-    {
+    public SequenceInfosPanel() {
         super();
 
         initialize();
 
-        editBtn.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                // it should be the current focused sequence
-                final Sequence seq = Icy.getMainInterface().getActiveSequence();
+        editBtn.addActionListener(e -> {
+            // it should be the current focused sequence
+            final Sequence seq = Icy.getMainInterface().getActiveSequence();
 
-                if (seq != null)
-                    new SequencePropertiesDialog(seq);
+            if (seq != null)
+                new SequencePropertiesDialog(seq);
+        });
+
+        detailBtn.addActionListener(e -> {
+            // it should be the current focused sequence
+            final Sequence seq = Icy.getMainInterface().getActiveSequence();
+
+            if (seq != null) {
+                final GenericFrame g = new GenericFrame(seq.getName() + " - Metadata",
+                        new SequenceMetadataPanel(seq));
+
+                g.addToDesktopPane();
+                g.center();
+                g.requestFocus();
             }
         });
 
-        detailBtn.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                // it should be the current focused sequence
-                final Sequence seq = Icy.getMainInterface().getActiveSequence();
-
-                if (seq != null)
-                {
-                    final GenericFrame g = new GenericFrame(seq.getName() + " - Metadata",
-                            new SequenceMetadataPanel(seq));
-
-                    g.addToDesktopPane();
-                    g.center();
-                    g.requestFocus();
-                }
-            }
-        });
-
-        infosRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                ThreadUtil.invokeNow(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        updateInfosInternal(Icy.getMainInterface().getActiveSequence());
-                    }
-                });
-            }
-        };
+        infosRefresher = () -> ThreadUtil.invokeNow(() -> updateInfosInternal(Icy.getMainInterface().getActiveSequence()));
 
         updateInfosInternal(null);
     }
 
-    public void initialize()
-    {
+    public void initialize() {
         GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[] {70, 40, 90, 40};
         gridBagLayout.rowHeights = new int[] {18, 0, 18, 18, 18, 0, 18, 18, 0};
@@ -163,11 +129,9 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_lbl_name.gridy = 0;
         add(lbl_name, gbc_lbl_name);
 
-        nameField = new JTextField()
-        {
+        nameField = new JTextField() {
             @Override
-            public Dimension getPreferredSize()
-            {
+            public Dimension getPreferredSize() {
                 final Dimension result = super.getPreferredSize();
                 // prevent enlarging panel
                 result.width = 100;
@@ -197,11 +161,9 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_pathLabel.gridy = 1;
         add(pathLabel, gbc_pathLabel);
 
-        pathField = new JTextField()
-        {
+        pathField = new JTextField() {
             @Override
-            public Dimension getPreferredSize()
-            {
+            public Dimension getPreferredSize() {
                 final Dimension result = super.getPreferredSize();
                 // prevent enlarging panel
                 result.width = 100;
@@ -211,22 +173,17 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         pathField.setOpaque(false);
         pathField.setBorder(null);
         pathField.setEditable(false);
-        pathField.addMouseListener(new MouseAdapter()
-        {
+        pathField.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 if (e.isConsumed())
                     return;
 
-                if (EventUtil.isLeftMouseButton(e) && (e.getClickCount() == 2))
-                {
-                    try
-                    {
+                if (EventUtil.isLeftMouseButton(e) && (e.getClickCount() == 2)) {
+                    try {
                         SystemUtil.openFolder(FileUtil.getDirectory(pathField.getText()));
                     }
-                    catch (IOException e1)
-                    {
+                    catch (IOException e1) {
                         IcyExceptionHandler.showErrorMessage(e1, false, false);
                     }
 
@@ -428,7 +385,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_resZLabel.gridy = 6;
         add(resZLabel, gbc_resZLabel);
 
-        editBtn = new IcyButton("Edit", new IcyIcon(ResourceUtil.ICON_DOCEDIT));
+        editBtn = new IcyButtonNew("Edit", GoogleMaterialDesignIcons.EDIT);
         editBtn.setToolTipText("Edit sequence properties");
 
         GridBagConstraints gbc_editBtn = new GridBagConstraints();
@@ -439,7 +396,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_editBtn.gridy = 7;
         add(editBtn, gbc_editBtn);
 
-        detailBtn = new IcyButton("Show metadata", new IcyIcon(ResourceUtil.ICON_PROPERTIES));
+        detailBtn = new IcyButtonNew("Show metadata", GoogleMaterialDesignIcons.DESCRIPTION);
         detailBtn.setText("Metadata");
         detailBtn.setToolTipText("Show all associated metadata informations");
 
@@ -451,15 +408,12 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         add(detailBtn, gbc_detailBtn);
     }
 
-    public void updateInfos()
-    {
+    public void updateInfos() {
         ThreadUtil.runSingle(infosRefresher);
     }
 
-    public void updateInfosInternal(Sequence sequence)
-    {
-        if (sequence != null)
-        {
+    public void updateInfosInternal(Sequence sequence) {
+        if (sequence != null) {
             final int sizeX = sequence.getSizeX();
             final int sizeY = sequence.getSizeY();
             final int sizeZ = sequence.getSizeZ();
@@ -474,13 +428,11 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
             nameField.setText(sequence.getName());
             // path
-            if (StringUtil.isEmpty(path))
-            {
+            if (StringUtil.isEmpty(path)) {
                 pathLabel.setVisible(false);
                 pathField.setVisible(false);
             }
-            else
-            {
+            else {
                 pathLabel.setVisible(true);
                 pathField.setVisible(true);
                 pathField.setText(path);
@@ -504,8 +456,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
             // owner user name
             String userNames = "";
-            for (String s : sequence.getUserNames())
-            {
+            for (String s : sequence.getUserNames()) {
                 if (StringUtil.isEmpty(userNames))
                     userNames = s;
                 else
@@ -537,8 +488,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
             editBtn.setEnabled(true);
             detailBtn.setEnabled(true);
         }
-        else
-        {
+        else {
             pathLabel.setVisible(false);
             pathField.setVisible(false);
 
@@ -574,22 +524,18 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
     }
 
     @Override
-    public void sequenceActivated(Sequence sequence)
-    {
+    public void sequenceActivated(Sequence sequence) {
         updateInfos();
     }
 
     @Override
-    public void sequenceDeactivated(Sequence sequence)
-    {
+    public void sequenceDeactivated(Sequence sequence) {
         // nothing to do here
     }
 
     @Override
-    public void activeSequenceChanged(SequenceEvent event)
-    {
-        switch (event.getSourceType())
-        {
+    public void activeSequenceChanged(SequenceEvent event) {
+        switch (event.getSourceType()) {
             case SEQUENCE_DATA:
             case SEQUENCE_TYPE:
             case SEQUENCE_META:

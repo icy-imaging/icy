@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.component;
 
@@ -34,14 +34,10 @@ import org.pushingpixels.substance.api.SubstanceLookAndFeel;
  * defined by a value and an extent. The upper value returned by RangeSlider is simply the lower
  * value plus the extent.
  * </p>
+ *
+ * @author Thomas MUSSET
  */
-public class RangeSlider extends JSlider
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 2079286476964629269L;
-
+public class RangeSlider extends JSlider {
     /**
      * Creates a range slider with the specified orientation and the
      * specified minimum, maximum, initial values and extend.
@@ -51,19 +47,13 @@ public class RangeSlider extends JSlider
      * The <code>BoundedRangeModel</code> that holds the slider's data handles any issues that may
      * arise from improperly setting the minimum, initial, and maximum values on the slider. See the
      * {@code BoundedRangeModel} documentation for details.
-     * 
-     * @param orientation
-     *        the orientation of the slider
-     * @param min
-     *        the minimum value of the slider
-     * @param max
-     *        the maximum value of the slider
-     * @param low
-     *        the lower range value of the slider
-     * @param high
-     *        the higher range value of the slider
-     * @throws IllegalArgumentException
-     *         if orientation is not one of {@code VERTICAL}, {@code HORIZONTAL}
+     *
+     * @param orientation the orientation of the slider
+     * @param min         the minimum value of the slider
+     * @param max         the maximum value of the slider
+     * @param low         the lower range value of the slider
+     * @param high        the higher range value of the slider
+     * @throws IllegalArgumentException if orientation is not one of {@code VERTICAL}, {@code HORIZONTAL}
      * @see BoundedRangeModel
      * @see #setOrientation
      * @see #setMinimum
@@ -71,8 +61,7 @@ public class RangeSlider extends JSlider
      * @see #setLowerValue
      * @see #setUpperValue
      */
-    public RangeSlider(int orientation, int min, int max, int low, int high)
-    {
+    public RangeSlider(int orientation, int min, int max, int low, int high) {
         super(orientation, min, max, low);
         // remove focus as we cannot choose which bound to move
         super.setFocusable(false);
@@ -85,23 +74,18 @@ public class RangeSlider extends JSlider
      * The <code>BoundedRangeModel</code> that holds the slider's data handles any issues that may
      * arise from improperly setting the minimum, initial, and maximum values on the slider. See the
      * {@code BoundedRangeModel} documentation for details.
-     * 
-     * @param min
-     *        the minimum value of the slider
-     * @param max
-     *        the maximum value of the slider
-     * @param low
-     *        the lower range value of the slider
-     * @param high
-     *        the higher range value of the slider
+     *
+     * @param min  the minimum value of the slider
+     * @param max  the maximum value of the slider
+     * @param low  the lower range value of the slider
+     * @param high the higher range value of the slider
      * @see BoundedRangeModel
      * @see #setMinimum
      * @see #setMaximum
      * @see #setLowerValue
      * @see #setUpperValue
      */
-    public RangeSlider(int min, int max, int low, int high)
-    {
+    public RangeSlider(int min, int max, int low, int high) {
         this(HORIZONTAL, min, max, low, high);
     }
 
@@ -112,17 +96,14 @@ public class RangeSlider extends JSlider
      * The <code>BoundedRangeModel</code> that holds the slider's data handles any issues that may
      * arise from improperly setting the minimum and maximum values on the slider. See the
      * {@code BoundedRangeModel} documentation for details.
-     * 
-     * @param min
-     *        the minimum value of the slider
-     * @param max
-     *        the maximum value of the slider
+     *
+     * @param min the minimum value of the slider
+     * @param max the maximum value of the slider
      * @see BoundedRangeModel
      * @see #setMinimum
      * @see #setMaximum
      */
-    public RangeSlider(int min, int max)
-    {
+    public RangeSlider(int min, int max) {
         this(HORIZONTAL, min, max, (min + max) / 2, 0);
     }
 
@@ -131,15 +112,12 @@ public class RangeSlider extends JSlider
      * range {@code 0} to {@code 100} and an initial value of {@code 50}.
      * The orientation can be
      * either <code>SwingConstants.VERTICAL</code> or <code>SwingConstants.HORIZONTAL</code>.
-     * 
-     * @param orientation
-     *        the orientation of the slider
-     * @throws IllegalArgumentException
-     *         if orientation is not one of {@code VERTICAL}, {@code HORIZONTAL}
+     *
+     * @param orientation the orientation of the slider
+     * @throws IllegalArgumentException if orientation is not one of {@code VERTICAL}, {@code HORIZONTAL}
      * @see #setOrientation
      */
-    public RangeSlider(int orientation)
-    {
+    public RangeSlider(int orientation) {
         this(orientation, 0, 100, 40, 20);
     }
 
@@ -147,14 +125,12 @@ public class RangeSlider extends JSlider
      * Creates a horizontal range slider with the range 0 to 100 and
      * an initial value of 50.
      */
-    public RangeSlider()
-    {
+    public RangeSlider() {
         this(HORIZONTAL, 0, 100, 40, 20);
     }
 
     @Override
-    public void setFocusable(boolean focusable)
-    {
+    public void setFocusable(boolean focusable) {
         // not focusable
         super.setFocusable(false);
     }
@@ -164,10 +140,9 @@ public class RangeSlider extends JSlider
      * thumbs.
      */
     @Override
-    public void updateUI()
-    {
-        if (SubstanceLookAndFeel.isCurrentLookAndFeel())
-        {
+    public void updateUI() {
+        // TODO: 25/01/2023 Remove this
+        if (SubstanceLookAndFeel.isCurrentLookAndFeel()) {
             setUI(new RangeSliderUI(this));
             // Update UI for slider labels. This must be called after updating the
             // UI of the slider. Refer to JSlider.updateUI().
@@ -181,8 +156,7 @@ public class RangeSlider extends JSlider
      * Returns the lower value in the range.
      */
     @Override
-    public int getValue()
-    {
+    public int getValue() {
         return super.getValue();
     }
 
@@ -190,8 +164,7 @@ public class RangeSlider extends JSlider
      * Sets the lower value in the range.
      */
     @Override
-    public void setValue(int value)
-    {
+    public void setValue(int value) {
         int oldValue = getValue();
         if (oldValue == value)
             return;
@@ -208,32 +181,28 @@ public class RangeSlider extends JSlider
     /**
      * Returns the lower value in the range.
      */
-    public int getLowerValue()
-    {
+    public int getLowerValue() {
         return getValue();
     }
 
     /**
      * Sets the lower value in the range.
      */
-    public void setLowerValue(int value)
-    {
+    public void setLowerValue(int value) {
         setValue(value);
     }
 
     /**
      * Returns the upper value in the range.
      */
-    public int getUpperValue()
-    {
+    public int getUpperValue() {
         return getValue() + getExtent();
     }
 
     /**
      * Sets the upper value in the range.
      */
-    public void setUpperValue(int value)
-    {
+    public void setUpperValue(int value) {
         // Compute new extent.
         int lowerValue = getValue();
         int newExtent = Math.min(Math.max(0, value - lowerValue), getMaximum() - lowerValue);

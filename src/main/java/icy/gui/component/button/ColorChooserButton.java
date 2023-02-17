@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.component.button;
 
@@ -30,36 +30,25 @@ import javax.swing.JColorChooser;
 
 /**
  * Color button used to select a specific color.
- * 
+ *
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class ColorChooserButton extends JButton implements ActionListener
-{
-    public static interface ColorChangeListener extends EventListener
-    {
+public class ColorChooserButton extends JButton implements ActionListener {
+    public interface ColorChangeListener extends EventListener {
         void colorChanged(ColorChooserButton source);
     }
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -5130821224410911737L;
-
     private String colorChooseText;
 
-    /**
-     * 
-     */
-    public ColorChooserButton()
-    {
+    public ColorChooserButton() {
         this(Color.black);
     }
 
     /**
-     * @param color
+     * @param color default color
      */
-    public ColorChooserButton(Color color)
-    {
+    public ColorChooserButton(Color color) {
         super();
 
         // setBorderPainted(false);
@@ -78,19 +67,15 @@ public class ColorChooserButton extends JButton implements ActionListener
     /**
      * @return the color
      */
-    public Color getColor()
-    {
+    public Color getColor() {
         return getBackground();
     }
 
     /**
-     * @param color
-     *        the color to set
+     * @param color the color to set
      */
-    public void setColor(Color color)
-    {
-        if (getColor() != color)
-        {
+    public void setColor(Color color) {
+        if (getColor() != color) {
             setBackground(color);
             // notify about color change
             fireColorChanged();
@@ -100,45 +85,37 @@ public class ColorChooserButton extends JButton implements ActionListener
     /**
      * @return the colorChooseText
      */
-    public String getColorChooseText()
-    {
+    public String getColorChooseText() {
         return colorChooseText;
     }
 
     /**
-     * @param colorChooseText
-     *        the colorChooseText to set
+     * @param colorChooseText the colorChooseText to set
      */
-    public void setColorChooseText(String colorChooseText)
-    {
+    public void setColorChooseText(String colorChooseText) {
         this.colorChooseText = colorChooseText;
     }
 
-    protected void fireColorChanged()
-    {
+    protected void fireColorChanged() {
         for (ColorChangeListener listener : listenerList.getListeners(ColorChangeListener.class))
             listener.colorChanged(this);
     }
 
     /**
      * Adds a <code>ColorChangeListener</code> to the button.
-     * 
-     * @param l
-     *        the listener to be added
+     *
+     * @param l the listener to be added
      */
-    public void addColorChangeListener(ColorChangeListener l)
-    {
+    public void addColorChangeListener(ColorChangeListener l) {
         listenerList.add(ColorChangeListener.class, l);
     }
 
     /**
      * Removes a ColorChangeListener from the button.
-     * 
-     * @param l
-     *        the listener to be removed
+     *
+     * @param l the listener to be removed
      */
-    public void removeColorChangeListener(ColorChangeListener l)
-    {
+    public void removeColorChangeListener(ColorChangeListener l) {
         listenerList.remove(ColorChangeListener.class, l);
     }
 
@@ -152,8 +129,7 @@ public class ColorChooserButton extends JButton implements ActionListener
     // }
 
     @Override
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
         final Color c = JColorChooser.showDialog(this, colorChooseText, getColor());
 
         if (c != null)

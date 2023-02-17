@@ -1,31 +1,28 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.component;
 
-import icy.gui.component.button.IcyButton;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
+import icy.gui.component.button.IcyButtonNew;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.EventListener;
 
 import javax.swing.BorderFactory;
@@ -39,46 +36,33 @@ import javax.swing.SwingConstants;
 
 /**
  * JTabbedPane with close button (configurable) in tab.
- * 
+ *
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class CloseableTabbedPane extends JTabbedPane
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 2105647353561738725L;
-
-    public static interface CloseableTabbedPaneListener extends EventListener
-    {
+public class CloseableTabbedPane extends JTabbedPane {
+    public interface CloseableTabbedPaneListener extends EventListener {
         /**
          * Called when the tab close button has been clicked.<br>
          * This callback is used to do special actions before tab close.<br>
          * You can prevent the close operation by returning false.
-         * 
+         *
          * @return true if the tab can be closed, false otherwise.
          */
-        public boolean tabClosing(int index, String title);
+        boolean tabClosing(int index, String title);
 
         /**
          * Called when the tab has been closed.
          */
-        public void tabClosed(int index, String title);
+        void tabClosed(int index, String title);
     }
 
-    private class CloseableTabComponent extends JPanel
-    {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 6828288788693627610L;
-
-        final private IcyButton closeButton;
+    private class CloseableTabComponent extends JPanel {
+        final private IcyButtonNew closeButton;
         final private JLabel label;
         final private Component sep;
 
-        public CloseableTabComponent(String title, Icon icon)
-        {
+        public CloseableTabComponent(String title, Icon icon) {
             super();
 
             setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
@@ -90,25 +74,18 @@ public class CloseableTabbedPane extends JTabbedPane
 
             sep = Box.createHorizontalStrut(6);
 
-            closeButton = new IcyButton(new IcyIcon(ResourceUtil.ICON_DELETE, 12));
-            closeButton.setFlat(true);
+            closeButton = new IcyButtonNew(GoogleMaterialDesignIcons.DELETE);
+            //closeButton.setFlat(true);
             closeButton.setContentAreaFilled(false);
             closeButton.setToolTipText("close");
 
-            closeButton.addActionListener(new ActionListener()
-            {
-                @Override
-                public void actionPerformed(ActionEvent actionevent)
-                {
-                    final int index = indexOfTabComponent(CloseableTabComponent.this);
+            closeButton.addActionListener(actionevent -> {
+                final int index = indexOfTabComponent(CloseableTabComponent.this);
 
-                    if (index != -1)
-                    {
-                        if (CloseableTabbedPane.this.fireTabClosing(index, getTitle()))
-                        {
-                            CloseableTabbedPane.this.removeTabAt(index);
-                            CloseableTabbedPane.this.fireTabClosed(index, getTitle());
-                        }
+                if (index != -1) {
+                    if (CloseableTabbedPane.this.fireTabClosing(index, getTitle())) {
+                        CloseableTabbedPane.this.removeTabAt(index);
+                        CloseableTabbedPane.this.fireTabClosed(index, getTitle());
                     }
                 }
             });
@@ -120,45 +97,37 @@ public class CloseableTabbedPane extends JTabbedPane
             validate();
         }
 
-        public boolean isClosable()
-        {
+        public boolean isClosable() {
             return closeButton.isVisible();
         }
 
-        public void setClosable(boolean value)
-        {
+        public void setClosable(boolean value) {
             sep.setVisible(value);
             closeButton.setVisible(value);
         }
 
-        public String getTitle()
-        {
+        public String getTitle() {
             return label.getText();
         }
 
-        public void setTitle(String title)
-        {
+        public void setTitle(String title) {
             label.setText(title);
         }
 
-        public void setIcon(Icon icon)
-        {
+        public void setIcon(Icon icon) {
             label.setIcon(icon);
         }
 
-        public void setDisabledIcon(Icon disabledIcon)
-        {
+        public void setDisabledIcon(Icon disabledIcon) {
             label.setDisabledIcon(disabledIcon);
         }
 
-        public void setBackgroundAll(Color background)
-        {
+        public void setBackgroundAll(Color background) {
             label.setBackground(background);
             closeButton.setBackground(background);
         }
 
-        public void setForegroundAll(Color foreground)
-        {
+        public void setForegroundAll(Color foreground) {
             label.setForeground(foreground);
             closeButton.setForeground(foreground);
         }
@@ -167,62 +136,51 @@ public class CloseableTabbedPane extends JTabbedPane
     /**
      * {@link JTabbedPane}
      */
-    public CloseableTabbedPane()
-    {
+    public CloseableTabbedPane() {
         super();
     }
 
     /**
      * {@link JTabbedPane}
      */
-    public CloseableTabbedPane(int tabPlacement)
-    {
+    public CloseableTabbedPane(int tabPlacement) {
         super(tabPlacement);
     }
 
     /**
      * {@link JTabbedPane}
      */
-    public CloseableTabbedPane(int tabPlacement, int tabLayoutPolicy)
-    {
+    public CloseableTabbedPane(int tabPlacement, int tabLayoutPolicy) {
         super(tabPlacement, tabLayoutPolicy);
     }
 
     /**
      * Returns the 'closable' state of tab component at <code>index</code>.
-     * 
-     * @param index
-     *        the tab index where the check state is queried
+     *
+     * @param index the tab index where the check state is queried
      * @return true if tab component at <code>index</code> can be closed (close button visible).<br>
-     *         Returns false otherwise
-     * @exception IndexOutOfBoundsException
-     *            if index is out of range (index &lt; 0 || index &gt;= tab count)
+     * Returns false otherwise
+     * @throws IndexOutOfBoundsException if index is out of range (index &lt; 0 || index &gt;= tab count)
      * @see #setTabClosable(int, boolean)
      */
-    public boolean isTabClosable(int index)
-    {
+    public boolean isTabClosable(int index) {
         return ((CloseableTabComponent) getTabComponentAt(index)).isClosable();
     }
 
     /**
      * Set the 'closable' state of tab component at <code>index</code>.
-     * 
-     * @param index
-     *        the tab index we want to set the 'closable' state
-     * @param value
-     *        true if the tab should be 'closable' (close button visible), false otherwise.
-     * @exception IndexOutOfBoundsException
-     *            if index is out of range (index &lt; 0 || index &gt;= tab count)
+     *
+     * @param index the tab index we want to set the 'closable' state
+     * @param value true if the tab should be 'closable' (close button visible), false otherwise.
+     * @throws IndexOutOfBoundsException if index is out of range (index &lt; 0 || index &gt;= tab count)
      * @see #isTabClosable(int)
      */
-    public void setTabClosable(int index, boolean value)
-    {
+    public void setTabClosable(int index, boolean value) {
         ((CloseableTabComponent) getTabComponentAt(index)).setClosable(value);
     }
 
     @Override
-    public void setIconAt(int index, Icon icon)
-    {
+    public void setIconAt(int index, Icon icon) {
         super.setIconAt(index, icon);
 
         final CloseableTabComponent comp = (CloseableTabComponent) getTabComponentAt(index);
@@ -232,8 +190,7 @@ public class CloseableTabbedPane extends JTabbedPane
     }
 
     @Override
-    public void setDisabledIconAt(int index, Icon disabledIcon)
-    {
+    public void setDisabledIconAt(int index, Icon disabledIcon) {
         super.setDisabledIconAt(index, disabledIcon);
 
         final CloseableTabComponent comp = (CloseableTabComponent) getTabComponentAt(index);
@@ -243,8 +200,7 @@ public class CloseableTabbedPane extends JTabbedPane
     }
 
     @Override
-    public void setBackgroundAt(int index, Color background)
-    {
+    public void setBackgroundAt(int index, Color background) {
         super.setBackgroundAt(index, background);
 
         final CloseableTabComponent comp = (CloseableTabComponent) getTabComponentAt(index);
@@ -254,8 +210,7 @@ public class CloseableTabbedPane extends JTabbedPane
     }
 
     @Override
-    public void setForegroundAt(int index, Color foreground)
-    {
+    public void setForegroundAt(int index, Color foreground) {
         super.setForegroundAt(index, foreground);
 
         final CloseableTabComponent comp = (CloseableTabComponent) getTabComponentAt(index);
@@ -265,8 +220,7 @@ public class CloseableTabbedPane extends JTabbedPane
     }
 
     @Override
-    public void setTitleAt(int index, String title)
-    {
+    public void setTitleAt(int index, String title) {
         super.setTitleAt(index, title);
 
         final CloseableTabComponent comp = (CloseableTabComponent) getTabComponentAt(index);
@@ -276,22 +230,19 @@ public class CloseableTabbedPane extends JTabbedPane
     }
 
     @Override
-    public void insertTab(String title, Icon icon, Component component, String tip, int index)
-    {
+    public void insertTab(String title, Icon icon, Component component, String tip, int index) {
         super.insertTab(title, icon, component, tip, index);
 
         setTabComponentAt(index, new CloseableTabComponent(title, icon));
     }
 
-    protected void fireTabClosed(int index, String text)
-    {
+    protected void fireTabClosed(int index, String text) {
         for (CloseableTabbedPaneListener l : listenerList.getListeners(CloseableTabbedPaneListener.class))
             l.tabClosed(index, text);
 
     }
 
-    protected boolean fireTabClosing(int index, String text)
-    {
+    protected boolean fireTabClosing(int index, String text) {
         for (CloseableTabbedPaneListener l : listenerList.getListeners(CloseableTabbedPaneListener.class))
             if (!l.tabClosing(index, text))
                 return false;
@@ -299,13 +250,11 @@ public class CloseableTabbedPane extends JTabbedPane
         return true;
     }
 
-    public void addCloseableTabbedPaneListener(CloseableTabbedPaneListener l)
-    {
+    public void addCloseableTabbedPaneListener(CloseableTabbedPaneListener l) {
         listenerList.add(CloseableTabbedPaneListener.class, l);
     }
 
-    public void removeCloseableTabbedPaneListener(CloseableTabbedPaneListener l)
-    {
+    public void removeCloseableTabbedPaneListener(CloseableTabbedPaneListener l) {
         listenerList.remove(CloseableTabbedPaneListener.class, l);
     }
 }

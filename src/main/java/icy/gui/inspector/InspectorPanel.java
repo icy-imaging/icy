@@ -1,72 +1,59 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.inspector;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.*;
 
 import icy.gui.component.ExtTabbedPanel;
 import icy.gui.component.ExternalizablePanel;
-import icy.gui.component.button.IcyToggleButton;
+import icy.gui.component.button.IcyToggleButtonNew;
 import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.main.ActiveSequenceListener;
 import icy.gui.main.ActiveViewerListener;
 import icy.gui.main.MainFrame;
 import icy.gui.system.MemoryMonitorPanel;
 import icy.gui.system.OutputConsolePanel;
-import icy.gui.system.OutputConsolePanel.OutputConsoleChangeListener;
+import icy.gui.util.LookAndFeelUtil;
 import icy.gui.viewer.Viewer;
 import icy.gui.viewer.ViewerEvent;
 import icy.image.cache.ImageCache;
 import icy.main.Icy;
 import icy.preferences.ApplicationPreferences;
 import icy.preferences.GeneralPreferences;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.system.thread.ThreadUtil;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 /**
  * This window shows all details about the current sequence.
- * 
+ *
  * @author Fabrice de Chaumont &amp; Stephane
+ * @author Thomas MUSSET
  */
-public class InspectorPanel extends ExternalizablePanel implements ActiveViewerListener, ActiveSequenceListener
-{
-    private static final long serialVersionUID = 5538230736731006318L;
-
-    /**
-     * GUI
-     */
+public class InspectorPanel extends ExternalizablePanel implements ActiveViewerListener, ActiveSequenceListener {
+    // GUI
     final ExtTabbedPanel mainPane;
 
     final SequencePanel sequencePanel;
@@ -76,13 +63,12 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     final OutputConsolePanel outputConsolePanel;
     // final ChatPanel chatPanel;
 
-    final IcyToggleButton virtualModeBtn;
+    final IcyToggleButtonNew virtualModeBtn;
 
     /**
      * The width of the inner component of the inspector should not exceed 300.
      */
-    public InspectorPanel()
-    {
+    public InspectorPanel() {
         super("Inspector", "inspector", new Point(600, 140), new Dimension(300, 600));
 
         // tab panel
@@ -99,25 +85,26 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
         // chatPanel = new ChatPanel();
 
         // virtual mode button (set the same size as memory monitor)
-        virtualModeBtn = new IcyToggleButton(new IcyIcon(ResourceUtil.ICON_HDD_STREAM, 48));
+        virtualModeBtn = new IcyToggleButtonNew(
+                GoogleMaterialDesignIcons.FLASH_OFF,
+                GoogleMaterialDesignIcons.FLASH_ON,
+                48f
+        );
         virtualModeBtn.setToolTipText("Enable / disable the virtual mode (all images are created in virtual mode)");
         virtualModeBtn.setHideActionText(true);
-        virtualModeBtn.setFlat(true);
         virtualModeBtn.setFocusable(false);
         virtualModeBtn.setSelected(GeneralPreferences.getVirtualMode());
-        virtualModeBtn.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                setVirtualModeInternal(!GeneralPreferences.getVirtualMode());
-            }
-        });
+        virtualModeBtn.addActionListener(e -> setVirtualModeInternal(!GeneralPreferences.getVirtualMode()));
+
+        final JScrollPane scrollPane = new JScrollPane(
+                sequencePanel,
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+        );
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         // add main tab panels
-        mainPane.addTab("Sequence", null, new JScrollPane(sequencePanel,
-                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER),
-                "Sequence informations");
+        mainPane.addTab("Sequence", null, scrollPane, "Sequence informations");
         // mainPane.add("Active Plugin", pluginsPanel);
         mainPane.addTab("ROI", null, roisPanel, "Manage / edit your ROI");
         mainPane.addTab("Layer", null, layersPanel, "Show all layers details");
@@ -147,46 +134,27 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
         validate();
         setVisible(true);
 
-        // get default color of tab background
-        final Color defaultBgColor = mainPane.getBackgroundAt(0);
+        outputConsolePanel.addOutputConsoleChangeListener((source, isError) -> {
+            final int index = getIndexOfTab(outputConsolePanel);
 
-        mainPane.addChangeListener(new ChangeListener()
-        {
-            @Override
-            public void stateChanged(ChangeEvent e)
-            {
-                final int index = getIndexOfTab(outputConsolePanel);
+            if ((index != -1) && (mainPane.getSelectedIndex() != index)) {
+                final boolean fIsError = isError;
 
-                // set back default tab color
-                if ((index != -1) && (mainPane.getSelectedIndex() == index))
-                    mainPane.setBackgroundAt(index, defaultBgColor);
-            }
-        });
+                ThreadUtil.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        // if it's already red, don't change background
+                        final boolean isRed = LookAndFeelUtil.isConsoleRed(mainPane.getBackgroundAt(index));
+                        if (isRed)
+                            return;
 
-        outputConsolePanel.addOutputConsoleChangeListener(new OutputConsoleChangeListener()
-        {
-            @Override
-            public void outputConsoleChanged(OutputConsolePanel source, boolean isError)
-            {
-                final int index = getIndexOfTab(outputConsolePanel);
-
-                if ((index != -1) && (mainPane.getSelectedIndex() != index))
-                {
-                    final boolean fIsError = isError;
-
-                    ThreadUtil.invokeLater(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            // change output console tab color when new data
-                            if (fIsError)
-                                mainPane.setBackgroundAt(index, Color.red);
-                            else if (!mainPane.getBackgroundAt(index).equals(Color.red))
-                                mainPane.setBackgroundAt(index, Color.blue);
-                        }
-                    });
-                }
+                        // change output console tab color when new data
+                        if (fIsError)
+                            mainPane.setBackgroundAt(index, LookAndFeelUtil.getConsoleRed());
+                        else
+                            mainPane.setBackgroundAt(index, LookAndFeelUtil.getConsoleBlue());
+                    }
+                });
             }
         });
 
@@ -198,86 +166,73 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     /**
      * @return the mainPane
      */
-    public ExtTabbedPanel getMainPane()
-    {
+    public ExtTabbedPanel getMainPane() {
         return mainPane;
     }
 
     /**
      * @return the sequencePanel
      */
-    public SequencePanel getSequencePanel()
-    {
+    public SequencePanel getSequencePanel() {
         return sequencePanel;
     }
 
     /**
      * @return the roisPanel
      */
-    public RoisPanel getRoisPanel()
-    {
+    public RoisPanel getRoisPanel() {
         return roisPanel;
     }
 
     /**
      * @return the layersPanel
      */
-    public LayersPanel getLayersPanel()
-    {
+    public LayersPanel getLayersPanel() {
         return layersPanel;
     }
 
     /**
      * @return the historyPanel
      */
-    public UndoManagerPanel getHistoryPanel()
-    {
+    public UndoManagerPanel getHistoryPanel() {
         return historyPanel;
     }
 
     /**
      * @return the outputConsolePanel
      */
-    public OutputConsolePanel getOutputConsolePanel()
-    {
+    public OutputConsolePanel getOutputConsolePanel() {
         return outputConsolePanel;
     }
 
-    public static boolean getVirtualMode()
-    {
+    public static boolean getVirtualMode() {
         return GeneralPreferences.getVirtualMode();
     }
 
-    public void setVirtualMode(boolean value)
-    {
+    public void setVirtualMode(boolean value) {
         virtualModeBtn.setSelected(value);
 
         setVirtualModeInternal(value);
     }
 
-    boolean setVirtualModeInternal(boolean value)
-    {
+    // TODO: 25/01/2023 Return value never used
+    boolean setVirtualModeInternal(boolean value) {
         boolean ok = false;
-        try
-        {
+        try {
             // start / end image cache
             if (value)
                 ok = ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
             else
                 ok = ImageCache.shutDownIfEmpty();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
         }
 
         // failed to change virtual mode state ?
-        if (!ok)
-        {
+        if (!ok) {
             // trying to disable cache ? --> show a message so user can understand why it didn't worked
             if (!value)
-                new FailedAnnounceFrame(
-                        "Cannot disable Image cache now. Some open images or sequences are using it.");
+                new FailedAnnounceFrame("Cannot disable Image cache now. Some open images or sequences are using it.");
 
             // restore button state
             virtualModeBtn.setSelected(!value);
@@ -300,8 +255,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     /**
      * Call this to disable 'virtual mode' button
      */
-    public void imageCacheDisabled()
-    {
+    public void imageCacheDisabled() {
         // image cache is disabled so we can't use caching
         setVirtualMode(false);
         virtualModeBtn.setEnabled(false);
@@ -311,21 +265,18 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     /**
      * Return the index of specified tab component
      */
-    protected int getIndexOfTab(Component component)
-    {
+    protected int getIndexOfTab(Component component) {
         return mainPane.indexOfComponent(component);
     }
 
     @Override
-    public void viewerActivated(Viewer viewer)
-    {
+    public void viewerActivated(Viewer viewer) {
         sequencePanel.viewerActivated(viewer);
         layersPanel.viewerActivated(viewer);
     }
 
     @Override
-    public void viewerDeactivated(Viewer viewer)
-    {
+    public void viewerDeactivated(Viewer viewer) {
         // nothing to do here
     }
 
@@ -333,23 +284,20 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
      * Called when focused viewer has changed
      */
     @Override
-    public void activeViewerChanged(ViewerEvent event)
-    {
+    public void activeViewerChanged(ViewerEvent event) {
         sequencePanel.activeViewerChanged(event);
         layersPanel.activeViewerChanged(event);
     }
 
     @Override
-    public void sequenceActivated(Sequence sequence)
-    {
+    public void sequenceActivated(Sequence sequence) {
         sequencePanel.sequenceActivated(sequence);
         roisPanel.sequenceActivated(sequence);
         historyPanel.sequenceActivated(sequence);
     }
 
     @Override
-    public void sequenceDeactivated(Sequence sequence)
-    {
+    public void sequenceDeactivated(Sequence sequence) {
         // nothing to do here
     }
 
@@ -357,9 +305,36 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
      * Called by mainInterface when focused sequence has changed
      */
     @Override
-    public void activeSequenceChanged(SequenceEvent event)
-    {
+    public void activeSequenceChanged(SequenceEvent event) {
         sequencePanel.activeSequenceChanged(event);
         roisPanel.activeSequenceChanged(event);
+    }
+
+    /**
+     * Change tab background color when skin changed
+     */
+    @Override
+    public void updateUI() {
+        super.updateUI();
+
+        if (outputConsolePanel == null || mainPane == null)
+            return;
+
+        final int index = getIndexOfTab(outputConsolePanel);
+
+        if ((index != -1) && (mainPane.getSelectedIndex() != index)) {
+            ThreadUtil.invokeLater(() -> {
+                final boolean isRed = LookAndFeelUtil.isConsoleRed(mainPane.getBackgroundAt(index));
+                final boolean isBlue = LookAndFeelUtil.isConsoleBlue(mainPane.getBackgroundAt(index));
+
+                if (!isRed && !isBlue)
+                    return;
+
+                if (isRed)
+                    mainPane.setBackgroundAt(index, LookAndFeelUtil.getConsoleRed());
+                else
+                    mainPane.setBackgroundAt(index, LookAndFeelUtil.getConsoleBlue());
+            });
+        }
     }
 }

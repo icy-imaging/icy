@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.preferences;
 
@@ -33,36 +33,34 @@ import plugins.kernel.roi.tool.MagicWand.MagicWandGradientToleranceMode;
 
 /**
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class MagicWandPreferencePanel extends PreferencePanel
-{
+public class MagicWandPreferencePanel extends PreferencePanel {
     public static final String NODE_NAME = "Magic Wand";
 
     /**
      * gui
      */
     private NumberTextField gradientToleranceValueField;
-    private JComboBox connectivityField;
-    private JComboBox gradientToleranceModeField;
+    private JComboBox<MagicWandConnectivity> connectivityField;
+    private JComboBox<MagicWandGradientToleranceMode> gradientToleranceModeField;
 
     /**
-     * @param parent
+     * @param parent The parent frame.
      */
-    MagicWandPreferencePanel(PreferenceFrame parent)
-    {
+    MagicWandPreferencePanel(PreferenceFrame parent) {
         super(parent, NODE_NAME, PreferenceFrame.NODE_NAME);
 
         initGui();
         load();
     }
 
-    private void initGui()
-    {
+    private void initGui() {
         GridBagLayout gridBagLayout = new GridBagLayout();
-        gridBagLayout.columnWidths = new int[] {160, 0, 0};
-        gridBagLayout.rowHeights = new int[] {0, 0, 0, 0};
-        gridBagLayout.columnWeights = new double[] {0.0, 1.0, Double.MIN_VALUE};
-        gridBagLayout.rowWeights = new double[] {0.0, 0.0, 0.0, Double.MIN_VALUE};
+        gridBagLayout.columnWidths = new int[]{160, 0, 0};
+        gridBagLayout.rowHeights = new int[]{0, 0, 0, 0};
+        gridBagLayout.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+        gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
         mainPanel.setLayout(gridBagLayout);
 
         JLabel lblNewLabel = new JLabel("Connectivity");
@@ -74,9 +72,9 @@ public class MagicWandPreferencePanel extends PreferencePanel
         gbc_lblNewLabel.gridy = 0;
         mainPanel.add(lblNewLabel, gbc_lblNewLabel);
 
-        connectivityField = new JComboBox();
+        connectivityField = new JComboBox<>();
         connectivityField.setToolTipText("Select connectivy method (default = 8 points)");
-        connectivityField.setModel(new DefaultComboBoxModel(MagicWandConnectivity.values()));
+        connectivityField.setModel(new DefaultComboBoxModel<>(MagicWandConnectivity.values()));
         connectivityField.setSelectedIndex(1);
         GridBagConstraints gbc_connectivityField = new GridBagConstraints();
         gbc_connectivityField.fill = GridBagConstraints.HORIZONTAL;
@@ -94,9 +92,9 @@ public class MagicWandPreferencePanel extends PreferencePanel
         gbc_lblNewLabel_1.gridy = 1;
         mainPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
 
-        gradientToleranceModeField = new JComboBox();
+        gradientToleranceModeField = new JComboBox<>();
         gradientToleranceModeField.setToolTipText("Gradient tolerance mode");
-        gradientToleranceModeField.setModel(new DefaultComboBoxModel(MagicWandGradientToleranceMode.values()));
+        gradientToleranceModeField.setModel(new DefaultComboBoxModel<>(MagicWandGradientToleranceMode.values()));
         gradientToleranceModeField.setSelectedIndex(0);
         GridBagConstraints gbc_gradientToleranceModeField = new GridBagConstraints();
         gbc_gradientToleranceModeField.insets = new Insets(0, 0, 5, 0);
@@ -123,19 +121,18 @@ public class MagicWandPreferencePanel extends PreferencePanel
     }
 
     @Override
-    protected void load()
-    {
+    protected void load() {
         gradientToleranceModeField.setSelectedItem(MagicWandPreferences.getGradientToleranceMode());
         gradientToleranceValueField.setNumericValue(MagicWandPreferences.getGradientToleranceValue());
         connectivityField.setSelectedItem(MagicWandPreferences.getConnectivity());
     }
 
     @Override
-    protected void save()
-    {
-        MagicWandPreferences.setGradientToleranceMode(
-                (MagicWandGradientToleranceMode) gradientToleranceModeField.getSelectedItem());
+    protected void save() {
+        if (gradientToleranceModeField.getSelectedItem() != null)
+            MagicWandPreferences.setGradientToleranceMode((MagicWandGradientToleranceMode) gradientToleranceModeField.getSelectedItem());
         MagicWandPreferences.setGradientToleranceValue(gradientToleranceValueField.getNumericValue());
-        MagicWandPreferences.setConnectivity((MagicWandConnectivity) connectivityField.getSelectedItem());
+        if (connectivityField.getSelectedItem() != null)
+            MagicWandPreferences.setConnectivity((MagicWandConnectivity) connectivityField.getSelectedItem());
     }
 }

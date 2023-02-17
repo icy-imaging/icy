@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.canvas;
 
@@ -57,7 +57,7 @@ import javax.swing.*;
 import icy.canvas.Canvas2DOLD.CanvasView.ImageCache.ImageCacheTile;
 import icy.canvas.CanvasLayerEvent.LayersEventType;
 import icy.canvas.IcyCanvasEvent.IcyCanvasEventType;
-import icy.gui.component.button.IcyToggleButton;
+import icy.gui.component.button.IcyToggleButtonNew;
 import icy.gui.menu.ROITask;
 import icy.gui.menu.ROITask.ROITaskListener;
 import icy.gui.util.GuiUtil;
@@ -79,7 +79,6 @@ import icy.painter.Overlay;
 import icy.preferences.CanvasPreferences;
 import icy.preferences.XMLPreferences;
 import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.roi.ROI;
 import icy.roi.ROI2D;
 import icy.roi.ROI3D;
@@ -99,17 +98,12 @@ import plugins.kernel.roi.tool.ROIMagicWand;
 /**
  * New Canvas 2D : default ICY 2D viewer.<br>
  * Support translation / scale and rotation transformation.<br>
- * 
+ *
  * @author Stephane
+ * @author Thomas MUSSET
  */
 @Deprecated
-public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 8850168605044063031L;
-
+public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener {
     static final int ICON_SIZE = 20;
     static final int ICON_TARGET_SIZE = 20;
 
@@ -130,17 +124,15 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     /**
      * Possible rounded zoom factor : 0.01 --> 100
      */
-    final static double[] zoomRoundedFactors = new double[] {0.01d, 0.02d, 0.0333d, 0.05d, 0.075d, 0.1d, 0.15d, 0.2d, 0.25d, 0.333d, 0.5d, 0.66d, 0.75d, 1d,
-        1.25d, 1.5d, 1.75d, 2d, 2.5d, 3d, 4d, 5d, 6.6d, 7.5d, 10d, 15d, 20d, 30d, 50d, 66d, 75d, 100d};
+    final static double[] zoomRoundedFactors = new double[]{0.01d, 0.02d, 0.0333d, 0.05d, 0.075d, 0.1d, 0.15d, 0.2d, 0.25d, 0.333d, 0.5d, 0.66d, 0.75d, 1d,
+            1.25d, 1.5d, 1.75d, 2d, 2.5d, 3d, 4d, 5d, 6.6d, 7.5d, 10d, 15d, 20d, 30d, 50d, 66d, 75d, 100d};
 
     /**
      * Image overlay to encapsulate image display in a canvas layer
      */
-    protected class Canvas2DImageOverlay extends IcyCanvasImageOverlay
-    {
+    protected class Canvas2DImageOverlay extends IcyCanvasImageOverlay {
         @Override
-        public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas)
-        {
+        public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas) {
             if (g == null)
                 return;
 
@@ -150,8 +142,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             for (ImageCacheTile tile : tiles)
                 g.drawImage(tile.image, tile.rect.x, tile.rect.y, null);
 
-            if (tiles.isEmpty())
-            {
+            if (tiles.isEmpty()) {
                 final Graphics2D g2 = (Graphics2D) g.create();
 
                 // set back canvas coordinate
@@ -175,10 +166,9 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
     }
 
-    public class CanvasMap extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener
-    {
+    public class CanvasMap extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -7305605644605013768L;
 
@@ -188,8 +178,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         private boolean mapMoving;
         private boolean mapRotating;
 
-        public CanvasMap()
-        {
+        public CanvasMap() {
             super();
 
             mouseMapPos = new Point(0, 0);
@@ -210,8 +199,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Return AffineTransform object which transform an image coordinate to map coordinate.
          */
-        public AffineTransform getImageTransform()
-        {
+        public AffineTransform getImageTransform() {
             final int w = getWidth();
             final int h = getHeight();
             final int imgW = getImageSizeX();
@@ -226,20 +214,17 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             final double s;
 
             // scale to viewport
-            if (sx < sy)
-            {
+            if (sx < sy) {
                 s = sx;
                 tx = 0;
                 ty = (h - (imgH * s)) / 2;
             }
-            else if (sx > sy)
-            {
+            else if (sx > sy) {
                 s = sy;
                 ty = 0;
                 tx = (w - (imgW * s)) / 2;
             }
-            else
-            {
+            else {
                 s = sx;
                 tx = 0;
                 ty = 0;
@@ -257,8 +242,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Transform a CanvasMap point in CanvasView point
          */
-        public Point getCanvasPosition(Point p)
-        {
+        public Point getCanvasPosition(Point p) {
             // transform map coordinate to canvas coordinate
             return imageToCanvas(getImagePosition(p));
         }
@@ -266,8 +250,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Transforms a Image point in CanvasView point.
          */
-        public Point getCanvasPosition(Point2D.Double p)
-        {
+        public Point getCanvasPosition(Point2D.Double p) {
             // transform image coordinate to canvas coordinate
             return imageToCanvas(p);
         }
@@ -275,28 +258,23 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Transforms a CanvasMap point in Image point.
          */
-        public Point2D.Double getImagePosition(Point p)
-        {
+        public Point2D.Double getImagePosition(Point p) {
             final AffineTransform trans = getImageTransform();
 
-            try
-            {
+            try {
                 // get image coordinates
                 return (Point2D.Double) trans.inverseTransform(p, new Point2D.Double());
             }
-            catch (Exception ecx)
-            {
+            catch (Exception ecx) {
                 return new Point2D.Double(0, 0);
             }
         }
 
-        public boolean isDragging()
-        {
+        public boolean isDragging() {
             return mapStartDragPos != null;
         }
 
-        protected void updateDrag(InputEvent e)
-        {
+        protected void updateDrag(InputEvent e) {
             // not moving --> exit
             if (!mapMoving)
                 return;
@@ -305,12 +283,11 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             final Point2D.Double imagePoint = getImagePosition(mouseMapPos);
 
             // shift action --> limit to one direction
-            if (EventUtil.isShiftDown(e))
-            {
+            if (EventUtil.isShiftDown(e)) {
                 // X drag
                 if (Math.abs(mouseMapPos.x - mapStartDragPos.x) > Math.abs(mouseMapPos.y - mapStartDragPos.y))
                     imagePoint.y = startDragImagePoint.y;
-                // Y drag
+                    // Y drag
                 else
                     imagePoint.x = startDragImagePoint.x;
             }
@@ -320,8 +297,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             // no need to update mouse canvas position here as it stays at center
         }
 
-        protected void updateRot(InputEvent e)
-        {
+        protected void updateRot(InputEvent e) {
             // not rotating --> exit
             if (!mapRotating)
                 return;
@@ -366,23 +342,18 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseDragged(MouseEvent e)
-        {
+        public void mouseDragged(MouseEvent e) {
             canvasView.handlingMouseMoveEvent = true;
-            try
-            {
+            try {
                 mouseMapPos = new Point(e.getPoint());
 
                 // get the drag event ?
-                if (isDragging())
-                {
+                if (isDragging()) {
                     // left button action --> center view on mouse point
-                    if (EventUtil.isLeftMouseButton(e))
-                    {
+                    if (EventUtil.isLeftMouseButton(e)) {
 
                         mapMoving = true;
-                        if (mapRotating)
-                        {
+                        if (mapRotating) {
                             mapRotating = false;
                             // force repaint so the cross is no more visible
                             canvasView.repaint();
@@ -390,11 +361,9 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
                         updateDrag(e);
                     }
-                    else if (EventUtil.isRightMouseButton(e))
-                    {
+                    else if (EventUtil.isRightMouseButton(e)) {
                         mapMoving = false;
-                        if (!mapRotating)
-                        {
+                        if (!mapRotating) {
                             mapRotating = true;
                             // force repaint so the cross is visible
                             canvasView.repaint();
@@ -407,15 +376,13 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                     e.consume();
                 }
             }
-            finally
-            {
+            finally {
                 canvasView.handlingMouseMoveEvent = false;
             }
         }
 
         @Override
-        public void mouseMoved(MouseEvent e)
-        {
+        public void mouseMoved(MouseEvent e) {
             mouseMapPos = new Point(e.getPoint());
 
             // send to canvas view with converted canvas position
@@ -423,28 +390,23 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseClicked(MouseEvent e)
-        {
+        public void mouseClicked(MouseEvent e) {
             // nothing here
         }
 
         @Override
-        public void mousePressed(MouseEvent e)
-        {
+        public void mousePressed(MouseEvent e) {
             // start drag mouse position
             mapStartDragPos = (Point) e.getPoint().clone();
             // store canvas parameters
             mapStartRotationZ = getRotationZ();
 
             // left click action --> center view on mouse point
-            if (EventUtil.isLeftMouseButton(e))
-            {
+            if (EventUtil.isLeftMouseButton(e)) {
                 final AffineTransform trans = getImageTransform();
 
-                if (trans != null)
-                {
-                    try
-                    {
+                if (trans != null) {
+                    try {
                         // get image coordinates
                         final Point2D imagePoint = trans.inverseTransform(e.getPoint(), null);
                         // center view on this point
@@ -454,8 +416,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                         // consume event
                         e.consume();
                     }
-                    catch (Exception ecx)
-                    {
+                    catch (Exception ecx) {
                         // ignore
                     }
                 }
@@ -463,8 +424,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseReleased(MouseEvent e)
-        {
+        public void mouseReleased(MouseEvent e) {
             // assume end dragging
             mapStartDragPos = null;
             mapRotating = false;
@@ -474,27 +434,22 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseEntered(MouseEvent e)
-        {
+        public void mouseEntered(MouseEvent e) {
             // nothing here
         }
 
         @Override
-        public void mouseExited(MouseEvent e)
-        {
+        public void mouseExited(MouseEvent e) {
             // nothing here
         }
 
         @Override
-        public void mouseWheelMoved(MouseWheelEvent e)
-        {
+        public void mouseWheelMoved(MouseWheelEvent e) {
             // we first center image to mouse position
             final AffineTransform trans = getImageTransform();
 
-            if (trans != null)
-            {
-                try
-                {
+            if (trans != null) {
+                try {
                     // get image coordinates
                     final Point2D imagePoint = trans.inverseTransform(e.getPoint(), null);
                     // center view on this point
@@ -502,8 +457,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                     // update new canvas position
                     setMousePos(imageToCanvas(imagePoint.getX(), imagePoint.getY()));
                 }
-                catch (Exception ecx)
-                {
+                catch (Exception ecx) {
                     // ignore
                 }
             }
@@ -514,36 +468,31 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                 e.consume();
         }
 
-        public void keyPressed(KeyEvent e)
-        {
+        public void keyPressed(KeyEvent e) {
             // just for the shift key state change
             updateDrag(e);
             updateRot(e);
         }
 
-        public void keyReleased(KeyEvent e)
-        {
+        public void keyReleased(KeyEvent e) {
             // just for the shift key state change
             updateDrag(e);
             updateRot(e);
         }
 
         @Override
-        protected void paintComponent(Graphics g)
-        {
+        protected void paintComponent(Graphics g) {
             super.paintComponent(g);
 
             final AffineTransform trans = getImageTransform();
 
-            if (trans != null)
-            {
+            if (trans != null) {
                 final Graphics2D g2 = (Graphics2D) g.create();
                 final List<ImageCacheTile> tiles = canvasView.imageCache.getImageAsTiles();
                 // final BufferedImage img = canvasView.imageCache.getImage();
 
                 // draw image
-                for (ImageCacheTile tile : tiles)
-                {
+                for (ImageCacheTile tile : tiles) {
                     trans.translate(tile.rect.getX(), tile.rect.getY());
                     g2.drawImage(tile.image, trans, null);
                     trans.translate(-tile.rect.getX(), -tile.rect.getY());
@@ -579,8 +528,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                 g2.draw(shape);
 
                 // rotation helper
-                if (mapRotating)
-                {
+                if (mapRotating) {
                     final Point2D center = trans.transform(new Point(canvasCenterX, canvasCenterY), null);
                     final int centerX = (int) Math.round(center.getX());
                     final int centerY = (int) Math.round(center.getY());
@@ -604,32 +552,27 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
     }
 
-    public class CanvasView extends JPanel implements ActionListener, MouseWheelListener, MouseListener, MouseMotionListener
-    {
+    public class CanvasView extends JPanel implements ActionListener, MouseWheelListener, MouseListener, MouseMotionListener {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 4041355608444378172L;
 
-        public class ImageCache implements Runnable
-        {
-            public class ImageCacheTile
-            {
+        public class ImageCache implements Runnable {
+            public class ImageCacheTile {
                 final static int TILE_SIZE = 2048;
 
                 public Rectangle rect;
                 public BufferedImage image;
 
-                public ImageCacheTile(Rectangle r, BufferedImage img)
-                {
+                public ImageCacheTile(Rectangle r, BufferedImage img) {
                     super();
 
                     rect = new Rectangle(r);
                     image = img;
                 }
 
-                public ImageCacheTile(Rectangle r)
-                {
+                public ImageCacheTile(Rectangle r) {
                     this(r, new BufferedImage(r.width, r.height, BufferedImage.TYPE_INT_ARGB));
                 }
             }
@@ -637,7 +580,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             /**
              * image cache
              */
-            private List<ImageCacheTile> tiles;
+            private final List<ImageCacheTile> tiles;
 
             /**
              * processor
@@ -649,15 +592,14 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             private boolean needRebuild;
             private boolean notEnoughMemory;
 
-            public ImageCache()
-            {
+            public ImageCache() {
                 super();
 
                 processor = new SingleProcessor(true, "Canvas2D renderer");
                 // we want the processor to stay alive for sometime
                 processor.setKeepAliveTime(3, TimeUnit.SECONDS);
 
-                tiles = new ArrayList<ImageCacheTile>();
+                tiles = new ArrayList<>();
                 needRebuild = true;
                 notEnoughMemory = false;
 
@@ -665,23 +607,19 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                 processor.submit(this);
             }
 
-            public void invalidCache()
-            {
+            public void invalidCache() {
                 needRebuild = true;
             }
 
-            public boolean isValid()
-            {
+            public boolean isValid() {
                 return !needRebuild;
             }
 
-            public boolean isProcessing()
-            {
+            public boolean isProcessing() {
                 return processor.isProcessing();
             }
 
-            public void refresh()
-            {
+            public void refresh() {
                 // rebuild cache
                 if (needRebuild)
                     processor.submit(this);
@@ -695,31 +633,26 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
              * @deprecated Caching is done as tiles now so it's better to use {@link #getImageAsTiles()}
              */
             @Deprecated
-            public BufferedImage getImage() throws InterruptedException
-            {
+            public BufferedImage getImage() throws InterruptedException {
                 // get original image
                 final IcyBufferedImage icyImage = Canvas2DOLD.this.getImage(getPositionT(), getPositionZ(), getPositionC());
 
                 return IcyBufferedImageUtil.toBufferedImage(icyImage, null);
             }
 
-            public List<ImageCacheTile> getImageAsTiles()
-            {
-                synchronized (tiles)
-                {
+            public List<ImageCacheTile> getImageAsTiles() {
+                synchronized (tiles) {
                     // duplicate list
-                    return new ArrayList<ImageCacheTile>(tiles);
+                    return new ArrayList<>(tiles);
                 }
             }
 
-            public boolean getNotEnoughMemory()
-            {
+            public boolean getNotEnoughMemory() {
                 return notEnoughMemory;
             }
 
             @Override
-            public void run()
-            {
+            public void run() {
                 // important to set it to false at beginning
                 needRebuild = false;
 
@@ -729,10 +662,8 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                 // clear cache so we know we don't have any image at this position
                 if (icyImage == null)
                     tiles.clear();
-                else
-                {
-                    try
-                    {
+                else {
+                    try {
                         {
                             final Rectangle imgRect = icyImage.getBounds();
                             // get tiles list
@@ -742,10 +673,8 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
                             int indNewTiles = 0;
                             // compare with previous tile list
-                            for (ImageCacheTile tile : tiles)
-                            {
-                                if (indNewTiles < len)
-                                {
+                            for (ImageCacheTile tile : tiles) {
+                                if (indNewTiles < len) {
                                     final Rectangle oldRect = tile.rect;
                                     final Rectangle newRect = newTiles.get(indNewTiles).intersection(imgRect);
 
@@ -768,21 +697,17 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
                             // rebuild images
                             final LUT l = getLut();
-                            for (ImageCacheTile tile : tiles)
-                            {
+                            for (ImageCacheTile tile : tiles) {
                                 final IcyBufferedImage icyTile = IcyBufferedImageUtil.getSubImage(icyImage, tile.rect);
 
-                                if (icyTile != null)
-                                {
+                                if (icyTile != null) {
                                     // be sure that we don't keep that in cache (useless and waste cache space)
                                     icyTile.setVolatile(false);
-                                    try
-                                    {
+                                    try {
                                         // convert to buffered image
                                         tile.image = IcyBufferedImageUtil.toBufferedImage(icyTile, tile.image, l);
                                     }
-                                    catch (InterruptedException e)
-                                    {
+                                    catch (InterruptedException e) {
                                         // shouldn't happen here
                                     }
                                 }
@@ -791,8 +716,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
                         notEnoughMemory = false;
                     }
-                    catch (OutOfMemoryError e)
-                    {
+                    catch (OutOfMemoryError e) {
                         notEnoughMemory = true;
                     }
                 }
@@ -818,7 +742,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         private final SmoothMover rotationInfoAlphaMover;
         private String zoomMessage;
         private String rotationMessage;
-        private SingleProcessor cursorUpdator;
+        private final SingleProcessor cursorUpdator;
         Dimension lastSize;
         boolean actived;
         boolean handlingMouseMoveEvent;
@@ -833,8 +757,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         boolean hasMouseFocus;
         boolean areaSelection;
 
-        public CanvasView()
-        {
+        public CanvasView() {
             super();
 
             imageCache = new ImageCache();
@@ -856,11 +779,9 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             zoomInfoAlphaMover = new SmoothMover(0);
             zoomInfoAlphaMover.setMoveTime(500);
             zoomInfoAlphaMover.setUpdateDelay(20);
-            zoomInfoAlphaMover.addListener(new SmoothMoverAdapter()
-            {
+            zoomInfoAlphaMover.addListener(new SmoothMoverAdapter() {
                 @Override
-                public void valueChanged(SmoothMover source, double newValue, int pourcent)
-                {
+                public void valueChanged(SmoothMover source, double newValue, int pourcent) {
                     // just repaint
                     repaint();
                 }
@@ -868,11 +789,9 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             rotationInfoAlphaMover = new SmoothMover(0);
             rotationInfoAlphaMover.setMoveTime(500);
             rotationInfoAlphaMover.setUpdateDelay(20);
-            rotationInfoAlphaMover.addListener(new SmoothMoverAdapter()
-            {
+            rotationInfoAlphaMover.addListener(new SmoothMoverAdapter() {
                 @Override
-                public void valueChanged(SmoothMover source, double newValue, int pourcent)
-                {
+                public void valueChanged(SmoothMover source, double newValue, int pourcent) {
                     // just repaint
                     repaint();
                 }
@@ -886,31 +805,26 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             rotationInfoTimer.setRepeats(false);
             cursorUpdator = new SingleProcessor(true);
 
-            addComponentListener(new ComponentAdapter()
-            {
+            addComponentListener(new ComponentAdapter() {
                 @Override
-                public void componentResized(ComponentEvent e)
-                {
+                public void componentResized(ComponentEvent e) {
                     final Dimension newSize = getSize();
                     int extX = 0;
                     int extY = 0;
 
                     // first time component is displayed ?
-                    if (!actived)
-                    {
+                    if (!actived) {
                         // by default we adapt image to canvas size
                         fitImageToCanvas(false);
                         // center image (if cannot fit to canvas size)
                         centerImage();
                         actived = true;
                     }
-                    else
-                    {
+                    else {
                         // auto FIT enabled
                         if (zoomFitCanvasButton.isSelected())
                             fitImageToCanvas(true);
-                        else
-                        {
+                        else {
                             // re-center
                             final int dx = newSize.width - lastSize.width;
                             final int dy = newSize.height - lastSize.height;
@@ -938,8 +852,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Release some stuff
          */
-        void shutDown()
-        {
+        void shutDown() {
             // stop timer and movers
             refreshTimer.stop();
             zoomInfoTimer.stop();
@@ -954,13 +867,11 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Returns the internal {@link ImageCache} object.
          */
-        public ImageCache getImageCache()
-        {
+        public ImageCache getImageCache() {
             return imageCache;
         }
 
-        protected void updateDrag(boolean control, boolean shift)
-        {
+        protected void updateDrag(boolean control, boolean shift) {
             if (!moving)
                 return;
 
@@ -968,12 +879,11 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             final Point delta = new Point(mousePos.x - startDragPosition.x, mousePos.y - startDragPosition.y);
 
             // shift action --> limit to one direction
-            if (shift)
-            {
+            if (shift) {
                 // X drag
                 if (Math.abs(delta.x) > Math.abs(delta.y))
                     delta.y = 0;
-                // Y drag
+                    // Y drag
                 else
                     delta.x = 0;
             }
@@ -981,8 +891,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             translate(startOffset, delta, control);
         }
 
-        protected void translate(Point startPos, Point delta, boolean control)
-        {
+        protected void translate(Point startPos, Point delta, boolean control) {
             final Point2D.Double deltaD;
 
             // control button down
@@ -999,8 +908,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             setOffset((int) Math.round(startPos.x + deltaD.x), (int) Math.round(startPos.y + deltaD.y), true);
         }
 
-        protected void updateRot(boolean control, boolean shift)
-        {
+        protected void updateRot(boolean control, boolean shift) {
             if (!rotating)
                 return;
 
@@ -1043,10 +951,8 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
          * Internal canvas process on mouseClicked event.<br>
          * Return true if event should be consumed.
          */
-        boolean onMouseClicked(boolean consumed, int clickCount, boolean left, boolean right, boolean control)
-        {
-            if (!consumed)
-            {
+        boolean onMouseClicked(boolean consumed, int clickCount, boolean left, boolean right, boolean control) {
+            if (!consumed) {
                 // nothing yet
             }
 
@@ -1057,20 +963,16 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
          * Internal canvas process on mousePressed event.<br>
          * Return true if event should be consumed.
          */
-        boolean onMousePressed(boolean consumed, boolean left, boolean right, boolean control, boolean shift)
-        {
+        boolean onMousePressed(boolean consumed, boolean left, boolean right, boolean control, boolean shift) {
             // not yet consumed
-            if (!consumed)
-            {
+            if (!consumed) {
                 final ROITask toolTask = Icy.getMainInterface().getROIRibbonTask();
                 final Sequence seq = getSequence();
 
                 // left button press ?
-                if (left)
-                {
+                if (left) {
                     // ROI tool selected --> ROI creation
-                    if ((toolTask != null) && toolTask.isROITool())
-                    {
+                    if ((toolTask != null) && toolTask.isROITool()) {
                         // get the ROI plugin class name
                         final String roiClassName = toolTask.getSelected();
 
@@ -1080,24 +982,20 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                             Icy.getMainInterface().setSelectedTool(null);
 
                         // only if sequence still live
-                        if (seq != null)
-                        {
+                        if (seq != null) {
                             // try to create ROI from current selected ROI tool
                             final ROI roi = ROI.create(roiClassName, getMouseImagePos5D());
                             // roi created ? --> it becomes the selected ROI
-                            if (roi != null)
-                            {
+                            if (roi != null) {
                                 roi.setCreating(true);
 
                                 // a bit hacky but it need special behavior
-                                if (roi instanceof ROIMagicWand)
-                                {
+                                if (roi instanceof ROIMagicWand) {
                                     ((ROIMagicWand) roi).start(getMouseImagePos5D(), getMousePos(), seq, Canvas2DOLD.this, shift);
                                     // attach to sequence (hacky method to avoid undoing Magic Wand)
                                     seq.addROI(roi, false);
                                 }
-                                else
-                                {
+                                else {
                                     // attach to sequence (hacky method to avoid undoing ROI cutting)
                                     seq.addROI(roi, !(roi instanceof ROILineCutter));
                                     // then do exclusive selection
@@ -1105,17 +1003,14 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                                 }
 
                                 // attach to current position
-                                if (shift)
-                                {
+                                if (shift) {
                                     // attach to current Z ?
-                                    if (getPositionZ() != -1)
-                                    {
+                                    if (getPositionZ() != -1) {
                                         if (roi instanceof ROI2D)
                                             ((ROI2D) roi).setZ(getPositionZ());
                                     }
                                     // attach to current T ?
-                                    if (getPositionT() != -1)
-                                    {
+                                    if (getPositionT() != -1) {
                                         if (roi instanceof ROI2D)
                                             ((ROI2D) roi).setT(getPositionT());
                                         else if (roi instanceof ROI3D)
@@ -1155,33 +1050,27 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
          * Internal canvas process on mouseReleased event.<br>
          * Return true if event should be consumed.
          */
-        boolean onMouseReleased(boolean consumed, boolean left, boolean right, boolean control)
-        {
+        boolean onMouseReleased(boolean consumed, boolean left, boolean right, boolean control) {
             // area selection ?
-            if (areaSelection)
-            {
+            if (areaSelection) {
                 final Sequence seq = getSequence();
 
-                if (seq != null)
-                {
+                if (seq != null) {
                     final List<ROI> rois = seq.getROIs();
 
                     // we have some rois ?
-                    if (rois.size() > 0)
-                    {
+                    if (rois.size() > 0) {
                         final Rectangle2D area = canvasToImage(getAreaSelection());
                         // 5D area
                         final Rectangle5D area5d = new Rectangle5D.Double(area.getX(), area.getY(), getPositionZ(), getPositionT(), Double.NEGATIVE_INFINITY,
                                 area.getWidth(), area.getHeight(), 1d, 1d, Double.POSITIVE_INFINITY);
 
                         seq.beginUpdate();
-                        try
-                        {
+                        try {
                             for (ROI roi : rois)
                                 roi.setSelected(roi.intersects(area5d));
                         }
-                        finally
-                        {
+                        finally {
                             seq.endUpdate();
                         }
                     }
@@ -1206,16 +1095,13 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
          * Internal canvas process on mouseMove event.<br>
          * Always processed, no consume here.
          */
-        void onMousePositionChanged(Point pos)
-        {
+        void onMousePositionChanged(Point pos) {
             handlingMouseMoveEvent = true;
-            try
-            {
+            try {
                 // update mouse position
                 setMousePos(pos);
             }
-            finally
-            {
+            finally {
                 handlingMouseMoveEvent = false;
             }
         }
@@ -1224,19 +1110,14 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
          * Internal canvas process on mouseDragged event.<br>
          * Return true if event should be consumed.
          */
-        boolean onMouseDragged(boolean consumed, Point pos, boolean left, boolean right, boolean control, boolean shift)
-        {
-            if (!consumed)
-            {
+        boolean onMouseDragged(boolean consumed, Point pos, boolean left, boolean right, boolean control, boolean shift) {
+            if (!consumed) {
                 // canvas get the drag event ?
-                if (isDragging())
-                {
+                if (isDragging()) {
                     // left mouse button action : translation
-                    if (left)
-                    {
+                    if (left) {
                         moving = true;
-                        if (rotating)
-                        {
+                        if (rotating) {
                             rotating = false;
                             // force repaint so the cross is no more visible
                             canvasView.repaint();
@@ -1245,11 +1126,9 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                         updateDrag(control, shift);
                     }
                     // right mouse button action : rotation
-                    else if (right)
-                    {
+                    else if (right) {
                         moving = false;
-                        if (!rotating)
-                        {
+                        if (!rotating) {
                             rotating = true;
                             // force repaint so the cross is visible
                             canvasView.repaint();
@@ -1276,12 +1155,9 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
          * Internal canvas process on mouseWheelMoved event.<br>
          * Return true if event should be consumed.
          */
-        boolean onMouseWheelMoved(boolean consumed, int wheelRotation, boolean left, boolean right, boolean control, boolean shift)
-        {
-            if (!consumed)
-            {
-                if (!isDragging())
-                {
+        boolean onMouseWheelMoved(boolean consumed, int wheelRotation, boolean left, boolean right, boolean control, boolean shift) {
+            if (!consumed) {
+                if (!isDragging()) {
                     // as soon we manipulate the image with mouse, we want to be focused
                     if (!viewer.hasFocus())
                         viewer.requestFocus();
@@ -1308,8 +1184,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                     // }
 
                     // control button down --> fast zoom
-                    if (control)
-                    {
+                    if (control) {
                         sx *= sx;
                         sy *= sy;
                     }
@@ -1327,8 +1202,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                     double newScaleY = curScaleY;
 
                     // shift key down --> adjust to closest "round" number
-                    if (shift)
-                    {
+                    if (shift) {
                         newScaleX = MathUtil.closest(newScaleX, zoomRoundedFactors);
                         newScaleY = MathUtil.closest(newScaleY, zoomRoundedFactors);
                     }
@@ -1345,8 +1219,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseClicked(MouseEvent e)
-        {
+        public void mouseClicked(MouseEvent e) {
             // send mouse event to overlays first
             Canvas2DOLD.this.mouseClick(e);
 
@@ -1356,8 +1229,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mousePressed(MouseEvent e)
-        {
+        public void mousePressed(MouseEvent e) {
             // send mouse event to overlays first
             Canvas2DOLD.this.mousePressed(e);
 
@@ -1368,8 +1240,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseReleased(MouseEvent e)
-        {
+        public void mouseReleased(MouseEvent e) {
             // send mouse event to overlays first
             Canvas2DOLD.this.mouseReleased(e);
 
@@ -1379,8 +1250,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseEntered(MouseEvent e)
-        {
+        public void mouseEntered(MouseEvent e) {
             hasMouseFocus = true;
 
             // send mouse event to overlays
@@ -1390,8 +1260,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseExited(MouseEvent e)
-        {
+        public void mouseExited(MouseEvent e) {
             hasMouseFocus = false;
 
             // send mouse event to overlays
@@ -1401,8 +1270,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseMoved(MouseEvent e)
-        {
+        public void mouseMoved(MouseEvent e) {
             // process first without consume (update mouse canvas position)
             onMousePositionChanged(e.getPoint());
 
@@ -1411,8 +1279,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseDragged(MouseEvent e)
-        {
+        public void mouseDragged(MouseEvent e) {
             // process first without consume (update mouse canvas position)
             onMousePositionChanged(e.getPoint());
 
@@ -1426,8 +1293,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void mouseWheelMoved(MouseWheelEvent e)
-        {
+        public void mouseWheelMoved(MouseWheelEvent e) {
             // send mouse event to overlays
             Canvas2DOLD.this.mouseWheelMoved(e);
 
@@ -1437,8 +1303,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                 e.consume();
         }
 
-        public void keyPressed(KeyEvent e)
-        {
+        public void keyPressed(KeyEvent e) {
             final boolean control = EventUtil.isControlDown(e);
             final boolean shift = EventUtil.isShiftDown(e);
 
@@ -1447,8 +1312,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             updateRot(control, shift);
         }
 
-        public void keyReleased(KeyEvent e)
-        {
+        public void keyReleased(KeyEvent e) {
             final boolean control = EventUtil.isControlDown(e);
             final boolean shift = EventUtil.isShiftDown(e);
 
@@ -1460,10 +1324,8 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Draw specified image layer and others layers on specified {@link Graphics2D} object.
          */
-        void drawLayer(Graphics2D g, Sequence seq, Layer layer)
-        {
-            if (layer.isVisible())
-            {
+        void drawLayer(Graphics2D g, Sequence seq, Layer layer) {
+            if (layer.isVisible()) {
                 final float opacity = layer.getOpacity();
 
                 if (opacity != 1f)
@@ -1478,19 +1340,16 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Draw specified image layer and others layers on specified {@link Graphics2D} object.
          */
-        void drawImageAndLayers(Graphics2D g, Layer imageLayer)
-        {
+        void drawImageAndLayers(Graphics2D g, Layer imageLayer) {
             final Sequence seq = getSequence();
             final Layer defaultImageLayer = getImageLayer();
 
             // global layer visible switch for canvas
-            if (isLayersVisible())
-            {
+            if (isLayersVisible()) {
                 final List<Layer> layers = getLayers(true);
 
                 // draw them in inverse order to have first painter event at top
-                for (int i = layers.size() - 1; i >= 0; i--)
-                {
+                for (int i = layers.size() - 1; i >= 0; i--) {
                     final Layer layer = layers.get(i);
 
                     // replace the default image layer by the specified one
@@ -1506,8 +1365,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        protected void paintComponent(Graphics g)
-        {
+        protected void paintComponent(Graphics g) {
             super.paintComponent(g);
 
             final int w = getCanvasSizeX();
@@ -1520,8 +1378,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                 final Graphics2D g2 = (Graphics2D) g.create();
 
                 // background
-                if (isBackgroundColorEnabled())
-                {
+                if (isBackgroundColorEnabled()) {
                     g2.setBackground(getBackgroundColor());
                     g2.clearRect(0, 0, w, h);
                 }
@@ -1543,8 +1400,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             }
 
             // area selection
-            if (areaSelection)
-            {
+            if (areaSelection) {
                 final Rectangle area = getAreaSelection();
                 final Graphics2D g2 = (Graphics2D) g.create();
 
@@ -1558,8 +1414,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             }
 
             // synchronized canvas ? display external cursor
-            if (!hasMouseFocus)
-            {
+            if (!hasMouseFocus) {
                 final Graphics2D g2 = (Graphics2D) g.create();
 
                 final Point mousePos = getMousePos();
@@ -1576,8 +1431,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             }
 
             // display zoom info
-            if (zoomInfoAlphaMover.getValue() > 0)
-            {
+            if (zoomInfoAlphaMover.getValue() > 0) {
                 final Graphics2D g2 = (Graphics2D) g.create();
 
                 g2.setFont(font);
@@ -1588,8 +1442,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             }
 
             // display rotation info
-            if (rotationInfoAlphaMover.getValue() > 0)
-            {
+            if (rotationInfoAlphaMover.getValue() > 0) {
                 final Graphics2D g2 = (Graphics2D) g.create();
 
                 g2.setFont(font);
@@ -1600,8 +1453,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             }
 
             // rotation helper
-            if (rotating)
-            {
+            if (rotating) {
                 final Graphics2D g2 = (Graphics2D) g.create();
 
                 final BasicStroke blackStr = new BasicStroke(5);
@@ -1625,7 +1477,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             // image or layers changed during repaint --> refresh again
             if (!isCacheValid())
                 refresh();
-            // cache is being rebuild --> refresh to show progression
+                // cache is being rebuild --> refresh to show progression
             else if (imageCache.isProcessing())
                 refreshLater(100);
 
@@ -1633,8 +1485,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             canvasMap.repaint();
         }
 
-        public void drawTextBottomRight(Graphics2D g, String text, float alpha)
-        {
+        public void drawTextBottomRight(Graphics2D g, String text, float alpha) {
             final Rectangle2D rect = GraphicsUtil.getStringBounds(g, text);
             final int w = (int) rect.getWidth();
             final int h = (int) rect.getHeight();
@@ -1649,8 +1500,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             g.drawString(text, x + 4, y + 2 + h);
         }
 
-        public void drawTextTopRight(Graphics2D g, String text, float alpha)
-        {
+        public void drawTextTopRight(Graphics2D g, String text, float alpha) {
             final Rectangle2D rect = GraphicsUtil.getStringBounds(g, text);
             final int w = (int) rect.getWidth();
             final int h = (int) rect.getHeight();
@@ -1665,8 +1515,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             g.drawString(text, x + 4, y + 2 + h);
         }
 
-        public void drawTextCenter(Graphics2D g, String text, float alpha)
-        {
+        public void drawTextCenter(Graphics2D g, String text, float alpha) {
             final Rectangle2D rect = GraphicsUtil.getStringBounds(g, text);
             final int w = (int) rect.getWidth();
             final int h = (int) rect.getHeight();
@@ -1684,81 +1533,66 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Update mouse cursor
          */
-        protected void updateCursor()
-        {
+        protected void updateCursor() {
             // as it can take a bit of time we do it asynchronously
-            cursorUpdator.submit(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    // final Cursor cursor = getCursor();
-                    //
-                    // // save previous cursor if different from HAND
-                    // if (cursor.getType() != Cursor.HAND_CURSOR)
-                    // previousCursor = cursor;
-                    //
-                    if (isDragging())
-                    {
-                        GuiUtil.setCursor(CanvasView.this, Cursor.HAND_CURSOR);
-                        return;
-                    }
-
-                    if (areaSelection)
-                    {
-                        GuiUtil.setCursor(CanvasView.this, Cursor.CROSSHAIR_CURSOR);
-                        return;
-                    }
-
-                    final Sequence seq = getSequence();
-
-                    if (seq != null)
-                    {
-                        final ROI overlappedRoi = seq.getFocusedROI();
-
-                        // overlapping an ROI ?
-                        if (overlappedRoi != null)
-                        {
-                            final Layer layer = getLayer(overlappedRoi);
-
-                            if ((layer != null) && layer.isVisible())
-                            {
-                                GuiUtil.setCursor(CanvasView.this, Cursor.HAND_CURSOR);
-                                return;
-                            }
-                        }
-
-                        final List<ROI> selectedRois = seq.getSelectedROIs();
-
-                        // search if we are overriding ROI control points
-                        for (ROI selectedRoi : selectedRois)
-                        {
-                            final Layer layer = getLayer(selectedRoi);
-
-                            if ((layer != null) && layer.isVisible() && selectedRoi.hasSelectedPoint())
-                            {
-                                GuiUtil.setCursor(CanvasView.this, Cursor.HAND_CURSOR);
-                                return;
-                            }
-                        }
-                    }
-
-                    // setCursor(previousCursor);
-                    GuiUtil.setCursor(CanvasView.this, Cursor.DEFAULT_CURSOR);
+            cursorUpdator.submit(() -> {
+                // final Cursor cursor = getCursor();
+                //
+                // // save previous cursor if different from HAND
+                // if (cursor.getType() != Cursor.HAND_CURSOR)
+                // previousCursor = cursor;
+                //
+                if (isDragging()) {
+                    GuiUtil.setCursor(CanvasView.this, Cursor.HAND_CURSOR);
+                    return;
                 }
+
+                if (areaSelection) {
+                    GuiUtil.setCursor(CanvasView.this, Cursor.CROSSHAIR_CURSOR);
+                    return;
+                }
+
+                final Sequence seq = getSequence();
+
+                if (seq != null) {
+                    final ROI overlappedRoi = seq.getFocusedROI();
+
+                    // overlapping an ROI ?
+                    if (overlappedRoi != null) {
+                        final Layer layer = getLayer(overlappedRoi);
+
+                        if ((layer != null) && layer.isVisible()) {
+                            GuiUtil.setCursor(CanvasView.this, Cursor.HAND_CURSOR);
+                            return;
+                        }
+                    }
+
+                    final List<ROI> selectedRois = seq.getSelectedROIs();
+
+                    // search if we are overriding ROI control points
+                    for (ROI selectedRoi : selectedRois) {
+                        final Layer layer = getLayer(selectedRoi);
+
+                        if ((layer != null) && layer.isVisible() && selectedRoi.hasSelectedPoint()) {
+                            GuiUtil.setCursor(CanvasView.this, Cursor.HAND_CURSOR);
+                            return;
+                        }
+                    }
+                }
+
+                // setCursor(previousCursor);
+                GuiUtil.setCursor(CanvasView.this, Cursor.DEFAULT_CURSOR);
             });
         }
 
-        public void refresh()
-        {
+        public void refresh() {
             imageCache.refresh();
         }
 
         /**
          * Refresh in sometime
          */
-        public void refreshLater(int milli)
-        {
+        public void refreshLater(int milli) {
             refreshTimer.setInitialDelay(milli);
             refreshTimer.start();
         }
@@ -1766,17 +1600,14 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Display zoom message for the specified amount of time (in ms)
          */
-        public void setZoomMessage(String value, int delay)
-        {
+        public void setZoomMessage(String value, int delay) {
             zoomMessage = value;
 
-            if (StringUtil.isEmpty(value))
-            {
+            if (StringUtil.isEmpty(value)) {
                 zoomInfoTimer.stop();
                 zoomInfoAlphaMover.setValue(0d);
             }
-            else
-            {
+            else {
                 zoomInfoAlphaMover.setValue(0.8d);
                 zoomInfoTimer.setInitialDelay(delay);
                 zoomInfoTimer.restart();
@@ -1786,40 +1617,33 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         /**
          * Display rotation message for the specified amount of time (in ms)
          */
-        public void setRotationMessage(String value, int delay)
-        {
+        public void setRotationMessage(String value, int delay) {
             rotationMessage = value;
 
-            if (StringUtil.isEmpty(value))
-            {
+            if (StringUtil.isEmpty(value)) {
                 rotationInfoTimer.stop();
                 rotationInfoAlphaMover.setValue(0d);
             }
-            else
-            {
+            else {
                 rotationInfoAlphaMover.setValue(0.8d);
                 rotationInfoTimer.setInitialDelay(delay);
                 rotationInfoTimer.restart();
             }
         }
 
-        public void imageChanged()
-        {
+        public void imageChanged() {
             imageCache.invalidCache();
         }
 
-        public void layersChanged()
-        {
+        public void layersChanged() {
             // nothing here
         }
 
-        public boolean isDragging()
-        {
+        public boolean isDragging() {
             return !areaSelection && (startDragPosition != null);
         }
 
-        public boolean isCacheValid()
-        {
+        public boolean isCacheValid() {
             return imageCache.isValid();
         }
 
@@ -1827,8 +1651,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
          * Returns the current Rectangle region of the area selection.<br>
          * It returns <code>null</code> if we are not in area selection mode
          */
-        public Rectangle getAreaSelection()
-        {
+        public Rectangle getAreaSelection() {
             if (!areaSelection)
                 return null;
 
@@ -1836,23 +1659,19 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             final int w, h;
             final Point mp = getMousePos();
 
-            if (mp.x > startDragPosition.x)
-            {
+            if (mp.x > startDragPosition.x) {
                 x = startDragPosition.x;
                 w = mp.x - x;
             }
-            else
-            {
+            else {
                 x = mp.x;
                 w = startDragPosition.x - x;
             }
-            if (mp.y > startDragPosition.y)
-            {
+            if (mp.y > startDragPosition.y) {
                 y = startDragPosition.y;
                 h = mp.y - y;
             }
-            else
-            {
+            else {
                 y = mp.y;
                 h = startDragPosition.y - y;
             }
@@ -1861,8 +1680,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void actionPerformed(ActionEvent e)
-        {
+        public void actionPerformed(ActionEvent e) {
             final Object source = e.getSource();
 
             if (source == refreshTimer)
@@ -1878,19 +1696,16 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
      * * index 0 : translation X (int) index 1 : translation Y (int) index 2 :
      * scale X (double) index 3 : scale Y (double) index 4 : rotation angle
      * (double)
-     * 
+     *
      * @author Stephane
      */
-    static class Canvas2DSmoothMover extends MultiSmoothMover
-    {
-        public Canvas2DSmoothMover(int size, SmoothMoveType type)
-        {
+    static class Canvas2DSmoothMover extends MultiSmoothMover {
+        public Canvas2DSmoothMover(int size, SmoothMoveType type) {
             super(size, type);
         }
 
         @Override
-        public void moveTo(int index, double value)
-        {
+        public void moveTo(int index, double value) {
             final double v;
 
             // format value for radian 0..2PI range
@@ -1899,8 +1714,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             else
                 v = value;
 
-            if (destValues[index] != v)
-            {
+            if (destValues[index] != v) {
                 destValues[index] = v;
                 // start movement
                 start(index, System.currentTimeMillis());
@@ -1908,14 +1722,12 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void moveTo(double[] values)
-        {
+        public void moveTo(double[] values) {
             final int maxInd = Math.min(values.length, destValues.length);
 
             // first we check we have at least one value which had changed
             boolean changed = false;
-            for (int index = 0; index < maxInd; index++)
-            {
+            for (int index = 0; index < maxInd; index++) {
                 final double value;
 
                 // format value for radian 0..2PI range
@@ -1924,21 +1736,18 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                 else
                     value = values[index];
 
-                if (destValues[index] != value)
-                {
+                if (destValues[index] != value) {
                     changed = true;
                     break;
                 }
             }
 
             // value changed ?
-            if (changed)
-            {
+            if (changed) {
                 // better synchronization for multiple changes
                 final long time = System.currentTimeMillis();
 
-                for (int index = 0; index < maxInd; index++)
-                {
+                for (int index = 0; index < maxInd; index++) {
                     final double value;
 
                     // format value for radian 0..2PI range
@@ -1955,8 +1764,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void setValue(int index, double value)
-        {
+        public void setValue(int index, double value) {
             final double v;
 
             // format value for radian 0..2PI range
@@ -1973,12 +1781,10 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        public void setValues(double[] values)
-        {
+        public void setValues(double[] values) {
             final int maxInd = Math.min(values.length, destValues.length);
 
-            for (int index = 0; index < maxInd; index++)
-            {
+            for (int index = 0; index < maxInd; index++) {
                 final double value;
 
                 // format value for radian 0..2PI range
@@ -1996,8 +1802,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        protected void setCurrentValue(int index, double value, int pourcent)
-        {
+        protected void setCurrentValue(int index, double value, int pourcent) {
             final double v;
 
             // format value for radian 0..2PI range
@@ -2006,8 +1811,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             else
                 v = value;
 
-            if (currentValues[index] != v)
-            {
+            if (currentValues[index] != v) {
                 currentValues[index] = v;
                 // notify value changed
                 changed(index, v, pourcent);
@@ -2015,18 +1819,15 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         @Override
-        protected void start(int index, long time)
-        {
+        protected void start(int index, long time) {
             final double current = currentValues[index];
             final double dest;
 
-            if (index == ROT)
-            {
+            if (index == ROT) {
                 double d = destValues[index];
 
                 // choose shorter path
-                if (Math.abs(d - current) > Math.PI)
-                {
+                if (Math.abs(d - current) > Math.PI) {
                     if (d > Math.PI)
                         dest = d - (Math.PI * 2);
                     else
@@ -2042,8 +1843,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             final int size = Math.max(moveTime / getUpdateDelay(), 1);
 
             // calculate interpolation
-            switch (type)
-            {
+            switch (type) {
                 case NONE:
                     stepValues[index] = new double[2];
                     stepValues[index][0] = current;
@@ -2064,8 +1864,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             }
 
             // notify and start
-            if (!isMoving(index))
-            {
+            if (!isMoving(index)) {
                 moveStarted(index, time);
                 moving[index] = true;
             }
@@ -2102,7 +1901,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     /**
      * GUI &amp; setting
      */
-    IcyToggleButton zoomFitCanvasButton;
+    IcyToggleButtonNew zoomFitCanvasButton;
     Color bgColor;
 
     /**
@@ -2121,8 +1920,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     boolean modifyingZoom;
     boolean modifyingRotation;
 
-    public Canvas2DOLD(Viewer viewer)
-    {
+    public Canvas2DOLD(Viewer viewer) {
         super(viewer);
 
         // all channel visible at once
@@ -2139,20 +1937,17 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         // init transform (5 values, log transition type)
         smoothTransform = new Canvas2DSmoothMover(5, SmoothMoveType.LOG);
         // initials transform values
-        smoothTransform.setValues(new double[] {0d, 0d, 1d, 1d, 0d});
+        smoothTransform.setValues(new double[]{0d, 0d, 1d, 1d, 0d});
         textInfos = null;
         modifyingZoom = false;
         modifyingRotation = false;
         previousImageSize = new Dimension(getImageSizeX(), getImageSizeY());
 
-        smoothTransform.addListener(new MultiSmoothMoverAdapter()
-        {
+        smoothTransform.addListener(new MultiSmoothMoverAdapter() {
             @Override
-            public void valueChanged(MultiSmoothMover source, int index, double newValue, int pourcent)
-            {
+            public void valueChanged(MultiSmoothMover source, int index, double newValue, int pourcent) {
                 // notify canvas transformation has changed
-                switch (index)
-                {
+                switch (index) {
                     case TRANS_X:
                         offsetChanged(DimensionId.X);
                         break;
@@ -2176,14 +1971,12 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             }
 
             @Override
-            public void moveEnded(MultiSmoothMover source, int index, double value)
-            {
+            public void moveEnded(MultiSmoothMover source, int index, double value) {
                 // just to allow correct set mouse position update
                 valueChanged(source, index, value, 100);
 
                 // scale move ended, we can fix notify canvas transformation has changed
-                switch (index)
-                {
+                switch (index) {
                     case SCALE_X:
                         canvasView.curScaleX = -1;
                         break;
@@ -2226,8 +2019,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public void shutDown()
-    {
+    public void shutDown() {
         super.shutDown();
 
         canvasView.shutDown();
@@ -2241,21 +2033,18 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    protected Overlay createImageOverlay()
-    {
+    protected Overlay createImageOverlay() {
         return new Canvas2DImageOverlay();
     }
 
-    public Canvas2DSettingPanel getCanvasSettingPanel()
-    {
+    public Canvas2DSettingPanel getCanvasSettingPanel() {
         return (Canvas2DSettingPanel) panel;
     }
 
     /**
      * Build canvas panel for inspector
      */
-    private void buildSettingGUI()
-    {
+    private void buildSettingGUI() {
         /*
         // canvas setting panel (for inspector)
         panel = new Canvas2DSettingPanel(this);
@@ -2285,30 +2074,26 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public Component getViewComponent()
-    {
+    public Component getViewComponent() {
         return canvasView;
     }
 
     /**
      * Return the {@link CanvasView} component of Canvas2D.
      */
-    public CanvasView getCanvasView()
-    {
+    public CanvasView getCanvasView() {
         return canvasView;
     }
 
     /**
      * Return the {@link CanvasMap} component of Canvas2D.
      */
-    public CanvasMap getCanvasMap()
-    {
+    public CanvasMap getCanvasMap() {
         return canvasMap;
     }
 
     @Override
-    public void customizeToolbar(JToolBar toolBar)
-    {
+    public void customizeToolbar(JToolBar toolBar) {
         toolBar.addSeparator();
         toolBar.add(zoomFitCanvasButton);
         // toolBar.addSeparator();
@@ -2317,21 +2102,18 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public void fitImageToCanvas()
-    {
+    public void fitImageToCanvas() {
         fitImageToCanvas(false);
     }
 
     /**
      * Change zoom so image fit in canvas view dimension
      */
-    public void fitImageToCanvas(boolean smooth)
-    {
+    public void fitImageToCanvas(boolean smooth) {
         // search best ratio
         final Point2D.Double s = getFitImageToCanvasScale();
 
-        if (s != null)
-        {
+        if (s != null) {
             final double scale = Math.min(s.x, s.y);
 
             // set mouse position on image center
@@ -2342,8 +2124,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public void fitCanvasToImage()
-    {
+    public void fitCanvasToImage() {
         // center image first
         centerImage();
 
@@ -2351,8 +2132,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public void centerOnImage(double x, double y)
-    {
+    public void centerOnImage(double x, double y) {
         // get point on canvas
         final Point pt = imageToCanvas(x, y);
         final int canvasCenterX = getCanvasSizeX() / 2;
@@ -2367,22 +2147,19 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     /**
      * Set mouse position on image center
      */
-    protected void centerMouseOnImage()
-    {
-        setMouseImagePos(getImageSizeX() / 2, getImageSizeY() / 2);
+    protected void centerMouseOnImage() {
+        setMouseImagePos(getImageSizeX() / 2f, getImageSizeY() / 2f);
     }
 
     /**
      * Set mouse position on current view center
      */
-    protected void centerMouseOnView()
-    {
+    protected void centerMouseOnView() {
         setMousePos(getCanvasSizeX() >> 1, getCanvasSizeY() >> 1);
     }
 
     @Override
-    public void centerOn(Rectangle region)
-    {
+    public void centerOn(Rectangle region) {
         final Rectangle2D imageRectMax = Rectangle2DUtil.getScaledRectangle(new Rectangle(getImageSizeX(), getImageSizeY()), 1.5d, true);
 
         Rectangle2D adjusted = Rectangle2DUtil.getScaledRectangle(region, 2d, true);
@@ -2414,15 +2191,13 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         final int offY;
         final double newScale;
 
-        if (scaleX < scaleY)
-        {
+        if (scaleX < scaleY) {
             newScale = scaleX;
             // use scale X, adapt offset Y
             offX = (int) (adjusted.getX() * newScale);
             offY = (int) ((adjusted.getY() * newScale) - ((viewRect.height - (adjusted.getHeight() * newScale)) / 2d));
         }
-        else
-        {
+        else {
             newScale = scaleY;
             // use scale Y, adapt offset X
             offX = (int) ((adjusted.getX() * newScale) - ((viewRect.width - (adjusted.getWidth() * newScale)) / 2d));
@@ -2436,9 +2211,8 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     /**
      * Set transform
      */
-    protected void setTransform(int tx, int ty, double sx, double sy, double rot, boolean smooth)
-    {
-        final double[] values = new double[] {tx, ty, sx, sy, rot};
+    protected void setTransform(int tx, int ty, double sx, double sy, double rot, boolean smooth) {
+        final double[] values = new double[]{tx, ty, sx, sy, rot};
 
         // modify all at once for synchronized change events
         if (smooth)
@@ -2449,12 +2223,10 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
     /**
      * Set offset X and Y.<br>
-     * 
-     * @param smooth
-     *        use smooth transition
+     *
+     * @param smooth use smooth transition
      */
-    public void setOffset(int x, int y, boolean smooth)
-    {
+    public void setOffset(int x, int y, boolean smooth) {
         final int adjX = Math.min(getMaxOffsetX(), Math.max(getMinOffsetX(), x));
         final int adjY = Math.min(getMaxOffsetY(), Math.max(getMinOffsetY(), y));
 
@@ -2463,15 +2235,12 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
     /**
      * Set zoom factor (this use the smart zoom position and smooth transition).
-     * 
-     * @param center
-     *        if true then zoom is centered to current view else zoom is
-     *        centered using current mouse position
-     * @param smooth
-     *        use smooth transition
+     *
+     * @param center if true then zoom is centered to current view else zoom is
+     *               centered using current mouse position
+     * @param smooth use smooth transition
      */
-    public void setScale(double factor, boolean center, boolean smooth)
-    {
+    public void setScale(double factor, boolean center, boolean smooth) {
         // first we center mouse position if requested
         if (center)
             centerMouseOnImage();
@@ -2482,16 +2251,13 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     /**
      * Set zoom X and Y factor.<br>
      * This use the smart zoom position and smooth transition.
-     * 
-     * @param mouseCentered
-     *        if true the current mouse image position will becomes the
-     *        center of viewport else the current mouse image position will
-     *        keep its place.
-     * @param smooth
-     *        use smooth transition
+     *
+     * @param mouseCentered if true the current mouse image position will becomes the
+     *                      center of viewport else the current mouse image position will
+     *                      keep its place.
+     * @param smooth        use smooth transition
      */
-    public void setScale(double x, double y, boolean mouseCentered, boolean smooth)
-    {
+    public void setScale(double x, double y, boolean mouseCentered, boolean smooth) {
         final Sequence seq = getSequence();
         // there is no way of changing scale if no sequence
         if (seq == null)
@@ -2514,13 +2280,11 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
         final Point2D.Double newTrans;
 
-        if (mouseCentered)
-        {
+        if (mouseCentered) {
             // we want the mouse image point to becomes the canvas center (take rotation in account)
             newTrans = canvasToImageDelta(canvasCenterX - newMouseCanvasPos.x, canvasCenterY - newMouseCanvasPos.y, 1d, 1d, rot);
         }
-        else
-        {
+        else {
             final Point mousePos = getMousePos();
             // we want the mouse image point to keep its place (take rotation in account)
             newTrans = canvasToImageDelta(mousePos.x - newMouseCanvasPos.x, mousePos.y - newMouseCanvasPos.y, 1d, 1d, rot);
@@ -2536,12 +2300,10 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     /**
      * Set zoom X and Y factor.<br>
      * This is direct affectation method without position modification.
-     * 
-     * @param smooth
-     *        use smooth transition
+     *
+     * @param smooth use smooth transition
      */
-    public void setScale(double x, double y, boolean smooth)
-    {
+    public void setScale(double x, double y, boolean smooth) {
         setTransform((int) smoothTransform.getDestValue(TRANS_X), (int) smoothTransform.getDestValue(TRANS_Y), x, y, smoothTransform.getDestValue(ROT), smooth);
     }
 
@@ -2549,12 +2311,11 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
      * Set zoom factor.<br>
      * Only here for backward compatibility with ICY4IJ.<br>
      * Zoom is center on image.
-     * 
+     *
      * @deprecated use setScale(...) instead
      */
     @Deprecated
-    public void setZoom(float zoom)
-    {
+    public void setZoom(float zoom) {
         // set mouse position on image center
         centerMouseOnImage();
         // then apply zoom
@@ -2564,29 +2325,25 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     /**
      * Get destination image size X in canvas pixel coordinate
      */
-    public int getDestImageCanvasSizeX()
-    {
+    public int getDestImageCanvasSizeX() {
         return (int) Math.ceil(getImageSizeX() * smoothTransform.getDestValue(SCALE_X));
     }
 
     /**
      * Get destination image size Y in canvas pixel coordinate
      */
-    public int getDestImageCanvasSizeY()
-    {
+    public int getDestImageCanvasSizeY() {
         return (int) Math.ceil(getImageSizeY() * smoothTransform.getDestValue(SCALE_Y));
     }
 
-    void backgroundColorEnabledChanged()
-    {
+    void backgroundColorEnabledChanged() {
         // save to preference
         preferences.putBoolean(ID_BG_COLOR_ENABLED, isBackgroundColorEnabled());
         // and refresh view
         canvasView.refresh();
     }
 
-    void backgroundColorChanged()
-    {
+    void backgroundColorChanged() {
         // save to preference
         preferences.putInt(ID_BG_COLOR, getBackgroundColor().getRGB());
         // and refresh view
@@ -2596,40 +2353,35 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     /**
      * Returns the background color enabled state
      */
-    public boolean isBackgroundColorEnabled()
-    {
+    public boolean isBackgroundColorEnabled() {
         return getCanvasSettingPanel().isBackgroundColorEnabled();
     }
 
     /**
      * Sets the background color enabled state
      */
-    public void setBackgroundColorEnabled(boolean value)
-    {
+    public void setBackgroundColorEnabled(boolean value) {
         getCanvasSettingPanel().setBackgroundColorEnabled(value);
     }
 
     /**
      * Returns the background color
      */
-    public Color getBackgroundColor()
-    {
+    public Color getBackgroundColor() {
         return getCanvasSettingPanel().getBackgroundColor();
     }
 
     /**
      * Sets the background color
      */
-    public void setBackgroundColor(Color color)
-    {
+    public void setBackgroundColor(Color color) {
         getCanvasSettingPanel().setBackgroundColor(color);
     }
 
     /**
      * @return the automatic 'fit to canvas' state
      */
-    public boolean getFitToCanvas()
-    {
+    public boolean getFitToCanvas() {
         if (zoomFitCanvasButton != null)
             return zoomFitCanvasButton.isSelected();
 
@@ -2639,41 +2391,34 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     /**
      * Sets the automatic 'fit to canvas' state
      */
-    public void setFitToCanvas(boolean value)
-    {
+    public void setFitToCanvas(boolean value) {
         if (zoomFitCanvasButton != null)
             zoomFitCanvasButton.setSelected(value);
     }
 
     @Override
-    public boolean isSynchronizationSupported()
-    {
+    public boolean isSynchronizationSupported() {
         return true;
     }
 
-    protected int getMinOffsetX()
-    {
+    protected int getMinOffsetX() {
         return (getCanvasSizeX() / 2) - getDestImageCanvasSizeX();
     }
 
-    protected int getMaxOffsetX()
-    {
+    protected int getMaxOffsetX() {
         return (getCanvasSizeX() / 2);
     }
 
-    protected int getMinOffsetY()
-    {
+    protected int getMinOffsetY() {
         return (getCanvasSizeY() / 2) - getDestImageCanvasSizeY();
     }
 
-    protected int getMaxOffsetY()
-    {
+    protected int getMaxOffsetY() {
         return (getCanvasSizeY() / 2);
     }
 
     @Override
-    public int getOffsetX()
-    {
+    public int getOffsetX() {
         // can be called before constructor ended
         if (smoothTransform == null)
             return 0;
@@ -2682,8 +2427,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public int getOffsetY()
-    {
+    public int getOffsetY() {
         // can be called before constructor ended
         if (smoothTransform == null)
             return 0;
@@ -2692,8 +2436,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public double getScaleX()
-    {
+    public double getScaleX() {
         // can be called before constructor ended
         if (smoothTransform == null)
             return 0d;
@@ -2702,8 +2445,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public double getScaleY()
-    {
+    public double getScaleY() {
         // can be called before constructor ended
         if (smoothTransform == null)
             return 0d;
@@ -2712,8 +2454,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public double getRotationZ()
-    {
+    public double getRotationZ() {
         // can be called before constructor ended
         if (smoothTransform == null)
             return 0d;
@@ -2723,96 +2464,82 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
     /**
      * Only here for backward compatibility with ICY4IJ plugin.
-     * 
+     *
      * @deprecated use getScaleX() or getScaleY() instead
      */
     @Deprecated
-    public double getZoomFactor()
-    {
+    public double getZoomFactor() {
         return getScaleX();
     }
 
     /**
      * We want angle to be in [0..2*PI]
      */
-    public double getRotation()
-    {
+    public double getRotation() {
         return MathUtil.formatRadianAngle(getRotationZ());
     }
 
     @Override
-    protected void setPositionCInternal(int c)
-    {
+    protected void setPositionCInternal(int c) {
         // not supported in this canvas, C should stay at -1
     }
 
     @Override
-    protected void setOffsetXInternal(int value)
-    {
+    protected void setOffsetXInternal(int value) {
         // this will automatically call the offsetChanged() event
         smoothTransform.setValue(TRANS_X, Math.min(getMaxOffsetX(), Math.max(getMinOffsetX(), value)));
     }
 
     @Override
-    protected void setOffsetYInternal(int value)
-    {
+    protected void setOffsetYInternal(int value) {
         // this will automatically call the offsetChanged() event
         smoothTransform.setValue(TRANS_Y, Math.min(getMaxOffsetY(), Math.max(getMinOffsetY(), value)));
     }
 
     @Override
-    protected void setScaleXInternal(double value)
-    {
+    protected void setScaleXInternal(double value) {
         // this will automatically call the scaledChanged() event
         smoothTransform.setValue(SCALE_X, value);
         canvasView.curScaleX = value;
     }
 
     @Override
-    protected void setScaleYInternal(double value)
-    {
+    protected void setScaleYInternal(double value) {
         // this will automatically call the scaledChanged() event
         smoothTransform.setValue(SCALE_Y, value);
         canvasView.curScaleY = value;
     }
 
     @Override
-    protected void setRotationZInternal(double value)
-    {
+    protected void setRotationZInternal(double value) {
         // this will automatically call the rotationChanged() event
         smoothTransform.setValue(ROT, value);
     }
 
     /**
      * Set rotation angle (radian).<br>
-     * 
-     * @param smooth
-     *        use smooth transition
+     *
+     * @param smooth use smooth transition
      */
-    public void setRotation(double value, boolean smooth)
-    {
+    public void setRotation(double value, boolean smooth) {
         setTransform((int) smoothTransform.getDestValue(TRANS_X), (int) smoothTransform.getDestValue(TRANS_Y), smoothTransform.getDestValue(SCALE_X),
                 smoothTransform.getDestValue(SCALE_Y), value, smooth);
     }
 
     @Override
-    public void keyPressed(KeyEvent e)
-    {
+    public void keyPressed(KeyEvent e) {
         // send to overlays
         super.keyPressed(e);
 
-        if (!e.isConsumed())
-        {
-            switch (e.getKeyCode())
-            {
+        if (!e.isConsumed()) {
+            switch (e.getKeyCode()) {
                 case KeyEvent.VK_R:
                     // reset zoom and rotation
                     setRotation(0, false);
                     fitImageToCanvas(true);
 
                     // also reset LUT
-                    if (EventUtil.isShiftDown(e, true))
-                    {
+                    if (EventUtil.isShiftDown(e, true)) {
                         final Sequence sequence = getSequence();
                         if ((viewer != null) && (sequence != null))
                             viewer.setLut(sequence.createCompatibleLUT());
@@ -2823,12 +2550,10 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
                 case KeyEvent.VK_LEFT:
                     int amount = EventUtil.isMenuControlDown(e, true) ? 5 : 1;
-                    if (isLoopingInT())
-                    {
+                    if (isLoopingInT()) {
                         setPositionT((getPositionT() - amount + getImageSizeT()) % getImageSizeT());
                     }
-                    else
-                    {
+                    else {
                         setPositionT(Math.max(getPositionT() - amount, 0));
                     }
                     e.consume();
@@ -2836,12 +2561,10 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
                 case KeyEvent.VK_RIGHT:
                     int amount1 = EventUtil.isMenuControlDown(e, true) ? 5 : 1;
-                    if (isLoopingInT())
-                    {
+                    if (isLoopingInT()) {
                         setPositionT((getPositionT() + amount1) % getImageSizeT());
                     }
-                    else
-                    {
+                    else {
                         setPositionT(Math.min(getPositionT() + amount1, getImageSizeT() - 1));
                     }
                     e.consume();
@@ -2864,8 +2587,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                     break;
 
                 case KeyEvent.VK_NUMPAD2:
-                    if (!canvasView.moving)
-                    {
+                    if (!canvasView.moving) {
                         final Point startPos = new Point(getOffsetX(), getOffsetY());
                         final Point delta = new Point(0, -getCanvasSizeY() / 4);
                         canvasView.translate(startPos, delta, EventUtil.isControlDown(e));
@@ -2873,8 +2595,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                     }
                     break;
                 case KeyEvent.VK_NUMPAD4:
-                    if (!canvasView.moving)
-                    {
+                    if (!canvasView.moving) {
                         final Point startPos = new Point(getOffsetX(), getOffsetY());
                         final Point delta = new Point(getCanvasSizeX() / 4, 0);
                         canvasView.translate(startPos, delta, EventUtil.isControlDown(e));
@@ -2883,8 +2604,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                     break;
 
                 case KeyEvent.VK_NUMPAD6:
-                    if (!canvasView.moving)
-                    {
+                    if (!canvasView.moving) {
                         final Point startPos = new Point(getOffsetX(), getOffsetY());
                         final Point delta = new Point(-getCanvasSizeX() / 4, 0);
                         canvasView.translate(startPos, delta, EventUtil.isControlDown(e));
@@ -2893,8 +2613,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                     break;
 
                 case KeyEvent.VK_NUMPAD8:
-                    if (!canvasView.moving)
-                    {
+                    if (!canvasView.moving) {
                         final Point startPos = new Point(getOffsetX(), getOffsetY());
                         final Point delta = new Point(0, getCanvasSizeY() / 4);
                         canvasView.translate(startPos, delta, EventUtil.isControlDown(e));
@@ -2905,10 +2624,8 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         // key char action
-        if (!e.isConsumed())
-        {
-            switch (e.getKeyChar())
-            {
+        if (!e.isConsumed()) {
+            switch (e.getKeyChar()) {
                 case '+':
                     // directly use the mouse wheel process for zoom operation
                     if (canvasView.onMouseWheelMoved(e.isConsumed(), 5, false, false, false, true))
@@ -2930,8 +2647,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public void keyReleased(KeyEvent e)
-    {
+    public void keyReleased(KeyEvent e) {
         // send to overlays
         super.keyReleased(e);
 
@@ -2942,8 +2658,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public void refresh()
-    {
+    public void refresh() {
         canvasView.imageChanged();
         canvasView.layersChanged();
         canvasView.refresh();
@@ -2952,15 +2667,13 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     /**
      * Return an ARGB BufferedImage form of the image located at position [T, Z, C].<br>
      * If the 'out' image is not compatible with wanted image, a new image is returned.
-     * 
+     *
      * @throws InterruptedException
      */
-    public BufferedImage getARGBImage(int t, int z, int c, BufferedImage out) throws InterruptedException
-    {
+    public BufferedImage getARGBImage(int t, int z, int c, BufferedImage out) throws InterruptedException {
         final IcyBufferedImage img = Canvas2DOLD.this.getImage(t, z, c);
 
-        if (img != null)
-        {
+        if (img != null) {
             final BufferedImage result;
 
             if ((out != null) && ImageUtil.sameSize(img, out))
@@ -2975,8 +2688,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public BufferedImage getRenderedImage(int t, int z, int c, boolean cv) throws InterruptedException
-    {
+    public BufferedImage getRenderedImage(int t, int z, int c, boolean cv) throws InterruptedException {
         final Sequence seq = getSequence();
         if (seq == null)
             return null;
@@ -2986,15 +2698,13 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         final int prevZ = getPositionZ();
         final boolean dl = isLayersVisible();
 
-        if (dl)
-        {
+        if (dl) {
             // set wanted position (needed for correct overlay drawing)
             // we have to fire events else some stuff can miss the change
             setPositionT(t);
             setPositionZ(z);
         }
-        try
-        {
+        try {
             final Dimension size;
 
             if (cv)
@@ -3009,8 +2719,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             // set default clip region
             g.setClip(0, 0, size.width, size.height);
 
-            if (cv)
-            {
+            if (cv) {
                 // apply filtering
                 if (CanvasPreferences.getFiltering() && ((getScaleX() < 4d) && (getScaleY() < 4d)))
                     g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -3021,8 +2730,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                 // apply transformation
                 g.transform(getTransform());
             }
-            else
-            {
+            else {
                 // apply filtering
                 if (CanvasPreferences.getFiltering())
                     g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -3036,8 +2744,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             // can we use the current image layer directly ?
             if ((t == prevT) && (z == prevZ) && (c == -1))
                 imgLayer = getImageLayer();
-            else
-            {
+            else {
                 // create temporary image, overlay and layer so we can choose the correct image
                 // (not optimal for memory and performance)
                 final BufferedImage img = getARGBImage(t, z, c, null);
@@ -3056,10 +2763,8 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
             return result;
         }
-        finally
-        {
-            if (dl)
-            {
+        finally {
+            if (dl) {
                 // restore position
                 setPositionT(prevT);
                 setPositionZ(prevZ);
@@ -3072,8 +2777,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
      * @deprecated Use <code>getRenderedImage(t, z, -1, true)</code> instead.
      */
     @Deprecated
-    public BufferedImage getRenderedImage(int t, int z) throws InterruptedException
-    {
+    public BufferedImage getRenderedImage(int t, int z) throws InterruptedException {
         return getRenderedImage(t, z, -1, true);
     }
 
@@ -3082,8 +2786,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
      * @deprecated Use <code>getRenderedImage(t, z, -1, canvasView)</code> instead.
      */
     @Deprecated
-    public BufferedImage getRenderedImage(int t, int z, boolean canvasView) throws InterruptedException
-    {
+    public BufferedImage getRenderedImage(int t, int z, boolean canvasView) throws InterruptedException {
         return getRenderedImage(t, z, -1, canvasView);
     }
 
@@ -3091,35 +2794,28 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
      * Synchronize views of specified list of canvas
      */
     @Override
-    protected void synchronizeCanvas(List<IcyCanvas> canvasList, IcyCanvasEvent event, boolean processAll)
-    {
+    protected void synchronizeCanvas(List<IcyCanvas> canvasList, IcyCanvasEvent event, boolean processAll) {
         final IcyCanvasEventType type = event.getType();
         final DimensionId dim = event.getDim();
 
         // position synchronization
-        if (isSynchOnSlice())
-        {
-            if (processAll || (type == IcyCanvasEventType.POSITION_CHANGED))
-            {
+        if (isSynchOnSlice()) {
+            if (processAll || (type == IcyCanvasEventType.POSITION_CHANGED)) {
                 // no information about dimension --> set all
-                if (processAll || (dim == DimensionId.NULL))
-                {
+                if (processAll || (dim == DimensionId.NULL)) {
                     // only support T and Z positioning
                     final int z = getPositionZ();
                     final int t = getPositionT();
 
-                    for (IcyCanvas cnv : canvasList)
-                    {
+                    for (IcyCanvas cnv : canvasList) {
                         if (z != -1)
                             cnv.setPositionZ(z);
                         if (t != -1)
                             cnv.setPositionT(t);
                     }
                 }
-                else
-                {
-                    for (IcyCanvas cnv : canvasList)
-                    {
+                else {
+                    for (IcyCanvas cnv : canvasList) {
                         final int pos = getPosition(dim);
                         if (pos != -1)
                             cnv.setPosition(dim, pos);
@@ -3129,57 +2825,47 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         // view synchronization
-        if (isSynchOnView())
-        {
-            if (processAll || (type == IcyCanvasEventType.SCALE_CHANGED))
-            {
+        if (isSynchOnView()) {
+            if (processAll || (type == IcyCanvasEventType.SCALE_CHANGED)) {
                 // no information about dimension --> set all
-                if (processAll || (dim == DimensionId.NULL))
-                {
+                if (processAll || (dim == DimensionId.NULL)) {
                     final double sX = getScaleX();
                     final double sY = getScaleY();
 
                     for (IcyCanvas cnv : canvasList)
                         ((Canvas2DOLD) cnv).setScale(sX, sY, false);
                 }
-                else
-                {
+                else {
                     for (IcyCanvas cnv : canvasList)
                         cnv.setScale(dim, getScale(dim));
                 }
             }
 
-            if (processAll || (type == IcyCanvasEventType.ROTATION_CHANGED))
-            {
+            if (processAll || (type == IcyCanvasEventType.ROTATION_CHANGED)) {
                 // no information about dimension --> set all
-                if (processAll || (dim == DimensionId.NULL))
-                {
+                if (processAll || (dim == DimensionId.NULL)) {
                     final double rot = getRotationZ();
 
                     for (IcyCanvas cnv : canvasList)
                         ((Canvas2DOLD) cnv).setRotation(rot, false);
                 }
-                else
-                {
+                else {
                     for (IcyCanvas cnv : canvasList)
                         cnv.setRotation(dim, getRotation(dim));
                 }
             }
 
             // process offset in last as it can be limited depending destination scale value
-            if (processAll || (type == IcyCanvasEventType.OFFSET_CHANGED))
-            {
+            if (processAll || (type == IcyCanvasEventType.OFFSET_CHANGED)) {
                 // no information about dimension --> set all
-                if (processAll || (dim == DimensionId.NULL))
-                {
+                if (processAll || (dim == DimensionId.NULL)) {
                     final int offX = getOffsetX();
                     final int offY = getOffsetY();
 
                     for (IcyCanvas cnv : canvasList)
                         ((Canvas2DOLD) cnv).setOffset(offX, offY, false);
                 }
-                else
-                {
+                else {
                     for (IcyCanvas cnv : canvasList)
                         cnv.setOffset(dim, getOffset(dim));
                 }
@@ -3188,21 +2874,17 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
         }
 
         // cursor synchronization
-        if (isSynchOnCursor())
-        { // mouse synchronization
-            if (processAll || (type == IcyCanvasEventType.MOUSE_IMAGE_POSITION_CHANGED))
-            {
+        if (isSynchOnCursor()) { // mouse synchronization
+            if (processAll || (type == IcyCanvasEventType.MOUSE_IMAGE_POSITION_CHANGED)) {
                 // no information about dimension --> set all
-                if (processAll || (dim == DimensionId.NULL))
-                {
+                if (processAll || (dim == DimensionId.NULL)) {
                     final double mouseImagePosX = getMouseImagePosX();
                     final double mouseImagePosY = getMouseImagePosY();
 
                     for (IcyCanvas cnv : canvasList)
                         ((Canvas2DOLD) cnv).setMouseImagePos(mouseImagePosX, mouseImagePosY);
                 }
-                else
-                {
+                else {
                     for (IcyCanvas cnv : canvasList)
                         cnv.setMouseImagePos(dim, getMouseImagePos(dim));
                 }
@@ -3211,8 +2893,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public void changed(IcyCanvasEvent event)
-    {
+    public void changed(IcyCanvasEvent event) {
         super.changed(event);
 
         // not yet initialized
@@ -3221,8 +2902,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
         final IcyCanvasEventType type = event.getType();
 
-        switch (type)
-        {
+        switch (type) {
             case POSITION_CHANGED:
                 // image has changed
                 canvasView.imageChanged();
@@ -3236,14 +2916,12 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
                     setMouseImagePos(canvasToImage(getMousePos()));
 
                 // display info message
-                if (type == IcyCanvasEventType.SCALE_CHANGED)
-                {
+                if (type == IcyCanvasEventType.SCALE_CHANGED) {
                     final String zoomInfo = Integer.toString((int) (getScaleX() * 100));
                     // set canvas message
                     canvasView.setZoomMessage("Zoom : " + zoomInfo + " \u0025", 500);
                 }
-                else if (type == IcyCanvasEventType.ROTATION_CHANGED)
-                {
+                else if (type == IcyCanvasEventType.ROTATION_CHANGED) {
                     final String rotInfo = Integer.toString((int) Math.round(getRotation() * 180d / Math.PI));
                     // set canvas message
                     canvasView.setRotationMessage("Rotation : " + rotInfo + " \u00B0", 500);
@@ -3255,8 +2933,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
 
             case MOUSE_IMAGE_POSITION_CHANGED:
                 // mouse position changed outside mouse move event ?
-                if (!canvasView.handlingMouseMoveEvent && !canvasView.isDragging() && !isSynchSlave())
-                {
+                if (!canvasView.handlingMouseMoveEvent && !canvasView.isDragging() && !isSynchSlave()) {
                     // mouse position in canvas
                     final Point mousePos = getMousePos();
                     final Point mouseAbsolutePos = getMousePos();
@@ -3282,29 +2959,24 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    protected void lutChanged(int component)
-    {
+    protected void lutChanged(int component) {
         super.lutChanged(component);
 
         // refresh image
-        if (canvasView != null)
-        {
+        if (canvasView != null) {
             canvasView.imageChanged();
             canvasView.refresh();
         }
     }
 
     @Override
-    protected void layerChanged(CanvasLayerEvent event)
-    {
+    protected void layerChanged(CanvasLayerEvent event) {
         super.layerChanged(event);
 
         // layer visibility property modified ?
-        if ((event.getType() == LayersEventType.CHANGED) && Layer.isPaintProperty(event.getProperty()))
-        {
+        if ((event.getType() == LayersEventType.CHANGED) && Layer.isPaintProperty(event.getProperty())) {
             // layer refresh
-            if (canvasView != null)
-            {
+            if (canvasView != null) {
                 canvasView.layersChanged();
                 canvasView.refresh();
             }
@@ -3312,34 +2984,29 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    protected void sequenceOverlayChanged(Overlay overlay, SequenceEventType type)
-    {
+    protected void sequenceOverlayChanged(Overlay overlay, SequenceEventType type) {
         super.sequenceOverlayChanged(overlay, type);
 
         // layer refresh
-        if (canvasView != null)
-        {
+        if (canvasView != null) {
             canvasView.layersChanged();
             canvasView.refresh();
         }
     }
 
     @Override
-    protected void sequenceDataChanged(IcyBufferedImage image, SequenceEventType type)
-    {
+    protected void sequenceDataChanged(IcyBufferedImage image, SequenceEventType type) {
         super.sequenceDataChanged(image, type);
 
         // refresh image
-        if (canvasView != null)
-        {
+        if (canvasView != null) {
             canvasView.imageChanged();
             canvasView.refresh();
         }
     }
 
     @Override
-    protected void sequenceTypeChanged()
-    {
+    protected void sequenceTypeChanged() {
         super.sequenceTypeChanged();
 
         // just to avoid possible NPE
@@ -3347,8 +3014,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
             return;
 
         // sequence XY dimension changed ?
-        if ((previousImageSize.width != getImageSizeX()) || (previousImageSize.height != getImageSizeY()))
-        {
+        if ((previousImageSize.width != getImageSizeX()) || (previousImageSize.height != getImageSizeY())) {
             // fit to canvas enabled ? --> adapt zoom to new sequence XY dimension
             if (getFitToCanvas())
                 fitImageToCanvas(true);
@@ -3356,14 +3022,12 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener
     }
 
     @Override
-    public void toolChanged(String command)
-    {
+    public void toolChanged(String command) {
         final Sequence seq = getSequence();
 
         final ROITask toolTask = Icy.getMainInterface().getROIRibbonTask();
 
-        if (toolTask != null)
-        {
+        if (toolTask != null) {
             // if we selected a ROI tool we force layers to be visible
             if (toolTask.isROITool())
                 setLayersVisible(true);

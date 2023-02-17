@@ -1,9 +1,28 @@
+/*
+ * Copyright 2010-2023 Institut Pasteur.
+ *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
 package icy.canvas;
 
 import icy.common.listener.ROIToolChangeListener;
-import icy.gui.component.button.IcyToggleButton;
+import icy.gui.component.button.IcyButtonNew;
 import icy.gui.menu.ApplicationMenuROI;
 import icy.gui.util.GuiUtil;
+import icy.gui.util.LookAndFeelUtil;
 import icy.gui.viewer.Viewer;
 import icy.image.IcyBufferedImage;
 import icy.image.IcyBufferedImageUtil;
@@ -18,8 +37,6 @@ import icy.painter.ImageOverlay;
 import icy.painter.Overlay;
 import icy.preferences.CanvasPreferences;
 import icy.preferences.XMLPreferences;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.roi.ROI;
 import icy.roi.ROI2D;
 import icy.roi.ROI3D;
@@ -29,10 +46,9 @@ import icy.sequence.SequenceEvent;
 import icy.system.thread.SingleProcessor;
 import icy.type.rectangle.Rectangle2DUtil;
 import icy.type.rectangle.Rectangle5D;
-import icy.util.EventUtil;
-import icy.util.GraphicsUtil;
-import icy.util.ShapeUtil;
-import icy.util.StringUtil;
+import icy.util.*;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import jiconfont.swing.IconFontSwing;
 import plugins.kernel.roi.tool.ROILineCutter;
 import plugins.kernel.roi.tool.ROIMagicWand;
 
@@ -49,24 +65,10 @@ import java.util.concurrent.TimeUnit;
 
 // TODO: 23/01/2023 Should be in gui package (extends JPanel)
 public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
-    static final int ICON_SIZE = 20;
-    static final int ICON_TARGET_SIZE = 20;
+    static final int ICON_TARGET_SIZE = LookAndFeelUtil.getDefaultIconSizeAsInt();
 
-    static final Image ICON_CENTER_IMAGE = ResourceUtil.ICON_CENTER_IMAGE;
-    static final Image ICON_FIT_IMAGE = ResourceUtil.ICON_FIT_IMAGE;
-    static final Image ICON_FIT_CANVAS = ResourceUtil.ICON_FIT_CANVAS;
-
-    // TODO: 23/01/2023 Remove this commented code
-    // static final Image ICON_CENTER_IMAGE = ImageUtil.scale(ResourceUtil.ICON_CENTER_IMAGE,
-    // ICON_SIZE, ICON_SIZE);
-    // static final Image ICON_FIT_IMAGE = ImageUtil.scale(ResourceUtil.ICON_FIT_IMAGE, ICON_SIZE,
-    // ICON_SIZE);
-    // static final Image ICON_FIT_CANVAS = ImageUtil.scale(ResourceUtil.ICON_FIT_CANVAS, ICON_SIZE,
-    // ICON_SIZE);
-
-    static final Image ICON_TARGET = ImageUtil.scale(ResourceUtil.ICON_TARGET, ICON_SIZE, ICON_SIZE);
-    static final Image ICON_TARGET_BLACK = ImageUtil.getColorImageFromAlphaImage(ICON_TARGET, Color.black);
-    static final Image ICON_TARGET_LIGHT = ImageUtil.getColorImageFromAlphaImage(ICON_TARGET, Color.lightGray);
+    static final Image ICON_TARGET_BLACK = IconFontSwing.buildImage(GoogleMaterialDesignIcons.ADJUST, ICON_TARGET_SIZE, Color.BLACK);
+    static final Image ICON_TARGET_LIGHT = IconFontSwing.buildImage(GoogleMaterialDesignIcons.ADJUST, ICON_TARGET_SIZE, Color.LIGHT_GRAY);
 
     /**
      * Possible rounded zoom factor : 0.01 --> 100
@@ -81,7 +83,8 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      */
     static final String PREF_CANVAS2D_ID = "Canvas2D";
 
-    static final String ID_FIT_CANVAS = "fitCanvas";
+    // TODO: 10/02/2023 Remove this, unused
+    //static final String ID_FIT_CANVAS = "fitCanvas";
     static final String ID_BG_COLOR_ENABLED = "bgColorEnabled";
     static final String ID_BG_COLOR = "bgColor";
 
@@ -104,10 +107,10 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     /**
      * GUI &amp; setting
      */
-    IcyToggleButton zoomFitCanvasButton;
+    IcyButtonNew zoomFitCanvasButton;
 
     // TODO: 23/01/2023 Remove this (unused) ?
-    Color bgColor;
+    //Color bgColor;
 
     /**
      * preferences
@@ -254,11 +257,12 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         panel.add(canvasMap, BorderLayout.CENTER);
 
         // fit canvas toggle
-        zoomFitCanvasButton = new IcyToggleButton(new IcyIcon(ICON_FIT_CANVAS));
-        zoomFitCanvasButton.setSelected(preferences.getBoolean(ID_FIT_CANVAS, false));
+        zoomFitCanvasButton = new IcyButtonNew(GoogleMaterialDesignIcons.ZOOM_OUT_MAP);
+        //zoomFitCanvasButton.setSelected(preferences.getBoolean(ID_FIT_CANVAS, false));
         zoomFitCanvasButton.setFocusable(false);
-        zoomFitCanvasButton.setToolTipText("Keep image fitting to window size");
-        zoomFitCanvasButton.addActionListener(e -> {
+        //zoomFitCanvasButton.setToolTipText("Keep image fitting to window size");
+        zoomFitCanvasButton.setToolTipText("Fit image to window size");
+        /*zoomFitCanvasButton.addActionListener(e -> {
             final boolean selected = zoomFitCanvasButton.isSelected();
 
             preferences.putBoolean(ID_FIT_CANVAS, selected);
@@ -266,7 +270,8 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             // fit if enabled
             if (selected)
                 fitImageToCanvas(true);
-        });
+        });*/
+        zoomFitCanvasButton.addActionListener(e -> fitImageToCanvas(true));
     }
 
     @Override
@@ -1121,12 +1126,12 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                 if (type == IcyCanvasEvent.IcyCanvasEventType.SCALE_CHANGED) {
                     final String zoomInfo = Integer.toString((int) (getScaleX() * 100));
                     // set canvas message
-                    canvasView.setZoomMessage("Zoom : " + zoomInfo + " \u0025", 500); // TODO: 23/01/2023 Remove unecessary escaped unicode character
+                    canvasView.setZoomMessage("Zoom : " + zoomInfo + " %", 500); // TODO: 23/01/2023 Remove unecessary escaped unicode character
                 }
                 else if (type == IcyCanvasEvent.IcyCanvasEventType.ROTATION_CHANGED) {
                     final String rotInfo = Integer.toString((int) Math.round(getRotation() * 180d / Math.PI));
                     // set canvas message
-                    canvasView.setRotationMessage("Rotation : " + rotInfo + " \u00B0", 500); // TODO: 23/01/2023 Remove unecessary escaped unicode character
+                    canvasView.setRotationMessage("Rotation : " + rotInfo + " °", 500); // TODO: 23/01/2023 Remove unecessary escaped unicode character
                 }
 
                 // refresh canvas
@@ -1292,7 +1297,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             mapMoving = false;
             mapRotating = false;
 
-            setBorder(BorderFactory.createRaisedBevelBorder());
+            setBorder(null);
             // height will then be fixed to 160
             setPreferredSize(new Dimension(160, 160));
 
@@ -2523,10 +2528,10 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                 final int y = mousePos.y - (ICON_TARGET_SIZE / 2);
 
                 // display cursor at mouse pos
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-                g2.drawImage(ICON_TARGET_LIGHT, x + 1, y + 1, null);
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-                g2.drawImage(ICON_TARGET_BLACK, x, y, null);
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .8f));
+                g2.drawImage(ICON_TARGET_BLACK, x + 1, y + 1, null);
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .8f));
+                g2.drawImage(ICON_TARGET_LIGHT, x, y, null);
 
                 g2.dispose();
             }

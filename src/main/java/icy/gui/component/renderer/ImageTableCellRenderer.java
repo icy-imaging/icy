@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package icy.gui.component.renderer;
 
@@ -13,32 +13,25 @@ import org.pushingpixels.substance.api.renderers.SubstanceDefaultTableCellRender
 
 /**
  * @author Stephane
+ * @deprecated Will be removed with Substance.
  */
-public class ImageTableCellRenderer extends IconRenderer
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -6330780301500309146L;
-
+@Deprecated
+public class ImageTableCellRenderer extends IconRenderer {
     final int size;
 
-    public ImageTableCellRenderer(int size)
-    {
+    public ImageTableCellRenderer(int size) {
         super();
 
         this.size = size;
         setIconTextGap(0);
     }
 
-    public ImageTableCellRenderer()
-    {
+    public ImageTableCellRenderer() {
         this(-1);
     }
 
     @Override
-    public void setValue(Object value)
-    {
+    public void setValue(Object value) {
         if (value instanceof Image)
             setIcon(ResourceUtil.getImageIcon((Image) value, size));
         else if (value instanceof Color)

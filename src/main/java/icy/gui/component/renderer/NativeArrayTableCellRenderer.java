@@ -1,6 +1,3 @@
-/**
- * 
- */
 package icy.gui.component.renderer;
 
 import icy.math.MathUtil;
@@ -13,18 +10,13 @@ import org.pushingpixels.substance.api.renderers.SubstanceDefaultTableCellRender
 
 /**
  * @author Stephane
+ * @deprecated Will be removed with Substance
  */
-public class NativeArrayTableCellRenderer extends SubstanceDefaultTableCellRenderer
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 7536618123117211456L;
-
+@Deprecated
+public class NativeArrayTableCellRenderer extends SubstanceDefaultTableCellRenderer {
     final boolean signed;
 
-    public NativeArrayTableCellRenderer(boolean signed)
-    {
+    public NativeArrayTableCellRenderer(boolean signed) {
         super();
 
         this.signed = signed;
@@ -32,16 +24,13 @@ public class NativeArrayTableCellRenderer extends SubstanceDefaultTableCellRende
         setHorizontalAlignment(SwingConstants.TRAILING);
     }
 
-    public NativeArrayTableCellRenderer()
-    {
+    public NativeArrayTableCellRenderer() {
         this(true);
     }
 
     @Override
-    protected void setValue(Object value)
-    {
-        if ((value != null) && (ArrayUtil.getDim(value) == 1))
-        {
+    protected void setValue(Object value) {
+        if ((value != null) && (ArrayUtil.getDim(value) == 1)) {
             final int len = ArrayUtil.getLength(value);
 
             String s;
@@ -50,8 +39,7 @@ public class NativeArrayTableCellRenderer extends SubstanceDefaultTableCellRende
                 s = "";
             else if (len == 1)
                 s = Double.toString(MathUtil.roundSignificant(Array1DUtil.getValue(value, 0, signed), 5));
-            else
-            {
+            else {
                 s = "[" + Double.toString(MathUtil.roundSignificant(Array1DUtil.getValue(value, 0, signed), 5));
                 for (int i = 1; i < len; i++)
                     s += " " + MathUtil.roundSignificant(Array1DUtil.getValue(value, i, signed), 5);

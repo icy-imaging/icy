@@ -1,61 +1,48 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.sequence.tools;
 
-import icy.gui.component.button.IcyToggleButton;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
+import icy.gui.component.button.IcyToggleButtonNew;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.event.EventListenerList;
 
-public class PositionAlignmentPanel extends JPanel
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -811970435734479103L;
+/**
+ * @author Thomas MUSSET
+ */
+public class PositionAlignmentPanel extends JPanel {
+    public static class PositionBox extends IcyToggleButtonNew {
+        public PositionBox() {
+            super(GoogleMaterialDesignIcons.RADIO_BUTTON_UNCHECKED, GoogleMaterialDesignIcons.RADIO_BUTTON_CHECKED);
 
-    public static class PositionBox extends IcyToggleButton
-    {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -6952409965950366299L;
-
-        public PositionBox()
-        {
-            super(new IcyIcon(ResourceUtil.ICON_NULL, 16));
-
-            setSelectedIcon(new IcyIcon(ResourceUtil.ICON_PICTURE, 16));
-            setBorder(BorderFactory.createLineBorder(Color.black));
+            // TODO: 17/02/2023 Why paint a black border ?
+            //setBorder(BorderFactory.createLineBorder(Color.black));
             setFocusPainted(false);
         }
     }
@@ -75,8 +62,7 @@ public class PositionAlignmentPanel extends JPanel
     /**
      * Create the panel.
      */
-    public PositionAlignmentPanel()
-    {
+    public PositionAlignmentPanel() {
         super();
 
         initialize();
@@ -95,15 +81,8 @@ public class PositionAlignmentPanel extends JPanel
 
         centerBox.setSelected(true);
 
-        final ActionListener listener = new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                // forward event
-                fireActionPerformed(e);
-            }
-        };
+        // forward event
+        final ActionListener listener = this::fireActionPerformed;
 
         topLeftBox.addActionListener(listener);
         topBox.addActionListener(listener);
@@ -117,8 +96,7 @@ public class PositionAlignmentPanel extends JPanel
     }
 
     @Override
-    public void setEnabled(boolean enabled)
-    {
+    public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
 
         topLeftBox.setEnabled(enabled);
@@ -136,8 +114,7 @@ public class PositionAlignmentPanel extends JPanel
      * Returns the selected horizontal alignment.<br>
      * Possible values are <code>SwingConstants.LEFT / CENTER / RIGHT</code>
      **/
-    public int getXAlign()
-    {
+    public int getXAlign() {
         final ButtonModel model = positionGroup.getSelection();
 
         if ((model == topLeftBox.getModel()) || (model == leftBox.getModel()) || (model == bottomLeftBox.getModel()))
@@ -152,8 +129,7 @@ public class PositionAlignmentPanel extends JPanel
      * Return the selected vertical alignment.<br>
      * Possible values are <code>SwingConstants.TOP / CENTER / BOTTOM</code>
      **/
-    public int getYAlign()
-    {
+    public int getYAlign() {
         final ButtonModel model = positionGroup.getSelection();
 
         if ((model == topLeftBox.getModel()) || (model == topBox.getModel()) || (model == topRightBox.getModel()))
@@ -168,13 +144,11 @@ public class PositionAlignmentPanel extends JPanel
      * Notifies all listeners that have registered interest for
      * notification on this event type. The event instance
      * is lazily created using the <code>event</code> parameter.
-     * 
-     * @param event
-     *        the <code>ActionEvent</code> object
+     *
+     * @param event the <code>ActionEvent</code> object
      * @see EventListenerList
      */
-    protected void fireActionPerformed(ActionEvent event)
-    {
+    protected void fireActionPerformed(ActionEvent event) {
         for (ActionListener listener : getActionListeners())
             listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, event.getActionCommand(),
                     event.getWhen(), event.getModifiers()));
@@ -182,12 +156,10 @@ public class PositionAlignmentPanel extends JPanel
 
     /**
      * Adds an <code>ActionListener</code> to the panel.
-     * 
-     * @param l
-     *        the <code>ActionListener</code> to be added
+     *
+     * @param l the <code>ActionListener</code> to be added
      */
-    public void addActionListener(ActionListener l)
-    {
+    public void addActionListener(ActionListener l) {
         listenerList.add(ActionListener.class, l);
     }
 
@@ -195,35 +167,31 @@ public class PositionAlignmentPanel extends JPanel
      * Removes an <code>ActionListener</code> from the panel.
      * If the listener is the currently set <code>Action</code> for the button, then the
      * <code>Action</code> is set to <code>null</code>.
-     * 
-     * @param l
-     *        the listener to be removed
+     *
+     * @param l the listener to be removed
      */
-    public void removeActionListener(ActionListener l)
-    {
+    public void removeActionListener(ActionListener l) {
         listenerList.remove(ActionListener.class, l);
     }
 
     /**
      * Returns an array of all the <code>ActionListener</code>s added
      * to this AbstractButton with addActionListener().
-     * 
+     *
      * @return all of the <code>ActionListener</code>s added or an empty
-     *         array if no listeners have been added
+     * array if no listeners have been added
      * @since 1.4
      */
-    public ActionListener[] getActionListeners()
-    {
+    public ActionListener[] getActionListeners() {
         return listenerList.getListeners(ActionListener.class);
     }
 
-    private void initialize()
-    {
+    private void initialize() {
         GridBagLayout gridBagLayout = new GridBagLayout();
-        gridBagLayout.columnWidths = new int[] {0, 0, 0, 0};
-        gridBagLayout.rowHeights = new int[] {0, 0, 0, 0};
-        gridBagLayout.columnWeights = new double[] {0.0, 0.0, 0.0, Double.MIN_VALUE};
-        gridBagLayout.rowWeights = new double[] {0.0, 0.0, 0.0, Double.MIN_VALUE};
+        gridBagLayout.columnWidths = new int[]{0, 0, 0, 0};
+        gridBagLayout.rowHeights = new int[]{0, 0, 0, 0};
+        gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+        gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
         setLayout(gridBagLayout);
 
         topLeftBox = new PositionBox();

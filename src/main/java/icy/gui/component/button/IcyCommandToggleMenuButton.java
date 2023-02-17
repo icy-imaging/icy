@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.component.button;
 
@@ -22,7 +22,6 @@ import icy.action.IcyAbstractAction;
 import icy.resource.icon.IcyIcon;
 import icy.util.StringUtil;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.Icon;
@@ -31,14 +30,10 @@ import org.pushingpixels.flamingo.api.common.JCommandToggleMenuButton;
 
 /**
  * @author Stephane
+ * @deprecated Will be removed with Substance
  */
-public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -7391297214095914082L;
-
+@Deprecated
+public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton {
     /**
      * internals
      */
@@ -46,21 +41,15 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton
     private IcyAbstractAction action;
     private final PropertyChangeListener actionPropertyChangeListener;
 
-    public IcyCommandToggleMenuButton(String title, IcyIcon icon)
-    {
+    public IcyCommandToggleMenuButton(String title, IcyIcon icon) {
         super(title, icon);
 
         action = null;
         internalEnabled = isEnabled();
 
-        actionPropertyChangeListener = new PropertyChangeListener()
-        {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt)
-            {
-                if (StringUtil.equals("enabled", evt.getPropertyName()))
-                    refreshEnabled();
-            }
+        actionPropertyChangeListener = evt -> {
+            if (StringUtil.equals("enabled", evt.getPropertyName()))
+                refreshEnabled();
         };
     }
 
@@ -68,23 +57,19 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton
      * @deprecated Use {@link #IcyCommandToggleMenuButton(String, IcyIcon)} instead.
      */
     @Deprecated
-    public IcyCommandToggleMenuButton(String title, String iconName)
-    {
+    public IcyCommandToggleMenuButton(String title, String iconName) {
         this(title, new IcyIcon(iconName));
     }
 
-    public IcyCommandToggleMenuButton(IcyIcon icon)
-    {
+    public IcyCommandToggleMenuButton(IcyIcon icon) {
         this(null, icon);
     }
 
-    public IcyCommandToggleMenuButton(String title)
-    {
+    public IcyCommandToggleMenuButton(String title) {
         this(title, (IcyIcon) null);
     }
 
-    public IcyCommandToggleMenuButton(IcyAbstractAction action)
-    {
+    public IcyCommandToggleMenuButton(IcyAbstractAction action) {
         this(null, (IcyIcon) null);
 
         setAction(action);
@@ -94,23 +79,20 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton
      * @deprecated User {@link #IcyCommandToggleMenuButton(IcyAbstractAction)} instead.
      */
     @Deprecated
-    public IcyCommandToggleMenuButton(icy.common.IcyAbstractAction action)
-    {
+    public IcyCommandToggleMenuButton(icy.common.IcyAbstractAction action) {
         this(null, (IcyIcon) null);
 
         setAction(action);
     }
 
-    public IcyCommandToggleMenuButton()
-    {
+    public IcyCommandToggleMenuButton() {
         this(null, (IcyIcon) null);
     }
 
     /**
      * Return the icon as IcyIcon
      */
-    public IcyIcon getIcyIcon()
-    {
+    public IcyIcon getIcyIcon() {
         final Icon icon = getIcon();
 
         if (icon instanceof IcyIcon)
@@ -122,8 +104,7 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton
     /**
      * @return the icon name
      */
-    public String getIconName()
-    {
+    public String getIconName() {
         final IcyIcon icon = getIcyIcon();
 
         if (icon != null)
@@ -133,11 +114,9 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton
     }
 
     /**
-     * @param iconName
-     *        the icon name to set
+     * @param iconName the icon name to set
      */
-    public void setIconName(String iconName)
-    {
+    public void setIconName(String iconName) {
         final IcyIcon icon = getIcyIcon();
 
         if (icon != null)
@@ -145,24 +124,20 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton
     }
 
     @Override
-    public void setEnabled(boolean b)
-    {
+    public void setEnabled(boolean b) {
         internalEnabled = b;
         refreshEnabled();
     }
 
-    protected void refreshEnabled()
-    {
+    protected void refreshEnabled() {
         super.setEnabled(internalEnabled && ((action == null) || action.isEnabled()));
     }
 
     /**
      * Sets the {@link IcyAbstractAction} attached to this button.
      */
-    public void setAction(IcyAbstractAction value)
-    {
-        if (action != value)
-        {
+    public void setAction(IcyAbstractAction value) {
+        if (action != value) {
             // remove listener from previous action
             if (action != null)
                 action.removePropertyChangeListener(actionPropertyChangeListener);
@@ -178,8 +153,7 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton
             else
                 setIcon(null);
 
-            if (value != null)
-            {
+            if (value != null) {
                 // set tooltip
                 setActionRichTooltip(action.getRichToolTip());
 
@@ -195,8 +169,7 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton
     /**
      * Returns the {@link IcyAbstractAction} attached to this button.
      */
-    public IcyAbstractAction getAction()
-    {
+    public IcyAbstractAction getAction() {
         return action;
     }
 }

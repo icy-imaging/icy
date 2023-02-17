@@ -1,3 +1,21 @@
+/*
+ * Copyright 2010-2023 Institut Pasteur.
+ *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
 package icy.resource.icon;
 
 import icy.gui.util.LookAndFeelUtil;
@@ -7,60 +25,34 @@ import jiconfont.swing.IconFontSwing;
 import javax.swing.*;
 import java.awt.*;
 
-public class IcyIconFont implements Icon {
-    public enum State {
-        FOREGROUND,
-        DISABLED,
-        SELECTED
-    }
-
+/**
+ * @author Thomas MUSSET
+ */
+public final class IcyIconFont implements Icon {
     final IconCode ic;
     float size;
-    State state;
+    private final LookAndFeelUtil.ColorType colorType;
 
     Icon internalIcon;
 
-    public IcyIconFont(final IconCode iconCode, final float size, final State state) {
+    public IcyIconFont(final IconCode iconCode, final float size, final LookAndFeelUtil.ColorType colorType) {
         this.ic = iconCode;
         this.size = size;
-        this.state = state;
+        this.colorType = colorType;
 
         updateIcon();
     }
 
-    public IcyIconFont(final IconCode iconCode, final State state) {
+    public IcyIconFont(final IconCode iconCode, final LookAndFeelUtil.ColorType colorType) {
         this.ic = iconCode;
-        this.size = LookAndFeelUtil.getDefaultIconSize();
-        this.state = state;
+        this.size = LookAndFeelUtil.getDefaultIconSizeAsFloat();
+        this.colorType = colorType;
 
         updateIcon();
-    }
-
-    private Color getColor(State state) {
-        Color color;
-        switch (state) {
-            default:
-            case FOREGROUND:
-                color = LookAndFeelUtil.getForeground();
-                break;
-            case DISABLED:
-                color = LookAndFeelUtil.getDisabledForeground();
-                break;
-            case SELECTED:
-                color = LookAndFeelUtil.getSelectionForeground();
-                break;
-        }
-        return color;
     }
 
     public IconCode getIconCode() {
         return ic;
-    }
-
-    public void updateIcon(final float size, final State state) {
-        this.size = size;
-        this.state = state;
-        updateIcon();
     }
 
     public void updateIcon(final float size) {
@@ -68,13 +60,8 @@ public class IcyIconFont implements Icon {
         updateIcon();
     }
 
-    public void updateIcon(final State state) {
-        this.state = state;
-        updateIcon();
-    }
-
     public void updateIcon() {
-        internalIcon = IconFontSwing.buildIcon(ic, size, getColor(state));
+        internalIcon = IconFontSwing.buildIcon(ic, size, LookAndFeelUtil.getUIColor(colorType));
     }
 
     @Override

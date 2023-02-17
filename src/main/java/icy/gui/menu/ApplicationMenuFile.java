@@ -1,9 +1,29 @@
+/*
+ * Copyright 2010-2023 Institut Pasteur.
+ *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
 package icy.gui.menu;
 
 import icy.action.FileActions;
 import icy.action.GeneralActions;
 import icy.action.PreferencesActions;
 import icy.file.Loader;
+import icy.gui.component.menu.IcyMenu;
+import icy.gui.component.menu.IcyMenuItem;
 import icy.main.Icy;
 import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginLoader;
@@ -18,62 +38,48 @@ import icy.type.collection.list.RecentFileList;
 import icy.util.StringUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
-import javax.swing.*;
 import java.util.List;
 
+/**
+ * @author Thomas MUSSET
+ */
 final class ApplicationMenuFile extends AbstractApplicationMenu {
-    // Menu list
-    private final JMenu menuCreate;
-    private final JMenu menuOpenRecent;
-    private final JMenu menuImport;
-
-    // Menuitem list
-    private final JMenuItem itemCreateSequence;
-    private final JMenuItem itemCreateGraySequence;
-    private final JMenuItem itemCreateRGBSequence;
-    private final JMenuItem itemCreateRGBASequence;
-    private final JMenuItem itemOpen;
-    private final JMenuItem itemCloseSequence;
-    private final JMenuItem itemCloseOther;
-    private final JMenuItem itemCloseAll;
-    private final JMenuItem itemSaveSequence;
-    private final JMenuItem itemSaveSequenceAs;
-    private final JMenuItem itemSaveMetadata;
-    private JMenuItem itemPreferences;
-    private JMenuItem itemQuit;
+    private final IcyMenu menuImport;
+    private final IcyMenuItem itemCloseSequence;
+    private final IcyMenuItem itemCloseOther;
+    private final IcyMenuItem itemCloseAll;
+    private final IcyMenuItem itemSaveSequence;
+    private final IcyMenuItem itemSaveSequenceAs;
+    private final IcyMenuItem itemSaveMetadata;
 
     public ApplicationMenuFile() {
         super("File");
 
-        menuCreate = new JMenu("New");
-        setIcon(menuCreate, GoogleMaterialDesignIcons.NOTE_ADD);
+        final IcyMenu menuCreate = new IcyMenu("New", GoogleMaterialDesignIcons.NOTE_ADD);
         add(menuCreate);
 
-        itemCreateSequence = new JMenuItem("Sequence");
-        setIcon(itemCreateSequence, GoogleMaterialDesignIcons.IMAGE);
+        final IcyMenuItem itemCreateSequence = new IcyMenuItem("Sequence", GoogleMaterialDesignIcons.IMAGE);
         itemCreateSequence.addActionListener(FileActions.newSequenceAction);
         menuCreate.add(itemCreateSequence);
 
-        itemCreateGraySequence = new JMenuItem("Grayscale sequence", new IcyIcon("gray", false));
+        final IcyMenuItem itemCreateGraySequence = new IcyMenuItem("Grayscale sequence", new IcyIcon("gray", 18, false));
         itemCreateGraySequence.addActionListener(FileActions.newGraySequenceAction);
         menuCreate.add(itemCreateGraySequence);
 
-        itemCreateRGBSequence = new JMenuItem("RGB sequence", new IcyIcon("rgb", false));
+        final IcyMenuItem itemCreateRGBSequence = new IcyMenuItem("RGB sequence", new IcyIcon("rgb", 18, false));
         itemCreateRGBSequence.addActionListener(FileActions.newRGBSequenceAction);
         menuCreate.add(itemCreateRGBSequence);
 
-        itemCreateRGBASequence = new JMenuItem("RGBA sequence", new IcyIcon("argb", false));
+        final IcyMenuItem itemCreateRGBASequence = new IcyMenuItem("RGBA sequence", new IcyIcon("argb", 18, false));
         itemCreateRGBASequence.addActionListener(FileActions.newARGBSequenceAction);
         menuCreate.add(itemCreateRGBASequence);
 
-        itemOpen = new JMenuItem("Open...");
-        setIcon(itemOpen, GoogleMaterialDesignIcons.FOLDER_OPEN);
+        final IcyMenuItem itemOpen = new IcyMenuItem("Open...", GoogleMaterialDesignIcons.FOLDER_OPEN);
         itemOpen.addActionListener(FileActions.openSequenceAction);
         add(itemOpen);
 
         // TODO Make recent files menu
-        menuOpenRecent = new JMenu("Open Recent");
-        setIcon(menuOpenRecent, GoogleMaterialDesignIcons.FOLDER);
+        final IcyMenu menuOpenRecent = new IcyMenu("Open Recent", GoogleMaterialDesignIcons.FOLDER);
         menuOpenRecent.setEnabled(false);
         add(menuOpenRecent);
 
@@ -85,7 +91,7 @@ final class ApplicationMenuFile extends AbstractApplicationMenu {
             final String entry = recentFileList.getEntryAsName(i, 100, true);
             if (!StringUtil.isEmpty(entry)) {
                 System.err.println(entry);
-                final JMenuItem itemFile = new JMenuItem(entry);
+                final IcyMenuItem itemFile = new IcyMenuItem(entry);
                 final String[] paths = recentFileList.getEntry(i);
                 itemFile.addActionListener(e -> Loader.load(CollectionUtil.asList(paths), false, true, true));
                 menuOpenRecent.add(itemFile);
@@ -94,56 +100,48 @@ final class ApplicationMenuFile extends AbstractApplicationMenu {
             }
         }
 
-        itemCloseSequence = new JMenuItem("Close Sequence");
-        setIcon(itemCloseSequence, GoogleMaterialDesignIcons.CLEAR);
+        itemCloseSequence = new IcyMenuItem("Close Sequence", GoogleMaterialDesignIcons.CLEAR);
         itemCloseSequence.addActionListener(FileActions.closeCurrentSequenceAction);
         add(itemCloseSequence);
 
-        itemCloseOther = new JMenuItem("Close Other Sequences");
-        setIcon(itemCloseOther, GoogleMaterialDesignIcons.CLEAR_ALL);
+        itemCloseOther = new IcyMenuItem("Close Other Sequences", GoogleMaterialDesignIcons.CLEAR_ALL);
         itemCloseOther.addActionListener(FileActions.closeOthersSequencesAction);
         add(itemCloseOther);
 
-        itemCloseAll = new JMenuItem("Close All Sequences");
-        setIcon(itemCloseAll, GoogleMaterialDesignIcons.CLEAR_ALL);
+        itemCloseAll = new IcyMenuItem("Close All Sequences", GoogleMaterialDesignIcons.CLEAR_ALL);
         itemCloseAll.addActionListener(FileActions.closeAllSequencesAction);
         add(itemCloseAll);
 
         addSeparator();
 
-        itemSaveSequence = new JMenuItem("Save Sequence");
-        setIcon(itemSaveSequence, GoogleMaterialDesignIcons.SAVE);
+        itemSaveSequence = new IcyMenuItem("Save Sequence", GoogleMaterialDesignIcons.SAVE);
         itemSaveSequence.addActionListener(FileActions.saveSequenceAction);
         add(itemSaveSequence);
 
-        itemSaveSequenceAs = new JMenuItem("Save Sequence As...");
-        setIcon(itemSaveSequenceAs, GoogleMaterialDesignIcons.SAVE);
+        itemSaveSequenceAs = new IcyMenuItem("Save Sequence As...", GoogleMaterialDesignIcons.SAVE);
         itemSaveSequenceAs.addActionListener(FileActions.saveAsSequenceAction);
         add(itemSaveSequenceAs);
 
-        itemSaveMetadata = new JMenuItem("Save Metadata");
-        setIcon(itemSaveMetadata, GoogleMaterialDesignIcons.ART_TRACK);
+        itemSaveMetadata = new IcyMenuItem("Save Metadata", GoogleMaterialDesignIcons.ART_TRACK);
         itemSaveMetadata.addActionListener(FileActions.saveMetaDataAction);
         add(itemSaveMetadata);
 
         addSeparator();
 
         // TODO Make import actions
-        menuImport = new JMenu("Import");
+        menuImport = new IcyMenu("Import");
         add(menuImport);
 
         if (!SystemUtil.isMac()) {
             addSeparator();
 
-            itemPreferences = new JMenuItem("Preferences...");
-            setIcon(itemPreferences, GoogleMaterialDesignIcons.SETTINGS);
+            final IcyMenuItem itemPreferences = new IcyMenuItem("Preferences...", GoogleMaterialDesignIcons.SETTINGS);
             itemPreferences.addActionListener(PreferencesActions.preferencesAction);
             add(itemPreferences);
 
             addSeparator();
 
-            itemQuit = new JMenuItem("Quit Icy");
-            setIcon(itemQuit, GoogleMaterialDesignIcons.POWER_SETTINGS_NEW);
+            final IcyMenuItem itemQuit = new IcyMenuItem("Quit Icy", GoogleMaterialDesignIcons.POWER_SETTINGS_NEW);
             itemQuit.addActionListener(GeneralActions.exitApplicationAction);
             add(itemQuit);
         }
@@ -151,7 +149,6 @@ final class ApplicationMenuFile extends AbstractApplicationMenu {
         reloadFileMenu();
         enableImport(false); // TODO: 19/01/2023 Remove this when reload import finished
 
-        addSkinChangeListener();
         addGlobalSequenceListener();
     }
 

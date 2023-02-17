@@ -213,7 +213,6 @@ public class GeneralPreferences
 
     public static String getGuiSkin()
     {
-        //return prefGeneral.get(ID_GUI_SKIN, LookAndFeelUtil.getDefaultSkin());
         return prefGeneral.get(ID_GUI_SKIN, LookAndFeelUtil.getDefaultSkinName());
     }
 

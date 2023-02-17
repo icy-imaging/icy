@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.component;
 
@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,17 +40,7 @@ import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.ActionMap;
-import javax.swing.Box;
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -60,25 +49,22 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
+import icy.gui.component.button.IcyButtonNew;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jdesktop.swingx.sort.DefaultSortController;
 import org.jdesktop.swingx.table.DefaultTableColumnModelExt;
 import org.jdesktop.swingx.table.TableColumnExt;
-import org.pushingpixels.substance.api.renderers.SubstanceDefaultTableCellRenderer;
-import org.pushingpixels.substance.api.skin.SkinChangeListener;
 
 import icy.action.RoiActions;
 import icy.canvas.IcyCanvas;
 import icy.canvas.IcyCanvas2D;
 import icy.canvas.IcyCanvas3D;
 import icy.gui.component.IcyTextField.TextChangeListener;
-import icy.gui.component.button.IcyButton;
 import icy.gui.component.renderer.ImageTableCellRenderer;
 import icy.gui.inspector.RoiSettingFrame;
 import icy.gui.main.ActiveSequenceListener;
 import icy.gui.util.GuiUtil;
-import icy.gui.util.LookAndFeelUtil;
 import icy.gui.viewer.Viewer;
 import icy.main.Icy;
 import icy.math.MathUtil;
@@ -134,15 +120,10 @@ import plugins.kernel.roi.descriptor.property.ROISizeZDescriptor;
 
 /**
  * Abstract ROI panel component
+ *
+ * @author Thomas MUSSET
  */
-public abstract class AbstractRoisPanel extends ExternalizablePanel
-        implements ActiveSequenceListener, TextChangeListener, ListSelectionListener, PluginLoaderListener
-{
-    /**
-     * 
-     */
-    protected static final long serialVersionUID = -2870878233087117178L;
-
+public abstract class AbstractRoisPanel extends ExternalizablePanel implements ActiveSequenceListener, TextChangeListener, ListSelectionListener, PluginLoaderListener {
     protected static final String ID_VIEW = "view";
     protected static final String ID_EXPORT = "export";
 
@@ -153,66 +134,57 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     protected static final String ID_PROPERTY_VISIBLE = "visible";
 
     // default row comparator
-    protected static Comparator<Object> comparator = new Comparator<Object>()
-    {
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        @Override
-        public int compare(Object o1, Object o2)
-        {
-            if (o1 == null)
-            {
-                if (o2 == null)
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    protected static Comparator<Object> comparator = (o1, o2) -> {
+        if (o1 == null) {
+            if (o2 == null)
+                return 0;
+            return -1;
+        }
+        if (o2 == null)
+            return 1;
+
+        Object obj1 = o1;
+        Object obj2 = o2;
+
+        if (o1 instanceof String) {
+            if (o1.equals("-" + MathUtil.INFINITE_STRING))
+                obj1 = Double.valueOf(Double.NEGATIVE_INFINITY);
+            else if (o1.equals(MathUtil.INFINITE_STRING))
+                obj1 = Double.valueOf(Double.POSITIVE_INFINITY);
+        }
+
+        if (o2 instanceof String) {
+            if (o2.equals("-" + MathUtil.INFINITE_STRING))
+                obj2 = Double.valueOf(Double.NEGATIVE_INFINITY);
+            else if (o2.equals(MathUtil.INFINITE_STRING))
+                obj2 = Double.valueOf(Double.POSITIVE_INFINITY);
+        }
+
+        if ((obj1 instanceof Number) && (obj2 instanceof Number)) {
+            final double d1 = ((Number) obj1).doubleValue();
+            final double d2 = ((Number) obj2).doubleValue();
+
+            if (Double.isNaN(d1)) {
+                if (Double.isNaN(d2))
                     return 0;
                 return -1;
             }
-            if (o2 == null)
+            if (Double.isNaN(d2))
                 return 1;
 
-            Object obj1 = o1;
-            Object obj2 = o2;
+            return Double.compare(d1, d2);
+            /*if (d1 < d2)
+                return -1;
+            if (d1 > d2)
+                return 1;
 
-            if (o1 instanceof String)
-            {
-                if (o1.equals("-" + MathUtil.INFINITE_STRING))
-                    obj1 = Double.valueOf(Double.NEGATIVE_INFINITY);
-                else if (o1.equals(MathUtil.INFINITE_STRING))
-                    obj1 = Double.valueOf(Double.POSITIVE_INFINITY);
-            }
-
-            if (o2 instanceof String)
-            {
-                if (o2.equals("-" + MathUtil.INFINITE_STRING))
-                    obj2 = Double.valueOf(Double.NEGATIVE_INFINITY);
-                else if (o2.equals(MathUtil.INFINITE_STRING))
-                    obj2 = Double.valueOf(Double.POSITIVE_INFINITY);
-            }
-
-            if ((obj1 instanceof Number) && (obj2 instanceof Number))
-            {
-                final double d1 = ((Number) obj1).doubleValue();
-                final double d2 = ((Number) obj2).doubleValue();
-
-                if (Double.isNaN(d1))
-                {
-                    if (Double.isNaN(d2))
-                        return 0;
-                    return -1;
-                }
-                if (Double.isNaN(d2))
-                    return 1;
-
-                if (d1 < d2)
-                    return -1;
-                if (d1 > d2)
-                    return 1;
-
-                return 0;
-            }
-            else if ((obj1 instanceof Comparable) && (obj1.getClass() == obj2.getClass()))
-                return ((Comparable) obj1).compareTo(obj2);
-
-            return o1.toString().compareTo(o2.toString());
+            return 0;*/
         }
+        else if ((obj1 instanceof Comparable) && (obj1.getClass() == obj2.getClass()))
+            return ((Comparable) obj1).compareTo(obj2);
+
+        return o1.toString().compareTo(o2.toString());
     };
 
     // GUI
@@ -262,110 +234,35 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
 
     /**
      * Create a new ROI table panel.<br>
-     * 
-     * @param preferences
-     *        XML preferences node which will contains the ROI table settings
+     *
+     * @param preferences XML preferences node which will contains the ROI table settings
      */
-    public AbstractRoisPanel(XMLPreferences preferences)
-    {
+    public AbstractRoisPanel(XMLPreferences preferences) {
         super("ROI", "roiPanel", new Point(100, 100), new Dimension(400, 600));
 
         basePreferences = preferences;
         viewPreferences = basePreferences.node(ID_VIEW);
         exportPreferences = basePreferences.node(ID_EXPORT);
 
-        roiSet = new HashSet<ROI>();
-        roiResultsMap = new HashMap<ROI, ROIResults>();
-        filteredRoiList = new ArrayList<ROI>();
-        filteredRoiResultsList = new ArrayList<ROIResults>();
-        savedSequenceEvents = new ArrayList<SequenceEvent>();
+        roiSet = new HashSet<>();
+        roiResultsMap = new HashMap<>();
+        filteredRoiList = new ArrayList<>();
+        filteredRoiResultsList = new ArrayList<>();
+        savedSequenceEvents = new ArrayList<>();
         modifySelection = new Semaphore(1);
-        columnInfoList = new ArrayList<ColumnInfo>();
+        columnInfoList = new ArrayList<>();
 
         lastTableDataRefresh = 0L;
 
         initialize();
 
-        roiListRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshRoisInternal();
-            }
-        };
-        filteredRoiListRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshFilteredRoisInternal();
-            }
-        };
-        descriptorsValueRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshDescriptorsValueInternal();
-            }
-        };
-        tableDataStructureRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshTableDataStructureInternal();
-            }
-        };
-        tableDataRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshTableDataInternal();
-            }
-        };
-        tableSelectionRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshTableSelectionInternal();
-            }
-        };
-        columnInfoListRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshColumnInfoListInternal();
-            }
-        };
-
-        /*LookAndFeelUtil.addSkinChangeListener(new SkinChangeListener()
-        {
-            @Override
-            public void skinChanged()
-            {
-                // regenerate column model to redefine the Cell Renderer (else colors are wrong)
-                roiTable.setColumnModel(new ROITableColumnModel());
-
-                // final TableColumnModel columnModel = roiTable.getColumnModel();
-                //
-                // for (int i = 0; i < columnModel.getColumnCount(); i++)
-                // {
-                // final TableColumn column = columnModel.getColumn(i);
-                //
-                // // need to reset specific renderer as background color can be wrong
-                // if (column.getCellRenderer() instanceof ImageTableCellRenderer)
-                // column.setCellRenderer(new ImageTableCellRenderer(18));
-                // }
-
-                // modify highlighter
-                roiTable.setHighlighters(HighlighterFactory.createSimpleStriping());
-            }
-        });*/
+        roiListRefresher = this::refreshRoisInternal;
+        filteredRoiListRefresher = this::refreshFilteredRoisInternal;
+        descriptorsValueRefresher = this::refreshDescriptorsValueInternal;
+        tableDataStructureRefresher = this::refreshTableDataStructureInternal;
+        tableDataRefresher = this::refreshTableDataInternal;
+        tableSelectionRefresher = this::refreshTableSelectionInternal;
+        columnInfoListRefresher = this::refreshColumnInfoListInternal;
 
         processor = new InstanceProcessor();
         processor.setThreadName("ROI panel GUI refresher");
@@ -389,8 +286,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         PluginLoader.addListener(this);
     }
 
-    protected void initialize()
-    {
+    protected void initialize() {
         // need filter before load
         nameFilter = new IcyTextField();
         nameFilter.setToolTipText("Filter ROI by name");
@@ -412,23 +308,17 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         roiTable.setColumnSelectionAllowed(false);
         roiTable.setRowSelectionAllowed(true);
         roiTable.setSortable(true);
-        // set highlight
-        roiTable.setHighlighters(HighlighterFactory.createSimpleStriping());
-        roiTable.addMouseListener(new MouseAdapter()
-        {
+        roiTable.addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent event)
-            {
-                if (event.getClickCount() == 2)
-                {
+            public void mousePressed(MouseEvent event) {
+                if (event.getClickCount() == 2) {
                     final int c = roiTable.columnAtPoint(event.getPoint());
                     TableColumn col = null;
 
                     if (c != -1)
                         col = roiTable.getColumn(c);
 
-                    if ((col == null) || !col.getHeaderValue().equals(new ROINameDescriptor().getName()))
-                        roiTableDoubleClicked();
+                    if ((col == null) || !col.getHeaderValue().equals(new ROINameDescriptor().getName())) roiTableDoubleClicked();
                 }
             }
         });
@@ -451,25 +341,34 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         middlePanel.add(new JScrollPane(roiTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
-        final IcyButton settingButton = new IcyButton(RoiActions.settingAction);
+        final IcyButtonNew settingButton = new IcyButtonNew(GoogleMaterialDesignIcons.SETTINGS);
+        settingButton.addActionListener(RoiActions.settingAction);
         settingButton.setHideActionText(true);
-        settingButton.setFlat(true);
 
-        final IcyButton xlsExportButton = new IcyButton(RoiActions.xlsExportAction);
+        final IcyButtonNew xlsExportButton = new IcyButtonNew(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
+        xlsExportButton.addActionListener(RoiActions.xlsExportAction);
         xlsExportButton.setHideActionText(true);
-        xlsExportButton.setFlat(true);
 
         setLayout(new BorderLayout());
-        add(GuiUtil.createLineBoxPanel(nameFilter, Box.createHorizontalStrut(8), selectedRoiNumberLabel,
-                new JLabel(" / "), roiNumberLabel, Box.createHorizontalStrut(4), settingButton, xlsExportButton),
-                BorderLayout.NORTH);
+        add(
+                GuiUtil.createLineBoxPanel(
+                        nameFilter,
+                        Box.createHorizontalStrut(8),
+                        selectedRoiNumberLabel,
+                        new JLabel(" / "),
+                        roiNumberLabel,
+                        Box.createHorizontalStrut(4),
+                        settingButton,
+                        xlsExportButton
+                ),
+                BorderLayout.NORTH
+        );
         add(middlePanel, BorderLayout.CENTER);
 
         validate();
     }
 
-    protected void buildActionMap()
-    {
+    protected void buildActionMap() {
         final InputMap imap = roiTable.getInputMap(JComponent.WHEN_FOCUSED);
         final ActionMap amap = roiTable.getActionMap();
 
@@ -492,16 +391,14 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         amap.put(RoiActions.pasteLinkAction.getName(), RoiActions.pasteLinkAction);
     }
 
-    protected ROIResults createNewROIResults(ROI roi)
-    {
+    protected ROIResults createNewROIResults(ROI roi) {
         return new ROIResults(roi);
     }
 
     /**
      * Returns number of channel of current sequence
      */
-    protected int getChannelCount()
-    {
+    protected int getChannelCount() {
         final Sequence sequence = getSequence();
 
         if (sequence != null)
@@ -513,8 +410,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * Returns roiTable column suffix for the specified channel
      */
-    protected String getChannelNameSuffix(int ch)
-    {
+    protected String getChannelNameSuffix(int ch) {
         final Sequence sequence = getSequence();
 
         if ((sequence != null) && (ch < getChannelCount()))
@@ -526,12 +422,10 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * Returns ROI descriptor given its id.
      */
-    protected ROIDescriptor getROIDescriptor(String descriptorId)
-    {
+    protected ROIDescriptor getROIDescriptor(String descriptorId) {
         final ROIDescriptor[] descriptors;
 
-        synchronized (descriptorMap)
-        {
+        synchronized (descriptorMap) {
             descriptors = descriptorMap.keySet().toArray(new ROIDescriptor[descriptorMap.size()]);
         }
 
@@ -542,40 +436,10 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         return null;
     }
 
-    // /**
-    // * Get column info for specified visible column index.
-    // */
-    // protected ColumnInfo getVisibleColumnInfo(List<ColumnInfo> columns, int column)
-    // {
-    // int ind = 0;
-    // for (int c = 0; c < columns.size(); c++)
-    // {
-    // final ColumnInfo col = columns.get(c);
-    //
-    // if (col.visible)
-    // {
-    // if (ind == column)
-    // return col;
-    // ind++;
-    // }
-    // }
-    //
-    // return null;
-    // }
-    //
-    // /**
-    // * Get column info for specified visible column index.
-    // */
-    // protected ColumnInfo getVisibleColumnInfo(int column)
-    // {
-    // return getVisibleColumnInfo(columnInfoList, column);
-    // }
-
     /**
      * Get column info for specified column index.
      */
-    protected ColumnInfo getColumnInfo(List<ColumnInfo> columns, int column)
-    {
+    protected ColumnInfo getColumnInfo(List<ColumnInfo> columns, int column) {
         if (column < columns.size())
             return columns.get(column);
 
@@ -585,13 +449,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * Get column info for specified column index.
      */
-    protected ColumnInfo getColumnInfo(int column)
-    {
+    protected ColumnInfo getColumnInfo(int column) {
         return getColumnInfo(columnInfoList, column);
     }
 
-    protected ColumnInfo getColumnInfo(List<ColumnInfo> columns, ROIDescriptor descriptor, int channel)
-    {
+    protected ColumnInfo getColumnInfo(List<ColumnInfo> columns, ROIDescriptor descriptor, int channel) {
         for (ColumnInfo ci : columns)
             if (ci.descriptor.equals(descriptor) && (ci.channel == channel))
                 return ci;
@@ -599,50 +461,41 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         return null;
     }
 
-    protected ColumnInfo getColumnInfo(ROIDescriptor descriptor, int channel)
-    {
+    protected ColumnInfo getColumnInfo(ROIDescriptor descriptor, int channel) {
         return getColumnInfo(columnInfoList, descriptor, channel);
     }
 
     protected abstract Sequence getSequence();
 
-    public void setNameFilter(String name)
-    {
+    public void setNameFilter(String name) {
         nameFilter.setText(name);
     }
 
-    protected boolean computeROIResults(ROIResults roiResults, Sequence seq, ColumnInfo columnInfo)
-    {
+    protected boolean computeROIResults(ROIResults roiResults, Sequence seq, ColumnInfo columnInfo) {
         final Map<ColumnInfo, DescriptorResult> results = roiResults.descriptorResults;
         final ROIDescriptor descriptor = columnInfo.descriptor;
         final DescriptorResult result;
 
-        synchronized (results)
-        {
+        synchronized (results) {
             // get result
             result = results.get(columnInfo);
         }
 
         // need to refresh this column result
-        if ((result != null) && result.isOutdated())
-        {
+        if ((result != null) && result.isOutdated()) {
             // get the corresponding plugin
             final PluginROIDescriptor plugin;
 
-            synchronized (descriptorMap)
-            {
+            synchronized (descriptorMap) {
                 plugin = descriptorMap.get(descriptor);
             }
 
-            if (plugin != null)
-            {
+            if (plugin != null) {
                 final Map<ROIDescriptor, Object> newResults;
 
-                try
-                {
+                try {
                     // need computation per channel ?
-                    if (descriptor.separateChannel())
-                    {
+                    if (descriptor.separateChannel()) {
                         // retrieve the ROI for this channel
                         final ROI roi = roiResults.getRoiForChannel(columnInfo.channel);
 
@@ -655,20 +508,17 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                     else
                         newResults = plugin.compute(roiResults.roi, seq);
 
-                    for (Entry<ROIDescriptor, Object> entryNewResult : newResults.entrySet())
-                    {
+                    for (Entry<ROIDescriptor, Object> entryNewResult : newResults.entrySet()) {
                         // get the column for this result
                         final ColumnInfo resultColumnInfo = getColumnInfo(entryNewResult.getKey(), columnInfo.channel);
                         final DescriptorResult oResult;
 
-                        synchronized (results)
-                        {
+                        synchronized (results) {
                             // get corresponding result
                             oResult = results.get(resultColumnInfo);
                         }
 
-                        if (oResult != null)
-                        {
+                        if (oResult != null) {
                             // set the result value
                             oResult.setValue(entryNewResult.getValue());
                             // result is up to date
@@ -676,31 +526,26 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                         }
                     }
                 }
-                catch (Throwable t)
-                {
+                catch (Throwable t) {
                     // not UnsupportedOperationException or InterruptedException ? --> show the error
                     if (!(t instanceof UnsupportedOperationException) && !(t instanceof InterruptedException))
                         IcyExceptionHandler.handleException(t, true);
 
                     final List<ROIDescriptor> descriptors = plugin.getDescriptors();
 
-                    if (descriptors != null)
-                    {
+                    if (descriptors != null) {
                         // not supported --> clear associated results and set them as computed
-                        for (ROIDescriptor desc : descriptors)
-                        {
+                        for (ROIDescriptor desc : descriptors) {
                             // get the column for this result
                             final ColumnInfo resultColumnInfo = getColumnInfo(desc, columnInfo.channel);
                             final DescriptorResult oResult;
 
-                            synchronized (results)
-                            {
+                            synchronized (results) {
                                 // get corresponding result
                                 oResult = results.get(resultColumnInfo);
                             }
 
-                            if (oResult != null)
-                            {
+                            if (oResult != null) {
                                 oResult.setValue(null);
                                 oResult.setOutdated(false);
                             }
@@ -719,8 +564,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * Return index of specified ROI in the filtered ROI list
      */
-    protected int getRoiIndex(ROI roi)
-    {
+    protected int getRoiIndex(ROI roi) {
         final int result = Collections.binarySearch(filteredRoiList, roi, ROI.idComparator);
 
         if (result >= 0)
@@ -732,33 +576,28 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * Return index of specified ROI in the model
      */
-    protected int getRoiModelIndex(ROI roi)
-    {
+    protected int getRoiModelIndex(ROI roi) {
         return getRoiIndex(roi);
     }
 
     /**
      * Return index of specified ROI in the table (view)
      */
-    protected int getRoiViewIndex(ROI roi)
-    {
+    protected int getRoiViewIndex(ROI roi) {
         final int ind = getRoiModelIndex(roi);
 
         if (ind == -1)
             return ind;
 
-        try
-        {
+        try {
             return roiTable.convertRowIndexToView(ind);
         }
-        catch (IndexOutOfBoundsException e)
-        {
+        catch (IndexOutOfBoundsException e) {
             return -1;
         }
     }
 
-    protected ROIResults getRoiResults(int rowModelIndex)
-    {
+    protected ROIResults getRoiResults(int rowModelIndex) {
         final List<ROIResults> entries = filteredRoiResultsList;
 
         if ((rowModelIndex >= 0) && (rowModelIndex < entries.size()))
@@ -770,35 +609,18 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * Returns the visible ROI in the ROI control panel.
      */
-    public List<ROI> getVisibleRois()
-    {
-        return new ArrayList<ROI>(filteredRoiList);
+    public List<ROI> getVisibleRois() {
+        return new ArrayList<>(filteredRoiList);
     }
-
-    // /**
-    // * Returns the ROI informations for the specified ROI.
-    // */
-    // public ROIInfo getROIInfo(ROI roi)
-    // {
-    // final int index = getRoiIndex(roi);
-    //
-    // if (index != -1)
-    // return filteredRois.get(index);
-    //
-    // return null;
-    // }
 
     /**
      * Returns the number of selected ROI from the table.
      */
-    public int getSelectedRoisCount()
-    {
+    public int getSelectedRoisCount() {
         int result = 0;
 
-        synchronized (roiSelectionModel)
-        {
-            if (!roiSelectionModel.isSelectionEmpty())
-            {
+        synchronized (roiSelectionModel) {
+            if (!roiSelectionModel.isSelectionEmpty()) {
                 for (int i = roiSelectionModel.getMinSelectionIndex(); i <= roiSelectionModel
                         .getMaxSelectionIndex(); i++)
                     if (roiSelectionModel.isSelectedIndex(i))
@@ -812,29 +634,22 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * Returns the selected ROI from the table.
      */
-    public List<ROI> getSelectedRois()
-    {
+    public List<ROI> getSelectedRois() {
         final List<ROIResults> roiResults = filteredRoiResultsList;
-        final List<ROI> result = new ArrayList<ROI>(roiResults.size());
+        final List<ROI> result = new ArrayList<>(roiResults.size());
 
-        synchronized (roiSelectionModel)
-        {
-            if (!roiSelectionModel.isSelectionEmpty())
-            {
+        synchronized (roiSelectionModel) {
+            if (!roiSelectionModel.isSelectionEmpty()) {
                 for (int i = roiSelectionModel.getMinSelectionIndex(); i <= roiSelectionModel
-                        .getMaxSelectionIndex(); i++)
-                {
-                    if (roiSelectionModel.isSelectedIndex(i))
-                    {
-                        try
-                        {
+                        .getMaxSelectionIndex(); i++) {
+                    if (roiSelectionModel.isSelectedIndex(i)) {
+                        try {
                             final int index = roiTable.convertRowIndexToModel(i);
 
                             if ((index >= 0) && (index < roiResults.size()))
                                 result.add(roiResults.get(index).roi);
                         }
-                        catch (IndexOutOfBoundsException e)
-                        {
+                        catch (IndexOutOfBoundsException e) {
                             // ignore
                         }
                     }
@@ -848,27 +663,22 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * Select the specified list of ROI in the ROI Table
      */
-    protected void setSelectedRoisInternal(Set<ROI> newSelected)
-    {
-        final List<Integer> selectedIndexes = new ArrayList<Integer>();
+    protected void setSelectedRoisInternal(Set<ROI> newSelected) {
+        final List<Integer> selectedIndexes = new ArrayList<>();
         final List<ROI> roiList = filteredRoiList;
 
-        for (int i = 0; i < roiList.size(); i++)
-        {
+        for (int i = 0; i < roiList.size(); i++) {
             final ROI roi = roiList.get(i);
 
             // HashSet provides fast "contains"
-            if (newSelected.contains(roi))
-            {
+            if (newSelected.contains(roi)) {
                 int ind;
 
-                try
-                {
+                try {
                     // convert model index to view index
                     ind = roiTable.convertRowIndexToView(i);
                 }
-                catch (IndexOutOfBoundsException e)
-                {
+                catch (IndexOutOfBoundsException e) {
                     ind = -1;
                 }
 
@@ -877,40 +687,35 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             }
         }
 
-        synchronized (roiSelectionModel)
-        {
+        synchronized (roiSelectionModel) {
             // start selection change
             roiSelectionModel.setValueIsAdjusting(true);
-            try
-            {
+            try {
                 // start by clearing selection
                 roiSelectionModel.clearSelection();
 
                 for (Integer index : selectedIndexes)
                     roiSelectionModel.addSelectionInterval(index.intValue(), index.intValue());
             }
-            finally
-            {
+            finally {
                 // end selection change
                 roiSelectionModel.setValueIsAdjusting(false);
             }
         }
     }
 
-    protected Set<ROI> getFilteredSet(String filter)
-    {
+    protected Set<ROI> getFilteredSet(String filter) {
         final Set<ROI> rois = roiSet;
-        final Set<ROI> result = new HashSet<ROI>();
+        final Set<ROI> result = new HashSet<>();
 
         if (StringUtil.isEmpty(filter, true))
             result.addAll(rois);
-        else
-        {
+        else {
             final String text = filter.trim().toLowerCase();
 
             // filter on name
             for (ROI roi : rois)
-                if (roi.getName().toLowerCase().indexOf(text) != -1)
+                if (roi.getName().toLowerCase().contains(text))
                     result.add(roi);
         }
 
@@ -920,16 +725,14 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * Display the roi in the table (scroll if needed)
      */
-    public void scrollTo(ROI roi)
-    {
+    public void scrollTo(ROI roi) {
         final int index = getRoiViewIndex(roi);
 
         if (index != -1)
             roiTable.scrollRowToVisible(index);
     }
 
-    protected void refreshRoiNumbers()
-    {
+    protected void refreshRoiNumbers() {
         final int selectedCount = getSelectedRoisCount();
         final int roisCount = roiTable.getRowCount();
 
@@ -954,16 +757,14 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * refresh whole ROI list
      */
-    protected void refreshRois()
-    {
+    protected void refreshRois() {
         processor.submit(true, roiListRefresher);
     }
 
     /**
      * refresh whole ROI list (internal)
      */
-    protected void refreshRoisInternal()
-    {
+    protected void refreshRoisInternal() {
         final Set<ROI> currentRoiSet = roiSet;
         final Set<ROI> newRoiSet;
         final Sequence sequence = getSequence();
@@ -971,13 +772,13 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         if (sequence != null)
             newRoiSet = sequence.getROISet();
         else
-            newRoiSet = new HashSet<ROI>();
+            newRoiSet = new HashSet<>();
 
         // no change --> exit
         if (newRoiSet.equals(currentRoiSet))
             return;
 
-        final Set<ROI> removedSet = new HashSet<ROI>();
+        final Set<ROI> removedSet = new HashSet<>();
 
         // build removed set
         for (ROI roi : currentRoiSet)
@@ -985,13 +786,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 removedSet.add(roi);
 
         // remove from ROI entry map
-        for (ROI roi : removedSet)
-        {
+        for (ROI roi : removedSet) {
             final ROIResults roiResults;
 
             // must be synchronized
-            synchronized (roiResultsMap)
-            {
+            synchronized (roiResultsMap) {
                 roiResults = roiResultsMap.remove(roi);
             }
 
@@ -1023,42 +822,38 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * refresh filtered ROI list
      */
-    protected void refreshFilteredRois()
-    {
+    protected void refreshFilteredRois() {
         processor.submit(true, filteredRoiListRefresher);
     }
 
     /**
      * refresh filtered ROI list (internal)
      */
-    protected void refreshFilteredRoisInternal()
-    {
+    protected void refreshFilteredRoisInternal() {
         // get new filtered list
         final List<ROI> currentFilteredRoiList = filteredRoiList;
         final Set<ROI> newFilteredRoiSet = getFilteredSet(nameFilter.getText());
 
         // no change --> exit
-        if (newFilteredRoiSet.equals(currentFilteredRoiList))
+        final Set<ROI> currentFilterRoiSet = new HashSet<>(currentFilteredRoiList);
+        if (newFilteredRoiSet.equals(currentFilterRoiSet))
             return;
 
         // update filtered lists
-        final List<ROI> newFilteredRoiList = new ArrayList<ROI>(newFilteredRoiSet);
-        final List<ROIResults> newFilteredResultsList = new ArrayList<ROIResults>(newFilteredRoiList.size());
+        final List<ROI> newFilteredRoiList = new ArrayList<>(newFilteredRoiSet);
+        final List<ROIResults> newFilteredResultsList = new ArrayList<>(newFilteredRoiList.size());
 
         // sort on id
-        Collections.sort(newFilteredRoiList, ROI.idComparator);
+        newFilteredRoiList.sort(ROI.idComparator);
         // then build filtered results list
-        for (ROI roi : newFilteredRoiList)
-        {
+        for (ROI roi : newFilteredRoiList) {
             ROIResults roiResults;
 
-            synchronized (roiResultsMap)
-            {
+            synchronized (roiResultsMap) {
                 // try to get the ROI results from the map first
                 roiResults = roiResultsMap.get(roi);
                 // and create it if needed
-                if (roiResults == null)
-                {
+                if (roiResults == null) {
                     roiResults = createNewROIResults(roi);
                     roiResultsMap.put(roi, roiResults);
                 }
@@ -1074,25 +869,21 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         refreshTableDataStructureInternal();
     }
 
-    public void refreshDescriptorsValue()
-    {
+    public void refreshDescriptorsValue() {
         processor.submit(true, descriptorsValueRefresher);
     }
 
-    protected void refreshDescriptorsValueInternal()
-    {
+    protected void refreshDescriptorsValueInternal() {
         final ROIResults[] allRoiResults;
         final List<SequenceEvent> events;
 
         // get all ROI results
-        synchronized (roiResultsMap)
-        {
+        synchronized (roiResultsMap) {
             allRoiResults = roiResultsMap.values().toArray(new ROIResults[roiResultsMap.size()]);
         }
 
         // get saved events
-        synchronized (savedSequenceEvents)
-        {
+        synchronized (savedSequenceEvents) {
             events = new ArrayList<>(savedSequenceEvents);
             // so we know we processed them
             savedSequenceEvents.clear();
@@ -1101,10 +892,8 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         final List<SequenceEvent> cleanedEvents = new ArrayList<>(events.size());
 
         // only keep meaningful events (ROI events are directly handled from ROI change event)
-        for (SequenceEvent event : events)
-        {
-            switch (event.getSourceType())
-            {
+        for (SequenceEvent event : events) {
+            switch (event.getSourceType()) {
                 case SEQUENCE_DATA:
                 case SEQUENCE_META:
                     cleanedEvents.add(event);
@@ -1128,13 +917,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         refreshTableData();
     }
 
-    public void refreshTableDataStructure()
-    {
+    public void refreshTableDataStructure() {
         processor.submit(true, tableDataStructureRefresher);
     }
 
-    protected void refreshTableDataStructureInternal()
-    {
+    protected void refreshTableDataStructureInternal() {
         // don't eat too much time on data structure refresh
         ThreadUtil.sleep(1);
 
@@ -1144,63 +931,50 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         if (sequence != null)
             newSelectedRois = sequence.getSelectedROISet();
         else
-            newSelectedRois = new HashSet<ROI>();
+            newSelectedRois = new HashSet<>();
 
-        ThreadUtil.invokeNow(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                modifySelection.acquireUninterruptibly();
-                try
-                {
-                    synchronized (roiTableModel)
-                    {
-                        try
-                        {
-                            // notify table data changed
-                            roiTableModel.fireTableDataChanged();
-                        }
-                        catch (Exception e)
-                        {
-                            // Sorter don't like when we change data while it's sorting...
-                        }
+        ThreadUtil.invokeNow(() -> {
+            modifySelection.acquireUninterruptibly();
+            try {
+                synchronized (roiTableModel) {
+                    try {
+                        // notify table data changed
+                        roiTableModel.fireTableDataChanged();
                     }
-
-                    // selection to restore ?
-                    if (!newSelectedRois.isEmpty())
-                        setSelectedRoisInternal(newSelectedRois);
-
-                    // // force loading values on sorted column
-                    // final List<? extends SortKey> keys = roiTable.getRowSorter().getSortKeys();
-                    // if (!keys.isEmpty())
-                    // forceComputationForColumn(keys.get(0).getColumn());
+                    catch (Exception e) {
+                        // Sorter don't like when we change data while it's sorting...
+                    }
                 }
-                finally
-                {
-                    modifySelection.release();
-                }
+
+                // selection to restore ?
+                if (!newSelectedRois.isEmpty())
+                    setSelectedRoisInternal(newSelectedRois);
+
+                // // force loading values on sorted column
+                // final List<? extends SortKey> keys = roiTable.getRowSorter().getSortKeys();
+                // if (!keys.isEmpty())
+                // forceComputationForColumn(keys.get(0).getColumn());
+            }
+            finally {
+                modifySelection.release();
             }
         });
 
         refreshRoiNumbers();
     }
 
-    public void refreshTableData()
-    {
+    public void refreshTableData() {
         processor.submit(true, tableDataRefresher);
     }
 
-    protected void refreshTableDataInternal()
-    {
+    protected void refreshTableDataInternal() {
         final long time = System.currentTimeMillis();
         final boolean hasPendingTask = primaryDescriptorComputer.hasPendingComputation()
                 && basicDescriptorComputer.hasPendingComputation()
                 && advancedDescriptorComputer.hasPendingComputation();
 
         // still pending descriptor task ?
-        if (hasPendingTask)
-        {
+        if (hasPendingTask) {
             // avoid too much table data update
             if ((time - lastTableDataRefresh) < 200)
                 return;
@@ -1211,48 +985,37 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         // don't eat too much time on data structure refresh
         ThreadUtil.sleep(1);
 
-        ThreadUtil.invokeNow(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                final int rowCount = roiTable.getRowCount();
+        ThreadUtil.invokeNow(() -> {
+            final int rowCount = roiTable.getRowCount();
 
-                // we use 'RowsUpdated' event to keep selection (DataChanged remove selection)
-                if (rowCount > 0)
-                {
-                    // save anchor index which is lost with 'RowsUpdated' event
-                    final int anchorInd = ((DefaultListSelectionModel) roiSelectionModel).getAnchorSelectionIndex();
+            // we use 'RowsUpdated' event to keep selection (DataChanged remove selection)
+            if (rowCount > 0) {
+                // save anchor index which is lost with 'RowsUpdated' event
+                final int anchorInd = roiSelectionModel.getAnchorSelectionIndex();
 
-                    synchronized (roiTableModel)
-                    {
-                        try
-                        {
-                            roiTableModel.fireTableRowsUpdated(0, rowCount - 1);
-                        }
-                        catch (Exception e)
-                        {
-                            // Sorter don't like when we change data while it's sorting...
-                        }
+                synchronized (roiTableModel) {
+                    try {
+                        roiTableModel.fireTableRowsUpdated(0, rowCount - 1);
                     }
-
-                    // restore anchor index
-                    if (anchorInd != -1)
-                        ((DefaultListSelectionModel) roiSelectionModel).setAnchorSelectionIndex(anchorInd);
+                    catch (Exception e) {
+                        // Sorter don't like when we change data while it's sorting...
+                    }
                 }
+
+                // restore anchor index
+                if (anchorInd != -1)
+                    roiSelectionModel.setAnchorSelectionIndex(anchorInd);
             }
         });
 
         refreshRoiNumbers();
     }
 
-    public void refreshTableSelection()
-    {
+    public void refreshTableSelection() {
         processor.submit(true, tableSelectionRefresher);
     }
 
-    protected void refreshTableSelectionInternal()
-    {
+    protected void refreshTableSelectionInternal() {
         // don't eat too much time on selection refresh
         ThreadUtil.sleep(1);
 
@@ -1262,48 +1025,37 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         if (sequence != null)
             newSelectedRois = sequence.getSelectedROISet();
         else
-            newSelectedRois = new HashSet<ROI>();
+            newSelectedRois = new HashSet<>();
 
-        ThreadUtil.invokeNow(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                modifySelection.acquireUninterruptibly();
-                try
-                {
-                    // set selection
-                    setSelectedRoisInternal(newSelectedRois);
-                }
-                finally
-                {
-                    modifySelection.release();
-                }
+        ThreadUtil.invokeNow(() -> {
+            modifySelection.acquireUninterruptibly();
+            try {
+                // set selection
+                setSelectedRoisInternal(newSelectedRois);
+            }
+            finally {
+                modifySelection.release();
             }
         });
 
         refreshRoiNumbers();
     }
 
-    protected void refreshDescriptorList()
-    {
+    protected void refreshDescriptorList() {
         descriptorMap = ROIUtil.getROIDescriptors();
         refreshColumnInfoList();
     }
 
-    public void refreshColumnInfoList()
-    {
+    public void refreshColumnInfoList() {
         processor.submit(true, columnInfoListRefresher);
     }
 
-    protected void refreshColumnInfoListInternal()
-    {
+    protected void refreshColumnInfoListInternal() {
         // rebuild the column property list
-        final List<ColumnInfo> newColumnInfos = new ArrayList<ColumnInfo>();
+        final List<ColumnInfo> newColumnInfos = new ArrayList<>();
         final int numChannel = getChannelCount();
 
-        for (ROIDescriptor descriptor : descriptorMap.keySet())
-        {
+        for (ROIDescriptor descriptor : descriptorMap.keySet()) {
             for (int ch = 0; ch < (descriptor.separateChannel() ? numChannel : 1); ch++)
                 newColumnInfos.add(new ColumnInfo(descriptor, ch, viewPreferences, false));
         }
@@ -1313,64 +1065,31 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         // set new column info
         columnInfoList = newColumnInfos;
         // rebuild table columns
-        ThreadUtil.invokeNow(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // regenerate column model
-                roiTable.setColumnModel(new ROITableColumnModel());
-            }
+        ThreadUtil.invokeNow(() -> {
+            // regenerate column model
+            roiTable.setColumnModel(new ROITableColumnModel());
         });
     }
 
-    // protected void forceComputationForColumn(int column)
-    // {
-    // final int numRow = roiTableModel.getRowCount();
-    //
-    // try
-    // {
-    // // force computation of the column values if needed
-    // for (int i = 0; i < numRow; i++)
-    // roiTableModel.getValueAt(i, column);
-    // }
-    // catch (Exception e)
-    // {
-    // // ignore
-    // System.out.println(e);
-    // }
-    // }
-
-    // protected boolean hasPendingComputation(ROIResults results)
-    // {
-    // return primaryDescriptorComputer.hasPendingComputation(results)
-    // || basicDescriptorComputer.hasPendingComputation(results)
-    // || advancedDescriptorComputer.hasPendingComputation(results);
-    // }
-
-    protected void requestDescriptorComputation(ROIResults results)
-    {
+    protected void requestDescriptorComputation(ROIResults results) {
         primaryDescriptorComputer.requestDescriptorComputation(results);
         basicDescriptorComputer.requestDescriptorComputation(results);
         advancedDescriptorComputer.requestDescriptorComputation(results);
     }
 
-    protected void cancelDescriptorComputation(ROIResults results)
-    {
+    protected void cancelDescriptorComputation(ROIResults results) {
         primaryDescriptorComputer.cancelDescriptorComputation(results);
         basicDescriptorComputer.cancelDescriptorComputation(results);
         advancedDescriptorComputer.cancelDescriptorComputation(results);
     }
 
-    protected void cancelDescriptorComputation(ROI roi)
-    {
+    protected void cancelDescriptorComputation(ROI roi) {
         primaryDescriptorComputer.cancelDescriptorComputation(roi);
         basicDescriptorComputer.cancelDescriptorComputation(roi);
         advancedDescriptorComputer.cancelDescriptorComputation(roi);
     }
 
-    protected void cancelAllDescriptorComputation()
-    {
+    protected void cancelAllDescriptorComputation() {
         primaryDescriptorComputer.cancelAllDescriptorComputation();
         basicDescriptorComputer.cancelAllDescriptorComputation();
         advancedDescriptorComputer.cancelAllDescriptorComputation();
@@ -1380,8 +1099,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
      * @deprecated Use {@link #getCSVFormattedInfos()} instead.
      */
     @Deprecated
-    public String getCSVFormattedInfosOfSelectedRois()
-    {
+    public String getCSVFormattedInfosOfSelectedRois() {
         // Check to ensure we have selected only a contiguous block of cells
         final int numcols = roiTable.getColumnCount();
         final int numrows = roiTable.getSelectedRowCount();
@@ -1390,12 +1108,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         if (numrows == 0)
             return "";
 
-        final StringBuffer sbf = new StringBuffer();
+        final StringBuilder sbf = new StringBuilder();
         final int[] rowsselected = roiTable.getSelectedRows();
 
         // column name
-        for (int j = 1; j < numcols; j++)
-        {
+        for (int j = 1; j < numcols; j++) {
             sbf.append(roiTable.getModel().getColumnName(j));
             if (j < numcols - 1)
                 sbf.append("\t");
@@ -1403,20 +1120,16 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         sbf.append("\r\n");
 
         // then content
-        for (int i = 0; i < numrows; i++)
-        {
-            for (int j = 1; j < numcols; j++)
-            {
+        for (int i = 0; i < numrows; i++) {
+            for (int j = 1; j < numcols; j++) {
                 final Object value = roiTable.getModel().getValueAt(roiTable.convertRowIndexToModel(rowsselected[i]),
                         j);
 
                 // special case of double array
-                if (value instanceof double[])
-                {
+                if (value instanceof double[]) {
                     final double[] darray = (double[]) value;
 
-                    for (int l = 0; l < darray.length; l++)
-                    {
+                    for (int l = 0; l < darray.length; l++) {
                         sbf.append(darray[l]);
                         if (l < darray.length - 1)
                             sbf.append(" ");
@@ -1437,15 +1150,13 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     /**
      * Returns all ROI informations in CSV format (tab separated) immediately.
      */
-    public String getCSVFormattedInfos()
-    {
-        final List<ColumnInfo> exportColumnInfos = new ArrayList<ColumnInfo>();
+    public String getCSVFormattedInfos() {
+        final List<ColumnInfo> exportColumnInfos = new ArrayList<>();
         final Sequence seq = getSequence();
         final int numChannel = getChannelCount();
 
         // get export column informations
-        for (ROIDescriptor descriptor : descriptorMap.keySet())
-        {
+        for (ROIDescriptor descriptor : descriptorMap.keySet()) {
             for (int ch = 0; ch < (descriptor.separateChannel() ? numChannel : 1); ch++)
                 exportColumnInfos.add(new ColumnInfo(descriptor, ch, exportPreferences, true));
         }
@@ -1453,38 +1164,32 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         // sort the list on order
         Collections.sort(exportColumnInfos);
 
-        final StringBuffer sbf = new StringBuffer();
+        final StringBuilder sbf = new StringBuilder();
 
         // column title
-        for (ColumnInfo columnInfo : exportColumnInfos)
-        {
-            if (columnInfo.visible)
-            {
+        for (ColumnInfo columnInfo : exportColumnInfos) {
+            if (columnInfo.visible) {
                 sbf.append(columnInfo.name);
                 sbf.append("\t");
             }
         }
         sbf.append("\r\n");
 
-        final List<ROI> rois = new ArrayList<ROI>(filteredRoiList);
+        final List<ROI> rois = new ArrayList<>(filteredRoiList);
 
         // content
-        for (ROI roi : rois)
-        {
+        for (ROI roi : rois) {
             final ROIResults results = createNewROIResults(roi);
             final Map<ColumnInfo, DescriptorResult> descriptorResults = results.descriptorResults;
 
             // compute results
-            for (ColumnInfo columnInfo : exportColumnInfos)
-            {
-                if (columnInfo.visible)
-                {
+            for (ColumnInfo columnInfo : exportColumnInfos) {
+                if (columnInfo.visible) {
                     // try to retrieve result for this column
                     final DescriptorResult result = descriptorResults.get(columnInfo);
 
                     // not yet created/computed --> create it and compute it now
-                    if (result == null)
-                    {
+                    if (result == null) {
                         descriptorResults.put(columnInfo, new DescriptorResult(columnInfo));
                         computeROIResults(results, seq, columnInfo);
                     }
@@ -1492,10 +1197,8 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             }
 
             // display results
-            for (ColumnInfo columnInfo : exportColumnInfos)
-            {
-                if (columnInfo.visible)
-                {
+            for (ColumnInfo columnInfo : exportColumnInfos) {
+                if (columnInfo.visible) {
                     final DescriptorResult result = descriptorResults.get(columnInfo);
                     final String id = columnInfo.descriptor.getId();
                     final Object value;
@@ -1505,12 +1208,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                     else
                         value = null;
 
-                    if (value != null)
-                    {
+                    if (value != null) {
                         // special case of icon --> use the ROI class name
                         if (StringUtil.equals(id, ROIIconDescriptor.ID))
                             sbf.append(roi.getSimpleClassName());
-                        // special case of color --> use the color code
+                            // special case of color --> use the color code
                         else if (StringUtil.equals(id, ROIColorDescriptor.ID))
                             sbf.append(String.format("%06X", Integer.valueOf(roi.getColor().getRGB() & 0xFFFFFF)));
                         else
@@ -1526,31 +1228,21 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         return sbf.toString();
     }
 
-    public void showSettingPanel()
-    {
+    public void showSettingPanel() {
         // create and display the setting frame
-        new RoiSettingFrame(viewPreferences, exportPreferences, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // refresh table columns
-                refreshColumnInfoListInternal();
-            }
-        });
+        // refresh table columns
+        new RoiSettingFrame(viewPreferences, exportPreferences, this::refreshColumnInfoListInternal);
     }
 
     @Override
-    public void textChanged(IcyTextField source, boolean validate)
-    {
+    public void textChanged(IcyTextField source, boolean validate) {
         if (source == nameFilter)
             refreshFilteredRois();
     }
 
     // called when selection changed in the ROI table
     @Override
-    public void valueChanged(ListSelectionEvent e)
-    {
+    public void valueChanged(ListSelectionEvent e) {
         // currently changing the selection ? --> exit
         if (e.getValueIsAdjusting())
             return;
@@ -1558,11 +1250,9 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         if (roiSelectionModel.getValueIsAdjusting())
             return;
 
-        if (modifySelection.tryAcquire())
-        {
+        if (modifySelection.tryAcquire()) {
             // semaphore acquired here
-            try
-            {
+            try {
                 final List<ROI> selectedRois = getSelectedRois();
                 final Sequence sequence = getSequence();
 
@@ -1570,8 +1260,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 if (sequence != null)
                     sequence.setSelectedROIs(selectedRois);
             }
-            finally
-            {
+            finally {
                 modifySelection.release();
             }
         }
@@ -1580,28 +1269,23 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     }
 
     // called when a ROI has been double clicked in the ROI table
-    protected void roiTableDoubleClicked()
-    {
+    protected void roiTableDoubleClicked() {
         final List<ROI> selectedRois = getSelectedRois();
 
-        if (selectedRois.size() > 0)
-        {
+        if (selectedRois.size() > 0) {
             final ROI selected = selectedRois.get(0);
             // get active viewer
             final Viewer v = Icy.getMainInterface().getActiveViewer();
 
-            if ((v != null) && (selected != null))
-            {
+            if ((v != null) && (selected != null)) {
                 // get canvas
                 final IcyCanvas canvas = v.getCanvas();
 
-                if (canvas instanceof IcyCanvas2D)
-                {
+                if (canvas instanceof IcyCanvas2D) {
                     // center view on selected ROI
                     ((IcyCanvas2D) canvas).centerOn(selected.getBounds5D().toRectangle2D().getBounds());
                 }
-                else if (canvas instanceof IcyCanvas3D)
-                {
+                else if (canvas instanceof IcyCanvas3D) {
                     // center view on selected ROI
                     ((IcyCanvas3D) canvas).centerOn(selected.getBounds5D().toRectangle3D().toInteger());
                 }
@@ -1620,8 +1304,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     }
 
     @Override
-    public void sequenceActivated(Sequence value)
-    {
+    public void sequenceActivated(Sequence value) {
         // refresh table columns
         refreshColumnInfoList();
         // refresh ROI list
@@ -1629,25 +1312,21 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     }
 
     @Override
-    public void sequenceDeactivated(Sequence sequence)
-    {
+    public void sequenceDeactivated(Sequence sequence) {
         // nothing here
     }
 
     @Override
-    public void activeSequenceChanged(SequenceEvent event)
-    {
+    public void activeSequenceChanged(SequenceEvent event) {
         // we are modifying externally
         // if (modifySelection.availablePermits() == 0)
         // return;
 
         final SequenceEventSourceType sourceType = event.getSourceType();
 
-        switch (sourceType)
-        {
+        switch (sourceType) {
             case SEQUENCE_ROI:
-                switch (event.getType())
-                {
+                switch (event.getType()) {
                     case ADDED:
                     case REMOVED:
                         refreshRois();
@@ -1659,8 +1338,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 }
 
                 // need to save event for refreshDescriptorsValue
-                synchronized (savedSequenceEvents)
-                {
+                synchronized (savedSequenceEvents) {
                     savedSequenceEvents.add(event);
                 }
 
@@ -1681,8 +1359,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 // don't use break, we also need to send the event to descriptors
 
             case SEQUENCE_DATA:
-                synchronized (savedSequenceEvents)
-                {
+                synchronized (savedSequenceEvents) {
                     savedSequenceEvents.add(event);
                 }
 
@@ -1698,32 +1375,27 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
     }
 
     @Override
-    public void pluginLoaderChanged(PluginLoaderEvent e)
-    {
+    public void pluginLoaderChanged(PluginLoaderEvent e) {
         refreshDescriptorList();
     }
 
-    protected class ROITableModel extends AbstractTableModel
-    {
+    protected class ROITableModel extends AbstractTableModel {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -6537163170625368503L;
 
-        public ROITableModel()
-        {
+        public ROITableModel() {
             super();
         }
 
         @Override
-        public int getColumnCount()
-        {
+        public int getColumnCount() {
             return columnInfoList.size();
         }
 
         @Override
-        public String getColumnName(int column)
-        {
+        public String getColumnName(int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
             if ((ci != null) && (ci.showName))
@@ -1733,8 +1405,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
 
         @Override
-        public Class<?> getColumnClass(int column)
-        {
+        public Class<?> getColumnClass(int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
             if (ci != null)
@@ -1744,14 +1415,12 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
 
         @Override
-        public int getRowCount()
-        {
+        public int getRowCount() {
             return filteredRoiResultsList.size();
         }
 
         @Override
-        public Object getValueAt(int row, int column)
-        {
+        public Object getValueAt(int row, int column) {
             final ROIResults roiResults = getRoiResults(row);
 
             if (roiResults != null)
@@ -1761,8 +1430,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
 
         @Override
-        public void setValueAt(Object value, int row, int column)
-        {
+        public void setValueAt(Object value, int row, int column) {
             final ROIResults roiResults = getRoiResults(row);
 
             if (roiResults != null)
@@ -1770,8 +1438,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
 
         @Override
-        public boolean isCellEditable(int row, int column)
-        {
+        public boolean isCellEditable(int row, int column) {
             final ROIResults roiResults = getRoiResults(row);
 
             if (roiResults != null)
@@ -1781,49 +1448,34 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
     }
 
-    protected class ROIResults implements ROIListener
-    {
+    protected class ROIResults implements ROIListener {
         public final Map<ColumnInfo, DescriptorResult> descriptorResults;
         public final ROI roi;
         private final Map<Integer, WeakReference<ROI>> channelRois;
 
-        protected ROIResults(ROI roi)
-        {
+        protected ROIResults(ROI roi) {
             super();
 
             this.roi = roi;
-            descriptorResults = new HashMap<ColumnInfo, DescriptorResult>();
-            channelRois = new HashMap<Integer, WeakReference<ROI>>();
+            descriptorResults = new HashMap<>();
+            channelRois = new HashMap<>();
 
             // listen for ROI change event
             roi.addListener(this);
         }
 
-        // boolean areResultsUpToDate()
-        // {
-        // for (DescriptorResult result : descriptorResults.values())
-        // if (result.isOutdated())
-        // return false;
-        //
-        // return true;
-        // }
-
-        private void clearChannelRois()
-        {
-            synchronized (channelRois)
-            {
+        private void clearChannelRois() {
+            synchronized (channelRois) {
                 channelRois.clear();
             }
         }
 
-        public ROI getRoiForChannel(int channel) throws InterruptedException
-        {
+        public ROI getRoiForChannel(int channel) throws InterruptedException {
             final Integer key = Integer.valueOf(channel);
             WeakReference<ROI> reference;
             ROI result;
 
-            synchronized (channelRois)
-            {
+            synchronized (channelRois) {
                 reference = channelRois.get(key);
             }
 
@@ -1833,8 +1485,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 result = null;
 
             // channel ROI does not exist ?
-            if (result == null)
-            {
+            if (result == null) {
                 // create it
                 result = roi.getSubROI(-1, -1, channel);
 
@@ -1842,13 +1493,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                 if (result == null)
                     result = roi.getSubROI(-1, -1, channel);
 
-                if (result != null)
-                {
+                if (result != null) {
                     // and put it in map
-                    synchronized (channelRois)
-                    {
+                    synchronized (channelRois) {
                         // we use WeakReference to not waste memory
-                        channelRois.put(key, new WeakReference<ROI>(result));
+                        channelRois.put(key, new WeakReference<>(result));
                     }
                 }
             }
@@ -1856,12 +1505,10 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return result;
         }
 
-        public boolean isEditable(int column)
-        {
+        public boolean isEditable(int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
-            if (ci != null)
-            {
+            if (ci != null) {
                 final ROIDescriptor descriptor = ci.descriptor;
                 final String id = descriptor.getId();
 
@@ -1872,23 +1519,19 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return false;
         }
 
-        public Object formatValue(Object value, String id)
-        {
+        public Object formatValue(Object value, String id) {
             return formatValue(value, id, true);
         }
 
-        public Object formatValue(Object value, String id, boolean truncateDouble)
-        {
+        public Object formatValue(Object value, String id, boolean truncateDouble) {
             Object result = value;
 
             // format result if needed
-            if (result instanceof Number)
-            {
+            if (result instanceof Number) {
                 final double doubleValue = ((Number) result).doubleValue();
 
                 // replace 'infinity' by infinite symbol
-                if (doubleValue == Double.POSITIVE_INFINITY)
-                {
+                if (doubleValue == Double.POSITIVE_INFINITY) {
                     // position descriptor ? negative infinite means 'ALL' here
                     if (id.equals(ROIPositionZDescriptor.ID) || id.equals(ROIPositionTDescriptor.ID)
                             || id.equals(ROIPositionCDescriptor.ID))
@@ -1896,8 +1539,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                     else
                         result = MathUtil.INFINITE_STRING;
                 }
-                else if (doubleValue == Double.NEGATIVE_INFINITY)
-                {
+                else if (doubleValue == Double.NEGATIVE_INFINITY) {
                     // position descriptor ? negative infinite means 'ALL' here
                     if (id.equals(ROIPositionXDescriptor.ID) || id.equals(ROIPositionYDescriptor.ID)
                             || id.equals(ROIPositionZDescriptor.ID) || id.equals(ROIPositionTDescriptor.ID)
@@ -1908,8 +1550,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                     else
                         result = "-" + MathUtil.INFINITE_STRING;
                 }
-                else if (doubleValue == -1d)
-                {
+                else if (doubleValue == -1d) {
                     // position descriptor ? -1 means 'ALL' here
                     if (id.equals(ROIPositionXDescriptor.ID) || id.equals(ROIPositionYDescriptor.ID)
                             || id.equals(ROIPositionZDescriptor.ID) || id.equals(ROIPositionTDescriptor.ID)
@@ -1918,21 +1559,19 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                             || id.equals(ROIMassCenterTDescriptor.ID) || id.equals(ROIMassCenterCDescriptor.ID))
                         result = "ALL";
                 }
-                else if (truncateDouble)
-                {
+                else if (truncateDouble) {
                     // value not too large ?
-                    if (Math.abs(doubleValue) < 10000000)
-                    {
+                    if (Math.abs(doubleValue) < 10000000) {
                         // simple integer ? -> show it as integer
                         if (doubleValue == (int) doubleValue)
                             result = Integer.valueOf((int) doubleValue);
-                        // small integer value ?
+                            // small integer value ?
                         else if (Math.abs(doubleValue) < 100)
                             result = Double.valueOf(MathUtil.roundSignificant(doubleValue, 5));
-                        // medium integer value ?
+                            // medium integer value ?
                         else if (Math.abs(doubleValue) < 10000)
                             result = Double.valueOf(MathUtil.round(doubleValue, 2));
-                        // medium large integer value ?
+                            // medium large integer value ?
                         else if (Math.abs(doubleValue) < 1000000)
                             result = Double.valueOf(MathUtil.round(doubleValue, 1));
                         else
@@ -1943,15 +1582,12 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                         // format double value
                         result = Double.valueOf(MathUtil.roundSignificant(doubleValue, 5));
                 }
-                else
-                {
+                else {
                     if (value instanceof Long || value instanceof Integer || value instanceof Short
-                            || value instanceof Byte)
-                    {
+                            || value instanceof Byte) {
                         result = ((Number) value).longValue();
                     }
-                    else
-                    {
+                    else {
                         result = doubleValue;
                     }
                 }
@@ -1963,18 +1599,15 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         /**
          * Retrieve the DescriptorResult for the specified column
          */
-        public DescriptorResult getDescriptorResult(ColumnInfo column)
-        {
+        public DescriptorResult getDescriptorResult(ColumnInfo column) {
             // get result for this descriptor
             DescriptorResult result;
 
-            synchronized (descriptorResults)
-            {
+            synchronized (descriptorResults) {
                 result = descriptorResults.get(column);
 
                 // no result --> create it and request computation
-                if (result == null)
-                {
+                if (result == null) {
                     // create descriptor result
                     result = new DescriptorResult(column);
                     // and put it in results map
@@ -1988,8 +1621,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         /**
          * Retrieve the value for the specified descriptor
          */
-        public Object getValue(ColumnInfo column)
-        {
+        public Object getValue(ColumnInfo column) {
             // get result for this descriptor
             final DescriptorResult result = getDescriptorResult(column);
 
@@ -2000,8 +1632,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return formatValue(result.getValue(), column.descriptor.getId());
         }
 
-        public Object getValueAt(int column)
-        {
+        public Object getValueAt(int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
             if (ci != null)
@@ -2010,12 +1641,10 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return null;
         }
 
-        public void setValueAt(Object aValue, int column)
-        {
+        public void setValueAt(Object aValue, int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
-            if (ci != null)
-            {
+            if (ci != null) {
                 final ROIDescriptor descriptor = ci.descriptor;
                 final String id = descriptor.getId();
 
@@ -2028,33 +1657,36 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
 
         @Override
-        public void roiChanged(ROIEvent event)
-        {
-            switch (event.getType())
-            {
+        public void roiChanged(ROIEvent event) {
+            switch (event.getType()) {
                 case ROI_CHANGED:
                 case PROPERTY_CHANGED:
                     final Object[] entries;
 
-                    synchronized (descriptorResults)
-                    {
+                    synchronized (descriptorResults) {
                         entries = descriptorResults.entrySet().toArray();
                     }
 
-                    for (Object entryObj : entries)
-                    {
-                        final Entry<ColumnInfo, DescriptorResult> entry = (Entry<ColumnInfo, DescriptorResult>) entryObj;
-                        final ColumnInfo key = entry.getKey();
-                        final ROIDescriptor descriptor = key.descriptor;
+                    for (Object entryObj : entries) {
+                        if (entryObj instanceof Entry<?, ?>) {
+                            final Entry<?, ?> entry = (Entry<?, ?>) entryObj;
+                            final Object key = entry.getKey();
+                            final Object value = entry.getValue();
+                            if (key instanceof ColumnInfo && value instanceof DescriptorResult) {
+                                //final Entry<ColumnInfo, DescriptorResult> entry = (Entry<ColumnInfo, DescriptorResult>) entryObj;
+                                //final ColumnInfo key = entry.getKey();
+                                final ROIDescriptor descriptor = ((ColumnInfo) key).descriptor;
 
-                        // need to recompute this descriptor ?
-                        if (descriptor.needRecompute(event))
-                        {
-                            final DescriptorResult result = entry.getValue();
+                                // need to recompute this descriptor ?
+                                if (descriptor.needRecompute(event)) {
+                                    //final DescriptorResult result = entry.getValue();
+                                    final DescriptorResult result = (DescriptorResult) value;
 
-                            // mark as outdated
-                            if (result != null)
-                                result.setOutdated(true);
+                                    // mark as outdated
+                                    //if (result != null)
+                                    result.setOutdated(true);
+                                }
+                            }
                         }
                     }
 
@@ -2077,123 +1709,113 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
 
         /**
          * Called when the sequence changed, in which case we need to invalidate results.
-         * 
-         * @param event
-         *        Sequence change event
+         *
+         * @param event Sequence change event
          */
-        public void sequenceChanged(SequenceEvent event)
-        {
+        public void sequenceChanged(SequenceEvent event) {
             final Object[] entries;
 
-            synchronized (descriptorResults)
-            {
+            synchronized (descriptorResults) {
                 entries = descriptorResults.entrySet().toArray();
             }
 
-            for (Object entryObj : entries)
-            {
-                final Entry<ColumnInfo, DescriptorResult> entry = (Entry<ColumnInfo, DescriptorResult>) entryObj;
-                final ColumnInfo key = entry.getKey();
-                final ROIDescriptor descriptor = key.descriptor;
+            for (Object entryObj : entries) {
+                if (entryObj instanceof Entry<?, ?>) {
+                    final Entry<?, ?> entry = (Entry<?, ?>) entryObj;
+                    final Object key = entry.getKey();
+                    final Object value = entry.getValue();
+                    if (key instanceof ColumnInfo && value instanceof DescriptorResult) {
+                        //final Entry<ColumnInfo, DescriptorResult> entry = (Entry<ColumnInfo, DescriptorResult>) entryObj;
+                        //final ColumnInfo key = entry.getKey();
+                        final ROIDescriptor descriptor = ((ColumnInfo) key).descriptor;
 
-                // need to recompute this descriptor ?
-                if (descriptor.needRecompute(event))
-                {
-                    final DescriptorResult result = entry.getValue();
+                        // need to recompute this descriptor ?
+                        if (descriptor.needRecompute(event)) {
+                            //final DescriptorResult result = entry.getValue();
+                            final DescriptorResult result = (DescriptorResult) value;
 
-                    // mark as outdated
-                    if (result != null)
-                        result.setOutdated(true);
+                            // mark as outdated
+                            //if (result != null)
+                            result.setOutdated(true);
+                        }
+                    }
                 }
             }
         }
     }
 
-    protected class DescriptorComputer extends Thread
-    {
+    protected class DescriptorComputer extends Thread {
         protected final LinkedHashSet<ROIResults> resultsToCompute;
         protected final DescriptorType type;
 
-        public DescriptorComputer(DescriptorType type)
-        {
+        public DescriptorComputer(DescriptorType type) {
             super("ROI " + type.toString() + " descriptor calculator");
 
-            resultsToCompute = new LinkedHashSet<AbstractRoisPanel.ROIResults>(256);
+            resultsToCompute = new LinkedHashSet<>(256);
             this.type = type;
 
             setPriority(Thread.MIN_PRIORITY);
         }
 
-        public boolean hasPendingComputation()
-        {
+        public boolean hasPendingComputation() {
             return resultsToCompute.size() > 0;
         }
 
-        public boolean hasPendingComputation(ROIResults results)
-        {
-            synchronized (resultsToCompute)
-            {
+        public boolean hasPendingComputation(ROIResults results) {
+            synchronized (resultsToCompute) {
                 return resultsToCompute.contains(results);
             }
         }
 
-        public void requestDescriptorComputation(ROIResults results)
-        {
-            synchronized (resultsToCompute)
-            {
+        public void requestDescriptorComputation(ROIResults results) {
+            synchronized (resultsToCompute) {
                 resultsToCompute.add(results);
                 resultsToCompute.notifyAll();
             }
         }
 
-        public void cancelDescriptorComputation(ROIResults roiResults)
-        {
-            synchronized (resultsToCompute)
-            {
+        public void cancelDescriptorComputation(ROIResults roiResults) {
+            synchronized (resultsToCompute) {
                 resultsToCompute.remove(roiResults);
                 resultsToCompute.notifyAll();
             }
         }
 
-        public void cancelDescriptorComputation(ROI roi)
-        {
-            synchronized (resultsToCompute)
-            {
-                final Iterator<ROIResults> it = resultsToCompute.iterator();
+        public void cancelDescriptorComputation(ROI roi) {
+            synchronized (resultsToCompute) {
 
-                while (it.hasNext())
-                {
+                // remove all results for this ROI
+                resultsToCompute.removeIf(roiResults -> roiResults.roi == roi);
+
+                /*final Iterator<ROIResults> it = resultsToCompute.iterator();
+
+                while (it.hasNext()) {
                     final ROIResults roiResults = it.next();
 
                     // remove all results for this ROI
                     if (roiResults.roi == roi)
                         it.remove();
-                }
+                }*/
+
 
                 resultsToCompute.notifyAll();
             }
         }
 
-        public void cancelAllDescriptorComputation()
-        {
-            synchronized (resultsToCompute)
-            {
+        public void cancelAllDescriptorComputation() {
+            synchronized (resultsToCompute) {
                 resultsToCompute.clear();
                 resultsToCompute.notifyAll();
             }
         }
 
         @Override
-        public void run()
-        {
-            try
-            {
-                while (!interrupted())
-                {
+        public void run() {
+            try {
+                while (!interrupted()) {
                     final ROIResults roiResults;
 
-                    synchronized (resultsToCompute)
-                    {
+                    synchronized (resultsToCompute) {
                         while (resultsToCompute.isEmpty())
                             resultsToCompute.wait();
 
@@ -2209,30 +1831,25 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                         computeROIResults(roiResults, seq);
                 }
             }
-            catch (InterruptedException exc)
-            {
+            catch (InterruptedException exc) {
                 // just interrupt processing thread
             }
-            catch (Throwable t)
-            {
+            catch (Throwable t) {
                 System.err.println("Error while computing ROI descriptors:");
                 System.err.println(t.getMessage());
             }
         }
 
-        protected void computeROIResults(ROIResults roiResults, Sequence seq)
-        {
+        protected void computeROIResults(ROIResults roiResults, Sequence seq) {
             final Map<ColumnInfo, DescriptorResult> results = roiResults.descriptorResults;
             final ColumnInfo[] columnInfos;
 
-            synchronized (results)
-            {
+            synchronized (results) {
                 columnInfos = results.keySet().toArray(new ColumnInfo[results.size()]);
             }
 
             boolean needUpdate = false;
-            for (ColumnInfo columnInfo : columnInfos)
-            {
+            for (ColumnInfo columnInfo : columnInfos) {
                 // only compute a specific kind of descriptor
                 if (columnInfo.getDescriptorType() == type)
                     needUpdate |= AbstractRoisPanel.this.computeROIResults(roiResults, seq, columnInfo);
@@ -2244,13 +1861,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
     }
 
-    protected class DescriptorResult
-    {
+    protected class DescriptorResult {
         private Object value;
         private boolean outdated;
 
-        public DescriptorResult(ColumnInfo column)
-        {
+        public DescriptorResult(ColumnInfo column) {
             super();
 
             value = null;
@@ -2259,34 +1874,28 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             outdated = true;
         }
 
-        public Object getValue()
-        {
+        public Object getValue() {
             return value;
         }
 
-        public void setValue(Object value)
-        {
+        public void setValue(Object value) {
             this.value = value;
         }
 
-        public boolean isOutdated()
-        {
+        public boolean isOutdated() {
             return outdated;
         }
 
-        public void setOutdated(boolean value)
-        {
+        public void setOutdated(boolean value) {
             outdated = value;
         }
     }
 
-    public static enum DescriptorType
-    {
+    public enum DescriptorType {
         PRIMARY, BASIC, EXTERNAL
-    };
+    }
 
-    public static class BaseColumnInfo implements Comparable<BaseColumnInfo>
-    {
+    public static class BaseColumnInfo implements Comparable<BaseColumnInfo> {
         public final ROIDescriptor descriptor;
         public int minSize;
         public int maxSize;
@@ -2294,8 +1903,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         public int order;
         public boolean visible;
 
-        public BaseColumnInfo(ROIDescriptor descriptor, XMLPreferences preferences, boolean export)
-        {
+        public BaseColumnInfo(ROIDescriptor descriptor, XMLPreferences preferences, boolean export) {
             super();
 
             this.descriptor = descriptor;
@@ -2303,12 +1911,10 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             load(preferences, export);
         }
 
-        public boolean load(XMLPreferences preferences, boolean export)
-        {
+        public boolean load(XMLPreferences preferences, boolean export) {
             final XMLPreferences p = preferences.node(descriptor.getId());
 
-            if (p != null)
-            {
+            if (p != null) {
                 minSize = p.getInt(ID_PROPERTY_MINSIZE, getDefaultMinSize());
                 maxSize = p.getInt(ID_PROPERTY_MAXSIZE, getDefaultMaxSize());
                 defaultSize = p.getInt(ID_PROPERTY_DEFAULTSIZE, getDefaultDefaultSize());
@@ -2321,12 +1927,10 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return false;
         }
 
-        public boolean save(XMLPreferences preferences)
-        {
+        public boolean save(XMLPreferences preferences) {
             final XMLPreferences p = preferences.node(descriptor.getId());
 
-            if (p != null)
-            {
+            if (p != null) {
                 // p.putInt(ID_PROPERTY_MINSIZE, minSize);
                 // p.putInt(ID_PROPERTY_MAXSIZE, maxSize);
                 // p.putInt(ID_PROPERTY_DEFAULTSIZE, defaultSize);
@@ -2339,15 +1943,13 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return false;
         }
 
-        protected boolean getDefaultVisible(boolean export)
-        {
+        protected boolean getDefaultVisible(boolean export) {
             if (descriptor == null)
                 return false;
 
             final String id = descriptor.getId();
 
-            if (export)
-            {
+            if (export) {
                 if (StringUtil.equals(id, ROIOpacityDescriptor.ID))
                     return false;
 
@@ -2368,8 +1970,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return false;
         }
 
-        protected int getDefaultOrder()
-        {
+        protected int getDefaultOrder() {
             if (descriptor == null)
                 return Integer.MAX_VALUE;
 
@@ -2473,8 +2074,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return Integer.MAX_VALUE;
         }
 
-        protected int getDefaultMinSize()
-        {
+        protected int getDefaultMinSize() {
             if (descriptor == null)
                 return Integer.MAX_VALUE;
 
@@ -2503,8 +2103,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return 40;
         }
 
-        protected int getDefaultMaxSize()
-        {
+        protected int getDefaultMaxSize() {
             if (descriptor == null)
                 return Integer.MAX_VALUE;
 
@@ -2520,8 +2119,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return Integer.MAX_VALUE;
         }
 
-        protected int getDefaultDefaultSize()
-        {
+        protected int getDefaultDefaultSize() {
             final int maxSize = getDefaultMaxSize();
             final int minSize = getDefaultMinSize();
 
@@ -2533,13 +2131,12 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
 
         /**
          * Used to know if this is a primary (name, color...) ROI descriptor.
-         * 
+         *
          * @see #isBasicDescriptor()
          * @see #isExtendedDescriptor()
          * @see #getDescriptorType()
          */
-        protected boolean isPrimaryDescriptor()
-        {
+        protected boolean isPrimaryDescriptor() {
             if (descriptor == null)
                 return false;
 
@@ -2547,7 +2144,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
 
             return (StringUtil.equals(id, ROIIconDescriptor.ID)) || (StringUtil.equals(id, ROIColorDescriptor.ID))
                     || (StringUtil.equals(id,
-                            ROINameDescriptor.ID)) /* || (StringUtil.equals(id, ROIGroupIdDescriptor.ID)) */
+                    ROINameDescriptor.ID)) /* || (StringUtil.equals(id, ROIGroupIdDescriptor.ID)) */
                     || (StringUtil.equals(id, ROIPositionXDescriptor.ID))
                     || (StringUtil.equals(id, ROIPositionYDescriptor.ID))
                     || (StringUtil.equals(id, ROIPositionZDescriptor.ID))
@@ -2560,13 +2157,12 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
 
         /**
          * Used to know if this is a primary or basic (interior, contour, intensities..) ROI descriptor.
-         * 
+         *
          * @see #isPrimaryDescriptor()
          * @see #isExtendedDescriptor()
          * @see #getDescriptorType()
          */
-        protected boolean isBasicDescriptor()
-        {
+        protected boolean isBasicDescriptor() {
             if (descriptor == null)
                 return false;
 
@@ -2590,13 +2186,12 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
 
         /**
          * Used to know if this is a extended (added by an external plugin) ROI descriptor
-         * 
+         *
          * @see #isPrimaryDescriptor()
          * @see #isBasicDescriptor()
          * @see #getDescriptorType()
          */
-        protected boolean isExtendedDescriptor()
-        {
+        protected boolean isExtendedDescriptor() {
             if (descriptor == null)
                 return false;
 
@@ -2606,8 +2201,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         /**
          * Returns the kind of ROI descriptor
          */
-        public DescriptorType getDescriptorType()
-        {
+        public DescriptorType getDescriptorType() {
             if (descriptor == null)
                 return null;
 
@@ -2620,20 +2214,17 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
 
         @Override
-        public int compareTo(BaseColumnInfo obj)
-        {
-            return Integer.valueOf(order).compareTo(Integer.valueOf(obj.order));
+        public int compareTo(BaseColumnInfo obj) {
+            return Integer.compare(order, obj.order);
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return descriptor.hashCode();
         }
 
         @Override
-        public boolean equals(Object obj)
-        {
+        public boolean equals(Object obj) {
             if (obj instanceof BaseColumnInfo)
                 // equality on descriptor
                 return ((BaseColumnInfo) obj).descriptor.equals(descriptor);
@@ -2642,22 +2233,19 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
     }
 
-    protected class ColumnInfo extends BaseColumnInfo
-    {
+    protected class ColumnInfo extends BaseColumnInfo {
         boolean showName;
         String name;
         final int channel;
 
-        public ColumnInfo(ROIDescriptor descriptor, int channel, XMLPreferences prefs, boolean export)
-        {
+        public ColumnInfo(ROIDescriptor descriptor, int channel, XMLPreferences prefs, boolean export) {
             super(descriptor, prefs, export);
 
             this.channel = channel;
             refreshName();
         }
 
-        protected String getSuffix()
-        {
+        protected String getSuffix() {
             String result = "";
 
             final String unit = descriptor.getUnit(getSequence());
@@ -2672,8 +2260,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             return result;
         }
 
-        protected void refreshName()
-        {
+        protected void refreshName() {
             name = descriptor.getName() + getSuffix();
 
             final String id = descriptor.getId();
@@ -2687,43 +2274,33 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return descriptor.hashCode() ^ channel;
         }
 
         @Override
-        public boolean equals(Object obj)
-        {
-            if (obj instanceof ColumnInfo)
-            {
+        public boolean equals(Object obj) {
+            if (obj instanceof ColumnInfo) {
                 final ColumnInfo ci = (ColumnInfo) obj;
 
                 // equality on descriptor and channel number
-                return (ci.descriptor.equals(descriptor) && (ci.channel == ci.channel));
+                //return (ci.descriptor.equals(descriptor) && (ci.channel == ci.channel));
+                return (ci.descriptor.equals(descriptor) && (ci.channel == channel));
             }
 
             return super.equals(obj);
         }
     }
 
-    protected class ROITableColumnModel extends DefaultTableColumnModelExt
-    {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -8024047283485991234L;
-
-        public ROITableColumnModel()
-        {
+    protected class ROITableColumnModel extends DefaultTableColumnModelExt {
+        public ROITableColumnModel() {
             super();
 
             final List<ColumnInfo> columnInfos = columnInfoList;
 
             // column info are sorted on their order
             int index = 0;
-            for (ColumnInfo ci : columnInfos)
-            {
+            for (ColumnInfo ci : columnInfos) {
                 final ROIDescriptor descriptor = ci.descriptor;
                 final TableColumnExt column = new TableColumnExt(index++);
 
@@ -2746,9 +2323,9 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
                     column.setCellRenderer(new ImageTableCellRenderer(18));
                 else if (type == Color.class)
                     column.setCellRenderer(new ImageTableCellRenderer(16));
-                // use the number cell renderer
-                else if (ClassUtil.isSubClass(type, Number.class))
-                    column.setCellRenderer(new SubstanceDefaultTableCellRenderer.NumberRenderer());
+                    // use the number cell renderer
+                //else if (ClassUtil.isSubClass(type, Number.class))
+                    //column.setCellRenderer(new SubstanceDefaultTableCellRenderer.NumberRenderer());
                 // column.setCellRenderer(new NumberTableCellRenderer());
 
                 // and finally add to the model
@@ -2758,21 +2335,17 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             setColumnSelectionAllowed(false);
         }
 
-        public void updateHeaders()
-        {
+        public void updateHeaders() {
             final List<ColumnInfo> columnInfos = columnInfoList;
             final List<TableColumn> columns = getColumns(true);
-            for (TableColumn column : columns)
-            {
+            for (TableColumn column : columns) {
                 final ColumnInfo ci = getColumnInfo(columnInfos, column.getModelIndex());
 
-                if (ci != null)
-                {
+                if (ci != null) {
                     final ROIDescriptor descriptor = ci.descriptor;
 
                     // that should be always the case
-                    if (StringUtil.equals((String) column.getIdentifier(), descriptor.getId()))
-                    {
+                    if (StringUtil.equals((String) column.getIdentifier(), descriptor.getId())) {
                         column.setHeaderValue(ci.showName ? ci.name : "");
                         if (column instanceof TableColumnExt)
                             ((TableColumnExt) column).setToolTipText(descriptor.getDescription() + ci.getSuffix());
@@ -2782,52 +2355,8 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
     }
 
-    // class CustomTableCellRenderer extends DefaultTableCellRenderer
-    // {
-    // @Override
-    // public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-    // boolean hasFocus, int row, int column)
-    // {
-    // super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-    //
-    // ROIResults roiResults;
-    // try
-    // {
-    // roiResults = getROIResults(roiTable.convertRowIndexToModel(row));
-    //
-    // }
-    // catch (IndexOutOfBoundsException e)
-    // {
-    // roiResults = null;
-    // }
-    //
-    // final Color defaultColor;
-    // final Color computeColor;
-    //
-    // if (isSelected)
-    // defaultColor = UIManager.getColor("Table.selectionBackground");
-    // else
-    // defaultColor = UIManager.getColor("Table.background");
-    // if (roiResults == null)
-    // computeColor = Color.green;
-    // else if (roiResults.areResultsUpToDate())
-    // computeColor = Color.green;
-    // else if (hasPendingComputation(roiResults))
-    // computeColor = Color.orange;
-    // else
-    // computeColor = Color.red;
-    //
-    // // define background color
-    // setBackground(ColorUtil.mix(defaultColor, computeColor, 0.15f));
-    //
-    // return this;
-    // }
-    // }
-
-    protected class ROITableSortController<M extends TableModel> extends DefaultSortController<M>
-    {
-        public ROITableSortController()
-        {
+    protected class ROITableSortController<M extends TableModel> extends DefaultSortController<M> {
+        public ROITableSortController() {
             super();
 
             cachedModelRowCount = roiTableModel.getRowCount();
@@ -2835,14 +2364,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
 
         @Override
-        public void sort()
-        {
-            try
-            {
+        public void sort() {
+            try {
                 super.sort();
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 // ignore this...
                 // System.err.println("ROI table column sort failed:");
                 // System.err.println(e.getMessage());
@@ -2850,14 +2376,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
         }
 
         @Override
-        public int convertRowIndexToModel(int index)
-        {
-            try
-            {
+        public int convertRowIndexToModel(int index) {
+            try {
                 return super.convertRowIndexToModel(index);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 return 0;
 
                 // ignore this...
@@ -2866,29 +2389,16 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
             }
         }
 
-        // @Override
-        // protected void fireSortOrderChanged()
-        // {
-        // super.fireSortOrderChanged();
-        //
-        // final List<? extends SortKey> keys = getSortKeys();
-        //
-        // if (!keys.isEmpty())
-        // forceComputationForColumn(keys.get(0).getColumn());
-        // }
-
         /**
          * Returns the <code>Comparator</code> for the specified
          * column. If a <code>Comparator</code> has not been specified using
          * the <code>setComparator</code> method a <code>Comparator</code> will be returned based on the column class
          * (<code>TableModel.getColumnClass</code>) of the specified column.
          *
-         * @throws IndexOutOfBoundsException
-         *         {@inheritDoc}
+         * @throws IndexOutOfBoundsException {@inheritDoc}
          */
         @Override
-        public Comparator<?> getComparator(int column)
-        {
+        public Comparator<?> getComparator(int column) {
             return comparator;
         }
 
@@ -2899,13 +2409,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
          * because here the comparator is never null.
          * <p>
          * PENDING JW: think about implications to string value lookup!
-         * 
-         * @throws IndexOutOfBoundsException
-         *         {@inheritDoc}
+         *
+         * @throws IndexOutOfBoundsException {@inheritDoc}
          */
         @Override
-        protected boolean useToString(int column)
-        {
+        protected boolean useToString(int column) {
             return false;
         }
 
@@ -2913,85 +2421,40 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel
          * Implementation of DefaultRowSorter.ModelWrapper that delegates to a
          * TableModel.
          */
-        private class TableRowSorterModelWrapper extends ModelWrapper<M, Integer>
-        {
-            public TableRowSorterModelWrapper()
-            {
+        private class TableRowSorterModelWrapper extends ModelWrapper<M, Integer> {
+            public TableRowSorterModelWrapper() {
                 super();
             }
 
             @Override
-            public M getModel()
-            {
+            public M getModel() {
                 return (M) roiTableModel;
             }
 
             @Override
-            public int getColumnCount()
-            {
+            public int getColumnCount() {
                 return roiTableModel.getColumnCount();
             }
 
             @Override
-            public int getRowCount()
-            {
+            public int getRowCount() {
                 return roiTableModel.getRowCount();
             }
 
             @Override
-            public Object getValueAt(int row, int column)
-            {
+            public Object getValueAt(int row, int column) {
                 return roiTableModel.getValueAt(row, column);
             }
 
             @Override
-            public String getStringValueAt(int row, int column)
-            {
+            public String getStringValueAt(int row, int column) {
                 return getStringValueProvider().getStringValue(row, column).getString(getValueAt(row, column));
             }
 
             @Override
-            public Integer getIdentifier(int index)
-            {
+            public Integer getIdentifier(int index) {
                 return Integer.valueOf(index);
             }
         }
     }
-
-    // protected class NumberTableCellRenderer extends SubstanceDefaultTableCellRenderer.NumberRenderer
-    // {
-    //
-    // /**
-    // *
-    // */
-    // private static final long serialVersionUID = 5033090596184731420L;
-    //
-    // @Override
-    // public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-    // boolean hasFocus, int row, int column)
-    // {
-    // final Component result = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
-    // column);
-    //
-    // final ROIResults roiResults = getRoiResults(row);
-    //
-    // if (roiResults != null)
-    // {
-    // final ColumnInfo ci = getVisibleColumnInfo(column);
-    //
-    // if (ci != null)
-    // {
-    // final DescriptorResult descResult = roiResults.getDescriptorResult(ci);
-    //
-    // if (descResult != null)
-    // {
-    // if (descResult.isOutdated())
-    // result.setBackground(ColorUtil.mix(Color.red, result.getBackground()));
-    // }
-    // }
-    // }
-    //
-    // return result;
-    // }
-    // }
 }

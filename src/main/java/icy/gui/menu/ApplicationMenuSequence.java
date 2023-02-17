@@ -1,6 +1,26 @@
+/*
+ * Copyright 2010-2023 Institut Pasteur.
+ *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
 package icy.gui.menu;
 
 import icy.action.SequenceOperationActions;
+import icy.gui.component.menu.IcyMenu;
+import icy.gui.component.menu.IcyMenuItem;
 import icy.main.Icy;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
@@ -10,13 +30,15 @@ import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * @author Thomas MUSSET
+ */
 public final class ApplicationMenuSequence extends AbstractApplicationMenu {
-    private final JMenu menuConversion;
-    private final JMenu menuRawConversion;
-    private final JMenu menuExtractChannel;
-    private final JMenu menuRemoveChannel;
+    private final IcyMenu menuConversion;
+    private final IcyMenu menuRawConversion;
+    private final IcyMenu menuExtractChannel;
+    private final IcyMenu menuRemoveChannel;
 
-    private final JMenuItem itemDuplicate;
     private final JRadioButtonMenuItem itemConversionUnsigned8bits;
     private final JRadioButtonMenuItem itemConversionSigned8bits;
     private final JRadioButtonMenuItem itemConversionUnsigned16bits;
@@ -33,39 +55,31 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
     private final JRadioButtonMenuItem itemRawConversionSigned32bits;
     private final JRadioButtonMenuItem itemRawConversionFloat32bits;
     private final JRadioButtonMenuItem itemRawConversionDouble64bits;
-    private final JMenuItem itemFastCrop;
-    private final JMenuItem itemResizeCanvas;
-    private final JMenuItem itemResizeImage;
-    private final JMenuItem itemExtractAllChannels;
-    private final JMenuItem itemMergeChannels;
-    private final JMenuItem itemReverseSlices;
-    private final JMenuItem itemExtractSlice;
-    private final JMenuItem itemRemoveSlice;
-    private final JMenuItem itemAddSlices;
-    private final JMenuItem itemMergeSlices;
-    private final JMenuItem itemRemoveSlices;
-    private final JMenuItem itemReverseFrames;
-    private final JMenuItem itemExtractFrame;
-    private final JMenuItem itemRemoveFrame;
-    private final JMenuItem itemAddFrames;
-    private final JMenuItem itemMergeFrames;
-    private final JMenuItem itemRemoveFrames;
-    private final JMenuItem itemConvertToSlices;
-    private final JMenuItem itemConvertToFrames;
-    private final JMenuItem itemConvertAdvancedZT;
+    private final IcyMenuItem itemExtractAllChannels;
+    private final IcyMenuItem itemMergeChannels;
+    private final IcyMenuItem itemReverseSlices;
+    private final IcyMenuItem itemExtractSlice;
+    private final IcyMenuItem itemRemoveSlice;
+    private final IcyMenuItem itemMergeSlices;
+    private final IcyMenuItem itemRemoveSlices;
+    private final IcyMenuItem itemReverseFrames;
+    private final IcyMenuItem itemExtractFrame;
+    private final IcyMenuItem itemRemoveFrame;
+    private final IcyMenuItem itemMergeFrames;
+    private final IcyMenuItem itemRemoveFrames;
+    private final IcyMenuItem itemConvertToSlices;
+    private final IcyMenuItem itemConvertToFrames;
 
     public ApplicationMenuSequence() {
         super("Sequence");
 
-        itemDuplicate = new JMenuItem("Duplicate Sequence");
-        setIcon(itemDuplicate, GoogleMaterialDesignIcons.PHOTO_LIBRARY);
+        final IcyMenuItem itemDuplicate = new IcyMenuItem("Duplicate Sequence", GoogleMaterialDesignIcons.PHOTO_LIBRARY);
         itemDuplicate.addActionListener(SequenceOperationActions.cloneSequenceAction);
         add(itemDuplicate);
 
         // TODO: 19/01/2023 Refactor conversion and raw conversion submenu
         /* submenu conversion */
-        menuConversion = new JMenu("Convert to");
-        setIcon(menuConversion, GoogleMaterialDesignIcons.LABEL);
+        menuConversion = new IcyMenu("Convert to", GoogleMaterialDesignIcons.LABEL);
         add(menuConversion);
 
         final ButtonGroup groupConversion = new ButtonGroup();
@@ -104,8 +118,7 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
         menuConversion.add(itemConversionDouble64bits);
 
         /* submenu raw conversion */
-        menuRawConversion = new JMenu("Convert to Raw");
-        setIcon(menuRawConversion, GoogleMaterialDesignIcons.LABEL_OUTLINE);
+        menuRawConversion = new IcyMenu("Convert to Raw", GoogleMaterialDesignIcons.LABEL_OUTLINE);
         add(menuRawConversion);
 
         final ButtonGroup groupRawConversion = new ButtonGroup();
@@ -146,109 +159,105 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
         addSeparator();
 
         // TODO: 19/01/2023 Check if there is ROI inside active sequence
-        itemFastCrop = new JMenuItem("Fast Crop ROI");
-        setIcon(itemFastCrop, GoogleMaterialDesignIcons.CROP);
+        final IcyMenuItem itemFastCrop = new IcyMenuItem("Fast Crop ROI", GoogleMaterialDesignIcons.CROP);
         itemFastCrop.addActionListener(SequenceOperationActions.cropSequenceAction);
         add(itemFastCrop);
 
-        itemResizeCanvas = new JMenuItem("Resize Canvas...");
-        setIcon(itemResizeCanvas, GoogleMaterialDesignIcons.IMAGE_ASPECT_RATIO);
+        final IcyMenuItem itemResizeCanvas = new IcyMenuItem("Resize Canvas...", GoogleMaterialDesignIcons.IMAGE_ASPECT_RATIO);
         itemResizeCanvas.addActionListener(SequenceOperationActions.canvasResizeAction);
         add(itemResizeCanvas);
 
-        itemResizeImage = new JMenuItem("Resize Image...");
-        setIcon(itemResizeImage, GoogleMaterialDesignIcons.ASPECT_RATIO);
+        final IcyMenuItem itemResizeImage = new IcyMenuItem("Resize Image...", GoogleMaterialDesignIcons.ASPECT_RATIO);
         itemResizeImage.addActionListener(SequenceOperationActions.imageResizeAction);
         add(itemResizeImage);
 
         addSeparator();
 
         // TODO: 19/01/2023 Make extract and remove channel actions auto reload
-        menuExtractChannel = new JMenu("Extract Channel...");
+        menuExtractChannel = new IcyMenu("Extract Channel...");
         add(menuExtractChannel);
 
-        itemExtractAllChannels = new JMenuItem("All");
+        itemExtractAllChannels = new IcyMenuItem("All");
         itemExtractAllChannels.addActionListener(SequenceOperationActions.extractAllChannelAction);
         menuExtractChannel.add(itemExtractAllChannels);
 
         menuExtractChannel.addSeparator();
 
-        menuRemoveChannel = new JMenu("Remove Channel");
+        menuRemoveChannel = new IcyMenu("Remove Channel");
         add(menuRemoveChannel);
 
-        itemMergeChannels = new JMenuItem("Merge Channels...");
+        itemMergeChannels = new IcyMenuItem("Merge Channels...");
         itemMergeChannels.addActionListener(SequenceOperationActions.mergeChannelsAction);
         add(itemMergeChannels);
 
         addSeparator();
 
-        itemReverseSlices = new JMenuItem("Reverse Z Slices");
+        itemReverseSlices = new IcyMenuItem("Reverse Z Slices");
         itemReverseSlices.addActionListener(SequenceOperationActions.reverseSlicesAction);
         add(itemReverseSlices);
 
-        itemExtractSlice = new JMenuItem("Extract Selected Z Slice");
+        itemExtractSlice = new IcyMenuItem("Extract Selected Z Slice");
         itemExtractSlice.addActionListener(SequenceOperationActions.extractSliceAction);
         add(itemExtractSlice);
 
-        itemRemoveSlice = new JMenuItem("Remove Selected Z Slice");
+        itemRemoveSlice = new IcyMenuItem("Remove Selected Z Slice");
         itemRemoveSlice.addActionListener(SequenceOperationActions.removeSliceAction);
         add(itemRemoveSlice);
 
-        itemAddSlices = new JMenuItem("Add Z Slices...");
+        final IcyMenuItem itemAddSlices = new IcyMenuItem("Add Z Slices...");
         itemAddSlices.addActionListener(SequenceOperationActions.addSlicesAction);
         add(itemAddSlices);
 
-        itemMergeSlices = new JMenuItem("Merge Z Slices...");
+        itemMergeSlices = new IcyMenuItem("Merge Z Slices...");
         itemMergeSlices.addActionListener(SequenceOperationActions.mergeSlicesAction);
         add(itemMergeSlices);
 
-        itemRemoveSlices = new JMenuItem("Remove Multiple Z Slices...");
+        itemRemoveSlices = new IcyMenuItem("Remove Multiple Z Slices...");
         itemRemoveSlices.addActionListener(SequenceOperationActions.removeSlicesAction);
         add(itemRemoveSlices);
 
         addSeparator();
 
-        itemReverseFrames = new JMenuItem("Reverse T Frames");
+        itemReverseFrames = new IcyMenuItem("Reverse T Frames");
         itemReverseFrames.addActionListener(SequenceOperationActions.reverseFramesAction);
         add(itemReverseFrames);
 
-        itemExtractFrame = new JMenuItem("Extract Selected T Frame");
+        itemExtractFrame = new IcyMenuItem("Extract Selected T Frame");
         itemExtractFrame.addActionListener(SequenceOperationActions.extractFrameAction);
         add(itemExtractFrame);
 
-        itemRemoveFrame = new JMenuItem("Remove Selected T Frame");
+        itemRemoveFrame = new IcyMenuItem("Remove Selected T Frame");
         itemRemoveFrame.addActionListener(SequenceOperationActions.removeFrameAction);
         add(itemRemoveFrame);
 
-        itemAddFrames = new JMenuItem("Add T Frames...");
+        final IcyMenuItem itemAddFrames = new IcyMenuItem("Add T Frames...");
         itemAddFrames.addActionListener(SequenceOperationActions.addFramesAction);
         add(itemAddFrames);
 
-        itemMergeFrames = new JMenuItem("Merge T Frames...");
+        itemMergeFrames = new IcyMenuItem("Merge T Frames...");
         itemMergeFrames.addActionListener(SequenceOperationActions.mergeFramesAction);
         add(itemMergeFrames);
 
-        itemRemoveFrames = new JMenuItem("Remove Multiple T Frames...");
+        itemRemoveFrames = new IcyMenuItem("Remove Multiple T Frames...");
         itemRemoveFrames.addActionListener(SequenceOperationActions.removeFramesAction);
         add(itemRemoveFrames);
 
         addSeparator();
 
-        itemConvertToSlices = new JMenuItem("Convert T to Z");
+        itemConvertToSlices = new IcyMenuItem("Convert T to Z");
         itemConvertToSlices.addActionListener(SequenceOperationActions.convertToSlicesAction);
         add(itemConvertToSlices);
 
-        itemConvertToFrames = new JMenuItem("Convert Z to T");
+        itemConvertToFrames = new IcyMenuItem("Convert Z to T");
         itemConvertToFrames.addActionListener(SequenceOperationActions.convertToFramesAction);
         add(itemConvertToFrames);
 
-        itemConvertAdvancedZT = new JMenuItem("Advanced Z-T Convertion...");
+        final IcyMenuItem itemConvertAdvancedZT = new IcyMenuItem("Advanced Z-T Convertion...");
         itemConvertAdvancedZT.addActionListener(SequenceOperationActions.advancedZTConvertAction);
         add(itemConvertAdvancedZT);
 
         reloadSequenceMenu();
 
-        addSkinChangeListener();
         addActiveSequenceListener();
     }
 
@@ -324,11 +333,11 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
                     menuExtractChannel.addSeparator();
 
                     for (int c = 0; c < sizeC; c ++) {
-                        final JMenuItem itemExtractChannel = new JMenuItem(active.getChannelName(c));
+                        final IcyMenuItem itemExtractChannel = new IcyMenuItem(active.getChannelName(c));
                         itemExtractChannel.addActionListener(SequenceOperationActions.extractChannelActions[c]);
                         menuExtractChannel.add(itemExtractChannel);
 
-                        final JMenuItem itemRemoveChannel = new JMenuItem(active.getChannelName(c));
+                        final IcyMenuItem itemRemoveChannel = new IcyMenuItem(active.getChannelName(c));
                         itemRemoveChannel.addActionListener(SequenceOperationActions.removeChannelActions[c]);
                         menuRemoveChannel.add(itemRemoveChannel);
                     }

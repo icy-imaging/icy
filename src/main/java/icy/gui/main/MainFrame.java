@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.main;
 
@@ -23,8 +23,7 @@ import icy.action.GeneralActions;
 import icy.action.SequenceOperationActions;
 import icy.file.FileUtil;
 import icy.file.Loader;
-import icy.gui.component.ExternalizablePanel;
-import icy.gui.component.ExternalizablePanel.StateListener;
+import icy.gui.component.button.IcyButtonNew;
 import icy.gui.frame.IcyExternalFrame;
 import icy.gui.inspector.InspectorPanel;
 import icy.gui.menu.ApplicationMenu;
@@ -40,31 +39,25 @@ import icy.math.HungarianAlgorithm;
 import icy.preferences.GeneralPreferences;
 import icy.resource.ResourceUtil;
 import icy.system.FileDrop;
-import icy.system.FileDrop.FileDropExtListener;
 import icy.system.FileDrop.FileDropListener;
 import icy.system.SystemUtil;
 import icy.type.collection.CollectionUtil;
 import icy.util.StringUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.swing.IconFontSwing;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-//import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author fab &amp; Stephane
+ * @author Thomas MUSSET
  */
-public class MainFrame extends JFrame
-{
-    private static Rectangle getDefaultBounds()
-    {
+public class MainFrame extends JFrame {
+    private static Rectangle getDefaultBounds() {
         Rectangle r = SystemUtil.getMaximumWindowBounds();
 
         r.width -= 100;
@@ -78,21 +71,15 @@ public class MainFrame extends JFrame
     /**
      * Returns the list of internal viewers.
      *
-     * @param bounds
-     *        If not null only viewers visible in the specified bounds are returned.
-     * @param wantNotVisible
-     *        Also return not visible viewers
-     * @param wantIconized
-     *        Also return iconized viewers
+     * @param bounds         If not null only viewers visible in the specified bounds are returned.
+     * @param wantNotVisible Also return not visible viewers
+     * @param wantIconized   Also return iconized viewers
      */
-    public static Viewer[] getExternalViewers(Rectangle bounds, boolean wantNotVisible, boolean wantIconized)
-    {
-        final List<Viewer> result = new ArrayList<Viewer>();
+    public static Viewer[] getExternalViewers(Rectangle bounds, boolean wantNotVisible, boolean wantIconized) {
+        final List<Viewer> result = new ArrayList<>();
 
-        for (Viewer viewer : Icy.getMainInterface().getViewers())
-        {
-            if (viewer.isExternalized())
-            {
+        for (Viewer viewer : Icy.getMainInterface().getViewers()) {
+            if (viewer.isExternalized()) {
                 final IcyExternalFrame externalFrame = viewer.getIcyExternalFrame();
 
                 if ((wantNotVisible || externalFrame.isVisible())
@@ -108,13 +95,10 @@ public class MainFrame extends JFrame
     /**
      * Returns the list of internal viewers.
      *
-     * @param wantNotVisible
-     *        Also return not visible viewers
-     * @param wantIconized
-     *        Also return iconized viewers
+     * @param wantNotVisible Also return not visible viewers
+     * @param wantIconized   Also return iconized viewers
      */
-    public static Viewer[] getExternalViewers(boolean wantNotVisible, boolean wantIconized)
-    {
+    public static Viewer[] getExternalViewers(boolean wantNotVisible, boolean wantIconized) {
         return getExternalViewers(null, wantNotVisible, wantIconized);
     }
 
@@ -148,8 +132,7 @@ public class MainFrame extends JFrame
     /**
      * @throws HeadlessException
      */
-    public MainFrame() throws HeadlessException
-    {
+    public MainFrame() throws HeadlessException {
         super(TITLE);
 
         // RibbonFrame force these properties to false
@@ -184,8 +167,8 @@ public class MainFrame extends JFrame
         //mainRibbon = new MainRibbon(getRibbon());
 
         // set application icons
-        setIconImages(ResourceUtil.getIcyIconImages());
-        //setApplicationIcon(new IcyApplicationIcon());
+        if (!SystemUtil.isMac())
+            setIconImages(ResourceUtil.getIcyIconImages());
 
         // set minimized state
         //getRibbon().setMinimized(GeneralPreferences.getRibbonMinimized());
@@ -194,8 +177,7 @@ public class MainFrame extends JFrame
         setJMenuBar(new ApplicationMenuBar());
 
         // Toolbars
-        JPanel panelToolbars = new JPanel(new GridLayout(1, 1));
-        panelToolbars.setBorder(new LineBorder(Color.darkGray.darker()));
+        JPanel panelToolbars = new JPanel(new FlowLayout(FlowLayout.LEFT));
         add(panelToolbars, BorderLayout.NORTH);
 
         panelToolbars.add(createSequenceToolbar());
@@ -209,13 +191,10 @@ public class MainFrame extends JFrame
 
         // desktop pane
         desktopPane = new IcyDesktopPane();
-        desktopPane.addMouseListener(new MouseAdapter()
-        {
+        desktopPane.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (e.getClickCount() == 2)
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
                     final Insets insets = mainPane.getInsets();
                     final int lastLoc = mainPane.getLastDividerLocation();
                     final int currentLoc = mainPane.getDividerLocation();
@@ -239,16 +218,9 @@ public class MainFrame extends JFrame
         centerPanel.add(desktopPane, BorderLayout.CENTER);
 
         // action on file drop
-        final FileDropListener desktopFileDropListener = new FileDropListener()
-        {
-            @Override
-            public void filesDropped(File[] files)
-            {
-                Loader.load(CollectionUtil.asList(FileUtil.toPaths(files)), (files.length <= 1) && !files[0].isDirectory(), true, true);
-            }
-        };
-        final FileDropExtListener bandFileDropListener = (evt, files) -> {
-            /*if (getRibbon().getSelectedTask() == mainRibbon.getImageJTask())
+        final FileDropListener desktopFileDropListener = files -> Loader.load(CollectionUtil.asList(FileUtil.toPaths(files)), (files.length <= 1) && !files[0].isDirectory(), true, true);
+        /*final FileDropExtListener bandFileDropListener = (evt, files) -> {
+            if (getRibbon().getSelectedTask() == mainRibbon.getImageJTask())
             {
                 final ImageJWrapper imageJ = mainRibbon.getImageJTask().getImageJ();
                 final JPanel imageJPanel = imageJ.getSwingPanel();
@@ -275,8 +247,8 @@ public class MainFrame extends JFrame
             }
 
             // classic file loading
-            Loader.load(CollectionUtil.asList(FileUtil.toPaths(files)), false, true, true);*/
-        };
+            Loader.load(CollectionUtil.asList(FileUtil.toPaths(files)), false, true, true);
+        };*/
 
         // handle file drop in desktop pane and in ribbon pane
         new FileDrop(desktopPane, BorderFactory.createLineBorder(Color.cyan.brighter(), 2), false,
@@ -306,20 +278,16 @@ public class MainFrame extends JFrame
      * Process init.<br>
      * Inspector is an ExternalizablePanel and requires MainFrame to be created.
      */
-    public void init()
-    {
+    public void init() {
         // inspector
         inspector = new InspectorPanel();
         inspectorWidthSet = false;
 
-        addComponentListener(new ComponentAdapter()
-        {
+        addComponentListener(new ComponentAdapter() {
             @Override
-            public void componentResized(ComponentEvent e)
-            {
+            public void componentResized(ComponentEvent e) {
                 // only need to do it at first display
-                if (!inspectorWidthSet)
-                {
+                if (!inspectorWidthSet) {
                     // main frame resized --> adjust divider location so inspector keep its size.
                     // we need to use this method as getWidth() do not return immediate correct
                     // value on OSX when initial state is maximized.
@@ -329,8 +297,7 @@ public class MainFrame extends JFrame
                     inspectorWidthSet = true;
                 }
 
-                if (detachedMode)
-                {
+                if (detachedMode) {
                     // fix height
                     final int prefH = getPreferredSize().height;
 
@@ -350,35 +317,27 @@ public class MainFrame extends JFrame
         // add the divider and border size if inspector was visible
         if (lastInspectorWidth > 16)
             lastInspectorWidth += 6 + 8;
-        // just force size for collapsed (divider + minimum border)
+            // just force size for collapsed (divider + minimum border)
         else
             lastInspectorWidth = 6 + 4;
 
-        if (inspector.isInternalized())
-        {
+        if (inspector.isInternalized()) {
             mainPane.setRightComponent(inspector);
             mainPane.setDividerSize(6);
         }
-        else
-        {
+        else {
             mainPane.setDividerSize(0);
             inspector.setParent(mainPane);
         }
         mainPane.setResizeWeight(1);
 
-        inspector.addStateListener(new StateListener()
-        {
-            @Override
-            public void stateChanged(ExternalizablePanel source, boolean externalized)
-            {
-                if (externalized)
-                    mainPane.setDividerSize(0);
-                else
-                {
-                    mainPane.setDividerSize(6);
-                    // restore previous location
-                    mainPane.setDividerLocation(getWidth() - lastInspectorWidth);
-                }
+        inspector.addStateListener((source, externalized) -> {
+            if (externalized)
+                mainPane.setDividerSize(0);
+            else {
+                mainPane.setDividerSize(6);
+                // restore previous location
+                mainPane.setDividerLocation(getWidth() - lastInspectorWidth);
             }
         });
 
@@ -387,8 +346,7 @@ public class MainFrame extends JFrame
         detachedMode = GeneralPreferences.getMultiWindowMode();
 
         // detached mode
-        if (detachedMode)
-        {
+        if (detachedMode) {
             // resize window to ribbon dimension
             if (previousMaximized)
                 ComponentUtil.setMaximized(this, false);
@@ -410,14 +368,12 @@ public class MainFrame extends JFrame
         buildActionMap();
     }
 
-    void buildActionMap()
-    {
+    void buildActionMap() {
         // global input map
         buildActionMap(mainPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW), mainPane.getActionMap());
     }
 
-    private void buildActionMap(InputMap imap, ActionMap amap)
-    {
+    private void buildActionMap(InputMap imap, ActionMap amap) {
         imap.put(GeneralActions.searchAction.getKeyStroke(), GeneralActions.searchAction.getName());
         imap.put(FileActions.openSequenceAction.getKeyStroke(), FileActions.openSequenceAction.getName());
         imap.put(FileActions.saveAsSequenceAction.getKeyStroke(), FileActions.saveAsSequenceAction.getName());
@@ -433,8 +389,8 @@ public class MainFrame extends JFrame
         amap.put(SequenceOperationActions.redoAction.getName(), SequenceOperationActions.redoAction);
     }
 
-    public ApplicationMenu getApplicationMenu()
-    {
+    @Deprecated
+    public ApplicationMenu getApplicationMenu() {
         //return (ApplicationMenu) getRibbon().getApplicationMenu();
         return null;
     }
@@ -443,16 +399,14 @@ public class MainFrame extends JFrame
      * Returns the center pane, this pane contains the desktop pane.<br>
      * Feel free to add temporary top/left/right or bottom pane to it.
      */
-    public JPanel getCenterPanel()
-    {
+    public JPanel getCenterPanel() {
         return centerPanel;
     }
 
     /**
      * Returns the {@link SearchBar} component.
      */
-    public SearchBar getSearchBar()
-    {
+    public SearchBar getSearchBar() {
         /*if (mainRibbon != null)
             return mainRibbon.getSearchBar();*/
 
@@ -462,35 +416,32 @@ public class MainFrame extends JFrame
     /**
      * Returns the desktopPane which contains InternalFrame.
      */
-    public IcyDesktopPane getDesktopPane()
-    {
+    public IcyDesktopPane getDesktopPane() {
         return desktopPane;
     }
 
     /**
      * Return all internal frames
      */
-    public ArrayList<JInternalFrame> getInternalFrames()
-    {
+    public ArrayList<JInternalFrame> getInternalFrames() {
         if (desktopPane != null)
             return CollectionUtil.asArrayList(desktopPane.getAllFrames());
 
-        return new ArrayList<JInternalFrame>();
+        return new ArrayList<>();
     }
 
     /**
      * @return the inspector
      */
-    public InspectorPanel getInspector()
-    {
+    public InspectorPanel getInspector() {
         return inspector;
     }
 
     /**
      * @return the mainRibbon
      */
-    public MainRibbon getMainRibbon()
-    {
+    @Deprecated
+    public MainRibbon getMainRibbon() {
         //return mainRibbon;
         return null;
     }
@@ -498,8 +449,7 @@ public class MainFrame extends JFrame
     /**
      * Return true if the main frame is in "detached" mode
      */
-    public boolean isDetachedMode()
-    {
+    public boolean isDetachedMode() {
         return detachedMode;
     }
 
@@ -507,8 +457,7 @@ public class MainFrame extends JFrame
      * Return content pane dimension (available area in main frame).<br>
      * If the main frame is in "detached" mode this actually return the system desktop dimension.
      */
-    public Dimension getDesktopSize()
-    {
+    public Dimension getDesktopSize() {
         if (detachedMode)
             return SystemUtil.getMaximumWindowBounds().getSize();
 
@@ -518,26 +467,22 @@ public class MainFrame extends JFrame
     /**
      * Return content pane width
      */
-    public int getDesktopWidth()
-    {
+    public int getDesktopWidth() {
         return getDesktopSize().width;
     }
 
     /**
      * Return content pane height
      */
-    public int getDesktopHeight()
-    {
+    public int getDesktopHeight() {
         return getDesktopSize().height;
     }
 
-    public int getPreviousHeight()
-    {
+    public int getPreviousHeight() {
         return previousHeight;
     }
 
-    public boolean getPreviousMaximized()
-    {
+    public boolean getPreviousMaximized() {
         return previousMaximized;
     }
 
@@ -545,8 +490,7 @@ public class MainFrame extends JFrame
      * Returns true if the inspector is internalized in main container.<br>
      * Always returns false in detached mode.
      */
-    public boolean isInpectorInternalized()
-    {
+    public boolean isInpectorInternalized() {
         return inspector.isInternalized();
     }
 
@@ -554,10 +498,8 @@ public class MainFrame extends JFrame
      * Internalize the inspector in main container.<br>
      * The method fails and returns false in detached mode.
      */
-    public boolean internalizeInspector()
-    {
-        if (inspector.isExternalized() && inspector.isInternalizationAutorized())
-        {
+    public boolean internalizeInspector() {
+        if (inspector.isExternalized() && inspector.isInternalizationAutorized()) {
             inspector.internalize();
             return true;
         }
@@ -569,10 +511,8 @@ public class MainFrame extends JFrame
      * Externalize the inspector in main container.<br>
      * Returns false if the methods failed.
      */
-    public boolean externalizeInspector()
-    {
-        if (inspector.isInternalized() && inspector.isExternalizationAutorized())
-        {
+    public boolean externalizeInspector() {
+        if (inspector.isInternalized() && inspector.isExternalizationAutorized()) {
             // save diviser location
             lastInspectorWidth = getWidth() - mainPane.getDividerLocation();
             inspector.externalize();
@@ -585,23 +525,20 @@ public class MainFrame extends JFrame
     /**
      * Organize all frames in cascade
      */
-    public void organizeCascade()
-    {
+    public void organizeCascade() {
         // all screen devices
-        final GraphicsDevice screenDevices[] = SystemUtil.getLocalGraphicsEnvironment().getScreenDevices();
+        final GraphicsDevice[] screenDevices = SystemUtil.getLocalGraphicsEnvironment().getScreenDevices();
         // screen devices to process
-        final ArrayList<GraphicsDevice> devices = new ArrayList<GraphicsDevice>();
+        final ArrayList<GraphicsDevice> devices = new ArrayList<>();
 
         // detached mode ?
-        if (isDetachedMode())
-        {
+        if (isDetachedMode()) {
             // process all available screen for cascade organization
             for (GraphicsDevice dev : screenDevices)
                 if (dev.getType() == GraphicsDevice.TYPE_RASTER_SCREEN)
                     devices.add(dev);
         }
-        else
-        {
+        else {
             // process desktop pane cascade organization
             desktopPane.organizeCascade();
 
@@ -620,8 +557,7 @@ public class MainFrame extends JFrame
     /**
      * Organize frames in cascade on the specified graphics device.
      */
-    protected void organizeCascade(GraphicsDevice graphicsDevice)
-    {
+    protected void organizeCascade(GraphicsDevice graphicsDevice) {
         final GraphicsConfiguration graphicsConfiguration = graphicsDevice.getDefaultConfiguration();
         final Rectangle bounds = graphicsConfiguration.getBounds();
         final Insets inset = getToolkit().getScreenInsets(graphicsConfiguration);
@@ -636,8 +572,7 @@ public class MainFrame extends JFrame
         final Viewer[] viewers = getExternalViewers(bounds, false, false);
 
         // this screen contains the main frame ?
-        if (bounds.contains(getLocation()))
-        {
+        if (bounds.contains(getLocation())) {
             // move main frame at top
             setLocation(bounds.x, bounds.y);
 
@@ -645,13 +580,11 @@ public class MainFrame extends JFrame
             final int mainFrameH = getHeight();
 
             // adjust available bounds of current screen
-            if (mainFrameW > mainFrameH)
-            {
+            if (mainFrameW > mainFrameH) {
                 bounds.y += mainFrameH;
                 bounds.height -= mainFrameH;
             }
-            else
-            {
+            else {
                 bounds.x += mainFrameW;
                 bounds.width -= mainFrameW;
             }
@@ -670,8 +603,7 @@ public class MainFrame extends JFrame
         int x = bounds.x + 32;
         int y = bounds.y + 32;
 
-        for (Viewer v : viewers)
-        {
+        for (Viewer v : viewers) {
             final IcyExternalFrame externalFrame = v.getIcyExternalFrame();
 
             if (externalFrame.isMaximized())
@@ -690,28 +622,24 @@ public class MainFrame extends JFrame
 
     /**
      * Organize all frames in tile.<br>
-     * 
-     * @param type
-     *        tile type.<br>
-     *        TILE_HORIZONTAL, TILE_VERTICAL or TILE_GRID.
+     *
+     * @param type tile type.<br>
+     *             TILE_HORIZONTAL, TILE_VERTICAL or TILE_GRID.
      */
-    public void organizeTile(int type)
-    {
+    public void organizeTile(int type) {
         // all screen devices
-        final GraphicsDevice screenDevices[] = SystemUtil.getLocalGraphicsEnvironment().getScreenDevices();
+        final GraphicsDevice[] screenDevices = SystemUtil.getLocalGraphicsEnvironment().getScreenDevices();
         // screen devices to process
-        final ArrayList<GraphicsDevice> devices = new ArrayList<GraphicsDevice>();
+        final ArrayList<GraphicsDevice> devices = new ArrayList<>();
 
         // detached mode ?
-        if (isDetachedMode())
-        {
+        if (isDetachedMode()) {
             // process all available screen for cascade organization
             for (GraphicsDevice dev : screenDevices)
                 if (dev.getType() == GraphicsDevice.TYPE_RASTER_SCREEN)
                     devices.add(dev);
         }
-        else
-        {
+        else {
             // process desktop pane tile organization
             desktopPane.organizeTile(type);
 
@@ -730,8 +658,7 @@ public class MainFrame extends JFrame
     /**
      * Organize frames in tile on the specified graphics device.
      */
-    protected void organizeTile(GraphicsDevice graphicsDevice, int type)
-    {
+    protected void organizeTile(GraphicsDevice graphicsDevice, int type) {
         final GraphicsConfiguration graphicsConfiguration = graphicsDevice.getDefaultConfiguration();
         final Rectangle bounds = graphicsConfiguration.getBounds();
         final Insets inset = Toolkit.getDefaultToolkit().getScreenInsets(graphicsConfiguration);
@@ -746,8 +673,7 @@ public class MainFrame extends JFrame
         final Viewer[] viewers = getExternalViewers(bounds, false, false);
 
         // this screen contains the main frame ?
-        if (bounds.contains(getLocation()))
-        {
+        if (bounds.contains(getLocation())) {
             // move main frame at top
             setLocation(bounds.x, bounds.y);
 
@@ -755,13 +681,11 @@ public class MainFrame extends JFrame
             final int mainFrameH = getHeight();
 
             // adjust available bounds of current screen
-            if (mainFrameW > mainFrameH)
-            {
+            if (mainFrameW > mainFrameH) {
                 bounds.y += mainFrameH;
                 bounds.height -= mainFrameH;
             }
-            else
-            {
+            else {
                 bounds.x += mainFrameW;
                 bounds.width -= mainFrameW;
             }
@@ -782,8 +706,7 @@ public class MainFrame extends JFrame
         int numCol;
         int numLine;
 
-        switch (type)
-        {
+        switch (type) {
             case MainFrame.TILE_HORIZONTAL:
                 numCol = 1;
                 numLine = numFrames;
@@ -810,16 +733,13 @@ public class MainFrame extends JFrame
         final int dy = h / numLine;
         int k = 0;
 
-        for (int i = 0; i < numLine; i++)
-        {
-            for (int j = 0; j < numCol; j++, k++)
-            {
+        for (int i = 0; i < numLine; i++) {
+            for (int j = 0; j < numCol; j++, k++) {
                 final double[] distances = framesDistances[k];
                 final double fx = x + (j * dx) + (dx / 2d);
                 final double fy = y + (i * dy) + (dy / 2d);
 
-                for (int f = 0; f < numFrames; f++)
-                {
+                for (int f = 0; f < numFrames; f++) {
                     final Point2D.Double center = ComponentUtil.getCenter(viewers[f].getExternalFrame());
                     distances[f] = Point2D.distanceSq(center.x, center.y, fx, fy);
                 }
@@ -829,14 +749,11 @@ public class MainFrame extends JFrame
         final int[] framePos = new HungarianAlgorithm(framesDistances).resolve();
 
         k = 0;
-        for (int i = 0; i < numLine; i++)
-        {
-            for (int j = 0; j < numCol; j++, k++)
-            {
+        for (int i = 0; i < numLine; i++) {
+            for (int j = 0; j < numCol; j++, k++) {
                 final int f = framePos[k];
 
-                if (f < numFrames)
-                {
+                if (f < numFrames) {
                     final IcyExternalFrame externalFrame = viewers[f].getIcyExternalFrame();
 
                     if (externalFrame.isMaximized())
@@ -851,13 +768,10 @@ public class MainFrame extends JFrame
     /**
      * Set detached window mode.
      */
-    public void setDetachedMode(boolean value)
-    {
-        if (detachedMode != value)
-        {
+    public void setDetachedMode(boolean value) {
+        if (detachedMode != value) {
             // detached mode
-            if (value)
-            {
+            if (value) {
                 // save inspector state
                 previousInspectorInternalized = inspector.isInternalized();
                 // save it in preferences...
@@ -879,8 +793,7 @@ public class MainFrame extends JFrame
                 pack();
             }
             // single window mode
-            else
-            {
+            else {
                 // show main pane & resize window back to original dimension
                 add(mainPane, BorderLayout.CENTER);
                 setSize(getWidth(), previousHeight);
@@ -906,8 +819,7 @@ public class MainFrame extends JFrame
     /**
      * Refresh application title
      */
-    public void refreshTitle()
-    {
+    public void refreshTitle() {
         final String login = GeneralPreferences.getUserLogin();
         final String userName = GeneralPreferences.getUserName();
         final String virtual = ImageCache.isEnabled() && GeneralPreferences.getVirtualMode() ? " (virtual mode)" : "";
@@ -921,8 +833,7 @@ public class MainFrame extends JFrame
     }
 
     @Override
-    public void reshape(int x, int y, int width, int height)
-    {
+    public void reshape(int x, int y, int width, int height) {
         final Rectangle r = new Rectangle(x, y, width, height);
         final boolean detached;
 
@@ -933,8 +844,7 @@ public class MainFrame extends JFrame
         else
             detached = mainPane.getParent() == null;
 
-        if (detached)
-        {
+        if (detached) {
             // fix height
             final int prefH = getPreferredSize().height;
 
@@ -966,7 +876,7 @@ public class MainFrame extends JFrame
         final JToolBar toolBar = new JToolBar("Sequence", JToolBar.HORIZONTAL);
         //panelToolbar.setPreferredSize(new Dimension(0, 30));
 
-        final JButton buttonDuplicate = new JButton(IconFontSwing.buildIcon(GoogleMaterialDesignIcons.CONTENT_COPY, 16f, Color.WHITE));
+        final IcyButtonNew buttonDuplicate = new IcyButtonNew(GoogleMaterialDesignIcons.CONTENT_COPY);
         buttonDuplicate.setToolTipText("Create a copy of the active sequence");
         toolBar.add(buttonDuplicate);
 

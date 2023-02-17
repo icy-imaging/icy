@@ -43,6 +43,7 @@ import icy.gui.main.MainEvent.MainEventType;
 import icy.gui.menu.ApplicationMenu;
 import icy.gui.menu.ROITask;
 import icy.gui.menu.ToolRibbonTask;
+import icy.gui.util.LookAndFeelUtil;
 import icy.gui.viewer.Viewer;
 import icy.gui.viewer.ViewerAdapter;
 import icy.gui.viewer.ViewerEvent;
@@ -937,8 +938,13 @@ public class MainInterfaceGui implements MainInterface
     @Override
     public void setDetachedMode(boolean value)
     {
-        if (mainFrame != null)
+        if (mainFrame != null) {
             mainFrame.setDetachedMode(value);
+
+            // Reload ui after mainframe set to attached mode
+            if (!value)
+                LookAndFeelUtil.updateUI();
+        }
     }
 
     @Override

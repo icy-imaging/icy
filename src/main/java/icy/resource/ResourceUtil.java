@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.resource;
 
@@ -25,7 +25,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import icy.image.ImageUtil;
@@ -35,11 +34,11 @@ import icy.util.StringUtil;
 
 /**
  * Resources (images, icons...) utilities class.
- * 
+ *
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class ResourceUtil
-{
+public class ResourceUtil {
     // image and icon path
     public static final String ICON_PATH = "icon/";
     public static final String IMAGE_PATH = "image/";
@@ -48,10 +47,13 @@ public class ResourceUtil
     public static final String COLOR_ICON_PATH = "color/";
 
     // default icon size
+    @Deprecated
     public static final int DEFAULT_ICON_SIZE = IcyIcon.DEFAULT_SIZE;
 
     // application images
     public static final Image IMAGE_ICY_16 = ResourceUtil.getIconAsImage("icy16.png");
+    public static final Image IMAGE_ICY_20 = ResourceUtil.getIconAsImage("icy20.png");
+    public static final Image IMAGE_ICY_24 = ResourceUtil.getIconAsImage("icy24.png");
     public static final Image IMAGE_ICY_32 = ResourceUtil.getIconAsImage("icy32.png");
     public static final Image IMAGE_ICY_256 = ResourceUtil.getImage("logo.png");
 
@@ -61,6 +63,8 @@ public class ResourceUtil
 
     // alpha mask icons
     public static final ImageIcon ICON_ICY_16 = ResourceUtil.getImageIcon(IMAGE_ICY_16);
+    public static final ImageIcon ICON_ICY_20 = ResourceUtil.getImageIcon(IMAGE_ICY_20);
+    public static final ImageIcon ICON_ICY_24 = ResourceUtil.getImageIcon(IMAGE_ICY_24);
     public static final ImageIcon ICON_ICY_32 = ResourceUtil.getImageIcon(IMAGE_ICY_32);
 
     public static final Image ICON_NULL = ResourceUtil.getAlphaIconAsImage("null.png");
@@ -244,7 +248,7 @@ public class ResourceUtil
     public static final Image ICON_BOX = ResourceUtil.getAlphaIconAsImage("box.png");
     public static final Image ICON_DATABASE = ResourceUtil.getAlphaIconAsImage("db.png");
     public static final Image ICON_HDD = ICON_DATABASE;
-    public static final Image ICON_HDD_STREAM = ResourceUtil.getAlphaIconAsImage("hdd_stream.png");;
+    public static final Image ICON_HDD_STREAM = ResourceUtil.getAlphaIconAsImage("hdd_stream.png");
     public static final Image ICON_STAR = ResourceUtil.getAlphaIconAsImage("star_fav.png");
     public static final Image ICON_NETWORK = ResourceUtil.getAlphaIconAsImage("network.png");
     public static final Image ICON_BROWSER = ResourceUtil.getAlphaIconAsImage("browser.png");
@@ -301,9 +305,8 @@ public class ResourceUtil
 
     public static final Image ICON_PLUGIN_COLOR = ResourceUtil.getColorIconAsImage("plugin.png");
 
-    public static ArrayList<Image> getIcyIconImages()
-    {
-        final ArrayList<Image> result = new ArrayList<Image>();
+    public static ArrayList<Image> getIcyIconImages() {
+        final ArrayList<Image> result = new ArrayList<>();
 
         result.add(ResourceUtil.IMAGE_ICY_256);
         result.add(ResourceUtil.IMAGE_ICY_32);
@@ -312,11 +315,9 @@ public class ResourceUtil
         return result;
     }
 
-    private static Image scaleImage(Image image, int size)
-    {
+    private static Image scaleImage(Image image, int size) {
         // resize if needed
-        if ((image != null) && (size != -1))
-        {
+        if ((image != null) && (size != -1)) {
             // be sure image data are ready
             ImageUtil.waitImageReady(image);
             // resize only if image has different size
@@ -330,14 +331,13 @@ public class ResourceUtil
     /**
      * Return an image with wanted size located in resources/image<br>
      * For any other location use the ImageUtil.loadImage() method
-     * 
+     *
      * @param name
      */
-    public static Image getImage(String name)
-    {
+    public static Image getImage(String name) {
         final URL url = ResourceUtil.class.getResource("/" + IMAGE_PATH + name);
 
-        Image result = null;
+        Image result;
 
         if (url != null)
             result = ImageUtil.load(url, false);
@@ -347,8 +347,7 @@ public class ResourceUtil
         // FIXME: we do that as in very rare occasion ImageIO.read(..) throw a NPE (inflater has been closed) 
         // I admit this is an ugly fix but it works eventually.. 
         int retry = 3;
-        while ((result == null) && (retry-- > 0))
-        {
+        while ((result == null) && (retry-- > 0)) {
             ThreadUtil.sleep(1);
 
             if (url != null)
@@ -357,8 +356,7 @@ public class ResourceUtil
                 result = ImageUtil.load(new File(IMAGE_PATH + name), false);
         }
 
-        if (result == null)
-        {
+        if (result == null) {
             System.out.println("Resource name can't be found: " + name);
             return null;
         }
@@ -369,8 +367,7 @@ public class ResourceUtil
     /**
      * Return lock image with specified number.
      */
-    public static BufferedImage getLockedImage(int number)
-    {
+    public static BufferedImage getLockedImage(int number) {
         final BufferedImage result = ImageUtil.getCopy(ICON_LOCK_CLOSE);
 
         // nice for 48 pixels image
@@ -382,8 +379,7 @@ public class ResourceUtil
     /**
      * Return lock image with specified letter.
      */
-    public static BufferedImage getLockedImage(char letter)
-    {
+    public static BufferedImage getLockedImage(char letter) {
         final BufferedImage result = ImageUtil.getCopy(ICON_LOCK_CLOSE);
 
         // nice for 48 pixels image
@@ -395,14 +391,13 @@ public class ResourceUtil
     /**
      * Return an image with wanted size located in resources/icon from its name<br>
      * For any other location use the ImageUtil.loadImage() method
-     * 
+     *
      * @param name
      */
-    public static Image getIconAsImage(String name, int size)
-    {
+    public static Image getIconAsImage(String name, int size) {
         final URL url = ResourceUtil.class.getResource("/" + ICON_PATH + name);
 
-        Image result = null;
+        Image result;
 
         if (url != null)
             result = ImageUtil.load(url, false);
@@ -412,8 +407,7 @@ public class ResourceUtil
         // FIXME: we do that as in very rare occasion ImageIO.read(..) throw a NPE (inflater has been closed) 
         // I admit this is an ugly fix but it works eventually.. 
         int retry = 3;
-        while ((result == null) && (retry-- > 0))
-        {
+        while ((result == null) && (retry-- > 0)) {
             ThreadUtil.sleep(1);
 
             if (url != null)
@@ -422,8 +416,7 @@ public class ResourceUtil
                 result = ImageUtil.load(new File(ICON_PATH + name), false);
         }
 
-        if (result == null)
-        {
+        if (result == null) {
             System.out.println("Resource name can't be found: " + name);
             return null;
         }
@@ -434,19 +427,17 @@ public class ResourceUtil
     /**
      * Return an image located in resources/icon from its name<br>
      * For any other location use the ImageUtil.loadImage() method
-     * 
+     *
      * @param name
      */
-    public static Image getIconAsImage(String name)
-    {
+    public static Image getIconAsImage(String name) {
         return getIconAsImage(name, -1);
     }
 
     /**
      * Create an ImageIcon with specified size from the specified image<br>
      */
-    public static ImageIcon getImageIcon(Image image, int size)
-    {
+    public static ImageIcon getImageIcon(Image image, int size) {
         if (image != null)
             return new ImageIcon(scaleImage(image, size));
 
@@ -456,8 +447,7 @@ public class ResourceUtil
     /**
      * Create an ImageIcon from the specified image (default image size is used as icon size)<br>
      */
-    public static ImageIcon getImageIcon(Image image)
-    {
+    public static ImageIcon getImageIcon(Image image) {
         if (image != null)
             return new ImageIcon(image);
 
@@ -467,24 +457,21 @@ public class ResourceUtil
     /**
      * Return an image located in resources/icon with specified square size from its name<br>
      */
-    public static ImageIcon getImageIcon(String resourceName, int size)
-    {
+    public static ImageIcon getImageIcon(String resourceName, int size) {
         return getImageIcon(getIconAsImage(resourceName, size));
     }
 
     /**
      * Return an image located in resources/icon from its name<br>
      */
-    public static ImageIcon getImageIcon(String resourceName)
-    {
+    public static ImageIcon getImageIcon(String resourceName) {
         return getImageIcon(getIconAsImage(resourceName));
     }
 
     /**
      * Return an image located in resources/icon/alpha with specified square size from its name<br>
      */
-    public static Image getAlphaIconAsImage(String resourceName, int size)
-    {
+    public static Image getAlphaIconAsImage(String resourceName, int size) {
         final String finalName;
 
         if (resourceName.toLowerCase().endsWith(".png"))
@@ -498,16 +485,14 @@ public class ResourceUtil
     /**
      * Return an image located in resources/icon/alpha from its name<br>
      */
-    public static Image getAlphaIconAsImage(String resourceName)
-    {
+    public static Image getAlphaIconAsImage(String resourceName) {
         return getAlphaIconAsImage(resourceName, -1);
     }
 
     /**
      * Return an ImageIcon located in resources/icon/alpha with specified square size<br>
      */
-    public static ImageIcon getAlphaIcon(String resourceName, int size)
-    {
+    public static ImageIcon getAlphaIcon(String resourceName, int size) {
         final String finalName;
 
         if (resourceName.toLowerCase().endsWith(".png"))
@@ -521,16 +506,14 @@ public class ResourceUtil
     /**
      * Return an ImageIcon located in resources/icon/alpha<br>
      */
-    public static ImageIcon getAlphaIcon(String resourceName)
-    {
+    public static ImageIcon getAlphaIcon(String resourceName) {
         return getAlphaIcon(resourceName, -1);
     }
 
     /**
      * Return an image located in resources/icon/color with specified square size from its name<br>
      */
-    public static Image getColorIconAsImage(String resourceName, int size)
-    {
+    public static Image getColorIconAsImage(String resourceName, int size) {
         final String finalName;
 
         if (resourceName.toLowerCase().endsWith(".png"))
@@ -544,16 +527,14 @@ public class ResourceUtil
     /**
      * Return an image located in resources/icon/color from its name<br>
      */
-    public static Image getColorIconAsImage(String resourceName)
-    {
+    public static Image getColorIconAsImage(String resourceName) {
         return getColorIconAsImage(resourceName, -1);
     }
 
     /**
      * Return an ImageIcon located in resources/icon/color with specified square size<br>
      */
-    public static ImageIcon getColorIcon(String resourceName, int size)
-    {
+    public static ImageIcon getColorIcon(String resourceName, int size) {
         final String finalName;
 
         if (resourceName.toLowerCase().endsWith(".png"))
@@ -567,8 +548,7 @@ public class ResourceUtil
     /**
      * Return an ImageIcon located in resources/icon/color<br>
      */
-    public static ImageIcon getColorIcon(String resourceName)
-    {
+    public static ImageIcon getColorIcon(String resourceName) {
         return getColorIcon(resourceName, -1);
     }
 
@@ -576,8 +556,7 @@ public class ResourceUtil
      * @deprecated use {@link #getAlphaIconAsImage(String, int)} instead
      */
     @Deprecated
-    public static Image getBlackIconAsImage(String resourceName, int size)
-    {
+    public static Image getBlackIconAsImage(String resourceName, int size) {
         return getAlphaIconAsImage(resourceName, size);
     }
 
@@ -585,8 +564,7 @@ public class ResourceUtil
      * @deprecated use {@link #getAlphaIconAsImage(String)} instead
      */
     @Deprecated
-    public static Image getBlackIconAsImage(String resourceName)
-    {
+    public static Image getBlackIconAsImage(String resourceName) {
         return getAlphaIconAsImage(resourceName);
     }
 
@@ -594,8 +572,7 @@ public class ResourceUtil
      * @deprecated use {@link #getAlphaIcon(String, int)} instead
      */
     @Deprecated
-    public static ImageIcon getBlackIcon(String resourceName, int size)
-    {
+    public static ImageIcon getBlackIcon(String resourceName, int size) {
         return getAlphaIcon(resourceName, size);
     }
 
@@ -603,8 +580,7 @@ public class ResourceUtil
      * @deprecated use {@link #getAlphaIcon(String)} instead
      */
     @Deprecated
-    public static ImageIcon getBlackIcon(String resourceName)
-    {
+    public static ImageIcon getBlackIcon(String resourceName) {
         return getAlphaIcon(resourceName);
     }
 
@@ -612,8 +588,7 @@ public class ResourceUtil
      * @deprecated use {@link #getAlphaIcon(String, int)} instead
      */
     @Deprecated
-    public static ImageIcon getWhiteIcon(String resourceName, int size)
-    {
+    public static ImageIcon getWhiteIcon(String resourceName, int size) {
         return getAlphaIcon(resourceName, size);
     }
 
@@ -621,8 +596,7 @@ public class ResourceUtil
      * @deprecated use {@link #getAlphaIcon(String)} instead
      */
     @Deprecated
-    public static ImageIcon getWhiteIcon(String resourceName)
-    {
+    public static ImageIcon getWhiteIcon(String resourceName) {
         return getAlphaIcon(resourceName);
     }
 
@@ -640,8 +614,7 @@ public class ResourceUtil
      * @deprecated use {@link #getAlphaIcon(String, int)} instead
      */
     @Deprecated
-    public static ImageIcon getIcyIcon(String resourceName, int size)
-    {
+    public static ImageIcon getIcyIcon(String resourceName, int size) {
         return getAlphaIcon(resourceName, size);
     }
 
@@ -649,16 +622,14 @@ public class ResourceUtil
      * @deprecated use {@link #getAlphaIcon(String)} instead
      */
     @Deprecated
-    public static ImageIcon getIcyIcon(String resourceName)
-    {
+    public static ImageIcon getIcyIcon(String resourceName) {
         return getAlphaIcon(resourceName);
     }
 
     /**
      * Return a new ImageIcon scaled with specified size
      */
-    public static ImageIcon scaleIcon(ImageIcon icon, int size)
-    {
+    public static ImageIcon scaleIcon(ImageIcon icon, int size) {
         if (icon != null)
             return getImageIcon(icon.getImage(), size);
 

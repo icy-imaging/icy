@@ -1,27 +1,26 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.frame;
 
 import icy.action.IcyAbstractAction;
 import icy.common.MenuCallback;
 import icy.gui.util.ComponentUtil;
-import icy.gui.util.LookAndFeelUtil;
 import icy.resource.ResourceUtil;
 import icy.resource.icon.IcyIcon;
 import icy.system.SystemUtil;
@@ -33,31 +32,29 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JRootPane;
 
-//import org.pushingpixels.substance.internal.utils.SubstanceTitlePane;
-
 /**
  * @author Stephane
  */
-public class IcyExternalFrame extends JFrame
-{
-    private class CloseAction extends IcyAbstractAction
-    {
-        public CloseAction()
-        {
-            super("Close", new IcyIcon(ResourceUtil.ICON_CLOSE, 20), "Close window", KeyEvent.VK_F4, SystemUtil
+public class IcyExternalFrame extends JFrame {
+    private class CloseAction extends IcyAbstractAction {
+        public CloseAction() {
+            super(
+                    "Close",
+                    //new IcyIcon(ResourceUtil.ICON_CLOSE, 20),
+                    (IcyIcon) null,
+                    "Close window",
+                    KeyEvent.VK_F4,
+                    SystemUtil
                     .getMenuCtrlMask());
         }
 
         @Override
-        public boolean doAction(ActionEvent e)
-        {
+        public boolean doAction(ActionEvent e) {
             close();
             return true;
         }
@@ -69,46 +66,33 @@ public class IcyExternalFrame extends JFrame
     //private SubstanceTitlePane titlePane;
     // private JMenuBar systemMenuBar;
     MenuCallback systemMenuCallback;
-    private boolean titleBarVisible;
+    private final boolean titleBarVisible;
     private boolean closeItemVisible;
-    private boolean initialized = false;
+    private final boolean initialized;
 
     /**
      * @param title
      * @throws HeadlessException
      */
-    public IcyExternalFrame(String title) throws HeadlessException
-    {
+    public IcyExternalFrame(String title) throws HeadlessException {
         super(title);
 
-        getRootPane().addPropertyChangeListener("titlePane", new PropertyChangeListener()
-        {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt)
-            {
-                // invoke later so the titlePane variable is up to date
-                ThreadUtil.invokeLater(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        updateTitlePane();
-                    }
-                });
-            }
-        });
+        /*getRootPane().addPropertyChangeListener("titlePane", evt -> {
+            // invoke later so the titlePane variable is up to date
+            ThreadUtil.invokeLater(this::updateTitlePane);
+        });*/
 
-        addWindowListener(new WindowAdapter()
-        {
+        addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosed(WindowEvent e)
-            {
+            public void windowClosed(WindowEvent e) {
                 // release the system menu callback as it can lead to some memory leak
                 // (cycling reference)
                 systemMenuCallback = null;
             }
         });
-        setIconImages(ResourceUtil.getIcyIconImages());
+        // Hide preview in Mac dock, so we don't set icon image for frame on MacOS
+        if (!SystemUtil.isMac())
+            setIconImages(ResourceUtil.getIcyIconImages());
         setVisible(false);
 
         systemMenuCallback = null;
@@ -120,7 +104,7 @@ public class IcyExternalFrame extends JFrame
         initialized = true;
     }
 
-    /**
+    /*
      * update internals informations linked to title pane with specified pane
      */
     /*protected void updateTitlePane(final SubstanceTitlePane pane)
@@ -138,10 +122,8 @@ public class IcyExternalFrame extends JFrame
     /**
      * update internals informations linked to title pane
      */
-    protected void updateTitlePane()
-    {
-        if (initialized)
-        {
+    protected void updateTitlePane() {
+        if (initialized) {
             // title pane can have changed
             //updateTitlePane(LookAndFeelUtil.getTitlePane(this));
 
@@ -153,30 +135,28 @@ public class IcyExternalFrame extends JFrame
     /**
      * Refresh system menu
      */
-    public void updateSystemMenu()
-    {
+    public void updateSystemMenu() {
         /*if (titlePane != null)
         {*/
-            final JMenu menu;
+        final JMenu menu;
 
-            if (systemMenuCallback != null)
-                menu = systemMenuCallback.getMenu();
-            else
-                menu = getDefaultSystemMenu();
+        if (systemMenuCallback != null)
+            menu = systemMenuCallback.getMenu();
+        else
+            menu = getDefaultSystemMenu();
 
-            // ensure compatibility with heavyweight component
-            menu.getPopupMenu().setLightWeightPopupEnabled(false);
+        // ensure compatibility with heavyweight component
+        menu.getPopupMenu().setLightWeightPopupEnabled(false);
 
-            // rebuild menu
-            //titlePane.setSystemMenu(menu);
-            // systemMenuBar.removeAll();
-            // systemMenuBar.add(menu);
-            // systemMenuBar.validate();
+        // rebuild menu
+        //titlePane.setSystemMenu(menu);
+        // systemMenuBar.removeAll();
+        // systemMenuBar.add(menu);
+        // systemMenuBar.validate();
         //}
     }
 
-    public void setTitleBarVisible(boolean value)
-    {
+    public void setTitleBarVisible(boolean value) {
         if (value)
             getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
         else
@@ -188,85 +168,67 @@ public class IcyExternalFrame extends JFrame
     /**
      * close frame
      */
-    public void close()
-    {
+    public void close() {
         dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
 
     /**
      * Implement isMinimized method
      */
-    public boolean isMinimized()
-    {
+    public boolean isMinimized() {
         return ComponentUtil.isMinimized(this);
     }
 
     /**
      * Implement isMaximized method
      */
-    public boolean isMaximized()
-    {
+    public boolean isMaximized() {
         return ComponentUtil.isMaximized(this);
     }
 
     /**
      * Implement setMinimized method
      */
-    public void setMinimized(final boolean value)
-    {
+    public void setMinimized(final boolean value) {
         ComponentUtil.setMinimized(this, value);
     }
 
     /**
      * Implement setMaximized method
      */
-    public void setMaximized(final boolean value)
-    {
+    public void setMaximized(final boolean value) {
         ComponentUtil.setMaximized(this, value);
     }
 
     /**
      * @return the titleBarVisible
      */
-    public boolean isTitleBarVisible()
-    {
+    public boolean isTitleBarVisible() {
         return getRootPane().getWindowDecorationStyle() != JRootPane.NONE;
     }
 
     /**
      * @return the closeItemVisible
      */
-    public boolean isCloseItemVisible()
-    {
+    public boolean isCloseItemVisible() {
         return closeItemVisible;
     }
 
     /**
-     * @param value
-     *        the closeItemVisible to set
+     * @param value the closeItemVisible to set
      */
-    public void setCloseItemVisible(boolean value)
-    {
-        if (closeItemVisible != value)
-        {
+    public void setCloseItemVisible(boolean value) {
+        if (closeItemVisible != value) {
             closeItemVisible = value;
 
-            ThreadUtil.invokeLater(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    updateSystemMenu();
-                }
-            });
+            ThreadUtil.invokeLater(this::updateSystemMenu);
         }
     }
 
     /**
      * Return the default system menu
      */
-    public JMenu getDefaultSystemMenu()
-    {
+    public JMenu getDefaultSystemMenu() {
         final JMenu result = new JMenu();
 
         if (closeItemVisible)
@@ -278,35 +240,27 @@ public class IcyExternalFrame extends JFrame
     /**
      * @return the systemMenuCallback
      */
-    public MenuCallback getSystemMenuCallback()
-    {
+    public MenuCallback getSystemMenuCallback() {
         return systemMenuCallback;
     }
 
     /**
-     * @param value
-     *        the systemMenuCallback to set
+     * @param value the systemMenuCallback to set
      */
-    public void setSystemMenuCallback(MenuCallback value)
-    {
-        if (systemMenuCallback != value)
-        {
+    public void setSystemMenuCallback(MenuCallback value) {
+        if (systemMenuCallback != value) {
             systemMenuCallback = value;
 
-            ThreadUtil.invokeLater(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    updateSystemMenu();
-                }
-            });
+            ThreadUtil.invokeLater(this::updateSystemMenu);
         }
     }
 
+    /**
+     * @deprecated Override deprecated method
+     */
+    @Deprecated
     @Override
-    public void reshape(int x, int y, int width, int height)
-    {
+    public void reshape(int x, int y, int width, int height) {
         final Rectangle r = new Rectangle(x, y, width, height);
 
         // prevent to go completely off screen

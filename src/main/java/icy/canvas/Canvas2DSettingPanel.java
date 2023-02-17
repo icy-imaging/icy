@@ -1,14 +1,28 @@
-/**
- * 
+/*
+ * Copyright 2010-2023 Institut Pasteur.
+ *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.canvas;
 
 import icy.gui.component.button.ColorChooserButton;
-import icy.gui.component.button.IcyButton;
+import icy.gui.component.button.IcyButtonNew;
 import icy.gui.util.ComponentUtil;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.util.EventUtil;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -19,14 +33,13 @@ import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 /**
  * Setting panel for Canvas2D
  * 
  * @author Stephane
+ * @author Thomas MUSSET
  */
 // TODO: 23/01/2023 Should be in gui package
 public class Canvas2DSettingPanel extends JPanel {
@@ -39,12 +52,12 @@ public class Canvas2DSettingPanel extends JPanel {
     JComboBox<String> zoomComboBox;
     JComboBox<String> rotationComboBox;
 
-    private IcyButton zoomFitImageButton;
-    private IcyButton centerImageButton;
-    private IcyButton zoomPlus;
-    private IcyButton zoomMinus;
-    private IcyButton rotateUnclock;
-    private IcyButton rotateClock;
+    private IcyButtonNew zoomFitImageButton;
+    private IcyButtonNew centerImageButton;
+    private IcyButtonNew zoomPlus;
+    private IcyButtonNew zoomMinus;
+    private IcyButtonNew rotateUnclock;
+    private IcyButtonNew rotateClock;
     ColorChooserButton bgColorButton;
 
     public Canvas2DSettingPanel(Canvas2D cnv) {
@@ -127,16 +140,6 @@ public class Canvas2DSettingPanel extends JPanel {
     }
 
     private void initialize() {
-        // subPanel.add(GuiUtil.createLineBoxPanel(Box.createHorizontalStrut(4),
-        // GuiUtil.createFixedWidthBoldLabel("Zoom", 70), zoomComboBox,
-        // GuiUtil.createFixedWidthBoldLabel("\u0025", 20), Box.createHorizontalGlue(), zoomMinus,
-        // Box.createHorizontalStrut(4), zoomPlus, Box.createHorizontalStrut(4)));
-        // subPanel.add(Box.createVerticalStrut(4));
-        // subPanel.add(GuiUtil.createLineBoxPanel(Box.createHorizontalStrut(4),
-        // GuiUtil.createFixedWidthBoldLabel("Rotation", 70), rotationComboBox,
-        // GuiUtil.createFixedWidthBoldLabel("\u00B0", 20), Box.createHorizontalGlue(), rotateUnclock,
-        // Box.createHorizontalStrut(4), rotateClock, Box.createHorizontalStrut(4)));
-
         setLayout(new BorderLayout());
 
         JPanel panel = new JPanel();
@@ -178,17 +181,15 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_label_2.gridy = 0;
         panel.add(label_2, gbc_label_2);
 
-        zoomMinus = new IcyButton(new IcyIcon(ResourceUtil.ICON_MINUS, Canvas2D.ICON_SIZE));
-        zoomMinus.setFlat(true);
+        zoomMinus = new IcyButtonNew(GoogleMaterialDesignIcons.ZOOM_OUT);
         zoomMinus.setToolTipText("Reduce zoom factor");
         GridBagConstraints gbc_zoomMinus_1 = new GridBagConstraints();
-        gbc_zoomMinus_1.insets = new Insets(0, 0, 5, 1);
+        gbc_zoomMinus_1.insets = new Insets(0, 0, 5, 5);
         gbc_zoomMinus_1.gridx = 3;
         gbc_zoomMinus_1.gridy = 0;
         panel.add(zoomMinus, gbc_zoomMinus_1);
 
-        zoomPlus = new IcyButton(new IcyIcon(ResourceUtil.ICON_PLUS, Canvas2D.ICON_SIZE));
-        zoomPlus.setFlat(true);
+        zoomPlus = new IcyButtonNew(GoogleMaterialDesignIcons.ZOOM_IN);
         zoomPlus.setToolTipText("Increase zoom factor");
         GridBagConstraints gbc_zoomPlus_1 = new GridBagConstraints();
         gbc_zoomPlus_1.insets = new Insets(0, 0, 5, 5);
@@ -217,7 +218,6 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_rotationComboBox.gridy = 1;
         panel.add(rotationComboBox, gbc_rotationComboBox);
 
-        //JLabel label_4 = new JLabel("\u00B0"); // Does not need to be escaped in unicode
         JLabel label_4 = new JLabel("°");
         label_4.setFont(new Font("Tahoma", Font.BOLD, 11));
         GridBagConstraints gbc_label_4 = new GridBagConstraints();
@@ -227,17 +227,15 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_label_4.gridy = 1;
         panel.add(label_4, gbc_label_4);
 
-        rotateUnclock = new IcyButton(new IcyIcon(ResourceUtil.ICON_ROTATE_UNCLOCK, Canvas2D.ICON_SIZE));
-        rotateUnclock.setFlat(true);
+        rotateUnclock = new IcyButtonNew(GoogleMaterialDesignIcons.ROTATE_LEFT);
         rotateUnclock.setToolTipText("Rotate counter clockwise");
         GridBagConstraints gbc_rotateUnclock_1 = new GridBagConstraints();
-        gbc_rotateUnclock_1.insets = new Insets(0, 0, 0, 1);
+        gbc_rotateUnclock_1.insets = new Insets(0, 0, 0, 5);
         gbc_rotateUnclock_1.gridx = 3;
         gbc_rotateUnclock_1.gridy = 1;
         panel.add(rotateUnclock, gbc_rotateUnclock_1);
 
-        rotateClock = new IcyButton(new IcyIcon(ResourceUtil.ICON_ROTATE_CLOCK, Canvas2D.ICON_SIZE));
-        rotateClock.setFlat(true);
+        rotateClock = new IcyButtonNew(GoogleMaterialDesignIcons.ROTATE_RIGHT);
         rotateClock.setToolTipText("Rotate clockwise");
         GridBagConstraints gbc_rotateClock_1 = new GridBagConstraints();
         gbc_rotateClock_1.insets = new Insets(0, 0, 0, 5);
@@ -245,8 +243,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_rotateClock_1.gridy = 1;
         panel.add(rotateClock, gbc_rotateClock_1);
 
-        zoomFitImageButton = new IcyButton(new IcyIcon(Canvas2D.ICON_FIT_IMAGE));
-        zoomFitImageButton.setFlat(true);
+        zoomFitImageButton = new IcyButtonNew(GoogleMaterialDesignIcons.ZOOM_OUT_MAP);
         zoomFitImageButton.setToolTipText("Fit window to image size");
         GridBagConstraints gbc_zoomFitImage = new GridBagConstraints();
         gbc_zoomFitImage.insets = new Insets(0, 0, 0, 5);
@@ -254,8 +251,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_zoomFitImage.gridy = 1;
         panel.add(zoomFitImageButton, gbc_zoomFitImage);
 
-        centerImageButton = new IcyButton(new IcyIcon(Canvas2D.ICON_CENTER_IMAGE));
-        centerImageButton.setFlat(true);
+        centerImageButton = new IcyButtonNew(GoogleMaterialDesignIcons.MY_LOCATION);
         centerImageButton.setToolTipText("Center image in window");
         GridBagConstraints gbc_centerImageButton = new GridBagConstraints();
         gbc_centerImageButton.gridx = 7;

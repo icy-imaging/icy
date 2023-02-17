@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
+ * Copyright 2010-2023 Institut Pasteur.
  * 
  * This file is part of Icy.
  * 
@@ -14,7 +14,7 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.system;
 
@@ -25,36 +25,32 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.JPanel;
 
-import icy.image.ImageUtil;
 import icy.image.cache.ImageCache;
 import icy.math.UnitUtil;
 import icy.network.NetworkUtil;
-import icy.resource.ResourceUtil;
 import icy.system.SystemUtil;
 import icy.system.thread.ThreadUtil;
 import icy.util.ColorUtil;
 import icy.util.GraphicsUtil;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import jiconfont.swing.IconFontSwing;
 import vtk.vtkObjectBase;
 
 /**
  * Memory monitor.
  * 
  * @author Fab &amp; Stephane
+ * @author Thomas MUSSET
  */
-public class MemoryMonitorPanel extends JPanel implements MouseListener
-{
-    private static final long serialVersionUID = 5629509450385435829L;
-
-    private static int NBVAL = 94;
+public class MemoryMonitorPanel extends JPanel implements MouseListener {
+    private static final int NBVAL = 94;
 
     /**
      * 0 est la valeur la plus ancienne.
@@ -63,32 +59,38 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener
     private final String[] infos;
     private final Timer updateTimer;
 
-    private final Color cacheTextColor = ColorUtil.mix(Color.yellow, Color.white);
-    private final Color cpuColor = ColorUtil.mix(Color.blue, Color.white);
-    private final Color cpuTextColor = ColorUtil.mix(cpuColor, Color.white);
+    //private final Color cacheTextColor = ColorUtil.mix(Color.yellow, Color.white);
+    private final Color cacheTextColor = ColorUtil.mix(Color.yellow, Color.darkGray);
+    //private final Color cpuColor = ColorUtil.mix(Color.blue, Color.white);
+    private final Color cpuColor = ColorUtil.mix(Color.blue, Color.darkGray);
+    //private final Color cpuTextColor = ColorUtil.mix(cpuColor, Color.white);
+    //private final Color cpuTextColor = ColorUtil.mix(cpuColor, Color.white);
+    private final Color cpuTextColor = ColorUtil.mix(cpuColor, Color.gray);
     private final Color memColor = Color.green;
-    private final Color memTextColor = ColorUtil.mix(memColor, Color.white);
-    private final Color connectionColor = ColorUtil.mix(Color.red, Color.white);
+    //private final Color memTextColor = ColorUtil.mix(memColor, Color.white);
+    private final Color memTextColor = ColorUtil.mix(memColor, Color.darkGray);
+    //private final Color connectionColor = ColorUtil.mix(Color.red, Color.white);
+    private final Color connectionColor = ColorUtil.mix(Color.red, Color.darkGray);
     private final BasicStroke cpuStroke = new BasicStroke(2);
     private final BasicStroke memStroke = new BasicStroke(3);
     private final Font textFont = new Font("Arial", Font.BOLD, 9);
-    private BufferedImage background = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
-    private final Image networkImage = ImageUtil.getColorImageFromAlphaImage(ResourceUtil.ICON_NETWORK, Color.gray);
-    private final Image deleteImage = ImageUtil.getColorImageFromAlphaImage(ResourceUtil.ICON_DELETE, Color.red);
+    //private BufferedImage background = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+    //private final Image networkImage = ImageUtil.getColorImageFromAlphaImage(ResourceUtil.ICON_NETWORK, Color.gray); //SIGNAL_WIFI_OFF
+    private final Image networkImage = IconFontSwing.buildImage(GoogleMaterialDesignIcons.SIGNAL_CELLULAR_4_BAR, 20f, Color.GRAY);
+    //private final Image deleteImage = ImageUtil.getColorImageFromAlphaImage(ResourceUtil.ICON_DELETE, Color.red);
+    private final Image deleteImage = IconFontSwing.buildImage(GoogleMaterialDesignIcons.CLEAR, 16f, Color.RED.brighter());
 
     boolean displayHelpMessage = false;
     int lastCacheUpdate;
 
-    public MemoryMonitorPanel()
-    {
+    public MemoryMonitorPanel() {
         super();
 
         updateTimer = new Timer("Memory / CPU monitor");
 
         // init tables
         valeur = new double[NBVAL][2];
-        for (int i = 0; i < NBVAL; i++)
-        {
+        for (int i = 0; i < NBVAL; i++) {
             // mem
             valeur[i][0] = 0;
             // cpu load
@@ -116,30 +118,27 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener
     }
 
     @Override
-    protected void paintComponent(Graphics g)
-    {
+    protected void paintComponent(Graphics g) {
         final Graphics2D g2 = (Graphics2D) g.create();
 
         final int w = getWidth();
         final int h = getHeight();
 
         // refresh BG
-        if ((background.getWidth() != w) || (background.getHeight() != h))
-        {
+        /*if ((background.getWidth() != w) || (background.getHeight() != h)) {
             background = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
             Graphics2D background_g2 = background.createGraphics();
             GraphicsUtil.paintIcyBackGround(w, h, background_g2);
-        }
+        }*/
 
         // draw cached BG
-        g2.drawImage(background, 0, 0, null);
+        //g2.drawImage(background, 0, 0, null);
 
         // enabled AA
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        //g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // display graph
-        if (valeur != null)
-        {
+        if (valeur != null) {
             float x;
             double max;
             double ymul;
@@ -152,8 +151,7 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener
             max = SystemUtil.getJavaMaxMemory();
             ymul = (h - 8) / max;
             x = 6;
-            for (int i = 0; i < NBVAL - 1; i++)
-            {
+            for (int i = 0; i < NBVAL - 1; i++) {
                 final double v1 = Math.min(valeur[i][0], max);
                 final double v2 = Math.min(valeur[i + 1][0], max);
                 final int y1 = h - (int) (v1 * ymul);
@@ -169,8 +167,7 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener
             max = 100d;
             ymul = (h - 8) / max;
             x = 6;
-            for (int i = 0; i < NBVAL - 1; i++)
-            {
+            for (int i = 0; i < NBVAL - 1; i++) {
                 final double v1 = Math.min(valeur[i][1], max);
                 final double v2 = Math.min(valeur[i + 1][1], max);
                 final int y1 = h - (int) (v1 * ymul);
@@ -184,45 +181,44 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener
         g2.setFont(textFont);
 
         // display Used & Max Memory
-        g2.setColor(Color.black);
-        GraphicsUtil.drawHCenteredString(g2, infos[0], (w / 2) + 1, 6 + 1, false);
+        //g2.setColor(Color.black);
+        //GraphicsUtil.drawHCenteredString(g2, infos[0], (w / 2) + 1, 6 + 1, false);
         g2.setColor(memTextColor);
         GraphicsUtil.drawHCenteredString(g2, infos[0], w / 2, 6, false);
         // display CPU Load
-        g2.setColor(Color.black);
-        GraphicsUtil.drawHCenteredString(g2, infos[1], (w / 2) + 1, 18 + 1, false);
+        //g2.setColor(Color.black);
+        //GraphicsUtil.drawHCenteredString(g2, infos[1], (w / 2) + 1, 18 + 1, false);
         g2.setColor(cpuTextColor);
         GraphicsUtil.drawHCenteredString(g2, infos[1], w / 2, 18, false);
         // display cache Load
-        g2.setColor(Color.black);
-        GraphicsUtil.drawHCenteredString(g2, infos[2], (w / 2) + 1, 30 + 1, false);
+        //g2.setColor(Color.black);
+        //GraphicsUtil.drawHCenteredString(g2, infos[2], (w / 2) + 1, 30 + 1, false);
         g2.setColor(cacheTextColor);
         GraphicsUtil.drawHCenteredString(g2, infos[2], w / 2, 30, false);
 
         String text;
 
         // display internet connection
-        if (!NetworkUtil.hasInternetAccess())
-        {
-            g2.drawImage(networkImage, 10, 30, 16, 16, null);
-            g2.drawImage(deleteImage, 13, 35, 10, 10, null);
+        if (!NetworkUtil.hasInternetAccess()) {
+            //g2.drawImage(networkImage, 10, 30, 16, 16, null);
+            g2.drawImage(networkImage, 5, 5, 20, 20, null);
+            //g2.drawImage(deleteImage, 13, 35, 10, 10, null);
+            g2.drawImage(deleteImage, 20, 9, 16, 16, null);
 
-            if (displayHelpMessage)
-            {
+            if (displayHelpMessage) {
                 text = "Not connected to internet";
 
-                g2.setColor(Color.black);
-                GraphicsUtil.drawHCenteredString(g2, text, (w / 2) + 1, 30 + 1, false);
+                //g2.setColor(Color.black);
+                //GraphicsUtil.drawHCenteredString(g2, text, (w / 2) + 1, 30 + 1, false);
                 g2.setColor(connectionColor);
                 GraphicsUtil.drawHCenteredString(g2, text, w / 2, 30, false);
             }
         }
 
-        if (displayHelpMessage)
-        {
+        if (displayHelpMessage) {
             text = "click to force a garbage collector event";
-            g2.setColor(Color.black);
-            GraphicsUtil.drawHCenteredString(g2, text, (w / 2) + 1, 44 + 1, false);
+            //g2.setColor(Color.black);
+            //GraphicsUtil.drawHCenteredString(g2, text, (w / 2) + 1, 44 + 1, false);
             g2.setColor(Color.white);
             GraphicsUtil.drawHCenteredString(g2, text, w / 2, 44, false);
         }
@@ -230,8 +226,7 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener
         g2.dispose();
     }
 
-    void updateStats()
-    {
+    void updateStats() {
         final double usedMemory = SystemUtil.getJavaUsedMemory();
         final int cpuLoad = SystemUtil.getCpuLoad();
 
@@ -243,18 +238,14 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener
         setInfo(0, "Memory: " + UnitUtil.getBytesString(usedMemory) + " / "
                 + UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory()));
         setInfo(1, "CPU: " + cpuLoad + "%");
-        if (ImageCache.isEnabled())
-        {
+        if (ImageCache.isEnabled()) {
             // don't update cache stats (take sometime) at each frame
-            if (--lastCacheUpdate == 0)
-            {
-            	try
-            	{
+            if (--lastCacheUpdate == 0) {
+            	try {
             		setInfo(2, "Cache - Memory: " + UnitUtil.getBytesString(ImageCache.usedMemory()) + "  Disk: "
                         + UnitUtil.getBytesString(ImageCache.usedDisk()));
             	}
-            	catch(Throwable t)
-            	{
+            	catch(Throwable t) {
             		// can happen when we exit Icy as the cache engine may be shutdown
             		// we can ignore safely
             	}
@@ -271,73 +262,60 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener
     /**
      * Scroll les valeurs et en ajoute ( un seeker serait plus joli...)
      */
-    public void newValue(int curve, double val)
-    {
+    public void newValue(int curve, double val) {
         for (int i = 0; i < NBVAL - 1; i++)
             valeur[i][curve] = valeur[i + 1][curve];
 
         valeur[NBVAL - 1][curve] = val;
     }
 
-    public void setInfo(int infonb, String info)
-    {
+    public void setInfo(int infonb, String info) {
         infos[infonb] = info;
     }
 
     @Override
-    public void mouseClicked(MouseEvent event)
-    {
+    public void mouseClicked(MouseEvent event) {
         final MouseEvent e = event;
 
-        ThreadUtil.bgRun(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                final double freeBefore = SystemUtil.getJavaFreeMemory();
+        ThreadUtil.bgRun(() -> {
+            final double freeBefore = SystemUtil.getJavaFreeMemory();
 
-                // force garbage collector
-                System.gc();
+            // force garbage collector
+            System.gc();
 
-                final double freeAfter = SystemUtil.getJavaFreeMemory();
-                final double released = freeAfter - freeBefore;
-                final double usedMemory = SystemUtil.getJavaUsedMemory();
+            final double freeAfter = SystemUtil.getJavaFreeMemory();
+            final double released = freeAfter - freeBefore;
+            final double usedMemory = SystemUtil.getJavaUsedMemory();
 
-                System.out.println("Max / Used memory: " + UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())
-                        + " / " + UnitUtil.getBytesString((usedMemory > 0) ? usedMemory : 0) + " (released by GC: "
-                        + UnitUtil.getBytesString((released > 0) ? released : 0) + ")");
-            }
+            System.out.println("Max / Used memory: " + UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())
+                    + " / " + UnitUtil.getBytesString((usedMemory > 0) ? usedMemory : 0) + " (released by GC: "
+                    + UnitUtil.getBytesString((released > 0) ? released : 0) + ")");
         });
 
         // double click --> force VTK garbage collection (need to be done in EDT or it crashes on OSX)
-        if (e.getClickCount() > 1)
-        {
+        if (e.getClickCount() > 1) {
             vtkObjectBase.JAVA_OBJECT_MANAGER.gc(true);
             System.out.println("VTK GC forced");
         }
     }
 
     @Override
-    public void mouseEntered(MouseEvent arg0)
-    {
+    public void mouseEntered(MouseEvent arg0) {
         displayHelpMessage = true;
     }
 
     @Override
-    public void mouseExited(MouseEvent arg0)
-    {
+    public void mouseExited(MouseEvent arg0) {
         displayHelpMessage = false;
     }
 
     @Override
-    public void mousePressed(MouseEvent arg0)
-    {
+    public void mousePressed(MouseEvent arg0) {
 
     }
 
     @Override
-    public void mouseReleased(MouseEvent arg0)
-    {
+    public void mouseReleased(MouseEvent arg0) {
 
     }
 }

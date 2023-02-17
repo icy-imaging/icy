@@ -1,77 +1,55 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.component.renderer;
 
-import java.awt.Dimension;
-import java.awt.Insets;
-
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 
-import org.pushingpixels.substance.internal.utils.SubstanceSizeUtils;
-
 import icy.gui.lut.ColormapIcon;
+import icy.gui.util.LookAndFeelUtil;
 import icy.image.colormap.IcyColorMap;
-import icy.util.ReflectionUtil;
 
 /**
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class ColormapComboBoxRenderer extends CustomComboBoxRenderer
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 8439070623266035911L;
-
+public class ColormapComboBoxRenderer extends CustomComboBoxRenderer {
     /**
      * @deprecated Use {@link #ColormapComboBoxRenderer(JComboBox)} instead
      */
     @Deprecated
-    public ColormapComboBoxRenderer(JComboBox combo, int w, int h)
-    {
+    public ColormapComboBoxRenderer(JComboBox<IcyColorMap> combo, int w, int h) {
         this(combo);
     }
 
-    public ColormapComboBoxRenderer(JComboBox combo)
-    {
+    public ColormapComboBoxRenderer(JComboBox<IcyColorMap> combo) {
         super(combo);
     }
 
     @Override
-    protected void updateItem(JList list, Object value)
-    {
-        if (value instanceof IcyColorMap)
-        {
+    protected void updateItem(JList<?> list, Object value) {
+        if (value instanceof IcyColorMap) {
             final IcyColorMap colormap = (IcyColorMap) value;
-            final JComboBox comboBox = getComboBox();
-            final Dimension dim = comboBox.getSize();
-            // good estimation (better to avoid using reflection for that)
-            final int btnWidth = SubstanceSizeUtils.getScrollBarWidth(SubstanceSizeUtils.getComponentFontSize(comboBox)) + 4;
 
-            final Insets insets = getInsets();
+            final int size = LookAndFeelUtil.getDefaultIconSizeAsInt();
 
-            dim.width -= btnWidth + insets.left + insets.right;
-            dim.height -= insets.top + insets.bottom + 2;
-
-            setIcon(new ColormapIcon(colormap, dim.width, dim.height));
+            setIcon(new ColormapIcon(colormap, size * 3, size));
             setText("");
             setToolTipText("Set " + colormap.getName() + " colormap");
             setEnabled(list.isEnabled());

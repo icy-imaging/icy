@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.component;
 
@@ -24,25 +24,20 @@ import java.util.List;
 
 /**
  * Component to display and modify a numeric (double) value
- * 
- * @author Yoann Le Montagner &amp; Stephane
+ *
+ * @author Yoann Le Montagner
+ * @author Stephane
+ * @author Thomas MUSSET
  */
-public class NumberTextField extends IcyTextField
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3043750422009529874L;
-
+public class NumberTextField extends IcyTextField {
     /**
      * Listener interface
      */
-    public static interface ValueChangeListener
-    {
+    public interface ValueChangeListener {
         /**
          * Method triggered when the numeric value in the component changes
          */
-        public void valueChanged(double newValue, boolean validate);
+        void valueChanged(double newValue, boolean validate);
     }
 
     protected double value;
@@ -52,36 +47,32 @@ public class NumberTextField extends IcyTextField
     /**
      * Constructor
      */
-    public NumberTextField(boolean integer)
-    {
+    public NumberTextField(boolean integer) {
         super();
 
         value = 0;
         this.integer = integer;
-        listeners = new ArrayList<ValueChangeListener>();
+        listeners = new ArrayList<>();
     }
 
     /**
      * Constructor
      */
-    public NumberTextField()
-    {
+    public NumberTextField() {
         this(false);
     }
 
     /**
      * Return true if the range use integer number
      */
-    public boolean isInteger()
-    {
+    public boolean isInteger() {
         return integer;
     }
 
     /**
      * Return true if the range use integer number
      */
-    public void setInteger(boolean integer)
-    {
+    public void setInteger(boolean integer) {
         this.integer = integer;
 
         // force value adjustment
@@ -91,66 +82,58 @@ public class NumberTextField extends IcyTextField
     /**
      * Add a new listener
      */
-    public void addValueListener(ValueChangeListener l)
-    {
+    public void addValueListener(ValueChangeListener l) {
         listeners.add(l);
     }
 
     /**
      * Remove a listener
      */
-    public void removeValueListener(ValueChangeListener l)
-    {
+    public void removeValueListener(ValueChangeListener l) {
         listeners.remove(l);
     }
 
     /**
      * Retrieve the value as a double
      */
-    public double getNumericValue()
-    {
+    public double getNumericValue() {
         return value;
     }
 
     /**
      * Set the value
      */
-    public void setNumericValue(double value)
-    {
+    public void setNumericValue(double value) {
         if (integer)
             setText(Integer.toString((int) value));
         else
             setText(Double.toString(value));
     }
 
-    protected void valueChanged(boolean validate)
-    {
+    protected void valueChanged(boolean validate) {
         fireValueChangedEvent(validate);
     }
 
     @Override
-    protected void textChanged(boolean validate)
-    {
+    protected void textChanged(boolean validate) {
         super.textChanged(validate);
 
         double oldValue = value;
 
-        try
-        {
+        try {
             final String text = getText();
             value = text.isEmpty() ? 0.0 : Double.parseDouble(text);
             // force integer
             if (integer)
                 value = (int) value;
-            setForeground(Color.BLACK);
+            setForeground(null);
         }
-        catch (NumberFormatException err)
-        {
-            setForeground(Color.RED);
+        catch (NumberFormatException err) {
+            setForeground(Color.RED.brighter());
         }
 
         if (validate)
-            valueChanged(validate);
+            valueChanged(true);
         else if (value != oldValue)
             valueChanged(false);
     }
@@ -158,8 +141,7 @@ public class NumberTextField extends IcyTextField
     /**
      * Fire the value changed event
      */
-    private void fireValueChangedEvent(boolean validate)
-    {
+    private void fireValueChangedEvent(boolean validate) {
         for (ValueChangeListener l : listeners)
             l.valueChanged(value, validate);
     }

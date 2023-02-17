@@ -1,7 +1,26 @@
+/*
+ * Copyright 2010-2023 Institut Pasteur.
+ *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
 package icy.gui.menu;
 
 import icy.action.PreferencesActions;
-//import icy.common.Version;
+import icy.gui.component.menu.IcyMenu;
+import icy.gui.component.menu.IcyMenuItem;
 import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginLauncher;
 import icy.plugin.PluginLoader;
@@ -16,19 +35,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * @author Thomas MUSSET
+ */
 public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
-    private final JMenuItem itemPluginsSettings;
+    private final IcyMenuItem itemPluginsSettings;
 
     public ApplicationMenuPlugins() {
         super("Plugins");
 
-        itemPluginsSettings = new JMenuItem("Plugins Settings...");
-        setIcon(itemPluginsSettings, GoogleMaterialDesignIcons.EXTENSION);
+        itemPluginsSettings = new IcyMenuItem("Plugins Settings...", GoogleMaterialDesignIcons.EXTENSION);
         itemPluginsSettings.addActionListener(PreferencesActions.onlinePluginPreferencesAction);
 
         reloadPluginsMenu();
 
-        addSkinChangeListener();
         addPluginLoaderListener();
     }
 
@@ -124,13 +144,13 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
             }
 
             for (final Map.Entry<String, Map<String, Map<String, PluginDescriptor>>> authorEntry : authorMap.entrySet()) {
-                final JMenu menuAuthor = new JMenu(authorEntry.getKey());
+                final IcyMenu menuAuthor = new IcyMenu(authorEntry.getKey());
                 for (final Map.Entry<String, Map<String, PluginDescriptor>> classEntry : authorEntry.getValue().entrySet()) {
-                    final JMenu menuClassName = new JMenu(classEntry.getKey());
+                    final IcyMenu menuClassName = new IcyMenu(classEntry.getKey());
                     for (final Map.Entry<String, PluginDescriptor> plugin : classEntry.getValue().entrySet()) {
                         if (menuClassName.getIcon() == null)
                             menuClassName.setIcon(new ImageIcon(plugin.getValue().getIcon().getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
-                        final JMenuItem itemPlugin = new JMenuItem(plugin.getKey());
+                        final IcyMenuItem itemPlugin = new IcyMenuItem(plugin.getKey());
                         itemPlugin.addActionListener(e -> PluginLauncher.start(plugin.getValue()));
                         menuClassName.add(itemPlugin);
                     }

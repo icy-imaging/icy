@@ -33,7 +33,9 @@ import org.pushingpixels.flamingo.api.common.icon.ResizableIcon;
 
 /**
  * @author fab &amp; stephane
+ * @deprecated Do not use this, will be removed with Substance
  */
+@Deprecated
 public class BasicResizableIcon implements ResizableIcon
 {
     protected static final int DEFAULT_ICONSIZE = 48;

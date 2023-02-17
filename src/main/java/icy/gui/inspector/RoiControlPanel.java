@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.inspector;
 
@@ -39,10 +39,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
-import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -55,11 +53,10 @@ import icy.gui.component.IcyTextField.TextChangeListener;
 import icy.gui.component.SpecialValueSpinner;
 import icy.gui.component.button.ColorChooserButton;
 import icy.gui.component.button.ColorChooserButton.ColorChangeListener;
+import icy.gui.component.button.IcyToggleButtonNew;
 import icy.gui.component.model.SpecialValueSpinnerModel;
 import icy.main.Icy;
 import icy.math.MathUtil;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.roi.ROI;
 import icy.roi.ROIEvent;
 import icy.roi.edit.BoundsROIEdit;
@@ -72,18 +69,13 @@ import icy.system.thread.ThreadUtil;
 import icy.type.point.Point5D;
 import icy.type.rectangle.Rectangle5D;
 import icy.util.StringUtil;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 /**
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class RoiControlPanel extends JPanel
-        implements ColorChangeListener, TextChangeListener, ClipboardListener, ChangeListener, ActionListener
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 7403770406075917063L;
-
+public class RoiControlPanel extends JPanel implements ColorChangeListener, TextChangeListener, ClipboardListener, ChangeListener, ActionListener {
     // GUI
     JLabel posCFieldLabel;
     JLabel posTFieldLabel;
@@ -107,7 +99,7 @@ public class RoiControlPanel extends JPanel
     ColorChooserButton colorButton;
     JSlider alphaSlider;
     JSpinner strokeSpinner;
-    JToggleButton readOnlyToggle;
+    IcyToggleButtonNew readOnlyToggle;
     JCheckBox displayNameCheckBox;
     JButton setAsDefaultBtn;
 
@@ -118,31 +110,16 @@ public class RoiControlPanel extends JPanel
     final Runnable roiActionsRefresher;
     final Runnable roiPropertiesRefresher;
 
-    public RoiControlPanel(AbstractRoisPanel roisPanel)
-    {
+    public RoiControlPanel(AbstractRoisPanel roisPanel) {
         super();
 
         this.roisPanel = roisPanel;
 
         modifyingRoi = new Semaphore(1);
-        modifiedRois = new ArrayList<Reference<ROI>>();
+        modifiedRois = new ArrayList<>();
 
-        roiActionsRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshROIActionsInternal();
-            }
-        };
-        roiPropertiesRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshROIPropertiesInternal();
-            }
-        };
+        roiActionsRefresher = this::refreshROIActionsInternal;
+        roiPropertiesRefresher = this::refreshROIPropertiesInternal;
 
         initialize();
 
@@ -174,19 +151,25 @@ public class RoiControlPanel extends JPanel
         refreshROIPropertiesInternal();
     }
 
-    private void initialize()
-    {
+    private void initialize() {
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
         JPanel actionPanel = new JPanel();
-        actionPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Properties",
-                TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+        actionPanel.setBorder(
+                new TitledBorder(
+                        null,
+                        "Properties",
+                        TitledBorder.LEADING,
+                        TitledBorder.TOP,
+                        null
+                )
+        );
         add(actionPanel);
         GridBagLayout gbl_actionPanel = new GridBagLayout();
-        gbl_actionPanel.columnWidths = new int[] {0, 0, 0, 60, 0, 0, 0};
-        gbl_actionPanel.rowHeights = new int[] {0, 0, 0};
-        gbl_actionPanel.columnWeights = new double[] {0.0, 1.0, 0.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
-        gbl_actionPanel.rowWeights = new double[] {0.0, 0.0, Double.MIN_VALUE};
+        gbl_actionPanel.columnWidths = new int[]{0, 0, 0, 60, 0, 0, 0};
+        gbl_actionPanel.rowHeights = new int[]{0, 0, 0};
+        gbl_actionPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
+        gbl_actionPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
         actionPanel.setLayout(gbl_actionPanel);
 
         final JLabel lblColor = new JLabel("Color");
@@ -227,7 +210,7 @@ public class RoiControlPanel extends JPanel
         alphaSlider.setMinimumSize(new Dimension(36, 20));
         alphaSlider.setToolTipText("ROI content opacity");
 
-        readOnlyToggle = new JToggleButton(new IcyIcon(ResourceUtil.ICON_LOCK_CLOSE));
+        readOnlyToggle = new IcyToggleButtonNew(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
         readOnlyToggle.setSelected(true);
         readOnlyToggle.setBorderPainted(false);
         readOnlyToggle.setFocusPainted(false);
@@ -254,8 +237,6 @@ public class RoiControlPanel extends JPanel
         strokeSpinner = new JSpinner();
         strokeSpinner.setToolTipText("ROI stroke size (for visualization only)");
         strokeSpinner.setModel(new SpinnerNumberModel(1.0, 1.0, 9.0, 1.0));
-        strokeSpinner.setMinimumSize(new Dimension(50, 20));
-        strokeSpinner.setPreferredSize(new Dimension(50, 20));
         GridBagConstraints gbc_strokeSpinner = new GridBagConstraints();
         gbc_strokeSpinner.fill = GridBagConstraints.HORIZONTAL;
         gbc_strokeSpinner.insets = new Insets(0, 0, 0, 5);
@@ -280,8 +261,7 @@ public class RoiControlPanel extends JPanel
         setAsDefaultBtn.setEnabled(false);
         setAsDefaultBtn.setMargin(new Insets(2, 2, 2, 2));
         setAsDefaultBtn.setIconTextGap(0);
-        setAsDefaultBtn
-                .setToolTipText("Set the current color, opacity, stroke and show name values as the default settings");
+        setAsDefaultBtn.setToolTipText("Set the current color, opacity, stroke and show name values as the default settings");
         GridBagConstraints gbc_setAsDefaultBtn = new GridBagConstraints();
         gbc_setAsDefaultBtn.fill = GridBagConstraints.HORIZONTAL;
         gbc_setAsDefaultBtn.gridwidth = 2;
@@ -293,15 +273,22 @@ public class RoiControlPanel extends JPanel
         JPanel positionAndSizePanel = new JPanel();
         add(positionAndSizePanel);
         GridBagLayout gbl_positionAndSizePanel = new GridBagLayout();
-        gbl_positionAndSizePanel.columnWidths = new int[] {0, 0, 0};
-        gbl_positionAndSizePanel.rowHeights = new int[] {0, 0};
-        gbl_positionAndSizePanel.columnWeights = new double[] {1.0, 1.0, Double.MIN_VALUE};
-        gbl_positionAndSizePanel.rowWeights = new double[] {0.0, Double.MIN_VALUE};
+        gbl_positionAndSizePanel.columnWidths = new int[]{0, 0, 0};
+        gbl_positionAndSizePanel.rowHeights = new int[]{0, 0};
+        gbl_positionAndSizePanel.columnWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
+        gbl_positionAndSizePanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
         positionAndSizePanel.setLayout(gbl_positionAndSizePanel);
 
         JPanel positionPanel = new JPanel();
-        positionPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Position",
-                TitledBorder.LEFT, TitledBorder.TOP, null, new Color(0, 0, 0)));
+        positionPanel.setBorder(
+                new TitledBorder(
+                        null,
+                        "Position",
+                        TitledBorder.LEFT,
+                        TitledBorder.TOP,
+                        null
+                )
+        );
         GridBagConstraints gbc_positionPanel = new GridBagConstraints();
         gbc_positionPanel.anchor = GridBagConstraints.NORTH;
         gbc_positionPanel.insets = new Insets(0, 0, 0, 5);
@@ -310,10 +297,10 @@ public class RoiControlPanel extends JPanel
         gbc_positionPanel.gridy = 0;
         positionAndSizePanel.add(positionPanel, gbc_positionPanel);
         GridBagLayout gbl_positionPanel = new GridBagLayout();
-        gbl_positionPanel.columnWidths = new int[] {20, 0, 0};
-        gbl_positionPanel.rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0};
-        gbl_positionPanel.columnWeights = new double[] {0.0, 1.0, Double.MIN_VALUE};
-        gbl_positionPanel.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+        gbl_positionPanel.columnWidths = new int[]{20, 0, 0};
+        gbl_positionPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+        gbl_positionPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+        gbl_positionPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         positionPanel.setLayout(gbl_positionPanel);
 
         final JLabel lblX = new JLabel("X");
@@ -452,7 +439,15 @@ public class RoiControlPanel extends JPanel
         posCSpinner.setToolTipText("Attach the ROI to a specific C channel (set to -1 for ALL)");
 
         JPanel sizePanel = new JPanel();
-        sizePanel.setBorder(new TitledBorder(null, "Dimension", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        sizePanel.setBorder(
+                new TitledBorder(
+                        null,
+                        "Dimension",
+                        TitledBorder.LEADING,
+                        TitledBorder.TOP,
+                        null
+                )
+        );
         GridBagConstraints gbc_sizePanel = new GridBagConstraints();
         gbc_sizePanel.anchor = GridBagConstraints.NORTH;
         gbc_sizePanel.fill = GridBagConstraints.HORIZONTAL;
@@ -461,10 +456,10 @@ public class RoiControlPanel extends JPanel
         positionAndSizePanel.add(sizePanel, gbc_sizePanel);
 
         GridBagLayout gbl_sizePanel = new GridBagLayout();
-        gbl_sizePanel.columnWidths = new int[] {20, 0, 0};
-        gbl_sizePanel.rowHeights = new int[] {0, 0, 0, 0, 0, 0};
-        gbl_sizePanel.columnWeights = new double[] {0.0, 1.0, Double.MIN_VALUE};
-        gbl_sizePanel.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+        gbl_sizePanel.columnWidths = new int[]{20, 0, 0};
+        gbl_sizePanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+        gbl_sizePanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+        gbl_sizePanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         sizePanel.setLayout(gbl_sizePanel);
 
         final JLabel lblNewLabel_2 = new JLabel("X");
@@ -552,41 +547,37 @@ public class RoiControlPanel extends JPanel
         sizeCField.setColumns(8);
     }
 
-    public void selectionChanged()
-    {
+    public void selectionChanged() {
         refreshROIActionsAndProperties();
     }
 
     /**
      * Get the visible ROI in the ROI control panel
      */
-    List<ROI> getVisibleRois()
-    {
+    List<ROI> getVisibleRois() {
         return roisPanel.getVisibleRois();
     }
 
     /**
      * Get all selected ROIs
      */
-    List<ROI> getSelectedRois()
-    {
+    List<ROI> getSelectedRois() {
         return getSelectedRois(true);
     }
 
     /**
      * Get the selected ROI in the ROI control panel.
-     * 
-     * @param wantReadOnly
-     *        If <code>true</code> the returned list will also contains ROI in Read-Only state
+     *
+     * @param wantReadOnly If <code>true</code> the returned list will also contains ROI in Read-Only state
      */
-    List<ROI> getSelectedRois(boolean wantReadOnly)
-    {
+    // TODO: 25/01/2023 wantReadOnly always true
+    List<ROI> getSelectedRois(boolean wantReadOnly) {
         final List<ROI> selected = roisPanel.getSelectedRois();
 
         if (wantReadOnly)
             return selected;
 
-        final List<ROI> result = new ArrayList<ROI>(selected.size());
+        final List<ROI> result = new ArrayList<>(selected.size());
 
         for (ROI roi : selected)
             if (!roi.isReadOnly())
@@ -595,8 +586,7 @@ public class RoiControlPanel extends JPanel
         return result;
     }
 
-    static double formatPosition(double pos, double size)
-    {
+    static double formatPosition(double pos, double size) {
         // special case of infinite dimension
         if (size == Double.POSITIVE_INFINITY)
             return -1d;
@@ -604,8 +594,7 @@ public class RoiControlPanel extends JPanel
         return MathUtil.roundSignificant(pos, 5, true);
     }
 
-    static String getPositionAsString(double pos, double size)
-    {
+    static String getPositionAsString(double pos, double size) {
         // special case of infinite dimension
         if (size == Double.POSITIVE_INFINITY)
             return "all";
@@ -613,13 +602,11 @@ public class RoiControlPanel extends JPanel
         return StringUtil.toString(MathUtil.roundSignificant(pos, 5, true));
     }
 
-    static double formatSize(double value)
-    {
+    static double formatSize(double value) {
         return MathUtil.roundSignificant(value, 5, true);
     }
 
-    static String getSizeAsString(double value)
-    {
+    static String getSizeAsString(double value) {
         // special case of infinite dimension
         if (value == Double.POSITIVE_INFINITY)
             return MathUtil.INFINITE_STRING;
@@ -630,16 +617,14 @@ public class RoiControlPanel extends JPanel
     /**
      * Refresh the ROI actions state.
      */
-    public void refreshROIActions()
-    {
+    public void refreshROIActions() {
         ThreadUtil.runSingle(roiActionsRefresher);
     }
 
     /**
      * Refresh the ROI actions state (internal)
      */
-    void refreshROIActionsInternal()
-    {
+    void refreshROIActionsInternal() {
         final Sequence sequence = Icy.getMainInterface().getActiveSequence();
         final List<ROI> selectedRois = getSelectedRois();
         final ROI roi = (selectedRois.size() > 0) ? selectedRois.get(0) : null;
@@ -648,8 +633,7 @@ public class RoiControlPanel extends JPanel
         boolean canSetBnd = false;
         boolean readOnly = true;
         // set read only flag
-        for (ROI r : selectedRois)
-        {
+        for (ROI r : selectedRois) {
             readOnly &= r.isReadOnly();
             canSetPos |= r.canSetPosition();
             canSetBnd |= r.canSetBounds();
@@ -664,138 +648,104 @@ public class RoiControlPanel extends JPanel
         // wait a bit to avoid eating too much time with refresh
         ThreadUtil.sleep(1);
 
-        ThreadUtil.invokeNow(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // modifyingRoi.acquireUninterruptibly();
-                if (modifyingRoi.tryAcquire())
-                {
-                    try
-                    {
-                        if (sequence != null)
-                        {
-                            ((SpecialValueSpinnerModel) posZSpinner.getModel())
-                                    .setMaximum(Integer.valueOf(sequence.getSizeZ() - 1));
-                            ((SpecialValueSpinnerModel) posTSpinner.getModel())
-                                    .setMaximum(Integer.valueOf(sequence.getSizeT() - 1));
-                            ((SpecialValueSpinnerModel) posCSpinner.getModel())
-                                    .setMaximum(Integer.valueOf(sequence.getSizeC() - 1));
-                        }
-                        else
-                        {
-                            ((SpecialValueSpinnerModel) posZSpinner.getModel()).setMaximum(Integer.valueOf(0));
-                            ((SpecialValueSpinnerModel) posTSpinner.getModel()).setMaximum(Integer.valueOf(0));
-                            ((SpecialValueSpinnerModel) posCSpinner.getModel()).setMaximum(Integer.valueOf(0));
-                        }
+        ThreadUtil.invokeNow(() -> {
+            // modifyingRoi.acquireUninterruptibly();
+            if (modifyingRoi.tryAcquire()) {
+                try {
+                    if (sequence != null) {
+                        ((SpecialValueSpinnerModel) posZSpinner.getModel())
+                                .setMaximum(Integer.valueOf(sequence.getSizeZ() - 1));
+                        ((SpecialValueSpinnerModel) posTSpinner.getModel())
+                                .setMaximum(Integer.valueOf(sequence.getSizeT() - 1));
+                        ((SpecialValueSpinnerModel) posCSpinner.getModel())
+                                .setMaximum(Integer.valueOf(sequence.getSizeC() - 1));
                     }
-                    finally
-                    {
-                        modifyingRoi.release();
+                    else {
+                        ((SpecialValueSpinnerModel) posZSpinner.getModel()).setMaximum(Integer.valueOf(0));
+                        ((SpecialValueSpinnerModel) posTSpinner.getModel()).setMaximum(Integer.valueOf(0));
+                        ((SpecialValueSpinnerModel) posCSpinner.getModel()).setMaximum(Integer.valueOf(0));
                     }
                 }
-
-                posXField.setEnabled(canSetPosition && editable);
-                posYField.setEnabled(canSetPosition && editable);
-                posZField.setEnabled(canSetPosition && editable);
-                posTField.setEnabled(canSetPosition && editable);
-                posCField.setEnabled(canSetPosition && editable);
-                posZSpinner.setEnabled(canSetPosition && editable);
-                posTSpinner.setEnabled(canSetPosition && editable);
-                posCSpinner.setEnabled(canSetPosition && editable);
-                sizeXField.setEnabled(canSetBounds && editable);
-                sizeYField.setEnabled(canSetBounds && editable && (dim > 1));
-                sizeZField.setEnabled(canSetBounds && editable && (dim > 2));
-                sizeTField.setEnabled(canSetBounds && editable && (dim > 3));
-                sizeCField.setEnabled(canSetBounds && editable && (dim > 4));
-
-                if (dim > 2)
-                {
-                    posZField.setVisible(true);
-                    posZFieldLabel.setVisible(true);
-                    posZSpinner.setVisible(false);
-                    posZSpinnerLabel.setVisible(false);
+                finally {
+                    modifyingRoi.release();
                 }
-                else
-                {
-                    posZField.setVisible(false);
-                    posZFieldLabel.setVisible(false);
-                    posZSpinner.setVisible(true);
-                    posZSpinnerLabel.setVisible(true);
-                }
-
-                if (dim > 3)
-                {
-                    posTField.setVisible(true);
-                    posTFieldLabel.setVisible(true);
-                    posTSpinner.setVisible(false);
-                    posTSpinnerLabel.setVisible(false);
-                }
-                else
-                {
-                    posTField.setVisible(false);
-                    posTFieldLabel.setVisible(false);
-                    posTSpinner.setVisible(true);
-                    posTSpinnerLabel.setVisible(true);
-                }
-
-                if (dim > 4)
-                {
-                    posCField.setVisible(true);
-                    posCFieldLabel.setVisible(true);
-                    posCSpinner.setVisible(false);
-                    posCSpinnerLabel.setVisible(false);
-                }
-                else
-                {
-                    posCField.setVisible(false);
-                    posCFieldLabel.setVisible(false);
-                    posCSpinner.setVisible(true);
-                    posCSpinnerLabel.setVisible(true);
-                }
-
-                colorButton.setEnabled(hasSelected);
-                strokeSpinner.setEnabled(hasSelected);
-                alphaSlider.setEnabled(hasSelected);
-                readOnlyToggle.setEnabled(hasSelected);
-                readOnlyToggle.setSelected(!editable);
-                updateReadOnlyButtonState();
-                displayNameCheckBox.setEnabled(hasSelected);
-
-                setAsDefaultBtn.setEnabled(hasSelected);
             }
+
+            posXField.setEnabled(canSetPosition && editable);
+            posYField.setEnabled(canSetPosition && editable);
+            posZField.setEnabled(canSetPosition && editable);
+            posTField.setEnabled(canSetPosition && editable);
+            posCField.setEnabled(canSetPosition && editable);
+            posZSpinner.setEnabled(canSetPosition && editable);
+            posTSpinner.setEnabled(canSetPosition && editable);
+            posCSpinner.setEnabled(canSetPosition && editable);
+            sizeXField.setEnabled(canSetBounds && editable);
+            sizeYField.setEnabled(canSetBounds && editable && (dim > 1));
+            sizeZField.setEnabled(canSetBounds && editable && (dim > 2));
+            sizeTField.setEnabled(canSetBounds && editable && (dim > 3));
+            sizeCField.setEnabled(canSetBounds && editable && (dim > 4));
+
+            if (dim > 2) {
+                posZField.setVisible(true);
+                posZFieldLabel.setVisible(true);
+                posZSpinner.setVisible(false);
+                posZSpinnerLabel.setVisible(false);
+            }
+            else {
+                posZField.setVisible(false);
+                posZFieldLabel.setVisible(false);
+                posZSpinner.setVisible(true);
+                posZSpinnerLabel.setVisible(true);
+            }
+
+            if (dim > 3) {
+                posTField.setVisible(true);
+                posTFieldLabel.setVisible(true);
+                posTSpinner.setVisible(false);
+                posTSpinnerLabel.setVisible(false);
+            }
+            else {
+                posTField.setVisible(false);
+                posTFieldLabel.setVisible(false);
+                posTSpinner.setVisible(true);
+                posTSpinnerLabel.setVisible(true);
+            }
+
+            if (dim > 4) {
+                posCField.setVisible(true);
+                posCFieldLabel.setVisible(true);
+                posCSpinner.setVisible(false);
+                posCSpinnerLabel.setVisible(false);
+            }
+            else {
+                posCField.setVisible(false);
+                posCFieldLabel.setVisible(false);
+                posCSpinner.setVisible(true);
+                posCSpinnerLabel.setVisible(true);
+            }
+
+            colorButton.setEnabled(hasSelected);
+            strokeSpinner.setEnabled(hasSelected);
+            alphaSlider.setEnabled(hasSelected);
+            readOnlyToggle.setEnabled(hasSelected);
+            readOnlyToggle.setSelected(!editable);
+            displayNameCheckBox.setEnabled(hasSelected);
+
+            setAsDefaultBtn.setEnabled(hasSelected);
         });
-    }
-
-    IcyIcon icon_locked = new IcyIcon(ResourceUtil.ICON_LOCK_CLOSE);
-    IcyIcon icon_unlocked = new IcyIcon(ResourceUtil.ICON_LOCK_OPEN);
-
-    private void updateReadOnlyButtonState()
-    {
-        if (readOnlyToggle.isSelected())
-        {
-            readOnlyToggle.setIcon(icon_locked);
-        }
-        else
-        {
-            readOnlyToggle.setIcon(icon_unlocked);
-        }
     }
 
     /**
      * Refresh ROI properties
      */
-    public void refreshROIProperties()
-    {
+    public void refreshROIProperties() {
         ThreadUtil.runSingle(roiPropertiesRefresher);
     }
 
     /**
      * Refresh ROI properties (internal)
      */
-    void refreshROIPropertiesInternal()
-    {
+    void refreshROIPropertiesInternal() {
         final List<ROI> rois = getSelectedRois();
         final ROI roi = (rois.size() > 0) ? rois.get(0) : null;
         final Rectangle5D bounds = (roi != null) ? roi.getBounds5D() : null;
@@ -803,72 +753,61 @@ public class RoiControlPanel extends JPanel
         // wait a bit to avoid eating too much time with refresh
         ThreadUtil.sleep(1);
 
-        ThreadUtil.invokeNow(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // modifyingRoi.acquireUninterruptibly();
-                if (!modifyingRoi.tryAcquire())
-                    return;
+        ThreadUtil.invokeNow(() -> {
+            // modifyingRoi.acquireUninterruptibly();
+            if (!modifyingRoi.tryAcquire())
+                return;
 
-                try
-                {
-                    if (roi != null)
-                    {
-                        colorButton.setColor(roi.getColor());
-                        strokeSpinner.setValue(Double.valueOf(roi.getStroke()));
-                        alphaSlider.setValue((int) (roi.getOpacity() * 100));
-                        displayNameCheckBox.setSelected(roi.getShowName());
-                    }
-                    else
-                    {
-                        // no ROI selected
-                        colorButton.setColor(Color.gray);
-                        strokeSpinner.setValue(Double.valueOf(1d));
-                        alphaSlider.setValue(0);
-                        displayNameCheckBox.setSelected(false);
-                    }
-
-                    if (bounds != null)
-                    {
-                        posXField.setText(getPositionAsString(bounds.getX(), bounds.getSizeX()));
-                        posYField.setText(getPositionAsString(bounds.getY(), bounds.getSizeY()));
-                        posZSpinner.setValue(Integer.valueOf((int) formatPosition(bounds.getZ(), bounds.getSizeZ())));
-                        posZField.setText(getPositionAsString(bounds.getZ(), bounds.getSizeZ()));
-                        posTSpinner.setValue(Integer.valueOf((int) formatPosition(bounds.getT(), bounds.getSizeT())));
-                        posTField.setText(getPositionAsString(bounds.getT(), bounds.getSizeT()));
-                        posCSpinner.setValue(Integer.valueOf((int) formatPosition(bounds.getC(), bounds.getSizeC())));
-                        posCField.setText(getPositionAsString(bounds.getC(), bounds.getSizeC()));
-
-                        sizeXField.setText(getSizeAsString(bounds.getSizeX()));
-                        sizeYField.setText(getSizeAsString(bounds.getSizeY()));
-                        sizeZField.setText(getSizeAsString(bounds.getSizeZ()));
-                        sizeTField.setText(getSizeAsString(bounds.getSizeT()));
-                        sizeCField.setText(getSizeAsString(bounds.getSizeC()));
-                    }
-                    else
-                    {
-                        posXField.setText("");
-                        posYField.setText("");
-                        posZField.setText("");
-                        posTField.setText("");
-                        posCField.setText("");
-                        posZSpinner.setValue(Integer.valueOf(0));
-                        posTSpinner.setValue(Integer.valueOf(0));
-                        posCSpinner.setValue(Integer.valueOf(0));
-
-                        sizeXField.setText("");
-                        sizeYField.setText("");
-                        sizeZField.setText("");
-                        sizeTField.setText("");
-                        sizeCField.setText("");
-                    }
+            try {
+                if (roi != null) {
+                    colorButton.setColor(roi.getColor());
+                    strokeSpinner.setValue(Double.valueOf(roi.getStroke()));
+                    alphaSlider.setValue((int) (roi.getOpacity() * 100));
+                    displayNameCheckBox.setSelected(roi.getShowName());
                 }
-                finally
-                {
-                    modifyingRoi.release();
+                else {
+                    // no ROI selected
+                    colorButton.setColor(Color.gray);
+                    strokeSpinner.setValue(Double.valueOf(1d));
+                    alphaSlider.setValue(0);
+                    displayNameCheckBox.setSelected(false);
                 }
+
+                if (bounds != null) {
+                    posXField.setText(getPositionAsString(bounds.getX(), bounds.getSizeX()));
+                    posYField.setText(getPositionAsString(bounds.getY(), bounds.getSizeY()));
+                    posZSpinner.setValue(Integer.valueOf((int) formatPosition(bounds.getZ(), bounds.getSizeZ())));
+                    posZField.setText(getPositionAsString(bounds.getZ(), bounds.getSizeZ()));
+                    posTSpinner.setValue(Integer.valueOf((int) formatPosition(bounds.getT(), bounds.getSizeT())));
+                    posTField.setText(getPositionAsString(bounds.getT(), bounds.getSizeT()));
+                    posCSpinner.setValue(Integer.valueOf((int) formatPosition(bounds.getC(), bounds.getSizeC())));
+                    posCField.setText(getPositionAsString(bounds.getC(), bounds.getSizeC()));
+
+                    sizeXField.setText(getSizeAsString(bounds.getSizeX()));
+                    sizeYField.setText(getSizeAsString(bounds.getSizeY()));
+                    sizeZField.setText(getSizeAsString(bounds.getSizeZ()));
+                    sizeTField.setText(getSizeAsString(bounds.getSizeT()));
+                    sizeCField.setText(getSizeAsString(bounds.getSizeC()));
+                }
+                else {
+                    posXField.setText("");
+                    posYField.setText("");
+                    posZField.setText("");
+                    posTField.setText("");
+                    posCField.setText("");
+                    posZSpinner.setValue(Integer.valueOf(0));
+                    posTSpinner.setValue(Integer.valueOf(0));
+                    posCSpinner.setValue(Integer.valueOf(0));
+
+                    sizeXField.setText("");
+                    sizeYField.setText("");
+                    sizeZField.setText("");
+                    sizeTField.setText("");
+                    sizeCField.setText("");
+                }
+            }
+            finally {
+                modifyingRoi.release();
             }
         });
     }
@@ -876,34 +815,30 @@ public class RoiControlPanel extends JPanel
     /**
      * Refresh ROI actions and properties
      */
-    public void refreshROIActionsAndProperties()
-    {
+    public void refreshROIActionsAndProperties() {
         ThreadUtil.runSingle(roiActionsRefresher);
         ThreadUtil.runSingle(roiPropertiesRefresher);
     }
 
     @Override
-    public void textChanged(IcyTextField source, boolean validate)
-    {
+    public void textChanged(IcyTextField source, boolean validate) {
         // source not anymore enable --> cancel validation
         if (!source.isEnabled())
             return;
 
         // keep trace of modified ROI and wait for validation
-        if (!validate)
-        {
+        if (!validate) {
             modifiedRois.clear();
             // better to use weak reference here to not retain ROI
             for (ROI roi : getSelectedRois())
-                modifiedRois.add(new WeakReference<ROI>(roi));
+                modifiedRois.add(new WeakReference<>(roi));
 
             return;
         }
 
         // at this point the text is validated so we can recover modified ROIs...
-        final List<ROI> rois = new ArrayList<ROI>();
-        for (Reference<ROI> ref : modifiedRois)
-        {
+        final List<ROI> rois = new ArrayList<>();
+        for (Reference<ROI> ref : modifiedRois) {
             final ROI roi = ref.get();
             if (roi != null)
                 rois.add(roi);
@@ -917,22 +852,17 @@ public class RoiControlPanel extends JPanel
         if (!modifyingRoi.tryAcquire())
             return;
 
-        try
-        {
+        try {
             // position fields ?
-            if ((source == posXField) || (source == posYField) || (source == posZField) || (source == posTField)
-                    || (source == posCField))
-            {
+            if ((source == posXField) || (source == posYField) || (source == posZField) || (source == posTField) || (source == posCField)) {
                 final double value = StringUtil.parseDouble(source.getText(), Double.NaN);
 
                 // correct value ?
-                if (!Double.isNaN(value))
-                {
-                    final List<ROI> roiToModify = new ArrayList<ROI>();
+                if (!Double.isNaN(value)) {
+                    final List<ROI> roiToModify = new ArrayList<>();
 
                     // get the ROI we were modifying
-                    for (ROI roi : rois)
-                    {
+                    for (ROI roi : rois) {
                         // can't edit read only ROI (should not arrive)
                         if (roi.isReadOnly())
                             continue;
@@ -943,13 +873,11 @@ public class RoiControlPanel extends JPanel
                     }
 
                     // we have effectively some ROI to modify ?
-                    if (!roiToModify.isEmpty())
-                    {
+                    if (!roiToModify.isEmpty()) {
                         Point5D positionSet = null;
 
                         // single change ?
-                        if (roiToModify.size() == 1)
-                        {
+                        if (roiToModify.size() == 1) {
                             final ROI roi = roiToModify.get(0);
 
                             // get current ROI position
@@ -976,17 +904,15 @@ public class RoiControlPanel extends JPanel
                             Icy.getMainInterface().getUndoManager()
                                     .addEdit(new PositionROIEdit(roi, savePosition, false));
                         }
-                        else
-                        {
-                            final List<Point5D> savePositions = new ArrayList<Point5D>();
-                            final List<Point5D> newPositions = new ArrayList<Point5D>();
+                        else {
+                            final List<Point5D> savePositions = new ArrayList<>();
+                            final List<Point5D> newPositions = new ArrayList<>();
 
                             // save previous positions
                             for (ROI roi : roiToModify)
                                 savePositions.add(roi.getPosition5D());
 
-                            for (ROI roi : roiToModify)
-                            {
+                            for (ROI roi : roiToModify) {
                                 // get current ROI position
                                 final Point5D position = roi.getPosition5D();
 
@@ -1012,12 +938,12 @@ public class RoiControlPanel extends JPanel
                             }
 
                             // add position change to undo manager
-                            Icy.getMainInterface().getUndoManager()
-                                    .addEdit(new PositionROIsEdit(roiToModify, savePositions, newPositions, false));
+                            Icy.getMainInterface().getUndoManager().addEdit(
+                                    new PositionROIsEdit(roiToModify, savePositions, newPositions, false)
+                            );
                         }
 
-                        if (positionSet != null)
-                        {
+                        if (positionSet != null) {
                             double p;
 
                             // fix field value if needed
@@ -1042,19 +968,15 @@ public class RoiControlPanel extends JPanel
                 }
             }
             // size fields ?
-            else if ((source == sizeXField) || (source == sizeYField) || (source == sizeZField)
-                    || (source == sizeTField) || (source == sizeCField))
-            {
+            else if ((source == sizeXField) || (source == sizeYField) || (source == sizeZField) || (source == sizeTField) || (source == sizeCField)) {
                 final double value = StringUtil.parseDouble(source.getText(), Double.NaN);
 
                 // correct value ?
-                if (!Double.isNaN(value))
-                {
-                    final List<ROI> roiToModify = new ArrayList<ROI>();
+                if (!Double.isNaN(value)) {
+                    final List<ROI> roiToModify = new ArrayList<>();
 
                     // get the ROI we were modifying
-                    for (ROI roi : rois)
-                    {
+                    for (ROI roi : rois) {
                         // can't edit read only ROI (should not arrive)
                         if (roi.isReadOnly())
                             continue;
@@ -1065,12 +987,10 @@ public class RoiControlPanel extends JPanel
                     }
 
                     // we have effectively some ROI to modify ?
-                    if (!roiToModify.isEmpty())
-                    {
+                    if (!roiToModify.isEmpty()) {
                         Rectangle5D boundsSet = null;
 
-                        if (roiToModify.size() == 1)
-                        {
+                        if (roiToModify.size() == 1) {
                             final ROI roi = roiToModify.get(0);
 
                             // get current ROI size
@@ -1095,17 +1015,15 @@ public class RoiControlPanel extends JPanel
                             // add position change to undo manager
                             Icy.getMainInterface().getUndoManager().addEdit(new BoundsROIEdit(roi, saveBounds, false));
                         }
-                        else
-                        {
-                            final List<Rectangle5D> saveBoundsList = new ArrayList<Rectangle5D>();
-                            final List<Rectangle5D> newBoundsList = new ArrayList<Rectangle5D>();
+                        else {
+                            final List<Rectangle5D> saveBoundsList = new ArrayList<>();
+                            final List<Rectangle5D> newBoundsList = new ArrayList<>();
 
                             // save previous size
                             for (ROI roi : roiToModify)
                                 saveBoundsList.add(roi.getBounds5D());
 
-                            for (ROI roi : roiToModify)
-                            {
+                            for (ROI roi : roiToModify) {
                                 // get current ROI size
                                 Rectangle5D bounds = roi.getBounds5D();
 
@@ -1130,12 +1048,12 @@ public class RoiControlPanel extends JPanel
                             }
 
                             // add position change to undo manager
-                            Icy.getMainInterface().getUndoManager()
-                                    .addEdit(new BoundsROIsEdit(roiToModify, saveBoundsList, newBoundsList, false));
+                            Icy.getMainInterface().getUndoManager().addEdit(
+                                    new BoundsROIsEdit(roiToModify, saveBoundsList, newBoundsList, false)
+                            );
                         }
 
-                        if (boundsSet != null)
-                        {
+                        if (boundsSet != null) {
                             final double p;
 
                             // fix field value if needed
@@ -1156,15 +1074,13 @@ public class RoiControlPanel extends JPanel
                 }
             }
         }
-        finally
-        {
+        finally {
             modifyingRoi.release();
         }
     }
 
     @Override
-    public void colorChanged(ColorChooserButton source)
-    {
+    public void colorChanged(ColorChooserButton source) {
         // source not anymore enable --> cancel change
         if (!source.isEnabled())
             return;
@@ -1177,22 +1093,19 @@ public class RoiControlPanel extends JPanel
             return;
 
         final List<ROI> rois = getSelectedRois();
-        final List<Object> oldValues = new ArrayList<Object>();
+        final List<Object> oldValues = new ArrayList<>();
         final Color color = source.getColor();
 
         sequence.beginUpdate();
-        try
-        {
+        try {
             // set new color
-            for (ROI roi : rois)
-            {
+            for (ROI roi : rois) {
                 // save previous color
                 oldValues.add(roi.getColor());
                 roi.setColor(color);
             }
         }
-        finally
-        {
+        finally {
             sequence.endUpdate();
             modifyingRoi.release();
         }
@@ -1202,8 +1115,7 @@ public class RoiControlPanel extends JPanel
     }
 
     @Override
-    public void stateChanged(ChangeEvent e)
-    {
+    public void stateChanged(ChangeEvent e) {
         if (!(e.getSource() instanceof JComponent))
             return;
 
@@ -1220,60 +1132,52 @@ public class RoiControlPanel extends JPanel
         if (!modifyingRoi.tryAcquire())
             return;
 
-        try
-        {
-            if (source == strokeSpinner)
-            {
+        try {
+            if (source == strokeSpinner) {
                 final List<ROI> rois = getSelectedRois();
-                final List<Object> oldValues = new ArrayList<Object>();
+                final List<Object> oldValues = new ArrayList<>();
                 final double stroke = ((Double) strokeSpinner.getValue()).doubleValue();
 
                 sequence.beginUpdate();
-                try
-                {
-                    for (ROI roi : rois)
-                    {
+                try {
+                    for (ROI roi : rois) {
                         // save previous stroke
                         oldValues.add(Double.valueOf(roi.getStroke()));
                         roi.setStroke(stroke);
                     }
                 }
-                finally
-                {
+                finally {
                     sequence.endUpdate();
                 }
 
                 // add stroke change to undo manager
                 sequence.addUndoableEdit(
-                        new PropertyROIsEdit(rois, ROI.PROPERTY_STROKE, oldValues, Double.valueOf(stroke)));
+                        new PropertyROIsEdit(rois, ROI.PROPERTY_STROKE, oldValues, Double.valueOf(stroke))
+                );
             }
-            else if (source == alphaSlider)
-            {
+            else if (source == alphaSlider) {
                 final List<ROI> rois = getSelectedRois();
-                final List<Object> oldValues = new ArrayList<Object>();
+                final List<Object> oldValues = new ArrayList<>();
                 final float opacity = alphaSlider.getValue() / 100f;
 
                 sequence.beginUpdate();
-                try
-                {
-                    for (ROI roi : rois)
-                    {
+                try {
+                    for (ROI roi : rois) {
                         // save previous opacity
                         oldValues.add(Float.valueOf(roi.getOpacity()));
                         roi.setOpacity(opacity);
                     }
                 }
-                finally
-                {
+                finally {
                     sequence.endUpdate();
                 }
 
                 // add opacity change to undo manager
                 sequence.addUndoableEdit(
-                        new PropertyROIsEdit(rois, ROI.PROPERTY_OPACITY, oldValues, Float.valueOf(opacity)));
+                        new PropertyROIsEdit(rois, ROI.PROPERTY_OPACITY, oldValues, Float.valueOf(opacity))
+                );
             }
-            else if ((source == posZSpinner) || (source == posTSpinner) || (source == posCSpinner))
-            {
+            else if ((source == posZSpinner) || (source == posTSpinner) || (source == posCSpinner)) {
                 final List<ROI> rois = getSelectedRois();
 
                 // nothing to edit
@@ -1284,13 +1188,11 @@ public class RoiControlPanel extends JPanel
                 final double value = ((Integer) spinner.getValue()).intValue();
 
                 // correct value ?
-                if (!Double.isNaN(value))
-                {
-                    final List<ROI> roiToModify = new ArrayList<ROI>();
+                if (!Double.isNaN(value)) {
+                    final List<ROI> roiToModify = new ArrayList<>();
 
                     // get the ROI we were modifying
-                    for (ROI roi : rois)
-                    {
+                    for (ROI roi : rois) {
                         // can't edit read only ROI (should not arrive)
                         if (roi.isReadOnly())
                             continue;
@@ -1301,13 +1203,11 @@ public class RoiControlPanel extends JPanel
                     }
 
                     // we have effectively some ROI to modify ?
-                    if (!roiToModify.isEmpty())
-                    {
+                    if (!roiToModify.isEmpty()) {
                         Point5D positionSet = null;
 
                         // single change ?
-                        if (roiToModify.size() == 1)
-                        {
+                        if (roiToModify.size() == 1) {
                             final ROI roi = roiToModify.get(0);
 
                             // get current ROI position
@@ -1327,20 +1227,19 @@ public class RoiControlPanel extends JPanel
                             positionSet = roi.getPosition5D();
 
                             // add position change to undo manager
-                            Icy.getMainInterface().getUndoManager()
-                                    .addEdit(new PositionROIEdit(roi, savePosition, false));
+                            Icy.getMainInterface().getUndoManager().addEdit(
+                                    new PositionROIEdit(roi, savePosition, false)
+                            );
                         }
-                        else
-                        {
-                            final List<Point5D> savePositions = new ArrayList<Point5D>();
-                            final List<Point5D> newPositions = new ArrayList<Point5D>();
+                        else {
+                            final List<Point5D> savePositions = new ArrayList<>();
+                            final List<Point5D> newPositions = new ArrayList<>();
 
                             // save previous positions
                             for (ROI roi : roiToModify)
                                 savePositions.add(roi.getPosition5D());
 
-                            for (ROI roi : roiToModify)
-                            {
+                            for (ROI roi : roiToModify) {
                                 // get current ROI position
                                 final Point5D position = roi.getPosition5D();
 
@@ -1362,12 +1261,12 @@ public class RoiControlPanel extends JPanel
                             }
 
                             // add position change to undo manager
-                            Icy.getMainInterface().getUndoManager()
-                                    .addEdit(new PositionROIsEdit(roiToModify, savePositions, newPositions, false));
+                            Icy.getMainInterface().getUndoManager().addEdit(
+                                    new PositionROIsEdit(roiToModify, savePositions, newPositions, false)
+                            );
                         }
 
-                        if (positionSet != null)
-                        {
+                        if (positionSet != null) {
                             double p;
 
                             // fix field value if needed
@@ -1388,15 +1287,13 @@ public class RoiControlPanel extends JPanel
                 }
             }
         }
-        finally
-        {
+        finally {
             modifyingRoi.release();
         }
     }
 
     @Override
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
         if (!(e.getSource() instanceof JComponent))
             return;
 
@@ -1413,42 +1310,26 @@ public class RoiControlPanel extends JPanel
         if (!modifyingRoi.tryAcquire())
             return;
 
-        try
-        {
-            if (source == readOnlyToggle)
-            {
-                for (ROI roi : getSelectedRois())
-                {
+        try {
+            if (source == readOnlyToggle) {
+                for (ROI roi : getSelectedRois()) {
                     roi.setReadOnly(readOnlyToggle.isSelected());
                     roi.setSelected(true);
                 }
-
-                if (readOnlyToggle.isSelected())
-                {
-                    readOnlyToggle.setIcon(icon_locked);
-                }
-                else
-                {
-                    readOnlyToggle.setIcon(icon_unlocked);
-                }
             }
-            else if (source == displayNameCheckBox)
-            {
+            else if (source == displayNameCheckBox) {
                 sequence.beginUpdate();
-                try
-                {
+                try {
                     final boolean display = displayNameCheckBox.isSelected();
 
                     for (ROI roi : getSelectedRois())
                         roi.setShowName(display);
                 }
-                finally
-                {
+                finally {
                     sequence.endUpdate();
                 }
             }
-            else if (source == setAsDefaultBtn)
-            {
+            else if (source == setAsDefaultBtn) {
                 final boolean display = displayNameCheckBox.isSelected();
                 final Color color = colorButton.getColor();
                 final double stroke = ((Double) strokeSpinner.getValue()).doubleValue();
@@ -1461,23 +1342,19 @@ public class RoiControlPanel extends JPanel
                 ROI.setDefaultStroke(stroke);
             }
         }
-        finally
-        {
+        finally {
             modifyingRoi.release();
         }
     }
 
     @Override
-    public void clipboardChanged()
-    {
+    public void clipboardChanged() {
         refreshROIActions();
     }
 
     // one of the selected ROI changed
-    public void roiChanged(ROIEvent event)
-    {
-        switch (event.getType())
-        {
+    public void roiChanged(ROIEvent event) {
+        switch (event.getType()) {
             case ROI_CHANGED:
                 // refresh the properties
                 refreshROIProperties();
@@ -1502,5 +1379,4 @@ public class RoiControlPanel extends JPanel
                 break;
         }
     }
-
 }

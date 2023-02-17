@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.component.math;
 
@@ -30,27 +30,19 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.EventListener;
 
-import javax.swing.BorderFactory;
-
 /**
  * Histogram component.
- * 
+ *
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class HistogramPanel extends BorderedPanel
-{
-    public static interface HistogramPanelListener extends EventListener
-    {
+public class HistogramPanel extends BorderedPanel {
+    public interface HistogramPanelListener extends EventListener {
         /**
          * histogram need to be refreshed (send values for recalculation)
          */
-        public void histogramNeedRefresh(HistogramPanel source);
+        void histogramNeedRefresh(HistogramPanel source);
     }
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -3932807727576675217L;
 
     protected static final int BORDER_WIDTH = 2;
     protected static final int BORDER_HEIGHT = 2;
@@ -88,16 +80,16 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Create a new histogram panel for the specified value range.<br>
      * By default it uses a Logarithm representation (modifiable via {@link #setLogScaling(boolean)}
-     * 
+     *
      * @param minValue
      * @param maxValue
      * @param integer
      */
-    public HistogramPanel(double minValue, double maxValue, boolean integer)
-    {
+    public HistogramPanel(double minValue, double maxValue, boolean integer) {
         super();
 
-        setBorder(BorderFactory.createEmptyBorder(BORDER_HEIGHT, BORDER_WIDTH, BORDER_HEIGHT, BORDER_WIDTH));
+        //setBorder(BorderFactory.createEmptyBorder(BORDER_HEIGHT, BORDER_WIDTH, BORDER_HEIGHT, BORDER_WIDTH));
+        setBorder(null);
 
         setMinimumSize(new Dimension(100, 100));
         setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
@@ -123,8 +115,7 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Returns true when histogram is being calculated.
      */
-    public boolean isUpdating()
-    {
+    public boolean isUpdating() {
         return updating;
     }
 
@@ -132,11 +123,10 @@ public class HistogramPanel extends BorderedPanel
      * Call this method to inform you start histogram computation (allow the panel to display
      * "computing" message).<br>
      * You need to call {@link #done()} when computation is done.
-     * 
+     *
      * @see #done()
      */
-    public void reset()
-    {
+    public void reset() {
         histogram.reset();
         // start histogram calculation
         updating = true;
@@ -146,8 +136,7 @@ public class HistogramPanel extends BorderedPanel
      * @deprecated Use <code>getHistogram.addValue(double)</code> instead.
      */
     @Deprecated
-    public void addValue(double value)
-    {
+    public void addValue(double value) {
         histogram.addValue(value);
     }
 
@@ -155,8 +144,7 @@ public class HistogramPanel extends BorderedPanel
      * @deprecated Use <code>getHistogram.addValue(Object, boolean signed)</code> instead.
      */
     @Deprecated
-    public void addValues(Object array, boolean signed)
-    {
+    public void addValues(Object array, boolean signed) {
         histogram.addValues(array, signed);
     }
 
@@ -164,8 +152,7 @@ public class HistogramPanel extends BorderedPanel
      * @deprecated Use <code>getHistogram.addValue(byte[])</code> instead.
      */
     @Deprecated
-    public void addValues(byte[] array, boolean signed)
-    {
+    public void addValues(byte[] array, boolean signed) {
         histogram.addValues(array, signed);
     }
 
@@ -173,8 +160,7 @@ public class HistogramPanel extends BorderedPanel
      * @deprecated Use <code>getHistogram.addValue(short[])</code> instead.
      */
     @Deprecated
-    public void addValues(short[] array, boolean signed)
-    {
+    public void addValues(short[] array, boolean signed) {
         histogram.addValues(array, signed);
     }
 
@@ -182,8 +168,7 @@ public class HistogramPanel extends BorderedPanel
      * @deprecated Use <code>getHistogram.addValue(int[])</code> instead.
      */
     @Deprecated
-    public void addValues(int[] array, boolean signed)
-    {
+    public void addValues(int[] array, boolean signed) {
         histogram.addValues(array, signed);
     }
 
@@ -191,8 +176,7 @@ public class HistogramPanel extends BorderedPanel
      * @deprecated Use <code>getHistogram.addValue(long[])</code> instead.
      */
     @Deprecated
-    public void addValues(long[] array, boolean signed)
-    {
+    public void addValues(long[] array, boolean signed) {
         histogram.addValues(array, signed);
     }
 
@@ -200,8 +184,7 @@ public class HistogramPanel extends BorderedPanel
      * @deprecated Use <code>getHistogram.addValue(float[])</code> instead.
      */
     @Deprecated
-    public void addValues(float[] array)
-    {
+    public void addValues(float[] array) {
         histogram.addValues(array);
     }
 
@@ -209,18 +192,16 @@ public class HistogramPanel extends BorderedPanel
      * @deprecated Use <code>getHistogram.addValue(double[])</code> instead.
      */
     @Deprecated
-    public void addValues(double[] array)
-    {
+    public void addValues(double[] array) {
         histogram.addValues(array);
     }
 
     /**
      * Returns the adjusted size (linear / log normalized) of the specified bin.
-     * 
+     *
      * @see #getBinSize(int)
      */
-    public double getAdjustedBinSize(int index)
-    {
+    public double getAdjustedBinSize(int index) {
         // cache
         final double[] data = histogramData;
 
@@ -232,43 +213,38 @@ public class HistogramPanel extends BorderedPanel
 
     /**
      * Returns the size of the specified bin (number of element in the bin)
-     * 
+     *
      * @see icy.math.Histogram#getBinSize(int)
      */
-    public int getBinSize(int index)
-    {
+    public int getBinSize(int index) {
         return histogram.getBinSize(index);
     }
 
     /**
      * @see icy.math.Histogram#getBinNumber()
      */
-    public int getBinNumber()
-    {
+    public int getBinNumber() {
         return histogram.getBinNumber();
     }
 
     /**
      * @see icy.math.Histogram#getBinWidth()
      */
-    public double getBinWidth()
-    {
+    public double getBinWidth() {
         return histogram.getBinWidth();
     }
 
     /**
      * @see icy.math.Histogram#getBins()
      */
-    public int[] getBins()
-    {
+    public int[] getBins() {
         return histogram.getBins();
     }
 
     /**
      * Invoke this method when the histogram calculation has been completed to refresh data cache.
      */
-    public void done()
-    {
+    public void done() {
         refreshDataCache();
 
         // end histogram calculation
@@ -278,16 +254,14 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Returns the minimum allowed value of the histogram.
      */
-    public double getMinValue()
-    {
+    public double getMinValue() {
         return histogram.getMinValue();
     }
 
     /**
      * Returns the maximum allowed value of the histogram.
      */
-    public double getMaxValue()
-    {
+    public double getMaxValue() {
         return histogram.getMaxValue();
     }
 
@@ -295,71 +269,63 @@ public class HistogramPanel extends BorderedPanel
      * Returns true if the input value are integer values only.<br>
      * This is used to adapt the bin number of histogram..
      */
-    public boolean isIntegerType()
-    {
+    public boolean isIntegerType() {
         return histogram.isIntegerType();
     }
 
     /**
      * Returns true if histogram is displayed with LOG scaling
      */
-    public boolean getLogScaling()
-    {
+    public boolean getLogScaling() {
         return logScaling;
     }
 
     /**
      * Returns true if histogram use LAF color scheme.
-     * 
+     *
      * @see #getColor()
      * @see #getBackgroundColor()
      */
-    public boolean getUseLAFColors()
-    {
+    public boolean getUseLAFColors() {
         return useLAFColors;
     }
 
     /**
      * Returns the drawing color
      */
-    public Color getColor()
-    {
+    public Color getColor() {
         return color;
     }
 
     /**
      * Returns the background color
      */
-    public Color getBackgroundColor()
-    {
+    public Color getBackgroundColor() {
         return color;
     }
 
     /**
      * Get histogram object
      */
-    public Histogram getHistogram()
-    {
+    public Histogram getHistogram() {
         return histogram;
     }
 
     /**
      * Get computed histogram data
      */
-    public double[] getHistogramData()
-    {
+    public double[] getHistogramData() {
         return histogramData;
     }
 
     /**
      * Set minimum, maximum and integer values at once
      */
-    public void setMinMaxIntValues(double min, double max, boolean intType)
-    {
+    public void setMinMaxIntValues(double min, double max, boolean intType) {
         // test with cached value first
         if ((minValue != min) || (maxValue != max) || (integer != intType))
             buildHistogram(min, max, intType);
-        // then test with uncached value (histo being updated)
+            // then test with uncached value (histo being updated)
         else if ((histogram.getMinValue() != min) || (histogram.getMaxValue() != max)
                 || (histogram.isIntegerType() != intType))
             buildHistogram(min, max, intType);
@@ -368,10 +334,8 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Set to true to display histogram with LOG scaling (else it uses linear scaling).
      */
-    public void setLogScaling(boolean value)
-    {
-        if (logScaling != value)
-        {
+    public void setLogScaling(boolean value) {
+        if (logScaling != value) {
             logScaling = value;
             refreshDataCache();
         }
@@ -379,14 +343,12 @@ public class HistogramPanel extends BorderedPanel
 
     /**
      * Set to true to use LAF color scheme.
-     * 
+     *
      * @see #setColor(Color)
      * @see #setBackgroundColor(Color)
      */
-    public void setUseLAFColors(boolean value)
-    {
-        if (useLAFColors != value)
-        {
+    public void setUseLAFColors(boolean value) {
+        if (useLAFColors != value) {
             useLAFColors = value;
             repaint();
         }
@@ -395,10 +357,8 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Set the drawing color
      */
-    public void setColor(Color value)
-    {
-        if (!color.equals(value))
-        {
+    public void setColor(Color value) {
+        if (!color.equals(value)) {
             color = value;
             if (!useLAFColors)
                 repaint();
@@ -408,25 +368,25 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Set the background color
      */
-    public void setBackgroundColor(Color value)
-    {
-        if (!backgroundColor.equals(value))
-        {
+    public void setBackgroundColor(Color value) {
+        if (!backgroundColor.equals(value)) {
             backgroundColor = value;
             if (!useLAFColors)
                 repaint();
         }
     }
 
-    protected void checkHisto()
-    {
+    protected void checkHisto() {
         // create temporary histogram
-        final Histogram newHisto = new Histogram(histogram.getMinValue(), histogram.getMaxValue(), Math.max(
-                getClientWidth(), MIN_SIZE), histogram.isIntegerType());
+        final Histogram newHisto = new Histogram(
+                histogram.getMinValue(),
+                histogram.getMaxValue(),
+                Math.max(getClientWidth(), MIN_SIZE),
+                histogram.isIntegerType()
+        );
 
         // histogram properties changed ?
-        if (!hasSameProperties(newHisto))
-        {
+        if (!hasSameProperties(newHisto)) {
             // set new histogram
             histogram = newHisto;
             // notify listeners so they can fill it
@@ -434,14 +394,17 @@ public class HistogramPanel extends BorderedPanel
         }
     }
 
-    protected void buildHistogram(double min, double max, boolean intType)
-    {
+    protected void buildHistogram(double min, double max, boolean intType) {
         // create temporary histogram
-        final Histogram newHisto = new Histogram(min, max, Math.max(getClientWidth(), MIN_SIZE), intType);
+        final Histogram newHisto = new Histogram(
+                min,
+                max,
+                Math.max(getClientWidth(), MIN_SIZE),
+                intType
+        );
 
         // histogram properties changed ?
-        if (!hasSameProperties(newHisto))
-        {
+        if (!hasSameProperties(newHisto)) {
             // set new histogram
             histogram = newHisto;
             // notify listeners so they can fill it
@@ -452,17 +415,17 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Return true if specified histogram has same bounds and number of bin than current one
      */
-    protected boolean hasSameProperties(Histogram h)
-    {
-        return (histogram.getBinNumber() == h.getBinNumber()) && (histogram.getMinValue() == h.getMinValue())
-                && (histogram.getMaxValue() == h.getMaxValue()) && (histogram.isIntegerType() == h.isIntegerType());
+    protected boolean hasSameProperties(Histogram h) {
+        return (histogram.getBinNumber() == h.getBinNumber()) &&
+                (histogram.getMinValue() == h.getMinValue()) &&
+                (histogram.getMaxValue() == h.getMaxValue()) &&
+                (histogram.isIntegerType() == h.isIntegerType());
     }
 
     /**
      * update histogram data cache
      */
-    protected void refreshDataCache()
-    {
+    protected void refreshDataCache() {
         // get histogram data
         final double[] newHistogramData = Array1DUtil.intArrayToDoubleArray(histogram.getBins(), false);
 
@@ -488,8 +451,7 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Returns the ratio to convert a data value to corresponding pixel X position
      */
-    protected double getDataToPixelRatio()
-    {
+    protected double getDataToPixelRatio() {
         final double pixelRange = Math.max(getClientWidth() - 1, 32);
         final double dataRange = maxValue - minValue;
 
@@ -502,8 +464,7 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Returns the ratio to convert a pixel X position to corresponding data value
      */
-    protected double getPixelToDataRatio()
-    {
+    protected double getPixelToDataRatio() {
         final double pixelRange = Math.max(getClientWidth() - 1, 32);
         final double dataRange = maxValue - minValue;
 
@@ -516,8 +477,7 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Returns the ratio to convert a pixel X position to corresponding histo bin
      */
-    protected double getPixelToHistoRatio()
-    {
+    protected double getPixelToHistoRatio() {
         final double histogramRange = histogramData.length - 1;
         final double pixelRange = Math.max(getClientWidth() - 1, 32);
 
@@ -530,16 +490,14 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Convert a data value to the corresponding pixel position
      */
-    public int dataToPixel(double value)
-    {
+    public int dataToPixel(double value) {
         return (int) Math.round(((value - minValue) * getDataToPixelRatio())) + getClientX();
     }
 
     /**
      * Convert a pixel position to corresponding data value
      */
-    public double pixelToData(int value)
-    {
+    public double pixelToData(int value) {
         final double data = ((value - getClientX()) * getPixelToDataRatio()) + minValue;
         return Math.min(Math.max(data, minValue), maxValue);
     }
@@ -547,8 +505,7 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Convert a pixel position to corresponding bin index
      */
-    public int pixelToBin(int value)
-    {
+    public int pixelToBin(int value) {
         final int index = (int) Math.round((value - getClientX()) * getPixelToHistoRatio());
         return Math.min(Math.max(index, 0), histogramData.length - 1);
     }
@@ -556,35 +513,29 @@ public class HistogramPanel extends BorderedPanel
     /**
      * Notify all listeners that histogram need to be recomputed
      */
-    protected void fireHistogramNeedRefresh()
-    {
+    protected void fireHistogramNeedRefresh() {
         for (HistogramPanelListener l : listenerList.getListeners(HistogramPanelListener.class))
             l.histogramNeedRefresh(this);
     }
 
-    public void addListener(HistogramPanelListener l)
-    {
+    public void addListener(HistogramPanelListener l) {
         listenerList.add(HistogramPanelListener.class, l);
     }
 
-    public void removeListener(HistogramPanelListener l)
-    {
+    public void removeListener(HistogramPanelListener l) {
         listenerList.remove(HistogramPanelListener.class, l);
     }
 
     @Override
-    protected void paintComponent(Graphics g)
-    {
+    protected void paintComponent(Graphics g) {
         final Color fc;
         final Color bc;
 
-        if (useLAFColors)
-        {
+        if (useLAFColors) {
             fc = getForeground();
             bc = getBackground();
         }
-        else
-        {
+        else {
             fc = color;
             bc = backgroundColor;
         }
@@ -603,16 +554,14 @@ public class HistogramPanel extends BorderedPanel
         final double[] data = histogramData;
 
         // not yet computed
-        if (data.length != 0)
-        {
+        if (data.length != 0) {
             final int histoRange = data.length - 1;
             final int hRange = getClientHeight() - 1;
             final int bottom = getClientY() + hRange;
             final int l = getClientX();
             final int r = l + getClientWidth();
 
-            for (int i = l; i < r; i++)
-            {
+            for (int i = l; i < r; i++) {
                 int index = (int) Math.round((i - l) * ratio);
 
                 if (index < 0)
@@ -624,8 +573,7 @@ public class HistogramPanel extends BorderedPanel
             }
         }
 
-        if ((data.length == 0) || updating)
-        {
+        if ((data.length == 0) || updating) {
             final int x = (getWidth() / 2) - 60;
             final int y = (getHeight() / 2) - 20;
 
