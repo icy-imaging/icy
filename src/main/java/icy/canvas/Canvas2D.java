@@ -19,7 +19,7 @@
 package icy.canvas;
 
 import icy.common.listener.ROIToolChangeListener;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.menu.ApplicationMenuROI;
 import icy.gui.util.GuiUtil;
 import icy.gui.util.LookAndFeelUtil;
@@ -107,7 +107,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     /**
      * GUI &amp; setting
      */
-    IcyButtonNew zoomFitCanvasButton;
+    IcyButton zoomFitCanvasButton;
 
     // TODO: 23/01/2023 Remove this (unused) ?
     //Color bgColor;
@@ -257,7 +257,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         panel.add(canvasMap, BorderLayout.CENTER);
 
         // fit canvas toggle
-        zoomFitCanvasButton = new IcyButtonNew(GoogleMaterialDesignIcons.ZOOM_OUT_MAP);
+        zoomFitCanvasButton = new IcyButton(GoogleMaterialDesignIcons.ZOOM_OUT_MAP);
         //zoomFitCanvasButton.setSelected(preferences.getBoolean(ID_FIT_CANVAS, false));
         zoomFitCanvasButton.setFocusable(false);
         //zoomFitCanvasButton.setToolTipText("Keep image fitting to window size");

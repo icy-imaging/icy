@@ -19,7 +19,7 @@
 package icy.gui.inspector;
 
 import icy.gui.component.ImageComponent;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.main.GlobalPluginListener;
 import icy.gui.util.ComponentUtil;
 import icy.main.Icy;
@@ -80,7 +80,7 @@ public class PluginsPanel extends JPanel implements GlobalPluginListener, Runnab
             final JLabel label = new JLabel(descriptor.getName());
             label.setToolTipText(descriptor.getName() + " " + descriptor.getVersion());
 
-            final IcyButtonNew killButton = new IcyButtonNew(GoogleMaterialDesignIcons.CLOSE);
+            final IcyButton killButton = new IcyButton(GoogleMaterialDesignIcons.CLOSE);
             killButton.setFlat(true);
             killButton.setEnabled(false);
             killButton.setToolTipText("kill plugin");

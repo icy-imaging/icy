@@ -83,7 +83,7 @@ public class ImageJTask extends RibbonTask implements PropertyChangeListener
             // home directory
             SystemUtil.setProperty("plugins.dir", "ij");
             // background color
-            ImageJ.backgroundColor = LookAndFeelUtil.getBackground(this);
+            ImageJ.backgroundColor = this.getBackground();
 
             try
             {

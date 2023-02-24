@@ -57,7 +57,7 @@ import javax.swing.*;
 import icy.canvas.Canvas2DOLD.CanvasView.ImageCache.ImageCacheTile;
 import icy.canvas.CanvasLayerEvent.LayersEventType;
 import icy.canvas.IcyCanvasEvent.IcyCanvasEventType;
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyToggleButton;
 import icy.gui.menu.ROITask;
 import icy.gui.menu.ROITask.ROITaskListener;
 import icy.gui.util.GuiUtil;
@@ -1901,7 +1901,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener {
     /**
      * GUI &amp; setting
      */
-    IcyToggleButtonNew zoomFitCanvasButton;
+    IcyToggleButton zoomFitCanvasButton;
     Color bgColor;
 
     /**

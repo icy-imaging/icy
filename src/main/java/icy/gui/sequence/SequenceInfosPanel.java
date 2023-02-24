@@ -30,7 +30,7 @@ import java.util.Date;
 import javax.swing.*;
 
 import icy.file.FileUtil;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.frame.GenericFrame;
 import icy.gui.main.ActiveSequenceListener;
 import icy.main.Icy;
@@ -63,9 +63,9 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
     private JLabel channelLabel;
 
     //private IcyButton editBtn;
-    private IcyButtonNew editBtn;
+    private IcyButton editBtn;
     //private IcyButton detailBtn;
-    private IcyButtonNew detailBtn;
+    private IcyButton detailBtn;
 
     private JLabel pathLabel;
     JTextField pathField;
@@ -385,7 +385,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_resZLabel.gridy = 6;
         add(resZLabel, gbc_resZLabel);
 
-        editBtn = new IcyButtonNew("Edit", GoogleMaterialDesignIcons.EDIT);
+        editBtn = new IcyButton("Edit", GoogleMaterialDesignIcons.EDIT);
         editBtn.setToolTipText("Edit sequence properties");
 
         GridBagConstraints gbc_editBtn = new GridBagConstraints();
@@ -396,7 +396,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_editBtn.gridy = 7;
         add(editBtn, gbc_editBtn);
 
-        detailBtn = new IcyButtonNew("Show metadata", GoogleMaterialDesignIcons.DESCRIPTION);
+        detailBtn = new IcyButton("Show metadata", GoogleMaterialDesignIcons.DESCRIPTION);
         detailBtn.setText("Metadata");
         detailBtn.setToolTipText("Show all associated metadata informations");
 

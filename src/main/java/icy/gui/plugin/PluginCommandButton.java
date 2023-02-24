@@ -36,6 +36,7 @@ import org.pushingpixels.flamingo.api.common.AbstractCommandButton;
  * 
  * @author Stephane
  */
+@Deprecated
 public class PluginCommandButton
 {
     /**

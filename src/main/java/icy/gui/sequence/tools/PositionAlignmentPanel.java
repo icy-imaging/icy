@@ -18,7 +18,7 @@
  */
 package icy.gui.sequence.tools;
 
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyToggleButton;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import java.awt.GridBagConstraints;
@@ -37,7 +37,7 @@ import javax.swing.event.EventListenerList;
  * @author Thomas MUSSET
  */
 public class PositionAlignmentPanel extends JPanel {
-    public static class PositionBox extends IcyToggleButtonNew {
+    public static class PositionBox extends IcyToggleButton {
         public PositionBox() {
             super(GoogleMaterialDesignIcons.RADIO_BUTTON_UNCHECKED, GoogleMaterialDesignIcons.RADIO_BUTTON_CHECKED);
 

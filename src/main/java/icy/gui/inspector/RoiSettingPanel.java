@@ -39,7 +39,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import icy.gui.component.AbstractRoisPanel.BaseColumnInfo;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.preferences.XMLPreferences;
 import icy.roi.ROIDescriptor;
 import icy.roi.ROIUtil;
@@ -59,10 +59,10 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
     private JCheckBox chkHeaderSelectAllToExport;
     private JToggleButton btnHeaderColumnsToDisplay;
     private JToggleButton btnHeaderColumnsToExport;
-    private IcyButtonNew btnUpView;
-    private IcyButtonNew btnDownView;
-    private IcyButtonNew btnUpExport;
-    private IcyButtonNew btnDownExport;
+    private IcyButton btnUpView;
+    private IcyButton btnDownView;
+    private IcyButton btnUpExport;
+    private IcyButton btnDownExport;
 
     // internals
     List<BaseColumnInfo> idsView;
@@ -317,7 +317,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         gbc_btnHeaderColumnsToDisplay.gridy = 0;
         panelViewTop.add(btnHeaderColumnsToDisplay, gbc_btnHeaderColumnsToDisplay);
 
-        btnUpView = new IcyButtonNew(GoogleMaterialDesignIcons.KEYBOARD_ARROW_UP);
+        btnUpView = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_UP);
         btnUpView.setToolTipText("Change order of selected column(s)");
         GridBagConstraints gbc_btnUpView = new GridBagConstraints();
         gbc_btnUpView.insets = new Insets(0, 0, 0, 5);
@@ -325,7 +325,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         gbc_btnUpView.gridy = 0;
         panelViewTop.add(btnUpView, gbc_btnUpView);
 
-        btnDownView = new IcyButtonNew(GoogleMaterialDesignIcons.KEYBOARD_ARROW_DOWN);
+        btnDownView = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_DOWN);
         btnDownView.setToolTipText("Change order of selected column(s)");
         GridBagConstraints gbc_btnDownView = new GridBagConstraints();
         gbc_btnDownView.gridx = 3;
@@ -369,7 +369,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         gbc_btnHeaderColumnsToExport.gridy = 0;
         panelExportTop.add(btnHeaderColumnsToExport, gbc_btnHeaderColumnsToExport);
 
-        btnUpExport = new IcyButtonNew(GoogleMaterialDesignIcons.KEYBOARD_ARROW_UP);
+        btnUpExport = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_UP);
         btnUpExport.setToolTipText("Change order of selected column(s)");
         GridBagConstraints gbc_btnUpExport = new GridBagConstraints();
         gbc_btnUpExport.insets = new Insets(0, 0, 0, 5);
@@ -377,7 +377,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         gbc_btnUpExport.gridy = 0;
         panelExportTop.add(btnUpExport, gbc_btnUpExport);
 
-        btnDownExport = new IcyButtonNew(GoogleMaterialDesignIcons.KEYBOARD_ARROW_DOWN);
+        btnDownExport = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_DOWN);
         btnDownExport.setToolTipText("Change order of selected column(s)");
         GridBagConstraints gbc_btnDownExport = new GridBagConstraints();
         gbc_btnDownExport.gridx = 3;

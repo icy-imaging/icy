@@ -22,7 +22,6 @@ import icy.action.IcyAbstractAction;
 import icy.common.MenuCallback;
 import icy.gui.util.ComponentUtil;
 import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
 import icy.system.SystemUtil;
 import icy.system.thread.ThreadUtil;
 
@@ -39,6 +38,7 @@ import javax.swing.JRootPane;
 
 /**
  * @author Stephane
+ * @author Thomas MUSSET
  */
 public class IcyExternalFrame extends JFrame {
     private class CloseAction extends IcyAbstractAction {
@@ -46,7 +46,6 @@ public class IcyExternalFrame extends JFrame {
             super(
                     "Close",
                     //new IcyIcon(ResourceUtil.ICON_CLOSE, 20),
-                    (IcyIcon) null,
                     "Close window",
                     KeyEvent.VK_F4,
                     SystemUtil

@@ -18,7 +18,7 @@
  */
 package icy.gui.component;
 
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyToggleButton;
 import icy.gui.util.ComponentUtil;
 import icy.gui.util.LookAndFeelUtil;
 import icy.resource.icon.IcyIcon;
@@ -37,7 +37,7 @@ import javax.swing.*;
  * @author Thomas MUSSET
  */
 public class PopupPanel extends JPanel {
-    private class PopupTitlePanel extends IcyToggleButtonNew {
+    private class PopupTitlePanel extends IcyToggleButton {
         @Deprecated
         public PopupTitlePanel(String text, Image image) {
             super(text, new IcyIcon(image, LookAndFeelUtil.getDefaultIconSizeAsInt()));

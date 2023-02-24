@@ -30,8 +30,8 @@ import icy.canvas.IcyCanvasListener;
 import icy.common.listener.ProgressListener;
 import icy.file.FileUtil;
 import icy.file.SequenceFileGroupImporter;
-import icy.gui.component.button.IcyButtonNew;
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyButton;
+import icy.gui.component.button.IcyToggleButton;
 import icy.gui.component.renderer.LabelComboBoxRenderer;
 import icy.gui.dialog.ConfirmDialog;
 import icy.gui.dialog.MessageDialog;
@@ -155,11 +155,11 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     JComboBox<String> canvasComboBox;
     JComboBox<JLabel> lockComboBox;
     JToggleButton layersEnabledButton;
-    IcyButtonNew screenShotButton;
-    IcyButtonNew screenShotAlternateButton;
-    IcyButtonNew duplicateButton;
-    IcyToggleButtonNew switchStateButton;
-    IcyToggleButtonNew virtualButton;
+    IcyButton screenShotButton;
+    IcyButton screenShotAlternateButton;
+    IcyButton duplicateButton;
+    IcyToggleButton switchStateButton;
+    IcyToggleButton virtualButton;
 
     /**
      * internals
@@ -531,35 +531,35 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         buildCanvasCombo();
 
         // build buttons
-        layersEnabledButton = new IcyToggleButtonNew(GoogleMaterialDesignIcons.LAYERS_CLEAR, GoogleMaterialDesignIcons.LAYERS);
+        layersEnabledButton = new IcyToggleButton(GoogleMaterialDesignIcons.LAYERS_CLEAR, GoogleMaterialDesignIcons.LAYERS);
         layersEnabledButton.addActionListener(new ToggleLayersAction(true));
         layersEnabledButton.setHideActionText(true);
         layersEnabledButton.setFocusable(false);
         layersEnabledButton.setSelected(true);
 
-        screenShotButton = new IcyButtonNew(GoogleMaterialDesignIcons.CAMERA_ALT);
+        screenShotButton = new IcyButton(GoogleMaterialDesignIcons.CAMERA_ALT);
         screenShotButton.addActionListener(CanvasActions.screenShotAction);
         screenShotButton.setFocusable(false);
         screenShotButton.setHideActionText(true);
 
-        screenShotAlternateButton = new IcyButtonNew(GoogleMaterialDesignIcons.ASPECT_RATIO);
+        screenShotAlternateButton = new IcyButton(GoogleMaterialDesignIcons.ASPECT_RATIO);
         screenShotAlternateButton.addActionListener(CanvasActions.screenShotAlternateAction);
         screenShotAlternateButton.setFocusable(false);
         screenShotAlternateButton.setHideActionText(true);
 
-        duplicateButton = new IcyButtonNew(GoogleMaterialDesignIcons.CONTENT_COPY);
+        duplicateButton = new IcyButton(GoogleMaterialDesignIcons.CONTENT_COPY);
         duplicateButton.addActionListener(ViewerActions.duplicateAction);
         duplicateButton.setFocusable(false);
         duplicateButton.setHideActionText(true);
         // duplicateButton.setToolTipText("Duplicate view (no data duplication)");
 
-        switchStateButton = new IcyToggleButtonNew(GoogleMaterialDesignIcons.OPEN_IN_NEW);
+        switchStateButton = new IcyToggleButton(GoogleMaterialDesignIcons.OPEN_IN_NEW);
         switchStateButton.addActionListener(getSwitchStateAction());
         switchStateButton.setSelected(isExternalized());
         switchStateButton.setFocusable(false);
         switchStateButton.setHideActionText(true);
 
-        virtualButton = new IcyToggleButtonNew(GoogleMaterialDesignIcons.FLASH_OFF, GoogleMaterialDesignIcons.FLASH_ON);
+        virtualButton = new IcyToggleButton(GoogleMaterialDesignIcons.FLASH_OFF, GoogleMaterialDesignIcons.FLASH_ON);
         virtualButton.addActionListener(new ToggleVirtualSequenceAction(false));
         virtualButton.setFocusable(false);
         virtualButton.setHideActionText(true);

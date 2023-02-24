@@ -1692,11 +1692,11 @@ public final class RoiActions {
                         final List<ROI> selectedROIs = sequence.getSelectedROIs();
                         final List<ROI> newROIs = new ArrayList<>();
 
-                        for (ROI roi : newROIs)
+                        for (ROI roi : selectedROIs)
                             newROIs.add(ROIUtil.getDownscaled(roi, false));
 
                         if (!newROIs.isEmpty()) {
-                            for (ROI roi : selectedROIs)
+                            for (ROI roi : newROIs)
                                 sequence.addROI(roi);
 
                             sequence.addUndoableEdit(new ROIAddsSequenceEdit(sequence, newROIs,

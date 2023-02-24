@@ -19,29 +19,51 @@
 package icy.gui.component.button;
 
 import icy.action.IcyAbstractAction;
-import icy.gui.util.ComponentUtil;
+import icy.gui.util.LookAndFeelUtil;
 import icy.resource.icon.IcyIcon;
-import icy.util.StringUtil;
-
-import java.awt.Dimension;
-import java.awt.Image;
+import icy.resource.icon.IcyIconFont;
+import jiconfont.IconCode;
 
 import javax.swing.*;
 
 /**
  * @author Stephane
- * @deprecated Use {@link IcyButtonNew} instead
+ * @author Thomas MUSSET
  */
-@Deprecated
 public class IcyButton extends JButton {
     private boolean flat;
 
-    /**
-     * Create a button with specified text and icon
-     */
-    public IcyButton(String text, IcyIcon icon) {
-        super(text, icon);
+    public IcyButton(final String text, final IconCode icon, final float size) {
+        super(text);
 
+        setIcon(new IcyIconFont(icon, size, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT));
+        setDisabledIcon(new IcyIconFont(icon, size, LookAndFeelUtil.ColorType.UI_BUTTON_DISABLED));
+        setSelectedIcon(new IcyIconFont(icon, size, LookAndFeelUtil.ColorType.UI_BUTTON_SELECTED));
+
+        flat = false;
+        init();
+    }
+
+    public IcyButton(final String text, final IconCode icon) {
+        this(text, icon, LookAndFeelUtil.getDefaultIconSizeAsFloat());
+    }
+
+    public IcyButton(final IconCode icon, final float size) {
+        this(null, icon, size);
+    }
+
+    /**
+     * Create a button with specified icon.
+     */
+    public IcyButton(final IconCode icon) {
+        this(null, icon);
+    }
+
+    /**
+     * Create a button with specified text and classic icon
+     */
+    public IcyButton(final String text, final Icon icon) {
+        super(text, icon);
         flat = false;
         init();
     }
@@ -49,98 +71,36 @@ public class IcyButton extends JButton {
     /**
      * Create a button with specified icon.
      */
-    public IcyButton(IcyIcon icon) {
-        this(null, icon);
+    public IcyButton(final Icon icon) {
+        super(icon);
+        flat = false;
+        init();
     }
 
     /**
      * Create a button with specified text.
      */
-    public IcyButton(String text) {
-        this(text, (IcyIcon) null);
+    public IcyButton(final String text) {
+        super(text);
+        flat = false;
+        init();
     }
 
     /**
      * Create a button with specified action.
      */
-    public IcyButton(IcyAbstractAction action) {
+    @Deprecated
+    public IcyButton(final IcyAbstractAction action) {
         super(action);
-
         flat = false;
         init();
-    }
-
-    /**
-     * @deprecated User {@link #IcyButton(IcyAbstractAction)} instead.
-     */
-    @Deprecated
-    public IcyButton(icy.common.IcyAbstractAction action) {
-        super(action);
-
-        flat = false;
-        init();
-    }
-
-    /**
-     * @deprecated Use {@link #IcyButton(String, IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyButton(String text, Image iconImage, int iconSize) {
-        this(text, new IcyIcon(iconImage, iconSize));
-    }
-
-    /**
-     * @deprecated Use {@link #IcyButton(String, IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyButton(String text, Image iconImage) {
-        this(text, iconImage, IcyIcon.DEFAULT_SIZE);
-    }
-
-    /**
-     * @deprecated Use {@link #IcyButton(IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyButton(Image iconImage, int iconSize) {
-        this(null, iconImage, iconSize);
-    }
-
-    /**
-     * @deprecated Use {@link #IcyButton(IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyButton(Image iconImage) {
-        this(null, iconImage);
-    }
-
-    /**
-     * @deprecated Use {@link #IcyButton(String, IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyButton(String text, String iconName, int iconSize) {
-        this(text, new IcyIcon(iconName, iconSize));
-    }
-
-    /**
-     * @deprecated Use {@link #IcyButton(String, IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyButton(String text, String iconName) {
-        this(text, iconName, IcyIcon.DEFAULT_SIZE);
     }
 
     private void init() {
         setHorizontalAlignment(SwingConstants.CENTER);
         setVerticalAlignment(SwingConstants.CENTER);
 
-        if (flat) {
-            setBorderPainted(false);
-            setFocusPainted(false);
-            setFocusable(false);
-        }
-
-        // manual change notify
-        updateSize();
+        setFlat(flat);
     }
 
     @Override
@@ -168,14 +128,33 @@ public class IcyButton extends JButton {
             setBorderPainted(!flat);
             setFocusPainted(!flat);
             setFocusable(!flat);
-
-            updateSize();
+            setOpaque(!flat);
+            setContentAreaFilled(!flat);
         }
+    }
+
+    public void updateIconFont() {
+        final Icon i = getIcon();
+        if (i instanceof IcyIconFont)
+            ((IcyIconFont) i).updateIcon();
+        final Icon di = getDisabledIcon();
+        if (di instanceof IcyIconFont)
+            ((IcyIconFont) di).updateIcon();
+        final Icon si = getSelectedIcon();
+        if (si instanceof IcyIconFont)
+            ((IcyIconFont) si).updateIcon();
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        updateIconFont();
     }
 
     /**
      * Return the icon as IcyIcon
      */
+    @Deprecated
     public IcyIcon getIcyIcon() {
         final Icon icon = getIcon();
 
@@ -188,6 +167,7 @@ public class IcyButton extends JButton {
     /**
      * @return the icon name
      */
+    @Deprecated
     public String getIconName() {
         final IcyIcon icon = getIcyIcon();
 
@@ -200,18 +180,19 @@ public class IcyButton extends JButton {
     /**
      * @param iconName the iconName to set
      */
+    @Deprecated
     public void setIconName(String iconName) {
         final IcyIcon icon = getIcyIcon();
 
         if (icon != null) {
             icon.setName(iconName);
-            updateSize();
         }
     }
 
     /**
      * @return the icon size
      */
+    @Deprecated
     public int getIconSize() {
         final IcyIcon icon = getIcyIcon();
 
@@ -224,35 +205,15 @@ public class IcyButton extends JButton {
     /**
      * @param iconSize the iconSize to set
      */
+    @Deprecated
     public void setIconSize(int iconSize) {
         final IcyIcon icon = getIcyIcon();
 
         if (icon != null) {
             icon.setSize(iconSize);
-            updateSize();
         }
     }
 
-    @Override
-    public void setText(String text) {
-        super.setText(text);
-
-        updateSize();
-    }
-
-    public void updateSize() {
-        final IcyIcon icon = getIcyIcon();
-        boolean noText = StringUtil.isEmpty(getText());
-        noText |= (getAction() != null) && getHideActionText();
-
-        // adjust size to icon size if no text
-        if (flat && (icon != null) && noText) {
-            final Dimension dim = icon.getDimension();
-            dim.height += 2;
-            dim.width += 2;
-            ComponentUtil.setFixedSize(this, dim);
-        }
-    }
 
     @Override
     protected void actionPropertyChanged(Action action, String propertyName) {
@@ -262,4 +223,5 @@ public class IcyButton extends JButton {
         else
             super.actionPropertyChanged(action, propertyName);
     }
+
 }

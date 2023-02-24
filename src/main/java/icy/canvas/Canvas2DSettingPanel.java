@@ -19,7 +19,7 @@
 package icy.canvas;
 
 import icy.gui.component.button.ColorChooserButton;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.util.ComponentUtil;
 import icy.util.EventUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
@@ -52,12 +52,12 @@ public class Canvas2DSettingPanel extends JPanel {
     JComboBox<String> zoomComboBox;
     JComboBox<String> rotationComboBox;
 
-    private IcyButtonNew zoomFitImageButton;
-    private IcyButtonNew centerImageButton;
-    private IcyButtonNew zoomPlus;
-    private IcyButtonNew zoomMinus;
-    private IcyButtonNew rotateUnclock;
-    private IcyButtonNew rotateClock;
+    private IcyButton zoomFitImageButton;
+    private IcyButton centerImageButton;
+    private IcyButton zoomPlus;
+    private IcyButton zoomMinus;
+    private IcyButton rotateUnclock;
+    private IcyButton rotateClock;
     ColorChooserButton bgColorButton;
 
     public Canvas2DSettingPanel(Canvas2D cnv) {
@@ -181,7 +181,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_label_2.gridy = 0;
         panel.add(label_2, gbc_label_2);
 
-        zoomMinus = new IcyButtonNew(GoogleMaterialDesignIcons.ZOOM_OUT);
+        zoomMinus = new IcyButton(GoogleMaterialDesignIcons.ZOOM_OUT);
         zoomMinus.setToolTipText("Reduce zoom factor");
         GridBagConstraints gbc_zoomMinus_1 = new GridBagConstraints();
         gbc_zoomMinus_1.insets = new Insets(0, 0, 5, 5);
@@ -189,7 +189,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_zoomMinus_1.gridy = 0;
         panel.add(zoomMinus, gbc_zoomMinus_1);
 
-        zoomPlus = new IcyButtonNew(GoogleMaterialDesignIcons.ZOOM_IN);
+        zoomPlus = new IcyButton(GoogleMaterialDesignIcons.ZOOM_IN);
         zoomPlus.setToolTipText("Increase zoom factor");
         GridBagConstraints gbc_zoomPlus_1 = new GridBagConstraints();
         gbc_zoomPlus_1.insets = new Insets(0, 0, 5, 5);
@@ -227,7 +227,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_label_4.gridy = 1;
         panel.add(label_4, gbc_label_4);
 
-        rotateUnclock = new IcyButtonNew(GoogleMaterialDesignIcons.ROTATE_LEFT);
+        rotateUnclock = new IcyButton(GoogleMaterialDesignIcons.ROTATE_LEFT);
         rotateUnclock.setToolTipText("Rotate counter clockwise");
         GridBagConstraints gbc_rotateUnclock_1 = new GridBagConstraints();
         gbc_rotateUnclock_1.insets = new Insets(0, 0, 0, 5);
@@ -235,7 +235,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_rotateUnclock_1.gridy = 1;
         panel.add(rotateUnclock, gbc_rotateUnclock_1);
 
-        rotateClock = new IcyButtonNew(GoogleMaterialDesignIcons.ROTATE_RIGHT);
+        rotateClock = new IcyButton(GoogleMaterialDesignIcons.ROTATE_RIGHT);
         rotateClock.setToolTipText("Rotate clockwise");
         GridBagConstraints gbc_rotateClock_1 = new GridBagConstraints();
         gbc_rotateClock_1.insets = new Insets(0, 0, 0, 5);
@@ -243,7 +243,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_rotateClock_1.gridy = 1;
         panel.add(rotateClock, gbc_rotateClock_1);
 
-        zoomFitImageButton = new IcyButtonNew(GoogleMaterialDesignIcons.ZOOM_OUT_MAP);
+        zoomFitImageButton = new IcyButton(GoogleMaterialDesignIcons.ZOOM_OUT_MAP);
         zoomFitImageButton.setToolTipText("Fit window to image size");
         GridBagConstraints gbc_zoomFitImage = new GridBagConstraints();
         gbc_zoomFitImage.insets = new Insets(0, 0, 0, 5);
@@ -251,7 +251,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_zoomFitImage.gridy = 1;
         panel.add(zoomFitImageButton, gbc_zoomFitImage);
 
-        centerImageButton = new IcyButtonNew(GoogleMaterialDesignIcons.MY_LOCATION);
+        centerImageButton = new IcyButton(GoogleMaterialDesignIcons.MY_LOCATION);
         centerImageButton.setToolTipText("Center image in window");
         GridBagConstraints gbc_centerImageButton = new GridBagConstraints();
         gbc_centerImageButton.gridx = 7;

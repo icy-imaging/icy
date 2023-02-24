@@ -1,29 +1,26 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package plugins.kernel.searchprovider;
 
 import java.awt.Image;
 import java.util.List;
 
-import org.pushingpixels.flamingo.api.common.RichTooltip;
-
-import icy.gui.plugin.PluginRichToolTip;
 import icy.network.NetworkUtil;
 import icy.plugin.PluginDescriptor;
 import icy.search.SearchResult;
@@ -31,15 +28,15 @@ import icy.search.SearchResultProducer;
 import icy.search.SearchResultProducer.SearchWord;
 import icy.util.StringUtil;
 
-public abstract class PluginSearchResult extends SearchResult
-{
+/**
+ * @author Thomas MUSSET
+ */
+public abstract class PluginSearchResult extends SearchResult {
     protected final PluginDescriptor plugin;
     protected final int priority;
     protected String description;
 
-    public PluginSearchResult(SearchResultProducer provider, PluginDescriptor plugin, String text,
-            List<SearchWord> words, int priority)
-    {
+    public PluginSearchResult(final SearchResultProducer provider, final PluginDescriptor plugin, final String text, final List<SearchWord> words, final int priority) {
         super(provider);
 
         this.plugin = plugin;
@@ -47,8 +44,7 @@ public abstract class PluginSearchResult extends SearchResult
 
         description = "";
         int wi = 0;
-        while (StringUtil.isEmpty(description) && (wi < words.size()))
-        {
+        while (StringUtil.isEmpty(description) && (wi < words.size())) {
             final SearchWord sw = words.get(wi);
 
             if (!sw.reject)
@@ -58,8 +54,7 @@ public abstract class PluginSearchResult extends SearchResult
             wi++;
         }
 
-        if (!StringUtil.isEmpty(description))
-        {
+        if (!StringUtil.isEmpty(description)) {
             // remove carriage return
             description = description.replace("\n", "");
 
@@ -70,20 +65,17 @@ public abstract class PluginSearchResult extends SearchResult
         }
     }
 
-    public PluginDescriptor getPlugin()
-    {
+    public PluginDescriptor getPlugin() {
         return plugin;
     }
 
     @Override
-    public String getTitle()
-    {
+    public String getTitle() {
         return plugin.getName();
     }
 
     @Override
-    public Image getImage()
-    {
+    public Image getImage() {
         if (plugin.isIconLoaded())
             return plugin.getIconAsImage();
 
@@ -91,14 +83,12 @@ public abstract class PluginSearchResult extends SearchResult
     }
 
     @Override
-    public String getDescription()
-    {
+    public String getDescription() {
         return description;
     }
 
     @Override
-    public void executeAlternate()
-    {
+    public void executeAlternate() {
         final String url = plugin.getWeb();
 
         if (!StringUtil.isEmpty(url))
@@ -106,14 +96,7 @@ public abstract class PluginSearchResult extends SearchResult
     }
 
     @Override
-    public RichTooltip getRichToolTip()
-    {
-        return new PluginRichToolTip(plugin);
-    }
-
-    @Override
-    public int compareTo(SearchResult o)
-    {
+    public int compareTo(final SearchResult o) {
         if (o instanceof PluginSearchResult)
             return ((PluginSearchResult) o).priority - priority;
 

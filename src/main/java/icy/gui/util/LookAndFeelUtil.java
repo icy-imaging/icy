@@ -329,6 +329,7 @@ public final class LookAndFeelUtil {
     /**
      * Return the foreground color for the specified component
      */
+    @Deprecated
     public static Color getForeground(final Component c) {
         if (c != null)
             return c.getForeground();
@@ -340,13 +341,15 @@ public final class LookAndFeelUtil {
      * Paint foreground component color in 'out' image<br>
      * depending original alpha intensity from 'alphaImage'
      */
-    public static Image paintForegroundImageFromAlphaImage(Component c, Image alphaImage, Image out) {
+    @Deprecated
+    public static Image paintForegroundImageFromAlphaImage(final Component c, final Image alphaImage, final Image out) {
         return ImageUtil.paintColorImageFromAlphaImage(alphaImage, out, getForeground(c));
     }
 
     /**
      * Return the background color for the specified component
      */
+    @Deprecated
     public static Color getBackground(Component c) {
         if (c != null)
             return c.getBackground();

@@ -18,7 +18,7 @@
  */
 package icy.gui.component;
 
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import java.awt.Color;
@@ -44,7 +44,7 @@ public class CloseTabbedPane extends JTabbedPane {
     }
 
     private class CloseTabComponent extends JPanel {
-        final private IcyButtonNew closeButton;
+        final private IcyButton closeButton;
         final private JLabel label;
         final private Component sep;
 
@@ -60,7 +60,7 @@ public class CloseTabbedPane extends JTabbedPane {
 
             sep = Box.createHorizontalStrut(6);
 
-            closeButton = new IcyButtonNew(GoogleMaterialDesignIcons.DELETE);
+            closeButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
             closeButton.setFlat(true);
             // closeButton.setContentAreaFilled(false);
             closeButton.setToolTipText("close");

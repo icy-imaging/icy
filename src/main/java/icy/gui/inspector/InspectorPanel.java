@@ -27,7 +27,7 @@ import javax.swing.*;
 
 import icy.gui.component.ExtTabbedPanel;
 import icy.gui.component.ExternalizablePanel;
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyToggleButton;
 import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.main.ActiveSequenceListener;
 import icy.gui.main.ActiveViewerListener;
@@ -63,7 +63,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     final OutputConsolePanel outputConsolePanel;
     // final ChatPanel chatPanel;
 
-    final IcyToggleButtonNew virtualModeBtn;
+    final IcyToggleButton virtualModeBtn;
 
     /**
      * The width of the inner component of the inspector should not exceed 300.
@@ -85,7 +85,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
         // chatPanel = new ChatPanel();
 
         // virtual mode button (set the same size as memory monitor)
-        virtualModeBtn = new IcyToggleButtonNew(
+        virtualModeBtn = new IcyToggleButton(
                 GoogleMaterialDesignIcons.FLASH_OFF,
                 GoogleMaterialDesignIcons.FLASH_ON,
                 48f

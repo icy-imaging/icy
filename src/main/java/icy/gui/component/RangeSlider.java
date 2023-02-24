@@ -18,12 +18,8 @@
  */
 package icy.gui.component;
 
-import icy.gui.component.ui.RangeSliderUI;
-
 import javax.swing.BoundedRangeModel;
 import javax.swing.JSlider;
-
-import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 /**
  * An extension of JSlider to select a range of values using two thumb controls.
@@ -37,7 +33,7 @@ import org.pushingpixels.substance.api.SubstanceLookAndFeel;
  *
  * @author Thomas MUSSET
  */
-public class RangeSlider extends JSlider {
+public final class RangeSlider extends JSlider {
     /**
      * Creates a range slider with the specified orientation and the
      * specified minimum, maximum, initial values and extend.
@@ -133,23 +129,6 @@ public class RangeSlider extends JSlider {
     public void setFocusable(boolean focusable) {
         // not focusable
         super.setFocusable(false);
-    }
-
-    /**
-     * Overrides the superclass method to install the UI delegate to draw two
-     * thumbs.
-     */
-    @Override
-    public void updateUI() {
-        // TODO: 25/01/2023 Remove this
-        if (SubstanceLookAndFeel.isCurrentLookAndFeel()) {
-            setUI(new RangeSliderUI(this));
-            // Update UI for slider labels. This must be called after updating the
-            // UI of the slider. Refer to JSlider.updateUI().
-            updateLabelUIs();
-        }
-        else
-            super.updateUI();
     }
 
     /**

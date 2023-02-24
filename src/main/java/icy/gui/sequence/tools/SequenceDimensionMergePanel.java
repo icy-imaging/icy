@@ -18,7 +18,7 @@
  */
 package icy.gui.sequence.tools;
 
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.component.sequence.SequenceChooser;
 import icy.gui.component.sequence.SequencePreviewPanel;
 import icy.gui.dialog.MessageDialog;
@@ -83,10 +83,10 @@ public class SequenceDimensionMergePanel extends JPanel {
     }
 
     // GUI
-    protected IcyButtonNew addButton;
-    protected IcyButtonNew removeButton;
-    protected IcyButtonNew upButton;
-    protected IcyButtonNew downButton;
+    protected IcyButton addButton;
+    protected IcyButton removeButton;
+    protected IcyButton upButton;
+    protected IcyButton downButton;
     protected JList<SequenceChannelEntry> sequenceList;
     protected SequenceChooser sequenceChooser;
     protected SequencePreviewPanel sequencePreview;
@@ -224,7 +224,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_sequenceChooser.gridy = 1;
         add(sequenceChooser, gbc_sequenceChooser);
 
-        addButton = new IcyButtonNew(new IcyIcon(ResourceUtil.ICON_ROUND_PLUS)); // FIXME: 15/02/2023
+        addButton = new IcyButton(new IcyIcon(ResourceUtil.ICON_ROUND_PLUS)); // FIXME: 15/02/2023
         addButton.setToolTipText("Add selected sequence to the list.");
         addButton.setFlat(true);
         GridBagConstraints gbc_addButton = new GridBagConstraints();
@@ -259,7 +259,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         scrollPane.setViewportView(sequenceList);
         sequenceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        removeButton = new IcyButtonNew(new IcyIcon(ResourceUtil.ICON_ROUND_MINUS)); // FIXME: 15/02/2023
+        removeButton = new IcyButton(new IcyIcon(ResourceUtil.ICON_ROUND_MINUS)); // FIXME: 15/02/2023
         removeButton.setToolTipText("Remove selected sequence from the list.");
         removeButton.setFlat(true);
         GridBagConstraints gbc_removeButton = new GridBagConstraints();
@@ -278,7 +278,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_bottomArrowLabel.gridy = 3;
         add(bottomArrowLabel, gbc_bottomArrowLabel);
 
-        upButton = new IcyButtonNew(GoogleMaterialDesignIcons.KEYBOARD_ARROW_UP);
+        upButton = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_UP);
         upButton.setToolTipText("Move up selected sequence.");
         upButton.setFlat(true);
         GridBagConstraints gbc_upButton = new GridBagConstraints();
@@ -288,7 +288,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_upButton.gridy = 3;
         add(upButton, gbc_upButton);
 
-        downButton = new IcyButtonNew(GoogleMaterialDesignIcons.KEYBOARD_ARROW_DOWN);
+        downButton = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_DOWN);
         downButton.setToolTipText("Move down selected sequence.");
         downButton.setFlat(true);
         GridBagConstraints gbc_downButton = new GridBagConstraints();

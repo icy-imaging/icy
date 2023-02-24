@@ -20,8 +20,8 @@ package icy.gui.system;
 
 import icy.file.FileUtil;
 import icy.gui.component.ExternalizablePanel;
-import icy.gui.component.button.IcyButtonNew;
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyButton;
+import icy.gui.component.button.IcyToggleButton;
 import icy.gui.frame.progress.ProgressFrame;
 import icy.gui.util.GuiUtil;
 import icy.preferences.GeneralPreferences;
@@ -99,11 +99,11 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
 
     final protected JSpinner logMaxLineField;
     final protected JTextField logMaxLineTextField;
-    final public IcyButtonNew clearLogButton;
-    final public IcyButtonNew copyLogButton;
-    final public IcyButtonNew reportLogButton;
-    final public IcyToggleButtonNew scrollLockButton;
-    final public IcyToggleButtonNew fileLogButton;
+    final public IcyButton clearLogButton;
+    final public IcyButton copyLogButton;
+    final public IcyButton reportLogButton;
+    final public IcyToggleButton scrollLockButton;
+    final public IcyToggleButton fileLogButton;
     final public JPanel bottomPanel;
 
     int nbUpdate;
@@ -129,11 +129,11 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
 
         logMaxLineField = new JSpinner(new SpinnerNumberModel(GeneralPreferences.getOutputLogSize(), 100, 1000000, 100));
         logMaxLineTextField = ((JSpinner.DefaultEditor) logMaxLineField.getEditor()).getTextField();
-        clearLogButton = new IcyButtonNew(GoogleMaterialDesignIcons.DELETE);
-        copyLogButton = new IcyButtonNew(GoogleMaterialDesignIcons.CONTENT_COPY);
-        reportLogButton = new IcyButtonNew(GoogleMaterialDesignIcons.BUG_REPORT);
-        scrollLockButton = new IcyToggleButtonNew(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
-        fileLogButton = new IcyToggleButtonNew(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
+        clearLogButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
+        copyLogButton = new IcyButton(GoogleMaterialDesignIcons.CONTENT_COPY);
+        reportLogButton = new IcyButton(GoogleMaterialDesignIcons.BUG_REPORT);
+        scrollLockButton = new IcyToggleButton(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
+        fileLogButton = new IcyToggleButton(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
         fileLogButton.setSelected(GeneralPreferences.getOutputLogToFile());
 
         // ComponentUtil.setFontSize(textPane, 10);

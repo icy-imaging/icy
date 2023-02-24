@@ -52,7 +52,7 @@ import icy.canvas.IcyCanvasEvent;
 import icy.canvas.IcyCanvasEvent.IcyCanvasEventType;
 import icy.canvas.Layer;
 import icy.common.exception.TooLargeArrayException;
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyToggleButton;
 import icy.gui.util.ComponentUtil;
 import icy.gui.util.GuiUtil;
 import icy.gui.viewer.Viewer;
@@ -199,12 +199,12 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      */
     protected VtkSettingPanel settingPanel;
     protected CustomVtkPanel panel3D;
-    protected IcyToggleButtonNew axesButton;
-    protected IcyToggleButtonNew boundingBoxButton;
-    protected IcyToggleButtonNew gridButton;
-    protected IcyToggleButtonNew rulerButton;
-    protected IcyToggleButtonNew rulerLabelButton;
-    protected IcyToggleButtonNew volumeSlicerButton;
+    protected IcyToggleButton axesButton;
+    protected IcyToggleButton boundingBoxButton;
+    protected IcyToggleButton gridButton;
+    protected IcyToggleButton rulerButton;
+    protected IcyToggleButton rulerLabelButton;
+    protected IcyToggleButton volumeSlicerButton;
     // protected IcyToggleButton pickOnMouseMoveButton;
 
     /**
@@ -252,22 +252,22 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         updateTNav();
 
         // create toolbar buttons
-        axesButton = new IcyToggleButtonNew(new IcyIcon(ICON_AXES3D)); // TODO: 17/02/2023 Change this icon
+        axesButton = new IcyToggleButton(new IcyIcon(ICON_AXES3D)); // TODO: 17/02/2023 Change this icon
         axesButton.setFocusable(false);
         axesButton.setToolTipText("Display 3D axis");
-        boundingBoxButton = new IcyToggleButtonNew(new IcyIcon(ICON_BOUNDINGBOX)); // TODO: 17/02/2023 Change this icon
+        boundingBoxButton = new IcyToggleButton(new IcyIcon(ICON_BOUNDINGBOX)); // TODO: 17/02/2023 Change this icon
         boundingBoxButton.setFocusable(false);
         boundingBoxButton.setToolTipText("Display bounding box");
-        gridButton = new IcyToggleButtonNew(new IcyIcon(ICON_GRID)); // TODO: 17/02/2023 Change this icon
+        gridButton = new IcyToggleButton(new IcyIcon(ICON_GRID)); // TODO: 17/02/2023 Change this icon
         gridButton.setFocusable(false);
         gridButton.setToolTipText("Display grid");
-        rulerButton = new IcyToggleButtonNew(new IcyIcon(ICON_RULER)); // TODO: 17/02/2023 Change this icon
+        rulerButton = new IcyToggleButton(new IcyIcon(ICON_RULER)); // TODO: 17/02/2023 Change this icon
         rulerButton.setFocusable(false);
         rulerButton.setToolTipText("Display rulers");
-        rulerLabelButton = new IcyToggleButtonNew(new IcyIcon(ICON_RULERLABEL)); // TODO: 17/02/2023 Change this icon
+        rulerLabelButton = new IcyToggleButton(new IcyIcon(ICON_RULERLABEL)); // TODO: 17/02/2023 Change this icon
         rulerLabelButton.setFocusable(false);
         rulerLabelButton.setToolTipText("Display rulers label");
-        volumeSlicerButton = new IcyToggleButtonNew(new IcyIcon(ICON_SLICER)); // TODO: 17/02/2023 Change this icon
+        volumeSlicerButton = new IcyToggleButton(new IcyIcon(ICON_SLICER)); // TODO: 17/02/2023 Change this icon
         volumeSlicerButton.setFocusable(false);
         volumeSlicerButton.setToolTipText("Enable volume slicer");
 

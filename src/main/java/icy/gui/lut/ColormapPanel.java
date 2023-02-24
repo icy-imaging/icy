@@ -26,7 +26,7 @@ import javax.swing.*;
 
 import icy.canvas.IcyCanvas3D;
 import icy.file.xml.XMLPersistentHelper;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.component.renderer.ColormapComboBoxRenderer;
 import icy.gui.dialog.OpenDialog;
 import icy.gui.dialog.SaveDialog;
@@ -171,7 +171,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         colormapComboBox.addActionListener(e -> setColorMap((IcyColorMap) colormapComboBox.getSelectedItem()));
 
         // load button
-        final IcyButtonNew loadButton = new IcyButtonNew(GoogleMaterialDesignIcons.FOLDER_OPEN);
+        final IcyButton loadButton = new IcyButton(GoogleMaterialDesignIcons.FOLDER_OPEN);
         loadButton.setToolTipText("Load colormap from file");
 
         // action to load colormap
@@ -187,7 +187,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         });
 
         // save button
-        final IcyButtonNew saveButton = new IcyButtonNew(GoogleMaterialDesignIcons.SAVE);
+        final IcyButton saveButton = new IcyButton(GoogleMaterialDesignIcons.SAVE);
         saveButton.setToolTipText("Save colormap to file");
 
         // action to save colormap

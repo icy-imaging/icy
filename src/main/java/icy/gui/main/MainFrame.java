@@ -23,7 +23,7 @@ import icy.action.GeneralActions;
 import icy.action.SequenceOperationActions;
 import icy.file.FileUtil;
 import icy.file.Loader;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.frame.IcyExternalFrame;
 import icy.gui.inspector.InspectorPanel;
 import icy.gui.menu.ApplicationMenu;
@@ -876,7 +876,7 @@ public class MainFrame extends JFrame {
         final JToolBar toolBar = new JToolBar("Sequence", JToolBar.HORIZONTAL);
         //panelToolbar.setPreferredSize(new Dimension(0, 30));
 
-        final IcyButtonNew buttonDuplicate = new IcyButtonNew(GoogleMaterialDesignIcons.CONTENT_COPY);
+        final IcyButton buttonDuplicate = new IcyButton(GoogleMaterialDesignIcons.CONTENT_COPY);
         buttonDuplicate.setToolTipText("Create a copy of the active sequence");
         toolBar.add(buttonDuplicate);
 

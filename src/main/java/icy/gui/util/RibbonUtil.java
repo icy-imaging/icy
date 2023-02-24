@@ -47,6 +47,7 @@ import icy.util.StringUtil;
 /**
  * @author Stephane
  */
+@Deprecated
 public class RibbonUtil
 {
     private static final int DEFAULT_HEIGHT = 48;

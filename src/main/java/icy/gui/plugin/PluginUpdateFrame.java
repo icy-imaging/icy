@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.plugin;
 
@@ -27,8 +27,6 @@ import icy.util.StringUtil;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,19 +40,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 /**
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class PluginUpdateFrame extends ActionFrame
-{
-    JList pluginList;
-    private DefaultListModel listModel;
+public class PluginUpdateFrame extends ActionFrame {
+    JList<PluginDescriptor> pluginList;
+    private final DefaultListModel<PluginDescriptor> listModel;
 
-    public PluginUpdateFrame(final List<PluginDescriptor> toInstallPlugins)
-    {
+    public PluginUpdateFrame(final List<PluginDescriptor> toInstallPlugins) {
         super("Plugin Update", true);
 
         setPreferredSize(new Dimension(640, 500));
@@ -66,39 +61,28 @@ public class PluginUpdateFrame extends ActionFrame
         changeLogArea.setEditable(false);
         final JLabel changeLogTitleLabel = GuiUtil.createBoldLabel("Change log :");
 
-        listModel = new DefaultListModel();
-        pluginList = new JList(listModel);
-        for (PluginDescriptor plugin : toInstallPlugins)
+        listModel = new DefaultListModel<>();
+        pluginList = new JList<>(listModel);
+        for (final PluginDescriptor plugin : toInstallPlugins)
             listModel.addElement(plugin);
 
         pluginList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        pluginList.getSelectionModel().addListSelectionListener(new ListSelectionListener()
-        {
-            @Override
-            public void valueChanged(ListSelectionEvent e)
-            {
-                final PluginDescriptor plugin = (PluginDescriptor) pluginList.getSelectedValue();
+        pluginList.getSelectionModel().addListSelectionListener(e -> {
+            final PluginDescriptor plugin = pluginList.getSelectedValue();
 
-                if (plugin != null)
-                {
-                    // plugin.loadChangeLog() can take lot of time, better to do that in background...
-                    ThreadUtil.bgRun(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            plugin.loadChangeLog();
-                            final String changeLog = plugin.getChangeLog();
+            if (plugin != null) {
+                // plugin.loadChangeLog() can take lot of time, better to do that in background...
+                ThreadUtil.bgRun(() -> {
+                    plugin.loadChangeLog();
+                    final String changeLog = plugin.getChangeLog();
 
-                            if (StringUtil.isEmpty(changeLog))
-                                changeLogArea.setText("no change log");
-                            else
-                                changeLogArea.setText(changeLog);
-                            changeLogArea.setCaretPosition(0);
-                            changeLogTitleLabel.setText(plugin.getName() + " change log");
-                        }
-                    });
-                }
+                    if (StringUtil.isEmpty(changeLog))
+                        changeLogArea.setText("no change log");
+                    else
+                        changeLogArea.setText(changeLog);
+                    changeLogArea.setCaretPosition(0);
+                    changeLogTitleLabel.setText(plugin.getName() + " change log");
+                });
             }
         });
         pluginList.setSelectionInterval(0, toInstallPlugins.size() - 1);
@@ -106,20 +90,12 @@ public class PluginUpdateFrame extends ActionFrame
         getOkBtn().setText("Update");
         getCancelBtn().setText("Close");
         setCloseAfterAction(false);
-        setOkAction(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                // launch update
-                doUpdate();
-            }
-        });
+        // launch update
+        setOkAction(e -> doUpdate());
 
         final JScrollPane medScrollPane = new JScrollPane(pluginList);
         final JScrollPane changeLogScrollPane = new JScrollPane(GuiUtil.createTabArea(changeLogArea, 4));
-        final JPanel bottomPanel = GuiUtil.createPageBoxPanel(Box.createVerticalStrut(4),
-                GuiUtil.createCenteredLabel(changeLogTitleLabel), Box.createVerticalStrut(4), changeLogScrollPane);
+        final JPanel bottomPanel = GuiUtil.createPageBoxPanel(Box.createVerticalStrut(4), GuiUtil.createCenteredLabel(changeLogTitleLabel), Box.createVerticalStrut(4), changeLogScrollPane);
 
         final JPanel mainPanel = getMainPanel();
 
@@ -141,14 +117,11 @@ public class PluginUpdateFrame extends ActionFrame
     /**
      * update selected plugins
      */
-    protected void doUpdate()
-    {
-        final ArrayList<PluginDescriptor> plugins = new ArrayList<PluginDescriptor>();
+    protected void doUpdate() {
 
-        for (Object value : pluginList.getSelectedValues())
-            plugins.add((PluginDescriptor) value);
+        final ArrayList<PluginDescriptor> plugins = new ArrayList<>(pluginList.getSelectedValuesList());
 
-        for (PluginDescriptor plugin : plugins)
+        for (final PluginDescriptor plugin : plugins)
             listModel.removeElement(plugin);
 
         // no more plugin to update ? close frame
@@ -156,14 +129,9 @@ public class PluginUpdateFrame extends ActionFrame
             close();
 
         // process plugins update in background
-        ThreadUtil.bgRun(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (!plugins.isEmpty())
-                    PluginUpdater.updatePlugins(plugins, true);
-            }
+        ThreadUtil.bgRun(() -> {
+            if (!plugins.isEmpty())
+                PluginUpdater.updatePlugins(plugins, true);
         });
     }
 }

@@ -22,8 +22,6 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.pushingpixels.flamingo.api.common.RichTooltip;
-
 import icy.action.ActionManager;
 import icy.action.IcyAbstractAction;
 import icy.resource.icon.IcyIcon;
@@ -128,21 +126,6 @@ public class KernelSearchResultProducer extends SearchResultProducer
         public void execute()
         {
             action.execute();
-        }
-
-        @Deprecated
-        @Override
-        public RichTooltip getRichToolTip()
-        {
-            /*final String longDesc = action.getLongDescription();
-
-            if (!StringUtil.isEmpty(longDesc))
-            {
-                if (longDesc.split("\n").length > 1)
-                    return action.getRichToolTip();
-            }*/
-
-            return null;
         }
 
         @Override

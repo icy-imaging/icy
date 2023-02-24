@@ -1,24 +1,40 @@
-/**
+/*
+ * Copyright 2010-2023 Institut Pasteur.
  *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.component.renderer;
 
 import icy.gui.component.ColorIcon;
+import icy.gui.util.LookAndFeelUtil;
 import icy.resource.ResourceUtil;
 
 import java.awt.Color;
 import java.awt.Image;
 
-import org.pushingpixels.substance.api.renderers.SubstanceDefaultTableCellRenderer.IconRenderer;
+import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  * @author Stephane
- * @deprecated Will be removed with Substance.
+ * @author Thomas MUSSET
  */
-@Deprecated
-public class ImageTableCellRenderer extends IconRenderer {
+public class ImageTableCellRenderer extends DefaultTableCellRenderer {
     final int size;
 
+    @Deprecated
     public ImageTableCellRenderer(int size) {
         super();
 
@@ -27,7 +43,10 @@ public class ImageTableCellRenderer extends IconRenderer {
     }
 
     public ImageTableCellRenderer() {
-        this(-1);
+        super();
+
+        this.size = LookAndFeelUtil.getDefaultIconSizeAsInt();
+        setIconTextGap(0);
     }
 
     @Override

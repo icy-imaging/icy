@@ -53,7 +53,7 @@ import icy.gui.component.IcyTextField.TextChangeListener;
 import icy.gui.component.SpecialValueSpinner;
 import icy.gui.component.button.ColorChooserButton;
 import icy.gui.component.button.ColorChooserButton.ColorChangeListener;
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyToggleButton;
 import icy.gui.component.model.SpecialValueSpinnerModel;
 import icy.main.Icy;
 import icy.math.MathUtil;
@@ -99,7 +99,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     ColorChooserButton colorButton;
     JSlider alphaSlider;
     JSpinner strokeSpinner;
-    IcyToggleButtonNew readOnlyToggle;
+    IcyToggleButton readOnlyToggle;
     JCheckBox displayNameCheckBox;
     JButton setAsDefaultBtn;
 
@@ -210,7 +210,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         alphaSlider.setMinimumSize(new Dimension(36, 20));
         alphaSlider.setToolTipText("ROI content opacity");
 
-        readOnlyToggle = new IcyToggleButtonNew(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
+        readOnlyToggle = new IcyToggleButton(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
         readOnlyToggle.setSelected(true);
         readOnlyToggle.setBorderPainted(false);
         readOnlyToggle.setFocusPainted(false);

@@ -42,7 +42,7 @@ import org.pushingpixels.flamingo.internal.ui.ribbon.BasicBandControlPanelUI;
 import icy.action.IcyAbstractAction;
 import icy.action.RoiActions;
 import icy.gui.component.NumberTextField;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.component.button.IcyCommandButton;
 import icy.gui.component.button.IcyCommandMenuButton;
 import icy.gui.component.button.IcyCommandToggleButton;
@@ -274,12 +274,12 @@ public class ROITask extends RibbonTask implements PluginLoaderListener {
         public static final String BAND_NAME = "Conversion";
 
         final NumberTextField radiusField;
-        final IcyButtonNew convertToEllipseButton;
-        final IcyButtonNew convertToRectangleButton;
-        final IcyButtonNew convertTo3DButton;
-        final IcyButtonNew convertTo2DButton;
-        final IcyButtonNew convertToMaskButton;
-        final IcyButtonNew convertToShapeButton;
+        final IcyButton convertToEllipseButton;
+        final IcyButton convertToRectangleButton;
+        final IcyButton convertTo3DButton;
+        final IcyButton convertTo2DButton;
+        final IcyButton convertToMaskButton;
+        final IcyButton convertToShapeButton;
 
         public ROIConversionBand() {
             super(BAND_NAME, new IcyIcon(ResourceUtil.ICON_LAYER_V2));
@@ -292,22 +292,22 @@ public class ROITask extends RibbonTask implements PluginLoaderListener {
             // addCommandButton(convertToMaskButton, RibbonElementPriority.MEDIUM);
             // addCommandButton(convertToShapeButton, RibbonElementPriority.MEDIUM);
 
-            convertTo3DButton = new IcyButtonNew(RoiActions.convertTo3DAction);
+            convertTo3DButton = new IcyButton(RoiActions.convertTo3DAction);
             convertTo3DButton.setHorizontalAlignment(SwingConstants.LEADING);
             convertTo3DButton.setFlat(true);
-            convertTo2DButton = new IcyButtonNew(RoiActions.convertTo2DAction);
+            convertTo2DButton = new IcyButton(RoiActions.convertTo2DAction);
             convertTo2DButton.setHorizontalAlignment(SwingConstants.LEADING);
             convertTo2DButton.setFlat(true);
-            convertToMaskButton = new IcyButtonNew(RoiActions.convertToMaskAction);
+            convertToMaskButton = new IcyButton(RoiActions.convertToMaskAction);
             convertToMaskButton.setHorizontalAlignment(SwingConstants.LEADING);
             convertToMaskButton.setFlat(true);
-            convertToShapeButton = new IcyButtonNew(RoiActions.convertToShapeAction);
+            convertToShapeButton = new IcyButton(RoiActions.convertToShapeAction);
             convertToShapeButton.setHorizontalAlignment(SwingConstants.LEADING);
             convertToShapeButton.setFlat(true);
-            convertToEllipseButton = new IcyButtonNew(RoiActions.convertToEllipseAction);
+            convertToEllipseButton = new IcyButton(RoiActions.convertToEllipseAction);
             convertToEllipseButton.setHorizontalAlignment(SwingConstants.LEADING);
             convertToEllipseButton.setFlat(true);
-            convertToRectangleButton = new IcyButtonNew(RoiActions.convertToRectangleAction);
+            convertToRectangleButton = new IcyButton(RoiActions.convertToRectangleAction);
             convertToRectangleButton.setHorizontalAlignment(SwingConstants.LEADING);
             convertToRectangleButton.setFlat(true);
             radiusField = new NumberTextField();
@@ -519,10 +519,10 @@ public class ROITask extends RibbonTask implements PluginLoaderListener {
     static class ROIMorphologyBand extends JRibbonBand {
         public static final String BAND_NAME = "Morphology";
 
-        final IcyButtonNew computeDistanceMapButton;
-        final IcyButtonNew computeSkeletonButton;
-        final IcyButtonNew dilateButton;
-        final IcyButtonNew erodeButton;
+        final IcyButton computeDistanceMapButton;
+        final IcyButton computeSkeletonButton;
+        final IcyButton dilateButton;
+        final IcyButton erodeButton;
         final NumberTextField distanceField;
 
         public ROIMorphologyBand() {
@@ -555,14 +555,14 @@ public class ROITask extends RibbonTask implements PluginLoaderListener {
             updateButtonsState();
         }
 
-        private IcyButtonNew createIcyButton(IcyAbstractAction action) {
-            IcyButtonNew button = new IcyButtonNew(action);
+        private IcyButton createIcyButton(IcyAbstractAction action) {
+            IcyButton button = new IcyButton(action);
             button.setHorizontalAlignment(SwingConstants.LEADING);
             button.setFlat(true);
             return button;
         }
 
-        private void addButtonComponent(IcyButtonNew button) {
+        private void addButtonComponent(IcyButton button) {
             JRibbonComponent comp;
             comp = new JRibbonComponent(button);
             comp.setResizingAware(true);
@@ -765,16 +765,16 @@ public class ROITask extends RibbonTask implements PluginLoaderListener {
 
         final NumberTextField fillValueField;
         // final IcyButton fillImage;
-        final IcyButtonNew fillInterior;
-        final IcyButtonNew fillExterior;
+        final IcyButton fillInterior;
+        final IcyButton fillExterior;
 
         public ROIFillBand() {
             super(BAND_NAME, new IcyIcon("document"));
 
-            fillInterior = new IcyButtonNew(RoiActions.fillInteriorAction);
+            fillInterior = new IcyButton(RoiActions.fillInteriorAction);
             fillInterior.setHorizontalAlignment(SwingConstants.LEADING);
             fillInterior.setFlat(true);
-            fillExterior = new IcyButtonNew(RoiActions.fillExteriorAction);
+            fillExterior = new IcyButton(RoiActions.fillExteriorAction);
             fillExterior.setHorizontalAlignment(SwingConstants.LEADING);
             fillExterior.setFlat(true);
             fillValueField = new NumberTextField();

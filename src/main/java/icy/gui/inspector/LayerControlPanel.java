@@ -21,7 +21,7 @@ package icy.gui.inspector;
 import icy.action.CanvasActions;
 import icy.canvas.IcyCanvas;
 import icy.canvas.Layer;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.viewer.Viewer;
 import icy.main.Icy;
 import icy.system.thread.ThreadUtil;
@@ -45,7 +45,7 @@ import javax.swing.event.ChangeListener;
 public class LayerControlPanel extends JPanel implements ChangeListener {
     // GUI
     JSlider opacitySlider;
-    IcyButtonNew deleteButton;
+    IcyButton deleteButton;
 
     // internal
     final LayersPanel layerPanel;
@@ -112,7 +112,7 @@ public class LayerControlPanel extends JPanel implements ChangeListener {
         /*deleteButton = new JButton(CanvasActions.deleteLayersAction);
         deleteButton.setIcon(IconUtil.DELETE);
         deleteButton.setDisabledIcon(IconUtil.DELETE_D);*/
-        deleteButton = new IcyButtonNew(GoogleMaterialDesignIcons.DELETE);
+        deleteButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
         deleteButton.addActionListener(CanvasActions.deleteLayersAction);
         GridBagConstraints gbc_deleteButton = new GridBagConstraints();
         gbc_deleteButton.anchor = GridBagConstraints.EAST;

@@ -19,7 +19,7 @@
 package icy.gui.lut;
 
 import icy.gui.component.CheckTabbedPane;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.dialog.MessageDialog;
 import icy.gui.lut.abstract_.IcyLutViewer;
 import icy.gui.util.GuiUtil;
@@ -77,7 +77,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     final ButtonGroup scaleGroup;
     final JRadioButton logButton;
     final JRadioButton linearButton;
-    final IcyButtonNew exportXLSButton;
+    final IcyButton exportXLSButton;
 
     /**
      * data
@@ -252,7 +252,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
         // force apply selected mode (no event dispatched on setSelected)
         scaleTypeChanged(logButton.isSelected());
 
-        exportXLSButton = new IcyButtonNew(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
+        exportXLSButton = new IcyButton(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
         exportXLSButton.setToolTipText("Export histogram data into an excel file");
         exportXLSButton.addActionListener(e -> {
             try {

@@ -39,7 +39,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyToggleButton;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.ColumnControlButton;
@@ -102,7 +102,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
     ListSelectionModel tableSelectionModel;
     JXTable table;
     IcyTextField nameFilter;
-    IcyToggleButtonNew tglbtnLayerVisibility;
+    IcyToggleButton tglbtnLayerVisibility;
     ActionListener visibilityToggleActionListener;
     LayerControlPanel controlPanel;
 
@@ -292,7 +292,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
         gbc_nameFilter.gridy = 0;
         panelNorth.add(nameFilter, gbc_nameFilter);
 
-        tglbtnLayerVisibility = new IcyToggleButtonNew(GoogleMaterialDesignIcons.VISIBILITY_OFF, GoogleMaterialDesignIcons.VISIBILITY);
+        tglbtnLayerVisibility = new IcyToggleButton(GoogleMaterialDesignIcons.VISIBILITY_OFF, GoogleMaterialDesignIcons.VISIBILITY);
         tglbtnLayerVisibility.setFocusable(false);
         tglbtnLayerVisibility.setToolTipText("Change visibility for selected layer(s)");
         GridBagConstraints gbc_tglbtnLayerVisibility = new GridBagConstraints();

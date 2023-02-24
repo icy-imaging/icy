@@ -42,7 +42,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import icy.gui.component.IcySlider;
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyToggleButton;
 import icy.gui.util.ComponentUtil;
 import icy.gui.util.GuiUtil;
 import icy.resource.ResourceUtil;
@@ -61,8 +61,8 @@ public class TNavigationPanel extends JPanel {
     final JLabel leftLabel;
     final JLabel rightLabel;
 
-    final IcyToggleButtonNew play;
-    final IcyToggleButtonNew loop;
+    final IcyToggleButton play;
+    final IcyToggleButton loop;
     final JSpinner frameRate;
 
     final Timer timer;
@@ -108,7 +108,7 @@ public class TNavigationPanel extends JPanel {
             }
         });
 
-        play = new IcyToggleButtonNew(GoogleMaterialDesignIcons.PLAY_CIRCLE_OUTLINE, GoogleMaterialDesignIcons.STOP);
+        play = new IcyToggleButton(GoogleMaterialDesignIcons.PLAY_CIRCLE_OUTLINE, GoogleMaterialDesignIcons.STOP);
         //play.setFlat(true);
         play.setToolTipText("play");
         play.addActionListener(e -> {
@@ -118,7 +118,7 @@ public class TNavigationPanel extends JPanel {
                 startPlay();
         });
 
-        loop = new IcyToggleButtonNew(GoogleMaterialDesignIcons.REPEAT);
+        loop = new IcyToggleButton(GoogleMaterialDesignIcons.REPEAT);
         //loop.setFlat(true);
         loop.setToolTipText("Enable loop playback");
         loop.addActionListener(e -> setRepeat(!isRepeat()));
@@ -230,12 +230,12 @@ public class TNavigationPanel extends JPanel {
      */
     public void setRepeat(boolean value) {
         if (value) {
-            loop.setIcon(new IcyIcon(ResourceUtil.ICON_RELOAD, 16));
+            //loop.setIcon(new IcyIcon(ResourceUtil.ICON_RELOAD, 16));
             loop.setSelected(true);
             loop.setToolTipText("Disable loop playback");
         }
         else {
-            loop.setIcon(new IcyIcon(ResourceUtil.ICON_ARROW_RIGHT, 16));
+            //loop.setIcon(new IcyIcon(ResourceUtil.ICON_ARROW_RIGHT, 16));
             loop.setSelected(false);
             loop.setToolTipText("Enable loop playback");
         }

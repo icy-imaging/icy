@@ -49,7 +49,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.sort.DefaultSortController;
@@ -341,11 +341,11 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel implements A
         middlePanel.add(new JScrollPane(roiTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
-        final IcyButtonNew settingButton = new IcyButtonNew(GoogleMaterialDesignIcons.SETTINGS);
+        final IcyButton settingButton = new IcyButton(GoogleMaterialDesignIcons.SETTINGS);
         settingButton.addActionListener(RoiActions.settingAction);
         settingButton.setHideActionText(true);
 
-        final IcyButtonNew xlsExportButton = new IcyButtonNew(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
+        final IcyButton xlsExportButton = new IcyButton(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
         xlsExportButton.addActionListener(RoiActions.xlsExportAction);
         xlsExportButton.setHideActionText(true);
 
@@ -2320,9 +2320,9 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel implements A
 
                 // image class type column --> use a special renderer
                 if (type == Image.class)
-                    column.setCellRenderer(new ImageTableCellRenderer(18));
+                    column.setCellRenderer(new ImageTableCellRenderer());
                 else if (type == Color.class)
-                    column.setCellRenderer(new ImageTableCellRenderer(16));
+                    column.setCellRenderer(new ImageTableCellRenderer());
                     // use the number cell renderer
                 //else if (ClassUtil.isSubClass(type, Number.class))
                     //column.setCellRenderer(new SubstanceDefaultTableCellRenderer.NumberRenderer());

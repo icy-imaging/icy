@@ -18,7 +18,7 @@
  */
 package icy.gui.component;
 
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import java.awt.Color;
@@ -36,7 +36,7 @@ import javax.swing.*;
 public class ExtTabbedPanel extends JTabbedPane {
     private static class TabComponent extends JPanel {
         final ExternalizablePanel extPanel;
-        final private IcyButtonNew externButton;
+        final private IcyButton externButton;
         final JLabel label;
 
         /**
@@ -59,7 +59,7 @@ public class ExtTabbedPanel extends JTabbedPane {
             label = new JLabel(title + " ", icon, SwingConstants.CENTER);
             label.setOpaque(false);
 
-            externButton = new IcyButtonNew(GoogleMaterialDesignIcons.OPEN_IN_NEW);
+            externButton = new IcyButton(GoogleMaterialDesignIcons.OPEN_IN_NEW);
             externButton.setOpaque(false);
             externButton.setContentAreaFilled(false);
             externButton.setToolTipText("Externalize panel");

@@ -1,20 +1,20 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 package icy.gui.menu.search;
 
@@ -29,30 +29,20 @@ import java.awt.Image;
 import javax.swing.ImageIcon;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
-import javax.swing.plaf.ColorUIResource;
-
-import org.pushingpixels.substance.api.ComponentState;
-import org.pushingpixels.substance.api.SubstanceColorScheme;
-import org.pushingpixels.substance.api.renderers.SubstanceDefaultTableCellRenderer;
-import org.pushingpixels.substance.internal.utils.SubstanceColorSchemeUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  * This class is a renderer to display the filtered data.
- * 
+ *
  * @author Thomas Provoost &amp; Stephane
+ * @author Thomas MUSSET
  */
-public class SearchResultTableCellRenderer extends SubstanceDefaultTableCellRenderer
-{
-    private static final long serialVersionUID = -6758382699884570205L;
-
+public class SearchResultTableCellRenderer extends DefaultTableCellRenderer {
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-            int row, int column)
-    {
+    public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        if (value instanceof SearchResult)
-        {
+        if (value instanceof SearchResult) {
             final SearchResult result = (SearchResult) value;
 
             final String title = result.getTitle();
@@ -80,21 +70,7 @@ public class SearchResultTableCellRenderer extends SubstanceDefaultTableCellRend
 
             // override enabled state
             if (!result.isEnabled())
-            {
-                final ComponentState state;
-
-                if (isSelected)
-                    state = ComponentState.DISABLED_SELECTED;
-                else
-                    state = ComponentState.DISABLED_UNSELECTED;
-
-                final SubstanceColorScheme colorScheme = SubstanceColorSchemeUtilities.getColorScheme(table, state);
-
-                // modify foreground
-                setForeground(new ColorUIResource(colorScheme.getForegroundColor()));
-                // disable result
                 setEnabled(false);
-            }
             else
                 setEnabled(table.isEnabled());
         }

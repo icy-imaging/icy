@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import javax.swing.ImageIcon;
 
 import icy.image.ImageUtil;
-import icy.resource.icon.IcyIcon;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 
@@ -47,8 +46,7 @@ public class ResourceUtil {
     public static final String COLOR_ICON_PATH = "color/";
 
     // default icon size
-    @Deprecated
-    public static final int DEFAULT_ICON_SIZE = IcyIcon.DEFAULT_SIZE;
+    //public static final int DEFAULT_ICON_SIZE = IcyIcon.DEFAULT_SIZE;
 
     // application images
     public static final Image IMAGE_ICY_16 = ResourceUtil.getIconAsImage("icy16.png");

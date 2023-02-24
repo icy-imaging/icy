@@ -19,123 +19,97 @@
 package icy.gui.component.button;
 
 import icy.action.IcyAbstractAction;
-import icy.gui.util.ComponentUtil;
+import icy.gui.util.LookAndFeelUtil;
 import icy.resource.icon.IcyIcon;
-import icy.util.StringUtil;
-
-import java.awt.Dimension;
-import java.awt.Image;
+import icy.resource.icon.IcyIconFont;
+import jiconfont.IconCode;
 
 import javax.swing.*;
 
 /**
  * @author Stephane
- * @deprecated Use {@link IcyToggleButtonNew} instead
+ * @author Thomas MUSSET
  */
-@Deprecated
 public class IcyToggleButton extends JToggleButton {
     private boolean flat;
 
-    /**
-     * Create a toggle button with specified action
-     */
-    public IcyToggleButton(IcyAbstractAction action) {
-        super(action);
+    public IcyToggleButton(final String text, final IconCode defaultIcon, final IconCode selectedIcon, final float size) {
+        super(text);
+
+        setIcon(new IcyIconFont(defaultIcon, size, LookAndFeelUtil.ColorType.UI_TOGGLEBUTTON_DEFAULT));
+        setDisabledIcon(new IcyIconFont(defaultIcon, size, LookAndFeelUtil.ColorType.UI_TOGGLEBUTTON_DISABLED));
+        setSelectedIcon(new IcyIconFont(selectedIcon, size, LookAndFeelUtil.ColorType.UI_TOGGLEBUTTON_SELECTED));
+        setDisabledSelectedIcon(new IcyIconFont(selectedIcon, size, LookAndFeelUtil.ColorType.UI_TOGGLEBUTTON_DISABLED));
 
         flat = false;
         init();
     }
 
-    /**
-     * @deprecated User {@link #IcyToggleButton(IcyAbstractAction)} instead.
-     */
-    @Deprecated
-    public IcyToggleButton(icy.common.IcyAbstractAction action) {
-        super(action);
-
-        flat = false;
-        init();
+    public IcyToggleButton(final String text, final IconCode defaultIcon, final IconCode selectedIcon) {
+        this(text, defaultIcon, selectedIcon, LookAndFeelUtil.getDefaultIconSizeAsFloat());
     }
 
     /**
-     * Create a toggle button with specified text and icon
+     * Create a button with specified text and icon
      */
-    public IcyToggleButton(String text, IcyIcon icon) {
+    public IcyToggleButton(final String text, final IconCode icon) {
+        this(text, icon, icon);
+    }
+
+    /**
+     * Create a button with specified icon
+     */
+    public IcyToggleButton(final IconCode defaultIcon, final IconCode selectedIcon) {
+        this(null, defaultIcon, selectedIcon);
+    }
+
+    /**
+     * Create a button with specified icon size
+     */
+    public IcyToggleButton(final IconCode defaultIcon, final IconCode selectedIcon, final float size) {
+        this(null, defaultIcon, selectedIcon, size);
+    }
+
+    /**
+     * Create a button with specified icon.
+     */
+    public IcyToggleButton(final IconCode icon) {
+        this(null, icon, icon);
+    }
+
+    /**
+     * Create a button with specified text and classic icon
+     */
+    public IcyToggleButton(final String text, final Icon icon) {
         super(text, icon);
-
         flat = false;
         init();
     }
 
     /**
-     * Create a toggle button with specified text and icon
+     * Create a button with specified icon.
      */
-    public IcyToggleButton(IcyIcon icon) {
+    public IcyToggleButton(final Icon icon) {
         this(null, icon);
     }
 
     /**
-     * @deprecated Use {@link #IcyToggleButton(String, IcyIcon)} instead.
+     * Create a button with specified text.
      */
-    @Deprecated
-    public IcyToggleButton(String text, Image iconImage, int iconSize) {
-        this(text, new IcyIcon(iconImage, iconSize));
+    public IcyToggleButton(final String text) {
+        super(text);
+        flat = false;
+        init();
     }
 
     /**
-     * @deprecated Use {@link #IcyToggleButton(String, IcyIcon)} instead.
+     * Create a button with specified action.
      */
     @Deprecated
-    public IcyToggleButton(String text, Image iconImage) {
-        this(text, iconImage, IcyIcon.DEFAULT_SIZE);
-    }
-
-    /**
-     * @deprecated Use {@link #IcyToggleButton(IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyToggleButton(Image iconImage, int iconSize) {
-        this(null, iconImage, iconSize);
-    }
-
-    /**
-     * @deprecated Use {@link #IcyToggleButton(IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyToggleButton(Image iconImage) {
-        this(null, iconImage, IcyIcon.DEFAULT_SIZE);
-    }
-
-    /**
-     * @deprecated Use {@link #IcyToggleButton(String, IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyToggleButton(String text, String iconName, int iconSize) {
-        this(text, new IcyIcon(iconName, iconSize));
-    }
-
-    /**
-     * @deprecated Use {@link #IcyToggleButton(String, IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyToggleButton(String text, String iconName) {
-        this(text, iconName, IcyIcon.DEFAULT_SIZE);
-    }
-
-    /**
-     * @deprecated Use {@link #IcyToggleButton(IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyToggleButton(String iconName, int iconSize) {
-        this(null, iconName, iconSize);
-    }
-
-    /**
-     * @deprecated Use {@link #IcyToggleButton(IcyIcon)} instead.
-     */
-    @Deprecated
-    public IcyToggleButton(String iconName) {
-        this(iconName, IcyIcon.DEFAULT_SIZE);
+    public IcyToggleButton(final IcyAbstractAction action) {
+        super(action);
+        flat = false;
+        init();
     }
 
     private void init() {
@@ -147,9 +121,6 @@ public class IcyToggleButton extends JToggleButton {
             setFocusPainted(false);
             setFocusable(false);
         }
-
-        // manual change notify
-        updateSize();
     }
 
     @Override
@@ -158,30 +129,6 @@ public class IcyToggleButton extends JToggleButton {
 
         // override tooltip set from action
         IcyAbstractAction.setToolTipTextFromAction(this, a);
-    }
-
-    /**
-     * Return the icon as IcyIcon
-     */
-    public IcyIcon getIcyIcon() {
-        final Icon icon = getIcon();
-
-        if (icon instanceof IcyIcon)
-            return (IcyIcon) icon;
-
-        return null;
-    }
-
-    /**
-     * Return the selected icon as IcyIcon
-     */
-    public IcyIcon getSelectedIcyIcon() {
-        final Icon icon = getSelectedIcon();
-
-        if (icon instanceof IcyIcon)
-            return (IcyIcon) icon;
-
-        return null;
     }
 
     /**
@@ -201,14 +148,44 @@ public class IcyToggleButton extends JToggleButton {
             setBorderPainted(!flat);
             setFocusPainted(!flat);
             setFocusable(!flat);
-
-            updateSize();
         }
+    }
+
+    public void updateIconFont() {
+        final Icon i = getIcon();
+        if (i instanceof IcyIconFont)
+            ((IcyIconFont) i).updateIcon();
+        final Icon di = getDisabledIcon();
+        if (di instanceof IcyIconFont)
+            ((IcyIconFont) di).updateIcon();
+        final Icon si = getSelectedIcon();
+        if (si instanceof IcyIconFont)
+            ((IcyIconFont) si).updateIcon();
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        updateIconFont();
+    }
+
+    /**
+     * Return the icon as IcyIcon
+     */
+    @Deprecated
+    public IcyIcon getIcyIcon() {
+        final Icon icon = getIcon();
+
+        if (icon instanceof IcyIcon)
+            return (IcyIcon) icon;
+
+        return null;
     }
 
     /**
      * @return the icon name
      */
+    @Deprecated
     public String getIconName() {
         final IcyIcon icon = getIcyIcon();
 
@@ -221,66 +198,19 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * @param iconName the iconName to set
      */
+    @Deprecated
     public void setIconName(String iconName) {
         final IcyIcon icon = getIcyIcon();
 
         if (icon != null) {
             icon.setName(iconName);
-            updateSize();
-        }
-    }
-
-    /**
-     * @return the icon name
-     */
-    public String getSelectedIconName() {
-        final IcyIcon icon = getSelectedIcyIcon();
-
-        if (icon != null)
-            return icon.getName();
-
-        return null;
-    }
-
-    /**
-     * @param iconName the iconName to set
-     */
-    public void setSelectedIconName(String iconName) {
-        final IcyIcon icon = getSelectedIcyIcon();
-
-        if (icon != null) {
-            icon.setName(iconName);
-            updateSize();
-        }
-    }
-
-    /**
-     * @param iconImage the iconImage to set
-     */
-    public void setIconImage(Image iconImage) {
-        final IcyIcon icon = getIcyIcon();
-
-        if (icon != null) {
-            icon.setImage(iconImage);
-            updateSize();
-        }
-    }
-
-    /**
-     * @param iconImage the iconImage to set
-     */
-    public void setSelectedIconImage(Image iconImage) {
-        final IcyIcon icon = getSelectedIcyIcon();
-
-        if (icon != null) {
-            icon.setImage(iconImage);
-            updateSize();
         }
     }
 
     /**
      * @return the icon size
      */
+    @Deprecated
     public int getIconSize() {
         final IcyIcon icon = getIcyIcon();
 
@@ -293,35 +223,15 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * @param iconSize the iconSize to set
      */
+    @Deprecated
     public void setIconSize(int iconSize) {
         final IcyIcon icon = getIcyIcon();
 
         if (icon != null) {
             icon.setSize(iconSize);
-            updateSize();
         }
     }
 
-    @Override
-    public void setText(String text) {
-        super.setText(text);
-
-        updateSize();
-    }
-
-    public void updateSize() {
-        final IcyIcon icon = getIcyIcon();
-        boolean noText = StringUtil.isEmpty(getText());
-        noText |= (getAction() != null) && getHideActionText();
-
-        // adjust size to icon size if no text
-        if (flat && (icon != null) && noText) {
-            final Dimension dim = icon.getDimension();
-            dim.height += 2;
-            dim.width += 2;
-            ComponentUtil.setFixedSize(this, dim);
-        }
-    }
 
     @Override
     protected void actionPropertyChanged(Action action, String propertyName) {

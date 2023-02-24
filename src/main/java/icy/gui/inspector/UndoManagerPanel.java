@@ -19,7 +19,7 @@
 package icy.gui.inspector;
 
 import icy.action.SequenceOperationActions;
-import icy.gui.component.button.IcyButtonNew;
+import icy.gui.component.button.IcyButton;
 import icy.gui.main.ActiveSequenceListener;
 import icy.main.Icy;
 import icy.preferences.GeneralPreferences;
@@ -60,11 +60,11 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
 
     // internals
     boolean isSelectionAdjusting;
-    IcyButtonNew undoButton;
-    IcyButtonNew redoButton;
+    IcyButton undoButton;
+    IcyButton redoButton;
     JSpinner historySizeField;
-    IcyButtonNew clearAllButLastButton;
-    IcyButtonNew clearAllButton;
+    IcyButton clearAllButLastButton;
+    IcyButton clearAllButton;
     final Runnable refresher;
 
     public UndoManagerPanel() {
@@ -184,12 +184,12 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
         bottomPanel.setBorder(new EmptyBorder(2, 0, 0, 0));
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
 
-        undoButton = new IcyButtonNew(GoogleMaterialDesignIcons.UNDO);
+        undoButton = new IcyButton(GoogleMaterialDesignIcons.UNDO);
         undoButton.addActionListener(SequenceOperationActions.undoAction);
         undoButton.setHideActionText(true);
         bottomPanel.add(undoButton);
 
-        redoButton = new IcyButtonNew(GoogleMaterialDesignIcons.REDO);
+        redoButton = new IcyButton(GoogleMaterialDesignIcons.REDO);
         redoButton.addActionListener(SequenceOperationActions.redoAction);
         redoButton.setHideActionText(true);
         bottomPanel.add(redoButton);
@@ -212,12 +212,12 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
         Component horizontalStrut_2 = Box.createHorizontalStrut(8);
         bottomPanel.add(horizontalStrut_2);
 
-        clearAllButLastButton = new IcyButtonNew(GoogleMaterialDesignIcons.DELETE_SWEEP);
+        clearAllButLastButton = new IcyButton(GoogleMaterialDesignIcons.DELETE_SWEEP);
         clearAllButLastButton.addActionListener(SequenceOperationActions.undoClearAllButLastAction);
         clearAllButLastButton.setHideActionText(true);
         bottomPanel.add(clearAllButLastButton);
 
-        clearAllButton = new IcyButtonNew(GoogleMaterialDesignIcons.DELETE);
+        clearAllButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
         clearAllButton.addActionListener(SequenceOperationActions.undoClearAction);
         clearAllButton.setHideActionText(true);
         bottomPanel.add(clearAllButton);

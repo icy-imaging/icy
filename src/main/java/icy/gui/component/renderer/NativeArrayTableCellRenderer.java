@@ -1,3 +1,21 @@
+/*
+ * Copyright 2010-2023 Institut Pasteur.
+ *
+ * This file is part of Icy.
+ *
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
 package icy.gui.component.renderer;
 
 import icy.math.MathUtil;
@@ -5,18 +23,16 @@ import icy.type.collection.array.Array1DUtil;
 import icy.type.collection.array.ArrayUtil;
 
 import javax.swing.SwingConstants;
-
-import org.pushingpixels.substance.api.renderers.SubstanceDefaultTableCellRenderer;
+import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  * @author Stephane
- * @deprecated Will be removed with Substance
+ * @author Thomas MUSSET
  */
-@Deprecated
-public class NativeArrayTableCellRenderer extends SubstanceDefaultTableCellRenderer {
-    final boolean signed;
+public class NativeArrayTableCellRenderer extends DefaultTableCellRenderer {
+    private final boolean signed;
 
-    public NativeArrayTableCellRenderer(boolean signed) {
+    public NativeArrayTableCellRenderer(final boolean signed) {
         super();
 
         this.signed = signed;
@@ -29,7 +45,7 @@ public class NativeArrayTableCellRenderer extends SubstanceDefaultTableCellRende
     }
 
     @Override
-    protected void setValue(Object value) {
+    protected void setValue(final Object value) {
         if ((value != null) && (ArrayUtil.getDim(value) == 1)) {
             final int len = ArrayUtil.getLength(value);
 

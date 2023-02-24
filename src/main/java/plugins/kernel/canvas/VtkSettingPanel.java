@@ -23,7 +23,7 @@ import icy.gui.component.IcyTextField.TextChangeListener;
 import icy.gui.component.NumberTextField;
 import icy.gui.component.button.ColorChooserButton;
 import icy.gui.component.button.ColorChooserButton.ColorChangeListener;
-import icy.gui.component.button.IcyToggleButtonNew;
+import icy.gui.component.button.IcyToggleButton;
 import icy.resource.ResourceUtil;
 import icy.resource.icon.IcyIcon;
 import icy.vtk.VtkImageVolume;
@@ -71,7 +71,7 @@ public class VtkSettingPanel extends JPanel implements ActionListener, TextChang
     private JComboBox<VtkVolumeBlendType> volumeBlendingComboBox;
     private JComboBox<String> volumeSampleComboBox;
     private JComboBox<String> volumeInterpolationComboBox;
-    private IcyToggleButtonNew shadingButton;
+    private IcyToggleButton shadingButton;
     private NumberTextField volumeAmbientField;
     private NumberTextField volumeSpecularField;
     private NumberTextField volumeDiffuseField;
@@ -205,7 +205,7 @@ public class VtkSettingPanel extends JPanel implements ActionListener, TextChang
         gbc_volumeSampleComboBox.gridy = 3;
         add(volumeSampleComboBox, gbc_volumeSampleComboBox);
 
-        shadingButton = new IcyToggleButtonNew(new IcyIcon(ICON_SHADING, false));
+        shadingButton = new IcyToggleButton(new IcyIcon(ICON_SHADING, false));
         shadingButton.setIconTextGap(8);
         shadingButton.setText("Shading");
         shadingButton.setFocusable(false);
