@@ -74,7 +74,7 @@ public class CloseableTabbedPane extends JTabbedPane {
 
             sep = Box.createHorizontalStrut(6);
 
-            closeButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
+            closeButton = new IcyButton(GoogleMaterialDesignIcons.CLOSE);
             //closeButton.setFlat(true);
             closeButton.setContentAreaFilled(false);
             closeButton.setToolTipText("close");
