@@ -16,6 +16,7 @@ public class IcyTextFieldHint extends JTextField implements FocusListener {
     private final Insets insets;
 
     public IcyTextFieldHint(final IconCode code, final String hint) {
+        super();
         this.icon = new IcyIconFont(code, LookAndFeelUtil.getDefaultIconSizeAsFloat(), LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
         this.hint = hint;
 

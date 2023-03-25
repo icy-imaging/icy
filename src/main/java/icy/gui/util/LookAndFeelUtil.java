@@ -186,6 +186,10 @@ public final class LookAndFeelUtil {
         return (color.equals(CONSOLE_BLUE_DARK) || color.equals(CONSOLE_BLUE_LIGHT));
     }
 
+    public static boolean isDarkMode() {
+        return getCurrentSkin().isDark();
+    }
+
     /**
      * Get skin by its name
      *
