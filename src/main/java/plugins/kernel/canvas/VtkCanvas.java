@@ -380,7 +380,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         clipBoxEdgeActor = new vtkActor();
         clipBoxEdgeActor.SetVisibility(0);
         clipBoxEdgeActor.GetProperty().SetColor(1d, 1d, 0d);
-        clipBoxEdgeActor.GetProperty().SetLineWidth(1.5d);
+        clipBoxEdgeActor.GetProperty().SetLineWidth(1.5f);
         clipBoxEdgeActor.GetProperty().SetAmbient(1d);
         clipBoxEdgeActor.GetProperty().SetDiffuse(0d);
         clipBoxEdgeActor.SetMapper(clipBoxEdgeMapper);
