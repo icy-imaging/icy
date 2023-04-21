@@ -18,11 +18,6 @@
  */
 package icy.image;
 
-import icy.gui.util.FontUtil;
-import icy.network.URLUtil;
-import icy.system.thread.ThreadUtil;
-import icy.util.GraphicsUtil;
-
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Font;
@@ -49,6 +44,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+
+import icy.gui.util.FontUtil;
+import icy.network.URLUtil;
+import icy.system.thread.ThreadUtil;
+import icy.util.GraphicsUtil;
 
 /**
  * Image utilities class.
@@ -133,8 +133,7 @@ public class ImageUtil
      */
     public static BufferedImage createIndexedImage(int w, int h, IndexColorModel cm, byte[] data)
     {
-        final WritableRaster raster = Raster.createInterleavedRaster(new DataBufferByte(data, w * h, 0), w, h, w, 1,
-                new int[] {0}, null);
+        final WritableRaster raster = Raster.createInterleavedRaster(new DataBufferByte(data, w * h, 0), w, h, w, 1, new int[] {0}, null);
 
         return new BufferedImage(cm, raster, false, null);
     }
@@ -412,8 +411,7 @@ public class ImageUtil
 
         // be sure image data are ready
         waitImageReady(image);
-        final BufferedImage bufImage = new BufferedImage(image.getWidth(null), image.getHeight(null),
-                BufferedImage.TYPE_INT_ARGB);
+        final BufferedImage bufImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
         final Graphics2D g = bufImage.createGraphics();
         g.drawImage(image, 0, 0, null);
@@ -561,8 +559,7 @@ public class ImageUtil
         {
             // be sure image data are ready
             waitImageReady(image);
-            return convert(image,
-                    new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_BYTE_GRAY));
+            return convert(image, new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_BYTE_GRAY));
         }
 
         return null;
@@ -577,8 +574,7 @@ public class ImageUtil
         {
             // be sure image data are ready
             waitImageReady(image);
-            return convert(image,
-                    new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB));
+            return convert(image, new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB));
         }
 
         return null;
@@ -593,8 +589,7 @@ public class ImageUtil
         {
             // be sure image data are ready
             waitImageReady(image);
-            return convert(image,
-                    new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB));
+            return convert(image, new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB));
         }
 
         return null;
@@ -738,6 +733,9 @@ public class ImageUtil
      */
     public static Image paintColorImageFromAlphaImage(Image alphaImage, Image out, Color color)
     {
+        if (alphaImage == null)
+            return null;
+
         final int w;
         final int h;
         final Image result;
