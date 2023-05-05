@@ -18,14 +18,10 @@
  */
 package icy.util;
 
-import icy.painter.Anchor2D;
-import icy.painter.PathAnchor2D;
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.awt.geom.Area;
 import java.awt.geom.CubicCurve2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
@@ -36,6 +32,10 @@ import java.awt.geom.RectangularShape;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import icy.painter.Anchor2D;
+import icy.painter.PathAnchor2D;
+import icy.type.geom.areax.AreaX;
 
 /**
  * @author Stephane
@@ -112,7 +112,7 @@ public class ShapeUtil
     }
 
     /**
-     * Returns <code>true</code> if the specified Shape define a closed Shape (Area).<br>
+     * Returns <code>true</code> if the specified Shape define a closed Shape (AreaX).<br>
      * Returns <code>false</code> if the specified Shape define a open Shape (Path).<br>
      */
     public static boolean isClosed(Shape shape)
@@ -138,11 +138,11 @@ public class ShapeUtil
      *        Shapes we want to merge.
      * @param operator
      *        {@link BooleanOperator} to apply.
-     * @return {@link Area} shape representing the result of the merge operation.
+     * @return {@link AreaX} shape representing the result of the merge operation.
      */
     public static Shape merge(List<Shape> shapes, BooleanOperator operator)
     {
-        Shape result = new Area();
+        Shape result = new AreaX();
 
         // merge shapes
         for (Shape shape : shapes)
@@ -181,8 +181,8 @@ public class ShapeUtil
     public static Shape union(Shape shape1, Shape shape2)
     {
         // first compute closed area union
-        final Area area = new Area(getClosedPath(shape1));
-        area.add(new Area(getClosedPath(shape2)));
+        final AreaX area = new AreaX(getClosedPath(shape1));
+        area.add(new AreaX(getClosedPath(shape2)));
         // then compute open path (polyline) union
         final Path2D result = new Path2D.Double(getOpenPath(shape1));
         result.append(getOpenPath(shape2), false);
@@ -202,45 +202,45 @@ public class ShapeUtil
     }
 
     /**
-     * Intersects 2 shapes and return result in an {@link Area} type shape.<br>
-     * If one of the specified Shape is not an Area (do not contains any pixel) then an empty Area is returned.
+     * Intersects 2 shapes and return result in an {@link AreaX} type shape.<br>
+     * If one of the specified Shape is not an AreaX (do not contains any pixel) then an empty AreaX is returned.
      */
-    public static Area intersect(Shape shape1, Shape shape2)
+    public static AreaX intersect(Shape shape1, Shape shape2)
     {
         // trivial optimization
         if (!isClosed(shape1) || !isClosed(shape2))
-            return new Area();
+            return new AreaX();
 
-        final Area result = new Area(getClosedPath(shape1));
+        final AreaX result = new AreaX(getClosedPath(shape1));
 
-        result.intersect(new Area(getClosedPath(shape2)));
+        result.intersect(new AreaX(getClosedPath(shape2)));
 
         return result;
     }
 
     /**
-     * Do exclusive union between the 2 shapes and return result in an {@link Area} type shape.<br>
-     * If one of the specified Shape is not an Area (do not contains any pixel) then it just return the other Shape in
-     * Area format. If both Shape are not Area then an empty Area is returned.
+     * Do exclusive union between the 2 shapes and return result in an {@link AreaX} type shape.<br>
+     * If one of the specified Shape is not an AreaX (do not contains any pixel) then it just return the other Shape in
+     * AreaX format. If both Shape are not AreaX then an empty AreaX is returned.
      */
-    public static Area exclusiveUnion(Shape shape1, Shape shape2)
+    public static AreaX exclusiveUnion(Shape shape1, Shape shape2)
     {
         // trivial optimization
         if (!isClosed(shape1))
         {
             if (!isClosed(shape2))
-                return new Area();
+                return new AreaX();
 
-            return new Area(shape2);
+            return new AreaX(shape2);
         }
 
         // trivial optimization
         if (!isClosed(shape2))
-            return new Area(shape1);
+            return new AreaX(shape1);
 
-        final Area result = new Area(getClosedPath(shape1));
+        final AreaX result = new AreaX(getClosedPath(shape1));
 
-        result.exclusiveOr(new Area(getClosedPath(shape2)));
+        result.exclusiveOr(new AreaX(getClosedPath(shape2)));
 
         return result;
     }
@@ -249,25 +249,25 @@ public class ShapeUtil
      * @deprecated Use {@link #exclusiveUnion(Shape, Shape)} instead.
      */
     @Deprecated
-    public static Area xor(Shape shape1, Shape shape2)
+    public static AreaX xor(Shape shape1, Shape shape2)
     {
         return exclusiveUnion(shape1, shape2);
     }
 
     /**
-     * Subtract shape2 from shape1 return result in an {@link Area} type shape.
+     * Subtract shape2 from shape1 return result in an {@link AreaX} type shape.
      */
-    public static Area subtract(Shape shape1, Shape shape2)
+    public static AreaX subtract(Shape shape1, Shape shape2)
     {
         // trivial optimization
         if (!isClosed(shape1))
-            return new Area();
+            return new AreaX();
         if (!isClosed(shape2))
-            return new Area(shape1);
+            return new AreaX(shape1);
 
-        final Area result = new Area(getClosedPath(shape1));
+        final AreaX result = new AreaX(getClosedPath(shape1));
 
-        result.subtract(new Area(getClosedPath(shape2)));
+        result.subtract(new AreaX(getClosedPath(shape2)));
 
         return result;
     }
