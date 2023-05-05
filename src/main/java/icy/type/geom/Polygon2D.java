@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class Polygon2D implements Shape, Cloneable
 {
-    private static void addFarthestPoint(List<Point2D> result, List<Point2D> points, int start, int end,
+    private static void addFarthestPoint(List<Point2D> result, List<? extends Point2D> points, int start, int end,
             double maxDeviation)
     {
         final Point2D p1 = points.get(start);
@@ -87,30 +87,27 @@ public class Polygon2D implements Shape, Cloneable
      *        maximum allowed deviation/distance of resulting polygon from the input contour (in pixel).
      * @return the polygon estimation from input contour
      */
-    public static Polygon2D getPolygon2D(List<Point2D> points, double maxDeviation)
+    public static Polygon2D getPolygon2D(List<? extends Point2D> points, double maxDeviation)
     {
         // just return
         if (points.size() < 3)
             return new Polygon2D(points);
 
         final List<Point2D> result = new ArrayList<Point2D>(points.size() / 4);
-
+        final List<Point2D> ptsCopy = new ArrayList<Point2D>(points);
+        // close the contour
+        ptsCopy.add(points.get(0));
+                
         int ind = points.size() / 2;
 
-        // close the contour
-        points.add(points.get(0));
-
         // add first point
-        result.add(points.get(0));
+        result.add(ptsCopy.get(0));
         // add points between first and medium
-        addFarthestPoint(result, points, 0, ind, maxDeviation);
+        addFarthestPoint(result, ptsCopy, 0, ind, maxDeviation);
         // add medium point
-        result.add(points.get(ind));
+        result.add(ptsCopy.get(ind));
         // add points between medium and end
-        addFarthestPoint(result, points, ind, points.size() - 1, maxDeviation);
-
-        // restore original contour
-        points.remove(points.size() - 1);
+        addFarthestPoint(result, ptsCopy, ind, ptsCopy.size() - 1, maxDeviation);
 
         return new Polygon2D(result);
     }
@@ -316,7 +313,7 @@ public class Polygon2D implements Shape, Cloneable
         calculatePath();
     }
 
-    public Polygon2D(List<Point2D> points)
+    public Polygon2D(List<? extends Point2D> points)
     {
         super();
 
@@ -453,7 +450,7 @@ public class Polygon2D implements Shape, Cloneable
         updatePath(x, y);
     }
 
-    public void setPoints(List<Point2D> points)
+    public void setPoints(List<? extends Point2D> points)
     {
         final int len = points.size();
 
