@@ -24,6 +24,7 @@ package icy.gui.main;
  *             {@link GlobalViewerListener} interface instead.
  * @author Stephane
  */
+@Deprecated
 public class MainEvent
 {
     public enum MainEventSourceType

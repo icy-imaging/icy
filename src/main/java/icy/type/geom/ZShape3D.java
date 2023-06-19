@@ -109,7 +109,7 @@ public abstract class ZShape3D implements Shape3D, Cloneable
      * 
      * @param z
      *        start z position of Z range to test
-     * @param size
+     * @param sizeZ
      *        depth of Z range to test
      * @return true if the specified z range is inside the Z boundary of the shape
      */
@@ -123,7 +123,7 @@ public abstract class ZShape3D implements Shape3D, Cloneable
      * 
      * @param z
      *        start z position of Z range to test
-     * @param size
+     * @param sizeZ
      *        depth of Z range to test
      * @return true if the specified Z range intersects the Z boundary of the shape
      */

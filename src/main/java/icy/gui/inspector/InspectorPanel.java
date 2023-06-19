@@ -63,6 +63,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     final OutputConsolePanel outputConsolePanel;
     // final ChatPanel chatPanel;
 
+    @Deprecated
     final IcyToggleButton virtualModeBtn;
 
     /**
@@ -121,15 +122,18 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
 
         add(mainPane, BorderLayout.CENTER);
 
-        // build bottom panel for inspector
-        final JPanel bottomPanel = new JPanel();
-        bottomPanel.setLayout(new BorderLayout());
+        // TODO: 15/06/2023 Remove this once StatusBar validated
+        if (false) {
+            // build bottom panel for inspector
+            final JPanel bottomPanel = new JPanel();
+            bottomPanel.setLayout(new BorderLayout());
 
-        // add virtual button and memory monitor
-        bottomPanel.add(virtualModeBtn, BorderLayout.EAST);
-        bottomPanel.add(new MemoryMonitorPanel(), BorderLayout.CENTER);
+            // add virtual button and memory monitor
+            bottomPanel.add(virtualModeBtn, BorderLayout.EAST);
+            bottomPanel.add(new MemoryMonitorPanel(), BorderLayout.CENTER);
 
-        add(bottomPanel, BorderLayout.SOUTH);
+            add(bottomPanel, BorderLayout.SOUTH);
+        }
 
         validate();
         setVisible(true);
@@ -216,6 +220,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     }
 
     // TODO: 25/01/2023 Return value never used
+    @Deprecated
     boolean setVirtualModeInternal(boolean value) {
         boolean ok = false;
         try {

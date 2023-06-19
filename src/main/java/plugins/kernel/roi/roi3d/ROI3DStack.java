@@ -606,6 +606,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
@@ -646,6 +647,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
@@ -686,6 +688,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
@@ -726,6 +729,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
     {
         if (roi instanceof ROI3D)
@@ -779,6 +783,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
      * @throws UnsupportedOperationException
      *         if the given ROI slice cannot be added to this ROI
      */
+    @SuppressWarnings("unchecked")
     public void add(int z, R roiSlice) throws UnsupportedOperationException, InterruptedException
     {
         if (roiSlice == null)
@@ -826,6 +831,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
      * @throws UnsupportedOperationException
      *         if the given ROI slice cannot be exclusively added to this ROI
      */
+    @SuppressWarnings("unchecked")
     public void exclusiveAdd(int z, R roiSlice) throws UnsupportedOperationException, InterruptedException
     {
         if (roiSlice == null)
@@ -873,6 +879,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
      * @throws UnsupportedOperationException
      *         if the given ROI slice cannot be intersected with this ROI
      */
+    @SuppressWarnings("unchecked")
     public void intersect(int z, R roiSlice) throws UnsupportedOperationException, InterruptedException
     {
         // better to throw an exception here than removing slice
@@ -915,6 +922,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
      *         if the given ROI slice cannot be subtracted from this ROI
      * @throws InterruptedException 
      */
+    @SuppressWarnings("unchecked")
     public void subtract(int z, R roiSlice) throws UnsupportedOperationException, InterruptedException
     {
         if (roiSlice == null)

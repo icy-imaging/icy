@@ -34,6 +34,7 @@ import vtk.vtkPropPicker;
  * @deprecated Use {@link IcyVtkPanel} instead
  * @author stephane
  */
+@Deprecated
 public class IcyVtkPanelOld extends vtkPanel
 {
     /**

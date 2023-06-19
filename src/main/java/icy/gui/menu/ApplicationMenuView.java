@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.menu;
 
 import com.formdev.flatlaf.FlatLaf;
@@ -37,7 +37,17 @@ import java.util.List;
  * @author Thomas MUSSET
  */
 public final class ApplicationMenuView extends AbstractApplicationMenu {
-    public ApplicationMenuView() {
+
+    private static ApplicationMenuView instance = null;
+
+    public static synchronized ApplicationMenuView getInstance() {
+        if (instance == null)
+            instance = new ApplicationMenuView();
+
+        return instance;
+    }
+
+    private ApplicationMenuView() {
         super("View");
 
         final IcyMenu menuAppearance = new IcyMenu("Appearance", GoogleMaterialDesignIcons.BRIGHTNESS_MEDIUM);

@@ -1637,6 +1637,7 @@ public class ROIUtil
      * @throws InterruptedException
      * @deprecated Use {@link #convertTo3D(ROI2D, double, double)} instead.
      */
+    @Deprecated
     public static ROI convertToStack(ROI2D roi, int zMin, int zMax) throws InterruptedException
     {
         ROI result = null;
@@ -1668,6 +1669,7 @@ public class ROIUtil
      * @throws InterruptedException
      * @deprecated Use {@link #convertTo2D(ROI3D)} instead
      */
+    @Deprecated
     public static ROI[] unstack(ROI3D roi) throws InterruptedException
     {
         return convertTo2D(roi);

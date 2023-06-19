@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
+ * Copyright 2010-2023 Institut Pasteur.
  *
  * This file is part of Icy.
  *
@@ -14,17 +14,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package icy.system;
 
-import java.awt.Desktop;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.beans.PropertyChangeListener;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+package icy.system;
 
 import icy.gui.dialog.LoaderDialog;
 import icy.gui.frame.AboutFrame;
@@ -33,193 +26,56 @@ import icy.gui.preferences.PreferenceFrame;
 import icy.main.Icy;
 import icy.resource.ResourceUtil;
 import icy.system.thread.ThreadUtil;
-import icy.util.ClassUtil;
-import icy.util.ReflectionUtil;
+
+import java.awt.*;
+import java.beans.PropertyChangeListener;
 
 /**
  * OSX application compatibility class
  *
  * @author stephane
+ * @author Thomas MUSSET
  */
-public class AppleUtil
-{
-    static final Thread fixThread = new Thread(new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            appleFixLiveRun();
-        }
-    }, "AppleFix");
+public class AppleUtil {
+    //static final Thread fixThread = new Thread(AppleUtil::appleFixLiveRun, "AppleFix");
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void init()
-    {
+    public static void init() {
         // only when we have the GUI
-        if (!Icy.getMainInterface().isHeadLess())
-        {
-            try
-            {
+        if (!Icy.getMainInterface().isHeadLess()) {
+            try {
                 // set quit strategy for OSX
                 System.setProperty("apple.eawt.quitStrategy", "CLOSE_ALL_WINDOWS");
 
-                // java 8 or <
-                if (SystemUtil.getJavaVersionAsNumber() < 9d)
-                {
-                    final ClassLoader classLoader = SystemUtil.getSystemClassLoader();
-                    final Class appClass = classLoader.loadClass("com.apple.eawt.Application");
-                    final Object app = appClass.getDeclaredConstructor().newInstance();
+                final Desktop desktop = Desktop.getDesktop();
 
-                    final Class listenerClass = classLoader.loadClass("com.apple.eawt.ApplicationListener");
-                    final Object listener = Proxy.newProxyInstance(classLoader, new Class[] {listenerClass}, new InvocationHandler()
-                    {
-                        @Override
-                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
-                        {
-                            final Object applicationEvent = args[0];
-                            final Class appEventClass = applicationEvent.getClass();
-                            final Method m = appEventClass.getMethod("setHandled", boolean.class);
+                desktop.setAboutHandler(e -> new AboutFrame());
+                desktop.setPreferencesHandler(e -> new PreferenceFrame(GeneralPreferencePanel.NODE_NAME));
+                desktop.setQuitHandler((e, r) -> Icy.exit(false));
+                desktop.setOpenFileHandler(e -> new LoaderDialog());
 
-                            if (method.getName().equals("handleQuit"))
-                            {
-                                Icy.exit(false);
-                                m.invoke(applicationEvent, Boolean.valueOf(true));
-                            }
-                            if (method.getName().equals("handleAbout"))
-                            {
-                                new AboutFrame();
-                                m.invoke(applicationEvent, Boolean.valueOf(true));
-                            }
-                            if (method.getName().equals("handleOpenFile"))
-                            {
-                                new LoaderDialog();
-                                m.invoke(applicationEvent, Boolean.valueOf(true));
-                            }
-                            if (method.getName().equals("handlePreferences"))
-                            {
-                                new PreferenceFrame(GeneralPreferencePanel.NODE_NAME);
-                                m.invoke(applicationEvent, Boolean.valueOf(true));
-                            }
-
-                            return null;
-                        }
-                    });
-
-                    Method m;
-
-                    m = appClass.getMethod("addApplicationListener", listenerClass);
-                    m.invoke(app, listener);
-                    m = appClass.getMethod("setDockIconImage", java.awt.Image.class);
-                    m.invoke(app, ResourceUtil.IMAGE_ICY_256);
-                    m = appClass.getMethod("addPreferencesMenuItem");
-                    m.invoke(app);
-                }
-                // java 9 or >
-                else
-                {
-                    final Desktop desktop = Desktop.getDesktop();
-                    final Class<?> desktopClass = desktop.getClass();
-
-                    // desktop.setAboutHandler(e -> { new AboutFrame(); });
-                    // desktop.setPreferencesHandler(e -> { new PreferenceFrame(GeneralPreferencePanel.NODE_NAME); });
-                    // desktop.setQuitHandler((e, r) -> { Icy.exit(false); });
-                    // desktop.setOpenFileHandler(e -> { new LoaderDialog(); });
-
-                    // use reflection so we can compile with Java 8
-                    final ClassLoader classLoader = desktopClass.getClassLoader();
-                    final Class<?> aboutHandlerClass = ClassUtil.findClass("java.awt.desktop.AboutHandler");
-                    final Class<?> preferencesHandlerClass = ClassUtil.findClass("java.awt.desktop.PreferencesHandler");
-                    final Class<?> quitHandlerClass = ClassUtil.findClass("java.awt.desktop.QuitHandler");
-                    final Class<?> openFilesHandlerClass = ClassUtil.findClass("java.awt.desktop.OpenFilesHandler");
-                    final Class<?> quitResponseClass = ClassUtil.findClass("java.awt.desktop.QuitResponse");
-
-                    final Object proxyHandler = Proxy.newProxyInstance(classLoader,
-                            new Class<?>[] {aboutHandlerClass, preferencesHandlerClass, quitHandlerClass, openFilesHandlerClass}, new InvocationHandler()
-                            {
-                                @Override
-                                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
-                                {
-                                    final String methodName = method.getName();
-
-                                    switch (methodName)
-                                    {
-                                        case "openFiles":
-                                            new LoaderDialog();
-                                            break;
-
-                                        case "handleAbout":
-                                            new AboutFrame();
-                                            break;
-
-                                        case "handlePreferences":
-                                            new PreferenceFrame(GeneralPreferencePanel.NODE_NAME);
-                                            break;
-
-                                        case "handleQuitRequestWith":
-                                            Icy.exit(false);
-                                            // let Icy handle quit
-                                            ReflectionUtil.getMethod(quitResponseClass, "cancelQuit").invoke(args[1]);
-                                            //else
-                                            // ReflectionUtil.getMethod(quitResponseClass, "performQuit").invoke(args[1]);
-                                            break;
-
-                                        default:
-                                            // nothing to do
-                                            break;
-                                    }
-
-                                    return null;
-                                }
-                            });
-
-                    // desktop.setAboutHandler(e -> { new AboutFrame(); });
-                    // desktop.setPreferencesHandler(e -> { new PreferenceFrame(GeneralPreferencePanel.NODE_NAME); });
-                    // desktop.setQuitHandler((e, r) -> { Icy.exit(false); });
-                    // desktop.setOpenFileHandler(e -> { new LoaderDialog(); });
-
-                    Method m;
-
-                    m = ReflectionUtil.getMethod(desktopClass, "setAboutHandler", aboutHandlerClass);
-                    m.invoke(desktop, proxyHandler);
-                    m = ReflectionUtil.getMethod(desktopClass, "setPreferencesHandler", preferencesHandlerClass);
-                    m.invoke(desktop, proxyHandler);
-                    m = ReflectionUtil.getMethod(desktopClass, "setQuitHandler", quitHandlerClass);
-                    m.invoke(desktop, proxyHandler);
-                    m = ReflectionUtil.getMethod(desktopClass, "setOpenFileHandler", openFilesHandlerClass);
-                    m.invoke(desktop, proxyHandler);
-
-                    // final TaskBar taskbar = Taskbar.getTaskBar();
-                    // taskbar.setIconImage(ResourceUtil.IMAGE_ICY_256);
-
-                    final Class<?> taskBarClass = ClassUtil.findClass("java.awt.Taskbar");
-                    final Object taskBar = taskBarClass.getDeclaredMethod("getTaskbar").invoke(null);
-
-                    m = ReflectionUtil.getMethod(taskBarClass, "setIconImage", Image.class);
-                    m.invoke(taskBar, ResourceUtil.IMAGE_ICY_256);
-                }
+                final Taskbar taskbar = Taskbar.getTaskbar();
+                taskbar.setIconImage(ResourceUtil.IMAGE_ICY_256);
 
                 // set menu bar name
                 SystemUtil.setProperty("com.apple.mrj.application.apple.menu.about.name", "Icy");
                 SystemUtil.setProperty("apple.awt.application.name", "Icy");
             }
-            catch (Exception e)
-            {
-                System.err.println("Warning: can't install OSX application wrapper...");
+            catch (Exception e) {
+                System.err.println("Warning: can't install MacOS application wrapper...");
                 System.err.println(e.getMessage());
             }
         }
 
         // start the fix thread
-        fixThread.start();
+        //fixThread.start();
     }
 
     /**
      * Apple fix live run (fixes specific OS X JVM stuff)
      */
-    static void appleFixLiveRun()
-    {
-        while (true)
-        {
+    @Deprecated
+    static void appleFixLiveRun() {
+        while (true) {
             final Toolkit toolkit = Toolkit.getDefaultToolkit();
 
             // fix memory leak introduced in java 1.6.0_29 in Mac OS X JVM
@@ -227,8 +83,8 @@ public class AppleUtil
             final PropertyChangeListener[] leak = toolkit.getPropertyChangeListeners("apple.awt.contentScaleFactor");
 
             // remove listener
-            for (int i = 0; i < leak.length; i++)
-                toolkit.removePropertyChangeListener("apple.awt.contentScaleFactor", leak[i]);
+            for (PropertyChangeListener propertyChangeListener : leak)
+                toolkit.removePropertyChangeListener("apple.awt.contentScaleFactor", propertyChangeListener);
 
             // no need more...
             ThreadUtil.sleep(500);

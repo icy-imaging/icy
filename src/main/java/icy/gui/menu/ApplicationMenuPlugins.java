@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,9 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.menu;
 
 import icy.action.PreferencesActions;
+import icy.gui.component.IcyTextFieldHint;
 import icy.gui.component.menu.IcyMenu;
 import icy.gui.component.menu.IcyMenuItem;
 import icy.plugin.PluginDescriptor;
@@ -39,9 +40,16 @@ import java.util.TreeMap;
  * @author Thomas MUSSET
  */
 public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
+
+    private static final ApplicationMenuPlugins instance = new ApplicationMenuPlugins();
+
+    public static synchronized ApplicationMenuPlugins getInstance() {
+        return instance;
+    }
+
     private final IcyMenuItem itemPluginsSettings;
 
-    public ApplicationMenuPlugins() {
+    private ApplicationMenuPlugins() {
         super("Plugins");
 
         itemPluginsSettings = new IcyMenuItem("Plugins Settings...", GoogleMaterialDesignIcons.EXTENSION);
@@ -56,6 +64,10 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
         removeAll();
 
         add(itemPluginsSettings);
+
+        final IcyTextFieldHint searcBar = new IcyTextFieldHint(GoogleMaterialDesignIcons.SEARCH, "Search for plugins...");
+        searcBar.setEnabled(false);
+        add(searcBar);
 
         addSeparator();
 

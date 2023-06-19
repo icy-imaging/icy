@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.menu;
 
 import icy.action.FileActions;
@@ -44,6 +44,16 @@ import java.util.List;
  * @author Thomas MUSSET
  */
 final class ApplicationMenuFile extends AbstractApplicationMenu {
+
+    private static ApplicationMenuFile instance = null;
+
+    public static synchronized ApplicationMenuFile getInstance() {
+        if (instance == null)
+            instance = new ApplicationMenuFile();
+
+        return instance;
+    }
+
     private final IcyMenu menuImport;
     private final IcyMenuItem itemCloseSequence;
     private final IcyMenuItem itemCloseOther;
@@ -52,7 +62,7 @@ final class ApplicationMenuFile extends AbstractApplicationMenu {
     private final IcyMenuItem itemSaveSequenceAs;
     private final IcyMenuItem itemSaveMetadata;
 
-    public ApplicationMenuFile() {
+    private ApplicationMenuFile() {
         super("File");
 
         final IcyMenu menuCreate = new IcyMenu("New", GoogleMaterialDesignIcons.NOTE_ADD);

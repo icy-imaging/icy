@@ -10,6 +10,7 @@ import plugins.kernel.roi.roi2d.ROI2DPolygon;
 /**
  * @deprecated Use #ROI3DFlatPolygon instead
  */
+@Deprecated
 public class ROI3DStackPolygon extends ROI3DStackShape
 {
     public ROI3DStackPolygon()

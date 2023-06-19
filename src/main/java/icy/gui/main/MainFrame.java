@@ -30,6 +30,7 @@ import icy.gui.menu.ApplicationMenu;
 import icy.gui.menu.ApplicationMenuBar;
 import icy.gui.menu.MainRibbon;
 import icy.gui.menu.search.SearchBar;
+import icy.gui.statusbar.StatusBar;
 import icy.gui.util.ComponentUtil;
 import icy.gui.util.WindowPositionSaver;
 import icy.gui.viewer.Viewer;
@@ -116,6 +117,7 @@ public class MainFrame extends JFrame {
     JSplitPane mainPane;
     private final JPanel centerPanel;
     private final IcyDesktopPane desktopPane;
+    private final StatusBar statusBar;
     InspectorPanel inspector;
     boolean detachedMode;
     int lastInspectorWidth;
@@ -174,7 +176,7 @@ public class MainFrame extends JFrame {
         //getRibbon().setMinimized(GeneralPreferences.getRibbonMinimized());
 
         // Application menubar
-        setJMenuBar(new ApplicationMenuBar());
+        setJMenuBar(ApplicationMenuBar.getInstance());
 
         // Toolbars
         JPanel panelToolbars = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -272,6 +274,8 @@ public class MainFrame extends JFrame {
                 GeneralPreferences.setRibbonMinimized(value);
             }
         });*/
+
+        statusBar = new StatusBar();
     }
 
     /**
@@ -354,6 +358,8 @@ public class MainFrame extends JFrame {
         }
         else
             add(mainPane, BorderLayout.CENTER);
+
+        add(statusBar, BorderLayout.SOUTH);
 
         validate();
 

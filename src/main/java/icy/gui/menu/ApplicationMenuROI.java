@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.menu;
 
 import icy.action.RoiActions;
@@ -52,6 +52,16 @@ import java.util.Set;
  * @author Thomas MUSSET
  */
 public final class ApplicationMenuROI extends AbstractApplicationMenu {
+
+    private static ApplicationMenuROI instance = null;
+
+    public static synchronized ApplicationMenuROI getInstance() {
+        if (instance == null)
+            instance = new ApplicationMenuROI();
+
+        return instance;
+    }
+
     private static final Set<ROIToolChangeListener> listeners = new HashSet<>();
 
     private final IcyMenuItem item2DTo3D;
@@ -73,7 +83,7 @@ public final class ApplicationMenuROI extends AbstractApplicationMenu {
 
     private final List<ROI> lastROISelection = new ArrayList<>();
 
-    public ApplicationMenuROI() {
+    private ApplicationMenuROI() {
         super("Region of Interest");
 
         final IcyMenuItem itemLoadROI = new IcyMenuItem("Load ROI...");

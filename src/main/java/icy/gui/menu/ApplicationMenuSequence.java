@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.menu;
 
 import icy.action.SequenceOperationActions;
@@ -34,6 +34,16 @@ import java.awt.*;
  * @author Thomas MUSSET
  */
 public final class ApplicationMenuSequence extends AbstractApplicationMenu {
+
+    private static ApplicationMenuSequence instance = null;
+
+    public static synchronized ApplicationMenuSequence getInstance() {
+        if (instance == null)
+            instance = new ApplicationMenuSequence();
+
+        return instance;
+    }
+
     private final IcyMenu menuConversion;
     private final IcyMenu menuRawConversion;
     private final IcyMenu menuExtractChannel;
@@ -70,7 +80,7 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
     private final IcyMenuItem itemConvertToSlices;
     private final IcyMenuItem itemConvertToFrames;
 
-    public ApplicationMenuSequence() {
+    private ApplicationMenuSequence() {
         super("Sequence");
 
         final IcyMenuItem itemDuplicate = new IcyMenuItem("Duplicate Sequence", GoogleMaterialDesignIcons.PHOTO_LIBRARY);

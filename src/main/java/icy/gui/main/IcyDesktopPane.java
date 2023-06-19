@@ -24,34 +24,14 @@ import icy.gui.viewer.Viewer;
 import icy.main.Icy;
 import icy.math.HungarianAlgorithm;
 import icy.resource.ResourceUtil;
-import icy.util.GraphicsUtil;
-import icy.util.Random;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JDesktopPane;
-import javax.swing.JInternalFrame;
 
 /**
  * Icy {@link JDesktopPane} class.<br>
@@ -82,21 +62,22 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
         private final static String BACKGROUND_PATH = "background/";
 
         private final Image backGround;
-        private final Image icyLogo;
-        private final Color textColor;
-        private final Color bgTextColor;
+        //private final Image icyLogo;
+        //private final Color textColor;
+        //private final Color bgTextColor;
 
         public BackgroundDesktopOverlay() {
             super();
 
             // load random background (nor really random as we have only one right now)
-            backGround = ResourceUtil.getImage(BACKGROUND_PATH + Integer.toString(Random.nextInt(1)) + ".jpg");
+            //backGround = ResourceUtil.getImage(BACKGROUND_PATH + Integer.toString(Random.nextInt(1)) + ".jpg");
+            backGround = ResourceUtil.getImage(BACKGROUND_PATH + "4.png");
             // load Icy logo
-            icyLogo = ResourceUtil.getImage("logoICY.png");
+            //icyLogo = ResourceUtil.getImage("logoICY.png");
 
             // default text colors
-            textColor = new Color(0, 0, 0, 0.5f);
-            bgTextColor = new Color(1, 1, 1, 0.5f);
+            //textColor = new Color(0, 0, 0, 0.5f);
+            //bgTextColor = new Color(1, 1, 1, 0.5f);
         }
 
         @Override
@@ -113,29 +94,34 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
             final int bgImgHeight = backGround.getHeight(this);
 
             // compute image scaling
-            final double scale = Math.max((double) width / (double) bgImgWidth, (double) height / (double) bgImgHeight) * 1.5d;
+            //final double scale = Math.max((double) width / (double) bgImgWidth, (double) height / (double) bgImgHeight) * 1.5d;
             final Graphics2D g2 = (Graphics2D) g.create();
 
             // fill background color
             g2.setBackground(bgColor);
             g2.clearRect(0, 0, width, height);
 
-            // paint image over background in transparency
-            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.2f));
-            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g2.drawImage(backGround, 0, 0, (int) (scale * bgImgWidth), (int) (scale * bgImgHeight), bgColor, this);
+            //int imgWidth = Math.min(desktop.getWidth(), desktop.getHeight());
+            //int imgHeight = imgWidth;
 
-            final String text = "Version " + Icy.version;
-            final int textWidth = (int) GraphicsUtil.getStringBounds(g, text).getWidth();
+            // paint image over background in transparency
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .2f));
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            //g2.drawImage(backGround, 0, 0, (int) (scale * bgImgWidth), (int) (scale * bgImgHeight), bgColor, this);
+            //g2.drawImage(backGround, (desktop.getWidth()/2)-(imgWidth/2), (desktop.getHeight()/2)-(imgWidth/2), imgWidth, imgHeight, bgColor, this);
+            g2.drawImage(backGround, (desktop.getWidth()/2)-(bgImgWidth/2), (desktop.getHeight()/2)-(bgImgHeight/2), bgImgWidth, bgImgHeight, null, this);
+
+            //final String text = "Version " + Icy.version;
+            //final int textWidth = (int) GraphicsUtil.getStringBounds(g, text).getWidth();
 
             // draw version text
-            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.7f));
-            g2.setColor(bgTextColor);
-            g2.drawString(text, width - (textWidth + 31), height - 8);
-            g2.setColor(textColor);
-            g2.drawString(text, width - (textWidth + 30), height - 9);
+            //g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.7f));
+            //g2.setColor(bgTextColor);
+            //g2.drawString(text, width - (textWidth + 31), height - 8);
+            //g2.setColor(textColor);
+            //g2.drawString(text, width - (textWidth + 30), height - 9);
             // and draw Icy text logo
-            g2.drawImage(icyLogo, width - 220, height - 130, this);
+            //g2.drawImage(icyLogo, width - 220, height - 130, this);
 
             g2.dispose();
         }

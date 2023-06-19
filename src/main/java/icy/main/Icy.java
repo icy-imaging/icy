@@ -109,7 +109,7 @@ public class Icy
     /**
      * Icy Version
      */
-    public static Version version = new Version("2.4.3.0");
+    public static Version version = new Version("3.0.0.0B");
 
     /**
      * Main interface
@@ -229,8 +229,8 @@ public class Icy
             // set LOCI debug level (do it immediately as it can quickly show some log messages)
             loci.common.DebugTools.enableLogging("ERROR");
             // disable GLSL on OSX otherwise GLJPanel stay blank (error on GL state preservation)
-            if (SystemUtil.isMac())
-                System.setProperty("jogl.gljpanel.noglsl", "true");
+            /*if (SystemUtil.isMac())
+                System.setProperty("jogl.gljpanel.noglsl", "true");*/
             if (!headless && SystemUtil.isMac())
                 System.setProperty("apple.laf.useScreenMenuBar", "false"); // FIXME change behaviour on detached mode
             if (!headless)
@@ -1200,6 +1200,333 @@ public class Icy
             // }
             // else
             {
+                loadLibrary(vtkLibPath, "vtkalglib", false);
+                loadLibrary(vtkLibPath, "vtkdoubleconversion", false);
+                loadLibrary(vtkLibPath, "vtklz4");
+                loadLibrary(vtkLibPath, "vtkzlib");
+                loadLibrary(vtkLibPath, "vtkexpat");
+                loadLibrary(vtkLibPath, "vtkDICOMParser");
+                loadLibrary(vtkLibPath, "vtkjpeg");
+                loadLibrary(vtkLibPath, "vtkpng");
+                loadLibrary(vtkLibPath, "vtkfreetype");
+                loadLibrary(vtkLibPath, "vtksys");
+                loadLibrary(vtkLibPath, "vtklzma", false);
+                loadLibrary(vtkLibPath, "vtkgl2ps", false); //
+                loadLibrary(vtkLibPath, "vtkogg", false);
+                loadLibrary(vtkLibPath, "vtkverdict");
+                loadLibrary(vtkLibPath, "vtktheora", false);
+                loadLibrary(vtkLibPath, "vtkoggtheora", false);
+                loadLibrary(vtkLibPath, "vtkjsoncpp");
+                loadLibrary(vtkLibPath, "vtkmetaio");
+                loadLibrary(vtkLibPath, "vtktiff");
+                loadLibrary(vtkLibPath, "vtklibharu");
+                loadLibrary(vtkLibPath, "vtkproj", false);
+                loadLibrary(vtkLibPath, "vtkproj4", false);
+                loadLibrary(vtkLibPath, "vtklibxml2");
+                loadLibrary(vtkLibPath, "vtkftgl", false);
+                loadLibrary(vtkLibPath, "vtkftgl2", false); //
+                loadLibrary(vtkLibPath, "vtkglew", false);
+                loadLibrary(vtkLibPath, "vtkpugixml", false);
+                loadLibrary(vtkLibPath, "vtksqlite", false);
+                loadLibrary(vtkLibPath, "vtkhdf5.8.2.0", false);
+                loadLibrary(vtkLibPath, "vtkhdf5_hl.8.2.0", false);
+                loadLibrary(vtkLibPath, "vtkhdf5", false);
+                loadLibrary(vtkLibPath, "vtkhdf5_hl", false);
+                loadLibrary(vtkLibPath, "vtkNetCDF");
+                loadLibrary(vtkLibPath, "vtkNetCDF_cxx", false);
+                loadLibrary(vtkLibPath, "vtknetcdf_c++", false);
+                loadLibrary(vtkLibPath, "vtknetcdfcpp", false);
+                loadLibrary(vtkLibPath, "vtkexodusII", false);
+                loadLibrary(vtkLibPath, "vtkexoIIc", false);
+
+                loadLibrary(vtkLibPath, "vtkCommonCore");
+                loadLibrary(vtkLibPath, "vtkWrappingJava");
+                loadLibrary(vtkLibPath, "vtkCommonSystem");
+                loadLibrary(vtkLibPath, "vtkCommonMath");
+                loadLibrary(vtkLibPath, "vtkCommonMisc");
+                loadLibrary(vtkLibPath, "vtkCommonTransforms");
+                loadLibrary(vtkLibPath, "vtkCommonDataModel");
+                loadLibrary(vtkLibPath, "vtkCommonColor");
+                loadLibrary(vtkLibPath, "vtkCommonComputationalGeometry");
+                loadLibrary(vtkLibPath, "vtkCommonExecutionModel");
+                loadLibrary(vtkLibPath, "vtkFiltersTopology");
+                loadLibrary(vtkLibPath, "vtkFiltersVerdict");
+                loadLibrary(vtkLibPath, "vtkFiltersProgrammable");
+                loadLibrary(vtkLibPath, "vtkImagingMath");
+                loadLibrary(vtkLibPath, "vtkIOCore");
+                loadLibrary(vtkLibPath, "vtkIOEnSight");
+                loadLibrary(vtkLibPath, "vtkIOVideo");
+                loadLibrary(vtkLibPath, "vtkIOVeraOut", false);
+                loadLibrary(vtkLibPath, "vtkIOLegacy");
+                loadLibrary(vtkLibPath, "vtkIONetCDF");
+                loadLibrary(vtkLibPath, "vtkIOXMLParser");
+                loadLibrary(vtkLibPath, "vtkIOXML");
+                loadLibrary(vtkLibPath, "vtkIOTecplotTable");
+                loadLibrary(vtkLibPath, "vtkIOImage");
+                loadLibrary(vtkLibPath, "vtkIOSQL");
+                loadLibrary(vtkLibPath, "vtkIOMovie");
+                loadLibrary(vtkLibPath, "vtkParallelCore");
+                loadLibrary(vtkLibPath, "vtkImagingCore");
+                loadLibrary(vtkLibPath, "vtkIOSegY", false);
+                loadLibrary(vtkLibPath, "vtkFiltersCore");
+                loadLibrary(vtkLibPath, "vtkImagingColor");
+                loadLibrary(vtkLibPath, "vtkImagingFourier");
+                loadLibrary(vtkLibPath, "vtkImagingSources");
+                loadLibrary(vtkLibPath, "vtkImagingHybrid");
+                loadLibrary(vtkLibPath, "vtkImagingStatistics");
+                loadLibrary(vtkLibPath, "vtkIOGeometry");
+                loadLibrary(vtkLibPath, "vtkIOPLY");
+                loadLibrary(vtkLibPath, "vtkFiltersSelection");
+                loadLibrary(vtkLibPath, "vtkImagingGeneral");
+                loadLibrary(vtkLibPath, "vtkImagingStencil");
+                loadLibrary(vtkLibPath, "vtkImagingMorphological");
+                loadLibrary(vtkLibPath, "vtkFiltersGeometry");
+                loadLibrary(vtkLibPath, "vtkFiltersStatistics");
+                loadLibrary(vtkLibPath, "vtkFiltersImaging");
+                loadLibrary(vtkLibPath, "vtkIOLSDyna");
+                loadLibrary(vtkLibPath, "vtkIOAsynchronous", false);
+                loadLibrary(vtkLibPath, "vtkIOParallelXML");
+                loadLibrary(vtkLibPath, "vtkFiltersGeneral");
+                loadLibrary(vtkLibPath, "vtkFiltersHyperTree");
+                loadLibrary(vtkLibPath, "vtkFiltersSMP");
+                loadLibrary(vtkLibPath, "vtkFiltersTexture");
+                loadLibrary(vtkLibPath, "vtkFiltersAMR");
+                loadLibrary(vtkLibPath, "vtkFiltersExtraction");
+                loadLibrary(vtkLibPath, "vtkFiltersSources");
+                loadLibrary(vtkLibPath, "vtkIOExodus");
+                loadLibrary(vtkLibPath, "vtkFiltersGeneric");
+                loadLibrary(vtkLibPath, "vtkFiltersModeling");
+                loadLibrary(vtkLibPath, "vtkIOAMR");
+                loadLibrary(vtkLibPath, "vtkFiltersFlowPaths");
+                loadLibrary(vtkLibPath, "vtkIOCityGML", false);
+                loadLibrary(vtkLibPath, "vtkInfovisCore");
+                loadLibrary(vtkLibPath, "vtkIOInfovis");
+                loadLibrary(vtkLibPath, "vtkFiltersPoints");
+                loadLibrary(vtkLibPath, "vtkInfovisLayout");
+                loadLibrary(vtkLibPath, "vtkRenderingCore");
+                loadLibrary(vtkLibPath, "vtkRenderingLOD");
+                loadLibrary(vtkLibPath, "vtkRenderingImage");
+                loadLibrary(vtkLibPath, "vtkRenderingFreeType");
+                loadLibrary(vtkLibPath, "vtkDomainsChemistry");
+                loadLibrary(vtkLibPath, "vtkDomainsChemistryOpenGL2", false);
+                loadLibrary(vtkLibPath, "vtkInteractionStyle");
+                loadLibrary(vtkLibPath, "vtkIOImport");
+                loadLibrary(vtkLibPath, "vtkRenderingAnnotation");
+                loadLibrary(vtkLibPath, "vtkRenderingLabel");
+                loadLibrary(vtkLibPath, "vtkFiltersHybrid");
+                loadLibrary(vtkLibPath, "vtkFiltersParallel");
+                loadLibrary(vtkLibPath, "vtkFiltersParallelImaging");
+                loadLibrary(vtkLibPath, "vtkIOMINC");
+                loadLibrary(vtkLibPath, "vtkIOParallel");
+                loadLibrary(vtkLibPath, "vtkRenderingVolume");
+                loadLibrary(vtkLibPath, "vtkRenderingVolumeAMR", false);
+                loadLibrary(vtkLibPath, "vtkInteractionWidgets");
+                loadLibrary(vtkLibPath, "vtkInteractionImage");
+                loadLibrary(vtkLibPath, "vtkViewsCore");
+
+                loadLibrary(vtkLibPath, "vtkRenderingOpenGL2", false);
+                loadLibrary(vtkLibPath, "vtkRenderingLIC", false); //
+                loadLibrary(vtkLibPath, "vtkRenderingVolumeOpenGL2", false);
+                loadLibrary(vtkLibPath, "vtkRenderingContext2D");
+                loadLibrary(vtkLibPath, "vtkRenderingContextOpenGL2", false);
+                loadLibrary(vtkLibPath, "vtkRenderingGL2PS", false); //
+                loadLibrary(vtkLibPath, "vtkRenderingGL2PSOpenGL2", false); //
+
+                loadLibrary(vtkLibPath, "vtkViewsContext2D");
+                loadLibrary(vtkLibPath, "vtkGeovisCore");
+                loadLibrary(vtkLibPath, "vtkIOExport");
+                loadLibrary(vtkLibPath, "vtkIOExportOpenGL2");
+                loadLibrary(vtkLibPath, "vtkIOExportPDF", false);
+
+                loadLibrary(vtkLibPath, "vtkChartsCore");
+                loadLibrary(vtkLibPath, "vtkViewsInfovis");
+                loadLibrary(vtkLibPath, "vtkViewsGeovis", false);
+
+                // JAVA wrapper
+                loadLibrary(vtkLibPath, "vtkCommonCoreJava");
+                loadLibrary(vtkLibPath, "vtkCommonSystemJava");
+                loadLibrary(vtkLibPath, "vtkCommonMathJava");
+                loadLibrary(vtkLibPath, "vtkCommonMiscJava");
+                loadLibrary(vtkLibPath, "vtkCommonTransformsJava");
+                loadLibrary(vtkLibPath, "vtkCommonDataModelJava");
+                loadLibrary(vtkLibPath, "vtkCommonColorJava");
+                loadLibrary(vtkLibPath, "vtkCommonComputationalGeometryJava");
+                loadLibrary(vtkLibPath, "vtkCommonExecutionModelJava");
+                loadLibrary(vtkLibPath, "vtkFiltersTopologyJava");
+                loadLibrary(vtkLibPath, "vtkFiltersVerdictJava");
+                loadLibrary(vtkLibPath, "vtkFiltersProgrammableJava");
+                loadLibrary(vtkLibPath, "vtkImagingMathJava");
+                loadLibrary(vtkLibPath, "vtkIOCoreJava");
+                loadLibrary(vtkLibPath, "vtkIOEnSightJava");
+                loadLibrary(vtkLibPath, "vtkIOVideoJava");
+                loadLibrary(vtkLibPath, "vtkIOVeraOutJava", false);
+                loadLibrary(vtkLibPath, "vtkIOLegacyJava");
+                loadLibrary(vtkLibPath, "vtkIONetCDFJava");
+                loadLibrary(vtkLibPath, "vtkIOXMLParserJava");
+                loadLibrary(vtkLibPath, "vtkIOXMLJava");
+                loadLibrary(vtkLibPath, "vtkIOTecplotTableJava");
+                loadLibrary(vtkLibPath, "vtkIOImageJava");
+                loadLibrary(vtkLibPath, "vtkIOSQLJava");
+                loadLibrary(vtkLibPath, "vtkIOMovieJava");
+                loadLibrary(vtkLibPath, "vtkParallelCoreJava");
+                loadLibrary(vtkLibPath, "vtkImagingCoreJava");
+                loadLibrary(vtkLibPath, "vtkIOSegYJava", false);
+                loadLibrary(vtkLibPath, "vtkFiltersCoreJava");
+                loadLibrary(vtkLibPath, "vtkImagingColorJava");
+                loadLibrary(vtkLibPath, "vtkImagingFourierJava");
+                loadLibrary(vtkLibPath, "vtkImagingSourcesJava");
+                loadLibrary(vtkLibPath, "vtkImagingHybridJava");
+                loadLibrary(vtkLibPath, "vtkImagingStatisticsJava");
+                loadLibrary(vtkLibPath, "vtkIOGeometryJava");
+                loadLibrary(vtkLibPath, "vtkIOPLYJava");
+                loadLibrary(vtkLibPath, "vtkFiltersSelectionJava");
+                loadLibrary(vtkLibPath, "vtkImagingGeneralJava");
+                loadLibrary(vtkLibPath, "vtkImagingStencilJava");
+                loadLibrary(vtkLibPath, "vtkImagingMorphologicalJava");
+                loadLibrary(vtkLibPath, "vtkFiltersGeometryJava");
+                loadLibrary(vtkLibPath, "vtkFiltersStatisticsJava");
+                loadLibrary(vtkLibPath, "vtkFiltersImagingJava");
+                loadLibrary(vtkLibPath, "vtkIOLSDynaJava");
+                loadLibrary(vtkLibPath, "vtkIOAsynchronousJava", false);
+                loadLibrary(vtkLibPath, "vtkIOParallelXMLJava");
+                loadLibrary(vtkLibPath, "vtkFiltersGeneralJava");
+                loadLibrary(vtkLibPath, "vtkFiltersHyperTreeJava");
+                loadLibrary(vtkLibPath, "vtkFiltersSMPJava");
+                loadLibrary(vtkLibPath, "vtkFiltersTextureJava");
+                loadLibrary(vtkLibPath, "vtkFiltersAMRJava");
+                loadLibrary(vtkLibPath, "vtkFiltersExtractionJava");
+                loadLibrary(vtkLibPath, "vtkFiltersSourcesJava");
+                loadLibrary(vtkLibPath, "vtkIOExodusJava");
+                loadLibrary(vtkLibPath, "vtkFiltersGenericJava");
+                loadLibrary(vtkLibPath, "vtkFiltersModelingJava");
+                loadLibrary(vtkLibPath, "vtkIOAMRJava");
+                loadLibrary(vtkLibPath, "vtkFiltersFlowPathsJava");
+                loadLibrary(vtkLibPath, "vtkIOCityGMLJava", false);
+                loadLibrary(vtkLibPath, "vtkInfovisCoreJava");
+                loadLibrary(vtkLibPath, "vtkIOInfovisJava");
+                loadLibrary(vtkLibPath, "vtkFiltersPointsJava");
+                loadLibrary(vtkLibPath, "vtkInfovisLayoutJava");
+                loadLibrary(vtkLibPath, "vtkRenderingCoreJava");
+                loadLibrary(vtkLibPath, "vtkRenderingLODJava");
+                loadLibrary(vtkLibPath, "vtkRenderingImageJava");
+                loadLibrary(vtkLibPath, "vtkRenderingFreeTypeJava");
+                loadLibrary(vtkLibPath, "vtkDomainsChemistryJava");
+                loadLibrary(vtkLibPath, "vtkDomainsChemistryOpenGL2Java", false);
+                loadLibrary(vtkLibPath, "vtkInteractionStyleJava");
+                loadLibrary(vtkLibPath, "vtkIOImportJava");
+                loadLibrary(vtkLibPath, "vtkRenderingAnnotationJava");
+                loadLibrary(vtkLibPath, "vtkRenderingLabelJava");
+                loadLibrary(vtkLibPath, "vtkFiltersHybridJava");
+                loadLibrary(vtkLibPath, "vtkFiltersParallelJava");
+                loadLibrary(vtkLibPath, "vtkFiltersParallelImagingJava");
+                loadLibrary(vtkLibPath, "vtkIOMINCJava");
+                loadLibrary(vtkLibPath, "vtkIOParallelJava");
+                loadLibrary(vtkLibPath, "vtkRenderingVolumeJava");
+                loadLibrary(vtkLibPath, "vtkRenderingVolumeAMRJava", false);
+                loadLibrary(vtkLibPath, "vtkInteractionWidgetsJava");
+                loadLibrary(vtkLibPath, "vtkInteractionImageJava");
+                loadLibrary(vtkLibPath, "vtkViewsCoreJava");
+
+                loadLibrary(vtkLibPath, "vtkRenderingOpenGL2Java", false);
+                loadLibrary(vtkLibPath, "vtkRenderingLICJava", false); //
+                loadLibrary(vtkLibPath, "vtkRenderingVolumeOpenGL2Java", false);
+                loadLibrary(vtkLibPath, "vtkRenderingContext2DJava");
+                loadLibrary(vtkLibPath, "vtkRenderingContextOpenGL2Java", false);
+                loadLibrary(vtkLibPath, "vtkRenderingGL2PSJava", false); //
+                loadLibrary(vtkLibPath, "vtkRenderingGL2PSOpenGL2", false); //
+
+                loadLibrary(vtkLibPath, "vtkViewsContext2DJava");
+                loadLibrary(vtkLibPath, "vtkGeovisCoreJava");
+                loadLibrary(vtkLibPath, "vtkIOExportJava");
+                loadLibrary(vtkLibPath, "vtkIOExportOpenGL2Java");
+                loadLibrary(vtkLibPath, "vtkIOExportPDFJava", false);
+                loadLibrary(vtkLibPath, "vtkChartsCoreJava");
+                loadLibrary(vtkLibPath, "vtkViewsInfovisJava");
+                loadLibrary(vtkLibPath, "vtkViewsGeovisJava", false);
+
+                // VTK library successfully loaded
+                vtkLibraryLoaded = true;
+            }
+
+            // redirect vtk error log to file
+            vtkNativeLibrary.DisableOutputWindow(new File("vtk.log"));
+        }
+        catch (Throwable e1)
+        {
+            IcyExceptionHandler.showErrorMessage(e1, false, false);
+
+            // // try to load the VTK way
+            // try
+            // {
+            // System.out.print("Try to load VTK library using VTK method... ");
+            //
+            // vtkLibraryLoaded = vtkNativeLibrary.LoadAllNativeLibraries();
+            //
+            // if (vtkLibraryLoaded)
+            // System.out.println("success !");
+            // else
+            // System.out.println("failed !");
+            //
+            // // redirect vtk error log to file
+            // vtkNativeLibrary.DisableOutputWindow(new File("vtk.log"));
+            // }
+            // catch (Throwable e2)
+            // {
+            // IcyExceptionHandler.showErrorMessage(e2, false, false);
+            // }
+        }
+
+        if (vtkLibraryLoaded)
+        {
+            final String vv = new vtkVersion().GetVTKVersion();
+
+            System.out.println("VTK " + vv + " library successfully loaded...");
+
+            // final vtkJavaGarbageCollector vtkJavaGarbageCollector =
+            // vtkObjectBase.JAVA_OBJECT_MANAGER
+            // .getAutoGarbageCollector();
+            //
+            // set auto garbage collection for VTK (every 20 seconds should be enough)
+            // probably not a good idea...
+            // vtkJavaGarbageCollector.SetScheduleTime(5, TimeUnit.SECONDS);
+            // vtkJavaGarbageCollector.SetAutoGarbageCollection(true);
+        }
+        else
+        {
+            System.out.println("Cannot load VTK library...");
+
+            if (SystemUtil.isMac())
+            {
+                final String osVer = SystemUtil.getOSVersion();
+
+                if (osVer.startsWith("10.6") || osVer.startsWith("10.5"))
+                    System.out.println(
+                            "VTK 6.3 is not supported on OSX " + osVer + ", version 10.7 or above is required.");
+            }
+        }
+    }
+
+    private static void loadVtkLibrary_v9_2_1(File libPathFile)
+    {
+        final String vtkLibPath = FileUtil.getGenericPath(new File(libPathFile, "vtk").getAbsolutePath());
+
+        // we load it directly from inner lib path if possible
+        System.setProperty("vtk.lib.dir", vtkLibPath);
+
+        vtkLibraryLoaded = false;
+        try
+        {
+            // if (SystemUtil.isUnix())
+            // {
+            // vtkNativeLibrary.LoadAllNativeLibraries();
+            //
+            // // assume VTK loaded if at least 1 native library is loaded
+            // for (vtkNativeLibrary lib : vtkNativeLibrary.values())
+            // if (lib.IsLoaded())
+            // vtkLibraryLoaded = true;
+            // }
+            // else
+            {
                 //loadLibrary(vtkLibPath, "vtkalglib"); //, false);
                 loadLibrary(vtkLibPath, "vtkdoubleconversion"); //, false);
                 loadLibrary(vtkLibPath, "vtklz4");
@@ -1618,7 +1945,7 @@ public class Icy
 
 
                 // VTK library successfully loaded
-                vtkLibraryLoaded = true;
+                vtkLibraryLoaded = false;
             }
 
             // redirect vtk error log to file

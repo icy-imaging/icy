@@ -34,6 +34,7 @@ import vtk.vtkProperty;
 /**
  * @deprecated Use #ROI3DZShape instead
  */
+@Deprecated
 public abstract class ROI3DStackShape extends ROI3DStack<ROI2DShape>
 {
     public ROI3DStackShape(Class<? extends ROI2DShape> roiClass)

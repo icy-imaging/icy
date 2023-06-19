@@ -12,6 +12,7 @@ import plugins.kernel.roi.roi2d.ROI2DEllipse;
 /**
  * @deprecated Use #ROI3DCylinder instead
  */
+@Deprecated
 public class ROI3DStackEllipse extends ROI3DStackShape
 {
     public ROI3DStackEllipse()

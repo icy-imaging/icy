@@ -118,7 +118,7 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener {
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
+    protected void paintComponent(final Graphics g) {
         final Graphics2D g2 = (Graphics2D) g.create();
 
         final int w = getWidth();

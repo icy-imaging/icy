@@ -9,6 +9,7 @@ import plugins.kernel.roi.roi2d.ROI2DRectangle;
 /**
  * @deprecated Use #ROI3DBox instead
  */
+@Deprecated
 public class ROI3DStackRectangle extends ROI3DStackShape
 {
     public ROI3DStackRectangle()

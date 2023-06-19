@@ -27,8 +27,6 @@ public class BooleanMask3D implements Cloneable
     /**
      * A temporary component structure used during the extraction process. Many such components may
      * be extracted from the sequence, and some are fused into the final extracted ROI
-     * 
-     * @author Alexandre Dufour
      */
     private static class ConnectedComponent
     {
@@ -1339,9 +1337,7 @@ public class BooleanMask3D implements Cloneable
      * Computes and returns the length of the contour.<br>
      * This is different from the number of contour point as it takes care of approximating
      * correctly distance between each contour point.
-     * 
-     * @author Alexandre Dufour
-     * @author Stephane Dallongeville
+     *
      * @return the length of the contour
      * @throws InterruptedException
      */
