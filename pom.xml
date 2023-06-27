@@ -32,6 +32,47 @@
                     </excludes>
                     <source>11</source>
                     <target>11</target>
+                    <compilerArgs>
+                        <arg>--add-modules</arg>
+                        <arg>java.se,java.desktop</arg>
+
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/com.google.common.util.concurrent=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/loci.common=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/loci.common.services=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/loci.formats=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/loci.formats.in=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/loci.formats.gui=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/loci.formats.meta=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/loci.formats.ome=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/loci.formats.out=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/loci.formats.services=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/loci.plugins.out=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/ome.units=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/ome.units.quantity=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/ome.xml.meta=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/ome.xml.model=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/ome.xml.model.enums=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/ome.xml.model.primitives=icy</arg>
+                        <arg>--add-exports</arg>
+                        <arg>icy.bioformats/org.joda.time=icy</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
@@ -152,6 +193,7 @@
                 <configuration>
                     <overview>${basedir}/src/main/javadoc/overview.html</overview>
                     <stylesheetfile>${basedir}/src/main/javadoc/java7doc.css</stylesheetfile>
+                    <failOnError>false</failOnError>
                 </configuration>
             </plugin>
 
@@ -171,6 +213,7 @@
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-bioformats</artifactId>
+            <version>7.0.0</version>
         </dependency>
 
         <dependency>
