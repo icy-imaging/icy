@@ -664,7 +664,8 @@ public class LoaderOptionPanel extends JPanel
          */
         public synchronized void updatePreview()
         {
-            updatePreview(singleUpdater.files, series);
+            if (singleUpdater != null)
+                updatePreview(singleUpdater.files, series);
         }
 
         /**
@@ -673,7 +674,8 @@ public class LoaderOptionPanel extends JPanel
          */
         public synchronized void updatePreview(int s)
         {
-            updatePreview(singleUpdater.files, s);
+            if (singleUpdater != null)
+                updatePreview(singleUpdater.files, s);
         }
 
         /**
