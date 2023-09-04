@@ -552,7 +552,7 @@ public class Icy
         if ((javaVersion > 0) && (javaVersion < 7d) && SystemUtil.isMac())
         {
             final String text = "It looks like you're using a old version of Java (1.6)<br>"
-                    + "It's recommended to use last JDK 8 for OSX for a better user experience.<br>See the <a href=\"http://icy.bioimageanalysis.org/faq#35\">FAQ</a> to get information about how to update java.";
+                    + "It's recommended to use last JDK 8 for OSX for a better user experience.<br>See the <a href=\"https://icy.bioimageanalysis.org/faq#35\">FAQ</a> to get information about how to update java.";
 
             System.out.println("Warning: " + text);
 
@@ -1081,8 +1081,8 @@ public class Icy
      */
     public static String getChangeLog()
     {
-        if (FileUtil.exists("CHANGELOG"))
-            return new String(FileUtil.load("CHANGELOG", false));
+        if (FileUtil.exists("CHANGELOG.md"))
+            return new String(FileUtil.load("CHANGELOG.md", false));
 
         return "";
     }

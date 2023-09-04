@@ -465,7 +465,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
         final int idInd = getIdIndex(0, 0, externalZ, externalT, externalC);
 
-        return new FileCursor(positions[idInd], idInd, internalZ, internalT, internalC);
+        return new FileCursor((idInd < positions.length) ? positions[idInd] : null, idInd, internalZ, internalT, internalC);
     }
 
     /**

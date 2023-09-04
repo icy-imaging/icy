@@ -3,10 +3,6 @@
  */
 package icy.image.colormap;
 
-import icy.file.xml.XMLPersistent;
-import icy.math.Interpolator;
-import icy.util.XMLUtil;
-
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +11,10 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import icy.file.xml.XMLPersistent;
+import icy.math.Interpolator;
+import icy.util.XMLUtil;
 
 /**
  * @author Stephane
@@ -408,11 +408,20 @@ public class IcyColorMapComponent implements XMLPersistent
         }
     }
 
+    public boolean isSame(IcyColorMapComponent source)
+    {
+        return controlPoints.equals(source.controlPoints) && (rawData == source.rawData) && map.equals(source.map);
+    }
+
     /**
      * Copy data from specified source colormap band
      */
     public void copyFrom(IcyColorMapComponent source)
     {
+        // nothing to do..
+        if (isSame(source))
+            return;
+
         // copy the rawData property
         rawData = source.rawData;
 

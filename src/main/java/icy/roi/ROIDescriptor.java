@@ -119,8 +119,8 @@ public abstract class ROIDescriptor
      * @throws InterruptedException
      *         if the thread was interrupted during the computation of the descriptor
      */
-    public static Object computeDescriptor(Collection<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi,
-            Sequence sequence) throws UnsupportedOperationException, InterruptedException
+    public static Object computeDescriptor(Collection<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi, Sequence sequence)
+            throws UnsupportedOperationException, InterruptedException
     {
         final ROIDescriptor roiDescriptor = getDescriptor(roiDescriptors, descriptorId);
 
@@ -150,8 +150,7 @@ public abstract class ROIDescriptor
      * @throws InterruptedException
      *         if the thread was interrupted during the computation of the descriptor
      */
-    public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence)
-            throws UnsupportedOperationException, InterruptedException
+    public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return computeDescriptor(getDescriptors().keySet(), descriptorId, roi, sequence);
     }
@@ -231,6 +230,29 @@ public abstract class ROIDescriptor
     };
 
     /**
+     * Returns the [minimum, maximum] allowed value for this descriptor [(useful only for Number type descriptor)
+     * 
+     * @see #compute(ROI, Sequence)
+     */
+    public Object[] getBounds()
+    {
+        if (type == Byte.class)
+            return new Object[] {Byte.valueOf((byte) 0), Byte.valueOf(Byte.MAX_VALUE)};
+        if (type == Short.class)
+            return new Object[] {Short.valueOf((short) 0), Long.valueOf(Short.MAX_VALUE)};
+        if (type == Integer.class)
+            return new Object[] {Integer.valueOf(0), Integer.valueOf(Integer.MAX_VALUE)};
+        if (type == Long.class)
+            return new Object[] {Long.valueOf(0), Long.valueOf(Long.MAX_VALUE)};
+        if (type == Float.class)
+            return new Object[] {Float.valueOf(0f), Float.valueOf(1f)};
+        if (type == Double.class)
+            return new Object[] {Double.valueOf(0d), Double.valueOf(1d)};
+
+        return null;
+    };
+
+    /**
      * Returns <code>true</code> if this descriptor compute its result on {@link Sequence} data and *per channel* (as
      * pixel intensity information).<br>
      * By default it returns <code>false</code>, override this method if a descriptor require per channel computation.
@@ -280,8 +302,7 @@ public abstract class ROIDescriptor
      * @throws InterruptedException
      *         if the thread was interrupted during the computation of the descriptor
      */
-    public abstract Object compute(ROI roi, Sequence sequence)
-            throws UnsupportedOperationException, InterruptedException;
+    public abstract Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException;
 
     /*
      * We want a unique id for each {@link ROIDescriptor}

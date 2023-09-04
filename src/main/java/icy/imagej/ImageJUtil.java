@@ -17,7 +17,6 @@ package icy.imagej;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import icy.type.DataType;
 import icy.type.collection.array.Array1DUtil;
 import icy.type.collection.array.Array2DUtil;
 import icy.type.collection.array.ArrayUtil;
+import icy.type.geom.areax.AreaX;
 import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -538,9 +538,9 @@ public class ImageJUtil
             final ROI2DArea roiArea = (ROI2DArea) roi;
             final Point[] points = roiArea.getBooleanMask(true).getPoints();
 
-            final Area area = new Area();
+            final AreaX area = new AreaX();
             for (Point pt : points)
-                area.add(new Area(new Rectangle(pt.x, pt.y, 1, 1)));
+                area.add(new AreaX(new Rectangle(pt.x, pt.y, 1, 1)));
 
             result = new ShapeRoi(area);
         }

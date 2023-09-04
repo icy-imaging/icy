@@ -333,8 +333,8 @@ public class ColormapViewer extends BorderedPanel implements MouseListener, Mous
                 polyline.lineTo(i, intensity);
             }
         }
-        else
         // the LUT is defined through control points, use them.
+        else if (cmc.getControlPointCount() > 0)
         {
             polyline = new GeneralPath(Path2D.WIND_EVEN_ODD, cmc.getControlPointCount());
 

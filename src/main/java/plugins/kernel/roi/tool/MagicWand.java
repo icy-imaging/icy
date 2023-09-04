@@ -106,8 +106,8 @@ public class MagicWand
      * @param gradientTolerance
      * @return
      */
-    public static ROI2D doWand2D(Sequence sequence, int xStart, int yStart, int z, int t, int channel,
-            double valueTolerance, double colorSensitivity, double gradientTolerance)
+    public static ROI2D doWand2D(Sequence sequence, int xStart, int yStart, int z, int t, int channel, double valueTolerance, double colorSensitivity,
+            double gradientTolerance)
     {
         if (sequence == null)
             return null;
@@ -122,10 +122,12 @@ public class MagicWand
     }
 
     /** Here the wand operation actually happens */
-    public static ROI2D doWand2D(Sequence sequence, int xStart, int yStart, int z, int t, int channel,
-            MagicWandSetting mws)
+    public static ROI2D doWand2D(Sequence sequence, int xStart, int yStart, int z, int t, int channel, MagicWandSetting mws)
     {
-        final IcyBufferedImage img = sequence.getImage(t, z);
+        final IcyBufferedImage img = sequence.getImage(t, z);        
+        if (img == null)
+            return null;
+
         final int width = img.getWidth();
         final int height = img.getHeight();
         final int sizeC = img.getSizeC();
@@ -272,8 +274,7 @@ public class MagicWand
                     if (!valueOK)
                         // don't analyze any more
                         maskPixels[offset2] = OUTSIDE;
-                    else if (!largeGradient
-                            || ((v2 - v) * ((xGradient * dirXoffset[d]) + (yGradient * dirYoffset[d])) <= 0))
+                    else if (!largeGradient || ((v2 - v) * ((xGradient * dirXoffset[d]) + (yGradient * dirYoffset[d])) <= 0))
                     {
                         // add new point
                         maskPixels[offset2] = INSIDE;
@@ -288,8 +289,7 @@ public class MagicWand
                             int newMask = newSize - 1;
                             int[] newPixelPointers = new int[newSize];
                             System.arraycopy(pixelPointers, 0, newPixelPointers, 0, pixelPointerMask + 1);
-                            System.arraycopy(pixelPointers, 0, newPixelPointers, pixelPointerMask + 1,
-                                    pixelPointerMask + 1);
+                            System.arraycopy(pixelPointers, 0, newPixelPointers, pixelPointerMask + 1, pixelPointerMask + 1);
                             pixelPointers = newPixelPointers;
                             pixelPointerMask = newMask;
                         }
@@ -325,8 +325,8 @@ public class MagicWand
         return result;
     }
 
-    public static ROI3D doWand3D(Sequence sequence, int xStart, int yStart, int zStart, int t, int channel,
-            double valueTolerance, double colorSensitivity, double gradientTolerance)
+    public static ROI3D doWand3D(Sequence sequence, int xStart, int yStart, int zStart, int t, int channel, double valueTolerance, double colorSensitivity,
+            double gradientTolerance)
     {
         if (sequence == null)
             return null;
@@ -394,8 +394,7 @@ public class MagicWand
         {
             // more grayscale-sensitive
             double deltaGray = (deltaR * rgbWeights[0]) + (deltaG * rgbWeights[1]) + (deltaB * rgbWeights[2]);
-            return (deltaSqr * ((1d / 3d) + (0.01d / 3d) * mws.colorSensitivity))
-                    - (0.01 * mws.colorSensitivity * sqr(deltaGray)) <= sqr(mws.valueTolerance);
+            return (deltaSqr * ((1d / 3d) + (0.01d / 3d) * mws.colorSensitivity)) - (0.01 * mws.colorSensitivity * sqr(deltaGray)) <= sqr(mws.valueTolerance);
         }
 
         final double rgb0Sqr = sqr(r0) + sqr(g0) + sqr(b0);
@@ -413,18 +412,15 @@ public class MagicWand
 
             deltaParSqr = sqr(Math.sqrt(deltaSqr - (cosine * eps)));
             deltaPerpSqr = (1 - sqr(cosine)) * sqr(eps);
-            deltaPerpSqrFactor = ((1d - (0.01d * mws.colorSensitivity)) + (0.01d * mws.colorSensitivity) * rgb0Sqr)
-                    / sqr(eps);
+            deltaPerpSqrFactor = ((1d - (0.01d * mws.colorSensitivity)) + (0.01d * mws.colorSensitivity) * rgb0Sqr) / sqr(eps);
         }
         else
         {
             deltaPerpSqr = deltaSqr - deltaParSqr;
-            deltaPerpSqrFactor = ((1d - (0.01d * mws.colorSensitivity)) + (0.01 * mws.colorSensitivity) * rgb0Sqr)
-                    / (sqr(r) + sqr(g) + sqr(b));
+            deltaPerpSqrFactor = ((1d - (0.01d * mws.colorSensitivity)) + (0.01 * mws.colorSensitivity) * rgb0Sqr) / (sqr(r) + sqr(g) + sqr(b));
         }
 
-        return ((deltaParSqr * (1d - (0.01d * mws.colorSensitivity))) + (deltaPerpSqr * deltaPerpSqrFactor)) <= (3
-                * sqr(mws.valueTolerance));
+        return ((deltaParSqr * (1d - (0.01d * mws.colorSensitivity))) + (deltaPerpSqr * deltaPerpSqrFactor)) <= (3 * sqr(mws.valueTolerance));
     }
 
     /**

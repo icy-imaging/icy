@@ -196,7 +196,7 @@ public class NetworkUtil
                     // in case we use proxy
                     try
                     {
-                        final URLConnection urlConnection = openConnection("http://www.google.com", true, false);
+                        final URLConnection urlConnection = openConnection("https://www.google.com", true, false);
 
                         if (urlConnection != null)
                         {

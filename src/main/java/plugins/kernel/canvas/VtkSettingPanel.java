@@ -18,17 +18,6 @@
  */
 package plugins.kernel.canvas;
 
-import icy.gui.component.IcyTextField;
-import icy.gui.component.IcyTextField.TextChangeListener;
-import icy.gui.component.NumberTextField;
-import icy.gui.component.button.ColorChooserButton;
-import icy.gui.component.button.ColorChooserButton.ColorChangeListener;
-import icy.gui.component.button.IcyToggleButton;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
-import icy.vtk.VtkImageVolume;
-import icy.vtk.VtkImageVolume.VtkVolumeBlendType;
-
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -46,10 +35,23 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-/**
- * @author Thomas MUSSET
- */
-public class VtkSettingPanel extends JPanel implements ActionListener, TextChangeListener, ColorChangeListener {
+import icy.gui.component.IcyTextField;
+import icy.gui.component.IcyTextField.TextChangeListener;
+import icy.gui.component.NumberTextField;
+import icy.gui.component.button.ColorChooserButton;
+import icy.gui.component.button.ColorChooserButton.ColorChangeListener;
+import icy.gui.component.button.IcyToggleButton;
+import icy.resource.ResourceUtil;
+import icy.resource.icon.IcyIcon;
+import icy.vtk.VtkImageVolume;
+import icy.vtk.VtkImageVolume.VtkVolumeBlendType;
+
+public class VtkSettingPanel extends JPanel implements ActionListener, TextChangeListener, ColorChangeListener
+{
+    /**
+     *
+     */
+    private static final long serialVersionUID = 6433369095311474470L;
     protected static final Image ICON_GPU = ResourceUtil.getAlphaIconAsImage("gpu.png");
     protected static final Image ICON_SHADING = ResourceUtil.getColorIconAsImage("shading.png");
 
@@ -150,7 +152,7 @@ public class VtkSettingPanel extends JPanel implements ActionListener, TextChang
         volumeInterpolationComboBox = new JComboBox<>();
         volumeInterpolationComboBox.setToolTipText("Select volume rendering interpolation method");
         volumeInterpolationComboBox.setMaximumRowCount(7);
-        volumeInterpolationComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"Nearest (Fast)", "Linear", "Cubic (Slow)"}));
+        volumeInterpolationComboBox.setModel(new DefaultComboBoxModel(new String[] {"Nearest (Fast)", "Linear", "Cubic (Slow)"}));
         volumeInterpolationComboBox.setSelectedIndex(1);
         GridBagConstraints gbc_volumeInterpolationComboBox = new GridBagConstraints();
         gbc_volumeInterpolationComboBox.fill = GridBagConstraints.HORIZONTAL;
@@ -188,14 +190,10 @@ public class VtkSettingPanel extends JPanel implements ActionListener, TextChang
         gbc_lblSample.gridx = 0;
         gbc_lblSample.gridy = 3;
         add(lblSample, gbc_lblSample);
-
-        volumeSampleComboBox = new JComboBox<>();
-        volumeSampleComboBox
-                .setToolTipText("Use low value for fine (but slow) rendering and high value for fast (but coarse) rendering");
+        volumeSampleComboBox = new JComboBox();
+        volumeSampleComboBox.setToolTipText("Use low value for fine (but slow) rendering and high value for fast (but coarse) rendering");
         volumeSampleComboBox.setMaximumRowCount(11);
-        volumeSampleComboBox.setModel(new DefaultComboBoxModel<>(
-                new String[]{"Auto", "1 (Slow)", "2", "3", "4", "5", "6", "7", "8", "9", "10 (Fast)"}
-        ));
+        volumeSampleComboBox.setModel(new DefaultComboBoxModel(new String[] {"Auto", "1 (Slow)", "2", "3", "4", "5", "6", "7", "8", "9", "10 (Fast)"}));
         volumeSampleComboBox.setSelectedIndex(0);
         GridBagConstraints gbc_volumeSampleComboBox = new GridBagConstraints();
         gbc_volumeSampleComboBox.fill = GridBagConstraints.HORIZONTAL;
@@ -392,19 +390,24 @@ public class VtkSettingPanel extends JPanel implements ActionListener, TextChang
         final Object source = e.getSource();
 
         if (source == gpuMapperCheckBox)
-            fireSettingChange(source, PROPERTY_MAPPER, Boolean.valueOf(!gpuMapperCheckBox.isSelected()),
-                    Boolean.valueOf(gpuMapperCheckBox.isSelected()));
+        {
+            fireSettingChange(source, PROPERTY_MAPPER, Boolean.valueOf(!gpuMapperCheckBox.isSelected()), Boolean.valueOf(gpuMapperCheckBox.isSelected()));
+            
+            // GPU rendering ? --> force volume sample to 1 (fine rendering, 'auto' is sometime buggy with GPU)
+            if (gpuMapperCheckBox.isSelected())
+                setVolumeSample(1);
+            // CPU rendering ? --> force 'auto' if slow mode was enabled
+            else if (getVolumeSample() == 1)
+                setVolumeSample(0);
+        }
         else if (source == volumeBlendingComboBox)
             fireSettingChange(source, PROPERTY_BLENDING, null, volumeBlendingComboBox.getSelectedItem());
         else if (source == volumeSampleComboBox)
-            fireSettingChange(source, PROPERTY_SAMPLE, Integer.valueOf(-1),
-                    Integer.valueOf(volumeSampleComboBox.getSelectedIndex()));
+            fireSettingChange(source, PROPERTY_SAMPLE, Integer.valueOf(-1), Integer.valueOf(volumeSampleComboBox.getSelectedIndex()));
         else if (source == volumeInterpolationComboBox)
-            fireSettingChange(source, PROPERTY_INTERPOLATION, Integer.valueOf(-1),
-                    Integer.valueOf(volumeInterpolationComboBox.getSelectedIndex()));
+            fireSettingChange(source, PROPERTY_INTERPOLATION, Integer.valueOf(-1), Integer.valueOf(volumeInterpolationComboBox.getSelectedIndex()));
         else if (source == shadingButton)
-            fireSettingChange(source, PROPERTY_SHADING, Integer.valueOf(-1),
-                    Boolean.valueOf(shadingButton.isSelected()));
+            fireSettingChange(source, PROPERTY_SHADING, Integer.valueOf(-1), Boolean.valueOf(shadingButton.isSelected()));
 
         updateState();
     }
@@ -415,14 +418,11 @@ public class VtkSettingPanel extends JPanel implements ActionListener, TextChang
             return;
 
         if (source == volumeAmbientField)
-            fireSettingChange(source, PROPERTY_AMBIENT, Double.valueOf(-1d),
-                    Double.valueOf(volumeAmbientField.getNumericValue()));
+            fireSettingChange(source, PROPERTY_AMBIENT, Double.valueOf(-1d), Double.valueOf(volumeAmbientField.getNumericValue()));
         else if (source == volumeDiffuseField)
-            fireSettingChange(source, PROPERTY_DIFFUSE, Double.valueOf(-1d),
-                    Double.valueOf(volumeDiffuseField.getNumericValue()));
+            fireSettingChange(source, PROPERTY_DIFFUSE, Double.valueOf(-1d), Double.valueOf(volumeDiffuseField.getNumericValue()));
         else if (source == volumeSpecularField)
-            fireSettingChange(source, PROPERTY_SPECULAR, Double.valueOf(-1d),
-                    Double.valueOf(volumeSpecularField.getNumericValue()));
+            fireSettingChange(source, PROPERTY_SPECULAR, Double.valueOf(-1d), Double.valueOf(volumeSpecularField.getNumericValue()));
 
         updateState();
     }

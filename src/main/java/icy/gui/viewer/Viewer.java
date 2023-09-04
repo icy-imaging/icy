@@ -718,8 +718,10 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * Set the specified LUT for the viewer.
      */
-    public void setLut(LUT value) {
-        if ((lut != value) && sequence.isLutCompatible(value)) {
+    public void setLut(LUT value)
+    {
+        if ((lut != value) && (sequence != null) && sequence.isLutCompatible(value))
+        {
             // set new lut & notify change
             lut = value;
             lutChanged();
@@ -744,7 +746,8 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                 newLut.getColorSpace().setColorMaps(lut.getColorSpace(), true);
 
             // set the new lut
-            setLut(newLut);
+            lut = newLut;
+            lutChanged();
         }
 
         return lut;
