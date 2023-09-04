@@ -32,6 +32,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -72,14 +73,17 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
         addSeparator();
 
         ThreadUtil.invokeLater(() -> {
-            final Map<String, Map<String, Map<String, PluginDescriptor>>> authorMap = new TreeMap<>();
             final List<PluginDescriptor> plugins = PluginLoader.getActionablePlugins();
+            /*
+            final Map<String, Map<String, Map<String, PluginDescriptor>>> authorMap = new TreeMap<>();
             for (final PluginDescriptor descriptor : plugins) {
 
                 String authorName = descriptor.getAuthor();
                 String className = descriptor.getSimpleClassName();
                 //Version version = descriptor.getVersion();
                 final String pluginName = descriptor.getName();
+
+                System.out.println(authorName + " > " + pluginName + "(" + className + ")");
 
                 // Check if author is empty
                 if (authorName.isEmpty()) {
@@ -103,7 +107,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
                             className = tempDescriptor.getSimpleClassName();
                             //version = tempDescriptor.getVersion();
                         }
-                        catch (IOException ex) {
+                        catch (final IOException ex) {
                             authorName = "???";
                         }
                     }
@@ -167,6 +171,35 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
                         menuClassName.add(itemPlugin);
                     }
                     menuAuthor.add(menuClassName);
+                }
+                add(menuAuthor);
+            }
+             */
+
+            final Map<Character, List<PluginDescriptor>> characterListMap = new TreeMap<>();
+            for (final PluginDescriptor descriptor : plugins) {
+                final String className = descriptor.getSimpleClassName();
+                final Character firstChar = className.charAt(0);
+
+                if (characterListMap.containsKey(firstChar)) {
+                    final List<PluginDescriptor> pluginList = characterListMap.get(firstChar);
+                    if (!pluginList.contains(descriptor))
+                        pluginList.add(descriptor);
+                }
+                else {
+                    final List<PluginDescriptor> pluginList = new ArrayList<>();
+                    pluginList.add(descriptor);
+
+                    characterListMap.put(firstChar, pluginList);
+                }
+            }
+
+            for (final Map.Entry<Character, List<PluginDescriptor>> characterListEntry : characterListMap.entrySet()) {
+                final IcyMenu menuAuthor = new IcyMenu(characterListEntry.getKey().toString());
+                for (final PluginDescriptor plugin : characterListEntry.getValue()) {
+                    final IcyMenuItem itemPlugin = new IcyMenuItem(plugin.getSimpleClassName());
+                    itemPlugin.addActionListener(e -> PluginLauncher.start(plugin));
+                    menuAuthor.add(itemPlugin);
                 }
                 add(menuAuthor);
             }
