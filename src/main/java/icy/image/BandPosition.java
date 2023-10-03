@@ -21,7 +21,7 @@ package icy.image;
 /**
  * @deprecated Use {@link ChannelPosition} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class BandPosition extends ImagePosition
 {
     public static final char C_ID = 'C';

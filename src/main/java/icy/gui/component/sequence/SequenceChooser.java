@@ -216,7 +216,7 @@ public class SequenceChooser extends JComboBox implements GlobalSequenceListener
      * @deprecated Use {@link #SequenceChooser(boolean, String, int)} instead.
      */
     @SuppressWarnings("unused")
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SequenceChooser(final int sequenceNameMaxLength, final boolean nullEntry, final boolean autoSelectIfNull,
             final String nullEntryName)
     {
@@ -227,7 +227,7 @@ public class SequenceChooser extends JComboBox implements GlobalSequenceListener
      * @deprecated Use {@link #SequenceChooser(boolean, String, int)} instead.
      */
     @SuppressWarnings("unused")
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SequenceChooser(int maxLength, boolean nullEntry, boolean autoSelectIfNull)
     {
         this(false, nullEntry ? "no sequence" : null, maxLength);
@@ -236,7 +236,7 @@ public class SequenceChooser extends JComboBox implements GlobalSequenceListener
     /**
      * @deprecated Use {@link #SequenceChooser(boolean, String, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SequenceChooser(int maxLength, boolean nullEntry)
     {
         this(false, nullEntry ? "no sequence" : null, maxLength);
@@ -261,7 +261,7 @@ public class SequenceChooser extends JComboBox implements GlobalSequenceListener
     /**
      * @deprecated Use {@link #SequenceChooser(boolean, String, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SequenceChooser(int nameMaxLength)
     {
         this(false, "no sequence", nameMaxLength);
@@ -349,7 +349,7 @@ public class SequenceChooser extends JComboBox implements GlobalSequenceListener
      * @deprecated
      *             use {@link #setSelectedSequence(Sequence)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setSequenceSelected(Sequence sequence)
     {
         setSelectedSequence(sequence);

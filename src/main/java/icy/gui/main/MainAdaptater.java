@@ -27,7 +27,7 @@ package icy.gui.main;
  *             {@link GlobalPluginListener}
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class MainAdaptater implements MainListener
 {
     /*

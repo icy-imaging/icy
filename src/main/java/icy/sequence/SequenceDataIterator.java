@@ -130,7 +130,7 @@ public class SequenceDataIterator implements DataIterator
      * @throws InterruptedException 
      * @deprecated Use {@link #SequenceDataIterator(Sequence, Integer)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SequenceDataIterator(Sequence sequence, int startX, int endX, int startY, int endY, int startC, int endC,
             int startZ, int endZ, int startT, int endT) throws InterruptedException
     {
@@ -142,7 +142,7 @@ public class SequenceDataIterator implements DataIterator
      * @throws InterruptedException 
      * @deprecated Use {@link #SequenceDataIterator(Sequence, Rectangle, int, int, int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SequenceDataIterator(Sequence sequence, int startX, int endX, int startY, int endY, int c, int z, int t) throws InterruptedException
     {
         this(sequence,

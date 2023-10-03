@@ -362,7 +362,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getApplicationDirectory()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getCurrentDirectory()
     {
         return getApplicationDirectory();
@@ -548,7 +548,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #rename(String, String, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean rename(String src, String dst, boolean force, boolean wantHidden)
     {
         return rename(src, dst, force);
@@ -634,7 +634,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #rename(File, File, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean rename(File src, File dst, boolean force, boolean wantHidden)
     {
         return rename(src, dst, force);
@@ -643,7 +643,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #rename(String, String, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean move(String src, String dst, boolean force)
     {
         return rename(src, dst, force);
@@ -652,7 +652,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #move(String, String, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean move(String src, String dst, boolean force, boolean wantHidden)
     {
         return move(src, dst, force);
@@ -661,7 +661,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #rename(File, File, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean move(File src, File dst, boolean force)
     {
         return rename(src, dst, force);
@@ -670,7 +670,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #move(File, File, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean move(File src, File dst, boolean force, boolean wantHidden)
     {
         return move(src, dst, force);
@@ -698,7 +698,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #copy(String, String, boolean, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean copy(String src, String dst, boolean force, boolean wantHidden, boolean recursive)
     {
         return copy(src, dst, force, recursive);
@@ -729,7 +729,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #copy(File, File, boolean, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean copy(File src, File dst, boolean force, boolean wantHidden, boolean recursive)
     {
         return copy(src, dst, force, recursive);
@@ -928,7 +928,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #explode(List, FileFilter, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<File> explode(List<File> files, boolean recursive, boolean wantHidden)
     {
         return explode(files, null, recursive, wantHidden);
@@ -1127,7 +1127,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<File> getFileList(String path, FileFilter filter, boolean recursive, boolean wantDirectory,
             boolean wantHidden)
     {
@@ -1141,7 +1141,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<File> getFileList(File file, FileFilter filter, boolean recursive, boolean wantDirectory,
             boolean wantHidden)
     {
@@ -1155,7 +1155,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<File> getFileList(String path, FileFilter filter, boolean recursive, boolean wantHidden)
     {
         return getFileList(path, filter, recursive, false, wantHidden);
@@ -1164,7 +1164,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<File> getFileList(File file, FileFilter filter, boolean recursive, boolean wantHidden)
     {
         return getFileList(file, filter, recursive, false, wantHidden);
@@ -1173,7 +1173,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<File> getFileList(String path, boolean recursive, boolean wantDirectory, boolean wantHidden)
     {
         return getFileList(new File(getGenericPath(path)), null, recursive, wantDirectory, wantHidden);
@@ -1182,7 +1182,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<File> getFileList(File file, boolean recursive, boolean wantDirectory, boolean wantHidden)
     {
         return getFileList(file, null, recursive, wantDirectory, wantHidden);
@@ -1191,7 +1191,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<File> getFileList(File file, boolean recursive, boolean wantHidden)
     {
         return getFileList(file, recursive, false, wantHidden);
@@ -1200,7 +1200,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<File> getFileList(String path, boolean recursive, boolean wantHidden)
     {
         return getFileList(path, recursive, false, wantHidden);
@@ -1209,7 +1209,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(String, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<String> getFileListAsString(String path, FileFilter filter, boolean recursive,
             boolean wantDirectory, boolean wantHidden)
     {
@@ -1225,7 +1225,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(String, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<String> getFileListAsString(String path, boolean recursive, boolean wantDirectory,
             boolean wantHidden)
     {
@@ -1235,7 +1235,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(String, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<String> getFileListAsString(String path, FileFilter filter, boolean recursive,
             boolean wantHidden)
     {
@@ -1245,7 +1245,7 @@ public class FileUtil
     /**
      * @deprecated Use {@link #getFiles(String, FileFilter, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<String> getFileListAsString(String path, boolean recursive, boolean wantHidden)
     {
         return getFileListAsString(path, recursive, false, wantHidden);
@@ -1256,7 +1256,7 @@ public class FileUtil
      * 
      * @deprecated use {@link #exists(String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean exist(String path)
     {
         return exists(path);

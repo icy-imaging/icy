@@ -21,7 +21,7 @@ package icy.image.colormap;
 /**
  * @deprecated Use {@link IcyColorMapComponent} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class IcyColorMapBand extends IcyColorMapComponent
 {
     public IcyColorMapBand(IcyColorMap colorMap, short initValue)

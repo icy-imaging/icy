@@ -84,7 +84,7 @@ import ij.IJ;
 /**
  * @author fab &amp; Stephane
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class MainFrameOLD extends JRibbonFrame
 {
     private static Rectangle getDefaultBounds()

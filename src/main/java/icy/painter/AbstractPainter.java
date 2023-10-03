@@ -36,7 +36,7 @@ import javax.swing.event.EventListenerList;
  * @deprecated Uses the {@link Overlay} class instead.
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class AbstractPainter extends PainterAdapter implements ChangeListener
 {
     /**
@@ -53,7 +53,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
      * 
      * @deprecated Uses the {@link Overlay} class instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public AbstractPainter()
     {
         super();
@@ -68,7 +68,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
      * @deprecated Uses the {@link Overlay} class instead.
      * @param sequence sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public AbstractPainter(Sequence sequence)
     {
         this();
@@ -93,7 +93,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
      * @deprecated Use {@link Sequence#addPainter(Painter)} instead.
      * @param sequence sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void attachTo(Sequence sequence)
     {
         if (sequence != null)
@@ -104,7 +104,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
      * @deprecated Use {@link Sequence#removePainter(Painter)} instead.
      * @param sequence sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void detachFrom(Sequence sequence)
     {
         if (sequence != null)
@@ -114,7 +114,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
     /**
      * @deprecated Use {@link #remove()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void detachFromAll()
     {
         remove();
@@ -123,7 +123,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
     /**
      * @deprecated Use {@link #remove()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void delete()
     {
         remove();
@@ -157,7 +157,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
      * @deprecated Use {@link Overlay} class instead.
      * @param event Painter event
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected void fireChangedEvent(PainterEvent event)
     {
         for (PainterListener listener : listeners.getListeners(PainterListener.class))
@@ -168,7 +168,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
      * @deprecated Use {@link Overlay#addOverlayListener(OverlayListener)} instead.
      * @param listener Painter listener
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addPainterListener(PainterListener listener)
     {
         listeners.add(PainterListener.class, listener);
@@ -178,7 +178,7 @@ public abstract class AbstractPainter extends PainterAdapter implements ChangeLi
      * @deprecated Use {@link Overlay#removeOverlayListener(OverlayListener)} instead.
      * @param listener Painter listener
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void removePainterListener(PainterListener listener)
     {
         listeners.remove(PainterListener.class, listener);

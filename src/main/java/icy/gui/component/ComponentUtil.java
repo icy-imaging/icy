@@ -21,7 +21,7 @@ package icy.gui.component;
 /**
  * @deprecated Use {@link icy.gui.util.ComponentUtil} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ComponentUtil extends icy.gui.util.ComponentUtil
 {
 }

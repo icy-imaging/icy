@@ -34,7 +34,7 @@ public class TitledFrame extends IcyFrame
     /**
      * @deprecated logo is now disabled (waste of space)
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected final IcyLogo logo;
 
     public TitledFrame(String title)
@@ -90,7 +90,7 @@ public class TitledFrame extends IcyFrame
      * @deprecated Title always hidden now
      * @param value boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setTitleVisible(boolean value)
     {
         // ignore
@@ -100,7 +100,7 @@ public class TitledFrame extends IcyFrame
      * @deprecated Title always hidden now
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isTitleVisible()
     {
         return false;

@@ -21,7 +21,7 @@ package icy.plugin.interface_;
 /**
  * @deprecated Use {@link icy.plugin.abstract_.PluginImporter} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface PluginImporter
 {
 

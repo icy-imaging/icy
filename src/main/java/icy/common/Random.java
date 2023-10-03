@@ -21,13 +21,13 @@ package icy.common;
 /**
  * @deprecated Use {@link icy.util.Random} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class Random
 {
     /**
      * @deprecated Use {@link icy.util.Random#nextInt()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int nextInt()
     {
         return icy.util.Random.nextInt();
@@ -36,7 +36,7 @@ public class Random
     /**
      * @deprecated Use {@link icy.util.Random#nextInt(int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int nextInt(int n)
     {
         return icy.util.Random.nextInt(n);
@@ -45,7 +45,7 @@ public class Random
     /**
      * @deprecated Use {@link icy.util.Random#nextBoolean()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean nextBoolean()
     {
         return icy.util.Random.nextBoolean();
@@ -54,7 +54,7 @@ public class Random
     /**
      * @deprecated Use {@link icy.util.Random#nextDouble()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double nextDouble()
     {
         return icy.util.Random.nextDouble();
@@ -63,7 +63,7 @@ public class Random
     /**
      * @deprecated Use {@link icy.util.Random#nextFloat()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float nextFloat()
     {
         return icy.util.Random.nextFloat();
@@ -72,7 +72,7 @@ public class Random
     /**
      * @deprecated Use {@link icy.util.Random#nextLong()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static long nextLong()
     {
         return icy.util.Random.nextLong();

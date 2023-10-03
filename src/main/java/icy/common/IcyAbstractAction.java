@@ -23,7 +23,7 @@ import icy.resource.icon.IcyIcon;
 /**
  * @deprecated Use {@link icy.action.IcyAbstractAction} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class IcyAbstractAction extends icy.action.IcyAbstractAction {
     private static final int DEFAULT_ICON_SIZE = 20;
 
@@ -70,22 +70,22 @@ public abstract class IcyAbstractAction extends icy.action.IcyAbstractAction {
         this(name, null, null, null, 0, 0, false, null);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public IcyAbstractAction(String name, String iconName, String description, int keyCode, int modifiers) {
         this(name, new IcyIcon(iconName, DEFAULT_ICON_SIZE), description, null, keyCode, modifiers, false, null);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public IcyAbstractAction(String name, String iconName, String description, int keyCode) {
         this(name, new IcyIcon(iconName, DEFAULT_ICON_SIZE), description, null, keyCode, 0, false, null);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public IcyAbstractAction(String name, String iconName, String description) {
         this(name, new IcyIcon(iconName, DEFAULT_ICON_SIZE), description, null, 0, 0, false, null);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public IcyAbstractAction(String name, String iconName) {
         this(name, new IcyIcon(iconName, DEFAULT_ICON_SIZE), null, null, 0, 0, false, null);
     }

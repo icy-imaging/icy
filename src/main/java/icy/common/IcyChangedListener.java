@@ -23,7 +23,7 @@ import icy.common.listener.ChangeListener;
 /**
  * @deprecated Use {@link ChangeListener} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface IcyChangedListener extends ChangeListener
 {
 

@@ -34,7 +34,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class ImageTableCellRenderer extends DefaultTableCellRenderer {
     final int size;
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageTableCellRenderer(int size) {
         super();
 

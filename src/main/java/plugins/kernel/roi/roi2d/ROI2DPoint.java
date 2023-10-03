@@ -258,7 +258,7 @@ public class ROI2DPoint extends ROI2DShape
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DPoint(Point2D pt, boolean cm)
     {
         this(pt);
@@ -310,7 +310,7 @@ public class ROI2DPoint extends ROI2DShape
     /**
      * @deprecated Use {@link #getLine()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Rectangle2D getRectangle()
     {
         final Point2D pt = getPoint();

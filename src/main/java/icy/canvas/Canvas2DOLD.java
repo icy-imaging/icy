@@ -102,7 +102,7 @@ import plugins.kernel.roi.tool.ROIMagicWand;
  * @author Stephane
  * @author Thomas MUSSET
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener {
     static final int ICON_SIZE = 20;
     static final int ICON_TARGET_SIZE = 20;
@@ -632,7 +632,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener {
              * @throws InterruptedException
              * @deprecated Caching is done as tiles now so it's better to use {@link #getImageAsTiles()}
              */
-            @Deprecated
+            @Deprecated(since = "2.4.3", forRemoval = true)
             public BufferedImage getImage() throws InterruptedException {
                 // get original image
                 final IcyBufferedImage icyImage = Canvas2DOLD.this.getImage(getPositionT(), getPositionZ(), getPositionC());
@@ -2314,7 +2314,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener {
      *
      * @deprecated use setScale(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setZoom(float zoom) {
         // set mouse position on image center
         centerMouseOnImage();
@@ -2467,7 +2467,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener {
      *
      * @deprecated use getScaleX() or getScaleY() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getZoomFactor() {
         return getScaleX();
     }
@@ -2776,7 +2776,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener {
      * @throws InterruptedException
      * @deprecated Use <code>getRenderedImage(t, z, -1, true)</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BufferedImage getRenderedImage(int t, int z) throws InterruptedException {
         return getRenderedImage(t, z, -1, true);
     }
@@ -2785,7 +2785,7 @@ public class Canvas2DOLD extends IcyCanvas2D implements ROITaskListener {
      * @throws InterruptedException
      * @deprecated Use <code>getRenderedImage(t, z, -1, canvasView)</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BufferedImage getRenderedImage(int t, int z, boolean canvasView) throws InterruptedException {
         return getRenderedImage(t, z, -1, canvasView);
     }

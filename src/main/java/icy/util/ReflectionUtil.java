@@ -61,7 +61,7 @@ public class ReflectionUtil
      * @deprecated using <i>forceAccess</i> is not anymore possible with Java17 so we have to stop doing that.<br>
      *             Use {@link #getMethod(Class, String, Class...)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Method getMethod(Class<?> objectClass, String methodName, boolean forceAccess, Class<?>... parameterTypes)
             throws SecurityException, NoSuchMethodException
     {
@@ -95,7 +95,7 @@ public class ReflectionUtil
      * @deprecated using <i>forceAccess</i> is not anymore possible with Java17 so we have to stop doing that.<br>
      *             Use {@link #getMethod(Class, String, Class...)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Method getMethod(Object object, String methodName, boolean forceAccess, Class<?>... parameterTypes)
             throws SecurityException, NoSuchMethodException
     {
@@ -125,7 +125,7 @@ public class ReflectionUtil
      * @deprecated using <i>forceAccess</i> is not anymore possible with Java17 so we have to stop doing that.<br>
      *             Use {@link #invokeMethod(Object, String, Object...)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object invokeMethod(Object object, String methodName, boolean forceAccess, Object... args)
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException
     {
@@ -173,7 +173,7 @@ public class ReflectionUtil
      * @deprecated using <i>forceAccess</i> is not anymore possible with Java17 so we have to stop doing that.<br>
      *             Use {@link #getField(Class, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Field getField(Class<?> objectClass, String fieldName, boolean forceAccess) throws SecurityException, NoSuchFieldException
     {
         Class<?> clazz = objectClass;
@@ -206,7 +206,7 @@ public class ReflectionUtil
      * @deprecated using <i>forceAccess</i> is not anymore possible with Java17 so we have to stop doing that.<br>
      *             Use {@link #getField(Class, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Field getField(Object object, String fieldName, boolean forceAccess) throws SecurityException, NoSuchFieldException
     {
         return getField(object.getClass(), fieldName, forceAccess);
@@ -225,7 +225,7 @@ public class ReflectionUtil
      * @deprecated using <i>forceAccess</i> is not anymore possible with Java17 so we have to stop doing that.<br>
      *             Use {@link #getFieldObject(Object, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object getFieldObject(Object object, String fieldName, boolean forceAccess)
             throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
     {

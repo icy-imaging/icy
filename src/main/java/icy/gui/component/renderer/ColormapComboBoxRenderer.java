@@ -33,7 +33,7 @@ public class ColormapComboBoxRenderer extends CustomComboBoxRenderer {
     /**
      * @deprecated Use {@link #ColormapComboBoxRenderer(JComboBox)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ColormapComboBoxRenderer(JComboBox<IcyColorMap> combo, int w, int h) {
         this(combo);
     }

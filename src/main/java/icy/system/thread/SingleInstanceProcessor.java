@@ -22,13 +22,13 @@ package icy.system.thread;
  * @author stephane
  * @deprecated Use {@link InstanceProcessor} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class SingleInstanceProcessor extends InstanceProcessor
 {
     /**
      * @deprecated Use {@link InstanceProcessor} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SingleInstanceProcessor()
     {
         super();

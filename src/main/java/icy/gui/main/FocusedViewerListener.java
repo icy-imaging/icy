@@ -26,7 +26,7 @@ import java.util.EventListener;
 /**
  * @deprecated Use {@link ActiveViewerListener} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface FocusedViewerListener extends EventListener
 {
     /**

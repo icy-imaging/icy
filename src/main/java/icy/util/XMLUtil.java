@@ -214,7 +214,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #createDocument(String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Document getDocument(String xmlString)
     {
         final DocumentBuilder docBuilder = createDocumentBuilder();
@@ -239,7 +239,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #createDocument(String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Document getDocumentSafe(String xmlString) throws SAXException, IOException
     {
         return createDocument(xmlString);
@@ -705,7 +705,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #getChildren(Node)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<Node> getSubNodes(Node node)
     {
         return getChildren(node);
@@ -714,7 +714,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #getChild(Node, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Node getSubNode(Node node, String name)
     {
         return getChild(node, name);
@@ -723,7 +723,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #getChildren(Node, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<Node> getSubNodes(Node node, String name)
     {
         return getChildren(node, name);
@@ -859,7 +859,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #getElements(Node)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<Element> getSubElements(Node node)
     {
         return getElements(node);
@@ -868,7 +868,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #getElement(Node, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Element getSubElement(Node node, String name)
     {
         return getElement(node, name);
@@ -877,7 +877,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #getElements(Node, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<Element> getSubElements(Node node, String name)
     {
         return getElements(node, name);
@@ -977,7 +977,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #getGenericElements(Node, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<Element> getSubGenericElements(Node node, String type)
     {
         return getGenericElements(node, type);
@@ -986,7 +986,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #getGenericElements(Node, String, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<Element> getSubGenericElements(Node node, String type, String name)
     {
         return getGenericElements(node, type, name);
@@ -2051,7 +2051,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #removeAllChildren(Node)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void removeAllChilds(Node node)
     {
         removeAllChildren(node);
@@ -2069,7 +2069,7 @@ public class XMLUtil
     /**
      * @deprecated Use {@link #removeChildren(Node, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void removeChilds(Node node, String name)
     {
         removeChildren(node, name);

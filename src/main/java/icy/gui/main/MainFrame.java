@@ -395,7 +395,8 @@ public class MainFrame extends JFrame {
         amap.put(SequenceOperationActions.redoAction.getName(), SequenceOperationActions.redoAction);
     }
 
-    @Deprecated
+    // FIXME: 03/10/2023 Crash when plugin want to access Ribbon
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public ApplicationMenu getApplicationMenu() {
         //return (ApplicationMenu) getRibbon().getApplicationMenu();
         return null;
@@ -446,7 +447,8 @@ public class MainFrame extends JFrame {
     /**
      * @return the mainRibbon
      */
-    @Deprecated
+    // FIXME: 03/10/2023 Crash when plugin want to access Ribbon
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public MainRibbon getMainRibbon() {
         //return mainRibbon;
         return null;

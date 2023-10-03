@@ -26,7 +26,7 @@ package icy.gui.main;
  *             {@link GlobalOverlayListener}<br>
  *             {@link GlobalPluginListener}
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class MainAdapter implements MainListener
 {
     @Override

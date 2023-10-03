@@ -23,7 +23,7 @@ import icy.common.CollapsibleEvent;
 /**
  * @deprecated Use {@link Overlay} classes instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class PainterEvent implements CollapsibleEvent
 {
     public enum PainterEventType

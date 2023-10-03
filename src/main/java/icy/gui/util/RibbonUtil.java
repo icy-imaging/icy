@@ -47,7 +47,7 @@ import icy.util.StringUtil;
 /**
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class RibbonUtil
 {
     private static final int DEFAULT_HEIGHT = 48;

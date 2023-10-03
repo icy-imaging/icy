@@ -24,7 +24,7 @@ package icy.system;
  * @author Stephane
  * @deprecated
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class CPUMonitor
 {
     private final icy.system.profile.CPUMonitor mon;
@@ -84,7 +84,7 @@ public class CPUMonitor
      * 
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getAvailableProcessors()
     {
         return SystemUtil.getNumberOfCPUs();

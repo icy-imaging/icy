@@ -605,7 +605,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      *
      * @deprecated Use <code>getVtkPanel().lock()</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void lock() {
         if (panel3D != null)
             panel3D.lock();
@@ -616,7 +616,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      *
      * @deprecated Use <code>getVtkPanel().unlock()</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void unlock() {
         if (panel3D != null)
             panel3D.unlock();
@@ -625,7 +625,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @deprecated Use {@link #getCamera()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public vtkCamera getActiveCam() {
         return getCamera();
     }
@@ -765,7 +765,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @deprecated USe {@link #setBackgroundColorInternal(Color)}
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setBoundingBoxColor(Color color) {
         setBackgroundColorInternal(color);
     }
@@ -979,7 +979,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @deprecated Use {@link #setVolumeSample(int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void setVolumeDistanceSample(int value) {
         setVolumeSample(value);
@@ -1012,7 +1012,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @deprecated Always enabled now (always return <code>true</code>)
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean getPickOnMouseMove() {
         return true;
         // return pickOnMouseMoveButton.isSelected();
@@ -1021,7 +1021,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @deprecated Always enable now
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setPickOnMouseMove(boolean value) {
         // if (pickOnMouseMoveButton.isSelected() != value)
         // pickOnMouseMoveButton.doClick();
@@ -1039,7 +1039,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @deprecated use {@link #pickProp(int, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public vtkActor pick(int x, int y) {
         return (vtkActor) panel3D.pick(x, y);
     }
@@ -1231,7 +1231,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @deprecated Use {@link VtkUtil#getLayerProps(Layer)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected vtkProp[] getLayerActors(Layer layer) {
         return VtkUtil.getLayerProps(layer);
     }
@@ -1350,7 +1350,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @deprecated Use {@link #getVtkPanel()}
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public IcyVtkPanel getPanel3D() {
         return getVtkPanel();

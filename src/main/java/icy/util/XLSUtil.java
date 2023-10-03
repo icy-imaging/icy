@@ -92,7 +92,7 @@ public class XLSUtil
      * @deprecated Use {@link #loadWorkbookForRead(File)} or {@link #loadWorkbookForWrite(File)}
      *             depending your needs.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static WritableWorkbook loadWorkbook(File file) throws IOException, BiffException
     {
         if (!file.exists())

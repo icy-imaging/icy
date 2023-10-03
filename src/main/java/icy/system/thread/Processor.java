@@ -51,7 +51,7 @@ public class Processor extends ThreadPoolExecutor
     /**
      * @deprecated Useless interface
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public interface ProcessorEventListener extends EventListener
     {
         public void processDone(Processor source, Runnable runnable);
@@ -158,7 +158,7 @@ public class Processor extends ThreadPoolExecutor
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected class RunnableAdapter implements Runnable
     {
         private final Runnable task;
@@ -196,7 +196,7 @@ public class Processor extends ThreadPoolExecutor
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected class CallableAdapter<T> implements Callable<T>
     {
         private final Callable<T> task;
@@ -236,7 +236,7 @@ public class Processor extends ThreadPoolExecutor
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected class FutureTaskAdapterEDT<T> extends FutureTaskAdapter<T>
     {
         public FutureTaskAdapterEDT(Runnable runnable, T result, boolean onEDT)
@@ -363,7 +363,7 @@ public class Processor extends ThreadPoolExecutor
      * @param task running task
      * @return true if task is delete
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean removeTask(Runnable task)
     {
         return removeFirstWaitingTask(task);
@@ -376,7 +376,7 @@ public class Processor extends ThreadPoolExecutor
      * @param id task id
      * @return true if task is added
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean addTask(Runnable task, boolean onEDT, int id)
     {
         return addTask(task, onEDT);
@@ -388,7 +388,7 @@ public class Processor extends ThreadPoolExecutor
      * @param onEDT boolean
      * @return true if task is added
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean addTask(Runnable task, boolean onEDT)
     {
         try
@@ -408,7 +408,7 @@ public class Processor extends ThreadPoolExecutor
      * @param task running task
      * @return true if task is added
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean addTask(Runnable task)
     {
         return addTask(task, false);
@@ -432,7 +432,7 @@ public class Processor extends ThreadPoolExecutor
      * @param <T> generic Object
      * @return Object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected <T> FutureTaskAdapter<T> newTaskFor(Runnable runnable, T value, boolean onEDT)
     {
         return new FutureTaskAdapterEDT<T>(runnable, value, onEDT);
@@ -445,7 +445,7 @@ public class Processor extends ThreadPoolExecutor
      * @param <T> generic Object
      * @return Object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected <T> FutureTaskAdapter<T> newTaskFor(Callable<T> callable, boolean onEDT)
     {
         return new FutureTaskAdapterEDT<T>(callable, onEDT);
@@ -626,7 +626,7 @@ public class Processor extends ThreadPoolExecutor
      * @param onEDT boolean
      * @return submit task
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Future<?> submit(Runnable task, boolean onEDT)
     {
         if (task == null)
@@ -645,7 +645,7 @@ public class Processor extends ThreadPoolExecutor
      * @param <T> generic Object
      * @return submit task
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public <T> Future<T> submit(Runnable task, T result, boolean onEDT)
     {
         if (task == null)
@@ -662,7 +662,7 @@ public class Processor extends ThreadPoolExecutor
      * @param <T> generic Object
      * @return submit task
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public <T> Future<T> submit(Callable<T> task, boolean onEDT)
     {
         if (task == null)
@@ -719,7 +719,7 @@ public class Processor extends ThreadPoolExecutor
      * @deprecated Use {@link #getThreadName()} instead
      * @return default thread name
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public String getDefaultThreadName()
     {
         return ((ProcessorThreadFactory) getThreadFactory()).getName();
@@ -729,7 +729,7 @@ public class Processor extends ThreadPoolExecutor
      * @deprecated Use {@link #setThreadName(String)} instead
      * @param defaultThreadName string
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setDefaultThreadName(String defaultThreadName)
     {
         ((ProcessorThreadFactory) getThreadFactory()).setName(defaultThreadName);
@@ -840,7 +840,7 @@ public class Processor extends ThreadPoolExecutor
      * @param id task id
      * @return task count
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getWaitingTasksCount(int id)
     {
         return 0;
@@ -890,7 +890,7 @@ public class Processor extends ThreadPoolExecutor
      * @param id task id
      * @return false
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean hasWaitingTasks(int id)
     {
         return false;
@@ -930,7 +930,7 @@ public class Processor extends ThreadPoolExecutor
      * @param id task id
      * @return false
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean removeFirstWaitingTask(int id)
     {
         return false;
@@ -1002,7 +1002,7 @@ public class Processor extends ThreadPoolExecutor
      * @param id task id
      * @return false
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean removeWaitingTasks(int id)
     {
         return false;
@@ -1065,7 +1065,7 @@ public class Processor extends ThreadPoolExecutor
      * @param task running task
      * @param value number of waiting tasks
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void limitWaitingTask(Runnable task, int value)
     {
         synchronized (getQueue())
@@ -1083,7 +1083,7 @@ public class Processor extends ThreadPoolExecutor
      * @param value number of waiting tasks
      * @param id task id
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void limitWaitingTask(int id, int value)
     {
         // not anymore supported
@@ -1094,7 +1094,7 @@ public class Processor extends ThreadPoolExecutor
      * @param value number of waiting task
      * @return false
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean limitWaitingTask(int value)
     {
         synchronized (getQueue())
@@ -1113,7 +1113,7 @@ public class Processor extends ThreadPoolExecutor
      * @deprecated Useless...
      * @param listener Processor Listener
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addListener(ProcessorEventListener listener)
     {
         //
@@ -1123,7 +1123,7 @@ public class Processor extends ThreadPoolExecutor
      * @deprecated Useless...
      * @param listener Processor Listener
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void removeListener(ProcessorEventListener listener)
     {
         //
@@ -1133,7 +1133,7 @@ public class Processor extends ThreadPoolExecutor
      * @deprecated useless
      * @param task task to run
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void fireDoneEvent(FutureTaskAdapter<?> task)
     {
         //

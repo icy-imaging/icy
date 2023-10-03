@@ -23,7 +23,7 @@ import java.util.EventListener;
 /**
  * @deprecated
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface LUTBandListener extends EventListener
 {
     public void lutBandChanged(LUTBandEvent e);

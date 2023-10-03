@@ -25,7 +25,7 @@ import icy.common.CollapsibleEvent;
  */
 public class IcyColorSpaceEvent implements CollapsibleEvent
 {
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public enum IcyColorSpaceEventType
     {
         CHANGED

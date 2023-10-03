@@ -47,7 +47,7 @@ public class IcyTextField extends JFormattedTextField implements DocumentListene
     /**
      * @deprecated Don't use this property.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected boolean consumeCharKeyPressEvent;
     protected boolean changed;
 
@@ -154,7 +154,7 @@ public class IcyTextField extends JFormattedTextField implements DocumentListene
     /**
      * @deprecated Should not be used (keep it to false)
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setConsumeCharKeyPressEvent(boolean consumeCharKeyPressEvent) {
         this.consumeCharKeyPressEvent = consumeCharKeyPressEvent;
     }
@@ -162,7 +162,7 @@ public class IcyTextField extends JFormattedTextField implements DocumentListene
     /**
      * @deprecated Should not be used.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean getConsumeCharKeyPressEvent() {
         return consumeCharKeyPressEvent;
     }

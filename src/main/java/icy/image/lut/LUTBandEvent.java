@@ -21,7 +21,7 @@ package icy.image.lut;
 /**
  * @deprecated
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class LUTBandEvent
 {
     public enum LUTBandEventType

@@ -156,7 +156,7 @@ public class IcyVtkPanel extends VtkJoglPanel
         planeClip.setWireframeMode();
         planeClip.getActor().GetProperty().SetAmbient(0.8d);
         planeClip.getActor().GetProperty().SetDiffuse(0.2d);
-        planeClip.getActor().GetProperty().SetLineWidth(2d);
+        planeClip.getActor().GetProperty().SetLineWidth(2f);
         slicerRenderer.AddActor(arrowClip.getActor());
         slicerRenderer.AddActor(planeClip.getActor());
 
@@ -384,7 +384,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * @deprecated Use {@link #pickActor(int, int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void pickActor(int x, int y)
     {
         pick(x, y);

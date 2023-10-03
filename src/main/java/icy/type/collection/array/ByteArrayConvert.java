@@ -942,7 +942,7 @@ public class ByteArrayConvert
      * @param little boolean
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object byteArrayTo(byte[] in, int inOffset, int outDataType, int length, boolean little)
     {
         return byteArrayTo(in, inOffset, DataType.getDataType(outDataType), 0, length, little);
@@ -955,7 +955,7 @@ public class ByteArrayConvert
      * @param little boolean
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object byteArrayTo(byte[] in, int outDataType, boolean little)
     {
         return byteArrayTo(in, 0, DataType.getDataType(outDataType), 0, -1, little);

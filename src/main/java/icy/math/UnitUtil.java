@@ -282,7 +282,7 @@ public class UnitUtil
     /**
      * @deprecated Use {@link #getBestTimeUnit(double)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static TimeUnit getBestUnit(double valueInMs)
     {
         return getBestTimeUnit(valueInMs);

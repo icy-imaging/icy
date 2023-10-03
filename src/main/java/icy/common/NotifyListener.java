@@ -21,7 +21,7 @@ package icy.common;
 /**
  * @deprecated Use {@link icy.common.listener.NotifyListener} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface NotifyListener extends icy.common.listener.NotifyListener
 {
 

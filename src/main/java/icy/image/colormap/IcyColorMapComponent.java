@@ -513,7 +513,7 @@ public class IcyColorMapComponent implements XMLPersistent
     /**
      * @deprecated Use {@link #getValue(int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public short getIntensity(int index)
     {
         return getValue(index);

@@ -201,7 +201,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
      * @throws InterruptedException
      * @deprecated Better to use {@link #open(Collection, int)} or {@link #open(SequenceFileGroup, int)} for this importer
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public boolean open(String path, int flags) throws UnsupportedFormatException, IOException, InterruptedException
     {

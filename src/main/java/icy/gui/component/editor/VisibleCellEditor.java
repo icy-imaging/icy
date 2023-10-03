@@ -37,11 +37,11 @@ import icy.gui.component.renderer.VisibleCellRenderer;
  */
 public class VisibleCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor {
     protected JLabel label;
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     int iconSize;
     boolean visible;
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public VisibleCellEditor(int iconSize) {
         this();
         this.iconSize = iconSize;

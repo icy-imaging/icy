@@ -61,7 +61,7 @@ import icy.util.XMLUtil;
  *        the type of 4D ROI for each slice of this 5D ROI
  * @deprecated Try to not use {@link ROI4D} or {@link ROI5D} anymore
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ROI5DStack<R extends ROI4D> extends ROI5D implements ROIListener, OverlayListener, Iterable<R>
 {
     public static final String PROPERTY_USECHILDCOLOR = "useChildColor";

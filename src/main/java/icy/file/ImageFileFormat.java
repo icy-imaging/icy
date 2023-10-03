@@ -38,7 +38,6 @@ public enum ImageFileFormat
             return true;
         }
 
-        @SuppressWarnings("deprecation")
         @Override
         public FileFormat toFileFormat()
         {
@@ -71,7 +70,6 @@ public enum ImageFileFormat
             return true;
         }
 
-        @SuppressWarnings("deprecation")
         @Override
         public FileFormat toFileFormat()
         {
@@ -104,7 +102,6 @@ public enum ImageFileFormat
             return false;
         }
 
-        @SuppressWarnings("deprecation")
         @Override
         public FileFormat toFileFormat()
         {
@@ -137,7 +134,6 @@ public enum ImageFileFormat
             return true;
         }
 
-        @SuppressWarnings("deprecation")
         @Override
         public FileFormat toFileFormat()
         {
@@ -170,7 +166,6 @@ public enum ImageFileFormat
             return true;
         }
 
-        @SuppressWarnings("deprecation")
         @Override
         public FileFormat toFileFormat()
         {
@@ -207,7 +202,6 @@ public enum ImageFileFormat
     /**
      * For backward compatibility with {@link FileFormat}.
      */
-    @SuppressWarnings({"deprecation", "javadoc"})
     public abstract FileFormat toFileFormat();
 
     /**
@@ -281,7 +275,6 @@ public enum ImageFileFormat
     /**
      * For backward compatibility with {@link FileFormat}.
      */
-    @SuppressWarnings({"deprecation", "javadoc"})
     public static ImageFileFormat getFormat(FileFormat format)
     {
         switch (format)

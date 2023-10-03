@@ -26,7 +26,7 @@ import icy.util.StringUtil;
  */
 public class ROIEvent implements CollapsibleEvent
 {
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public enum ROIPointEventType
     {
         NULL, POINT_ADDED, POINT_REMOVED, POINT_CHANGED;
@@ -43,22 +43,22 @@ public class ROIEvent implements CollapsibleEvent
                       * ROI property change event.<br>
                       * check property field to know which property has actually changed
                       */
-        PROPERTY_CHANGED, @Deprecated PAINTER_CHANGED, @Deprecated NAME_CHANGED;
+        PROPERTY_CHANGED, @Deprecated(since = "2.4.3", forRemoval = true) PAINTER_CHANGED, @Deprecated(since = "2.4.3", forRemoval = true) NAME_CHANGED;
     }
 
     private final ROI source;
     private final ROIEventType type;
     private String propertyName;
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     private Object point;
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     private ROIPointEventType pointEventType;
 
     /**
      * @deprecated Use {@link #ROIEvent(ROI, ROIEventType)} constructor instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROIEvent(ROI source, ROIEventType type, ROIPointEventType pointEventType, Object point)
     {
         super();
@@ -114,13 +114,13 @@ public class ROIEvent implements CollapsibleEvent
         return propertyName;
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Object getPoint()
     {
         return point;
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROIPointEventType getPointEventType()
     {
         return pointEventType;

@@ -85,7 +85,7 @@ public class Loader
     /**
      * @deprecated Use {@link SequenceFileSticher#groupFiles(SequenceFileImporter, Collection, boolean, FileFrame)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static class FilePosition extends ChannelPosition
     {
         public final String path;
@@ -104,7 +104,7 @@ public class Loader
         /**
          * @deprecated Use {@link #FilePosition(String, String, int, int, int, int)} instead.
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public FilePosition(String path, int t, int z, int c)
         {
             super(t, z, c);
@@ -766,7 +766,7 @@ public class Loader
     /**
      * @deprecated Use {@link #getSequenceFileImporter(List, String, boolean)}
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static SequenceFileImporter getSequenceFileImporter(List<SequenceFileImporter> importers, String path)
     {
         return getSequenceFileImporter(importers, path, true);
@@ -775,7 +775,7 @@ public class Loader
     /**
      * @deprecated Use {@link #getSequenceFileImporter(String, boolean)}
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static SequenceFileImporter getSequenceFileImporter(String path)
     {
         return getSequenceFileImporter(path, true);
@@ -840,7 +840,7 @@ public class Loader
     /**
      * @deprecated Use {@link #isSupportedImageFile(String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean isImageFile(String path)
     {
         return isSupportedImageFile(path);
@@ -1130,7 +1130,7 @@ public class Loader
      * @deprecated Use {@link #getSequenceFileImporters(String)} instead.
      */
     @SuppressWarnings("resource")
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IFormatReader getReader(String path) throws FormatException, IOException
     {
         return new ImageReader().getReader(path);
@@ -1193,7 +1193,7 @@ public class Loader
      * @throws InterruptedException
      * @deprecated Use {@link #getOMEXMLMetaData(SequenceFileImporter, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadataImpl getMetaData(SequenceFileImporter importer, String path)
             throws UnsupportedFormatException, IOException, InterruptedException
     {
@@ -1217,7 +1217,7 @@ public class Loader
      * @throws InterruptedException
      * @deprecated Use {@link #getOMEXMLMetaData(String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadataImpl getMetaData(String path) throws UnsupportedFormatException, IOException, InterruptedException
     {
         OMEXMLMetadataImpl result;
@@ -1245,7 +1245,7 @@ public class Loader
      * @throws InterruptedException
      * @deprecated Use {@link #getOMEXMLMetaData(String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadataImpl getMetaData(File file) throws UnsupportedFormatException, IOException, InterruptedException
     {
         return getMetaData(file.getAbsolutePath());
@@ -1254,7 +1254,7 @@ public class Loader
     /**
      * @deprecated Use {@link #getOMEXMLMetaData(String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected static OMEXMLMetadataImpl getMetaData(IFormatReader reader, String path) throws FormatException, IOException
     {
         // prepare meta data store structure
@@ -1345,7 +1345,7 @@ public class Loader
     /**
      * @deprecated Use {@link IcyBufferedImage#createFrom(IFormatReader, int, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage loadImage(IFormatReader reader, int z, int t) throws FormatException, IOException
     {
         // return an icy image
@@ -1356,7 +1356,7 @@ public class Loader
      * @deprecated Use {@link IcyBufferedImage#createFrom(IFormatReader, int, int)} with Z and T
      *             parameters set to 0.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage loadImage(IFormatReader reader) throws FormatException, IOException
     {
         // return an icy image
@@ -1366,7 +1366,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadImage(String, int, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage loadImage(File file, int z, int t) throws FormatException, IOException
     {
         return loadImage(file.getAbsolutePath(), z, t);
@@ -1376,7 +1376,7 @@ public class Loader
      * @throws InterruptedException
      * @deprecated Use {@link #loadImage(String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage loadImage(File file) throws UnsupportedFormatException, IOException, InterruptedException
     {
         return loadImage(file.getAbsolutePath());
@@ -1385,7 +1385,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadImage(String, int, int, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage loadImage(String path, int z, int t) throws FormatException, IOException
     {
         final IFormatReader reader = getReader(path);
@@ -1479,7 +1479,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File[], int, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence[] loadSequences(File[] files, int[] series, boolean separate, boolean autoOrder, boolean showProgress)
     {
         final List<Sequence> result = new ArrayList<Sequence>();
@@ -1499,7 +1499,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File[], int[], boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<Sequence> loadSequences(List<File> files, List<Integer> series, boolean separate, boolean autoOrder, boolean showProgress)
     {
         final int[] seriesArray;
@@ -1523,7 +1523,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File[], int[], boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<Sequence> loadSequences(List<File> files, List<Integer> series, boolean separate, boolean showProgress)
     {
         return loadSequences(files, series, separate, true, showProgress);
@@ -1532,7 +1532,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File[], int[], boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<Sequence> loadSequences(List<File> files, List<Integer> series, boolean separate)
     {
         return loadSequences(files, series, separate, true, true);
@@ -1541,7 +1541,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File[], int[], boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<Sequence> loadSequences(List<File> files, List<Integer> series)
     {
         return loadSequences(files, series, false, true, true);
@@ -1550,7 +1550,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File[], int[], boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<Sequence> loadSequences(List<File> files, boolean separate, boolean showProgress)
     {
         return loadSequences(files, null, separate, true, showProgress);
@@ -1559,7 +1559,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File[], int[], boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<Sequence> loadSequences(List<File> files, boolean separate)
     {
         return loadSequences(files, null, separate, true, true);
@@ -1568,7 +1568,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File[], int[], boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<Sequence> loadSequences(List<File> files, boolean separate, boolean display, boolean addToRecent)
     {
         return loadSequences(files, null, separate, true, true);
@@ -1577,7 +1577,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequence(File, int, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence[] loadSequences(File file, int[] series, boolean showProgress)
     {
         return loadSequences(new File[] {file}, series, false, true, showProgress);
@@ -1586,7 +1586,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File, int[], boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<Sequence> loadSequences(File file, List<Integer> series, boolean showProgress)
     {
         final int[] seriesArray;
@@ -1610,7 +1610,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File, int[], boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<Sequence> loadSequences(File file, List<Integer> series)
     {
         return loadSequences(file, series, true);
@@ -1619,7 +1619,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequences(File, int[], boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<Sequence> loadSequences(File file, List<Integer> series, boolean display, boolean addToRecent)
     {
         return loadSequences(file, series, true);
@@ -1628,7 +1628,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequence(File, int, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence loadSequence(File file, boolean showProgress)
     {
         return loadSequence(new File[] {file}, -1, showProgress);
@@ -1637,7 +1637,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequence(File, int, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence loadSequence(File file)
     {
         return loadSequence(new File[] {file}, -1, true);
@@ -1647,7 +1647,7 @@ public class Loader
      * @deprecated Use {@link #loadSequences(List, int, boolean, boolean, boolean, boolean)}
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence[] loadSequences(File[] files, int series, boolean separate, boolean autoOrder, boolean showProgress)
     {
         final List<Sequence> result = loadSequences(FileUtil.toPaths(CollectionUtil.asList(files)), series, separate, autoOrder, false, showProgress);
@@ -1666,7 +1666,7 @@ public class Loader
      * @param showProgress
      *        Show progression of loading process.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence loadSequence(File[] files, int series, boolean showProgress)
     {
         final Sequence[] result = loadSequences(files, series, false, true, showProgress);
@@ -1680,7 +1680,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequence(String, int, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence loadSequence(File file, int series, boolean showProgress)
     {
         return loadSequence(new File[] {file}, series, showProgress);
@@ -1910,7 +1910,7 @@ public class Loader
     /**
      * @deprecated Use {@link #loadSequence(SequenceFileImporter, List, boolean, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence loadSequence(List<?> files, boolean display, boolean addToRecent)
     {
         return loadSequence(files, true);
@@ -2033,7 +2033,7 @@ public class Loader
     /**
      * @deprecated Use {@link #load(List, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void load(List<File> files)
     {
         load(files.toArray(new File[files.size()]), false, true, true);
@@ -2042,7 +2042,7 @@ public class Loader
     /**
      * @deprecated Use {@link #load(List, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void load(List<File> files, boolean separate)
     {
         load(files.toArray(new File[files.size()]), separate, true, true);
@@ -2051,7 +2051,7 @@ public class Loader
     /**
      * @deprecated Use {@link #load(List, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void load(List<File> files, boolean separate, boolean showProgress)
     {
         load(files.toArray(new File[files.size()]), separate, true, showProgress);
@@ -2060,7 +2060,7 @@ public class Loader
     // /**
     // * @deprecated Use {@link #load(File[], boolean, boolean, boolean)} instead.
     // */
-    // @Deprecated
+    // @Deprecated(since = "2.4.3", forRemoval = true)
     // public static void load(List<File> files, boolean separate, boolean autoOrder, boolean
     // showProgress)
     // {
@@ -2070,7 +2070,7 @@ public class Loader
     /**
      * @deprecated Use {@link #load(String, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void load(File file)
     {
         load(new File[] {file}, false, false, true);
@@ -2079,7 +2079,7 @@ public class Loader
     /**
      * @deprecated Use {@link #load(List, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void load(final File[] files, final boolean separate, final boolean autoOrder, final boolean showProgress)
     {
         // asynchronous call
@@ -2100,7 +2100,7 @@ public class Loader
     /**
      * @deprecated Use {@link #load(String, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void load(File file, boolean showProgress)
     {
         load(new File[] {file}, false, false, showProgress);
@@ -2807,7 +2807,7 @@ public class Loader
      * @deprecated Use {@link #loadSequences(List, int, boolean, boolean, boolean, boolean)}
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     static Sequence[] loadSequences(SequenceFileImporter importer, File[] files, int series, boolean separate, boolean autoOrder, boolean directory,
             boolean addToRecent, boolean showProgress)
     {
@@ -4378,7 +4378,7 @@ public class Loader
     /**
      * @deprecated Use {@link #selectSerie(SequenceFileImporter, String, OMEXMLMetadata, int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int selectSerie(final SequenceFileImporter importer, final String path, final OMEXMLMetadataImpl meta, int defaultSerie)
             throws UnsupportedFormatException, IOException
     {
@@ -4423,7 +4423,7 @@ public class Loader
      * @throws ClosedByInterruptException
      * @deprecated Use {@link SequenceFileSticher#groupAllFiles(SequenceFileImporter, Collection, boolean, FileFrame)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<FilePosition> getFilePositions(List<String> paths, boolean dimOrder, FileFrame loadingFrame)
             throws InterruptedException, ClosedByInterruptException
     {
@@ -4449,7 +4449,7 @@ public class Loader
      * @throws ClosedByInterruptException
      * @deprecated Use {@link SequenceFileSticher#groupAllFiles(SequenceFileImporter, Collection, boolean, FileFrame)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<FilePosition> getFilePositions(List<String> paths, boolean dimOrder) throws InterruptedException, ClosedByInterruptException
     {
         return getFilePositions(paths, dimOrder, null);

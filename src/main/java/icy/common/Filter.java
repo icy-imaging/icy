@@ -23,7 +23,7 @@ import icy.common.listener.AcceptListener;
 /**
  * @deprecated use {@link AcceptListener} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface Filter extends AcceptListener
 {
 

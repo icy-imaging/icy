@@ -163,7 +163,7 @@ public class WorkspaceLoader
     /**
      * @deprecated Use {@link #reloadAsynch()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void reload_asynch()
     {
         reloadAsynch();

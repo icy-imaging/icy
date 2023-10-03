@@ -65,7 +65,7 @@ public abstract class ROI2D extends ROI
     /**
      * @deprecated Use {@link ROI2D#getROI2DList(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<ROI2D> getROI2DList(ArrayList<ROI> rois)
     {
         final ArrayList<ROI2D> result = new ArrayList<ROI2D>();
@@ -80,7 +80,7 @@ public abstract class ROI2D extends ROI
     /**
      * @deprecated Use {@link ROI2D#getROI2DList(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI2D[] getROI2DList(ROI[] rois)
     {
         final ArrayList<ROI2D> result = new ArrayList<ROI2D>();
@@ -97,7 +97,7 @@ public abstract class ROI2D extends ROI
      * @throws UnsupportedOperationException
      * @deprecated Use {@link ROIUtil#merge(List, icy.util.ShapeUtil.BooleanOperator)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI2D merge(ROI2D[] rois, ShapeOperation operation)
             throws UnsupportedOperationException, InterruptedException
     {
@@ -113,7 +113,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link ROI#getSubtraction(ROI)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI2D substract(ROI2D roi1, ROI2D roi2) throws InterruptedException
     {
         return subtract(roi1, roi2);
@@ -123,7 +123,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link ROI#getSubtraction(ROI)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI2D subtract(ROI2D roi1, ROI2D roi2) throws InterruptedException
     {
         ROI result = roi1.getSubtraction(roi2);
@@ -546,7 +546,7 @@ public abstract class ROI2D extends ROI
     /**
      * @deprecated Use {@link #isOverEdge(IcyCanvas, Point2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isOver(IcyCanvas canvas, Point2D p)
     {
         return isOverEdge(canvas, p.getX(), p.getY());
@@ -555,7 +555,7 @@ public abstract class ROI2D extends ROI
     /**
      * @deprecated Use {@link #isOverEdge(IcyCanvas, double, double)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isOver(IcyCanvas canvas, double x, double y)
     {
         return isOverEdge(canvas, x, y);
@@ -1088,7 +1088,7 @@ public abstract class ROI2D extends ROI
     /**
      * @deprecated Use {@link #setPosition2D(Point2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setPosition(Point2D position)
     {
         setPosition2D(position);
@@ -1213,7 +1213,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(int, int, int, int, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean[] getBooleanMask(int x, int y, int width, int height) throws InterruptedException
     {
         return getBooleanMask(x, y, width, height, false);
@@ -1239,7 +1239,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(Rectangle, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean[] getBooleanMask(Rectangle rect) throws InterruptedException
     {
         return getBooleanMask(rect, false);
@@ -1280,7 +1280,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BooleanMask2D getBooleanMask() throws InterruptedException
     {
         return getBooleanMask(false);
@@ -1290,7 +1290,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BooleanMask2D getAsBooleanMask(boolean inclusive) throws InterruptedException
     {
         return getBooleanMask(inclusive);
@@ -1300,7 +1300,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(Rectangle, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean[] getAsBooleanMask(Rectangle rect, boolean inclusive) throws InterruptedException
     {
         return getBooleanMask(rect, inclusive);
@@ -1310,7 +1310,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(int, int, int, int, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean[] getAsBooleanMask(int x, int y, int w, int h, boolean inclusive) throws InterruptedException
     {
         return getBooleanMask(x, y, w, h, inclusive);
@@ -1320,7 +1320,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BooleanMask2D getAsBooleanMask() throws InterruptedException
     {
         return getBooleanMask();
@@ -1330,7 +1330,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean[] getAsBooleanMask(Rectangle rect) throws InterruptedException
     {
         return getBooleanMask(rect);
@@ -1340,7 +1340,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException 
      * @deprecated Use {@link #getBooleanMask(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean[] getAsBooleanMask(int x, int y, int w, int h) throws InterruptedException
     {
         return getBooleanMask(x, y, w, h);
@@ -1381,7 +1381,7 @@ public abstract class ROI2D extends ROI
      * @throws UnsupportedOperationException
      * @deprecated Perimeter computation cannot be cached so directly use #getLength(Sequence) instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double computePerimeter(Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return getLength(sequence);
@@ -1391,7 +1391,7 @@ public abstract class ROI2D extends ROI
      * @throws InterruptedException
      * @deprecated Use {@link #getLength(Sequence)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getPerimeter(Sequence sequence) throws UnsupportedOperationException, InterruptedException
     {
         return getLength(sequence);
@@ -1407,7 +1407,7 @@ public abstract class ROI2D extends ROI
      * @see #computeNumberOfContourPoints()
      */
     @Override
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getPerimeter() throws InterruptedException
     {
         return getNumberOfContourPoints();
@@ -1422,7 +1422,7 @@ public abstract class ROI2D extends ROI
      * @see #getNumberOfPoints()
      * @see #computeNumberOfPoints()
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getArea() throws InterruptedException
     {
         return getNumberOfPoints();

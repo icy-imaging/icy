@@ -23,7 +23,7 @@ import icy.type.DataType;
 /**
  * @deprecated Use {@link ArrayType} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ArrayDataType extends ArrayType
 {
     /**
@@ -31,7 +31,7 @@ public class ArrayDataType extends ArrayType
      * @param array obect
      * @return Data type of the array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayDataType getArrayDataType(Object array)
     {
         return ArrayUtil.getArrayDataType(array);

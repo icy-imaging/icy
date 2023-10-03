@@ -88,25 +88,25 @@ import plugins.kernel.roi.tool.plugin.ROIMagicWandPlugin;
  * @author Thomas MUSSET
  * @deprecated Do not use this (will be removed with Substance)
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class ROITask extends RibbonTask implements PluginLoaderListener {
     public static final String NAME = "Region Of Interest";
 
     /**
      * @deprecated Use {@link #setSelected(String)} with <code>null</code> parameter instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final String SELECT = "Selection";
     /**
      * @deprecated Use {@link #setSelected(String)} with <code>null</code> parameter instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final String MOVE = "Move";
 
     /**
      * @deprecated Use {@link ROITask#isROITool()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean isROITool(String command) {
         // assume it's a ROI command when it's not null
         return (command != null);

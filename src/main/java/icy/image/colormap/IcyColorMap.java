@@ -1052,7 +1052,7 @@ public class IcyColorMap implements ChangeListener, XMLPersistent
     /**
      * @deprecated Use {@link #setAlphaToLinear3D()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setDefaultAlphaFor3D()
     {
         setAlphaToLinear3D();

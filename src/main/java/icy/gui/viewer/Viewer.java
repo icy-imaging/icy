@@ -881,7 +881,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * @deprecated Use {@link #setCanvas(String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setCanvas(IcyCanvas value) {
         if (canvas == value)
             return;
@@ -990,7 +990,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * @deprecated Use {@link #getLutViewer()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyLutViewer getLutPanel() {
         return getLutViewer();
     }
@@ -998,7 +998,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * @deprecated Use {@link #setLutViewer(LUTViewer)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setLutPanel(IcyLutViewer lutViewer) {
         setLutViewer((LUTViewer) lutViewer);
     }
@@ -1067,7 +1067,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * @deprecated Use {@link #getPositionT()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getT() {
         return getPositionT();
     }
@@ -1075,7 +1075,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * @deprecated Use {@link #setPositionT(int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setT(int t) {
         setPositionT(t);
     }
@@ -1083,7 +1083,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * @deprecated Use {@link #getPositionZ()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getZ() {
         return getPositionZ();
     }
@@ -1091,7 +1091,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * @deprecated Use {@link #setPositionZ(int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setZ(int z) {
         setPositionZ(z);
     }
@@ -1099,7 +1099,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * @deprecated Use {@link #getPositionZ()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getC() {
         return getPositionC();
     }
@@ -1107,7 +1107,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * @deprecated Use {@link #setPositionZ(int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setC(int c) {
         setPositionC(c);
     }
@@ -1198,7 +1198,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * @deprecated Use {@link #getImage(int, int, int)} with C = -1 instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyBufferedImage getImage(int t, int z) {
         return getImage(t, z, -1);
     }

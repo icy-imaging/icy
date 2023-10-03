@@ -69,7 +69,7 @@ public class ClassUtil
 //     *         Warning: this function is not safe and would not always work as expected.<br>
 //     *         It can return <code>null</code> if an error occurred.
 //     */
-//    @Deprecated
+//    @Deprecated(since = "2.4.3", forRemoval = true)
 //    public static List<Class<?>> getLoadedClasses(ClassLoader cl)
 //    {
 //        try
@@ -984,7 +984,7 @@ public class ClassUtil
     /**
      * @deprecated Use {@link ReflectionUtil#getMethod(Class, String, Class...)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Method getMethod(Object object, String methodName, boolean forceAccess, Class<?>... parameterTypes)
             throws SecurityException, NoSuchMethodException
     {
@@ -994,7 +994,7 @@ public class ClassUtil
     /**
      * @deprecated Use {@link ReflectionUtil#invokeMethod(Object, String, Object...)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object invokeMethod(Object object, String methodName, boolean forceAccess, Object... args)
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
             InvocationTargetException
@@ -1005,7 +1005,7 @@ public class ClassUtil
     /**
      * @deprecated Use {@link ReflectionUtil#getField(Class, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Field getField(Object object, String fieldName, boolean forceAccess)
             throws SecurityException, NoSuchFieldException
     {
@@ -1015,7 +1015,7 @@ public class ClassUtil
     /**
      * @deprecated Use {@link ReflectionUtil#getFieldObject(Object, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object getFieldObject(Object object, String fieldName, boolean forceAccess)
             throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
     {

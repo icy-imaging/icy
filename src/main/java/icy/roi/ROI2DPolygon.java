@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DPolygon} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ROI2DPolygon extends plugins.kernel.roi.roi2d.ROI2DPolygon
 {
     protected class ROI2DPolygonAnchor2D extends plugins.kernel.roi.roi2d.ROI2DPolygon.ROI2DPolygonAnchor2D
@@ -42,7 +42,7 @@ public class ROI2DPolygon extends plugins.kernel.roi.roi2d.ROI2DPolygon
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DPolygon(Point2D pt, boolean cm)
     {
         super(pt);

@@ -73,7 +73,7 @@ public class AppleUtil {
     /**
      * Apple fix live run (fixes specific OS X JVM stuff)
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     static void appleFixLiveRun() {
         while (true) {
             final Toolkit toolkit = Toolkit.getDefaultToolkit();

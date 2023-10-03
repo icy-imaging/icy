@@ -30,7 +30,7 @@ import vtk.vtkRenderer;
  * @deprecated Use {@link VtkCanvas} instead.
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class Canvas3D extends IcyCanvas3D
 {
     private static final long serialVersionUID = -2677870897470280726L;
@@ -64,7 +64,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated Use {@link #getVolumeScale()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getVolumeScaleX()
     {
         return getVolumeScale()[0];
@@ -73,7 +73,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated Use {@link #getVolumeScale()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getVolumeScaleY()
     {
         return getVolumeScale()[1];
@@ -82,7 +82,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated Use {@link #getVolumeScale()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getVolumeScaleZ()
     {
         return getVolumeScale()[2];
@@ -91,7 +91,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getXScaling()
     {
         return getVolumeScaleX();
@@ -100,7 +100,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getYScaling()
     {
         return getVolumeScaleY();
@@ -109,7 +109,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getZScaling()
     {
         return getVolumeScaleZ();
@@ -123,7 +123,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated Use {@link #setVolumeScale(double, double, double)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setVolumeScaleX(double value)
     {
         final double[] scale = getVolumeScale();
@@ -138,7 +138,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated Use {@link #setVolumeScale(double, double, double)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setVolumeScaleY(double value)
     {
         final double[] scale = getVolumeScale();
@@ -153,7 +153,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated Use {@link #setVolumeScale(double, double, double)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setVolumeScaleZ(double value)
     {
         final double[] scale = getVolumeScale();
@@ -168,7 +168,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setXScaling(double value)
     {
         setVolumeScaleX(value);
@@ -177,7 +177,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setYScaling(double value)
     {
         setVolumeScaleY(value);
@@ -186,7 +186,7 @@ public abstract class Canvas3D extends IcyCanvas3D
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setZScaling(double value)
     {
         setVolumeScaleZ(value);

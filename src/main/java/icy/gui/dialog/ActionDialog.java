@@ -117,7 +117,7 @@ public class ActionDialog extends JDialog implements ActionListener
     /**
      * @deprecated Use {@link #ActionDialog(String, JComponent, Frame)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ActionDialog(Frame owner, String title)
     {
         this(title, null, owner);

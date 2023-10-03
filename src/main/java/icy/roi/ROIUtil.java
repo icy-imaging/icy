@@ -160,7 +160,7 @@ public class ROIUtil
      * @throws UnsupportedOperationException
      * @deprecated Use {@link ROIDescriptor#computeDescriptor(Collection, String, ROI, Sequence)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object computeDescriptor(Set<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi, Sequence sequence)
             throws UnsupportedOperationException, InterruptedException
     {
@@ -196,7 +196,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIStandardDeviationDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getStandardDeviation(Sequence sequence, ROI roi, int z, int t, int c)
     {
         try
@@ -241,7 +241,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIIntensityDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IntensityInfo getIntensityInfo(Sequence sequence, ROI roi, int z, int t, int c)
     {
         try
@@ -320,7 +320,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMinIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getMinIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
     {
         return DataIteratorMath.min(new SequenceDataIterator(sequence, roi, false, z, t, c));
@@ -331,7 +331,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMaxIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getMaxIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
     {
         return DataIteratorMath.max(new SequenceDataIterator(sequence, roi, false, z, t, c));
@@ -342,7 +342,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMeanIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getMeanIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
     {
         return DataIteratorMath.mean(new SequenceDataIterator(sequence, roi, false, z, t, c));
@@ -353,7 +353,7 @@ public class ROIUtil
      * @deprecated Use {@link ROISumIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getSumIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
     {
         return DataIteratorMath.sum(new SequenceDataIterator(sequence, roi, false, z, t, c));
@@ -363,7 +363,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIStandardDeviationDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getStandardDeviation(Sequence sequence, ROI roi)
     {
         return getStandardDeviation(sequence, roi, -1, -1, -1);
@@ -373,7 +373,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIIntensityDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IntensityInfo getIntensityInfo(Sequence sequence, ROI roi)
     {
         return getIntensityInfo(sequence, roi, -1, -1, -1);
@@ -394,7 +394,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMinIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getMinIntensity(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getMinIntensity(sequence, roi, -1, -1, -1);
@@ -405,7 +405,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMaxIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getMaxIntensity(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getMaxIntensity(sequence, roi, -1, -1, -1);
@@ -416,7 +416,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMeanIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getMeanIntensity(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getMeanIntensity(sequence, roi, -1, -1, -1);
@@ -427,7 +427,7 @@ public class ROIUtil
      * @deprecated Use {@link ROISumIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getSumIntensity(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getSumIntensity(sequence, roi, -1, -1, -1);
@@ -438,7 +438,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Point5D getMassCenter(ROI roi) throws InterruptedException
     {
         switch (roi.getDimension())
@@ -471,7 +471,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Point2D getMassCenter(ROI2D roi) throws InterruptedException
     {
         double x = 0, y = 0;
@@ -511,7 +511,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Point3D getMassCenter(ROI3D roi) throws InterruptedException
     {
         double x = 0, y = 0, z = 0;
@@ -560,7 +560,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Point4D getMassCenter(ROI4D roi) throws InterruptedException
     {
         final BooleanMask4D mask4d = roi.getBooleanMask(true);
@@ -618,7 +618,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Point5D getMassCenter(ROI5D roi) throws InterruptedException
     {
         final BooleanMask5D mask5d = roi.getBooleanMask(true);
@@ -681,7 +681,7 @@ public class ROIUtil
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     private static double getMultiplier(Sequence sequence, ROI roi, int dim)
     {
         final int dimRoi = roi.getDimension();
@@ -747,7 +747,7 @@ public class ROIUtil
     /**
      * @deprecated Use {@link ROIContourDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getContourSize(Sequence sequence, double contourPoints, ROI roi, int dim, int roundSignificant)
     {
         final double mul = getMultiplier(sequence, roi, dim);
@@ -763,7 +763,7 @@ public class ROIUtil
      * @throws InterruptedException
      * @deprecated Use {@link ROIContourDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getContourSize(Sequence sequence, ROI roi, int dim, int roundSignificant) throws InterruptedException
     {
         return getContourSize(sequence, roi.getNumberOfContourPoints(), roi, dim, roundSignificant);
@@ -773,7 +773,7 @@ public class ROIUtil
      * @throws InterruptedException
      * @deprecated Use {@link ROIContourDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getContourSize(Sequence sequence, ROI roi, int dim) throws InterruptedException
     {
         return getContourSize(sequence, roi, dim, 0);
@@ -783,7 +783,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIInteriorDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getInteriorSize(Sequence sequence, double interiorPoints, ROI roi, int dim, int roundSignificant)
     {
         final double mul = getMultiplier(sequence, roi, dim);
@@ -800,7 +800,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIInteriorDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getInteriorSize(Sequence sequence, ROI roi, int dim, int roundSignificant) throws InterruptedException
     {
         return getInteriorSize(sequence, roi.getNumberOfPoints(), roi, dim, roundSignificant);
@@ -811,7 +811,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIInteriorDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getInteriorSize(Sequence sequence, ROI roi, int dim) throws InterruptedException
     {
         return getInteriorSize(sequence, roi, dim, 0);
@@ -822,7 +822,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIPerimeterDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getPerimeter(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
     {
         return getContourSize(sequence, roi, 2, roundSignificant);
@@ -833,7 +833,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIPerimeterDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getPerimeter(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getPerimeter(sequence, roi, 0);
@@ -843,7 +843,7 @@ public class ROIUtil
      * @throws InterruptedException
      * @deprecated Use {@link ROIAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getArea(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
     {
         return getInteriorSize(sequence, roi, 2, roundSignificant);
@@ -853,7 +853,7 @@ public class ROIUtil
      * @throws InterruptedException
      * @deprecated Use {@link ROIAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getArea(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getArea(sequence, roi, 0);
@@ -864,7 +864,7 @@ public class ROIUtil
      * @deprecated Use {@link ROISurfaceAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getSurfaceArea(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
     {
         return getContourSize(sequence, roi, 3, roundSignificant);
@@ -875,7 +875,7 @@ public class ROIUtil
      * @deprecated Use {@link ROISurfaceAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getSurfaceArea(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getSurfaceArea(sequence, roi, 0);
@@ -885,7 +885,7 @@ public class ROIUtil
      * @throws InterruptedException
      * @deprecated Use {@link ROIVolumeDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getVolume(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
     {
         return getInteriorSize(sequence, roi, 3, roundSignificant);
@@ -895,7 +895,7 @@ public class ROIUtil
      * @throws InterruptedException
      * @deprecated Use {@link ROIVolumeDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getVolume(Sequence sequence, ROI roi) throws InterruptedException
     {
         return getVolume(sequence, roi, 0);
@@ -1659,7 +1659,7 @@ public class ROIUtil
      * @throws InterruptedException
      * @deprecated Use {@link #convertTo3D(ROI2D, double, double)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI convertToStack(ROI2D roi, int zMin, int zMax) throws InterruptedException
     {
         ROI result = null;
@@ -1691,7 +1691,7 @@ public class ROIUtil
      * @throws InterruptedException
      * @deprecated Use {@link #convertTo2D(ROI3D)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI[] unstack(ROI3D roi) throws InterruptedException
     {
         return convertTo2D(roi);

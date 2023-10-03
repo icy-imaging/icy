@@ -62,7 +62,7 @@ public class IcyBufferedImageUtil
     /**
      * @deprecated Use {@link IcyBufferedImage#createFrom(BufferedImage)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage toIcyBufferedImage(BufferedImage image)
     {
         return IcyBufferedImage.createFrom(image);
@@ -71,7 +71,7 @@ public class IcyBufferedImageUtil
     /**
      * @deprecated Use {@link IcyBufferedImage#createFrom(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage toIcyBufferedImage(List<BufferedImage> images)
     {
         return IcyBufferedImage.createFrom(images);
@@ -193,7 +193,7 @@ public class IcyBufferedImageUtil
      * @throws InterruptedException
      * @deprecated Use {@link #toBufferedImage(IcyBufferedImage, BufferedImage, LUT)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage getARGBImage(IcyBufferedImage source, LUT lut, BufferedImage dest)
             throws InterruptedException
     {
@@ -231,7 +231,7 @@ public class IcyBufferedImageUtil
      * @throws InterruptedException
      * @deprecated Use {@link #toBufferedImage(IcyBufferedImage, BufferedImage)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage getARGBImage(IcyBufferedImage source, BufferedImage dest) throws InterruptedException
     {
         return getARGBImage(source, null, dest);
@@ -347,7 +347,7 @@ public class IcyBufferedImageUtil
     /**
      * @deprecated Use {@link #convertType(IcyBufferedImage, DataType, Scaler[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage convertToType(IcyBufferedImage source, DataType dataType, Scaler scaler)
     {
         if (source == null)
@@ -578,7 +578,7 @@ public class IcyBufferedImageUtil
     /**
      * @deprecated Use {@link #getSubImage(IcyBufferedImage, Rectangle, int, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage getSubImage(IcyBufferedImage source, int x, int y, int c, int sizeX, int sizeY,
             int sizeC)
     {
@@ -605,7 +605,7 @@ public class IcyBufferedImageUtil
     /**
      * @deprecated Use {@link #extractChannels(IcyBufferedImage, int[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage extractChannels(IcyBufferedImage source, List<Integer> channelNumbers)
     {
         if (source == null)

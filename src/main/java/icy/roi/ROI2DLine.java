@@ -26,13 +26,13 @@ import java.awt.geom.Point2D;
 /**
  * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DLine} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ROI2DLine extends plugins.kernel.roi.roi2d.ROI2DLine
 {
     /**
      * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DLine.ROI2DLineAnchor2D} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected class ROI2DLineAnchor2D extends plugins.kernel.roi.roi2d.ROI2DLine.ROI2DLineAnchor2D
     {
         public ROI2DLineAnchor2D(Point2D position)
@@ -54,7 +54,7 @@ public class ROI2DLine extends plugins.kernel.roi.roi2d.ROI2DLine
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DLine(Point2D pt, boolean cm)
     {
         super(pt);

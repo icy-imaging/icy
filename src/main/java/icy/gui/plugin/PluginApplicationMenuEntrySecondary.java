@@ -16,7 +16,7 @@ import org.pushingpixels.flamingo.api.ribbon.RibbonApplicationMenuEntrySecondary
 /**
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class PluginApplicationMenuEntrySecondary extends RibbonApplicationMenuEntrySecondary
 {
     public PluginApplicationMenuEntrySecondary(PluginDescriptor plugin, String description, ActionListener action,

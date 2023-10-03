@@ -37,7 +37,7 @@ import javax.swing.SwingConstants;
 /**
  * @deprecated Use {@link CloseableTabbedPane} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class CloseTabbedPane extends JTabbedPane {
     public interface CloseTabbedPaneListener extends EventListener {
         void tabClosed(int index, String title);

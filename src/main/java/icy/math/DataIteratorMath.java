@@ -32,7 +32,7 @@ public class DataIteratorMath
      * @throws InterruptedException
      * @deprecated Use {@link DataIteratorUtil#count(DataIterator)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static long count(DataIterator it) throws InterruptedException
     {
         return DataIteratorUtil.count(it);

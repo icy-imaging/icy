@@ -67,7 +67,7 @@ public class Saver
     /**
      * @deprecated use {@link OMEUtil#generateMetaData(int, int, int, int, int, DataType, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT, DataType dataType)
             throws ServiceException
     {
@@ -77,7 +77,7 @@ public class Saver
     /**
      * @deprecated use {@link OMEUtil#generateMetaData(int, int, int, int, int, DataType, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT, int dataType, boolean signedDataType)
             throws ServiceException
     {
@@ -88,7 +88,7 @@ public class Saver
     /**
      * @deprecated use {@link OMEUtil#generateMetaData(int, int, int, DataType, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, DataType dataType) throws ServiceException
     {
         return (loci.formats.ome.OMEXMLMetadata) OMEUtil.generateMetaData(sizeX, sizeY, sizeC, 1, 1, dataType, false);
@@ -97,7 +97,7 @@ public class Saver
     /**
      * @deprecated use {@link OMEUtil#generateMetaData(int, int, int, DataType, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static loci.formats.ome.OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int dataType, boolean signedDataType)
             throws ServiceException
     {
@@ -127,7 +127,7 @@ public class Saver
     /**
      * @deprecated Use {@link #getImageFileFormat(IFormatWriter, ImageFileFormat)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static FileFormat getFileFormat(IFormatWriter writer, FileFormat defaultValue)
     {
         return getImageFileFormat(writer, ImageFileFormat.getFormat(defaultValue)).toFileFormat();
@@ -189,7 +189,7 @@ public class Saver
     /**
      * @deprecated Use {@link #getWriter(ImageFileFormat)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IFormatWriter getWriter(FileFormat fileFormat)
     {
         return getWriter(ImageFileFormat.getFormat(fileFormat));
@@ -223,7 +223,7 @@ public class Saver
     /**
      * @deprecated Use {@link #getWriter(String, ImageFileFormat)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IFormatWriter getWriter(String ext, FileFormat defaultFormat)
     {
         return getWriter(ext, ImageFileFormat.getFormat(defaultFormat));
@@ -232,7 +232,7 @@ public class Saver
     /**
      * @deprecated Use {@link #getWriter(String, FileFormat)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IFormatWriter getWriter(String ext)
     {
         return getWriter(ext, ImageFileFormat.TIFF);
@@ -266,7 +266,7 @@ public class Saver
     /**
      * @deprecated Use {@link #getWriter(File, ImageFileFormat)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IFormatWriter getWriter(File file, FileFormat defaultFormat)
     {
         return getWriter(file, ImageFileFormat.getFormat(defaultFormat));
@@ -275,7 +275,7 @@ public class Saver
     /**
      * @deprecated Use {@link #getWriter(File, FileFormat)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IFormatWriter getWriter(File file)
     {
         return getWriter(file, ImageFileFormat.TIFF);
@@ -547,7 +547,7 @@ public class Saver
     /**
      * @deprecated Use {@link #save(Sequence, File, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void save(Sequence sequence, File file, boolean multipleFiles)
     {
         save(sequence, file, 0, sequence.getSizeZ() - 1, 0, sequence.getSizeT() - 1, 15, multipleFiles, true);
@@ -575,7 +575,7 @@ public class Saver
     /**
      * @deprecated Use {@link #save(Sequence, File, int, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void save(Sequence sequence, File file, int zMin, int zMax, int tMin, int tMax, int fps, boolean multipleFiles)
     {
         save(sequence, file, zMin, zMax, tMin, tMax, fps, multipleFiles, true);
@@ -584,7 +584,7 @@ public class Saver
     /**
      * @deprecated Use {@link #save(Sequence, File, int, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void save(Sequence sequence, File file, int zMin, int zMax, int tMin, int tMax, int fps, boolean multipleFile, boolean showProgress)
     {
         save(null, sequence, file, fps, multipleFile, showProgress, true);
@@ -615,7 +615,7 @@ public class Saver
     /**
      * @deprecated Use {@link #save(IFormatWriter, Sequence, File, int, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void save(IFormatWriter formatWriter, Sequence sequence, File file, int zMin, int zMax, int tMin, int tMax, int fps, boolean multipleFile,
             boolean showProgress)
     {
@@ -625,7 +625,7 @@ public class Saver
     /**
      * @deprecated Use {@link #save(IFormatWriter, Sequence, File, int, boolean, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void save(IFormatWriter formatWriter, Sequence sequence, File file, int zMin, int zMax, int tMin, int tMax, int fps, boolean multipleFile,
             boolean showProgress, boolean addToRecent)
     {
@@ -921,7 +921,7 @@ public class Saver
     /**
      * @deprecated Use {@link #saveImage(byte[], int, int, int, DataType, File, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void saveImage(byte[] data, int width, int height, int numChannel, int dataType, boolean signedDataType, File file, boolean force)
             throws FormatException, IOException
     {

@@ -31,7 +31,7 @@ import org.pushingpixels.flamingo.api.ribbon.RibbonApplicationMenuEntrySecondary
  * @author Stephane
  * @deprecated Will be removed with Substance.
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class IcyRibbonApplicationMenuEntrySecondary extends RibbonApplicationMenuEntrySecondary {
     private final IcyAbstractAction action;
 

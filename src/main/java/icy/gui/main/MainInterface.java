@@ -154,19 +154,19 @@ public interface MainInterface {
     /**
      * @deprecated Use {@link #getActiveViewer()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     Viewer getFocusedViewer();
 
     /**
      * @deprecated Use {@link #getActiveSequence()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     Sequence getFocusedSequence();
 
     /**
      * @deprecated Use {@link #getActiveImage()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     IcyBufferedImage getFocusedImage();
 
     /**
@@ -208,7 +208,7 @@ public interface MainInterface {
     /**
      * @deprecated Use {@link #setActiveViewer(Viewer)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void setFocusedViewer(Viewer viewer);
 
     /**
@@ -226,15 +226,15 @@ public interface MainInterface {
 
     IcyDesktopPane getDesktopPane();
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     ApplicationMenu getApplicationMenu();
 
     TaskFrameManager getTaskWindowManager();
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void registerExternalFrame(JFrame frame);
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void unRegisterExternalFrame(JFrame frame);
 
     void registerPlugin(Plugin plugin);
@@ -248,7 +248,7 @@ public interface MainInterface {
     /**
      * @deprecated Use {@link #getMainFrame()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     MainFrame getFrame();
 
     /**
@@ -269,7 +269,7 @@ public interface MainInterface {
     /**
      * @deprecated Use {@link #closeSequence(Sequence)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void closeViewersOfSequence(Sequence sequence);
 
     /**
@@ -287,7 +287,7 @@ public interface MainInterface {
      *
      * @deprecated use {@link #getFirstViewerContaining(Overlay)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     Viewer getFirstViewerContaining(Painter painter);
 
     /**
@@ -330,7 +330,7 @@ public interface MainInterface {
      *
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     Sequence getFirstSequencesContaining(ROI roi);
 
     /**
@@ -338,7 +338,7 @@ public interface MainInterface {
      *
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     Sequence getFirstSequencesContaining(Painter painter);
 
     /**
@@ -351,7 +351,7 @@ public interface MainInterface {
      *
      * @deprecated Use {@link #getFirstSequenceContaining(Overlay)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     Sequence getFirstSequenceContaining(Painter painter);
 
     /**
@@ -369,7 +369,7 @@ public interface MainInterface {
      *
      * @deprecated Use {@link #getSequencesContaining(Overlay)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     ArrayList<Sequence> getSequencesContaining(Painter painter);
 
     /**
@@ -387,7 +387,7 @@ public interface MainInterface {
      *
      * @deprecated Use {@link #getROI(Overlay)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     ROI getROI(Painter painter);
 
     /**
@@ -400,7 +400,7 @@ public interface MainInterface {
      *
      * @deprecated Use {@link #getOverlays()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     ArrayList<Painter> getPainters();
 
     /**
@@ -431,13 +431,13 @@ public interface MainInterface {
     /**
      * Returns the ROI task of the Ribbon menu.
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     ROITask getROIRibbonTask();
 
     /**
      * @deprecated Use {@link #getROIRibbonTask()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     ToolRibbonTask getToolRibbon();
 
     /**
@@ -463,13 +463,13 @@ public interface MainInterface {
     /**
      * @deprecated Use addGlobalXXXListener instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void addListener(MainListener listener);
 
     /**
      * @deprecated Use removeGlobalXXXListener instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void removeListener(MainListener listener);
 
     /**
@@ -525,13 +525,13 @@ public interface MainInterface {
     /**
      * @deprecated Use {@link #addActiveViewerListener(ActiveViewerListener)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void addFocusedViewerListener(FocusedViewerListener listener);
 
     /**
      * @deprecated Use {@link #removeActiveViewerListener(ActiveViewerListener)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void removeFocusedViewerListener(FocusedViewerListener listener);
 
     /**
@@ -549,13 +549,13 @@ public interface MainInterface {
     /**
      * @deprecated Use {@link #addActiveSequenceListener(ActiveSequenceListener)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void addFocusedSequenceListener(FocusedSequenceListener listener);
 
     /**
      * @deprecated Use {@link #removeActiveSequenceListener(ActiveSequenceListener)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void removeFocusedSequenceListener(FocusedSequenceListener listener);
 
     /**
@@ -586,18 +586,18 @@ public interface MainInterface {
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void beginUpdate();
 
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     void endUpdate();
 
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     boolean isUpdating();
 }

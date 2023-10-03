@@ -21,7 +21,7 @@ package icy.gui.dialog;
 /**
  * @deprecated Use {@link LoaderDialog} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ImageLoaderDialog extends LoaderDialog
 {
     /**
@@ -32,7 +32,7 @@ public class ImageLoaderDialog extends LoaderDialog
     /**
      * @deprecated Use {@link LoaderDialog.AllImagesFileFilter} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static class AllImagesFileFilter extends LoaderDialog.AllImagesFileFilter
     {
 
@@ -41,7 +41,7 @@ public class ImageLoaderDialog extends LoaderDialog
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static class AllImageFileFilter extends AllImagesFileFilter
     {
 

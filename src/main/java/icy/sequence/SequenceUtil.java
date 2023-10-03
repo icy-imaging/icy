@@ -1021,7 +1021,7 @@ public class SequenceUtil
     /**
      * @deprecated Use {@link #convertToStack(Sequence)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void convertToVolume(Sequence sequence)
     {
         convertToStack(sequence);
@@ -1484,7 +1484,7 @@ public class SequenceUtil
     /**
      * @deprecated Use {@link #extractChannels(Sequence, int...)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence extractChannels(Sequence source, List<Integer> channels)
     {
         final Sequence outSequence = new Sequence(OMEUtil.createOMEXMLMetadata(source.getOMEXMLMetadata(), true));
@@ -1748,7 +1748,7 @@ public class SequenceUtil
     /**
      * @deprecated Use {@link #convertType(Sequence, DataType, Scaler[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence convertToType(Sequence source, DataType dataType, Scaler scaler)
     {
         final Sequence output = new Sequence(OMEUtil.createOMEXMLMetadata(source.getOMEXMLMetadata(), true));
@@ -2179,7 +2179,7 @@ public class SequenceUtil
     /**
      * @deprecated Use {@link #getSubSequence(Sequence, Rectangle5D.Integer)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence getSubSequence(Sequence source, int startX, int startY, int startC, int startZ, int startT,
             int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT)
     {
@@ -2190,7 +2190,7 @@ public class SequenceUtil
     /**
      * @deprecated Use {@link #getSubSequence(Sequence, Rectangle5D.Integer)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Sequence getSubSequence(Sequence source, int startX, int startY, int startZ, int startT, int sizeX,
             int sizeY, int sizeZ, int sizeT)
     {

@@ -314,7 +314,7 @@ public class SaverDialog extends JFileChooser
     /**
      * @deprecated Use {@link #SaverDialog(Sequence, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SaverDialog(Sequence sequence, int defZ, int defT, boolean autoSave)
     {
         this(sequence, autoSave);
@@ -323,7 +323,7 @@ public class SaverDialog extends JFileChooser
     /**
      * @deprecated Use {@link #SaverDialog(Sequence)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SaverDialog(Sequence sequence, int defZ, int defT)
     {
         this(sequence, true);
@@ -428,7 +428,7 @@ public class SaverDialog extends JFileChooser
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @SuppressWarnings("static-method")
     public int getZMin()
     {
@@ -438,7 +438,7 @@ public class SaverDialog extends JFileChooser
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @SuppressWarnings("static-method")
     public int getZMax()
     {
@@ -448,7 +448,7 @@ public class SaverDialog extends JFileChooser
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @SuppressWarnings("static-method")
     public int getTMin()
     {
@@ -458,7 +458,7 @@ public class SaverDialog extends JFileChooser
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @SuppressWarnings("static-method")
     public int getTMax()
     {

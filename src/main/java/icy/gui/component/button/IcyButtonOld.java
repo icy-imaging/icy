@@ -32,7 +32,7 @@ import javax.swing.*;
  * @author Stephane
  * @deprecated Use {@link IcyButton} instead
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class IcyButtonOld extends JButton {
     private boolean flat;
 
@@ -73,7 +73,7 @@ public class IcyButtonOld extends JButton {
     /**
      * @deprecated User {@link #IcyButtonOld(IcyAbstractAction)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyButtonOld(icy.common.IcyAbstractAction action) {
         super(action);
 
@@ -84,7 +84,7 @@ public class IcyButtonOld extends JButton {
     /**
      * @deprecated Use {@link #IcyButtonOld(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyButtonOld(String text, Image iconImage, int iconSize) {
         this(text, new IcyIcon(iconImage, iconSize));
     }
@@ -92,7 +92,7 @@ public class IcyButtonOld extends JButton {
     /**
      * @deprecated Use {@link #IcyButtonOld(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyButtonOld(String text, Image iconImage) {
         this(text, iconImage, IcyIcon.DEFAULT_SIZE);
     }
@@ -100,7 +100,7 @@ public class IcyButtonOld extends JButton {
     /**
      * @deprecated Use {@link #IcyButtonOld(IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyButtonOld(Image iconImage, int iconSize) {
         this(null, iconImage, iconSize);
     }
@@ -108,7 +108,7 @@ public class IcyButtonOld extends JButton {
     /**
      * @deprecated Use {@link #IcyButtonOld(IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyButtonOld(Image iconImage) {
         this(null, iconImage);
     }
@@ -116,7 +116,7 @@ public class IcyButtonOld extends JButton {
     /**
      * @deprecated Use {@link #IcyButtonOld(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyButtonOld(String text, String iconName, int iconSize) {
         this(text, new IcyIcon(iconName, iconSize));
     }
@@ -124,7 +124,7 @@ public class IcyButtonOld extends JButton {
     /**
      * @deprecated Use {@link #IcyButtonOld(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyButtonOld(String text, String iconName) {
         this(text, iconName, IcyIcon.DEFAULT_SIZE);
     }

@@ -67,7 +67,7 @@ import org.pushingpixels.substance.internal.utils.SubstanceSizeUtils;
  * @author Stephane Dallongeville
  * @deprecated Will be removed with Substance.
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class RangeSliderUI extends SubstanceSliderUI {
     /**
      * Location and size of thumb for upper value.

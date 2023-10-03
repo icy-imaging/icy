@@ -98,7 +98,7 @@ public class IcyPreferences
      * @param plugin plugin
      * @return XML Preferences
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static XMLPreferences pluginRoot(Plugin plugin)
     {
         return PluginsPreferences.root(plugin);
@@ -108,7 +108,7 @@ public class IcyPreferences
      * @deprecated Use {@link PluginsPreferences#getPreferences()} instead.
      * @return XML Preferences
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static XMLPreferences pluginsRoot()
     {
         return PluginsPreferences.getPreferences();

@@ -22,7 +22,7 @@ package icy.system.thread;
  * @author Stephane
  * @deprecated
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class BackgroundProcessor
 {
     /**
@@ -31,7 +31,7 @@ public class BackgroundProcessor
      * @param onEventThread if an event is happening to the thread
      * @return boolean - if background process is running
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean bgRun(Runnable runnable, boolean onEventThread)
     {
         return ThreadUtil.bgRun(runnable, onEventThread);
@@ -42,7 +42,7 @@ public class BackgroundProcessor
      * @param runnable run process
      * @return boolean - if background process is running
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean bgRun(Runnable runnable)
     {
         return ThreadUtil.bgRun(runnable);
@@ -52,7 +52,7 @@ public class BackgroundProcessor
      * @deprecated Use {@link ThreadUtil#bgRunWait(Runnable)} instead
      * @param runnable run process
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void bgRunWait(Runnable runnable)
     {
         ThreadUtil.bgRunWait(runnable);
@@ -62,7 +62,7 @@ public class BackgroundProcessor
      * @deprecated Use {@link ThreadUtil#getActiveBgTaskCount()} instead
      * @return active count
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getActiveCount()
     {
         return ThreadUtil.getActiveBgTaskCount();
@@ -72,7 +72,7 @@ public class BackgroundProcessor
      * @deprecated
      * @return true
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean hasIdleSlots()
     {
         return true;
@@ -81,7 +81,7 @@ public class BackgroundProcessor
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void waitForIdleSlots()
     {
     }

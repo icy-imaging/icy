@@ -32,13 +32,13 @@ import java.util.List;
 /**
  * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DShape} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class ROI2DShape extends plugins.kernel.roi.roi2d.ROI2DShape
 {
     /**
      * @deprecated Use {@link ROIUtil#merge(List, BooleanOperator)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI2DPath merge(ROI2DShape[] rois, ShapeOperation operation)
     {
         return merge(Arrays.asList(rois), operation.getBooleanOperator());
@@ -47,7 +47,7 @@ public abstract class ROI2DShape extends plugins.kernel.roi.roi2d.ROI2DShape
     /**
      * @deprecated Use {@link ROIUtil#merge(List, BooleanOperator)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI2DPath merge(List<ROI2DShape> rois, BooleanOperator operator)
     {
         final List<Shape> shapes = new ArrayList<Shape>(rois.size());
@@ -79,7 +79,7 @@ public abstract class ROI2DShape extends plugins.kernel.roi.roi2d.ROI2DShape
     /**
      * @deprecated Use {@link ROI#getSubtraction(ROI)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI2DPath subtract(ROI2DShape roi1, ROI2DShape roi2)
     {
         final ROI2DPath result = new ROI2DPath(ShapeUtil.subtract(roi1, roi2));
@@ -92,7 +92,7 @@ public abstract class ROI2DShape extends plugins.kernel.roi.roi2d.ROI2DShape
     /**
      * @deprecated Use {@link ROI#getSubtraction(ROI)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI2DPath substract(ROI2DShape roi1, ROI2DShape roi2)
     {
         return subtract(roi1, roi2);
@@ -101,7 +101,7 @@ public abstract class ROI2DShape extends plugins.kernel.roi.roi2d.ROI2DShape
     /**
      * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DShape.ROI2DShapePainter} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected class ROI2DShapePainter extends plugins.kernel.roi.roi2d.ROI2DShape.ROI2DShapePainter
     {
         public ROI2DShapePainter()

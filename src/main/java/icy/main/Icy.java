@@ -1,35 +1,22 @@
 /*
- * Copyright 2010-2019 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.main;
-
-import java.awt.EventQueue;
-import java.beans.PropertyVetoException;
-import java.io.File;
-import java.nio.channels.FileLock;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JOptionPane;
-import javax.swing.WindowConstants;
 
 import icy.action.ActionManager;
 import icy.common.Version;
@@ -42,6 +29,7 @@ import icy.gui.frame.ExitFrame;
 import icy.gui.frame.IcyExternalFrame;
 import icy.gui.frame.SplashScreenFrame;
 import icy.gui.frame.progress.AnnounceFrame;
+import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.frame.progress.ToolTipFrame;
 import icy.gui.inspector.InspectorPanel;
 import icy.gui.main.MainFrame;
@@ -54,11 +42,7 @@ import icy.image.cache.ImageCache;
 import icy.imagej.ImageJPatcher;
 import icy.math.UnitUtil;
 import icy.network.NetworkUtil;
-import icy.plugin.PluginDescriptor;
-import icy.plugin.PluginInstaller;
-import icy.plugin.PluginLauncher;
-import icy.plugin.PluginLoader;
-import icy.plugin.PluginUpdater;
+import icy.plugin.*;
 import icy.plugin.abstract_.Plugin;
 import icy.preferences.ApplicationPreferences;
 import icy.preferences.GeneralPreferences;
@@ -72,6 +56,7 @@ import icy.system.SingleInstanceCheck;
 import icy.system.SystemUtil;
 import icy.system.audit.Audit;
 import icy.system.thread.ThreadUtil;
+import icy.type.collection.CollectionUtil;
 import icy.update.IcyUpdater;
 import icy.util.StringUtil;
 import icy.workspace.WorkspaceInstaller;
@@ -82,34 +67,28 @@ import jiconfont.swing.IconFontSwing;
 import vtk.vtkNativeLibrary;
 import vtk.vtkVersion;
 
+import javax.swing.*;
+import java.awt.*;
+import java.beans.PropertyVetoException;
+import java.io.File;
+import java.nio.channels.FileLock;
+import java.util.List;
+import java.util.*;
+
 /**
- * <strong>Icy - copyright 2019 Institut Pasteur</strong>
- * An open community platform for bio image analysis<br>
- * <i>http://icy.bioimageanalysis.org</i><br>
- * <br>
- * Icy has been created by the Bio Image Analysis team at Institut Pasteur<br>
- * <i>https://research.pasteur.fr/fr/team/bioimage-analysis</i><br>
- * <br>
- * Icy is free and open source, it has been funded both by Institut Pasteur and the FBI consortium<br>
- * <i>https://france-bioimaging.org</i><br>
- * <br>
- * Source code is always provided in the main application package (in the icy.jar archive file) but can be also browsed
- * from the GitHub repository<br>
- * <i>https://github.com/Icy-imaging/Icy-Kernel</i><br>
- * <br>
+ * Entry point for Icy.
  *
- * @author Stephane Dallongeville
- * @author Fabrice de Chaumont
+ * @author Stephane
+ * @author Thomas MUSSET
  */
-public class Icy
-{
+public class Icy {
     public static final String LIB_PATH = "lib";
     public static final int EXIT_FORCE_DELAY = 3000;
 
     /**
      * Icy Version
      */
-    public static Version version = new Version("3.0.0.0B");
+    public static Version version = new Version(3, 0, 0, Version.Snapshot.ALPHA);
 
     /**
      * Main interface
@@ -175,15 +154,12 @@ public class Icy
     private static boolean disableNetwork = false;
 
     /**
-     * @param args
-     *        Received from the command line.
+     * @param args Received from the command line.
      */
-    public static void main(String[] args)
-    {
+    public static void main(final String[] args) {
         boolean headless = false;
 
-        try
-        {
+        try {
             System.out.println("Initializing...");
             System.out.println();
 
@@ -199,21 +175,21 @@ public class Icy
 
             // check if Icy is already running
             lock = SingleInstanceCheck.lock("icy");
-            if (lock == null)
-            {
+            if (lock == null) {
                 // we always accept multi instance in headless mode
-                if (!headless)
-                {
+                if (!headless) {
                     // we need to use our custom ConfirmDialog as
                     // Icy.getMainInterface().isHeadless() will return false here
-                    final Confirmer confirmer = new Confirmer("Confirmation",
-                            "Icy is already running on this computer. Start anyway ?", JOptionPane.YES_NO_OPTION,
-                            ApplicationPreferences.ID_SINGLE_INSTANCE);
+                    final Confirmer confirmer = new Confirmer(
+                            "Confirmation",
+                            "Icy is already running on this computer. Start anyway ?",
+                            JOptionPane.YES_NO_OPTION,
+                            ApplicationPreferences.ID_SINGLE_INSTANCE
+                    );
 
                     ThreadUtil.invokeNow(confirmer);
 
-                    if (!confirmer.getResult())
-                    {
+                    if (!confirmer.getResult()) {
                         System.out.println("Exiting...");
                         // save preferences
                         IcyPreferences.save();
@@ -236,8 +212,7 @@ public class Icy
             if (!headless)
                 IconFontSwing.register(GoogleMaterialDesignIcons.getIconFont());
 
-            if (!headless && !noSplash)
-            {
+            if (!headless && !noSplash) {
                 // prepare splashScreen (ok to create it here as we are not yet in substance laf)
                 splashScreen = new SplashScreenFrame();
 
@@ -246,54 +221,30 @@ public class Icy
                 // while others threads load some new library with ClassLoader.loadLibrary
 
                 // display splash NOW (don't use ThreadUtil as headless is still false here)
-                EventQueue.invokeAndWait(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        // display splash screen
-                        splashScreen.setVisible(true);
-                    }
+                EventQueue.invokeAndWait(() -> {
+                    // display splash screen
+                    splashScreen.setVisible(true);
                 });
             }
 
             // fast start
-            new Thread(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    // force image cache initialization so GUI won't wait after it (need preferences init)
-                    ImageCache.isEnabled();
-                }
-            }, "Initializer: Cache").start();
-            new Thread(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    // initialize network (need preferences init)
-                    NetworkUtil.init();
-                }
-            }, "Initializer: Network").start();
-            new Thread(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    // load plugins classes (need preferences init)
-                    PluginLoader.reloadAsynch();
-                    WorkspaceLoader.reloadAsynch();
-                }
+            // force image cache initialization so GUI won't wait after it (need preferences init)
+            new Thread(ImageCache::isEnabled, "Initializer: Cache").start();
+
+            // initialize network (need preferences init)
+            new Thread(NetworkUtil::init, "Initializer: Network").start();
+
+            new Thread(() -> {
+                // load plugins classes (need preferences init)
+                PluginLoader.reloadAsynch();
+                WorkspaceLoader.reloadAsynch();
             }, "Initializer: Plugin and WS").start();
 
-            try
-            {
+            try {
                 // patches ImageJ classes (need to be done before instancing ImageJ)
                 ImageJPatcher.applyPatches();
             }
-            catch (Throwable t)
-            {
+            catch (final Throwable t) {
                 System.err.println("Error while patching ImageJ classes:");
                 IcyExceptionHandler.showErrorMessage(t, false);
             }
@@ -304,70 +255,51 @@ public class Icy
             else
                 mainInterface = new MainInterfaceGui();
         }
-        catch (Throwable t)
-        {
+        catch (final Throwable t) {
             // any error at this point is fatal
             fatalError(t, headless);
         }
 
-        if (!headless)
-        {
+        if (!headless) {
             // do it on AWT thread NOW as this is what we want first
-            ThreadUtil.invokeNow(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    try
-                    {
-                        // init Look And Feel (need mainInterface instance)
-                        LookAndFeelUtil.init();
-                        // init need "mainInterface" variable to be initialized
-                        getMainInterface().init();
-                    }
-                    catch (Throwable t)
-                    {
-                        // any error here is fatal
-                        fatalError(t, false);
-                    }
+            ThreadUtil.invokeNow(() -> {
+                try {
+                    // init Look And Feel (need mainInterface instance)
+                    LookAndFeelUtil.init();
+                    // init need "mainInterface" variable to be initialized
+                    getMainInterface().init();
+                }
+                catch (final Throwable t) {
+                    // any error here is fatal
+                    fatalError(t, false);
                 }
             });
         }
-        else
-        {
+        else {
             // simple main interface init
             getMainInterface().init();
         }
 
         // splash screen initialized --> hide it
-        if (splashScreen != null)
-        {
+        if (splashScreen != null) {
             // then do less important stuff later
-            ThreadUtil.invokeLater(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    // we can now hide splash as we have interface
-                    splashScreen.dispose();
-                    splashScreen = null;
-                }
+            ThreadUtil.invokeLater(() -> {
+                // we can now hide splash as we have interface
+                splashScreen.dispose();
+                splashScreen = null;
             });
         }
 
         // show general informations
-        System.out.println(SystemUtil.getJavaName() + " " + SystemUtil.getJavaVersion() + " ("
-                + SystemUtil.getJavaArchDataModel() + " bit)");
-        System.out.println("Running on " + SystemUtil.getOSName() + " " + SystemUtil.getOSVersion() + " ("
-                + SystemUtil.getOSArch() + ")");
+        System.out.println(SystemUtil.getJavaName() + " " + SystemUtil.getJavaVersion() + " (" + SystemUtil.getJavaArchDataModel() + " bit)");
+        System.out.println("Running on " + SystemUtil.getOSName() + " " + SystemUtil.getOSVersion() + " (" + SystemUtil.getOSArch() + ")");
         System.out.println("Number of processors : " + SystemUtil.getNumberOfCPUs());
         System.out.println("System total memory : " + UnitUtil.getBytesString(SystemUtil.getTotalMemory()));
         System.out.println("System available memory : " + UnitUtil.getBytesString(SystemUtil.getFreeMemory()));
         System.out.println("Max java memory : " + UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory()));
 
         // image cache disabled from command line ?
-        if (isCacheDisabled())
-        {
+        if (isCacheDisabled()) {
             System.out.println("Image cache is disabled.");
             // disable virtual mode button from inspector
             final InspectorPanel inspector = getMainInterface().getInspector();
@@ -377,7 +309,7 @@ public class Icy
         // virtual mode enabled ? --> initialize image cache
         else if (InspectorPanel.getVirtualMode())
             ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
-        
+
         if (headless)
             System.out.println("Headless mode.");
         System.out.println();
@@ -394,24 +326,16 @@ public class Icy
         nativeLibrariesInit();
 
         // changed version ?
-        if (!ApplicationPreferences.getVersion().equals(Icy.version))
-        {
+        if (!ApplicationPreferences.getVersion().equals(Icy.version)) {
             // not headless ?
-            if (!headless)
-            {
+            if (!headless) {
                 // display the new version information
                 final String changeLog = Icy.getChangeLog();
 
                 // show the new version frame
-                if (!StringUtil.isEmpty(changeLog))
-                {
-                    ThreadUtil.invokeNow(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            new NewVersionFrame(Icy.getChangeLog());
-                        }
+                if (!StringUtil.isEmpty(changeLog)) {
+                    ThreadUtil.invokeNow(() -> {
+                        new NewVersionFrame(Icy.getChangeLog());
                     });
                 }
             }
@@ -424,8 +348,7 @@ public class Icy
         final long halfDayInterval = 1000 * 60 * 60 * 12;
 
         // check only once per 12 hours slice
-        if (!isNetworkDisabled() && (currentTime > (GeneralPreferences.getLastUpdateCheckTime() + halfDayInterval)))
-        {
+        if (!isNetworkDisabled() && (currentTime > (GeneralPreferences.getLastUpdateCheckTime() + halfDayInterval))) {
             // check for core update
             if (GeneralPreferences.getAutomaticUpdate())
                 IcyUpdater.checkUpdate(true);
@@ -442,8 +365,8 @@ public class Icy
         // set LOCI debug level
         // loci.common.DebugTools.enableLogging("ERROR");
         // set OGL debug level
-        // SystemUtil.setProperty("jogl.verbose", "TRUE");
-        // SystemUtil.setProperty("jogl.debug", "TRUE");
+        //SystemUtil.setProperty("jogl.verbose", "TRUE");
+        //SystemUtil.setProperty("jogl.debug", "TRUE");
 
         System.out.println();
         System.out.println("Icy Version " + version + " started !");
@@ -460,14 +383,12 @@ public class Icy
                 || WorkspaceInstaller.isProcessing())
             ThreadUtil.sleep(1);
 
-        if (startupPluginName != null)
-        {
+        if (startupPluginName != null) {
             PluginLoader.waitWhileLoading();
 
             final PluginDescriptor plugin = PluginLoader.getPlugin(startupPluginName);
 
-            if (plugin == null)
-            {
+            if (plugin == null) {
                 System.err.println("Could not launch plugin '" + startupPluginName + "': the plugin was not found.");
                 System.err.println("Be sure you correctly wrote the complete class name and respected the case.");
                 System.err.println("Ex: plugins.mydevid.analysis.MyPluginClass");
@@ -481,9 +402,8 @@ public class Icy
             exit(false);
     }
 
-    private static boolean handleAppArgs(String[] args)
-    {
-        final List<String> pluginArgsList = new ArrayList<String>();
+    private static boolean handleAppArgs(final String[] args) {
+        final List<String> pluginArgsList = new ArrayList<>();
 
         startupImage = null;
         startupPluginName = null;
@@ -496,48 +416,46 @@ public class Icy
         // save the base arguments
         Icy.args = args;
 
-        for (String arg : args)
-        {
+        for (final String arg : args) {
             // store plugin arguments
             if (startupPluginName != null)
                 pluginArgsList.add(arg);
             else if (execute)
                 startupPluginName = arg;
-            // special flag to disabled JCL (needed for development)
+                // special flag to disabled JCL (needed for development)
             else if (arg.equalsIgnoreCase("--disableJCL") || arg.equalsIgnoreCase("-dJCL"))
                 PluginLoader.setJCLDisabled(true);
-            // headless mode
+                // headless mode
             else if (arg.equalsIgnoreCase("--headless") || arg.equalsIgnoreCase("-hl"))
                 headless = true;
             else if (arg.equalsIgnoreCase("--nocache") || arg.equalsIgnoreCase("-nc"))
                 disableCache = true;
             else if (arg.equalsIgnoreCase("--nonetwork") || arg.equalsIgnoreCase("-nnt"))
                 disableNetwork = true;
-            // disable splash-screen
+                // disable splash-screen
             else if (arg.equalsIgnoreCase("--nosplash") || arg.equalsIgnoreCase("-ns"))
                 noSplash = true;
-            // disable default exit operation in headless mode
+                // disable default exit operation in headless mode
             else if (arg.equalsIgnoreCase("--noHLexit") || arg.equalsIgnoreCase("-nhle"))
                 noHLExit = true;
-            // execute plugin
+                // execute plugin
             else if (arg.equalsIgnoreCase("--execute") || arg.equalsIgnoreCase("-x"))
                 execute = true;
-            // assume image name ?
+                // assume image name ?
             else
                 startupImage = arg;
         }
 
         // save the plugin arguments
-        Icy.pluginArgs = pluginArgsList.toArray(new String[pluginArgsList.size()]);
+        Icy.pluginArgs = pluginArgsList.toArray(new String[0]);
 
         return headless;
     }
 
-    static void checkParameters()
-    {
+    static void checkParameters() {
         // we are using a 32 bits JVM with a 64 bits OS --> warn the user
-        if (SystemUtil.isWindows64() && SystemUtil.is32bits())
-        {
+        // As Icy is compiled with Java 11, and there is no 32bits version of Java 11, there is no chance to trigger this warning
+        if (SystemUtil.isWindows64() && SystemUtil.is32bits()) {
             final String text = "You're using a 32 bits Java with a 64 bits OS, try to upgrade to 64 bits java for better performance !";
 
             System.out.println("Warning: " + text);
@@ -546,44 +464,21 @@ public class Icy
                 new ToolTipFrame("<html>" + text + "</html>", 15, "badJavaArchTip");
         }
 
-        // we are using java 6 on OSX --> warn the user
-        final double javaVersion = SystemUtil.getJavaVersionAsNumber();
-
-        if ((javaVersion > 0) && (javaVersion < 7d) && SystemUtil.isMac())
-        {
-            final String text = "It looks like you're using a old version of Java (1.6)<br>"
-                    + "It's recommended to use last JDK 8 for OSX for a better user experience.<br>See the <a href=\"https://icy.bioimageanalysis.org/faq#35\">FAQ</a> to get information about how to update java.";
-
-            System.out.println("Warning: " + text);
-
-            if (!Icy.getMainInterface().isHeadLess())
-                new ToolTipFrame("<html>" + text + "</html>", 15, "outdatedJavaOSX");
-        }
-
         // HTTPS not supported ?
-        if (!NetworkUtil.isHTTPSSupported())
-        {
-            // final String text1 = "Your version of java does not support HTTPS connection required by the future new web site.";
-            // final String text2 = "You need to upgrade java to 7u111 (Java 7) or 8u101 (Java 8) at least to be able to use online features in future.";
-            final String text1 = "Your version of java does not support HTTPS protocol which will be used soon by the new web site.";
-            final String text2 = "You need to upgrade your version of java to 7u111 (Java 7) or 8u101 (Java 8) at least to use online features (as search or plugin update) in future.";
-            // final String text2 = "You won't be able to use online features (as search or plugin update) in future until you update your version of java (Java
-            // 7u111 or Java
-            // 8u101 minimum).";
+        // As Icy is compiled with Java 11, there is no way to not have HTTPS enabled.
+        if (!NetworkUtil.isHTTPSSupported()) {
+            final String text1 = "Your version of java does not support HTTPS protocol.";
+            final String text2 = "You need to upgrade your version of java to Java 11 to use online features.";
 
             System.err.println("Warning: " + text1);
             System.err.println(text2);
 
-            // TODO: change message when new web site is here
             if (!Icy.getMainInterface().isHeadLess())
-                new ToolTipFrame("<html><b>WARNING:</b> " + text1 + "<br>" + text2 + "</html>", 0,
-                        "httpsNotSupportedWarning");
-            // new ToolTipFrame("<html><b>" + text1 + "<br>" + text2 + "</b></html>", 0, "httpsNotSupported");
+                new ToolTipFrame("<html><b>WARNING:</b> " + text1 + "<br>" + text2 + "</html>", 0, "httpsNotSupportedWarning");
         }
 
         // detect bad memory setting
-        if ((ApplicationPreferences.getMaxMemoryMB() <= 128) && (ApplicationPreferences.getMaxMemoryMBLimit() > 256))
-        {
+        if ((ApplicationPreferences.getMaxMemoryMB() <= 128) && (ApplicationPreferences.getMaxMemoryMBLimit() > 256)) {
             final String text = "Your maximum memory setting is low, you should increase it in Preferences.";
 
             System.out.println("Warning: " + text);
@@ -591,49 +486,56 @@ public class Icy
             if (!Icy.getMainInterface().isHeadLess())
                 new ToolTipFrame("<html>" + text + "</html>", 15, "lowMemoryTip");
         }
-        else if (ApplicationPreferences.getMaxMemoryMB() < (ApplicationPreferences.getDefaultMemoryMB() / 2))
-        {
-            if (!Icy.getMainInterface().isHeadLess())
-            {
+        else if (ApplicationPreferences.getMaxMemoryMB() < (ApplicationPreferences.getDefaultMemoryMB() / 2)) {
+            if (!Icy.getMainInterface().isHeadLess()) {
                 new ToolTipFrame(
-                        "<html><b>Tip:</b> you can increase your maximum memory in preferences setting.</html>", 15,
-                        "maxMemoryTip");
+                        "<html><b>Tip:</b> you can increase your maximum memory in preferences setting.</html>",
+                        15,
+                        "maxMemoryTip"
+                );
             }
         }
 
-        if (!Icy.getMainInterface().isHeadLess())
-        {
+        if (!Icy.getMainInterface().isHeadLess()) {
             ToolTipFrame tooltip;
+            String message;
 
+            // TODO: 28/09/2023 Add image for each OS (Windows, macOS & Linux)
             // welcome tip !
-            tooltip = new ToolTipFrame(
-                    "<html>Access the main menu by clicking on top left icon<br>" + "<img src=\""
-                            + Icy.class.getResource("/image/help/main_menu.png").toString() + "\" /></html>",
-                    30, "mainMenuTip");
-            tooltip.setSize(456, 240);
+            message = String.format(
+                    "<html>Access the main menu with the new menu bar<br>" + "<img width=\"400\" src=\"%s\" /></html>",
+                    //Objects.requireNonNull(Icy.class.getResource("/image/help/main_menu.png"))
+                    Objects.requireNonNull(Icy.class.getResource("/image/help/menubar_macOS.png"))
+            );
+            tooltip = new ToolTipFrame(message, 30, "menubarTip");
+            tooltip.setSize(410, 150);
 
             // new Image Cache !
-            tooltip = new ToolTipFrame("<html>" + "<img src=\""
-                    + Icy.class.getResource("/image/help/virtual_mode.jpg").toString() + "\" /><br>"
-                    + "This new button allow to enable/disable Icy <b>virtual mode</b>.<br><br>"
-                    + "Virtual mode will force all new created images to be in <i>virtual mode</i> which mean their data can be stored on disk to spare memory.<br>"
-                    + "Note that <i>virtual mode</i> is still experimental and <b>some plugins don't support it</b> (processed data can be lost) so use it carefully and only if you're running out of memory.<br>"
-                    + "<i>You can change the image caching settings in Icy preferences</i></html>", 30, "virtualMode");
+            message = String.format(
+                    "<html><img src=\"%s\" /><br>"
+                            + "This new button allow to enable/disable Icy <b>virtual mode</b>.<br><br>"
+                            + "Virtual mode will force all new created images to be in <i>virtual mode</i> which mean their data can be stored on disk to spare memory.<br>"
+                            + "Note that <i>virtual mode</i> is still experimental and <b>some plugins don't support it</b>"
+                            + " (processed data can be lost) so use it carefully and only if you're running out of memory.<br>"
+                            + "<i>You can change the image caching settings in Icy preferences</i></html>",
+                    Objects.requireNonNull(Icy.class.getResource("/image/help/virtual_mode.jpg"))
+            );
+            tooltip = new ToolTipFrame(message, 30, "virtualMode");
             tooltip.setSize(380, 240);
 
             // new Magic Wand!
-            tooltip = new ToolTipFrame(
-                    "<html>" + "<img src=\"" + Icy.class.getResource("/image/help/magic_wand.png").toString()
-                            + "\" /><br>" + "<b>Magic Wand</b> is now available in Icy !<br><br>"
-                            + "You can access its settings from preferences :<br>" + "<img src=\""
-                            + Icy.class.getResource("/image/help/icy_prefs.png").toString() + "\" /></html>",
-                    30, "magicWand");
+            message = String.format(
+                    "<html><img src=\"%s\" /><br>" + "<b>Magic Wand</b> is now available in Icy !<br><br>"
+                            + "You can access its settings from preferences :<br><img src=\"%s\" /></html>",
+                    Objects.requireNonNull(Icy.class.getResource("/image/help/magic_wand.png")),
+                    Objects.requireNonNull(Icy.class.getResource("/image/help/icy_prefs.png"))
+            );
+            tooltip = new ToolTipFrame(message, 30, "magicWand");
             tooltip.setSize(300, 260);
         }
     }
 
-    static void fatalError(Throwable t, boolean headless)
-    {
+    static void fatalError(final Throwable t, final boolean headless) {
         // hide splashScreen if needed
         if ((splashScreen != null) && (splashScreen.isVisible()))
             splashScreen.dispose();
@@ -641,10 +543,13 @@ public class Icy
         // show error in console
         IcyExceptionHandler.showErrorMessage(t, true);
         // and show error in dialog if not headless
-        if (!headless)
-        {
-            JOptionPane.showMessageDialog(null, IcyExceptionHandler.getErrorMessage(t, true), "Fatal error",
-                    JOptionPane.ERROR_MESSAGE);
+        if (!headless) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    IcyExceptionHandler.getErrorMessage(t, true),
+                    "Fatal error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
 
         // exit with error code 1
@@ -654,16 +559,14 @@ public class Icy
     /**
      * Restart application with user confirmation
      */
-    public static void confirmRestart()
-    {
+    public static void confirmRestart() {
         confirmRestart(null);
     }
 
     /**
      * Restart application with user confirmation (custom message)
      */
-    public static void confirmRestart(String message)
-    {
+    public static void confirmRestart(final String message) {
         final String mess;
 
         if (StringUtil.isEmpty(message))
@@ -679,16 +582,14 @@ public class Icy
     /**
      * Show announcement to restart application
      */
-    public static void announceRestart()
-    {
+    public static void announceRestart() {
         announceRestart(null);
     }
 
     /**
      * Show announcement to restart application (custom message)
      */
-    public static void announceRestart(String message)
-    {
+    public static void announceRestart(final String message) {
         final String mess;
 
         if (StringUtil.isEmpty(message))
@@ -696,21 +597,14 @@ public class Icy
         else
             mess = message;
 
-        if (Icy.getMainInterface().isHeadLess())
-        {
+        if (Icy.getMainInterface().isHeadLess()) {
             // just display this message
             System.out.println(mess);
         }
-        else
-        {
-            new AnnounceFrame(mess, "Restart Now", new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    // restart application now
-                    exit(true);
-                }
+        else {
+            new AnnounceFrame(mess, "Restart Now", () -> {
+                // restart application now
+                exit(true);
             }, 20);
         }
     }
@@ -719,8 +613,7 @@ public class Icy
      * Returns <code>true</code> if application can exit.<br>
      * Shows a confirmation dialog if setting requires it or if it's unsafe to exit now.
      */
-    public static boolean canExit(boolean showConfirm)
-    {
+    public static boolean canExit(final boolean showConfirm) {
         // we first check if externals listeners allow existing
         if (!getMainInterface().canExitExternal())
             return false;
@@ -733,22 +626,16 @@ public class Icy
         final boolean safeExit = (!PluginInstaller.isProcessing()) && (!WorkspaceInstaller.isProcessing());
 
         // not safe, need confirmation
-        if (!safeExit)
-        {
-            if (!ConfirmDialog.confirm("Quit the application",
+        if (!safeExit) {
+            return ConfirmDialog.confirm(
+                    "Quit the application",
                     "Some processes are not yet completed, are you sure you want to quit ?",
-                    ConfirmDialog.YES_NO_CANCEL_OPTION))
-                return false;
-
-            return true;
+                    ConfirmDialog.YES_NO_CANCEL_OPTION
+            );
         }
-        else if (showConfirm && GeneralPreferences.getExitConfirm())
-        {
+        else if (showConfirm && GeneralPreferences.getExitConfirm()) {
             // we need user confirmation
-            if (!IdConfirmDialog.confirm("Quit the application ?", GeneralPreferences.ID_CONFIRM_EXIT))
-                return false;
-
-            return true;
+            return IdConfirmDialog.confirm("Quit the application ?", GeneralPreferences.ID_CONFIRM_EXIT);
         }
 
         return true;
@@ -759,15 +646,13 @@ public class Icy
      * Note that the method is asynchronous so you still have a bit of time to execute some stuff before the application
      * actually exit.
      */
-    public static boolean exit(final boolean restart)
-    {
+    public static boolean exit(final boolean restart) {
         // check we can exit application
         if (!canExit(!restart))
             return false;
 
         // already existing
-        if (exiting && terminer.isAlive())
-        {
+        if (exiting && terminer.isAlive()) {
             // set focus on exit frame
             if (exitFrame != null)
                 exitFrame.requestFocus();
@@ -777,174 +662,137 @@ public class Icy
 
         // we don't want to be in EDT here and avoid BG runner
         // as we test for BG runner completion
-        terminer = new Thread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // mark the application as exiting
-                exiting = true;
+        terminer = new Thread(() -> {
+            // mark the application as exiting
+            exiting = true;
 
-                System.out.print("Exiting...");
+            System.out.print("Exiting...");
 
-                final ImageJ ij = Icy.getMainInterface().getImageJ();
+            final ImageJ ij = Icy.getMainInterface().getImageJ();
 
-                // clean ImageJ exit
-                if (ij != null)
-                    ij.quit();
+            // clean ImageJ exit
+            if (ij != null)
+                ij.quit();
 
-                // get main frame
-                final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
+            // get main frame
+            final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
 
-                // disconnect from chat (not needed but preferred)
-                // if (mainFrame != null)
-                // mainFrame.getChat().disconnect("Icy closed");
+            // disconnect from chat (not needed but preferred)
+            // if (mainFrame != null)
+            // mainFrame.getChat().disconnect("Icy closed");
 
-                // close all icyFrames (force wait completion)
-                ThreadUtil.invokeNow(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        // for (IcyFrame frame : IcyFrame.getAllFrames())
-                        // frame.close();
-                        // close all JInternalFrames
-                        final JDesktopPane desktopPane = Icy.getMainInterface().getDesktopPane();
+            // close all icyFrames (force wait completion)
+            ThreadUtil.invokeNow(() -> {
+                // for (IcyFrame frame : IcyFrame.getAllFrames())
+                // frame.close();
+                // close all JInternalFrames
+                final JDesktopPane desktopPane = Icy.getMainInterface().getDesktopPane();
 
-                        if (desktopPane != null)
-                        {
-                            for (JInternalFrame frame : desktopPane.getAllFrames())
-                            {
-                                try
-                                {
-                                    try
-                                    {
-                                        frame.setClosed(true);
-                                    }
-                                    catch (PropertyVetoException e)
-                                    {
-                                        // if (frame.getDefaultCloseOperation() !=
-                                        // WindowConstants.DISPOSE_ON_CLOSE)
-                                        frame.dispose();
-                                    }
-                                    catch (Throwable t)
-                                    {
-                                        // error on close ? --> try dispose
-                                        frame.dispose();
-                                    }
-                                }
-                                catch (Throwable t)
-                                {
-                                    // ignore further error here...
-                                }
+                if (desktopPane != null) {
+                    for (final JInternalFrame frame : desktopPane.getAllFrames()) {
+                        try {
+                            try {
+                                frame.setClosed(true);
+                            }
+                            catch (final PropertyVetoException e) {
+                                // if (frame.getDefaultCloseOperation() !=
+                                // WindowConstants.DISPOSE_ON_CLOSE)
+                                frame.dispose();
+                            }
+                            catch (final Throwable t) {
+                                // error on close ? --> try dispose
+                                frame.dispose();
                             }
                         }
-
-                        // then close all external frames except main frame
-                        for (JFrame frame : Icy.getMainInterface().getExternalFrames())
-                        {
-                            if (frame != mainFrame)
-                            {
-                                if (frame instanceof IcyExternalFrame)
-                                {
-                                    final IcyExternalFrame iFrame = (IcyExternalFrame) frame;
-                                    iFrame.close();
-                                    if (iFrame.getDefaultCloseOperation() != WindowConstants.DISPOSE_ON_CLOSE)
-                                        iFrame.dispose();
-                                }
-                                else
-                                    frame.dispose();
-                            }
+                        catch (final Throwable t) {
+                            // ignore further error here...
                         }
                     }
-                });
-
-                // stop daemon plugin
-                PluginLoader.stopDaemons();
-                // shutdown background processor after frame close
-                ThreadUtil.shutdown();
-                // shutdown prefetcher
-                SequencePrefetcher.shutdown();
-
-                // headless mode
-                if (Icy.getMainInterface().isHeadLess())
-                {
-                    // final long start = System.currentTimeMillis();
-                    // // wait 10s max for background processors completed theirs tasks
-                    // while (!ThreadUtil.isShutdownAndTerminated() && ((System.currentTimeMillis()
-                    // - start) < 10 * 1000))
-                    // ThreadUtil.sleep(1);
-
-                    // wait that background processors completed theirs tasks
-                    while (!ThreadUtil.isShutdownAndTerminated())
-                        ThreadUtil.sleep(1);
-                }
-                else
-                {
-                    // need to create the exit frame in EDT
-                    ThreadUtil.invokeNow(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            // create and display the exit frame
-                            exitFrame = new ExitFrame(EXIT_FORCE_DELAY);
-                        }
-                    });
-
-                    // wait that background processors completed theirs tasks
-                    while (!ThreadUtil.isShutdownAndTerminated() && !exitFrame.isForced())
-                        ThreadUtil.sleep(1);
-
-                    // need to dispose the exit frame in EDT (else we can have deadlock)
-                    ThreadUtil.invokeNow(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            // can close the exit frame now
-                            exitFrame.dispose();
-                        }
-                    });
                 }
 
-                // need to dispose the main frame in EDT (else we can have deadlock)
-                ThreadUtil.invokeNow(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        // finally close the main frame
-                        if (mainFrame != null)
-                            mainFrame.dispose();
+                // then close all external frames except main frame
+                for (final JFrame frame : Icy.getMainInterface().getExternalFrames()) {
+                    if (frame != mainFrame) {
+                        if (frame instanceof IcyExternalFrame) {
+                            final IcyExternalFrame iFrame = (IcyExternalFrame) frame;
+                            iFrame.close();
+                            if (iFrame.getDefaultCloseOperation() != WindowConstants.DISPOSE_ON_CLOSE)
+                                iFrame.dispose();
+                        }
+                        else
+                            frame.dispose();
                     }
-                });
+                }
+            });
 
-                // save preferences
-                IcyPreferences.save();
-                // save audit data
-                Audit.save();
-                // cache cleanup
-                ImageCache.shutDown();
+            // stop daemon plugin
+            PluginLoader.stopDaemons();
+            // shutdown background processor after frame close
+            ThreadUtil.shutdown();
+            // shutdown prefetcher
+            SequencePrefetcher.shutdown();
 
-                // clean up native library files
-                // unPrepareNativeLibraries();
+            // headless mode
+            if (Icy.getMainInterface().isHeadLess()) {
+                // final long start = System.currentTimeMillis();
+                // // wait 10s max for background processors completed theirs tasks
+                // while (!ThreadUtil.isShutdownAndTerminated() && ((System.currentTimeMillis()
+                // - start) < 10 * 1000))
+                // ThreadUtil.sleep(1);
 
-                // release lock
-                if (lock != null)
-                    SingleInstanceCheck.release(lock);
-
-                final boolean doUpdate = IcyUpdater.getWantUpdate();
-
-                // launch updater if needed
-                if (doUpdate || restart)
-                    IcyUpdater.launchUpdater(doUpdate, restart);
-
-                System.out.println(" done");
-
-                // good exit
-                System.exit(0);
+                // wait that background processors completed theirs tasks
+                while (!ThreadUtil.isShutdownAndTerminated())
+                    ThreadUtil.sleep(1);
             }
+            else {
+                // need to create the exit frame in EDT
+                ThreadUtil.invokeNow(() -> {
+                    // create and display the exit frame
+                    exitFrame = new ExitFrame(EXIT_FORCE_DELAY);
+                });
+
+                // wait that background processors completed theirs tasks
+                while (!ThreadUtil.isShutdownAndTerminated() && !exitFrame.isForced())
+                    ThreadUtil.sleep(1);
+
+                // need to dispose the exit frame in EDT (else we can have deadlock)
+                ThreadUtil.invokeNow(() -> {
+                    // can close the exit frame now
+                    exitFrame.dispose();
+                });
+            }
+
+            // need to dispose the main frame in EDT (else we can have deadlock)
+            ThreadUtil.invokeNow(() -> {
+                // finally close the main frame
+                if (mainFrame != null)
+                    mainFrame.dispose();
+            });
+
+            // save preferences
+            IcyPreferences.save();
+            // save audit data
+            Audit.save();
+            // cache cleanup
+            ImageCache.shutDown();
+
+            // clean up native library files
+            // unPrepareNativeLibraries();
+
+            // release lock
+            if (lock != null)
+                SingleInstanceCheck.release(lock);
+
+            final boolean doUpdate = IcyUpdater.getWantUpdate();
+
+            // launch updater if needed
+            if (doUpdate || restart)
+                IcyUpdater.launchUpdater(doUpdate, restart);
+
+            System.out.println(" done");
+
+            // good exit
+            System.exit(0);
         });
 
         terminer.setName("Icy Shutdown");
@@ -954,87 +802,76 @@ public class Icy
     }
 
     /**
-     * @param force
      * @deprecated use <code>exit(boolean)</code> instead
      */
-    @Deprecated
-    public static boolean exit(final boolean restart, boolean force)
-    {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public static boolean exit(final boolean restart, final boolean force) {
         return exit(restart);
     }
 
     /**
      * Return true is VTK library loaded.
      */
-    public static boolean isVtkLibraryLoaded()
-    {
+    public static boolean isVtkLibraryLoaded() {
         return vtkLibraryLoaded;
     }
 
     /**
      * Return true is VTK library loaded.
      */
-    public static boolean isItkLibraryLoaded()
-    {
+    public static boolean isItkLibraryLoaded() {
         return itkLibraryLoaded;
     }
 
     /**
      * @deprecated Use {@link MainInterface#isHeadLess()} instead.
      */
-    @Deprecated
-    public static boolean isHeadLess()
-    {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public static boolean isHeadLess() {
         return getMainInterface().isHeadLess();
     }
 
     /**
      * @deprecated Use {@link #isCacheDisabled()} instead
      */
-    @Deprecated
-    public static boolean isCacheEnabled()
-    {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public static boolean isCacheEnabled() {
         return !isCacheDisabled();
     }
 
     /**
      * @deprecated Use {@link #isNetworkDisabled()} instead
      */
-    @Deprecated
-    public static boolean isNetworkEnabled()
-    {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public static boolean isNetworkEnabled() {
         return !isNetworkDisabled();
     }
 
     /**
      * @return {@code true} if the cache module is disabled (not loaded).
      */
-    public static boolean isCacheDisabled()
-    {
+    public static boolean isCacheDisabled() {
         return disableCache;
     }
 
     /**
      * @return {@code true} if the network module is disabled (not loaded).
      */
-    public static boolean isNetworkDisabled()
-    {
+    public static boolean isNetworkDisabled() {
         return disableNetwork;
     }
 
     /**
      * Return true is the application is currently exiting.
      */
-    public static boolean isExiting()
-    {
+    public static boolean isExiting() {
         return exiting;
     }
 
     /**
      * Return the main Icy interface.
      */
-    public static MainInterface getMainInterface()
-    {
+    public static MainInterface getMainInterface() {
         // batch mode
         if (mainInterface == null)
             mainInterface = new MainInterfaceBatch();
@@ -1045,16 +882,14 @@ public class Icy
     /**
      * Returns the command line arguments
      */
-    public static String[] getCommandLineArgs()
-    {
+    public static String[] getCommandLineArgs() {
         return args;
     }
 
     /**
      * Returns the plugin command line arguments
      */
-    public static String[] getCommandLinePluginArgs()
-    {
+    public static String[] getCommandLinePluginArgs() {
         return pluginArgs;
     }
 
@@ -1063,24 +898,21 @@ public class Icy
      * This method should be called after the launching plugin actually 'consumed' the startup
      * arguments.
      */
-    public static void clearCommandLinePluginArgs()
-    {
+    public static void clearCommandLinePluginArgs() {
         pluginArgs = new String[0];
     }
 
     /**
      * Returns the startup plugin if any
      */
-    public static Plugin getStartupPlugin()
-    {
+    public static Plugin getStartupPlugin() {
         return startupPlugin;
     }
 
     /**
      * Return content of the <code>CHANGELOG</code> file
      */
-    public static String getChangeLog()
-    {
+    public static String getChangeLog() {
         if (FileUtil.exists("CHANGELOG.md"))
             return new String(FileUtil.load("CHANGELOG.md", false));
 
@@ -1090,8 +922,7 @@ public class Icy
     /**
      * Return content of the <code>LICENSE</code> file
      */
-    public static String getLicense()
-    {
+    public static String getLicense() {
         if (FileUtil.exists("LICENSE"))
             return new String(FileUtil.load("LICENSE", false));
 
@@ -1101,8 +932,7 @@ public class Icy
     /**
      * Return content of the <code>README</code> file
      */
-    public static String getReadMe()
-    {
+    public static String getReadMe() {
         if (FileUtil.exists("README.md"))
             return new String(FileUtil.load("README.md", false));
 
@@ -1112,31 +942,27 @@ public class Icy
     /**
      * @deprecated Uses <code>Icy.getMainInterface().addSequence(Sequence)</code> instead.
      */
-    @Deprecated
-    public static void addSequence(final Sequence sequence)
-    {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public static void addSequence(final Sequence sequence) {
         Icy.getMainInterface().addSequence(sequence);
     }
 
-    static void nativeLibrariesInit()
-    {
+    static void nativeLibrariesInit() {
         // build the local native library path
         final String libPath = LIB_PATH + FileUtil.separator + SystemUtil.getOSArchIdString();
         final File libPathFile = new File(libPath);
 
         // get all files in local native library path
         final File[] files = FileUtil.getFiles(libPathFile, null, true, true, false);
-        final ArrayList<String> directories = new ArrayList<String>();
+        final ArrayList<String> directories = new ArrayList<>();
 
         // add base local native library path to user library paths
         directories.add(libPathFile.getAbsolutePath());
         // add base temporary native library path to user library paths
         directories.add(new File(SystemUtil.getTempLibraryDirectory()).getAbsolutePath());
 
-        for (File f : files)
-        {
-            if (f.isDirectory())
-            {
+        for (final File f : files) {
+            if (f.isDirectory()) {
                 // add all directories to user library paths
                 final String filePath = f.getAbsolutePath();
                 if (!directories.contains(filePath))
@@ -1145,13 +971,11 @@ public class Icy
         }
 
         // add lib folder for unix system
-        if (SystemUtil.isUnix())
-        {
+        if (SystemUtil.isUnix()) {
             directories.add(new File("/lib").getAbsolutePath());
             directories.add(new File("/usr/lib").getAbsolutePath());
 
-            if (SystemUtil.is64bits())
-            {
+            if (SystemUtil.is64bits()) {
                 directories.add(new File("/lib64").getAbsolutePath());
                 directories.add(new File("/lib/x86_64").getAbsolutePath());
                 directories.add(new File("/lib/x86_64-linux-gnu").getAbsolutePath());
@@ -1159,8 +983,7 @@ public class Icy
                 directories.add(new File("/usr/lib/x86_64").getAbsolutePath());
                 directories.add(new File("/usr/lib/x86_64-linux-gnu").getAbsolutePath());
             }
-            else
-            {
+            else {
                 directories.add(new File("/lib/x86").getAbsolutePath());
                 directories.add(new File("/lib/x86-linux-gnu").getAbsolutePath());
                 directories.add(new File("/usr/lib/x86").getAbsolutePath());
@@ -1168,27 +991,26 @@ public class Icy
             }
         }
 
-        if (!SystemUtil.addToJavaLibraryPath(directories.toArray(new String[directories.size()])))
+        // TODO: 21/09/2023 Remove this illegal reflexion before Icy 3 release
+        if (!SystemUtil.addToJavaLibraryPath(directories.toArray(new String[0])))
             System.out.println("Some native libraries may not load correctly.");
 
         // load native libraries
-        loadVtkLibrary(libPathFile);
+        loadVtkLibrary_v9_2_6(libPathFile);
         // loadItkLibrary(libPathFile);
 
         // disable native lib support for JAI as we don't provide them
         SystemUtil.setProperty("com.sun.media.jai.disableMediaLib", "true");
     }
 
-    private static void loadVtkLibrary(File libPathFile)
-    {
+    private static void loadVtkLibrary(final File libPathFile) {
         final String vtkLibPath = FileUtil.getGenericPath(new File(libPathFile, "vtk").getAbsolutePath());
 
         // we load it directly from inner lib path if possible
         System.setProperty("vtk.lib.dir", vtkLibPath);
 
         vtkLibraryLoaded = false;
-        try
-        {
+        try {
             // if (SystemUtil.isUnix())
             // {
             // vtkNativeLibrary.LoadAllNativeLibraries();
@@ -1451,8 +1273,7 @@ public class Icy
             // redirect vtk error log to file
             vtkNativeLibrary.DisableOutputWindow(new File("vtk.log"));
         }
-        catch (Throwable e1)
-        {
+        catch (final Throwable e1) {
             IcyExceptionHandler.showErrorMessage(e1, false, false);
 
             // // try to load the VTK way
@@ -1476,8 +1297,7 @@ public class Icy
             // }
         }
 
-        if (vtkLibraryLoaded)
-        {
+        if (vtkLibraryLoaded) {
             final String vv = new vtkVersion().GetVTKVersion();
 
             System.out.println("VTK " + vv + " library successfully loaded...");
@@ -1491,12 +1311,10 @@ public class Icy
             // vtkJavaGarbageCollector.SetScheduleTime(5, TimeUnit.SECONDS);
             // vtkJavaGarbageCollector.SetAutoGarbageCollection(true);
         }
-        else
-        {
+        else {
             System.out.println("Cannot load VTK library...");
 
-            if (SystemUtil.isMac())
-            {
+            if (SystemUtil.isMac()) {
                 final String osVer = SystemUtil.getOSVersion();
 
                 if (osVer.startsWith("10.6") || osVer.startsWith("10.5"))
@@ -1506,27 +1324,83 @@ public class Icy
         }
     }
 
-    private static void loadVtkLibrary_v9_2_1(File libPathFile)
-    {
+    private static boolean loadLibrary(final String path) {
+        if (FileUtil.exists(path)) {
+            try {
+                System.load(path);
+                return true;
+            }
+            catch (final Throwable t) {
+                //
+            }
+        }
+
+        return false;
+    }
+
+    private static void loadVtkLibrary_v9_2_6(final File libPathFile) {
         final String vtkLibPath = FileUtil.getGenericPath(new File(libPathFile, "vtk").getAbsolutePath());
 
         // we load it directly from inner lib path if possible
         System.setProperty("vtk.lib.dir", vtkLibPath);
 
+        final boolean autoload = false;
+        final boolean loopload = true;
+        final boolean manualload = false;
+
         vtkLibraryLoaded = false;
-        try
-        {
-            // if (SystemUtil.isUnix())
-            // {
-            // vtkNativeLibrary.LoadAllNativeLibraries();
-            //
-            // // assume VTK loaded if at least 1 native library is loaded
-            // for (vtkNativeLibrary lib : vtkNativeLibrary.values())
-            // if (lib.IsLoaded())
-            // vtkLibraryLoaded = true;
-            // }
-            // else
+        try {
+            if (autoload)
+            //if (SystemUtil.isUnix() || SystemUtil.isMac())
             {
+                vtkNativeLibrary.LoadAllNativeLibraries();
+
+                // assume VTK loaded if at least 1 native library is loaded
+                for (final vtkNativeLibrary lib : vtkNativeLibrary.values())
+                    if (lib.IsLoaded()) {
+                        vtkLibraryLoaded = true;
+                        break;
+                    }
+
+                System.out.println("Auto load " + ((vtkLibraryLoaded) ? "succeded" : "failed"));
+            }
+
+            if (loopload) {
+                final Set<String> nativeLibraries = new HashSet<>(CollectionUtil.asList(FileUtil.getFiles(vtkLibPath, null, false, false)));
+                final int numFile = nativeLibraries.size();
+                boolean load = true;
+
+                // so we can at least load 1 library at each iteration
+                while (load) {
+                    load = false;
+
+                    for (final String lib : new ArrayList<>(nativeLibraries)) {
+                        // successfully loaded ? one more iteration
+                        if (loadLibrary(lib)) {
+                            // done
+                            nativeLibraries.remove(lib);
+                            // try another iteration
+                            load = true;
+//                          System.out.println(FileUtil.getFileName(lib) + " loaded");
+                        }
+                    }
+                }
+
+                // still some remaining files not loaded ? --> display a warning
+                if (!nativeLibraries.isEmpty()) {
+                    System.out.println("Warning: following VTK library files couldn't be loaded:");
+                    for (final String lib : nativeLibraries)
+                        System.out.println(FileUtil.getFileName(lib));
+                }
+
+                // at least one file was correctly loaded ? --> the library certainly loaded correctly then
+                if (nativeLibraries.size() < numFile)
+                    vtkLibraryLoaded = true;
+
+                System.out.println("Loop load " + ((vtkLibraryLoaded) ? "succeded" : "failed"));
+            }
+
+            if (manualload) {
                 //loadLibrary(vtkLibPath, "vtkalglib"); //, false);
                 loadLibrary(vtkLibPath, "vtkdoubleconversion"); //, false);
                 loadLibrary(vtkLibPath, "vtklz4");
@@ -1842,117 +1716,116 @@ public class Icy
                 //loadLibrary(vtkLibPath, "vtkViewsGeovis"); //, false);
 
                 // JAVA wrapper
-                //loadLibrary(vtkLibPath, "vtkCommonCoreJava");
-                //loadLibrary(vtkLibPath, "vtkCommonSystemJava");
-                //loadLibrary(vtkLibPath, "vtkCommonMathJava");
-                //loadLibrary(vtkLibPath, "vtkCommonMiscJava");
-                //loadLibrary(vtkLibPath, "vtkCommonTransformsJava");
-                //loadLibrary(vtkLibPath, "vtkCommonDataModelJava");
-                //loadLibrary(vtkLibPath, "vtkCommonColorJava");
-                //loadLibrary(vtkLibPath, "vtkCommonComputationalGeometryJava");
-                //loadLibrary(vtkLibPath, "vtkCommonExecutionModelJava");
-                //loadLibrary(vtkLibPath, "vtkFiltersTopologyJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersVerdictJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersProgrammableJava");
-//                loadLibrary(vtkLibPath, "vtkImagingMathJava");
-//                loadLibrary(vtkLibPath, "vtkIOCoreJava");
-//                loadLibrary(vtkLibPath, "vtkIOEnSightJava");
-//                loadLibrary(vtkLibPath, "vtkIOVideoJava");
-//                loadLibrary(vtkLibPath, "vtkIOVeraOutJava"); //, false);
-//                loadLibrary(vtkLibPath, "vtkIOLegacyJava");
-//                loadLibrary(vtkLibPath, "vtkIONetCDFJava");
-//                loadLibrary(vtkLibPath, "vtkIOXMLParserJava");
-//                loadLibrary(vtkLibPath, "vtkIOXMLJava");
-//                loadLibrary(vtkLibPath, "vtkIOTecplotTableJava");
-//                loadLibrary(vtkLibPath, "vtkIOImageJava");
-//                loadLibrary(vtkLibPath, "vtkIOSQLJava");
-//                loadLibrary(vtkLibPath, "vtkIOMovieJava");
-//                loadLibrary(vtkLibPath, "vtkParallelCoreJava");
-//                loadLibrary(vtkLibPath, "vtkImagingCoreJava");
-//                loadLibrary(vtkLibPath, "vtkIOSegYJava"); //, false);
-//                loadLibrary(vtkLibPath, "vtkFiltersCoreJava");
-//                loadLibrary(vtkLibPath, "vtkImagingColorJava");
-//                loadLibrary(vtkLibPath, "vtkImagingFourierJava");
-//                loadLibrary(vtkLibPath, "vtkImagingSourcesJava");
-//                loadLibrary(vtkLibPath, "vtkImagingHybridJava");
-//                loadLibrary(vtkLibPath, "vtkImagingStatisticsJava");
-//                loadLibrary(vtkLibPath, "vtkIOGeometryJava");
-//                loadLibrary(vtkLibPath, "vtkIOPLYJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersSelectionJava");
-//                loadLibrary(vtkLibPath, "vtkImagingGeneralJava");
-//                loadLibrary(vtkLibPath, "vtkImagingStencilJava");
-//                loadLibrary(vtkLibPath, "vtkImagingMorphologicalJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersGeometryJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersStatisticsJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersImagingJava");
-//                loadLibrary(vtkLibPath, "vtkIOLSDynaJava");
-//                loadLibrary(vtkLibPath, "vtkIOAsynchronousJava"); //, false);
-//                loadLibrary(vtkLibPath, "vtkIOParallelXMLJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersGeneralJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersHyperTreeJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersSMPJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersTextureJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersAMRJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersExtractionJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersSourcesJava");
-//                loadLibrary(vtkLibPath, "vtkIOExodusJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersGenericJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersModelingJava");
-//                loadLibrary(vtkLibPath, "vtkIOAMRJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersFlowPathsJava");
-//                loadLibrary(vtkLibPath, "vtkIOCityGMLJava"); //, false);
-//                loadLibrary(vtkLibPath, "vtkInfovisCoreJava");
-//                loadLibrary(vtkLibPath, "vtkIOInfovisJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersPointsJava");
-//                loadLibrary(vtkLibPath, "vtkInfovisLayoutJava");
-//                loadLibrary(vtkLibPath, "vtkRenderingCoreJava");
-//                loadLibrary(vtkLibPath, "vtkRenderingLODJava");
-//                loadLibrary(vtkLibPath, "vtkRenderingImageJava");
-//                loadLibrary(vtkLibPath, "vtkRenderingFreeTypeJava");
-//                loadLibrary(vtkLibPath, "vtkDomainsChemistryJava");
-//                loadLibrary(vtkLibPath, "vtkDomainsChemistryOpenGL2Java"); //, false);
-//                loadLibrary(vtkLibPath, "vtkInteractionStyleJava");
-//                loadLibrary(vtkLibPath, "vtkIOImportJava");
-//                loadLibrary(vtkLibPath, "vtkRenderingAnnotationJava");
-//                loadLibrary(vtkLibPath, "vtkRenderingLabelJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersHybridJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersParallelJava");
-//                loadLibrary(vtkLibPath, "vtkFiltersParallelImagingJava");
-//                loadLibrary(vtkLibPath, "vtkIOMINCJava");
-//                loadLibrary(vtkLibPath, "vtkIOParallelJava");
-//                loadLibrary(vtkLibPath, "vtkRenderingVolumeJava");
-//                loadLibrary(vtkLibPath, "vtkRenderingVolumeAMRJava"); //, false);
-//                loadLibrary(vtkLibPath, "vtkInteractionWidgetsJava");
-//                loadLibrary(vtkLibPath, "vtkInteractionImageJava");
-//                loadLibrary(vtkLibPath, "vtkViewsCoreJava");
+                loadLibrary(vtkLibPath, "vtkCommonCoreJava");
+                loadLibrary(vtkLibPath, "vtkCommonSystemJava");
+                loadLibrary(vtkLibPath, "vtkCommonMathJava");
+                loadLibrary(vtkLibPath, "vtkCommonMiscJava");
+                loadLibrary(vtkLibPath, "vtkCommonTransformsJava");
+                loadLibrary(vtkLibPath, "vtkCommonDataModelJava");
+                loadLibrary(vtkLibPath, "vtkCommonColorJava");
+                loadLibrary(vtkLibPath, "vtkCommonComputationalGeometryJava");
+                loadLibrary(vtkLibPath, "vtkCommonExecutionModelJava");
+                loadLibrary(vtkLibPath, "vtkFiltersTopologyJava");
+                loadLibrary(vtkLibPath, "vtkFiltersVerdictJava");
+                loadLibrary(vtkLibPath, "vtkFiltersProgrammableJava");
+                loadLibrary(vtkLibPath, "vtkImagingMathJava");
+                loadLibrary(vtkLibPath, "vtkIOCoreJava");
+                loadLibrary(vtkLibPath, "vtkIOEnSightJava");
+                loadLibrary(vtkLibPath, "vtkIOVideoJava");
+                loadLibrary(vtkLibPath, "vtkIOVeraOutJava"); //, false);
+                loadLibrary(vtkLibPath, "vtkIOLegacyJava");
+                loadLibrary(vtkLibPath, "vtkIONetCDFJava");
+                loadLibrary(vtkLibPath, "vtkIOXMLParserJava");
+                loadLibrary(vtkLibPath, "vtkIOXMLJava");
+                loadLibrary(vtkLibPath, "vtkIOTecplotTableJava");
+                loadLibrary(vtkLibPath, "vtkIOImageJava");
+                loadLibrary(vtkLibPath, "vtkIOSQLJava");
+                loadLibrary(vtkLibPath, "vtkIOMovieJava");
+                loadLibrary(vtkLibPath, "vtkParallelCoreJava");
+                loadLibrary(vtkLibPath, "vtkImagingCoreJava");
+                loadLibrary(vtkLibPath, "vtkIOSegYJava"); //, false);
+                loadLibrary(vtkLibPath, "vtkFiltersCoreJava");
+                loadLibrary(vtkLibPath, "vtkImagingColorJava");
+                loadLibrary(vtkLibPath, "vtkImagingFourierJava");
+                loadLibrary(vtkLibPath, "vtkImagingSourcesJava");
+                loadLibrary(vtkLibPath, "vtkImagingHybridJava");
+                loadLibrary(vtkLibPath, "vtkImagingStatisticsJava");
+                loadLibrary(vtkLibPath, "vtkIOGeometryJava");
+                loadLibrary(vtkLibPath, "vtkIOPLYJava");
+                loadLibrary(vtkLibPath, "vtkFiltersSelectionJava");
+                loadLibrary(vtkLibPath, "vtkImagingGeneralJava");
+                loadLibrary(vtkLibPath, "vtkImagingStencilJava");
+                loadLibrary(vtkLibPath, "vtkImagingMorphologicalJava");
+                loadLibrary(vtkLibPath, "vtkFiltersGeometryJava");
+                loadLibrary(vtkLibPath, "vtkFiltersStatisticsJava");
+                loadLibrary(vtkLibPath, "vtkFiltersImagingJava");
+                loadLibrary(vtkLibPath, "vtkIOLSDynaJava");
+                loadLibrary(vtkLibPath, "vtkIOAsynchronousJava"); //, false);
+                loadLibrary(vtkLibPath, "vtkIOParallelXMLJava");
+                loadLibrary(vtkLibPath, "vtkFiltersGeneralJava");
+                loadLibrary(vtkLibPath, "vtkFiltersHyperTreeJava");
+                loadLibrary(vtkLibPath, "vtkFiltersSMPJava");
+                loadLibrary(vtkLibPath, "vtkFiltersTextureJava");
+                loadLibrary(vtkLibPath, "vtkFiltersAMRJava");
+                loadLibrary(vtkLibPath, "vtkFiltersExtractionJava");
+                loadLibrary(vtkLibPath, "vtkFiltersSourcesJava");
+                loadLibrary(vtkLibPath, "vtkIOExodusJava");
+                loadLibrary(vtkLibPath, "vtkFiltersGenericJava");
+                loadLibrary(vtkLibPath, "vtkFiltersModelingJava");
+                loadLibrary(vtkLibPath, "vtkIOAMRJava");
+                loadLibrary(vtkLibPath, "vtkFiltersFlowPathsJava");
+                loadLibrary(vtkLibPath, "vtkIOCityGMLJava"); //, false);
+                loadLibrary(vtkLibPath, "vtkInfovisCoreJava");
+                loadLibrary(vtkLibPath, "vtkIOInfovisJava");
+                loadLibrary(vtkLibPath, "vtkFiltersPointsJava");
+                loadLibrary(vtkLibPath, "vtkInfovisLayoutJava");
+                loadLibrary(vtkLibPath, "vtkRenderingCoreJava");
+                loadLibrary(vtkLibPath, "vtkRenderingLODJava");
+                loadLibrary(vtkLibPath, "vtkRenderingImageJava");
+                loadLibrary(vtkLibPath, "vtkRenderingFreeTypeJava");
+                loadLibrary(vtkLibPath, "vtkDomainsChemistryJava");
+                loadLibrary(vtkLibPath, "vtkDomainsChemistryOpenGL2Java"); //, false);
+                loadLibrary(vtkLibPath, "vtkInteractionStyleJava");
+                loadLibrary(vtkLibPath, "vtkIOImportJava");
+                loadLibrary(vtkLibPath, "vtkRenderingAnnotationJava");
+                loadLibrary(vtkLibPath, "vtkRenderingLabelJava");
+                loadLibrary(vtkLibPath, "vtkFiltersHybridJava");
+                loadLibrary(vtkLibPath, "vtkFiltersParallelJava");
+                loadLibrary(vtkLibPath, "vtkFiltersParallelImagingJava");
+                loadLibrary(vtkLibPath, "vtkIOMINCJava");
+                loadLibrary(vtkLibPath, "vtkIOParallelJava");
+                loadLibrary(vtkLibPath, "vtkRenderingVolumeJava");
+                loadLibrary(vtkLibPath, "vtkRenderingVolumeAMRJava"); //, false);
+                loadLibrary(vtkLibPath, "vtkInteractionWidgetsJava");
+                loadLibrary(vtkLibPath, "vtkInteractionImageJava");
+                loadLibrary(vtkLibPath, "vtkViewsCoreJava");
 
-//                loadLibrary(vtkLibPath, "vtkRenderingOpenGL2Java"); //, false);
-//                loadLibrary(vtkLibPath, "vtkRenderingLICJava"); //, false); //
-//                loadLibrary(vtkLibPath, "vtkRenderingVolumeOpenGL2Java"); //, false);
-//                loadLibrary(vtkLibPath, "vtkRenderingContext2DJava");
-//                loadLibrary(vtkLibPath, "vtkRenderingContextOpenGL2Java"); //, false);
-//                loadLibrary(vtkLibPath, "vtkRenderingGL2PSJava"); //, false); //
-//                loadLibrary(vtkLibPath, "vtkRenderingGL2PSOpenGL2"); //, false); //
+                loadLibrary(vtkLibPath, "vtkRenderingOpenGL2Java"); //, false);
+                loadLibrary(vtkLibPath, "vtkRenderingLICJava"); //, false); //
+                loadLibrary(vtkLibPath, "vtkRenderingVolumeOpenGL2Java"); //, false);
+                loadLibrary(vtkLibPath, "vtkRenderingContext2DJava");
+                loadLibrary(vtkLibPath, "vtkRenderingContextOpenGL2Java"); //, false);
+                loadLibrary(vtkLibPath, "vtkRenderingGL2PSJava"); //, false); //
+                loadLibrary(vtkLibPath, "vtkRenderingGL2PSOpenGL2"); //, false); //
 
-//                loadLibrary(vtkLibPath, "vtkViewsContext2DJava");
-//                loadLibrary(vtkLibPath, "vtkGeovisCoreJava");
-//                loadLibrary(vtkLibPath, "vtkIOExportJava");
-//                loadLibrary(vtkLibPath, "vtkIOExportOpenGL2Java");
-//                loadLibrary(vtkLibPath, "vtkIOExportPDFJava"); //, false);
-//                loadLibrary(vtkLibPath, "vtkChartsCoreJava");
-//                loadLibrary(vtkLibPath, "vtkViewsInfovisJava");
-//                loadLibrary(vtkLibPath, "vtkViewsGeovisJava"); //, false);
+                loadLibrary(vtkLibPath, "vtkViewsContext2DJava");
+                loadLibrary(vtkLibPath, "vtkGeovisCoreJava");
+                loadLibrary(vtkLibPath, "vtkIOExportJava");
+                loadLibrary(vtkLibPath, "vtkIOExportOpenGL2Java");
+                loadLibrary(vtkLibPath, "vtkIOExportPDFJava"); //, false);
+                loadLibrary(vtkLibPath, "vtkChartsCoreJava");
+                loadLibrary(vtkLibPath, "vtkViewsInfovisJava");
+                loadLibrary(vtkLibPath, "vtkViewsGeovisJava"); //, false);
 
 
                 // VTK library successfully loaded
-                vtkLibraryLoaded = false;
+                vtkLibraryLoaded = true;
             }
 
             // redirect vtk error log to file
             vtkNativeLibrary.DisableOutputWindow(new File("vtk.log"));
         }
-        catch (Throwable e1)
-        {
+        catch (final Throwable e1) {
             IcyExceptionHandler.showErrorMessage(e1, false, false);
 
             // // try to load the VTK way
@@ -1976,15 +1849,13 @@ public class Icy
             // }
         }
 
-        if (vtkLibraryLoaded)
-        {
-            //final String vv = new vtkVersion().GetVTKVersion();
-            vtkVersion vtkVers = new vtkVersion();
-            final String vv = vtkVers.GetVTKVersion();
+        if (vtkLibraryLoaded) {
+            final String vv = new vtkVersion().GetVTKVersion();
 
+            final String message = String.format("VTK %s library successfully loaded.", vv);
+            System.out.println(message);
+            new AnnounceFrame(message, 5);
 
-
-            System.out.println("VTK " + vv + " library successfully loaded...");
 
             // final vtkJavaGarbageCollector vtkJavaGarbageCollector =
             // vtkObjectBase.JAVA_OBJECT_MANAGER
@@ -1995,77 +1866,65 @@ public class Icy
             // vtkJavaGarbageCollector.SetScheduleTime(5, TimeUnit.SECONDS);
             // vtkJavaGarbageCollector.SetAutoGarbageCollection(true);
         }
-        else
-        {
-            System.out.println("Cannot load VTK library...");
+        else {
+            final String message = "Cannot load VTK library.";
+            System.err.println(message);
+            new FailedAnnounceFrame(message, 5);
 
-            if (SystemUtil.isMac())
-            {
+            if (SystemUtil.isMac()) {
                 final String osVer = SystemUtil.getOSVersion();
 
                 if (osVer.startsWith("10.6") || osVer.startsWith("10.5"))
-                    System.out.println(
-                            "VTK 6.3 is not supported on OSX " + osVer + ", version 10.7 or above is required.");
+                    System.out.println("VTK 9.2.6 is not supported on OSX " + osVer + ", version 10.7 (Lion) or above is required.");
             }
         }
     }
 
     @SuppressWarnings("unused")
-    private static void loadItkLibrary(String osDir)
-    {
+    private static void loadItkLibrary(final String osDir) {
         final String itkLibDir = osDir + FileUtil.separator + "itk";
 
-        try
-        {
+        try {
             loadLibrary(itkLibDir, "SimpleITKJava", true);
 
             System.out.println("SimpleITK library successfully loaded...");
             itkLibraryLoaded = true;
         }
-        catch (Throwable e)
-        {
+        catch (final Throwable e) {
             System.out.println("Cannot load SimpleITK library...");
         }
     }
 
-    private static void loadLibrary(String dir, String name, boolean mandatory, boolean showLog)
-    {
+    private static void loadLibrary(final String dir, final String name, final boolean mandatory, final boolean showLog) {
         if (mandatory)
             SystemUtil.loadLibrary(dir, name);
-        else
-        {
-            try
-            {
+        else {
+            try {
                 SystemUtil.loadLibrary(dir, name);
             }
-            catch (Throwable e)
-            {
+            catch (final Throwable e) {
                 if (showLog)
                     System.out.println("cannot load " + name + ", skipping...");
             }
         }
     }
 
-    private static void loadLibrary(String dir, String name, boolean mandatory)
-    {
+    private static void loadLibrary(final String dir, final String name, final boolean mandatory) {
         loadLibrary(dir, name, mandatory, false);
     }
 
-    private static void loadLibrary(String dir, String name)
-    {
+    private static void loadLibrary(final String dir, final String name) {
         loadLibrary(dir, name, true, false);
     }
 
-    static void nativeLibrariesShutdown()
-    {
+    static void nativeLibrariesShutdown() {
         // build the native local library path
         final String path = LIB_PATH + FileUtil.separator + SystemUtil.getOSArchIdString();
         // get file list (we don't want hidden files if any)
         File[] libraryFiles = FileUtil.getFiles(new File(path), null, true, false, false);
 
         // remove previous copied files
-        for (File libraryFile : libraryFiles)
-        {
+        for (final File libraryFile : libraryFiles) {
             // get file in root directory
             final File file = new File(libraryFile.getName());
             // invoke delete on exit if the file exists
@@ -2077,8 +1936,7 @@ public class Icy
         libraryFiles = FileUtil.getFiles(new File(SystemUtil.getTempLibraryDirectory()), null, true, false, false);
 
         // remove previous copied files
-        for (File libraryFile : libraryFiles)
-        {
+        for (final File libraryFile : libraryFiles) {
             // delete file
             if (!FileUtil.delete(libraryFile, false))
                 libraryFile.deleteOnExit();

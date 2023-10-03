@@ -37,7 +37,7 @@ import jxl.write.WriteException;
 /**
  * @deprecated Use {@link XLSUtil} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class XlsManager
 {
     WritableSheet excelPage = null;

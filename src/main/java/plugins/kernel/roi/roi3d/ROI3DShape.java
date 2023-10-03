@@ -179,7 +179,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
             outlineActor.GetProperty().SetColor(r, g, b);
             final vtkProperty property = actor.GetProperty();
-            property.SetPointSize(getStroke());
+            property.SetPointSize((float) getStroke());
             property.SetColor(r, g, b);
         }
 
@@ -303,8 +303,8 @@ public class ROI3DShape extends ROI3D implements Shape3D
                     vtkInfo.Set(VtkCanvas.visibilityKey, 0);
                 }
                 vtkProperty.SetColor(r, g, b);
-                vtkProperty.SetPointSize(strk);
-                vtkProperty.SetLineWidth(strk);
+                vtkProperty.SetPointSize((float) strk);
+                vtkProperty.SetLineWidth((float) strk);
                 // opacity here is about ROI content, global opacity is handled by Layer
                 // vtkProperty.SetOpacity(opacity);
                 setVtkObjectsColor(col);

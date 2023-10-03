@@ -66,7 +66,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
     /**
      * @deprecated this property does not exist anymore
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final String PROPERTY_USECHILDCOLOR = "useChildColor";
 
     protected final TreeMap<Integer, R> slices = new TreeMap<Integer, R>();
@@ -1423,7 +1423,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
          * @deprecated this property does not exist anymore (always return <code>false</code>)
          * @return boolean
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public boolean getUseChildColor()
         {
             return false;
@@ -1434,7 +1434,7 @@ public class ROI3DStack<R extends ROI2D> extends ROI3D implements ROIListener, O
          * @param value
          *        boolean
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public void setUseChildColor(boolean value)
         {
             //

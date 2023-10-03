@@ -263,7 +263,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#load(String, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage loadImage(String path, boolean displayError)
     {
         return load(path, displayError);
@@ -272,7 +272,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#load(String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage loadImage(String path)
     {
         return load(path);
@@ -281,7 +281,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#load(URL, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage loadImage(URL url, boolean displayError)
     {
         return load(url, displayError);
@@ -290,7 +290,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#load(URL)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Image loadImage(URL url)
     {
         return load(url);
@@ -299,7 +299,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#load(File, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage loadImage(File file, boolean displayError)
     {
         return load(file, displayError);
@@ -308,7 +308,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#load(File)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage loadImage(File file)
     {
         return load(file);
@@ -317,7 +317,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#load(InputStream, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage loadImage(InputStream input, boolean displayError)
     {
         return load(input, displayError);
@@ -327,7 +327,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#load(InputStream)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage loadImage(InputStream input)
     {
         return load(input);
@@ -377,7 +377,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#save(RenderedImage, String, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean saveImage(RenderedImage image, String format, String path)
     {
         return save(image, format, path);
@@ -386,7 +386,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#save(RenderedImage, String, File)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean saveImage(RenderedImage image, String format, File file)
     {
         return save(image, format, file);
@@ -598,7 +598,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#scale(Image, int, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage scaleImage(Image image, int width, int height)
     {
         return scale(image, width, height);
@@ -607,7 +607,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#scaleQuality(Image, int, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage scaleImageQuality(Image image, int width, int height)
     {
         return scaleQuality(image, width, height);
@@ -616,7 +616,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#convert(Image, BufferedImage)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage convertImage(Image in, BufferedImage out)
     {
         return convert(in, out);
@@ -625,7 +625,7 @@ public class ImageUtil
     /**
      * @deprecated Use {@link ImageUtil#toGray(Image)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BufferedImage toGrayImage(Image image)
     {
         return toGray(image);

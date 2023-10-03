@@ -1,15 +1,25 @@
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package icy.vtk;
 
-import java.awt.Graphics;
-import java.util.concurrent.locks.ReentrantLock;
-
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLCapabilities;
-import com.jogamp.opengl.GLContext;
-import com.jogamp.opengl.GLEventListener;
-import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
-
 import icy.gui.dialog.IdConfirmDialog;
 import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.system.IcyExceptionHandler;
@@ -18,28 +28,24 @@ import icy.system.thread.ThreadUtil;
 import icy.util.OpenGLUtil;
 import icy.util.ReflectionUtil;
 import jogamp.opengl.GLDrawableHelper;
-import vtk.vtkCamera;
-import vtk.vtkGenericOpenGLRenderWindow;
-import vtk.vtkGenericRenderWindowInteractor;
-import vtk.vtkLight;
-import vtk.vtkRenderWindow;
-import vtk.vtkRenderWindowInteractor;
-import vtk.vtkRenderer;
+import jogamp.opengl.GLOffscreenAutoDrawableImpl;
+import jogamp.opengl.es3.GLES3Impl;
+import vtk.*;
+
+import java.awt.*;
+import java.util.Arrays;
+import java.util.concurrent.locks.ReentrantLock;
 
 // kind of custom vtkJoglPanelComponent;
-public class VtkJoglPanel extends GLJPanel
-{
-    class GLEventImpl implements GLEventListener
-    {
+public class VtkJoglPanel extends GLJPanel {
+    class GLEventImpl implements GLEventListener {
         @Override
-        public void init(GLAutoDrawable drawable)
-        {
-            if (!windowset)
-            {
+        public void init(final GLAutoDrawable drawable) {
+            if (!windowset) {
                 windowset = true;
 
                 // Make sure the JOGL Context is current
-                GLContext ctx = drawable.getContext();
+                final GLContext ctx = drawable.getContext();
                 if (!ctx.isCurrent())
                     ctx.makeCurrent();
 
@@ -51,8 +57,7 @@ public class VtkJoglPanel extends GLJPanel
                 // rw.OpenGLInit();
 
                 // init light
-                if (!lightingset)
-                {
+                if (!lightingset) {
                     lightingset = true;
                     ren.AddLight(lgt);
                     lgt.SetPosition(cam.GetPosition());
@@ -62,28 +67,20 @@ public class VtkJoglPanel extends GLJPanel
         }
 
         @Override
-        public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
-        {
+        public void reshape(final GLAutoDrawable drawable, final int x, final int y, final int width, final int height) {
             setSize(width, height);
         }
 
         @Override
-        public void display(GLAutoDrawable drawable)
-        {
+        public void display(final GLAutoDrawable drawable) {
             render();
         }
 
         @Override
-        public void dispose(GLAutoDrawable drawable)
-        {
+        public void dispose(final GLAutoDrawable drawable) {
             delete();
         }
     }
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 8821516677188995191L;
 
     protected vtkGenericOpenGLRenderWindow rw;
     protected vtkRenderer ren;
@@ -92,7 +89,7 @@ public class VtkJoglPanel extends GLJPanel
     protected vtkLight lgt;
 
     protected ReentrantLock lock;
-    protected GLEventImpl glEventImpl;
+    GLEventImpl glEventImpl;
 
     protected int lastX;
     protected int lastY;
@@ -102,16 +99,20 @@ public class VtkJoglPanel extends GLJPanel
     protected boolean rendering;
     private boolean failed;
 
-    public VtkJoglPanel()
-    {
+    public VtkJoglPanel() {
         super(new GLCapabilities(GLProfile.getMaximum(true)));
 
-        final float scales[] = new float[2];
+        final float[] scales = new float[2];
 
         // check that requested pixel scale is ok (can be 0 on OSX)
         getRequestedSurfaceScale(scales);
+        System.out.println("GLPanel.getRequestedSurfaceScale = " + Arrays.toString(scales));
+
+        getCurrentSurfaceScale(scales);
+        System.out.println("GLPanel.getCurrentSurfaceScale = " + Arrays.toString(scales));
+
         // scale = 0 ? --> set to 1
-        if ((scales[0] == 0f) || (scales[1] == 0f))
+        /*if ((scales[0] == 0f) || (scales[1] == 0f))
         {
             try
             {
@@ -123,7 +124,20 @@ public class VtkJoglPanel extends GLJPanel
             {
                 System.err.println("Couldn't patch GLJPanel.reqPixelScale[] field with Java 17, try using Java 8 instead if you experience some bugs with 3D VTK view.");
             }
-        }
+        }*/
+        /*if ((scales[0] == 0f) || (scales[1] == 0f))
+        {
+            try
+            {
+                final float[] hasPixelScale = (float[]) ReflectionUtil.getFieldObject(this, "hasPixelScale", true);
+                hasPixelScale[0] = 1f;
+                hasPixelScale[1] = 1f;
+            }
+            catch (final Throwable t)
+            {
+                System.err.println("Couldn't patch GLJPanel.hasPixelScale[] field with Java 17, try using Java 8 instead if you experience some bugs with 3D VTK view.");
+            }
+        }*/
 
         rw = new vtkGenericOpenGLRenderWindow();
 
@@ -178,8 +192,7 @@ public class VtkJoglPanel extends GLJPanel
         cam = ren.GetActiveCamera();
 
         // not compatible with OpenGL 3 ? (new VTK OpenGL backend require OpenGL 3.2)
-        if (!OpenGLUtil.isOpenGLSupported(3))
-        {
+        if (!OpenGLUtil.isOpenGLSupported(3)) {
             if (!IdConfirmDialog.confirm("Warning",
                     "Your graphics card driver does not support OpenGL 3, you may experience issues or crashes with VTK.\nDo you want to try anyway ?",
                     IdConfirmDialog.YES_NO_OPTION, getClass().getName() + ".notCompatibleDialog"))
@@ -187,10 +200,8 @@ public class VtkJoglPanel extends GLJPanel
         }
     }
 
-    protected void delete()
-    {
-        if (rendering)
-        {
+    protected void delete() {
+        if (rendering) {
             rw.SetAbortRender(1);
             // wait a bit while rendering
             ThreadUtil.sleep(500);
@@ -200,8 +211,7 @@ public class VtkJoglPanel extends GLJPanel
         }
 
         lock.lock();
-        try
-        {
+        try {
             // prevent any further rendering
             rendering = true;
 
@@ -218,20 +228,17 @@ public class VtkJoglPanel extends GLJPanel
             wi = null;
 
             // On linux we prefer to have a memory leak instead of a crash
-            if (!rw.GetClassName().equals("vtkXOpenGLRenderWindow"))
-            {
+            if (!rw.GetClassName().equals("vtkXOpenGLRenderWindow")) {
                 rw = null;
             }
-            else
-            {
+            else {
                 System.out.println("The renderwindow has been kept arount to prevent a crash");
             }
 
             // call it only once in parent as this can take a lot of time
             // vtkObjectBase.JAVA_OBJECT_MANAGER.gc(false);
         }
-        finally
-        {
+        finally {
             // removing the renderWindow is let to the superclass
             // because in the very special case of an AWT component
             // under Linux, destroying renderWindow crashes.
@@ -243,8 +250,7 @@ public class VtkJoglPanel extends GLJPanel
      * Disable method, use {@link #disposeInternal()} instead to release VTK and OpenGL resources
      */
     @Override
-    protected void dispose(Runnable runnable)
-    {
+    protected void dispose(final Runnable runnable) {
         // prevent disposal on removeNotify as window externalization produce remove/add operation.
         // --> don't forget to call disposeInternal when needed
     }
@@ -253,81 +259,66 @@ public class VtkJoglPanel extends GLJPanel
      * Release VTK and OGL objects.<br>
      * Call it when you know you won't use anymore the VTK OGL panel
      */
-    public void disposeInternal()
-    {
+    public void disposeInternal() {
         super.dispose(null);
 
         // remove the GL event listener to avoid memory leak
         removeGLEventListener(glEventImpl);
 
-        try
-        {
+        try {
             // hacky fix to avoid the infamous memory leak from ThreadLocal from GLPanel !
             final GLDrawableHelper helper = (GLDrawableHelper) ReflectionUtil.getFieldObject(this, "helper", true);
-            final ThreadLocal threadLocal = (ThreadLocal) ReflectionUtil.getFieldObject(helper, "perThreadInitAction",
-                    true);
+            final ThreadLocal threadLocal = (ThreadLocal) ReflectionUtil.getFieldObject(helper, "perThreadInitAction", true);
             threadLocal.remove();
         }
-        catch (Throwable t)
-        {
+        catch (Throwable t) {
             // ignore
         }
     }
 
-    public vtkRenderer getRenderer()
-    {
+    public vtkRenderer getRenderer() {
         return ren;
     }
 
-    public vtkRenderWindow getRenderWindow()
-    {
+    public vtkRenderWindow getRenderWindow() {
         return rw;
     }
 
-    public vtkCamera getCamera()
-    {
+    public vtkCamera getCamera() {
         return cam;
     }
 
-    public vtkLight getLight()
-    {
+    public vtkLight getLight() {
         return lgt;
     }
 
-    public vtkRenderWindowInteractor getInteractor()
-    {
+    public vtkRenderWindowInteractor getInteractor() {
         return wi;
     }
 
     /**
      * return true if currently rendering
      */
-    public boolean isRendering()
-    {
+    public boolean isRendering() {
         return rendering;
     }
 
     @Override
-    public void setBounds(int x, int y, int width, int height)
-    {
+    public void setBounds(final int x, final int y, final int width, final int height) {
         super.setBounds(x, y, width, height);
 
-        if (windowset)
-        {
+        if (windowset) {
             final int[] size = rw.GetSize();
 
             // set size only if needed
-            if ((size[0] != width) || (size[1] != height))
-            {
+            if ((size[0] != width) || (size[1] != height)) {
                 lock();
-                try
-                {
+                try {
                     wi.SetSize(width, height);
                     rw.SetSize(width, height);
                     sizeChanged();
                 }
-                finally
-                {
+                finally {
                     unlock();
                 }
             }
@@ -337,92 +328,75 @@ public class VtkJoglPanel extends GLJPanel
     /**
      * Called when window render size changed (helper for this specific event)
      */
-    public void sizeChanged()
-    {
+    public void sizeChanged() {
         // nothing here but can be overridden
     }
 
     /**
      * Do rendering
      */
-    public void render()
-    {
+    public void render() {
         if (rendering)
             return;
 
         rendering = true;
         lock();
-        try
-        {
+        try {
             rw.Render();
         }
-        finally
-        {
+        finally {
             unlock();
             rendering = false;
         }
     }
 
-    public boolean isWindowSet()
-    {
+    public boolean isWindowSet() {
         return windowset;
     }
 
-    public void lock()
-    {
+    public void lock() {
         lock.lock();
     }
 
-    public void unlock()
-    {
+    public void unlock() {
         lock.unlock();
     }
 
-    public void updateLight()
-    {
+    public void updateLight() {
         lgt.SetPosition(cam.GetPosition());
         lgt.SetFocalPoint(cam.GetFocalPoint());
     }
 
-    public void resetCameraClippingRange()
-    {
+    public void resetCameraClippingRange() {
         lock();
-        try
-        {
+        try {
             ren.ResetCameraClippingRange();
         }
-        finally
-        {
+        finally {
             unlock();
         }
     }
 
-    public void resetCamera()
-    {
+    public void resetCamera() {
         lock();
-        try
-        {
+        try {
             ren.ResetCamera();
         }
-        finally
-        {
+        finally {
             unlock();
         }
     }
 
     @Override
-    public void paint(Graphics g)
-    {
+    public void paint(final Graphics g) {
         // previous failed --> do nothing now
         if (failed)
             return;
 
-        try
-        {
+        try {
             super.paint(g);
         }
-        catch (Throwable t)
-        {
+        catch (final Throwable t) {
             // it can happen with older video cards
             failed = true;
 

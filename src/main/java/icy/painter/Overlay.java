@@ -366,7 +366,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @see #setCanBeRemoved(boolean)
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isFixed()
     {
         return !getCanBeRemoved();
@@ -376,7 +376,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @deprecated Use {@link #setCanBeRemoved(boolean)} instead.
      * @param value boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setFixed(boolean value)
     {
         setCanBeRemoved(!value);
@@ -511,7 +511,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @deprecated Use {@link Sequence#addOverlay(Overlay)} instead.
      * @param sequence sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void attachTo(Sequence sequence)
     {
         if (sequence != null)
@@ -522,7 +522,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @deprecated Use {@link Sequence#removeOverlay(Overlay)} instead.
      * @param sequence seuqence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void detachFrom(Sequence sequence)
     {
         if (sequence != null)
@@ -584,7 +584,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     /**
      * @deprecated Use {@link #painterChanged()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void changed()
     {
         painterChanged();
@@ -656,7 +656,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param imagePoint 2D point
      * @param e event
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void mousePressed(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -669,7 +669,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param e event
      * @param canvas canvas
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void mouseReleased(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -681,7 +681,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas canvas
      * @param imagePoint 2D point
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void mouseClick(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -694,7 +694,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas canvas
      * @param e event
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void mouseMove(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -707,7 +707,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param imagePoint 2D point
      * @param e event
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void mouseDrag(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -720,7 +720,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param e event
      * @param canvas canvas
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void mouseEntered(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
         // no action by default
@@ -732,7 +732,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param e event
      * @param canvas canvas
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void mouseExited(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
         // no action by default
@@ -744,7 +744,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param e event
      * @param canvas canvas
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void mouseWheelMoved(MouseWheelEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
         // no action by default
@@ -756,7 +756,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param e event
      * @param canvas canvas
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void keyPressed(KeyEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -769,7 +769,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param e event
      * @param canvas canvas
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void keyReleased(KeyEvent e, Point2D imagePoint, IcyCanvas canvas)
     {

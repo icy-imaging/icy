@@ -142,7 +142,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
     /**
      * @deprecated use {@link #IcyColorModel(int, DataType, int[])} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     IcyColorModel(int numComponents, int dataType, boolean signed, int[] bits)
     {
         this(numComponents, DataType.getDataType(dataType, signed), bits);
@@ -260,7 +260,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
      * @return color model
      * @deprecated use {@link #createInstance(int, DataType)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyColorModel createInstance(int numComponents, int dataType, boolean signed)
     {
         return createInstance(numComponents, DataType.getDataType(dataType, signed));
@@ -524,7 +524,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
      *        source colormodel
      * @deprecated Use {@link #setBounds(IcyColorModel)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void copyBounds(IcyColorModel source)
     {
         setBounds(source);
@@ -548,7 +548,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
      * @return colormap
      * @deprecated Use {@link #getColorMap(int)} instead (different case).
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyColorMap getColormap(int component)
     {
         return getColorMap(component);
@@ -570,7 +570,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
      *        source colormodel
      * @deprecated Use {@link #setColorMaps(ColorModel)} instead (different case).
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setColormaps(ColorModel source)
     {
         setColorMaps(source);
@@ -581,7 +581,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
      *        source colormodel
      * @deprecated Use {@link #setColorMaps(ColorModel)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void copyColormap(ColorModel source)
     {
         setColorMaps(source);
@@ -609,7 +609,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
      *        source colormap to copy
      * @deprecated Use {@link #setColorMap(int, IcyColorMap, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setColormap(int component, IcyColorMap map)
     {
         setColorMap(component, map, true);
@@ -949,7 +949,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
      * @deprecated use {@link #getDataType_()} instead
      * @return data type
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getDataType()
     {
         return TypeUtil.dataBufferTypeToDataType(transferType);
@@ -959,6 +959,7 @@ public abstract class IcyColorModel extends ColorModel implements ScalerListener
      * @return data type for this colormodel
      * @see DataType
      */
+    // TODO: 03/10/2023 Rename this method after old method deleted
     public DataType getDataType_()
     {
         return dataType;

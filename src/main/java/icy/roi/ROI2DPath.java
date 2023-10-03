@@ -25,7 +25,7 @@ import java.awt.geom.Point2D;
 /**
  * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DPath} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ROI2DPath extends plugins.kernel.roi.roi2d.ROI2DPath
 {
     public ROI2DPath(Path2D path)
@@ -41,7 +41,7 @@ public class ROI2DPath extends plugins.kernel.roi.roi2d.ROI2DPath
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DPath(Point2D pt, boolean cm)
     {
         super(pt);

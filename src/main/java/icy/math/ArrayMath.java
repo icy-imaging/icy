@@ -262,7 +262,7 @@ public class ArrayMath
     /**
      * @deprecated use {@link #add(double[] , double , double[])} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double[] add(double value, double[] array, double[] out)
     {
         return add(array, value, out);
@@ -1166,7 +1166,7 @@ public class ArrayMath
     /**
      * @deprecated use {@link #multiply(double[] , double , double[])} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double[] multiply(double value, double[] array, double[] out)
     {
         return multiply(array, value, out);

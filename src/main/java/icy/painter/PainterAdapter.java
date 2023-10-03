@@ -29,7 +29,7 @@ import java.awt.geom.Point2D;
 /**
  * @deprecated Use {@link Overlay} class instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class PainterAdapter implements Painter
 {
     @Override

@@ -105,7 +105,7 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * Create a button with specified action.
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public IcyToggleButton(final IcyAbstractAction action) {
         super(action);
         flat = false;
@@ -172,7 +172,7 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * Return the icon as IcyIcon
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public IcyIcon getIcyIcon() {
         final Icon icon = getIcon();
 
@@ -185,7 +185,7 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * @return the icon name
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public String getIconName() {
         final IcyIcon icon = getIcyIcon();
 
@@ -198,7 +198,7 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * @param iconName the iconName to set
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public void setIconName(String iconName) {
         final IcyIcon icon = getIcyIcon();
 
@@ -210,7 +210,7 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * @return the icon size
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public int getIconSize() {
         final IcyIcon icon = getIcyIcon();
 
@@ -223,7 +223,7 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * @param iconSize the iconSize to set
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public void setIconSize(int iconSize) {
         final IcyIcon icon = getIcyIcon();
 

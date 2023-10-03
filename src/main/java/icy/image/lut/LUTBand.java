@@ -35,7 +35,7 @@ import javax.swing.event.EventListenerList;
 /**
  * @deprecated Use {@link LUTChannel} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class LUTBand implements ScalerListener, IcyColorSpaceListener
 {
     /**

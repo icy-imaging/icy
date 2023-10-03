@@ -999,7 +999,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getUnion(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getUnionBooleanMask(List<BooleanMask2D> masks) throws InterruptedException
     {
         return getUnion(masks);
@@ -1009,7 +1009,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getUnion(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getUnionBooleanMask(ROI2D[] rois) throws InterruptedException
     {
         final List<BooleanMask2D> masks = new ArrayList<BooleanMask2D>();
@@ -1025,7 +1025,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getUnion(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getUnionBooleanMask(ArrayList<ROI2D> rois) throws InterruptedException
     {
         return getUnionBooleanMask(rois.toArray(new ROI2D[rois.size()]));
@@ -1035,7 +1035,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getUnion(BooleanMask2D, BooleanMask2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getUnionBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2)
             throws InterruptedException
     {
@@ -1047,7 +1047,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getUnion(Rectangle, boolean[], Rectangle, boolean[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getUnionBooleanMask(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
             boolean[] mask2) throws InterruptedException
     {
@@ -1059,7 +1059,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getIntersection(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getIntersectionBooleanMask(List<BooleanMask2D> masks) throws InterruptedException
     {
         return getIntersection(masks);
@@ -1069,7 +1069,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getIntersection(BooleanMask2D, BooleanMask2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getIntersectionBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2)
             throws InterruptedException
     {
@@ -1080,7 +1080,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getIntersection(Rectangle, boolean[], Rectangle, boolean[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getIntersectionBooleanMask(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
             boolean[] mask2) throws InterruptedException
     {
@@ -1091,7 +1091,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getIntersection(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getIntersectBooleanMask(ROI2D[] rois) throws InterruptedException
     {
         final List<BooleanMask2D> masks = new ArrayList<BooleanMask2D>();
@@ -1107,7 +1107,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getIntersection(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getIntersectBooleanMask(ArrayList<ROI2D> rois) throws InterruptedException
     {
         return getIntersectBooleanMask(rois.toArray(new ROI2D[rois.size()]));
@@ -1117,7 +1117,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getIntersectionBooleanMask(BooleanMask2D, BooleanMask2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getIntersectBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2)
             throws InterruptedException
     {
@@ -1128,7 +1128,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getIntersectionBooleanMask(Rectangle, boolean[], Rectangle, boolean[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getIntersectBooleanMask(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
             boolean[] mask2) throws InterruptedException
     {
@@ -1139,7 +1139,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getExclusiveUnionBooleanMask(List<BooleanMask2D> masks) throws InterruptedException
     {
         return getExclusiveUnion(masks);
@@ -1149,7 +1149,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getExclusiveUnion(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getExclusiveUnionBooleanMask(ROI2D[] rois) throws InterruptedException
     {
         final List<BooleanMask2D> masks = new ArrayList<BooleanMask2D>();
@@ -1165,7 +1165,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link ROIUtil#getExclusiveUnion(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getExclusiveUnionBooleanMask(ArrayList<ROI2D> rois) throws InterruptedException
     {
         return getExclusiveUnionBooleanMask(rois.toArray(new ROI2D[rois.size()]));
@@ -1175,7 +1175,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(BooleanMask2D, BooleanMask2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getExclusiveUnionBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2)
             throws InterruptedException
     {
@@ -1187,7 +1187,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(Rectangle, boolean[], Rectangle, boolean[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getExclusiveUnionBooleanMask(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
             boolean[] mask2) throws InterruptedException
     {
@@ -1199,7 +1199,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnionBooleanMask(ROI2D[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getXorBooleanMask(ROI2D[] rois) throws InterruptedException
     {
         return getExclusiveUnionBooleanMask(rois);
@@ -1209,7 +1209,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnionBooleanMask(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getXorBooleanMask(ArrayList<ROI2D> rois) throws InterruptedException
     {
         return getExclusiveUnionBooleanMask(rois);
@@ -1219,7 +1219,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnionBooleanMask(BooleanMask2D, BooleanMask2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getXorBooleanMask(BooleanMask2D mask1, BooleanMask2D mask2) throws InterruptedException
     {
         return getExclusiveUnionBooleanMask(mask1, mask2);
@@ -1229,7 +1229,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Uses {@link #getExclusiveUnionBooleanMask(Rectangle, boolean[], Rectangle, boolean[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static BooleanMask2D getXorBooleanMask(Rectangle bounds1, boolean[] mask1, Rectangle bounds2,
             boolean[] mask2) throws InterruptedException
     {
@@ -2352,7 +2352,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getContourPoints()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Point[] getEdgePoints() throws InterruptedException
     {
         return TypeUtil.toPoint(getContourPointsAsIntArray());
@@ -2556,7 +2556,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getIntersection(BooleanMask2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BooleanMask2D getIntersect(BooleanMask2D booleanMask) throws InterruptedException
     {
         return getIntersection(booleanMask);
@@ -2566,7 +2566,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getIntersection(Rectangle, boolean[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BooleanMask2D getIntersect(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         return getIntersection(bounds, mask);
@@ -2640,7 +2640,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(BooleanMask2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BooleanMask2D getXor(BooleanMask2D booleanMask) throws InterruptedException
     {
         return getExclusiveUnion(booleanMask);
@@ -2650,7 +2650,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(Rectangle, boolean[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BooleanMask2D getXor(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         return getExclusiveUnion(bounds, mask);
@@ -2912,7 +2912,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #add(BooleanMask2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void union(BooleanMask2D booleanMask) throws InterruptedException
     {
         add(booleanMask.bounds, booleanMask.mask);
@@ -2922,7 +2922,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #add(BooleanMask2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void union(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         add(bounds, mask);
@@ -2932,7 +2932,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(BooleanMask2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void exclusiveUnion(BooleanMask2D booleanMask) throws InterruptedException
     {
         exclusiveAdd(booleanMask.bounds, booleanMask.mask);
@@ -2942,7 +2942,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #getExclusiveUnion(Rectangle, boolean[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void exclusiveUnion(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         exclusiveAdd(bounds, mask);
@@ -2952,7 +2952,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #exclusiveUnion(BooleanMask2D)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void xor(BooleanMask2D booleanMask) throws InterruptedException
     {
         exclusiveAdd(booleanMask);
@@ -2962,7 +2962,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #exclusiveUnion(Rectangle, boolean[])} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void xor(Rectangle bounds, boolean[] mask) throws InterruptedException
     {
         exclusiveAdd(bounds, mask);
@@ -3024,7 +3024,7 @@ public class BooleanMask2D implements Cloneable
      * @throws InterruptedException
      * @deprecated Use {@link #moveBounds(Rectangle)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setBounds(Rectangle value)
     {
         moveBounds(value);

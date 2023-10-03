@@ -72,7 +72,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /**
      * @deprecated Use {@link Anchor2DPositionListener} listener or {@link OverlayListener}
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static interface Anchor2DListener extends PainterListener
     {
         public void positionChanged(Anchor2D source);
@@ -291,7 +291,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param position 2D point
      * @param ray int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Point2D position, int ray, Color color, Color selectedColor)
     {
         this(position.getX(), position.getY(), ray, color, selectedColor);
@@ -303,7 +303,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param ray int
      * @param color color
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Point2D position, int ray, Color color)
     {
         this(position.getX(), position.getY(), ray, color, DEFAULT_SELECTED_COLOR);
@@ -314,7 +314,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param position 2D point
      * @param ray int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Point2D position, int ray)
     {
         this(position.getX(), position.getY(), ray, DEFAULT_NORMAL_COLOR, DEFAULT_SELECTED_COLOR);
@@ -326,7 +326,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param color color
      * @param selectedColor color
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Point2D position, Color color, Color selectedColor)
     {
         this(position.getX(), position.getY(), DEFAULT_RAY, color, selectedColor);
@@ -337,7 +337,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param position 2D point
      * @param color color
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Point2D position, Color color)
     {
         this(position.getX(), position.getY(), DEFAULT_RAY, color, DEFAULT_SELECTED_COLOR);
@@ -347,7 +347,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @deprecated Use {@link #Anchor2D(double, double)} instead.
      * @param position 2D point
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Point2D position)
     {
         this(position.getX(), position.getY(), DEFAULT_RAY, DEFAULT_NORMAL_COLOR, DEFAULT_SELECTED_COLOR);
@@ -362,7 +362,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param color color
      * @param selectedColor color
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, double x, double y, int ray, Color color, Color selectedColor)
     {
         this(x, y, ray, color, selectedColor);
@@ -377,7 +377,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param selectedColor color
      * @param ray int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, Point2D position, int ray, Color color, Color selectedColor)
     {
         this(position.getX(), position.getY(), ray, color, selectedColor);
@@ -391,7 +391,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param color color
      * @param ray int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, Point2D position, int ray, Color color)
     {
         this(position.getX(), position.getY(), ray, color, DEFAULT_SELECTED_COLOR);
@@ -405,7 +405,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param y double
      * @param ray int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, double x, double y, int ray)
     {
         this(x, y, ray, DEFAULT_NORMAL_COLOR, DEFAULT_SELECTED_COLOR);
@@ -418,7 +418,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param position 2D position
      * @param color color
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, Point2D position, Color color)
     {
         this(position.getX(), position.getY(), DEFAULT_RAY, color, DEFAULT_SELECTED_COLOR);
@@ -431,7 +431,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param sequence sequence
      * @param ray int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, Point2D position, int ray)
     {
         this(position.getX(), position.getY(), ray, DEFAULT_NORMAL_COLOR, DEFAULT_SELECTED_COLOR);
@@ -446,7 +446,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param color color
      * @param selectedColor color
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, double x, double y, Color color, Color selectedColor)
     {
         this(x, y, DEFAULT_RAY, color, selectedColor);
@@ -460,7 +460,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param color color
      * @param selectedColor color
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, Point2D position, Color color, Color selectedColor)
     {
         this(position.getX(), position.getY(), DEFAULT_RAY, color, selectedColor);
@@ -474,7 +474,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param x int
      * @param y int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, double x, double y, Color color)
     {
         this(x, y, DEFAULT_RAY, color, DEFAULT_SELECTED_COLOR);
@@ -487,7 +487,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param x int
      * @param y int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, double x, double y)
     {
         this(sequence, x, y, DEFAULT_RAY, DEFAULT_NORMAL_COLOR, DEFAULT_SELECTED_COLOR);
@@ -499,7 +499,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @param sequence sequence
      * @param position 2D point
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence, Point2D position)
     {
         this(position.getX(), position.getY(), DEFAULT_RAY, DEFAULT_NORMAL_COLOR, DEFAULT_SELECTED_COLOR);
@@ -510,7 +510,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      * @deprecated Use {@link Anchor2D#Anchor2D()} instead.
      * @param sequence sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Anchor2D(Sequence sequence)
     {
         this(0d, 0d, DEFAULT_RAY, DEFAULT_NORMAL_COLOR, DEFAULT_SELECTED_COLOR);
@@ -1141,7 +1141,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      *             {@link #addOverlayListener(OverlayListener)} instead.
      * @param listener anchor listener
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addAnchorListener(Anchor2DListener listener)
     {
         anchor2Dlisteners.add(listener);
@@ -1152,7 +1152,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      *             {@link #removeOverlayListener(OverlayListener)} instead.
      * @param listener anchor listener
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void removeAnchorListener(Anchor2DListener listener)
     {
         anchor2Dlisteners.remove(listener);
@@ -1163,7 +1163,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      *             {@link #addOverlayListener(OverlayListener)} instead.
      * @param listener anchor listener
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addListener(Anchor2DListener listener)
     {
         addAnchorListener(listener);
@@ -1174,7 +1174,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
      *             {@link #removeOverlayListener(OverlayListener)} instead.
      * @param listener anchor listener
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void removeListener(Anchor2DListener listener)
     {
         removeAnchorListener(listener);
@@ -1246,7 +1246,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /*
      * only for backward compatibility
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void keyPressed(KeyEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -1267,7 +1267,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /*
      * only for backward compatibility
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void keyReleased(KeyEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -1288,7 +1288,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /*
      * only for backward compatibility
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void mousePressed(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -1320,7 +1320,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /*
      * only for backward compatibility
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void mouseReleased(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -1330,7 +1330,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /*
      * only for backward compatibility
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void mouseDrag(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {
@@ -1369,7 +1369,7 @@ public class Anchor2D extends Overlay implements VtkPainter, Runnable
     /*
      * only for backward compatibility
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void mouseMove(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
     {

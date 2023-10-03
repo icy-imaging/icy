@@ -126,7 +126,7 @@ public class ActiveSequenceActionFrame extends ActionFrame implements ActiveSequ
     /**
      * @deprecated Use {@link #getSequence()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence getSeqIn()
     {
         return getSequence();

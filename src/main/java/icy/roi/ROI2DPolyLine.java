@@ -28,13 +28,13 @@ import java.util.List;
 /**
  * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DPolyLine} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ROI2DPolyLine extends plugins.kernel.roi.roi2d.ROI2DPolyLine
 {
     /**
      * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DPolyLine.ROI2DPolyLineAnchor2D} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected class ROI2DPolyLineAnchor2D extends plugins.kernel.roi.roi2d.ROI2DPolyLine.ROI2DPolyLineAnchor2D
     {
         public ROI2DPolyLineAnchor2D(Point2D position, Color color, Color selectedColor)
@@ -46,7 +46,7 @@ public class ROI2DPolyLine extends plugins.kernel.roi.roi2d.ROI2DPolyLine
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DPolyLine(Point2D pt, boolean cm)
     {
         super(pt);

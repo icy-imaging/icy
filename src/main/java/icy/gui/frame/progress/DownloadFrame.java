@@ -64,7 +64,7 @@ public class DownloadFrame extends CancelableProgressFrame
     /**
      * @deprecated use setMessage(..) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setMessageBase(String messageBase)
     {
         setMessage(messageBase);

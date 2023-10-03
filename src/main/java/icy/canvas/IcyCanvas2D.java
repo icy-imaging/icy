@@ -184,7 +184,7 @@ public abstract class IcyCanvas2D extends IcyCanvas
     /**
      * @deprecated Use {@link #setMousePos(int, int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setMouseCanvasPos(int x, int y)
     {
         setMousePos(x, y);
@@ -193,7 +193,7 @@ public abstract class IcyCanvas2D extends IcyCanvas
     /**
      * @deprecated Use {@link #setMousePos(Point)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setMouseCanvasPos(Point point)
     {
         setMousePos(point);

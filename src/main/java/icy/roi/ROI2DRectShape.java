@@ -27,13 +27,13 @@ import java.awt.geom.RectangularShape;
 /**
  * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DRectShape} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class ROI2DRectShape extends plugins.kernel.roi.roi2d.ROI2DRectShape
 {
     /**
      * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DRectShape.ROI2DRectAnchor2D} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected class ROI2DRectAnchor2D extends plugins.kernel.roi.roi2d.ROI2DRectShape.ROI2DRectAnchor2D
     {
         public ROI2DRectAnchor2D(Point2D position, Color color, Color selectedColor)

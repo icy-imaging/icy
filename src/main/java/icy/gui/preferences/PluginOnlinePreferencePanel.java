@@ -1,21 +1,21 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.preferences;
 
 import icy.gui.dialog.ConfirmDialog;
@@ -33,24 +33,17 @@ import java.util.List;
 
 /**
  * @author Stephane
+ * @author Thomas MUSSET
  */
 public class PluginOnlinePreferencePanel extends PluginListPreferencePanel implements PluginRepositoryLoaderListener,
-        PluginInstallerListener
-{
-    private enum PluginOnlineState
-    {
+        PluginInstallerListener {
+    private enum PluginOnlineState {
         NULL, INSTALLING, REMOVING, HAS_INSTALL, INSTALLED, INSTALLED_FAULTY, OLDER, NEWER
     }
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 7737976340704271890L;
-
     public static final String NODE_NAME = "Online Plugin";
 
-    PluginOnlinePreferencePanel(PreferenceFrame parent)
-    {
+    PluginOnlinePreferencePanel(final PreferenceFrame parent) {
         super(parent, NODE_NAME, PluginPreferencePanel.NODE_NAME);
 
         PluginRepositoryLoader.addListener(this);
@@ -70,16 +63,14 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
     }
 
     @Override
-    protected void closed()
-    {
+    protected void closed() {
         super.closed();
 
         PluginRepositoryLoader.removeListener(this);
         PluginInstaller.removeListener(this);
     }
 
-    private PluginOnlineState getPluginOnlineState(PluginDescriptor plugin)
-    {
+    private PluginOnlineState getPluginOnlineState(final PluginDescriptor plugin) {
         if (plugin == null)
             return PluginOnlineState.NULL;
 
@@ -89,18 +80,16 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
             return PluginOnlineState.REMOVING;
 
         // has a local version ?
-        if (plugin.isInstalled())
-        {
+        if (plugin.isInstalled()) {
             // get local version
             final PluginDescriptor localPlugin = PluginLoader.getPlugin(plugin.getClassName());
 
-            if (localPlugin != null)
-            {
+            if (localPlugin != null) {
                 if (plugin.equals(localPlugin))
                     return PluginOnlineState.INSTALLED;
-                if (plugin.isOlder(localPlugin))
+                if (plugin.isLower(localPlugin))
                     return PluginOnlineState.OLDER;
-                if (plugin.isNewer(localPlugin))
+                if (plugin.isGreater(localPlugin))
                     return PluginOnlineState.NEWER;
             }
 
@@ -112,13 +101,11 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
     }
 
     @Override
-    protected void doAction1()
-    {
+    protected void doAction1() {
         final List<PluginDescriptor> selectedPlugins = getSelectedPlugins();
-        final List<PluginDescriptor> toRemove = new ArrayList<PluginDescriptor>();
+        final List<PluginDescriptor> toRemove = new ArrayList<>();
 
-        for (PluginDescriptor plugin : selectedPlugins)
-        {
+        for (final PluginDescriptor plugin : selectedPlugins) {
             final PluginOnlineState state = getPluginOnlineState(plugin);
 
             // remove plugin
@@ -135,24 +122,22 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
         // delete the one we plan to remove
         dependants.removeAll(toRemove);
 
-        String message = "<html>";
+        final StringBuilder message = new StringBuilder("<html>");
 
-        if (!dependants.isEmpty())
-        {
-            message = message + "The following plugin(s) won't work anymore :<br>";
+        if (!dependants.isEmpty()) {
+            message.append("The following plugin(s) won't work anymore :<br>");
 
-            for (PluginDescriptor depPlug : dependants)
-                message = message + depPlug.getName() + " " + depPlug.getVersion() + "<br>";
+            for (final PluginDescriptor depPlug : dependants)
+                message.append(depPlug.getName()).append(" ").append(depPlug.getVersion()).append("<br>");
 
-            message = message + "<br>";
+            message.append("<br>");
         }
 
-        message = message + "Are you sure you want to remove selected plugin(s) ?</html>";
+        message.append("Are you sure you want to remove selected plugin(s) ?</html>");
 
-        if (ConfirmDialog.confirm(message))
-        {
+        if (ConfirmDialog.confirm(message.toString())) {
             // remove plugins
-            for (PluginDescriptor plugin : toRemove)
+            for (final PluginDescriptor plugin : toRemove)
                 PluginInstaller.desinstall(plugin, false, true);
         }
 
@@ -161,22 +146,18 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
     }
 
     @Override
-    protected void doAction2()
-    {
+    protected void doAction2() {
         final List<PluginDescriptor> selectedPlugins = getSelectedPlugins();
 
-        for (PluginDescriptor plugin : selectedPlugins)
-        {
+        for (final PluginDescriptor plugin : selectedPlugins) {
             final PluginOnlineState state = getPluginOnlineState(plugin);
 
             if ((state == PluginOnlineState.HAS_INSTALL) || (state == PluginOnlineState.NEWER)
-                    || (state == PluginOnlineState.OLDER))
-            {
+                    || (state == PluginOnlineState.OLDER)) {
                 final boolean doInstall;
 
                 if (state == PluginOnlineState.OLDER)
-                    doInstall = ConfirmDialog
-                            .confirm("You'll replace your plugin by an older version !\nAre you sure you want to continue ?");
+                    doInstall = ConfirmDialog.confirm("You'll replace your plugin by an older version !\nAre you sure you want to continue ?");
                 else
                     doInstall = true;
 
@@ -191,24 +172,20 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
     }
 
     @Override
-    protected void repositoryChanged()
-    {
+    protected void repositoryChanged() {
         refreshPlugins();
     }
 
     @Override
-    protected void reloadPlugins()
-    {
+    protected void reloadPlugins() {
         PluginRepositoryLoader.reload();
         // so we display the empty list during reload
         pluginsChanged();
     }
 
     @Override
-    protected String getStateValue(PluginDescriptor plugin)
-    {
-        switch (getPluginOnlineState(plugin))
-        {
+    protected String getStateValue(final PluginDescriptor plugin) {
+        switch (getPluginOnlineState(plugin)) {
             case INSTALLING:
                 return "installing...";
 
@@ -232,11 +209,10 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
     }
 
     @Override
-    protected List<PluginDescriptor> getPlugins()
-    {
+    protected List<PluginDescriptor> getPlugins() {
         // loading...
         if (!PluginRepositoryLoader.isLoaded())
-            return new ArrayList<PluginDescriptor>();
+            return new ArrayList<>();
 
         // get selected repository
         final Object selectedItem = repository.getSelectedItem();
@@ -249,28 +225,24 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
     }
 
     @Override
-    protected void updateButtonsStateInternal()
-    {
+    protected void updateButtonsStateInternal() {
         super.updateButtonsStateInternal();
 
         final List<PluginDescriptor> selectedPlugins = getSelectedPlugins();
         final boolean selected = (selectedPlugins.size() > 0);
 
-        if (PluginRepositoryLoader.isLoaded())
-        {
+        if (PluginRepositoryLoader.isLoaded()) {
             refreshButton.setText("Reload list");
             refreshButton.setEnabled(true);
             repository.setEnabled(true);
         }
-        else
-        {
+        else {
             refreshButton.setText("Reloading...");
             refreshButton.setEnabled(false);
             repository.setEnabled(false);
         }
 
-        if (!selected)
-        {
+        if (!selected) {
             action1Button.setEnabled(false);
             action2Button.setEnabled(false);
             return;
@@ -279,10 +251,8 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
         PluginOnlineState state;
 
         state = PluginOnlineState.NULL;
-        for (PluginDescriptor plugin : selectedPlugins)
-        {
-            switch (getPluginOnlineState(plugin))
-            {
+        for (final PluginDescriptor plugin : selectedPlugins) {
+            switch (getPluginOnlineState(plugin)) {
                 case REMOVING:
                     if (state == PluginOnlineState.NULL)
                         state = PluginOnlineState.REMOVING;
@@ -297,8 +267,7 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
         }
 
         // some online plugins are already installed ?
-        switch (state)
-        {
+        switch (state) {
             case REMOVING:
                 // special case where plugins are currently begin removed
                 action1Button.setText("Deleting...");
@@ -317,10 +286,8 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
         }
 
         state = PluginOnlineState.NULL;
-        for (PluginDescriptor plugin : selectedPlugins)
-        {
-            switch (getPluginOnlineState(plugin))
-            {
+        for (final PluginDescriptor plugin : selectedPlugins) {
+            switch (getPluginOnlineState(plugin)) {
                 case INSTALLING:
                     if (state == PluginOnlineState.NULL)
                         state = PluginOnlineState.INSTALLING;
@@ -343,8 +310,7 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
             }
         }
 
-        switch (state)
-        {
+        switch (state) {
             case INSTALLING:
                 action2Button.setText("Installing...");
                 action2Button.setEnabled(false);
@@ -373,44 +339,31 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
     }
 
     @Override
-    public void pluginRepositeryLoaderChanged(PluginDescriptor plugin)
-    {
-        if (plugin != null)
-        {
+    public void pluginRepositeryLoaderChanged(final PluginDescriptor plugin) {
+        if (plugin != null) {
             final int ind = getPluginModelIndex(plugin.getClassName());
 
-            if (ind != -1)
-            {
-                ThreadUtil.invokeNow(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        try
-                        {
-                            tableModel.fireTableRowsUpdated(ind, ind);
-                        }
-                        catch (Exception e)
-                        {
-                            // ignore possible exception here
-                        }
+            if (ind != -1) {
+                ThreadUtil.invokeNow(() -> {
+                    try {
+                        tableModel.fireTableRowsUpdated(ind, ind);
+                    }
+                    catch (final Exception e) {
+                        // ignore possible exception here
                     }
                 });
             }
         }
-        else
-            pluginsChanged();
+        else pluginsChanged();
     }
 
     @Override
-    public void pluginInstalled(PluginDescriptor plugin, boolean success)
-    {
+    public void pluginInstalled(final PluginDescriptor plugin, final boolean success) {
         refreshTableData();
     }
 
     @Override
-    public void pluginRemoved(PluginDescriptor plugin, boolean success)
-    {
+    public void pluginRemoved(final PluginDescriptor plugin, final boolean success) {
         refreshTableData();
     }
 }

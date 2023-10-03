@@ -44,7 +44,7 @@ import javax.swing.text.StyleConstants;
 /**
  * @deprecated Use {@link ErrorReportFrame} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class PluginErrorReportPanel extends JPanel
 {
     /**

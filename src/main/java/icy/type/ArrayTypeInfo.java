@@ -24,7 +24,7 @@ import icy.type.collection.array.ArrayDataType;
  * @author Stephane
  * @deprecated use {@link ArrayDataType} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ArrayTypeInfo
 {
     public int type;

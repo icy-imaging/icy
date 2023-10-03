@@ -40,7 +40,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#BYTE} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_BYTE = DataBuffer.TYPE_BYTE;
 
     /**
@@ -48,7 +48,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#SHORT} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_SHORT = DataBuffer.TYPE_SHORT;
 
     /**
@@ -56,7 +56,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#INT} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_INT = DataBuffer.TYPE_INT;
 
     /**
@@ -64,7 +64,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#FLOAT} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_FLOAT = DataBuffer.TYPE_FLOAT;
 
     /**
@@ -72,7 +72,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#DOUBLE} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_DOUBLE = DataBuffer.TYPE_DOUBLE;
 
     /**
@@ -80,7 +80,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#UNDEFINED} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_UNDEFINED = DataBuffer.TYPE_UNDEFINED;
 
     /**
@@ -88,7 +88,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType} method instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int sizeOf(int dataType)
     {
         switch (dataType)
@@ -113,7 +113,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType} method instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean isFloat(int dataType)
     {
         return (dataType == TYPE_FLOAT) || (dataType == TYPE_DOUBLE);
@@ -124,7 +124,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType} method instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String toLongString(int dataType)
     {
         switch (dataType)
@@ -149,7 +149,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType} method instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String toString(int dataType)
     {
         switch (dataType)
@@ -198,7 +198,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#getItems(boolean, boolean, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String[] getItems(boolean longString, boolean wantUndef)
     {
         final String[] result;
@@ -237,7 +237,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link ArrayDataType#getArrayDataType(Object)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayTypeInfo getTypeInfo(Object value)
     {
         final ArrayTypeInfo result = new ArrayTypeInfo(TYPE_UNDEFINED, 0);
@@ -376,7 +376,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link ArrayUtil#getDataType(Object)} method instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getDataType(Object value)
     {
         return getTypeInfo(value).type;
@@ -387,7 +387,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link ArrayUtil#getDim(Object)} method instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getNumDimension(Object value)
     {
         return getTypeInfo(value).dim;
@@ -398,7 +398,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#getDataType(String)} method instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getDataType(String value)
     {
         final String s = value.toLowerCase();
@@ -422,7 +422,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#getDataTypeFromDataBufferType(int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int dataBufferTypeToDataType(int dataBufferType)
     {
         switch (dataBufferType)
@@ -485,7 +485,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#getDataTypeFromFormatToolsType(int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int formatToolsTypeToDataType(int type)
     {
         switch (type)
@@ -542,7 +542,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#getDataTypeFromPixelType(PixelType)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int pixelTypeToDataType(PixelType type)
     {
         switch (type)
@@ -599,7 +599,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#toPixelType()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static PixelType dataTypeToPixelType(int dataType, boolean signed)
     {
         switch (dataType)
@@ -935,7 +935,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#getMinValue()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getMinValue(int dataType, boolean signed)
     {
         return getDefaultBounds(dataType, signed)[0];
@@ -946,7 +946,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#getMaxValue()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getMaxValue(int dataType, boolean signed)
     {
         return getDefaultBounds(dataType, signed)[1];
@@ -957,7 +957,7 @@ public class TypeUtil
      * 
      * @deprecated use {@link DataType#getDefaultBounds()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double[] getDefaultBounds(int dataType, boolean signed)
     {
         return DataType.getDataType(dataType, signed).getDefaultBounds();

@@ -90,7 +90,7 @@ public class MetaDataUtil
      *        OME metadata
      * @return OME
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OME getOME(OMEXMLMetadataImpl metaData)
     {
         return getOME((OMEXMLMetadata) metaData);
@@ -112,7 +112,7 @@ public class MetaDataUtil
      * @param metaData
      *        OME metadata
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getNumSerie(loci.formats.ome.OMEXMLMetadata metaData)
     {
         return getNumSeries(metaData);
@@ -124,7 +124,7 @@ public class MetaDataUtil
      * @param metaData
      *        OME metadata
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getNumSerie(OMEXMLMetadata metaData)
     {
         return getNumSeries(metaData);
@@ -136,7 +136,7 @@ public class MetaDataUtil
      *        OME metadata
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getNumSerie(OMEXMLMetadataImpl metaData)
     {
         return getNumSerie((OMEXMLMetadata) metaData);
@@ -165,7 +165,7 @@ public class MetaDataUtil
      *        int
      * @return Image
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Image getSerie(OMEXMLMetadata metaData, int index)
     {
         return getSeries(metaData, index);
@@ -179,7 +179,7 @@ public class MetaDataUtil
      *        int
      * @return Image
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Image getSerie(OMEXMLMetadataImpl metaData, int index)
     {
         return getSeries(metaData, index);
@@ -223,7 +223,7 @@ public class MetaDataUtil
      *        OME
      * @return Image
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Image ensureSerie(OME ome, int index)
     {
         return ensureSeries(ome, index);
@@ -256,7 +256,7 @@ public class MetaDataUtil
      * @param num
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setNumSerie(OMEXMLMetadata metaData, int num)
     {
         setNumSeries(metaData, num);
@@ -269,7 +269,7 @@ public class MetaDataUtil
      * @param num
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setNumSerie(OMEXMLMetadataImpl metaData, int num)
     {
         setNumSerie((OMEXMLMetadata) metaData, num);
@@ -313,7 +313,7 @@ public class MetaDataUtil
      *        int
      * @return Pixels
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Pixels getPixels(OMEXMLMetadataImpl metaData, int index)
     {
         return getPixels((OMEXMLMetadata) metaData, index);
@@ -542,7 +542,7 @@ public class MetaDataUtil
      * @param z
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean removePlane(OMEXMLMetadataImpl metadata, int series, int t, int z, int c)
     {
         return removePlane((OMEXMLMetadata) metadata, series, t, z, c);
@@ -618,7 +618,7 @@ public class MetaDataUtil
      * @param posZ
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void removePlanes(OMEXMLMetadataImpl metadata, int series, int posT, int posZ, int posC)
     {
         removePlanes((OMEXMLMetadata) metadata, series, posT, posZ, posC);
@@ -650,7 +650,7 @@ public class MetaDataUtil
      * @param series
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static DataType getDataType(OMEXMLMetadataImpl metaData, int series)
     {
         return getDataType((OMEXMLMetadata) metaData, series);
@@ -680,7 +680,7 @@ public class MetaDataUtil
      * @param series
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getSizeX(OMEXMLMetadataImpl metaData, int series)
     {
         return getSizeX((OMEXMLMetadata) metaData, series);
@@ -711,7 +711,7 @@ public class MetaDataUtil
      * @param series
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getSizeY(OMEXMLMetadataImpl metaData, int series)
     {
         return getSizeY((OMEXMLMetadata) metaData, series);
@@ -742,7 +742,7 @@ public class MetaDataUtil
      *        int
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getSizeC(OMEXMLMetadataImpl metaData, int series)
     {
         return getSizeC((OMEXMLMetadata) metaData, series);
@@ -773,7 +773,7 @@ public class MetaDataUtil
      *        int
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getSizeZ(OMEXMLMetadataImpl metaData, int series)
     {
         return getSizeZ((OMEXMLMetadata) metaData, series);
@@ -814,7 +814,7 @@ public class MetaDataUtil
      *        int
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getSizeT(OMEXMLMetadataImpl metaData, int series)
     {
         return getSizeT((OMEXMLMetadata) metaData, series);
@@ -920,7 +920,7 @@ public class MetaDataUtil
      * @param dataType
      *        object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setDataType(OMEXMLMetadataImpl metaData, int series, DataType dataType)
     {
         setDataType((OMEXMLMetadata) metaData, series, dataType);
@@ -950,7 +950,7 @@ public class MetaDataUtil
      * @param sizeX
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setSizeX(OMEXMLMetadataImpl metaData, int series, int sizeX)
     {
         setSizeX((OMEXMLMetadata) metaData, series, sizeX);
@@ -980,7 +980,7 @@ public class MetaDataUtil
      * @param sizeY
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setSizeY(OMEXMLMetadataImpl metaData, int series, int sizeY)
     {
         setSizeY((OMEXMLMetadata) metaData, series, sizeY);
@@ -1010,7 +1010,7 @@ public class MetaDataUtil
      * @param sizeC
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setSizeC(OMEXMLMetadataImpl metaData, int series, int sizeC)
     {
         setSizeC((OMEXMLMetadata) metaData, series, sizeC);
@@ -1040,7 +1040,7 @@ public class MetaDataUtil
      * @param sizeZ
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setSizeZ(OMEXMLMetadataImpl metaData, int series, int sizeZ)
     {
         setSizeZ((OMEXMLMetadata) metaData, series, sizeZ);
@@ -1070,7 +1070,7 @@ public class MetaDataUtil
      * @param sizeT
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setSizeT(OMEXMLMetadataImpl metaData, int series, int sizeT)
     {
         setSizeT((OMEXMLMetadata) metaData, series, sizeT);
@@ -1101,7 +1101,7 @@ public class MetaDataUtil
      *        int
      * @return string
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getImageID(OMEXMLMetadataImpl metaData, int series)
     {
         return getImageID((OMEXMLMetadata) metaData, series);
@@ -1131,7 +1131,7 @@ public class MetaDataUtil
      * @param value
      *        string
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setImageID(OMEXMLMetadataImpl metaData, int series, String value)
     {
         setImageID((OMEXMLMetadata) metaData, series, value);
@@ -1162,7 +1162,7 @@ public class MetaDataUtil
      *        int
      * @return string
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getName(OMEXMLMetadataImpl metaData, int series)
     {
         return getName((OMEXMLMetadata) metaData, series);
@@ -1192,7 +1192,7 @@ public class MetaDataUtil
      * @param value
      *        string
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setName(OMEXMLMetadataImpl metaData, int series, String value)
     {
         setName((OMEXMLMetadata) metaData, series, value);
@@ -1227,7 +1227,7 @@ public class MetaDataUtil
      *        double
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getPixelSizeX(OMEXMLMetadataImpl metaData, int series, double defaultValue)
     {
         return getPixelSizeX((OMEXMLMetadata) metaData, series, defaultValue);
@@ -1262,7 +1262,7 @@ public class MetaDataUtil
      *        double
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getPixelSizeY(OMEXMLMetadataImpl metaData, int series, double defaultValue)
     {
         return getPixelSizeY((OMEXMLMetadata) metaData, series, defaultValue);
@@ -1297,7 +1297,7 @@ public class MetaDataUtil
      *        double
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getPixelSizeZ(OMEXMLMetadataImpl metaData, int series, double defaultValue)
     {
         return getPixelSizeZ((OMEXMLMetadata) metaData, series, defaultValue);
@@ -1330,7 +1330,7 @@ public class MetaDataUtil
      *        int
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getTimeIntervalFromTimePositions(OMEXMLMetadataImpl metaData, int series)
     {
         return getTimeIntervalFromTimePositions((OMEXMLMetadata) metaData, series);
@@ -1382,7 +1382,7 @@ public class MetaDataUtil
      *        double
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getTimeInterval(OMEXMLMetadataImpl metaData, int series, double defaultValue)
     {
         return getTimeInterval((OMEXMLMetadata) metaData, series, defaultValue);
@@ -1412,7 +1412,7 @@ public class MetaDataUtil
      * @param value
      *        double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setPixelSizeX(OMEXMLMetadataImpl metaData, int series, double value)
     {
         setPixelSizeX((OMEXMLMetadata) metaData, series, value);
@@ -1442,7 +1442,7 @@ public class MetaDataUtil
      * @param value
      *        double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setPixelSizeY(OMEXMLMetadataImpl metaData, int series, double value)
     {
         setPixelSizeY((OMEXMLMetadata) metaData, series, value);
@@ -1472,7 +1472,7 @@ public class MetaDataUtil
      * @param value
      *        double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setPixelSizeZ(OMEXMLMetadataImpl metaData, int series, double value)
     {
         setPixelSizeZ((OMEXMLMetadata) metaData, series, value);
@@ -1502,7 +1502,7 @@ public class MetaDataUtil
      * @param value
      *        double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setTimeInterval(OMEXMLMetadataImpl metaData, int series, double value)
     {
         setTimeInterval((OMEXMLMetadata) metaData, series, value);
@@ -1713,7 +1713,7 @@ public class MetaDataUtil
      *        int
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getPositionT(OMEXMLMetadata metaData, int series, int t, int z, int c, double defaultValue)
     {
         return getPositionTOffset(metaData, series, t, z, c, defaultValue);
@@ -1735,7 +1735,7 @@ public class MetaDataUtil
      *        int
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getTimePosition(OMEXMLMetadata metaData, int series, int t, int z, int c, double defaultValue)
     {
         return getPositionTOffset(metaData, series, t, z, c, defaultValue);
@@ -1990,7 +1990,7 @@ public class MetaDataUtil
      *        int
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getNumChannel(OMEXMLMetadataImpl metaData, int series)
     {
         return getNumChannel((OMEXMLMetadata) metaData, series);
@@ -2025,7 +2025,7 @@ public class MetaDataUtil
      *        int
      * @return Channel
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Channel getChannel(OMEXMLMetadataImpl metaData, int series, int index)
     {
         return getChannel((OMEXMLMetadata) metaData, series, index);
@@ -2060,7 +2060,7 @@ public class MetaDataUtil
      *        int
      * @return Channel
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Channel ensureChannel(OMEXMLMetadataImpl metaData, int series, int index)
     {
         return ensureChannel((OMEXMLMetadata) metaData, series, index);
@@ -2109,7 +2109,7 @@ public class MetaDataUtil
      * @param index
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void removeChannel(OMEXMLMetadataImpl metaData, int series, int index)
     {
         removeChannel((OMEXMLMetadata) metaData, series, index);
@@ -2173,7 +2173,7 @@ public class MetaDataUtil
      * @param num
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setNumChannel(OMEXMLMetadataImpl metaData, int series, int num)
     {
         setNumChannel((OMEXMLMetadata) metaData, series, num);
@@ -2237,7 +2237,7 @@ public class MetaDataUtil
      *        int
      * @return string
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getChannelName(OMEXMLMetadataImpl metaData, int series, int channel)
     {
         return getChannelName((OMEXMLMetadata) metaData, series, channel);
@@ -2274,7 +2274,7 @@ public class MetaDataUtil
      * @param value
      *        string
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setChannelName(OMEXMLMetadataImpl metaData, int series, int channel, String value)
     {
         setChannelName((OMEXMLMetadata) metaData, series, channel, value);
@@ -2376,7 +2376,7 @@ public class MetaDataUtil
      *        int
      * @return color
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Color getChannelColor(OMEXMLMetadataImpl metaData, int series, int channel)
     {
         return getChannelColor((OMEXMLMetadata) metaData, series, channel);
@@ -2406,7 +2406,7 @@ public class MetaDataUtil
      *        string
      * @return OME Metadata
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadataImpl createDefaultMetadata(String name)
     {
         return (OMEXMLMetadataImpl) createMetadata(name);
@@ -2420,7 +2420,7 @@ public class MetaDataUtil
      *        int
      * @return OME metadata
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadata createOMEMetadata(loci.formats.meta.MetadataRetrieve metadata, int series)
     {
         return OMEUtil.createOMEXMLMetadata(metadata, series);
@@ -2545,7 +2545,7 @@ public class MetaDataUtil
      * @param sizeY
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setMetaData(OMEXMLMetadataImpl metadata, int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT,
             DataType dataType, boolean separateChannel)
     {
@@ -2629,7 +2629,7 @@ public class MetaDataUtil
      *        boolean
      * @return OME Metadata
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadata generateMetaData(Sequence sequence, boolean useZ, boolean useT,
             boolean separateChannel)
     {
@@ -2648,7 +2648,7 @@ public class MetaDataUtil
      *        int
      * @return OME metadata
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadata generateMetaData(Sequence sequence, int sizeZ, int sizeT, boolean separateChannel)
     {
         return generateMetaData(sequence, separateChannel);
@@ -2902,7 +2902,7 @@ public class MetaDataUtil
      * @param num
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void keepSingleSerie(OMEXMLMetadataImpl metaData, int num)
     {
         keepSingleSerie((OMEXMLMetadata) metaData, num);
@@ -3071,7 +3071,7 @@ public class MetaDataUtil
     /**
      * @deprecated Use {@link #clean(OMEXMLMetadata)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void clean(OMEXMLMetadataImpl metaData)
     {
         clean((OMEXMLMetadata) metaData);

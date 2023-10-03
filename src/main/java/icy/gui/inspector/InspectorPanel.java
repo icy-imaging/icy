@@ -63,7 +63,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     final OutputConsolePanel outputConsolePanel;
     // final ChatPanel chatPanel;
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     final IcyToggleButton virtualModeBtn;
 
     /**
@@ -220,7 +220,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     }
 
     // TODO: 25/01/2023 Return value never used
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     boolean setVirtualModeInternal(boolean value) {
         boolean ok = false;
         try {

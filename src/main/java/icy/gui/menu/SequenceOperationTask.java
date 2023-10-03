@@ -48,7 +48,7 @@ import icy.util.StringUtil;
 /**
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class SequenceOperationTask extends RibbonTask
 {
     public static class FileBand extends JRibbonBand
@@ -698,7 +698,7 @@ public class SequenceOperationTask extends RibbonTask
     /**
      * @deprecated Use <i>Icy.getMainInterface().getROIRibbonTask().getFillValue()</i> instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getFillValue()
     {
         return Icy.getMainInterface().getROIRibbonTask().getFillValue();

@@ -37,13 +37,13 @@ import icy.util.XMLUtil;
  * 
  * @deprecated Try to not use {@link ROI4D} or {@link ROI5D} anymore
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class ROI4D extends ROI
 {
     /**
      * @deprecated Use {@link ROI4D#getROI4DList(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<ROI4D> getROI4DList(ArrayList<ROI> rois)
     {
         final ArrayList<ROI4D> result = new ArrayList<ROI4D>();

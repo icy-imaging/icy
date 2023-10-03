@@ -273,7 +273,7 @@ public class MainInterfaceBatch implements MainInterface
     // }
 
     @Override
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public MainFrame getFrame()
     {
         return getMainFrame();
@@ -292,7 +292,7 @@ public class MainInterfaceBatch implements MainInterface
             activeSequence = null;
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void closeViewersOfSequence(Sequence sequence)
     {
@@ -347,7 +347,7 @@ public class MainInterfaceBatch implements MainInterface
         return getFirstSequenceContaining(roi);
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public Sequence getFirstSequencesContaining(Painter painter)
     {
@@ -363,7 +363,7 @@ public class MainInterfaceBatch implements MainInterface
         return new ArrayList<Sequence>();
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public ArrayList<Sequence> getSequencesContaining(Painter painter)
     {
@@ -394,7 +394,7 @@ public class MainInterfaceBatch implements MainInterface
     }
 
     @Override
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI getROI(Painter painter)
     {
         if (painter instanceof Overlay)
@@ -415,7 +415,7 @@ public class MainInterfaceBatch implements MainInterface
         return null;
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public ArrayList<Painter> getPainters()
     {
@@ -457,12 +457,13 @@ public class MainInterfaceBatch implements MainInterface
     }
 
     @Override
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public ROITask getROIRibbonTask()
     {
         return null;
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public ToolRibbonTask getToolRibbon()
     {
@@ -491,13 +492,13 @@ public class MainInterfaceBatch implements MainInterface
     {
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void addListener(MainListener listener)
     {
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void removeListener(MainListener listener)
     {
@@ -513,32 +514,32 @@ public class MainInterfaceBatch implements MainInterface
     {
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void beginUpdate()
     {
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void endUpdate()
     {
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public boolean isUpdating()
     {
         return false;
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void registerExternalFrame(JFrame frame)
     {
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void unRegisterExternalFrame(JFrame frame)
     {
@@ -560,7 +561,7 @@ public class MainInterfaceBatch implements MainInterface
     }
 
     @Override
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence getFirstSequenceContaining(Painter painter)
     {
         if ((activeSequence != null) && activeSequence.contains(painter))
@@ -584,7 +585,7 @@ public class MainInterfaceBatch implements MainInterface
         return null;
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public Viewer getFirstViewerContaining(Painter painter)
     {
@@ -609,25 +610,25 @@ public class MainInterfaceBatch implements MainInterface
         return null;
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void addFocusedViewerListener(FocusedViewerListener listener)
     {
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void removeFocusedViewerListener(FocusedViewerListener listener)
     {
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void addFocusedSequenceListener(FocusedSequenceListener listener)
     {
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public void removeFocusedSequenceListener(FocusedSequenceListener listener)
     {

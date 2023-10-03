@@ -33,7 +33,7 @@ public class ROI2DRectangle extends ROI2DRectShape
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DRectangle(Point2D topLeft, Point2D bottomRight, boolean cm)
     {
         this(topLeft, bottomRight);
@@ -55,7 +55,7 @@ public class ROI2DRectangle extends ROI2DRectShape
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DRectangle(Rectangle2D rectangle, boolean cm)
     {
         this(rectangle);
@@ -70,7 +70,7 @@ public class ROI2DRectangle extends ROI2DRectShape
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DRectangle(Point2D pt, boolean cm)
     {
         this(pt);

@@ -25,7 +25,7 @@ import icy.plugin.PluginDescriptor;
  * This class represent a MenuItem which launch a plugin when pressed
  * @deprecated USe {@link IcyPluginMenuItem} instead
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class PluginMenuItem extends IcyPluginMenuItem {
     public PluginMenuItem(final PluginDescriptor pluginDescriptor) {
         super(pluginDescriptor);

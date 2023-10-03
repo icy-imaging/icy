@@ -45,7 +45,7 @@ public class ImageComponent extends JPanel
     /**
      * @deprecated Use {@link #ImageComponent(Image)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageComponent(Image image, Dimension d)
     {
         this(image);
@@ -54,7 +54,7 @@ public class ImageComponent extends JPanel
     /**
      * @deprecated Use {@link #ImageComponent(Image)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageComponent(Image image, int width, int height)
     {
         this(image);

@@ -36,7 +36,7 @@ import javax.swing.text.Document;
 /**
  * @deprecated Use {@link ErrorReportFrame} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class PluginErrorReportFrame extends TitledFrame
 {
     // GUI

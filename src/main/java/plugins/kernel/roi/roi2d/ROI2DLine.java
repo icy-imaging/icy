@@ -101,7 +101,7 @@ public class ROI2DLine extends ROI2DShape
      * @deprecated
      */
     @SuppressWarnings("unused")
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DLine(Point2D pt, boolean cm)
     {
         this(pt);

@@ -21,7 +21,7 @@ package icy.common;
 /**
  * @deprecated Use {@link icy.common.listener.ProgressListener} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface ProgressListener extends icy.common.listener.ProgressListener
 {
 

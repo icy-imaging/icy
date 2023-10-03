@@ -23,13 +23,13 @@ import java.awt.geom.Point2D;
 /**
  * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DArea} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ROI2DArea extends plugins.kernel.roi.roi2d.ROI2DArea
 {
     /**
      * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DArea.ROI2DAreaPainter} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public class ROI2DAreaPainter extends plugins.kernel.roi.roi2d.ROI2DArea.ROI2DAreaPainter
     {
     }
@@ -53,7 +53,7 @@ public class ROI2DArea extends plugins.kernel.roi.roi2d.ROI2DArea
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DArea(Point2D position, boolean cm)
     {
         super(position);

@@ -40,9 +40,9 @@ import java.awt.image.BufferedImage;
  * @author Stephane
  * @deprecated Will be removed once IconFont fully implemented
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class IcyIcon implements ResizableIcon {
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final int DEFAULT_SIZE = LookAndFeelUtil.getDefaultIconSizeAsInt();
 
     protected Image image;
@@ -171,7 +171,7 @@ public class IcyIcon implements ResizableIcon {
     /**
      * @deprecated Use {@link #getAlpha()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isAlpha() {
         return getAlpha();
     }

@@ -40,7 +40,7 @@ public class ArrayUtil
      * @param array object
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayDataType getArrayDataType(Object array)
     {
         int dim = 0;
@@ -152,7 +152,7 @@ public class ArrayUtil
      * @param array object
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getLenght(Object array)
     {
         return getLength(array);
@@ -186,7 +186,7 @@ public class ArrayUtil
      * @param array object
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getTotalLenght(Object array)
     {
         return getTotalLength(array);
@@ -200,7 +200,7 @@ public class ArrayUtil
      * @param dataType int
      * @param len int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object createArray1D(int dataType, int len)
     {
         return Array1DUtil.createArray(dataType, len);
@@ -214,7 +214,7 @@ public class ArrayUtil
      * @param dataType int
      * @param len int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object createArray2D(int dataType, int len)
     {
         return Array2DUtil.createArray(dataType, len);
@@ -228,7 +228,7 @@ public class ArrayUtil
      * @param len int
      * @param dataType int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object createArray3D(int dataType, int len)
     {
         return Array3DUtil.createArray(dataType, len);
@@ -301,7 +301,7 @@ public class ArrayUtil
      * @param signed If signed is true then any integer primitive is considered as signed data
      * @param offset int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getValue(Object array, int offset, boolean signed)
     {
         return getValue(array, offset, TypeUtil.getDataType(array), signed);
@@ -316,7 +316,7 @@ public class ArrayUtil
      * @param signed If signed is true then any integer primitive is considered as signed data
      * @param offset int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double getValue(Object array, int offset, int dataType, boolean signed)
     {
         return Array1DUtil.getValue(array, offset, dataType, signed);
@@ -330,7 +330,7 @@ public class ArrayUtil
      * @param signed If signed is true then any integer primitive is considered as signed data
      * @param offset int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float getValueAsFloat(Object array, int offset, boolean signed)
     {
         return getValueAsFloat(array, offset, TypeUtil.getDataType(array), signed);
@@ -345,7 +345,7 @@ public class ArrayUtil
      * @param signed If signed is true then any integer primitive is considered as signed data
      * @param offset int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float getValueAsFloat(Object array, int offset, int dataType, boolean signed)
     {
         return Array1DUtil.getValueAsFloat(array, offset, dataType, signed);
@@ -359,7 +359,7 @@ public class ArrayUtil
      * @param signed If signed is true then any integer primitive is considered as signed data
      * @param offset int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getValueAsInt(Object array, int offset, boolean signed)
     {
         return getValueAsInt(array, offset, TypeUtil.getDataType(array), signed);
@@ -374,7 +374,7 @@ public class ArrayUtil
      * @param signed If signed is true then any integer primitive is considered as signed data
      * @param offset int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getValueAsInt(Object array, int offset, int dataType, boolean signed)
     {
         return Array1DUtil.getValueAsInt(array, offset, dataType, signed);
@@ -388,7 +388,7 @@ public class ArrayUtil
      * @param offset int
      * @param value double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setValue(Object array, int offset, double value)
     {
         setValue(array, offset, TypeUtil.getDataType(array), value);
@@ -403,7 +403,7 @@ public class ArrayUtil
      * @param offset int
      * @param value double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setValue(Object array, int offset, int dataType, double value)
     {
         Array1DUtil.setValue(array, offset, dataType, value);
@@ -531,7 +531,7 @@ public class ArrayUtil
      * @param to int
      * @param value double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void fill(Object array, int from, int to, double value)
     {
         Array1DUtil.fill(array, from, to, value);
@@ -547,7 +547,7 @@ public class ArrayUtil
      * @param to int
      * @param cnt int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void innerCopy(Object array, int from, int to, int cnt)
     {
         Array1DUtil.innerCopy(array, from, to, cnt);
@@ -842,7 +842,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.doubleArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object doubleArrayToArray1D(double[] in, int inOffset, Object out, int outOffset, int length)
     {
         return Array1DUtil.doubleArrayToArray(in, inOffset, out, outOffset, length);
@@ -858,7 +858,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.doubleArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object doubleArrayToArray1D(double[] in, Object out)
     {
         return Array1DUtil.doubleArrayToArray(in, out);
@@ -880,7 +880,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.floatArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object floatArrayToArray1D(float[] in, int inOffset, Object out, int outOffset, int length)
     {
         return Array1DUtil.floatArrayToArray(in, inOffset, out, outOffset, length);
@@ -897,7 +897,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.floatArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object floatArrayToArray1D(float[] in, Object out)
     {
         return Array1DUtil.floatArrayToArray(in, out);
@@ -921,7 +921,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.intArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object intArrayToArray1D(int[] in, int inOffset, Object out, int outOffset, int length, boolean signed)
     {
         return Array1DUtil.intArrayToArray(in, inOffset, out, outOffset, length, signed);
@@ -940,7 +940,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.intArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object intArrayToArray1D(int[] in, Object out, boolean signed)
     {
         return Array1DUtil.intArrayToArray(in, out, signed);
@@ -964,7 +964,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.shortArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object shortArrayToArray1D(short[] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -984,7 +984,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.shortArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object shortArrayToArray1D(short[] in, Object out, boolean signed)
     {
         return Array1DUtil.shortArrayToArray(in, out, signed);
@@ -1008,7 +1008,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.byteArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object byteArrayToArray1D(byte[] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -1032,7 +1032,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.doubleArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object doubleArrayToArray2D(double[][] in, int inOffset, Object out, int outOffset, int length)
     {
         return Array2DUtil.doubleArrayToArray(in, inOffset, out, outOffset, length);
@@ -1048,7 +1048,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.doubleArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object doubleArrayToArray2D(double[][] in, Object out)
     {
         return Array2DUtil.doubleArrayToArray(in, out);
@@ -1070,7 +1070,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.floatArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object floatArrayToArray2D(float[][] in, int inOffset, Object out, int outOffset, int length)
     {
         return Array2DUtil.floatArrayToArray(in, inOffset, out, outOffset, length);
@@ -1087,7 +1087,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.floatArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object floatArrayToArray2D(float[][] in, Object out)
     {
         return Array2DUtil.floatArrayToArray(in, out);
@@ -1111,7 +1111,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.intArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object intArrayToArray2D(int[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -1131,7 +1131,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.intArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object intArrayToArray2D(int[][] in, Object out, boolean signed)
     {
         return Array2DUtil.intArrayToArray(in, out, signed);
@@ -1155,7 +1155,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.shortArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object shortArrayToArray2D(short[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -1175,7 +1175,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.shortArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object shortArrayToArray2D(short[][] in, Object out, boolean signed)
     {
         return Array2DUtil.shortArrayToArray(in, out, signed);
@@ -1199,7 +1199,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.byteArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object byteArrayToArray2D(byte[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -1219,7 +1219,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.byteArrayToArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object byteArrayToArray2D(byte[][] in, Object out, boolean signed)
     {
         return Array2DUtil.byteArrayToArray(in, out, signed);
@@ -1243,7 +1243,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToDoubleArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double[] arrayToDoubleArray1D(Object in, int inOffset, double[] out, int outOffset, int length,
             boolean signed)
     {
@@ -1262,7 +1262,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToDoubleArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double[] arrayToDoubleArray1D(Object in, double[] out, boolean signed)
     {
         return Array1DUtil.arrayToDoubleArray(in, out, signed);
@@ -1278,7 +1278,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToDoubleArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double[] arrayToDoubleArray1D(Object in, boolean signed)
     {
         return Array1DUtil.arrayToDoubleArray(in, signed);
@@ -1302,7 +1302,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToDoubleArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double[][] arrayToDoubleArray2D(Object in, int inOffset, double[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -1321,7 +1321,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToDoubleArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double[][] arrayToDoubleArray2D(Object in, double[][] out, boolean signed)
     {
         return Array2DUtil.arrayToDoubleArray(in, out, signed);
@@ -1337,7 +1337,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToDoubleArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double[][] arrayToDoubleArray2D(Object in, boolean signed)
     {
         return Array2DUtil.arrayToDoubleArray(in, signed);
@@ -1361,7 +1361,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToFloatArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float[] arrayToFloatArray1D(Object in, int inOffset, float[] out, int outOffset, int length,
             boolean signed)
     {
@@ -1380,7 +1380,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToFloatArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float[] arrayToFloatArray1D(Object in, float[] out, boolean signed)
     {
         return Array1DUtil.arrayToFloatArray(in, out, signed);
@@ -1396,7 +1396,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToFloatArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float[] arrayToFloatArray1D(Object in, boolean signed)
     {
         return Array1DUtil.arrayToFloatArray(in, signed);
@@ -1420,7 +1420,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToFloatArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float[][] arrayToFloatArray2D(Object in, int inOffset, float[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -1440,7 +1440,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToFloatArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float[][] arrayToFloatArray2D(Object in, float[][] out, boolean signed)
     {
         return Array2DUtil.arrayToFloatArray(in, out, signed);
@@ -1456,7 +1456,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToFloatArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float[][] arrayToFloatArray2D(Object in, boolean signed)
     {
         return Array2DUtil.arrayToFloatArray(in, signed);
@@ -1481,7 +1481,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToIntArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[] arrayToIntArray1D(Object in, int inOffset, int[] out, int outOffset, int length, boolean signed)
     {
         return Array1DUtil.arrayToIntArray(in, inOffset, out, outOffset, length, signed);
@@ -1500,7 +1500,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToIntArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[] arrayToIntArray1D(Object in, int[] out, boolean signed)
     {
         return Array1DUtil.arrayToIntArray(in, out, signed);
@@ -1516,7 +1516,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToIntArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[] arrayToIntArray1D(Object in, boolean signed)
     {
         return Array1DUtil.arrayToIntArray(in, signed);
@@ -1541,7 +1541,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToIntArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[][] arrayToIntArray2D(Object in, int inOffset, int[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -1561,7 +1561,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToIntArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[][] arrayToIntArray2D(Object in, int[][] out, boolean signed)
     {
         return Array2DUtil.arrayToIntArray(in, out, signed);
@@ -1577,7 +1577,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToIntArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[][] arrayToIntArray2D(Object in, boolean signed)
     {
         return Array2DUtil.arrayToIntArray(in, signed);
@@ -1602,7 +1602,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToShortArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[] arrayToShortArray1D(Object in, int inOffset, short[] out, int outOffset, int length,
             boolean signed)
     {
@@ -1622,7 +1622,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToShortArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[] arrayToShortArray1D(Object in, short[] out, boolean signed)
     {
         return Array1DUtil.arrayToShortArray(in, out, signed);
@@ -1638,7 +1638,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToShortArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[] arrayToShortArray1D(Object in, boolean signed)
     {
         return Array1DUtil.arrayToShortArray(in, signed);
@@ -1663,7 +1663,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToShortArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[][] arrayToShortArray2D(Object in, int inOffset, short[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -1683,7 +1683,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToShortArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[][] arrayToShortArray2D(Object in, short[][] out, boolean signed)
     {
         return Array2DUtil.arrayToShortArray(in, out, signed);
@@ -1699,7 +1699,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToShortArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[][] arrayToShortArray2D(Object in, boolean signed)
     {
         return Array2DUtil.arrayToShortArray(in, signed);
@@ -1722,7 +1722,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToByteArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[] arrayToByteArray1D(Object in, int inOffset, byte[] out, int outOffset, int length)
     {
         return Array1DUtil.arrayToByteArray(in, inOffset, out, outOffset, length);
@@ -1738,7 +1738,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToByteArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[] arrayToByteArray1D(Object in, byte[] out)
     {
         return Array1DUtil.arrayToByteArray(in, out);
@@ -1752,7 +1752,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array1DUtil.arrayToByteArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[] arrayToByteArray1D(Object in)
     {
         return Array1DUtil.arrayToByteArray(in);
@@ -1775,7 +1775,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToByteArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[][] arrayToByteArray2D(Object in, int inOffset, byte[][] out, int outOffset, int length)
     {
         return Array2DUtil.arrayToByteArray(in, inOffset, out, outOffset, length);
@@ -1792,7 +1792,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToByteArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[][] arrayToByteArray2D(Object in, byte[][] out)
     {
         return Array2DUtil.arrayToByteArray(in, out);
@@ -1806,7 +1806,7 @@ public class ArrayUtil
      * @deprecated
      *             use Array2DUtil.arrayToByteArray instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[][] arrayToByteArray2D(Object in)
     {
         return Array2DUtil.arrayToByteArray(in);
@@ -2122,7 +2122,7 @@ public class ArrayUtil
      * @param signed boolean
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object arrayToSafeArray(Object in, int inOffset, Object out, int outOffset, int length, boolean signed)
     {
         return arrayToSafeArray(in, inOffset, out, outOffset, length, signed, signed);
@@ -2155,7 +2155,7 @@ public class ArrayUtil
      * @param signed boolean
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object arrayToSafeArray(Object in, Object out, boolean signed)
     {
         return arrayToSafeArray(in, 0, out, 0, -1, signed, signed);
@@ -2173,7 +2173,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object doubleArrayToSafeArray1D(double[] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2189,7 +2189,7 @@ public class ArrayUtil
      * @param out object
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object doubleArrayToSafeArray1D(double[] in, Object out, boolean signed)
     {
         return Array1DUtil.doubleArrayToSafeArray(in, out, signed);
@@ -2207,7 +2207,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object doubleArrayToSafeArray2D(double[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2224,7 +2224,7 @@ public class ArrayUtil
      * @param out object
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object doubleArrayToSafeArray2D(double[][] in, Object out, boolean signed)
     {
         return Array2DUtil.doubleArrayToSafeArray(in, out, signed);
@@ -2242,7 +2242,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object floatArrayToSafeArray1D(float[] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2258,7 +2258,7 @@ public class ArrayUtil
      * @param out object
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object floatArrayToSafeArray1D(float[] in, Object out, boolean signed)
     {
         return Array1DUtil.floatArrayToSafeArray(in, out, signed);
@@ -2276,7 +2276,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object floatArrayToSafeArray2D(float[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2293,7 +2293,7 @@ public class ArrayUtil
      * @param out object
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object floatArrayToSafeArray2D(float[][] in, Object out, boolean signed)
     {
         return Array2DUtil.floatArrayToSafeArray(in, out, signed);
@@ -2312,7 +2312,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object intArrayToSafeArray1D(int[] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2329,7 +2329,7 @@ public class ArrayUtil
      * @param out object
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object intArrayToSafeArray1D(int[] in, Object out, boolean signed)
     {
         return Array1DUtil.intArrayToSafeArray(in, out, signed);
@@ -2347,7 +2347,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object intArrayToSafeArray2D(int[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2364,7 +2364,7 @@ public class ArrayUtil
      * @param out object
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object intArrayToSafeArray2D(int[][] in, Object out, boolean signed)
     {
         return Array2DUtil.intArrayToSafeArray(in, out, signed);
@@ -2383,7 +2383,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object shortArrayToSafeArray1D(short[] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2400,7 +2400,7 @@ public class ArrayUtil
      * @param out object
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object shortArrayToSafeArray1D(short[] in, Object out, boolean signed)
     {
         return Array1DUtil.shortArrayToSafeArray(in, out, signed);
@@ -2418,7 +2418,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object shortArrayToSafeArray2D(short[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2435,7 +2435,7 @@ public class ArrayUtil
      * @param out object
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object shortArrayToSafeArray2D(short[][] in, Object out, boolean signed)
     {
         return Array2DUtil.shortArrayToSafeArray(in, out, signed);
@@ -2454,7 +2454,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[] arrayToSafeIntArray1D(Object in, int inOffset, int[] out, int outOffset, int length,
             boolean signed)
     {
@@ -2470,7 +2470,7 @@ public class ArrayUtil
      * @param out array
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[] arrayToSafeIntArray1D(Object in, int[] out, boolean signed)
     {
         return Array1DUtil.arrayToSafeIntArray(in, out, signed);
@@ -2488,7 +2488,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[][] arrayToSafeIntArray2D(Object in, int inOffset, int[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2505,7 +2505,7 @@ public class ArrayUtil
      * @param out 2D array
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[][] arrayToSafeIntArray2D(Object in, int[][] out, boolean signed)
     {
         return Array2DUtil.arrayToSafeIntArray(in, out, signed);
@@ -2524,7 +2524,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[] arrayToSafeShortArray1D(Object in, int inOffset, short[] out, int outOffset, int length,
             boolean signed)
     {
@@ -2541,7 +2541,7 @@ public class ArrayUtil
      * @param out array
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[] arrayToSafeShortArray1D(Object in, short[] out, boolean signed)
     {
         return Array1DUtil.arrayToSafeShortArray(in, out, signed);
@@ -2560,7 +2560,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[][] arrayToSafeShortArray2D(Object in, int inOffset, short[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2577,7 +2577,7 @@ public class ArrayUtil
      * @param out 2D array
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[][] arrayToSafeShortArray2D(Object in, short[][] out, boolean signed)
     {
         return Array2DUtil.arrayToSafeShortArray(in, out, signed);
@@ -2596,7 +2596,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[] arrayToSafeByteArray1D(Object in, int inOffset, byte[] out, int outOffset, int length,
             boolean signed)
     {
@@ -2613,7 +2613,7 @@ public class ArrayUtil
      * @param out array
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[] arrayToSafeByteArray1D(Object in, byte[] out, boolean signed)
     {
         return Array1DUtil.arrayToSafeByteArray(in, out, signed);
@@ -2632,7 +2632,7 @@ public class ArrayUtil
      * @param length int
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[][] arrayToSafeByteArray2D(Object in, int inOffset, byte[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2649,7 +2649,7 @@ public class ArrayUtil
      * @param out 2D array
      * @param signed boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[][] arrayToSafeByteArray2D(Object in, byte[][] out, boolean signed)
     {
         return Array2DUtil.arrayToSafeByteArray(in, out, signed);
@@ -2850,7 +2850,7 @@ public class ArrayUtil
      * @param value string
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object stringToArray1D(String value, int dataType)
     {
         return stringToArray1D(value, DataType.getDataType(dataType));
@@ -2882,7 +2882,7 @@ public class ArrayUtil
      * @param separator string
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object stringToArray1D(String value, int dataType, boolean hexa, String separator)
     {
         return stringToArray1D(value, DataType.getDataType(dataType), hexa, separator);
@@ -2944,7 +2944,7 @@ public class ArrayUtil
      * @deprecated use {@link Array1DUtil#toByteArray(boolean[])} instead
      * @param array array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[] toByteArray1D(boolean[] array)
     {
         return Array1DUtil.toByteArray(array, null, 0);
@@ -2959,7 +2959,7 @@ public class ArrayUtil
      * @param in array
      * @param offset int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[] toByteArray1D(boolean[] in, byte[] out, int offset)
     {
         return Array1DUtil.toByteArray(in, out, offset);
@@ -2971,7 +2971,7 @@ public class ArrayUtil
      * @deprecated use {@link Array1DUtil#toBooleanArray(byte[])} instead
      * @param array array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean[] toBooleanArray1D(byte[] array)
     {
         return Array1DUtil.toBooleanArray(array);
@@ -2986,7 +2986,7 @@ public class ArrayUtil
      * @param in array
      * @param offset int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean[] toBooleanArray1D(byte[] in, boolean[] out, int offset)
     {
         return Array1DUtil.toBooleanArray(in, out, offset);

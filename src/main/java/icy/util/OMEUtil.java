@@ -229,7 +229,7 @@ public class OMEUtil
     /**
      * @deprecated Use {@link #createOMEXMLMetadata()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadataImpl createOMEMetadata()
     {
         return (OMEXMLMetadataImpl) createOMEXMLMetadata();
@@ -290,7 +290,7 @@ public class OMEUtil
     /**
      * @deprecated Use {@link #createOMEXMLMetadata(MetadataRetrieve)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public synchronized static OMEXMLMetadataImpl createOMEMetadata(loci.formats.meta.MetadataRetrieve metadata)
     {
         return (OMEXMLMetadataImpl) createOMEXMLMetadata(metadata);
@@ -318,7 +318,7 @@ public class OMEUtil
     /**
      * @deprecated Use {@link #createOMEXMLMetadata(MetadataRetrieve,int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadataImpl createOMEMetadata(loci.formats.meta.MetadataRetrieve metadata, int serie)
     {
         return (OMEXMLMetadataImpl) createOMEXMLMetadata(metadata, serie);
@@ -339,7 +339,7 @@ public class OMEUtil
     /**
      * @deprecated Use {@link #getOMEXMLMetadata(MetadataRetrieve)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadataImpl getOMEMetadata(loci.formats.meta.MetadataRetrieve metadata)
     {
         return (OMEXMLMetadataImpl) getOMEXMLMetadata(metadata);
@@ -366,7 +366,7 @@ public class OMEUtil
     /**
      * @deprecated Use {@link #getXMLDocument(OMEXMLMetadata)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Document getXMLDocument(loci.formats.meta.MetadataRetrieve metadata)
     {
         return getXMLDocument(getOMEXMLMetadata(metadata));
@@ -376,7 +376,7 @@ public class OMEUtil
      * @deprecated Uses {@link MetaDataUtil#setMetaData(OMEXMLMetadata, int, int, int, int, int, DataType, boolean)}
      *             instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadataImpl generateMetaData(OMEXMLMetadataImpl metadata, int sizeX, int sizeY, int sizeC,
             int sizeZ, int sizeT, DataType dataType, boolean separateChannel)
     {
@@ -395,7 +395,7 @@ public class OMEUtil
     /**
      * @deprecated Uses {@link MetaDataUtil#generateMetaData(int, int, int, int, int, DataType, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT,
             DataType dataType, boolean separateChannel) throws ServiceException
     {
@@ -405,7 +405,7 @@ public class OMEUtil
     /**
      * @deprecated Use {@link MetaDataUtil#generateMetaData(int, int, int, DataType, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, DataType dataType,
             boolean separateChannel) throws ServiceException
     {
@@ -415,7 +415,7 @@ public class OMEUtil
     /**
      * @deprecated Use {@link MetaDataUtil#generateMetaData(IcyBufferedImage, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadata generateMetaData(IcyBufferedImage image, boolean separateChannel)
             throws ServiceException
     {
@@ -425,7 +425,7 @@ public class OMEUtil
     /**
      * @deprecated Use {@link MetaDataUtil#generateMetaData(Sequence, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadata generateMetaData(Sequence sequence, boolean useZ, boolean useT,
             boolean separateChannel)
     {
@@ -435,7 +435,7 @@ public class OMEUtil
     /**
      * @deprecated Use {@link MetaDataUtil#generateMetaData(Sequence, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadata generateMetaData(Sequence sequence, int sizeZ, int sizeT, boolean separateChannel)
     {
         return MetaDataUtil.generateMetaData(sequence, separateChannel);
@@ -444,7 +444,7 @@ public class OMEUtil
     /**
      * @deprecated Use {@link MetaDataUtil#generateMetaData(Sequence, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static OMEXMLMetadata generateMetaData(Sequence sequence, boolean separateChannel)
     {
         return MetaDataUtil.generateMetaData(sequence, separateChannel);

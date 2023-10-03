@@ -151,7 +151,7 @@ public class JarClassLoader extends AbstractClassLoader
      * 
      * @deprecated Not anymore supported (we need URL for getResource(..) method)
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void add(InputStream jarStream)
     {
         // classpathResources.loadJar(jarStream);

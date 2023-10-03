@@ -320,7 +320,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
     /**
      * @deprecated Use {@link #setColorMap(IcyColorMap)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void copyColorMap(IcyColorMap src) {
         setColorMap(src);
     }

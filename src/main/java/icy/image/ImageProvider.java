@@ -57,7 +57,7 @@ public interface ImageProvider
      * @throws InterruptedException
      * @deprecated Use {@link #getOMEXMLMetaData()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**

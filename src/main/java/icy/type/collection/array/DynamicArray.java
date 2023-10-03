@@ -75,7 +75,7 @@ public abstract class DynamicArray
      * @deprecated
      * @param type int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static DynamicArray create(int type)
     {
         return create(DataType.getDataType(type));
@@ -431,7 +431,7 @@ public abstract class DynamicArray
          * @deprecated USe {@link #getAvailable()} instead.
          * @return int
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public int getFreeSpace()
         {
             return getAvailable();

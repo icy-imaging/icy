@@ -4,7 +4,7 @@ import icy.type.rectangle.Rectangle3D;
 import icy.type.rectangle.Rectangle4D;
 import plugins.kernel.roi.roi3d.ROI3DStackRectangle;
 
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ROI4DStackRectangle extends ROI4DStack<ROI3DStackRectangle>
 {
     public ROI4DStackRectangle()

@@ -173,7 +173,7 @@ public class PluginLoader
      * @deprecated Use {@link #reload()} instead.
      */
     @SuppressWarnings("unused")
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void reload(boolean forceNow)
     {
         reload();
@@ -485,7 +485,7 @@ public class PluginLoader
      * 
      * @deprecated Use {@link #getLoadedClasses()} instead as we load classes on demand.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Map<String, Class<?>> getAllClasses()
     {
         return getLoadedClasses();
@@ -829,7 +829,7 @@ public class PluginLoader
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean getLogError()
     {
         return false;
@@ -839,7 +839,7 @@ public class PluginLoader
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setLogError(boolean value)
     {
         // instance.logError = value;

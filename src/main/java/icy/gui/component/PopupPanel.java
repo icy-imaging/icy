@@ -38,7 +38,7 @@ import javax.swing.*;
  */
 public class PopupPanel extends JPanel {
     private class PopupTitlePanel extends IcyToggleButton {
-        @Deprecated
+        @Deprecated(since = "3.0.0", forRemoval = true)
         public PopupTitlePanel(String text, Image image) {
             super(text, new IcyIcon(image, LookAndFeelUtil.getDefaultIconSizeAsInt()));
             setHorizontalAlignment(SwingConstants.LEADING);
@@ -119,7 +119,7 @@ public class PopupPanel extends JPanel {
     /**
      * @deprecated Use {@link #PopupPanel(String, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public PopupPanel(String title, int panelHeight, boolean subPopupPanel) {
         this(title, subPopupPanel);
     }
@@ -127,7 +127,7 @@ public class PopupPanel extends JPanel {
     /**
      * @deprecated Use {@link #PopupPanel(String, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public PopupPanel(String title, int panelHeight) {
         this(title, false);
     }
@@ -189,7 +189,7 @@ public class PopupPanel extends JPanel {
     /**
      * @deprecated Use {@link #PopupPanel(String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public PopupPanel() {
         this("no title", false);
     }

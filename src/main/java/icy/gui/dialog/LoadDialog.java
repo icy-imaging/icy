@@ -22,13 +22,13 @@ package icy.gui.dialog;
  * @deprecated Use {@link OpenDialog} instead.
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class LoadDialog
 {
     /**
      * @deprecated Use {@link OpenDialog#chooseFile(String, String, String, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String chooseFile(String title, String defaultDir, String defaultName, String extension)
     {
         return OpenDialog.chooseFile(title, defaultDir, defaultName, extension);
@@ -37,7 +37,7 @@ public class LoadDialog
     /**
      * @deprecated Use {@link OpenDialog#chooseFile(String, String, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String chooseFile(String title, String defaultDir, String defaultName)
     {
         return OpenDialog.chooseFile(title, defaultDir, defaultName);
@@ -46,7 +46,7 @@ public class LoadDialog
     /**
      * @deprecated Use {@link OpenDialog#chooseFile(String, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String chooseFile(String defaultDir, String defaultName)
     {
         return OpenDialog.chooseFile(defaultDir, defaultName);
@@ -55,7 +55,7 @@ public class LoadDialog
     /**
      * @deprecated Use {@link OpenDialog#chooseFile()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String chooseFile()
     {
         return OpenDialog.chooseFile();

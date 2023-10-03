@@ -56,7 +56,7 @@ public abstract class ROI3D extends ROI
      *        List of ROI
      * @return list of 3D ROI
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<ROI3D> getROI3DList(ArrayList<ROI> rois)
     {
         final ArrayList<ROI3D> result = new ArrayList<ROI3D>();
@@ -1139,7 +1139,7 @@ public abstract class ROI3D extends ROI
      * @see #getNumberOfContourPoints()
      * @see #computeNumberOfContourPoints()
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getSurfaceArea() throws InterruptedException
     {
         return getNumberOfContourPoints();
@@ -1154,7 +1154,7 @@ public abstract class ROI3D extends ROI
      * @see #computeNumberOfPoints()
      */
     @Override
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getVolume() throws InterruptedException
     {
         return getNumberOfPoints();

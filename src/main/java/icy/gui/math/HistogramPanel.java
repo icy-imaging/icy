@@ -21,7 +21,7 @@ package icy.gui.math;
 /**
  * @deprecated Use {@link icy.gui.component.math.HistogramPanel} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class HistogramPanel extends icy.gui.component.math.HistogramPanel
 {
     public HistogramPanel(double minValue, double maxValue, boolean integer)

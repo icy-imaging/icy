@@ -79,7 +79,7 @@ public class ROI2DPolyLine extends ROI2DShape
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DPolyLine(Point2D pt, boolean cm)
     {
         this(pt);
@@ -156,7 +156,7 @@ public class ROI2DPolyLine extends ROI2DShape
     /**
      * @deprecated Use {@link #getPolyline2D()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected Path2D getPath()
     {
         return new Path2D.Double(shape);
@@ -198,7 +198,7 @@ public class ROI2DPolyLine extends ROI2DShape
     /**
      * @deprecated Use {@link #setPoints(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setPoints(ArrayList<Point2D> pts)
     {
         setPoints((List<Point2D>) pts);

@@ -33,13 +33,7 @@ public final class StatusBar extends JToolBar {
         super(JToolBar.HORIZONTAL);
         setFloatable(false);
 
-        final String version = String.format(
-                "%d.%d.%d%s",
-                Icy.version.getMajor(),
-                Icy.version.getMinor(),
-                Icy.version.getRevision(),
-                (Icy.version.isBeta())? "b" : ""
-        );
+        final String version = Icy.version.toShortString();
 
         final JLabel icy = new JLabel("Icy v" + version);
         icy.setEnabled(false);

@@ -31,7 +31,7 @@ import icy.system.thread.ThreadUtil;
 /**
  * @deprecated Use {@link SequenceUtil#getSubSequence(Sequence, ROI)} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class SequenceCropper
 {
     private SequenceCropper()
@@ -43,7 +43,7 @@ public class SequenceCropper
      * @deprecated Use {@link SequenceUtil#getSubSequence(Sequence, ROI)} instead.
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean doRoiCrop()
     {
         final Viewer viewer = Icy.getMainInterface().getActiveViewer();
@@ -93,7 +93,7 @@ public class SequenceCropper
      *        viewer
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean doRoiCrop(final Viewer viewer, final ROI roi)
     {
         final Sequence seq = viewer.getSequence();

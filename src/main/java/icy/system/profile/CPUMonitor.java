@@ -276,7 +276,7 @@ public class CPUMonitor
      * 
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getAvailableProcessors()
     {
         return SystemUtil.getNumberOfCPUs();

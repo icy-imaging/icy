@@ -69,7 +69,7 @@ import ij.util.Java2;
 /**
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class LookAndFeelUtilOLD
 {
     /**
@@ -418,7 +418,7 @@ public class LookAndFeelUtilOLD
     /**
      * @deprecated Use {@link #getActiveColorScheme(DecorationAreaType)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static SubstanceColorScheme getActiveColorSheme(DecorationAreaType d)
     {
         return getActiveColorScheme(d);
@@ -499,7 +499,7 @@ public class LookAndFeelUtilOLD
     /**
      * @deprecated Use {@link #getActiveColorScheme(Component)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static SubstanceColorScheme getActiveColorSheme(Component c)
     {
         return getActiveColorScheme(c);
@@ -508,7 +508,7 @@ public class LookAndFeelUtilOLD
     /**
      * @deprecated Use {@link #getActiveColorScheme(Component, ComponentState)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static SubstanceColorScheme getActiveColorSheme(Component c, ComponentState state)
     {
         return getActiveColorScheme(c, state);

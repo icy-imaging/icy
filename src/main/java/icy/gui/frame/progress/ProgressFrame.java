@@ -246,7 +246,7 @@ public class ProgressFrame extends TaskFrame implements ProgressListener, Runnab
     /**
      * @deprecated use {@link #setPosition(double)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setProgress(int value)
     {
         setPosition(value);

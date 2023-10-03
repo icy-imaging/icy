@@ -34,7 +34,7 @@ import vtk.vtkProperty;
 /**
  * @deprecated Use #ROI3DZShape instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class ROI3DStackShape extends ROI3DStack<ROI2DShape>
 {
     public ROI3DStackShape(Class<? extends ROI2DShape> roiClass)
@@ -165,7 +165,7 @@ public abstract class ROI3DStackShape extends ROI3DStack<ROI2DShape>
 
             outlineActor.GetProperty().SetColor(r, g, b);
             final vtkProperty property = actor.GetProperty();
-            property.SetPointSize(getStroke());
+            property.SetPointSize((float) getStroke());
             property.SetColor(r, g, b);
         }
 
@@ -357,7 +357,7 @@ public abstract class ROI3DStackShape extends ROI3DStack<ROI2DShape>
                     vtkInfo.Set(VtkCanvas.visibilityKey, 0);
                 }
                 vtkProperty.SetColor(r, g, b);
-                vtkProperty.SetPointSize(strk);
+                vtkProperty.SetPointSize((float) strk);
                 // opacity here is about ROI content, global opacity is handled by Layer
                 // vtkProperty.SetOpacity(opacity);
                 setVtkObjectsColor(col);

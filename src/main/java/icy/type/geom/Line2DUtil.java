@@ -6,7 +6,7 @@ import java.awt.geom.Point2D;
 /**
  * @deprecated Use {@link GeomUtil} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class Line2DUtil
 {
     /**
@@ -17,7 +17,7 @@ public class Line2DUtil
      * @return intersection point
      * @deprecated Use {@link GeomUtil#getIntersection(Line2D, Line2D)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Point2D getIntersection(Line2D lineA, Line2D lineB)
     {
         return GeomUtil.getIntersection(lineA, lineB);
@@ -33,7 +33,7 @@ public class Line2DUtil
      * @return intersection point
      * @deprecated Use {@link GeomUtil#getIntersection(Line2D, Line2D)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Point2D getIntersection(Line2D lineA, Line2D lineB, boolean limitToSegmentA, boolean limitToSegmentB)
     {
         return GeomUtil.getIntersection(lineA, lineB, limitToSegmentA, limitToSegmentB);

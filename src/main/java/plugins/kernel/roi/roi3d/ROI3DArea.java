@@ -937,7 +937,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      *        boolean
      * @throws InterruptedException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setSlice(int z, ROI2D roiSlice, boolean merge) throws InterruptedException
     {
         if (roiSlice == null)
@@ -1016,7 +1016,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      * @return array of 3D points
      * @throws InterruptedException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Point3D[] getEdgePoints() throws InterruptedException
     {
         return getBooleanMask(true).getContourPoints();
@@ -1027,7 +1027,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      * @return array of 3D points
      * @throws InterruptedException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Point3D[] getPoints() throws InterruptedException
     {
         return getBooleanMask(true).getPoints();
@@ -1040,7 +1040,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea>
      * @param dx
      *        double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void translate(double dx, double dy)
     {
         beginUpdate();

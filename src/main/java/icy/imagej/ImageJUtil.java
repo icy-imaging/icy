@@ -563,7 +563,7 @@ public class ImageJUtil
     /**
      * @deprecated Use {@link #convertToImageJRoi(ROI2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static PointRoi convertToImageJRoiPoint(List<ROI2DPoint> points)
     {
         final int size = points.size();

@@ -23,13 +23,13 @@ import java.awt.geom.Point2D;
 /**
  * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DPoint} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ROI2DPoint extends plugins.kernel.roi.roi2d.ROI2DPoint
 {
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DPoint(Point2D pt, boolean cm)
     {
         super(pt);

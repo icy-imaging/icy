@@ -135,7 +135,7 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * @deprecated Use <code>getHistogram.addValue(double)</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addValue(double value) {
         histogram.addValue(value);
     }
@@ -143,7 +143,7 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * @deprecated Use <code>getHistogram.addValue(Object, boolean signed)</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addValues(Object array, boolean signed) {
         histogram.addValues(array, signed);
     }
@@ -151,7 +151,7 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * @deprecated Use <code>getHistogram.addValue(byte[])</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addValues(byte[] array, boolean signed) {
         histogram.addValues(array, signed);
     }
@@ -159,7 +159,7 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * @deprecated Use <code>getHistogram.addValue(short[])</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addValues(short[] array, boolean signed) {
         histogram.addValues(array, signed);
     }
@@ -167,7 +167,7 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * @deprecated Use <code>getHistogram.addValue(int[])</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addValues(int[] array, boolean signed) {
         histogram.addValues(array, signed);
     }
@@ -175,7 +175,7 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * @deprecated Use <code>getHistogram.addValue(long[])</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addValues(long[] array, boolean signed) {
         histogram.addValues(array, signed);
     }
@@ -183,7 +183,7 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * @deprecated Use <code>getHistogram.addValue(float[])</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addValues(float[] array) {
         histogram.addValues(array);
     }
@@ -191,7 +191,7 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * @deprecated Use <code>getHistogram.addValue(double[])</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addValues(double[] array) {
         histogram.addValues(array);
     }

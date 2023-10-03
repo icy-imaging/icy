@@ -75,14 +75,14 @@ public class Main
      * 
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     private static final String ARG_NOUPDATE = "-noupdate";
     /**
      * Keep for older version compatibility
      * 
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     private static final String ARG_RESTART = "-restart";
 
     private static final String ICY_JARNAME = "icy.jar";

@@ -31,7 +31,7 @@ import javax.swing.JScrollPane;
  * @deprecated Don't use this anymore
  * @author stephane
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class LabelFrame extends IcyFrame
 {
     public LabelFrame(String text)

@@ -32,7 +32,7 @@ import org.pushingpixels.flamingo.api.common.JCommandToggleMenuButton;
  * @author Stephane
  * @deprecated Will be removed with Substance
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton {
     /**
      * internals
@@ -56,7 +56,7 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton {
     /**
      * @deprecated Use {@link #IcyCommandToggleMenuButton(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyCommandToggleMenuButton(String title, String iconName) {
         this(title, new IcyIcon(iconName));
     }
@@ -78,7 +78,7 @@ public class IcyCommandToggleMenuButton extends JCommandToggleMenuButton {
     /**
      * @deprecated User {@link #IcyCommandToggleMenuButton(IcyAbstractAction)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyCommandToggleMenuButton(icy.common.IcyAbstractAction action) {
         this(null, (IcyIcon) null);
 

@@ -1,35 +1,22 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.plugin;
-
-import java.awt.Image;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.ImageIcon;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import icy.common.Version;
 import icy.file.FileUtil;
@@ -47,16 +34,28 @@ import icy.util.ClassUtil;
 import icy.util.JarUtil;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import javax.swing.*;
+import java.awt.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * <br>
  * The plugin descriptor contains all the data needed to launch a plugin. <br>
- * 
+ *
+ * @author Fabrice de Chaumont
+ * @author Stephane
+ * @author Thomas MUSSET
  * @see PluginLauncher
- * @author Fabrice de Chaumont &amp; Stephane
  */
-public class PluginDescriptor implements XMLPersistent
-{
+public class PluginDescriptor implements XMLPersistent {
     public static final int ICON_SIZE = 64;
     public static final int IMAGE_SIZE = 256;
 
@@ -66,12 +65,12 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * @deprecated Use {@link PluginIdent#ID_CLASSNAME} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final String ID_CLASSNAME = PluginIdent.ID_CLASSNAME;
     /**
      * @deprecated Use {@link PluginIdent#ID_REQUIRED_KERNEL_VERSION} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final String ID_REQUIRED_KERNEL_VERSION = PluginIdent.ID_REQUIRED_KERNEL_VERSION;
 
     public static final String ID_URL = "url";
@@ -163,8 +162,7 @@ public class PluginDescriptor implements XMLPersistent
      * Returns the index for the specified plugin in the specified list.<br>
      * Returns -1 if not found.
      */
-    public static int getIndex(List<PluginDescriptor> list, PluginDescriptor plugin)
-    {
+    public static int getIndex(final List<PluginDescriptor> list, final PluginDescriptor plugin) {
         return getIndex(list, plugin.getIdent());
     }
 
@@ -172,8 +170,7 @@ public class PluginDescriptor implements XMLPersistent
      * Returns the index for the specified plugin in the specified list.<br>
      * Returns -1 if not found.
      */
-    public static int getIndex(List<PluginDescriptor> list, PluginIdent ident)
-    {
+    public static int getIndex(final List<PluginDescriptor> list, final PluginIdent ident) {
         final int size = list.size();
 
         for (int i = 0; i < size; i++)
@@ -187,8 +184,7 @@ public class PluginDescriptor implements XMLPersistent
      * Returns the index for the specified plugin in the specified list.<br>
      * Returns -1 if not found.
      */
-    public static int getIndex(List<PluginDescriptor> list, String className)
-    {
+    public static int getIndex(final List<PluginDescriptor> list, final String className) {
         final int size = list.size();
 
         for (int i = 0; i < size; i++)
@@ -201,56 +197,47 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * Returns true if the specified plugin is present in the specified list.
      */
-    public static boolean existInList(List<PluginDescriptor> list, PluginDescriptor plugin)
-    {
+    public static boolean existInList(final List<PluginDescriptor> list, final PluginDescriptor plugin) {
         return existInList(list, plugin.getIdent());
     }
 
     /**
      * Returns true if the specified plugin is present in the specified list.
      */
-    public static boolean existInList(List<PluginDescriptor> list, PluginIdent ident)
-    {
+    public static boolean existInList(final List<PluginDescriptor> list, final PluginIdent ident) {
         return getIndex(list, ident) != -1;
     }
 
     /**
      * Returns true if the specified plugin is present in the specified list.
      */
-    public static boolean existInList(List<PluginDescriptor> list, String className)
-    {
+    public static boolean existInList(final List<PluginDescriptor> list, final String className) {
         return getIndex(list, className) != -1;
     }
 
-    public static boolean existInList(Set<PluginDescriptor> plugins, PluginIdent ident)
-    {
-        for (PluginDescriptor plugin : plugins)
+    public static boolean existInList(final Set<PluginDescriptor> plugins, final PluginIdent ident) {
+        for (final PluginDescriptor plugin : plugins)
             if (plugin.getIdent().equals(ident))
                 return true;
 
         return false;
     }
 
-    public static void addToList(List<PluginDescriptor> list, PluginDescriptor plugin, int position)
-    {
+    public static void addToList(final List<PluginDescriptor> list, final PluginDescriptor plugin, final int position) {
         if ((plugin != null) && !existInList(list, plugin))
             list.add(position, plugin);
     }
 
-    public static void addToList(List<PluginDescriptor> list, PluginDescriptor plugin)
-    {
+    public static void addToList(final List<PluginDescriptor> list, final PluginDescriptor plugin) {
         if ((plugin != null) && !existInList(list, plugin))
             list.add(plugin);
     }
 
-    public static boolean removeFromList(List<PluginDescriptor> list, String className)
-    {
-        for (int i = list.size() - 1; i >= 0; i--)
-        {
+    public static boolean removeFromList(final List<PluginDescriptor> list, final String className) {
+        for (int i = list.size() - 1; i >= 0; i--) {
             final PluginDescriptor p = list.get(i);
 
-            if (p.getClassName().equals(className))
-            {
+            if (p.getClassName().equals(className)) {
                 list.remove(i);
                 return true;
             }
@@ -267,37 +254,32 @@ public class PluginDescriptor implements XMLPersistent
     // return "";
     // }
 
-    public static ArrayList<PluginDescriptor> getPlugins(List<PluginDescriptor> list, String className)
-    {
-        final ArrayList<PluginDescriptor> result = new ArrayList<PluginDescriptor>();
+    public static ArrayList<PluginDescriptor> getPlugins(final List<PluginDescriptor> list, final String className) {
+        final ArrayList<PluginDescriptor> result = new ArrayList<>();
 
-        for (PluginDescriptor plugin : list)
+        for (final PluginDescriptor plugin : list)
             if (plugin.getClassName().equals(className))
                 result.add(plugin);
 
         return result;
     }
 
-    public static PluginDescriptor getPlugin(List<PluginDescriptor> list, String className)
-    {
-        for (PluginDescriptor plugin : list)
+    public static PluginDescriptor getPlugin(final List<PluginDescriptor> list, final String className) {
+        for (final PluginDescriptor plugin : list)
             if (plugin.getClassName().equals(className))
                 return plugin;
 
         return null;
     }
 
-    public static PluginDescriptor getPlugin(List<PluginDescriptor> list, PluginIdent ident, boolean acceptNewer)
-    {
-        if (acceptNewer)
-        {
-            for (PluginDescriptor plugin : list)
-                if (plugin.getIdent().isNewerOrEqual(ident))
+    public static PluginDescriptor getPlugin(final List<PluginDescriptor> list, final PluginIdent ident, final boolean acceptNewer) {
+        if (acceptNewer) {
+            for (final PluginDescriptor plugin : list)
+                if (plugin.getIdent().isGreaterOrEqual(ident))
                     return plugin;
         }
-        else
-        {
-            for (PluginDescriptor plugin : list)
+        else {
+            for (final PluginDescriptor plugin : list)
                 if (plugin.getIdent().equals(ident))
                     return plugin;
         }
@@ -305,8 +287,7 @@ public class PluginDescriptor implements XMLPersistent
         return null;
     }
 
-    public PluginDescriptor()
-    {
+    public PluginDescriptor() {
         super();
 
         pluginClass = null;
@@ -327,7 +308,7 @@ public class PluginDescriptor implements XMLPersistent
         desc = "";
         changeLog = "";
 
-        required = new ArrayList<PluginIdent>();
+        required = new ArrayList<>();
         repository = null;
 
         // default
@@ -341,8 +322,7 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * Create from class, used for local plugin.
      */
-    public PluginDescriptor(Class<? extends Plugin> clazz)
-    {
+    public PluginDescriptor(final Class<? extends Plugin> clazz) {
         this();
 
         this.pluginClass = clazz;
@@ -352,8 +332,7 @@ public class PluginDescriptor implements XMLPersistent
         final boolean bundled = isBundled();
 
         // bundled plugin ?
-        if (bundled)
-        {
+        if (bundled) {
             // find original JAR file
             final String jarPath = getPluginJarPath();
 
@@ -361,8 +340,7 @@ public class PluginDescriptor implements XMLPersistent
             baseResourceName = FileUtil.getFileName(jarPath, false);
             baseLocalName = FileUtil.setExtension(jarPath, "");
         }
-        else
-        {
+        else {
             baseResourceName = clazz.getSimpleName();
             baseLocalName = ClassUtil.getPathFromQualifiedName(clazz.getName());
         }
@@ -385,8 +363,7 @@ public class PluginDescriptor implements XMLPersistent
             xmlUrl = URLUtil.getURL(baseLocalName + getXMLExtension());
 
         // can't load details from XML file or bundled plugin
-        if (!loadFromXML(xmlUrl) || bundled)
-        {
+        if (!loadFromXML(xmlUrl) || bundled) {
             // set default informations
             name = pluginClass.getSimpleName();
 
@@ -414,11 +391,8 @@ public class PluginDescriptor implements XMLPersistent
 
     /**
      * Create from plugin online identifier, used for online plugin only.
-     * 
-     * @throws IllegalArgumentException
      */
-    public PluginDescriptor(PluginOnlineIdent ident, RepositoryInfo repos) throws IllegalArgumentException
-    {
+    public PluginDescriptor(final PluginOnlineIdent ident, final RepositoryInfo repos) throws IllegalArgumentException {
         this();
 
         this.ident.setClassName(ident.getClassName());
@@ -438,11 +412,9 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * @deprecated Use {@link #loadDescriptor()} or {@link #loadAll()} instead
      */
-    @Deprecated
-    public boolean load(boolean loadImages)
-    {
-        if (loadDescriptor())
-        {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public boolean load(final boolean loadImages) {
+        if (loadDescriptor()) {
             loadChangeLog();
             if (loadImages)
                 return loadImages();
@@ -454,8 +426,7 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * Load descriptor informations (xmlUrl field should be correctly filled)
      */
-    public boolean loadDescriptor()
-    {
+    public boolean loadDescriptor() {
         return loadDescriptor(false);
     }
 
@@ -463,8 +434,7 @@ public class PluginDescriptor implements XMLPersistent
      * Load descriptor informations (xmlUrl field should be correctly filled).<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public boolean loadDescriptor(boolean reload)
-    {
+    public boolean loadDescriptor(final boolean reload) {
         // already loaded ?
         if (descriptorLoaded && !reload)
             return true;
@@ -476,11 +446,9 @@ public class PluginDescriptor implements XMLPersistent
         final Document document = XMLUtil.loadDocument(xmlUrl,
                 (repository != null) ? repository.getAuthenticationInfo() : null, true);
 
-        if (document != null)
-        {
+        if (document != null) {
             // load xml
-            if (!loadFromXML(document.getDocumentElement()))
-            {
+            if (!loadFromXML(document.getDocumentElement())) {
                 System.err.println("Can't find valid XML file from '" + xmlUrl + "' for plugin class '"
                         + ident.getClassName() + "'");
                 return false;
@@ -500,8 +468,7 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * Load change log field (xmlUrl field should be correctly filled)
      */
-    public boolean loadChangeLog()
-    {
+    public boolean loadChangeLog() {
         // already loaded ?
         if (changeLogLoaded)
             return true;
@@ -513,12 +480,10 @@ public class PluginDescriptor implements XMLPersistent
         final Document document = XMLUtil.loadDocument(xmlUrl,
                 (repository != null) ? repository.getAuthenticationInfo() : null, true);
 
-        if (document != null)
-        {
+        if (document != null) {
             final Element node = document.getDocumentElement();
 
-            if (node != null)
-            {
+            if (node != null) {
                 setChangeLog(XMLUtil.getElementValue(node, ID_CHANGELOG, ""));
                 return true;
             }
@@ -535,8 +500,7 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * Load 64x64 icon (icon url field should be correctly filled)
      */
-    public boolean loadIcon()
-    {
+    public boolean loadIcon() {
         // already loaded ?
         if (iconLoaded)
             return true;
@@ -553,8 +517,7 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * Load 256x256 image (image url field should be correctly filled)
      */
-    public boolean loadImage()
-    {
+    public boolean loadImage() {
         // already loaded ?
         if (imageLoaded)
             return true;
@@ -571,56 +534,49 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * Load icon and image (both icon and image url fields should be correctly filled)
      */
-    public boolean loadImages()
-    {
+    public boolean loadImages() {
         return loadIcon() & loadImage();
     }
 
     /**
      * Load descriptor and images if not already done
      */
-    public boolean loadAll()
-    {
+    public boolean loadAll() {
         return loadDescriptor() & loadChangeLog() & loadImages();
     }
 
     /**
      * Check if the plugin class is an instance of (or subclass of) the specified class.
      */
-    public boolean isInstanceOf(Class<?> baseClazz)
-    {
+    public boolean isInstanceOf(final Class<?> baseClazz) {
         return ClassUtil.isSubClass(pluginClass, baseClazz);
     }
 
     /**
      * Return true if the plugin class is abstract
      */
-    public boolean isAbstract()
-    {
+    public boolean isAbstract() {
         return ClassUtil.isAbstract(pluginClass);
     }
 
     /**
      * Return true if the plugin class is private
      */
-    public boolean isPrivate()
-    {
+    public boolean isPrivate() {
         return ClassUtil.isPrivate(pluginClass);
     }
 
     /**
      * Return true if the plugin class is an interface
      */
-    public boolean isInterface()
-    {
+    public boolean isInterface() {
         return pluginClass.isInterface();
     }
 
     /**
      * return true if the plugin has an action which can be started from menu
      */
-    public boolean isActionable()
-    {
+    public boolean isActionable() {
         return isClassLoaded() && !isPrivate() && !isAbstract() && !isInterface()
                 && isInstanceOf(PluginImageAnalysis.class);
     }
@@ -629,38 +585,40 @@ public class PluginDescriptor implements XMLPersistent
      * Return true if the plugin is bundled inside another plugin (mean it does not have a proper
      * descriptor)
      */
-    public boolean isBundled()
-    {
+    public boolean isBundled() {
         return isClassLoaded() && isInstanceOf(PluginBundled.class);
     }
 
     /**
      * Return true if the plugin is in beta state
+     *
+     * @deprecated Use {@link #isSnapshot()} instead.
      */
-    public boolean isBeta()
-    {
-        return getVersion().isBeta();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public boolean isBeta() {
+        return isSnapshot();
+    }
+
+    public boolean isSnapshot() {
+        return getVersion().isSnapshot();
     }
 
     /**
      * Return true if this plugin is a system application plugin (declared in plugins.plugins.kernel
      * package).
      */
-    public boolean isKernelPlugin()
-    {
+    public boolean isKernelPlugin() {
         return getClassName().startsWith(PluginLoader.PLUGIN_KERNEL_PACKAGE + ".");
     }
 
-    boolean loadIcon(URL url)
-    {
+    boolean loadIcon(final URL url) {
         // load icon
         if (url != null)
             icon = ResourceUtil.getImageIcon(ImageUtil.load(NetworkUtil.getInputStream(url,
                     (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false), ICON_SIZE);
 
         // get default icon
-        if (icon == null)
-        {
+        if (icon == null) {
             icon = DEFAULT_ICON;
             return false;
         }
@@ -668,19 +626,25 @@ public class PluginDescriptor implements XMLPersistent
         return true;
     }
 
-    boolean loadImage(URL url)
-    {
+    boolean loadImage(final URL url) {
         // load image
         if (url != null)
-            image = ImageUtil
-                    .scale(ImageUtil.load(
-                            NetworkUtil.getInputStream(url,
-                                    (repository != null) ? repository.getAuthenticationInfo() : null, true, false),
-                            false), IMAGE_SIZE, IMAGE_SIZE);
+            image = ImageUtil.scale(
+                    ImageUtil.load(
+                            NetworkUtil.getInputStream(
+                                    url,
+                                    (repository != null) ? repository.getAuthenticationInfo() : null,
+                                    true,
+                                    false
+                            ),
+                            false
+                    ),
+                    IMAGE_SIZE,
+                    IMAGE_SIZE
+            );
 
         // get default image
-        if (image == null)
-        {
+        if (image == null) {
             image = DEFAULT_IMAGE;
             return false;
         }
@@ -700,24 +664,20 @@ public class PluginDescriptor implements XMLPersistent
     // saveToXML();
     // }
 
-    public boolean loadFromXML(String path)
-    {
+    public boolean loadFromXML(final String path) {
         return XMLPersistentHelper.loadFromXML(this, path);
     }
 
-    public boolean loadFromXML(URL xmlUrl)
-    {
+    public boolean loadFromXML(final URL xmlUrl) {
         return XMLPersistentHelper.loadFromXML(this, xmlUrl);
     }
 
     @Override
-    public boolean loadFromXML(Node node)
-    {
+    public boolean loadFromXML(final Node node) {
         return loadFromXML(node, false);
     }
 
-    public boolean loadFromXML(Node node, boolean loadChangeLog)
-    {
+    public boolean loadFromXML(final Node node, final boolean loadChangeLog) {
         if (node == null)
             return false;
 
@@ -739,12 +699,10 @@ public class PluginDescriptor implements XMLPersistent
             setChangeLog("");
 
         final Node nodeDependances = XMLUtil.getElement(node, ID_DEPENDENCIES);
-        if (nodeDependances != null)
-        {
+        if (nodeDependances != null) {
             final ArrayList<Node> nodesDependances = XMLUtil.getChildren(nodeDependances, ID_DEPENDENCY);
 
-            for (Node n : nodesDependances)
-            {
+            for (final Node n : nodesDependances) {
                 final PluginIdent ident = new PluginIdent();
                 // required don't need URL information as we now search from classname
                 ident.loadFromXML(n);
@@ -756,14 +714,12 @@ public class PluginDescriptor implements XMLPersistent
         return true;
     }
 
-    public boolean saveToXML()
-    {
+    public boolean saveToXML() {
         return XMLPersistentHelper.saveToXML(this, getXMLFilename());
     }
 
     @Override
-    public boolean saveToXML(Node node)
-    {
+    public boolean saveToXML(final Node node) {
         if (node == null)
             return false;
 
@@ -796,18 +752,16 @@ public class PluginDescriptor implements XMLPersistent
         // }
 
         final Element dependances = XMLUtil.setElement(node, ID_DEPENDENCIES);
-        if (dependances != null)
-        {
+        if (dependances != null) {
             XMLUtil.removeAllChildren(dependances);
-            for (PluginIdent dep : required)
+            for (final PluginIdent dep : required)
                 dep.saveToXML(XMLUtil.addElement(dependances, ID_DEPENDENCY));
         }
 
         return true;
     }
 
-    public boolean isClassLoaded()
-    {
+    public boolean isClassLoaded() {
         return pluginClass != null;
     }
 
@@ -815,46 +769,40 @@ public class PluginDescriptor implements XMLPersistent
      * Returns the plugin class name.<br>
      * Ex: "plugins.tutorial.Example1"
      */
-    public String getClassName()
-    {
+    public String getClassName() {
         return ident.getClassName();
     }
 
-    public String getSimpleClassName()
-    {
+    public String getSimpleClassName() {
         return ident.getSimpleClassName();
     }
 
     /**
      * Returns the package name of the plugin class.
      */
-    public String getPackageName()
-    {
+    public String getPackageName() {
         return ident.getPackageName();
     }
 
     /**
      * Returns the minimum package name (remove "icy" or/and "plugin" header)<br>
      */
-    public String getSimplePackageName()
-    {
+    public String getSimplePackageName() {
         return ident.getSimplePackageName();
     }
 
     /**
      * Returns the author package name (first part of simple package name)
      */
-    public String getAuthorPackageName()
-    {
+    public String getAuthorPackageName() {
         return ident.getAuthorPackageName();
     }
 
     /**
      * @deprecated useless method
      */
-    @Deprecated
-    public String getClassAsString()
-    {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public String getClassAsString() {
         if (pluginClass != null)
             return pluginClass.toString();
 
@@ -864,45 +812,37 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * @return the pluginClass
      */
-    public Class<? extends Plugin> getPluginClass()
-    {
+    public Class<? extends Plugin> getPluginClass() {
         return pluginClass;
     }
 
     /**
      * @return the <i>Main Plugin</i> descriptor if this plugin is a bundled plugin (see {@link #isBundled()}) otherwise
-     *         return the current descriptor.<br>
-     *         Note that the method may fail to recover <i>Main Plugin</i> information, in which case it will return <code>NULL</code>
+     * return the current descriptor.<br>
+     * Note that the method may fail to recover <i>Main Plugin</i> information, in which case it will return <code>NULL</code>
      */
-    public PluginDescriptor getMainPlugin()
-    {
+    public PluginDescriptor getMainPlugin() {
         if (!isBundled())
             return this;
 
-        try
-        {
+        try {
             // get main plugin
             return PluginLoader.getPlugin(((PluginBundled) PluginLauncher.create(this)).getMainPluginClassName());
         }
-        catch (Throwable t)
-        {
+        catch (final Throwable t) {
             // try alternate method
             final List<PluginDescriptor> allPlugins = PluginLoader.getPlugins(false);
 
             String packageName = getPackageName();
 
-            while (!StringUtil.isEmpty(packageName))
-            {
+            while (!StringUtil.isEmpty(packageName)) {
                 PluginDescriptor matchingPlugin = null;
 
-                for (PluginDescriptor p : allPlugins)
-                {
+                for (final PluginDescriptor p : allPlugins) {
                     // package name matches ? --> increase
-                    if (p.getClassName().startsWith(packageName))
-                    {
+                    if (p.getClassName().startsWith(packageName)) {
                         // several results ? --> no need to go further
-                        if (matchingPlugin != null)
-                        {
+                        if (matchingPlugin != null) {
                             // we use this to know that we have several matches (no way to recover origin plugin)
                             matchingPlugin = this;
                             // stop here
@@ -933,8 +873,7 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * @return the JAR file hosting this plugin (returns <code>null</code> if the plugin is not installed).<br>
      */
-    public String getPluginJarPath()
-    {
+    public String getPluginJarPath() {
         if (pluginClass != null)
             return ClassUtil.getJarPath(pluginClass);
 
@@ -944,24 +883,21 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * return associated filename
      */
-    public String getFilename()
-    {
+    public String getFilename() {
         return ClassUtil.getPathFromQualifiedName(getClassName());
     }
 
     /**
      * Returns the XML file extension.
      */
-    public String getXMLExtension()
-    {
+    public String getXMLExtension() {
         return XMLUtil.FILE_DOT_EXTENSION;
     }
 
     /**
      * return xml filename (local XML file)
      */
-    public String getXMLFilename()
-    {
+    public String getXMLFilename() {
         if (!StringUtil.isEmpty(localXmlUrl))
             return localXmlUrl;
 
@@ -971,56 +907,49 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * return icon extension
      */
-    public String getIconExtension()
-    {
+    public String getIconExtension() {
         return "_icon.png";
     }
 
     /**
      * return icon filename
      */
-    public String getIconFilename()
-    {
+    public String getIconFilename() {
         return getFilename() + getIconExtension();
     }
 
     /**
      * return image extension
      */
-    public String getImageExtension()
-    {
+    public String getImageExtension() {
         return ".png";
     }
 
     /**
      * return image filename
      */
-    public String getImageFilename()
-    {
+    public String getImageFilename() {
         return getFilename() + getImageExtension();
     }
 
     /**
      * Returns the JAR file extension.
      */
-    public String getJarExtension()
-    {
+    public String getJarExtension() {
         return JarUtil.FILE_DOT_EXTENSION;
     }
 
     /**
      * return jar filename
      */
-    public String getJarFilename()
-    {
+    public String getJarFilename() {
         return getFilename() + getJarExtension();
     }
 
     /**
      * @return the icon
      */
-    public ImageIcon getIcon()
-    {
+    public ImageIcon getIcon() {
         loadIcon();
         return icon;
     }
@@ -1028,8 +957,7 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * @return the icon as image
      */
-    public Image getIconAsImage()
-    {
+    public Image getIconAsImage() {
         final ImageIcon i = getIcon();
 
         if (i != null)
@@ -1041,8 +969,7 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * @return the image
      */
-    public Image getImage()
-    {
+    public Image getImage() {
         loadImage();
         return image;
     }
@@ -1067,24 +994,21 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * @return the ident
      */
-    public PluginIdent getIdent()
-    {
+    public PluginIdent getIdent() {
         return ident;
     }
 
     /**
      * @return the name
      */
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
     /**
      * @return the version
      */
-    public Version getVersion()
-    {
+    public Version getVersion() {
         if (ident != null)
             return ident.getVersion();
 
@@ -1112,8 +1036,7 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * @return the url
      */
-    public String getUrl()
-    {
+    public String getUrl() {
         // url is default XML url
         return getXmlUrl();
     }
@@ -1121,8 +1044,7 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * @return the url for xml file
      */
-    public String getXmlUrl()
-    {
+    public String getXmlUrl() {
         return xmlUrl;
     }
 
@@ -1130,230 +1052,196 @@ public class PluginDescriptor implements XMLPersistent
      * @return the desc
      * @deprecated use {@link #getDescription()} instead
      */
-    @Deprecated
-    public String getDesc()
-    {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public String getDesc() {
         return getDescription();
     }
 
     /**
      * @return the description
      */
-    public String getDescription()
-    {
+    public String getDescription() {
         return desc;
     }
 
     /**
-     * @param xmlUrl
-     *        the xmlUrl to set
+     * @param xmlUrl the xmlUrl to set
      */
-    public void setXmlUrl(String xmlUrl)
-    {
+    public void setXmlUrl(final String xmlUrl) {
         this.xmlUrl = xmlUrl;
     }
 
     /**
-     * @param repository
-     *        the repository to set
+     * @param repository the repository to set
      */
-    public void setRepository(RepositoryInfo repository)
-    {
+    public void setRepository(final RepositoryInfo repository) {
         this.repository = repository;
     }
 
     /**
      * @return the jarUrl
      */
-    public String getJarUrl()
-    {
+    public String getJarUrl() {
         return jarUrl;
     }
 
     /**
-     * @param jarUrl
-     *        the jarUrl to set
+     * @param jarUrl the jarUrl to set
      */
-    public void setJarUrl(String jarUrl)
-    {
+    public void setJarUrl(final String jarUrl) {
         this.jarUrl = jarUrl;
     }
 
     /**
      * @return the imageUrl
      */
-    public String getImageUrl()
-    {
+    public String getImageUrl() {
         return imageUrl;
     }
 
     /**
-     * @param imageUrl
-     *        the imageUrl to set
+     * @param imageUrl the imageUrl to set
      */
-    public void setImageUrl(String imageUrl)
-    {
+    public void setImageUrl(final String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
     /**
      * @return the iconUrl
      */
-    public String getIconUrl()
-    {
+    public String getIconUrl() {
         return iconUrl;
     }
 
     /**
-     * @param iconUrl
-     *        the iconUrl to set
+     * @param iconUrl the iconUrl to set
      */
-    public void setIconUrl(String iconUrl)
-    {
+    public void setIconUrl(final String iconUrl) {
         this.iconUrl = iconUrl;
     }
 
     /**
      * Returns the author's plugin name.
      */
-    public String getAuthor()
-    {
+    public String getAuthor() {
         return author;
     }
 
     /**
      * Returns the website url of this plugin.
      */
-    public String getWeb()
-    {
+    public String getWeb() {
         return web;
     }
 
     /**
      * @return the email
      */
-    public String getEmail()
-    {
+    public String getEmail() {
         return email;
     }
 
     /**
      * @return the changeLog
      */
-    public String getChangeLog()
-    {
+    public String getChangeLog() {
         return changeLog;
     }
 
     /**
      * @deprecated Use {@link #getChangeLog()} instead
      */
-    @Deprecated
-    public String getChangesLog()
-    {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public String getChangesLog() {
         return getChangeLog();
     }
 
     /**
      * @return the requiredKernelVersion
      */
-    public Version getRequiredKernelVersion()
-    {
+    public Version getRequiredKernelVersion() {
         return ident.getRequiredKernelVersion();
     }
 
     /**
      * Returns true if descriptor is loaded.
      */
-    public boolean isDescriptorLoaded()
-    {
+    public boolean isDescriptorLoaded() {
         return descriptorLoaded;
     }
 
     /**
      * @deprecated Use {@link #isDescriptorLoaded()} instead
      */
-    @Deprecated
-    public boolean isLoaded()
-    {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public boolean isLoaded() {
         return descriptorLoaded;
     }
 
     /**
      * Returns true if change log is loaded.
      */
-    public boolean isChangeLogLoaded()
-    {
+    public boolean isChangeLogLoaded() {
         return changeLogLoaded;
     }
 
     /**
      * Returns true if icon is loaded.
      */
-    public boolean isIconLoaded()
-    {
+    public boolean isIconLoaded() {
         return iconLoaded;
     }
 
     /**
      * Returns true if image is loaded.
      */
-    public boolean isImageLoaded()
-    {
+    public boolean isImageLoaded() {
         return imageLoaded;
     }
 
     /**
      * Returns true if image and icon are loaded.
      */
-    public boolean isImagesLoaded()
-    {
+    public boolean isImagesLoaded() {
         return iconLoaded && imageLoaded;
     }
 
     /**
      * Returns true if both descriptor and images are loaded.
      */
-    public boolean isAllLoaded()
-    {
+    public boolean isAllLoaded() {
         return descriptorLoaded && changeLogLoaded && iconLoaded && imageLoaded;
     }
 
     /**
      * @return the required
      */
-    public List<PluginIdent> getRequired()
-    {
-        return new ArrayList<PluginIdent>(required);
+    public List<PluginIdent> getRequired() {
+        return new ArrayList<>(required);
     }
 
-    public RepositoryInfo getRepository()
-    {
+    public RepositoryInfo getRepository() {
         return repository;
     }
 
     /**
      * @return the enabled
      */
-    public boolean isEnabled()
-    {
+    public boolean isEnabled() {
         return enabled;
     }
 
     /**
-     * @param enabled
-     *        the enabled to set
+     * @param enabled the enabled to set
      */
-    public void setEnabled(boolean enabled)
-    {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
     }
 
     /**
      * Return true if plugin is installed (corresponding JAR file exist)
      */
-    public boolean isInstalled()
-    {
+    public boolean isInstalled() {
         return FileUtil.exists(getJarFilename());
     }
 
@@ -1423,113 +1311,124 @@ public class PluginDescriptor implements XMLPersistent
     // }
 
     /**
-     * @param name
-     *        the name to set
+     * @param name the name to set
      */
-    public void setName(String name)
-    {
+    public void setName(final String name) {
         this.name = name;
     }
 
     /**
-     * @param author
-     *        the author to set
+     * @param author the author to set
      */
-    public void setAuthor(String author)
-    {
+    public void setAuthor(final String author) {
         this.author = author;
     }
 
     /**
-     * @param web
-     *        the web to set
+     * @param web the web to set
      */
-    public void setWeb(String web)
-    {
+    public void setWeb(final String web) {
         this.web = web;
     }
 
     /**
-     * @param email
-     *        the email to set
+     * @param email the email to set
      */
-    public void setEmail(String email)
-    {
+    public void setEmail(final String email) {
         this.email = email;
     }
 
     /**
-     * @param desc
-     *        the description to set
+     * @param desc the description to set
      */
-    public void setDescription(String desc)
-    {
+    public void setDescription(final String desc) {
         this.desc = desc;
     }
 
     /**
-     * @param value
-     *        the changeLog to set
+     * @param value the changeLog to set
      */
-    public void setChangeLog(String value)
-    {
+    public void setChangeLog(final String value) {
         this.changeLog = value;
     }
 
     /**
      * @deprecated use {@link #setChangeLog(String)}
      */
-    @Deprecated
-    public void setChangesLog(String value)
-    {
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public void setChangesLog(final String value) {
         setChangeLog(value);
     }
 
     /**
-     * Return true if specified plugin is required by current plugin
+     * Return true if specified plugin is required by the current plugin
      */
-    public boolean requires(PluginDescriptor plugin)
-    {
+    public boolean requires(final PluginDescriptor plugin) {
         final PluginIdent curIdent = plugin.getIdent();
 
-        for (PluginIdent ident : required)
-            if (ident.isOlderOrEqual(curIdent))
+        for (final PluginIdent ident : required)
+            if (ident.isLowerOrEqual(curIdent))
                 return true;
 
         return false;
     }
 
-    public boolean isOlderOrEqual(PluginDescriptor plugin)
-    {
-        return ident.isOlderOrEqual(plugin.getIdent());
+    /**
+     * @deprecated Use {@link #isLowerOrEqual(PluginDescriptor)} instead.
+     */
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public boolean isOlderOrEqual(final PluginDescriptor plugin) {
+        return isLowerOrEqual(plugin);
     }
 
-    public boolean isOlder(PluginDescriptor plugin)
-    {
-        return ident.isOlder(plugin.getIdent());
+    public boolean isLowerOrEqual(final PluginDescriptor plugin) {
+        return ident.isLowerOrEqual(plugin.getIdent());
     }
 
-    public boolean isNewerOrEqual(PluginDescriptor plugin)
-    {
-        return ident.isNewerOrEqual(plugin.getIdent());
+    /**
+     * @deprecated Use {@link #isLower(PluginDescriptor)} instead.
+     */
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public boolean isOlder(final PluginDescriptor plugin) {
+        return isLower(plugin);
     }
 
-    public boolean isNewer(PluginDescriptor plugin)
-    {
-        return ident.isNewer(plugin.getIdent());
+    public boolean isLower(final PluginDescriptor plugin) {
+        return ident.isLower(plugin.getIdent());
+    }
+
+    /**
+     * @deprecated Use {@link #isGreaterOrEqual(PluginDescriptor)} instead.
+     */
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public boolean isNewerOrEqual(final PluginDescriptor plugin) {
+        return isGreaterOrEqual(plugin);
+    }
+
+    public boolean isGreaterOrEqual(final PluginDescriptor plugin) {
+        return ident.isGreaterOrEqual(plugin.getIdent());
+    }
+
+    /**
+     * @deprecated Use {@link #isGreater(PluginDescriptor)} instead.
+     */
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public boolean isNewer(final PluginDescriptor plugin) {
+        return isGreater(plugin);
+    }
+
+    public boolean isGreater(final PluginDescriptor plugin) {
+        return ident.isGreater(plugin.getIdent());
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return getName() + " " + getVersion().toString();
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if (obj instanceof PluginDescriptor)
-        {
+    public boolean equals(final Object obj) {
+        if (obj instanceof PluginDescriptor) {
             final PluginDescriptor plug = (PluginDescriptor) obj;
 
             return getClassName().equals(plug.getClassName()) && getVersion().equals(plug.getVersion());
@@ -1539,19 +1438,16 @@ public class PluginDescriptor implements XMLPersistent
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return getClassName().hashCode() ^ getVersion().hashCode();
     }
 
-    public static class PluginIdent implements XMLPersistent
-    {
+    public static class PluginIdent implements XMLPersistent {
         /**
          * Returns the index for the specified plugin ident in the specified list.<br>
          * Returns -1 if not found.
          */
-        public static int getIndex(List<PluginIdent> list, PluginIdent ident)
-        {
+        public static int getIndex(final List<PluginIdent> list, final PluginIdent ident) {
             final int size = list.size();
 
             for (int i = 0; i < size; i++)
@@ -1565,8 +1461,7 @@ public class PluginDescriptor implements XMLPersistent
          * Returns the index for the specified plugin in the specified list.<br>
          * Returns -1 if not found.
          */
-        public static int getIndex(List<? extends PluginIdent> list, String className)
-        {
+        public static int getIndex(final List<? extends PluginIdent> list, final String className) {
             final int size = list.size();
 
             for (int i = 0; i < size; i++)
@@ -1585,10 +1480,9 @@ public class PluginDescriptor implements XMLPersistent
         protected Version requiredKernelVersion;
 
         /**
-         * 
+         *
          */
-        public PluginIdent()
-        {
+        public PluginIdent() {
             super();
 
             // default
@@ -1597,8 +1491,7 @@ public class PluginDescriptor implements XMLPersistent
             requiredKernelVersion = new Version();
         }
 
-        public boolean loadFromXMLShort(Node node)
-        {
+        public boolean loadFromXMLShort(final Node node) {
             if (node == null)
                 return false;
 
@@ -1609,8 +1502,7 @@ public class PluginDescriptor implements XMLPersistent
         }
 
         @Override
-        public boolean loadFromXML(Node node)
-        {
+        public boolean loadFromXML(final Node node) {
             if (!loadFromXMLShort(node))
                 return false;
 
@@ -1619,8 +1511,7 @@ public class PluginDescriptor implements XMLPersistent
             return true;
         }
 
-        public boolean saveToXMLShort(Node node)
-        {
+        public boolean saveToXMLShort(final Node node) {
             if (node == null)
                 return false;
 
@@ -1631,8 +1522,7 @@ public class PluginDescriptor implements XMLPersistent
         }
 
         @Override
-        public boolean saveToXML(Node node)
-        {
+        public boolean saveToXML(final Node node) {
             if (!saveToXMLShort(node))
                 return false;
 
@@ -1641,49 +1531,42 @@ public class PluginDescriptor implements XMLPersistent
             return true;
         }
 
-        public boolean isEmpty()
-        {
+        public boolean isEmpty() {
             return StringUtil.isEmpty(className) && version.isEmpty() && requiredKernelVersion.isEmpty();
         }
 
         /**
          * @return the className
          */
-        public String getClassName()
-        {
+        public String getClassName() {
             return className;
         }
 
         /**
-         * @param className
-         *        the className to set
+         * @param className the className to set
          */
-        public void setClassName(String className)
-        {
+        public void setClassName(final String className) {
             this.className = className;
         }
 
         /**
          * return the simple className
          */
-        public String getSimpleClassName()
-        {
+        public String getSimpleClassName() {
             return ClassUtil.getSimpleClassName(className);
         }
 
         /**
          * return the package name
          */
-        public String getPackageName()
-        {
+        public String getPackageName() {
             return ClassUtil.getPackageName(className);
         }
 
         /**
          * return the minimum package name (remove "icy" or/and "plugin" header)<br>
          */
-        public String getSimplePackageName()
-        {
+        public String getSimplePackageName() {
             String result = getPackageName();
 
             if (result.startsWith("icy."))
@@ -1697,8 +1580,7 @@ public class PluginDescriptor implements XMLPersistent
         /**
          * return the author package name (first part of simple package name)
          */
-        public String getAuthorPackageName()
-        {
+        public String getAuthorPackageName() {
             final String result = getSimplePackageName();
             final int index = result.indexOf('.');
 
@@ -1709,64 +1591,84 @@ public class PluginDescriptor implements XMLPersistent
         }
 
         /**
-         * @param version
-         *        the version to set
+         * @param version the version to set
          */
-        public void setVersion(Version version)
-        {
+        public void setVersion(final Version version) {
             this.version = version;
         }
 
         /**
          * @return the version
          */
-        public Version getVersion()
-        {
+        public Version getVersion() {
             return version;
         }
 
         /**
          * @return the requiredKernelVersion
          */
-        public Version getRequiredKernelVersion()
-        {
+        public Version getRequiredKernelVersion() {
             return requiredKernelVersion;
         }
 
         /**
-         * @param requiredKernelVersion
-         *        the requiredKernelVersion to set
+         * @param requiredKernelVersion the requiredKernelVersion to set
          */
-        public void setRequiredKernelVersion(Version requiredKernelVersion)
-        {
+        public void setRequiredKernelVersion(final Version requiredKernelVersion) {
             this.requiredKernelVersion = requiredKernelVersion;
         }
 
-        public boolean isOlderOrEqual(PluginIdent ident)
-        {
-            return className.equals(ident.getClassName()) && version.isOlderOrEqual(ident.getVersion());
+        /**
+         * @deprecated Use {@link #isLowerOrEqual(PluginIdent)} instead.
+         */
+        @Deprecated(since = "3.0.0", forRemoval = true)
+        public boolean isOlderOrEqual(final PluginIdent ident) {
+            return isLowerOrEqual(ident);
         }
 
-        public boolean isOlder(PluginIdent ident)
-        {
-            return className.equals(ident.getClassName()) && version.isOlder(ident.getVersion());
+        public boolean isLowerOrEqual(final PluginIdent ident) {
+            return className.equals(ident.getClassName()) && version.isLowerOrEqual(ident.getVersion());
         }
 
-        public boolean isNewerOrEqual(PluginIdent ident)
-        {
-            return className.equals(ident.getClassName()) && version.isNewerOrEqual(ident.getVersion());
+        /**
+         * @deprecated Use {@link #isLower(PluginIdent)} instead.
+         */
+        @Deprecated(since = "3.0.0", forRemoval = true)
+        public boolean isOlder(final PluginIdent ident) {
+            return isLower(ident);
         }
 
-        public boolean isNewer(PluginIdent ident)
-        {
-            return className.equals(ident.getClassName()) && version.isNewer(ident.getVersion());
+        public boolean isLower(final PluginIdent ident) {
+            return className.equals(ident.getClassName()) && version.isLower(ident.getVersion());
+        }
+
+        /**
+         * @deprecated Use {@link #isGreaterOrEqual(PluginIdent)} instead.
+         */
+        @Deprecated(since = "3.0.0", forRemoval = true)
+        public boolean isNewerOrEqual(final PluginIdent ident) {
+            return isGreaterOrEqual(ident);
+        }
+
+        public boolean isGreaterOrEqual(final PluginIdent ident) {
+            return className.equals(ident.getClassName()) && version.isGreaterOrEqual(ident.getVersion());
+        }
+
+        /**
+         * @deprecated Use {@link #isGreater(PluginIdent)} instead.
+         */
+        @Deprecated(since = "3.0.0", forRemoval = true)
+        public boolean isNewer(final PluginIdent ident) {
+            return isGreater(ident);
+        }
+
+        public boolean isGreater(final PluginIdent ident) {
+            return className.equals(ident.getClassName()) && version.isGreater(ident.getVersion());
         }
 
         @Override
-        public boolean equals(Object obj)
-        {
-            if (obj instanceof PluginIdent)
-            {
+        public boolean equals(final Object obj) {
+            if (obj instanceof PluginIdent) {
                 final PluginIdent ident = (PluginIdent) obj;
                 return ident.getClassName().equals(className) && ident.getVersion().equals(getVersion());
             }
@@ -1775,25 +1677,21 @@ public class PluginDescriptor implements XMLPersistent
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return className.hashCode() ^ version.hashCode();
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return className + " " + version.toString();
         }
     }
 
-    public static class PluginOnlineIdent extends PluginIdent
-    {
+    public static class PluginOnlineIdent extends PluginIdent {
         protected String name;
         protected String url;
 
-        public PluginOnlineIdent()
-        {
+        public PluginOnlineIdent() {
             super();
 
             name = "";
@@ -1803,34 +1701,28 @@ public class PluginDescriptor implements XMLPersistent
         /**
          * @return the name
          */
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
-        public void setName(String name)
-        {
+        public void setName(final String name) {
             this.name = name;
         }
 
         /**
          * @return the url
          */
-        public String getUrl()
-        {
+        public String getUrl() {
             return url;
         }
 
-        public void setUrl(String url)
-        {
+        public void setUrl(final String url) {
             this.url = url;
         }
 
         @Override
-        public boolean loadFromXML(Node node)
-        {
-            if (super.loadFromXML(node))
-            {
+        public boolean loadFromXML(final Node node) {
+            if (super.loadFromXML(node)) {
                 setName(XMLUtil.getElementValue(node, PluginDescriptor.ID_NAME, ""));
                 setUrl(XMLUtil.getElementValue(node, PluginDescriptor.ID_URL, ""));
                 return true;
@@ -1840,10 +1732,8 @@ public class PluginDescriptor implements XMLPersistent
         }
 
         @Override
-        public boolean saveToXML(Node node)
-        {
-            if (super.saveToXML(node))
-            {
+        public boolean saveToXML(final Node node) {
+            if (super.saveToXML(node)) {
                 XMLUtil.setElementValue(node, PluginDescriptor.ID_NAME, getName());
                 XMLUtil.setElementValue(node, PluginDescriptor.ID_URL, getUrl());
                 return true;
@@ -1856,25 +1746,21 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * Sort plugins on name with plugins.kernel plugins appearing first.
      */
-    public static class PluginKernelNameSorter implements Comparator<PluginDescriptor>
-    {
+    public static class PluginKernelNameSorter implements Comparator<PluginDescriptor> {
         // static class
         public static PluginKernelNameSorter instance = new PluginKernelNameSorter();
 
         // static class
-        private PluginKernelNameSorter()
-        {
+        private PluginKernelNameSorter() {
             super();
         }
 
         @Override
-        public int compare(PluginDescriptor o1, PluginDescriptor o2)
-        {
+        public int compare(final PluginDescriptor o1, final PluginDescriptor o2) {
             final String packageName1 = o1.getPackageName();
             final String packageName2 = o2.getPackageName();
 
-            if (packageName1.startsWith(PluginLoader.PLUGIN_KERNEL_PACKAGE))
-            {
+            if (packageName1.startsWith(PluginLoader.PLUGIN_KERNEL_PACKAGE)) {
                 if (!packageName2.startsWith(PluginLoader.PLUGIN_KERNEL_PACKAGE))
                     return -1;
             }
@@ -1888,20 +1774,17 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * Sort plugins on name.
      */
-    public static class PluginNameSorter implements Comparator<PluginDescriptor>
-    {
+    public static class PluginNameSorter implements Comparator<PluginDescriptor> {
         // static class
         public static PluginNameSorter instance = new PluginNameSorter();
 
         // static class
-        private PluginNameSorter()
-        {
+        private PluginNameSorter() {
             super();
         }
 
         @Override
-        public int compare(PluginDescriptor o1, PluginDescriptor o2)
-        {
+        public int compare(final PluginDescriptor o1, final PluginDescriptor o2) {
             return o1.toString().compareToIgnoreCase(o2.toString());
         }
     }
@@ -1909,20 +1792,17 @@ public class PluginDescriptor implements XMLPersistent
     /**
      * Sort plugins on class name.
      */
-    public static class PluginClassNameSorter implements Comparator<PluginDescriptor>
-    {
+    public static class PluginClassNameSorter implements Comparator<PluginDescriptor> {
         // static class
         public static PluginClassNameSorter instance = new PluginClassNameSorter();
 
         // static class
-        private PluginClassNameSorter()
-        {
+        private PluginClassNameSorter() {
             super();
         }
 
         @Override
-        public int compare(PluginDescriptor o1, PluginDescriptor o2)
-        {
+        public int compare(final PluginDescriptor o1, final PluginDescriptor o2) {
             return o1.getClassName().compareToIgnoreCase(o2.getClassName());
         }
     }

@@ -29,7 +29,7 @@ import java.util.EventListener;
  *             {@link GlobalPluginListener}
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface MainListener extends EventListener
 {
     /**

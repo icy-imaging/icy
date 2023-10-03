@@ -25,6 +25,7 @@ package icy.itk;
  * 
  * @author Stephane
  */
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ItkUtil
 {
 //    public static DataType getDataTypeFromPixelID(int value)

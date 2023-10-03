@@ -33,7 +33,7 @@ import java.awt.RenderingHints;
  * 
  * @author Fabrice de Chaumont
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class IcyLogo extends IcyPanel // implements ComponentListener
 {
     private static final long serialVersionUID = 3914710344010035775L;

@@ -90,7 +90,7 @@ import org.pushingpixels.flamingo.api.ribbon.resize.CoreRibbonResizeSequencingPo
  * 
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class MainRibbon implements PluginLoaderListener, ActiveSequenceListener
 {
     /**
@@ -223,7 +223,7 @@ public class MainRibbon implements PluginLoaderListener, ActiveSequenceListener
     /**
      * @deprecated Use {@link #getROIRibbonTask()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ToolRibbonTask getToolRibbon()
     {
         return roiTask;

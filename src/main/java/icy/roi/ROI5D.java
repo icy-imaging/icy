@@ -32,13 +32,13 @@ import icy.type.rectangle.Rectangle5D;
  * 
  * @deprecated Try to not use {@link ROI4D} or {@link ROI5D} anymore
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public abstract class ROI5D extends ROI
 {
     /**
      * @deprecated Use {@link ROI5D#getROI5DList(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<ROI5D> getROI5DList(ArrayList<ROI> rois)
     {
         final ArrayList<ROI5D> result = new ArrayList<ROI5D>();

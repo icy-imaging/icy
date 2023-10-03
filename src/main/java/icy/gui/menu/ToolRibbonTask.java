@@ -3,7 +3,7 @@ package icy.gui.menu;
 /**
  * @deprecated Use {@link ROITask} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ToolRibbonTask extends ROITask
 {
     // just for backward compatibility

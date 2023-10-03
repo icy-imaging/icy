@@ -71,7 +71,7 @@ public enum DataType
     /**
      * @deprecated Use <code>null</code> instance instead
      */
-    @SuppressWarnings("dep-ann")
+    @Deprecated(since = "2.4.3", forRemoval = true)
     UNDEFINED(0, true, false, 0d, 0d, null, DataBuffer.TYPE_UNDEFINED, null, "undefined", "undefined");
 
     /**
@@ -435,7 +435,7 @@ public enum DataType
     /**
      * @deprecated Use {@link #getSize()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int sizeOf()
     {
         return getSize();

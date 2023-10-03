@@ -32,7 +32,7 @@ import org.pushingpixels.flamingo.api.common.RichTooltip;
  * 
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class PluginRichToolTip extends RichTooltip
 {
     public PluginRichToolTip(PluginDescriptor plugin)

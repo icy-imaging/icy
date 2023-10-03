@@ -546,7 +546,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
      * @param constraints object
      * @deprecated Use {@link #addToDesktopPane()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addTo(final Container c, final Object constraints) {
         // don't try to go further
         if (headless)
@@ -587,7 +587,7 @@ public class IcyFrame implements InternalFrameListener, WindowListener, ImageObs
     /**
      * @deprecated Use {@link #addToDesktopPane()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addToMainDesktopPane() {
         addToDesktopPane();
     }

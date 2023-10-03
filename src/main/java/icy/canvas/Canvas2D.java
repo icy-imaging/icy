@@ -520,7 +520,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      *
      * @deprecated use setScale(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setZoom(float zoom) {
         // set mouse position on image center
         centerMouseOnImage();
@@ -673,7 +673,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      *
      * @deprecated use getScaleX() or getScaleY() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getZoomFactor() {
         return getScaleX();
     }
@@ -982,7 +982,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * @throws InterruptedException
      * @deprecated Use <code>getRenderedImage(t, z, -1, true)</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BufferedImage getRenderedImage(int t, int z) throws InterruptedException {
         return getRenderedImage(t, z, -1, true);
     }
@@ -991,7 +991,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * @throws InterruptedException
      * @deprecated Use <code>getRenderedImage(t, z, -1, canvasView)</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BufferedImage getRenderedImage(int t, int z, boolean canvasView) throws InterruptedException {
         return getRenderedImage(t, z, -1, canvasView);
     }
@@ -1736,7 +1736,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
              * @throws InterruptedException
              * @deprecated Caching is done as tiles now so it's better to use {@link #getImageAsTiles()}
              */
-            @Deprecated
+            @Deprecated(since = "2.4.3", forRemoval = true)
             public BufferedImage getImage() throws InterruptedException {
                 // get original image
                 final IcyBufferedImage icyImage = Canvas2D.this.getImage(getPositionT(), getPositionZ(), getPositionC());

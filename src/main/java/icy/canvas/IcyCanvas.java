@@ -654,7 +654,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #isLayersVisible()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean getDrawLayers()
     {
         return isLayersVisible();
@@ -663,7 +663,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #setLayersVisible(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setDrawLayers(boolean value)
     {
         setLayersVisible(value);
@@ -788,7 +788,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #customizeToolbar(JToolBar)} instead.
      */
     @SuppressWarnings("unused")
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addViewerToolbarComponents(JToolBar toolBar)
     {
 
@@ -902,7 +902,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getLayers()} instead (sorted on Layer priority).
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public List<Layer> getOrderedLayersForEvent()
     {
         return getLayers();
@@ -911,7 +911,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getVisibleLayers()} instead (sorted on Layer priority).
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public List<Layer> getVisibleOrderedLayersForEvent()
     {
         return getVisibleLayers();
@@ -920,7 +920,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getOverlays()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public List<Painter> getLayersPainter()
     {
         final ArrayList<Painter> result = new ArrayList<Painter>();
@@ -1006,7 +1006,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #isSynchMaster()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isSynchHeader()
     {
         return isSynchMaster();
@@ -1066,7 +1066,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getSynchMaster()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected boolean getSynchHeader()
     {
         return getSynchMaster();
@@ -1090,7 +1090,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getSynchMaster(List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected boolean getSynchHeader(List<IcyCanvas> canvasList)
     {
         return getSynchMaster(canvasList);
@@ -1107,7 +1107,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #releaseSynchMaster()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected void releaseSynchHeader()
     {
         releaseSynchMaster();
@@ -1386,7 +1386,7 @@ public abstract class IcyCanvas extends JPanel
      * @return current Z (-1 if all selected)
      * @deprecated uses getPositionZ() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getZ()
     {
         return getPositionZ();
@@ -1396,7 +1396,7 @@ public abstract class IcyCanvas extends JPanel
      * @return current T (-1 if all selected)
      * @deprecated uses getPositionT() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getT()
     {
         return getPositionT();
@@ -1406,7 +1406,7 @@ public abstract class IcyCanvas extends JPanel
      * @return current C (-1 if all selected)
      * @deprecated uses getPositionC() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getC()
     {
         return getPositionC();
@@ -1518,7 +1518,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getMaxPosition(DimensionId)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getMax(DimensionId dim)
     {
         return getMaxPosition(dim);
@@ -1527,7 +1527,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getMaxPositionX()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getMaxX()
     {
         return getMaxPositionX();
@@ -1536,7 +1536,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getMaxPositionY()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getMaxY()
     {
         return getMaxPositionY();
@@ -1545,7 +1545,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getMaxPositionZ()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getMaxZ()
     {
         return getMaxPositionZ();
@@ -1554,7 +1554,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getMaxPositionT()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getMaxT()
     {
         return getMaxPositionT();
@@ -1563,7 +1563,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getMaxPositionC()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getMaxC()
     {
         return getMaxPositionC();
@@ -1818,7 +1818,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getOffsetX() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageOffsetX()
     {
         return 0;
@@ -1829,7 +1829,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getOffsetY() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageOffsetY()
     {
         return 0;
@@ -1840,7 +1840,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getOffsetZ() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageOffsetZ()
     {
         return 0;
@@ -1851,7 +1851,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getOffsetT() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageOffsetT()
     {
         return 0;
@@ -1862,7 +1862,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getOffsetC() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageOffsetC()
     {
         return 0;
@@ -1873,7 +1873,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getOffsetX() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getCanvasOffsetX()
     {
         return 0;
@@ -1884,7 +1884,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getOffsetY() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getCanvasOffsetY()
     {
         return 0;
@@ -1895,7 +1895,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getOffsetZ() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getCanvasOffsetZ()
     {
         return 0;
@@ -1906,7 +1906,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getOffsetT() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getCanvasOffsetT()
     {
         return 0;
@@ -1917,7 +1917,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getOffsetC() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getCanvasOffsetC()
     {
         return 0;
@@ -1928,7 +1928,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getScaleX() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getScaleFactorX()
     {
         return getScaleX();
@@ -1939,7 +1939,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getScaleY() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getScaleFactorY()
     {
         return getScaleY();
@@ -1950,7 +1950,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getScaleZ() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getScaleFactorZ()
     {
         return getScaleZ();
@@ -1961,7 +1961,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getScaleT() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getScaleFactorT()
     {
         return getScaleT();
@@ -1972,7 +1972,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated use getScaleC() instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getScaleFactorC()
     {
         return getScaleC();
@@ -2195,7 +2195,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageCanvasSize(DimensionId dim)
     {
         switch (dim)
@@ -2221,7 +2221,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageCanvasSizeX()
     {
         return imageToCanvasDeltaX(getImageSizeX());
@@ -2233,7 +2233,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageCanvasSizeY()
     {
         return imageToCanvasDeltaY(getImageSizeY());
@@ -2245,7 +2245,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageCanvasSizeZ()
     {
         return imageToCanvasDeltaZ(getImageSizeZ());
@@ -2257,7 +2257,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageCanvasSizeT()
     {
         return imageToCanvasDeltaT(getImageSizeT());
@@ -2269,7 +2269,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getImageCanvasSizeC()
     {
         return imageToCanvasDeltaC(getImageSizeC());
@@ -2305,7 +2305,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated uses setPositionZ(int) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setZ(int z)
     {
         setPositionZ(z);
@@ -2316,7 +2316,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated uses setPositionT(int) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setT(int t)
     {
         setPositionT(t);
@@ -2327,7 +2327,7 @@ public abstract class IcyCanvas extends JPanel
      * 
      * @deprecated uses setPositionC(int) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setC(int c)
     {
         setPositionC(c);
@@ -3110,7 +3110,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.canvasToImage(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double canvasToImageX(int value)
     {
         return canvasToImageDeltaX(value - getOffsetX());
@@ -3122,7 +3122,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.canvasToImage(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double canvasToImageY(int value)
     {
         return canvasToImageDeltaY(value - getOffsetY());
@@ -3134,7 +3134,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.canvasToImage(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double canvasToImageZ(int value)
     {
         return canvasToImageDeltaZ(value - getOffsetZ());
@@ -3146,7 +3146,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.canvasToImage(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double canvasToImageT(int value)
     {
         return canvasToImageDeltaT(value - getOffsetT());
@@ -3158,7 +3158,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.canvasToImage(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double canvasToImageC(int value)
     {
         return canvasToImageDeltaC(value - getOffsetC());
@@ -3220,7 +3220,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.imageToCanvas(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int imageToCanvasX(double value)
     {
         return imageToCanvasDeltaX(value) + getOffsetX();
@@ -3232,7 +3232,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.imageToCanvas(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int imageToCanvasY(double value)
     {
         return imageToCanvasDeltaY(value) + getOffsetY();
@@ -3244,7 +3244,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.imageToCanvas(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int imageToCanvasZ(double value)
     {
         return imageToCanvasDeltaZ(value) + getOffsetZ();
@@ -3256,7 +3256,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.imageToCanvas(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int imageToCanvasT(double value)
     {
         return imageToCanvasDeltaT(value) + getOffsetT();
@@ -3268,7 +3268,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.imageToCanvas(...) instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int imageToCanvasC(double value)
     {
         return imageToCanvasDeltaC(value) + getOffsetC();
@@ -3790,7 +3790,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getImage(int, int, int)} with C = -1 instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyBufferedImage getImage(int t, int z)
     {
         return getImage(t, z, -1);
@@ -3808,7 +3808,7 @@ public abstract class IcyCanvas extends JPanel
      * @throws InterruptedException 
      * @deprecated use {@link #getRenderedImage(int, int, int, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public final BufferedImage getRenderedImage(int t, int z, int c, int imageType, boolean canvasView) throws InterruptedException
     {
         return getRenderedImage(t, z, c, canvasView);
@@ -3818,7 +3818,7 @@ public abstract class IcyCanvas extends JPanel
      * @throws InterruptedException
      * @deprecated use {@link #getRenderedSequence(boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public final Sequence getRenderedSequence(int imageType, boolean canvasView) throws InterruptedException
     {
         return getRenderedSequence(canvasView, null);
@@ -3845,7 +3845,7 @@ public abstract class IcyCanvas extends JPanel
      * @throws InterruptedException
      * @deprecated Use {@link #getRenderedImage(int, int, int, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public BufferedImage getRenderedImage(int t, int z, int c) throws InterruptedException
     {
         return getRenderedImage(t, z, c, true);
@@ -4012,7 +4012,7 @@ public abstract class IcyCanvas extends JPanel
      * @throws InterruptedException
      * @deprecated Use {@link #getRenderedSequence(boolean, ProgressListener)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence getRenderedSequence(boolean canvasView) throws InterruptedException
     {
         return getRenderedSequence(canvasView, null);
@@ -4022,7 +4022,7 @@ public abstract class IcyCanvas extends JPanel
      * @throws InterruptedException
      * @deprecated Use {@link #getRenderedSequence(boolean, ProgressListener)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence getRenderedSequence() throws InterruptedException
     {
         return getRenderedSequence(true, null);
@@ -4110,7 +4110,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #getLayer(Overlay)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Layer getLayer(Painter painter)
     {
         for (Layer layer : getLayers(false))
@@ -4139,7 +4139,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #hasLayer(Overlay)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean hasLayer(Painter painter)
     {
         return getLayer(painter) != null;
@@ -4173,7 +4173,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #addLayer(Overlay)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addLayer(Painter painter)
     {
         if (!hasLayer(painter))
@@ -4213,7 +4213,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #removeLayer(Overlay)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void removeLayer(Painter painter)
     {
         removeLayer(getLayer(painter));
@@ -4270,7 +4270,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #addLayerListener(CanvasLayerListener)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void addLayersListener(CanvasLayerListener listener)
     {
         addLayerListener(listener);
@@ -4279,7 +4279,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #removeLayerListener(CanvasLayerListener)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void removeLayersListener(CanvasLayerListener listener)
     {
         removeLayerListener(listener);
@@ -4613,7 +4613,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @deprecated Use {@link #sequenceOverlayChanged(Overlay, SequenceEventType)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected void sequencePainterChanged(Painter painter, SequenceEventType type)
     {
         // no more stuff here

@@ -77,7 +77,7 @@ public class ScalerPanel extends JPanel
     /**
      * @deprecated Use {@link #refreshHistogram()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void refreshHistoData()
     {
         refreshHistogram();

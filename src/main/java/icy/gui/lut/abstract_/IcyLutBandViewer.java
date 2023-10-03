@@ -26,7 +26,7 @@ import javax.swing.JPanel;
 /**
  * @deprecated
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class IcyLutBandViewer extends JPanel
 {
     /**

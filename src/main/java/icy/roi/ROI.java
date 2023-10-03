@@ -153,7 +153,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @deprecated Use {@link #DEFAULT_COLOR} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final Color DEFAULT_NORMAL_COLOR = DEFAULT_COLOR;
 
     public static final String PROPERTY_NAME = ID_NAME;
@@ -319,7 +319,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        2D point
      * @return ROI
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI create(String className, Point2D imagePoint)
     {
         return create(className, new Point5D.Double(imagePoint.getX(), imagePoint.getY(), -1d, -1d, -1d));
@@ -337,7 +337,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        boolean
      * @return ROI
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI create(String className, Sequence seq, Point2D imagePoint, boolean creation)
     {
         final ROI result = create(className, imagePoint);
@@ -413,7 +413,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        ROI class
      * @return list of ROI
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ArrayList<ROI> getROIList(ArrayList<? extends ROI> rois, Class<? extends ROI> clazz)
     {
         final ArrayList<ROI> result = new ArrayList<ROI>();
@@ -433,7 +433,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        ROI class
      * @return list of ROI
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<ROI> getROIList(ROI rois[], Class<? extends ROI> clazz)
     {
         final List<ROI> result = new ArrayList<ROI>();
@@ -500,7 +500,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        node
      * @return List of ROI
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static List<ROI> getROIsFromXML(Node node)
     {
         return loadROIsFromXML(node);
@@ -538,7 +538,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param rois
      *        list of ROI
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setROIsFromXML(Node node, List<ROI> rois)
     {
         saveROIsToXML(node, rois);
@@ -612,7 +612,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        int
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double canvasToImageDeltaX(IcyCanvas canvas, int value)
     {
         return canvas.canvasToImageDeltaX(value);
@@ -628,7 +628,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        double
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double canvasToImageLogDeltaX(IcyCanvas canvas, double value, double logFactor)
     {
         return canvas.canvasToImageLogDeltaX((int) value, logFactor);
@@ -642,7 +642,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        canvas
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double canvasToImageLogDeltaX(IcyCanvas canvas, double value)
     {
         return canvas.canvasToImageLogDeltaX((int) value);
@@ -658,7 +658,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        double
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double canvasToImageLogDeltaX(IcyCanvas canvas, int value, double logFactor)
     {
         return canvas.canvasToImageLogDeltaX(value, logFactor);
@@ -672,7 +672,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        int
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double canvasToImageLogDeltaX(IcyCanvas canvas, int value)
     {
         return canvas.canvasToImageLogDeltaX(value);
@@ -686,7 +686,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        canvas
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double canvasToImageDeltaY(IcyCanvas canvas, int value)
     {
         return canvas.canvasToImageDeltaY(value);
@@ -702,7 +702,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        double
      * @return doubme
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double canvasToImageLogDeltaY(IcyCanvas canvas, double value, double logFactor)
     {
         return canvas.canvasToImageLogDeltaY((int) value, logFactor);
@@ -716,7 +716,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        canvas
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double canvasToImageLogDeltaY(IcyCanvas canvas, double value)
     {
         return canvas.canvasToImageLogDeltaY((int) value);
@@ -732,7 +732,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        double
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double canvasToImageLogDeltaY(IcyCanvas canvas, int value, double logFactor)
     {
         return canvas.canvasToImageLogDeltaY(value, logFactor);
@@ -746,7 +746,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        int
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double canvasToImageLogDeltaY(IcyCanvas canvas, int value)
     {
         return canvas.canvasToImageLogDeltaY(value);
@@ -857,7 +857,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @deprecated
          * @return color
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public Color getSelectedColor()
         {
             return getColor();
@@ -922,7 +922,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @param value
          *        color
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public void setSelectedColor(Color value)
         {
             //
@@ -932,7 +932,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @deprecated Better to retrieve mouse position from the {@link IcyCanvas} object.
          * @return double of 5D point
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public Point5D.Double getMousePos()
         {
             return mousePos;
@@ -943,7 +943,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @param pos
          *        5DPoint
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public void setMousePos(Point5D pos)
         {
             if (!mousePos.equals(pos))
@@ -1602,7 +1602,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param sequence
      *        sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void attachTo(Sequence sequence)
     {
         if (sequence != null)
@@ -1614,7 +1614,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param sequence
      *        sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void detachFrom(Sequence sequence)
     {
         if (sequence != null)
@@ -1626,7 +1626,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param canUndo
      *        boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void detachFromAll(boolean canUndo)
     {
         remove(canUndo);
@@ -1635,7 +1635,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @deprecated Use {@link #remove()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void detachFromAll()
     {
         remove(false);
@@ -1695,7 +1695,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param canUndo
      *        boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void delete(boolean canUndo)
     {
         remove(canUndo);
@@ -1704,7 +1704,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @deprecated Use {@link #remove()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void delete()
     {
         remove(true);
@@ -1732,7 +1732,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @deprecated Use {@link #getOverlay()} instead.
      * @return ROI painter
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROIPainter getPainter()
     {
         return getOverlay();
@@ -1802,7 +1802,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @deprecated
      * @return color
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Color getSelectedColor()
     {
         return getOverlay().getSelectedColor();
@@ -1838,7 +1838,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        color
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setSelectedColor(Color value)
     {
         //
@@ -2019,7 +2019,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        string
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Object getPropertyValue(String propertyName)
     {
         if (StringUtil.equals(propertyName, PROPERTY_COLOR))
@@ -2049,7 +2049,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setPropertyValue(String propertyName, Object value)
     {
         if (StringUtil.equals(propertyName, PROPERTY_COLOR))
@@ -2199,7 +2199,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param exclusive
      *        boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setSelected(boolean value, boolean exclusive)
     {
         if (exclusive)
@@ -2217,7 +2217,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @deprecated Use {@link #setSelected(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void internalUnselect()
     {
         if (selected != false)
@@ -2232,7 +2232,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @deprecated Use {@link #setSelected(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void internalSelect()
     {
         if (selected != true)
@@ -2246,7 +2246,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @deprecated Use {@link #isReadOnly()} instead.
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isEditable()
     {
         return !isReadOnly();
@@ -2257,7 +2257,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setEditable(boolean value)
     {
         setReadOnly(!value);
@@ -2865,7 +2865,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * Generic implementation for ROI using the BooleanMask object so the result is just an
      * approximation. Override to optimize for specific ROI.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected ROI computeOperation(ROI roi, BooleanOperator op) throws UnsupportedOperationException
     {
         System.out.println("Deprecated method " + getClassName() + ".computeOperation(ROI, BooleanOperator) called !");
@@ -3244,7 +3244,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      * @throws InterruptedException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getPerimeter() throws InterruptedException
     {
         return getNumberOfContourPoints();
@@ -3256,7 +3256,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      * @throws InterruptedException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getVolume() throws InterruptedException
     {
         return getNumberOfPoints();
@@ -3267,7 +3267,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param pos
      *        2D point
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setMousePos(Point2D pos)
     {
         if (pos != null)
@@ -3604,7 +3604,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param pointEventType
      *        ROI event
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void roiChanged(ROIPointEventType pointEventType, Object point)
     {
         // handle with updater
@@ -3629,7 +3629,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @deprecated Use {@link #roiChanged(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void roiChanged()
     {
         // handle with updater
@@ -3659,7 +3659,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * 
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void painterChanged()
     {
         // handle with updater
@@ -3671,7 +3671,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * 
      * @deprecated Use {@link #propertyChanged(String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void nameChanged()
     {
         // handle with updater

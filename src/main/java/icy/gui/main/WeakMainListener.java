@@ -32,7 +32,7 @@ import icy.main.Icy;
  *             {@link GlobalPluginListener}
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class WeakMainListener extends WeakListener<MainListener> implements MainListener
 {
     public WeakMainListener(MainListener listener)

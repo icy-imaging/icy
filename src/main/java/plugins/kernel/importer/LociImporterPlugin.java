@@ -1219,7 +1219,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         return result;
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException
     {

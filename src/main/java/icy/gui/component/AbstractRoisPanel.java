@@ -1098,7 +1098,7 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel implements A
     /**
      * @deprecated Use {@link #getCSVFormattedInfos()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public String getCSVFormattedInfosOfSelectedRois() {
         // Check to ensure we have selected only a contiguous block of cells
         final int numcols = roiTable.getColumnCount();

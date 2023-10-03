@@ -28,7 +28,7 @@ public class ScalerEvent implements CollapsibleEvent
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public enum ScalerEventType
     {
         CHANGED
@@ -57,7 +57,7 @@ public class ScalerEvent implements CollapsibleEvent
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ScalerEventType getType()
     {
         return ScalerEventType.CHANGED;

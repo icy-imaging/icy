@@ -32,7 +32,7 @@ import javax.swing.*;
  * @author Stephane
  * @deprecated Use {@link IcyToggleButton} instead
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class IcyToggleButtonOld extends JToggleButton {
     private boolean flat;
 
@@ -49,7 +49,7 @@ public class IcyToggleButtonOld extends JToggleButton {
     /**
      * @deprecated User {@link #IcyToggleButtonOld(IcyAbstractAction)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyToggleButtonOld(icy.common.IcyAbstractAction action) {
         super(action);
 
@@ -77,7 +77,7 @@ public class IcyToggleButtonOld extends JToggleButton {
     /**
      * @deprecated Use {@link #IcyToggleButtonOld(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyToggleButtonOld(String text, Image iconImage, int iconSize) {
         this(text, new IcyIcon(iconImage, iconSize));
     }
@@ -85,7 +85,7 @@ public class IcyToggleButtonOld extends JToggleButton {
     /**
      * @deprecated Use {@link #IcyToggleButtonOld(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyToggleButtonOld(String text, Image iconImage) {
         this(text, iconImage, IcyIcon.DEFAULT_SIZE);
     }
@@ -93,7 +93,7 @@ public class IcyToggleButtonOld extends JToggleButton {
     /**
      * @deprecated Use {@link #IcyToggleButtonOld(IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyToggleButtonOld(Image iconImage, int iconSize) {
         this(null, iconImage, iconSize);
     }
@@ -101,7 +101,7 @@ public class IcyToggleButtonOld extends JToggleButton {
     /**
      * @deprecated Use {@link #IcyToggleButtonOld(IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyToggleButtonOld(Image iconImage) {
         this(null, iconImage, IcyIcon.DEFAULT_SIZE);
     }
@@ -109,7 +109,7 @@ public class IcyToggleButtonOld extends JToggleButton {
     /**
      * @deprecated Use {@link #IcyToggleButtonOld(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyToggleButtonOld(String text, String iconName, int iconSize) {
         this(text, new IcyIcon(iconName, iconSize));
     }
@@ -117,7 +117,7 @@ public class IcyToggleButtonOld extends JToggleButton {
     /**
      * @deprecated Use {@link #IcyToggleButtonOld(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyToggleButtonOld(String text, String iconName) {
         this(text, iconName, IcyIcon.DEFAULT_SIZE);
     }
@@ -125,7 +125,7 @@ public class IcyToggleButtonOld extends JToggleButton {
     /**
      * @deprecated Use {@link #IcyToggleButtonOld(IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyToggleButtonOld(String iconName, int iconSize) {
         this(null, iconName, iconSize);
     }
@@ -133,7 +133,7 @@ public class IcyToggleButtonOld extends JToggleButton {
     /**
      * @deprecated Use {@link #IcyToggleButtonOld(IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyToggleButtonOld(String iconName) {
         this(iconName, IcyIcon.DEFAULT_SIZE);
     }

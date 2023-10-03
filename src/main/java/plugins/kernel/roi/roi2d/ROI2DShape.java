@@ -197,7 +197,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
 
             outlineActor.GetProperty().SetColor(r, g, b);
             final vtkProperty property = actor.GetProperty();
-            property.SetPointSize(getStroke());
+            property.SetPointSize((float) getStroke());
             property.SetColor(r, g, b);
         }
 
@@ -377,7 +377,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
                     vtkInfo.Set(VtkCanvas.visibilityKey, 0);
                 }
                 vtkProperty.SetColor(r, g, b);
-                vtkProperty.SetPointSize(strk);
+                vtkProperty.SetPointSize((float) strk);
                 // opacity here is about ROI content, global opacity is handled by Layer
                 // vtkProperty.SetOpacity(opacity);
                 setVtkObjectsColor(col);
@@ -1189,7 +1189,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
      * @return true if succeed
      * @deprecated Use {@link #addNewPoint(Point2D, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean addPoint(Point2D pos, boolean insert)
     {
         return (addNewPoint(pos, insert) != null);
@@ -1204,7 +1204,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
      * @return true if succeed
      * @deprecated Use {@link #addNewPoint(Point2D, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean addPointAt(Point2D pos, boolean insert)
     {
         return (addNewPoint(pos, insert) != null);
@@ -1346,7 +1346,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
      * @return true if succeed
      * @deprecated Use {@link #removeSelectedPoint(IcyCanvas)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean removePointAt(IcyCanvas canvas, Point2D imagePoint)
     {
         if (!canRemovePoint())
@@ -1373,7 +1373,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
      * @return true if succeed
      * @deprecated Use {@link #removeSelectedPoint(IcyCanvas)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected boolean removeSelectedPoint(IcyCanvas canvas, Point2D imagePoint)
     {
         return removeSelectedPoint(canvas);
@@ -1491,7 +1491,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape
     /**
      * @deprecated Use {@link #getSelectedPoint()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected Anchor2D getSelectedControlPoint()
     {
         return getSelectedPoint();

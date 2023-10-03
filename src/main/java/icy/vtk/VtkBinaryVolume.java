@@ -47,7 +47,7 @@ public class VtkBinaryVolume extends VtkImageVolume
      * @deprecated Use {@link #setColor(Color)} instead.
      */
     @Override
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setColorMap(vtkColorTransferFunction map, int channel)
     {
         // done nothing here
@@ -57,7 +57,7 @@ public class VtkBinaryVolume extends VtkImageVolume
      * @deprecated Use {@link #setOpacity(double)} instead.
      */
     @Override
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setOpacityMap(vtkPiecewiseFunction map, int channel)
     {
         // done nothing here
@@ -67,7 +67,7 @@ public class VtkBinaryVolume extends VtkImageVolume
      * @deprecated Use {@link #setColor(Color)} and {@link #setOpacity(double)} instead.
      */
     @Override
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setLUT(LUT value)
     {
         // done nothing here
@@ -77,7 +77,7 @@ public class VtkBinaryVolume extends VtkImageVolume
      * @deprecated Use {@link #setColor(Color)} and {@link #setOpacity(double)} instead.
      */
     @Override
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setLUT(LUTChannel lutChannel, int channel)
     {
         // done nothing here

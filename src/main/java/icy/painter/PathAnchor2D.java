@@ -84,7 +84,7 @@ public class PathAnchor2D extends Anchor2D
      * @param sequence sequence
      * @param ray int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public PathAnchor2D(Sequence sequence, double x1, double y1, double x2, double y2, double x3, double y3, int ray,
             Color color, Color selectedColor)
     {
@@ -135,7 +135,7 @@ public class PathAnchor2D extends Anchor2D
      * @param selectedColor color
      * @param ray int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public PathAnchor2D(double x1, double y1, int ray, Color color, Color selectedColor)
     {
         this(0d, 0d, 0d, 0d, x1, y1, ray, color, selectedColor, PathIterator.SEG_MOVETO);

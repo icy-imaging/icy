@@ -32,7 +32,7 @@ import org.pushingpixels.flamingo.api.common.icon.ResizableIcon;
  * @author Stephane
  * @deprecated Do not use this, will be removed with Substance
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class IcyApplicationIcon implements ResizableIcon
 {
     private static final int DEFAULT_SIZE = 32;

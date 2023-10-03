@@ -71,7 +71,7 @@ import org.pushingpixels.flamingo.api.ribbon.RibbonApplicationMenuEntrySecondary
 /**
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class ApplicationMenu extends RibbonApplicationMenu implements PluginLoaderListener
 {
      static final int RECENTFILE_MAXLEN = 100;

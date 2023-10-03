@@ -1024,8 +1024,7 @@ public final class SequenceOperationActions {
     /**
      * @deprecated Use {@link RoiActions#fillInteriorAction} instead
      */
-
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final IcyAbstractAction fillSequenceAction = new IcyAbstractAction(
             "Fill",
             //new IcyIcon(ResourceUtil.ICON_BRUSH),

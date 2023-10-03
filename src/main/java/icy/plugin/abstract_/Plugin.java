@@ -182,7 +182,7 @@ public abstract class Plugin
      * @deprecated Use {@link #getActiveViewer()} instead
      * @return Viewer
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Viewer getFocusedViewer()
     {
         return getActiveViewer();
@@ -192,7 +192,7 @@ public abstract class Plugin
      * @deprecated Use {@link #getActiveSequence()} instead
      * @return Sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence getFocusedSequence()
     {
         return getActiveSequence();
@@ -202,7 +202,7 @@ public abstract class Plugin
      * @deprecated Use {@link #getActiveImage()} instead
      * @return Buffered image
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyBufferedImage getFocusedImage()
     {
         return getActiveImage();
@@ -530,7 +530,7 @@ public abstract class Plugin
      * @deprecated Use {@link #getResourceNativeLibraryPath()} instead.
      * @return string
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected String getResourceLibraryPath()
     {
         return getResourceNativeLibraryPath();
@@ -615,7 +615,7 @@ public abstract class Plugin
      * @return file
      * @throws IOException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected File extractResource(String outputPath, URL resource) throws IOException
     {
         return extractResourceTo(outputPath, resource);

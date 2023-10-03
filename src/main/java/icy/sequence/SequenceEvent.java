@@ -28,7 +28,7 @@ public class SequenceEvent implements CollapsibleEvent
         SEQUENCE_TYPE, SEQUENCE_META, SEQUENCE_COLORMAP, SEQUENCE_COMPONENTBOUNDS, SEQUENCE_DATA, SEQUENCE_ROI, /**
          * @deprecated
          **/
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         SEQUENCE_PAINTER, SEQUENCE_OVERLAY
     }
 

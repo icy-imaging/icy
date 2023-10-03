@@ -36,14 +36,14 @@ import javax.swing.tree.TreeCellRenderer;
  * @author Thomas MUSSET
  */
 public class VisibleCellRenderer extends JLabel implements TableCellRenderer, TreeCellRenderer {
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     float iconSize = LookAndFeelUtil.getDefaultIconSizeAsFloat();
 
     // TODO: 02/02/2023 Move icon creation
     public static final IcyIconFont VISIBILITY = new IcyIconFont(GoogleMaterialDesignIcons.VISIBILITY, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
     public static final IcyIconFont VISIBILITY_OFF = new IcyIconFont(GoogleMaterialDesignIcons.VISIBILITY_OFF, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public VisibleCellRenderer(int iconSize) {
         this();
 

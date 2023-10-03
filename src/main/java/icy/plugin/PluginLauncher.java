@@ -230,7 +230,7 @@ public class PluginLauncher
      *             You can retrieve a {@link PluginDescriptor} from the class name by using
      *             {@link PluginLoader#getPlugin(String)} method.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Plugin start(String pluginClassName)
     {
         final PluginDescriptor plugin = PluginLoader.getPlugin(pluginClassName);
@@ -274,7 +274,7 @@ public class PluginLauncher
      *             You can retrieve a {@link PluginDescriptor} from the class name by using
      *             {@link PluginLoader#getPlugin(String)} method.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Plugin startSafe(String pluginClassName) throws Exception
     {
         final PluginDescriptor plugin = PluginLoader.getPlugin(pluginClassName);
@@ -288,7 +288,7 @@ public class PluginLauncher
     /**
      * @deprecated Use {@link #start(PluginDescriptor)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public synchronized static void launch(PluginDescriptor descriptor)
     {
         start(descriptor);

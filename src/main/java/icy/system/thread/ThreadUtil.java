@@ -186,7 +186,7 @@ public class ThreadUtil
      * @deprecated Use {@link #invokeNow(Runnable)} instead
      * @param runnable running task
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void invokeAndWait(Runnable runnable)
     {
         invokeNow(runnable);
@@ -371,7 +371,7 @@ public class ThreadUtil
      * @param onEDT boolean
      * @return true if submitted process is not null
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean bgRun(Runnable runnable, boolean onEDT)
     {
         return (bgProcessor.submit(runnable, onEDT) != null);
@@ -381,7 +381,7 @@ public class ThreadUtil
      * @deprecated Use {@link #bgRun(Runnable)} instead and check for acceptance.
      * @param runnable thread
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void bgRunWait(Runnable runnable)
     {
         while (!bgRun(runnable))
@@ -409,7 +409,7 @@ public class ThreadUtil
      * @param <T> generic Object
      * @return Object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static <T> Future<T> bgRun(Callable<T> callable, boolean onEDT)
     {
         return bgProcessor.submit(callable, onEDT);
@@ -437,7 +437,7 @@ public class ThreadUtil
      * @param onEDT boolean
      * @return true if submitted process is not null
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean bgRunSingle(Runnable runnable, boolean onEDT)
     {
         final InstanceProcessor processor = getInstanceProcessor(runnable);
@@ -453,7 +453,7 @@ public class ThreadUtil
      * @param <T> generic Object
      * @return running thread
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static <T> Future<T> bgRunSingle(Callable<T> callable, boolean onEDT)
     {
         final InstanceProcessor processor = getInstanceProcessor(callable);

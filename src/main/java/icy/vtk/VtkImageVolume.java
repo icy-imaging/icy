@@ -296,7 +296,11 @@ public class VtkImageVolume
             else
             {
                 mapper.AutoAdjustSampleDistancesOff();
-                mapper.SetImageSampleDistance(value);
+
+                if (value >= Float.MAX_VALUE)
+                    System.err.printf("Sample resolution [%f] is superoir to Float.MAX_VALUE [%f]\r\n", value, Float.MAX_VALUE);
+
+                mapper.SetImageSampleDistance((float) value);
             }
         }
         else if (volumeMapper instanceof vtkGPUVolumeRayCastMapper)
@@ -308,7 +312,7 @@ public class VtkImageVolume
             else
             {
                 mapper.AutoAdjustSampleDistancesOff();
-                mapper.SetImageSampleDistance(value);
+                mapper.SetImageSampleDistance((float) value);
             }
         }
         else if (volumeMapper instanceof vtkOpenGLGPUVolumeRayCastMapper)
@@ -320,7 +324,7 @@ public class VtkImageVolume
             else
             {
                 mapper.AutoAdjustSampleDistancesOff();
-                mapper.SetImageSampleDistance(value);
+                mapper.SetImageSampleDistance((float) value);
             }
         }
     }

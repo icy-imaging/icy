@@ -121,32 +121,32 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_BYTE = TypeUtil.TYPE_BYTE;
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_DOUBLE = TypeUtil.TYPE_DOUBLE;
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_FLOAT = TypeUtil.TYPE_FLOAT;
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_INT = TypeUtil.TYPE_INT;
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_SHORT = TypeUtil.TYPE_SHORT;
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final int TYPE_UNDEFINED = TypeUtil.TYPE_UNDEFINED;
 
     public static final String ID_ID = "id";
@@ -415,7 +415,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param name
      *        string
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence(OMEXMLMetadataImpl meta, String name)
     {
         this((OMEXMLMetadata) meta, name);
@@ -454,7 +454,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param meta
      *        OME metadata
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence(OMEXMLMetadataImpl meta)
     {
         this((OMEXMLMetadata) meta);
@@ -808,7 +808,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return sequence
      * @throws InterruptedException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence convertToType(DataType dataType, boolean rescale) throws InterruptedException
     {
         return SequenceUtil.convertToType(this, dataType, rescale);
@@ -822,7 +822,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        sclare
      * @return sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence convertToType(DataType dataType, Scaler scaler)
     {
         return SequenceUtil.convertToType(this, dataType, scaler);
@@ -839,7 +839,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return sequence
      * @throws InterruptedException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence convertToType(int dataType, boolean signed, boolean rescale) throws InterruptedException
     {
         return convertToType(DataType.getDataType(dataType, signed), rescale);
@@ -852,7 +852,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return sequence
      * @throws InterruptedException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence extractChannel(int channelNumber) throws InterruptedException
     {
         return SequenceUtil.extractChannel(this, channelNumber);
@@ -864,7 +864,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        list of channels
      * @return sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence extractChannels(List<Integer> channelNumbers)
     {
         return SequenceUtil.extractChannels(this, channelNumbers);
@@ -877,7 +877,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return sequence
      * @throws InterruptedException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence extractBand(int bandNumber) throws InterruptedException
     {
         return extractChannel(bandNumber);
@@ -889,7 +889,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        list of bandNumbers
      * @return sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence extractBands(List<Integer> bandNumbers)
     {
         return extractChannels(bandNumbers);
@@ -1474,7 +1474,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getSeries()} instead
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getSerieIndex()
     {
         return getSeries();
@@ -1508,7 +1508,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getOMEXMLMetadata()} instead.
      * @return OME metadata
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public OMEXMLMetadataImpl getMetadata()
     {
         return (OMEXMLMetadataImpl) getOMEXMLMetadata();
@@ -1519,7 +1519,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param metaData
      *        OME metadata
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setMetaData(OMEXMLMetadataImpl metaData)
     {
         setMetaData((OMEXMLMetadata) metaData);
@@ -2133,7 +2133,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getAutoUpdateChannelBounds()} instead.
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isComponentAbsBoundsAutoUpdate()
     {
         return getAutoUpdateChannelBounds();
@@ -2144,7 +2144,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param value
      *        boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setComponentAbsBoundsAutoUpdate(boolean value)
     {
         // nothing here
@@ -2182,7 +2182,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getAutoUpdateChannelBounds()} instead.
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isComponentUserBoundsAutoUpdate()
     {
         return getAutoUpdateChannelBounds();
@@ -2193,7 +2193,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param value
      *        boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setComponentUserBoundsAutoUpdate(boolean value)
     {
         setAutoUpdateChannelBounds(value);
@@ -2203,7 +2203,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return the AWT dispatching property
      * @deprecated Don't use it, events should stay on current thread
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isAWTDispatching()
     {
         return updater.isAwtDispatch();
@@ -2216,7 +2216,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param value
      *        boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setAWTDispatching(boolean value)
     {
         updater.setAwtDispatch(value);
@@ -2289,7 +2289,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param painter
      *        Painter
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean contains(Painter painter)
     {
         return getOverlay(painter) != null;
@@ -2331,7 +2331,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #hasOverlay()} instead.
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean hasPainter()
     {
         return hasOverlay();
@@ -2341,7 +2341,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getOverlays()} instead.
      * @return list of painter
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ArrayList<Painter> getPainters()
     {
         final ArrayList<Painter> result = new ArrayList<Painter>(overlays.size());
@@ -2364,7 +2364,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getOverlaySet()} instead.
      * @return painter hash
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public HashSet<Painter> getPainterSet()
     {
         final HashSet<Painter> result = new HashSet<Painter>(overlays.size());
@@ -2389,7 +2389,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        class
      * @return list of Painter
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public List<Painter> getPainters(Class<? extends Painter> painterClass)
     {
         final ArrayList<Painter> result = new ArrayList<Painter>(overlays.size());
@@ -2638,7 +2638,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        ROID Class
      * @return list of ROI
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public List<ROI> getROIs(Class<? extends ROI> roiClass)
     {
         final List<ROI> result = new ArrayList<ROI>(rois.size());
@@ -2948,7 +2948,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        boolean
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean setSelectedROI(ROI roi, boolean exclusive)
     {
         if (exclusive)
@@ -2968,7 +2968,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param selected
      *        list of ROI
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setSelectedROIs(ArrayList<ROI> selected)
     {
         setSelectedROIs((List<ROI>) selected);
@@ -3333,7 +3333,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        Painter
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean addPainter(Painter painter)
     {
         if (painter instanceof Overlay)
@@ -3353,7 +3353,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        Painter
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean removePainter(Painter painter)
     {
         if (painter instanceof Overlay)
@@ -3540,7 +3540,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        int
      * @return boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean removeVolumetricImage(int t)
     {
         return removeAllImages(t);
@@ -3959,7 +3959,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        int
      * @return true
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean removeAllImage(int t)
     {
         return removeAllImages(t);
@@ -3968,7 +3968,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @deprecated Use {@link #removeAllImages()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void removeAllImage()
     {
         removeAllImages();
@@ -4066,7 +4066,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @see #getSizeT
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getLength()
     {
         return getSizeT();
@@ -4093,7 +4093,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @see #getSizeZ
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getDepth()
     {
         return getSizeZ();
@@ -4137,7 +4137,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @see #getSizeC
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getNumComponents()
     {
         return getSizeC();
@@ -4250,7 +4250,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getDimension2D()} instead.
      * @return diemension
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Dimension getDimension()
     {
         return getDimension2D();
@@ -4278,7 +4278,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getBounds2D()} instead
      * @return rectangle
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Rectangle getBounds()
     {
         return getBounds2D();
@@ -4528,7 +4528,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return the data type of sequence
      * @deprecated use {@link #getDataType_()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getDataType()
     {
         final IcyColorModel cm = colorModel;
@@ -4692,7 +4692,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param forceRecalculation
      *        boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void updateComponentsBounds(boolean forceRecalculation, boolean adjustByteToo)
     {
         updateChannelsBounds(forceRecalculation);
@@ -4703,7 +4703,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param forceRecalculation
      *        boolean
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void updateComponentsBounds(boolean forceRecalculation)
     {
         updateChannelsBounds(forceRecalculation);
@@ -4712,7 +4712,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @deprecated Use {@link #updateChannelsBounds(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void updateComponentsBounds()
     {
         // force recalculation
@@ -4826,7 +4826,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getChannelsGlobalTypeBounds()} instead
      * @return array of double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double[] getChannelTypeGlobalBounds()
     {
         return getChannelsGlobalTypeBounds();
@@ -4836,7 +4836,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getChannelTypeGlobalBounds()} instead.
      * @return array of double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double[] getGlobalChannelTypeBounds()
     {
         return getChannelTypeGlobalBounds();
@@ -4848,7 +4848,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        int
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getComponentAbsMinValue(int component)
     {
         return getChannelTypeMin(component);
@@ -4860,7 +4860,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        int
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getComponentAbsMaxValue(int component)
     {
         return getChannelTypeMax(component);
@@ -4872,7 +4872,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        int
      * @return array of double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double[] getComponentAbsBounds(int component)
     {
         return getChannelTypeBounds(component);
@@ -4882,7 +4882,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getChannelsTypeBounds()} instead.
      * @return 2D array of double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double[][] getComponentsAbsBounds()
     {
         return getChannelsTypeBounds();
@@ -4892,7 +4892,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getChannelsGlobalTypeBounds()} instead.
      * @return array of double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double[] getGlobalComponentAbsBounds()
     {
         return getChannelsGlobalTypeBounds();
@@ -4993,7 +4993,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        int
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getComponentUserMinValue(int component)
     {
         return getChannelMin(component);
@@ -5005,7 +5005,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        int
      * @return double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double getComponentUserMaxValue(int component)
     {
         return getChannelMax(component);
@@ -5017,7 +5017,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        int
      * @return array of double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double[] getComponentUserBounds(int component)
     {
         return getChannelBounds(component);
@@ -5027,7 +5027,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @deprecated Use {@link #getChannelsBounds()} instead.
      * @return 2 array of double
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double[][] getComponentsUserBounds()
     {
         return getChannelsBounds();
@@ -7990,7 +7990,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        int
      * @return sequence
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence getSubSequence(int startX, int startY, int startZ, int startT, int sizeX, int sizeY, int sizeZ,
             int sizeT)
     {
@@ -8002,7 +8002,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return sequence
      * @throws InterruptedException
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Sequence getCopy() throws InterruptedException
     {
         return SequenceUtil.getCopy(this);
@@ -8017,7 +8017,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param t
      *        int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setT(int t)
     {
         for (Viewer viewer : Icy.getMainInterface().getViewers())
@@ -8222,7 +8222,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *        string
      * @return Node
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Node setNode(String name)
     {
         return persistent.setNode(name);
@@ -8480,7 +8480,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param painter
      *        painter
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void painterChanged(Painter painter)
     {
         updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_OVERLAY, getOverlay(painter),
@@ -8526,7 +8526,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @deprecated Use {@link #roiChanged(ROI)} method instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void roiChanged()
     {
         final Iterator<ROI> it = rois.iterator();

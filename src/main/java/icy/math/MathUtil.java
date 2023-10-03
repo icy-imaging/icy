@@ -39,7 +39,7 @@ public class MathUtil
     /**
      * @deprecated please use {@link UnitUtil#getBytesString(double)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getBytesString(double value)
     {
         return UnitUtil.getBytesString(value);
@@ -255,7 +255,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#min(Object, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double min(Object array, boolean signed)
     {
         return ArrayMath.min(array, signed);
@@ -264,7 +264,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#min(byte[], boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int min(byte[] array, boolean signed)
     {
         return ArrayMath.min(array, signed);
@@ -273,7 +273,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#min(short[], boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int min(short[] array, boolean signed)
     {
         return ArrayMath.min(array, signed);
@@ -282,7 +282,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#min(int[], boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static long min(int[] array, boolean signed)
     {
         return ArrayMath.min(array, signed);
@@ -291,7 +291,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#min(float[])} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float min(float[] array)
     {
         return ArrayMath.min(array);
@@ -300,7 +300,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#min(double[])} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double min(double[] array)
     {
         return ArrayMath.min(array);
@@ -310,7 +310,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#max(Object, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double max(Object array, boolean signed)
     {
         return ArrayMath.max(array, signed);
@@ -319,7 +319,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#max(byte[], boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int max(byte[] array, boolean signed)
     {
         return ArrayMath.max(array, signed);
@@ -328,7 +328,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#max(short[], boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int max(short[] array, boolean signed)
     {
         return ArrayMath.max(array, signed);
@@ -337,7 +337,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#max(int[], boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static long max(int[] array, boolean signed)
     {
         return ArrayMath.max(array, signed);
@@ -346,7 +346,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#max(float[])} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static float max(float[] array)
     {
         return ArrayMath.max(array);
@@ -355,7 +355,7 @@ public class MathUtil
     /**
      * @deprecated use {@link ArrayMath#max(double[])} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static double max(double[] array)
     {
         return ArrayMath.max(array);

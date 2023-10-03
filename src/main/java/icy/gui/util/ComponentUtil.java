@@ -183,7 +183,7 @@ public class ComponentUtil {
      *
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void center(IcyFrame f) {
         f.center();
     }
@@ -445,7 +445,7 @@ public class ComponentUtil {
     /**
      * @deprecated Use {@link #setJTextPaneFont(JTextPane, Font)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static void setJTextPaneFont(JTextPane tp, Font font, Color c) {
         final MutableAttributeSet attrs = tp.getInputAttributes();
 

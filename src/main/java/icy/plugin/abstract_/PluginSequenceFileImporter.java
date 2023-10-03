@@ -48,7 +48,7 @@ public abstract class PluginSequenceFileImporter extends Plugin implements Seque
             PluginSequenceFileImporter.this.close();
         }
 
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         @Override
         public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException, InterruptedException
         {

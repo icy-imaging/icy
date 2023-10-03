@@ -36,7 +36,7 @@ public abstract class PluginActionable extends Plugin implements PluginImageAnal
      *             Use {@link #run()} instead.
      */
     @Override
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void compute()
     {
         run();

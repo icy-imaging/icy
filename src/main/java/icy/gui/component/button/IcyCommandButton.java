@@ -35,7 +35,7 @@ import org.pushingpixels.flamingo.api.common.popup.PopupPanelCallback;
  * @author Stephane
  * @deprecated Will be removed with Sustance.
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class IcyCommandButton extends JCommandButton {
     /**
      * internals
@@ -59,7 +59,7 @@ public class IcyCommandButton extends JCommandButton {
     /**
      * @deprecated Use {@link #IcyCommandButton(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyCommandButton(String title, Image icon) {
         this(title, new IcyIcon(icon));
     }
@@ -67,7 +67,7 @@ public class IcyCommandButton extends JCommandButton {
     /**
      * @deprecated Use {@link #IcyCommandButton(String, IcyIcon)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyCommandButton(String title, String iconName) {
         this(title, new IcyIcon(iconName));
     }
@@ -87,9 +87,9 @@ public class IcyCommandButton extends JCommandButton {
     }
 
     /**
-     * @deprecated User {@link #IcyCommandButton(IcyAbstractAction)} instead.
+     * @deprecated Use {@link #IcyCommandButton(IcyAbstractAction)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyCommandButton(icy.common.IcyAbstractAction action) {
         this(null, (IcyIcon) null);
 

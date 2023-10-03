@@ -146,7 +146,7 @@ public class Array2DUtil
      * @param array 2D array
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getTotalLenght(byte[][] array)
     {
         return getTotalLength(array);
@@ -158,7 +158,7 @@ public class Array2DUtil
      * @param array 2D array
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getTotalLenght(short[][] array)
     {
         return getTotalLength(array);
@@ -170,7 +170,7 @@ public class Array2DUtil
      * @param array 2D array
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getTotalLenght(int[][] array)
     {
         return getTotalLength(array);
@@ -182,7 +182,7 @@ public class Array2DUtil
      * @param array 2D array
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getTotalLenght(float[][] array)
     {
         return getTotalLength(array);
@@ -194,7 +194,7 @@ public class Array2DUtil
      * @param array 2D array
      * @return int
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getTotalLenght(double[][] array)
     {
         return getTotalLength(array);
@@ -232,7 +232,7 @@ public class Array2DUtil
      * @param len int
      * @return array of object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object[] createArray(int dataType, int len)
     {
         return createArray(DataType.getDataType(dataType), len);
@@ -453,7 +453,7 @@ public class Array2DUtil
      * @param in 2D array
      * @return Return the multi dimension 'in' array as a single dimension int array.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[] toIntArray(int[][] in)
     {
         return toIntArray1D(in, null, 0);
@@ -1995,7 +1995,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object longArrayToSafeArray(long[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2009,7 +2009,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object longArrayToSafeArray(long[][] in, Object out, boolean signed)
     {
         return longArrayToSafeArray(in, 0, out, 0, -1, signed);
@@ -2052,7 +2052,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object intArrayToSafeArray(int[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2066,7 +2066,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object intArrayToSafeArray(int[][] in, Object out, boolean signed)
     {
         return intArrayToSafeArray(in, 0, out, 0, -1, signed);
@@ -2110,7 +2110,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object shortArrayToSafeArray(short[][] in, int inOffset, Object out, int outOffset, int length,
             boolean signed)
     {
@@ -2124,7 +2124,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return object
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object shortArrayToSafeArray(short[][] in, Object out, boolean signed)
     {
         return shortArrayToSafeArray(in, 0, out, 0, -1, signed);
@@ -2195,7 +2195,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static long[][] arrayToSafeLongArray(Object in, int inOffset, long[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2209,7 +2209,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static long[][] arrayToSafeLongArray(Object in, long[][] out, boolean signed)
     {
         return arrayToSafeLongArray(in, 0, out, 0, -1, signed, signed);
@@ -2252,7 +2252,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[][] arrayToSafeIntArray(Object in, int inOffset, int[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2266,7 +2266,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[][] arrayToSafeIntArray(Object in, int[][] out, boolean signed)
     {
         return arrayToSafeIntArray(in, 0, out, 0, -1, signed, signed);
@@ -2310,7 +2310,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[][] arrayToSafeShortArray(Object in, int inOffset, short[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2324,7 +2324,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[][] arrayToSafeShortArray(Object in, short[][] out, boolean signed)
     {
         return arrayToSafeShortArray(in, 0, out, 0, -1, signed, signed);
@@ -2368,7 +2368,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[][] arrayToSafeByteArray(Object in, int inOffset, byte[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2382,7 +2382,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[][] arrayToSafeByteArray(Object in, byte[][] out, boolean signed)
     {
         return arrayToSafeByteArray(in, 0, out, 0, -1, signed, signed);
@@ -2554,7 +2554,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int[][] longArrayToSafeIntArray(long[][] in, int inOffset, int[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2571,7 +2571,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[][] longArrayToSafeShortArray(long[][] in, int inOffset, short[][] out, int outOffset,
             int length, boolean signed)
     {
@@ -2589,7 +2589,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[][] longArrayToSafeByteArray(long[][] in, int inOffset, byte[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2645,7 +2645,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static short[][] intArrayToSafeShortArray(int[][] in, int inOffset, short[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2662,7 +2662,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[][] intArrayToSafeByteArray(int[][] in, int inOffset, byte[][] out, int outOffset, int length,
             boolean signed)
     {
@@ -2705,7 +2705,7 @@ public class Array2DUtil
      * @param signed boolean
      * @return 2D array
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static byte[][] shortArrayToSafeByteArray(short[][] in, int inOffset, byte[][] out, int outOffset,
             int length, boolean signed)
     {

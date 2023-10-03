@@ -478,7 +478,7 @@ public abstract class AbstractImageProvider implements ImageProvider
     // /**
     // * @deprecated Use {@link #getImageByTile(int, int, Rectangle, int, int, int, int, int, ProgressListener)} instead.
     // */
-    // @Deprecated
+    // @Deprecated(since = "2.4.3", forRemoval = true)
     // public IcyBufferedImage getImageByTile(int series, int resolution, int z, int t, int c, int tileW, int tileH,
     // ProgressListener listener) throws UnsupportedFormatException, IOException
     // {
@@ -488,7 +488,7 @@ public abstract class AbstractImageProvider implements ImageProvider
     // /**
     // * @deprecated USe {@link ImageUtil#getTileList(int, int, int, int)} instead
     // */
-    // @Deprecated
+    // @Deprecated(since = "2.4.3", forRemoval = true)
     // public static List<Rectangle> getTileList(int sizeX, int sizeY, int tileW, int tileH)
     // {
     // return ImageUtil.getTileList(sizeX, sizeY, tileW, tileH);

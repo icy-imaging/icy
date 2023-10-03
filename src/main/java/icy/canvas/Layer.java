@@ -54,7 +54,7 @@ public class Layer implements OverlayListener, Comparable<Layer>
     /**
      * @deprecated Use {@link #PROPERTY_OPACITY} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public final static String PROPERTY_ALPHA = "alpha";
     public final static String PROPERTY_OPACITY = "opacity";
     public final static String PROPERTY_VISIBLE = "visible";
@@ -117,7 +117,7 @@ public class Layer implements OverlayListener, Comparable<Layer>
     /**
      * @deprecated Use {@link #Layer(Overlay)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Layer(Painter painter, String name)
     {
         this(createOverlayWrapper(painter, name));
@@ -126,7 +126,7 @@ public class Layer implements OverlayListener, Comparable<Layer>
     /**
      * @deprecated Use {@link #Layer(Overlay)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Layer(Painter painter)
     {
         this(painter, null);
@@ -143,7 +143,7 @@ public class Layer implements OverlayListener, Comparable<Layer>
     /**
      * @deprecated Use {@link #getOverlay()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Painter getPainter()
     {
         final Overlay result = getOverlay();
@@ -219,7 +219,7 @@ public class Layer implements OverlayListener, Comparable<Layer>
      * 
      * @deprecated Use {@link #getCanBeRemoved()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean isFixed()
     {
         return !getCanBeRemoved();
@@ -228,7 +228,7 @@ public class Layer implements OverlayListener, Comparable<Layer>
     /**
      * @deprecated Use {@link #setCanBeRemoved(boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setFixed(boolean value)
     {
         setCanBeRemoved(value);
@@ -345,7 +345,7 @@ public class Layer implements OverlayListener, Comparable<Layer>
     /**
      * @deprecated Use {@link #getOpacity()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public float getAlpha()
     {
         return getOpacity();
@@ -354,7 +354,7 @@ public class Layer implements OverlayListener, Comparable<Layer>
     /**
      * @deprecated Use {@link #setOpacity(float)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setAlpha(float value)
     {
         setOpacity(value);

@@ -123,7 +123,7 @@ public class ImageDataIterator implements DataIterator
     /**
      * @deprecated Use {@link #ImageDataIterator(IcyBufferedImage, Rectangle, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageDataIterator(IcyBufferedImage image, int startX, int endX, int startY, int endY, int startC, int endC)
     {
         this(image, new Rectangle(startX, startY, (endX - startX) + 1, (endY - startY) + 1), startC);
@@ -132,7 +132,7 @@ public class ImageDataIterator implements DataIterator
     /**
      * @deprecated Use {@link #ImageDataIterator(IcyBufferedImage, Rectangle, int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageDataIterator(IcyBufferedImage image, int startX, int endX, int startY, int endY, int c)
     {
         this(image, new Rectangle(startX, startY, (endX - startX) + 1, (endY - startY) + 1), c);
@@ -155,7 +155,7 @@ public class ImageDataIterator implements DataIterator
      * @deprecated Use {@link #ImageDataIterator(IcyBufferedImage, int)} instead.<br>
      *             The <code>ImageDataIterator</code> iterate only on single channel data.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageDataIterator(IcyBufferedImage image)
     {
         this(image, image.getBounds(), 0);
@@ -179,7 +179,7 @@ public class ImageDataIterator implements DataIterator
     /**
      * @deprecated Use {@link #ImageDataIterator(IcyBufferedImage, BooleanMask2D, int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageDataIterator(IcyBufferedImage image, BooleanMask2D maskXY)
     {
         this(image, maskXY, 0);
@@ -191,7 +191,7 @@ public class ImageDataIterator implements DataIterator
      *             You can use the {@link ROI#getBooleanMask2D(int, int, int, boolean)} method to
      *             retrieve the boolean mask from the ROI.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageDataIterator(IcyBufferedImage image, ROI roi) throws InterruptedException
     {
         this(image, roi.getBooleanMask2D(0, 0, 0, false));
@@ -348,7 +348,7 @@ public class ImageDataIterator implements DataIterator
     /**
      * @deprecated Use {@link #getX()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getPositionX()
     {
         return getX();
@@ -357,7 +357,7 @@ public class ImageDataIterator implements DataIterator
     /**
      * @deprecated Use {@link #getY()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getPositionY()
     {
         return getY();
@@ -366,7 +366,7 @@ public class ImageDataIterator implements DataIterator
     /**
      * @deprecated Use {@link #getC()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getPositionC()
     {
         return getC();

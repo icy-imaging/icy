@@ -172,7 +172,7 @@ public class Array3DUtil
      * @param len int
      * @return Create a new 3D array with specified data type and length
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Object[][] createArray(int dataType, int len)
     {
         return createArray(DataType.getDataType(dataType), len);

@@ -87,7 +87,7 @@ public class NetworkUtil
     /**
      * @deprecated Use {@link WebInterface#reportError(icy.plugin.PluginDescriptor, String, String)}
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     static final String REPORT_URL = WEBSITE_URL + "index.php";
 
     /**
@@ -250,12 +250,12 @@ public class NetworkUtil
     /**
      * Internet monitor
      */
-    public static final InternetMonitorThread internetMonitor = new InternetMonitorThread();
+    private static final InternetMonitorThread internetMonitor = new InternetMonitorThread();
 
     /**
      * Network module enabled flag. Set at Icy start up
      */
-    public static final boolean networkEnabled = Icy.isNetworkEnabled();
+    public static final boolean networkEnabled = !Icy.isNetworkDisabled();
     /**
      * Internet access up flag
      */
@@ -277,9 +277,9 @@ public class NetworkUtil
             final int javaInt = javaVersion.getMajor();
 
             if (javaInt == 7)
-                httpsSupported = javaVersion.isGreaterOrEqual(new Version("7.0.111"));
+                httpsSupported = javaVersion.isGreaterOrEqual(new Version(7,0, 111));
             else if (javaInt == 8)
-                httpsSupported = javaVersion.isGreaterOrEqual(new Version("8.0.101"));
+                httpsSupported = javaVersion.isGreaterOrEqual(new Version(8, 0, 101));
             else
                 httpsSupported = (javaInt >= 9);
 
@@ -313,7 +313,6 @@ public class NetworkUtil
         // }
         // catch (Exception e)
         // {
-        // // TODO Auto-generated catch block
         // e.printStackTrace();
         // }
 
@@ -600,7 +599,7 @@ public class NetworkUtil
     /**
      * @deprecated Use {@link #hasInternetAccess()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean hasInternetConnection()
     {
         return hasInternetAccess();
@@ -714,7 +713,7 @@ public class NetworkUtil
     /**
      * @deprecated Use {@link #openBrowser(String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void openURL(String url)
     {
         openBrowser(url);
@@ -723,7 +722,7 @@ public class NetworkUtil
     /**
      * @deprecated Use {@link #openBrowser(URL)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void openURL(URL url)
     {
         openBrowser(url);
@@ -732,7 +731,7 @@ public class NetworkUtil
     /**
      * @deprecated Use {@link #openBrowser(URI)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void openURL(URI uri)
     {
         openBrowser(uri);
@@ -1417,7 +1416,7 @@ public class NetworkUtil
      * @deprecated Use {@link WebInterface#reportError(icy.plugin.PluginDescriptor, String, String)}
      *             or {@link #postData(String, Map)} methods instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void report(final Map<String, String> values)
     {
         ThreadUtil.bgRun(new Runnable()
@@ -1442,7 +1441,7 @@ public class NetworkUtil
     /**
      * @deprecated Use {@link #getContentString(Map)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String getContentString(HashMap<String, String> values)
     {
         return getContentString((Map<String, String>) values);
@@ -1451,7 +1450,7 @@ public class NetworkUtil
     /**
      * @deprecated Use {@link #postData(String, Map, String, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String postData(String target, HashMap<String, String> values, String login, String pass)
             throws IOException
     {
@@ -1461,7 +1460,7 @@ public class NetworkUtil
     /**
      * @deprecated Use {@link #postData(String, Map)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static String postData(String target, HashMap<String, String> values) throws IOException
     {
         return postData(target, (Map<String, String>) values);
@@ -1470,7 +1469,7 @@ public class NetworkUtil
     /**
      * @deprecated Use {@link #report(Map)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void report(final HashMap<String, String> values)
     {
         report((Map<String, String>) values);

@@ -326,7 +326,7 @@ public class GuiUtil
      * 
      * @deprecated what was the goal of this method ???
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void setEnableContainer(Container container, boolean enable)
     {
         for (Component c : container.getComponents())
@@ -488,7 +488,7 @@ public class GuiUtil
     /**
      * @deprecated Use {@link GraphicsUtil#paintIcyBackGround(int, int, Graphics)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void paintBackGround(int width, int height, Graphics g)
     {
         GraphicsUtil.paintIcyBackGround(width, height, g);
@@ -497,7 +497,7 @@ public class GuiUtil
     /**
      * @deprecated Use {@link GraphicsUtil#paintIcyBackGround(Component, Graphics)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void paintBackGround(Component component, Graphics g)
     {
         GraphicsUtil.paintIcyBackGround(component, g);
@@ -506,7 +506,7 @@ public class GuiUtil
     /**
      * @deprecated Use {@link GraphicsUtil#paintIcyBackGround(Component, Graphics)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void paintBackGround(Image image)
     {
         GraphicsUtil.paintIcyBackGround(image);
@@ -515,7 +515,7 @@ public class GuiUtil
     /**
      * @deprecated Use {@link GraphicsUtil#getStringBounds(Graphics, Font, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Rectangle2D getStringBounds(Graphics g, Font f, String s)
     {
         return GraphicsUtil.getStringBounds(g, f, s);
@@ -524,7 +524,7 @@ public class GuiUtil
     /**
      * @deprecated Use {@link GraphicsUtil#getStringBounds(Component, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Rectangle2D getStringBounds(Component c, String s)
     {
         return GraphicsUtil.getStringBounds(c, s);
@@ -533,7 +533,7 @@ public class GuiUtil
     /**
      * @deprecated Use {@link GraphicsUtil#getStringBounds(Graphics, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Rectangle2D getStringBounds(Graphics g, String s)
     {
         return GraphicsUtil.getStringBounds(g, s);
@@ -542,7 +542,7 @@ public class GuiUtil
     /**
      * @deprecated uses {@link GraphicsUtil#drawHCenteredString(Graphics, String, int, int, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void drawHCenteredText(Graphics g, String string, int w, int y)
     {
         GraphicsUtil.drawHCenteredString(g, string, w / 2, y, false);
@@ -551,7 +551,7 @@ public class GuiUtil
     /**
      * @deprecated Use {@link GraphicsUtil#drawCenteredString(Graphics, String, int, int, boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void drawCenteredText(Graphics g, String string, int w, int h)
     {
         GraphicsUtil.drawCenteredString(g, string, w / 2, h / 2, false);

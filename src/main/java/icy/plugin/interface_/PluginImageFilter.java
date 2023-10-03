@@ -30,7 +30,7 @@ import javax.swing.JPanel;
  * @author Fabrice de Chaumont
  * @deprecated
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface PluginImageFilter
 {
     public IcyBufferedImage processImage(IcyBufferedImage icyBufferedImage);

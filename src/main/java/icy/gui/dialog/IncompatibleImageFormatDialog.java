@@ -33,7 +33,7 @@ import javax.swing.SwingConstants;
  * @deprecated Not anymore used.
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class IncompatibleImageFormatDialog extends ActionFrame
 {
     public IncompatibleImageFormatDialog()

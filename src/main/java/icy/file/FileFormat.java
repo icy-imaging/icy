@@ -23,7 +23,7 @@ import loci.formats.gui.ExtensionFileFilter;
 /**
  * @deprecated Use {@link ImageFileFormat} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public enum FileFormat
 {
     TIFF
@@ -153,7 +153,7 @@ public enum FileFormat
     /**
      * @deprecated Use {@link #getFileFormat(String, FileFormat)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static FileFormat getFileFormat(String ext)
     {
         return getFileFormat(ext, null);

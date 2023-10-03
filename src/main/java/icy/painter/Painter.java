@@ -33,7 +33,7 @@ import java.awt.geom.Point2D;
  * @deprecated Prefer the {@link Overlay} class to this interface when possible.
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface Painter
 {
     /**

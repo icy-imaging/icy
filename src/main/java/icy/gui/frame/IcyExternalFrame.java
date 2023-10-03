@@ -257,7 +257,7 @@ public class IcyExternalFrame extends JFrame {
     /**
      * @deprecated Override deprecated method
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void reshape(int x, int y, int width, int height) {
         final Rectangle r = new Rectangle(x, y, width, height);

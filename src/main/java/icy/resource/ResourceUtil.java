@@ -257,42 +257,42 @@ public class ResourceUtil {
     /**
      * @deprecated Use {@link #ICON_DOC_NEW} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final Image ICON_NEWDOC = ICON_DOC_NEW;
     /**
      * @deprecated Use {@link #ICON_DOC_COPY} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final Image ICON_DOCCOPY = ICON_DOC_COPY;
     /**
      * @deprecated Use {@link #ICON_DOC_IMPORT} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final Image ICON_DOCIMPORT = ICON_DOC_IMPORT;
     /**
      * @deprecated Use {@link #ICON_DOC_EXPORT} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final Image ICON_DOCEXPORT = ICON_DOC_EXPORT;
     /**
      * @deprecated Use {@link #ICON_ARROW_DOWN} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final Image ICON_ARROW_BOTTOM = ICON_ARROW_DOWN;
     /**
      * @deprecated Use {@link #ICON_ARROW_UP} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final Image ICON_ARROW_TOP = ICON_ARROW_UP;
     /**
      * @deprecated Use {@link #ICON_WINDOW_EXPAND} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final Image ICON_EXPAND = ICON_WINDOW_EXPAND;
     /**
      * @deprecated Use {@link #ICON_WINDOW_COLLAPSE} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static final Image ICON_COLLAPSE = ICON_WINDOW_COLLAPSE;
 
     // color icons
@@ -553,7 +553,7 @@ public class ResourceUtil {
     /**
      * @deprecated use {@link #getAlphaIconAsImage(String, int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Image getBlackIconAsImage(String resourceName, int size) {
         return getAlphaIconAsImage(resourceName, size);
     }
@@ -561,7 +561,7 @@ public class ResourceUtil {
     /**
      * @deprecated use {@link #getAlphaIconAsImage(String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Image getBlackIconAsImage(String resourceName) {
         return getAlphaIconAsImage(resourceName);
     }
@@ -569,7 +569,7 @@ public class ResourceUtil {
     /**
      * @deprecated use {@link #getAlphaIcon(String, int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ImageIcon getBlackIcon(String resourceName, int size) {
         return getAlphaIcon(resourceName, size);
     }
@@ -577,7 +577,7 @@ public class ResourceUtil {
     /**
      * @deprecated use {@link #getAlphaIcon(String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ImageIcon getBlackIcon(String resourceName) {
         return getAlphaIcon(resourceName);
     }
@@ -585,7 +585,7 @@ public class ResourceUtil {
     /**
      * @deprecated use {@link #getAlphaIcon(String, int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ImageIcon getWhiteIcon(String resourceName, int size) {
         return getAlphaIcon(resourceName, size);
     }
@@ -593,7 +593,7 @@ public class ResourceUtil {
     /**
      * @deprecated use {@link #getAlphaIcon(String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ImageIcon getWhiteIcon(String resourceName) {
         return getAlphaIcon(resourceName);
     }
@@ -611,7 +611,7 @@ public class ResourceUtil {
     /**
      * @deprecated use {@link #getAlphaIcon(String, int)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ImageIcon getIcyIcon(String resourceName, int size) {
         return getAlphaIcon(resourceName, size);
     }
@@ -619,7 +619,7 @@ public class ResourceUtil {
     /**
      * @deprecated use {@link #getAlphaIcon(String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ImageIcon getIcyIcon(String resourceName) {
         return getAlphaIcon(resourceName);
     }

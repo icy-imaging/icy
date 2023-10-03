@@ -23,7 +23,7 @@ import icy.main.Icy;
 /**
  * @deprecated Use {@link InstanceProcessor} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class IdProcessor extends Processor
 {
 
@@ -35,7 +35,7 @@ public class IdProcessor extends Processor
      * @param maxProcessPerId maximum of resources for each id
      */
     @SuppressWarnings("unused")
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IdProcessor(int maxProcess, int maxProcessPerId)
     {
         super();

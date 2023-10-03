@@ -114,7 +114,7 @@ public class IcyUpdater
     /**
      * @deprecated Use {@link #checkUpdate(boolean)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void checkUpdate(boolean showProgress, boolean auto)
     {
         checkUpdate(!showProgress || auto);

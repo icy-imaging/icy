@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package icy.plugin;
 
 import icy.main.Icy;
@@ -210,7 +211,7 @@ public class PluginRepositoryLoader
                 {
                     // accept only if required plugins.kernel version is ok and beta accepted
                     if (ident.getRequiredKernelVersion().isLowerOrEqual(Icy.version)
-                            && (betaAllowed || (!ident.getVersion().isBeta())))
+                            && (betaAllowed || (!ident.getVersion().isSnapshot())))
                     {
                         // check if we have several version of the same plugin
                         final int ind = PluginIdent.getIndex(result, ident.getClassName());
@@ -218,7 +219,7 @@ public class PluginRepositoryLoader
                         if (ind != -1)
                         {
                             // replace old version if needed
-                            if (result.get(ind).isOlderOrEqual(ident))
+                            if (result.get(ind).isLowerOrEqual(ident))
                                 result.set(ind, ident);
                         }
                         else
@@ -371,7 +372,7 @@ public class PluginRepositoryLoader
     /**
      * @deprecated use {@link #isLoaded()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean isBasicLoaded()
     {
         return isLoaded();
@@ -380,7 +381,7 @@ public class PluginRepositoryLoader
     /**
      * @deprecated descriptor loading is now done per descriptor when needed
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean isDescriptorsLoaded()
     {
         return true;
@@ -389,7 +390,7 @@ public class PluginRepositoryLoader
     /**
      * @deprecated image loading is now done per descriptor when needed
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean isImagesLoaded()
     {
         return true;
@@ -398,7 +399,7 @@ public class PluginRepositoryLoader
     /**
      * @deprecated use {@link #waitLoaded()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void waitBasicLoaded()
     {
         waitLoaded();
@@ -407,7 +408,7 @@ public class PluginRepositoryLoader
     /**
      * @deprecated descriptor loading is now done per descriptor when needed
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void waitDescriptorsLoaded()
     {
         // do nothing

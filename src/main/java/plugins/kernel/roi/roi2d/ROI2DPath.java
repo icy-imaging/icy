@@ -106,7 +106,7 @@ public class ROI2DPath extends ROI2DShape
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DPath(Point2D pt, boolean cm)
     {
         this(pt);

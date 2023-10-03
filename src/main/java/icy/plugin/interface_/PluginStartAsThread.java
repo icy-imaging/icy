@@ -23,7 +23,7 @@ package icy.plugin.interface_;
  * 
  * @deprecated Use {@link PluginThreaded} or {@link PluginNoEDTConstructor} instead
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface PluginStartAsThread
 {
 

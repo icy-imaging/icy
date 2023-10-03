@@ -93,7 +93,7 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable
     /**
      * @deprecated Use {@link #SeriesSelectionDialog(SequenceFileImporter, String)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SeriesSelectionDialog(IFormatReader reader)
     {
         super("Series selection", null, Icy.getMainInterface().getMainFrame());
@@ -411,7 +411,7 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable
     /**
      * @deprecated Use {@link #SeriesSelectionDialog(SequenceFileImporter, String, OMEXMLMetadata)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public SeriesSelectionDialog(SequenceFileImporter importer, String id, OMEXMLMetadataImpl metadata)
             throws UnsupportedFormatException, IOException
     {

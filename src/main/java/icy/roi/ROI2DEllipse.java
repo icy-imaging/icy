@@ -25,13 +25,13 @@ import java.awt.geom.Rectangle2D;
 /**
  * @deprecated Use {@link plugins.kernel.roi.roi2d.ROI2DEllipse} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ROI2DEllipse extends plugins.kernel.roi.roi2d.ROI2DEllipse
 {
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DEllipse(Point2D topLeft, Point2D bottomRight, boolean cm)
     {
         super(topLeft, bottomRight);
@@ -53,7 +53,7 @@ public class ROI2DEllipse extends plugins.kernel.roi.roi2d.ROI2DEllipse
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DEllipse(Rectangle2D rectangle, boolean cm)
     {
         super(rectangle);
@@ -72,7 +72,7 @@ public class ROI2DEllipse extends plugins.kernel.roi.roi2d.ROI2DEllipse
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DEllipse(Point2D pt, boolean cm)
     {
         super(pt);

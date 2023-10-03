@@ -541,7 +541,7 @@ public class VtkUtil
     /**
      * @deprecated Use {@link #hasProp(vtkRenderer, vtkProp)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean findProp(vtkRenderer renderer, vtkProp actor)
     {
         return hasProp(renderer, actor);
@@ -550,7 +550,7 @@ public class VtkUtil
     /**
      * @deprecated Use {@link #hasProp(vtkRenderer, vtkProp)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean findActor(vtkRenderer renderer, vtkActor actor)
     {
         if ((renderer == null) || (actor == null))
@@ -578,7 +578,7 @@ public class VtkUtil
     /**
      * @deprecated Use {@link #hasProp(vtkRenderer, vtkProp)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean findActor2D(vtkRenderer renderer, vtkActor2D actor)
     {
         if ((renderer == null) || (actor == null))
@@ -620,7 +620,7 @@ public class VtkUtil
     /**
      * @deprecated Use {@link #addProp(vtkRenderer, vtkProp)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void addActor(vtkRenderer renderer, vtkActor actor)
     {
         if ((renderer == null) || (actor == null))
@@ -634,7 +634,7 @@ public class VtkUtil
     /**
      * @deprecated Use {@link #addProp(vtkRenderer, vtkProp)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void addActor2D(vtkRenderer renderer, vtkActor2D actor)
     {
         if ((renderer == null) || (actor == null))
@@ -858,7 +858,7 @@ public class VtkUtil
     /**
      * @deprecated Uses {@link ROI3DArea#ROI3DArea(BooleanMask3D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static ROI getROIFromBinaryImage(vtkImageData image, boolean force3DROI)
     {
         final BooleanMask3D mask = getBooleanMaskFromBinaryImage(image, true);
@@ -1137,9 +1137,11 @@ public class VtkUtil
         whiteImage.AllocateScalars(VtkUtil.VTK_UNSIGNED_CHAR, 1);
 
         // fill the image with foreground voxels
-        final int len = whiteImage.GetNumberOfPoints();
+        final long len = whiteImage.GetNumberOfPoints();
+        if (len >= Integer.MAX_VALUE)
+            System.err.printf("whiteImage.GetNumberOfPoints() [%d] is superior to Integer.MAX_VALUE [%d]\r\n", len, Integer.MAX_VALUE);
         // allocate java array
-        final byte[] javaArray = new byte[len];
+        final byte[] javaArray = new byte[(int) len];
         // get VTK array
         final vtkUnsignedCharArray vtkArray = (vtkUnsignedCharArray) whiteImage.GetPointData().GetScalars();
 
@@ -1183,7 +1185,7 @@ public class VtkUtil
     /**
      * @deprecated Use {@link #getBinaryImageData(vtkPolyData, double[])} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static vtkImageData polyDataToImageData(vtkPolyData polyData, double space[])
     {
         return getBinaryImageData(polyData, space);
@@ -1346,7 +1348,7 @@ public class VtkUtil
      */
     public static void setPolyDataColor(vtkPolyData polyData, Color color, VtkCanvas canvas)
     {
-        final int numPts = polyData.GetNumberOfPoints();
+        final long numPts = polyData.GetNumberOfPoints();
         vtkUnsignedCharArray colors = null;
 
         // try to recover colors object
@@ -1376,12 +1378,16 @@ public class VtkUtil
             polyData.GetPointData().SetScalars(colors);
         }
 
-        final int len = numPts * 3;
+        final long len = numPts * 3;
 
         final byte r = (byte) color.getRed();
         final byte g = (byte) color.getGreen();
         final byte b = (byte) color.getBlue();
-        final byte[] data = new byte[len];
+
+        if (len >= Integer.MAX_VALUE)
+            System.err.printf("polyData.GetNumberOfPoints() * 3 [%d] is superior to Integer.MAX_VALUE [%d]\r\n", len, Integer.MAX_VALUE);
+
+        final byte[] data = new byte[(int) len];
 
         for (int i = 0; i < len; i += 3)
         {

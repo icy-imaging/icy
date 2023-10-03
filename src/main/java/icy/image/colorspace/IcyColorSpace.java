@@ -481,7 +481,7 @@ public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColo
     /**
      * @deprecated Use {@link #getColorMap(int)} instead (different case).
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public IcyColorMap getColormap(int component)
     {
         return getColorMap(component);
@@ -505,7 +505,7 @@ public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColo
     /**
      * @deprecated Use {@link #setColorMap(int, IcyColorMap, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setColormap(int component, IcyColorMap map)
     {
         setColorMap(component, map, true);
@@ -514,7 +514,7 @@ public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColo
     /**
      * @deprecated Use <code>setColormap(channel, map)</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void copyColormap(int component, IcyColorMap map, boolean copyName, boolean copyAlpha)
     {
         setColorMap(component, map, copyAlpha);
@@ -526,7 +526,7 @@ public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColo
     /**
      * @deprecated Use <code>setColormap(channel, map)</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void copyColormap(int component, IcyColorMap map, boolean copyName)
     {
         setColorMap(component, map, true);
@@ -538,7 +538,7 @@ public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColo
     /**
      * @deprecated Use <code>setColormap(channel, map)</code> instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void copyColormap(int component, IcyColorMap map)
     {
         setColorMap(component, map, true);
@@ -745,7 +745,7 @@ public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColo
     /**
      * @deprecated Use {@link #setColorMaps(ColorModel)} instead (different case).
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setColormaps(ColorModel cm)
     {
         setColorMaps(cm);
@@ -754,7 +754,7 @@ public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColo
     /**
      * @deprecated Use {@link #setColorMaps(ColorModel)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void copyColormaps(ColorModel cm)
     {
         setColorMaps(cm);
@@ -788,7 +788,7 @@ public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColo
     /**
      * @deprecated Use {@link #setColorMaps(IcyColorSpace, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setColormaps(IcyColorSpace source)
     {
         setColorMaps(source, true);
@@ -797,7 +797,7 @@ public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColo
     /**
      * @deprecated Use {@link #setColorMaps(IcyColorSpace, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void copyColormaps(IcyColorSpace source)
     {
         setColorMaps(source, true);

@@ -21,7 +21,7 @@ package icy.common;
 /**
  * @deprecated Replaced by the {@link CollapsibleEvent}
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface EventHierarchicalChecker
 {
     public boolean isEventRedundantWith(EventHierarchicalChecker event);

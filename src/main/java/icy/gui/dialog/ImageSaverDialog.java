@@ -23,7 +23,7 @@ import icy.sequence.Sequence;
 /**
  * @deprecated Use {@link SaveDialog} instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public class ImageSaverDialog extends SaverDialog
 {
     /**
@@ -34,7 +34,7 @@ public class ImageSaverDialog extends SaverDialog
     /**
      * @deprecated Use {@link LoaderDialog.AllImagesFileFilter} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageSaverDialog(Sequence sequence, int defZ, int defT, boolean autoSave)
     {
         super(sequence, defZ, defT, autoSave);
@@ -43,7 +43,7 @@ public class ImageSaverDialog extends SaverDialog
     /**
      * @deprecated Use {@link LoaderDialog.AllImagesFileFilter} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageSaverDialog(Sequence sequence, int defZ, int defT)
     {
         super(sequence, defZ, defT);
@@ -52,7 +52,7 @@ public class ImageSaverDialog extends SaverDialog
     /**
      * @deprecated Use {@link LoaderDialog.AllImagesFileFilter} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageSaverDialog(Sequence sequence, boolean autoSave)
     {
         super(sequence, autoSave);
@@ -61,7 +61,7 @@ public class ImageSaverDialog extends SaverDialog
     /**
      * @deprecated Use {@link LoaderDialog.AllImagesFileFilter} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ImageSaverDialog(Sequence sequence)
     {
         super(sequence);

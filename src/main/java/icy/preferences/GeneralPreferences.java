@@ -87,7 +87,7 @@ public class GeneralPreferences
      * @deprecated Use {@link #getPreferences()} instead
      * @return XML Preferences
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static XMLPreferences getPreferencesGeneral()
     {
         return getPreferences();

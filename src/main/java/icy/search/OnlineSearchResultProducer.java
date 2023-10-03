@@ -40,7 +40,7 @@ public abstract class OnlineSearchResultProducer extends SearchResultProducer
     /**
      * @deprecated Use {@link WebInterface#doSearch(String, String)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected static final String SEARCH_URL = NetworkUtil.WEBSITE_URL + "search/search.php?search=";
 
     public static final long REQUEST_INTERVAL = 250;
@@ -119,7 +119,7 @@ public abstract class OnlineSearchResultProducer extends SearchResultProducer
      * @param consumer search
      * @param doc document
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void doSearch(Document doc, String[] words, SearchResultConsumer consumer)
     {
         // default implementation, does nothing...

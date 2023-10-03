@@ -169,7 +169,7 @@ public class LUT implements IcyColorSpaceListener, ScalerListener, ChangeListene
         /**
          * @deprecated Use {@link #setColorMap(IcyColorMap, boolean)} instead.
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public void setColorMap(IcyColorMap colorMap)
         {
             setColorMap(colorMap, true);
@@ -178,7 +178,7 @@ public class LUT implements IcyColorSpaceListener, ScalerListener, ChangeListene
         /**
          * @deprecated Use {@link #setColorMap(IcyColorMap, boolean)} instead.
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public void copyColorMap(IcyColorMap colorMap)
         {
             setColorMap(colorMap, true);
@@ -248,7 +248,7 @@ public class LUT implements IcyColorSpaceListener, ScalerListener, ChangeListene
         /**
          * @deprecated Use {@link #getChannel()} instead.
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public int getComponent()
         {
             return getChannel();
@@ -384,7 +384,7 @@ public class LUT implements IcyColorSpaceListener, ScalerListener, ChangeListene
     /**
      * @deprecated Use {@link #getLutChannels()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ArrayList<LUTBand> getLutBands()
     {
         final ArrayList<LUTBand> result = new ArrayList<LUTBand>();
@@ -398,7 +398,7 @@ public class LUT implements IcyColorSpaceListener, ScalerListener, ChangeListene
     /**
      * @deprecated Use {@link #getLutChannel(int)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public LUTBand getLutBand(int band)
     {
         return getLutBands().get(band);
@@ -415,7 +415,7 @@ public class LUT implements IcyColorSpaceListener, ScalerListener, ChangeListene
     /**
      * @deprecated Use {@link #getNumChannel()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public int getNumComponents()
     {
         return getNumChannel();
@@ -468,7 +468,7 @@ public class LUT implements IcyColorSpaceListener, ScalerListener, ChangeListene
     /**
      * @deprecated Use {@link #setScalers(LUT)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void copyScalers(LUT lut)
     {
         setScalers(lut);
@@ -490,7 +490,7 @@ public class LUT implements IcyColorSpaceListener, ScalerListener, ChangeListene
     /**
      * @deprecated USe {@link #setColorMaps(LUT, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void setColormaps(LUT lut)
     {
         setColorMaps(lut, true);
@@ -499,7 +499,7 @@ public class LUT implements IcyColorSpaceListener, ScalerListener, ChangeListene
     /**
      * @deprecated Use {@link #setColorMaps(LUT, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void copyColormaps(LUT lut)
     {
         setColorMaps(lut, true);

@@ -23,7 +23,7 @@ import java.util.EventListener;
 /**
  * @deprecated Use {@link Overlay} and {@link OverlayListener} classes instead.
  */
-@Deprecated
+@Deprecated(since = "2.4.3", forRemoval = true)
 public interface PainterListener extends EventListener
 {
     /**
@@ -31,6 +31,6 @@ public interface PainterListener extends EventListener
      *             {@link OverlayListener#overlayChanged(OverlayEvent)} event instead.
      * @param event event
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void painterChanged(PainterEvent event);
 }

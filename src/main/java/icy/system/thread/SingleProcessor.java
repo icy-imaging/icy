@@ -71,7 +71,7 @@ public class SingleProcessor extends Processor
      * @param task running task
      * @return true if submited task is not null
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public synchronized boolean requestProcess(Runnable task)
     {
         return submit(task) != null;
@@ -83,7 +83,7 @@ public class SingleProcessor extends Processor
      * @param onAWTEventThread thread listener
      * @return true if submited task is not null
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public synchronized boolean requestProcess(Runnable task, boolean onAWTEventThread)
     {
         return submit(task, onAWTEventThread) != null;

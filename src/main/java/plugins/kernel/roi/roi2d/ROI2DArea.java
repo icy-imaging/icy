@@ -93,7 +93,7 @@ public class ROI2DArea extends ROI2D
         /**
          * @deprecated Use {@link #getOpacity()} instead.
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public static final float CONTENT_ALPHA = 0.3f;
 
         private static final float MIN_CURSOR_SIZE = 0.3f;
@@ -441,7 +441,7 @@ public class ROI2DArea extends ROI2D
         /**
          * @deprecated Use {@link #getBrushPosition()} instead.
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public Point2D getCursorPosition()
         {
             return getBrushPosition();
@@ -450,7 +450,7 @@ public class ROI2DArea extends ROI2D
         /**
          * @deprecated Use {@link #setBrushPosition(Point2D)} instead.
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public void setCursorPosition(Point2D position)
         {
             setBrushPosition(position);
@@ -481,7 +481,7 @@ public class ROI2DArea extends ROI2D
         /**
          * @deprecated Use {@link #getBrushSize()} instead
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public float getCursorSize()
         {
             return getBrushSize();
@@ -490,7 +490,7 @@ public class ROI2DArea extends ROI2D
         /**
          * @deprecated Use {@link #setBrushSize(float)} instead
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public void setCursorSize(float value)
         {
             setBrushSize(value);
@@ -519,7 +519,7 @@ public class ROI2DArea extends ROI2D
         /**
          * @deprecated Use {@link #getBrushColor()} instead
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public Color getCursorColor()
         {
             return getBrushColor();
@@ -528,7 +528,7 @@ public class ROI2DArea extends ROI2D
         /**
          * @deprecated Use {@link #setBrushColor(Color)} instead
          */
-        @Deprecated
+        @Deprecated(since = "2.4.3", forRemoval = true)
         public void setCursorColor(Color value)
         {
             setBrushColor(value);
@@ -1146,7 +1146,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated Use {@link #ROI2DArea(Point5D)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public ROI2DArea(Point2D position, boolean cm)
     {
         this(position);
@@ -1255,7 +1255,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated Use {@link #optimizeBounds()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void optimizeBounds(boolean removeIfEmpty)
     {
         optimizeBounds();
@@ -1346,7 +1346,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated Use {@link #getDisplayColor()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public Color getMaskColor()
     {
         return getOverlay().getDisplayColor();
@@ -1514,7 +1514,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated Use {@link #setPoint(int, int, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void updateMask(int x, int y, boolean remove)
     {
         setPoint(x, y, !remove);
@@ -1807,7 +1807,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated Use {@link #subtract(ROI2DArea)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void remove(ROI2DArea roi)
     {
         subtract(roi);
@@ -1816,7 +1816,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated Use {@link #subtract(BooleanMask2D)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void remove(BooleanMask2D mask)
     {
         subtract(mask);
@@ -1896,7 +1896,7 @@ public class ROI2DArea extends ROI2D
         updateMask(shape, remove, true, false, false);
     }
 
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
     public ROI2DAreaPainter getPainter()
     {
@@ -1924,7 +1924,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated useless method.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean canAddPoint()
     {
         return true;
@@ -1933,7 +1933,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated useless method.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean canRemovePoint()
     {
         return true;
@@ -1942,7 +1942,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated Use {@link #addBrush(Point2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean addPointAt(Point2D pos, boolean ctrl)
     {
         addBrush(pos);
@@ -1952,7 +1952,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated Use {@link #removeBrush(Point2D)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean removePointAt(IcyCanvas canvas, Point2D pos)
     {
         removeBrush(pos);
@@ -1962,7 +1962,7 @@ public class ROI2DArea extends ROI2D
     /**
      * @deprecated Useless method.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     protected boolean removeSelectedPoint(IcyCanvas canvas, Point2D imagePoint)
     {
         // no selected point for this ROI

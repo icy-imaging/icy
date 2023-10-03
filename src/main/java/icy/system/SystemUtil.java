@@ -260,7 +260,7 @@ public class SystemUtil
     /**
      * @deprecated Use {@link #getMenuCtrlMask()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getCtrlMask()
     {
         return getMenuCtrlMask();
@@ -285,7 +285,7 @@ public class SystemUtil
     /**
      * @deprecated Use {@link #getMenuCtrlMask()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getSystemCtrlMask()
     {
         return getMenuCtrlMask();
@@ -323,7 +323,7 @@ public class SystemUtil
     /**
      * @deprecated Use {@link #getDefaultGraphicsConfiguration()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static GraphicsConfiguration getSystemGraphicsConfiguration()
     {
         return getDefaultGraphicsConfiguration();
@@ -590,7 +590,7 @@ public class SystemUtil
     /**
      * @deprecated Use {@link #getNumberOfCPUs()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getAvailableProcessors()
     {
         return Runtime.getRuntime().availableProcessors();
@@ -623,7 +623,7 @@ public class SystemUtil
     /**
      * @deprecated Use {@link #getJavaAllocatedMemory()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static long getJavaTotalMemory()
     {
         return getJavaAllocatedMemory();
@@ -688,7 +688,7 @@ public class SystemUtil
     /**
      * @deprecated Use {@link #getTotalMemory()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static long getSystemTotalMemory()
     {
         return getTotalMemory();
@@ -710,7 +710,7 @@ public class SystemUtil
     /**
      * @deprecated Use {@link #getFreeMemory()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static long getSystemFreeMemory()
     {
         return getFreeMemory();
@@ -732,7 +732,7 @@ public class SystemUtil
     /**
      * @deprecated Use {@link #getProcessCpuTime()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static long getSystemProcessCpuTime()
     {
         return getProcessCpuTime();
@@ -780,7 +780,7 @@ public class SystemUtil
     /**
      * @deprecated Use {@link #getCpuLoad()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getSystemCpuLoad()
     {
         return getCpuLoad();
@@ -875,7 +875,7 @@ public class SystemUtil
             }
         }
 
-        return new Version(version);
+        return Version.fromString(version);
     }
 
     /**
@@ -979,7 +979,7 @@ public class SystemUtil
     /**
      * @deprecated Use {@link #isWindows()} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean isWindow()
     {
         return isWindows();
@@ -1052,7 +1052,7 @@ public class SystemUtil
     /**
      * @deprecated Not allowed since Java 12 so don't use it !
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean addToJavaLibraryPath(String directories[])
     {
         try

@@ -128,16 +128,16 @@ public abstract class IcyAbstractAction extends AbstractAction {
         this(name, null, null, 0, 0, false, null);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public IcyAbstractAction(
-            String name, 
-            IcyIcon icon, 
-            String description, 
-            String longDescription, 
-            int keyCode,
-            int modifiers, 
-            boolean bgProcess, 
-            String processMessage
+            final String name,
+            final IcyIcon icon,
+            final String description,
+            final String longDescription,
+            final int keyCode,
+            final int modifiers,
+            final boolean bgProcess,
+            final String processMessage
     ) {
         super(name, icon);
 
@@ -156,43 +156,43 @@ public abstract class IcyAbstractAction extends AbstractAction {
         processing = false;
     }
 
-    @Deprecated
-    public IcyAbstractAction(String name, IcyIcon icon, String description, String longDescription, int keyCode, int modifiers) {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final String longDescription, final int keyCode, final int modifiers) {
         this(name, icon, description, longDescription, keyCode, modifiers, false, null);
     }
 
-    @Deprecated
-    public IcyAbstractAction(String name, IcyIcon icon, String description, String longDescription, boolean bgProcess, String processMessage) {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final String longDescription, final boolean bgProcess, final String processMessage) {
         this(name, icon, description, longDescription, 0, 0, bgProcess, processMessage);
     }
 
-    @Deprecated
-    public IcyAbstractAction(String name, IcyIcon icon, String description, boolean bgProcess, String processMessage) {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final boolean bgProcess, final String processMessage) {
         this(name, icon, description, null, 0, 0, bgProcess, processMessage);
     }
 
-    @Deprecated
-    public IcyAbstractAction(String name, IcyIcon icon, String description, int keyCode, int modifiers) {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final int keyCode, final int modifiers) {
         this(name, icon, description, null, keyCode, modifiers, false, null);
     }
 
-    @Deprecated
-    public IcyAbstractAction(String name, IcyIcon icon, String description, int keyCode) {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final int keyCode) {
         this(name, icon, description, null, keyCode, 0, false, null);
     }
 
-    @Deprecated
-    public IcyAbstractAction(String name, IcyIcon icon, String description, String longDescription) {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final String longDescription) {
         this(name, icon, description, longDescription, 0, 0, false, null);
     }
 
-    @Deprecated
-    public IcyAbstractAction(String name, IcyIcon icon, String description) {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public IcyAbstractAction(final String name, final IcyIcon icon, final String description) {
         this(name, icon, description, null, 0, 0, false, null);
     }
 
-    @Deprecated
-    public IcyAbstractAction(String name, IcyIcon icon) {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public IcyAbstractAction(final String name, final IcyIcon icon) {
         this(name, icon, null, null, 0, 0, false, null);
     }
 
@@ -266,12 +266,12 @@ public abstract class IcyAbstractAction extends AbstractAction {
         return (String) getValue(Action.NAME);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public void setIcon(final IcyIcon value) {
         putValue(Action.SMALL_ICON, value);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public IcyIcon getIcon() {
         return (IcyIcon) getValue(Action.SMALL_ICON);
     }
@@ -477,7 +477,7 @@ public abstract class IcyAbstractAction extends AbstractAction {
     /**
      * @deprecated Use {@link #executeNow()} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean doAction() {
         return doAction(new ActionEvent(this, 0, ""));
     }

@@ -54,7 +54,7 @@ import ij.gui.ImageWindow;
 /**
  * @author Stephane
  */
-@Deprecated
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class ImageJTask extends RibbonTask implements PropertyChangeListener
 {
     static final Image detachForIJ = ResourceUtil.getImage("help/ij_detached.jpg");

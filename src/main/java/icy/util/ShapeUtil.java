@@ -68,7 +68,7 @@ public class ShapeUtil
     /**
      * @deprecated Use {@link BooleanOperator} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static enum ShapeOperation
     {
         OR
@@ -169,7 +169,7 @@ public class ShapeUtil
     /**
      * @deprecated Use {@link #merge(List, BooleanOperator)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Shape merge(Shape[] shapes, ShapeOperation operation)
     {
         return merge(Arrays.asList(shapes), operation.getBooleanOperator());
@@ -195,7 +195,7 @@ public class ShapeUtil
     /**
      * @deprecated Use {@link #union(Shape, Shape)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static Shape add(Shape shape1, Shape shape2)
     {
         return union(shape1, shape2);
@@ -248,7 +248,7 @@ public class ShapeUtil
     /**
      * @deprecated Use {@link #exclusiveUnion(Shape, Shape)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static AreaX xor(Shape shape1, Shape shape2)
     {
         return exclusiveUnion(shape1, shape2);
@@ -684,7 +684,7 @@ public class ShapeUtil
     /**
      * @deprecated Use {@link GraphicsUtil#drawPathIterator(PathIterator, Graphics2D)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void drawFromPath(PathIterator path, final Graphics2D g)
     {
         GraphicsUtil.drawPathIterator(path, g);

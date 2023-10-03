@@ -290,7 +290,7 @@ public class PluginInstaller implements Runnable
     /**
      * @deprecated Use {@link #desinstall(PluginDescriptor, boolean, boolean)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static void desinstall(PluginDescriptor plugin, boolean showConfirm)
     {
         desinstall(plugin, showConfirm, showConfirm);

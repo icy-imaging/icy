@@ -228,7 +228,7 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
      * @param words
      *        array of strings
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void search(String[] words, SearchResultConsumer consumer)
     {
         if (words.length > 0)
@@ -275,7 +275,7 @@ public abstract class SearchResultProducer implements Comparable<SearchResultPro
      *        consumer
      * @deprecated Use {@link #doSearch(String, SearchResultConsumer)} instead
      */
-    @Deprecated
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void doSearch(String[] words, SearchResultConsumer consumer)
     {
         // default implementation, does nothing...
