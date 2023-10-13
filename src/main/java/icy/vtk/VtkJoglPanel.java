@@ -46,7 +46,6 @@ public class VtkJoglPanel extends GLJPanel
                 // Init VTK OpenGL RenderWindow
                 rw.SetMapped(1);
                 rw.SetPosition(0, 0);
-                setSize(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
                 rw.InitializeFromCurrentContext();
                 // rw.OpenGLInit();
 
@@ -64,7 +63,26 @@ public class VtkJoglPanel extends GLJPanel
         @Override
         public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
         {
-            setSize(width, height);
+            if (!windowset) return;
+            
+            lock();
+            try
+            {
+                // resize renderWindow and windowInteractor
+                rw.SetSize(width, height);
+                wi.SetSize(width, height);
+                sizeChanged();
+            }
+            finally
+            {
+                unlock();
+            }
+
+//            float[] scale = new float[2];
+//            getCurrentSurfaceScale(scale);
+//            
+//            System.out.println("scale = " + scale[0] + ", " + scale[1]);
+//            System.out.println("reshape(" + x + ", " + y + ", " + width + ", " + height + ")");
         }
 
         @Override
@@ -105,25 +123,6 @@ public class VtkJoglPanel extends GLJPanel
     public VtkJoglPanel()
     {
         super(new GLCapabilities(GLProfile.getMaximum(true)));
-
-        final float scales[] = new float[2];
-
-        // check that requested pixel scale is ok (can be 0 on OSX)
-        getRequestedSurfaceScale(scales);
-        // scale = 0 ? --> set to 1
-        if ((scales[0] == 0f) || (scales[1] == 0f))
-        {
-            try
-            {
-                final float[] reqPixelScale = (float[]) ReflectionUtil.getFieldObject(this, "reqPixelScale", true);
-                reqPixelScale[0] = 1f;
-                reqPixelScale[1] = 1f;
-            }
-            catch (Throwable t)
-            {
-                System.err.println("Couldn't patch GLJPanel.reqPixelScale[] field with Java 17, try using Java 8 instead if you experience some bugs with 3D VTK view.");
-            }
-        }
 
         rw = new vtkGenericOpenGLRenderWindow();
 
@@ -305,33 +304,6 @@ public class VtkJoglPanel extends GLJPanel
     public boolean isRendering()
     {
         return rendering;
-    }
-
-    @Override
-    public void setBounds(int x, int y, int width, int height)
-    {
-        super.setBounds(x, y, width, height);
-
-        if (windowset)
-        {
-            final int[] size = rw.GetSize();
-
-            // set size only if needed
-            if ((size[0] != width) || (size[1] != height))
-            {
-                lock();
-                try
-                {
-                    wi.SetSize(width, height);
-                    rw.SetSize(width, height);
-                    sizeChanged();
-                }
-                finally
-                {
-                    unlock();
-                }
-            }
-        }
     }
 
     /**
