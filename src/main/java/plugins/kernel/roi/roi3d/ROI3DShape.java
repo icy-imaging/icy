@@ -179,7 +179,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
 
             outlineActor.GetProperty().SetColor(r, g, b);
             final vtkProperty property = actor.GetProperty();
-            property.SetPointSize(getStroke());
+            property.SetPointSize((float) getStroke());
             property.SetColor(r, g, b);
         }
 
@@ -278,7 +278,7 @@ public class ROI3DShape extends ROI3D implements Shape3D
             final double r = col.getRed() / 255d;
             final double g = col.getGreen() / 255d;
             final double b = col.getBlue() / 255d;
-            final double strk = getStroke();
+            final float strk = (float) getStroke();
             // final float opacity = getOpacity();
 
             final IcyVtkPanel vtkPanel = (cnv != null) ? cnv.getVtkPanel() : null;

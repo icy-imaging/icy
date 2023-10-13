@@ -156,7 +156,7 @@ public class IcyVtkPanel extends VtkJoglPanel
         planeClip.setWireframeMode();
         planeClip.getActor().GetProperty().SetAmbient(0.8d);
         planeClip.getActor().GetProperty().SetDiffuse(0.2d);
-        planeClip.getActor().GetProperty().SetLineWidth(2d);
+        planeClip.getActor().GetProperty().SetLineWidth(2f);
         slicerRenderer.AddActor(arrowClip.getActor());
         slicerRenderer.AddActor(planeClip.getActor());
 

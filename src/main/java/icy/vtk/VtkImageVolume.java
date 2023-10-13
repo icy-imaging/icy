@@ -296,7 +296,7 @@ public class VtkImageVolume
             else
             {
                 mapper.AutoAdjustSampleDistancesOff();
-                mapper.SetImageSampleDistance(value);
+                mapper.SetImageSampleDistance((float) value);
             }
         }
         else if (volumeMapper instanceof vtkGPUVolumeRayCastMapper)
@@ -308,7 +308,7 @@ public class VtkImageVolume
             else
             {
                 mapper.AutoAdjustSampleDistancesOff();
-                mapper.SetImageSampleDistance(value);
+                mapper.SetImageSampleDistance((float) value);
             }
         }
         else if (volumeMapper instanceof vtkOpenGLGPUVolumeRayCastMapper)
@@ -320,7 +320,7 @@ public class VtkImageVolume
             else
             {
                 mapper.AutoAdjustSampleDistancesOff();
-                mapper.SetImageSampleDistance(value);
+                mapper.SetImageSampleDistance((float) value);
             }
         }
     }

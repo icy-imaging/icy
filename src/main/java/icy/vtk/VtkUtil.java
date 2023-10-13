@@ -1137,9 +1137,9 @@ public class VtkUtil
         whiteImage.AllocateScalars(VtkUtil.VTK_UNSIGNED_CHAR, 1);
 
         // fill the image with foreground voxels
-        final int len = whiteImage.GetNumberOfPoints();
+        final long len = whiteImage.GetNumberOfPoints();
         // allocate java array
-        final byte[] javaArray = new byte[len];
+        final byte[] javaArray = new byte[(int) len];
         // get VTK array
         final vtkUnsignedCharArray vtkArray = (vtkUnsignedCharArray) whiteImage.GetPointData().GetScalars();
 
@@ -1346,7 +1346,7 @@ public class VtkUtil
      */
     public static void setPolyDataColor(vtkPolyData polyData, Color color, VtkCanvas canvas)
     {
-        final int numPts = polyData.GetNumberOfPoints();
+        final long numPts = polyData.GetNumberOfPoints();
         vtkUnsignedCharArray colors = null;
 
         // try to recover colors object
@@ -1376,7 +1376,7 @@ public class VtkUtil
             polyData.GetPointData().SetScalars(colors);
         }
 
-        final int len = numPts * 3;
+        final int len = (int) (numPts * 3);
 
         final byte r = (byte) color.getRed();
         final byte g = (byte) color.getGreen();

@@ -164,7 +164,7 @@ public abstract class ROI3DStackShape extends ROI3DStack<ROI2DShape>
 
             outlineActor.GetProperty().SetColor(r, g, b);
             final vtkProperty property = actor.GetProperty();
-            property.SetPointSize(getStroke());
+            property.SetPointSize((float) getStroke());
             property.SetColor(r, g, b);
         }
 
@@ -331,7 +331,7 @@ public abstract class ROI3DStackShape extends ROI3DStack<ROI2DShape>
             final double r = col.getRed() / 255d;
             final double g = col.getGreen() / 255d;
             final double b = col.getBlue() / 255d;
-            final double strk = getStroke();
+            final float strk = (float) getStroke();
             // final float opacity = getOpacity();
 
             final IcyVtkPanel vtkPanel = (cnv != null) ? cnv.getVtkPanel() : null;
