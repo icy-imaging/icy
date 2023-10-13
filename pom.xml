@@ -7,7 +7,7 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>2.1.4</version>
+        <version>2.1.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>icy-kernel</artifactId>
@@ -206,58 +206,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-linux-amd64</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-linux-i586</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-macosx-universal</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-windows-amd64</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-windows-i586</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt-natives-linux-amd64</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt-natives-linux-i586</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt-natives-macosx-universal</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt-natives-windows-amd64</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt-natives-windows-i586</artifactId>
         </dependency>
 
         <dependency>
