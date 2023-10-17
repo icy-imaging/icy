@@ -399,7 +399,6 @@ public class IcyVtkPanel extends VtkJoglPanel
         try
         {
             float[] scale = getCurrentSurfaceScale(new float[2]);
-
             picker.Pick(x * scale[0], rw.GetSize()[1] - (y * scale[1]), 0, renderer);
         }
         finally
@@ -671,14 +670,15 @@ public class IcyVtkPanel extends VtkJoglPanel
         final int[] size = rw.GetSize();
         final int w = size[0];
         final int h = size[1];
-        final int x = e.getX();
-        final int y = e.getY();
+        float[] scale = getCurrentSurfaceScale(new float[2]);
+        final int x = (int) (e.getX() * scale[0]);
+        final int y = (int) (e.getY() * scale[1]);
 
         // are we on the volume slicer area ?
         if ((x > (w * (1d - (0.25d * ((double) h / (double) w))))) && (y > (h * (1d - 0.25d))))
         {
             // slicer plane picked ?
-            if (pick(x, y, slicerRenderer) == planeClip.getActor())
+            if (pick(e.getX(), e.getY(), slicerRenderer) == planeClip.getActor())
                 slicerPickState = SlicerPickState.PICK_PLANE;
             else
                 slicerPickState = SlicerPickState.PICK_VECTOR;
@@ -964,8 +964,9 @@ public class IcyVtkPanel extends VtkJoglPanel
         // get current mouse position
         final int x = e.getX();
         final int y = e.getY();
-        int deltaX = (lastX - x);
-        int deltaY = (lastY - y);
+        float[] scale = getCurrentSurfaceScale(new float[2]);
+        int deltaX = (int)((lastX - x) * scale[0]);
+        int deltaY = (int)((lastY - y) * scale[1]);
 
         // consume event
         e.consume();

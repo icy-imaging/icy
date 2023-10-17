@@ -1118,8 +1118,9 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         if ((r == null) || (rw == null))
             return 0d;
 
+        float[] scale = panel3D.getCurrentSurfaceScale(new float[2]);
         // need to revert Y axis
-        return r.GetZ(x, rw.GetSize()[1] - y);
+        return r.GetZ((int)(x * scale[0]), (int)(rw.GetSize()[1] - (y * scale[1])));
     }
 
     public double getWorldZ(Point pt)
@@ -1152,9 +1153,12 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         r.SetWorldPoint(x, y, z, 1d);
         r.WorldToDisplay();
         final Point3D result = new Point3D.Double(r.GetDisplayPoint());
+        float[] scale = panel3D.getCurrentSurfaceScale(new float[2]);
 
+        // reverse surface scaling
+        result.setX(result.getX() / scale[0]);
         // need to revert Y axis
-        result.setY(rw.GetSize()[1] - result.getY());
+        result.setY((rw.GetSize()[1] - result.getY()) / scale[1]);
 
         return result;
     }
@@ -1208,8 +1212,9 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         if ((r == null) || (rw == null))
             return new Point3D.Double();
 
+        float[] scale = panel3D.getCurrentSurfaceScale(new float[2]);
         // need to revert Y axis
-        r.SetDisplayPoint(x, rw.GetSize()[1] - y, z);
+        r.SetDisplayPoint(x * scale[0], (rw.GetSize()[1] - y) * scale[1], z);
         r.DisplayToWorld();
         final double[] result = r.GetWorldPoint();
 
