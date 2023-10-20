@@ -18,6 +18,6 @@ AppPackageFolder=$(pwd)
 AppResourcesFolder="${AppPackageFolder}"/Contents/Resources
 AppIconPath="${AppResourcesFolder}"/icy.icns
 
-cd $AppPackageFolder
+cd "${AppPackageFolder}" || exit 11
 
-/usr/libexec/java_home -v 1.8 --exec java -Xdock:icon=$AppIconPath -Xdock:name="Icy" -jar updater.jar
+/usr/libexec/java_home -v 1.8 --exec java -Xdock:icon="${AppIconPath}" -Xdock:name="Icy" -jar updater.jar
