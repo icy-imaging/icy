@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,10 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package icy.gui.system;
+
+package icy.gui.toolbar.panel;
 
 import icy.file.FileUtil;
-import icy.gui.component.ExternalizablePanel;
 import icy.gui.component.button.IcyButton;
 import icy.gui.component.button.IcyToggleButton;
 import icy.gui.frame.progress.ProgressFrame;
@@ -30,9 +29,10 @@ import icy.system.thread.ThreadUtil;
 import icy.util.EventUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
+import javax.annotation.Nonnull;
+import javax.swing.*;
+import javax.swing.text.*;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
@@ -47,20 +47,19 @@ import java.io.PrintStream;
 import java.io.Writer;
 import java.util.EventListener;
 
-import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Element;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
-
 /**
  * @author Stephane
  * @author Thomas MUSSET
- * @deprecated Use {@link icy.gui.toolbar.panel.OutputConsolePanel} instead.
  */
-@Deprecated(since = "3.0.0", forRemoval = true)
-public class OutputConsolePanel extends ExternalizablePanel implements ClipboardOwner {
+public final class OutputConsolePanel extends ToolbarPanel implements ClipboardOwner {
+    private static OutputConsolePanel instance = null;
+
+    public static OutputConsolePanel getInstance() {
+        if (instance == null)
+            instance = new OutputConsolePanel();
+        return instance;
+    }
+
     public interface OutputConsoleChangeListener extends EventListener {
         void outputConsoleChanged(OutputConsolePanel source, boolean isError);
     }
@@ -68,14 +67,14 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
     private class WindowsOutPrintStream extends PrintStream {
         boolean isStdErr;
 
-        public WindowsOutPrintStream(PrintStream out, boolean isStdErr) {
+        public WindowsOutPrintStream(final PrintStream out, final boolean isStdErr) {
             super(out);
 
             this.isStdErr = isStdErr;
         }
 
         @Override
-        public void write(byte[] buf, int off, int len) {
+        public void write(@Nonnull final byte[] buf, final int off, final int len) {
             try {
                 super.write(buf, off, len);
 
@@ -88,33 +87,27 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
                     logWriter.flush();
                 }
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
                 addText(t.getMessage(), isStdErr);
             }
         }
     }
 
-    final protected JTextPane textPane;
-    final protected StyledDocument doc;
+    private final JTextPane textPane;
+    private final StyledDocument doc;
     final SimpleAttributeSet normalAttributes;
     final SimpleAttributeSet errorAttributes;
 
-    final protected JSpinner logMaxLineField;
-    final protected JTextField logMaxLineTextField;
-    final public IcyButton clearLogButton;
-    final public IcyButton copyLogButton;
-    final public IcyButton reportLogButton;
-    final public IcyToggleButton scrollLockButton;
-    final public IcyToggleButton fileLogButton;
-    final public JPanel bottomPanel;
+    private final JSpinner logMaxLineField;
+    private final JTextField logMaxLineTextField;
+    private final IcyToggleButton scrollLockButton;
+    private final IcyToggleButton fileLogButton;
 
     int nbUpdate;
     Writer logWriter;
 
     public OutputConsolePanel() {
-        super("Output", "outputConsole");
-
-        setPreferredSize(new Dimension(300, 200));
+        super(new Dimension(300, 200));
 
         textPane = new JTextPane();
         doc = textPane.getStyledDocument();
@@ -133,9 +126,9 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
 
         logMaxLineField = new JSpinner(new SpinnerNumberModel(GeneralPreferences.getOutputLogSize(), 100, 1000000, 100));
         logMaxLineTextField = ((JSpinner.DefaultEditor) logMaxLineField.getEditor()).getTextField();
-        clearLogButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
-        copyLogButton = new IcyButton(GoogleMaterialDesignIcons.CONTENT_COPY);
-        reportLogButton = new IcyButton(GoogleMaterialDesignIcons.BUG_REPORT);
+        final IcyButton clearLogButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
+        final IcyButton copyLogButton = new IcyButton(GoogleMaterialDesignIcons.CONTENT_COPY);
+        final IcyButton reportLogButton = new IcyButton(GoogleMaterialDesignIcons.BUG_REPORT);
         scrollLockButton = new IcyToggleButton(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
         fileLogButton = new IcyToggleButton(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
         fileLogButton.setSelected(GeneralPreferences.getOutputLogToFile());
@@ -155,7 +148,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
         logMaxLineTextField.setFocusable(false);
         logMaxLineTextField.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(final MouseEvent e) {
                 // get focus on double click to enable manual edition
                 if (EventUtil.isLeftMouseButton(e)) {
                     logMaxLineField.setFocusable(true);
@@ -166,7 +159,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
         });
         logMaxLineTextField.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
+            public void keyPressed(final KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     // cancel manual edition ? --> remove focus
                     if (logMaxLineTextField.isFocusable()) {
@@ -188,7 +181,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
             try {
                 limitLog();
             }
-            catch (Exception ex) {
+            catch (final Exception ex) {
                 // ignore
             }
         });
@@ -216,7 +209,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
         });
         fileLogButton.addActionListener(e -> GeneralPreferences.setOutputLogFile(fileLogButton.isSelected()));
 
-        bottomPanel = GuiUtil.createPageBoxPanel(Box.createVerticalStrut(4),
+        final JPanel bottomPanel = GuiUtil.createPageBoxPanel(Box.createVerticalStrut(4),
                 GuiUtil.createLineBoxPanel(clearLogButton, Box.createHorizontalStrut(4), copyLogButton,
                         Box.createHorizontalStrut(4), reportLogButton, Box.createHorizontalGlue(),
                         Box.createHorizontalStrut(4), new JLabel("Limit"), Box.createHorizontalStrut(4),
@@ -244,7 +237,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
             // define log file writer (always clear log.txt file if present)
             logWriter = new FileWriter(FileUtil.getApplicationDirectory() + "/icy.log", false);
         }
-        catch (IOException e1) {
+        catch (final IOException e1) {
             logWriter = null;
         }
     }
@@ -270,7 +263,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
                         textPane.setCaretPosition(doc.getLength());
                 }
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 // ignore
             }
 
@@ -287,15 +280,13 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
                 return doc.getText(0, doc.getLength());
             }
         }
-        catch (BadLocationException e) {
+        catch (final BadLocationException e) {
             return "";
         }
     }
 
     /**
      * Apply maximum line limitation to the log output
-     *
-     * @throws BadLocationException
      */
     public void limitLog() throws BadLocationException {
         final Element root = doc.getDefaultRootElement();
@@ -320,29 +311,29 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
     /**
      * Sets maximum log line number
      */
-    public void setLogMaxLine(int value) {
+    public void setLogMaxLine(final int value) {
         logMaxLineField.setValue(Integer.valueOf(value));
     }
 
-    private void changed(boolean isError) {
+    private void changed(final boolean isError) {
         fireChangedEvent(isError);
     }
 
-    public void fireChangedEvent(boolean isError) {
-        for (OutputConsoleChangeListener listener : listenerList.getListeners(OutputConsoleChangeListener.class))
+    public void fireChangedEvent(final boolean isError) {
+        for (final OutputConsoleChangeListener listener : listenerList.getListeners(OutputConsoleChangeListener.class))
             listener.outputConsoleChanged(this, isError);
     }
 
-    public void addOutputConsoleChangeListener(OutputConsoleChangeListener listener) {
+    public void addOutputConsoleChangeListener(final OutputConsoleChangeListener listener) {
         listenerList.add(OutputConsoleChangeListener.class, listener);
     }
 
-    public void removeOutputConsoleChangeListener(OutputConsoleChangeListener listener) {
+    public void removeOutputConsoleChangeListener(final OutputConsoleChangeListener listener) {
         listenerList.remove(OutputConsoleChangeListener.class, listener);
     }
 
     @Override
-    public void lostOwnership(Clipboard clipboard, Transferable contents) {
+    public void lostOwnership(final Clipboard clipboard, final Transferable contents) {
         // ignore
     }
 }

@@ -1,62 +1,38 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package icy.vtk;
 
-import java.awt.Color;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+package icy.vtk;
 
 import icy.preferences.CanvasPreferences;
 import icy.system.thread.ThreadUtil;
-import icy.type.collection.array.ArrayUtil;
 import icy.util.EventUtil;
-import vtk.vtkActor;
-import vtk.vtkActorCollection;
-import vtk.vtkAxesActor;
-import vtk.vtkCamera;
-import vtk.vtkCellPicker;
-import vtk.vtkLight;
-import vtk.vtkPicker;
-import vtk.vtkProp;
-import vtk.vtkRenderer;
-import vtk.vtkTransform;
+import vtk.*;
+
+import java.awt.*;
+import java.awt.event.*;
 
 /**
  * Icy custom VTK panel used for VTK rendering.
- * 
+ *
  * @author stephane dallongeville
  */
-public class IcyVtkPanel extends VtkJoglPanel
-        implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, Runnable
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -8455671369400627703L;
-
-    private static enum SlicerPickState
-    {
+public class IcyVtkPanel extends VtkJoglPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, Runnable {
+    private enum SlicerPickState {
         PICK_NONE, PICK_VECTOR, PICK_PLANE
     }
 
@@ -67,7 +43,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     protected vtkAxesActor axis;
     protected vtkRenderer axisRenderer;
     protected vtkCamera axisCam;
-    protected int axisOffset[];
+    protected int[] axisOffset;
     protected double axisScale;
 
     // plane slicer
@@ -76,7 +52,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     private vtkRenderer slicerRenderer;
     private vtkCamera slicerCam;
     private SlicerPickState slicerPickState;
-    protected int slicerOffset[];
+    protected int[] slicerOffset;
     protected double slicerScale;
 
     protected boolean lightFollowCamera;
@@ -85,8 +61,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     // picked object
     protected vtkProp pickedObject;
 
-    public IcyVtkPanel()
-    {
+    public IcyVtkPanel() {
         super();
 
         picker = new vtkCellPicker();
@@ -138,7 +113,7 @@ public class IcyVtkPanel extends VtkJoglPanel
         axisRenderer.ResetCameraClippingRange();
 
         // default axis offset and scale
-        axisOffset = new int[] {124, 124};
+        axisOffset = new int[]{124, 124};
         axisScale = 1d;
 
         // initialize slicer actors
@@ -171,7 +146,7 @@ public class IcyVtkPanel extends VtkJoglPanel
         // default slicer properties
         slicerPickState = SlicerPickState.PICK_NONE;
         // from right border
-        slicerOffset = new int[] {124, 124};
+        slicerOffset = new int[]{124, 124};
         slicerScale = 1d;
 
         // used for restore quality rendering after a given amount of time
@@ -186,8 +161,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     @Override
-    protected void delete()
-    {
+    protected void delete() {
         // stop thread
         fineRenderingTime = 0;
         renderingMonitor.interrupt();
@@ -195,8 +169,7 @@ public class IcyVtkPanel extends VtkJoglPanel
         super.delete();
 
         lock.lock();
-        try
-        {
+        try {
             // release VTK objects
             arrowClip.release();
             planeClip.release();
@@ -217,8 +190,7 @@ public class IcyVtkPanel extends VtkJoglPanel
             // call it once in parent as this can take a lot fo time
             // vtkObjectBase.JAVA_OBJECT_MANAGER.gc(false);
         }
-        finally
-        {
+        finally {
             // removing the renderWindow is let to the superclass
             // because in the very special case of an AWT component
             // under Linux, destroying renderWindow crashes.
@@ -227,8 +199,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     @Override
-    public void removeNotify()
-    {
+    public void removeNotify() {
         // cancel fine rendering request
         fineRenderingTime = 0;
 
@@ -236,8 +207,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     @Override
-    public void sizeChanged()
-    {
+    public void sizeChanged() {
         super.sizeChanged();
 
         updateAxisView();
@@ -247,71 +217,62 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Return picker object.
      */
-    public vtkPicker getPicker()
-    {
+    public vtkPicker getPicker() {
         return picker;
     }
 
     /**
      * Returns the picked object on the last mouse move event (can be <code>null</code> if no object was picked).
-     * 
+     *
      * @see #pick(int, int)
      */
-    public vtkProp getPickedObject()
-    {
+    public vtkProp getPickedObject() {
         return pickedObject;
     }
 
     /**
      * Return the actor for axis orientation display.
      */
-    public vtkAxesActor getAxesActor()
-    {
+    public vtkAxesActor getAxesActor() {
         return axis;
     }
 
-    public boolean getLightFollowCamera()
-    {
+    public boolean getLightFollowCamera() {
         return lightFollowCamera;
     }
 
     /**
      * Return true if the axis orientation display is enabled
      */
-    public boolean isAxisOrientationDisplayEnable()
-    {
-        return (axis.GetVisibility() == 0) ? false : true;
+    public boolean isAxisOrientationDisplayEnable() {
+        return (axis.GetVisibility() != 0);
     }
 
     /**
      * Returns the offset from border ({X, Y} format) for the axis orientation display
      */
-    public int[] getAxisOrientationDisplayOffset()
-    {
+    public int[] getAxisOrientationDisplayOffset() {
         return axisOffset;
     }
 
     /**
      * Returns the scale factor (default = 1) for the axis orientation display
      */
-    public double getAxisOrientationDisplayScale()
-    {
+    public double getAxisOrientationDisplayScale() {
         return axisScale;
     }
 
     /**
      * Set to <code>true</code> to automatically update light position to camera position when camera move.
      */
-    public void setLightFollowCamera(boolean value)
-    {
+    public void setLightFollowCamera(final boolean value) {
         lightFollowCamera = value;
     }
 
     /**
      * Enable/Disable the axis orientation display
      */
-    public void setAxisOrientationDisplayEnable(boolean value)
-    {
+    public void setAxisOrientationDisplayEnable(final boolean value) {
         axis.SetVisibility(value ? 1 : 0);
         updateAxisView();
     }
@@ -319,8 +280,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Sets the offset from border ({X, Y} format) for the axis orientation display (default = {130, 130})
      */
-    public void setAxisOrientationDisplayOffset(int[] value)
-    {
+    public void setAxisOrientationDisplayOffset(final int[] value) {
         axisOffset = value;
         updateAxisView();
     }
@@ -328,8 +288,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Set the scale factor (default = 1) for the axis orientation display
      */
-    public void setAxisOrientationDisplayScale(double value)
-    {
+    public void setAxisOrientationDisplayScale(final double value) {
         axisScale = value;
         updateAxisView();
     }
@@ -337,41 +296,33 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Return true if the slicer is enable
      */
-    public boolean isSlicerEnable()
-    {
-        return (rw.HasRenderer(slicerRenderer) != 0) ? true : false;
+    public boolean isSlicerEnable() {
+        return (rw.HasRenderer(slicerRenderer) != 0);
     }
 
     /**
      * Enable/Disable the slicer
      */
-    public void setSlicerEnable(boolean value)
-    {
+    public void setSlicerEnable(final boolean value) {
         if (!isWindowSet())
             return;
 
         lock();
-        try
-        {
-            if (value)
-            {
-                if (rw.HasRenderer(slicerRenderer) == 0)
-                {
+        try {
+            if (value) {
+                if (rw.HasRenderer(slicerRenderer) == 0) {
                     rw.AddRenderer(slicerRenderer);
                     rw.SetNumberOfLayers(3);
                 }
             }
-            else
-            {
-                if (rw.HasRenderer(slicerRenderer) == 1)
-                {
+            else {
+                if (rw.HasRenderer(slicerRenderer) == 1) {
                     rw.RemoveRenderer(slicerRenderer);
                     rw.SetNumberOfLayers(2);
                 }
             }
         }
-        finally
-        {
+        finally {
             unlock();
         }
 
@@ -382,26 +333,24 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     /**
-     * @deprecated Use {@link #pickActor(int, int)} instead
+     * @deprecated Use {@link #pick(int, int)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void pickActor(int x, int y)
-    {
+    public void pickActor(final int x, final int y) {
         pick(x, y);
     }
 
     /**
      * Pick object at specified position and return it.
      */
-    public vtkProp pick(int x, int y, vtkRenderer renderer)
-    {
+    public vtkProp pick(final int x, final int y, final vtkRenderer renderer) {
         lock();
-        try
-        {
-            picker.Pick(x, rw.GetSize()[1] - y, 0, renderer);
+        try {
+            final float[] scale = getCurrentSurfaceScale(new float[2]);
+
+            picker.Pick(x * scale[0], rw.GetSize()[1] - (y * scale[1]), 0, renderer);
         }
-        finally
-        {
+        finally {
             unlock();
         }
 
@@ -411,26 +360,23 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Pick object at specified position and return it.
      */
-    public vtkProp pick(int x, int y)
-    {
+    public vtkProp pick(final int x, final int y) {
         return pick(x, y, ren);
     }
 
     /**
      * Translate specified camera view
      */
-    public void translateView(vtkCamera c, vtkRenderer r, double dx, double dy)
-    {
+    public void translateView(final vtkCamera c, final vtkRenderer r, final double dx, final double dy) {
         // translation mode
-        double FPoint[];
-        double PPoint[];
-        double APoint[] = new double[3];
-        double RPoint[];
-        double focalDepth;
+        final double[] FPoint;
+        final double[] PPoint;
+        final double[] APoint = new double[3];
+        final double[] RPoint;
+        final double focalDepth;
 
         lock();
-        try
-        {
+        try {
             // get the current focal point and position
             FPoint = c.GetFocalPoint();
             PPoint = c.GetPosition();
@@ -447,8 +393,7 @@ public class IcyVtkPanel extends VtkJoglPanel
             r.SetDisplayPoint(APoint);
             r.DisplayToWorld();
             RPoint = r.GetWorldPoint();
-            if (RPoint[3] != 0.0)
-            {
+            if (RPoint[3] != 0.0) {
                 RPoint[0] = RPoint[0] / RPoint[3];
                 RPoint[1] = RPoint[1] / RPoint[3];
                 RPoint[2] = RPoint[2] / RPoint[3];
@@ -458,14 +403,19 @@ public class IcyVtkPanel extends VtkJoglPanel
              * Compute a translation vector, moving everything 1/2 the distance
              * to the cursor. (Arbitrary scale factor)
              */
-            c.SetFocalPoint((FPoint[0] - RPoint[0]) / 2.0 + FPoint[0], (FPoint[1] - RPoint[1]) / 2.0 + FPoint[1],
-                    (FPoint[2] - RPoint[2]) / 2.0 + FPoint[2]);
-            c.SetPosition((FPoint[0] - RPoint[0]) / 2.0 + PPoint[0], (FPoint[1] - RPoint[1]) / 2.0 + PPoint[1],
-                    (FPoint[2] - RPoint[2]) / 2.0 + PPoint[2]);
+            c.SetFocalPoint(
+                    (FPoint[0] - RPoint[0]) / 2.0 + FPoint[0],
+                    (FPoint[1] - RPoint[1]) / 2.0 + FPoint[1],
+                    (FPoint[2] - RPoint[2]) / 2.0 + FPoint[2]
+            );
+            c.SetPosition(
+                    (FPoint[0] - RPoint[0]) / 2.0 + PPoint[0],
+                    (FPoint[1] - RPoint[1]) / 2.0 + PPoint[1],
+                    (FPoint[2] - RPoint[2]) / 2.0 + PPoint[2]
+            );
             r.ResetCameraClippingRange();
         }
-        finally
-        {
+        finally {
             unlock();
         }
     }
@@ -473,19 +423,16 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Rotate specified camera view
      */
-    public void rotateView(vtkCamera c, vtkRenderer r, int dx, int dy)
-    {
+    public void rotateView(final vtkCamera c, final vtkRenderer r, final int dx, final int dy) {
         lock();
-        try
-        {
+        try {
             // rotation mode
             c.Azimuth(dx);
             c.Elevation(dy);
             c.OrthogonalizeViewUp();
             r.ResetCameraClippingRange();
         }
-        finally
-        {
+        finally {
             unlock();
         }
     }
@@ -493,21 +440,17 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Zoom current view by specified factor (value &lt; 1d means unzoom while value &gt; 1d mean zoom)
      */
-    public void zoomView(vtkCamera c, vtkRenderer r, double factor)
-    {
+    public void zoomView(final vtkCamera c, final vtkRenderer r, final double factor) {
         lock();
-        try
-        {
+        try {
             if (c.GetParallelProjection() == 1)
                 c.SetParallelScale(c.GetParallelScale() / factor);
-            else
-            {
+            else {
                 c.Dolly(factor);
                 r.ResetCameraClippingRange();
             }
         }
-        finally
-        {
+        finally {
             unlock();
         }
     }
@@ -515,8 +458,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Translate current camera view
      */
-    public void translateView(double dx, double dy)
-    {
+    public void translateView(final double dx, final double dy) {
         translateView(cam, ren, dx, dy);
         // adjust light position
         if (getLightFollowCamera())
@@ -526,8 +468,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Rotate current camera view
      */
-    public void rotateView(int dx, int dy)
-    {
+    public void rotateView(final int dx, final int dy) {
         // rotate world view
         rotateView(cam, ren, dx, dy);
         // adjust light position
@@ -542,8 +483,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Zoom current view by specified factor (negative value means unzoom)
      */
-    public void zoomView(double factor)
-    {
+    public void zoomView(final double factor) {
         // zoom world
         zoomView(cam, ren, factor);
         // update axis camera
@@ -553,8 +493,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Rotate slicer camera view
      */
-    public void rotateSlicerView(int dx, int dy)
-    {
+    public void rotateSlicerView(final int dx, final int dy) {
         // reset slicer camera before doing interaction
         slicerRenderer.ResetCamera();
         slicerRenderer.ResetCameraClippingRange();
@@ -570,20 +509,18 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Set the specified light at the same position than the specified camera
      */
-    public static void setLightToCameraPosition(vtkLight l, vtkCamera c)
-    {
+    public static void setLightToCameraPosition(final vtkLight l, final vtkCamera c) {
         l.SetPosition(c.GetPosition());
         l.SetFocalPoint(c.GetFocalPoint());
     }
 
     /**
      * Set coarse and fast rendering mode immediately
-     * 
+     *
      * @see #setCoarseRendering(long)
      * @see #setFineRendering()
      */
-    public void setCoarseRendering()
-    {
+    public void setCoarseRendering() {
         // cancel pending fine rendering restoration
         fineRenderingTime = 0;
 
@@ -591,13 +528,11 @@ public class IcyVtkPanel extends VtkJoglPanel
             return;
 
         lock();
-        try
-        {
+        try {
             // set fast rendering
             rw.SetDesiredUpdateRate(20d);
         }
-        finally
-        {
+        finally {
             unlock();
         }
     }
@@ -605,11 +540,10 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Set coarse and fast rendering mode <b>for the specified amount of time</b> (in ms).<br>
      * Setting it to 0 means for always.
-     * 
+     *
      * @see #setFineRendering(long)
      */
-    public void setCoarseRendering(long time)
-    {
+    public void setCoarseRendering(final long time) {
         // want fast update
         setCoarseRendering();
 
@@ -619,12 +553,11 @@ public class IcyVtkPanel extends VtkJoglPanel
 
     /**
      * Set fine (and possibly slow) rendering mode immediately
-     * 
+     *
      * @see #setFineRendering(long)
      * @see #setCoarseRendering()
      */
-    public void setFineRendering()
-    {
+    public void setFineRendering() {
         // cancel pending fine rendering restoration
         fineRenderingTime = 0;
 
@@ -632,13 +565,11 @@ public class IcyVtkPanel extends VtkJoglPanel
             return;
 
         lock();
-        try
-        {
+        try {
             // set quality rendering
             rw.SetDesiredUpdateRate(0.01);
         }
-        finally
-        {
+        finally {
             unlock();
         }
     }
@@ -646,11 +577,10 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Set fine (and possibly slow) rendering <b>after</b> specified time delay (in ms).<br>
      * Using 0 means we want to immediately switch to fine rendering.
-     * 
+     *
      * @see #setCoarseRendering(long)
      */
-    public void setFineRendering(long delay)
-    {
+    public void setFineRendering(final long delay) {
         if (delay > 0)
             fineRenderingTime = System.currentTimeMillis() + delay;
         else
@@ -658,25 +588,23 @@ public class IcyVtkPanel extends VtkJoglPanel
             setFineRendering();
     }
 
-    public boolean isSlicerPicked()
-    {
+    public boolean isSlicerPicked() {
         return slicerPickState != SlicerPickState.PICK_NONE;
     }
 
-    protected boolean slicerPick(MouseEvent e)
-    {
+    protected boolean slicerPick(final MouseEvent e) {
         final SlicerPickState oldPickState = slicerPickState;
         final int[] size = rw.GetSize();
         final int w = size[0];
         final int h = size[1];
-        final int x = e.getX();
-        final int y = e.getY();
+        final float[] scale = getCurrentSurfaceScale(new float[2]);
+        final int x = (int) (e.getX() * scale[0]);
+        final int y = (int) (e.getY() * scale[1]);
 
         // are we on the volume slicer area ?
-        if ((x > (w * (1d - (0.25d * ((double) h / (double) w))))) && (y > (h * (1d - 0.25d))))
-        {
+        if ((x > (w * (1d - (0.25d * ((double) h / (double) w))))) && (y > (h * (1d - 0.25d)))) {
             // slicer plane picked ?
-            if (pick(x, y, slicerRenderer) == planeClip.getActor())
+            if (pick(e.getX(), e.getY(), slicerRenderer) == planeClip.getActor())
                 slicerPickState = SlicerPickState.PICK_PLANE;
             else
                 slicerPickState = SlicerPickState.PICK_VECTOR;
@@ -687,14 +615,12 @@ public class IcyVtkPanel extends VtkJoglPanel
         else
             slicerPickState = SlicerPickState.PICK_NONE;
 
-        if (slicerPickState == SlicerPickState.PICK_PLANE)
-        {
+        if (slicerPickState == SlicerPickState.PICK_PLANE) {
             planeClip.setColor(Color.white);
             planeClip.setSurfaceMode();
             planeClip.setEdgeVisibile(true);
         }
-        else
-        {
+        else {
             planeClip.setColor(Color.gray);
             planeClip.setWireframeMode();
             planeClip.setEdgeVisibile(false);
@@ -709,21 +635,18 @@ public class IcyVtkPanel extends VtkJoglPanel
         return oldPickState != slicerPickState;
     }
 
-    protected void translateSlicerPlane(int deltaX, int deltaY)
-    {
+    protected void translateSlicerPlane(final int deltaX, final int deltaY) {
         final double[] pos = planeClip.getActor().GetPosition();
         final double delta;
 
         // adjust delta depending camera rotation
-        if (Math.abs(deltaX) > Math.abs(deltaY))
-        {
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
             if (slicerCam.GetOrientation()[2] < 0)
                 delta = -deltaX;
             else
                 delta = deltaX;
         }
-        else
-        {
+        else {
             if (Math.abs(slicerCam.GetOrientation()[2]) > 90)
                 delta = -deltaY;
             else
@@ -743,18 +666,16 @@ public class IcyVtkPanel extends VtkJoglPanel
         planeClipChanged();
     }
 
-    protected void planeClipChanged()
-    {
+    protected void planeClipChanged() {
         // override it
     }
 
     /**
      * @return clip plane normal
      */
-    public double[] getClipNormal()
-    {
+    public double[] getClipNormal() {
         // initial arrow vector
-        double result[] = new double[] {0d, -1d, 0d};
+        double[] result = new double[]{0d, -1d, 0d};
 
         final vtkTransform camTrans = cam.GetModelViewTransformObject();
         final vtkTransform slicerTrans = slicerCam.GetModelViewTransformObject();
@@ -787,8 +708,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * @return Z clip position in [-0.5..0.5] range
      */
-    public double getClipPosition()
-    {
+    public double getClipPosition() {
         // System.out.println("pos=" + StringUtil.toString(planeClip.getActor().GetPosition()[1], 3));
 
         // use plane actor Y position
@@ -799,17 +719,15 @@ public class IcyVtkPanel extends VtkJoglPanel
      * Update axis display depending the current scene camera view.<br>
      * You should call it after having modified camera settings.
      */
-    public void updateAxisView()
-    {
+    public void updateAxisView() {
         if (!isWindowSet())
             return;
 
         lock();
-        try
-        {
-            double pos[] = cam.GetPosition();
-            double fp[] = cam.GetFocalPoint();
-            double viewup[] = cam.GetViewUp();
+        try {
+            final double[] pos = cam.GetPosition();
+            final double[] fp = cam.GetFocalPoint();
+            final double[] viewup = cam.GetViewUp();
 
             // mimic axis camera position to scene camera position
             axisCam.SetPosition(pos);
@@ -827,8 +745,7 @@ public class IcyVtkPanel extends VtkJoglPanel
             zoomView(axisCam, axisRenderer, axisScale * (axisCam.GetDistance() / 17d));
             translateView(axisCam, axisRenderer, -w, -h);
         }
-        finally
-        {
+        finally {
             unlock();
         }
     }
@@ -836,14 +753,12 @@ public class IcyVtkPanel extends VtkJoglPanel
     /**
      * Update slicer display (call after any camera reset / change)
      */
-    public void updateSlicerView()
-    {
+    public void updateSlicerView() {
         if (!isWindowSet())
             return;
 
         lock();
-        try
-        {
+        try {
             final int[] size = rw.GetSize();
             // adjust scale
             final double scale = size[1] / 512d;
@@ -858,25 +773,20 @@ public class IcyVtkPanel extends VtkJoglPanel
             zoomView(slicerCam, slicerRenderer, slicerScale * (slicerCam.GetDistance() / 12d));
             translateView(slicerCam, slicerRenderer, w, -h);
         }
-        finally
-        {
+        finally {
             unlock();
         }
     }
 
     @Override
-    public void run()
-    {
-        while (!Thread.currentThread().isInterrupted())
-        {
+    public void run() {
+        while (!Thread.currentThread().isInterrupted()) {
             // nothing to do
             if (fineRenderingTime == 0)
                 ThreadUtil.sleep(1);
-            else
-            {
+            else {
                 // thread used for restoring fine rendering after a certain amount of time
-                if (System.currentTimeMillis() >= fineRenderingTime)
-                {
+                if (System.currentTimeMillis() >= fineRenderingTime) {
                     // set back quality rendering
                     setFineRendering();
                     // request repaint
@@ -892,47 +802,32 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     @Override
-    public void mouseEntered(MouseEvent e)
-    {
+    public void mouseEntered(final MouseEvent e) {
         // nothing to do here
     }
 
     @Override
-    public void mouseExited(MouseEvent e)
-    {
+    public void mouseExited(final MouseEvent e) {
         // nothing to do here
     }
 
     @Override
-    public void mouseClicked(MouseEvent e)
-    {
-        if (e.isConsumed())
-            return;
-
+    public void mouseClicked(final MouseEvent e) {
         // nothing to do here
     }
 
     @Override
-    public void mousePressed(MouseEvent e)
-    {
-        if (e.isConsumed())
-            return;
-
+    public void mousePressed(final MouseEvent e) {
         // nothing to do here
     }
 
     @Override
-    public void mouseReleased(MouseEvent e)
-    {
-        if (e.isConsumed())
-            return;
-
+    public void mouseReleased(final MouseEvent e) {
         // nothing to do here
     }
 
     @Override
-    public void mouseMoved(MouseEvent e)
-    {
+    public void mouseMoved(final MouseEvent e) {
         // just save mouse position
         lastX = e.getX();
         lastY = e.getY();
@@ -950,8 +845,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     @Override
-    public void mouseDragged(MouseEvent e)
-    {
+    public void mouseDragged(final MouseEvent e) {
         // camera not yet defined --> exit
         if (cam == null)
             return;
@@ -962,8 +856,9 @@ public class IcyVtkPanel extends VtkJoglPanel
         // get current mouse position
         final int x = e.getX();
         final int y = e.getY();
-        int deltaX = (lastX - x);
-        int deltaY = (lastY - y);
+        final float[] scale = getCurrentSurfaceScale(new float[2]);
+        int deltaX = (int)((lastX - x) * scale[0]);
+        int deltaY = (int)((lastY - y) * scale[1]);
 
         // consume event
         e.consume();
@@ -973,11 +868,9 @@ public class IcyVtkPanel extends VtkJoglPanel
         rw.SetAbortRender(1);
 
         // slicer picked ? --> interact with slicer
-        if (isSlicerEnable() && isSlicerPicked())
-        {
+        if (isSlicerEnable() && isSlicerPicked()) {
             // only accept left button action
-            if (EventUtil.isLeftMouseButton(e) && !EventUtil.isShiftDown(e))
-            {
+            if (EventUtil.isLeftMouseButton(e) && !EventUtil.isShiftDown(e)) {
                 // rotate mode ?
                 if (slicerPickState == SlicerPickState.PICK_VECTOR)
                     // rotation mode
@@ -987,11 +880,9 @@ public class IcyVtkPanel extends VtkJoglPanel
                     translateSlicerPlane(deltaX, deltaY);
             }
         }
-        else
-        {
+        else {
             // faster movement with control modifier
-            if (EventUtil.isControlDown(e))
-            {
+            if (EventUtil.isControlDown(e)) {
                 deltaX *= 3;
                 deltaY *= 3;
             }
@@ -1018,8 +909,7 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     @Override
-    public void mouseWheelMoved(MouseWheelEvent e)
-    {
+    public void mouseWheelMoved(final MouseWheelEvent e) {
         // camera not yet defined --> exit
         if (cam == null)
             return;
@@ -1056,25 +946,22 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     @Override
-    public void keyTyped(KeyEvent e)
-    {
+    public void keyTyped(final KeyEvent e) {
         //
     }
 
     @Override
-    public void keyPressed(KeyEvent e)
-    {
+    public void keyPressed(final KeyEvent e) {
         if (e.isConsumed())
             return;
         if (ren.VisibleActorCount() == 0)
             return;
 
-        vtkActorCollection ac;
+        final vtkActorCollection ac;
         vtkActor anActor;
         int i;
 
-        switch (e.getKeyChar())
-        {
+        switch (e.getKeyChar()) {
             case 'r': // reset camera
                 resetCamera();
                 repaint();
@@ -1084,18 +971,15 @@ public class IcyVtkPanel extends VtkJoglPanel
 
             case 'w': // wireframe mode
                 lock();
-                try
-                {
+                try {
                     ac = ren.GetActors();
                     ac.InitTraversal();
-                    for (i = 0; i < ac.GetNumberOfItems(); i++)
-                    {
+                    for (i = 0; i < ac.GetNumberOfItems(); i++) {
                         anActor = ac.GetNextActor();
                         anActor.GetProperty().SetRepresentationToWireframe();
                     }
                 }
-                finally
-                {
+                finally {
                     unlock();
                 }
                 repaint();
@@ -1105,18 +989,15 @@ public class IcyVtkPanel extends VtkJoglPanel
 
             case 's':
                 lock();
-                try
-                {
+                try {
                     ac = ren.GetActors();
                     ac.InitTraversal();
-                    for (i = 0; i < ac.GetNumberOfItems(); i++)
-                    {
+                    for (i = 0; i < ac.GetNumberOfItems(); i++) {
                         anActor = ac.GetNextActor();
                         anActor.GetProperty().SetRepresentationToSurface();
                     }
                 }
-                finally
-                {
+                finally {
                     unlock();
                 }
                 repaint();
@@ -1127,9 +1008,6 @@ public class IcyVtkPanel extends VtkJoglPanel
     }
 
     @Override
-    public void keyReleased(KeyEvent e)
-    {
-        if (e.isConsumed())
-            return;
+    public void keyReleased(final KeyEvent e) {
     }
 }

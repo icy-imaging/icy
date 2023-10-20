@@ -61,6 +61,7 @@ import ij.IJ;
  * 
  * @author Curtis Rueden
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class IJMethods
 {
     /** Resolution to use when converting double progress to int ratio. */

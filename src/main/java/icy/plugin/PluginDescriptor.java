@@ -26,10 +26,12 @@ import icy.image.ImageUtil;
 import icy.network.NetworkUtil;
 import icy.network.URLUtil;
 import icy.plugin.abstract_.Plugin;
+import icy.plugin.interface_.IcyPlugin;
 import icy.plugin.interface_.PluginBundled;
 import icy.plugin.interface_.PluginImageAnalysis;
 import icy.preferences.RepositoryPreferences.RepositoryInfo;
 import icy.resource.ResourceUtil;
+import icy.system.logging.IcyLogger;
 import icy.util.ClassUtil;
 import icy.util.JarUtil;
 import icy.util.StringUtil;
@@ -331,6 +333,18 @@ public class PluginDescriptor implements XMLPersistent {
         final String baseLocalName;
         final boolean bundled = isBundled();
 
+        String magicName = "";
+        String magicIcon = "";
+
+        if (clazz.isAnnotationPresent(IcyPlugin.class)) {
+            final IcyPlugin annotation = clazz.getAnnotation(IcyPlugin.class);
+            magicName = annotation.name();
+            magicIcon = annotation.icon();
+
+            IcyLogger.debug(String.format("Magic name is %s", magicName));
+            IcyLogger.debug(String.format("Magic icon is %s", magicIcon));
+        }
+
         // bundled plugin ?
         if (bundled) {
             // find original JAR file
@@ -346,7 +360,11 @@ public class PluginDescriptor implements XMLPersistent {
         }
 
         // load icon
-        URL iconUrl = clazz.getResource(baseResourceName + getIconExtension());
+        URL iconUrl;
+        if (magicIcon.isEmpty())
+            iconUrl = clazz.getResource(baseResourceName + getIconExtension());
+        else
+            iconUrl = clazz.getResource(magicIcon);
         if (iconUrl == null)
             iconUrl = URLUtil.getURL(baseLocalName + getIconExtension());
         // loadIcon(url);
@@ -372,6 +390,9 @@ public class PluginDescriptor implements XMLPersistent {
             else
                 desc = name + " plugin";
         }
+
+        if (!magicName.isEmpty())
+            name = magicName;
 
         // always overwrite class name from class object (more as bundled plugin may have incorrect one from XML file
         ident.setClassName(pluginClass.getName());
@@ -1428,11 +1449,8 @@ public class PluginDescriptor implements XMLPersistent {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj instanceof PluginDescriptor) {
-            final PluginDescriptor plug = (PluginDescriptor) obj;
-
+        if (obj instanceof final PluginDescriptor plug)
             return getClassName().equals(plug.getClassName()) && getVersion().equals(plug.getVersion());
-        }
 
         return super.equals(obj);
     }
@@ -1668,10 +1686,8 @@ public class PluginDescriptor implements XMLPersistent {
 
         @Override
         public boolean equals(final Object obj) {
-            if (obj instanceof PluginIdent) {
-                final PluginIdent ident = (PluginIdent) obj;
+            if (obj instanceof final PluginIdent ident)
                 return ident.getClassName().equals(className) && ident.getVersion().equals(getVersion());
-            }
 
             return super.equals(obj);
         }

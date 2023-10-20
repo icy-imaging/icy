@@ -43,6 +43,9 @@ import icy.gui.main.MainEvent.MainEventType;
 import icy.gui.menu.ApplicationMenu;
 import icy.gui.menu.ROITask;
 import icy.gui.menu.ToolRibbonTask;
+import icy.gui.toolbar.panel.OutputConsolePanel;
+import icy.gui.toolbar.panel.SequencePanel;
+import icy.gui.toolbar.panel.UndoManagerPanel;
 import icy.gui.util.LookAndFeelUtil;
 import icy.gui.viewer.Viewer;
 import icy.gui.viewer.ViewerAdapter;
@@ -181,9 +184,16 @@ public class MainInterfaceGui implements MainInterface
     @Override
     public void init()
     {
+        // init toolbar panels first
+        OutputConsolePanel.getInstance();
+        SequencePanel.getInstance();
+        icy.gui.toolbar.panel.RoisPanel.getInstance();
+        icy.gui.toolbar.panel.LayersPanel.getInstance();
+        UndoManagerPanel.getInstance();
+
         // build main frame
         mainFrame = new MainFrame();
-        mainFrame.init();
+        //mainFrame.init();
         mainFrame.addWindowListener(new WindowAdapter()
         {
             @Override

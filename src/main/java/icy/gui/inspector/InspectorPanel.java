@@ -52,6 +52,7 @@ import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
  * @author Fabrice de Chaumont &amp; Stephane
  * @author Thomas MUSSET
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class InspectorPanel extends ExternalizablePanel implements ActiveViewerListener, ActiveSequenceListener {
     // GUI
     final ExtTabbedPanel mainPane;
@@ -122,19 +123,6 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
 
         add(mainPane, BorderLayout.CENTER);
 
-        // TODO: 15/06/2023 Remove this once StatusBar validated
-        if (false) {
-            // build bottom panel for inspector
-            final JPanel bottomPanel = new JPanel();
-            bottomPanel.setLayout(new BorderLayout());
-
-            // add virtual button and memory monitor
-            bottomPanel.add(virtualModeBtn, BorderLayout.EAST);
-            bottomPanel.add(new MemoryMonitorPanel(), BorderLayout.CENTER);
-
-            add(bottomPanel, BorderLayout.SOUTH);
-        }
-
         validate();
         setVisible(true);
 
@@ -148,15 +136,17 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
                     @Override
                     public void run() {
                         // if it's already red, don't change background
-                        final boolean isRed = LookAndFeelUtil.isConsoleRed(mainPane.getBackgroundAt(index));
+                        final boolean isRed = LookAndFeelUtil.isRed(mainPane.getBackgroundAt(index));
                         if (isRed)
                             return;
 
                         // change output console tab color when new data
                         if (fIsError)
-                            mainPane.setBackgroundAt(index, LookAndFeelUtil.getConsoleRed());
+                            mainPane.setBackgroundAt(index, LookAndFeelUtil.getRed());
                         else
-                            mainPane.setBackgroundAt(index, LookAndFeelUtil.getConsoleBlue());
+                            mainPane.setBackgroundAt(index, LookAndFeelUtil.getBlue());
+
+                        mainPane.setForegroundAt(index, LookAndFeelUtil.getAccentForeground());
                     }
                 });
             }
@@ -329,16 +319,17 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
 
         if ((index != -1) && (mainPane.getSelectedIndex() != index)) {
             ThreadUtil.invokeLater(() -> {
-                final boolean isRed = LookAndFeelUtil.isConsoleRed(mainPane.getBackgroundAt(index));
-                final boolean isBlue = LookAndFeelUtil.isConsoleBlue(mainPane.getBackgroundAt(index));
+                final boolean isRed = LookAndFeelUtil.isRed(mainPane.getBackgroundAt(index));
+                final boolean isBlue = LookAndFeelUtil.isBlue(mainPane.getBackgroundAt(index));
 
                 if (!isRed && !isBlue)
                     return;
 
                 if (isRed)
-                    mainPane.setBackgroundAt(index, LookAndFeelUtil.getConsoleRed());
+                    mainPane.setBackgroundAt(index, LookAndFeelUtil.getRed());
                 else
-                    mainPane.setBackgroundAt(index, LookAndFeelUtil.getConsoleBlue());
+                    mainPane.setBackgroundAt(index, LookAndFeelUtil.getBlue());
+                mainPane.setForegroundAt(index, LookAndFeelUtil.getAccentForeground());
             });
         }
     }

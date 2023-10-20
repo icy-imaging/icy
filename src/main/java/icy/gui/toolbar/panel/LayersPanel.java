@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,31 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package icy.gui.inspector;
 
-import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
-
-import icy.gui.component.button.IcyToggleButton;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.table.ColumnControlButton;
-import org.jdesktop.swingx.table.TableColumnExt;
+package icy.gui.toolbar.panel;
 
 import icy.action.CanvasActions;
 import icy.canvas.CanvasLayerEvent;
@@ -49,22 +25,44 @@ import icy.canvas.IcyCanvas;
 import icy.canvas.Layer;
 import icy.gui.component.IcyTextField;
 import icy.gui.component.IcyTextField.TextChangeListener;
+import icy.gui.component.button.IcyToggleButton;
 import icy.gui.component.editor.VisibleCellEditor;
 import icy.gui.component.renderer.VisibleCellRenderer;
 import icy.gui.main.ActiveViewerListener;
 import icy.gui.viewer.Viewer;
 import icy.gui.viewer.ViewerEvent;
 import icy.gui.viewer.ViewerEvent.ViewerEventType;
+import icy.main.Icy;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.table.ColumnControlButton;
+import org.jdesktop.swingx.table.TableColumnExt;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Stephane
  * @author Thomas MUSSET
- * @deprecated USe {@link icy.gui.toolbar.panel.LayersPanel} instead.
  */
-@Deprecated(since = "3.0.0", forRemoval = true)
-public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasLayerListener, TextChangeListener, ListSelectionListener {
+public final class LayersPanel extends ToolbarPanel implements ActiveViewerListener, CanvasLayerListener, TextChangeListener, ListSelectionListener {
+    private static LayersPanel instance = null;
+
+    public static LayersPanel getInstance() {
+        if (instance == null)
+            instance = new LayersPanel();
+        return instance;
+    }
+
     private class CanvasRefresher implements Runnable {
         IcyCanvas newCanvas;
 
@@ -93,38 +91,34 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
 
     static final String[] columnNames = {"Name", ""};
 
-    List<Layer> layers;
-    IcyCanvas canvas;
+    private List<Layer> layers;
+    private IcyCanvas canvas;
 
     // GUI
-    AbstractTableModel tableModel;
-    ListSelectionModel tableSelectionModel;
-    JXTable table;
-    IcyTextField nameFilter;
-    IcyToggleButton tglbtnLayerVisibility;
-    ActionListener visibilityToggleActionListener;
-    LayerControlPanel controlPanel;
+    private final AbstractTableModel tableModel;
+    private final ListSelectionModel tableSelectionModel;
+    private final JXTable table;
+    private final IcyTextField nameFilter;
+    private final IcyToggleButton tglbtnLayerVisibility;
+    private ActionListener visibilityToggleActionListener;
+    private LayerControlPanel controlPanel;
 
     // internals
-    boolean isSelectionAdjusting;
-    boolean isLayerEditing;
-    boolean isLayerPropertiesAdjusting;
+    private boolean isSelectionAdjusting;
+    private boolean isLayerEditing;
 
-    final Runnable layersRefresher;
-    final Runnable tableDataRefresher;
-    final Runnable controlPanelRefresher;
-    final CanvasRefresher canvasRefresher;
+    private final Runnable layersRefresher;
+    private final Runnable tableDataRefresher;
+    private final Runnable controlPanelRefresher;
+    private final CanvasRefresher canvasRefresher;
 
     public LayersPanel() {
-        super();
-
-        setPreferredSize(new Dimension(400, 0));
+        super(new Dimension(400, 0));
 
         layers = new ArrayList<>();
         canvas = null;
         isSelectionAdjusting = false;
         isLayerEditing = false;
-        isLayerPropertiesAdjusting = false;
 
         layersRefresher = this::refreshLayersInternal;
         tableDataRefresher = this::refreshTableData;
@@ -132,7 +126,57 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
         canvasRefresher = new CanvasRefresher();
 
         // build GUI
-        initialize();
+        final JPanel panelNorth = new JPanel();
+        final GridBagLayout gbl_panelNorth = new GridBagLayout();
+        gbl_panelNorth.columnWidths = new int[]{46, 22, 0};
+        gbl_panelNorth.rowHeights = new int[]{23, 0};
+        gbl_panelNorth.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
+        gbl_panelNorth.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+        panelNorth.setLayout(gbl_panelNorth);
+
+        nameFilter = new IcyTextField();
+        nameFilter.setToolTipText("Enter a string sequence to filter Layer on name");
+        nameFilter.addTextChangeListener(this);
+        final GridBagConstraints gbc_nameFilter = new GridBagConstraints();
+        gbc_nameFilter.fill = GridBagConstraints.HORIZONTAL;
+        gbc_nameFilter.insets = new Insets(0, 0, 0, 5);
+        gbc_nameFilter.gridx = 0;
+        gbc_nameFilter.gridy = 0;
+        panelNorth.add(nameFilter, gbc_nameFilter);
+
+        tglbtnLayerVisibility = new IcyToggleButton(GoogleMaterialDesignIcons.VISIBILITY_OFF, GoogleMaterialDesignIcons.VISIBILITY);
+        tglbtnLayerVisibility.setFocusable(false);
+        tglbtnLayerVisibility.setToolTipText("Change visibility for selected layer(s)");
+        final GridBagConstraints gbc_tglbtnLayerVisibility = new GridBagConstraints();
+        gbc_tglbtnLayerVisibility.anchor = GridBagConstraints.WEST;
+        gbc_tglbtnLayerVisibility.gridx = 1;
+        gbc_tglbtnLayerVisibility.gridy = 0;
+        panelNorth.add(tglbtnLayerVisibility, gbc_tglbtnLayerVisibility);
+
+        table = new JXTable();
+        table.setAutoStartEditOnKeyStroke(false);
+        table.setRowHeight(24);
+        table.setShowVerticalLines(false);
+        table.setColumnControlVisible(true);
+        table.setColumnSelectionAllowed(false);
+        table.setRowSelectionAllowed(true);
+        table.setAutoCreateRowSorter(true);
+
+        controlPanel = new LayerControlPanel(this);
+
+        setLayout(new BorderLayout(0, 0));
+        add(panelNorth, BorderLayout.NORTH);
+        add(
+                new JScrollPane(
+                        table,
+                        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+                        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+                ),
+                BorderLayout.CENTER
+        );
+        add(controlPanel, BorderLayout.SOUTH);
+
+        validate();
 
         // add show/hide listener
         initVisibilityToggleListener();
@@ -146,7 +190,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
             }
 
             @Override
-            public String getColumnName(int column) {
+            public String getColumnName(final int column) {
                 return columnNames[column];
             }
 
@@ -156,7 +200,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
             }
 
             @Override
-            public Object getValueAt(int row, int column) {
+            public Object getValueAt(final int row, final int column) {
                 // safe
                 if (row >= layers.size())
                     return null;
@@ -178,7 +222,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
             }
 
             @Override
-            public void setValueAt(Object value, int row, int column) {
+            public void setValueAt(final Object value, final int row, final int column) {
                 // safe
                 if (row >= layers.size())
                     return;
@@ -205,7 +249,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
             }
 
             @Override
-            public boolean isCellEditable(int row, int column) {
+            public boolean isCellEditable(final int row, final int column) {
                 // safe
                 if (row >= layers.size())
                     return false;
@@ -225,7 +269,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
             }
 
             @Override
-            public Class<?> getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(final int columnIndex) {
                 switch (columnIndex) {
                     default:
                     case 0:
@@ -272,66 +316,15 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
 
         // and refresh layers
         refreshLayers();
-    }
 
-    private void initialize() {
-        JPanel panelNorth = new JPanel();
-        GridBagLayout gbl_panelNorth = new GridBagLayout();
-        gbl_panelNorth.columnWidths = new int[]{46, 22, 0};
-        gbl_panelNorth.rowHeights = new int[]{23, 0};
-        gbl_panelNorth.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
-        gbl_panelNorth.rowWeights = new double[]{0.0, Double.MIN_VALUE};
-        panelNorth.setLayout(gbl_panelNorth);
+        Icy.getMainInterface().addActiveViewerListener(this);
 
-        nameFilter = new IcyTextField();
-        nameFilter.setToolTipText("Enter a string sequence to filter Layer on name");
-        nameFilter.addTextChangeListener(this);
-        GridBagConstraints gbc_nameFilter = new GridBagConstraints();
-        gbc_nameFilter.fill = GridBagConstraints.HORIZONTAL;
-        gbc_nameFilter.insets = new Insets(0, 0, 0, 5);
-        gbc_nameFilter.gridx = 0;
-        gbc_nameFilter.gridy = 0;
-        panelNorth.add(nameFilter, gbc_nameFilter);
-
-        tglbtnLayerVisibility = new IcyToggleButton(GoogleMaterialDesignIcons.VISIBILITY_OFF, GoogleMaterialDesignIcons.VISIBILITY);
-        tglbtnLayerVisibility.setFocusable(false);
-        tglbtnLayerVisibility.setToolTipText("Change visibility for selected layer(s)");
-        GridBagConstraints gbc_tglbtnLayerVisibility = new GridBagConstraints();
-        gbc_tglbtnLayerVisibility.anchor = GridBagConstraints.WEST;
-        gbc_tglbtnLayerVisibility.gridx = 1;
-        gbc_tglbtnLayerVisibility.gridy = 0;
-        panelNorth.add(tglbtnLayerVisibility, gbc_tglbtnLayerVisibility);
-
-        table = new JXTable();
-        table.setAutoStartEditOnKeyStroke(false);
-        table.setRowHeight(24);
-        table.setShowVerticalLines(false);
-        table.setColumnControlVisible(true);
-        table.setColumnSelectionAllowed(false);
-        table.setRowSelectionAllowed(true);
-        table.setAutoCreateRowSorter(true);
-
-        controlPanel = new LayerControlPanel(this);
-
-        setLayout(new BorderLayout(0, 0));
-        add(panelNorth, BorderLayout.NORTH);
-        add(
-                new JScrollPane(
-                        table,
-                        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-                        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
-                ),
-                BorderLayout.CENTER
-        );
-        add(controlPanel, BorderLayout.SOUTH);
-
-        validate();
     }
 
     private void initVisibilityToggleListener() {
         visibilityToggleActionListener = e -> {
-            boolean visibilityValue = tglbtnLayerVisibility.isSelected();
-            for (Layer l : getSelectedLayers()) {
+            final boolean visibilityValue = tglbtnLayerVisibility.isSelected();
+            for (final Layer l : getSelectedLayers()) {
                 l.setVisible(visibilityValue);
             }
         };
@@ -352,14 +345,14 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
         amap.put(CanvasActions.deleteLayersAction.getName(), CanvasActions.deleteLayersAction);
     }
 
-    public void setNameFilter(String name) {
+    public void setNameFilter(final String name) {
         nameFilter.setText(name);
     }
 
     /**
      * refresh Layer list (and refresh table data according)
      */
-    protected void refreshLayers() {
+    private void refreshLayers() {
         ThreadUtil.runSingle(layersRefresher);
     }
 
@@ -379,21 +372,21 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
     /**
      * Return index of specified Layer in the Layer list
      */
-    protected int getLayerIndex(Layer layer) {
+    private int getLayerIndex(final Layer layer) {
         return layers.indexOf(layer);
     }
 
     /**
      * Return index of specified Layer in the model
      */
-    protected int getLayerModelIndex(Layer layer) {
+    private int getLayerModelIndex(final Layer layer) {
         return getLayerIndex(layer);
     }
 
     /**
      * Return index of specified Layer in the table
      */
-    protected int getLayerTableIndex(Layer layer) {
+    private int getLayerTableIndex(final Layer layer) {
         final int ind = getLayerModelIndex(layer);
 
         if (ind == -1)
@@ -402,7 +395,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
         try {
             return table.convertRowIndexToView(ind);
         }
-        catch (IndexOutOfBoundsException e) {
+        catch (final IndexOutOfBoundsException e) {
             return -1;
         }
     }
@@ -410,14 +403,14 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
     public ArrayList<Layer> getSelectedLayers() {
         final ArrayList<Layer> result = new ArrayList<>();
 
-        for (int rowIndex : table.getSelectedRows()) {
+        for (final int rowIndex : table.getSelectedRows()) {
             int index = -1;
 
             if (rowIndex != -1) {
                 try {
                     index = table.convertRowIndexToModel(rowIndex);
                 }
-                catch (IndexOutOfBoundsException e) {
+                catch (final IndexOutOfBoundsException e) {
                     // ignore
                 }
             }
@@ -433,14 +426,14 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
         setSelectedLayersInternal(new ArrayList<>());
     }
 
-    void setSelectedLayersInternal(List<Layer> newSelected) {
+    void setSelectedLayersInternal(final List<Layer> newSelected) {
         isSelectionAdjusting = true;
         try {
             table.clearSelection();
 
             if (newSelected != null) {
                 boolean allHidden = newSelected.size() > 0;
-                for (Layer layer : newSelected) {
+                for (final Layer layer : newSelected) {
                     final int index = getLayerTableIndex(layer);
 
                     if (index > -1) {
@@ -460,11 +453,11 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
         selectionChanged();
     }
 
-    private void setToggleButtonState(boolean active) {
+    private void setToggleButtonState(final boolean active) {
         tglbtnLayerVisibility.setSelected(active);
     }
 
-    List<Layer> filterList(List<Layer> list, String nameFilterText) {
+    List<Layer> filterList(final List<Layer> list, final String nameFilterText) {
         final List<Layer> result = new ArrayList<>();
 
         final boolean nameEmpty = StringUtil.isEmpty(nameFilterText, true);
@@ -475,7 +468,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
         else
             nameFilterUp = "";
 
-        for (Layer layer : list) {
+        for (final Layer layer : list) {
             // search in name and type
             if (nameEmpty || (layer.getName().toLowerCase().contains(nameFilterUp)))
                 result.add(layer);
@@ -484,7 +477,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
         return result;
     }
 
-    protected void refreshTableData() {
+    private void refreshTableData() {
         final List<Layer> save = getSelectedLayers();
 
         // need to be done on EDT
@@ -504,10 +497,10 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
     /**
      * Called when selection changed
      */
-    protected void selectionChanged() {
-        ArrayList<Layer> newSelected = getSelectedLayers();
+    private void selectionChanged() {
+        final ArrayList<Layer> newSelected = getSelectedLayers();
         boolean allHidden = newSelected.size() > 0;
-        for (Layer layer : newSelected) {
+        for (final Layer layer : newSelected) {
             final int index = getLayerTableIndex(layer);
             if (index > -1) {
                 allHidden = allHidden && !layer.isVisible();
@@ -520,13 +513,13 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
     }
 
     @Override
-    public void textChanged(IcyTextField source, boolean validate) {
+    public void textChanged(final IcyTextField source, final boolean validate) {
         if (source == nameFilter)
             refreshLayers();
     }
 
     @Override
-    public void valueChanged(ListSelectionEvent e) {
+    public void valueChanged(final ListSelectionEvent e) {
         // internal change --> ignore
         if (isSelectionAdjusting || e.getValueIsAdjusting())
             return;
@@ -535,7 +528,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
     }
 
     @Override
-    public void viewerActivated(Viewer viewer) {
+    public void viewerActivated(final Viewer viewer) {
         if (viewer != null)
             canvasRefresher.newCanvas = viewer.getCanvas();
         else
@@ -545,12 +538,12 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
     }
 
     @Override
-    public void viewerDeactivated(Viewer viewer) {
+    public void viewerDeactivated(final Viewer viewer) {
         // nothing here
     }
 
     @Override
-    public void activeViewerChanged(ViewerEvent event) {
+    public void activeViewerChanged(final ViewerEvent event) {
         if (event.getType() == ViewerEventType.CANVAS_CHANGED) {
             canvasRefresher.newCanvas = event.getSource().getCanvas();
             ThreadUtil.runSingle(canvasRefresher);
@@ -558,7 +551,7 @@ public class LayersPanel extends JPanel implements ActiveViewerListener, CanvasL
     }
 
     @Override
-    public void canvasLayerChanged(CanvasLayerEvent event) {
+    public void canvasLayerChanged(final CanvasLayerEvent event) {
         // refresh layer from externals changes
         if (isLayerEditing)
             return;

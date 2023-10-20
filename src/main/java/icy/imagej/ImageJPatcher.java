@@ -62,6 +62,7 @@ import icy.system.SystemUtil;
  * @author Curtis Rueden
  * @author Stephane Dallongeville
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class ImageJPatcher
 {
     private static final String PATCH_PKG = "icy.imagej.patches";

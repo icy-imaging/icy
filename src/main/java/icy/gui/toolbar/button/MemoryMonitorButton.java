@@ -16,7 +16,7 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package icy.gui.statusbar;
+package icy.gui.toolbar.button;
 
 import icy.gui.component.button.IcyButton;
 import icy.gui.component.menu.IcyMenuItem;
@@ -38,7 +38,7 @@ import java.util.TimerTask;
 /**
  * @author Thomas MUSSET
  */
-public final class MemoryMonitor extends IcyButton implements MouseListener {
+public final class MemoryMonitorButton extends IcyButton implements MouseListener {
 
     private final Icon OK = IconFontSwing.buildIcon(GoogleMaterialDesignIcons.CHECK_CIRCLE, LookAndFeelUtil.getDefaultIconSizeAsFloat(), Color.GREEN.darker());
     private final Icon WARN = IconFontSwing.buildIcon(GoogleMaterialDesignIcons.WARNING, LookAndFeelUtil.getDefaultIconSizeAsFloat(), Color.YELLOW.darker());
@@ -46,7 +46,7 @@ public final class MemoryMonitor extends IcyButton implements MouseListener {
 
     private final JPopupMenu popup;
 
-    public MemoryMonitor() {
+    public MemoryMonitorButton() {
         super("CPU: 100% | RAM: 100%");
         setPreferredSize(new Dimension(185, 27));
         setHorizontalAlignment(JButton.LEFT);

@@ -89,6 +89,7 @@ public final class GeneralActions {
         }
     };
 
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final IcyAbstractAction detachedModeAction = new IcyAbstractAction(
             "Detached Mode",
             //new IcyIcon(ResourceUtil.ICON_DETACHED_WINDOW),

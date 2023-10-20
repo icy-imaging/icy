@@ -16,33 +16,40 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package icy.gui.statusbar;
-
-import icy.main.Icy;
+package icy.gui.toolbar;
 
 import javax.swing.*;
 
 /**
  * @author Thomas MUSSET
  */
-public final class StatusBar extends JToolBar {
+abstract class IcyToolbar extends JToolBar {
+    private final int orientation;
+    private final boolean floatable;
+
+    protected IcyToolbar(final int orientation, final boolean floatable) {
+        super();
+
+        super.setOrientation(orientation);
+        super.setFloatable(floatable);
+
+        this.orientation = orientation;
+        this.floatable = floatable;
+    }
+
     /**
-     * Creates a new tool bar; orientation defaults to <code>HORIZONTAL</code>.
+     * Forbid orientation change.
      */
-    public StatusBar() {
-        super(JToolBar.HORIZONTAL);
-        setFloatable(false);
+    @Override
+    public final void setOrientation(final int o) {
+        super.setOrientation(orientation);
+    }
 
-        final String version = Icy.version.toShortString();
-
-        final JLabel icy = new JLabel("Icy v" + version);
-        icy.setEnabled(false);
-        add(icy);
-
-        add(Box.createHorizontalGlue());
-
-        add(new MemoryMonitor());
-        add(new Separator());
-        add(new EHCacheButton());
+    /**
+     * Forbid floatable change.
+     */
+    @Override
+    public final void setFloatable(final boolean b) {
+        super.setFloatable(floatable);
     }
 }

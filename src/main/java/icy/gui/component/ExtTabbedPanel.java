@@ -33,6 +33,7 @@ import javax.swing.*;
  * @author Stephane
  * @author Thomas MUSSET
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class ExtTabbedPanel extends JTabbedPane {
     private static class TabComponent extends JPanel {
         final ExternalizablePanel extPanel;

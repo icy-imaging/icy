@@ -42,6 +42,7 @@ import javax.swing.WindowConstants;
  * 
  * @author Stephane
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class ExternalizablePanel extends JPanel
 {
     public static class WeakStateListener extends WeakListener<StateListener> implements StateListener

@@ -178,7 +178,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
 
             final Map<Character, List<PluginDescriptor>> characterListMap = new TreeMap<>();
             for (final PluginDescriptor descriptor : plugins) {
-                final String className = descriptor.getSimpleClassName();
+                final String className = descriptor.getName();
                 final Character firstChar = className.charAt(0);
 
                 if (characterListMap.containsKey(firstChar)) {
@@ -197,7 +197,8 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
             for (final Map.Entry<Character, List<PluginDescriptor>> characterListEntry : characterListMap.entrySet()) {
                 final IcyMenu menuAuthor = new IcyMenu(characterListEntry.getKey().toString());
                 for (final PluginDescriptor plugin : characterListEntry.getValue()) {
-                    final IcyMenuItem itemPlugin = new IcyMenuItem(plugin.getSimpleClassName());
+                    final IcyMenuItem itemPlugin = new IcyMenuItem(plugin.getName());
+                    itemPlugin.setIcon(new ImageIcon(plugin.getIcon().getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH)));
                     itemPlugin.addActionListener(e -> PluginLauncher.start(plugin));
                     menuAuthor.add(itemPlugin);
                 }

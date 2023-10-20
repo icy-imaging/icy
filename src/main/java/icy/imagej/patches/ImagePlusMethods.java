@@ -59,6 +59,7 @@ import ij.ImagePlus;
  * @author Curtis Rueden
  * @author Barry DeZonia
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public final class ImagePlusMethods
 {
     private ImagePlusMethods()

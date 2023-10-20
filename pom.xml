@@ -7,7 +7,7 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>2.2.0</version>
+        <version>3.0.0</version>
     </parent>
 
     <artifactId>icy-kernel</artifactId>
@@ -30,8 +30,8 @@
                     <excludes>
                         <exclude>icy/updater/</exclude>
                     </excludes>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>${java-target}</source>
+                    <target>${java-target}</target>
                 </configuration>
             </plugin>
 
@@ -151,8 +151,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <overview>${basedir}/src/main/javadoc/overview.html</overview>
-                    <stylesheetfile>${basedir}/src/main/javadoc/java7doc.css</stylesheetfile>
                     <failOnError>false</failOnError>
                 </configuration>
             </plugin>
@@ -168,89 +166,104 @@
         <dependency>
             <groupId>net.sf.ehcache</groupId>
             <artifactId>ehcache</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-bioformats</artifactId>
-            <version>7.0.0</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-insubstantial</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
-            <version>3.1.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-intellij-themes</artifactId>
-            <version>3.1.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.github.jiconfont</groupId>
             <artifactId>jiconfont-swing</artifactId>
-            <version>1.0.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.github.jiconfont</groupId>
             <artifactId>jiconfont-google_material_design_icons</artifactId>
-            <version>2.2.0.2</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.github.jiconfont</groupId>
             <artifactId>jiconfont</artifactId>
-            <version>1.0.0</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-vtk</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.imagej</groupId>
             <artifactId>ij</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>javax.media</groupId>
             <artifactId>jai-core</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.sun.media</groupId>
             <artifactId>jai-codec</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.sourceforge.jexcelapi</groupId>
             <artifactId>jxl</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.swinglabs.swingx</groupId>
             <artifactId>swingx-all</artifactId>
+            <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>

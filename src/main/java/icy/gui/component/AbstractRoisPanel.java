@@ -50,6 +50,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import icy.gui.component.button.IcyButton;
+import icy.gui.toolbar.panel.ToolbarPanel;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.sort.DefaultSortController;
@@ -123,7 +124,7 @@ import plugins.kernel.roi.descriptor.property.ROISizeZDescriptor;
  *
  * @author Thomas MUSSET
  */
-public abstract class AbstractRoisPanel extends ExternalizablePanel implements ActiveSequenceListener, TextChangeListener, ListSelectionListener, PluginLoaderListener {
+public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSequenceListener, TextChangeListener, ListSelectionListener, PluginLoaderListener {
     protected static final String ID_VIEW = "view";
     protected static final String ID_EXPORT = "export";
 
@@ -238,7 +239,8 @@ public abstract class AbstractRoisPanel extends ExternalizablePanel implements A
      * @param preferences XML preferences node which will contains the ROI table settings
      */
     public AbstractRoisPanel(XMLPreferences preferences) {
-        super("ROI", "roiPanel", new Point(100, 100), new Dimension(400, 600));
+        //super("ROI", "roiPanel", new Point(100, 100), new Dimension(400, 600));
+        super(new Dimension(400, 0));
 
         basePreferences = preferences;
         viewPreferences = basePreferences.node(ID_VIEW);

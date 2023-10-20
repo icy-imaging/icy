@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,7 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package icy.gui.inspector;
+
+package icy.gui.toolbar.panel;
 
 import icy.action.CanvasActions;
 import icy.canvas.IcyCanvas;
@@ -27,54 +27,41 @@ import icy.main.Icy;
 import icy.system.thread.ThreadUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.util.List;
-
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.util.List;
 
 /**
  * @author Stephane
  * @author Thomas MUSSET
- * @deprecated Use {@link icy.gui.toolbar.panel.LayerControlPanel} instead
  */
-@Deprecated(since = "3.0.0", forRemoval = true)
-public class LayerControlPanel extends JPanel implements ChangeListener {
+public final class LayerControlPanel extends JPanel implements ChangeListener {
     // GUI
-    JSlider opacitySlider;
-    IcyButton deleteButton;
+    private final JSlider opacitySlider;
+    private final IcyButton deleteButton;
 
     // internal
-    final LayersPanel layerPanel;
-    private JPanel optionsPanel;
+    private final LayersPanel layerPanel;
+    private final JPanel optionsPanel;
 
-    public LayerControlPanel(LayersPanel layerPanel) {
+    public LayerControlPanel(final LayersPanel layerPanel) {
         super();
 
         this.layerPanel = layerPanel;
 
-        initialize();
-
-        opacitySlider.addChangeListener(this);
-    }
-
-    private void initialize() {
         setBorder(null);
         setLayout(new BorderLayout(0, 0));
 
-        JScrollPane scrollPane = new JScrollPane();
+        final JScrollPane scrollPane = new JScrollPane();
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         add(scrollPane, BorderLayout.CENTER);
 
         final JPanel actionPanel = new JPanel();
         scrollPane.setViewportView(actionPanel);
         scrollPane.setMaximumSize(new Dimension(32767, 100));
-        GridBagLayout gbl_actionPanel = new GridBagLayout();
+        final GridBagLayout gbl_actionPanel = new GridBagLayout();
         gbl_actionPanel.columnWidths = new int[]{0, 0, 0, 0};
         gbl_actionPanel.rowHeights = new int[]{0, 0, 0};
         gbl_actionPanel.columnWeights = new double[]{1.0, 1.0, 0.0, Double.MIN_VALUE};
@@ -82,7 +69,7 @@ public class LayerControlPanel extends JPanel implements ChangeListener {
         actionPanel.setLayout(gbl_actionPanel);
 
         optionsPanel = new JPanel();
-        GridBagConstraints gbc_optionsPanel = new GridBagConstraints();
+        final GridBagConstraints gbc_optionsPanel = new GridBagConstraints();
         gbc_optionsPanel.gridwidth = 3;
         gbc_optionsPanel.insets = new Insets(0, 0, 5, 5);
         gbc_optionsPanel.fill = GridBagConstraints.BOTH;
@@ -92,7 +79,7 @@ public class LayerControlPanel extends JPanel implements ChangeListener {
         optionsPanel.setLayout(new BorderLayout(0, 0));
 
         final JLabel lblOpacity = new JLabel(" Opacity  ");
-        GridBagConstraints gbc_lblOpacity = new GridBagConstraints();
+        final GridBagConstraints gbc_lblOpacity = new GridBagConstraints();
         gbc_lblOpacity.anchor = GridBagConstraints.WEST;
         gbc_lblOpacity.insets = new Insets(0, 0, 0, 5);
         gbc_lblOpacity.gridx = 0;
@@ -104,25 +91,24 @@ public class LayerControlPanel extends JPanel implements ChangeListener {
         opacitySlider.setFocusable(false);
         opacitySlider.setMinimumSize(new Dimension(120, 23));
         opacitySlider.setToolTipText("Change opacity for selected layer(s)");
-        GridBagConstraints gbc_opacitySlider = new GridBagConstraints();
+        final GridBagConstraints gbc_opacitySlider = new GridBagConstraints();
         gbc_opacitySlider.fill = GridBagConstraints.HORIZONTAL;
         gbc_opacitySlider.insets = new Insets(0, 0, 0, 5);
         gbc_opacitySlider.gridx = 1;
         gbc_opacitySlider.gridy = 1;
         actionPanel.add(opacitySlider, gbc_opacitySlider);
 
-        /*deleteButton = new JButton(CanvasActions.deleteLayersAction);
-        deleteButton.setIcon(IconUtil.DELETE);
-        deleteButton.setDisabledIcon(IconUtil.DELETE_D);*/
         deleteButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
         deleteButton.addActionListener(CanvasActions.deleteLayersAction);
-        GridBagConstraints gbc_deleteButton = new GridBagConstraints();
+        final GridBagConstraints gbc_deleteButton = new GridBagConstraints();
         gbc_deleteButton.anchor = GridBagConstraints.EAST;
         gbc_deleteButton.gridx = 2;
         gbc_deleteButton.gridy = 1;
         actionPanel.add(deleteButton, gbc_deleteButton);
 
         validate();
+
+        opacitySlider.addChangeListener(this);
     }
 
     public void refresh() {
@@ -134,7 +120,7 @@ public class LayerControlPanel extends JPanel implements ChangeListener {
         // boolean canEdit = false;
         boolean canRemove = false;
 
-        for (Layer layer : selectedLayers) {
+        for (final Layer layer : selectedLayers) {
             // canEdit |= !layer.isReadOnly();
             canRemove |= layer.getCanBeRemoved();
         }
@@ -171,7 +157,7 @@ public class LayerControlPanel extends JPanel implements ChangeListener {
     }
 
     @Override
-    public void stateChanged(ChangeEvent e) {
+    public void stateChanged(final ChangeEvent e) {
         final Viewer viewer = Icy.getMainInterface().getActiveViewer();
 
         if (viewer != null) {
@@ -185,9 +171,10 @@ public class LayerControlPanel extends JPanel implements ChangeListener {
                     canvas.beginUpdate();
                     try {
                         // set layer transparency
-                        for (Layer layer : selectedLayers)
+                        for (final Layer layer : selectedLayers)
                             layer.setOpacity(value / 100f);
-                    } finally {
+                    }
+                    finally {
                         canvas.endUpdate();
                     }
                 }

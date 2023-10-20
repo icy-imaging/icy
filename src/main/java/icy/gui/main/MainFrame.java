@@ -18,19 +18,17 @@
  */
 package icy.gui.main;
 
-import icy.action.FileActions;
-import icy.action.GeneralActions;
-import icy.action.SequenceOperationActions;
 import icy.file.FileUtil;
 import icy.file.Loader;
-import icy.gui.component.button.IcyButton;
 import icy.gui.frame.IcyExternalFrame;
 import icy.gui.inspector.InspectorPanel;
 import icy.gui.menu.ApplicationMenu;
 import icy.gui.menu.ApplicationMenuBar;
 import icy.gui.menu.MainRibbon;
 import icy.gui.menu.search.SearchBar;
-import icy.gui.statusbar.StatusBar;
+import icy.gui.toolbar.InspectorBar;
+import icy.gui.toolbar.StatusBar;
+import icy.gui.toolbar.container.StatusPanel;
 import icy.gui.util.ComponentUtil;
 import icy.gui.util.WindowPositionSaver;
 import icy.gui.viewer.Viewer;
@@ -44,11 +42,9 @@ import icy.system.FileDrop.FileDropListener;
 import icy.system.SystemUtil;
 import icy.type.collection.CollectionUtil;
 import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +55,7 @@ import java.util.List;
  */
 public class MainFrame extends JFrame {
     private static Rectangle getDefaultBounds() {
-        Rectangle r = SystemUtil.getMaximumWindowBounds();
+        final Rectangle r = SystemUtil.getMaximumWindowBounds();
 
         r.width -= 100;
         r.height -= 100;
@@ -70,16 +66,17 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * Returns the list of internal viewers.
+     * Returns the list of external viewers.
      *
      * @param bounds         If not null only viewers visible in the specified bounds are returned.
      * @param wantNotVisible Also return not visible viewers
      * @param wantIconized   Also return iconized viewers
      */
-    public static Viewer[] getExternalViewers(Rectangle bounds, boolean wantNotVisible, boolean wantIconized) {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static Viewer[] getExternalViewers(final Rectangle bounds, final boolean wantNotVisible, final boolean wantIconized) {
         final List<Viewer> result = new ArrayList<>();
 
-        for (Viewer viewer : Icy.getMainInterface().getViewers()) {
+        for (final Viewer viewer : Icy.getMainInterface().getViewers()) {
             if (viewer.isExternalized()) {
                 final IcyExternalFrame externalFrame = viewer.getIcyExternalFrame();
 
@@ -90,7 +87,7 @@ public class MainFrame extends JFrame {
             }
         }
 
-        return result.toArray(new Viewer[result.size()]);
+        return result.toArray(new Viewer[0]);
     }
 
     /**
@@ -99,12 +96,13 @@ public class MainFrame extends JFrame {
      * @param wantNotVisible Also return not visible viewers
      * @param wantIconized   Also return iconized viewers
      */
-    public static Viewer[] getExternalViewers(boolean wantNotVisible, boolean wantIconized) {
+    public static Viewer[] getExternalViewers(final boolean wantNotVisible, final boolean wantIconized) {
         return getExternalViewers(null, wantNotVisible, wantIconized);
     }
 
     public static final String TITLE = "Icy";
 
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final String PROPERTY_DETACHEDMODE = "detachedMode";
 
     public static final int TILE_HORIZONTAL = 0;
@@ -115,25 +113,30 @@ public class MainFrame extends JFrame {
 
     //final MainRibbon mainRibbon;
     JSplitPane mainPane;
-    private final JPanel centerPanel;
+    private final JSplitPane centerPanel;
     private final IcyDesktopPane desktopPane;
+    private final InspectorBar inspectorBar;
     private final StatusBar statusBar;
+    @Deprecated(since = "3.0.0", forRemoval = true)
     InspectorPanel inspector;
+    @Deprecated(since = "3.0.0", forRemoval = true)
     boolean detachedMode;
+    @Deprecated(since = "3.0.0", forRemoval = true)
     int lastInspectorWidth;
+    @Deprecated(since = "3.0.0", forRemoval = true)
     boolean inspectorWidthSet;
 
     // state save for detached mode
+    @Deprecated(since = "3.0.0", forRemoval = true)
     private int previousHeight;
+    @Deprecated(since = "3.0.0", forRemoval = true)
     private boolean previousMaximized;
+    @Deprecated(since = "3.0.0", forRemoval = true)
     private boolean previousInspectorInternalized;
 
     // we need to keep reference on it as the object only use weak reference
     final WindowPositionSaver positionSaver;
 
-    /**
-     * @throws HeadlessException
-     */
     public MainFrame() throws HeadlessException {
         super(TITLE);
 
@@ -156,8 +159,7 @@ public class MainFrame extends JFrame {
 
         final Rectangle defaultBounds = getDefaultBounds();
 
-        positionSaver = new WindowPositionSaver(this, "frame/main", defaultBounds.getLocation(),
-                defaultBounds.getSize());
+        positionSaver = new WindowPositionSaver(this, "frame/main", defaultBounds.getLocation(), defaultBounds.getSize());
         previousInspectorInternalized = positionSaver.getPreferences().getBoolean(ID_PREVIOUS_STATE, true);
 
         // set "always on top" state
@@ -178,22 +180,14 @@ public class MainFrame extends JFrame {
         // Application menubar
         setJMenuBar(ApplicationMenuBar.getInstance());
 
-        // Toolbars
-        JPanel panelToolbars = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        add(panelToolbars, BorderLayout.NORTH);
-
-        panelToolbars.add(createSequenceToolbar());
-
-        // TODO remove this once JMenuBar complete
-        panelToolbars.setVisible(false);
-
         // main center pane (contains desktop pane)
-        centerPanel = new JPanel();
-        centerPanel.setLayout(new BorderLayout());
+        //centerPanel = new JPanel();
+        //centerPanel.setLayout(new BorderLayout());
+        centerPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
         // desktop pane
         desktopPane = new IcyDesktopPane();
-        desktopPane.addMouseListener(new MouseAdapter() {
+        /*desktopPane.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
@@ -214,10 +208,14 @@ public class MainFrame extends JFrame {
                     // internalizeInspector();
                 }
             }
-        });
+        });*/
 
         // set the desktop pane in center pane
-        centerPanel.add(desktopPane, BorderLayout.CENTER);
+        //centerPanel.add(desktopPane, BorderLayout.CENTER);
+        centerPanel.setTopComponent(desktopPane);
+        centerPanel.setBottomComponent(StatusPanel.getInstance());
+        centerPanel.setResizeWeight(1);
+        centerPanel.setDividerLocation(1.0d);
 
         // action on file drop
         final FileDropListener desktopFileDropListener = files -> Loader.load(CollectionUtil.asList(FileUtil.toPaths(files)), (files.length <= 1) && !files[0].isDirectory(), true, true);
@@ -253,8 +251,7 @@ public class MainFrame extends JFrame {
         };*/
 
         // handle file drop in desktop pane and in ribbon pane
-        new FileDrop(desktopPane, BorderFactory.createLineBorder(Color.cyan.brighter(), 2), false,
-                desktopFileDropListener);
+        new FileDrop(desktopPane, BorderFactory.createLineBorder(Color.cyan.brighter(), 2), false, desktopFileDropListener);
         /*new FileDrop(getRibbon(), BorderFactory.createLineBorder(Color.blue.brighter(), 1), false,
                 bandFileDropListener);*/
 
@@ -275,7 +272,22 @@ public class MainFrame extends JFrame {
             }
         });*/
 
+        inspectorBar = new InspectorBar();
         statusBar = new StatusBar();
+
+        mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        mainPane.setLeftComponent(centerPanel);
+        mainPane.setRightComponent(icy.gui.toolbar.container.InspectorPanel.getInstance());
+
+        mainPane.setResizeWeight(1);
+        mainPane.setDividerLocation(1.0d);
+        mainPane.setEnabled(false);
+
+        add(mainPane, BorderLayout.CENTER);
+        add(inspectorBar, BorderLayout.EAST);
+        add(statusBar, BorderLayout.SOUTH);
+
+        setVisible(true);
     }
 
     /**
@@ -287,7 +299,7 @@ public class MainFrame extends JFrame {
         inspector = new InspectorPanel();
         inspectorWidthSet = false;
 
-        addComponentListener(new ComponentAdapter() {
+        /*addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 // only need to do it at first display
@@ -309,15 +321,17 @@ public class MainFrame extends JFrame {
                         setSize(getWidth(), prefH);
                 }
             }
-        });
+        });*/
 
         // main pane
-        mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerPanel, null);
-        mainPane.setContinuousLayout(true);
-        mainPane.setOneTouchExpandable(true);
+        mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerPanel, icy.gui.toolbar.container.InspectorPanel.getInstance());
+
+        mainPane.setResizeWeight(1);
+        mainPane.setEnabled(false);
+
 
         // get saved inspector width
-        lastInspectorWidth = inspector.getPreferredSize().width;
+        /*lastInspectorWidth = inspector.getPreferredSize().width;
         // add the divider and border size if inspector was visible
         if (lastInspectorWidth > 16)
             lastInspectorWidth += 6 + 8;
@@ -327,19 +341,16 @@ public class MainFrame extends JFrame {
 
         if (inspector.isInternalized()) {
             mainPane.setRightComponent(inspector);
-            mainPane.setDividerSize(6);
         }
         else {
-            mainPane.setDividerSize(0);
             inspector.setParent(mainPane);
         }
         mainPane.setResizeWeight(1);
 
         inspector.addStateListener((source, externalized) -> {
-            if (externalized)
-                mainPane.setDividerSize(0);
+            if (externalized) {
+            }
             else {
-                mainPane.setDividerSize(6);
                 // restore previous location
                 mainPane.setDividerLocation(getWidth() - lastInspectorWidth);
             }
@@ -357,8 +368,11 @@ public class MainFrame extends JFrame {
             setSize(getWidth(), getMinimumSize().height);
         }
         else
-            add(mainPane, BorderLayout.CENTER);
+            add(mainPane, BorderLayout.CENTER);*/
 
+        add(mainPane, BorderLayout.CENTER);
+
+        add(inspectorBar, BorderLayout.EAST);
         add(statusBar, BorderLayout.SOUTH);
 
         validate();
@@ -371,15 +385,15 @@ public class MainFrame extends JFrame {
         setVisible(true);
 
         // can be done after setVisible
-        buildActionMap();
+        //buildActionMap();
     }
 
-    void buildActionMap() {
+    /*void buildActionMap() {
         // global input map
         buildActionMap(mainPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW), mainPane.getActionMap());
-    }
+    }*/
 
-    private void buildActionMap(InputMap imap, ActionMap amap) {
+    /*private void buildActionMap(InputMap imap, ActionMap amap) {
         imap.put(GeneralActions.searchAction.getKeyStroke(), GeneralActions.searchAction.getName());
         imap.put(FileActions.openSequenceAction.getKeyStroke(), FileActions.openSequenceAction.getName());
         imap.put(FileActions.saveAsSequenceAction.getKeyStroke(), FileActions.saveAsSequenceAction.getName());
@@ -393,7 +407,7 @@ public class MainFrame extends JFrame {
         amap.put(GeneralActions.onlineHelpAction.getName(), GeneralActions.onlineHelpAction);
         amap.put(SequenceOperationActions.undoAction.getName(), SequenceOperationActions.undoAction);
         amap.put(SequenceOperationActions.redoAction.getName(), SequenceOperationActions.redoAction);
-    }
+    }*/
 
     // FIXME: 03/10/2023 Crash when plugin want to access Ribbon
     @Deprecated(since = "3.0.0", forRemoval = true)
@@ -406,13 +420,15 @@ public class MainFrame extends JFrame {
      * Returns the center pane, this pane contains the desktop pane.<br>
      * Feel free to add temporary top/left/right or bottom pane to it.
      */
-    public JPanel getCenterPanel() {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public JSplitPane getCenterPanel() {
         return centerPanel;
     }
 
     /**
      * Returns the {@link SearchBar} component.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public SearchBar getSearchBar() {
         /*if (mainRibbon != null)
             return mainRibbon.getSearchBar();*/
@@ -440,6 +456,7 @@ public class MainFrame extends JFrame {
     /**
      * @return the inspector
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public InspectorPanel getInspector() {
         return inspector;
     }
@@ -457,6 +474,7 @@ public class MainFrame extends JFrame {
     /**
      * Return true if the main frame is in "detached" mode
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public boolean isDetachedMode() {
         return detachedMode;
     }
@@ -498,6 +516,7 @@ public class MainFrame extends JFrame {
      * Returns true if the inspector is internalized in main container.<br>
      * Always returns false in detached mode.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public boolean isInpectorInternalized() {
         return inspector.isInternalized();
     }
@@ -506,6 +525,7 @@ public class MainFrame extends JFrame {
      * Internalize the inspector in main container.<br>
      * The method fails and returns false in detached mode.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public boolean internalizeInspector() {
         if (inspector.isExternalized() && inspector.isInternalizationAutorized()) {
             inspector.internalize();
@@ -519,6 +539,7 @@ public class MainFrame extends JFrame {
      * Externalize the inspector in main container.<br>
      * Returns false if the methods failed.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public boolean externalizeInspector() {
         if (inspector.isInternalized() && inspector.isExternalizationAutorized()) {
             // save diviser location
@@ -776,6 +797,7 @@ public class MainFrame extends JFrame {
     /**
      * Set detached window mode.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public void setDetachedMode(boolean value) {
         if (detachedMode != value) {
             // detached mode
@@ -841,6 +863,7 @@ public class MainFrame extends JFrame {
     }
 
     @Override
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public void reshape(int x, int y, int width, int height) {
         final Rectangle r = new Rectangle(x, y, width, height);
         final boolean detached;
@@ -863,38 +886,5 @@ public class MainFrame extends JFrame {
         ComponentUtil.fixPosition(this, r);
 
         super.reshape(r.x, r.y, r.width, r.height);
-    }
-
-    // @Override
-    // public synchronized void setMaximizedBounds(Rectangle bounds)
-    // {
-    // Rectangle bnds = SystemUtil.getScreenBounds(ComponentUtil.getScreen(this), true);
-    //
-    // if (bnds.isEmpty())
-    // bnds = bounds;
-    // // at least use the location from original bounds
-    // else if (bounds != null)
-    // bnds.setLocation(bounds.getLocation());
-    // else bnds.setLocation(0, 0);
-    //
-    // super.setMaximizedBounds(bnds);
-    // }
-
-    private JToolBar createSequenceToolbar() {
-        final JToolBar toolBar = new JToolBar("Sequence", JToolBar.HORIZONTAL);
-        //panelToolbar.setPreferredSize(new Dimension(0, 30));
-
-        final IcyButton buttonDuplicate = new IcyButton(GoogleMaterialDesignIcons.CONTENT_COPY);
-        buttonDuplicate.setToolTipText("Create a copy of the active sequence");
-        toolBar.add(buttonDuplicate);
-
-        final JComboBox<String> comboConversion = new JComboBox<>();
-        final String[] listConversion = new String[1];
-        listConversion[0] = "Unsigned Byte (8bits)";
-        final ComboBoxModel<String> modelConversion = new DefaultComboBoxModel<>(listConversion);
-        comboConversion.setModel(modelConversion);
-        toolBar.add(comboConversion);
-
-        return toolBar;
     }
 }

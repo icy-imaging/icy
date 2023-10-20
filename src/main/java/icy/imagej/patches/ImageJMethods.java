@@ -63,6 +63,7 @@ import ij.ImageJ;
  * @author Curtis Rueden
  * @author Stephane Dallongeville
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class ImageJMethods
 {
     /** Appends <code>ImageJ.showStatus(String)</code> method */

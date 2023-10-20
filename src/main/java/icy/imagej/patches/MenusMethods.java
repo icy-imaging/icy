@@ -29,6 +29,7 @@ import ij.Menus;
  * 
  * @author Stephane Dallongeville
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 @SuppressWarnings("unused")
 public class MenusMethods
 {

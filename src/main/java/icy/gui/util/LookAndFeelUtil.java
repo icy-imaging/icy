@@ -21,6 +21,7 @@ package icy.gui.util;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.intellijthemes.*;
 import icy.common.listener.SkinChangeListener;
 import icy.image.ImageUtil;
 import icy.preferences.GeneralPreferences;
@@ -29,12 +30,13 @@ import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 import ij.util.Java2;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
-import com.formdev.flatlaf.intellijthemes.*;
+import java.util.Set;
 
 /**
  * LookAndFeelUtil class. Use to install all skins used by Icy and helps manipulating UI manager.
@@ -50,10 +52,12 @@ public final class LookAndFeelUtil {
     private static FlatLaf currentSkin = null;
     private static UIDefaults defaults = null;
 
-    private static final Color CONSOLE_RED_DARK = new Color(162, 19, 8);
-    private static final Color CONSOLE_RED_LIGHT = new Color(245, 90, 78);
-    private static final Color CONSOLE_BLUE_DARK = new Color(0, 85, 174);
-    private static final Color CONSOLE_BLUE_LIGHT = new Color(157, 205, 255);
+    private static final Color RED_DARK = new Color(200, 64, 64);
+    private static final Color RED_LIGHT = new Color(255, 128, 128);
+    private static final Color GREEN_DARK = new Color(64, 128, 64);
+    private static final Color GREEN_LIGHT = new Color(128, 255, 128);
+    private static final Color BLUE_DARK = new Color(0, 85, 174);
+    private static final Color BLUE_LIGHT = new Color(157, 205, 255);
 
     public enum ColorType {
         UI_BUTTON_DEFAULT("Button.foreground"),
@@ -87,7 +91,7 @@ public final class LookAndFeelUtil {
             // so ImageJ won't try to change the look and feel later
             Java2.setSystemLookAndFeel();
         }
-        catch (Throwable t) {
+        catch (final Throwable t) {
             // just ignore the error here
         }
 
@@ -137,6 +141,8 @@ public final class LookAndFeelUtil {
 
         // get saved skin, if not found, get default skin and save it
         setSkin(GeneralPreferences.getGuiSkin());
+
+        UIManager.put("SplitPaneDivider.gripDotCount", 0);
     }
 
     private static void addSkin(final FlatLaf skin) {
@@ -164,26 +170,44 @@ public final class LookAndFeelUtil {
         return defaults.getColor(colorType.type);
     }
 
-    public static Color getConsoleRed() {
-        if (currentSkin.isDark())
-            return CONSOLE_RED_DARK;
+    public static Color getAccentForeground() {
+        if (isDarkMode())
+            return Color.WHITE;
         else
-            return CONSOLE_RED_LIGHT;
+            return Color.BLACK;
     }
 
-    public static Color getConsoleBlue() {
-        if (currentSkin.isDark())
-            return CONSOLE_BLUE_DARK;
+    public static Color getRed() {
+        if (isDarkMode())
+            return RED_DARK;
         else
-            return CONSOLE_BLUE_LIGHT;
+            return RED_LIGHT;
     }
 
-    public static boolean isConsoleRed(final Color color) {
-        return (color.equals(CONSOLE_RED_DARK) || color.equals(CONSOLE_RED_LIGHT));
+    public static Color getGreen() {
+        if (isDarkMode())
+            return GREEN_DARK;
+        else
+            return GREEN_LIGHT;
     }
 
-    public static boolean isConsoleBlue(final Color color) {
-        return (color.equals(CONSOLE_BLUE_DARK) || color.equals(CONSOLE_BLUE_LIGHT));
+    public static Color getBlue() {
+        if (isDarkMode())
+            return BLUE_DARK;
+        else
+            return BLUE_LIGHT;
+    }
+
+    public static boolean isRed(@Nullable final Color color) {
+        return (RED_DARK.equals(color) || RED_LIGHT.equals(color));
+    }
+
+    public static boolean isGreen(@Nullable final Color color) {
+        return (GREEN_DARK.equals(color) || GREEN_LIGHT.equals(color));
+    }
+
+    public static boolean isBlue(@Nullable final Color color) {
+        return (BLUE_DARK.equals(color) || BLUE_LIGHT.equals(color));
     }
 
     public static boolean isDarkMode() {
@@ -272,7 +296,7 @@ public final class LookAndFeelUtil {
 
                     updateUI();
                 }
-                catch (Exception e) {
+                catch (final Exception e) {
                     System.err.println("LookAndFeelUtil.setSkin(" + skin.getName() + ") error :");
                     IcyExceptionHandler.showErrorMessage(e, false);
                 }
@@ -293,7 +317,7 @@ public final class LookAndFeelUtil {
                     if (skinName.equals(skin.getName()))
                         setSkin(skin);
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 System.err.println("LookAndFeelUtil.setSkin(" + skinName + ") error :");
                 IcyExceptionHandler.showErrorMessage(e, false);
             }
@@ -324,7 +348,7 @@ public final class LookAndFeelUtil {
      * Fire all the listeners.
      */
     private static void fireSkinChangeListeners() {
-        for (SkinChangeListener listener : LISTENERS)
+        for (final SkinChangeListener listener : LISTENERS)
             listener.skinChanged();
     }
 
@@ -354,7 +378,7 @@ public final class LookAndFeelUtil {
      * Return the background color for the specified component
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    public static Color getBackground(Component c) {
+    public static Color getBackground(final Component c) {
         if (c != null)
             return c.getBackground();
 

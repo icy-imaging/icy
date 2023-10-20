@@ -49,6 +49,7 @@ import vtk.vtkObjectBase;
  * @author Fab &amp; Stephane
  * @author Thomas MUSSET
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class MemoryMonitorPanel extends JPanel implements MouseListener {
     private static final int NBVAL = 94;
 

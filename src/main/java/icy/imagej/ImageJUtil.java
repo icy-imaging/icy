@@ -63,6 +63,7 @@ import plugins.kernel.roi.roi2d.ROI2DShape;
  * 
  * @author Stephane
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class ImageJUtil
 {
     /**

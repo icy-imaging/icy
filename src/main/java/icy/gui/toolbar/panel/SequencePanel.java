@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,7 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package icy.gui.inspector;
+
+package icy.gui.toolbar.panel;
 
 import icy.gui.component.PopupPanel;
 import icy.gui.main.ActiveSequenceListener;
@@ -24,65 +24,59 @@ import icy.gui.main.ActiveViewerListener;
 import icy.gui.sequence.SequenceInfosPanel;
 import icy.gui.viewer.Viewer;
 import icy.gui.viewer.ViewerEvent;
+import icy.main.Icy;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 
-import java.awt.*;
-
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Stephane
  * @author Thomas MUSSET
- *
- * @deprecated Use {@link icy.gui.toolbar.panel.SequencePanel} instead.
  */
-@Deprecated(since = "3.0.0", forRemoval = true)
-public class SequencePanel extends JPanel implements ActiveSequenceListener, ActiveViewerListener {
-    private PopupPanel canvasPopupPanel;
-    private PopupPanel lutPopupPanel;
-    private PopupPanel infosPopupPanel;
+public final class SequencePanel extends ToolbarPanel implements ActiveSequenceListener, ActiveViewerListener {
+    private static SequencePanel instance = null;
 
-    private JPanel canvasPanel;
-    private JPanel lutPanel;
-    private JPanel infosPanel;
-
-    private SequenceInfosPanel sequenceInfosPanel;
-
-    public SequencePanel() {
-        super();
-
-        setPreferredSize(new Dimension(400, 0));
-
-        initialize();
+    public static SequencePanel getInstance() {
+        if (instance == null)
+            instance = new SequencePanel();
+        return instance;
     }
 
-    private void initialize() {
+    private final JPanel canvasPanel;
+    private final JPanel lutPanel;
+
+    private final SequenceInfosPanel sequenceInfosPanel;
+
+    private SequencePanel() {
+        super(new Dimension(400, 0));
+
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        GridBagLayout gridBagLayout = new GridBagLayout();
+        final GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[]{0, 0};
         gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0};
         gridBagLayout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
         gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
         setLayout(gridBagLayout);
 
-        canvasPopupPanel = new PopupPanel("Canvas");
+        final PopupPanel canvasPopupPanel = new PopupPanel("Canvas");
         canvasPanel = canvasPopupPanel.getMainPanel();
         canvasPanel.setLayout(new BorderLayout());
         canvasPopupPanel.expand();
-        GridBagConstraints gbc_canvasPopupPanel = new GridBagConstraints();
+        final GridBagConstraints gbc_canvasPopupPanel = new GridBagConstraints();
         gbc_canvasPopupPanel.fill = GridBagConstraints.HORIZONTAL;
         gbc_canvasPopupPanel.insets = new Insets(0, 0, 0, 0);
         gbc_canvasPopupPanel.gridx = 0;
         gbc_canvasPopupPanel.gridy = 0;
         add(canvasPopupPanel, gbc_canvasPopupPanel);
 
-        lutPopupPanel = new PopupPanel("Histogram and colormap");
+        final PopupPanel lutPopupPanel = new PopupPanel("Histogram and colormap");
         lutPanel = lutPopupPanel.getMainPanel();
         lutPanel.setLayout(new BorderLayout());
         lutPopupPanel.expand();
-        GridBagConstraints gbc_lutPopupPanel = new GridBagConstraints();
+        final GridBagConstraints gbc_lutPopupPanel = new GridBagConstraints();
         gbc_lutPopupPanel.fill = GridBagConstraints.HORIZONTAL;
         gbc_lutPopupPanel.insets = new Insets(0, 0, 0, 0);
         gbc_lutPopupPanel.gridx = 0;
@@ -92,20 +86,23 @@ public class SequencePanel extends JPanel implements ActiveSequenceListener, Act
         sequenceInfosPanel = new SequenceInfosPanel();
         sequenceInfosPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 
-        infosPopupPanel = new PopupPanel("Sequence Properties");
-        infosPanel = infosPopupPanel.getMainPanel();
+        final PopupPanel infosPopupPanel = new PopupPanel("Sequence Properties");
+        final JPanel infosPanel = infosPopupPanel.getMainPanel();
         infosPanel.setLayout(new BorderLayout());
         infosPopupPanel.expand();
         infosPanel.add(sequenceInfosPanel, BorderLayout.CENTER);
-        GridBagConstraints gbc_infosPopupPanel = new GridBagConstraints();
+        final GridBagConstraints gbc_infosPopupPanel = new GridBagConstraints();
         gbc_infosPopupPanel.insets = new Insets(0, 0, 0, 0);
         gbc_infosPopupPanel.fill = GridBagConstraints.HORIZONTAL;
         gbc_infosPopupPanel.gridx = 0;
         gbc_infosPopupPanel.gridy = 2;
         add(infosPopupPanel, gbc_infosPopupPanel);
+
+        Icy.getMainInterface().addActiveViewerListener(this);
+        Icy.getMainInterface().addActiveSequenceListener(this);
     }
 
-    public void setCanvasPanel(JPanel panel) {
+    private void setCanvasPanel(final JPanel panel) {
         canvasPanel.removeAll();
 
         if (panel != null) {
@@ -114,12 +111,9 @@ public class SequencePanel extends JPanel implements ActiveSequenceListener, Act
         }
 
         canvasPanel.revalidate();
-        // we need it for zoom value refresh in detached mode
-        // FIXME : normally revalidate should be enough (seems fixed now)
-        //canvasPanel.repaint();
     }
 
-    public void setLutPanel(JPanel panel) {
+    private void setLutPanel(final JPanel panel) {
         lutPanel.removeAll();
 
         if (panel != null) {
@@ -128,13 +122,10 @@ public class SequencePanel extends JPanel implements ActiveSequenceListener, Act
         }
 
         lutPanel.revalidate();
-        // we need it for histogram refresh in detached mode
-        // FIXME : normally revalidate should be enough (seems fixed now)
-        //lutPanel.repaint();
     }
 
     @Override
-    public void viewerActivated(Viewer viewer) {
+    public void viewerActivated(final Viewer viewer) {
         if (viewer != null) {
             setLutPanel(viewer.getLutViewer());
             setCanvasPanel(viewer.getCanvasPanel());
@@ -146,12 +137,12 @@ public class SequencePanel extends JPanel implements ActiveSequenceListener, Act
     }
 
     @Override
-    public void viewerDeactivated(Viewer viewer) {
+    public void viewerDeactivated(final Viewer viewer) {
         // nothing here
     }
 
     @Override
-    public void activeViewerChanged(ViewerEvent event) {
+    public void activeViewerChanged(final ViewerEvent event) {
         // we receive from current focused viewer only
         switch (event.getType()) {
             case CANVAS_CHANGED:
@@ -171,17 +162,17 @@ public class SequencePanel extends JPanel implements ActiveSequenceListener, Act
     }
 
     @Override
-    public void sequenceActivated(Sequence sequence) {
+    public void sequenceActivated(final Sequence sequence) {
         sequenceInfosPanel.sequenceActivated(sequence);
     }
 
     @Override
-    public void sequenceDeactivated(Sequence sequence) {
+    public void sequenceDeactivated(final Sequence sequence) {
         // nothing here
     }
 
     @Override
-    public void activeSequenceChanged(SequenceEvent event) {
+    public void activeSequenceChanged(final SequenceEvent event) {
         sequenceInfosPanel.activeSequenceChanged(event);
     }
 

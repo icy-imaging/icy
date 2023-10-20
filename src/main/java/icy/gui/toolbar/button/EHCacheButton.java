@@ -16,7 +16,7 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package icy.gui.statusbar;
+package icy.gui.toolbar.button;
 
 import icy.gui.component.button.IcyToggleButton;
 import icy.gui.frame.progress.FailedAnnounceFrame;

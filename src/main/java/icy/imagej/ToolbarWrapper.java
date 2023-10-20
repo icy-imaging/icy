@@ -47,6 +47,7 @@ import ij.plugin.MacroInstaller;
  *
  * @author Stephane
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class ToolbarWrapper extends Toolbar {
     private class CustomToolBar extends JToolBar {
         /**

@@ -61,6 +61,7 @@ import ij.gui.ImageWindow;
  * 
  * @author Stephane
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public final class WindowManagerMethods
 {
     private WindowManagerMethods()

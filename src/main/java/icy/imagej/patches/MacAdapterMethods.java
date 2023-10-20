@@ -23,6 +23,7 @@ import ij.plugin.MacAdapter;
 /**
  * @author Stephane
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class MacAdapterMethods
 {
     private MacAdapterMethods()
