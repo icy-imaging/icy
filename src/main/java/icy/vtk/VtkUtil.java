@@ -1138,8 +1138,6 @@ public class VtkUtil
 
         // fill the image with foreground voxels
         final long len = whiteImage.GetNumberOfPoints();
-        if (len >= Integer.MAX_VALUE)
-            System.err.printf("whiteImage.GetNumberOfPoints() [%d] is superior to Integer.MAX_VALUE [%d]\r\n", len, Integer.MAX_VALUE);
         // allocate java array
         final byte[] javaArray = new byte[(int) len];
         // get VTK array
@@ -1378,14 +1376,11 @@ public class VtkUtil
             polyData.GetPointData().SetScalars(colors);
         }
 
-        final long len = numPts * 3;
+        final int len = (int) (numPts * 3);
 
         final byte r = (byte) color.getRed();
         final byte g = (byte) color.getGreen();
         final byte b = (byte) color.getBlue();
-
-        if (len >= Integer.MAX_VALUE)
-            System.err.printf("polyData.GetNumberOfPoints() * 3 [%d] is superior to Integer.MAX_VALUE [%d]\r\n", len, Integer.MAX_VALUE);
 
         final byte[] data = new byte[(int) len];
 

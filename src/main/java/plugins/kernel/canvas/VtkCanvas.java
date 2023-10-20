@@ -1100,7 +1100,6 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
 
         // reverse surface scaling
         result.setX(result.getX() / scale[0]);
-
         // need to revert Y axis
         result.setY((rw.GetSize()[1] - result.getY()) / scale[1]);
 
@@ -1153,7 +1152,6 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             return new Point3D.Double();
 
         final float[] scale = panel3D.getCurrentSurfaceScale(new float[2]);
-
         // need to revert Y axis
         r.SetDisplayPoint(x * scale[0], (rw.GetSize()[1] - y) * scale[1], z);
         r.DisplayToWorld();

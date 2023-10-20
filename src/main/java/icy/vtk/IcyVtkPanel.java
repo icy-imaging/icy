@@ -347,7 +347,6 @@ public class IcyVtkPanel extends VtkJoglPanel implements MouseListener, MouseMot
         lock();
         try {
             final float[] scale = getCurrentSurfaceScale(new float[2]);
-
             picker.Pick(x * scale[0], rw.GetSize()[1] - (y * scale[1]), 0, renderer);
         }
         finally {

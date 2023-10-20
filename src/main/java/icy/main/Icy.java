@@ -189,7 +189,6 @@ public class Icy {
                             JOptionPane.YES_NO_OPTION,
                             ApplicationPreferences.ID_SINGLE_INSTANCE
                     );
-
                     ThreadUtil.invokeNow(confirmer);
 
                     if (!confirmer.getResult()) {
@@ -378,8 +377,7 @@ public class Icy {
             Icy.getMainInterface().addSequence(Loader.loadSequence(FileUtil.getGenericPath(startupImage), 0, false));
 
         // wait while updates are occurring before starting command line plugin...
-        while (PluginUpdater.isCheckingForUpdate() || PluginInstaller.isProcessing()
-                || WorkspaceInstaller.isProcessing())
+        while (PluginUpdater.isCheckingForUpdate() || PluginInstaller.isProcessing() || WorkspaceInstaller.isProcessing())
             ThreadUtil.sleep(1);
 
         if (startupPluginName != null) {
@@ -994,15 +992,13 @@ public class Icy {
                 else
                     IcyLogger.warn("VTK loop-load failed.");
             }
-
-            // redirect vtk error log to file
-            vtkNativeLibrary.DisableOutputWindow(new File("vtk.log"));
         }
         catch (final Throwable e1) {
             IcyExceptionHandler.showErrorMessage(e1, false, false);
         }
 
         if (vtkLibraryLoaded) {
+            vtkNativeLibrary.DisableOutputWindow(new File("vtk.log"));
             final String vv = new vtkVersion().GetVTKVersion();
 
             final String message = String.format("VTK %s library successfully loaded.", vv);

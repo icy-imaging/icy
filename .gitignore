@@ -8,3 +8,4 @@
 *.iml
 setting.xml
 release/
+**/.DS_Store

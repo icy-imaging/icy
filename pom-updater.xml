@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>2.1.2</version>
+        <version>3.0.0</version>
     </parent>
 
     <artifactId>icy-updater</artifactId>
-    <version>2.4.3</version>
+    <version>3.0.0</version>
 
     <packaging>jar</packaging>
 
@@ -19,7 +19,7 @@
     <description>Updater / Launcher tool for Icy software</description>
 
     <properties>
-       <maven.javadoc.skip>true</maven.javadoc.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <build>
@@ -140,18 +140,15 @@
                     <skipSource>true</skipSource>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-kernel</artifactId>
             <version>${project.version}</version>
         </dependency>
-
     </dependencies>
 
     <repositories>
@@ -161,5 +158,4 @@
             <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
         </repository>
     </repositories>
-
 </project>

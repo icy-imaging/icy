@@ -296,10 +296,6 @@ public class VtkImageVolume
             else
             {
                 mapper.AutoAdjustSampleDistancesOff();
-
-                if (value >= Float.MAX_VALUE)
-                    System.err.printf("Sample resolution [%f] is superoir to Float.MAX_VALUE [%f]\r\n", value, Float.MAX_VALUE);
-
                 mapper.SetImageSampleDistance((float) value);
             }
         }
