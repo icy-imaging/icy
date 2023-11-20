@@ -22,12 +22,16 @@ import com.sun.management.OperatingSystemMXBean;
 import icy.common.Version;
 import icy.file.FileUtil;
 import icy.main.Icy;
+import icy.system.logging.IcyLogger;
 import icy.type.collection.CollectionUtil;
 import icy.util.ReflectionUtil;
 import icy.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.Desktop.Action;
+import java.awt.event.InputEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -37,6 +41,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -64,9 +69,48 @@ public class SystemUtil {
      * @param vmArgs  arguments for the java virtual machine.
      * @param appArgs arguments for jar application.
      * @param workDir working directory.
+     * @deprecated Use {@link #execJAR(String, String[], String, String)} instead.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static Process execJAR(final String jarPath, final String vmArgs, final String appArgs, final String workDir) {
-        return exec("java " + vmArgs + " -jar " + jarPath + " " + appArgs, workDir);
+        //return exec("java " + vmArgs + " -jar " + jarPath + " " + appArgs, workDir);
+        return exec(new String[]{"java", vmArgs, "-jar", jarPath, appArgs}, workDir);
+    }
+
+    /**
+     * Launch specified jar file.
+     *
+     * @param jarPath jar file path.
+     * @param vmArgs  arguments for the java virtual machine.
+     * @param appArgs arguments for jar application.
+     * @param workDir working directory.
+     */
+    public static Process execJAR(final String jarPath, @NotNull final String[] vmArgs, final String appArgs, final String workDir) {
+        //return exec("java " + vmArgs + " -jar " + jarPath + " " + appArgs, workDir);
+        final List<String> cmdarray = new ArrayList<>();
+        cmdarray.add("java");
+        if (vmArgs.length > 0)
+            cmdarray.addAll(Arrays.asList(vmArgs));
+        cmdarray.add("-jar");
+        cmdarray.add(jarPath);
+        cmdarray.add(appArgs);
+
+        //return exec(new String[]{"java", vmArgs, "-jar", jarPath, appArgs}, workDir);
+        return exec(cmdarray.toArray(new String[0]), workDir);
+    }
+
+    /**
+     * Launch specified jar file.
+     *
+     * @param jarPath jar file path.
+     * @param vmArgs  arguments for the java virtual machine.
+     * @param appArgs arguments for jar application.
+     * @deprecated Use {@link #execJAR(String, String[], String)} instead.
+     */
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static Process execJAR(final String jarPath, final String vmArgs, final String appArgs) {
+        //return exec("java " + vmArgs + " -jar " + jarPath + " " + appArgs);
+        return exec(new String[]{"java", vmArgs, "-jar", jarPath, appArgs});
     }
 
     /**
@@ -76,8 +120,18 @@ public class SystemUtil {
      * @param vmArgs  arguments for the java virtual machine.
      * @param appArgs arguments for jar application.
      */
-    public static Process execJAR(final String jarPath, final String vmArgs, final String appArgs) {
-        return exec("java " + vmArgs + " -jar " + jarPath + " " + appArgs);
+    public static Process execJAR(final String jarPath, @NotNull final String[] vmArgs, final String appArgs) {
+        //return exec("java " + vmArgs + " -jar " + jarPath + " " + appArgs, workDir);
+        final List<String> cmdarray = new ArrayList<>();
+        cmdarray.add("java");
+        if (vmArgs.length > 0)
+            cmdarray.addAll(Arrays.asList(vmArgs));
+        cmdarray.add("-jar");
+        cmdarray.add(jarPath);
+        cmdarray.add(appArgs);
+
+        //return exec(new String[]{"java", vmArgs, "-jar", jarPath, appArgs}, workDir);
+        return exec(cmdarray.toArray(new String[0]));
     }
 
     /**
@@ -87,7 +141,8 @@ public class SystemUtil {
      * @param appArgs arguments for jar application.
      */
     public static Process execJAR(final String jarPath, final String appArgs) {
-        return execJAR(jarPath, "", appArgs);
+        //return execJAR(jarPath, "", appArgs);
+        return execJAR(jarPath, new String[]{}, appArgs);
     }
 
     /**
@@ -103,9 +158,20 @@ public class SystemUtil {
      * Execute a system command and return the attached process.
      *
      * @param cmd system command to execute.
+     * @deprecated Use {@link #exec(String[])} instead.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static Process exec(final String cmd) {
         return exec(cmd, ".");
+    }
+
+    /**
+     * Execute a system command and return the attached process.
+     *
+     * @param cmdarray system commands list to execute.
+     */
+    public static Process exec(final String[] cmdarray) {
+        return exec(cmdarray, ".");
     }
 
     /**
@@ -114,7 +180,10 @@ public class SystemUtil {
      * @param cmd system command to execute.
      * @param dir the working directory of the subprocess, or null if the subprocess should inherit the
      *            working directory of the current process.
+     * @deprecated Use {@link #exec(String[], String)} instead.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    @Nullable
     public static Process exec(final String cmd, final String dir) {
         try {
             return Runtime.getRuntime().exec(cmd, null, new File(dir));
@@ -122,6 +191,24 @@ public class SystemUtil {
         catch (final Exception e) {
             System.err.println("SystemUtil.exec(" + cmd + ") error :");
             IcyExceptionHandler.showErrorMessage(e, false);
+            return null;
+        }
+    }
+
+    /**
+     * Execute a system command and return the attached process.
+     *
+     * @param cmdarray system commands list to execute.
+     * @param dir the working directory of the subprocess, or null if the subprocess should inherit the
+     *            working directory of the current process.
+     */
+    @Nullable
+    public static Process exec(final String[] cmdarray, final String dir) {
+        try {
+            return Runtime.getRuntime().exec(cmdarray, null, new File(dir));
+        }
+        catch (final IOException e) {
+            IcyLogger.error("SystemUtil.exec(" + Arrays.toString(cmdarray) + ") error.");
             return null;
         }
     }
@@ -148,6 +235,7 @@ public class SystemUtil {
         return defaultGC.createCompatibleImage(width, height, transparency);
     }
 
+    @Nullable
     public static VolatileImage createCompatibleVolatileImage(final int width, final int height) {
         final GraphicsConfiguration defaultGC = getDefaultGraphicsConfiguration();
 
@@ -157,6 +245,7 @@ public class SystemUtil {
         return defaultGC.createCompatibleVolatileImage(width, height);
     }
 
+    @Nullable
     public static VolatileImage createCompatibleVolatileImage(final int width, final int height, final int transparency) {
         final GraphicsConfiguration defaultGC = getDefaultGraphicsConfiguration();
 
@@ -166,6 +255,7 @@ public class SystemUtil {
         return defaultGC.createCompatibleVolatileImage(width, height, transparency);
     }
 
+    @Nullable
     public static Desktop getDesktop() {
         if (Desktop.isDesktopSupported())
             return Desktop.getDesktop();
@@ -219,7 +309,10 @@ public class SystemUtil {
 
     /**
      * Return the CTRL key mask used for Menu shortcut.
+     *
+     * @deprecated Use {@link #getMenuCtrlMaskEx()} instead.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static int getMenuCtrlMask() {
         try {
             return Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -231,13 +324,30 @@ public class SystemUtil {
     }
 
     /**
-     * @deprecated Use {@link #getMenuCtrlMask()} instead
+     * Return the CTRL key mask used for Menu shortcut.
+     */
+    public static int getMenuCtrlMaskEx() {
+        try {
+            return Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+        }
+        catch (final HeadlessException e) {
+            // headless mode, use default Ctrl Mask Ex
+            return InputEvent.CTRL_DOWN_MASK;
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #getMenuCtrlMask()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     public static int getSystemCtrlMask() {
         return getMenuCtrlMask();
     }
 
+    /**
+     * @deprecated Use {@link GraphicsEnvironment#getLocalGraphicsEnvironment()} instead.
+     */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static GraphicsEnvironment getLocalGraphicsEnvironment() {
         return GraphicsEnvironment.getLocalGraphicsEnvironment();
     }
@@ -245,6 +355,7 @@ public class SystemUtil {
     /**
      * Return the default screen device.
      */
+    @Nullable
     public static GraphicsDevice getDefaultScreenDevice() {
         if (Icy.getMainInterface().isHeadLess())
             return null;
@@ -255,6 +366,7 @@ public class SystemUtil {
     /**
      * Return the default graphics configuration.
      */
+    @Nullable
     public static GraphicsConfiguration getDefaultGraphicsConfiguration() {
         final GraphicsDevice screenDevice = getDefaultScreenDevice();
 
@@ -275,6 +387,7 @@ public class SystemUtil {
     /**
      * Return all available screen devices.
      */
+    @NotNull
     public static List<GraphicsDevice> getScreenDevices() {
         final List<GraphicsDevice> result = new ArrayList<>();
 
@@ -307,6 +420,7 @@ public class SystemUtil {
     /**
      * Return the screen device corresponding to specified index.
      */
+    @Nullable
     public static GraphicsDevice getScreenDevice(final int index) {
         if (Icy.getMainInterface().isHeadLess())
             return null;
@@ -323,6 +437,7 @@ public class SystemUtil {
      * Returns all screen device intersecting the given region.<br>
      * Can return an empty list if given region do not intersect any screen device.
      */
+    @NotNull
     public static List<GraphicsDevice> getScreenDevices(final Rectangle region) {
         final List<GraphicsDevice> result = new ArrayList<>();
 
@@ -341,6 +456,7 @@ public class SystemUtil {
      * If the given region intersect multiple screen, it return screen containing the largest area.<br>
      * Can return <code>null</code> if given region do not intersect any screen device.
      */
+    @Nullable
     public static GraphicsDevice getScreenDevice(final Rectangle region) {
         if (Icy.getMainInterface().isHeadLess())
             return null;
@@ -368,6 +484,7 @@ public class SystemUtil {
      * Returns the screen device corresponding to the given position.<br>
      * Can return <code>null</code> if given position is not located in any screen device.
      */
+    @Nullable
     public static GraphicsDevice getScreenDevice(final Point position) {
         if (Icy.getMainInterface().isHeadLess())
             return null;
@@ -381,7 +498,10 @@ public class SystemUtil {
 
     /**
      * Returns true if current system is "head less" (no screen output device).
+     *
+     * @deprecated Use {@link GraphicsEnvironment#isHeadless()} instead.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static boolean isHeadLess() {
         return GraphicsEnvironment.isHeadless();
     }
@@ -390,10 +510,12 @@ public class SystemUtil {
         return Thread.currentThread().getContextClassLoader();
     }
 
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static ClassLoader getSystemClassLoader() {
         return ClassLoader.getSystemClassLoader();
     }
 
+    @Nullable
     public static BufferCapabilities getSystemBufferCapabilities() {
         final GraphicsConfiguration defaultGC = getDefaultGraphicsConfiguration();
 
@@ -403,6 +525,7 @@ public class SystemUtil {
         return defaultGC.getBufferCapabilities();
     }
 
+    @Nullable
     public static ImageCapabilities getSystemImageCapabilities() {
         final GraphicsConfiguration defaultGC = getDefaultGraphicsConfiguration();
 
@@ -412,6 +535,7 @@ public class SystemUtil {
         return defaultGC.getImageCapabilities();
     }
 
+    @Nullable
     public static ColorModel getSystemColorModel() {
         final GraphicsConfiguration defaultGC = getDefaultGraphicsConfiguration();
 
@@ -421,6 +545,7 @@ public class SystemUtil {
         return defaultGC.getColorModel();
     }
 
+    @Nullable
     public static ColorModel getSystemColorModel(final int transparency) {
         final GraphicsConfiguration defaultGC = getDefaultGraphicsConfiguration();
 
@@ -435,6 +560,7 @@ public class SystemUtil {
      *
      * @param removeInsets remove any existing taskbars and menubars from the result
      */
+    @NotNull
     public static Rectangle getScreenBounds(final GraphicsDevice graphicsDevice, final boolean removeInsets) {
         if (graphicsDevice == null)
             return new Rectangle();
@@ -456,6 +582,7 @@ public class SystemUtil {
      *
      * @param removeInsets remove any existing taskbars and menubars from the result
      */
+    @NotNull
     public static Rectangle getDesktopBounds(final boolean removeInsets) {
         Rectangle result = new Rectangle();
 
@@ -475,6 +602,7 @@ public class SystemUtil {
      *
      * @see #getDesktopBounds(boolean)
      */
+    @NotNull
     public static Rectangle getDesktopBounds() {
         return getDesktopBounds(true);
     }
@@ -492,6 +620,7 @@ public class SystemUtil {
     /**
      * {@link GraphicsDevice#getDisplayMode()}
      */
+    @Nullable
     public static DisplayMode getSystemDisplayMode() {
         final GraphicsDevice screenDevice = getDefaultScreenDevice();
 
@@ -552,6 +681,7 @@ public class SystemUtil {
         return getJavaAllocatedMemory() - Runtime.getRuntime().freeMemory();
     }
 
+    @Nullable
     private static OperatingSystemMXBean getOSMXBean() {
         final java.lang.management.OperatingSystemMXBean bean = ManagementFactory.getOperatingSystemMXBean();
 
@@ -585,7 +715,7 @@ public class SystemUtil {
         final OperatingSystemMXBean bean = getOSMXBean();
 
         if (bean != null)
-            return bean.getTotalPhysicalMemorySize();
+            return bean.getTotalMemorySize();
 
         return -1L;
     }
@@ -605,7 +735,7 @@ public class SystemUtil {
         final OperatingSystemMXBean bean = getOSMXBean();
 
         if (bean != null)
-            return bean.getFreePhysicalMemorySize();
+            return bean.getFreeMemorySize();
 
         return -1L;
     }
@@ -740,6 +870,7 @@ public class SystemUtil {
     /**
      * Returns the JVM integer version (ex: 6.0.91, 7.0.71, 8.0.151..)
      */
+    @NotNull
     public static Version getJavaVersionAsVersion() {
         // replace separators by '.'
         String version = getJavaVersion().replaceAll("-", ".");
@@ -747,7 +878,7 @@ public class SystemUtil {
         // then remove all unwanted characters
         version = version.replaceAll("[^\\d.]", "");
 
-        int firstSepInd = version.indexOf('.');
+        final int firstSepInd = version.indexOf('.');
 
         if (firstSepInd >= 0) {
             // version 1.xxx ?
@@ -755,7 +886,7 @@ public class SystemUtil {
                 // remove "1."
                 version = version.substring(firstSepInd + 1);
                 // get first "." index
-                firstSepInd = version.indexOf('.');
+                //firstSepInd = version.indexOf('.');
             }
         }
 
@@ -840,7 +971,7 @@ public class SystemUtil {
     /**
      * Returns true is the JVM is 32 bits.
      *
-     * @deprecated Since Java 11, there is no x86 (32bits) version of the JVM.
+     * @deprecated Since Java 11, there is no 32bits version of the JVM.
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
     public static boolean is32bits() {
@@ -850,7 +981,7 @@ public class SystemUtil {
     /**
      * Returns true is the JVM is 64 bits.
      *
-     * @deprecated Since Java 11, there is only x64 (64bits) version of the JVM.
+     * @deprecated Since Java 11, there is only 64bits version of the JVM.
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
     public static boolean is64bits() {
@@ -912,6 +1043,7 @@ public class SystemUtil {
      * <code>/tmp</code><br>
      * Same as {@link FileUtil#getTempDirectory()}
      */
+    @NotNull
     public static String getTempDirectory() {
         return FileUtil.getTempDirectory();
     }
@@ -919,6 +1051,7 @@ public class SystemUtil {
     /**
      * Returns temporary native library path (used to load native libraries from plugin)
      */
+    @NotNull
     public static String getTempLibraryDirectory() {
         return FileUtil.getTempDirectory() + "/lib";
     }
@@ -965,7 +1098,7 @@ public class SystemUtil {
      * @param name name of the library.<br>
      *             The filename of the library is automatically built depending the operating system.
      */
-    public static void loadLibrary(final String dir, final String name) {
+    public static void loadLibrary(@NotNull final String dir, @NotNull final String name) {
         final File libPath = new File(dir, System.mapLibraryName(name));
 
         if (libPath.exists())
@@ -979,7 +1112,7 @@ public class SystemUtil {
      *
      * @param pathname complete path or name of the library we want to load
      */
-    public static void loadLibrary(final String pathname) {
+    public static void loadLibrary(@NotNull final String pathname) {
         final File file = new File(pathname);
 
         if (file.exists())

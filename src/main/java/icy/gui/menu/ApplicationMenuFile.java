@@ -37,6 +37,7 @@ import icy.type.collection.CollectionUtil;
 import icy.type.collection.list.RecentFileList;
 import icy.util.StringUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -44,22 +45,27 @@ import java.util.List;
  * @author Thomas MUSSET
  */
 final class ApplicationMenuFile extends AbstractApplicationMenu {
+    @NotNull
+    private static final ApplicationMenuFile instance = new ApplicationMenuFile();
 
-    private static ApplicationMenuFile instance = null;
-
+    @NotNull
     public static synchronized ApplicationMenuFile getInstance() {
-        if (instance == null)
-            instance = new ApplicationMenuFile();
-
         return instance;
     }
 
+    @NotNull
     private final IcyMenu menuImport;
+    @NotNull
     private final IcyMenuItem itemCloseSequence;
+    @NotNull
     private final IcyMenuItem itemCloseOther;
+    @NotNull
     private final IcyMenuItem itemCloseAll;
+    @NotNull
     private final IcyMenuItem itemSaveSequence;
+    @NotNull
     private final IcyMenuItem itemSaveSequenceAs;
+    @NotNull
     private final IcyMenuItem itemSaveMetadata;
 
     private ApplicationMenuFile() {
@@ -214,6 +220,6 @@ final class ApplicationMenuFile extends AbstractApplicationMenu {
 
     @Override
     public void pluginLoaderChanged(final PluginLoader.PluginLoaderEvent e) {
-        reloadImportMenu();
+        //reloadImportMenu();
     }
 }

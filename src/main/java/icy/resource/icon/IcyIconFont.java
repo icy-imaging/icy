@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,11 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.resource.icon;
 
 import icy.gui.util.LookAndFeelUtil;
 import jiconfont.IconCode;
 import jiconfont.swing.IconFontSwing;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,13 +31,15 @@ import java.awt.*;
  * @author Thomas MUSSET
  */
 public final class IcyIconFont implements Icon {
+    @NotNull
     final IconCode ic;
     float size;
+    @NotNull
     private final LookAndFeelUtil.ColorType colorType;
 
     Icon internalIcon;
 
-    public IcyIconFont(final IconCode iconCode, final float size, final LookAndFeelUtil.ColorType colorType) {
+    public IcyIconFont(@NotNull final IconCode iconCode, final float size, @NotNull final LookAndFeelUtil.ColorType colorType) {
         this.ic = iconCode;
         this.size = size;
         this.colorType = colorType;
@@ -43,7 +47,7 @@ public final class IcyIconFont implements Icon {
         updateIcon();
     }
 
-    public IcyIconFont(final IconCode iconCode, final LookAndFeelUtil.ColorType colorType) {
+    public IcyIconFont(@NotNull final IconCode iconCode, @NotNull final LookAndFeelUtil.ColorType colorType) {
         this.ic = iconCode;
         this.size = LookAndFeelUtil.getDefaultIconSizeAsFloat();
         this.colorType = colorType;
@@ -51,6 +55,7 @@ public final class IcyIconFont implements Icon {
         updateIcon();
     }
 
+    @NotNull
     public IconCode getIconCode() {
         return ic;
     }
@@ -64,8 +69,13 @@ public final class IcyIconFont implements Icon {
         internalIcon = IconFontSwing.buildIcon(ic, size, LookAndFeelUtil.getUIColor(colorType));
     }
 
+    public static void updateIcon(@Nullable final Icon icon) {
+        if (icon instanceof IcyIconFont)
+            ((IcyIconFont) icon).updateIcon();
+    }
+
     @Override
-    public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
+    public void paintIcon(@NotNull final Component c, @NotNull final Graphics g, final int x, final int y) {
         internalIcon.paintIcon(c, g, x, y);
     }
 

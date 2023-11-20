@@ -38,7 +38,6 @@ import icy.gui.main.MainInterfaceGui;
 import icy.gui.system.NewVersionFrame;
 import icy.gui.util.LookAndFeelUtil;
 import icy.image.cache.ImageCache;
-import icy.imagej.ImageJPatcher;
 import icy.math.UnitUtil;
 import icy.network.NetworkUtil;
 import icy.plugin.*;
@@ -61,9 +60,9 @@ import icy.update.IcyUpdater;
 import icy.util.StringUtil;
 import icy.workspace.WorkspaceInstaller;
 import icy.workspace.WorkspaceLoader;
-import ij.ImageJ;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import jiconfont.swing.IconFontSwing;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import vtk.vtkNativeLibrary;
 import vtk.vtkVersion;
@@ -89,7 +88,7 @@ public class Icy {
     /**
      * Icy Version
      */
-    public static Version version = new Version(3, 0, 0, Version.Snapshot.ALPHA);
+    public static final Version VERSION = new Version(3, 0, 0, Version.Snapshot.ALPHA);
 
     /**
      * Main interface
@@ -132,6 +131,7 @@ public class Icy {
     /**
      * Startup parameters
      */
+    @NotNull
     static String[] args;
     static String[] pluginArgs;
     static String startupPluginName;
@@ -157,7 +157,7 @@ public class Icy {
     /**
      * @param args Received from the command line.
      */
-    public static void main(final String[] args) {
+    public static void main(@NotNull final String[] args) {
         boolean headless = false;
 
         IcyLogger.setConsoleLevel(IcyLogger.DEBUG);
@@ -170,7 +170,7 @@ public class Icy {
             headless = handleAppArgs(args);
 
             // force headless if we have a headless system
-            if (!headless && SystemUtil.isHeadLess())
+            if (!headless && GraphicsEnvironment.isHeadless())
                 headless = true;
 
             // initialize preferences
@@ -207,11 +207,6 @@ public class Icy {
             // set LOCI debug level (do it immediately as it can quickly show some log messages)
             loci.common.DebugTools.enableLogging("ERROR");
 
-            if (!headless && SystemUtil.isMac())
-                System.setProperty("apple.laf.useScreenMenuBar", "false"); // FIXME change behaviour on detached mode
-            if (!headless)
-                IconFontSwing.register(GoogleMaterialDesignIcons.getIconFont());
-
             if (!headless && !noSplash) {
                 // prepare splashScreen (ok to create it here as we are not yet in substance laf)
                 splashScreen = new SplashScreenFrame();
@@ -240,14 +235,6 @@ public class Icy {
                 WorkspaceLoader.reloadAsynch();
             }, "Initializer: Plugin and WS").start();
 
-            try {
-                // patches ImageJ classes (need to be done before instancing ImageJ)
-                ImageJPatcher.applyPatches();
-            }
-            catch (final Throwable t) {
-                IcyLogger.error("Error while patching ImageJ classes.", t);
-            }
-
             // build main interface
             if (headless)
                 mainInterface = new MainInterfaceBatch();
@@ -263,6 +250,8 @@ public class Icy {
             // do it on AWT thread NOW as this is what we want first
             ThreadUtil.invokeNow(() -> {
                 try {
+                    // init IconFontSwing with GoogleMaterialIcons
+                    IconFontSwing.register(GoogleMaterialDesignIcons.getIconFont());
                     // init Look And Feel (need mainInterface instance)
                     LookAndFeelUtil.init();
                     // init need "mainInterface" variable to be initialized
@@ -326,7 +315,7 @@ public class Icy {
         nativeLibrariesInit();
 
         // changed version ?
-        if (!ApplicationPreferences.getVersion().equals(Icy.version)) {
+        if (!ApplicationPreferences.getVersion().equals(Icy.VERSION)) {
             // not headless ?
             if (!headless) {
                 // display the new version information
@@ -361,19 +350,19 @@ public class Icy {
         }
 
         // update version info
-        ApplicationPreferences.setVersion(Icy.version);
+        ApplicationPreferences.setVersion(Icy.VERSION);
         // set LOCI debug level
         // loci.common.DebugTools.enableLogging("ERROR");
         // set OGL debug level
         //SystemUtil.setProperty("jogl.verbose", "TRUE");
         //SystemUtil.setProperty("jogl.debug", "TRUE");
 
-        IcyLogger.info(String.format("Icy v%s started.", version.toShortString()));
+        IcyLogger.info(String.format("Icy v%s started.", VERSION.toShortString()));
 
         checkParameters();
 
         // handle startup arguments
-        if (startupImage != null)
+        if (startupImage != null && !startupImage.isEmpty() && !startupImage.isBlank())
             Icy.getMainInterface().addSequence(Loader.loadSequence(FileUtil.getGenericPath(startupImage), 0, false));
 
         // wait while updates are occurring before starting command line plugin...
@@ -387,8 +376,8 @@ public class Icy {
 
             if (plugin == null) {
                 IcyLogger.error(String.format("Could not launch plugin '%s': the plugin was not found.", startupPluginName));
-                IcyLogger.error("Be sure you correctly wrote the complete class name and respected the case.");
-                IcyLogger.error("Ex: plugins.mydevid.analysis.MyPluginClass");
+                IcyLogger.info("Be sure you correctly wrote the complete class name and respected the case.");
+                IcyLogger.info("Ex: plugins.mydevid.analysis.MyPluginClass");
             }
             else
                 startupPlugin = PluginLauncher.start(plugin);
@@ -399,7 +388,7 @@ public class Icy {
             exit(false);
     }
 
-    private static boolean handleAppArgs(final String[] args) {
+    private static boolean handleAppArgs(@NotNull final String[] args) {
         final List<String> pluginArgsList = new ArrayList<>();
 
         startupImage = null;
@@ -439,7 +428,7 @@ public class Icy {
             else if (arg.equalsIgnoreCase("--execute") || arg.equalsIgnoreCase("-x"))
                 execute = true;
                 // assume image name ?
-            else
+            else if (!arg.trim().isBlank())
                 startupImage = arg;
         }
 
@@ -508,7 +497,7 @@ public class Icy {
         }
     }
 
-    static void fatalError(final Throwable t, final boolean headless) {
+    static void fatalError(@NotNull final Throwable t, final boolean headless) {
         // hide splashScreen if needed
         if ((splashScreen != null) && (splashScreen.isVisible()))
             splashScreen.dispose();
@@ -641,12 +630,6 @@ public class Icy {
 
             IcyLogger.info("Exiting...");
 
-            final ImageJ ij = Icy.getMainInterface().getImageJ();
-
-            // clean ImageJ exit
-            if (ij != null)
-                ij.quit();
-
             // get main frame
             final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
 
@@ -686,8 +669,7 @@ public class Icy {
                 // then close all external frames except main frame
                 for (final JFrame frame : Icy.getMainInterface().getExternalFrames()) {
                     if (frame != mainFrame) {
-                        if (frame instanceof IcyExternalFrame) {
-                            final IcyExternalFrame iFrame = (IcyExternalFrame) frame;
+                        if (frame instanceof final IcyExternalFrame iFrame) {
                             iFrame.close();
                             if (iFrame.getDefaultCloseOperation() != WindowConstants.DISPOSE_ON_CLOSE)
                                 iFrame.dispose();
@@ -844,6 +826,7 @@ public class Icy {
     /**
      * Return the main Icy interface.
      */
+    @NotNull
     public static MainInterface getMainInterface() {
         // batch mode
         if (mainInterface == null)
@@ -855,6 +838,7 @@ public class Icy {
     /**
      * Returns the command line arguments
      */
+    @NotNull
     public static String[] getCommandLineArgs() {
         return args;
     }
@@ -940,58 +924,47 @@ public class Icy {
 
         vtkLibraryLoaded = false;
         try {
-            // If Linux or macOS, try with VTK auto-load (faster)
-            if (SystemUtil.isUnix() || SystemUtil.isMac()) {
-                vtkNativeLibrary.LoadAllNativeLibraries();
+            final Set<String> nativeLibraries = new HashSet<>(CollectionUtil.asList(FileUtil.getFiles(vtkLibPath, null, false, false)));
 
-                // assume VTK loaded if at least 1 native library is loaded
-                for (final vtkNativeLibrary lib : vtkNativeLibrary.values())
-                    if (lib.IsLoaded()) {
-                        vtkLibraryLoaded = true;
-                        break;
-                    }
-
-                if (vtkLibraryLoaded)
-                    IcyLogger.debug("VTK auto-load success.");
-                else
-                    IcyLogger.warn("VTK auto-load failed.");
+            final Set<String> filesToRemove = new HashSet<>();
+            for (final String path : nativeLibraries) {
+                final String[] split = path.split("\\.");
+                final String extension = split[split.length - 1].toLowerCase(Locale.ROOT);
+                if (!(extension.equals("dylib") || extension.equals("jnilib") || extension.equals("so") || extension.equals("dll"))) {
+                    IcyLogger.warn(String.format("Wrong file format for a native library: %s", path));
+                    filesToRemove.add(path);
+                }
             }
 
-            // If Windows or failed with auto-load, try with files loop-load (slower)
-            if (SystemUtil.isWindows() || !vtkLibraryLoaded) {
-                final Set<String> nativeLibraries = new HashSet<>(CollectionUtil.asList(FileUtil.getFiles(vtkLibPath, null, false, false)));
-                final int numFile = nativeLibraries.size();
-                boolean load = true;
+            if (!filesToRemove.isEmpty())
+                nativeLibraries.removeAll(filesToRemove);
 
-                // so we can at least load 1 library at each iteration
-                while (load) {
-                    load = false;
+            final int numFile = nativeLibraries.size();
+            boolean load = true;
 
-                    for (final String lib : new ArrayList<>(nativeLibraries)) {
-                        // successfully loaded ? one more iteration
-                        if (loadLibrary(lib)) {
-                            // done
-                            nativeLibraries.remove(lib);
-                            // try another iteration
-                            load = true;
-                        }
+            // so we can at least load 1 library at each iteration
+            while (load) {
+                load = false;
+
+                for (final String lib : new ArrayList<>(nativeLibraries)) {
+                    // successfully loaded ? one more iteration
+                    if (loadLibrary(lib)) {
+                        // done
+                        nativeLibraries.remove(lib);
+                        // try another iteration
+                        load = true;
                     }
                 }
-
-                // still some remaining files not loaded ? --> display a warning
-                if (!nativeLibraries.isEmpty())
-                    for (final String lib : nativeLibraries)
-                        IcyLogger.warn(String.format("This VTK library file couldn't be loaded: %s", FileUtil.getFileName(lib)));
-
-                // at least one file was correctly loaded ? --> the library certainly loaded correctly then
-                if (nativeLibraries.size() < numFile)
-                    vtkLibraryLoaded = true;
-
-                if (vtkLibraryLoaded)
-                    IcyLogger.debug("VTK loop-load success.");
-                else
-                    IcyLogger.warn("VTK loop-load failed.");
             }
+
+            // still some remaining files not loaded ? --> display a warning
+            if (!nativeLibraries.isEmpty())
+                for (final String lib : nativeLibraries)
+                    IcyLogger.warn(String.format("This VTK library file couldn't be loaded: %s", FileUtil.getFileName(lib)));
+
+            // at least one file was correctly loaded ? --> the library certainly loaded correctly then
+            if (nativeLibraries.size() < numFile)
+                vtkLibraryLoaded = true;
         }
         catch (final Throwable e1) {
             IcyExceptionHandler.showErrorMessage(e1, false, false);
@@ -1024,6 +997,7 @@ public class Icy {
         return false;
     }
 
+    @Deprecated(since = "3.0.0")
     static void nativeLibrariesShutdown() {
         // build the native local library path
         final String path = LIB_PATH + FileUtil.separator + SystemUtil.getOSArchIdString();

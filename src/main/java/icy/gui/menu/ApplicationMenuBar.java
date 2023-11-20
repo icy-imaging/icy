@@ -18,19 +18,19 @@
 
 package icy.gui.menu;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.*;
 
 /**
  * @author Thomas MUSSET
  */
 public final class ApplicationMenuBar extends JMenuBar {
+    @NotNull
+    private static final ApplicationMenuBar instance = new ApplicationMenuBar();
 
-    private static ApplicationMenuBar instance = null;
-
+    @NotNull
     public static synchronized ApplicationMenuBar getInstance() {
-        if (instance == null)
-            instance = new ApplicationMenuBar();
-
         return instance;
     }
 

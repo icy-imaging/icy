@@ -13,8 +13,6 @@
     <artifactId>icy-updater</artifactId>
     <version>3.0.0</version>
 
-    <packaging>jar</packaging>
-
     <name>Icy-Updater</name>
     <description>Updater / Launcher tool for Icy software</description>
 
@@ -23,7 +21,7 @@
     </properties>
 
     <build>
-        <defaultGoal>install</defaultGoal>
+        <defaultGoal>clean install</defaultGoal>
         <directory>build-updater</directory>
         <finalName>updater-${project.version}</finalName>
 
@@ -31,7 +29,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
                 <configuration>
                     <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                     <resources>
@@ -47,23 +44,24 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
                 <configuration>
                     <includes>
                         <include>icy/updater/*.java</include>
 
                         <include>icy/common/Version.java</include>
                         <include>icy/file/FileUtil.java</include>
-                        <include>icy/file/xml/XMLPersistent.java</include>
+                        <!--<include>icy/file/xml/XMLPersistent.java</include>-->
+                        <include>icy/gui/main/IcyDesktopPane.java</include>
                         <include>icy/gui/main/MainInterface.java</include>
+                        <include>icy/gui/main/MainInterfaceBatch.java</include>
                         <include>icy/main/Icy.java</include>
                         <include>icy/math/MathUtil.java</include>
                         <include>icy/network/NetworkUtil.java</include>
-                        <include>icy/network/URLUtil.java</include>
-                        <include>icy/plugin/PluginDescriptor.java</include>
+                        <!--<include>icy/network/URLUtil.java</include>
+                        <include>icy/plugin/PluginDescriptor.java</include>-->
                         <include>icy/preferences/ApplicationPreferences.java</include>
                         <include>icy/preferences/CanvasPreferences.java</include>
-                        <include>icy/preferences/ChatPreferences.java</include>
+                        <!--<include>icy/preferences/ChatPreferences.java</include>-->
                         <include>icy/preferences/GeneralPreferences.java</include>
                         <include>icy/preferences/IcyPreferences.java</include>
                         <include>icy/preferences/MagicWandPreferences.java</include>
@@ -77,17 +75,20 @@
                         <include>icy/preferences/WorkspaceOnlinePreferences.java</include>
                         <include>icy/preferences/WorkspacePreferences.java</include>
                         <include>icy/preferences/XMLPreferences.java</include>
-                        <include>icy/system/IcyExceptionHandler.java</include>
+                        <include>icy/swimmingPool/SwimmingPool.java</include>
+                        <!--<include>icy/system/IcyExceptionHandler.java</include>-->
                         <include>icy/system/SystemUtil.java</include>
+                        <include>icy/system/logging/IcyLogger.java</include>
                         <include>icy/system/thread/ThreadUtil.java</include>
                         <include>icy/system/thread/Processor.java</include>
                         <include>icy/system/thread/InstanceProcessor.java</include>
-                        <include>icy/type/collection/array/DynamicArray.java</include>
+                        <!--<include>icy/type/collection/array/DynamicArray.java</include>
                         <include>icy/update/ElementDescriptor.java</include>
-                        <include>icy/update/Updater.java</include>
+                        <include>icy/update/Updater.java</include>-->
+                        <include>icy/util/DateUtil.java</include>
                         <include>icy/util/XMLUtil.java</include>
                         <include>icy/util/StringUtil.java</include>
-                        <include>icy/util/ZipUtil.java</include>
+                        <!--<include>icy/util/ZipUtil.java</include>-->
                     </includes>
                 </configuration>
             </plugin>
@@ -95,10 +96,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.2</version>
                 <configuration>
                     <archive>
                         <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <classpathLayoutType>custom</classpathLayoutType>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <customClasspathLayout>$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
                             <mainClass>icy.updater.Main</mainClass>
                         </manifest>
                         <addMavenDescriptor>false</addMavenDescriptor>
@@ -109,8 +114,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.0.0</version>
                 <executions>
+
                     <execution>
                         <id>copy-package</id>
                         <phase>package</phase>
@@ -147,7 +152,25 @@
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-kernel</artifactId>
-            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-intellij-themes</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

@@ -142,7 +142,7 @@ public class IcyUpdater
                 checkingFrame = null;
 
             final String params = PARAM_ARCH + "=" + SystemUtil.getOSArchIdString() + "&" + PARAM_VERSION + "="
-                    + Icy.version.toShortString();
+                    + Icy.VERSION.toShortString();
 
             try
             {

@@ -19,8 +19,9 @@
 package icy.common;
 
 import icy.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.Locale;
 
 /**
@@ -37,22 +38,26 @@ public class Version implements Comparable<Version> {
         BETA("b", "beta"),
         RELEASE_CANDIDATE("rc", "release-candidate");
 
+        @NotNull
         private final String shortLabel;
+        @NotNull
         private final String longLabel;
 
         Snapshot() {
             this("", "");
         }
 
-        Snapshot(@Nonnull final String shortLabel, @Nonnull final String longLabel) {
+        Snapshot(@NotNull final String shortLabel, @NotNull final String longLabel) {
             this.shortLabel = shortLabel;
             this.longLabel = longLabel;
         }
 
+        @NotNull
         public final String getShortLabel() {
             return shortLabel;
         }
 
+        @NotNull
         public final String getLongLabel() {
             return longLabel;
         }
@@ -63,13 +68,11 @@ public class Version implements Comparable<Version> {
         }
     }
 
-    private int major;
-    private int minor;
-    private int patch;
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    private int build;
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    private boolean beta;
+    private int major; // TODO: 02/11/2023 Make major final
+    private int minor; // TODO: 02/11/2023 Make minor final
+    private int patch; // TODO: 02/11/2023 Make patch final
+
+    @NotNull
     private Snapshot snapshot;
 
     public Version() {
@@ -101,24 +104,15 @@ public class Version implements Comparable<Version> {
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
     public Version(final int major, final int minor, final int revision, final int build, final boolean beta) {
-        super();
-
-        this.major = major;
-        this.minor = minor;
-        this.patch = revision;
-        this.build = build;
-        this.beta = beta;
-        this.snapshot = (beta) ? Snapshot.BETA : Snapshot.NONE;
+        this(major, minor, revision, (beta) ? Snapshot.BETA : Snapshot.NONE);
     }
 
-    public Version(final int major, final int minor, final int patch, @Nonnull final Snapshot snapshot) {
+    public Version(final int major, final int minor, final int patch, @NotNull final Snapshot snapshot) {
         super();
 
         this.major = major;
         this.minor = minor;
         this.patch = patch;
-        this.build = 0;
-        this.beta = false;
         this.snapshot = snapshot;
     }
 
@@ -126,38 +120,39 @@ public class Version implements Comparable<Version> {
      * @deprecated Use {@link #fromString(String)} instead.
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    public Version(@Nonnull final String version) {
-        this(0, 0, 0, Snapshot.NONE);
+    public Version(@NotNull final String version) {
+        this();
 
-        final String lower = version.toLowerCase(Locale.ROOT);
+        final String lower = version.toLowerCase(Locale.ROOT).replaceAll("[0-9 \\-_]", "");
 
-        if (lower.contains(Snapshot.ALPHA.getShortLabel()) || lower.contains(Snapshot.ALPHA.getLongLabel()))
-            snapshot = Snapshot.ALPHA;
-        else if (lower.contains(Snapshot.BETA.getShortLabel()) || lower.contains(Snapshot.BETA.getLongLabel()))
-            snapshot = Snapshot.BETA;
-        else if (lower.contains(Snapshot.RELEASE_CANDIDATE.getShortLabel()) || lower.contains(Snapshot.RELEASE_CANDIDATE.getLongLabel()))
+        if (lower.equals(Snapshot.RELEASE_CANDIDATE.getShortLabel()) || lower.equals(Snapshot.RELEASE_CANDIDATE.getLongLabel()))
             snapshot = Snapshot.RELEASE_CANDIDATE;
+        else if (lower.equals(Snapshot.BETA.getShortLabel()) || lower.equals(Snapshot.BETA.getLongLabel()))
+            snapshot = Snapshot.BETA;
+        else if (lower.equals(Snapshot.ALPHA.getShortLabel()) || lower.equals(Snapshot.ALPHA.getLongLabel()))
+            snapshot = Snapshot.ALPHA;
 
         final String[] values = version.replaceAll("[a-zA-Z \\-]", "").split("\\.");
 
         if ((values.length > 0) && (!StringUtil.isEmpty(values[0], true)))
             major = Integer.parseInt(values[0]);
         if ((values.length > 1) && (!StringUtil.isEmpty(values[1], true)))
-            major = Integer.parseInt(values[1]);
+            minor = Integer.parseInt(values[1]);
         if ((values.length > 2) && (!StringUtil.isEmpty(values[2], true)))
             patch = Integer.parseInt(values[2]);
     }
 
-    public static Version fromString(@Nonnull final String version) {
-        final String lower = version.toLowerCase(Locale.ROOT);
+    @NotNull
+    public static Version fromString(@NotNull final String version) {
+        final String lower = version.toLowerCase(Locale.ROOT).replaceAll("[0-9 \\-_]", "");
 
         final Snapshot snapshot;
-        if (lower.contains(Snapshot.ALPHA.getShortLabel()) || lower.contains(Snapshot.ALPHA.getLongLabel()))
-            snapshot = Snapshot.ALPHA;
-        else if (lower.contains(Snapshot.BETA.getShortLabel()) || lower.contains(Snapshot.BETA.getLongLabel()))
-            snapshot = Snapshot.BETA;
-        else if (lower.contains(Snapshot.RELEASE_CANDIDATE.getShortLabel()) || lower.contains(Snapshot.RELEASE_CANDIDATE.getLongLabel()))
+        if (lower.equals(Snapshot.RELEASE_CANDIDATE.getShortLabel()) || lower.equals(Snapshot.RELEASE_CANDIDATE.getLongLabel()))
             snapshot = Snapshot.RELEASE_CANDIDATE;
+        else if (lower.equals(Snapshot.BETA.getShortLabel()) || lower.equals(Snapshot.BETA.getLongLabel()))
+            snapshot = Snapshot.BETA;
+        else if (lower.equals(Snapshot.ALPHA.getShortLabel()) || lower.equals(Snapshot.ALPHA.getLongLabel()))
+            snapshot = Snapshot.ALPHA;
         else
             snapshot = Snapshot.NONE;
 
@@ -182,27 +177,28 @@ public class Version implements Comparable<Version> {
         return major;
     }
 
+    /**
+     * @deprecated No replacement.
+     */
     @Deprecated(since = "3.0.0", forRemoval = true)
     public void setMajor(final int major) {
-        this.major = major;
+        // Version is write protected
     }
 
     public int getMinor() {
         return minor;
     }
 
+    /**
+     * @deprecated No replacement.
+     */
     @Deprecated(since = "3.0.0", forRemoval = true)
     public void setMinor(final int minor) {
-        this.minor = minor;
+        // Version is write protected
     }
 
     public int getPatch() {
         return patch;
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public void setPatch(final int patch) {
-        this.patch = patch;
     }
 
     /**
@@ -214,21 +210,27 @@ public class Version implements Comparable<Version> {
     }
 
     /**
-     * @deprecated Use {@link #setPatch(int)} instead.
+     * @deprecated No replacement.
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
     public void setRevision(final int revision) {
-        this.patch = revision;
+        // Version is write protected
     }
 
+    /**
+     * @deprecated No replacement.
+     */
     @Deprecated(since = "3.0.0", forRemoval = true)
     public int getBuild() {
-        return build;
+        return 0;
     }
 
+    /**
+     * @deprecated No replacement.
+     */
     @Deprecated(since = "3.0.0", forRemoval = true)
     public void setBuild(final int build) {
-        this.build = build;
+        // Version is write protected
     }
 
     /**
@@ -236,38 +238,34 @@ public class Version implements Comparable<Version> {
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
     public boolean isBeta() {
-        return beta;
+        return isSnapshot();
     }
 
     /**
-     * @deprecated Use {@link #setSnapshot(Snapshot)} instead.
+     * @deprecated No replacement.
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
     public void setBeta(final boolean beta) {
-        this.beta = beta;
+        // Version is write protected
     }
 
     public boolean isSnapshot() {
         return snapshot != Snapshot.NONE;
     }
 
+    @NotNull
     public Snapshot getSnapshot() {
         return snapshot;
     }
 
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public void setSnapshot(@Nonnull final Snapshot snapshot) {
-        this.snapshot = snapshot;
-    }
-
     /**
-     * special isEmpty case (0.0.0.0)
+     * @return True if equals '0.0.0' and not a snapshot.
      */
     public boolean isEmpty() {
-        //return (major == 0) && (minor == 0) && (revision == 0) && (build == 0) && !beta;
         return (major == 0) && (minor == 0) && (patch == 0) && (snapshot == Snapshot.NONE);
     }
 
+    @NotNull
     public String toShortString() {
         if (isEmpty())
             return "0";
@@ -285,6 +283,7 @@ public class Version implements Comparable<Version> {
         return version;
     }
 
+    @NotNull
     @Override
     public String toString() {
         if (isEmpty())
@@ -304,7 +303,7 @@ public class Version implements Comparable<Version> {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         if (obj instanceof Version)
             return compareTo((Version) obj) == 0;
 
@@ -314,7 +313,7 @@ public class Version implements Comparable<Version> {
     @Override
     public int hashCode() {
         // assume 8 bits for each number (0-255 range)
-        return (major << 0) | (minor << 8) | (patch << 16) | (snapshot.ordinal() << 24);
+        return (major/* << 0*/) | (minor << 8) | (patch << 16) | (snapshot.ordinal() << 24);
     }
 
     /**
@@ -325,7 +324,7 @@ public class Version implements Comparable<Version> {
      * @return negative if lower, zero if equal or positive if greater.
      */
     @Override
-    public int compareTo(@Nonnull final Version version) {
+    public int compareTo(@NotNull final Version version) {
         if (version.isEmpty() || isEmpty())
             return 0;
         else if (version.major < major)
@@ -348,19 +347,19 @@ public class Version implements Comparable<Version> {
             return 0;
     }
 
-    public boolean isGreater(@Nonnull final Version version) {
+    public boolean isGreater(@NotNull final Version version) {
         return compareTo(version) > 0;
     }
 
-    public boolean isGreaterOrEqual(@Nonnull final Version version) {
+    public boolean isGreaterOrEqual(@NotNull final Version version) {
         return compareTo(version) >= 0;
     }
 
-    public boolean isLower(@Nonnull final Version version) {
+    public boolean isLower(@NotNull final Version version) {
         return compareTo(version) < 0;
     }
 
-    public boolean isLowerOrEqual(@Nonnull final Version version) {
+    public boolean isLowerOrEqual(@NotNull final Version version) {
         return compareTo(version) <= 0;
     }
 
@@ -368,7 +367,7 @@ public class Version implements Comparable<Version> {
      * @deprecated Use {@link #isGreater(Version)}
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    public boolean isNewer(final Version version) {
+    public boolean isNewer(@NotNull final Version version) {
         return isGreater(version);
     }
 
@@ -376,7 +375,7 @@ public class Version implements Comparable<Version> {
      * @deprecated Use {@link #isGreaterOrEqual(Version)}
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    public boolean isNewerOrEqual(final Version version) {
+    public boolean isNewerOrEqual(@NotNull final Version version) {
         return isGreaterOrEqual(version);
     }
 
@@ -384,7 +383,7 @@ public class Version implements Comparable<Version> {
      * @deprecated Use {@link #isLower(Version)}
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    public boolean isOlder(final Version version) {
+    public boolean isOlder(@NotNull final Version version) {
         return isLower(version);
     }
 
@@ -392,7 +391,7 @@ public class Version implements Comparable<Version> {
      * @deprecated Use {@link #isLowerOrEqual(Version)}
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    public boolean isOlderOrEqual(final Version version) {
+    public boolean isOlderOrEqual(@NotNull final Version version) {
         return isLowerOrEqual(version);
     }
 }

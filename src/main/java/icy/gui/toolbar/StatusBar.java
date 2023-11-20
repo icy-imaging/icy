@@ -35,7 +35,7 @@ public final class StatusBar extends IcyToolbar {
 
         add(Box.createHorizontalStrut(5));
 
-        add(new JLabel("Icy v" + Icy.version.toShortString()));
+        add(new JLabel("Icy v" + Icy.VERSION.toShortString()));
 
         add(Box.createHorizontalGlue());
 

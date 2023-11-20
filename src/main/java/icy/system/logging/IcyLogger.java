@@ -148,6 +148,7 @@ public final class IcyLogger {
      *
      * @param message The text print in the console and on the GUI.
      */
+    @Deprecated(forRemoval = true)
     public static void error(@NotNull final String message, @NotNull final Throwable cause) {
         final String date = DateUtil.now("yyyy-MM-dd H:mm:ss");
         final String consoleMSG1 = String.format("[ERROR] %s - %s", date, message);
@@ -178,6 +179,7 @@ public final class IcyLogger {
      *
      * @param message The text print in the console and on the GUI.
      */
+    @Deprecated(forRemoval = true)
     public static void fatal(@NotNull final String message, @NotNull final Throwable cause) {
         final String date = DateUtil.now("yyyy-MM-dd H:mm:ss");
         final String consoleMSG1 = String.format("[FATAL] %s - %s", date, message);

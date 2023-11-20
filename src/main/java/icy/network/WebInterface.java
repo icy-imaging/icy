@@ -143,7 +143,7 @@ public class WebInterface
         values.put(PARAM_ACTION, ACTION_TYPE_BUGREPORT);
 
         // add informations about java / system / OS
-        values.put(PARAM_KERNELVERSION, Icy.version.toString());
+        values.put(PARAM_KERNELVERSION, Icy.VERSION.toString());
         values.put(PARAM_JAVANAME, SystemUtil.getJavaName());
         values.put(PARAM_JAVAVERSION, SystemUtil.getJavaVersion());
         values.put(PARAM_JAVABITS, Integer.toString(SystemUtil.getJavaArchDataModel()));
@@ -151,7 +151,7 @@ public class WebInterface
         values.put(PARAM_OSVERSION, SystemUtil.getOSVersion());
         values.put(PARAM_OSARCH, SystemUtil.getOSArch());
 
-        icyId = "Icy Version " + Icy.version + "<br>";
+        icyId = "Icy Version " + Icy.VERSION + "<br>";
         javaId = SystemUtil.getJavaName() + " " + SystemUtil.getJavaVersion() + " (" + SystemUtil.getJavaArchDataModel()
                 + " bit)<br>";
         osId = "Running on " + SystemUtil.getOSName() + " " + SystemUtil.getOSVersion() + " (" + SystemUtil.getOSArch()

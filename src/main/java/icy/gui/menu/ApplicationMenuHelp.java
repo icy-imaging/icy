@@ -21,6 +21,7 @@ package icy.gui.menu;
 import icy.gui.component.menu.IcyMenuItem;
 import icy.network.NetworkUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,13 +32,11 @@ import java.io.IOException;
  * @author Thomas MUSSET
  */
 public final class ApplicationMenuHelp extends AbstractApplicationMenu {
+    @NotNull
+    private static final ApplicationMenuHelp instance = new ApplicationMenuHelp();
 
-    private static ApplicationMenuHelp instance = null;
-
+    @NotNull
     public static synchronized ApplicationMenuHelp getInstance() {
-        if (instance == null)
-            instance = new ApplicationMenuHelp();
-
         return instance;
     }
 
@@ -65,7 +64,7 @@ public final class ApplicationMenuHelp extends AbstractApplicationMenu {
                 if (log.isFile())
                     Desktop.getDesktop().open(log);
             }
-            catch (IOException ex) {
+            catch (final IOException ex) {
                 System.err.println("An error occured while opening log file");
             }
         });

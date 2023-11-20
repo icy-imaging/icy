@@ -232,7 +232,7 @@ public class Audit
         final int id = ApplicationPreferences.getId();
 
         values.put(ID_CLIENT_ARCH, SystemUtil.getOSArchIdString());
-        values.put(ID_CLIENT_VERSION, Icy.version.toString());
+        values.put(ID_CLIENT_VERSION, Icy.VERSION.toString());
 
         // need to register
         if (id == -1)

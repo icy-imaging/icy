@@ -171,7 +171,7 @@ public class PluginRepositoryLoader
             final Map<String, String> values = new HashMap<String, String>();
 
             // add plugins.kernel information parameter
-            values.put(NetworkUtil.ID_KERNELVERSION, Icy.version.toString());
+            values.put(NetworkUtil.ID_KERNELVERSION, Icy.VERSION.toString());
             // add beta allowed information parameter
             values.put(NetworkUtil.ID_BETAALLOWED, Boolean.toString(betaAllowed));
             // concat to address
@@ -210,7 +210,7 @@ public class PluginRepositoryLoader
                 if (!ident.isEmpty())
                 {
                     // accept only if required plugins.kernel version is ok and beta accepted
-                    if (ident.getRequiredKernelVersion().isLowerOrEqual(Icy.version)
+                    if (ident.getRequiredKernelVersion().isLowerOrEqual(Icy.VERSION)
                             && (betaAllowed || (!ident.getVersion().isSnapshot())))
                     {
                         // check if we have several version of the same plugin

@@ -1,40 +1,34 @@
-/**
- * 
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.updater;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.HeadlessException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.SwingConstants;
-import javax.swing.text.BadLocationException;
+import javax.swing.*;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import java.awt.*;
 
 /**
  * @author stephane
+ * @author Thomas MUSSET
  */
-public class UpdateFrame extends JFrame
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -1849973451683594479L;
-
+public class UpdateFrame extends JFrame {
     /**
      * gui
      */
@@ -43,17 +37,26 @@ public class UpdateFrame extends JFrame
     final JTextPane infos = new JTextPane();
     final JButton closeBtn = new JButton("close");
 
-    /**
-     * @param title
-     * @throws HeadlessException
-     */
-    public UpdateFrame(String title) throws HeadlessException
-    {
+    private final SimpleAttributeSet errorAttributes;
+    private final SimpleAttributeSet normalAttributes;
+    private final StyledDocument doc;
+
+    public UpdateFrame(final String title) throws HeadlessException {
         super(title);
 
-        infos.setContentType("text/html");
-        infos.setText("<html>");
-        
+        errorAttributes = new SimpleAttributeSet();
+        normalAttributes = new SimpleAttributeSet();
+
+        StyleConstants.setFontFamily(errorAttributes, "arial");
+        StyleConstants.setFontSize(errorAttributes, 11);
+        StyleConstants.setForeground(errorAttributes, Color.red.brighter());
+
+        StyleConstants.setFontFamily(normalAttributes, "arial");
+        StyleConstants.setFontSize(normalAttributes, 11);
+        //StyleConstants.setForeground(normalAttributes, Color.black);
+
+        doc = infos.getStyledDocument();
+
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setDefaultLookAndFeelDecorated(true);
 
@@ -64,8 +67,7 @@ public class UpdateFrame extends JFrame
         build();
     }
 
-    public void build()
-    {
+    public void build() {
         setLayout(new BorderLayout());
 
         final JPanel topPanel = new JPanel();
@@ -97,14 +99,9 @@ public class UpdateFrame extends JFrame
         progress.setMaximum(100);
 
         closeBtn.setEnabled(false);
-        closeBtn.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                // close frame
-                UpdateFrame.this.dispose();
-            }
+        closeBtn.addActionListener(e -> {
+            // close frame
+            UpdateFrame.this.dispose();
         });
 
         labelPanel.add(Box.createHorizontalGlue());
@@ -133,47 +130,36 @@ public class UpdateFrame extends JFrame
     }
 
     @Override
-    public void setTitle(String text)
-    {
+    public void setTitle(final String text) {
         title.setText(text);
     }
 
-    public void setCanClose(boolean value)
-    {
+    public void setCanClose(final boolean value) {
         closeBtn.setEnabled(value);
     }
 
-    public void addMessage(String message, boolean error)
-    {
-        SimpleAttributeSet set = new SimpleAttributeSet();
+    public void addMessage(final String message, final boolean error) {
+        try {
+            // insert text
+            synchronized (doc) {
+                if (error)
+                    doc.insertString(doc.getLength(), message, errorAttributes);
+                else
+                    doc.insertString(doc.getLength(), message, normalAttributes);
 
-        if (error)
-        {
-            StyleConstants.setForeground(set, Color.red);
-            // force frame visibility if error
-            setVisible(true);
+                infos.setCaretPosition(doc.getLength());
+            }
         }
-        else
-            StyleConstants.setForeground(set, Color.black);
-
-        try
-        {
-            infos.getDocument().insertString(infos.getDocument().getLength(), message, set);
-            infos.setCaretPosition(infos.getDocument().getLength());
-        }
-        catch (BadLocationException e)
-        {
+        catch (final Exception e) {
             // ignore
         }
     }
 
-    public void setProgress(int value)
-    {
+    public void setProgress(final int value) {
         progress.setValue(value);
     }
 
-    public void setProgressVisible(boolean value)
-    {
+    public void setProgressVisible(final boolean value) {
         progress.setVisible(value);
     }
 }
