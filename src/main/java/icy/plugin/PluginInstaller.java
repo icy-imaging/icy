@@ -1,39 +1,26 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.plugin;
-
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.EventListener;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.event.EventListenerList;
 
 import icy.file.FileUtil;
 import icy.gui.dialog.ConfirmDialog;
-import icy.gui.frame.progress.AnnounceFrame;
-import icy.gui.frame.progress.CancelableProgressFrame;
-import icy.gui.frame.progress.DownloadFrame;
-import icy.gui.frame.progress.FailedAnnounceFrame;
-import icy.gui.frame.progress.SuccessfullAnnounceFrame;
+import icy.gui.frame.progress.*;
 import icy.main.Icy;
 import icy.network.NetworkUtil;
 import icy.network.URLUtil;
@@ -45,48 +32,38 @@ import icy.update.Updater;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
 import icy.util.ZipUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.event.EventListenerList;
+import java.net.URL;
+import java.util.*;
 
 /**
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class PluginInstaller implements Runnable
-{
-    public static interface PluginInstallerListener extends EventListener
-    {
-        public void pluginInstalled(PluginDescriptor plugin, boolean success);
+public class PluginInstaller implements Runnable {
+    public interface PluginInstallerListener extends EventListener {
+        void pluginInstalled(PluginDescriptor plugin, boolean success);
 
-        public void pluginRemoved(PluginDescriptor plugin, boolean success);
+        void pluginRemoved(PluginDescriptor plugin, boolean success);
     }
 
-    private static class PluginInstallInfo
-    {
-        // final PluginRepositoryLoader loader;
-        final PluginDescriptor plugin;
-        final boolean showProgress;
-
-        public PluginInstallInfo(PluginDescriptor plugin, boolean showProgress)
-        {
-            super();
-
-            this.plugin = plugin;
-            this.showProgress = showProgress;
-        }
-
+    public record PluginInstallInfo(PluginDescriptor plugin, boolean showProgress) {
         @Override
-        public boolean equals(Object obj)
-        {
-            if (obj instanceof PluginInstallInfo)
-                return ((PluginInstallInfo) obj).plugin.equals(plugin);
+            public boolean equals(@Nullable final Object obj) {
+                if (obj instanceof PluginInstallInfo)
+                    return ((PluginInstallInfo) obj).plugin.equals(plugin);
 
-            return super.equals(obj);
-        }
+                return false;
+            }
 
-        @Override
-        public int hashCode()
-        {
-            return plugin.hashCode();
+            @Override
+            public int hashCode() {
+                return plugin.hashCode();
+            }
         }
-    }
 
     private static final String ERROR_DOWNLOAD = "Error while downloading ";
     private static final String ERROR_SAVE = "Error while saving";
@@ -120,17 +97,16 @@ public class PluginInstaller implements Runnable
     /**
      * static class
      */
-    private PluginInstaller()
-    {
+    private PluginInstaller() {
         super();
 
-        installFIFO = new ArrayList<PluginInstallInfo>();
-        removeFIFO = new ArrayList<PluginInstallInfo>();
+        installFIFO = new ArrayList<>();
+        removeFIFO = new ArrayList<>();
 
         listeners = new EventListenerList();
 
-        installingPlugins = new ArrayList<PluginDescriptor>();
-        desinstallingPlugin = new ArrayList<PluginDescriptor>();
+        installingPlugins = new ArrayList<>();
+        desinstallingPlugin = new ArrayList<>();
 
         // launch installer thread
         new Thread(this, "Plugin installer").start();
@@ -139,25 +115,19 @@ public class PluginInstaller implements Runnable
     /**
      * Return true if install or desinstall is possible
      */
-    private static boolean isEnabled()
-    {
+    private static boolean isEnabled() {
         return !PluginLoader.isJCLDisabled();
     }
 
     /**
      * Install a plugin (asynchronous)
-     * 
-     * @param plugin
-     *        the plugin to install
-     * @param showProgress
-     *        show a progress frame during process
+     *
+     * @param plugin       the plugin to install
+     * @param showProgress show a progress frame during process
      */
-    public static void install(PluginDescriptor plugin, boolean showProgress)
-    {
-        if ((plugin != null) && isEnabled())
-        {
-            if (!NetworkUtil.hasInternetAccess())
-            {
+    public static void install(final PluginDescriptor plugin, final boolean showProgress) {
+        if ((plugin != null) && isEnabled()) {
+            if (!NetworkUtil.hasInternetAccess()) {
                 final String text = "Cannot install '" + plugin.getName()
                         + "' plugin : you are not connected to Internet.";
 
@@ -169,8 +139,7 @@ public class PluginInstaller implements Runnable
                 return;
             }
 
-            synchronized (instance.installFIFO)
-            {
+            synchronized (instance.installFIFO) {
                 instance.installFIFO.add(new PluginInstallInfo(plugin, showProgress));
             }
         }
@@ -179,27 +148,23 @@ public class PluginInstaller implements Runnable
     /**
      * return true if PluginInstaller is processing
      */
-    public static boolean isProcessing()
-    {
+    public static boolean isProcessing() {
         return isInstalling() || isDesinstalling();
     }
 
     /**
      * return a copy of the install FIFO
      */
-    public static ArrayList<PluginInstallInfo> getInstallFIFO()
-    {
-        synchronized (instance.installFIFO)
-        {
-            return new ArrayList<PluginInstallInfo>(instance.installFIFO);
+    public static ArrayList<PluginInstallInfo> getInstallFIFO() {
+        synchronized (instance.installFIFO) {
+            return new ArrayList<>(instance.installFIFO);
         }
     }
 
     /**
      * Wait while installer is installing plugin.
      */
-    public static void waitInstall()
-    {
+    public static void waitInstall() {
         while (isInstalling())
             ThreadUtil.sleep(100);
     }
@@ -207,19 +172,16 @@ public class PluginInstaller implements Runnable
     /**
      * return true if PluginInstaller is installing plugin(s)
      */
-    public static boolean isInstalling()
-    {
+    public static boolean isInstalling() {
         return !instance.installFIFO.isEmpty() || !instance.installingPlugins.isEmpty();
     }
 
     /**
      * return true if 'plugin' is in the install FIFO
      */
-    public static boolean isWaitingForInstall(PluginDescriptor plugin)
-    {
-        synchronized (instance.installFIFO)
-        {
-            for (PluginInstallInfo info : instance.installFIFO)
+    public static boolean isWaitingForInstall(final PluginDescriptor plugin) {
+        synchronized (instance.installFIFO) {
+            for (final PluginInstallInfo info : instance.installFIFO)
                 if (plugin == info.plugin)
                     return true;
         }
@@ -230,57 +192,44 @@ public class PluginInstaller implements Runnable
     /**
      * return true if specified plugin is currently being installed or will be installed
      */
-    public static boolean isInstallingPlugin(PluginDescriptor plugin)
-    {
-        return (instance.installingPlugins.indexOf(plugin) != -1) || isWaitingForInstall(plugin);
+    public static boolean isInstallingPlugin(final PluginDescriptor plugin) {
+        return instance.installingPlugins.contains(plugin) || isWaitingForInstall(plugin);
     }
 
     /**
      * Uninstall a plugin (asynchronous)
-     * 
-     * @param plugin
-     *        the plugin to uninstall
-     * @param showConfirm
-     *        show a confirmation dialog
-     * @param showProgress
-     *        show a progress frame during process
+     *
+     * @param plugin       the plugin to uninstall
+     * @param showConfirm  show a confirmation dialog
+     * @param showProgress show a progress frame during process
      */
-    public static void desinstall(PluginDescriptor plugin, boolean showConfirm, boolean showProgress)
-    {
-        if ((plugin != null) && isEnabled())
-        {
-            if (showConfirm)
-            {
+    public static void desinstall(final PluginDescriptor plugin, final boolean showConfirm, final boolean showProgress) {
+        if ((plugin != null) && isEnabled()) {
+            if (showConfirm) {
                 // get local plugins which depend from the plugin we want to delete
                 final List<PluginDescriptor> dependants = getLocalDependenciesFrom(plugin);
 
-                String message = "<html>";
+                final StringBuilder message = new StringBuilder("<html>");
 
-                if (!dependants.isEmpty())
-                {
-                    message = message + "The following plugin(s) won't work anymore :<br>";
+                if (!dependants.isEmpty()) {
+                    message.append("The following plugin(s) won't work anymore :<br>");
 
-                    for (PluginDescriptor depPlug : dependants)
-                        message = message + depPlug.getName() + " " + depPlug.getVersion() + "<br>";
+                    for (final PluginDescriptor depPlug : dependants)
+                        message.append(depPlug.getName()).append(" ").append(depPlug.getVersion()).append("<br>");
 
-                    message = message + "<br>";
+                    message.append("<br>");
                 }
 
-                message = message + "Are you sure you want to remove '" + plugin.getName() + " " + plugin.getVersion()
-                        + "' ?</html>";
+                message.append("Are you sure you want to remove '").append(plugin.getName()).append(" ").append(plugin.getVersion()).append("' ?</html>");
 
-                if (ConfirmDialog.confirm(message))
-                {
-                    synchronized (instance.removeFIFO)
-                    {
+                if (ConfirmDialog.confirm(message.toString())) {
+                    synchronized (instance.removeFIFO) {
                         instance.removeFIFO.add(new PluginInstallInfo(plugin, showConfirm));
                     }
                 }
             }
-            else
-            {
-                synchronized (instance.removeFIFO)
-                {
+            else {
+                synchronized (instance.removeFIFO) {
                     instance.removeFIFO.add(new PluginInstallInfo(plugin, showProgress));
                 }
             }
@@ -291,27 +240,23 @@ public class PluginInstaller implements Runnable
      * @deprecated Use {@link #desinstall(PluginDescriptor, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void desinstall(PluginDescriptor plugin, boolean showConfirm)
-    {
+    public static void desinstall(final PluginDescriptor plugin, final boolean showConfirm) {
         desinstall(plugin, showConfirm, showConfirm);
     }
 
     /**
      * return a copy of the remove FIFO
      */
-    public static ArrayList<PluginInstallInfo> getRemoveFIFO()
-    {
-        synchronized (instance.removeFIFO)
-        {
-            return new ArrayList<PluginInstallInfo>(instance.removeFIFO);
+    public static ArrayList<PluginInstallInfo> getRemoveFIFO() {
+        synchronized (instance.removeFIFO) {
+            return new ArrayList<>(instance.removeFIFO);
         }
     }
 
     /**
      * Wait while installer is removing plugin.
      */
-    public static void waitDesinstall()
-    {
+    public static void waitDesinstall() {
         while (isDesinstalling())
             ThreadUtil.sleep(100);
     }
@@ -319,19 +264,16 @@ public class PluginInstaller implements Runnable
     /**
      * return true if PluginInstaller is desinstalling plugin(s)
      */
-    public static boolean isDesinstalling()
-    {
+    public static boolean isDesinstalling() {
         return !instance.removeFIFO.isEmpty() || !instance.desinstallingPlugin.isEmpty();
     }
 
     /**
      * return true if 'plugin' is in the remove FIFO
      */
-    public static boolean isWaitingForDesinstall(PluginDescriptor plugin)
-    {
-        synchronized (instance.removeFIFO)
-        {
-            for (PluginInstallInfo info : instance.removeFIFO)
+    public static boolean isWaitingForDesinstall(final PluginDescriptor plugin) {
+        synchronized (instance.removeFIFO) {
+            for (final PluginInstallInfo info : instance.removeFIFO)
                 if (plugin == info.plugin)
                     return true;
         }
@@ -342,19 +284,15 @@ public class PluginInstaller implements Runnable
     /**
      * return true if specified plugin is currently being desinstalled or will be desinstalled
      */
-    public static boolean isDesinstallingPlugin(PluginDescriptor plugin)
-    {
-        return (instance.desinstallingPlugin.indexOf(plugin) != -1) || isWaitingForDesinstall(plugin);
+    public static boolean isDesinstallingPlugin(final PluginDescriptor plugin) {
+        return instance.desinstallingPlugin.contains(plugin) || isWaitingForDesinstall(plugin);
     }
 
     @Override
-    public void run()
-    {
-        while (!Thread.interrupted())
-        {
+    public void run() {
+        while (!Thread.interrupted()) {
             // process installations
-            if (!installFIFO.isEmpty())
-            {
+            if (!installFIFO.isEmpty()) {
                 // so list has sometime to fill-up
                 ThreadUtil.sleep(200);
 
@@ -364,8 +302,7 @@ public class PluginInstaller implements Runnable
             }
 
             // process deletions
-            while (!removeFIFO.isEmpty())
-            {
+            while (!removeFIFO.isEmpty()) {
                 // so list has sometime to fill-up
                 ThreadUtil.sleep(200);
 
@@ -382,13 +319,14 @@ public class PluginInstaller implements Runnable
      * Backup specified plugin if it already exists.<br>
      * Return an empty string if no error else return error message
      */
-    private static String backup(PluginDescriptor plugin)
-    {
-        boolean ok;
+    private static String backup(@NotNull final PluginDescriptor plugin) {
+        final boolean ok;
 
         // backup JAR, XML and image files
-        ok = Updater.backup(plugin.getJarFilename()) && Updater.backup(plugin.getXMLFilename())
-                && Updater.backup(plugin.getIconFilename()) && Updater.backup(plugin.getImageFilename());
+        ok = Updater.backup(plugin.getJarFilename())
+                && Updater.backup(plugin.getXMLFilename())
+                && Updater.backup(plugin.getIconFilename())
+                && Updater.backup(plugin.getImageFilename());
 
         if (!ok)
             return "Can't backup plugin '" + plugin.getName() + "'";
@@ -399,8 +337,7 @@ public class PluginInstaller implements Runnable
     /**
      * Return an empty string if no error else return error message
      */
-    private static String downloadAndSavePlugin(PluginDescriptor plugin, DownloadFrame taskFrame)
-    {
+    private static String downloadAndSavePlugin(final PluginDescriptor plugin, final DownloadFrame taskFrame) {
         String result;
 
         if (taskFrame != null)
@@ -414,13 +351,11 @@ public class PluginInstaller implements Runnable
         final String pass;
 
         // use authentication (repos should not be null at this point)
-        if (repos.isAuthenticationEnabled())
-        {
+        if (repos.isAuthenticationEnabled()) {
             login = repos.getLogin();
             pass = repos.getPassword();
         }
-        else
-        {
+        else {
             login = null;
             pass = null;
         }
@@ -450,13 +385,11 @@ public class PluginInstaller implements Runnable
             return "Downloaded XML file '" + plugin.getXMLFilename() + "' is corrupted !";
 
         // download and save icon & image files
-        if (!StringUtil.isEmpty(plugin.getIconUrl()))
-        {
+        if (!StringUtil.isEmpty(plugin.getIconUrl())) {
             url = URLUtil.buildURL(basePath, plugin.getIconUrl());
             downloadAndSave(url, plugin.getIconFilename(), login, pass, false, taskFrame);
         }
-        if (!StringUtil.isEmpty(plugin.getImageUrl()))
-        {
+        if (!StringUtil.isEmpty(plugin.getImageUrl())) {
             url = URLUtil.buildURL(basePath, plugin.getImageUrl());
             downloadAndSave(url, plugin.getImageFilename(), login, pass, false, taskFrame);
         }
@@ -467,9 +400,7 @@ public class PluginInstaller implements Runnable
     /**
      * Return an empty string if no error else return error message
      */
-    private static String downloadAndSave(URL downloadPath, String savePath, String login, String pass,
-            boolean displayError, DownloadFrame downloadFrame)
-    {
+    private static String downloadAndSave(final URL downloadPath, final String savePath, final String login, final String pass, final boolean displayError, final DownloadFrame downloadFrame) {
         if (downloadFrame != null)
             downloadFrame.setPath(FileUtil.getFileName(savePath));
 
@@ -479,8 +410,7 @@ public class PluginInstaller implements Runnable
             return ERROR_DOWNLOAD + downloadPath.toString();
 
         // save data
-        if (!FileUtil.save(savePath, data, displayError))
-        {
+        if (!FileUtil.save(savePath, data, displayError)) {
             System.err.println("Can't write '" + savePath + "' !");
             System.err.println("File may be locked or you don't own the rights to write files here.");
             return ERROR_SAVE + savePath;
@@ -489,10 +419,8 @@ public class PluginInstaller implements Runnable
         return null;
     }
 
-    private static boolean deletePlugin(PluginDescriptor plugin)
-    {
-        if (!FileUtil.delete(plugin.getJarFilename(), false))
-        {
+    private static boolean deletePlugin(@NotNull final PluginDescriptor plugin) {
+        if (!FileUtil.delete(plugin.getJarFilename(), false)) {
             System.err.println("Can't delete '" + plugin.getJarFilename() + "' file !");
             // fatal error
             return false;
@@ -511,13 +439,11 @@ public class PluginInstaller implements Runnable
     /**
      * Fill list with local dependencies (plugins) of specified plugin
      */
-    public static void getLocalDependenciesOf(List<PluginDescriptor> result, PluginDescriptor plugin)
-    {
+    public static void getLocalDependenciesOf(final List<PluginDescriptor> result, final PluginDescriptor plugin) {
         // load plugin descriptor informations if not yet done
         plugin.loadDescriptor();
 
-        for (PluginIdent ident : plugin.getRequired())
-        {
+        for (final PluginIdent ident : plugin.getRequired()) {
             // already in our dependences ? --> pass to the next one
             if (PluginDescriptor.getPlugin(result, ident, true) != null)
                 continue;
@@ -526,8 +452,7 @@ public class PluginInstaller implements Runnable
             final PluginDescriptor dep = PluginLoader.getPlugin(ident, true);
 
             // dependence found ?
-            if (dep != null)
-            {
+            if (dep != null) {
                 // and add it to list
                 PluginDescriptor.addToList(result, dep);
                 // search its dependencies too
@@ -539,11 +464,10 @@ public class PluginInstaller implements Runnable
     /**
      * Return local plugins list which depend from the specified list of plugins.
      */
-    public static List<PluginDescriptor> getLocalDependenciesFrom(List<PluginDescriptor> plugins)
-    {
-        final List<PluginDescriptor> result = new ArrayList<PluginDescriptor>();
+    public static List<PluginDescriptor> getLocalDependenciesFrom(final List<PluginDescriptor> plugins) {
+        final List<PluginDescriptor> result = new ArrayList<>();
 
-        for (PluginDescriptor plugin : plugins)
+        for (final PluginDescriptor plugin : plugins)
             getLocalDependenciesFrom(plugin, result);
 
         return result;
@@ -552,9 +476,8 @@ public class PluginInstaller implements Runnable
     /**
      * Return local plugins list which depend from the specified plugin.
      */
-    public static List<PluginDescriptor> getLocalDependenciesFrom(PluginDescriptor plugin)
-    {
-        final List<PluginDescriptor> result = new ArrayList<PluginDescriptor>();
+    public static List<PluginDescriptor> getLocalDependenciesFrom(final PluginDescriptor plugin) {
+        final List<PluginDescriptor> result = new ArrayList<>();
 
         getLocalDependenciesFrom(plugin, result);
 
@@ -564,9 +487,8 @@ public class PluginInstaller implements Runnable
     /**
      * Return local plugins list which depend from the specified plugin.
      */
-    private static void getLocalDependenciesFrom(PluginDescriptor plugin, List<PluginDescriptor> result)
-    {
-        for (PluginDescriptor curPlug : PluginLoader.getPlugins(false))
+    private static void getLocalDependenciesFrom(final PluginDescriptor plugin, final List<PluginDescriptor> result) {
+        for (final PluginDescriptor curPlug : PluginLoader.getPlugins(false))
             // require specified plugin ?
             if (curPlug.requires(plugin))
                 PluginDescriptor.addToList(result, curPlug);
@@ -575,14 +497,11 @@ public class PluginInstaller implements Runnable
     /**
      * Fill list with 'sources' dependencies of specified plugin
      */
-    private static void getLocalDependenciesOf(List<PluginDescriptor> result, List<PluginDescriptor> sources,
-            PluginDescriptor plugin)
-    {
+    private static void getLocalDependenciesOf(final List<PluginDescriptor> result, final List<PluginDescriptor> sources, @NotNull final PluginDescriptor plugin) {
         // load plugin descriptor informations if not yet done
         plugin.loadDescriptor();
 
-        for (PluginIdent ident : plugin.getRequired())
-        {
+        for (final PluginIdent ident : plugin.getRequired()) {
             // already in our dependences ? --> pass to the next one
             if ((ident == null) || (PluginDescriptor.getPlugin(result, ident, true) != null))
                 continue;
@@ -591,8 +510,7 @@ public class PluginInstaller implements Runnable
             final PluginDescriptor dep = PluginDescriptor.getPlugin(sources, ident, true);
 
             // dependence found ?
-            if (dep != null)
-            {
+            if (dep != null) {
                 // and add it to list
                 PluginDescriptor.addToList(result, dep);
                 // search its dependencies too
@@ -604,14 +522,13 @@ public class PluginInstaller implements Runnable
     /**
      * Reorder the list so needed dependencies comes first in list
      */
-    public static List<PluginDescriptor> orderDependencies(List<PluginDescriptor> plugins)
-    {
-        final List<PluginDescriptor> sources = new ArrayList<PluginDescriptor>(plugins);
-        final List<PluginDescriptor> result = new ArrayList<PluginDescriptor>();
+    @NotNull
+    public static List<PluginDescriptor> orderDependencies(@NotNull final List<PluginDescriptor> plugins) {
+        final List<PluginDescriptor> sources = new ArrayList<>(plugins);
+        final List<PluginDescriptor> result = new ArrayList<>();
 
-        while (sources.size() > 0)
-        {
-            final List<PluginDescriptor> deps = new ArrayList<PluginDescriptor>();
+        while (sources.size() > 0) {
+            final List<PluginDescriptor> deps = new ArrayList<>();
 
             getLocalDependenciesOf(result, sources, sources.get(0));
 
@@ -631,18 +548,13 @@ public class PluginInstaller implements Runnable
 
     /**
      * Resolve dependencies for specified plugin
-     * 
-     * @param taskFrame
      */
-    public static boolean getDependencies(PluginDescriptor plugin, List<PluginDescriptor> pluginsToInstall,
-            CancelableProgressFrame taskFrame, boolean showError)
-    {
+    public static boolean getDependencies(@NotNull final PluginDescriptor plugin, final List<PluginDescriptor> pluginsToInstall, final CancelableProgressFrame taskFrame, final boolean showError) {
         // load plugin descriptor informations if not yet done
         plugin.loadDescriptor();
 
         // check dependencies
-        for (PluginIdent ident : plugin.getRequired())
-        {
+        for (final PluginIdent ident : plugin.getRequired()) {
             if ((taskFrame != null) && taskFrame.isCancelRequested())
                 return false;
 
@@ -661,20 +573,16 @@ public class PluginInstaller implements Runnable
             final PluginDescriptor onlinePlugin = PluginRepositoryLoader.getPlugin(className);
 
             // plugin not yet installed or outdated ?
-            if ((localPlugin == null) || ident.getVersion().isGreater(localPlugin.getVersion()))
-            {
+            if ((localPlugin == null) || ident.getVersion().isGreater(localPlugin.getVersion())) {
                 // online plugin not found ?
-                if (onlinePlugin == null)
-                {
+                if (onlinePlugin == null) {
                     // error
-                    if (showError)
-                    {
+                    if (showError) {
                         System.err.println("Can't resolve dependencies for plugin '" + plugin.getName() + "' :");
 
                         if (localPlugin == null)
                             System.err.println("Plugin class '" + ident.getClassName() + " not found !");
-                        else
-                        {
+                        else {
                             System.err.println(localPlugin.getName() + " " + localPlugin.getVersion() + " installed");
                             System.err.println("but version " + ident.getVersion() + " or greater needed.");
                         }
@@ -683,14 +591,11 @@ public class PluginInstaller implements Runnable
                     return false;
                 }
                 // online plugin version incorrect
-                else if (ident.getVersion().isGreater(onlinePlugin.getVersion()))
-                {
+                else if (ident.getVersion().isGreater(onlinePlugin.getVersion())) {
                     // error
-                    if (showError)
-                    {
+                    if (showError) {
                         System.err.println("Can't resolve dependencies for plugin '" + plugin.getName() + "' :");
-                        System.err.println(
-                                onlinePlugin.getName() + " " + onlinePlugin.getVersion() + " found in repository");
+                        System.err.println(onlinePlugin.getName() + " " + onlinePlugin.getVersion() + " found in repository");
                         System.err.println("but version " + ident.getVersion() + " or greater needed.");
                     }
 
@@ -703,11 +608,9 @@ public class PluginInstaller implements Runnable
                 if (!getDependencies(onlinePlugin, pluginsToInstall, taskFrame, showError))
                     return false;
             }
-            else
-            {
+            else {
                 // just check if we have update for dependency
-                if ((onlinePlugin != null) && (localPlugin.getVersion().isLower(onlinePlugin.getVersion())))
-                {
+                if ((onlinePlugin != null) && (localPlugin.getVersion().isLower(onlinePlugin.getVersion()))) {
                     // as web site doesn't handle version dependency, we force the update
 
                     // add to the install list
@@ -722,22 +625,18 @@ public class PluginInstaller implements Runnable
         return true;
     }
 
-    private void installInternal()
-    {
+    private void installInternal() {
         DownloadFrame taskFrame = null;
 
-        try
-        {
+        try {
             final List<PluginInstallInfo> infos;
             boolean showProgress;
 
-            synchronized (installFIFO)
-            {
-                infos = new ArrayList<PluginInstallInfo>(installFIFO);
+            synchronized (installFIFO) {
+                infos = new ArrayList<>(installFIFO);
 
                 showProgress = false;
-                for (int i = infos.size() - 1; i >= 0; i--)
-                {
+                for (int i = infos.size() - 1; i >= 0; i--) {
                     final PluginInstallInfo info = infos.get(i);
 
                     PluginDescriptor.addToList(installingPlugins, info.plugin);
@@ -747,25 +646,22 @@ public class PluginInstaller implements Runnable
                 installFIFO.clear();
             }
 
-            if (showProgress && !Icy.getMainInterface().isHeadLess())
-            {
+            if (showProgress && !Icy.getMainInterface().isHeadLess()) {
                 taskFrame = new DownloadFrame();
                 taskFrame.setMessage("Initializing...");
             }
 
-            List<PluginDescriptor> dependencies = new ArrayList<PluginDescriptor>();
-            final Set<PluginDescriptor> pluginsOk = new HashSet<PluginDescriptor>();
-            final Set<PluginDescriptor> pluginsNOk = new HashSet<PluginDescriptor>();
-            final Set<PluginDescriptor> pluginsNewJava = new HashSet<PluginDescriptor>();
+            List<PluginDescriptor> dependencies = new ArrayList<>();
+            final Set<PluginDescriptor> pluginsOk = new HashSet<>();
+            final Set<PluginDescriptor> pluginsNOk = new HashSet<>();
+            final Set<PluginDescriptor> pluginsNewJava = new HashSet<>();
 
             // get dependencies
-            for (int i = installingPlugins.size() - 1; i >= 0; i--)
-            {
+            for (int i = installingPlugins.size() - 1; i >= 0; i--) {
                 final PluginDescriptor plugin = installingPlugins.get(i);
                 final String plugDesc = plugin.getName() + " " + plugin.getVersion();
 
-                if (taskFrame != null)
-                {
+                if (taskFrame != null) {
                     // cancel requested ?
                     if (taskFrame.isCancelRequested())
                         return;
@@ -774,8 +670,7 @@ public class PluginInstaller implements Runnable
                 }
 
                 // check dependencies
-                if (!getDependencies(plugin, dependencies, taskFrame, true))
-                {
+                if (!getDependencies(plugin, dependencies, taskFrame, true)) {
                     // can't resolve dependencies for this plugin
                     pluginsNOk.add(plugin);
                     installingPlugins.remove(i);
@@ -789,32 +684,27 @@ public class PluginInstaller implements Runnable
             // order dependencies
             dependencies = orderDependencies(dependencies);
             // add dependencies at the beginning of the installing list
-            for (PluginDescriptor plugin : dependencies)
+            for (final PluginDescriptor plugin : dependencies)
                 PluginDescriptor.addToList(installingPlugins, plugin, 0);
 
-            String error = "";
+            String error;
 
             // clear backup folder
             FileUtil.delete(Updater.BACKUP_DIRECTORY, true);
 
             // now we can proceed the installation itself
-            for (PluginDescriptor plugin : installingPlugins)
-            {
-                for (PluginIdent ident : plugin.getRequired())
-                {
+            for (final PluginDescriptor plugin : installingPlugins) {
+                for (final PluginIdent ident : plugin.getRequired()) {
                     // one of the dependencies was not correctly installed ?
-                    if (PluginDescriptor.existInList(pluginsNOk, ident))
-                    {
+                    if (PluginDescriptor.existInList(pluginsNOk, ident)) {
                         // we can't install the plugin, continue with the next one
                         pluginsNOk.add(plugin);
-                        continue;
                     }
                 }
 
                 final String plugDesc = plugin.getName() + " " + plugin.getVersion();
 
-                if (taskFrame != null)
-                {
+                if (taskFrame != null) {
                     // cancel requested ? --> interrupt installation
                     if (taskFrame.isCancelRequested())
                         break;
@@ -822,14 +712,12 @@ public class PluginInstaller implements Runnable
                     taskFrame.setMessage("Installing " + plugDesc + "...");
                 }
 
-                try
-                {
+                try {
                     // backup plugin
                     error = backup(plugin);
 
                     // backup ok --> install plugin
-                    if (StringUtil.isEmpty(error))
-                    {
+                    if (StringUtil.isEmpty(error)) {
                         error = downloadAndSavePlugin(plugin, taskFrame);
 
                         // an error occurred ? --> restore
@@ -837,16 +725,14 @@ public class PluginInstaller implements Runnable
                             Updater.restore();
                     }
                 }
-                finally
-                {
+                finally {
                     // delete backup
                     FileUtil.delete(Updater.BACKUP_DIRECTORY, true);
                 }
 
                 if (StringUtil.isEmpty(error))
                     pluginsOk.add(plugin);
-                else
-                {
+                else {
                     pluginsNOk.add(plugin);
                     // print error
                     System.err.println(error);
@@ -860,26 +746,21 @@ public class PluginInstaller implements Runnable
             // reload plugin list
             PluginLoader.reload();
 
-            for (PluginDescriptor plugin : pluginsOk)
-            {
+            for (final PluginDescriptor plugin : pluginsOk) {
                 error = PluginLoader.verifyPlugin(plugin);
 
                 // send report when we have verification error
-                if (!StringUtil.isEmpty(error))
-                {
-                    final String mess = "Fatal error while loading '" + plugin.getClassName() + "' class from "
-                            + plugin.getJarFilename() + " :\n" + error;
+                if (!StringUtil.isEmpty(error)) {
+                    final String mess = "Fatal error while loading '" + plugin.getClassName() + "' class from " + plugin.getJarFilename() + " :\n" + error;
 
                     // new java version required ?
-                    if (error.contains(PluginLoader.NEWER_JAVA_REQUIRED))
-                    {
+                    if (error.contains(PluginLoader.NEWER_JAVA_REQUIRED)) {
                         // print error in console
                         System.err.println(mess);
                         // add to list
                         pluginsNewJava.add(plugin);
                     }
-                    else
-                    {
+                    else {
                         // report error to developer
                         IcyExceptionHandler.report(plugin, "An error occured while installing the plugin :\n" + error);
                         // print error
@@ -894,12 +775,10 @@ public class PluginInstaller implements Runnable
             pluginsOk.removeAll(pluginsNOk);
             pluginsOk.removeAll(pluginsNewJava);
 
-            if (!pluginsNOk.isEmpty())
-            {
+            if (!pluginsNOk.isEmpty()) {
                 System.err.println();
                 System.err.println("Installation of the following plugin(s) failed:");
-                for (PluginDescriptor plugin : pluginsNOk)
-                {
+                for (final PluginDescriptor plugin : pluginsNOk) {
                     System.err.println(plugin.getName() + " " + plugin.getVersion());
                     // notify about installation fails
                     fireInstalledEvent(plugin, false);
@@ -907,12 +786,10 @@ public class PluginInstaller implements Runnable
                 System.err.println();
             }
 
-            if (!pluginsOk.isEmpty())
-            {
+            if (!pluginsOk.isEmpty()) {
                 System.out.println();
                 System.out.println("The following plugin(s) has been correctly installed:");
-                for (PluginDescriptor plugin : pluginsOk)
-                {
+                for (final PluginDescriptor plugin : pluginsOk) {
                     System.out.println(plugin.getName() + " " + plugin.getVersion());
                     // notify about installation successes
                     fireInstalledEvent(plugin, true);
@@ -920,12 +797,10 @@ public class PluginInstaller implements Runnable
                 System.out.println();
             }
 
-            if (!pluginsNewJava.isEmpty())
-            {
+            if (!pluginsNewJava.isEmpty()) {
                 System.err.println();
                 System.err.println("The following plugin(s) require a newer version of java:");
-                for (PluginDescriptor plugin : pluginsNewJava)
-                {
+                for (final PluginDescriptor plugin : pluginsNewJava) {
                     System.err.println(plugin.getName() + " " + plugin.getVersion());
                     // notify about installation even fails
                     fireInstalledEvent(plugin, false);
@@ -933,12 +808,11 @@ public class PluginInstaller implements Runnable
                 System.err.println();
             }
 
-            if (showProgress && !Icy.getMainInterface().isHeadLess())
-            {
+            if (showProgress && !Icy.getMainInterface().isHeadLess()) {
                 // no plugin success ?
                 if (pluginsOk.isEmpty())
                     new FailedAnnounceFrame("Plugin(s) installation failed !", 10);
-                // no plugin fail ?
+                    // no plugin fail ?
                 else if (pluginsNOk.isEmpty() && pluginsNewJava.isEmpty())
                     new SuccessfullAnnounceFrame("Plugin(s) installation was successful !", 10);
                 else if (!pluginsNOk.isEmpty())
@@ -946,12 +820,11 @@ public class PluginInstaller implements Runnable
                             "Some plugin(s) installation failed (looks at the output console for detail) !", 10);
 
                 // notify about new java version required
-                for (PluginDescriptor plugin : pluginsNewJava)
+                for (final PluginDescriptor plugin : pluginsNewJava)
                     new AnnounceFrame("Plugin '" + plugin.getName() + " requires a new version of Java !", 10);
             }
         }
-        finally
-        {
+        finally {
             // installation end
             installingPlugins.clear();
             if (taskFrame != null)
@@ -959,23 +832,19 @@ public class PluginInstaller implements Runnable
         }
     }
 
-    private void desinstallInternal()
-    {
+    private void desinstallInternal() {
         CancelableProgressFrame taskFrame = null;
 
-        try
-        {
+        try {
             final List<PluginInstallInfo> infos;
             boolean showProgress;
 
-            synchronized (removeFIFO)
-            {
-                infos = new ArrayList<PluginInstallInfo>(removeFIFO);
+            synchronized (removeFIFO) {
+                infos = new ArrayList<>(removeFIFO);
 
                 // determine if we should display the progress bar
                 showProgress = false;
-                for (int i = infos.size() - 1; i >= 0; i--)
-                {
+                for (int i = infos.size() - 1; i >= 0; i--) {
                     final PluginInstallInfo info = infos.get(i);
 
                     desinstallingPlugin.add(info.plugin);
@@ -989,13 +858,11 @@ public class PluginInstaller implements Runnable
                 taskFrame = new CancelableProgressFrame("Initializing...");
 
             // now we can proceed remove
-            for (PluginDescriptor plugin : desinstallingPlugin)
-            {
+            for (final PluginDescriptor plugin : desinstallingPlugin) {
                 final String plugDesc = plugin.getName() + " " + plugin.getVersion();
                 final boolean result;
 
-                if (taskFrame != null)
-                {
+                if (taskFrame != null) {
                     // cancel requested ?
                     if (taskFrame.isCancelRequested())
                         return;
@@ -1008,8 +875,7 @@ public class PluginInstaller implements Runnable
                 // notify plugin deletion
                 fireRemovedEvent(plugin, result);
 
-                if (showProgress && !Icy.getMainInterface().isHeadLess())
-                {
+                if (showProgress && !Icy.getMainInterface().isHeadLess()) {
                     if (!result)
                         new FailedAnnounceFrame("Plugin '" + plugDesc + "' delete operation failed !");
                 }
@@ -1020,8 +886,7 @@ public class PluginInstaller implements Runnable
                     System.err.println("Plugin '" + plugDesc + "' delete operation failed !");
             }
         }
-        finally
-        {
+        finally {
             if (taskFrame != null)
                 taskFrame.close();
             // removing end
@@ -1034,26 +899,18 @@ public class PluginInstaller implements Runnable
 
     /**
      * Add a listener
-     * 
-     * @param listener
      */
-    public static void addListener(PluginInstallerListener listener)
-    {
-        synchronized (instance.listeners)
-        {
+    public static void addListener(final PluginInstallerListener listener) {
+        synchronized (instance.listeners) {
             instance.listeners.add(PluginInstallerListener.class, listener);
         }
     }
 
     /**
      * Remove a listener
-     * 
-     * @param listener
      */
-    public static void removeListener(PluginInstallerListener listener)
-    {
-        synchronized (instance.listeners)
-        {
+    public static void removeListener(final PluginInstallerListener listener) {
+        synchronized (instance.listeners) {
             instance.listeners.remove(PluginInstallerListener.class, listener);
         }
     }
@@ -1061,11 +918,9 @@ public class PluginInstaller implements Runnable
     /**
      * fire plugin installed event
      */
-    private void fireInstalledEvent(PluginDescriptor plugin, boolean success)
-    {
-        synchronized (listeners)
-        {
-            for (PluginInstallerListener listener : listeners.getListeners(PluginInstallerListener.class))
+    private void fireInstalledEvent(final PluginDescriptor plugin, final boolean success) {
+        synchronized (listeners) {
+            for (final PluginInstallerListener listener : listeners.getListeners(PluginInstallerListener.class))
                 listener.pluginInstalled(plugin, success);
         }
     }
@@ -1073,11 +928,9 @@ public class PluginInstaller implements Runnable
     /**
      * fire plugin removed event
      */
-    private void fireRemovedEvent(PluginDescriptor plugin, boolean success)
-    {
-        synchronized (listeners)
-        {
-            for (PluginInstallerListener listener : listeners.getListeners(PluginInstallerListener.class))
+    private void fireRemovedEvent(final PluginDescriptor plugin, final boolean success) {
+        synchronized (listeners) {
+            for (final PluginInstallerListener listener : listeners.getListeners(PluginInstallerListener.class))
                 listener.pluginRemoved(plugin, success);
         }
     }

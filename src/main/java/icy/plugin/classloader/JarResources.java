@@ -1,20 +1,19 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package icy.plugin.classloader;
@@ -23,19 +22,17 @@ import icy.network.NetworkUtil;
 import icy.network.URLUtil;
 import icy.plugin.classloader.exception.JclException;
 import icy.system.IcyExceptionHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,12 +42,12 @@ import java.util.zip.ZipInputStream;
 
 /**
  * JarResources reads jar files and loads the class content/bytes in a HashMap
- * 
+ *
  * @author Kamran Zafar
  * @author Stephane Dallongeville
+ * @author Thomas MUSSET
  */
-public class JarResources
-{
+public class JarResources {
     // <resourceName, content> map
     protected Map<String, byte[]> entryContents;
     // <resourceName, fileName> map
@@ -60,35 +57,30 @@ public class JarResources
     // keep trace of loaded resource size
     protected int loadedSize;
 
-    private static Logger logger = Logger.getLogger(JarResources.class.getName());
+    private static final Logger logger = Logger.getLogger(JarResources.class.getName());
 
     /**
      * Default constructor
      */
-    public JarResources()
-    {
-        entryContents = new HashMap<String, byte[]>();
-        entryUrls = new HashMap<String, URL>();
+    public JarResources() {
+        entryContents = new HashMap<>();
+        entryUrls = new HashMap<>();
         collisionAllowed = Configuration.suppressCollisionException();
         loadedSize = 0;
     }
 
-    public URL getResource(String name)
-    {
+    public URL getResource(final String name) {
         return entryUrls.get(name);
     }
 
-    public byte[] getResourceContent(String name) throws IOException
-    {
-        byte content[] = entryContents.get(name);
+    public byte[] getResourceContent(final String name) throws IOException {
+        byte[] content = entryContents.get(name);
 
         // we load the content
-        if (content == null)
-        {
+        if (content == null) {
             final URL url = entryUrls.get(name);
 
-            if (url != null)
-            {
+            if (url != null) {
                 // load content and return it
                 loadContent(name, url);
                 content = entryContents.get(name);
@@ -114,8 +106,7 @@ public class JarResources
         return content;
     }
 
-    protected void loadContent(String name, URL url) throws IOException
-    {
+    protected void loadContent(final String name, final URL url) throws IOException {
         // only support JAR resource here
         final byte[] content = loadJarContent(url);
         setResourceContent(name, content);
@@ -124,37 +115,31 @@ public class JarResources
     /**
      * Returns an immutable Set of all resources names
      */
-    public Set<String> getResourcesName()
-    {
+    public Set<String> getResourcesName() {
         return Collections.unmodifiableSet(entryUrls.keySet());
     }
 
     /**
      * Returns an immutable Map of all resources
      */
-    public Map<String, URL> getResources()
-    {
+    public Map<String, URL> getResources() {
         return Collections.unmodifiableMap(entryUrls);
     }
 
     /**
      * Returns an immutable Map of all loaded jar resources
      */
-    public Map<String, byte[]> getLoadedResources()
-    {
+    public Map<String, byte[]> getLoadedResources() {
         return Collections.unmodifiableMap(entryContents);
     }
 
     /**
      * Loads the jar file from a specified File.<br>
      * This method actually stores all contained URL in the specified JAR file.
-     * 
-     * @throws IOException
      */
-    public void loadJar(File file) throws IOException
-    {
+    public void loadJar(@NotNull final File file) throws IOException {
         final String filePath = file.getAbsolutePath();
-        final String urlPrefix = "jar:" + file.toURI().toString() + "!/";
+        final String urlPrefix = "jar:" + file.toURI() + "!/";
 
         if (logger.isLoggable(Level.FINEST))
             logger.finest("Loading jar: " + filePath);
@@ -162,12 +147,10 @@ public class JarResources
         // we don't care about JAR specific information so just use ZipFile here
         final ZipFile zipFile = new ZipFile(file);
 
-        try
-        {
+        try {
             final Enumeration<? extends ZipEntry> entries = zipFile.entries();
 
-            while (entries.hasMoreElements())
-            {
+            while (entries.hasMoreElements()) {
                 final ZipEntry entry = entries.nextElement();
 
                 // ignore folder entries
@@ -180,8 +163,7 @@ public class JarResources
                 if (name.equals("META-INF/MANIFEST.MF"))
                     continue;
 
-                if (entryUrls.containsKey(name))
-                {
+                if (entryUrls.containsKey(name)) {
                     if (!collisionAllowed)
                         throw new JclException("Class/Resource " + name + " already loaded");
 
@@ -191,20 +173,21 @@ public class JarResources
                 }
 
                 // add to internal resource HashMap
-                entryUrls.put(name, new URL(urlPrefix + name));
+                //entryUrls.put(name, new URL(urlPrefix + name));
+                entryUrls.put(name, new URI(urlPrefix + name).toURL());
             }
         }
-        finally
-        {
-            try
-            {
+        catch (final URISyntaxException e) {
+            IcyExceptionHandler.showErrorMessage(e, false);
+        }
+        finally {
+            try {
                 zipFile.close();
             }
-            catch (IOException e)
-            {
+            catch (final IOException e) {
                 // not important
                 System.err.println("JarResources.loadJar(" + filePath + ") error:");
-                IcyExceptionHandler.showErrorMessage(e, false, true);
+                IcyExceptionHandler.showErrorMessage(e, false);
             }
         }
 
@@ -213,22 +196,16 @@ public class JarResources
     /**
      * Loads the jar file from a specified URL.<br>
      * This method actually stores all contained URL in the specified JAR archive.
-     * 
-     * @throws IOException
      */
-    public void loadJar(URL url) throws IOException
-    {
+    public void loadJar(final URL url) throws IOException {
         // use file loading if possible
-        if (URLUtil.isFileURL(url))
-        {
+        if (URLUtil.isFileURL(url)) {
             File f;
 
-            try
-            {
+            try {
                 f = new File(url.toURI());
             }
-            catch (URISyntaxException e)
-            {
+            catch (final URISyntaxException e) {
                 f = new File(url.getPath());
             }
 
@@ -244,8 +221,7 @@ public class JarResources
         // we don't care about JAR specific information so just use ZipInputStream here
         ZipInputStream zis = null;
 
-        try
-        {
+        try {
             final InputStream in = url.openStream();
 
             if (in instanceof BufferedInputStream)
@@ -255,9 +231,8 @@ public class JarResources
 
             zis = new ZipInputStream(bis);
 
-            ZipEntry entry = null;
-            while ((entry = zis.getNextEntry()) != null)
-            {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest(dump(entry));
 
@@ -270,8 +245,7 @@ public class JarResources
                 if (name.equals("META-INF/MANIFEST.MF"))
                     continue;
 
-                if (entryUrls.containsKey(name))
-                {
+                if (entryUrls.containsKey(name)) {
                     if (!collisionAllowed)
                         throw new JclException("Class/Resource " + name + " already loaded");
 
@@ -281,7 +255,8 @@ public class JarResources
                 }
 
                 // add to internal resource HashMap
-                entryUrls.put(name, new URL(urlPrefix + name));
+                //entryUrls.put(name, new URL(urlPrefix + name));
+                entryUrls.put(name, new URI(urlPrefix + name).toURL());
             }
         }
         // catch (NullPointerException e)
@@ -289,30 +264,26 @@ public class JarResources
         // if (logger.isLoggable(Level.FINEST))
         // logger.finest("Done loading.");
         // }
-        finally
-        {
-            if (zis != null)
-            {
-                try
-                {
+        catch (final URISyntaxException e) {
+            IcyExceptionHandler.showErrorMessage(e, false);
+        }
+        finally {
+            if (zis != null) {
+                try {
                     zis.close();
                 }
-                catch (IOException e)
-                {
+                catch (final IOException e) {
                     // not important
                     System.err.println("JarResources.loadJar(" + url + ") error:");
                     IcyExceptionHandler.showErrorMessage(e, false, true);
                 }
             }
 
-            if (bis != null)
-            {
-                try
-                {
+            if (bis != null) {
+                try {
                     bis.close();
                 }
-                catch (IOException e)
-                {
+                catch (final IOException e) {
                     // not important
                     System.err.println("JarResources.loadJar(" + url + ") error:");
                     IcyExceptionHandler.showErrorMessage(e, false, true);
@@ -323,29 +294,23 @@ public class JarResources
 
     /**
      * Load the jar contents from InputStream
-     * 
-     * @throws IOException
      */
-    protected byte[] loadJarContent(URL url) throws IOException
-    {
+    protected byte[] loadJarContent(@NotNull final URL url) throws IOException {
         final JarURLConnection uc = (JarURLConnection) url.openConnection();
         final JarEntry jarEntry = uc.getJarEntry();
 
-        if (jarEntry != null)
-        {
+        if (jarEntry != null) {
             if (logger.isLoggable(Level.FINEST))
                 logger.finest(dump(jarEntry));
 
             return NetworkUtil.download(uc.getInputStream(), jarEntry.getSize(), null);
         }
 
-        throw new IOException("JarResources.loadJarContent(" + url.toString() + ") error:\nEntry not found !");
+        throw new IOException("JarResources.loadJarContent(" + url + ") error:\nEntry not found !");
     }
 
-    protected void setResourceContent(String name, byte content[])
-    {
-        if (entryContents.containsKey(name))
-        {
+    protected void setResourceContent(final String name, final byte[] content) {
+        if (entryContents.containsKey(name)) {
             if (!collisionAllowed)
                 throw new JclException("Class/Resource " + name + " already loaded");
 
@@ -363,13 +328,10 @@ public class JarResources
 
     /**
      * For debugging
-     * 
-     * @param je
-     * @return String
      */
-    private String dump(ZipEntry ze)
-    {
-        StringBuffer sb = new StringBuffer();
+    @NotNull
+    private String dump(final ZipEntry ze) {
+        final StringBuilder sb = new StringBuilder();
         if (ze.isDirectory())
             sb.append("d ");
         else
@@ -382,9 +344,9 @@ public class JarResources
 
         sb.append(ze.getName());
         sb.append("\t");
-        sb.append("" + ze.getSize());
+        sb.append(ze.getSize());
         if (ze.getMethod() == ZipEntry.DEFLATED)
-            sb.append("/" + ze.getCompressedSize());
+            sb.append("/").append(ze.getCompressedSize());
 
         return (sb.toString());
     }

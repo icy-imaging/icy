@@ -1,20 +1,19 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package icy.plugin.classloader;
@@ -22,25 +21,19 @@ package icy.plugin.classloader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Abstract class loader that can load classes from different resources
- * 
+ *
  * @author Kamran Zafar
  * @author Stephane Dallongeville
+ * @author Thomas MUSSET
  */
-@SuppressWarnings("unchecked")
-public abstract class AbstractClassLoader extends ClassLoader
-{
-    protected final List<ProxyClassLoader> loaders = new ArrayList<ProxyClassLoader>();
+public abstract class AbstractClassLoader extends ClassLoader {
+    protected final List<ProxyClassLoader> loaders = new ArrayList<>();
 
     private final ProxyClassLoader systemLoader = new SystemLoader();
     private final ProxyClassLoader parentLoader = new ParentLoader();
@@ -49,26 +42,22 @@ public abstract class AbstractClassLoader extends ClassLoader
 
     /**
      * Build a new instance of AbstractClassLoader.java.
-     * 
-     * @param parent
-     *        parent class loader
+     *
+     * @param parent parent class loader
      */
-    public AbstractClassLoader(ClassLoader parent)
-    {
+    public AbstractClassLoader(final ClassLoader parent) {
         super(parent);
 
         addDefaultLoaders();
     }
 
-    public void addLoader(ProxyClassLoader loader)
-    {
+    public void addLoader(final ProxyClassLoader loader) {
         loaders.add(loader);
 
         Collections.sort(loaders);
     }
 
-    protected void addDefaultLoaders()
-    {
+    protected void addDefaultLoaders() {
         // always add this one
         loaders.add(systemLoader);
         loaders.add(parentLoader);
@@ -79,8 +68,7 @@ public abstract class AbstractClassLoader extends ClassLoader
     }
 
     @Override
-    public Class loadClass(String className) throws ClassNotFoundException
-    {
+    public Class<?> loadClass(final String className) throws ClassNotFoundException {
         return loadClass(className, true);
     }
 
@@ -88,23 +76,20 @@ public abstract class AbstractClassLoader extends ClassLoader
      * Overrides the loadClass method to load classes from other resources,
      * JarClassLoader is the only subclass in this project that loads classes
      * from jar files
-     * 
+     *
      * @see ClassLoader#loadClass(String, boolean)
      */
     @Override
-    public Class loadClass(String className, boolean resolveIt) throws ClassNotFoundException
-    {
+    public Class<?> loadClass(final String className, final boolean resolveIt) throws ClassNotFoundException {
         if (className == null || className.trim().equals(""))
             return null;
 
-        final List<ProxyClassLoader> loadersDone = new ArrayList<ProxyClassLoader>();
+        final List<ProxyClassLoader> loadersDone = new ArrayList<>();
 
-        for (ProxyClassLoader l : loaders)
-        {
+        for (final ProxyClassLoader l : loaders) {
             // don't search in same loader
-            if (l.isEnabled() && !loadersDone.contains(l))
-            {
-                final Class clazz = l.loadClass(className, resolveIt);
+            if (l.isEnabled() && !loadersDone.contains(l)) {
+                final Class<?> clazz = l.loadClass(className, resolveIt);
                 if (clazz != null)
                     return clazz;
 
@@ -120,22 +105,19 @@ public abstract class AbstractClassLoader extends ClassLoader
      * Overrides the getResourceAsStream method to load non-class resources from
      * other sources, JarClassLoader is the only subclass in this project that
      * loads non-class resources from jar files
-     * 
+     *
      * @see ClassLoader#getResourceAsStream(String)
      */
     @Override
-    public InputStream getResourceAsStream(String name)
-    {
+    public InputStream getResourceAsStream(final String name) {
         if (name == null || name.trim().equals(""))
             return null;
 
-        final List<ProxyClassLoader> loadersDone = new ArrayList<ProxyClassLoader>();
+        final List<ProxyClassLoader> loadersDone = new ArrayList<>();
 
-        for (ProxyClassLoader l : loaders)
-        {
+        for (final ProxyClassLoader l : loaders) {
             // don't search in same loader
-            if (l.isEnabled() && !loadersDone.contains(l))
-            {
+            if (l.isEnabled() && !loadersDone.contains(l)) {
                 final InputStream is = l.getResourceAsStream(name);
                 if (is != null)
                     return is;
@@ -149,18 +131,15 @@ public abstract class AbstractClassLoader extends ClassLoader
     }
 
     @Override
-    public URL getResource(String name)
-    {
+    public URL getResource(final String name) {
         if (name == null || name.trim().equals(""))
             return null;
 
-        final List<ProxyClassLoader> loadersDone = new ArrayList<ProxyClassLoader>();
+        final List<ProxyClassLoader> loadersDone = new ArrayList<>();
 
-        for (ProxyClassLoader l : loaders)
-        {
+        for (final ProxyClassLoader l : loaders) {
             // don't search in same loader
-            if (l.isEnabled() && !loadersDone.contains(l))
-            {
+            if (l.isEnabled() && !loadersDone.contains(l)) {
                 final URL url = l.getResource(name);
                 if (url != null)
                     return url;
@@ -174,23 +153,19 @@ public abstract class AbstractClassLoader extends ClassLoader
     }
 
     @Override
-    public Enumeration<URL> getResources(String name) throws IOException
-    {
+    public Enumeration<URL> getResources(final String name) throws IOException {
         if (name == null || name.trim().equals(""))
             return null;
 
-        final Set<URL> result = new HashSet<URL>();
-        final List<ProxyClassLoader> loadersDone = new ArrayList<ProxyClassLoader>();
+        final Set<URL> result = new HashSet<>();
+        final List<ProxyClassLoader> loadersDone = new ArrayList<>();
 
-        for (ProxyClassLoader l : loaders)
-        {
+        for (final ProxyClassLoader l : loaders) {
             // don't search in same loader
-            if (l.isEnabled() && !loadersDone.contains(l))
-            {
+            if (l.isEnabled() && !loadersDone.contains(l)) {
                 final Enumeration<URL> urls = l.getResources(name);
 
-                if (urls != null)
-                {
+                if (urls != null) {
                     // avoid duplicate using Set here
                     while (urls.hasMoreElements())
                         result.add(urls.nextElement());
@@ -207,34 +182,28 @@ public abstract class AbstractClassLoader extends ClassLoader
     /**
      * System class loader
      */
-    class SystemLoader extends ProxyClassLoader
-    {
+    class SystemLoader extends ProxyClassLoader {
         private final Logger logger = Logger.getLogger(SystemLoader.class.getName());
 
-        public SystemLoader()
-        {
+        public SystemLoader() {
             super(10);
 
             enabled = Configuration.isSystemLoaderEnabled();
         }
 
         @Override
-        public ClassLoader getLoader()
-        {
+        public ClassLoader getLoader() {
             return getSystemClassLoader();
         }
 
         @Override
-        public Class loadClass(String className, boolean resolveIt)
-        {
-            Class result;
+        public Class<?> loadClass(final String className, final boolean resolveIt) {
+            final Class<?> result;
 
-            try
-            {
+            try {
                 result = findSystemClass(className);
             }
-            catch (ClassNotFoundException e)
-            {
+            catch (final ClassNotFoundException e) {
                 return null;
             }
 
@@ -245,12 +214,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public InputStream getResourceAsStream(String name)
-        {
-            InputStream is = getSystemResourceAsStream(name);
+        public InputStream getResourceAsStream(final String name) {
+            final InputStream is = getSystemResourceAsStream(name);
 
-            if (is != null)
-            {
+            if (is != null) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning system resource " + name);
 
@@ -261,12 +228,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public URL getResource(String name)
-        {
-            URL url = getSystemResource(name);
+        public URL getResource(final String name) {
+            final URL url = getSystemResource(name);
 
-            if (url != null)
-            {
+            if (url != null) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning system resource " + name);
 
@@ -277,12 +242,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public Enumeration<URL> getResources(String name) throws IOException
-        {
-            Enumeration<URL> urls = getSystemResources(name);
+        public Enumeration<URL> getResources(final String name) throws IOException {
+            final Enumeration<URL> urls = getSystemResources(name);
 
-            if ((urls != null) && urls.hasMoreElements())
-            {
+            if ((urls != null) && urls.hasMoreElements()) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning system resources " + name);
 
@@ -296,34 +259,28 @@ public abstract class AbstractClassLoader extends ClassLoader
     /**
      * Parent class loader
      */
-    class ParentLoader extends ProxyClassLoader
-    {
+    class ParentLoader extends ProxyClassLoader {
         private final Logger logger = Logger.getLogger(ParentLoader.class.getName());
 
-        public ParentLoader()
-        {
+        public ParentLoader() {
             super(30);
 
             enabled = Configuration.isParentLoaderEnabled();
         }
 
         @Override
-        public ClassLoader getLoader()
-        {
+        public ClassLoader getLoader() {
             return getParent();
         }
 
         @Override
-        public Class loadClass(String className, boolean resolveIt)
-        {
-            Class result;
+        public Class<?> loadClass(final String className, final boolean resolveIt) {
+            final Class<?> result;
 
-            try
-            {
+            try {
                 result = getParent().loadClass(className);
             }
-            catch (ClassNotFoundException e)
-            {
+            catch (final ClassNotFoundException e) {
                 return null;
             }
 
@@ -334,12 +291,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public InputStream getResourceAsStream(String name)
-        {
-            InputStream is = getParent().getResourceAsStream(name);
+        public InputStream getResourceAsStream(final String name) {
+            final InputStream is = getParent().getResourceAsStream(name);
 
-            if (is != null)
-            {
+            if (is != null) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning resource " + name + " loaded with parent classloader");
 
@@ -349,12 +304,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public URL getResource(String name)
-        {
-            URL url = getParent().getResource(name);
+        public URL getResource(final String name) {
+            final URL url = getParent().getResource(name);
 
-            if (url != null)
-            {
+            if (url != null) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning resource " + name + " loaded with parent classloader");
 
@@ -365,12 +318,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public Enumeration<URL> getResources(String name) throws IOException
-        {
-            Enumeration<URL> urls = getParent().getResources(name);
+        public Enumeration<URL> getResources(final String name) throws IOException {
+            final Enumeration<URL> urls = getParent().getResources(name);
 
-            if ((urls != null) && urls.hasMoreElements())
-            {
+            if ((urls != null) && urls.hasMoreElements()) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning resource " + name + " loaded with parent classloader");
 
@@ -384,34 +335,28 @@ public abstract class AbstractClassLoader extends ClassLoader
     /**
      * Current class loader
      */
-    class CurrentLoader extends ProxyClassLoader
-    {
+    static class CurrentLoader extends ProxyClassLoader {
         private final Logger logger = Logger.getLogger(CurrentLoader.class.getName());
 
-        public CurrentLoader()
-        {
+        public CurrentLoader() {
             super(20);
 
             enabled = Configuration.isCurrentLoaderEnabled();
         }
 
         @Override
-        public ClassLoader getLoader()
-        {
+        public ClassLoader getLoader() {
             return getClass().getClassLoader();
         }
 
         @Override
-        public Class loadClass(String className, boolean resolveIt)
-        {
-            Class result;
+        public Class<?> loadClass(final String className, final boolean resolveIt) {
+            final Class<?> result;
 
-            try
-            {
+            try {
                 result = getClass().getClassLoader().loadClass(className);
             }
-            catch (ClassNotFoundException e)
-            {
+            catch (final ClassNotFoundException e) {
                 return null;
             }
 
@@ -422,12 +367,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public InputStream getResourceAsStream(String name)
-        {
-            InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        public InputStream getResourceAsStream(final String name) {
+            final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
 
-            if (is != null)
-            {
+            if (is != null) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning resource " + name + " loaded with current classloader");
 
@@ -438,12 +381,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public URL getResource(String name)
-        {
-            URL url = getClass().getClassLoader().getResource(name);
+        public URL getResource(final String name) {
+            final URL url = getClass().getClassLoader().getResource(name);
 
-            if (url != null)
-            {
+            if (url != null) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning resource " + name + " loaded with current classloader");
 
@@ -454,12 +395,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public Enumeration<URL> getResources(String name) throws IOException
-        {
-            Enumeration<URL> urls = getClass().getClassLoader().getResources(name);
+        public Enumeration<URL> getResources(final String name) throws IOException {
+            final Enumeration<URL> urls = getClass().getClassLoader().getResources(name);
 
-            if ((urls != null) && (urls.hasMoreElements()))
-            {
+            if ((urls != null) && (urls.hasMoreElements())) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning resources " + name + " loaded with current classloader");
 
@@ -474,33 +413,27 @@ public abstract class AbstractClassLoader extends ClassLoader
     /**
      * Current class loader
      */
-    class ThreadContextLoader extends ProxyClassLoader
-    {
+    static class ThreadContextLoader extends ProxyClassLoader {
         private final Logger logger = Logger.getLogger(ThreadContextLoader.class.getName());
 
-        public ThreadContextLoader()
-        {
+        public ThreadContextLoader() {
             super(40);
 
             enabled = Configuration.isThreadContextLoaderEnabled();
         }
 
         @Override
-        public ClassLoader getLoader()
-        {
+        public ClassLoader getLoader() {
             return Thread.currentThread().getContextClassLoader();
         }
 
         @Override
-        public Class loadClass(String className, boolean resolveIt)
-        {
-            Class result;
-            try
-            {
+        public Class<?> loadClass(final String className, final boolean resolveIt) {
+            final Class<?> result;
+            try {
                 result = Thread.currentThread().getContextClassLoader().loadClass(className);
             }
-            catch (ClassNotFoundException e)
-            {
+            catch (final ClassNotFoundException e) {
                 return null;
             }
 
@@ -511,12 +444,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public InputStream getResourceAsStream(String name)
-        {
-            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
+        public InputStream getResourceAsStream(final String name) {
+            final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
 
-            if (is != null)
-            {
+            if (is != null) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning resource " + name + " loaded with thread context classloader");
 
@@ -527,12 +458,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public URL getResource(String name)
-        {
-            URL url = Thread.currentThread().getContextClassLoader().getResource(name);
+        public URL getResource(final String name) {
+            final URL url = Thread.currentThread().getContextClassLoader().getResource(name);
 
-            if (url != null)
-            {
+            if (url != null) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning resource " + name + " loaded with thread context classloader");
 
@@ -543,12 +472,10 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
 
         @Override
-        public Enumeration<URL> getResources(String name) throws IOException
-        {
-            Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(name);
+        public Enumeration<URL> getResources(final String name) throws IOException {
+            final Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(name);
 
-            if ((urls != null) && (urls.hasMoreElements()))
-            {
+            if ((urls != null) && (urls.hasMoreElements())) {
                 if (logger.isLoggable(Level.FINEST))
                     logger.finest("Returning resources " + name + " loaded with thread context classloader");
 
@@ -559,23 +486,19 @@ public abstract class AbstractClassLoader extends ClassLoader
         }
     }
 
-    public ProxyClassLoader getSystemLoader()
-    {
+    public ProxyClassLoader getSystemLoader() {
         return systemLoader;
     }
 
-    public ProxyClassLoader getParentLoader()
-    {
+    public ProxyClassLoader getParentLoader() {
         return parentLoader;
     }
 
-    public ProxyClassLoader getCurrentLoader()
-    {
+    public ProxyClassLoader getCurrentLoader() {
         return currentLoader;
     }
 
-    public ProxyClassLoader getThreadLoader()
-    {
+    public ProxyClassLoader getThreadLoader() {
         return threadLoader;
     }
 }

@@ -1,20 +1,19 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package icy.plugin.classloader;
@@ -26,14 +25,13 @@ import java.util.Enumeration;
 
 /**
  * @author Kamran Zafar
+ * @author Thomas MUSSET
  */
-public abstract class ProxyClassLoader implements Comparable<ProxyClassLoader>
-{
+public abstract class ProxyClassLoader implements Comparable<ProxyClassLoader> {
     protected int order;
     protected boolean enabled;
 
-    public ProxyClassLoader(int order)
-    {
+    public ProxyClassLoader(final int order) {
         super();
 
         // Default order
@@ -42,8 +40,7 @@ public abstract class ProxyClassLoader implements Comparable<ProxyClassLoader>
         enabled = true;
     }
 
-    public int getOrder()
-    {
+    public int getOrder() {
         return order;
     }
 
@@ -54,10 +51,8 @@ public abstract class ProxyClassLoader implements Comparable<ProxyClassLoader>
 
     /**
      * Loads the class and returns it.
-     * 
-     * @throws ClassNotFoundException
      */
-    public abstract Class loadClass(String className, boolean resolveIt) throws ClassNotFoundException;
+    public abstract Class<?> loadClass(String className, boolean resolveIt) throws ClassNotFoundException;
 
     /**
      * Loads the resource and returns an input stream for reading it.
@@ -74,19 +69,16 @@ public abstract class ProxyClassLoader implements Comparable<ProxyClassLoader>
      */
     public abstract Enumeration<URL> getResources(String name) throws IOException;
 
-    public boolean isEnabled()
-    {
+    public boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled)
-    {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
     }
 
     @Override
-    public int compareTo(ProxyClassLoader o)
-    {
+    public int compareTo(final ProxyClassLoader o) {
         return order - o.getOrder();
     }
 }

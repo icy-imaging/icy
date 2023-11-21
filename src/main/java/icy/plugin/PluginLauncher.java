@@ -1,58 +1,56 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.plugin;
 
 import icy.main.Icy;
 import icy.plugin.abstract_.Plugin;
-import icy.plugin.interface_.PluginImageAnalysis;
+import icy.plugin.abstract_.PluginActionable;
 import icy.plugin.interface_.PluginNoEDTConstructor;
-import icy.plugin.interface_.PluginStartAsThread;
 import icy.plugin.interface_.PluginThreaded;
 import icy.system.IcyExceptionHandler;
 import icy.system.audit.Audit;
 import icy.system.thread.ThreadUtil;
 import icy.util.ClassUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.Callable;
 
 /**
  * This class launch plugins and register them to the main application.<br>
  * The launch can be in a decicated thread or in the EDT.
- * 
+ *
  * @author Fabrice de Chaumont &amp; Stephane
+ * @author Thomas MUSSET
  */
-public class PluginLauncher
-{
-    protected static class PluginExecutor implements Callable<Boolean>, Runnable
-    {
+public class PluginLauncher {
+    protected static class PluginExecutor implements Callable<Boolean>, Runnable {
         final Plugin plugin;
 
-        public PluginExecutor(Plugin plugin)
-        {
+        public PluginExecutor(final Plugin plugin) {
             super();
 
             this.plugin = plugin;
         }
 
         @Override
-        public Boolean call() throws Exception
-        {
+        public Boolean call() throws Exception {
             // some plugins (as EzPlug) do not respect the PluginActionable convention (run() method
             // contains all the process)
             // so we can't yet use this bloc of code
@@ -64,21 +62,21 @@ public class PluginLauncher
             // ((PluginImageAnalysis) plugin).compute();
 
             // keep backward compatibility
-            if (plugin instanceof PluginImageAnalysis)
-                ((PluginImageAnalysis) plugin).compute();
+            //if (plugin instanceof PluginImageAnalysis)
+            //    ((PluginImageAnalysis) plugin).compute();
+
+            if (plugin instanceof PluginActionable)
+                ((PluginActionable) plugin).run();
 
             return Boolean.TRUE;
         }
 
         @Override
-        public void run()
-        {
-            try
-            {
+        public void run() {
+            try {
                 call();
             }
-            catch (Throwable t)
-            {
+            catch (final Throwable t) {
                 IcyExceptionHandler.handleException(plugin.getDescriptor(), t, true);
             }
         }
@@ -90,33 +88,28 @@ public class PluginLauncher
      * a separate thread and the method will return before completion.<br>
      * In other case the plugin is executed on the EDT by using {@link ThreadUtil#invokeNow(Callable)} and so method
      * return after completion.
-     * 
-     * @throws InterruptedException
-     *         if the current thread was interrupted while waiting for execution on EDT.
-     * @throws Exception
-     *         if the computation threw an exception (only when plugin is executed on EDT).
+     *
+     * @throws InterruptedException if the current thread was interrupted while waiting for execution on EDT.
+     * @throws Exception            if the computation threw an exception (only when plugin is executed on EDT).
      */
-    private static void internalExecute(final Plugin plugin) throws Exception
-    {
-        if (plugin instanceof PluginThreaded)
-        {
+    private static void internalExecute(final Plugin plugin) throws Exception {
+        if (plugin instanceof PluginThreaded) {
             // headless mode --> command line direct execution
             if (Icy.getMainInterface().isHeadLess())
                 ((PluginThreaded) plugin).run();
             else
                 new Thread((PluginThreaded) plugin, plugin.getName()).start();
         }
-        else
-        {
+        else {
             final PluginExecutor executor = new PluginExecutor(plugin);
 
             // headless mode --> command line direct execution
             if (Icy.getMainInterface().isHeadLess())
                 executor.call();
-            // keep backward compatibility
-            else if (plugin instanceof PluginStartAsThread)
-                new Thread(executor, plugin.getName()).start();
-            // direct launch in EDT now (no thread creation)
+                // keep backward compatibility
+            //else if (plugin instanceof PluginStartAsThread)
+            //    new Thread(executor, plugin.getName()).start();
+                // direct launch in EDT now (no thread creation)
             else
                 ThreadUtil.invokeNow((Callable<Boolean>) executor);
         }
@@ -124,32 +117,21 @@ public class PluginLauncher
 
     /**
      * Creates a new instance of the specified plugin and returns it.<br>
-     * 
-     * @param plugin
-     *        descriptor of the plugin we want to create an instance for
-     * @param register
-     *        if we want to register the plugin in the active plugin list
+     *
+     * @param plugin   descriptor of the plugin we want to create an instance for
+     * @param register if we want to register the plugin in the active plugin list
      * @see #startSafe(PluginDescriptor)
      */
-    public static Plugin create(final PluginDescriptor plugin, boolean register) throws Exception
-    {
+    public static Plugin create(@NotNull final PluginDescriptor plugin, final boolean register) throws Exception {
         final Class<? extends Plugin> clazz = plugin.getPluginClass();
         final Plugin result;
 
         // use the special PluginNoEDTConstructor interface or headless mode ?
         if (ClassUtil.isSubClass(clazz, PluginNoEDTConstructor.class) || Icy.getMainInterface().isHeadLess())
-            result = clazz.newInstance();
-        else
-        {
+            result = clazz.getDeclaredConstructor().newInstance();
+        else {
             // create the plugin instance on the EDT
-            result = ThreadUtil.invokeNow(new Callable<Plugin>()
-            {
-                @Override
-                public Plugin call() throws Exception
-                {
-                    return clazz.newInstance();
-                }
-            });
+            result = ThreadUtil.invokeNow((Callable<Plugin>) () -> clazz.getDeclaredConstructor().newInstance());
         }
 
         // register plugin
@@ -162,13 +144,11 @@ public class PluginLauncher
     /**
      * Creates a new instance of the specified plugin and returns it.<br>
      * The plugin is automatically registered to the list of active plugins.
-     * 
-     * @param plugin
-     *        descriptor of the plugin we want to create an instance for
+     *
+     * @param plugin descriptor of the plugin we want to create an instance for
      * @see #startSafe(PluginDescriptor)
      */
-    public static Plugin create(final PluginDescriptor plugin) throws Exception
-    {
+    public static Plugin create(final PluginDescriptor plugin) throws Exception {
         return create(plugin, true);
     }
 
@@ -176,30 +156,20 @@ public class PluginLauncher
      * Starts the specified plugin (catched exception version).<br>
      * Returns the plugin instance (only meaningful for {@link PluginThreaded} plugin) or <code>null</code> if an error
      * occurred.
-     * 
-     * @param plugin
-     *        descriptor of the plugin we want to start
+     *
+     * @param plugin descriptor of the plugin we want to start
      * @see #startSafe(PluginDescriptor)
      */
-    public static Plugin start(PluginDescriptor plugin)
-    {
+    @Nullable
+    public static Plugin start(final PluginDescriptor plugin) {
         final Plugin result;
 
-        try
-        {
-            try
-            {
+        try {
+            try {
                 // create plugin instance
                 result = create(plugin);
             }
-            catch (IllegalAccessException e)
-            {
-                System.err.println("Cannot start plugin " + plugin.getName() + " :");
-                System.err.println(e.getMessage());
-                return null;
-            }
-            catch (InstantiationException e)
-            {
+            catch (final IllegalAccessException | InstantiationException e) {
                 System.err.println("Cannot start plugin " + plugin.getName() + " :");
                 System.err.println(e.getMessage());
                 return null;
@@ -208,17 +178,16 @@ public class PluginLauncher
             // audit
             Audit.pluginLaunched(result);
             // execute plugin
-            if (result instanceof PluginImageAnalysis)
+            //if (result instanceof PluginImageAnalysis)
+            if (result instanceof PluginActionable)
                 internalExecute(result);
 
             return result;
         }
-        catch (InterruptedException e)
-        {
+        catch (final InterruptedException e) {
             // we just ignore interruption
         }
-        catch (Throwable t)
-        {
+        catch (final Throwable t) {
             IcyExceptionHandler.handleException(plugin, t, true);
         }
 
@@ -227,12 +196,11 @@ public class PluginLauncher
 
     /**
      * @deprecated Use {@link #start(PluginDescriptor)} instead.<br>
-     *             You can retrieve a {@link PluginDescriptor} from the class name by using
-     *             {@link PluginLoader#getPlugin(String)} method.
+     * You can retrieve a {@link PluginDescriptor} from the class name by using
+     * {@link PluginLoader#getPlugin(String)} method.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Plugin start(String pluginClassName)
-    {
+    public static Plugin start(final String pluginClassName) {
         final PluginDescriptor plugin = PluginLoader.getPlugin(pluginClassName);
 
         if (plugin != null)
@@ -244,17 +212,13 @@ public class PluginLauncher
     /**
      * Same as {@link #start(PluginDescriptor)} except it throws {@link Exception} on error
      * so user can handle them.
-     * 
-     * @param plugin
-     *        descriptor of the plugin we want to start
-     *        compatibility)
-     * @throws InterruptedException
-     *         if the current thread was interrupted while waiting for execution on EDT.
-     * @throws Exception
-     *         if the computation threw an exception (only when plugin is executed on EDT).
+     *
+     * @param plugin descriptor of the plugin we want to start
+     *               compatibility)
+     * @throws InterruptedException if the current thread was interrupted while waiting for execution on EDT.
+     * @throws Exception            if the computation threw an exception (only when plugin is executed on EDT).
      */
-    public static Plugin startSafe(PluginDescriptor plugin) throws Exception
-    {
+    public static Plugin startSafe(final PluginDescriptor plugin) throws Exception {
         final Plugin result;
 
         // create plugin instance
@@ -263,7 +227,8 @@ public class PluginLauncher
         // audit
         Audit.pluginLaunched(result);
         // execute plugin
-        if (result instanceof PluginImageAnalysis)
+        //if (result instanceof PluginImageAnalysis)
+        if (result instanceof PluginActionable)
             internalExecute(result);
 
         return result;
@@ -271,12 +236,11 @@ public class PluginLauncher
 
     /**
      * @deprecated Use {@link #startSafe(PluginDescriptor)} instead.<br>
-     *             You can retrieve a {@link PluginDescriptor} from the class name by using
-     *             {@link PluginLoader#getPlugin(String)} method.
+     * You can retrieve a {@link PluginDescriptor} from the class name by using
+     * {@link PluginLoader#getPlugin(String)} method.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Plugin startSafe(String pluginClassName) throws Exception
-    {
+    public static Plugin startSafe(final String pluginClassName) throws Exception {
         final PluginDescriptor plugin = PluginLoader.getPlugin(pluginClassName);
 
         if (plugin != null)
@@ -288,9 +252,14 @@ public class PluginLauncher
     /**
      * @deprecated Use {@link #start(PluginDescriptor)} instead.
      */
+    @SuppressWarnings("EmptyTryBlock")
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public synchronized static void launch(PluginDescriptor descriptor)
-    {
-        start(descriptor);
+    public synchronized static void launch(final PluginDescriptor descriptor) {
+        try (final Plugin ignored = start(descriptor)) {
+
+        }
+        catch (final Exception e) {
+            IcyExceptionHandler.showErrorMessage(e, true);
+        }
     }
 }

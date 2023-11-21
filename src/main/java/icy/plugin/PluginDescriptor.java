@@ -26,9 +26,9 @@ import icy.image.ImageUtil;
 import icy.network.NetworkUtil;
 import icy.network.URLUtil;
 import icy.plugin.abstract_.Plugin;
+import icy.plugin.abstract_.PluginActionable;
 import icy.plugin.interface_.IcyPlugin;
 import icy.plugin.interface_.PluginBundled;
-import icy.plugin.interface_.PluginImageAnalysis;
 import icy.preferences.RepositoryPreferences.RepositoryInfo;
 import icy.resource.ResourceUtil;
 import icy.system.logging.IcyLogger;
@@ -598,8 +598,7 @@ public class PluginDescriptor implements XMLPersistent {
      * return true if the plugin has an action which can be started from menu
      */
     public boolean isActionable() {
-        return isClassLoaded() && !isPrivate() && !isAbstract() && !isInterface()
-                && isInstanceOf(PluginImageAnalysis.class);
+        return isClassLoaded() && !isPrivate() && !isAbstract() && !isInterface() && isInstanceOf(PluginActionable.class);
     }
 
     /**
@@ -846,9 +845,12 @@ public class PluginDescriptor implements XMLPersistent {
         if (!isBundled())
             return this;
 
-        try {
-            // get main plugin
-            return PluginLoader.getPlugin(((PluginBundled) PluginLauncher.create(this)).getMainPluginClassName());
+        // get main plugin
+        //try {
+        //    return PluginLoader.getPlugin(((PluginBundled) PluginLauncher.create(this)).getMainPluginClassName());
+        //}
+        try (final Plugin plugin = PluginLauncher.create(this)) {
+            return PluginLoader.getPlugin(((PluginBundled) plugin).getMainPluginClassName());
         }
         catch (final Throwable t) {
             // try alternate method
@@ -1514,7 +1516,7 @@ public class PluginDescriptor implements XMLPersistent {
                 return false;
 
             setClassName(XMLUtil.getElementValue(node, ID_CLASSNAME, ""));
-            setVersion(new Version(XMLUtil.getElementValue(node, ID_VERSION, "")));
+            setVersion(Version.fromString(XMLUtil.getElementValue(node, ID_VERSION, "")));
 
             return true;
         }
@@ -1524,7 +1526,7 @@ public class PluginDescriptor implements XMLPersistent {
             if (!loadFromXMLShort(node))
                 return false;
 
-            setRequiredKernelVersion(new Version(XMLUtil.getElementValue(node, ID_REQUIRED_KERNEL_VERSION, "")));
+            setRequiredKernelVersion(Version.fromString(XMLUtil.getElementValue(node, ID_REQUIRED_KERNEL_VERSION, "")));
 
             return true;
         }
