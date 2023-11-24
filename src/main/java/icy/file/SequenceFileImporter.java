@@ -55,8 +55,7 @@ public interface SequenceFileImporter extends SequenceIdImporter {
      * @see #close()
      */
     @Override
-    @Nullable
-    String getOpened();
+    @Nullable String getOpened();
 
     /**
      * Open the image designed by the specified file <code>path</code> to allow image data / metadata access.<br>
@@ -72,11 +71,10 @@ public interface SequenceFileImporter extends SequenceIdImporter {
      * @return <code>true</code> if the operation has succeeded and <code>false</code> otherwise.
      */
     @Override
-    boolean open(@NotNull String path, int flags) throws UnsupportedFormatException, IOException, InterruptedException;
+    boolean open(@Nullable String path, int flags) throws UnsupportedFormatException, IOException, InterruptedException;
 
     /**
      * Return the supported FileFilter for this importer.
      */
-    @NotNull
-    List<FileFilter> getFileFilters();
+    @NotNull List<FileFilter> getFileFilters();
 }

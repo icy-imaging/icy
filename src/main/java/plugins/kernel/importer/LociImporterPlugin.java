@@ -1,20 +1,22 @@
-/**
- * 
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package plugins.kernel.importer;
-
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.channels.ClosedByInterruptException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-
-import javax.swing.filechooser.FileFilter;
 
 import icy.common.exception.UnsupportedFormatException;
 import icy.common.listener.ProgressListener;
@@ -41,54 +43,53 @@ import icy.util.ColorUtil;
 import icy.util.OMEUtil;
 import icy.util.StringUtil;
 import jxl.biff.drawing.PNGReader;
-import loci.formats.FormatException;
-import loci.formats.IFormatReader;
-import loci.formats.ImageReader;
-import loci.formats.MissingLibraryException;
-import loci.formats.TileStitcher;
-import loci.formats.UnknownFormatException;
+import loci.formats.*;
 import loci.formats.gui.AWTImageTools;
 import loci.formats.gui.ExtensionFileFilter;
-import loci.formats.in.APNGReader;
-import loci.formats.in.DynamicMetadataOptions;
-import loci.formats.in.JPEG2000Reader;
-import loci.formats.in.MetadataLevel;
-import loci.formats.in.NativeND2Reader;
+import loci.formats.in.*;
 import loci.formats.meta.MetadataStore;
 import loci.formats.ome.OMEXMLMetadataImpl;
 import ome.xml.meta.OMEXMLMetadata;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.channels.ClosedByInterruptException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Stack;
 
 /**
  * LOCI Bio-Formats library importer class.
- * 
+ *
  * @author Stephane
  */
-public class LociImporterPlugin extends PluginSequenceFileImporter
-{
-    protected class LociAllFileFilter extends AllImagesFileFilter
-    {
+public class LociImporterPlugin extends PluginSequenceFileImporter {
+    protected static class LociAllFileFilter extends AllImagesFileFilter {
         @Override
-        public String getDescription()
-        {
+        public String getDescription() {
             return "All image files / Bio-Formats";
         }
-    };
+    }
 
     /**
      * Used for multi thread tile image reading.
-     * 
+     *
      * @author Stephane
      */
-    class LociTilePixelsReader
-    {
-        class TilePixelsWorkBuffer
-        {
+    class LociTilePixelsReader {
+        static class TilePixelsWorkBuffer {
             final byte[] rawBuffer;
             final byte[] channelBuffer;
             final Object pixelBuffer;
 
-            public TilePixelsWorkBuffer(int sizeX, int sizeY, int rgbChannel, DataType dataType)
-            {
+            public TilePixelsWorkBuffer(final int sizeX, final int sizeY, final int rgbChannel, final DataType dataType) {
                 super();
 
                 // allocate arrays
@@ -98,14 +99,12 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
             }
         }
 
-        class TilePixelsReaderWorker implements Runnable
-        {
+        class TilePixelsReaderWorker implements Runnable {
             final Rectangle region;
             boolean done;
             boolean failed;
 
-            public TilePixelsReaderWorker(Rectangle region)
-            {
+            public TilePixelsReaderWorker(final Rectangle region) {
                 super();
 
                 this.region = region;
@@ -113,27 +112,20 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
                 failed = false;
             }
 
-            @SuppressWarnings("resource")
             @Override
-            public void run()
-            {
+            public void run() {
                 Object pixels;
 
-                try
-                {
+                try {
                     // get reader and working buffers
                     final IFormatReader r = getReader();
                     final TilePixelsWorkBuffer buf = buffers.pop();
 
-                    try
-                    {
-                        try
-                        {
-                            pixels = getPixelsInternal(r, region, z, t, c, false, downScaleLevel, buf.rawBuffer,
-                                    buf.channelBuffer, buf.pixelBuffer);
+                    try {
+                        try {
+                            pixels = getPixelsInternal(r, region, z, t, c, false, downScaleLevel, buf.rawBuffer, buf.channelBuffer, buf.pixelBuffer);
                         }
-                        finally
-                        {
+                        finally {
                             // release reader
                             releaseReader(r);
                         }
@@ -141,11 +133,9 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
                         // need to adjust input region
                         final Rectangle adjRegion = new Rectangle(region);
                         int downScale = downScaleLevel;
-                        while (downScale > 0)
-                        {
+                        while (downScale > 0) {
                             // reduce region size by a factor of 2
-                            adjRegion.setBounds(adjRegion.x / 2, adjRegion.y / 2, adjRegion.width / 2,
-                                    adjRegion.height / 2);
+                            adjRegion.setBounds(adjRegion.x / 2, adjRegion.y / 2, adjRegion.width / 2, adjRegion.height / 2);
                             downScale--;
                         }
 
@@ -154,17 +144,14 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
                         pt.translate(-imageRegion.x, -imageRegion.y);
 
                         // copy tile to result
-                        Array1DUtil.copyRect(pixels, adjRegion.getSize(), null, result, imageRegion.getSize(), pt,
-                                signed);
+                        Array1DUtil.copyRect(pixels, adjRegion.getSize(), null, result, imageRegion.getSize(), pt, signed);
                     }
-                    finally
-                    {
+                    finally {
                         // release working buffer
                         buffers.push(buf);
                     }
                 }
-                catch (Exception e)
-                {
+                catch (final Exception e) {
                     failed = true;
                 }
 
@@ -185,9 +172,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         final Object result;
         final Stack<TilePixelsWorkBuffer> buffers;
 
-        public LociTilePixelsReader(int series, int resolution, Rectangle region, int z, int t, int c, int tileW,
-                int tileH, ProgressListener listener) throws IOException, UnsupportedFormatException
-        {
+        public LociTilePixelsReader(final int series, final int resolution, final Rectangle region, final int z, final int t, final int c, final int tileW, final int tileH, final ProgressListener listener) throws IOException, UnsupportedFormatException {
             super();
 
             this.z = z;
@@ -211,11 +196,9 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
             resShift = getResolutionShift();
 
             // adapt region size to final image resolution
-            imageRegion = new Rectangle(adjRegion.x >> resolution, adjRegion.y >> resolution,
-                    adjRegion.width >> resolution, adjRegion.height >> resolution);
+            imageRegion = new Rectangle(adjRegion.x >> resolution, adjRegion.y >> resolution, adjRegion.width >> resolution, adjRegion.height >> resolution);
             // adapt region size to reader resolution
-            adjRegion = new Rectangle(adjRegion.x >> resShift, adjRegion.y >> resShift, adjRegion.width >> resShift,
-                    adjRegion.height >> resShift);
+            adjRegion = new Rectangle(adjRegion.x >> resShift, adjRegion.y >> resShift, adjRegion.width >> resShift, adjRegion.height >> resShift);
 
             // allocate result (adapted to final wanted resolution)
             result = Array1DUtil.createArray(type, imageRegion.width * imageRegion.height);
@@ -238,80 +221,70 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
             final int numThread = Math.max(1, SystemUtil.getNumberOfCPUs() - 1);
 
-            buffers = new Stack<TilePixelsWorkBuffer>();
+            buffers = new Stack<>();
             for (int i = 0; i < numThread; i++)
                 buffers.push(new TilePixelsWorkBuffer(tw, th, rgbChannelCount, type));
 
             // create processor
-            final Processor readerProcessor = new Processor(numThread);
-            readerProcessor.setThreadName("Pixels tile reader");
+            try (final Processor readerProcessor = new Processor(numThread)) {
+                readerProcessor.setThreadName("Pixels tile reader");
 
-            // get all required tiles
-            final List<Rectangle> tiles = ImageUtil.getTileList(adjRegion, tw, th);
+                // get all required tiles
+                final List<Rectangle> tiles = ImageUtil.getTileList(adjRegion, tw, th);
 
-            // submit all tasks
-            for (Rectangle tile : tiles)
-            {
-                // wait a bit if the process queue is full
-                while (readerProcessor.isFull())
-                {
-                    try
-                    {
-                        Thread.sleep(0);
+                // submit all tasks
+                for (final Rectangle tile : tiles) {
+                    // wait a bit if the process queue is full
+                    while (readerProcessor.isFull()) {
+                        try {
+                            Thread.sleep(0);
+                        }
+                        catch (final InterruptedException e) {
+                            // interrupt all processes
+                            readerProcessor.shutdownNow();
+                            break;
+                        }
                     }
-                    catch (InterruptedException e)
-                    {
+
+                    // submit next task
+                    readerProcessor.submit(new TilePixelsReaderWorker(tile.intersection(adjRegion)));
+
+                    // display progression
+                    if (listener != null) {
+                        // process cancel requested ?
+                        if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size())) {
+                            // interrupt processes
+                            readerProcessor.shutdownNow();
+                            break;
+                        }
+                    }
+                }
+
+                // wait for completion
+                while (readerProcessor.isProcessing()) {
+                    try {
+                        Thread.sleep(1);
+                    }
+                    catch (final InterruptedException e) {
                         // interrupt all processes
                         readerProcessor.shutdownNow();
                         break;
                     }
-                }
 
-                // submit next task
-                readerProcessor.submit(new TilePixelsReaderWorker(tile.intersection(adjRegion)));
-
-                // display progression
-                if (listener != null)
-                {
-                    // process cancel requested ?
-                    if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size()))
-                    {
-                        // interrupt processes
-                        readerProcessor.shutdownNow();
-                        break;
+                    // display progression
+                    if (listener != null) {
+                        // process cancel requested ?
+                        if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size())) {
+                            // interrupt processes
+                            readerProcessor.shutdownNow();
+                            break;
+                        }
                     }
                 }
+
+                // last wait for completion just in case we were interrupted
+                readerProcessor.waitAll();
             }
-
-            // wait for completion
-            while (readerProcessor.isProcessing())
-            {
-                try
-                {
-                    Thread.sleep(1);
-                }
-                catch (InterruptedException e)
-                {
-                    // interrupt all processes
-                    readerProcessor.shutdownNow();
-                    break;
-                }
-
-                // display progression
-                if (listener != null)
-                {
-                    // process cancel requested ?
-                    if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size()))
-                    {
-                        // interrupt processes
-                        readerProcessor.shutdownNow();
-                        break;
-                    }
-                }
-            }
-
-            // last wait for completion just in case we were interrupted
-            readerProcessor.waitAll();
 
             // faster memory release
             buffers.clear();
@@ -320,19 +293,16 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
     /**
      * Used for multi thread tile image reading.
-     * 
+     *
      * @author Stephane
      */
-    class LociTileImageReader
-    {
-        class TileImageWorkBuffer
-        {
+    class LociTileImageReader {
+        static class TileImageWorkBuffer {
             final byte[] rawBuffer;
             final byte[] channelBuffer;
             final Object[] pixelBuffer;
 
-            public TileImageWorkBuffer(int sizeX, int sizeY, int sizeC, int rgbChannel, DataType dataType)
-            {
+            public TileImageWorkBuffer(final int sizeX, final int sizeY, final int sizeC, final int rgbChannel, final DataType dataType) {
                 super();
 
                 // allocate arrays
@@ -340,18 +310,16 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
                 channelBuffer = new byte[sizeX * sizeY * dataType.getSize()];
                 pixelBuffer = Array2DUtil.createArray(dataType, sizeC);
                 for (int i = 0; i < sizeC; i++)
-                    pixelBuffer[i] = Array1DUtil.createArray(dataType, sizeX * sizeY);
+                    Objects.requireNonNull(pixelBuffer)[i] = Array1DUtil.createArray(dataType, sizeX * sizeY);
             }
         }
 
-        class TileImageReaderWorker implements Runnable
-        {
+        class TileImageReaderWorker implements Runnable {
             final Rectangle region;
             boolean done;
             boolean failed;
 
-            public TileImageReaderWorker(Rectangle region)
-            {
+            public TileImageReaderWorker(final Rectangle region) {
                 super();
 
                 this.region = region;
@@ -359,45 +327,34 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
                 failed = false;
             }
 
-            @SuppressWarnings("resource")
             @Override
-            public void run()
-            {
+            public void run() {
                 IcyBufferedImage img;
 
-                try
-                {
+                try {
                     // get reader and working buffers
                     final IFormatReader r = getReader();
                     final TileImageWorkBuffer buf = buffers.pop();
 
-                    try
-                    {
-                        try
-                        {
+                    try {
+                        try {
                             // get image tile
-                            if (c == -1)
-                            {
-                                img = getImageInternal(r, region, z, t, false, downScaleLevel, buf.rawBuffer,
-                                        buf.channelBuffer, buf.pixelBuffer);
+                            if (c == -1) {
+                                img = getImageInternal(r, region, z, t, false, downScaleLevel, buf.rawBuffer, buf.channelBuffer, buf.pixelBuffer);
                                 // colormaps not yet set ?
-                                if (colormaps[0] == null)
-                                {
+                                if (colormaps[0] == null) {
                                     for (int c = 0; c < img.getSizeC(); c++)
                                         colormaps[c] = img.getColorMap(c);
                                 }
                             }
-                            else
-                            {
-                                img = getImageInternal(r, region, z, t, c, false, downScaleLevel, buf.rawBuffer,
-                                        buf.channelBuffer, buf.pixelBuffer[0]);
+                            else {
+                                img = getImageInternal(r, region, z, t, c, false, downScaleLevel, buf.rawBuffer, buf.channelBuffer, Objects.requireNonNull(buf.pixelBuffer)[0]);
                                 // colormap not yet set ?
                                 if (colormaps[0] == null)
                                     colormaps[0] = img.getColorMap(0);
                             }
                         }
-                        finally
-                        {
+                        finally {
                             // release reader
                             releaseReader(r);
                         }
@@ -409,14 +366,12 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
                         // copy tile to image result
                         result.copyData(img, null, pt);
                     }
-                    finally
-                    {
+                    finally {
                         // release working buffer
                         buffers.push(buf);
                     }
                 }
-                catch (Exception e)
-                {
+                catch (final Exception e) {
                     failed = true;
                 }
 
@@ -437,9 +392,8 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         final IcyColorMap[] colormaps;
         final Stack<TileImageWorkBuffer> buffers;
 
-        public LociTileImageReader(int series, int resolution, Rectangle region, int z, int t, int c, int tileW,
-                int tileH, ProgressListener listener) throws IOException, UnsupportedFormatException
-        {
+        public LociTileImageReader(final int series, final int resolution, final Rectangle region, final int z, final int t, final int c, final int tileW,
+                                   final int tileH, final ProgressListener listener) throws IOException, UnsupportedFormatException {
             super();
 
             this.z = z;
@@ -491,92 +445,80 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
             final int numThread = Math.max(1, SystemUtil.getNumberOfCPUs() - 1);
 
-            buffers = new Stack<TileImageWorkBuffer>();
+            buffers = new Stack<>();
             for (int i = 0; i < numThread; i++)
                 buffers.push(new TileImageWorkBuffer(tw, th, sizeC, rgbChannelCount, type));
 
             // create processor
-            final Processor readerProcessor = new Processor(numThread);
+            try (final Processor readerProcessor = new Processor(numThread)) {
 
-            readerProcessor.setThreadName("Image tile reader");
+                readerProcessor.setThreadName("Image tile reader");
 
-            // force working in RAM as we will do many write operations (too slow with cache)
-            result.setVolatile(false);
-            // to avoid multiple update
-            result.beginUpdate();
+                // force working in RAM as we will do many write operations (too slow with cache)
+                result.setVolatile(false);
+                // to avoid multiple update
+                result.beginUpdate();
 
-            try
-            {
-                // get all required tiles
-                final List<Rectangle> tiles = ImageUtil.getTileList(adjRegion, tw, th);
+                try {
+                    // get all required tiles
+                    final List<Rectangle> tiles = ImageUtil.getTileList(adjRegion, tw, th);
 
-                // submit all tasks
-                for (Rectangle tile : tiles)
-                {
-                    // wait a bit if the process queue is full
-                    while (readerProcessor.isFull())
-                    {
-                        try
-                        {
-                            Thread.sleep(0);
+                    // submit all tasks
+                    for (final Rectangle tile : tiles) {
+                        // wait a bit if the process queue is full
+                        while (readerProcessor.isFull()) {
+                            try {
+                                Thread.sleep(0);
+                            }
+                            catch (final InterruptedException e) {
+                                // interrupt all processes
+                                readerProcessor.shutdownNow();
+                                break;
+                            }
                         }
-                        catch (InterruptedException e)
-                        {
+
+                        // submit next task
+                        readerProcessor.submit(new TileImageReaderWorker(tile.intersection(adjRegion)));
+
+                        // display progression
+                        if (listener != null) {
+                            // process cancel requested ?
+                            if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size())) {
+                                // interrupt processes
+                                readerProcessor.shutdownNow();
+                                break;
+                            }
+                        }
+                    }
+
+                    // wait for completion
+                    while (readerProcessor.isProcessing()) {
+                        try {
+                            Thread.sleep(1);
+                        }
+                        catch (final InterruptedException e) {
                             // interrupt all processes
                             readerProcessor.shutdownNow();
                             break;
                         }
-                    }
 
-                    // submit next task
-                    readerProcessor.submit(new TileImageReaderWorker(tile.intersection(adjRegion)));
-
-                    // display progression
-                    if (listener != null)
-                    {
-                        // process cancel requested ?
-                        if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size()))
-                        {
-                            // interrupt processes
-                            readerProcessor.shutdownNow();
-                            break;
+                        // display progression
+                        if (listener != null) {
+                            // process cancel requested ?
+                            if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size())) {
+                                // interrupt processes
+                                readerProcessor.shutdownNow();
+                                break;
+                            }
                         }
                     }
+
+                    // last wait for completion just in case we were interrupted
+                    readerProcessor.waitAll();
                 }
-
-                // wait for completion
-                while (readerProcessor.isProcessing())
-                {
-                    try
-                    {
-                        Thread.sleep(1);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        // interrupt all processes
-                        readerProcessor.shutdownNow();
-                        break;
-                    }
-
-                    // display progression
-                    if (listener != null)
-                    {
-                        // process cancel requested ?
-                        if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size()))
-                        {
-                            // interrupt processes
-                            readerProcessor.shutdownNow();
-                            break;
-                        }
-                    }
+                finally {
+                    result.endUpdate();
                 }
-
-                // last wait for completion just in case we were interrupted
-                readerProcessor.waitAll();
-            }
-            finally
-            {
-                result.endUpdate();
             }
 
             // set back colormap
@@ -636,8 +578,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      */
     protected int openFlags;
 
-    public LociImporterPlugin()
-    {
+    public LociImporterPlugin() {
         super();
 
         mainReader = new ImageReader();
@@ -647,7 +588,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         reader = null;
         internalReader = null;
         acceptReader = null;
-        readersPool = new ArrayList<IFormatReader>();
+        readersPool = new ArrayList<>();
 
         options = new DynamicMetadataOptions();
 
@@ -666,29 +607,25 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         openFlags = 0;
     }
 
-    protected void setReader(Class<? extends IFormatReader> readerClass) throws FormatException, IOException
-    {
+    protected void setReader(final Class<? extends IFormatReader> readerClass) throws FormatException {
         IFormatReader newReader = internalReader;
 
         // no reader defined or not compatible..
-        if ((newReader == null) || !readerClass.isInstance(newReader))
+        if (!readerClass.isInstance(newReader))
             newReader = mainReader.getReader(readerClass);
 
         setReaderInternal(newReader);
     }
 
-    protected void setReader(String path) throws FormatException, IOException
-    {
+    protected void setReader(final String path) throws FormatException, IOException {
         IFormatReader newReader = internalReader;
 
         // no reader defined so just get the good one
         if (newReader == null)
             newReader = mainReader.getReader(path);
-        else
-        {
+        else {
             // don't check if the file is currently opened
-            if (!isOpen(path))
-            {
+            if (!isOpen(path)) {
                 // try to check only with extension first then open it if needed
                 // Note that OME TIFF can be opened with the classic TIFF reader
                 if (!internalReader.isThisType(path, false) && !internalReader.isThisType(path, true))
@@ -699,11 +636,9 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         setReaderInternal(newReader);
     }
 
-    protected void setReaderInternal(IFormatReader newReader) throws FormatException, IOException
-    {
+    protected void setReaderInternal(final IFormatReader newReader) {
         // reader changed ?
-        if (internalReader != newReader)
-        {
+        if (internalReader != newReader) {
             // update it
             internalReader = newReader;
             // update 'accept' reader
@@ -716,8 +651,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         }
     }
 
-    protected void reportError(final String title, final String message, final String filename)
-    {
+    protected void reportError(final String title, final String message, final String filename) {
         // TODO: enable that when LOCI will be ready
         // ThreadUtil.invokeLater(new Runnable()
         // {
@@ -749,31 +683,28 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * When set to <code>true</code> the importer will also read original metadata (as
      * annotations)
-     * 
+     *
      * @return the readAllMetadata state<br>
      * @see #setReadOriginalMetadata(boolean)
      */
-    public boolean getReadOriginalMetadata()
-    {
+    public boolean getReadOriginalMetadata() {
         return originalMetadata;
     }
 
     /**
      * When set to <code>true</code> the importer will also read original metadata (as annotations).
      */
-    public void setReadOriginalMetadata(boolean value)
-    {
+    public void setReadOriginalMetadata(final boolean value) {
         originalMetadata = value;
     }
 
     /**
      * When set to <code>true</code> the importer will try to group files required for the whole
      * dataset.
-     * 
+     *
      * @return the groupFiles
      */
-    public boolean isGroupFiles()
-    {
+    public boolean isGroupFiles() {
         return groupFiles;
     }
 
@@ -781,21 +712,20 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * When set to <code>true</code> the importer will try to group files required for the whole
      * dataset.
      */
-    public void setGroupFiles(boolean value)
-    {
+    public void setGroupFiles(final boolean value) {
         groupFiles = value;
     }
 
     @Override
-    public List<FileFilter> getFileFilters()
-    {
-        final List<FileFilter> result = new ArrayList<FileFilter>();
+    @NotNull
+    public List<FileFilter> getFileFilters() {
+        final List<FileFilter> result = new ArrayList<>();
 
         result.add(new LociAllFileFilter());
-        result.add(new ExtensionFileFilter(new String[] {"tif", "tiff"}, "TIFF images / Bio-Formats"));
-        result.add(new ExtensionFileFilter(new String[] {"png"}, "PNG images / Bio-Formats"));
-        result.add(new ExtensionFileFilter(new String[] {"jpg", "jpeg"}, "JPEG images / Bio-Formats"));
-        result.add(new ExtensionFileFilter(new String[] {"avi"}, "AVI videos / Bio-Formats"));
+        result.add(new ExtensionFileFilter(new String[]{"tif", "tiff"}, "TIFF images / Bio-Formats"));
+        result.add(new ExtensionFileFilter(new String[]{"png"}, "PNG images / Bio-Formats"));
+        result.add(new ExtensionFileFilter(new String[]{"jpg", "jpeg"}, "JPEG images / Bio-Formats"));
+        result.add(new ExtensionFileFilter(new String[]{"avi"}, "AVI videos / Bio-Formats"));
 
         // final IFormatReader[] readers = mainReader.getReaders();
 
@@ -806,8 +736,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     }
 
     @Override
-    public boolean acceptFile(String path)
-    {
+    public boolean acceptFile(final String path) {
         // easy discard
         if (Loader.canDiscardImageFile(path))
             return false;
@@ -815,10 +744,8 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         // better for Bio-Formats to have system path format (bug with Bio-Format ?)
         final String adjPath = new File(path).getAbsolutePath();
 
-        while (true)
-        {
-            try
-            {
+        while (true) {
+            try {
                 // this method should not modify the current reader so we use a specific reader for that :)
                 if ((acceptReader == null)
                         || (!acceptReader.isThisType(adjPath, false) && !acceptReader.isThisType(adjPath, true)))
@@ -826,27 +753,23 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
                 return true;
             }
-            catch (ClosedByInterruptException e)
-            {
+            catch (final ClosedByInterruptException e) {
                 // we don't accept this interrupt here --> remove interrupted state & retry
                 Thread.interrupted();
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 // assume false on exception (FormatException or IOException)
                 return false;
             }
         }
     }
 
-    public boolean isOpen(String path)
-    {
+    public boolean isOpen(final String path) {
         return StringUtil.equals(getOpened(), FileUtil.getGenericPath(path));
     }
 
     @Override
-    public String getOpened()
-    {
+    public String getOpened() {
         return openedPath;
 
         // if (reader != null)
@@ -856,8 +779,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     }
 
     @Override
-    public boolean open(String path, int flags) throws UnsupportedFormatException, IOException
-    {
+    public boolean open(@Nullable final String path, final int flags) throws UnsupportedFormatException, IOException {
         return openWith(path, flags, null);
     }
 
@@ -865,24 +787,17 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * Open the image designed by the specified file <code>path</code> to allow image data / metadata access.<br>
      * Calling this method will automatically close the previous opened image.<br>
      * Don't forget to call {@link #close()} to close the image when you're done.<br>
-     * 
-     * @param path
-     *        Path of the image file to open.
-     * @param flags
-     *        operation flag:<br>
-     *        <ul>
-     *        <li>{@link #FLAG_METADATA_MINIMUM} = load minimum metadata informations</li>
-     *        <li>{@link #FLAG_METADATA_ALL} = load all metadata informations</li>
-     *        </ul>
-     * @param readerClass
-     *        the IFormatReader class to use to open the dataset (can be null).
+     *
+     * @param path        Path of the image file to open.
+     * @param flags       operation flag:<br>
+     *                    <ul>
+     *                    <li>{@link #FLAG_METADATA_MINIMUM} = load minimum metadata informations</li>
+     *                    <li>{@link #FLAG_METADATA_ALL} = load all metadata informations</li>
+     *                    </ul>
+     * @param readerClass the IFormatReader class to use to open the dataset (can be null).
      * @return <code>true</code> if the operation has succeeded and <code>false</code> otherwise.
-     * @throws UnsupportedFormatException
-     * @throws IOException
      */
-    public boolean openWith(String path, int flags, Class<? extends IFormatReader> readerClass)
-            throws UnsupportedFormatException, IOException
-    {
+    public boolean openWith(final String path, final int flags, final Class<? extends IFormatReader> readerClass) throws UnsupportedFormatException, IOException {
         // already opened ?
         if (isOpen(path))
             return true;
@@ -890,15 +805,14 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         // close first
         close();
 
-        try
-        {
+        try {
             // better for Bio-Formats to have system path format
             final String adjPath = new File(path).getAbsolutePath();
 
             // force reader class
             if (readerClass != null)
                 setReader(readerClass);
-            // determine reader from file
+                // determine reader from file
             else
                 setReader(adjPath);
 
@@ -906,8 +820,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
             openReader(reader, adjPath, flags);
 
             // set reader in reader pool
-            synchronized (readersPool)
-            {
+            synchronized (readersPool) {
                 readersPool.add(reader);
             }
 
@@ -920,24 +833,20 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
             return true;
         }
-        catch (FormatException e)
-        {
+        catch (final FormatException e) {
             throw translateException(path, e);
         }
     }
 
     @Override
-    public void close() throws IOException
-    {
+    public void close() throws IOException {
         // something to close ?
-        if (getOpened() != null)
-        {
+        if (getOpened() != null) {
             openedPath = null;
 
-            synchronized (readersPool)
-            {
+            synchronized (readersPool) {
                 // close all readers
-                for (IFormatReader r : readersPool)
+                for (final IFormatReader r : readersPool)
                     r.close();
 
                 readersPool.clear();
@@ -948,8 +857,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * Open reader for given file path
      */
-    protected void openReader(IFormatReader reader, String path, int flags) throws FormatException, IOException
-    {
+    protected void openReader(final IFormatReader reader, final String path, final int flags) throws FormatException, IOException {
         final int adjFlags;
 
         // for safety
@@ -961,8 +869,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         else
             adjFlags = flags;
 
-        switch (adjFlags & FLAG_METADATA_MASK)
-        {
+        switch (adjFlags & FLAG_METADATA_MASK) {
             case FLAG_METADATA_MINIMUM:
                 options.setMetadataLevel(MetadataLevel.MINIMUM);
                 // set metadata option
@@ -1003,14 +910,12 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * Clone the current used reader conserving its properties and current path
      */
-    protected IFormatReader cloneReader()
-            throws FormatException, IOException, InstantiationException, IllegalAccessException
-    {
+    protected IFormatReader cloneReader() throws FormatException, IOException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         if (internalReader == null)
             return null;
 
         // create the new internal reader instance
-        final IFormatReader newReader = internalReader.getClass().newInstance();
+        final IFormatReader newReader = internalReader.getClass().getDeclaredConstructor().newInstance();
         final IFormatReader result;
 
         // use TileStitcher wrapper when grouping is ON
@@ -1032,20 +937,17 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * Returns a reader to use for the current thread (allocate it if needed).<br>
      * Any obtained reader should be released using {@link #releaseReader(IFormatReader)}
-     * 
+     *
      * @see #releaseReader(IFormatReader)
      */
-    public IFormatReader getReader() throws FormatException, IOException
-    {
-        try
-        {
+    public IFormatReader getReader() throws FormatException, IOException {
+        try {
             final IFormatReader result;
 
-            synchronized (readersPool)
-            {
+            synchronized (readersPool) {
                 if (readersPool.isEmpty())
                     result = cloneReader();
-                // allocate last reader (faster)
+                    // allocate last reader (faster)
                 else
                     result = readersPool.remove(readersPool.size() - 1);
             }
@@ -1061,13 +963,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
             return result;
         }
-        catch (InstantiationException e)
-        {
-            // better to rethrow as RuntimeException
-            throw new RuntimeException(e.getMessage());
-        }
-        catch (IllegalAccessException e)
-        {
+        catch (final InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             // better to rethrow as RuntimeException
             throw new RuntimeException(e.getMessage());
         }
@@ -1075,13 +971,11 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
     /**
      * Release the reader obtained through {@link #getReader()} to the reader pool.
-     * 
+     *
      * @see #getReader()
      */
-    public void releaseReader(IFormatReader r)
-    {
-        synchronized (readersPool)
-        {
+    public void releaseReader(final IFormatReader r) {
+        synchronized (readersPool) {
             readersPool.add(r);
         }
     }
@@ -1091,11 +985,9 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * WARNING: this method should not be called while image reading operation are still occurring (multi threaded
      * read).
      */
-    protected void prepareReader(int series)
-    {
+    protected void prepareReader(final int series) {
         // series changed ?
-        if (reader.getSeries() != series)
-        {
+        if (reader.getSeries() != series) {
             // set wanted series
             reader.setSeries(series);
             // reset resolution level
@@ -1103,8 +995,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         }
 
         // need to update resolution levels ?
-        if (resolutions == null)
-        {
+        if (resolutions == null) {
             // set default resolution
             reader.setResolution(0);
 
@@ -1114,13 +1005,12 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
             final int resCount = reader.getResolutionCount();
 
             // init resolution levels
-            final List<Integer> validResolutions = new ArrayList<Integer>(16);
+            final List<Integer> validResolutions = new ArrayList<>(16);
             // full resolution at 0 (always)
             validResolutions.add(Integer.valueOf(0));
 
             // check the sub resolution level
-            for (int r = 1; r < resCount; r++)
-            {
+            for (int r = 1; r < resCount; r++) {
                 // set resolution level in reader
                 reader.setResolution(r);
 
@@ -1144,15 +1034,13 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * Prepare the reader to read data from specified series and at specified resolution.<br>
      * WARNING: this method should not be called while image reading operation are still occurring (multi threaded
      * read).
-     * 
+     *
      * @return the image divisor factor to match the wanted resolution if needed
      */
-    protected int prepareReader(int series, int resolution)
-    {
+    protected int prepareReader(final int series, final int resolution) {
         prepareReader(series);
 
-        if (resolution > 0)
-        {
+        if (resolution > 0) {
             // find closest (but strictly <=) available resolution level
             int indRes = 1;
             while ((indRes < resolutions.length) && (resolutions[indRes] <= resolution))
@@ -1176,22 +1064,19 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * Internal use only
      */
-    protected int getResolutionShift()
-    {
+    protected int getResolutionShift() {
         return resolutions[reader.getResolution()];
     }
 
     /**
      * Internal use only
      */
-    protected double getResolutionDiviserFactor()
-    {
+    protected double getResolutionDiviserFactor() {
         return 1d / Math.pow(2, getResolutionShift());
     }
 
     @Override
-    public OMEXMLMetadata getOMEXMLMetaData() throws UnsupportedFormatException, IOException
-    {
+    public OMEXMLMetadata getOMEXMLMetaData() throws UnsupportedFormatException, IOException {
         // no image currently opened
         if (getOpened() == null)
             return null;
@@ -1200,8 +1085,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         final OMEXMLMetadata result = (OMEXMLMetadata) reader.getMetadataStore();
 
         // TileStitcher reduced series number (stitching occurred) ?
-        if ((reader.getSeriesCount() == 1) && (MetaDataUtil.getNumSeries(result) > 1))
-        {
+        if ((reader.getSeriesCount() == 1) && (MetaDataUtil.getNumSeries(result) > 1)) {
             // adjust series count in metadata
             MetaDataUtil.setNumSeries(result, 1);
 
@@ -1209,8 +1093,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
             final int sy = reader.getSizeY();
 
             // fix metadata regarding reader information if available
-            if ((sx > 0) && (sy > 0))
-            {
+            if ((sx > 0) && (sy > 0)) {
                 MetaDataUtil.setSizeX(result, 0, sx);
                 MetaDataUtil.setSizeY(result, 0, sy);
             }
@@ -1221,14 +1104,12 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException
-    {
+    public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException {
         return (OMEXMLMetadataImpl) getOMEXMLMetaData();
     }
 
     @Override
-    public int getTileWidth(int series) throws UnsupportedFormatException, IOException
-    {
+    public int getTileWidth(final int series) throws IOException {
         // no image currently opened
         if (getOpened() == null)
             return 0;
@@ -1237,7 +1118,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         prepareReader(series);
 
         // don't need thread safe reader for this
-        int result = reader.getOptimalTileWidth();
+        final int result = reader.getOptimalTileWidth();
 
         if (result == 0)
             return result;
@@ -1247,8 +1128,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     }
 
     @Override
-    public int getTileHeight(int series) throws UnsupportedFormatException, IOException
-    {
+    public int getTileHeight(final int series) throws IOException {
         // no image currently opened
         if (getOpened() == null)
             return 0;
@@ -1257,7 +1137,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         prepareReader(series);
 
         // don't need thread safe reader for this
-        int result = reader.getOptimalTileHeight();
+        final int result = reader.getOptimalTileHeight();
 
         if (result == 0)
             return result;
@@ -1267,8 +1147,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     }
 
     @Override
-    public boolean isResolutionAvailable(int series, int resolution) throws UnsupportedFormatException, IOException
-    {
+    public boolean isResolutionAvailable(final int series, final int resolution) {
         // no image currently opened
         if (getOpened() == null)
             return resolution == 0;
@@ -1276,10 +1155,9 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         // prepare reader
         prepareReader(series);
 
-        if (resolution > 0)
-        {
+        if (resolution > 0) {
             // try to find wanted resolution
-            for (int r : resolutions)
+            for (final int r : resolutions)
                 if (r == resolution)
                     return true;
         }
@@ -1287,10 +1165,8 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         return resolution == 0;
     }
 
-    @SuppressWarnings("resource")
     @Override
-    public IcyBufferedImage getThumbnail(int series) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public IcyBufferedImage getThumbnail(final int series) throws Exception {
         // no image currently opened
         if (getOpened() == null)
             return null;
@@ -1300,45 +1176,37 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         if ((reader.getSizeX() != internalReader.getSizeX()) || (reader.getSizeY() != internalReader.getSizeY()))
             return super.getThumbnail(series);
 
-        try
-        {
+        try {
             // prepare reader (no down scaling here)
             prepareReader(series, 0);
 
             final IFormatReader r = getReader();
 
-            try
-            {
+            try {
                 // get image
                 return getThumbnail(r, r.getSizeZ() / 2, r.getSizeT() / 2);
             }
-            finally
-            {
+            finally {
                 releaseReader(r);
             }
         }
-        catch (FormatException e)
-        {
+        catch (final FormatException e) {
             throw translateException(getOpened(), e);
         }
-        catch (Throwable t)
-        {
+        catch (final Throwable t) {
             // can happen if we don't have enough memory --> try default implementation
             return super.getThumbnail(series);
         }
     }
 
-    @SuppressWarnings("resource")
     @Override
-    public Object getPixels(int series, int resolution, Rectangle rectangle, int z, int t, int c)
-            throws UnsupportedFormatException, IOException
-    {
+    public Object getPixels(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c)
+            throws UnsupportedFormatException, IOException {
         // no image currently opened
         if (getOpened() == null)
             return null;
 
-        try
-        {
+        try {
             // prepare reader and get down scale factor
             final int downScaleLevel = prepareReader(series, resolution);
             final IFormatReader r = getReader();
@@ -1347,38 +1215,31 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
             // adjust rectangle to current reader resolution if needed
             if (rectangle != null)
-                adjRect = Rectangle2DUtil.getScaledRectangle(rectangle, getResolutionDiviserFactor(), false, true)
-                        .getBounds();
+                adjRect = Rectangle2DUtil.getScaledRectangle(rectangle, getResolutionDiviserFactor(), false, true).getBounds();
             else
                 adjRect = null;
 
-            try
-            {
+            try {
                 // return pixels
                 return getPixelsInternal(r, adjRect, z, t, c, false, downScaleLevel);
             }
-            finally
-            {
+            finally {
                 releaseReader(r);
             }
         }
-        catch (FormatException e)
-        {
+        catch (final FormatException e) {
             throw translateException(getOpened(), e);
         }
     }
 
-    @SuppressWarnings("resource")
     @Override
-    public IcyBufferedImage getImage(int series, int resolution, Rectangle rectangle, int z, int t, int c)
-            throws UnsupportedFormatException, IOException
-    {
+    public IcyBufferedImage getImage(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c)
+            throws UnsupportedFormatException, IOException {
         // no image currently opened
         if (getOpened() == null)
             return null;
 
-        try
-        {
+        try {
             // prepare reader and get down scale factor if wanted resolution is not available
             final int downScaleLevel = prepareReader(series, resolution);
             final IFormatReader r = getReader();
@@ -1386,81 +1247,56 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
             // adjust rectangle to current reader resolution if needed
             if (rectangle != null)
-                adjRect = Rectangle2DUtil.getScaledRectangle(rectangle, getResolutionDiviserFactor(), false, true)
-                        .getBounds();
+                adjRect = Rectangle2DUtil.getScaledRectangle(rectangle, getResolutionDiviserFactor(), false, true).getBounds();
             else
                 adjRect = null;
 
-            try
-            {
+            try {
                 // get image
                 return getImage(r, adjRect, z, t, c, downScaleLevel);
             }
-            catch (IOException e)
-            {
+            catch (final IOException e) {
                 throw e;
             }
-            // not enough memory error ?
-            catch (OutOfMemoryError e)
-            {
+            // not enough memory error ? Or too large XY plan ?
+            catch (final OutOfMemoryError | UnsupportedOperationException e) {
                 // need rescaling --> try tiling read
                 if (downScaleLevel > 0)
-                    return getImageByTile(series, resolution, rectangle, z, t, c, getTileWidth(series),
-                            getTileHeight(series), null);
+                    return getImageByTile(series, resolution, rectangle, z, t, c, getTileWidth(series), getTileHeight(series), null);
 
                 throw e;
             }
-            // too large XY plan ?
-            catch (UnsupportedOperationException e)
-            {
-                // need rescaling --> try tiling read
-                if (downScaleLevel > 0)
-                    return getImageByTile(series, resolution, rectangle, z, t, c, getTileWidth(series),
-                            getTileHeight(series), null);
-
-                throw e;
-            }
-            catch (FormatException e)
-            {
+            catch (final FormatException e) {
                 if (!(e.getCause() instanceof ClosedByInterruptException) && (downScaleLevel > 0))
                     // we can have here a "Image plane too large. Only 2GB of data can be extracted at
                     // one time." error here --> so can try to use tile loading when we need rescaling
-                    return getImageByTile(series, resolution, rectangle, z, t, c, getTileWidth(series),
-                            getTileHeight(series), null);
+                    return getImageByTile(series, resolution, rectangle, z, t, c, getTileWidth(series), getTileHeight(series), null);
 
                 throw e;
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 // we can have NegativeArraySizeException here for instance
                 // try to use tile loading when we need rescaling
                 if (downScaleLevel > 0)
-                    return getImageByTile(series, resolution, rectangle, z, t, c, getTileWidth(series),
-                            getTileHeight(series), null);
+                    return getImageByTile(series, resolution, rectangle, z, t, c, getTileWidth(series), getTileHeight(series), null);
 
                 throw new UnsupportedOperationException(e);
             }
-            finally
-            {
+            finally {
                 releaseReader(r);
             }
         }
-        catch (FormatException e)
-        {
+        catch (final FormatException e) {
             throw translateException(getOpened(), e);
         }
     }
 
-    public IcyBufferedImage getImageByTile(int series, int resolution, Rectangle region, int z, int t, int c, int tileW,
-            int tileH, ProgressListener listener) throws UnsupportedFormatException, IOException
-    {
+    public IcyBufferedImage getImageByTile(final int series, final int resolution, final Rectangle region, final int z, final int t, final int c, final int tileW, final int tileH, final ProgressListener listener) throws UnsupportedFormatException, IOException {
         return new LociTileImageReader(series, resolution, region, z, t, c, tileW, tileH, listener).result;
     }
 
     @Override
-    public Object getPixelsByTile(int series, int resolution, Rectangle region, int z, int t, int c, int tileW,
-            int tileH, ProgressListener listener) throws UnsupportedFormatException, IOException
-    {
+    public Object getPixelsByTile(final int series, final int resolution, final Rectangle region, final int z, final int t, final int c, final int tileW, final int tileH, final ProgressListener listener) throws UnsupportedFormatException, IOException {
         return new LociTilePixelsReader(series, resolution, region, z, t, c, tileW, tileH, listener).result;
     }
 
@@ -1468,53 +1304,39 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * Load a thumbnail version of the image located at (Z, T) position from the specified
      * {@link IFormatReader} and
      * returns it as an IcyBufferedImage.
-     * 
-     * @param reader
-     *        {@link IFormatReader}
-     * @param z
-     *        Z position of the image to load
-     * @param t
-     *        T position of the image to load
+     *
+     * @param reader {@link IFormatReader}
+     * @param z      Z position of the image to load
+     * @param t      T position of the image to load
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage getThumbnail(IFormatReader reader, int z, int t)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    public static IcyBufferedImage getThumbnail(final IFormatReader reader, final int z, final int t) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         return getThumbnail(reader, z, t, -1);
     }
 
     /**
      * Load a thumbnail version of the image located at (Z, T, C) position from the specified
      * {@link IFormatReader} and returns it as an IcyBufferedImage.
-     * 
-     * @param reader
-     *        {@link IFormatReader}
-     * @param z
-     *        Z position of the thumbnail to load
-     * @param t
-     *        T position of the thumbnail to load
-     * @param c
-     *        Channel index
+     *
+     * @param reader {@link IFormatReader}
+     * @param z      Z position of the thumbnail to load
+     * @param t      T position of the thumbnail to load
+     * @param c      Channel index
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage getThumbnail(IFormatReader reader, int z, int t, int c)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
-        try
-        {
+    public static IcyBufferedImage getThumbnail(final IFormatReader reader, final int z, final int t, final int c) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
+        try {
             // all channel ?
             if (c == -1)
                 return getImageInternal(reader, null, z, t, true, 0);
 
             return getImageInternal(reader, null, z, t, c, true, 0);
         }
-        catch (ClosedByInterruptException e)
-        {
+        catch (final ClosedByInterruptException e) {
             // loading interrupted --> return null
             return null;
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             // LOCI do not support thumbnail for all image, try compatible version
             return getThumbnailCompatible(reader, z, t, c);
         }
@@ -1524,18 +1346,13 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * Load a thumbnail version of the image located at (Z, T) position from the specified
      * {@link IFormatReader} and returns it as an IcyBufferedImage.<br>
      * <i>Slow compatible version (load the original image and resize it)</i>
-     * 
-     * @param reader
-     *        {@link IFormatReader}
-     * @param z
-     *        Z position of the image to load
-     * @param t
-     *        T position of the image to load
+     *
+     * @param reader {@link IFormatReader}
+     * @param z      Z position of the image to load
+     * @param t      T position of the image to load
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage getThumbnailCompatible(IFormatReader reader, int z, int t)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    public static IcyBufferedImage getThumbnailCompatible(final IFormatReader reader, final int z, final int t) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         return getThumbnailCompatible(reader, z, t, -1);
     }
 
@@ -1543,25 +1360,18 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * Load a thumbnail version of the image located at (Z, T, C) position from the specified
      * {@link IFormatReader} and returns it as an IcyBufferedImage.<br>
      * <i>Slow compatible version (load the original image and resize it)</i>
-     * 
-     * @param reader
-     *        {@link IFormatReader}
-     * @param z
-     *        Z position of the thumbnail to load
-     * @param t
-     *        T position of the thumbnail to load
-     * @param c
-     *        Channel index
+     *
+     * @param reader {@link IFormatReader}
+     * @param z      Z position of the thumbnail to load
+     * @param t      T position of the thumbnail to load
+     * @param c      Channel index
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage getThumbnailCompatible(IFormatReader reader, int z, int t, int c)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    public static IcyBufferedImage getThumbnailCompatible(final IFormatReader reader, final int z, final int t, final int c) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         final IcyBufferedImage image = getImage(reader, null, z, t, c, 0);
 
         // scale it to desired dimension (fast enough as here we have a small image)
-        final IcyBufferedImage result = IcyBufferedImageUtil.scale(image, reader.getThumbSizeX(),
-                reader.getThumbSizeY(), FilterType.BILINEAR);
+        final IcyBufferedImage result = IcyBufferedImageUtil.scale(image, reader.getThumbSizeX(), reader.getThumbSizeY(), FilterType.BILINEAR);
 
         // preserve colormaps
         result.setColorMaps(image);
@@ -1572,26 +1382,18 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * Load a single channel sub image at (Z, T, C) position from the specified {@link IFormatReader}<br>
      * and returns it as an IcyBufferedImage.
-     * 
-     * @param reader
-     *        Reader used to load the image
-     * @param rect
-     *        Define the image rectangular region we want to retrieve data for (considering current selected image
-     *        resolution).<br>
-     *        Set to <code>null</code> to retrieve the whole image.
-     * @param z
-     *        Z position of the image to load
-     * @param t
-     *        T position of the image to load
-     * @param c
-     *        Channel index to load (-1 = all channels)
-     * @param downScaleLevel
-     *        number of downscale to process (scale level = 1/2^downScaleLevel)
+     *
+     * @param reader         Reader used to load the image
+     * @param rect           Define the image rectangular region we want to retrieve data for (considering current selected image
+     *                       resolution).<br>
+     *                       Set to <code>null</code> to retrieve the whole image.
+     * @param z              Z position of the image to load
+     * @param t              T position of the image to load
+     * @param c              Channel index to load (-1 = all channels)
+     * @param downScaleLevel number of downscale to process (scale level = 1/2^downScaleLevel)
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage getImage(IFormatReader reader, Rectangle rect, int z, int t, int c,
-            int downScaleLevel) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    public static IcyBufferedImage getImage(final IFormatReader reader, final Rectangle rect, final int z, final int t, final int c, final int downScaleLevel) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         // we want all channel ? use method to retrieve whole image
         if (c == -1)
             return getImageInternal(reader, rect, z, t, false, downScaleLevel);
@@ -1602,67 +1404,49 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * Load a single channel sub image at (Z, T, C) position from the specified {@link IFormatReader}<br>
      * and returns it as an IcyBufferedImage.
-     * 
-     * @param reader
-     *        Reader used to load the image
-     * @param rect
-     *        Define the image rectangular region we want to retrieve data for (considering current selected image
-     *        resolution).<br>
-     *        Set to <code>null</code> to retrieve the whole image.
-     * @param z
-     *        Z position of the image to load
-     * @param t
-     *        T position of the image to load
-     * @param c
-     *        Channel index to load (-1 = all channels)
+     *
+     * @param reader Reader used to load the image
+     * @param rect   Define the image rectangular region we want to retrieve data for (considering current selected image
+     *               resolution).<br>
+     *               Set to <code>null</code> to retrieve the whole image.
+     * @param z      Z position of the image to load
+     * @param t      T position of the image to load
+     * @param c      Channel index to load (-1 = all channels)
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage getImage(IFormatReader reader, Rectangle rect, int z, int t, int c)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    public static IcyBufferedImage getImage(final IFormatReader reader, final Rectangle rect, final int z, final int t, final int c) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         return getImage(reader, rect, z, t, c, 0);
     }
 
     /**
      * Load the image located at (Z, T) position from the specified IFormatReader<br>
      * and return it as an IcyBufferedImage.
-     * 
-     * @param reader
-     *        {@link IFormatReader}
-     * @param rect
-     *        Define the image rectangular region we want to retrieve data for (considering current selected image
-     *        resolution).<br>
-     *        Set to <code>null</code> to retrieve the whole image.
-     * @param z
-     *        Z position of the image to load
-     * @param t
-     *        T position of the image to load
+     *
+     * @param reader {@link IFormatReader}
+     * @param rect   Define the image rectangular region we want to retrieve data for (considering current selected image
+     *               resolution).<br>
+     *               Set to <code>null</code> to retrieve the whole image.
+     * @param z      Z position of the image to load
+     * @param t      T position of the image to load
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage getImage(IFormatReader reader, Rectangle rect, int z, int t)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    public static IcyBufferedImage getImage(final IFormatReader reader, final Rectangle rect, final int z, final int t) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         return getImage(reader, rect, z, t, -1, 0);
     }
 
     /**
      * Load the image located at (Z, T) position from the specified IFormatReader<br>
      * and return it as an IcyBufferedImage (compatible and slower method).
-     * 
-     * @param reader
-     *        {@link IFormatReader}
-     * @param z
-     *        Z position of the image to load
-     * @param t
-     *        T position of the image to load
+     *
+     * @param reader {@link IFormatReader}
+     * @param z      Z position of the image to load
+     * @param t      T position of the image to load
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage getImageCompatible(IFormatReader reader, int z, int t)
-            throws FormatException, IOException
-    {
+    public static IcyBufferedImage getImageCompatible(final IFormatReader reader, final int z, final int t) throws FormatException, IOException {
         final int sizeX = reader.getSizeX();
         final int sizeY = reader.getSizeY();
-        final List<BufferedImage> imageList = new ArrayList<BufferedImage>();
+        final List<BufferedImage> imageList = new ArrayList<>();
         final int sizeC = reader.getEffectiveSizeC();
 
         for (int c = 0; c < sizeC; c++)
@@ -1676,45 +1460,31 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * Load pixels of the specified region of image at (Z, T, C) position and returns them as an
      * array.
-     * 
-     * @param reader
-     *        Reader used to load the pixels
-     * @param rect
-     *        Define the pixels rectangular region we want to load (considering current selected image resolution).<br>
-     *        Should be adjusted if <i>thumbnail</i> parameter is <code>true</code>
-     * @param z
-     *        Z position of the pixels to load
-     * @param t
-     *        T position of the pixels to load
-     * @param c
-     *        Channel index to load
-     * @param thumbnail
-     *        Set to <code>true</code> to request a thumbnail of the image in which case <i>rect</i>
-     *        parameter should contains thumbnail size
-     * @param downScaleLevel
-     *        number of downscale to process (scale level = 1/2^downScaleLevel)
-     * @param rawBuffer
-     *        pre allocated byte data buffer ([reader.getRGBChannelCount() * SizeX * SizeY *
-     *        Datatype.size]) used to read the whole RGB raw data (can be <code>null</code>)
-     * @param channelBuffer
-     *        pre allocated byte data buffer ([SizeX * SizeY * Datatype.size]) used to read the
-     *        channel raw data (can be <code>null</code>)
-     * @param pixelBuffer
-     *        pre allocated 1D array pixel data buffer ([SizeX * SizeY]) used to receive the pixel
-     *        converted data and to build the result image (can be <code>null</code>)
+     *
+     * @param reader         Reader used to load the pixels
+     * @param rect           Define the pixels rectangular region we want to load (considering current selected image resolution).<br>
+     *                       Should be adjusted if <i>thumbnail</i> parameter is <code>true</code>
+     * @param z              Z position of the pixels to load
+     * @param t              T position of the pixels to load
+     * @param c              Channel index to load
+     * @param thumbnail      Set to <code>true</code> to request a thumbnail of the image in which case <i>rect</i>
+     *                       parameter should contains thumbnail size
+     * @param downScaleLevel number of downscale to process (scale level = 1/2^downScaleLevel)
+     * @param rawBuffer      pre allocated byte data buffer ([reader.getRGBChannelCount() * SizeX * SizeY *
+     *                       Datatype.size]) used to read the whole RGB raw data (can be <code>null</code>)
+     * @param channelBuffer  pre allocated byte data buffer ([SizeX * SizeY * Datatype.size]) used to read the
+     *                       channel raw data (can be <code>null</code>)
+     * @param pixelBuffer    pre allocated 1D array pixel data buffer ([SizeX * SizeY]) used to receive the pixel
+     *                       converted data and to build the result image (can be <code>null</code>)
      * @return 1D array containing pixels data.<br>
-     *         The type of the array depends from the internal image data type
-     * @throws UnsupportedOperationException
-     *         if the XY plane size is &gt;= 2^31 pixels
-     * @throws OutOfMemoryError
-     *         if there is not enough memory to open the image
+     * The type of the array depends from the internal image data type
+     * @throws UnsupportedOperationException if the XY plane size is &gt;= 2^31 pixels
+     * @throws OutOfMemoryError              if there is not enough memory to open the image
      */
-    protected static Object getPixelsInternal(IFormatReader reader, Rectangle rect, int z, int t, int c,
-            boolean thumbnail, int downScaleLevel, byte[] rawBuffer, byte[] channelBuffer, Object pixelBuffer)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    protected static Object getPixelsInternal(final IFormatReader reader, final Rectangle rect, final int z, final int t, final int c, final boolean thumbnail, final int downScaleLevel, final byte[] rawBuffer, final byte[] channelBuffer, final Object pixelBuffer) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         // get pixel data type
         final DataType dataType = DataType.getDataTypeFromFormatToolsType(reader.getPixelType());
+        Objects.requireNonNull(dataType);
 
         // check we can open the image
         // Loader.checkOpening(resolutions[reader.getResolution()], rect.width, rect.height, 1, 1, 1, dataType,
@@ -1732,17 +1502,15 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         final int subC = c % rgbChanCount;
 
         // get image data (whole RGB data for RGB channel)
-        byte[] rawData = getBytesInternal(reader, reader.getIndex(z, baseC, t), rect, thumbnail, rawBuffer);
+        final byte[] rawData = getBytesInternal(reader, reader.getIndex(z, baseC, t), rect, thumbnail, rawBuffer);
 
         // current final component
         final int componentByteLen = rawData.length / rgbChanCount;
 
         // build data array
-        if (interleaved)
-        {
+        if (interleaved) {
             // get channel interleaved data
-            final byte[] channelData = Array1DUtil.getInterleavedData(rawData, subC, rgbChanCount, channelBuffer, 0,
-                    componentByteLen);
+            final byte[] channelData = Array1DUtil.getInterleavedData(rawData, subC, rgbChanCount, channelBuffer, 0, componentByteLen);
             ByteArrayConvert.byteArrayTo(channelData, 0, result, 0, componentByteLen, little);
         }
         else
@@ -1757,8 +1525,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         int sizeX = rect.width;
         int sizeY = rect.height;
 
-        while (it-- > 0)
-        {
+        while (it-- > 0) {
             result = IcyBufferedImageUtil.downscaleBy2(result, sizeX, sizeY, dataType.isSigned(), true);
             sizeX /= 2;
             sizeY /= 2;
@@ -1770,30 +1537,20 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * Load pixels of the specified region of image at (Z, T, C) position and returns them as an
      * array.
-     * 
-     * @param reader
-     *        Reader used to load the pixels
-     * @param rect
-     *        Define the pixels rectangular region we want to load (considering current selected image resolution).<br>
-     *        Set to <code>null</code> to retrieve the whole image.
-     * @param z
-     *        Z position of the pixels to load
-     * @param t
-     *        T position of the pixels to load
-     * @param c
-     *        Channel index to load
-     * @param thumbnail
-     *        Set to <code>true</code> to request a thumbnail of the image (<code>rect</code>
-     *        parameter is then ignored)
-     * @param downScaleLevel
-     *        number of downscale to process (scale level = 1/2^downScaleLevel)
+     *
+     * @param reader         Reader used to load the pixels
+     * @param rect           Define the pixels rectangular region we want to load (considering current selected image resolution).<br>
+     *                       Set to <code>null</code> to retrieve the whole image.
+     * @param z              Z position of the pixels to load
+     * @param t              T position of the pixels to load
+     * @param c              Channel index to load
+     * @param thumbnail      Set to <code>true</code> to request a thumbnail of the image (<code>rect</code>
+     *                       parameter is then ignored)
+     * @param downScaleLevel number of downscale to process (scale level = 1/2^downScaleLevel)
      * @return 1D array containing pixels data.<br>
-     *         The type of the array depends from the internal image data type
+     * The type of the array depends from the internal image data type
      */
-    protected static Object getPixelsInternal(IFormatReader reader, Rectangle rect, int z, int t, int c,
-            boolean thumbnail, int downScaleLevel)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    protected static Object getPixelsInternal(final IFormatReader reader, final Rectangle rect, final int z, final int t, final int c, final boolean thumbnail, final int downScaleLevel) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         final Rectangle r;
 
         if (thumbnail)
@@ -1810,46 +1567,30 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * Load a single channel sub image at (Z, T, C) position from the specified
      * {@link IFormatReader}<br>
      * and returns it as an IcyBufferedImage.
-     * 
-     * @param reader
-     *        Reader used to load the image
-     * @param rect
-     *        Define the image rectangular region we want to retrieve data for (considering current selected image
-     *        resolution).<br>
-     *        Should be adjusted if <i>thumbnail</i> parameter is <code>true</code>
-     * @param z
-     *        Z position of the image to load
-     * @param t
-     *        T position of the image to load
-     * @param c
-     *        Channel index to load
-     * @param thumbnail
-     *        Set to <code>true</code> to request a thumbnail of the image in which case <i>rect</i>
-     *        parameter should contains thumbnail size
-     * @param downScaleLevel
-     *        number of downscale to process (scale level = 1/2^downScaleLevel)
-     * @param rawBuffer
-     *        pre allocated byte data buffer ([reader.getRGBChannelCount() * SizeX * SizeY *
-     *        Datatype.size]) used to read the whole RGB raw data (can be <code>null</code>)
-     * @param channelBuffer
-     *        pre allocated byte data buffer ([SizeX * SizeY * Datatype.size]) used to read the
-     *        channel raw data (can be <code>null</code>)
-     * @param pixelBuffer
-     *        pre allocated 1D array pixel data buffer ([SizeX * SizeY]) used to receive the pixel
-     *        converted data and to build the result image (can be <code>null</code>)
+     *
+     * @param reader         Reader used to load the image
+     * @param rect           Define the image rectangular region we want to retrieve data for (considering current selected image
+     *                       resolution).<br>
+     *                       Should be adjusted if <i>thumbnail</i> parameter is <code>true</code>
+     * @param z              Z position of the image to load
+     * @param t              T position of the image to load
+     * @param c              Channel index to load
+     * @param thumbnail      Set to <code>true</code> to request a thumbnail of the image in which case <i>rect</i>
+     *                       parameter should contains thumbnail size
+     * @param downScaleLevel number of downscale to process (scale level = 1/2^downScaleLevel)
+     * @param rawBuffer      pre allocated byte data buffer ([reader.getRGBChannelCount() * SizeX * SizeY *
+     *                       Datatype.size]) used to read the whole RGB raw data (can be <code>null</code>)
+     * @param channelBuffer  pre allocated byte data buffer ([SizeX * SizeY * Datatype.size]) used to read the
+     *                       channel raw data (can be <code>null</code>)
+     * @param pixelBuffer    pre allocated 1D array pixel data buffer ([SizeX * SizeY]) used to receive the pixel
+     *                       converted data and to build the result image (can be <code>null</code>)
      * @return {@link IcyBufferedImage}
-     * @throws UnsupportedOperationException
-     *         if the XY plane size is &gt;= 2^31 pixels
-     * @throws OutOfMemoryError
-     *         if there is not enough memory to open the image
+     * @throws UnsupportedOperationException if the XY plane size is &gt;= 2^31 pixels
+     * @throws OutOfMemoryError              if there is not enough memory to open the image
      */
-    protected static IcyBufferedImage getImageInternal(IFormatReader reader, Rectangle rect, int z, int t, int c,
-            boolean thumbnail, int downScaleLevel, byte[] rawBuffer, byte[] channelBuffer, Object pixelBuffer)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    protected static IcyBufferedImage getImageInternal(final IFormatReader reader, final Rectangle rect, final int z, final int t, final int c, final boolean thumbnail, final int downScaleLevel, final byte[] rawBuffer, final byte[] channelBuffer, final Object pixelBuffer) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         // get pixel data
-        final Object pixelData = getPixelsInternal(reader, rect, z, t, c, thumbnail, downScaleLevel, rawBuffer,
-                channelBuffer, pixelBuffer);
+        final Object pixelData = getPixelsInternal(reader, rect, z, t, c, thumbnail, downScaleLevel, rawBuffer, channelBuffer, pixelBuffer);
         // get pixel data type
         final DataType dataType = DataType.getDataTypeFromFormatToolsType(reader.getPixelType());
 
@@ -1857,25 +1598,22 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         int sizeX = rect.width;
         int sizeY = rect.height;
         int downScale = downScaleLevel;
-        while (downScale > 0)
-        {
+        while (downScale > 0) {
             sizeX /= 2;
             sizeY /= 2;
             downScale--;
         }
 
         // create the single channel result image from pixel data
-        final IcyBufferedImage result = new IcyBufferedImage(sizeX, sizeY, pixelData, dataType.isSigned());
+        final IcyBufferedImage result = new IcyBufferedImage(sizeX, sizeY, pixelData, Objects.requireNonNull(dataType).isSigned());
 
         IcyColorMap map = null;
         final int rgbChannel = reader.getRGBChannelCount();
 
         // indexed color ?
-        if (reader.isIndexed())
-        {
+        if (reader.isIndexed()) {
             // only 8 bits and 16 bits lookup table supported
-            switch (dataType.getJavaType())
-            {
+            switch (dataType.getJavaType()) {
                 case BYTE:
                     final byte[][] bmap = reader.get8BitLookupTable();
                     if (bmap != null)
@@ -1894,11 +1632,9 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         }
 
         // no RGB image ?
-        if (rgbChannel <= 1)
-        {
+        if (rgbChannel <= 1) {
             // colormap not set (or black) ? --> try to use metadata
-            if ((map == null) || map.isBlack())
-            {
+            if ((map == null) || map.isBlack()) {
                 final OMEXMLMetadata metaData = (OMEXMLMetadata) reader.getMetadataStore();
                 final Color color = MetaDataUtil.getChannelColor(metaData, reader.getSeries(), c);
 
@@ -1908,23 +1644,14 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
                     map = null;
             }
         }
-        else
-        {
-            switch (c)
-            {
-                case 0:
-                    map = LinearColorMap.red_;
-                    break;
-                case 1:
-                    map = LinearColorMap.green_;
-                    break;
-                case 2:
-                    map = LinearColorMap.blue_;
-                    break;
-                case 3:
-                    map = LinearColorMap.alpha_;
-                    break;
-            }
+        else {
+            map = switch (c) {
+                case 0 -> LinearColorMap.red_;
+                case 1 -> LinearColorMap.green_;
+                case 2 -> LinearColorMap.blue_;
+                case 3 -> LinearColorMap.alpha_;
+                default -> map;
+            };
         }
 
         // we were able to retrieve a colormap ? --> set it
@@ -1938,30 +1665,20 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
      * Load a single channel sub image at (Z, T, C) position from the specified
      * {@link IFormatReader}<br>
      * and returns it as an IcyBufferedImage.
-     * 
-     * @param reader
-     *        Reader used to load the image
-     * @param rect
-     *        Define the image rectangular region we want to retrieve data for (considering current selected image
-     *        resolution).<br>
-     *        Set to <code>null</code> to retrieve the whole image.
-     * @param z
-     *        Z position of the image to load
-     * @param t
-     *        T position of the image to load
-     * @param c
-     *        Channel index to load
-     * @param thumbnail
-     *        Set to <code>true</code> to request a thumbnail of the image (<code>rect</code>
-     *        parameter is then ignored)
-     * @param downScaleLevel
-     *        number of downscale to process (scale level = 1/2^downScaleLevel)
+     *
+     * @param reader         Reader used to load the image
+     * @param rect           Define the image rectangular region we want to retrieve data for (considering current selected image
+     *                       resolution).<br>
+     *                       Set to <code>null</code> to retrieve the whole image.
+     * @param z              Z position of the image to load
+     * @param t              T position of the image to load
+     * @param c              Channel index to load
+     * @param thumbnail      Set to <code>true</code> to request a thumbnail of the image (<code>rect</code>
+     *                       parameter is then ignored)
+     * @param downScaleLevel number of downscale to process (scale level = 1/2^downScaleLevel)
      * @return {@link IcyBufferedImage}
      */
-    protected static IcyBufferedImage getImageInternal(IFormatReader reader, Rectangle rect, int z, int t, int c,
-            boolean thumbnail, int downScaleLevel)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    protected static IcyBufferedImage getImageInternal(final IFormatReader reader, final Rectangle rect, final int z, final int t, final int c, final boolean thumbnail, final int downScaleLevel) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         final Rectangle r;
 
         if (thumbnail)
@@ -1977,41 +1694,27 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * Load the image located at (Z, T) position from the specified IFormatReader and return it as
      * an IcyBufferedImage.
-     * 
-     * @param reader
-     *        {@link IFormatReader}
-     * @param rect
-     *        Define the image rectangular region we want to retrieve data for (considering current selected image
-     *        reader resolution).<br>
-     *        Should be adjusted if <i>thumbnail</i> parameter is <code>true</code>
-     * @param z
-     *        Z position of the image to load
-     * @param t
-     *        T position of the image to load
-     * @param thumbnail
-     *        Set to <code>true</code> to request a thumbnail of the image in which case <i>rect</i> parameter should
-     *        contains thumbnail size
-     * @param downScaleLevel
-     *        number of downscale to process after loading the image (scale level = 1/2^downScaleLevel)
-     * @param rawBuffer
-     *        pre allocated byte data buffer ([reader.getRGBChannelCount() * SizeX * SizeY * Datatype.size]) used to
-     *        read the whole RGB raw data (can be <code>null</code>)
-     * @param channelBuffer
-     *        pre allocated byte data buffer ([SizeX * SizeY * Datatype.size]) used to read the channel raw data (can be
-     *        <code>null</code>)
-     * @param pixelBuffer
-     *        pre allocated 2D array ([SizeC][SizeX*SizeY]) pixel data buffer used to receive the pixel converted data
-     *        and to build the result image (can be <code>null</code>)
+     *
+     * @param reader         {@link IFormatReader}
+     * @param rect           Define the image rectangular region we want to retrieve data for (considering current selected image
+     *                       reader resolution).<br>
+     *                       Should be adjusted if <i>thumbnail</i> parameter is <code>true</code>
+     * @param z              Z position of the image to load
+     * @param t              T position of the image to load
+     * @param thumbnail      Set to <code>true</code> to request a thumbnail of the image in which case <i>rect</i> parameter should
+     *                       contains thumbnail size
+     * @param downScaleLevel number of downscale to process after loading the image (scale level = 1/2^downScaleLevel)
+     * @param rawBuffer      pre allocated byte data buffer ([reader.getRGBChannelCount() * SizeX * SizeY * Datatype.size]) used to
+     *                       read the whole RGB raw data (can be <code>null</code>)
+     * @param channelBuffer  pre allocated byte data buffer ([SizeX * SizeY * Datatype.size]) used to read the channel raw data (can be
+     *                       <code>null</code>)
+     * @param pixelBuffer    pre allocated 2D array ([SizeC][SizeX*SizeY]) pixel data buffer used to receive the pixel converted data
+     *                       and to build the result image (can be <code>null</code>)
      * @return {@link IcyBufferedImage}
-     * @throws UnsupportedOperationException
-     *         if the XY plane size is &gt;= 2^31 pixels
-     * @throws OutOfMemoryError
-     *         if there is not enough memory to open the image
+     * @throws UnsupportedOperationException if the XY plane size is &gt;= 2^31 pixels
+     * @throws OutOfMemoryError              if there is not enough memory to open the image
      */
-    protected static IcyBufferedImage getImageInternal(IFormatReader reader, Rectangle rect, int z, int t,
-            boolean thumbnail, int downScaleLevel, byte[] rawBuffer, byte[] channelBuffer, Object[] pixelBuffer)
-            throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException
-    {
+    protected static IcyBufferedImage getImageInternal(final IFormatReader reader, final Rectangle rect, final int z, final int t, final boolean thumbnail, final int downScaleLevel, final byte[] rawBuffer, final byte[] channelBuffer, final Object[] pixelBuffer) throws UnsupportedOperationException, OutOfMemoryError, FormatException, IOException {
         // get pixel data type
         final DataType dataType = DataType.getDataTypeFromFormatToolsType(reader.getPixelType());
         // get sizeC
@@ -2033,12 +1736,12 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         // prepare internal image data array
         final Object[] pixelData;
 
-        if (pixelBuffer == null)
-        {
+        if (pixelBuffer == null) {
             // allocate array
-            pixelData = Array2DUtil.createArray(dataType, sizeC);
-            for (int i = 0; i < sizeC; i++)
-                pixelData[i] = Array1DUtil.createArray(dataType, sizeX * sizeY);
+            pixelData = Array2DUtil.createArray(Objects.requireNonNull(dataType), sizeC);
+            if (pixelData != null)
+                for (int i = 0; i < sizeC; i++)
+                    pixelData[i] = Array1DUtil.createArray(dataType, sizeX * sizeY);
         }
         else
             pixelData = pixelBuffer;
@@ -2046,9 +1749,8 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         // colormap allocation
         final IcyColorMap[] colormaps = new IcyColorMap[effSizeC];
 
-        byte[] rawData = null;
-        for (int effC = 0; effC < effSizeC; effC++)
-        {
+        byte[] rawData;
+        for (int effC = 0; effC < effSizeC; effC++) {
             // get data
             rawData = getBytesInternal(reader, reader.getIndex(z, effC, t), rect, thumbnail, rawBuffer);
 
@@ -2058,33 +1760,27 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
             // build data array
             int inOffset = 0;
-            if (reader.isInterleaved())
-            {
+            if (reader.isInterleaved()) {
                 final byte[] channelData = (channelBuffer == null) ? new byte[componentByteLen] : channelBuffer;
 
-                for (int sc = 0; sc < rgbChanCount; sc++)
-                {
+                for (int sc = 0; sc < rgbChanCount; sc++) {
                     // get channel interleaved data
                     Array1DUtil.getInterleavedData(rawData, inOffset, rgbChanCount, channelData, 0, componentByteLen);
-                    ByteArrayConvert.byteArrayTo(channelData, 0, pixelData[c + sc], 0, componentByteLen, little);
+                    ByteArrayConvert.byteArrayTo(channelData, 0, Objects.requireNonNull(pixelData)[c + sc], 0, componentByteLen, little);
                     inOffset++;
                 }
             }
-            else
-            {
-                for (int sc = 0; sc < rgbChanCount; sc++)
-                {
-                    ByteArrayConvert.byteArrayTo(rawData, inOffset, pixelData[c + sc], 0, componentByteLen, little);
+            else {
+                for (int sc = 0; sc < rgbChanCount; sc++) {
+                    ByteArrayConvert.byteArrayTo(rawData, inOffset, Objects.requireNonNull(pixelData)[c + sc], 0, componentByteLen, little);
                     inOffset += componentByteLen;
                 }
             }
 
             // indexed color ?
-            if (indexed)
-            {
+            if (indexed) {
                 // only 8 bits and 16 bits lookup table supported
-                switch (dataType.getJavaType())
-                {
+                switch (Objects.requireNonNull(dataType).getJavaType()) {
                     case BYTE:
                         final byte[][] bmap = reader.get8BitLookupTable();
                         if (bmap != null)
@@ -2104,11 +1800,9 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
             }
 
             // no RGB image ?
-            if (rgbChanCount <= 1)
-            {
+            if (rgbChanCount <= 1) {
                 // colormap not yet set (or black) ? --> try to use metadata
-                if ((colormaps[effC] == null) || colormaps[effC].isBlack())
-                {
+                if ((colormaps[effC] == null) || colormaps[effC].isBlack()) {
                     final Color color = MetaDataUtil.getChannelColor(metaData, series, effC);
 
                     if ((color != null) && !ColorUtil.isBlack(color))
@@ -2120,21 +1814,18 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         }
 
         // create result image
-        IcyBufferedImage result = new IcyBufferedImage(sizeX, sizeY, pixelData, dataType.isSigned());
+        IcyBufferedImage result = new IcyBufferedImage(sizeX, sizeY, pixelData, Objects.requireNonNull(dataType).isSigned());
 
         // do downscaling if needed
         result = IcyBufferedImageUtil.downscaleBy2(result, true, downScaleLevel);
 
         // affect colormap
         result.beginUpdate();
-        try
-        {
+        try {
             // RGB image (can't use colormaps)
-            if (rgbChanCount > 1)
-            {
+            if (rgbChanCount > 1) {
                 // RGB at least ? --> set RGB colormap
-                if ((sizeC >= 3) && (rgbChanCount >= 3))
-                {
+                if ((sizeC >= 3) && (rgbChanCount >= 3)) {
                     result.setColorMap(0, LinearColorMap.red_, true);
                     result.setColorMap(1, LinearColorMap.green_, true);
                     result.setColorMap(2, LinearColorMap.blue_, true);
@@ -2145,19 +1836,16 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
                     result.setColorMap(3, LinearColorMap.alpha_, true);
             }
             // fluo image
-            else if (sizeC == effSizeC)
-            {
+            else if (sizeC == effSizeC) {
                 // set colormaps
-                for (int comp = 0; comp < effSizeC; comp++)
-                {
+                for (int comp = 0; comp < effSizeC; comp++) {
                     // we were able to retrieve a colormap for that channel ? --> set it
                     if (colormaps[comp] != null)
                         result.setColorMap(comp, colormaps[comp], true);
                 }
             }
         }
-        finally
-        {
+        finally {
             result.endUpdate();
         }
 
@@ -2167,26 +1855,18 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
     /**
      * Load the image located at (Z, T) position from the specified IFormatReader<br>
      * and return it as an IcyBufferedImage.
-     * 
-     * @param reader
-     *        {@link IFormatReader}
-     * @param rect
-     *        Define the image rectangular region we want to retrieve data for (considering current selected image
-     *        resolution).<br>
-     *        Set to <code>null</code> to retrieve the whole image.
-     * @param z
-     *        Z position of the image to load
-     * @param t
-     *        T position of the image to load
-     * @param thumbnail
-     *        Set to <code>true</code> to request a thumbnail of the image (<code>rect</code> parameter is then ignored)
-     * @param downScaleLevel
-     *        number of downscale to process (scale level = 1/2^downScaleLevel)
+     *
+     * @param reader         {@link IFormatReader}
+     * @param rect           Define the image rectangular region we want to retrieve data for (considering current selected image
+     *                       resolution).<br>
+     *                       Set to <code>null</code> to retrieve the whole image.
+     * @param z              Z position of the image to load
+     * @param t              T position of the image to load
+     * @param thumbnail      Set to <code>true</code> to request a thumbnail of the image (<code>rect</code> parameter is then ignored)
+     * @param downScaleLevel number of downscale to process (scale level = 1/2^downScaleLevel)
      * @return {@link IcyBufferedImage}
      */
-    protected static IcyBufferedImage getImageInternal(IFormatReader reader, Rectangle rect, int z, int t,
-            boolean thumbnail, int downScaleLevel) throws FormatException, IOException
-    {
+    protected static IcyBufferedImage getImageInternal(final IFormatReader reader, final Rectangle rect, final int z, final int t, final boolean thumbnail, final int downScaleLevel) throws FormatException, IOException {
         final Rectangle r;
 
         if (thumbnail)
@@ -2201,30 +1881,21 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
 
     /**
      * <b>Internal use only !!</b><br>
-     * 
-     * @param reader
-     *        Reader used to load the pixels
-     * @param index
-     *        plane index
-     * @param rect
-     *        Define the pixels rectangular region we want to load (considering current selected image resolution).<br>
-     *        Should be adjusted if <i>thumbnail</i> parameter is <code>true</code>
-     * @param thumbnail
-     *        Set to <code>true</code> to request a thumbnail of the image in which case <i>rect</i>
-     *        parameter should contains thumbnail size
-     * @param buffer
-     *        pre allocated output byte data buffer ([reader.getRGBChannelCount() * rect.width * rect.height *
-     *        Datatype.size]) used to
-     *        read the whole RGB raw data (can be <code>null</code>)
+     *
+     * @param reader    Reader used to load the pixels
+     * @param index     plane index
+     * @param rect      Define the pixels rectangular region we want to load (considering current selected image resolution).<br>
+     *                  Should be adjusted if <i>thumbnail</i> parameter is <code>true</code>
+     * @param thumbnail Set to <code>true</code> to request a thumbnail of the image in which case <i>rect</i>
+     *                  parameter should contains thumbnail size
+     * @param buffer    pre allocated output byte data buffer ([reader.getRGBChannelCount() * rect.width * rect.height *
+     *                  Datatype.size]) used to
+     *                  read the whole RGB raw data (can be <code>null</code>)
      * @return byte array containing pixels data.<br>
-     * @throws UnsupportedOperationException
-     *         if the XY plane size is &gt;= 2^31 pixels
-     * @throws OutOfMemoryError
-     *         if there is not enough memory to open the image
+     * @throws UnsupportedOperationException if the XY plane size is &gt;= 2^31 pixels
+     * @throws OutOfMemoryError              if there is not enough memory to open the image
      */
-    protected static byte[] getBytesInternal(IFormatReader reader, int index, Rectangle rect, boolean thumbnail,
-            byte[] buffer) throws FormatException, IOException
-    {
+    protected static byte[] getBytesInternal(final IFormatReader reader, final int index, final Rectangle rect, final boolean thumbnail, final byte[] buffer) throws FormatException, IOException {
         if (thumbnail)
             return reader.openThumbBytes(index);
 
@@ -2233,8 +1904,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         // TODO: we should check that we open a big image and then use tile loading instead
 
         // need to allocate
-        if (buffer == null)
-        {
+        if (buffer == null) {
             // return whole image
             if ((rect == null) || rect.contains(imgRect))
                 return reader.openBytes(index);
@@ -2251,8 +1921,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter
         return reader.openBytes(index, buffer, rect.x, rect.y, rect.width, rect.height);
     }
 
-    protected static UnsupportedFormatException translateException(String path, FormatException exception)
-    {
+    protected static UnsupportedFormatException translateException(final String path, final FormatException exception) {
         if (exception instanceof UnknownFormatException)
             return new UnsupportedFormatException(path + ": Unknown image format.", exception);
         else if (exception instanceof MissingLibraryException)

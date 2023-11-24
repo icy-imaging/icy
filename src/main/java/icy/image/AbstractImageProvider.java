@@ -1,15 +1,23 @@
-/**
- * 
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.image;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.io.IOException;
-import java.util.List;
-
-import icy.common.exception.UnsupportedFormatException;
 import icy.common.listener.ProgressListener;
 import icy.image.IcyBufferedImageUtil.FilterType;
 import icy.sequence.MetaDataUtil;
@@ -19,22 +27,22 @@ import icy.type.DataType;
 import icy.type.collection.array.Array1DUtil;
 import ome.xml.meta.OMEXMLMetadata;
 
+import java.awt.*;
+import java.util.List;
+
 /**
  * Abstract implementation of the {@link ImageProvider} interface.<br>
  * It provide methods wrapper so you only need implement one method the get your importer working.<br>
  * But free feel to override more methods to provide better support and/or better performance.
- * 
+ *
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public abstract class AbstractImageProvider implements ImageProvider
-{
+public abstract class AbstractImageProvider implements ImageProvider {
     /**
      * Used for multi thread tile image reading.
-     * 
-     * @author Stephane
      */
-    class TilePixelsReader implements Runnable
-    {
+    class TilePixelsReader implements Runnable {
         final int series;
         final int resolution;
         final Rectangle region;
@@ -48,8 +56,7 @@ public abstract class AbstractImageProvider implements ImageProvider
         boolean done;
         boolean failed;
 
-        public TilePixelsReader(int series, int resolution, Rectangle region, int z, int t, int c, Object result, Dimension resDim, boolean signed)
-        {
+        public TilePixelsReader(final int series, final int resolution, final Rectangle region, final int z, final int t, final int c, final Object result, final Dimension resDim, final boolean signed) {
             super();
 
             this.series = series;
@@ -66,16 +73,13 @@ public abstract class AbstractImageProvider implements ImageProvider
         }
 
         @Override
-        public void run()
-        {
-            if (Thread.currentThread().isInterrupted())
-            {
+        public void run() {
+            if (Thread.currentThread().isInterrupted()) {
                 failed = true;
                 return;
             }
 
-            try
-            {
+            try {
                 // get image tile
                 final Object obj = getPixels(series, resolution, region, z, t, c);
                 // compute resolution divider
@@ -83,8 +87,7 @@ public abstract class AbstractImageProvider implements ImageProvider
                 // copy tile to image result
                 Array1DUtil.copyRect(obj, region.getSize(), null, result, resDim, new Point(region.x / divider, region.y / divider), signed);
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 failed = true;
             }
 
@@ -95,24 +98,20 @@ public abstract class AbstractImageProvider implements ImageProvider
     public static final int DEFAULT_THUMBNAIL_SIZE = 160;
 
     // default implementation as ImageProvider interface changed
-    @SuppressWarnings("deprecation")
     @Override
-    public OMEXMLMetadata getOMEXMLMetaData() throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public OMEXMLMetadata getOMEXMLMetaData() throws Exception {
         return getMetaData();
     }
 
     // default implementation, override it if you need specific value for faster tile access
     @Override
-    public int getTileWidth(int series) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public int getTileWidth(final int series) throws Exception {
         return MetaDataUtil.getSizeX(getOMEXMLMetaData(), series);
     }
 
     // default implementation, override it if you need specific value for faster tile access
     @Override
-    public int getTileHeight(int series) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public int getTileHeight(final int series) throws Exception {
         final OMEXMLMetadata meta = getOMEXMLMetaData();
         final int sx = MetaDataUtil.getSizeX(meta, series);
 
@@ -128,19 +127,17 @@ public abstract class AbstractImageProvider implements ImageProvider
 
     // default implementation, override it if sub resolution is supported
     @Override
-    public boolean isResolutionAvailable(int series, int resolution) throws UnsupportedFormatException, IOException
-    {
+    public boolean isResolutionAvailable(final int series, final int resolution) {
         // by default we have only the original resolution
         return resolution == 0;
     }
 
     // default implementation which use the getImage(..) method, override it for better support / performance
     @Override
-    public IcyBufferedImage getThumbnail(int series) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public IcyBufferedImage getThumbnail(final int series) throws Exception {
         final OMEXMLMetadata meta = getOMEXMLMetaData();
-        int sx = MetaDataUtil.getSizeX(meta, series);
-        int sy = MetaDataUtil.getSizeY(meta, series);
+        final int sx = MetaDataUtil.getSizeX(meta, series);
+        final int sy = MetaDataUtil.getSizeY(meta, series);
         final int sz = MetaDataUtil.getSizeZ(meta, series);
         final int st = MetaDataUtil.getSizeT(meta, series);
 
@@ -175,41 +172,33 @@ public abstract class AbstractImageProvider implements ImageProvider
     // default implementation: use the getImage(..) method then return data.
     // It should be the opposite side for performance reason, override this method if possible
     @Override
-    public Object getPixels(int series, int resolution, Rectangle rectangle, int z, int t, int c)
-            throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public Object getPixels(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c) throws Exception {
         return getImage(series, resolution, rectangle, z, t, c).getDataXY(0);
     }
 
     @Override
-    public IcyBufferedImage getImage(int series, int resolution, Rectangle rectangle, int z, int t)
-            throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public IcyBufferedImage getImage(final int series, final int resolution, final Rectangle rectangle, final int z, final int t) throws Exception {
         return getImage(series, resolution, rectangle, z, t, -1);
     }
 
     // default implementation using the region getImage(..) method, better to override
     @Override
-    public IcyBufferedImage getImage(int series, int resolution, int z, int t, int c) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public IcyBufferedImage getImage(final int series, final int resolution, final int z, final int t, final int c) throws Exception {
         return getImage(series, resolution, null, z, t, c);
     }
 
     @Override
-    public IcyBufferedImage getImage(int series, int resolution, int z, int t) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public IcyBufferedImage getImage(final int series, final int resolution, final int z, final int t) throws Exception {
         return getImage(series, resolution, null, z, t, -1);
     }
 
     @Override
-    public IcyBufferedImage getImage(int series, int z, int t) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public IcyBufferedImage getImage(final int series, final int z, final int t) throws Exception {
         return getImage(series, 0, null, z, t, -1);
     }
 
     @Override
-    public IcyBufferedImage getImage(int z, int t) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public IcyBufferedImage getImage(final int z, final int t) throws Exception {
         return getImage(0, 0, null, z, t, -1);
     }
 
@@ -217,37 +206,25 @@ public abstract class AbstractImageProvider implements ImageProvider
      * Returns the pixels located at specified position using tile by tile reading (if supported by the importer).<br>
      * This method is useful to read a sub resolution of a very large image which cannot fit in memory and also to take
      * advantage of multi threading.
-     * 
-     * @param series
-     *        Series index for multi series image (use 0 if unsure).
-     * @param resolution
-     *        Wanted resolution level for the image (use 0 if unsure).<br>
-     *        The retrieved image resolution is equal to <code>image.resolution / (2^resolution)</code><br>
-     *        So for instance level 0 is the default image resolution while level 1 is base image
-     *        resolution / 2 and so on...
-     * @param region
-     *        The 2D region we want to retrieve (considering the original image resolution).<br>
-     *        If set to <code>null</code> then the whole image is returned.
-     * @param z
-     *        Z position of the image (slice) we want retrieve
-     * @param t
-     *        T position of the image (frame) we want retrieve
-     * @param c
-     *        C position of the image (channel) we want retrieve (-1 not accepted here).<br>
-     * @param tileW
-     *        width of the tile (better to use a multiple of 2).<br>
-     *        If &lt;= 0 then tile width is automatically determined
-     * @param tileH
-     *        height of the tile (better to use a multiple of 2).<br>
-     *        If &lt;= 0 then tile height is automatically determined
-     * @param listener
-     *        Progression listener
-     * @throws InterruptedException
+     *
+     * @param series     Series index for multi series image (use 0 if unsure).
+     * @param resolution Wanted resolution level for the image (use 0 if unsure).<br>
+     *                   The retrieved image resolution is equal to <code>image.resolution / (2^resolution)</code><br>
+     *                   So for instance level 0 is the default image resolution while level 1 is base image
+     *                   resolution / 2 and so on...
+     * @param region     The 2D region we want to retrieve (considering the original image resolution).<br>
+     *                   If set to <code>null</code> then the whole image is returned.
+     * @param z          Z position of the image (slice) we want retrieve
+     * @param t          T position of the image (frame) we want retrieve
+     * @param c          C position of the image (channel) we want retrieve (-1 not accepted here).<br>
+     * @param tileW      width of the tile (better to use a multiple of 2).<br>
+     *                   If &lt;= 0 then tile width is automatically determined
+     * @param tileH      height of the tile (better to use a multiple of 2).<br>
+     *                   If &lt;= 0 then tile height is automatically determined
+     * @param listener   Progression listener
      * @see #getPixels(int, int, Rectangle, int, int, int)
      */
-    public Object getPixelsByTile(int series, int resolution, Rectangle region, int z, int t, int c, int tileW, int tileH, ProgressListener listener)
-            throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public Object getPixelsByTile(final int series, final int resolution, final Rectangle region, final int z, final int t, final int c, final int tileW, final int tileH, final ProgressListener listener) throws Exception {
         final OMEXMLMetadata meta = getOMEXMLMetaData();
         final int sizeX = MetaDataUtil.getSizeX(meta, series);
         final int sizeY = MetaDataUtil.getSizeY(meta, series);
@@ -264,88 +241,77 @@ public abstract class AbstractImageProvider implements ImageProvider
         final Object result = Array1DUtil.createArray(type, resDim.width * resDim.height);
 
         // create processor
-        final Processor readerProcessor = new Processor(Math.max(1, SystemUtil.getNumberOfCPUs() - 1));
-        readerProcessor.setThreadName("Image tile reader");
+        try (final Processor readerProcessor = new Processor(Math.max(1, SystemUtil.getNumberOfCPUs() - 1))) {
+            readerProcessor.setThreadName("Image tile reader");
 
-        int tw = tileW;
-        int th = tileH;
+            int tw = tileW;
+            int th = tileH;
 
-        // adjust tile size if needed
-        if (tw <= 0)
-            tw = getTileWidth(series);
-        if (tw <= 0)
-            tw = 512;
-        if (th <= 0)
-            th = getTileHeight(series);
-        if (th <= 0)
-            th = 512;
+            // adjust tile size if needed
+            if (tw <= 0)
+                tw = getTileWidth(series);
+            if (tw <= 0)
+                tw = 512;
+            if (th <= 0)
+                th = getTileHeight(series);
+            if (th <= 0)
+                th = 512;
 
-        final List<Rectangle> tiles = ImageUtil.getTileList(adjRegion, tw, th);
+            final List<Rectangle> tiles = ImageUtil.getTileList(adjRegion, tw, th);
 
-        // submit all tasks
-        for (Rectangle tile : tiles)
-        {
-            // wait a bit if the process queue is full
-            while (readerProcessor.isFull())
-            {
-                try
-                {
-                    Thread.sleep(0);
+            // submit all tasks
+            for (final Rectangle tile : tiles) {
+                // wait a bit if the process queue is full
+                while (readerProcessor.isFull()) {
+                    try {
+                        Thread.sleep(0);
+                    }
+                    catch (final InterruptedException e) {
+                        // interrupt all processes
+                        readerProcessor.shutdownNow();
+                        break;
+                    }
                 }
-                catch (InterruptedException e)
-                {
+
+                // submit next task
+                readerProcessor.submit(new TilePixelsReader(series, resolution, tile.intersection(adjRegion), z, t, c, result, resDim, signed));
+
+                // display progression
+                if (listener != null) {
+                    // process cancel requested ?
+                    if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size())) {
+                        // interrupt processes
+                        readerProcessor.shutdownNow();
+                        break;
+                    }
+                }
+            }
+
+            // wait for completion
+            while (readerProcessor.isProcessing()) {
+                try {
+                    Thread.sleep(1);
+                }
+                catch (final InterruptedException e) {
                     // interrupt all processes
                     readerProcessor.shutdownNow();
                     break;
                 }
-            }
 
-            // submit next task
-            readerProcessor.submit(new TilePixelsReader(series, resolution, tile.intersection(adjRegion), z, t, c, result, resDim, signed));
-
-            // display progression
-            if (listener != null)
-            {
-                // process cancel requested ?
-                if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size()))
-                {
-                    // interrupt processes
-                    readerProcessor.shutdownNow();
-                    break;
+                // display progression
+                if (listener != null) {
+                    // process cancel requested ?
+                    if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size())) {
+                        // interrupt processes
+                        readerProcessor.shutdownNow();
+                        break;
+                    }
                 }
             }
+
+            // last wait for completion just in case we were interrupted
+            readerProcessor.waitAll();
         }
-
-        // wait for completion
-        while (readerProcessor.isProcessing())
-        {
-            try
-            {
-                Thread.sleep(1);
-            }
-            catch (InterruptedException e)
-            {
-                // interrupt all processes
-                readerProcessor.shutdownNow();
-                break;
-            }
-
-            // display progression
-            if (listener != null)
-            {
-                // process cancel requested ?
-                if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size()))
-                {
-                    // interrupt processes
-                    readerProcessor.shutdownNow();
-                    break;
-                }
-            }
-        }
-
-        // last wait for completion just in case we were interrupted
-        readerProcessor.waitAll();
-
         return result;
     }
 
@@ -496,26 +462,21 @@ public abstract class AbstractImageProvider implements ImageProvider
 
     /**
      * Returns the sub image resolution which best suit to the desired size.
-     * 
-     * @param sizeX
-     *        original image width
-     * @param sizeY
-     *        original image height
-     * @param wantedSize
-     *        wanted size (for the maximum dimension)
+     *
+     * @param sizeX      original image width
+     * @param sizeY      original image height
+     * @param wantedSize wanted size (for the maximum dimension)
      * @return resolution ratio<br>
-     *         0 = original resolution<br>
-     *         1 = (original resolution / 2)<br>
-     *         2 = (original resolution / 4)
+     * 0 = original resolution<br>
+     * 1 = (original resolution / 2)<br>
+     * 2 = (original resolution / 4)
      */
-    public static int getResolutionFactor(int sizeX, int sizeY, int wantedSize)
-    {
+    public static int getResolutionFactor(final int sizeX, final int sizeY, final int wantedSize) {
         int sx = sizeX / 2;
         int sy = sizeY / 2;
         int result = 0;
 
-        while ((sx > wantedSize) || (sy > wantedSize))
-        {
+        while ((sx > wantedSize) || (sy > wantedSize)) {
             sx /= 2;
             sy /= 2;
             result++;
@@ -526,21 +487,15 @@ public abstract class AbstractImageProvider implements ImageProvider
 
     /**
      * Returns the image resolution that best suit to the size resolution.
-     * 
-     * @param series
-     *        Series index for multi series image (use 0 if unsure).
-     * @param wantedSize
-     *        wanted size (for the maximum dimension)
+     *
+     * @param series     Series index for multi series image (use 0 if unsure).
+     * @param wantedSize wanted size (for the maximum dimension)
      * @return resolution ratio<br>
-     *         0 = original resolution<br>
-     *         1 = (original resolution / 2)<br>
-     *         2 = (original resolution / 4)
-     * @throws IOException
-     * @throws UnsupportedFormatException
-     * @throws InterruptedException
+     * 0 = original resolution<br>
+     * 1 = (original resolution / 2)<br>
+     * 2 = (original resolution / 4)
      */
-    public int getResolutionFactor(int series, int wantedSize) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public int getResolutionFactor(final int series, final int wantedSize) throws Exception {
         final OMEXMLMetadata meta = getOMEXMLMetaData();
         return getResolutionFactor(MetaDataUtil.getSizeX(meta, series), MetaDataUtil.getSizeY(meta, series), wantedSize);
     }

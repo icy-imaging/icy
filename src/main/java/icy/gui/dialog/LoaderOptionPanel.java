@@ -1,60 +1,29 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.dialog;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import java.nio.channels.ClosedByInterruptException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JToggleButton;
-import javax.swing.border.Border;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import icy.common.exception.UnsupportedFormatException;
 import icy.file.Loader;
 import icy.file.SequenceFileGroupImporter;
 import icy.file.SequenceFileImporter;
 import icy.file.SequenceFileSticher;
 import icy.file.SequenceFileSticher.SequenceFileGroup;
-import icy.gui.component.PopupPanel;
-import icy.gui.component.RangeComponent;
-import icy.gui.component.Region2DComponent;
-import icy.gui.component.SpecialValueSpinner;
-import icy.gui.component.ThumbnailComponent;
+import icy.gui.component.*;
 import icy.gui.component.model.SpecialValueSpinnerModel;
 import icy.image.IcyBufferedImage;
 import icy.resource.ResourceUtil;
@@ -67,38 +36,42 @@ import icy.util.OMEUtil;
 import ome.xml.meta.OMEXMLMetadata;
 import plugins.kernel.importer.LociImporterPlugin;
 
-public class LoaderOptionPanel extends JPanel
-{
-    public enum LoaderLoadingType
-    {
-        GROUP
-        {
+import javax.swing.*;
+import javax.swing.border.Border;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Stephane
+ * @author Thomas MUSSET
+ */
+public class LoaderOptionPanel extends JPanel {
+    public enum LoaderLoadingType {
+        GROUP {
             @Override
-            public String toString()
-            {
+            public String toString() {
                 return "Group files";
             }
         },
-        GROUP_NO_ORDERING
-        {
+        GROUP_NO_ORDERING {
             @Override
-            public String toString()
-            {
+            public String toString() {
                 return "Group files (no ordering)";
             }
         },
-        NO_GROUP
-        {
+        NO_GROUP {
             @Override
-            public String toString()
-            {
+            public String toString() {
                 return "Separate files";
             }
         }
     }
 
-    private class PreviewSingleUpdate extends Thread
-    {
+    private class PreviewSingleUpdate extends Thread {
         SequenceFileImporter importer;
         List<SequenceFileImporter> importers;
         List<String> files;
@@ -107,8 +80,7 @@ public class LoaderOptionPanel extends JPanel
         boolean imageRefreshOnly;
         // boolean softInterrupted;
 
-        PreviewSingleUpdate(SequenceFileImporter importer, List<String> files, int z, int t, boolean imageRefreshOnly)
-        {
+        PreviewSingleUpdate(final SequenceFileImporter importer, final List<String> files, final int z, final int t, final boolean imageRefreshOnly) {
             super("Preview single update");
 
             this.importer = importer;
@@ -120,17 +92,14 @@ public class LoaderOptionPanel extends JPanel
             // softInterrupted = false;
         }
 
-        public List<SequenceFileImporter> getSingleFileImporters()
-        {
+        public List<SequenceFileImporter> getSingleFileImporters() {
             // get importer and open image
             final List<SequenceFileImporter> result = Loader.getSequenceFileImporters(files.get(0));
 
             // adjust importers setting if needed
-            for (SequenceFileImporter imp : result)
-            {
+            for (final SequenceFileImporter imp : result) {
                 // LOCI importer ?
-                if (imp instanceof LociImporterPlugin)
-                {
+                if (imp instanceof LociImporterPlugin) {
                     // separate loading wanted ? --> disable grouping in LOCI importer
                     if (isSeparateSequenceSelected())
                         ((LociImporterPlugin) imp).setGroupFiles(false);
@@ -140,8 +109,7 @@ public class LoaderOptionPanel extends JPanel
             return result;
         }
 
-        void getImporters()
-        {
+        void getImporters() {
             // already done ? --> exit
             if (importer != null)
                 return;
@@ -153,55 +121,46 @@ public class LoaderOptionPanel extends JPanel
                 importer = importers.get(0);
         }
 
-        void close()
-        {
-            try
-            {
+        void close() {
+            try {
                 // close previous importer (shouldn't exist here)
                 if (importer != null)
                     importer.close();
             }
-            catch (IOException e)
-            {
+            catch (final Exception e) {
                 // ignore
             }
 
             importer = null;
         }
 
-        boolean internalOpen(SequenceFileImporter imp) throws ClosedByInterruptException, InterruptedException
-        {
+        boolean internalOpen(final SequenceFileImporter imp) throws ClosedByInterruptException, InterruptedException {
             // default
             SequenceFileImporter usedImp = imp;
 
-            try
-            {
+            try {
                 // want to open a group of file ?
-                if (isMultiFile())
-                {
+                if (isMultiFile()) {
                     // use the SequenceFileGroupImporter importer for that
-                    final SequenceFileGroupImporter grpImp = new SequenceFileGroupImporter();
-                    final SequenceFileGroup group = SequenceFileSticher.groupFiles(imp, files, isGroupedSequenceSelected(), null);
+                    try (final SequenceFileGroupImporter grpImp = new SequenceFileGroupImporter()) {
+                        final SequenceFileGroup group = SequenceFileSticher.groupFiles(imp, files, isGroupedSequenceSelected(), null);
 
-                    usedImp = grpImp;
-                    if (group != null)
-                        grpImp.open(group, SequenceIdImporter.FLAG_METADATA_MINIMUM);
+                        usedImp = grpImp;
+                        if (group != null)
+                            grpImp.open(group, SequenceIdImporter.FLAG_METADATA_MINIMUM);
+                    }
                 }
-                else
-                {
+                else {
                     // open single file
                     usedImp.open(files.get(0), SequenceIdImporter.FLAG_METADATA_MINIMUM);
                 }
             }
-            catch (Exception e)
-            {
-                try
-                {
+            catch (final Exception e) {
+                try {
                     // close importer
                     usedImp.close();
                 }
-                catch (Throwable th)
-                {
+                catch (final Throwable th) {
                     // ignore
                 }
 
@@ -212,8 +171,7 @@ public class LoaderOptionPanel extends JPanel
             }
 
             // correctly opened ? --> use this importer
-            if (usedImp.getOpened() != null)
-            {
+            if (usedImp.getOpened() != null) {
                 importer = usedImp;
                 return true;
             }
@@ -221,8 +179,7 @@ public class LoaderOptionPanel extends JPanel
             return false;
         }
 
-        boolean open() throws ClosedByInterruptException, InterruptedException
-        {
+        boolean open() throws ClosedByInterruptException, InterruptedException {
             // get importers first if not already done
             getImporters();
 
@@ -235,8 +192,7 @@ public class LoaderOptionPanel extends JPanel
                 return internalOpen(importer);
 
             // try to open from the given importers
-            for (SequenceFileImporter imp : importers)
-            {
+            for (final SequenceFileImporter imp : importers) {
                 // correctly opened ? --> use this importer
                 if (internalOpen(imp))
                     return true;
@@ -246,24 +202,21 @@ public class LoaderOptionPanel extends JPanel
             return false;
         }
 
-        OMEXMLMetadata getMetaData() throws InterruptedException, UnsupportedFormatException, IOException
-        {
+        OMEXMLMetadata getMetaData() throws Exception {
             if (!open())
                 throw new IOException("Can't open importer !");
 
             return importer.getOMEXMLMetaData();
         }
 
-        IcyBufferedImage getThumbnail(int s) throws InterruptedException, UnsupportedFormatException, IOException
-        {
+        IcyBufferedImage getThumbnail(final int s) throws Exception {
             if (!open())
                 throw new IOException("Can't open importer !");
 
             return importer.getThumbnail(s);
         }
 
-        IcyBufferedImage getImage(int s, int res) throws InterruptedException, UnsupportedFormatException, IOException
-        {
+        IcyBufferedImage getImage(final int s, final int res) throws Exception {
             if (!open())
                 throw new IOException("Can't open importer !");
 
@@ -274,24 +227,20 @@ public class LoaderOptionPanel extends JPanel
             return importer.getImage(s, res, z, t, pCh);
         }
 
-        public boolean isMultiFile()
-        {
-            try
-            {
+        public boolean isMultiFile() {
+            try {
                 // return true if we have multiple file selection
                 if (files.size() > 1)
                     return true;
 
-                if (importer instanceof SequenceFileGroupImporter)
-                {
+                if (importer instanceof SequenceFileGroupImporter) {
                     final SequenceFileGroup group = ((SequenceFileGroupImporter) importer).getOpenedGroup();
 
                     if (group != null)
                         return (group.positions.size() > 1);
                 }
             }
-            catch (Throwable t)
-            {
+            catch (final Throwable t) {
                 // ignore
             }
 
@@ -319,8 +268,7 @@ public class LoaderOptionPanel extends JPanel
         // }
 
         @Override
-        public void run()
-        {
+        public void run() {
             // interrupt process
             if (isInterrupted())
                 return;
@@ -329,19 +277,16 @@ public class LoaderOptionPanel extends JPanel
             final int s = getSelectedSeries();
 
             // only need to update image
-            if (imageRefreshOnly)
-            {
+            if (imageRefreshOnly) {
                 // can't re open importer ? --> nothing to do here
                 if ((importer == null) && (files.size() == 0))
                     return;
 
-                try
-                {
+                try {
                     // use last - 1 resolution
                     final int res = Math.max(0, resolutionSlider.getMaximum() - 1);
 
-                    try
-                    {
+                    try {
                         // can't open ? --> error
                         if (!open())
                             throw new IOException("Can't open '" + files.get(0) + "' image file..");
@@ -360,29 +305,21 @@ public class LoaderOptionPanel extends JPanel
                         // default position --> use thumbnail
                         if ((z == 0) && (t == 0) && (pCh == -1))
                             preview.setImage(getThumbnail(s));
-                        // specific image
+                            // specific image
                         else
                             preview.setImage(getImage(s, res));
                     }
-                    finally
-                    {
+                    finally {
                         // just close internals importers
                         if (importer instanceof SequenceFileGroupImporter)
                             ((SequenceFileGroupImporter) importer).closeInternalsImporters();
                     }
                 }
-                catch (ClosedByInterruptException e)
-                {
+                catch (final ClosedByInterruptException | InterruptedException e) {
                     // can't use importer anymore
                     close();
                 }
-                catch (InterruptedException e2)
-                {
-                    // can't use importer anymore
-                    close();
-                }
-                catch (Throwable e)
-                {
+                catch (final Throwable e) {
                     // can't use importer anymore
                     if (e.getCause() instanceof ClosedByInterruptException)
                         close();
@@ -396,28 +333,21 @@ public class LoaderOptionPanel extends JPanel
                 return;
             }
 
-            try
-            {
+            try {
                 metadata = null;
 
                 // no files ?
-                if (files.size() == 0)
-                {
+                if (files.size() == 0) {
                     preview.setImage(null);
                     preview.setInfos("");
                     metadata = OMEUtil.createOMEXMLMetadata();
 
                     // use Callable as we can get interrupted here...
-                    ThreadUtil.invokeNow(new Callable<Boolean>()
-                    {
-                        @Override
-                        public Boolean call() throws Exception
-                        {
-                            // disable panel while we are loading metadata
-                            disablePanel();
+                    ThreadUtil.invokeNow(() -> {
+                        // disable panel while we are loading metadata
+                        disablePanel();
 
-                            return Boolean.TRUE;
-                        }
+                        return Boolean.TRUE;
                     });
 
                     // nothing more to do
@@ -429,17 +359,11 @@ public class LoaderOptionPanel extends JPanel
                 preview.setInfos("loading...");
 
                 // use Callable as we can get interrupted here...
-                ThreadUtil.invokeNow(new Callable<Boolean>()
-                {
+                ThreadUtil.invokeNow(() -> {
+                    // disable panel while we are loading metadata
+                    disablePanel();
 
-                    @Override
-                    public Boolean call() throws Exception
-                    {
-                        // disable panel while we are loading metadata
-                        disablePanel();
-
-                        return Boolean.TRUE;
-                    }
+                    return Boolean.TRUE;
                 });
 
                 // close previous importer (shouldn't exist here)
@@ -449,8 +373,7 @@ public class LoaderOptionPanel extends JPanel
                 if (!open())
                     throw new IOException("Can't open '" + files.get(0) + "' image file..");
 
-                try
-                {
+                try {
                     // interrupted ? --> stop here
                     if (isInterrupted())
                         return;
@@ -458,17 +381,11 @@ public class LoaderOptionPanel extends JPanel
                     metadata = getMetaData();
 
                     // update it as soon as possible (use Callable as we can get interrupted here...)
-                    ThreadUtil.invokeNow(new Callable<Boolean>()
-                    {
+                    ThreadUtil.invokeNow(() -> {
+                        // update panel
+                        updatePanel();
 
-                        @Override
-                        public Boolean call() throws Exception
-                        {
-                            // update panel
-                            updatePanel();
-
-                            return Boolean.TRUE;
-                        }
+                        return Boolean.TRUE;
                     });
 
                     // now the different "metadata" fields are up to date
@@ -495,57 +412,39 @@ public class LoaderOptionPanel extends JPanel
                     // initial preview --> use thumbnail
                     preview.setImage(getThumbnail(s));
                 }
-                finally
-                {
+                finally {
                     // just close internals importers
                     if (importer instanceof SequenceFileGroupImporter)
                         ((SequenceFileGroupImporter) importer).closeInternalsImporters();
                 }
             }
-            catch (ClosedByInterruptException e)
-            {
+            catch (final ClosedByInterruptException | InterruptedException e) {
                 // can't use importer anymore
                 close();
             }
-            catch (InterruptedException t)
-            {
-                // can't use importer anymore
-                close();
-            }
-            catch (Throwable t1)
-            {
+            catch (final Throwable t1) {
                 // System.out.println("Preview: can't load all image information.");
                 // IcyExceptionHandler.showErrorMessage(t1, false);
 
                 // no more update ? --> show that an error happened
-                if (!previewUpdater.getNeedUpdate())
-                {
+                if (!previewUpdater.getNeedUpdate()) {
                     // fatal error --> failed image
                     preview.setImage(ResourceUtil.ICON_DELETE);
 
                     // cannot even read metadata
-                    if (!metadataFieldsOk)
-                    {
+                    if (!metadataFieldsOk) {
                         preview.setInfos("Cannot read file");
 
-                        try
-                        {
+                        try {
                             // use Callable as we can get interrupted here...
-                            ThreadUtil.invokeNow(new Callable<Boolean>()
-                            {
+                            ThreadUtil.invokeNow(() -> {
+                                // update panel
+                                updatePanel();
 
-                                @Override
-                                public Boolean call() throws Exception
-                                {
-                                    // update panel
-                                    updatePanel();
-
-                                    return Boolean.TRUE;
-                                }
+                                return Boolean.TRUE;
                             });
                         }
-                        catch (Throwable t2)
-                        {
+                        catch (final Throwable t2) {
                             // probably interrupted...
 
                         }
@@ -565,8 +464,7 @@ public class LoaderOptionPanel extends JPanel
         // }
     }
 
-    private class PreviewUpdater extends Thread
-    {
+    protected class PreviewUpdater extends Thread {
         SequenceFileImporter newImporter;
         List<String> newFiles;
         int newZ;
@@ -577,26 +475,22 @@ public class LoaderOptionPanel extends JPanel
 
         PreviewSingleUpdate singleUpdater;
 
-        PreviewUpdater()
-        {
+        PreviewUpdater() {
             super("Preview updater");
 
             singleUpdater = null;
             needUpdate = false;
         }
 
-        public boolean getNeedUpdate()
-        {
+        public boolean getNeedUpdate() {
             return needUpdate;
         }
 
-        public boolean isUpdating()
-        {
+        public boolean isUpdating() {
             return getNeedUpdate() || ((singleUpdater != null) && singleUpdater.isAlive());
         }
 
-        public boolean isMultiFile()
-        {
+        public boolean isMultiFile() {
             if (singleUpdater == null)
                 return false;
 
@@ -606,8 +500,7 @@ public class LoaderOptionPanel extends JPanel
         /**
          * previous preview canceled ?
          */
-        public boolean isPreviewCanceled()
-        {
+        public boolean isPreviewCanceled() {
             if (singleUpdater == null)
                 return true;
 
@@ -617,19 +510,16 @@ public class LoaderOptionPanel extends JPanel
         /**
          * Cancel preview refresh
          */
-        public void cancelPreview()
-        {
+        public void cancelPreview() {
             // interrupt (soft interrupt to not close IO channel) current preview update
             if (singleUpdater != null)
                 singleUpdater.interrupt();
         }
 
         /**
-         * Asynchronous image preview refresh only.<br>
-         * ({@link #updatePreview(String)} should have be called once before to give the fileId)
+         * Asynchronous image preview refresh only.
          */
-        protected synchronized void updatePreview(int z, int t)
-        {
+        protected synchronized void updatePreview(final int z, final int t) {
             // nothing to do
             if (singleUpdater == null)
                 return;
@@ -662,8 +552,7 @@ public class LoaderOptionPanel extends JPanel
         /**
          * Asynchronous preview refresh (complete preview refresh)
          */
-        public synchronized void updatePreview()
-        {
+        public synchronized void updatePreview() {
             if (singleUpdater != null)
                 updatePreview(singleUpdater.files, series);
         }
@@ -672,8 +561,7 @@ public class LoaderOptionPanel extends JPanel
          * Asynchronous preview refresh.<br>
          * ({@link #updatePreview(List, int)} should have be called once before to give the fileId)
          */
-        public synchronized void updatePreview(int s)
-        {
+        public synchronized void updatePreview(final int s) {
             if (singleUpdater != null)
                 updatePreview(singleUpdater.files, s);
         }
@@ -681,8 +569,7 @@ public class LoaderOptionPanel extends JPanel
         /**
          * Asynchronous preview refresh
          */
-        public synchronized void updatePreview(String[] files, int s)
-        {
+        public synchronized void updatePreview(final String[] files, final int s) {
             // interrupt previous preview refresh
             cancelPreview();
 
@@ -708,8 +595,7 @@ public class LoaderOptionPanel extends JPanel
         /**
          * Asynchronous preview refresh
          */
-        public synchronized void updatePreview(List<String> files, int s)
-        {
+        public synchronized void updatePreview(final List<String> files, final int s) {
             // interrupt previous preview refresh
             cancelPreview();
 
@@ -745,8 +631,7 @@ public class LoaderOptionPanel extends JPanel
          * Don't forget to call this method otherwise the updater thread will remain active !!<br>
          * Ensure metadata are correctly loaded (it's important that this method is called from EDT)
          */
-        public synchronized void closeFromEDT()
-        {
+        public synchronized void closeFromEDT() {
             // interrupt preview
             cancelPreview();
             // just update panel
@@ -787,25 +672,19 @@ public class LoaderOptionPanel extends JPanel
         }
 
         @Override
-        public void run()
-        {
-            try
-            {
+        public void run() {
+            try {
                 // interrupt process
-                while (!isInterrupted())
-                {
+                while (!isInterrupted()) {
                     // sleep a bit
                     Thread.sleep(10);
 
                     // need to be synchronized
-                    synchronized (this)
-                    {
+                    synchronized (this) {
                         // previous preview done ?
-                        if (isPreviewCanceled())
-                        {
+                        if (isPreviewCanceled()) {
                             // need preview update ?
-                            if (needUpdate)
-                            {
+                            if (needUpdate) {
                                 // create new single updater and start it
                                 singleUpdater = new PreviewSingleUpdate(newImporter, newFiles, newZ, newT, newImageRefreshOnly);
                                 singleUpdater.start();
@@ -817,21 +696,14 @@ public class LoaderOptionPanel extends JPanel
                     }
                 }
             }
-            catch (InterruptedException t)
-            {
+            catch (final InterruptedException t) {
                 // no need to do more here...
             }
-            catch (Throwable t)
-            {
+            catch (final Throwable t) {
                 IcyExceptionHandler.showErrorMessage(t, false);
             }
         }
     }
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 4180367632912879286L;
 
     /**
      * GUI
@@ -839,7 +711,7 @@ public class LoaderOptionPanel extends JPanel
     protected ThumbnailComponent preview;
     protected JPanel optionsPanel;
     protected PopupPanel popupPanel;
-    protected JComboBox loadingTypeCombo;
+    protected JComboBox<LoaderLoadingType> loadingTypeCombo;
     protected JLabel loadInSeparatedLabel;
     protected JSlider resolutionSlider;
     protected JLabel resolutionLevelLabel;
@@ -871,8 +743,7 @@ public class LoaderOptionPanel extends JPanel
     /**
      * Create the panel.
      */
-    public LoaderOptionPanel(LoaderLoadingType loadType)
-    {
+    public LoaderOptionPanel(final LoaderLoadingType loadType) {
         super();
 
         metadataFieldsOk = false;
@@ -894,8 +765,7 @@ public class LoaderOptionPanel extends JPanel
         updatePanel();
     }
 
-    private void initialize(LoaderLoadingType loadType)
-    {
+    private void initialize(final LoaderLoadingType loadType) {
         setBorder(BorderFactory.createTitledBorder((Border) null));
         setLayout(new BorderLayout());
 
@@ -911,13 +781,13 @@ public class LoaderOptionPanel extends JPanel
         popupPanel.setExpanded(true);
         add(popupPanel, BorderLayout.SOUTH);
 
-        GridBagLayout gbl_optionsPanel = new GridBagLayout();
-        gbl_optionsPanel.columnWidths = new int[] {0, 100, 0, 0, 0};
-        gbl_optionsPanel.rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0};
-        gbl_optionsPanel.columnWeights = new double[] {0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
-        gbl_optionsPanel.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+        final GridBagLayout gbl_optionsPanel = new GridBagLayout();
+        gbl_optionsPanel.columnWidths = new int[]{0, 100, 0, 0, 0};
+        gbl_optionsPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+        gbl_optionsPanel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
+        gbl_optionsPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         optionsPanel.setLayout(gbl_optionsPanel);
-        GridBagConstraints gbc_loadInSeparatedLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_loadInSeparatedLabel = new GridBagConstraints();
         gbc_loadInSeparatedLabel.anchor = GridBagConstraints.WEST;
         gbc_loadInSeparatedLabel.insets = new Insets(0, 0, 5, 5);
         gbc_loadInSeparatedLabel.gridx = 0;
@@ -926,19 +796,12 @@ public class LoaderOptionPanel extends JPanel
         loadInSeparatedLabel.setToolTipText("Define if we try to group files / series or not (and eventually automatic set Z, T, C ordering from file name)");
         optionsPanel.add(loadInSeparatedLabel, gbc_loadInSeparatedLabel);
 
-        loadingTypeCombo = new JComboBox();
+        loadingTypeCombo = new JComboBox<>();
         loadingTypeCombo.setToolTipText("Define if we try to group files or not (and eventually automatic set Z, T, C ordering from file name)");
-        loadingTypeCombo.setModel(new DefaultComboBoxModel(LoaderLoadingType.values()));
+        loadingTypeCombo.setModel(new DefaultComboBoxModel<>(LoaderLoadingType.values()));
         loadingTypeCombo.setSelectedIndex(loadType.ordinal());
-        loadingTypeCombo.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                loadingTypeChanged();
-            }
-        });
-        GridBagConstraints gbc_loadingTypeCombo = new GridBagConstraints();
+        loadingTypeCombo.addActionListener(e -> loadingTypeChanged());
+        final GridBagConstraints gbc_loadingTypeCombo = new GridBagConstraints();
         gbc_loadingTypeCombo.fill = GridBagConstraints.HORIZONTAL;
         gbc_loadingTypeCombo.gridwidth = 3;
         gbc_loadingTypeCombo.insets = new Insets(0, 0, 5, 0);
@@ -948,7 +811,7 @@ public class LoaderOptionPanel extends JPanel
 
         seriesLabel = new JLabel("Series");
         seriesLabel.setToolTipText("Series to load (only for multi serie image)");
-        GridBagConstraints gbc_seriesLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_seriesLabel = new GridBagConstraints();
         gbc_seriesLabel.anchor = GridBagConstraints.WEST;
         gbc_seriesLabel.insets = new Insets(0, 0, 5, 5);
         gbc_seriesLabel.gridx = 0;
@@ -957,16 +820,9 @@ public class LoaderOptionPanel extends JPanel
 
         seriesSpinner = new SpecialValueSpinner(new SpecialValueSpinnerModel(-1, -1, 0, 1, -1, "ALL"));
         seriesSpinner.setPreferredSize(new Dimension(50, 22));
-        seriesSpinner.addChangeListener(new ChangeListener()
-        {
-            @Override
-            public void stateChanged(ChangeEvent e)
-            {
-                seriesChanged();
-            }
-        });
+        seriesSpinner.addChangeListener(e -> seriesChanged());
         seriesSpinner.setToolTipText("Series to load (only for multi serie image)");
-        GridBagConstraints gbc_seriesSpinner = new GridBagConstraints();
+        final GridBagConstraints gbc_seriesSpinner = new GridBagConstraints();
         gbc_seriesSpinner.insets = new Insets(0, 0, 5, 5);
         gbc_seriesSpinner.anchor = GridBagConstraints.WEST;
         gbc_seriesSpinner.gridx = 1;
@@ -975,7 +831,7 @@ public class LoaderOptionPanel extends JPanel
 
         channelLabel = new JLabel("Channel");
         channelLabel.setToolTipText("Channel to load");
-        GridBagConstraints gbc_channelLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_channelLabel = new GridBagConstraints();
         gbc_channelLabel.anchor = GridBagConstraints.EAST;
         gbc_channelLabel.insets = new Insets(0, 0, 5, 5);
         gbc_channelLabel.gridx = 2;
@@ -984,16 +840,9 @@ public class LoaderOptionPanel extends JPanel
 
         channelSpinner = new SpecialValueSpinner(new SpecialValueSpinnerModel(-1, -1, 0, 1, -1, "ALL"));
         channelSpinner.setPreferredSize(new Dimension(50, 22));
-        channelSpinner.addChangeListener(new ChangeListener()
-        {
-            @Override
-            public void stateChanged(ChangeEvent e)
-            {
-                rangeChanged();
-            }
-        });
+        channelSpinner.addChangeListener(e -> rangeChanged());
         channelSpinner.setToolTipText("Channel to load");
-        GridBagConstraints gbc_channelSpinner = new GridBagConstraints();
+        final GridBagConstraints gbc_channelSpinner = new GridBagConstraints();
         gbc_channelSpinner.anchor = GridBagConstraints.EAST;
         gbc_channelSpinner.insets = new Insets(0, 0, 5, 0);
         gbc_channelSpinner.gridx = 3;
@@ -1002,7 +851,7 @@ public class LoaderOptionPanel extends JPanel
 
         resolutionFixLabel = new JLabel("Resolution");
         resolutionFixLabel.setToolTipText("Select resolution level to open");
-        GridBagConstraints gbc_resolutionFixLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_resolutionFixLabel = new GridBagConstraints();
         gbc_resolutionFixLabel.anchor = GridBagConstraints.WEST;
         gbc_resolutionFixLabel.insets = new Insets(0, 0, 5, 5);
         gbc_resolutionFixLabel.gridx = 0;
@@ -1018,23 +867,16 @@ public class LoaderOptionPanel extends JPanel
         resolutionSlider.setValue(0);
         resolutionSlider.setMaximum(10);
         resolutionSlider.setFocusable(false);
-        resolutionSlider.addChangeListener(new ChangeListener()
-        {
-            @Override
-            public void stateChanged(ChangeEvent e)
-            {
-                updateFinaleResolution();
-            }
-        });
+        resolutionSlider.addChangeListener(e -> updateFinaleResolution());
 
         resolutionLevelLabel = new JLabel("");
-        GridBagConstraints gbc_resolutionLevelLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_resolutionLevelLabel = new GridBagConstraints();
         gbc_resolutionLevelLabel.anchor = GridBagConstraints.WEST;
         gbc_resolutionLevelLabel.insets = new Insets(0, 0, 5, 5);
         gbc_resolutionLevelLabel.gridx = 1;
         gbc_resolutionLevelLabel.gridy = 2;
         optionsPanel.add(resolutionLevelLabel, gbc_resolutionLevelLabel);
-        GridBagConstraints gbc_resolutionSlider = new GridBagConstraints();
+        final GridBagConstraints gbc_resolutionSlider = new GridBagConstraints();
         gbc_resolutionSlider.fill = GridBagConstraints.BOTH;
         gbc_resolutionSlider.gridwidth = 2;
         gbc_resolutionSlider.insets = new Insets(0, 0, 5, 0);
@@ -1047,15 +889,8 @@ public class LoaderOptionPanel extends JPanel
         xyRegionLoadingToggle.setIconTextGap(0);
         xyRegionLoadingToggle.setMargin(new Insets(2, 4, 2, 4));
         xyRegionLoadingToggle.setToolTipText("Enable region loading (X,Y)-(W,H) in original resolution coordinates (pixel)");
-        xyRegionLoadingToggle.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                regionLoadingToggleChanged();
-            }
-        });
-        GridBagConstraints gbc_xyRegionLoadingCheck = new GridBagConstraints();
+        xyRegionLoadingToggle.addActionListener(e -> regionLoadingToggleChanged());
+        final GridBagConstraints gbc_xyRegionLoadingCheck = new GridBagConstraints();
         gbc_xyRegionLoadingCheck.fill = GridBagConstraints.BOTH;
         gbc_xyRegionLoadingCheck.insets = new Insets(0, 0, 5, 5);
         gbc_xyRegionLoadingCheck.gridx = 0;
@@ -1066,7 +901,7 @@ public class LoaderOptionPanel extends JPanel
         xyRegionComp.setMaximumSize(new Dimension(160, 24));
         xyRegionComp.setInteger(true);
         xyRegionComp.setToolTipText("Rectangular region to load (X,Y,W,H) in original resolution coordinates");
-        GridBagConstraints gbc_xyRegionComp = new GridBagConstraints();
+        final GridBagConstraints gbc_xyRegionComp = new GridBagConstraints();
         gbc_xyRegionComp.fill = GridBagConstraints.HORIZONTAL;
         gbc_xyRegionComp.gridwidth = 3;
         gbc_xyRegionComp.insets = new Insets(0, 0, 5, 0);
@@ -1076,7 +911,7 @@ public class LoaderOptionPanel extends JPanel
 
         zRangeLabel = new JLabel("Z range  ");
         zRangeLabel.setToolTipText("Z interval to load");
-        GridBagConstraints gbc_zRangeLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_zRangeLabel = new GridBagConstraints();
         gbc_zRangeLabel.anchor = GridBagConstraints.WEST;
         gbc_zRangeLabel.insets = new Insets(0, 0, 5, 5);
         gbc_zRangeLabel.gridx = 0;
@@ -1084,14 +919,7 @@ public class LoaderOptionPanel extends JPanel
         optionsPanel.add(zRangeLabel, gbc_zRangeLabel);
 
         zRangeComp = new RangeComponent();
-        zRangeComp.addChangeListener(new ChangeListener()
-        {
-            @Override
-            public void stateChanged(ChangeEvent e)
-            {
-                rangeChanged();
-            }
-        });
+        zRangeComp.addChangeListener(e -> rangeChanged());
         zRangeComp.setToolTipText("Z interval to load");
         zRangeComp.setMinimumSize(new Dimension(130, 22));
         zRangeComp.setMaximumSize(new Dimension(180, 22));
@@ -1102,7 +930,7 @@ public class LoaderOptionPanel extends JPanel
         zRangeComp.setPreferredSize(new Dimension(180, 22));
         zRangeComp.getSlider().setPreferredSize(new Dimension(70, 22));
         zRangeComp.setSliderVisible(true);
-        GridBagConstraints gbc_zRangeComp = new GridBagConstraints();
+        final GridBagConstraints gbc_zRangeComp = new GridBagConstraints();
         gbc_zRangeComp.gridwidth = 3;
         gbc_zRangeComp.insets = new Insets(0, 0, 5, 0);
         gbc_zRangeComp.fill = GridBagConstraints.HORIZONTAL;
@@ -1112,7 +940,7 @@ public class LoaderOptionPanel extends JPanel
 
         tRangeLabel = new JLabel("T range  ");
         tRangeLabel.setToolTipText("T interval to load");
-        GridBagConstraints gbc_tRangeLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_tRangeLabel = new GridBagConstraints();
         gbc_tRangeLabel.anchor = GridBagConstraints.WEST;
         gbc_tRangeLabel.insets = new Insets(0, 0, 0, 5);
         gbc_tRangeLabel.gridx = 0;
@@ -1120,14 +948,7 @@ public class LoaderOptionPanel extends JPanel
         optionsPanel.add(tRangeLabel, gbc_tRangeLabel);
 
         tRangeComp = new RangeComponent();
-        tRangeComp.addChangeListener(new ChangeListener()
-        {
-            @Override
-            public void stateChanged(ChangeEvent e)
-            {
-                rangeChanged();
-            }
-        });
+        tRangeComp.addChangeListener(e -> rangeChanged());
         tRangeComp.setToolTipText("T interval to load");
         tRangeComp.setMinimumSize(new Dimension(130, 22));
         tRangeComp.setMaximumSize(new Dimension(180, 22));
@@ -1138,7 +959,7 @@ public class LoaderOptionPanel extends JPanel
         tRangeComp.setPreferredSize(new Dimension(180, 22));
         tRangeComp.getSlider().setPreferredSize(new Dimension(70, 22));
         tRangeComp.setSliderVisible(true);
-        GridBagConstraints gbc_tRangeComp = new GridBagConstraints();
+        final GridBagConstraints gbc_tRangeComp = new GridBagConstraints();
         gbc_tRangeComp.gridwidth = 3;
         gbc_tRangeComp.fill = GridBagConstraints.HORIZONTAL;
         gbc_tRangeComp.gridx = 1;
@@ -1146,8 +967,7 @@ public class LoaderOptionPanel extends JPanel
         optionsPanel.add(tRangeComp, gbc_tRangeComp);
     }
 
-    protected void updatePreviewOnChange()
-    {
+    protected void updatePreviewOnChange() {
         if (updatingPanel)
             return;
 
@@ -1158,38 +978,33 @@ public class LoaderOptionPanel extends JPanel
 
         // detect change on z, t, c position in preview
         v = getZMin();
-        if (pZMin != v)
-        {
+        if (pZMin != v) {
             z = v;
             pZMin = v;
             changed = true;
         }
         v = getZMax();
-        if (pZMax != v)
-        {
+        if (pZMax != v) {
             z = v;
             pZMax = v;
             changed = true;
         }
 
         v = getTMin();
-        if (pTMin != v)
-        {
+        if (pTMin != v) {
             t = v;
             pTMin = v;
             changed = true;
         }
         v = getTMax();
-        if (pTMax != v)
-        {
+        if (pTMax != v) {
             t = v;
             pTMax = v;
             changed = true;
         }
 
         v = getChannel();
-        if (pCh != v)
-        {
+        if (pCh != v) {
             pCh = v;
             changed = true;
         }
@@ -1199,29 +1014,24 @@ public class LoaderOptionPanel extends JPanel
             updatePreview(z, t);
     }
 
-    protected void rangeChanged()
-    {
+    protected void rangeChanged() {
         updatePreviewOnChange();
     }
 
-    protected void seriesChanged()
-    {
+    protected void seriesChanged() {
         // update preview series index
         previewUpdater.updatePreview(((Integer) seriesSpinner.getValue()).intValue());
     }
 
-    void updateLoadingType()
-    {
+    void updateLoadingType() {
         final List<String> files = getFiles();
 
         loadingTypeCombo.setEnabled((files != null) && !files.isEmpty());
         // loadingTypeCombo.setEnabled(metadata != null);
     }
 
-    void updateXYRegion()
-    {
-        if (metadata != null)
-        {
+    void updateXYRegion() {
+        if (metadata != null) {
             final Rectangle2D r = xyRegionComp.getRegion();
             final int s = getSelectedSeries();
             final int sizeX = MetaDataUtil.getSizeX(metadata, s);
@@ -1233,17 +1043,14 @@ public class LoaderOptionPanel extends JPanel
             if ((r.getMaxX() > sizeX) || (r.getMaxY() > sizeY))
                 xyRegionComp.setRegion(0, 0, sizeX, sizeY);
         }
-        else
-        {
+        else {
             xyRegionComp.setEnabled(false);
             xyRegionLoadingToggle.setEnabled(false);
         }
     }
 
-    void updateZRange()
-    {
-        if (metadata != null)
-        {
+    void updateZRange() {
+        if (metadata != null) {
             final int s = getSelectedSeries();
             final int sizeZ = Math.max(MetaDataUtil.getSizeZ(metadata, s), 1);
 
@@ -1251,17 +1058,14 @@ public class LoaderOptionPanel extends JPanel
             zRangeComp.setLowHigh(0d, sizeZ - 1d);
             zRangeComp.setEnabled(canUseAdvancedSetting() && (sizeZ > 1));
         }
-        else
-        {
+        else {
             zRangeComp.setMinMaxStep(0d, 0d, 1d);
             zRangeComp.setEnabled(false);
         }
     }
 
-    void updateTRange()
-    {
-        if (metadata != null)
-        {
+    void updateTRange() {
+        if (metadata != null) {
             final int s = getSelectedSeries();
             final int sizeT = Math.max(MetaDataUtil.getSizeT(metadata, s), 1);
 
@@ -1269,55 +1073,46 @@ public class LoaderOptionPanel extends JPanel
             tRangeComp.setLowHigh(0d, sizeT - 1d);
             tRangeComp.setEnabled(canUseAdvancedSetting() && (sizeT > 1));
         }
-        else
-        {
+        else {
             tRangeComp.setMinMaxStep(0d, 0d, 1d);
             tRangeComp.setEnabled(false);
         }
     }
 
-    void updateChannelRange()
-    {
-        if (metadata != null)
-        {
+    void updateChannelRange() {
+        if (metadata != null) {
             final int s = getSelectedSeries();
             final int sizeC = Math.max(MetaDataUtil.getSizeC(metadata, s), 1);
 
             channelSpinner.setModel(new SpecialValueSpinnerModel(Math.min(getChannel(), sizeC - 1), -1, sizeC - 1, 1, -1, "ALL"));
             channelSpinner.setEnabled(canUseAdvancedSetting() && (sizeC > 1));
         }
-        else
-        {
+        else {
             channelSpinner.setModel(new SpecialValueSpinnerModel(-1, -1, 0, 1, -1, "ALL"));
             channelSpinner.setEnabled(false);
         }
     }
 
-    void updateSeriesRange()
-    {
-        if (metadata != null)
-        {
+    void updateSeriesRange() {
+        if (metadata != null) {
             final int numSeries = Math.max(MetaDataUtil.getNumSeries(metadata), 1);
 
             seriesSpinner.setModel(new SpecialValueSpinnerModel(Math.min(getSeries(), numSeries - 1), -1, numSeries - 1, 1, -1, "ALL"));
             seriesSpinner.setEnabled(canUseAdvancedSetting() && (numSeries > 1));
         }
-        else
-        {
+        else {
             seriesSpinner.setModel(new SpecialValueSpinnerModel(-1, -1, 0, 1, -1, "ALL"));
             seriesSpinner.setEnabled(false);
         }
     }
 
-    void updateResolutionSlider()
-    {
+    void updateResolutionSlider() {
         // min sub resolution to open (full resolution by default)
-        int minRes = 0;
+        final int minRes = 0;
         // max sub resolution to open
         int maxRes = 0;
 
-        if (metadata != null)
-        {
+        if (metadata != null) {
             final int s = getSelectedSeries();
             long sizeXY;
 
@@ -1336,8 +1131,7 @@ public class LoaderOptionPanel extends JPanel
             sizeXY = (long) MetaDataUtil.getSizeX(metadata, s) * (long) MetaDataUtil.getSizeY(metadata, s);
 
             // no need to get lower than 128x128
-            while (sizeXY > 16384)
-            {
+            while (sizeXY > 16384) {
                 // increase max sub resolution until XY plane is too low
                 maxRes++;
                 sizeXY /= 4;
@@ -1356,24 +1150,21 @@ public class LoaderOptionPanel extends JPanel
         updateFinaleResolution();
     }
 
-    void updateFinaleResolution()
-    {
-        if (metadata != null)
-        {
+    void updateFinaleResolution() {
+        if (metadata != null) {
             final int res = resolutionSlider.getValue();
             final int s = getSelectedSeries();
             final int baseX = MetaDataUtil.getSizeX(metadata, s);
             final int baseY = MetaDataUtil.getSizeY(metadata, s);
             final double diviser = Math.pow(2d, res);
 
-            resolutionLevelLabel.setText(res + " (" + Integer.toString((int) (baseX / diviser)) + " x " + Integer.toString((int) (baseY / diviser)) + ")");
+            resolutionLevelLabel.setText(res + " (" + ((int) (baseX / diviser)) + " x " + ((int) (baseY / diviser)) + ")");
         }
         else
             resolutionLevelLabel.setText("");
     }
 
-    void disablePanel()
-    {
+    void disablePanel() {
         // loadingTypeCombo.setEnabled(false);
         channelSpinner.setEnabled(false);
         seriesSpinner.setEnabled(false);
@@ -1385,11 +1176,9 @@ public class LoaderOptionPanel extends JPanel
         zRangeComp.setEnabled(false);
     }
 
-    void updatePanel()
-    {
+    void updatePanel() {
         updatingPanel = true;
-        try
-        {
+        try {
             updateResolutionSlider();
             updateXYRegion();
             updateTRange();
@@ -1397,88 +1186,73 @@ public class LoaderOptionPanel extends JPanel
             updateChannelRange();
             updateSeriesRange();
         }
-        finally
-        {
+        finally {
             updatingPanel = false;
         }
     }
 
-    void loadingTypeChanged()
-    {
+    void loadingTypeChanged() {
         updatePreview(-1);
     }
 
-    void regionLoadingToggleChanged()
-    {
+    void regionLoadingToggleChanged() {
         xyRegionComp.setEnabled(xyRegionLoadingToggle.isEnabled() && xyRegionLoadingToggle.isSelected());
     }
 
-    public List<String> getFiles()
-    {
+    public List<String> getFiles() {
         if (previewUpdater != null)
             return previewUpdater.newFiles;
 
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
-    public boolean getOptionsVisible()
-    {
+    public boolean getOptionsVisible() {
         return popupPanel.isExpanded();
     }
 
-    public void setOptionsVisible(boolean value)
-    {
+    public void setOptionsVisible(final boolean value) {
         popupPanel.setExpanded(value);
     }
 
-    public boolean isSeparateSequenceSelected()
-    {
+    public boolean isSeparateSequenceSelected() {
         return loadingTypeCombo.getSelectedItem() == LoaderLoadingType.NO_GROUP;
     }
 
-    public boolean isGroupedSequenceSelected()
-    {
+    public boolean isGroupedSequenceSelected() {
         return loadingTypeCombo.getSelectedItem() == LoaderLoadingType.GROUP;
     }
 
-    public boolean isMultiFile()
-    {
+    public boolean isMultiFile() {
         return previewUpdater.isMultiFile();
     }
 
-    public boolean canUseAdvancedSetting()
-    {
+    public boolean canUseAdvancedSetting() {
         return !(isSeparateSequenceSelected() && isMultiFile());
     }
 
-    public LoaderLoadingType getLoadingType()
-    {
+    public LoaderLoadingType getLoadingType() {
         return (LoaderLoadingType) loadingTypeCombo.getSelectedItem();
     }
 
-    void setLoadingType(LoaderLoadingType value)
-    {
+    void setLoadingType(final LoaderLoadingType value) {
         loadingTypeCombo.setSelectedItem(value);
     }
 
-    public int getResolutionLevel()
-    {
+    public int getResolutionLevel() {
         if (resolutionSlider.isVisible() && resolutionSlider.isEnabled())
             return resolutionSlider.getValue();
 
         return 0;
     }
 
-    public Rectangle getXYRegion()
-    {
+    public Rectangle getXYRegion() {
         if (xyRegionComp.isVisible() && xyRegionComp.isEnabled())
             return (Rectangle) xyRegionComp.getRegion();
 
         return null;
     }
 
-    public void setXYRegion(Rectangle region)
-    {
+    public void setXYRegion(final Rectangle region) {
         // enable region loading
         xyRegionLoadingToggle.setSelected(true);
         xyRegionComp.setEnabled(true);
@@ -1488,50 +1262,43 @@ public class LoaderOptionPanel extends JPanel
         setOptionsVisible(true);
     }
 
-    public int getZMin()
-    {
+    public int getZMin() {
         if (zRangeComp.isVisible())
             return (int) zRangeComp.getLow();
 
         return 0;
     }
 
-    public int getZMax()
-    {
+    public int getZMax() {
         if (zRangeComp.isVisible())
             return (int) zRangeComp.getHigh();
 
         return 0;
     }
 
-    public boolean getFullZRange()
-    {
+    public boolean getFullZRange() {
         return (getZMin() == 0) && (getZMax() == (int) zRangeComp.getMax());
     }
 
-    public int getTMin()
-    {
+    public int getTMin() {
         if (tRangeComp.isVisible())
             return (int) tRangeComp.getLow();
 
         return 0;
     }
 
-    public int getTMax()
-    {
+    public int getTMax() {
         if (tRangeComp.isVisible())
             return (int) tRangeComp.getHigh();
 
         return 0;
     }
 
-    public boolean getFullTRange()
-    {
+    public boolean getFullTRange() {
         return (getTMin() == 0) && (getTMax() == (int) tRangeComp.getMax());
     }
 
-    public int getChannel()
-    {
+    public int getChannel() {
         if (channelSpinner.isVisible())
             return ((Integer) channelSpinner.getValue()).intValue();
 
@@ -1539,8 +1306,7 @@ public class LoaderOptionPanel extends JPanel
         return -1;
     }
 
-    public int getSeries()
-    {
+    public int getSeries() {
         if (seriesSpinner.isVisible())
             // use cached value
             return series;
@@ -1549,8 +1315,7 @@ public class LoaderOptionPanel extends JPanel
         return -1;
     }
 
-    public void setSeries(int series)
-    {
+    public void setSeries(final int series) {
         // set default series
         seriesSpinner.setValue(Integer.valueOf(series));
 
@@ -1561,8 +1326,7 @@ public class LoaderOptionPanel extends JPanel
     /**
      * Same as {@link #getSeries()} except it returns 0 instead of -1 to ensure we have one selected series
      */
-    public int getSelectedSeries()
-    {
+    public int getSelectedSeries() {
         final int result = getSeries();
 
         return (result == -1) ? 0 : result;
@@ -1571,13 +1335,11 @@ public class LoaderOptionPanel extends JPanel
     /**
      * Cancel preview refresh
      */
-    public void cancelPreview()
-    {
+    public void cancelPreview() {
         previewUpdater.cancelPreview();
     }
 
-    protected void updatePreview(int series)
-    {
+    protected void updatePreview(final int series) {
         previewUpdater.updatePreview(series);
     }
 
@@ -1586,16 +1348,14 @@ public class LoaderOptionPanel extends JPanel
      * give
      * the fileId)
      */
-    protected void updatePreview(int z, int t)
-    {
+    protected void updatePreview(final int z, final int t) {
         previewUpdater.updatePreview(z, t);
     }
 
     /**
      * Asynchronous preview refresh
      */
-    public void updatePreview(String[] files, int s)
-    {
+    public void updatePreview(final String[] files, final int s) {
         // series or files selection changed ?
         if ((series != s) || !CollectionUtil.equals(getFiles(), CollectionUtil.asList(files)))
             previewUpdater.updatePreview(files, s);
@@ -1604,8 +1364,7 @@ public class LoaderOptionPanel extends JPanel
     /**
      * Asynchronous preview refresh
      */
-    public void updatePreview(List<String> files, int s)
-    {
+    public void updatePreview(final List<String> files, final int s) {
         // series or files selection changed ?
         if ((series != s) || !CollectionUtil.equals(getFiles(), files))
             previewUpdater.updatePreview(files, s);
@@ -1614,8 +1373,7 @@ public class LoaderOptionPanel extends JPanel
     /**
      * Asynchronous preview refresh
      */
-    public void updatePreview(String[] files)
-    {
+    public void updatePreview(final String[] files) {
         // files selection changed ?
         if (!CollectionUtil.equals(getFiles(), CollectionUtil.asList(files)))
             previewUpdater.updatePreview(files, -1);
@@ -1625,8 +1383,7 @@ public class LoaderOptionPanel extends JPanel
      * We are closing the Open Dialog.
      * Ensure metadata are correctly loaded (it's important that this method is called from EDT)
      */
-    public void closingFromEDT()
-    {
+    public void closingFromEDT() {
         previewUpdater.closeFromEDT();
     }
 }

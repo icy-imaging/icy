@@ -1,34 +1,22 @@
 /*
- * Copyright 2010-2018 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.file;
-
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.io.IOException;
-import java.nio.channels.ClosedByInterruptException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.filechooser.FileFilter;
 
 import icy.common.exception.UnsupportedFormatException;
 import icy.file.SequenceFileSticher.SequenceFileGroup;
@@ -53,26 +41,34 @@ import ome.xml.meta.OMEXMLMetadata;
 import ome.xml.model.Channel;
 import ome.xml.model.Pixels;
 import ome.xml.model.Plane;
+import org.jetbrains.annotations.NotNull;
 import plugins.kernel.importer.LociImporterPlugin;
+
+import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
+import java.util.List;
+import java.util.*;
 
 /**
  * Special importer able to group a list of path ({@link SequenceFileGroup}) to build a single Sequence out of it.<br>
  * Note that this importer is limited to single series group, we don't allow group mixing several series.
+ *
+ * @author Stephane
+ * @author Thomas MUSSET
  */
-public class SequenceFileGroupImporter extends AbstractImageProvider implements SequenceFileImporter
-{
+public class SequenceFileGroupImporter extends AbstractImageProvider implements SequenceFileImporter {
     static final int MAX_IMPORTER = 16;
 
-    class FileCursor
-    {
+    protected static class FileCursor {
         public final SequencePosition position;
         public final int index;
         public final int internalZ;
         public final int internalT;
         public final int internalC;
 
-        public FileCursor(SequencePosition position, int index, int z, int t, int c)
-        {
+        public FileCursor(final SequencePosition position, final int index, final int z, final int t, final int c) {
             super();
 
             this.position = position;
@@ -83,18 +79,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         }
     }
 
-    class TileIndex
-    {
-        public final Rectangle region;
-        public final int index;
-
-        public TileIndex(Rectangle region, int index)
-        {
-            super();
-
-            this.region = region;
-            this.index = index;
-        }
+    protected record TileIndex(Rectangle region, int index) {
     }
 
     protected SequenceFileGroup currentGroup;
@@ -117,30 +102,26 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
      */
     protected final Map<String, SequenceFileImporter> importersPool;
 
-    public SequenceFileGroupImporter()
-    {
+    public SequenceFileGroupImporter() {
         super();
 
         currentGroup = null;
         currentMetadata = null;
         // default
         ordering = true;
-        importersPool = new HashMap<String, SequenceFileImporter>();
+        importersPool = new HashMap<>();
     }
 
-    public void setOrdering(boolean ordering)
-    {
+    public void setOrdering(final boolean ordering) {
         this.ordering = ordering;
     }
 
-    public boolean getOrdering()
-    {
+    public boolean getOrdering() {
         return ordering;
     }
 
     @Override
-    public boolean acceptFile(String path)
-    {
+    public boolean acceptFile(final String path) {
         boolean result = false;
 
         if ((currentGroup != null) && (currentGroup.ident.importer != null))
@@ -154,10 +135,9 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     @Override
-    public List<FileFilter> getFileFilters()
-    {
+    public @NotNull List<FileFilter> getFileFilters() {
         // return a generic image file filter here
-        final List<FileFilter> result = new ArrayList<FileFilter>();
+        final List<FileFilter> result = new ArrayList<>();
         result.add(LoaderDialog.allImagesFileFilter);
         return result;
     }
@@ -165,8 +145,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     /**
      * @return <code>true</code> if a opened is currently opened
      */
-    public boolean isOpen()
-    {
+    public boolean isOpen() {
         return getOpenedGroup() != null;
     }
 
@@ -174,10 +153,8 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
      * Return the current / last loaded image without the image group
      */
     @Override
-    public String getOpened()
-    {
-        if (currentGroup != null)
-        {
+    public String getOpened() {
+        if (currentGroup != null) {
             // single image in the group ? --> directly return its path
             if (currentGroup.positions.size() == 1)
                 return currentGroup.positions.get(0).getPath();
@@ -192,19 +169,16 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     /**
      * @return current opened group
      */
-    public SequenceFileGroup getOpenedGroup()
-    {
+    public SequenceFileGroup getOpenedGroup() {
         return currentGroup;
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Better to use {@link #open(Collection, int)} or {@link #open(SequenceFileGroup, int)} for this importer
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public boolean open(String path, int flags) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public boolean open(@NotNull final String path, final int flags) throws UnsupportedFormatException, IOException, InterruptedException {
         open(CollectionUtil.createArrayList(path), flags);
 
         return true;
@@ -214,27 +188,19 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
      * Open a list of ids.<br>
      * Prefer to use {@link SequenceFileSticher#groupFiles(SequenceFileImporter, Collection, boolean, icy.gui.frame.progress.FileFrame)
      * then use #open(SequenceFileGroup, int) instead.
-     * 
-     * @param ids
-     * @throws InterruptedException
-     * @throws ClosedByInterruptException
      */
-    public void open(Collection<String> ids, int flags) throws InterruptedException, ClosedByInterruptException
-    {
+    public void open(final Collection<String> ids, final int flags) throws InterruptedException, ClosedByInterruptException {
         open(SequenceFileSticher.groupFiles(null, ids, ordering, null), flags);
     }
 
     /**
      * Open a SequenceFileGroup
      */
-    public void open(SequenceFileGroup group, int flags)
-    {
-        try
-        {
+    public void open(final SequenceFileGroup group, final int flags) {
+        try {
             close();
         }
-        catch (IOException e)
-        {
+        catch (final Exception e) {
             // should not prevent from opening
             IcyExceptionHandler.showErrorMessage(e, true, true);
         }
@@ -259,14 +225,10 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     /**
      * Open the specified importer to the given path (internal use only).
-     * 
-     * @throws IOException
-     * @throws UnsupportedFormatException
-     * @throws InterruptedException
+     *
      * @see #releaseImporter(String, SequenceFileImporter)
      */
-    protected boolean openImporter(SequenceFileImporter result, String path) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    protected boolean openImporter(final SequenceFileImporter result, final String path) throws Exception {
         // importer is already opened ? --> close it first
         if (!StringUtil.isEmpty(result.getOpened()))
             result.close();
@@ -280,17 +242,13 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     /**
      * Create and open a new importer for the given path (internal use only)
-     * 
-     * @throws InterruptedException
      */
-    protected SequenceFileImporter createImporter(String path)
-            throws InstantiationException, IllegalAccessException, UnsupportedFormatException, IOException, InterruptedException
-    {
+    protected SequenceFileImporter createImporter(final String path) throws Exception {
         if (!isOpen())
             return null;
 
         // we should always use the same importer for a file group
-        final SequenceFileImporter result = currentGroup.ident.importer.getClass().newInstance();
+        final SequenceFileImporter result = currentGroup.ident.importer.getClass().getDeclaredConstructor().newInstance();
 
         // open the importer for given path
         openImporter(result, path);
@@ -316,20 +274,14 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     /**
      * Return the path of the first available importer (internal use only)
-     * 
-     * @throws IOException
-     * @throws UnsupportedFormatException
      */
-    protected String getFirstImporterPath() throws IOException, UnsupportedFormatException
-    {
-        synchronized (importersPool)
-        {
+    protected String getFirstImporterPath() {
+        synchronized (importersPool) {
             if (!importersPool.isEmpty())
                 return importersPool.keySet().iterator().next();
         }
 
-        for (SequencePosition pos : currentGroup.positions)
-        {
+        for (final SequencePosition pos : currentGroup.positions) {
             if (pos != null)
                 return pos.getPath();
         }
@@ -340,35 +292,26 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     /**
      * Return an opened importer for given path.<br>
      * Note that you should call {@link #releaseImporter(String, SequenceFileImporter)} when you're done with it.
-     * 
-     * @throws IOException
-     * @throws UnsupportedFormatException
-     * @throws InterruptedException
+     *
      * @see #releaseImporter(String, SequenceFileImporter)
      */
-    @SuppressWarnings("resource")
-    public SequenceFileImporter getImporter(String path) throws IOException, UnsupportedFormatException, InterruptedException
-    {
+    public SequenceFileImporter getImporter(final String path) throws Exception {
         if (StringUtil.isEmpty(path))
             return null;
 
-        try
-        {
+        try {
             final int numImporter;
             SequenceFileImporter result;
 
-            synchronized (importersPool)
-            {
+            synchronized (importersPool) {
                 numImporter = importersPool.size();
                 result = importersPool.remove(path);
             }
 
             // no available importer for this path ?
-            if (result == null)
-            {
+            if (result == null) {
                 // we have already enough importers (we don't want to create too much of them)
-                if (numImporter >= MAX_IMPORTER)
-                {
+                if (numImporter >= MAX_IMPORTER) {
                     // recycle first importer found one
                     result = getImporter(getFirstImporterPath());
 
@@ -384,13 +327,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
             return result;
         }
-        catch (InstantiationException e)
-        {
-            // better to re-throw as RuntimeException
-            throw new RuntimeException(e.getMessage());
-        }
-        catch (IllegalAccessException e)
-        {
+        catch (final InstantiationException | IllegalAccessException e) {
             // better to re-throw as RuntimeException
             throw new RuntimeException(e.getMessage());
         }
@@ -398,20 +335,17 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
     /**
      * Release the importer obtained through {@link #getImporter(String)} to the importer pool.
-     * 
+     *
      * @see #getImporter(String)
      */
-    public void releaseImporter(String path, SequenceFileImporter importer)
-    {
-        synchronized (importersPool)
-        {
+    public void releaseImporter(final String path, final SequenceFileImporter importer) {
+        synchronized (importersPool) {
             // it's better to specify path instead of using SequenceFileImporter.getOpened() as internally format can change
             importersPool.put(path, importer);
         }
     }
 
-    protected void buildIndexes()
-    {
+    protected void buildIndexes() {
         final SequenceFileGroup group = currentGroup;
         final SequenceType baseType = group.ident.baseType;
 
@@ -427,8 +361,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         positions = new SequencePosition[totalLen];
 
         // find maxX and maxY
-        for (SequencePosition pos : currentGroup.positions)
-        {
+        for (final SequencePosition pos : currentGroup.positions) {
             // compute index
             final int ind = getIdIndex(pos.getIndexX(), pos.getIndexY(), pos.getIndexZ(), pos.getIndexT(), pos.getIndexC());
             // set path for this index
@@ -439,8 +372,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     /**
      * @return <code>true</code> if this image group requires several images to build a full XY plan image.
      */
-    public boolean isStitchedImage()
-    {
+    public boolean isStitchedImage() {
         if (!isOpen())
             return false;
 
@@ -451,8 +383,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     /**
      * @return cursor for the given [z,t,c] position
      */
-    protected FileCursor getCursor(int z, int t, int c)
-    {
+    protected FileCursor getCursor(final int z, final int t, final int c) {
         final SequenceType baseType = currentGroup.ident.baseType;
 
         final int externalZ = z / baseType.sizeZ;
@@ -471,12 +402,11 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     /**
      * @return all required TileIndex for the given XY region
      */
-    protected List<TileIndex> getTileIndexes(Rectangle xyRegion)
-    {
+    protected List<TileIndex> getTileIndexes(final Rectangle xyRegion) {
         if (!isStitchedImage())
             return CollectionUtil.createArrayList(new TileIndex(xyRegion, 0));
 
-        final List<TileIndex> result = new ArrayList<TileIndex>();
+        final List<TileIndex> result = new ArrayList<>();
 
         final SequenceType baseType = currentGroup.ident.baseType;
         final int tsx = baseType.sizeX;
@@ -486,8 +416,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         final List<Rectangle> tiles = ImageUtil.getTileList(xyRegion, tsx, tsy);
 
         // each tile represent a single image
-        for (Rectangle tile : tiles)
-        {
+        for (final Rectangle tile : tiles) {
             // find the image index
             final int x = tile.x / tsx;
             final int y = tile.y / tsy;
@@ -502,8 +431,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     /**
      * @return file path for the given [z,t,c] position
      */
-    public String getPath(int z, int t, int c)
-    {
+    public String getPath(final int z, final int t, final int c) {
         if (!isOpen())
             return "";
 
@@ -515,20 +443,17 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         return "";
     }
 
-    protected int getIdIndex(int x, int y, int z, int t, int c)
-    {
+    protected int getIdIndex(final int x, final int y, final int z, final int t, final int c) {
         return x + (y * indYMul) + (z * indZMul) + (t * indTMul) + (c * indCMul);
     }
 
     /**
      * Close all opened internals importer without closing the Group Importer itself (importer remaing active)
      */
-    public void closeInternalsImporters() throws IOException
-    {
-        synchronized (importersPool)
-        {
+    public void closeInternalsImporters() throws Exception {
+        synchronized (importersPool) {
             // close all importers
-            for (SequenceFileImporter imp : importersPool.values())
+            for (final SequenceFileImporter imp : importersPool.values())
                 imp.close();
 
             importersPool.clear();
@@ -536,8 +461,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     @Override
-    public void close() throws IOException
-    {
+    public void close() throws Exception {
         closeInternalsImporters();
 
         // release position indexes array
@@ -547,16 +471,14 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         currentGroup = null;
     }
 
-    @SuppressWarnings("deprecation")
+    @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public OMEXMLMetadataImpl getMetaData() throws Exception {
         return (OMEXMLMetadataImpl) getOMEXMLMetaData();
     }
 
     @Override
-    public OMEXMLMetadata getOMEXMLMetaData() throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public OMEXMLMetadata getOMEXMLMetaData() throws Exception {
         if (!isOpen())
             return null;
 
@@ -567,9 +489,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         return currentMetadata;
     }
 
-    @SuppressWarnings({"static-access", "resource"})
-    protected OMEXMLMetadata buildMetaData() throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    protected OMEXMLMetadata buildMetaData() throws Exception {
         final SequenceFileGroup group = currentGroup;
         final SequenceIdent ident = group.ident;
         final SequenceType baseType = ident.baseType;
@@ -579,17 +499,14 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         OMEXMLMetadata result = null;
 
         // try to recover general metadata from first image
-        if ((openFlags & SequenceFileImporter.FLAG_METADATA_MASK) != SequenceFileImporter.FLAG_METADATA_MINIMUM)
-        {
+        if ((openFlags & SequenceFileImporter.FLAG_METADATA_MASK) != SequenceFileImporter.FLAG_METADATA_MINIMUM) {
             final SequencePosition position = getCursor(0, 0, 0).position;
 
             // do we have an image for this position ?
-            if (position != null)
-            {
+            if (position != null) {
                 final SequenceFileImporter imp = getImporter(position.getPath());
 
-                if (imp != null)
-                {
+                if (imp != null) {
                     // create from original metadata
                     result = OMEUtil.createOMEXMLMetadata(imp.getOMEXMLMetaData(), 0);
                     // set name
@@ -620,39 +537,31 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         MetaDataUtil.ensurePlane(resultPixels, group.totalSizeT - 1, group.totalSizeZ - 1, group.totalSizeC - 1);
 
         // iterate over all dimension
-        for (int c = 0; c < group.totalSizeC; c++)
-        {
-            for (int z = 0; z < group.totalSizeZ; z++)
-            {
-                for (int t = 0; t < group.totalSizeT; t++)
-                {
+        for (int c = 0; c < group.totalSizeC; c++) {
+            for (int z = 0; z < group.totalSizeZ; z++) {
+                for (int t = 0; t < group.totalSizeT; t++) {
                     final FileCursor cursor = getCursor(z, t, c);
                     final SequencePosition position = cursor.position;
 
                     // do we have an image for this position ?
-                    if (position != null)
-                    {
+                    if (position != null) {
                         // get original plane metadata
                         Plane metaPlane = null;
 
                         // default metadata
-                        if ((openFlags & SequenceFileImporter.FLAG_METADATA_MASK) != SequenceFileImporter.FLAG_METADATA_MINIMUM)
-                        {
+                        if ((openFlags & SequenceFileImporter.FLAG_METADATA_MASK) != SequenceFileImporter.FLAG_METADATA_MINIMUM) {
                             final SequenceFileImporter imp = getImporter(position.getPath());
 
                             // importer ok ?
-                            if (imp != null)
-                            {
-                                try
-                                {
+                            if (imp != null) {
+                                try {
                                     // get metadata for this file
                                     final OMEXMLMetadata meta = imp.getOMEXMLMetaData();
                                     // get OME Pixels object (easier to deal with)
                                     final Pixels metaPixels = MetaDataUtil.getPixels(meta, 0);
 
                                     // first ZT plane ? --> fill channel data
-                                    if ((z == 0) && (t == 0))
-                                    {
+                                    if ((z == 0) && (t == 0)) {
                                         final Channel metaChannel;
 
                                         // get origin channel (or create it if needed)
@@ -670,15 +579,13 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
                                     // retrieve the original Plane object
                                     metaPlane = MetaDataUtil.getPlane(metaPixels, cursor.internalT, cursor.internalZ, cursor.internalC);
 
-                                    if (metaPlane != null)
-                                    {
+                                    if (metaPlane != null) {
                                         // remove linked annotation from plane
                                         for (int a = (metaPlane.sizeOfLinkedAnnotationList() - 1); a >= 0; a--)
                                             metaPlane.unlinkAnnotation(metaPlane.getLinkedAnnotation(a));
                                     }
                                 }
-                                finally
-                                {
+                                finally {
                                     releaseImporter(position.getPath(), imp);
                                 }
                             }
@@ -707,10 +614,8 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         return result;
     }
 
-    @SuppressWarnings("resource")
     @Override
-    public int getTileHeight(int series) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public int getTileHeight(final int series) throws Exception {
         if (!isOpen())
             return 0;
 
@@ -720,19 +625,15 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         final int isy = currentGroup.ident.baseType.sizeY;
 
         // single image for XY plane or stitched image with sizeY > 2048 --> use image tile height
-        if ((tsy == isy) || (isy > 2048))
-        {
+        if ((tsy == isy) || (isy > 2048)) {
             final String path = getFirstImporterPath();
             final SequenceFileImporter imp = getImporter(path);
 
-            if (imp != null)
-            {
-                try
-                {
+            if (imp != null) {
+                try {
                     return imp.getTileHeight(series);
                 }
-                finally
-                {
+                finally {
                     releaseImporter(path, imp);
                 }
             }
@@ -742,10 +643,8 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         return isy;
     }
 
-    @SuppressWarnings("resource")
     @Override
-    public int getTileWidth(int series) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public int getTileWidth(final int series) throws Exception {
         if (!isOpen())
             return 0;
 
@@ -755,19 +654,15 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         final int isx = currentGroup.ident.baseType.sizeX;
 
         // single image for XY plane or stitched image with sizeX > 2048 --> use image tile width
-        if ((tsx == isx) || (isx > 2048))
-        {
+        if ((tsx == isx) || (isx > 2048)) {
             final String path = getFirstImporterPath();
             final SequenceFileImporter imp = getImporter(path);
 
-            if (imp != null)
-            {
-                try
-                {
+            if (imp != null) {
+                try {
                     return imp.getTileWidth(series);
                 }
-                finally
-                {
+                finally {
                     releaseImporter(path, imp);
                 }
             }
@@ -778,12 +673,8 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     // internal use only
-    @SuppressWarnings("resource")
-    private Object getPixelsInternal(SequencePosition pos, int series, int resolution, Rectangle region, int z, int t, int c)
-            throws UnsupportedFormatException, IOException, InterruptedException
-    {
-        if (pos == null)
-        {
+    private Object getPixelsInternal(final SequencePosition pos, final int series, final int resolution, final Rectangle region, final int z, final int t, final int c) throws Exception {
+        if (pos == null) {
             final SequenceType bt = currentGroup.ident.baseType;
             System.err.println("SequenceIdGroupImporter.getPixelsInternal: no image for tile [" + (region.x / bt.sizeX) + "," + (region.y / bt.sizeY) + "] !");
             return null;
@@ -792,28 +683,23 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         // get importer for this image
         final SequenceFileImporter imp = getImporter(pos.getPath());
 
-        if (imp == null)
-        {
+        if (imp == null) {
             System.err.println("SequenceIdGroupImporter.getPixelsInternal: cannot get importer for image '" + pos.getPath() + "' !");
             return null;
         }
 
-        try
-        {
+        try {
             // get pixels from importer (it actually represents a tile of the resulting image)
             return imp.getPixels(series, resolution, region, z, t, c);
         }
-        finally
-        {
+        finally {
             // release importer
             releaseImporter(pos.getPath(), imp);
         }
     }
 
     @Override
-    public Object getPixels(int series, int resolution, Rectangle rectangle, int z, int t, int c)
-            throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public Object getPixels(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c) throws Exception {
         if (!isOpen())
             return null;
 
@@ -832,8 +718,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
         // single tile ?
         if (tiles.size() == 1)
-            return getPixelsInternal(positions[cursor.index + tiles.get(0).index], series, resolution, region, cursor.internalZ, cursor.internalT,
-                    cursor.internalC);
+            return getPixelsInternal(positions[cursor.index + tiles.get(0).index], series, resolution, region, cursor.internalZ, cursor.internalT, cursor.internalC);
 
         // define XY region to load (wanted resolution)
         final Rectangle finalRegion = new Rectangle(region.x >> resolution, region.y >> resolution, region.width >> resolution, region.height >> resolution);
@@ -846,8 +731,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         final int dy = -finalRegion.y;
 
         // each tile represent a single image
-        for (TileIndex tile : tiles)
-        {
+        for (final TileIndex tile : tiles) {
             // adjusted tile region
             final Rectangle tileRegion = tile.region.intersection(region);
             // get tile pixels
@@ -874,11 +758,8 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     // internal use only
-    private IcyBufferedImage getImageInternal(SequencePosition pos, int series, int resolution, Rectangle region, int z, int t, int c)
-            throws UnsupportedFormatException, IOException, InterruptedException
-    {
-        if (pos == null)
-        {
+    private IcyBufferedImage getImageInternal(final SequencePosition pos, final int series, final int resolution, final Rectangle region, final int z, final int t, final int c) throws Exception {
+        if (pos == null) {
             final SequenceType bt = currentGroup.ident.baseType;
             System.err.println("SequenceIdGroupImporter.getImageInternal: no image for tile [" + (region.x / bt.sizeX) + "," + (region.y / bt.sizeY) + "] !");
             return null;
@@ -887,28 +768,23 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         // get importer for this image
         final SequenceFileImporter imp = getImporter(pos.getPath());
 
-        if (imp == null)
-        {
+        if (imp == null) {
             System.err.println("SequenceIdGroupImporter.getImageInternal: cannot get importer for image '" + pos.getPath() + "' !");
             return null;
         }
 
-        try
-        {
+        try {
             // get image from importer (it actually represents a tile of the resulting image)
             return imp.getImage(series, resolution, region, z, t, c);
         }
-        finally
-        {
+        finally {
             // release importer
             releaseImporter(pos.getPath(), imp);
         }
     }
 
     // internal use only, at this point c cannot be -1
-    private IcyBufferedImage getImageInternal(int series, int resolution, Rectangle rectangle, int z, int t, int c)
-            throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    private IcyBufferedImage getImageInternal(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c) throws Exception {
         if (!isOpen())
             return null;
 
@@ -927,8 +803,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
         // single tile ?
         if (tiles.size() == 1)
-            return getImageInternal(positions[cursor.index + tiles.get(0).index], series, resolution, region, cursor.internalZ, cursor.internalT,
-                    cursor.internalC);
+            return getImageInternal(positions[cursor.index + tiles.get(0).index], series, resolution, region, cursor.internalZ, cursor.internalT, cursor.internalC);
 
         // define XY region to load (wanted resolution)
         final Rectangle finalRegion = new Rectangle(region.x >> resolution, region.y >> resolution, region.width >> resolution, region.height >> resolution);
@@ -942,13 +817,11 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         final int dy = -finalRegion.y;
 
         // each tile represent a single image
-        for (TileIndex tile : tiles)
-        {
+        for (final TileIndex tile : tiles) {
             // adjusted tile region
             final Rectangle tileRegion = tile.region.intersection(region);
             // get tile pixels
-            final IcyBufferedImage image = getImageInternal(positions[cursor.index + tile.index], series, resolution, tileRegion, cursor.internalZ,
-                    cursor.internalT, cursor.internalC);
+            final IcyBufferedImage image = getImageInternal(positions[cursor.index + tile.index], series, resolution, tileRegion, cursor.internalZ, cursor.internalT, cursor.internalC);
 
             // cannot retrieve pixels for this tile ? --> ignore
             if (image == null)
@@ -975,19 +848,16 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     @Override
-    public IcyBufferedImage getImage(int series, int resolution, Rectangle rectangle, int z, int t, int c)
-            throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public IcyBufferedImage getImage(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c) throws Exception {
         if (!isOpen())
             return null;
 
         final SequenceFileGroup group = currentGroup;
         final int sizeC = (c == -1) ? group.totalSizeC : 1;
-        final List<IcyBufferedImage> result = new ArrayList<IcyBufferedImage>();
+        final List<IcyBufferedImage> result = new ArrayList<>();
 
         // multi channel ?
-        if (sizeC > 1)
-        {
+        if (sizeC > 1) {
             // handle channel independently we can have channel in separate file
             for (int ch = 0; ch < sizeC; ch++)
                 result.add(getImageInternal(series, resolution, rectangle, z, t, ch));
@@ -997,8 +867,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
             result.add(getImageInternal(series, resolution, rectangle, z, t, (c == -1) ? 0 : c));
 
         // we have a null image in the result ?
-        if (result.contains(null))
-        {
+        if (result.contains(null)) {
             final SequenceIdent ident = group.ident;
             final SequenceType baseType = ident.baseType;
 
@@ -1020,10 +889,8 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         return IcyBufferedImage.createFrom(result);
     }
 
-    @SuppressWarnings("resource")
     @Override
-    public IcyBufferedImage getThumbnail(int series) throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    public IcyBufferedImage getThumbnail(final int series) throws Exception {
         final OMEXMLMetadata meta = getOMEXMLMetaData();
 
         // probably no group opened
@@ -1050,19 +917,16 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
         final SequenceFileImporter imp = getImporter(path);
 
-        if (imp == null)
-        {
+        if (imp == null) {
             // should not happen
             System.err.println("SequenceIdGroupImporter.getThumbnail: cannot find importer...");
             return null;
         }
 
-        try
-        {
+        try {
             return imp.getThumbnail(series);
         }
-        finally
-        {
+        finally {
             releaseImporter(path, imp);
         }
     }

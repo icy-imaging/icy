@@ -1,42 +1,22 @@
 /*
- * Copyright 2010-2018 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.file;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.channels.ClosedByInterruptException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.stream.ImageInputStream;
 
 import icy.gui.frame.progress.FileFrame;
 import icy.sequence.DimensionId;
@@ -48,17 +28,29 @@ import icy.type.DataType;
 import icy.util.StringUtil;
 import icy.util.StringUtil.AlphanumComparator;
 import ome.xml.meta.OMEXMLMetadata;
+import org.jetbrains.annotations.NotNull;
 import plugins.kernel.importer.LociImporterPlugin;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.stream.ImageInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * This class is an utility class aim to help in grouping a list of <i>file path</i> representing image to form a complete and valid Sequence.
- * 
+ *
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class SequenceFileSticher
-{
-    public static class SequenceType
-    {
+public class SequenceFileSticher {
+    public static class SequenceType {
         public boolean minimumMeta;
         public int sizeX;
         public int sizeY;
@@ -74,8 +66,7 @@ public class SequenceFileSticher
         // internal
         int hc;
 
-        public SequenceType()
-        {
+        public SequenceType() {
             super();
 
             minimumMeta = true;
@@ -95,8 +86,7 @@ public class SequenceFileSticher
             timeInterval = 0d;
         }
 
-        void computeHashCode()
-        {
+        void computeHashCode() {
             // don't use optional info for hashcode
             hc = (sizeX << 0) ^ (sizeY << 4) ^ (sizeZ << 8) ^ (sizeT << 12) ^ (sizeC << 16) ^ ((dataType != null) ? (dataType.ordinal() >> 12) : 0);
 
@@ -110,25 +100,18 @@ public class SequenceFileSticher
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return hc;
         }
 
         @Override
-        public boolean equals(Object obj)
-        {
-            if (obj instanceof SequenceType)
-            {
-                final SequenceType st = (SequenceType) obj;
-
-                boolean result = (st.sizeX == sizeX) && (st.sizeY == sizeY) && (st.sizeZ == sizeZ) && (st.sizeT == sizeT) && (st.sizeC == sizeC)
-                        && (st.dataType == dataType);
+        public boolean equals(final Object obj) {
+            if (obj instanceof final SequenceType st) {
+                boolean result = (st.sizeX == sizeX) && (st.sizeY == sizeY) && (st.sizeZ == sizeZ) && (st.sizeT == sizeT) && (st.sizeC == sizeC) && (st.dataType == dataType);
 
                 // optional meta data ?
                 if (!st.minimumMeta && !minimumMeta)
-                    result = result && (st.pixelSizeX == pixelSizeX) && (st.pixelSizeY == pixelSizeY) && (st.pixelSizeZ == pixelSizeZ)
-                            && (st.timeInterval == timeInterval);
+                    result = result && (st.pixelSizeX == pixelSizeX) && (st.pixelSizeY == pixelSizeY) && (st.pixelSizeZ == pixelSizeZ) && (st.timeInterval == timeInterval);
 
                 return result;
             }
@@ -137,8 +120,7 @@ public class SequenceFileSticher
         }
     }
 
-    public static class SequenceIdent
-    {
+    public static class SequenceIdent {
         /**
          * base path pattern (identical part of the path in this group)
          */
@@ -159,8 +141,7 @@ public class SequenceFileSticher
         SequencePosition pos;
         private final int hc;
 
-        public SequenceIdent(SequencePosition position, SequenceType type, SequenceFileImporter importer)
-        {
+        public SequenceIdent(@NotNull final SequencePosition position, final SequenceType type, final SequenceFileImporter importer) {
             super();
 
             this.pos = position;
@@ -173,18 +154,13 @@ public class SequenceFileSticher
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return hc;
         }
 
         @Override
-        public boolean equals(Object obj)
-        {
-            if (obj instanceof SequenceIdent)
-            {
-                final SequenceIdent ident = (SequenceIdent) obj;
-
+        public boolean equals(final Object obj) {
+            if (obj instanceof final SequenceIdent ident) {
                 return base.equals(ident.base) && (series == ident.series) && baseType.equals(ident.baseType);
             }
 
@@ -192,8 +168,7 @@ public class SequenceFileSticher
         }
     }
 
-    public static class SequenceAbsolutePosition implements Comparable<SequenceAbsolutePosition>
-    {
+    public static class SequenceAbsolutePosition implements Comparable<SequenceAbsolutePosition> {
         // absolute position from metadata
         public double posX;
         public double posY;
@@ -207,8 +182,7 @@ public class SequenceFileSticher
         // internal
         protected int hc;
 
-        public SequenceAbsolutePosition()
-        {
+        public SequenceAbsolutePosition() {
             super();
 
             // undetermined
@@ -225,11 +199,9 @@ public class SequenceFileSticher
         /**
          * Set index X from absolute position and sequence properties (pixel size, dimension)
          */
-        public void setIndexX(SequenceType type)
-        {
+        public void setIndexX(final SequenceType type) {
             // -1 mean not set
-            if (posX != -1d)
-            {
+            if (posX != -1d) {
                 // get pixel position if possible
                 final double pixPos;
 
@@ -248,11 +220,9 @@ public class SequenceFileSticher
         /**
          * Set index X from absolute position and sequence properties (pixel size, dimension)
          */
-        public void setIndexY(SequenceType type)
-        {
+        public void setIndexY(final SequenceType type) {
             // -1 mean not set
-            if (posY != -1d)
-            {
+            if (posY != -1d) {
                 // get pixel position if possible
                 final double pixPos;
 
@@ -271,11 +241,9 @@ public class SequenceFileSticher
         /**
          * Set index X from absolute position and sequence properties (pixel size, dimension)
          */
-        public void setIndexZ(SequenceType type)
-        {
+        public void setIndexZ(final SequenceType type) {
             // -1 mean not set
-            if (posZ != -1d)
-            {
+            if (posZ != -1d) {
                 // get pixel position if possible
                 final double pixPos;
 
@@ -294,11 +262,9 @@ public class SequenceFileSticher
         /**
          * Set index T from absolute time position and sequence properties (pixel size, dimension)
          */
-        public void setIndexT(SequenceType type)
-        {
+        public void setIndexT(final SequenceType type) {
             // -1 mean not set
-            if (posT != -1d)
-            {
+            if (posT != -1d) {
                 // get time position in second if possible
                 final double timePos;
 
@@ -314,28 +280,23 @@ public class SequenceFileSticher
             }
         }
 
-        public void clearIndX()
-        {
+        public void clearIndX() {
             indX = -1d;
         }
 
-        public void clearIndY()
-        {
+        public void clearIndY() {
             indY = -1d;
         }
 
-        public void clearIndZ()
-        {
+        public void clearIndZ() {
             indZ = -1d;
         }
 
-        public void clearIndT()
-        {
+        public void clearIndT() {
             indT = -1d;
         }
 
-        public DimensionId getDifference(SequenceAbsolutePosition sap)
-        {
+        public DimensionId getDifference(final SequenceAbsolutePosition sap) {
             if (compare(indT, sap.indT) != 0)
                 return DimensionId.T;
             if (compare(indZ, sap.indZ) != 0)
@@ -348,26 +309,20 @@ public class SequenceFileSticher
             return null;
         }
 
-        public void computeHashCode()
-        {
+        public void computeHashCode() {
             hc = Float.floatToIntBits((float) indX) ^ (Float.floatToIntBits((float) indY) << 8) ^ (Float.floatToIntBits((float) indZ) << 16)
                     ^ (Float.floatToIntBits((float) indT) << 24) ^ Float.floatToIntBits((float) posX) ^ (Float.floatToIntBits((float) posY) >> 8)
                     ^ (Float.floatToIntBits((float) posZ) >> 16) ^ (Float.floatToIntBits((float) posT) >> 24);
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return hc;
         }
 
         @Override
-        public boolean equals(Object obj)
-        {
-            if (obj instanceof SequenceAbsolutePosition)
-            {
-                final SequenceAbsolutePosition sap = (SequenceAbsolutePosition) obj;
-
+        public boolean equals(final Object obj) {
+            if (obj instanceof final SequenceAbsolutePosition sap) {
                 return (sap.indX == indX) && (sap.indY == indY) && (sap.indZ == indZ) && (sap.indT == indT);
             }
 
@@ -375,8 +330,7 @@ public class SequenceFileSticher
         }
 
         @Override
-        public int compareTo(SequenceAbsolutePosition sap)
-        {
+        public int compareTo(final SequenceAbsolutePosition sap) {
             int result = compare(indT, sap.indT);
             if (result == 0)
                 result = compare(indZ, sap.indZ);
@@ -390,16 +344,14 @@ public class SequenceFileSticher
 
     }
 
-    public static class SequenceIndexPosition implements Comparable<SequenceIndexPosition>
-    {
+    public static class SequenceIndexPosition implements Comparable<SequenceIndexPosition> {
         public int x;
         public int y;
         public int z;
         public int t;
         public int c;
 
-        public SequenceIndexPosition()
-        {
+        public SequenceIndexPosition() {
             super();
 
             // undetermined
@@ -410,8 +362,7 @@ public class SequenceFileSticher
             c = -1;
         }
 
-        public DimensionId getDifference(SequenceIndexPosition sip)
-        {
+        public DimensionId getDifference(final SequenceIndexPosition sip) {
             if (SequenceFileSticher.compare(t, sip.t) != 0)
                 return DimensionId.T;
             if (SequenceFileSticher.compare(z, sip.z) != 0)
@@ -427,26 +378,20 @@ public class SequenceFileSticher
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return x ^ (y << 6) ^ (z << 12) ^ (t << 18) ^ (c << 24);
         }
 
         @Override
-        public boolean equals(Object obj)
-        {
-            if (obj instanceof SequenceIndexPosition)
-            {
-                final SequenceIndexPosition sip = (SequenceIndexPosition) obj;
-
+        public boolean equals(final Object obj) {
+            if (obj instanceof final SequenceIndexPosition sip) {
                 return (sip.x == x) && (sip.y == y) && (sip.z == z) && (sip.t == t) && (sip.c == c);
             }
 
             return super.equals(obj);
         }
 
-        public int compare(SequenceIndexPosition sip)
-        {
+        public int compare(final SequenceIndexPosition sip) {
             int result = 0;
 
             if (result == 0)
@@ -464,20 +409,17 @@ public class SequenceFileSticher
         }
 
         @Override
-        public int compareTo(SequenceIndexPosition sip)
-        {
+        public int compareTo(@NotNull final SequenceIndexPosition sip) {
             return compare(sip);
         }
     }
 
-    public static class SequenceIdentGetter implements Callable<SequenceIdent>
-    {
+    public static class SequenceIdentGetter implements Callable<SequenceIdent> {
         final SequencePosition pos;
         final SequenceFileImporter importer;
         final boolean minimumMetadata;
 
-        public SequenceIdentGetter(SequenceFileImporter importer, SequencePosition pos, boolean minimumMetadata)
-        {
+        public SequenceIdentGetter(final SequenceFileImporter importer, final SequencePosition pos, final boolean minimumMetadata) {
             super();
 
             this.importer = importer;
@@ -486,15 +428,13 @@ public class SequenceFileSticher
         }
 
         @Override
-        public SequenceIdent call() throws Exception
-        {
+        public SequenceIdent call() throws Exception {
             // clone importer for each task instance
             return getSequenceIdent(Loader.cloneSequenceFileImporter(importer), pos, minimumMetadata);
         }
     }
 
-    public static class SequencePosition implements Comparable<SequencePosition>
-    {
+    public static class SequencePosition implements Comparable<SequencePosition> {
         // /**
         // * file path
         // */
@@ -543,8 +483,7 @@ public class SequenceFileSticher
         // // metadata = null;
         // }
 
-        public SequencePosition(FilePosition filePosition)
-        {
+        public SequencePosition(final FilePosition filePosition) {
             super();
 
             // type = new SequenceType();
@@ -557,18 +496,15 @@ public class SequenceFileSticher
             // metadata = null;
         }
 
-        public String getBase()
-        {
+        public String getBase() {
             return filePosition.base;
         }
 
-        public String getPath()
-        {
+        public String getPath() {
             return filePosition.path;
         }
 
-        public int getIndexS()
-        {
+        public int getIndexS() {
             int result = filePosition.getValue(DimensionId.NULL, true);
 
             // if not defined then series = 0
@@ -578,8 +514,7 @@ public class SequenceFileSticher
             return result;
         }
 
-        public int getIndexX()
-        {
+        public int getIndexX() {
             if (indPos.x != -1)
                 return indPos.x;
 
@@ -587,17 +522,15 @@ public class SequenceFileSticher
             return 0;
         }
 
-        public int getIndexY()
-        {
+        public int getIndexY() {
             if (indPos.y != -1)
-                return indPos.x;
+                return indPos.y;
 
             // default
             return 0;
         }
 
-        public int getIndexC()
-        {
+        public int getIndexC() {
             if (indPos.c != -1)
                 return indPos.c;
 
@@ -605,8 +538,7 @@ public class SequenceFileSticher
             return 0;
         }
 
-        public int getIndexZ()
-        {
+        public int getIndexZ() {
             if (indPos.z != -1)
                 return indPos.z;
 
@@ -614,8 +546,7 @@ public class SequenceFileSticher
             return 0;
         }
 
-        public int getIndexT()
-        {
+        public int getIndexT() {
             if (indPos.t != -1)
                 return indPos.t;
 
@@ -650,13 +581,11 @@ public class SequenceFileSticher
         // return 1;
         // }
 
-        public int compareSeries(SequencePosition sp)
-        {
+        public int compareSeries(final SequencePosition sp) {
             return filePosition.compareSeries(sp.filePosition);
         }
 
-        public DimensionId getDifference(SequencePosition sp)
-        {
+        public DimensionId getDifference(final SequencePosition sp) {
             // not the same series (always compare first)
             if (compareSeries(sp) != 0)
                 return DimensionId.NULL;
@@ -671,8 +600,7 @@ public class SequenceFileSticher
         }
 
         @Override
-        public int compareTo(SequencePosition sp)
-        {
+        public int compareTo(@NotNull final SequencePosition sp) {
             int result = compareSeries(sp);
             if (result == 0)
                 // result = absPos.compareTo(sp.absPos);
@@ -685,8 +613,7 @@ public class SequenceFileSticher
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return "Path=" + getPath() + " Position=[S:" + getIndexS() + " T:" + getIndexT() + " Z:" + getIndexZ() + " C:" + getIndexC() + " Y:" + getIndexY()
                     + " X:" + getIndexX() + "]";
         }
@@ -694,46 +621,54 @@ public class SequenceFileSticher
 
     /**
      * Class used to build a FilePosition from an <i>path</i>
-     * 
+     *
      * @author Stephane
      */
-    public static class FilePosition implements Comparable<FilePosition>
-    {
+    public static class FilePosition implements Comparable<FilePosition> {
         /**
          * Class representing a position for a specific dimension.
-         * 
+         *
          * @author Stephane
          */
-        private static class PositionChunk
-        {
-            /** X dimension prefixes */
+        public static class PositionChunk {
+            /**
+             * X dimension prefixes
+             */
             static final String[] prefixesX = {"x", "xpos", "posx", "xposition", "positionx"};
 
-            /** Y dimension prefixes */
+            /**
+             * Y dimension prefixes
+             */
             static final String[] prefixesY = {"y", "ypos", "posy", "yposition", "positiony"};
 
-            /** Depth (Z) dimension prefixes (taken from Bio-Formats for almost) */
+            /**
+             * Depth (Z) dimension prefixes (taken from Bio-Formats for almost)
+             */
             static final String[] prefixesZ = {"fp", "sec", "z", "zs", "plane", "focal", "focalplane"};
 
-            /** Time (T) dimension prefixes (taken from Bio-Formats for almost) */
+            /**
+             * Time (T) dimension prefixes (taken from Bio-Formats for almost)
+             */
             static final String[] prefixesT = {"t", "tl", "tp", "time", "frame"};
 
-            /** Channel (C) dimension prefixes (taken from Bio-Formats for almost) */
+            /**
+             * Channel (C) dimension prefixes (taken from Bio-Formats for almost)
+             */
             static final String[] prefixesC = {"c", "ch", "channel", "b", "band", "w", "wl", "wave", "wavelength"};
 
-            /** Series (S)dimension prefixes (taken from Bio-Formats for almost) */
+            /**
+             * Series (S)dimension prefixes (taken from Bio-Formats for almost)
+             */
             static final String[] prefixesS = {"s", "series", "sp", "f", "field"};
 
             public DimensionId dim;
             public int value;
 
-            PositionChunk(String prefix, int value)
-            {
+            PositionChunk(final String prefix, final int value) {
                 super();
 
                 dim = null;
-                if (!StringUtil.isEmpty(prefix))
-                {
+                if (!StringUtil.isEmpty(prefix)) {
                     final String prefixLC = prefix.toLowerCase();
 
                     if (dim == null)
@@ -753,9 +688,8 @@ public class SequenceFileSticher
                 this.value = value;
             }
 
-            private static DimensionId getDim(String prefix, String prefixes[], DimensionId d)
-            {
-                for (String p : prefixes)
+            private static DimensionId getDim(final String prefix, final String[] prefixes, final DimensionId d) {
+                for (final String p : prefixes)
                     // better to just test on equality
                     if (prefix.equals(p))
                         // if (prefix.endsWith(p))
@@ -769,34 +703,30 @@ public class SequenceFileSticher
         final String base;
         final List<PositionChunk> chunks;
 
-        FilePosition(String path)
-        {
+        FilePosition(final String path) {
             super();
 
             this.path = path;
             this.base = getBase(path);
 
-            chunks = new ArrayList<PositionChunk>();
+            chunks = new ArrayList<>();
 
             build();
         }
 
-        private void build()
-        {
+        private void build() {
             // we need to extract position from filename (not from the complete path)
             final String name = FileUtil.getFileName(path);
             final int len = name.length();
 
             // int value;
             int index = 0;
-            while (index < len)
-            {
+            while (index < len) {
                 // get starting digit char index
                 final int startInd = StringUtil.getNextDigitCharIndex(name, index);
 
                 // we find a digit char ?
-                if (startInd >= 0)
-                {
+                if (startInd >= 0) {
                     // get ending digit char index
                     int endInd = StringUtil.getNextNonDigitCharIndex(name, startInd);
                     if (endInd < 0)
@@ -822,20 +752,17 @@ public class SequenceFileSticher
             }
         }
 
-        private static String getBase(String path)
-        {
+        private static String getBase(final String path) {
             // final String folder = FileUtil.getDirectory(path, true);
 
             // we extract position from filename (not from the complete path)
             String result = FileUtil.getFileName(path);
             int pos = 0;
 
-            while (pos < result.length())
-            {
+            while (pos < result.length()) {
                 int st = StringUtil.getNextDigitCharIndex(result, pos);
 
-                if (st != -1)
-                {
+                if (st != -1) {
                     // get ending digit char index
                     int end = StringUtil.getNextNonDigitCharIndex(result, st);
                     if (end < 0)
@@ -844,14 +771,13 @@ public class SequenceFileSticher
                     // assume 'separator + dimension id', remove them
                     if ((st > 2) && (Character.isLetter(result.charAt(st - 1)) && " -_".contains(result.substring(st - 2, st - 1))))
                         st -= 2;
-                    // try others combinations
-                    else if (st > 1)
-                    {
+                        // try others combinations
+                    else if (st > 1) {
                         // assume dimension id (should be preceded by a non letter), remove it
                         if (!Character.isLetter(result.charAt(st - 2)) && Character.isLetter(result.charAt(st - 1)))
                             st--;
-                        // assume separator, remove it
-                        else if (" -_".contains(result.substring(st - 1, st - 0)))
+                            // assume separator, remove it
+                        else if (" -_".contains(result.substring(st - 1, st)))
                             st--;
                     }
 
@@ -870,10 +796,8 @@ public class SequenceFileSticher
             // return folder + result;
         }
 
-        private static String getPositionPrefix(String text, int ind)
-        {
-            if ((ind >= 0) && (ind < text.length()))
-            {
+        private static String getPositionPrefix(final String text, final int ind) {
+            if ((ind >= 0) && (ind < text.length())) {
                 // we have a letter at this position
                 if (Character.isLetter(text.charAt(ind)))
                     // get complete prefix
@@ -883,8 +807,7 @@ public class SequenceFileSticher
             return "";
         }
 
-        private void addChunk(String prefix, int value)
-        {
+        private void addChunk(final String prefix, final int value) {
             final PositionChunk chunk = new PositionChunk(prefix, value);
             // get the previous chunk for this dimension
             final PositionChunk previousChunk = getChunk(chunk.dim, false);
@@ -900,18 +823,15 @@ public class SequenceFileSticher
             chunks.add(chunk);
         }
 
-        private boolean removeChunk(PositionChunk chunk)
-        {
+        private boolean removeChunk(final PositionChunk chunk) {
             return chunks.remove(chunk);
         }
 
-        boolean removeChunk(DimensionId dim)
-        {
+        boolean removeChunk(final DimensionId dim) {
             return removeChunk(getChunk(dim, true));
         }
 
-        public int getValue(DimensionId dim, boolean fromUnknow)
-        {
+        public int getValue(final DimensionId dim, final boolean fromUnknow) {
             final PositionChunk chunk = getChunk(dim, fromUnknow);
 
             if (chunk != null)
@@ -921,16 +841,13 @@ public class SequenceFileSticher
             return -1;
         }
 
-        boolean isUnknowDim(DimensionId dim)
-        {
+        boolean isUnknowDim(final DimensionId dim) {
             return getChunk(dim, false) == null;
         }
 
-        public PositionChunk getChunk(DimensionId dim, boolean allowUnknown)
-        {
-            if (dim != null)
-            {
-                for (PositionChunk chunk : chunks)
+        public PositionChunk getChunk(final DimensionId dim, final boolean allowUnknown) {
+            if (dim != null) {
+                for (final PositionChunk chunk : chunks)
                     if (dim.equals(chunk.dim))
                         return chunk;
 
@@ -945,15 +862,13 @@ public class SequenceFileSticher
          * Try to attribute given dimension position from unknown chunk(x).<br>
          * Work only for Z, T and C dimension (unlikely to have unaffected X and Y dimension)
          */
-        private PositionChunk getChunkFromUnknown(DimensionId dim)
-        {
+        private PositionChunk getChunkFromUnknown(final DimensionId dim) {
             final boolean hasCChunk = (getChunk(DimensionId.C, false) != null);
             final boolean hasZChunk = (getChunk(DimensionId.Z, false) != null);
             final boolean hasTChunk = (getChunk(DimensionId.T, false) != null);
 
             // priority order for affectation: T, Z, C
-            switch (dim)
-            {
+            switch (dim) {
                 case Z:
                     // shouldn't happen (Z already affected)
                     if (hasZChunk)
@@ -979,8 +894,7 @@ public class SequenceFileSticher
                     if (hasCChunk)
                         return null;
 
-                    if (hasTChunk)
-                    {
+                    if (hasTChunk) {
                         // T and Z chunk present --> C = unknown[0]
                         if (hasZChunk)
                             return getUnknownChunk(0);
@@ -999,14 +913,11 @@ public class SequenceFileSticher
             return null;
         }
 
-        private PositionChunk getUnknownChunk(int i)
-        {
+        private PositionChunk getUnknownChunk(final int i) {
             int ind = 0;
 
-            for (PositionChunk chunk : chunks)
-            {
-                if (chunk.dim == null)
-                {
+            for (final PositionChunk chunk : chunks) {
+                if (chunk.dim == null) {
                     if (ind == i)
                         return chunk;
 
@@ -1017,19 +928,17 @@ public class SequenceFileSticher
             return null;
         }
 
-        int getUnknownChunkCount()
-        {
+        int getUnknownChunkCount() {
             int result = 0;
 
-            for (PositionChunk chunk : chunks)
+            for (final PositionChunk chunk : chunks)
                 if (chunk.dim == null)
                     result++;
 
             return result;
         }
 
-        public int compareSeries(FilePosition ipb)
-        {
+        public int compareSeries(final FilePosition ipb) {
             int result = 0;
             final String bn1 = base;
             final String bn2 = ipb.base;
@@ -1047,8 +956,7 @@ public class SequenceFileSticher
             return result;
         }
 
-        public int compare(FilePosition ipb, boolean compareSeries)
-        {
+        public int compare(final FilePosition ipb, final boolean compareSeries) {
             int result = 0;
 
             // always compare series first
@@ -1082,10 +990,8 @@ public class SequenceFileSticher
             return result;
         }
 
-        public DimensionId getDifference(FilePosition ipb, boolean compareSeries)
-        {
-            if (compareSeries)
-            {
+        public DimensionId getDifference(final FilePosition ipb, final boolean compareSeries) {
+            if (compareSeries) {
                 // always compare series first
                 if (compareSeries(ipb) != 0)
                     return DimensionId.NULL;
@@ -1119,21 +1025,18 @@ public class SequenceFileSticher
         }
 
         @Override
-        public int compareTo(FilePosition ipb)
-        {
+        public int compareTo(@NotNull final FilePosition ipb) {
             return compare(ipb, false);
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return "FilePosition [S:" + getValue(DimensionId.NULL, true) + " C:" + getValue(DimensionId.C, true) + " T:" + getValue(DimensionId.T, true) + " Z:"
                     + getValue(DimensionId.Z, true) + " Y:" + getValue(DimensionId.Y, true) + " X:" + getValue(DimensionId.X, true) + "]";
         }
     }
 
-    public static class SequenceFileGroup
-    {
+    public static class SequenceFileGroup {
         public final SequenceIdent ident;
         public final List<SequencePosition> positions;
 
@@ -1150,12 +1053,11 @@ public class SequenceFileSticher
         /**
          * Internal use only, use {@link SequenceFileSticher#groupFiles(SequenceFileImporter, Collection, boolean, FileFrame)} instead.
          */
-        public SequenceFileGroup(SequenceIdent ident)
-        {
+        public SequenceFileGroup(final SequenceIdent ident) {
             super();
 
             this.ident = ident;
-            positions = new ArrayList<SequencePosition>();
+            positions = new ArrayList<>();
 
             // we will compute them with buildIndexesFromPositions
             totalSizeX = 0;
@@ -1216,25 +1118,21 @@ public class SequenceFileSticher
         // }
         // }
 
-        void checkZTDimIdPos()
-        {
+        void checkZTDimIdPos() {
             final boolean zMulti = ident.baseType.sizeZ > 1;
             final boolean tMulti = ident.baseType.sizeT > 1;
 
             // determine if we need to swap out Z and T position (if only one of the dimension can move)
-            if (tMulti ^ zMulti)
-            {
+            if (tMulti ^ zMulti) {
                 boolean tSet = false;
                 boolean tCanChange = true;
                 boolean zSet = false;
                 boolean zCanChange = true;
 
-                for (SequencePosition pos : positions)
-                {
+                for (final SequencePosition pos : positions) {
                     final FilePosition idPos = pos.filePosition;
 
-                    if (idPos != null)
-                    {
+                    if (idPos != null) {
                         if (idPos.getValue(DimensionId.T, true) != -1)
                             tSet = true;
                         if (idPos.getValue(DimensionId.Z, true) != -1)
@@ -1248,13 +1146,11 @@ public class SequenceFileSticher
                 }
 
                 // Z and T position are not fixed, and one of the dimension , try to swap if possible
-                if (tCanChange && zCanChange)
-                {
+                if (tCanChange && zCanChange) {
                     boolean swapZT = false;
 
                     // multi T but single Z
-                    if (tMulti)
-                    {
+                    if (tMulti) {
                         // T position set but can be swapped with Z
                         if (tSet && tCanChange && !zSet)
                             swapZT = true;
@@ -1268,14 +1164,11 @@ public class SequenceFileSticher
                     }
 
                     // swap T and Z dimension
-                    if (swapZT)
-                    {
-                        for (SequencePosition pos : positions)
-                        {
+                    if (swapZT) {
+                        for (final SequencePosition pos : positions) {
                             final FilePosition idPos = pos.filePosition;
 
-                            if (idPos != null)
-                            {
+                            if (idPos != null) {
                                 final FilePosition.PositionChunk zChunk = idPos.getChunk(DimensionId.Z, true);
                                 final FilePosition.PositionChunk tChunk = idPos.getChunk(DimensionId.T, true);
 
@@ -1291,8 +1184,7 @@ public class SequenceFileSticher
             }
         }
 
-        void buildIndexesAndSizesFromPositions(boolean findPosition)
-        {
+        void buildIndexesAndSizesFromPositions(final boolean findPosition) {
             final int size = positions.size();
 
             // nothing to do
@@ -1329,8 +1221,7 @@ public class SequenceFileSticher
             indPos.y = y;
             indPos.x = x;
 
-            for (int i = 1; i < size; i++)
-            {
+            for (int i = 1; i < size; i++) {
                 final SequencePosition current = positions.get(i);
                 DimensionId diff = null;
 
@@ -1343,8 +1234,7 @@ public class SequenceFileSticher
                     diff = DimensionId.T;
 
                 // base path changed
-                switch (diff)
-                {
+                switch (diff) {
                     // // series position change (shouldn't arrive, group are here for that)
                     // case NULL:
                     // s++;
@@ -1429,8 +1319,7 @@ public class SequenceFileSticher
             mx++;
 
             // normally we want the equality here
-            if ((mt * mz * mc * my * mx) != size)
-            {
+            if ((mt * mz * mc * my * mx) != size) {
                 // note that this can happen when thread is interrupted so just put a warning here
                 System.err.println("Warning: SequenceFileSticher - number of image doesn't match: " + size + " (expected = " + (mt * mz * mc * my * mx) + ")");
             }
@@ -1449,30 +1338,26 @@ public class SequenceFileSticher
         /**
          * @return all contained path in this group
          */
-        public List<String> getPaths()
-        {
-            final List<String> results = new ArrayList<String>();
+        public List<String> getPaths() {
+            final List<String> results = new ArrayList<>();
 
-            for (SequencePosition pos : positions)
+            for (final SequencePosition pos : positions)
                 results.add(pos.getPath());
 
             return results;
         }
 
-        private static List<String> getNumberChunks(String path)
-        {
+        private static List<String> getNumberChunks(final String path) {
             final List<String> result = new ArrayList<>();
 
             // we extract position from filename (not from the complete path)
-            String name = FileUtil.getFileName(path);
+            final String name = FileUtil.getFileName(path);
             int pos = 0;
 
-            while (pos < name.length())
-            {
+            while (pos < name.length()) {
                 final int st = StringUtil.getNextDigitCharIndex(name, pos);
 
-                if (st != -1)
-                {
+                if (st != -1) {
                     // get ending digit char index
                     int end = StringUtil.getNextNonDigitCharIndex(name, st);
                     if (end < 0)
@@ -1491,8 +1376,7 @@ public class SequenceFileSticher
             return result;
         }
 
-        private static String getBase(String path, Set<Integer> acceptedNumberChunks)
-        {
+        private static String getBase(final String path, final Set<Integer> acceptedNumberChunks) {
             final String folder = FileUtil.getDirectory(path, true);
 
             // we extract position from filename (not from the complete path)
@@ -1500,31 +1384,27 @@ public class SequenceFileSticher
             int pos = 0;
             int ind = 0;
 
-            while (pos < result.length())
-            {
+            while (pos < result.length()) {
                 int st = StringUtil.getNextDigitCharIndex(result, pos);
 
-                if (st != -1)
-                {
+                if (st != -1) {
                     // get ending digit char index
                     int end = StringUtil.getNextNonDigitCharIndex(result, st);
                     if (end < 0)
                         end = result.length();
 
                     // number chunk not accepted ? --> remove it
-                    if (!acceptedNumberChunks.contains(Integer.valueOf(ind++)))
-                    {
+                    if (!acceptedNumberChunks.contains(Integer.valueOf(ind++))) {
                         // assume 'separator + dimension id', remove them
                         if ((st > 1) && (Character.isLetter(result.charAt(st - 1)) && " -_".contains(result.substring(st - 2, st - 1))))
                             st -= 2;
-                        // try others combinations
-                        else if (st > 1)
-                        {
+                            // try others combinations
+                        else if (st > 1) {
                             // assume dimension id (should be preceded by a non letter), remove it
                             if (!Character.isLetter(result.charAt(st - 2)) && Character.isLetter(result.charAt(st - 1)))
                                 st--;
-                            // assume separator, remove it
-                            else if (" -_".contains(result.substring(st - 1, st - 0)))
+                                // assume separator, remove it
+                            else if (" -_".contains(result.substring(st - 1, st)))
                                 st--;
                         }
 
@@ -1548,8 +1428,7 @@ public class SequenceFileSticher
         /**
          * @return common path part from all contained path in this group
          */
-        public String getBasePath()
-        {
+        public String getBasePath() {
             if (StringUtil.isEmpty(basePath))
                 basePath = buildBasePath();
 
@@ -1559,25 +1438,22 @@ public class SequenceFileSticher
         /**
          * @return common path part from all contained path in this group
          */
-        private String buildBasePath()
-        {
+        private String buildBasePath() {
             if (positions.isEmpty())
                 return "";
 
-            final Map<Integer, String> chunks = new HashMap<Integer, String>();
+            final Map<Integer, String> chunks = new HashMap<>();
             final SequencePosition firstPos = positions.get(0);
 
             // fill number chunks
-            for (String chunk : getNumberChunks(firstPos.getPath()))
+            for (final String chunk : getNumberChunks(firstPos.getPath()))
                 chunks.put(Integer.valueOf(chunks.size()), chunk);
 
             // eliminate number chunk which change
-            for (SequencePosition pos : positions)
-            {
+            for (final SequencePosition pos : positions) {
                 int ind = 0;
 
-                for (String chunk : getNumberChunks(pos.getPath()))
-                {
+                for (final String chunk : getNumberChunks(pos.getPath())) {
                     final Integer key = Integer.valueOf(ind++);
                     final String old = chunks.get(key);
 
@@ -1597,26 +1473,20 @@ public class SequenceFileSticher
      * The grouping is done using the path name information (recognizing and parsing specific patterns in the path) and assume file shares the same properties
      * (dimensions).<br>
      * The method returns a set of {@link SequenceFileGroup} where each group define a Sequence.<br>
-     * 
-     * @param importer
-     *        {@link SequenceFileImporter} to use to open image.<br>
-     *        If set to <i>null</i> the method automatically try to find a compatible {@link SequenceFileImporter}.
-     * @param paths
-     *        image file paths we want to group
-     * @param findPosition
-     *        if true we try to determine the X, Y, Z, T and C image position otherwise a simple ascending T ordering is done
-     * @param loadingFrame
-     *        Loading dialog if any to show progress
-     * @throws ClosedByInterruptException
+     *
+     * @param importer     {@link SequenceFileImporter} to use to open image.<br>
+     *                     If set to <i>null</i> the method automatically try to find a compatible {@link SequenceFileImporter}.
+     * @param paths        image file paths we want to group
+     * @param findPosition if true we try to determine the X, Y, Z, T and C image position otherwise a simple ascending T ordering is done
+     * @param loadingFrame Loading dialog if any to show progress
      * @see #groupFiles(SequenceFileImporter, Collection, boolean, FileFrame)
      */
-    public static Collection<SequenceFileGroup> groupAllFiles(SequenceFileImporter importer, Collection<String> paths, boolean findPosition,
-            FileFrame loadingFrame) throws InterruptedException, ClosedByInterruptException
-    {
+    public static Collection<SequenceFileGroup> groupAllFiles(final SequenceFileImporter importer, final Collection<String> paths, final boolean findPosition,
+                                                              final FileFrame loadingFrame) throws InterruptedException, ClosedByInterruptException {
         final List<String> sortedPaths = Loader.cleanNonImageFile(Loader.explode(new ArrayList<>(paths)));
 
         if (sortedPaths.isEmpty())
-            return new ArrayList<SequenceFileGroup>();
+            return new ArrayList<>();
 
         // final List<FilePosition> filePositions = new ArrayList<FilePosition>();
 
@@ -1625,31 +1495,25 @@ public class SequenceFileSticher
 
         // sort paths on name using smart sorter
         if (sortedPaths.size() > 1)
-            Collections.sort(sortedPaths, new AlphanumComparator());
+            sortedPaths.sort(new AlphanumComparator());
 
         // we do a 1st pass to build all FilePosition
         if (loadingFrame != null)
             loadingFrame.setAction("Extracting positions from paths...");
 
         // group FilePosition by 'base' path
-        final Map<String, List<FilePosition>> pathPositionsMap = new HashMap<String, List<FilePosition>>();
+        final Map<String, List<FilePosition>> pathPositionsMap = new HashMap<>();
 
         // build FilePosition
-        for (String path : sortedPaths)
-        {
+        for (final String path : sortedPaths) {
             final FilePosition filePosition = new FilePosition(path);
             final String base = filePosition.base;
 
             // we want to group by 'base' path
-            List<FilePosition> positions = pathPositionsMap.get(base);
-
             // list not yet created ?
-            if (positions == null)
-            {
-                // create and add it
-                positions = new ArrayList<FilePosition>();
-                pathPositionsMap.put(base, positions);
-            }
+            // create and add it
+            final List<FilePosition> positions = pathPositionsMap.computeIfAbsent(base, k -> new ArrayList<>());
+
 
             // add it
             positions.add(filePosition);
@@ -1658,8 +1522,7 @@ public class SequenceFileSticher
         }
 
         // clean FilePosition grouped by base path
-        for (List<FilePosition> positions : pathPositionsMap.values())
-        {
+        for (final List<FilePosition> positions : pathPositionsMap.values()) {
             // remove position information which never change
             while (cleanPositions(positions, DimensionId.NULL))
                 ;
@@ -1675,42 +1538,37 @@ public class SequenceFileSticher
                 ;
         }
 
-        final Map<SequenceIdent, SequenceFileGroup> result = new HashMap<SequenceIdent, SequenceFileGroup>();
+        final Map<SequenceIdent, SequenceFileGroup> result = new HashMap<>();
 
         // add FilePosition grouped by base path to group
-        for (List<FilePosition> positions : pathPositionsMap.values())
-        {
-            final Processor processor = new Processor(positions.size(), Processor.DEFAULT_MAX_PROCESSING);
-            final List<Future<SequenceIdent>> tasks = new ArrayList<>();
+        for (final List<FilePosition> positions : pathPositionsMap.values()) {
+            try (final Processor processor = new Processor(positions.size(), Processor.DEFAULT_MAX_PROCESSING)) {
+                final List<Future<SequenceIdent>> tasks = new ArrayList<>();
 
-            // add tasks
-            for (FilePosition pos : positions)
-                tasks.add(processor.submit(new SequenceIdentGetter(importer, new SequencePosition(pos), true)));
+                // add tasks
+                for (final FilePosition pos : positions)
+                    tasks.add(processor.submit(new SequenceIdentGetter(importer, new SequencePosition(pos), true)));
 
-            boolean exception = false;
-            for (Future<SequenceIdent> task : tasks)
-            {
-                try
-                {
-                    // build groups
-                    addToGroup(result, task.get(), importer);
-                }
-                catch (InterruptedException ex)
-                {
-                    // stop now
-                    processor.removeAllWaitingTasks();
-                    processor.shutdownNow();
+                boolean exception = false;
+                for (final Future<SequenceIdent> task : tasks) {
+                    try {
+                        // build groups
+                        addToGroup(result, task.get(), importer);
+                    }
+                    catch (final InterruptedException ex) {
+                        // stop now
+                        processor.removeAllWaitingTasks();
+                        processor.shutdownNow();
 
-                    // re-throw it
-                    throw new InterruptedException("Files grouping process interrupted");
-                }
-                catch (ExecutionException e)
-                {
-                    // display it only once
-                    if (!exception)
-                    {
-                        e.getCause().printStackTrace();
-                        exception = true;
+                        // re-throw it
+                        throw new InterruptedException("Files grouping process interrupted");
+                    }
+                    catch (final ExecutionException e) {
+                        // display it only once
+                        if (!exception) {
+                            e.getCause().printStackTrace();
+                            exception = true;
+                        }
                     }
                 }
             }
@@ -1719,10 +1577,10 @@ public class SequenceFileSticher
         /*
          * if (loadingFrame != null)
          * loadingFrame.setAction("Get positions information from metadata...");
-         * 
+         *
          * SequenceFileImporter imp = importer;
          * int indT = 0;
-         * 
+         *
          * for (int i = 0; i < sortedPaths.size(); i++)
          * {
          * final String path = sortedPaths.get(i);
@@ -1730,10 +1588,10 @@ public class SequenceFileSticher
          * final SequenceType type = position.type;
          * final SequenceAbsolutePosition absPos = position.absPos;
          * final SequenceIndexPosition indPos = position.indPos;
-         * 
+         *
          * // try to open the image
          * imp = tryOpen(imp, path);
-         * 
+         *
          * // correctly opened ?
          * if (imp != null)
          * {
@@ -1741,7 +1599,7 @@ public class SequenceFileSticher
          * {
          * // get metadata
          * final OMEXMLMetadata meta = imp.getOMEXMLMetaData();
-         * 
+         *
          * // set type information
          * type.sizeX = MetaDataUtil.getSizeX(meta, 0);
          * type.sizeY = MetaDataUtil.getSizeY(meta, 0);
@@ -1756,7 +1614,7 @@ public class SequenceFileSticher
          * type.timeInterval = MetaDataUtil.getTimeInterval(meta, 0, 0d);
          * // can compute hash code
          * type.computeHashCode();
-         * 
+         *
          * if (findPosition)
          * {
          * // use -1 as default value to detect when position is not set
@@ -1776,7 +1634,7 @@ public class SequenceFileSticher
          * // can compute hash code
          * absPos.computeHashCode();
          * }
-         * 
+         *
          * // store importer & metadata object
          * position.importer = imp;
          * position.metadata = meta;
@@ -1798,7 +1656,7 @@ public class SequenceFileSticher
          * // just ignore...
          * }
          * }
-         * 
+         *
          * // store filePosition in position object
          * if (findPosition)
          * position.filePosition = filePositions.get(i);
@@ -1810,28 +1668,26 @@ public class SequenceFileSticher
          * // simple T ordering
          * indPos.t = indT;
          * indPos.c = 0;
-         * 
+         *
          * // next T position
          * indT += type.sizeT;
          * }
-         * 
+         *
          * // add to result map (important to have position informations first)
          * addToGroup(result, position);
          * }
          * }
-         * 
+         *
          */
         if (loadingFrame != null)
             loadingFrame.setAction("Cleanup up positions and rebuilding indexes...");
 
         // need to improve position informations
-        for (SequenceFileGroup group : result.values())
-        {
+        for (final SequenceFileGroup group : result.values()) {
             // // clean absolute positions
             // group.cleanFixedAbsPos();
             // check if we can revert Z and T dimension from FilePosition
-            if (findPosition)
-            {
+            if (findPosition) {
                 group.checkZTDimIdPos();
                 // sort group positions on cleaned up position (S, T, Z, C, Y, X order)
                 Collections.sort(group.positions);
@@ -1850,28 +1706,20 @@ public class SequenceFileSticher
      * (dimensions).<br>
      * The method returns the "biggest" group found, use {@link SequenceFileSticher#groupAllFiles(SequenceFileImporter, Collection, boolean, FileFrame)} to
      * retrieve all possible groups.<br>
-     * 
-     * @param importer
-     *        {@link SequenceFileImporter} to use to open image.<br>
-     *        If set to <i>null</i> the method automatically try to find a compatible
-     *        {@link SequenceFileImporter}
-     * @param paths
-     *        image file paths we want to group
-     * @param findPosition
-     *        if true we try to determine the X, Y, Z, T and C image position otherwise a simple ascending T ordering is done
-     * @param loadingFrame
-     *        Loading dialog if any to show progress
-     * @throws InterruptedException
-     * @throws ClosedByInterruptException
+     *
+     * @param importer     {@link SequenceFileImporter} to use to open image.<br>
+     *                     If set to <i>null</i> the method automatically try to find a compatible
+     *                     {@link SequenceFileImporter}
+     * @param paths        image file paths we want to group
+     * @param findPosition if true we try to determine the X, Y, Z, T and C image position otherwise a simple ascending T ordering is done
+     * @param loadingFrame Loading dialog if any to show progress
      * @see #groupAllFiles(SequenceFileImporter, Collection, boolean, FileFrame)
      */
-    public static SequenceFileGroup groupFiles(SequenceFileImporter importer, Collection<String> paths, boolean findPosition, FileFrame loadingFrame)
-            throws InterruptedException, ClosedByInterruptException
-    {
+    public static SequenceFileGroup groupFiles(final SequenceFileImporter importer, final Collection<String> paths, final boolean findPosition, final FileFrame loadingFrame)
+            throws InterruptedException, ClosedByInterruptException {
         SequenceFileGroup result = null;
 
-        for (SequenceFileGroup group : groupAllFiles(importer, paths, findPosition, loadingFrame))
-        {
+        for (final SequenceFileGroup group : groupAllFiles(importer, paths, findPosition, loadingFrame)) {
             if (result == null)
                 result = group;
             else if (result.positions.size() < group.positions.size())
@@ -1881,11 +1729,9 @@ public class SequenceFileSticher
         return result;
     }
 
-    static int compare(double v1, double v2)
-    {
+    static int compare(final double v1, final double v2) {
         // can compare ?
-        if ((v1 != -1d) && (v2 != -1d))
-        {
+        if ((v1 != -1d) && (v2 != -1d)) {
             if (v1 < v2)
                 return -1;
             else if (v1 > v2)
@@ -1897,25 +1743,20 @@ public class SequenceFileSticher
 
     /**
      * @return opened {@link SequenceFileImporter} or <i>null</i> if we can't open the given path
-     * @throws ClosedByInterruptException
-     * @throws InterruptedException
      */
-    static SequenceFileImporter tryOpen(SequenceFileImporter importer, String path, boolean minimumMetadata)
-            throws ClosedByInterruptException, InterruptedException
-    {
+    static SequenceFileImporter tryOpen(final SequenceFileImporter importer, final String path, final boolean minimumMetadata)
+            throws ClosedByInterruptException, InterruptedException {
         final boolean tryAnotherImporter;
-        SequenceFileImporter imp;
+        final SequenceFileImporter imp;
 
         // importer not defined ?
-        if (importer == null)
-        {
+        if (importer == null) {
             // try to find a compatible file importer
             imp = Loader.getSequenceFileImporter(path, true);
             // we don't need to try another importer
             tryAnotherImporter = false;
         }
-        else
-        {
+        else {
             // use given importer
             imp = importer;
             // we may need to test another importer
@@ -1923,23 +1764,19 @@ public class SequenceFileSticher
         }
 
         // we have an importer ?
-        if (imp != null)
-        {
+        if (imp != null) {
             // disable original metadata for LOCI importer
-            if (imp instanceof LociImporterPlugin)
-            {
+            if (imp instanceof LociImporterPlugin) {
                 // disable grouping and extra metadata
                 ((LociImporterPlugin) imp).setGroupFiles(false);
                 ((LociImporterPlugin) imp).setReadOriginalMetadata(false);
             }
 
-            try
-            {
+            try {
                 // try to open it (require default metadata otherwise pixel size may miss)
                 imp.open(path, minimumMetadata ? SequenceIdImporter.FLAG_METADATA_MINIMUM : 0);
             }
-            catch (Throwable t)
-            {
+            catch (final Throwable t) {
                 if (t instanceof InterruptedException)
                     throw (InterruptedException) t;
                 if (t instanceof ClosedByInterruptException)
@@ -1975,22 +1812,18 @@ public class SequenceFileSticher
     // group.positions.add(position);
     // }
 
-    private static void addToGroup(Map<SequenceIdent, SequenceFileGroup> groups, SequenceIdent ident, SequenceFileImporter importer)
-            throws ClosedByInterruptException, InterruptedException
-    {
+    private static void addToGroup(final Map<SequenceIdent, SequenceFileGroup> groups, final SequenceIdent ident, final SequenceFileImporter importer) throws ClosedByInterruptException, InterruptedException {
         if (ident == null)
             return;
 
         SequenceFileGroup group;
 
         // multi-thread access here --> synchronize
-        synchronized (groups)
-        {
+        synchronized (groups) {
             group = groups.get(ident);
 
             // no group yet for this base path
-            if (group == null)
-            {
+            if (group == null) {
                 // get complete ident for this position
                 final SequenceIdent completeIdent = getSequenceIdent(importer, ident.pos, false);
 
@@ -2032,8 +1865,7 @@ public class SequenceFileSticher
     // group.positions.add(position);
     // }
 
-    private static SequenceType getSequenceTypeFast(String path)
-    {
+    private static SequenceType getSequenceTypeFast(final String path) {
         final String fileExt = FileUtil.getFileExtension(path, false).toLowerCase();
 
         // better to not try with TIF files (can be OME-TIF)
@@ -2045,15 +1877,11 @@ public class SequenceFileSticher
         final SequenceType result = new SequenceType();
         final Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(fileExt);
 
-        while (readers.hasNext())
-        {
-            try
-            {
+        while (readers.hasNext()) {
+            try {
                 final ImageReader reader = readers.next();
-                final ImageInputStream is = ImageIO.createImageInputStream(new File(path));
 
-                try
-                {
+                try (final ImageInputStream is = ImageIO.createImageInputStream(new File(path))) {
                     reader.setInput(is, false, true);
 
                     ImageTypeSpecifier type = reader.getRawImageType(0);
@@ -2071,14 +1899,11 @@ public class SequenceFileSticher
 
                     return result;
                 }
-                finally
-                {
+                finally {
                     reader.dispose();
-                    is.close();
                 }
             }
-            catch (IOException e)
-            {
+            catch (final IOException e) {
                 // error, try next...
                 e.printStackTrace();
             }
@@ -2090,18 +1915,12 @@ public class SequenceFileSticher
 
     /**
      * Build and return sequence ident for specified {@link SequencePosition}
-     * 
-     * @throws InterruptedException
-     * @throws ClosedByInterruptException
      */
-    static SequenceIdent getSequenceIdent(SequenceFileImporter importer, SequencePosition position, boolean minimumMetadata)
-            throws ClosedByInterruptException, InterruptedException
-    {
+    static SequenceIdent getSequenceIdent(final SequenceFileImporter importer, final SequencePosition position, final boolean minimumMetadata) throws ClosedByInterruptException, InterruptedException {
         final String path = position.getPath();
 
         // we want minimal metadata ?
-        if (minimumMetadata)
-        {
+        if (minimumMetadata) {
             // try the fast method
             final SequenceType type = getSequenceTypeFast(path);
             if (type != null)
@@ -2115,8 +1934,7 @@ public class SequenceFileSticher
         if (imp == null)
             return null;
 
-        try
-        {
+        try (imp) {
             // get metadata
             final OMEXMLMetadata meta = imp.getOMEXMLMetaData();
             final SequenceType type = new SequenceType();
@@ -2130,8 +1948,7 @@ public class SequenceFileSticher
             type.dataType = MetaDataUtil.getDataType(meta, 0);
 
             // populated ?
-            if (!minimumMetadata)
-            {
+            if (!minimumMetadata) {
                 type.minimumMeta = false;
                 type.pixelSizeX = MetaDataUtil.getPixelSizeX(meta, 0, 0d);
                 type.pixelSizeY = MetaDataUtil.getPixelSizeY(meta, 0, 0d);
@@ -2144,8 +1961,7 @@ public class SequenceFileSticher
 
             return new SequenceIdent(position, type, imp);
         }
-        catch (Throwable t)
-        {
+        catch (final Throwable t) {
             if (t instanceof InterruptedException)
                 throw (InterruptedException) t;
             if (t instanceof ClosedByInterruptException)
@@ -2154,34 +1970,18 @@ public class SequenceFileSticher
             IcyExceptionHandler.showErrorMessage(t, true);
             return null;
         }
-        finally
-        {
-            try
-            {
-                // close importer
-                imp.close();
-            }
-            catch (IOException e)
-            {
-                // just ignore...
-            }
-        }
     }
 
-    private static boolean cleanPositions(Collection<FilePosition> filePositions, DimensionId dim)
-    {
+    private static boolean cleanPositions(final Collection<FilePosition> filePositions, final DimensionId dim) {
         // remove fixed dim
         int value = -1;
-        for (FilePosition position : filePositions)
-        {
+        for (final FilePosition position : filePositions) {
             final int v = position.getValue(dim, true);
 
-            if (v != -1)
-            {
+            if (v != -1) {
                 if (value == -1)
                     value = v;
-                else if (value != v)
-                {
+                else if (value != v) {
                     // variable --> stop
                     value = -1;
                     break;
@@ -2190,10 +1990,8 @@ public class SequenceFileSticher
         }
 
         // fixed dimension ? --> remove it
-        if (value != -1)
-        {
-            for (FilePosition position : filePositions)
-            {
+        if (value != -1) {
+            for (final FilePosition position : filePositions) {
                 if (position.getValue(dim, true) != -1)
                     position.removeChunk(dim);
             }

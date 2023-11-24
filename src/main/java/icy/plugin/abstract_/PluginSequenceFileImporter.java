@@ -63,12 +63,12 @@ public abstract class PluginSequenceFileImporter extends Plugin implements Seque
 
         @Deprecated(since = "2.4.3", forRemoval = true)
         @Override
-        public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException, InterruptedException {
+        public OMEXMLMetadataImpl getMetaData() throws Exception {
             return PluginSequenceFileImporter.this.getMetaData();
         }
 
         @Override
-        public IcyBufferedImage getImage(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c) throws UnsupportedFormatException, IOException, InterruptedException {
+        public IcyBufferedImage getImage(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c) throws Exception {
             return PluginSequenceFileImporter.this.getImage(series, resolution, rectangle, z, t, c);
         }
     }
@@ -83,79 +83,78 @@ public abstract class PluginSequenceFileImporter extends Plugin implements Seque
 
     // default implementation as ImageProvider interface changed
     @Override
-    public OMEXMLMetadata getOMEXMLMetaData() throws UnsupportedFormatException, IOException, InterruptedException {
+    public OMEXMLMetadata getOMEXMLMetaData() throws Exception {
         return interfaceHelper.getOMEXMLMetaData();
     }
 
     // default implementation, override it if you need specific value for faster tile access
     @Override
-    public int getTileWidth(final int series) throws UnsupportedFormatException, IOException, InterruptedException {
+    public int getTileWidth(final int series) throws Exception {
         return interfaceHelper.getTileWidth(series);
     }
 
     // default implementation, override it if you need specific value for faster tile access
     @Override
-    public int getTileHeight(final int series) throws UnsupportedFormatException, IOException, InterruptedException {
+    public int getTileHeight(final int series) throws Exception {
         return interfaceHelper.getTileHeight(series);
     }
 
     // default implementation, override it if you need specific value for faster tile access
     @Override
-    public boolean isResolutionAvailable(final int series, final int resolution) throws UnsupportedFormatException, IOException {
+    public boolean isResolutionAvailable(final int series, final int resolution) throws Exception {
         return interfaceHelper.isResolutionAvailable(series, resolution);
     }
 
     // default implementation
     @Override
-    public IcyBufferedImage getThumbnail(final int series) throws UnsupportedFormatException, IOException, InterruptedException {
+    public IcyBufferedImage getThumbnail(final int series) throws Exception {
         return interfaceHelper.getThumbnail(series);
     }
 
     // default implementation: use the getImage(..) method then return data.
     // It should be the opposite side for performance reason, override this method if possible
     @Override
-    public Object getPixels(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c) throws UnsupportedFormatException, IOException, InterruptedException {
+    public Object getPixels(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c) throws Exception {
         return interfaceHelper.getPixels(series, resolution, rectangle, z, t, c);
     }
 
     @Override
-    public IcyBufferedImage getImage(final int series, final int resolution, final Rectangle rectangle, final int z, final int t)
-            throws UnsupportedFormatException, IOException, InterruptedException {
+    public IcyBufferedImage getImage(final int series, final int resolution, final Rectangle rectangle, final int z, final int t) throws Exception {
         return interfaceHelper.getImage(series, resolution, rectangle, z, t);
     }
 
     // default implementation using the region getImage(..) method, better to override
     @Override
-    public IcyBufferedImage getImage(final int series, final int resolution, final int z, final int t, final int c) throws UnsupportedFormatException, IOException, InterruptedException {
+    public IcyBufferedImage getImage(final int series, final int resolution, final int z, final int t, final int c) throws Exception {
         return interfaceHelper.getImage(series, resolution, z, t, c);
     }
 
     @Override
-    public IcyBufferedImage getImage(final int series, final int resolution, final int z, final int t) throws UnsupportedFormatException, IOException, InterruptedException {
+    public IcyBufferedImage getImage(final int series, final int resolution, final int z, final int t) throws Exception {
         return interfaceHelper.getImage(series, resolution, z, t);
     }
 
     @Override
-    public IcyBufferedImage getImage(final int series, final int z, final int t) throws UnsupportedFormatException, IOException, InterruptedException {
+    public IcyBufferedImage getImage(final int series, final int z, final int t) throws Exception {
         return interfaceHelper.getImage(series, z, t);
     }
 
     @Override
-    public IcyBufferedImage getImage(final int z, final int t) throws UnsupportedFormatException, IOException, InterruptedException {
+    public IcyBufferedImage getImage(final int z, final int t) throws Exception {
         return interfaceHelper.getImage(z, t);
     }
 
     /**
      * See {@link AbstractImageProvider#getPixelsByTile(int, int, Rectangle, int, int, int, int, int, ProgressListener)}
      */
-    public Object getPixelsByTile(final int series, final int resolution, final Rectangle region, final int z, final int t, final int c, final int tileW, final int tileH, final ProgressListener listener) throws UnsupportedFormatException, IOException, InterruptedException {
+    public Object getPixelsByTile(final int series, final int resolution, final Rectangle region, final int z, final int t, final int c, final int tileW, final int tileH, final ProgressListener listener) throws Exception {
         return interfaceHelper.getPixelsByTile(series, resolution, region, z, t, c, tileW, tileH, listener);
     }
 
     /**
      * See {@link AbstractImageProvider#getResolutionFactor(int, int)}
      */
-    public int getResolutionFactor(final int series, final int wantedSize) throws UnsupportedFormatException, IOException, InterruptedException {
+    public int getResolutionFactor(final int series, final int wantedSize) throws Exception {
         return interfaceHelper.getResolutionFactor(series, wantedSize);
     }
 }
