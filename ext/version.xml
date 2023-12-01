@@ -89,9 +89,6 @@
                 <file>
                     <localpath>lib/gluegen-rt.jar</localpath>
                 </file>
-                <file>
-                    <localpath>lib/gluegen-rt-natives-all.jar</localpath>
-                </file>
             </files>
         </element>
         <element>
@@ -100,9 +97,6 @@
             <files>
                 <file>
                     <localpath>lib/jogl-all.jar</localpath>
-                </file>
-                <file>
-                    <localpath>lib/jogl-all-natives-all.jar</localpath>
                 </file>
             </files>
         </element>
