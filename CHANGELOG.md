@@ -1,4 +1,4 @@
-Icy 2.4.4.0 - 01/12/2023
+Icy 2.5.0.0 - 01/12/2023
 ------------------------
 
 **Application**
@@ -11,6 +11,7 @@ Icy 2.4.4.0 - 01/12/2023
   - optimized boolean operations for shape type rois.
 * added support for MacOS arm64 architecture (M1/M2)
 * small fix for MacOS 'Quit' command
+* small fix for OSX launcher
 * load of small bugfixes
   
 **Developper**
