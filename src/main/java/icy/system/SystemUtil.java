@@ -932,26 +932,26 @@ public class SystemUtil
 
     /**
      * Return an id OS architecture string<br>
-     * example : "win32", "win64", "mac32", "mac64", "maca64" (mac arm64), "unix32"...<br>
+     * example : "win32", "win64", "mac32", "mac64", "maca64", "unix32", "unix64", "unixa64"<br>
      * The bits number depends only from current installed JVM (32 or 64 bit)
      * and not directly from host OS.<br>
      * An empty string is returned if OS is unknown.
      */
     public static String getOSArchIdString()
     {
-        final String javaBit = Integer.toString(getJavaArchDataModel());
+        final String javaBit;
+        
+        // arm64 architecture ?
+        if (StringUtil.equals(getOSArch().toLowerCase(), "aarch64"))
+            javaBit = "a64";
+        else
+            javaBit = Integer.toString(getJavaArchDataModel());
 
         if (isWindows())
             return SYSTEM_WINDOWS + javaBit;
-        if (isMac())
-        {
-            // arm64 architecture (mac M1 or M2) ?
-            if (StringUtil.equals(getOSArch(), "aarch64"))
-                return SYSTEM_MAC_OS + "a64";
-            // classic x86_64 architecture
+        else if (isMac())
             return SYSTEM_MAC_OS + javaBit;
-        }
-        if (isUnix())
+        else if (isUnix())
             return SYSTEM_UNIX + javaBit;
 
         return "";
