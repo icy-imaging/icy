@@ -423,8 +423,7 @@ public class SystemUtil
             if (!intersection.isEmpty())
             {
                 // bigger intersection ?
-                if ((largest == null) || ((intersection.getWidth() * intersection.getHeight()) > (largest.getWidth()
-                        * largest.getHeight())))
+                if ((largest == null) || ((intersection.getWidth() * intersection.getHeight()) > (largest.getWidth() * largest.getHeight())))
                 {
                     largest = intersection;
                     result = gd;
@@ -933,7 +932,7 @@ public class SystemUtil
 
     /**
      * Return an id OS architecture string<br>
-     * example : "win32", "win64", "mac32", "mac64", "unix32"...<br>
+     * example : "win32", "win64", "mac32", "mac64", "maca64" (mac arm64), "unix32"...<br>
      * The bits number depends only from current installed JVM (32 or 64 bit)
      * and not directly from host OS.<br>
      * An empty string is returned if OS is unknown.
@@ -945,7 +944,13 @@ public class SystemUtil
         if (isWindows())
             return SYSTEM_WINDOWS + javaBit;
         if (isMac())
+        {
+            // arm64 architecture (mac M1 or M2) ?
+            if (StringUtil.equals(getOSArch(), "aarch64"))
+                return SYSTEM_MAC_OS + "a64";
+            // classic x86_64 architecture
             return SYSTEM_MAC_OS + javaBit;
+        }
         if (isUnix())
             return SYSTEM_UNIX + javaBit;
 
@@ -1061,7 +1066,7 @@ public class SystemUtil
             System.out.println("Java 12 (or above) don't support patching java library path.");
             return false;
         }
-        
+
         try
         {
             final String path_separator = System.getProperty("path.separator");
