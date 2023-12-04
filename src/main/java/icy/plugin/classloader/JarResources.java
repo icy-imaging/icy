@@ -22,6 +22,7 @@ import icy.network.NetworkUtil;
 import icy.network.URLUtil;
 import icy.plugin.classloader.exception.JclException;
 import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedInputStream;
@@ -173,13 +174,23 @@ public class JarResources {
                 }
 
                 // add to internal resource HashMap
-                //entryUrls.put(name, new URL(urlPrefix + name));
-                entryUrls.put(name, new URI(urlPrefix + name).toURL());
+                try {
+                    // Recreate an URI with the resource : jar:file:/path/to/jar!/path/to/resource
+                    final URI uri = new URI("jar:file", null, file.toURI().getPath() + "!/" + name, null, null);
+                    entryUrls.put(name, uri.toURL());
+                }
+                catch (final URISyntaxException e) {
+                    IcyLogger.warn("Cannot load resource with URI: " + name + "\n\rTrying with URL...");
+                    // Trying with direct URL (DEPRECATED SINCE JDK 20)
+                    @SuppressWarnings("deprecation")
+                    final URL url = new URL(urlPrefix + name);
+                    entryUrls.put(name, url);
+                }
             }
         }
-        catch (final URISyntaxException e) {
+        /*catch (final URISyntaxException e) {
             IcyExceptionHandler.showErrorMessage(e, false);
-        }
+        }*/
         finally {
             try {
                 zipFile.close();

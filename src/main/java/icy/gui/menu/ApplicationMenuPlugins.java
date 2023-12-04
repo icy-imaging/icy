@@ -28,8 +28,6 @@ import icy.system.thread.ThreadUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +64,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
         addPluginLoaderListener();
     }
 
+    @SuppressWarnings("resource")
     private void reloadPluginsMenu() {
         removeAll();
 
@@ -99,8 +98,10 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
                 final IcyMenu menuAuthor = new IcyMenu(characterListEntry.getKey().toString());
                 for (final PluginDescriptor plugin : characterListEntry.getValue()) {
                     final IcyMenuItem itemPlugin = new IcyMenuItem(plugin.getName());
-                    itemPlugin.setIcon(new ImageIcon(plugin.getIcon().getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH)));
+                    itemPlugin.setIcon(plugin.getIcon());
                     itemPlugin.addActionListener(e -> PluginLauncher.start(plugin));
+                    if (!plugin.getShortDescription().isBlank())
+                        itemPlugin.setToolTipText("<html>" + plugin.getShortDescription() + "</html>");
                     menuAuthor.add(itemPlugin);
                 }
                 add(menuAuthor);

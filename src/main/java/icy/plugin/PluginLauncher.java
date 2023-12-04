@@ -162,27 +162,21 @@ public class PluginLauncher {
      */
     @Nullable
     public static Plugin start(final PluginDescriptor plugin) {
-        final Plugin result;
-
         try {
-            try {
-                // create plugin instance
-                result = create(plugin);
+            try (final Plugin result = create(plugin)) {
+                // audit
+                Audit.pluginLaunched(result);
+                // execute plugin
+                if (result instanceof PluginActionable)
+                    internalExecute(result);
+
+                return result;
             }
             catch (final IllegalAccessException | InstantiationException e) {
                 System.err.println("Cannot start plugin " + plugin.getName() + " :");
                 System.err.println(e.getMessage());
                 return null;
             }
-
-            // audit
-            Audit.pluginLaunched(result);
-            // execute plugin
-            //if (result instanceof PluginImageAnalysis)
-            if (result instanceof PluginActionable)
-                internalExecute(result);
-
-            return result;
         }
         catch (final InterruptedException e) {
             // we just ignore interruption
@@ -252,14 +246,9 @@ public class PluginLauncher {
     /**
      * @deprecated Use {@link #start(PluginDescriptor)} instead.
      */
-    @SuppressWarnings("EmptyTryBlock")
+    @SuppressWarnings("resource")
     @Deprecated(since = "2.4.3", forRemoval = true)
     public synchronized static void launch(final PluginDescriptor descriptor) {
-        try (final Plugin ignored = start(descriptor)) {
-
-        }
-        catch (final Exception e) {
-            IcyExceptionHandler.showErrorMessage(e, true);
-        }
+        start(descriptor);
     }
 }

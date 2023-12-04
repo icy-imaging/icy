@@ -20,7 +20,7 @@ package icy.gui.toolbar;
 
 import icy.gui.component.button.IcyToggleButton;
 import icy.gui.toolbar.button.*;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -30,6 +30,7 @@ import java.util.Enumeration;
  * @author Thomas MUSSET
  */
 public final class InspectorBar extends IcyToolbar {
+    @Nullable
     private IcyToggleButton selected = null;
 
     /**
@@ -41,24 +42,29 @@ public final class InspectorBar extends IcyToolbar {
         final ButtonGroup group = new ButtonGroup();
 
         final SequenceButton sequenceButton = new SequenceButton();
+        sequenceButton.setToolTipText("Open/close sequence panel");
         group.add(sequenceButton);
         add(sequenceButton);
 
         final ROIButton ROIButton = new ROIButton();
+        ROIButton.setToolTipText("Open/close ROIs panel");
         group.add(ROIButton);
         add(ROIButton);
 
         final LayersButton layersButton = new LayersButton();
+        layersButton.setToolTipText("Open/close layers panel");
         group.add(layersButton);
         add(layersButton);
 
         final HistoryButton historyButton = new HistoryButton();
+        historyButton.setToolTipText("Open/close history panel");
         group.add(historyButton);
         add(historyButton);
 
         add(Box.createVerticalGlue());
 
         final ConsoleButton consoleButton = new ConsoleButton();
+        consoleButton.setToolTipText("Open/close console panel");
         add(consoleButton);
 
         add(new EHCacheButton());

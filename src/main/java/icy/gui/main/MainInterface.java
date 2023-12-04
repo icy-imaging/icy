@@ -107,16 +107,19 @@ public interface MainInterface {
     /**
      * Returns the inspector object (right informations panel)
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     InspectorPanel getInspector();
 
     /**
      * Returns the ROI manager panel
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     RoisPanel getRoisPanel();
 
     /**
      * Returns the Layer manager panel
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     LayersPanel getLayersPanel();
 
     /**

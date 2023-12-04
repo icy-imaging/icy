@@ -18,18 +18,18 @@
  */
 package icy.resource;
 
-import java.awt.Color;
-import java.awt.Image;
+import icy.image.ImageUtil;
+import icy.system.thread.ThreadUtil;
+import icy.util.StringUtil;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import jiconfont.swing.IconFontSwing;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-
-import javax.swing.ImageIcon;
-
-import icy.image.ImageUtil;
-import icy.system.thread.ThreadUtil;
-import icy.util.StringUtil;
 
 /**
  * Resources (images, icons...) utilities class.
@@ -55,7 +55,8 @@ public class ResourceUtil {
     public static final Image IMAGE_ICY_32 = ResourceUtil.getIconAsImage("icy32.png");
     public static final Image IMAGE_ICY_256 = ResourceUtil.getImage("logo.png");
 
-    public static final Image IMAGE_PLUGIN_SMALL = ResourceUtil.getImage("app/plugin_small.png");
+    //public static final Image IMAGE_PLUGIN_SMALL = ResourceUtil.getImage("app/plugin_small.png");
+    public static final Image IMAGE_PLUGIN_SMALL = IconFontSwing.buildImage(GoogleMaterialDesignIcons.EXTENSION, 32f);
     public static final Image IMAGE_PLUGIN = ResourceUtil.getImage("app/plugin.png");
     public static final Image IMAGE_ACCOLADE_LEFT = ResourceUtil.getImage("app/accol_left.png");
 

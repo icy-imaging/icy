@@ -31,7 +31,6 @@ import icy.plugin.interface_.IcyPlugin;
 import icy.plugin.interface_.PluginBundled;
 import icy.preferences.RepositoryPreferences.RepositoryInfo;
 import icy.resource.ResourceUtil;
-import icy.system.logging.IcyLogger;
 import icy.util.ClassUtil;
 import icy.util.JarUtil;
 import icy.util.StringUtil;
@@ -58,7 +57,7 @@ import java.util.Set;
  * @see PluginLauncher
  */
 public class PluginDescriptor implements XMLPersistent {
-    public static final int ICON_SIZE = 64;
+    public static final int ICON_SIZE = 32;
     public static final int IMAGE_SIZE = 256;
 
     public static final ImageIcon DEFAULT_ICON = ResourceUtil.getImageIcon(ResourceUtil.IMAGE_PLUGIN_SMALL);
@@ -95,6 +94,7 @@ public class PluginDescriptor implements XMLPersistent {
     protected Image image;
 
     protected String name;
+    protected String shortDescription;
     protected PluginIdent ident;
     protected String localXmlUrl;
     protected String xmlUrl;
@@ -300,6 +300,7 @@ public class PluginDescriptor implements XMLPersistent {
         localXmlUrl = "";
         xmlUrl = "";
         name = "";
+        shortDescription = "";
         ident = new PluginIdent();
         jarUrl = "";
         imageUrl = "";
@@ -334,15 +335,14 @@ public class PluginDescriptor implements XMLPersistent {
         final boolean bundled = isBundled();
 
         String magicName = "";
+        String magicShortDescription = "";
         String magicIcon = "";
 
         if (clazz.isAnnotationPresent(IcyPlugin.class)) {
             final IcyPlugin annotation = clazz.getAnnotation(IcyPlugin.class);
             magicName = annotation.name();
+            magicShortDescription = annotation.shortDescription();
             magicIcon = annotation.icon();
-
-            IcyLogger.debug(String.format("Magic name is %s", magicName));
-            IcyLogger.debug(String.format("Magic icon is %s", magicIcon));
         }
 
         // bundled plugin ?
@@ -391,8 +391,10 @@ public class PluginDescriptor implements XMLPersistent {
                 desc = name + " plugin";
         }
 
-        if (!magicName.isEmpty())
+        if (!magicName.isBlank())
             name = magicName;
+        if (!magicShortDescription.isBlank())
+            shortDescription = magicShortDescription;
 
         // always overwrite class name from class object (more as bundled plugin may have incorrect one from XML file
         ident.setClassName(pluginClass.getName());
@@ -1026,6 +1028,13 @@ public class PluginDescriptor implements XMLPersistent {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * @return the short description.
+     */
+    public String getShortDescription() {
+        return shortDescription;
     }
 
     /**
