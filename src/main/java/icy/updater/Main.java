@@ -224,11 +224,11 @@ public class Main
             {
                 // we may want to rename Icy folder to .app
                 final File oldFile = new File("").getAbsoluteFile();
+                final File parentFile = oldFile.getParentFile();
 
                 // not an MacOS application ? --> rename folder to make a proper app
                 if (!oldFile.getAbsolutePath().toLowerCase().endsWith(".app"))
                 {
-                    final File parentFile = oldFile.getParentFile();
                     final File newFile = new File(parentFile, ICY_FOLDER_OSX).getAbsoluteFile();
                     
                     // do not already exist ? --> can rename
