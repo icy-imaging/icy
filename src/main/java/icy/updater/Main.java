@@ -94,7 +94,7 @@ public class Main
     /**
      * Updater Version
      */
-    public static Version version = new Version("2.3.0.0");
+    public static Version version = new Version("2.5.1.0");
 
     static final OutPrintStream stdStream = new OutPrintStream(System.out, false);
     static final OutPrintStream errStream = new OutPrintStream(System.err, true);
@@ -222,22 +222,40 @@ public class Main
             // update successful ? check we are on OSX
             if (SystemUtil.isMac())
             {
-                // we may want to rename Icy folder
+                // we may want to rename Icy folder to .app
                 final File oldFile = new File("").getAbsoluteFile();
-                final File parentFile = oldFile.getParentFile();
-                final File newFile = new File(parentFile, ICY_FOLDER_OSX).getAbsoluteFile();
 
-                // not yet done ?
-                if (!newFile.exists())
+                // not an MacOS application ? --> rename folder to make a proper app
+                if (!oldFile.getAbsolutePath().toLowerCase().endsWith(".app"))
                 {
-                    // try to rename Icy folder
-                    if (!doOSXFolderNameUpdate(parentFile, oldFile, newFile))
-                        return false;
+                    final File parentFile = oldFile.getParentFile();
+                    final File newFile = new File(parentFile, ICY_FOLDER_OSX).getAbsoluteFile();
+                    
+                    // do not already exist ? --> can rename
+                    if (!newFile.exists())
+                    {
+                        // try to rename Icy folder
+                        if (!doOSXFolderNameUpdate(parentFile, oldFile, newFile))
+                            return false;
 
+                        // we cannot restart Icy the classic way so do it via the OSX app open
+                        if (start)
+                            return startICY_OSX(newFile.getAbsolutePath(), parentFile.getAbsolutePath());
+                        
+                        return true;
+                    }
+                    // cannot rename
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
                     // we cannot restart Icy the classic way so do it via the OSX app open
                     if (start)
-                        return startICY_OSX(newFile.getAbsolutePath(), parentFile.getAbsolutePath());
-
+                        return startICY_OSX(oldFile.getAbsolutePath(), parentFile.getAbsolutePath());
+                    
                     return true;
                 }
             }
