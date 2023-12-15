@@ -89,21 +89,6 @@
                 <file>
                     <localpath>lib/gluegen-rt.jar</localpath>
                 </file>
-                <file>
-                    <localpath>lib/gluegen-rt-natives-linux-amd64.jar</localpath>
-                </file>
-                <file>
-                    <localpath>lib/gluegen-rt-natives-linux-i586.jar</localpath>
-                </file>
-                <file>
-                    <localpath>lib/gluegen-rt-natives-macosx-universal.jar</localpath>
-                </file>
-                <file>
-                    <localpath>lib/gluegen-rt-natives-windows-amd64.jar</localpath>
-                </file>
-                <file>
-                    <localpath>lib/gluegen-rt-natives-windows-i586.jar</localpath>
-                </file>
             </files>
         </element>
         <element>
@@ -112,21 +97,6 @@
             <files>
                 <file>
                     <localpath>lib/jogl-all.jar</localpath>
-                </file>
-                <file>
-                    <localpath>lib/jogl-all-natives-linux-amd64.jar</localpath>
-                </file>
-                <file>
-                    <localpath>lib/jogl-all-natives-linux-i586.jar</localpath>
-                </file>
-                <file>
-                    <localpath>lib/jogl-all-natives-macosx-universal.jar</localpath>
-                </file>
-                <file>
-                    <localpath>lib/jogl-all-natives-windows-amd64.jar</localpath>
-                </file>
-                <file>
-                    <localpath>lib/jogl-all-natives-windows-i586.jar</localpath>
                 </file>
             </files>
         </element>
@@ -189,14 +159,16 @@
         </element>
         <element>
             <name>VTK</name>
-            <version>9.2.6</version>
-            <changeslog/>
+            <version>9.2.6.0</version>
             <files>
                 <file>
                     <localpath>lib/icy-vtk.jar</localpath>
                 </file>
                 <file>
                     <localpath>lib/mac64/vtk</localpath>
+                </file>
+                <file>
+                    <localpath>lib/maca64/vtk</localpath>
                 </file>
                 <file>
                     <localpath>lib/win64/vtk</localpath>

@@ -1,3 +1,27 @@
+Icy 2.5.0.0 - 01/12/2023
+------------------------
+
+**Application**
+* VTK
+ - updated to VTK 9.2.6
+ - fixed picking and panel resizing when GUI zooming (OS) is used
+ - allow transparent geometry to correctly intermix with volume (still a bit buggy)
+ - improved library loading process (might be slower though)
+* ROI
+  - optimized boolean operations for shape type rois.
+* added support for MacOS arm64 architecture (M1/M2)
+* small fix for MacOS 'Quit' command
+* small fix for OSX launcher
+* load of small bugfixes
+  
+**Developper**
+* ROI
+  - added fast AreaX implementation (allow fast shape boolean operation)
+  - Added ROI2DPath.addFast(), .intersectFast() and .exclusiveAddFast() methods
+  - added getBounds() methods to ROIDescriptor (useful to 'bound' descriptor result)
+* cleaned up / removed some old useless classes.
+
+
 Icy 2.4.3.0 - 16/12/2022
 ------------------------
 

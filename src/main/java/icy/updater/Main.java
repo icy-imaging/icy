@@ -36,8 +36,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 /**
  * @author stephane
@@ -183,20 +183,35 @@ public class Main {
 
             // update successful ? check we are on OSX
             if (SystemUtil.isMac()) {
-                // we may want to rename Icy folder
+                // we may want to rename Icy folder to .app
                 final File oldFile = new File("").getAbsoluteFile();
                 final File parentFile = oldFile.getParentFile();
-                final File newFile = new File(parentFile, ICY_FOLDER_OSX).getAbsoluteFile();
 
-                // not yet done ?
-                if (!newFile.exists()) {
-                    // try to rename Icy folder
-                    if (!doOSXFolderNameUpdate(parentFile, oldFile, newFile))
+                // not an MacOS application ? --> rename folder to make a proper app
+                if (!oldFile.getAbsolutePath().toLowerCase().endsWith(".app")) {
+                    final File newFile = new File(parentFile, ICY_FOLDER_OSX).getAbsoluteFile();
+
+                    // do not already exist ? --> can rename
+                    if (!newFile.exists()) {
+                        // try to rename Icy folder
+                        if (!doOSXFolderNameUpdate(parentFile, oldFile, newFile))
+                            return false;
+
+                        // we cannot restart Icy the classic way so do it via the OSX app open
+                        if (start)
+                            return startICY_OSX(newFile.getAbsolutePath(), parentFile.getAbsolutePath());
+
+                        return true;
+                    }
+                    // cannot rename
+                    else {
                         return false;
-
+                    }
+                }
+                else {
                     // we cannot restart Icy the classic way so do it via the OSX app open
                     if (start)
-                        return startICY_OSX(newFile.getAbsolutePath(), parentFile.getAbsolutePath());
+                        return startICY_OSX(oldFile.getAbsolutePath(), parentFile.getAbsolutePath());
 
                     return true;
                 }

@@ -1411,10 +1411,7 @@ public class ROIUtil
 
         ROI result;
         if (!roi2dShapes.isEmpty())
-        {
-            result = new ROI2DPath();
-            ROIUtil.copyROIProperties(roi2dShapes.get(0), result, true);
-        }
+            result = roi2dShapes.get(0).getCopy();
         else
             result = rois.get(0).getCopy();
 

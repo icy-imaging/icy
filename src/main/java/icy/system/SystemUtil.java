@@ -199,8 +199,8 @@ public class SystemUtil {
      * Execute a system command and return the attached process.
      *
      * @param cmdarray system commands list to execute.
-     * @param dir the working directory of the subprocess, or null if the subprocess should inherit the
-     *            working directory of the current process.
+     * @param dir      the working directory of the subprocess, or null if the subprocess should inherit the
+     *                 working directory of the current process.
      */
     @Nullable
     public static Process exec(final String[] cmdarray, final String dir) {
@@ -265,7 +265,6 @@ public class SystemUtil {
 
     /**
      * Launch the system file manager on specified folder (if supported)
-     *
      */
     public static boolean openFolder(final String folder) throws IOException {
         final Desktop desktop = getDesktop();
@@ -469,8 +468,7 @@ public class SystemUtil {
 
             if (!intersection.isEmpty()) {
                 // bigger intersection ?
-                if ((largest == null) || ((intersection.getWidth() * intersection.getHeight()) > (largest.getWidth()
-                        * largest.getHeight()))) {
+                if ((largest == null) || ((intersection.getWidth() * intersection.getHeight()) > (largest.getWidth() * largest.getHeight()))) {
                     largest = intersection;
                     result = gd;
                 }
@@ -943,7 +941,7 @@ public class SystemUtil {
 
     /**
      * Return an id OS architecture string<br>
-     * example : "win32", "win64", "mac32", "mac64", "unix32"...<br>
+     * example : "win32", "win64", "mac32", "mac64", "maca64", "unix32", "unix64", "unixa64"<br>
      * The bits number depends only from current installed JVM (32 or 64 bit)
      * and not directly from host OS.<br>
      * An empty string is returned if OS is unknown.
@@ -959,9 +957,9 @@ public class SystemUtil {
 
         if (isWindows())
             return SYSTEM_WINDOWS + javaBit;
-        if (isMac())
+        else if (isMac())
             return SYSTEM_MAC_OS + javaBit;
-        if (isUnix())
+        else if (isUnix())
             return SYSTEM_UNIX + javaBit;
 
         return "";
