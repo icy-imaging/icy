@@ -68,7 +68,9 @@ public interface ImageProvider {
      * @deprecated Use {@link #getOMEXMLMetaData()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    OMEXMLMetadataImpl getMetaData() throws Exception;
+    default OMEXMLMetadataImpl getMetaData() throws Exception {
+        return (OMEXMLMetadataImpl) getOMEXMLMetaData();
+    }
 
     /**
      * Returns the (optimal) tile width for the specified series of the image.<br>

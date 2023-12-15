@@ -48,7 +48,6 @@ import loci.formats.gui.AWTImageTools;
 import loci.formats.gui.ExtensionFileFilter;
 import loci.formats.in.*;
 import loci.formats.meta.MetadataStore;
-import loci.formats.ome.OMEXMLMetadataImpl;
 import ome.xml.meta.OMEXMLMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -1100,12 +1099,6 @@ public class LociImporterPlugin extends PluginSequenceFileImporter {
         }
 
         return result;
-    }
-
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    @Override
-    public OMEXMLMetadataImpl getMetaData() throws UnsupportedFormatException, IOException {
-        return (OMEXMLMetadataImpl) getOMEXMLMetaData();
     }
 
     @Override

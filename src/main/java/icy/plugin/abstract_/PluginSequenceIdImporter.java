@@ -24,7 +24,6 @@ import icy.image.AbstractImageProvider;
 import icy.image.IcyBufferedImage;
 import icy.plugin.interface_.PluginNoEDTConstructor;
 import icy.sequence.SequenceIdImporter;
-import loci.formats.ome.OMEXMLMetadataImpl;
 import ome.xml.meta.OMEXMLMetadata;
 
 import java.awt.*;
@@ -56,12 +55,6 @@ public abstract class PluginSequenceIdImporter extends Plugin implements Sequenc
         @Override
         public void close() throws Exception {
             PluginSequenceIdImporter.this.close();
-        }
-
-        @Deprecated(since = "2.4.3", forRemoval = true)
-        @Override
-        public OMEXMLMetadataImpl getMetaData() throws Exception {
-            return PluginSequenceIdImporter.this.getMetaData();
         }
 
         @Override

@@ -3,14 +3,10 @@
  */
 package icy.image.cache;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import icy.image.IcyBufferedImage;
 import icy.system.IcyExceptionHandler;
+
+import java.util.*;
 
 /**
  * Image Cache static util class.<br>
@@ -28,7 +24,8 @@ public class ImageCache
         {
             try
             {
-                cache = new EHCache2(cacheSizeMB, path + "/icy_cache");
+                //cache = new EHCache2(cacheSizeMB, path + "/icy_cache");
+                cache = new EHCache3(cacheSizeMB, path + "/icy_cache");
 
                 System.out.println("Image cache initialized (reserved memory = " + cacheSizeMB
                         + " MB, disk cache location = '" + path + "/icy_cache')");

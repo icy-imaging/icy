@@ -1,49 +1,45 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.util;
+
+import icy.system.IcyExceptionHandler;
+import jxl.Workbook;
+import jxl.format.Colour;
+import jxl.read.biff.BiffException;
+import jxl.write.Number;
+import jxl.write.*;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 
-import icy.system.IcyExceptionHandler;
-import jxl.Workbook;
-import jxl.format.Colour;
-import jxl.read.biff.BiffException;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableImage;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
-
 /**
  * XLS (excel) utilities class (create and write XLS documents).<br>
  * <b>IMPORTANT NOTE</b>: this class only handles basic XLS file, for XLSX files (XML excel)
  * you need to use the <code>Workbooks</code> plugin (Alexandre Dufour)
- * 
+ *
  * @author Stephane
+ * @deprecated Use {@link icy.xls.XLSXUtil} instead.
  */
-public class XLSUtil
-{
+@Deprecated(since = "3.0.0", forRemoval = true)
+public final class XLSUtil {
     public static final String FILE_EXTENSION = "xls";
     public static final String FILE_DOT_EXTENSION = "." + FILE_EXTENSION;
 
@@ -51,8 +47,7 @@ public class XLSUtil
      * Creates and returns a new Workbook file.<br>
      * Previous existing file is overwritten.
      */
-    public static WritableWorkbook createWorkbook(File file) throws IOException
-    {
+    public static WritableWorkbook createWorkbook(final File file) throws IOException {
         return Workbook.createWorkbook(file);
     }
 
@@ -60,16 +55,14 @@ public class XLSUtil
      * Creates and returns a new Workbook file.<br>
      * Previous existing file is overwritten.
      */
-    public static WritableWorkbook createWorkbook(String filename) throws IOException
-    {
+    public static WritableWorkbook createWorkbook(final String filename) throws IOException {
         return createWorkbook(new File(filename));
     }
 
     /**
      * Loads and returns Workbook from an existing file (read operation only)
      */
-    public static Workbook loadWorkbookForRead(File file) throws IOException, BiffException
-    {
+    public static Workbook loadWorkbookForRead(final File file) throws IOException, BiffException {
         return Workbook.getWorkbook(file);
     }
 
@@ -80,8 +73,7 @@ public class XLSUtil
      * WARNING: don't forget to end by {@link #saveAndClose(WritableWorkbook)} even if you don't
      * change the Workbook else you lost all previous data already present.
      */
-    public static WritableWorkbook loadWorkbookForWrite(File file) throws IOException, BiffException
-    {
+    public static WritableWorkbook loadWorkbookForWrite(final File file) throws IOException, BiffException {
         if (!file.exists())
             return createWorkbook(file);
 
@@ -90,11 +82,10 @@ public class XLSUtil
 
     /**
      * @deprecated Use {@link #loadWorkbookForRead(File)} or {@link #loadWorkbookForWrite(File)}
-     *             depending your needs.
+     * depending your needs.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static WritableWorkbook loadWorkbook(File file) throws IOException, BiffException
-    {
+    public static WritableWorkbook loadWorkbook(final File file) throws IOException, BiffException {
         if (!file.exists())
             return createWorkbook(file);
 
@@ -107,12 +98,8 @@ public class XLSUtil
 
     /**
      * Saves and closes the specified Workbook.
-     * 
-     * @throws IOException
-     * @throws WriteException
      */
-    public static void saveAndClose(WritableWorkbook workbook) throws IOException, WriteException
-    {
+    public static void saveAndClose(final WritableWorkbook workbook) throws IOException, WriteException {
         workbook.write();
         workbook.close();
     }
@@ -120,11 +107,10 @@ public class XLSUtil
     /**
      * Searches for the specified page in workbook and returns it.<br>
      * If the page does not exists it creates and returns a new page.<br>
-     * 
+     *
      * @see #createNewPage(WritableWorkbook, String)
      */
-    public static WritableSheet getPage(WritableWorkbook workbook, String title)
-    {
+    public static WritableSheet getPage(final WritableWorkbook workbook, final String title) {
         WritableSheet result = workbook.getSheet(title);
 
         if (result == null)
@@ -136,17 +122,15 @@ public class XLSUtil
     /**
      * Creates and returns a new page for the specified workbook.<br>
      * If the page already exists, add an incremented number for distinction.
-     * 
+     *
      * @see #getPage(WritableWorkbook, String)
      */
-    public static WritableSheet createNewPage(WritableWorkbook workbook, String title)
-    {
+    public static WritableSheet createNewPage(final WritableWorkbook workbook, final String title) {
         if (workbook.getSheet(title) == null)
             return workbook.createSheet(title, workbook.getNumberOfSheets() + 1);
 
         int counter = 2;
-        while (true)
-        {
+        while (true) {
             final String pageName = title + " " + counter;
 
             if (workbook.getSheet(pageName) == null)
@@ -159,8 +143,7 @@ public class XLSUtil
     /**
      * Clear the specified workbook (remove all pages).
      */
-    public static void clear(WritableWorkbook workbook)
-    {
+    public static void clear(final WritableWorkbook workbook) {
         while (workbook.getNumberOfSheets() > 0)
             workbook.removeSheet(workbook.getNumberOfSheets() - 1);
     }
@@ -168,8 +151,7 @@ public class XLSUtil
     /**
      * Clear the specified page (remove all rows)
      */
-    public static void clearPage(WritableSheet sheet, String name)
-    {
+    public static void clearPage(final WritableSheet sheet, final String name) {
         while (sheet.getRows() > 0)
             sheet.removeRow(sheet.getRows() - 1);
     }
@@ -177,8 +159,7 @@ public class XLSUtil
     /**
      * Sets name of specified Sheet
      */
-    public static void setPageName(WritableSheet sheet, String name)
-    {
+    public static void setPageName(final WritableSheet sheet, final String name) {
         sheet.setName(name);
     }
 
@@ -186,15 +167,12 @@ public class XLSUtil
      * Adds an image to the specified Sheet.<br>
      * Returns false if the operation failed.
      */
-    public static boolean addImage(WritableSheet sheet, WritableImage image)
-    {
-        try
-        {
+    public static boolean addImage(final WritableSheet sheet, final WritableImage image) {
+        try {
             sheet.addImage(image);
             return true;
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             IcyExceptionHandler.showErrorMessage(e, false, true);
         }
 
@@ -205,29 +183,24 @@ public class XLSUtil
      * Sets cell content in string format of specified Sheet.<br>
      * Returns false if the operation failed.
      */
-    public static boolean setCellString(WritableSheet sheet, int x, int y, String value, Colour background)
-    {
+    public static boolean setCellString(final WritableSheet sheet, final int x, final int y, final String value, final Colour background) {
         final WritableCellFormat wcf = new WritableCellFormat();
 
-        try
-        {
+        try {
             wcf.setBackground(background);
         }
-        catch (WriteException e)
-        {
+        catch (final WriteException e) {
             // not a fatal error
             IcyExceptionHandler.showErrorMessage(e, false, true);
         }
 
         final Label label = new Label(x, y, value, wcf);
 
-        try
-        {
+        try {
             sheet.addCell(label);
             return true;
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             IcyExceptionHandler.showErrorMessage(e, false, true);
         }
 
@@ -238,17 +211,14 @@ public class XLSUtil
      * Sets cell content in string format of specified Sheet.<br>
      * Returns false if the operation failed.
      */
-    public static boolean setCellString(WritableSheet sheet, int x, int y, String value)
-    {
+    public static boolean setCellString(final WritableSheet sheet, final int x, final int y, final String value) {
         final Label label = new Label(x, y, value);
 
-        try
-        {
+        try {
             sheet.addCell(label);
             return true;
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             IcyExceptionHandler.showErrorMessage(e, false, true);
         }
 
@@ -259,29 +229,24 @@ public class XLSUtil
      * Sets cell content in double format of specified Sheet.<br>
      * Returns false if the operation failed.
      */
-    public static boolean setCellNumber(WritableSheet sheet, int x, int y, double value, Colour background)
-    {
+    public static boolean setCellNumber(final WritableSheet sheet, final int x, final int y, final double value, final Colour background) {
         final WritableCellFormat wcf = new WritableCellFormat();
 
-        try
-        {
+        try {
             wcf.setBackground(background);
         }
-        catch (WriteException e)
-        {
+        catch (final WriteException e) {
             // not a fatal error
             IcyExceptionHandler.showErrorMessage(e, false, true);
         }
 
         final Number number = new Number(x, y, value, wcf);
 
-        try
-        {
+        try {
             sheet.addCell(number);
             return true;
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             IcyExceptionHandler.showErrorMessage(e, false, true);
         }
 
@@ -292,17 +257,14 @@ public class XLSUtil
      * Sets cell content in double format of specified Sheet.<br>
      * Returns false if the operation failed.
      */
-    public static boolean setCellNumber(WritableSheet sheet, int x, int y, double value)
-    {
+    public static boolean setCellNumber(final WritableSheet sheet, final int x, final int y, final double value) {
         final Number number = new Number(x, y, value);
 
-        try
-        {
+        try {
             sheet.addCell(number);
             return true;
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             IcyExceptionHandler.showErrorMessage(e, false, true);
         }
 
@@ -311,25 +273,20 @@ public class XLSUtil
 
     /**
      * Fill sheet content from CSV text.
-     * 
+     *
      * @return <code>true</code> if the operation succeed
-     * @throws InterruptedException
      */
-    public static boolean setFromCSV(WritableSheet sheet, String csvContent) throws InterruptedException
-    {
+    public static boolean setFromCSV(final WritableSheet sheet, final String csvContent) throws InterruptedException {
         final BufferedReader br = new BufferedReader(new StringReader(csvContent));
 
         String line;
         int y = 0;
-        try
-        {
-            while ((line = br.readLine()) != null)
-            {
+        try {
+            while ((line = br.readLine()) != null) {
                 int x = 0;
 
                 // use tab as separator
-                for (String col : line.split("\t"))
-                {
+                for (final String col : line.split("\t")) {
                     XLSUtil.setCellString(sheet, x, y, col);
                     x++;
                 }
@@ -342,8 +299,7 @@ public class XLSUtil
 
             return true;
         }
-        catch (IOException e)
-        {
+        catch (final IOException e) {
             IcyExceptionHandler.showErrorMessage(e, false, true);
             return false;
         }

@@ -36,7 +36,6 @@ import icy.util.OMEUtil;
 import icy.util.StringUtil;
 import loci.formats.FormatTools;
 import loci.formats.MetadataTools;
-import loci.formats.ome.OMEXMLMetadataImpl;
 import ome.xml.meta.OMEXMLMetadata;
 import ome.xml.model.Channel;
 import ome.xml.model.Pixels;
@@ -469,12 +468,6 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         // release everything
         currentMetadata = null;
         currentGroup = null;
-    }
-
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    @Override
-    public OMEXMLMetadataImpl getMetaData() throws Exception {
-        return (OMEXMLMetadataImpl) getOMEXMLMetaData();
     }
 
     @Override

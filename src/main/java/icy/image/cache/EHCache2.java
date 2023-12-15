@@ -1,51 +1,40 @@
 package icy.image.cache;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import icy.file.FileUtil;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.config.Configuration;
-import net.sf.ehcache.config.DiskStoreConfiguration;
-import net.sf.ehcache.config.MemoryUnit;
-import net.sf.ehcache.config.PersistenceConfiguration;
+import net.sf.ehcache.config.*;
 import net.sf.ehcache.config.PersistenceConfiguration.Strategy;
 import net.sf.ehcache.event.CacheEventListener;
 import net.sf.ehcache.statistics.StatisticsGateway;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
-public class EHCache2 extends AbstractCache
-{
-    private class CustomCacheEventListener implements CacheEventListener
-    {
-        public CustomCacheEventListener()
-        {
+import java.io.File;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class EHCache2 extends AbstractCache {
+    private class CustomCacheEventListener implements CacheEventListener {
+        public CustomCacheEventListener() {
             super();
         }
 
         @Override
-        public void dispose()
-        {
+        public void dispose() {
             System.out.println("EHCache disposed");
         }
 
         @Override
-        public Object clone() throws CloneNotSupportedException
-        {
+        public Object clone() throws CloneNotSupportedException {
             return super.clone();
         }
 
         @Override
-        public void notifyElementEvicted(Ehcache ehCache, Element element)
-        {
+        public void notifyElementEvicted(final Ehcache ehCache, final Element element) {
             // Note (Stephane): sometime ehcache evict element from cache even if we have unlimited disk storage tier enabled.
             // I guess this happen when it try to cache into the heap cache and there is not enough free space to do so.
             // Ideally it would move some elements from heap to disk or directly save element in disk storage
@@ -53,8 +42,7 @@ public class EHCache2 extends AbstractCache
             // while it keep non eternal elements in cache !!
 
             // eternal element eviction ?
-            if (element.isEternal())
-            {
+            if (element.isEternal()) {
 //                System.out.println("Warning: eternal element " + element.getObjectKey() + " evicted from cache");
 //                System.out.println("Trying to put it back...");
                 // try to force GC and put it back in cache
@@ -67,11 +55,9 @@ public class EHCache2 extends AbstractCache
         }
 
         @Override
-        public void notifyElementExpired(Ehcache ehCache, Element element)
-        {
+        public void notifyElementExpired(final Ehcache ehCache, final Element element) {
             // eternal element expiration ?
-            if (element.isEternal())
-            {
+            if (element.isEternal()) {
 //                System.out.println("Warning: eternal element " + element.getObjectKey() + " marked as expired..");
 //                System.out.println("Trying to put it back...");
                 cache.put(new Element(element.getObjectKey(), element.getObjectValue(), true));
@@ -82,26 +68,22 @@ public class EHCache2 extends AbstractCache
         }
 
         @Override
-        public void notifyElementPut(Ehcache ehCache, Element element) throws net.sf.ehcache.CacheException
-        {
+        public void notifyElementPut(final Ehcache ehCache, final Element element) throws net.sf.ehcache.CacheException {
             //
         }
 
         @Override
-        public void notifyElementRemoved(Ehcache ehCache, Element element) throws net.sf.ehcache.CacheException
-        {
+        public void notifyElementRemoved(final Ehcache ehCache, final Element element) throws net.sf.ehcache.CacheException {
             //
         }
 
         @Override
-        public void notifyElementUpdated(Ehcache ehCache, Element element) throws net.sf.ehcache.CacheException
-        {
+        public void notifyElementUpdated(final Ehcache ehCache, final Element element) throws net.sf.ehcache.CacheException {
             //
         }
 
         @Override
-        public void notifyRemoveAll(Ehcache ehCache)
-        {
+        public void notifyRemoveAll(final Ehcache ehCache) {
             //
         }
     }
@@ -110,24 +92,18 @@ public class EHCache2 extends AbstractCache
     CacheManager cacheManager;
     Cache cache;
 
-    public EHCache2(int cacheSizeMB, String path)
-    {
+    public EHCache2(final int cacheSizeMB, final String path) {
         super();
 
-        eternalStoredKeys = new HashSet<Integer>();
+        eternalStoredKeys = new HashSet<>();
 
         // get old ehcache agent JAR files
-        final String[] oldFiles = FileUtil.getFiles(FileUtil.getTempDirectory(), new FileFilter()
-        {
-            @Override
-            public boolean accept(File pathname)
-            {
-                // old ehcache temp agent JAR files
-                return FileUtil.getFileName(pathname.getAbsolutePath(), false).startsWith("ehcache");
-            }
+        final String[] oldFiles = FileUtil.getFiles(FileUtil.getTempDirectory(), pathname -> {
+            // old ehcache temp agent JAR files
+            return FileUtil.getFileName(pathname.getAbsolutePath(), false).startsWith("ehcache");
         }, false, false, false);
         // delete these files as ehcache don't do it itself
-        for (String file : oldFiles)
+        for (final String file : oldFiles)
             FileUtil.delete(file, false);
 
         // delete previous cache file
@@ -136,8 +112,7 @@ public class EHCache2 extends AbstractCache
         final DiskStoreConfiguration diskConfig = new DiskStoreConfiguration().path(path);
         final Configuration cacheManagerConfig = new Configuration().diskStore(diskConfig);
 
-        final PersistenceConfiguration persistenceConfig = new PersistenceConfiguration()
-                .strategy(Strategy.LOCALTEMPSWAP);
+        final PersistenceConfiguration persistenceConfig = new PersistenceConfiguration().strategy(Strategy.LOCALTEMPSWAP);
         // CacheWriterFactoryConfiguration c = new CacheWriterFactoryConfiguration();
         // c.setClass(path);
 
@@ -174,14 +149,11 @@ public class EHCache2 extends AbstractCache
     }
 
     @Override
-    public void end()
-    {
-        try
-        {
+    public void end() {
+        try {
             clear();
         }
-        catch (CacheException e)
-        {
+        catch (final CacheException e) {
             System.err.println(e.getMessage());
         }
 
@@ -190,101 +162,84 @@ public class EHCache2 extends AbstractCache
 
     @SuppressWarnings("deprecation")
     @Override
-    public long usedMemory()
-    {
+    public long usedMemory() {
         return cache.calculateInMemorySize() + cache.calculateOffHeapSize();
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public long usedDisk()
-    {
+    public long usedDisk() {
         return cache.calculateOnDiskSize();
     }
 
     @Override
-    public boolean isOnMemoryCache(Integer key)
-    {
+    public boolean isOnMemoryCache(final Integer key) {
         if (profiling)
             startProf();
 
-        try
-        {
+        try {
             return cache.isElementInMemory(key) | cache.isElementOffHeap(key);
         }
-        finally
-        {
+        finally {
             if (profiling)
                 endProf();
         }
     }
 
     @Override
-    public boolean isOnDiskCache(Integer key)
-    {
+    public boolean isOnDiskCache(final Integer key) {
         if (profiling)
             startProf();
 
-        try
-        {
+        try {
             return cache.isElementOnDisk(key);
         }
-        finally
-        {
+        finally {
             if (profiling)
                 endProf();
         }
     }
 
     @Override
-    public boolean isInCache(Integer key)
-    {
+    public boolean isInCache(final Integer key) {
         if (profiling)
             startProf();
 
-        try
-        {
+        try {
             return cache.isKeyInCache(key);
         }
-        finally
-        {
+        finally {
             if (profiling)
                 endProf();
         }
     }
 
     @Override
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         // fast empty check
         return cache.getKeysNoDuplicateCheck().size() == 0;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<Integer> getAllKeys() throws CacheException
-    {
+    public Collection<Integer> getAllKeys() throws CacheException {
         if (profiling)
             startProf();
 
-        try
-        {
+        try {
             return cache.getKeys();
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             throw new CacheException("ImageCache: an error occured while retrieving all keys from cache", e);
         }
-        finally
-        {
+        finally {
             if (profiling)
                 endProf();
         }
     }
 
     @Override
-    public Object get(Integer key) throws CacheException
-    {
+    public Object get(final Integer key) throws CacheException {
         if (profiling)
             startProf();
 
@@ -292,13 +247,11 @@ public class EHCache2 extends AbstractCache
         Object result = null;
 
         // test if we need to check for null result
-        synchronized (eternalStoredKeys)
-        {
+        synchronized (eternalStoredKeys) {
             checkNull = eternalStoredKeys.contains(key);
         }
 
-        try
-        {
+        try {
             final Element e = cache.get(key);
 
             if (e != null)
@@ -310,21 +263,18 @@ public class EHCache2 extends AbstractCache
 
             return result;
         }
-        finally
-        {
+        finally {
             if (profiling)
                 endProf();
         }
     }
 
     @Override
-    public void set(Integer key, Object object, boolean eternal) throws CacheException
-    {
+    public void set(final Integer key, final Object object, final boolean eternal) throws CacheException {
         if (profiling)
             startProf();
 
-        synchronized (eternalStoredKeys)
-        {
+        synchronized (eternalStoredKeys) {
             // save in keyset (only for non null eternal data)
             if ((object != null) && eternal)
                 eternalStoredKeys.add(key);
@@ -332,19 +282,16 @@ public class EHCache2 extends AbstractCache
                 eternalStoredKeys.remove(key);
         }
 
-        try
-        {
+        try {
             // System.out.println("EHCache.set(" + IcyBufferedImage.getIcyBufferedImage(key).getImageSourceInfo() + ", "
             // + eternal + ")");
             //
             cache.put(new Element(key, object, eternal));
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             throw new CacheException("ImageCache error: data '" + key + "' couldn't be saved in cache", e);
         }
-        finally
-        {
+        finally {
             if (profiling)
                 endProf();
         }
@@ -352,8 +299,7 @@ public class EHCache2 extends AbstractCache
 
     @SuppressWarnings("unchecked")
     @Override
-    public void clean()
-    {
+    public void clean() {
         System.gc();
         cache.evictExpiredElements();
         System.gc();
@@ -371,66 +317,55 @@ public class EHCache2 extends AbstractCache
     }
 
     @Override
-    public void clear() throws CacheException
-    {
+    public void clear() throws CacheException {
         if (profiling)
             startProf();
 
         eternalStoredKeys.clear();
 
-        try
-        {
+        try {
             cache.removeAll();
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             throw new CacheException("ImageCache: an error occured while clearing cache", e);
         }
-        finally
-        {
+        finally {
             if (profiling)
                 endProf();
         }
     }
 
     @Override
-    public void remove(Integer key) throws CacheException
-    {
+    public void remove(final Integer key) throws CacheException {
         if (profiling)
             startProf();
 
-        synchronized (eternalStoredKeys)
-        {
+        synchronized (eternalStoredKeys) {
             // remove from keyset
             eternalStoredKeys.remove(key);
         }
 
-        try
-        {
+        try {
             // System.out
             // .println("EHCache.remove(" + IcyBufferedImage.getIcyBufferedImage(key).getImageSourceInfo() + ")");
             //
             cache.remove(key);
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             throw new CacheException("ImageCache: an error occured while removing data '" + key + "' from cache", e);
         }
-        finally
-        {
+        finally {
             if (profiling)
                 endProf();
         }
     }
 
-    public StatisticsGateway getStats()
-    {
+    public StatisticsGateway getStats() {
         return cache.getStatistics();
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return "EHCache 2";
     }
 

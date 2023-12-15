@@ -949,7 +949,13 @@ public class SystemUtil {
      * An empty string is returned if OS is unknown.
      */
     public static String getOSArchIdString() {
-        final String javaBit = Integer.toString(getJavaArchDataModel());
+        final String javaBit;
+
+        // arm64 architecture ?
+        if (StringUtil.equals(getOSArch().toLowerCase(), "aarch64"))
+            javaBit = "a64";
+        else
+            javaBit = Integer.toString(getJavaArchDataModel());
 
         if (isWindows())
             return SYSTEM_WINDOWS + javaBit;
