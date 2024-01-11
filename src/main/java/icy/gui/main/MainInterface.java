@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,19 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.main;
 
 import icy.common.listener.AcceptListener;
 import icy.gui.inspector.InspectorPanel;
 import icy.gui.inspector.LayersPanel;
 import icy.gui.inspector.RoisPanel;
-import icy.gui.menu.ApplicationMenu;
-import icy.gui.menu.ROITask;
-import icy.gui.menu.ToolRibbonTask;
 import icy.gui.viewer.Viewer;
 import icy.image.IcyBufferedImage;
 import icy.image.lut.LUT;
-import icy.imagej.ImageJWrapper;
 import icy.painter.Overlay;
 import icy.painter.Painter;
 import icy.plugin.abstract_.Plugin;
@@ -225,9 +221,6 @@ public interface MainInterface {
 
     IcyDesktopPane getDesktopPane();
 
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    ApplicationMenu getApplicationMenu();
-
     TaskFrameManager getTaskWindowManager();
 
     @Deprecated(since = "2.4.3", forRemoval = true)
@@ -413,11 +406,6 @@ public interface MainInterface {
     SwimmingPool getSwimmingPool();
 
     /**
-     * Returns the ImageJ object instance
-     */
-    ImageJWrapper getImageJ();
-
-    /**
      * Returns current selected tool (ROI / Selection)
      */
     String getSelectedTool();
@@ -426,18 +414,6 @@ public interface MainInterface {
      * Set current selected tool (ROI / Selection).
      */
     void setSelectedTool(String command);
-
-    /**
-     * Returns the ROI task of the Ribbon menu.
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    ROITask getROIRibbonTask();
-
-    /**
-     * @deprecated Use {@link #getROIRibbonTask()} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    ToolRibbonTask getToolRibbon();
 
     /**
      * Returns true if the main frame is set as "always on top"

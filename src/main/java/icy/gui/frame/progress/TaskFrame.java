@@ -26,11 +26,8 @@ import icy.gui.main.TaskFrameManager;
 import icy.main.Icy;
 import icy.system.thread.ThreadUtil;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Use it to create a Task Window on the border like the loader (Thread Safe)<br>
@@ -185,7 +182,9 @@ public abstract class TaskFrame extends IcyFrame
         if (headless)
             return;
 
-        super.close();
+        // FIXME 2024/01/02 : .dispose() makes the menubar instable
+        //super.close();
+        setVisible(false);
     }
 
     /**

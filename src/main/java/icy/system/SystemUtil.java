@@ -343,10 +343,6 @@ public class SystemUtil {
         return getMenuCtrlMask();
     }
 
-    /**
-     * @deprecated Use {@link GraphicsEnvironment#getLocalGraphicsEnvironment()} instead.
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
     public static GraphicsEnvironment getLocalGraphicsEnvironment() {
         return GraphicsEnvironment.getLocalGraphicsEnvironment();
     }
@@ -496,10 +492,7 @@ public class SystemUtil {
 
     /**
      * Returns true if current system is "head less" (no screen output device).
-     *
-     * @deprecated Use {@link GraphicsEnvironment#isHeadless()} instead.
      */
-    @Deprecated(since = "3.0.0", forRemoval = true)
     public static boolean isHeadLess() {
         return GraphicsEnvironment.isHeadless();
     }
@@ -508,7 +501,6 @@ public class SystemUtil {
         return Thread.currentThread().getContextClassLoader();
     }
 
-    @Deprecated(since = "3.0.0", forRemoval = true)
     public static ClassLoader getSystemClassLoader() {
         return ClassLoader.getSystemClassLoader();
     }

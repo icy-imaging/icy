@@ -18,6 +18,8 @@
 
 package icy.plugin;
 
+import com.drew.lang.annotations.NotNull;
+import com.drew.lang.annotations.Nullable;
 import icy.common.Version;
 import icy.file.FileUtil;
 import icy.file.xml.XMLPersistent;
@@ -63,17 +65,6 @@ public class PluginDescriptor implements XMLPersistent {
     public static final ImageIcon DEFAULT_ICON = ResourceUtil.getImageIcon(ResourceUtil.IMAGE_PLUGIN_SMALL);
     public static final Image DEFAULT_IMAGE = ResourceUtil.IMAGE_PLUGIN;
 
-    /**
-     * @deprecated Use {@link PluginIdent#ID_CLASSNAME} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final String ID_CLASSNAME = PluginIdent.ID_CLASSNAME;
-    /**
-     * @deprecated Use {@link PluginIdent#ID_REQUIRED_KERNEL_VERSION} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final String ID_REQUIRED_KERNEL_VERSION = PluginIdent.ID_REQUIRED_KERNEL_VERSION;
-
     public static final String ID_URL = "url";
     public static final String ID_NAME = "name";
 
@@ -112,59 +103,18 @@ public class PluginDescriptor implements XMLPersistent {
     protected boolean iconLoaded;
     protected boolean imageLoaded;
     protected boolean changeLogLoaded;
-    // boolean checkingForUpdate;
-    // boolean updateChecked;
-    // PluginDescriptor onlineDescriptor;
 
-    // private final List<String> publicClasseNames;
     protected final List<PluginIdent> required;
 
     // only for online descriptor
     protected RepositoryInfo repository;
 
-    // /**
-    // * Get online plugin of specified PluginIdent<br>
-    // * Take care of "allow beta" global flag<br>
-    // * This method can take sometime !<br>
-    // */
-    // public static PluginDescriptor getOnlinePlugin(PluginIdent ident, boolean loadImage)
-    // {
-    // PluginDescriptor betaDescriptor = null;
-    // PluginDescriptor stableDescriptor = null;
-    //
-    // try
-    // {
-    // // get beta online plugin descriptor if allowed
-    // if (PluginPreferences.getAllowBeta())
-    // betaDescriptor = new PluginDescriptor(ident.getUrlBeta(), loadImage);
-    // }
-    // catch (Exception e)
-    // {
-    // betaDescriptor = null;
-    // }
-    //
-    // try
-    // {
-    // // get stable online plugin descriptor
-    // stableDescriptor = new PluginDescriptor(ident.getUrlStable(), loadImage);
-    // }
-    // catch (Exception e)
-    // {
-    // stableDescriptor = null;
-    // }
-    //
-    // if ((betaDescriptor != null) && ((stableDescriptor == null) ||
-    // betaDescriptor.isNewerOrEqual(stableDescriptor)))
-    // return betaDescriptor;
-    //
-    // return stableDescriptor;
-    // }
 
     /**
      * Returns the index for the specified plugin in the specified list.<br>
      * Returns -1 if not found.
      */
-    public static int getIndex(final List<PluginDescriptor> list, final PluginDescriptor plugin) {
+    public static int getIndex(final @NotNull List<PluginDescriptor> list, final @NotNull PluginDescriptor plugin) {
         return getIndex(list, plugin.getIdent());
     }
 
@@ -172,7 +122,7 @@ public class PluginDescriptor implements XMLPersistent {
      * Returns the index for the specified plugin in the specified list.<br>
      * Returns -1 if not found.
      */
-    public static int getIndex(final List<PluginDescriptor> list, final PluginIdent ident) {
+    public static int getIndex(final @NotNull List<PluginDescriptor> list, final @NotNull PluginIdent ident) {
         final int size = list.size();
 
         for (int i = 0; i < size; i++)
@@ -186,7 +136,7 @@ public class PluginDescriptor implements XMLPersistent {
      * Returns the index for the specified plugin in the specified list.<br>
      * Returns -1 if not found.
      */
-    public static int getIndex(final List<PluginDescriptor> list, final String className) {
+    public static int getIndex(final @NotNull List<PluginDescriptor> list, final @NotNull String className) {
         final int size = list.size();
 
         for (int i = 0; i < size; i++)
@@ -199,25 +149,25 @@ public class PluginDescriptor implements XMLPersistent {
     /**
      * Returns true if the specified plugin is present in the specified list.
      */
-    public static boolean existInList(final List<PluginDescriptor> list, final PluginDescriptor plugin) {
+    public static boolean existInList(final @NotNull List<PluginDescriptor> list, final @NotNull PluginDescriptor plugin) {
         return existInList(list, plugin.getIdent());
     }
 
     /**
      * Returns true if the specified plugin is present in the specified list.
      */
-    public static boolean existInList(final List<PluginDescriptor> list, final PluginIdent ident) {
+    public static boolean existInList(final @NotNull List<PluginDescriptor> list, final @NotNull PluginIdent ident) {
         return getIndex(list, ident) != -1;
     }
 
     /**
      * Returns true if the specified plugin is present in the specified list.
      */
-    public static boolean existInList(final List<PluginDescriptor> list, final String className) {
+    public static boolean existInList(final @NotNull List<PluginDescriptor> list, final @NotNull String className) {
         return getIndex(list, className) != -1;
     }
 
-    public static boolean existInList(final Set<PluginDescriptor> plugins, final PluginIdent ident) {
+    public static boolean existInList(final @NotNull Set<PluginDescriptor> plugins, final @NotNull PluginIdent ident) {
         for (final PluginDescriptor plugin : plugins)
             if (plugin.getIdent().equals(ident))
                 return true;
@@ -225,17 +175,17 @@ public class PluginDescriptor implements XMLPersistent {
         return false;
     }
 
-    public static void addToList(final List<PluginDescriptor> list, final PluginDescriptor plugin, final int position) {
+    public static void addToList(final @NotNull List<PluginDescriptor> list, final @Nullable PluginDescriptor plugin, final int position) {
         if ((plugin != null) && !existInList(list, plugin))
             list.add(position, plugin);
     }
 
-    public static void addToList(final List<PluginDescriptor> list, final PluginDescriptor plugin) {
+    public static void addToList(final @NotNull List<PluginDescriptor> list, final @Nullable PluginDescriptor plugin) {
         if ((plugin != null) && !existInList(list, plugin))
             list.add(plugin);
     }
 
-    public static boolean removeFromList(final List<PluginDescriptor> list, final String className) {
+    public static boolean removeFromList(final @NotNull List<PluginDescriptor> list, final @NotNull String className) {
         for (int i = list.size() - 1; i >= 0; i--) {
             final PluginDescriptor p = list.get(i);
 
@@ -248,15 +198,7 @@ public class PluginDescriptor implements XMLPersistent {
         return false;
     }
 
-    // public static String getPluginTypeString(int type)
-    // {
-    // if ((type >= 0) && (type < pluginTypeString.length))
-    // return pluginTypeString[type];
-    //
-    // return "";
-    // }
-
-    public static ArrayList<PluginDescriptor> getPlugins(final List<PluginDescriptor> list, final String className) {
+    public static @NotNull ArrayList<PluginDescriptor> getPlugins(final @NotNull List<PluginDescriptor> list, final @NotNull String className) {
         final ArrayList<PluginDescriptor> result = new ArrayList<>();
 
         for (final PluginDescriptor plugin : list)
@@ -266,7 +208,7 @@ public class PluginDescriptor implements XMLPersistent {
         return result;
     }
 
-    public static PluginDescriptor getPlugin(final List<PluginDescriptor> list, final String className) {
+    public static @Nullable PluginDescriptor getPlugin(@NotNull final List<PluginDescriptor> list, @NotNull final String className) {
         for (final PluginDescriptor plugin : list)
             if (plugin.getClassName().equals(className))
                 return plugin;
@@ -274,7 +216,7 @@ public class PluginDescriptor implements XMLPersistent {
         return null;
     }
 
-    public static PluginDescriptor getPlugin(final List<PluginDescriptor> list, final PluginIdent ident, final boolean acceptNewer) {
+    public static @Nullable PluginDescriptor getPlugin(final @NotNull List<PluginDescriptor> list, final @NotNull PluginIdent ident, final boolean acceptNewer) {
         if (acceptNewer) {
             for (final PluginDescriptor plugin : list)
                 if (plugin.getIdent().isGreaterOrEqual(ident))
@@ -325,7 +267,7 @@ public class PluginDescriptor implements XMLPersistent {
     /**
      * Create from class, used for local plugin.
      */
-    public PluginDescriptor(final Class<? extends Plugin> clazz) {
+    public PluginDescriptor(final @NotNull Class<? extends Plugin> clazz) {
         this();
 
         this.pluginClass = clazz;
@@ -415,7 +357,7 @@ public class PluginDescriptor implements XMLPersistent {
     /**
      * Create from plugin online identifier, used for online plugin only.
      */
-    public PluginDescriptor(final PluginOnlineIdent ident, final RepositoryInfo repos) throws IllegalArgumentException {
+    public PluginDescriptor(final @NotNull PluginOnlineIdent ident, final @Nullable RepositoryInfo repos) throws IllegalArgumentException {
         this();
 
         this.ident.setClassName(ident.getClassName());
@@ -511,8 +453,7 @@ public class PluginDescriptor implements XMLPersistent {
                 return true;
             }
 
-            System.err.println(
-                    "Can't find valid XML file from '" + xmlUrl + "' for plugin class '" + ident.getClassName() + "'");
+            System.err.println("Can't find valid XML file from '" + xmlUrl + "' for plugin class '" + ident.getClassName() + "'");
         }
 
         System.err.println("Can't load XML file from '" + xmlUrl + "' for plugin class '" + ident.getClassName() + "'");
@@ -521,7 +462,7 @@ public class PluginDescriptor implements XMLPersistent {
     }
 
     /**
-     * Load 64x64 icon (icon url field should be correctly filled)
+     * Load 32x32 icon (icon url field should be correctly filled)
      */
     public boolean loadIcon() {
         // already loaded ?
@@ -634,10 +575,76 @@ public class PluginDescriptor implements XMLPersistent {
     }
 
     boolean loadIcon(final URL url) {
+        if (url == null) {
+            icon = DEFAULT_ICON;
+            return false;
+        }
+
         // load icon
-        if (url != null)
+        /*if (isInstanceOf(PluginDaemon.class)) {
+            BufferedImage img = ImageUtil.load(NetworkUtil.getInputStream(url, (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false);
+            if (img != null) {
+                BufferedImage overlay = ImageUtil.convert(ResourceUtil.getColorIconAsImage("overlay_daemon.png", 16), new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB));
+
+                // create the new image, canvas size is the max. of both image sizes
+                int w = Math.max(img.getWidth(), overlay.getWidth());
+                int h = Math.max(img.getHeight(), overlay.getHeight());
+                BufferedImage combined = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
+                // paint both images, preserving the alpha channels
+                Graphics g = combined.getGraphics();
+                g.drawImage(img, 0, 0, null);
+                g.drawImage(overlay, 16, 16, null);
+
+                g.dispose();
+
+                icon = ResourceUtil.getImageIcon(combined, ICON_SIZE);
+            }
+        }
+        else if (isActionable()) {
+            BufferedImage img = ImageUtil.load(NetworkUtil.getInputStream(url, (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false);
+            if (img != null) {
+                BufferedImage overlay = ImageUtil.convert(ResourceUtil.getColorIconAsImage("overlay_actionable.png", 16), new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB));
+
+                // create the new image, canvas size is the max. of both image sizes
+                int w = Math.max(img.getWidth(), overlay.getWidth());
+                int h = Math.max(img.getHeight(), overlay.getHeight());
+                BufferedImage combined = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
+                // paint both images, preserving the alpha channels
+                Graphics g = combined.getGraphics();
+                g.drawImage(img, 0, 0, null);
+                g.drawImage(overlay, 16, 16, null);
+
+                g.dispose();
+
+                icon = ResourceUtil.getImageIcon(combined, ICON_SIZE);
+            }
+        }
+        else if (isInstanceOf(PluginLibrary.class)) {
+            BufferedImage img = ImageUtil.load(NetworkUtil.getInputStream(url, (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false);
+            if (img != null) {
+                BufferedImage overlay = ImageUtil.convert(ResourceUtil.getColorIconAsImage("overlay_core.png", 16), new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB));
+
+                // create the new image, canvas size is the max. of both image sizes
+                int w = Math.max(img.getWidth(), overlay.getWidth());
+                int h = Math.max(img.getHeight(), overlay.getHeight());
+                BufferedImage combined = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
+                // paint both images, preserving the alpha channels
+                Graphics g = combined.getGraphics();
+                g.drawImage(img, 0, 0, null);
+                g.drawImage(overlay, 16, 16, null);
+
+                g.dispose();
+
+                icon = ResourceUtil.getImageIcon(combined, ICON_SIZE);
+            }
+        }
+        else {*/
             icon = ResourceUtil.getImageIcon(ImageUtil.load(NetworkUtil.getInputStream(url,
                     (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false), ICON_SIZE);
+        //}
 
         // get default icon
         if (icon == null) {

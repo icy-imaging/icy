@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,28 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.action;
+
+import icy.gui.preferences.*;
+import icy.util.ClassUtil;
 
 import java.awt.event.ActionEvent;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import icy.gui.preferences.GUICanvasPreferencePanel;
-import icy.gui.preferences.GeneralPreferencePanel;
-import icy.gui.preferences.MagicWandPreferencePanel;
-import icy.gui.preferences.NetworkPreferencePanel;
-import icy.gui.preferences.PluginLocalPreferencePanel;
-import icy.gui.preferences.PluginOnlinePreferencePanel;
-import icy.gui.preferences.PluginPreferencePanel;
-import icy.gui.preferences.PluginStartupPreferencePanel;
-import icy.gui.preferences.PreferenceFrame;
-import icy.gui.preferences.RepositoryPreferencePanel;
-import icy.gui.preferences.WorkspaceLocalPreferencePanel;
-import icy.gui.preferences.WorkspaceOnlinePreferencePanel;
-import icy.gui.preferences.WorkspacePreferencePanel;
-import icy.util.ClassUtil;
 
 /**
  * Preference actions.
@@ -176,43 +164,6 @@ public final class PreferencesActions {
         }
     };
 
-    public static final IcyAbstractAction workspacePreferencesAction = new IcyAbstractAction(
-            "Workspace preferences",
-            //new IcyIcon(ResourceUtil.ICON_TOOLS),
-            "Show the workspace preferences window"
-    ) {
-        @Override
-        public boolean doAction(final ActionEvent e) {
-            new PreferenceFrame(WorkspacePreferencePanel.NODE_NAME);
-            return true;
-        }
-    };
-
-    public static final IcyAbstractAction localWorkspacePreferencesAction = new IcyAbstractAction(
-            "Local workspace",
-            //new IcyIcon(ResourceUtil.ICON_TOOLS),
-            "Show the local workspace window",
-            "Enable / disable or remove installed workspaces."
-    ) {
-        @Override
-        public boolean doAction(final ActionEvent e) {
-            new PreferenceFrame(WorkspaceLocalPreferencePanel.NODE_NAME);
-            return true;
-        }
-    };
-    public static final IcyAbstractAction onlineWorkspacePreferencesAction = new IcyAbstractAction(
-            "Online workspace",
-            //new IcyIcon(ResourceUtil.ICON_TOOLS),
-            "Show the online workspace window",
-            "Browse online workspaces and install them."
-    ) {
-        @Override
-        public boolean doAction(final ActionEvent e) {
-            new PreferenceFrame(WorkspaceOnlinePreferencePanel.NODE_NAME);
-            return true;
-        }
-    };
-
     /**
      * Return all actions of this class
      */
@@ -228,7 +179,7 @@ public final class PreferencesActions {
                 else if (ClassUtil.isSubClass(type, IcyAbstractAction.class))
                     result.add((IcyAbstractAction) field.get(null));
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 // ignore
             }
         }

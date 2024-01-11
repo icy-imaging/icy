@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,9 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.action;
 
-import java.awt.Image;
+import icy.clipboard.Clipboard;
+import icy.clipboard.TransferableImage;
+import icy.gui.frame.AboutFrame;
+import icy.gui.main.MainFrame;
+import icy.gui.viewer.Viewer;
+import icy.image.ImageUtil;
+import icy.main.Icy;
+import icy.network.NetworkUtil;
+import icy.plugin.PluginUpdater;
+import icy.preferences.GeneralPreferences;
+import icy.sequence.Sequence;
+import icy.system.IcyExceptionHandler;
+import icy.system.SystemUtil;
+import icy.update.IcyUpdater;
+import icy.util.ClassUtil;
+
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -27,27 +43,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import icy.clipboard.Clipboard;
-import icy.clipboard.TransferableImage;
-import icy.gui.frame.AboutFrame;
-import icy.gui.main.MainFrame;
-import icy.gui.menu.search.SearchBar;
-import icy.gui.viewer.Viewer;
-import icy.image.ImageUtil;
-import icy.imagej.ImageJUtil;
-import icy.main.Icy;
-import icy.network.NetworkUtil;
-import icy.plugin.PluginUpdater;
-import icy.preferences.GeneralPreferences;
-import icy.sequence.Sequence;
-import icy.system.IcyExceptionHandler;
-import icy.system.SystemUtil;
-import icy.system.thread.ThreadUtil;
-import icy.update.IcyUpdater;
-import icy.util.ClassUtil;
-import ij.ImagePlus;
-import ij.WindowManager;
 
 /**
  * General actions.
@@ -60,20 +55,21 @@ public final class GeneralActions {
             "Search",
             //new IcyIcon(ResourceUtil.ICON_SEARCH),
             "Application search tool", KeyEvent.VK_F,
-            SystemUtil.getMenuCtrlMask()
+            SystemUtil.getMenuCtrlMaskEx()
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
             final MainFrame mf = Icy.getMainInterface().getMainFrame();
 
-            if (mf != null) {
+            // TODO replace search bar
+            /*if (mf != null) {
                 final SearchBar sb = mf.getSearchBar();
 
                 if (sb != null) {
                     sb.setFocus();
                     return true;
                 }
-            }
+            }*/
             return false;
         }
     };
@@ -115,7 +111,7 @@ public final class GeneralActions {
             "Copy image to clipboard",
             "Copy the active image to the system clipboard.",
             KeyEvent.VK_C,
-            SystemUtil.getMenuCtrlMask(),
+            SystemUtil.getMenuCtrlMaskEx(),
             true,
             "Copying image to the clipboard..."
     ) {
@@ -138,7 +134,7 @@ public final class GeneralActions {
 
                         return true;
                     }
-                    catch (Throwable e1) {
+                    catch (final Throwable e1) {
                         System.err.println("Can't copy image to clipboard:");
                         IcyExceptionHandler.showErrorMessage(e1, false);
                     }
@@ -160,7 +156,7 @@ public final class GeneralActions {
             "Paste image from clipboard",
             "Paste image from the system clipboard in a new sequence.",
             KeyEvent.VK_V,
-            SystemUtil.getMenuCtrlMask(),
+            SystemUtil.getMenuCtrlMaskEx(),
             true,
             "Creating new sequence from clipboard image..."
     ) {
@@ -173,7 +169,7 @@ public final class GeneralActions {
                     return true;
                 }
             }
-            catch (Throwable e1) {
+            catch (final Throwable e1) {
                 System.err.println("Can't paste image from clipboard:");
                 IcyExceptionHandler.showErrorMessage(e1, false);
             }
@@ -186,12 +182,13 @@ public final class GeneralActions {
             try {
                 return super.isEnabled() && Clipboard.hasTypeSystem(DataFlavor.imageFlavor);
             }
-            catch (Throwable e) {
+            catch (final Throwable e) {
                 return false;
             }
         }
     };
 
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final IcyAbstractAction toIJAction = new IcyAbstractAction(
             "Convert to IJ",
             //new IcyIcon(ResourceUtil.ICON_TOIJ),
@@ -202,42 +199,16 @@ public final class GeneralActions {
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
-            try {
-                final Sequence seq = Icy.getMainInterface().getActiveSequence();
-
-                if (seq != null) {
-                    final ImagePlus ip = ImageJUtil.convertToImageJImage(seq, true, progressFrame);
-
-                    // show the image
-                    ThreadUtil.invokeLater(ip::show);
-
-                    return true;
-                }
-            }
-            catch (InterruptedException e1) {
-                // interrupted
-            }
-
             return false;
         }
-
-        // TODO: 17/02/2023 Remove this once Substance removed
-        /*@Override
-        public RichTooltip getRichToolTip() {
-            final RichTooltip result = super.getRichToolTip();
-
-            result.addFooterSection("Icy needs to be in detached mode to enabled this feature.");
-
-            return result;
-        }*/
 
         @Override
         public boolean isEnabled() {
             return super.isEnabled() && (Icy.getMainInterface().getActiveSequence() != null);
         }
-
     };
 
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final IcyAbstractAction toIcyAction = new IcyAbstractAction(
             "Convert to Icy",
             //new IcyIcon(ResourceUtil.ICON_TOICY),
@@ -248,40 +219,12 @@ public final class GeneralActions {
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
-            try {
-                final ImagePlus ip = WindowManager.getCurrentImage();
-
-                if (ip != null) {
-                    final Sequence seq = ImageJUtil.convertToIcySequence(ip, progressFrame);
-
-                    ThreadUtil.invokeLater(() -> {
-                        // show the sequence
-                        new Viewer(seq);
-                    });
-
-                    return true;
-                }
-            }
-            catch (InterruptedException e1) {
-                // interrupted
-            }
-
             return false;
         }
 
-        // TODO: 17/02/2023 Remove this once Substance removed
-        /*@Override
-        public RichTooltip getRichToolTip() {
-            final RichTooltip result = super.getRichToolTip();
-
-            result.addFooterSection("Icy needs to be in detached mode to enabled this feature.");
-
-            return result;
-        }*/
-
         @Override
         public boolean isEnabled() {
-            return super.isEnabled() && (WindowManager.getCurrentImage() != null);
+            return super.isEnabled();
         }
     };
 
@@ -420,7 +363,7 @@ public final class GeneralActions {
                 else if (ClassUtil.isSubClass(type, IcyAbstractAction.class))
                     result.add((IcyAbstractAction) field.get(null));
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 // ignore
             }
         }

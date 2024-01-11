@@ -18,6 +18,7 @@
 
 package icy.gui.toolbar.button;
 
+import icy.action.PreferencesActions;
 import icy.gui.component.button.IcyButton;
 import icy.gui.component.menu.IcyMenuItem;
 import icy.gui.util.LookAndFeelUtil;
@@ -47,8 +48,8 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
     private final JPopupMenu popup;
 
     public MemoryMonitorButton() {
-        super("CPU: 100% | RAM: 100%");
-        setPreferredSize(new Dimension(185, 27));
+        super("CPU: 0% | RAM: 0%");
+        setFlat(true);
         setHorizontalAlignment(JButton.LEFT);
         setIcon(OK);
         setToolTipText("<html>Left click to free memory<br>Right click to open menu</html>");
@@ -57,6 +58,7 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
 
         popup = new JPopupMenu();
         final IcyMenuItem settings = new IcyMenuItem("Open Settings...", GoogleMaterialDesignIcons.SETTINGS);
+        settings.addActionListener(PreferencesActions.generalPreferencesAction);
         final IcyMenuItem GB = new IcyMenuItem("Free Java Memory", GoogleMaterialDesignIcons.DELETE_SWEEP);
         GB.addActionListener(e -> forceGC());
         final IcyMenuItem VTKGB = new IcyMenuItem("Free VTK Memory", GoogleMaterialDesignIcons.DELETE_SWEEP);

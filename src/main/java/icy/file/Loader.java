@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ import icy.gui.dialog.ImporterSelectionDialog;
 import icy.gui.dialog.SeriesSelectionDialog;
 import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.frame.progress.FileFrame;
-import icy.gui.menu.ApplicationMenu;
+import icy.gui.menu.ApplicationMenuFile;
 import icy.image.ChannelPosition;
 import icy.image.IcyBufferedImage;
 import icy.image.ImagePosition;
@@ -477,7 +477,6 @@ public class Loader {
                 final List<String> list = result.computeIfAbsent(imp, k -> new ArrayList<>());
 
 
-
                 // add path to the list
                 list.add(path);
             }
@@ -658,8 +657,7 @@ public class Loader {
         if (importer == null)
             return null;
 
-        @SuppressWarnings("unchecked")
-        final T result = (T) importer.getClass().getDeclaredConstructor().newInstance();
+        @SuppressWarnings("unchecked") final T result = (T) importer.getClass().getDeclaredConstructor().newInstance();
 
         if (result instanceof final LociImporterPlugin resImp) {
             final LociImporterPlugin srcImp = (LociImporterPlugin) importer;
@@ -849,105 +847,6 @@ public class Loader {
         checkOpening(meta, series, resolution, MetaDataUtil.getSizeZ(meta, series), MetaDataUtil.getSizeT(meta, series), messageSuffix);
     }
 
-    // /**
-    // * Returns the best resolution to use from the given metadata information and series index.<br>
-    // * If the image is too large to be displayed at full resolution (XY plane size > 2^31) or if
-    // we don't have enough
-    // * memory to store the whole image (depending wanted constraint) then a sub resolution index
-    // is returned.<br>
-    // * A return value of <code>0</code> means full resolution of the original image while value
-    // <code>1</code>
-    // * correspond to the resolution / 2.<br>
-    // * Formula: <code>resolution / 2^value</code><br>
-    // *
-    // * @param meta
-    // * metadata of the image
-    // * @param series
-    // * series index
-    // * @param showMessage
-    // * show announce frame or message in the output log when one size constraint is meet and
-    // induce resolution
-    // * decrease
-    // */
-    // public static int getBestResolution(OMEXMLMetadataImpl meta, int series, boolean showMessage)
-    // {
-    // // easy trick to disable message display when needed
-    // boolean warningDisplayed = !showMessage;
-    // // default resolution to open (full resolution)
-    // int resolution = 0;
-    // // size of XY plane
-    // long sizeXY = (long) MetaDataUtil.getSizeX(meta, series) * (long) MetaDataUtil.getSizeY(meta,
-    // series);
-    //
-    // // we can't handle that plane size
-    // if (sizeXY > Integer.MAX_VALUE)
-    // {
-    // if (!warningDisplayed)
-    // {
-    // // notify we can't open that image at full resolution
-    // if (!Icy.getMainInterface().isHeadLess())
-    // new AnnounceFrame("XY plane size is >= 2^31, try to open sub resolution of the image...",
-    // 10);
-    // else
-    // System.out.println("XY plane size is >= 2^31, try to open sub resolution of the image...");
-    //
-    // warningDisplayed = true;
-    // }
-    //
-    // // reduce resolution until XY plane size is acceptable
-    // do
-    // {
-    // resolution++;
-    // sizeXY /= 4;
-    // }
-    // while (sizeXY > Integer.MAX_VALUE);
-    // }
-    //
-    // // get free memory
-    // long freeInByte = SystemUtil.getJavaFreeMemory() - (16 * 1024 * 1024);
-    // // check that we have enough memory for the whole image and the ARGB image used for display
-    // (sizeXY * 4)
-    // long sizeInByte = MetaDataUtil.getDataSize(meta, series, resolution) + (sizeXY * 4);
-    //
-    // // not enough memory to store the whole image ?
-    // if (sizeInByte > freeInByte)
-    // {
-    // // try to release some memory
-    // System.gc();
-    // // get updated free memory
-    // freeInByte = SystemUtil.getJavaFreeMemory() - (16 * 1024 * 1024);
-    // }
-    //
-    // // still not enough memory ?
-    // if (sizeInByte > freeInByte)
-    // {
-    // if (!warningDisplayed)
-    // {
-    // // display an information message that we can only load a sub resolution of the image
-    // if (!Icy.getMainInterface().isHeadLess())
-    // new AnnounceFrame(
-    // "Not enough memory to open full resolution of the image, try to open sub resolution...", 10);
-    // else
-    // System.out
-    // .println("Not enough memory to open full resolution of the image, try to open sub
-    // resolution...");
-    //
-    // warningDisplayed = true;
-    // }
-    //
-    // // reduce image resolution so the whole image fit in about 70% of available memory (safe)
-    // freeInByte = (int) (freeInByte * 0.7d);
-    // do
-    // {
-    // resolution++;
-    // sizeInByte /= 4;
-    // }
-    // while (sizeInByte > freeInByte);
-    // }
-    //
-    // return resolution;
-    // }
-
     /**
      * @deprecated Use {@link #getSequenceFileImporters(String)} instead.
      */
@@ -1053,19 +952,6 @@ public class Loader {
 
         return (OMEXMLMetadataImpl) reader.getMetadataStore();
     }
-
-    // /**
-    // * Use the given importer to load and return metadata of the specified image file.
-    // *
-    // * @throws UnsupportedFormatException
-    // * @throws IOException
-    // */
-    // public static OMEXMLMetadataImpl getMetaData(SequenceFileImporter importer, File file)
-    // throws UnsupportedFormatException, IOException
-    // {
-    // // load current file and add to results
-    // return importer.getMetaData(file);
-    // }
 
     /**
      * Returns a thumbnail of the specified image file path.<br>
@@ -1519,12 +1405,12 @@ public class Loader {
      * @see #getSequenceFileImporter(String, boolean)
      */
     public static Sequence loadSequence(final SequenceFileImporter importer, final List<String> paths, final boolean addToRecent, final boolean showProgress) {
-        final ApplicationMenu mainMenu;
+        final ApplicationMenuFile mainMenu;
         final FileFrame loadingFrame;
         Sequence result = null;
 
         if (addToRecent)
-            mainMenu = Icy.getMainInterface().getApplicationMenu();
+            mainMenu = ApplicationMenuFile.getInstance();
         else
             mainMenu = null;
         if (showProgress && !Icy.getMainInterface().isHeadLess())
@@ -1811,11 +1697,11 @@ public class Loader {
      * @param showProgress Show progression in loading process
      */
     public static void loadFiles(final FileImporter importer, final List<String> paths, final boolean addToRecent, final boolean showProgress) {
-        final ApplicationMenu mainMenu;
+        final ApplicationMenuFile mainMenu;
         final FileFrame loadingFrame;
 
         if (addToRecent)
-            mainMenu = Icy.getMainInterface().getApplicationMenu();
+            mainMenu = ApplicationMenuFile.getInstance();
         else
             mainMenu = null;
         if (showProgress && !Icy.getMainInterface().isHeadLess()) {
@@ -2006,11 +1892,11 @@ public class Loader {
     ) {
         // asynchronous call
         ThreadUtil.bgRun(() -> {
-            final ApplicationMenu mainMenu;
+            final ApplicationMenuFile mainMenu;
             final FileFrame loadingFrame;
 
             if (addToRecent)
-                mainMenu = Icy.getMainInterface().getApplicationMenu();
+                mainMenu = ApplicationMenuFile.getInstance();
             else
                 mainMenu = null;
             if (showProgress && !Icy.getMainInterface().isHeadLess())
@@ -2119,11 +2005,11 @@ public class Loader {
     ) {
         // asynchronous call
         ThreadUtil.bgRun(() -> {
-            final ApplicationMenu mainMenu;
+            final ApplicationMenuFile mainMenu;
             final FileFrame loadingFrame;
 
             if (addToRecent)
-                mainMenu = Icy.getMainInterface().getApplicationMenu();
+                mainMenu = ApplicationMenuFile.getInstance();
             else
                 mainMenu = null;
             if (showProgress && !Icy.getMainInterface().isHeadLess())
@@ -2348,12 +2234,12 @@ public class Loader {
      * @param showProgress  Show progression in loading process
      */
     public static Sequence loadSequence(final SequenceFileImporter importer, final String path, final int series, final int resolution, final Rectangle region, final int minZ, final int maxZ, final int minT, final int maxT, final int channel, final boolean forceVolatile, final boolean addToRecent, final boolean showProgress) {
-        final ApplicationMenu mainMenu;
+        final ApplicationMenuFile mainMenu;
         final FileFrame loadingFrame;
         final Sequence result;
 
         if (addToRecent)
-            mainMenu = Icy.getMainInterface().getApplicationMenu();
+            mainMenu = ApplicationMenuFile.getInstance();
         else
             mainMenu = null;
         if (showProgress && !Icy.getMainInterface().isHeadLess())
@@ -2519,12 +2405,12 @@ public class Loader {
             final boolean forceVolatile, final boolean directory, final boolean addToRecent,
             final boolean showProgress
     ) {
-        final ApplicationMenu mainMenu;
+        final ApplicationMenuFile mainMenu;
         final FileFrame loadingFrame;
         Sequence result = null;
 
         if (addToRecent)
-            mainMenu = Icy.getMainInterface().getApplicationMenu();
+            mainMenu = ApplicationMenuFile.getInstance();
         else
             mainMenu = null;
         if (showProgress && !Icy.getMainInterface().isHeadLess())
@@ -2660,11 +2546,11 @@ public class Loader {
         if (paths.size() <= 0)
             return result;
 
-        final ApplicationMenu mainMenu;
+        final ApplicationMenuFile mainMenu;
         final FileFrame loadingFrame;
 
         if (addToRecent)
-            mainMenu = Icy.getMainInterface().getApplicationMenu();
+            mainMenu = ApplicationMenuFile.getInstance();
         else
             mainMenu = null;
         if (showProgress && !Icy.getMainInterface().isHeadLess())
@@ -3302,7 +3188,7 @@ public class Loader {
             final SequenceFileGroup group, final int resolution, final Rectangle region,
             final int minZ, final int maxZ, final int minT,
             final int maxT, final int channel, final boolean forceVolatile,
-            final boolean directory, final ApplicationMenu mainMenu, final FileFrame loadingFrame
+            final boolean directory, final ApplicationMenuFile mainMenu, final FileFrame loadingFrame
     ) throws OutOfMemoryError, Exception {
         final double endStep;
         Sequence result;
@@ -3381,7 +3267,7 @@ public class Loader {
      * @param loadingFrame  the loading frame used to cancel / display progress of the operation (can be null)
      * @return the loaded Sequence (or <code>null<code> if loading was canceled)
      */
-    public static Sequence internalLoadGroup(final SequenceFileGroup group, final boolean forceVolatile, final boolean directory, final ApplicationMenu mainMenu, final FileFrame loadingFrame) throws Exception {
+    public static Sequence internalLoadGroup(final SequenceFileGroup group, final boolean forceVolatile, final boolean directory, final ApplicationMenuFile mainMenu, final FileFrame loadingFrame) throws Exception {
         return internalLoadGroup(group, 0, null, -1, -1, -1, -1, -1, forceVolatile, directory, mainMenu, loadingFrame);
     }
 

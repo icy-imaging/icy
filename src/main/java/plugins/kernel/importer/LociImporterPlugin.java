@@ -42,7 +42,7 @@ import icy.type.rectangle.Rectangle2DUtil;
 import icy.util.ColorUtil;
 import icy.util.OMEUtil;
 import icy.util.StringUtil;
-import jxl.biff.drawing.PNGReader;
+//import jxl.biff.drawing.PNGReader;
 import loci.formats.*;
 import loci.formats.gui.AWTImageTools;
 import loci.formats.gui.ExtensionFileFilter;
@@ -1824,8 +1824,7 @@ public class LociImporterPlugin extends PluginSequenceFileImporter {
                     result.setColorMap(2, LinearColorMap.blue_, true);
                 }
                 // RGBA ? --> set alpha colormap
-                if ((sizeC >= 4) && ((rgbChanCount >= 4) || (reader instanceof PNGReader)
-                        || (reader instanceof APNGReader) || (reader instanceof JPEG2000Reader)))
+                if ((sizeC >= 4) && ((rgbChanCount >= 4) /*|| (reader instanceof PNGReader)*/ || (reader instanceof APNGReader) || (reader instanceof JPEG2000Reader)))
                     result.setColorMap(3, LinearColorMap.alpha_, true);
             }
             // fluo image

@@ -18,18 +18,6 @@
  */
 package icy.action;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.io.PrintWriter;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-
-import org.w3c.dom.Document;
-
 import icy.clipboard.Clipboard;
 import icy.file.FileUtil;
 import icy.gui.dialog.IdConfirmDialog;
@@ -40,11 +28,7 @@ import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.inspector.RoisPanel;
 import icy.gui.main.MainFrame;
 import icy.main.Icy;
-import icy.roi.ROI;
-import icy.roi.ROI2D;
-import icy.roi.ROI3D;
-import icy.roi.ROI4D;
-import icy.roi.ROIUtil;
+import icy.roi.*;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceDataIterator;
 import icy.sequence.edit.ROIAddSequenceEdit;
@@ -57,15 +41,26 @@ import icy.type.dimension.Dimension3D;
 import icy.util.ClassUtil;
 import icy.util.ShapeUtil.BooleanOperator;
 import icy.util.StringUtil;
-import icy.util.XLSUtil;
 import icy.util.XMLUtil;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
+import icy.file.xls.XLSXUtil;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.w3c.dom.Document;
 import plugins.kernel.roi.roi2d.ROI2DPoint;
 import plugins.kernel.roi.roi2d.ROI2DRectangle;
 import plugins.kernel.roi.roi3d.ROI3DBox;
 import plugins.kernel.roi.roi4d.ROI4DStackRectangle;
 import plugins.kernel.roi.roi5d.ROI5DStackRectangle;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Roi actions (open / save / copy / paste / merge...)
@@ -845,7 +840,7 @@ public final class RoiActions {
 
                 if (mainFrame != null) {
                     //final double value = mainFrame.getMainRibbon().getROIRibbonTask().getFillValue();
-                    final double value = 0d; // TODO: 23/01/2023 Change this when ROI toolbar is set
+                    final double value = 1d; // TODO: 23/01/2023 Change this when ROI toolbar is set
 
                     try {
                         // create undo point
@@ -980,7 +975,8 @@ public final class RoiActions {
         @Override
         public boolean doAction(final ActionEvent e) {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-            final RoisPanel roisPanel = Icy.getMainInterface().getRoisPanel();
+            //final RoisPanel roisPanel = Icy.getMainInterface().getRoisPanel();
+            final icy.gui.toolbar.panel.RoisPanel roisPanel = icy.gui.toolbar.panel.RoisPanel.getInstance();
 
             if ((sequence != null) && (roisPanel != null)) {
                 final String content = roisPanel.getCSVFormattedInfos();
@@ -990,33 +986,31 @@ public final class RoiActions {
                     return true;
                 }
 
-                final String filename = SaveDialog.chooseFileForResult("Export ROIs...", "result", ".xls");
+                final String filename = SaveDialog.chooseFileForResult("Export ROIs...", "result", XLSXUtil.FILE_DOT_EXTENSION);
 
                 if (filename != null) {
                     try {
                         // CSV format wanted ?
-                        if (!FileUtil.getFileExtension(filename, false).toLowerCase().startsWith("xls")) {
+                        if (!FileUtil.getFileExtension(filename, false).toLowerCase().startsWith(XLSXUtil.FILE_EXTENSION)) {
                             // just write CSV content
                             final PrintWriter out = new PrintWriter(filename);
                             out.println(content);
                             out.close();
                         }
-                        // XLS export
+                        // XLSX export
                         else {
-                            final WritableWorkbook workbook = XLSUtil.createWorkbook(filename);
-                            final WritableSheet sheet = XLSUtil.createNewPage(workbook, "ROIS");
+                            final Workbook workbook = XLSXUtil.createWorkbook();
+                            final Sheet sheet = XLSXUtil.createNewPage(workbook, "ROIS");
 
-                            if (XLSUtil.setFromCSV(sheet, content))
-                                XLSUtil.saveAndClose(workbook);
+                            if (XLSXUtil.setFromCSV(sheet, content))
+                                XLSXUtil.saveAndClose(workbook, filename);
                             else {
-                                MessageDialog.showDialog("Error",
-                                        "Error while exporting ROIs table content to XLS file.",
-                                        MessageDialog.ERROR_MESSAGE);
+                                MessageDialog.showDialog("Error", "Error while exporting ROIs table content to XLSX file.", MessageDialog.ERROR_MESSAGE);
                                 return false;
                             }
                         }
                     }
-                    catch (Exception e1) {
+                    catch (final Exception e1) {
                         MessageDialog.showDialog("Error", e1.getMessage(), MessageDialog.ERROR_MESSAGE);
                         return false;
                     }

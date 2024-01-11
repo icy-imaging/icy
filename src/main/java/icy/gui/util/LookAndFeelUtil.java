@@ -29,7 +29,6 @@ import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
-import ij.util.Java2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -98,14 +97,6 @@ public final class LookAndFeelUtil {
     }
 
     public static void init() {
-        try {
-            // so ImageJ won't try to change the look and feel later
-            Java2.setSystemLookAndFeel();
-        }
-        catch (final Throwable t) {
-            // just ignore the error here
-        }
-
         if (SystemUtil.isWindows()) {
             // enabled LAF decoration instead of native ones
             JFrame.setDefaultLookAndFeelDecorated(true);

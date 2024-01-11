@@ -1,101 +1,88 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component;
 
 import icy.system.thread.ThreadUtil;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
-
-import jxl.Sheet;
-import jxl.write.WritableSheet;
 
 /**
  * Excel table view
- * 
- * @author Fabrice de Chaumont, Alexandre Dufour
+ *
+ * @author Fabrice de Chaumont
+ * @author Alexandre Dufour
+ * @author Thomas MUSSET
  */
-public class ExcelTable extends JScrollPane
-{
-    private static final long serialVersionUID = 1L;
+public class ExcelTable extends JScrollPane {
+    private final JTable table;
 
-    JTable table;
-
-    public ExcelTable()
-    {
-
+    public ExcelTable() {
+        table = new JTable();
     }
 
-    public ExcelTable(Sheet page)
-    {
+    public ExcelTable(final @NotNull Sheet page) {
+        this();
         updateSheet(page);
         setViewportView(table);
         setAutoscrolls(true);
     }
 
-    public ExcelTable(WritableSheet page)
-    {
-        this((Sheet) page);
-    }
-
-    public synchronized void updateSheet(final Sheet page)
-    {
-        ThreadUtil.invokeLater(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                table = new JTable();
+    public synchronized void updateSheet(final @NotNull Sheet page) {
+        ThreadUtil.invokeLater(() -> {
+            synchronized (table) {
+                clearTable();
                 setViewportView(table);
-                if (page != null)
-                    table.setModel(new SheetTableModel(page));
+                table.setModel(new SheetTableModel(page));
             }
         });
     }
 
-    public synchronized void updateSheet(final WritableSheet page)
-    {
-        updateSheet((Sheet) page);
+    private synchronized void clearTable() {
+        synchronized (table) {
+            final DefaultTableModel model = (DefaultTableModel) table.getModel();
+            final int rows = model.getRowCount();
+            for (int i = rows - 1; i >= 0; i--)
+                model.removeRow(i);
+        }
     }
 
-    private class SheetTableModel implements TableModel
-    {
-        private Sheet sheet = null;
-
-        public SheetTableModel(Sheet sheet)
-        {
-            this.sheet = sheet;
+    private record SheetTableModel(Sheet sheet) implements TableModel {
+        @Override
+        public int getRowCount() {
+            return sheet.getPhysicalNumberOfRows();
         }
 
         @Override
-        public int getRowCount()
-        {
-            return sheet.getRows();
-        }
-
-        @Override
-        public int getColumnCount()
-        {
-
-            return sheet.getColumns();
+        public int getColumnCount() {
+            int cellNumber = 0;
+            for (final Row row : sheet) {
+                cellNumber = Math.max(cellNumber, row.getPhysicalNumberOfCells());
+            }
+            return cellNumber;
         }
 
         /**
@@ -103,57 +90,52 @@ public class ExcelTable extends JScrollPane
          * conventions: A, B, C, . Z, AA, AB, etc.
          */
         @Override
-        public String getColumnName(int column)
-        {
-            String result = "";
-            for (; column >= 0; column = column / 26 - 1)
-            {
-                result = (char) ((char) (column % 26) + 'A') + result;
+        public @NotNull String getColumnName(int column) {
+            final StringBuilder result = new StringBuilder();
+            for (; column >= 0; column = column / 26 - 1) {
+                result.insert(0, (char) ((char) (column % 26) + 'A'));
             }
-            return result;
+            return result.toString();
         }
 
         @Override
-        public Class<?> getColumnClass(int columnIndex)
-        {
+        public @NotNull Class<?> getColumnClass(final int columnIndex) {
             return String.class;
         }
 
         @Override
-        public boolean isCellEditable(int rowIndex, int columnIndex)
-        {
+        public boolean isCellEditable(final int rowIndex, final int columnIndex) {
             return false;
         }
 
         @Override
-        public Object getValueAt(int rowIndex, int columnIndex)
-        {
-
-            try
-            {
-                return sheet.getCell(columnIndex, rowIndex).getContents();
+        public @Nullable Object getValueAt(final int rowIndex, final int columnIndex) {
+            try {
+                final Cell cell = sheet.getRow(rowIndex).getCell(columnIndex);
+                return switch (cell.getCellType()) {
+                    case STRING -> cell.getStringCellValue();
+                    case BOOLEAN -> cell.getBooleanCellValue();
+                    case NUMERIC -> cell.getNumericCellValue();
+                    default -> null;
+                };
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 return null;
             }
         }
 
         @Override
-        public void setValueAt(Object aValue, int rowIndex, int columnIndex)
-        {
+        public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
 
         }
 
         @Override
-        public void addTableModelListener(TableModelListener l)
-        {
+        public void addTableModelListener(final TableModelListener l) {
 
         }
 
         @Override
-        public void removeTableModelListener(TableModelListener l)
-        {
+        public void removeTableModelListener(final TableModelListener l) {
 
         }
     }

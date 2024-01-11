@@ -1,57 +1,42 @@
 /*
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.preferences;
 
 import icy.gui.component.IcyTable;
 import icy.plugin.PluginRepositoryLoader;
 import icy.preferences.RepositoryPreferences;
 import icy.preferences.RepositoryPreferences.RepositoryInfo;
-import icy.workspace.WorkspaceRepositoryLoader;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import java.awt.*;
+import java.util.ArrayList;
 
 /**
  * @author Stephane
+ * @author Thomas MUSSET
  */
-public class RepositoryPreferencePanel extends PreferencePanel implements ListSelectionListener
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 5676905012950916850L;
-
+public class RepositoryPreferencePanel extends PreferencePanel implements ListSelectionListener {
     public static final String NODE_NAME = "Repository";
 
     static final String[] columnNames = {"Name", "Location", "Enabled"};
@@ -71,47 +56,25 @@ public class RepositoryPreferencePanel extends PreferencePanel implements ListSe
     final JButton editButton;
     final JButton removeButton;
 
-    RepositoryPreferencePanel(PreferenceFrame parent)
-    {
+    RepositoryPreferencePanel(final PreferenceFrame parent) {
         super(parent, NODE_NAME, PreferenceFrame.NODE_NAME);
 
-        repositories = new ArrayList<RepositoryInfo>();
+        repositories = new ArrayList<>();
 
         load();
 
         // build buttons
         addButton = new JButton("add...");
         addButton.setToolTipText("Add a new repository");
-        addButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                addRepository();
-            }
-        });
+        addButton.addActionListener(e -> addRepository());
 
         editButton = new JButton("edit...");
         editButton.setToolTipText("Edit selected repository");
-        editButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                editRepository(getSelectedRepository());
-            }
-        });
+        editButton.addActionListener(e -> editRepository(getSelectedRepository()));
 
         removeButton = new JButton("remove");
         removeButton.setToolTipText("Delete selected repository");
-        removeButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                removeRepository(getSelectedRepository());
-            }
-        });
+        removeButton.addActionListener(e -> removeRepository(getSelectedRepository()));
 
         final JPanel buttonsPanel = new JPanel();
         buttonsPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
@@ -126,65 +89,44 @@ public class RepositoryPreferencePanel extends PreferencePanel implements ListSe
         buttonsPanel.add(Box.createVerticalGlue());
 
         // build table
-        tableModel = new AbstractTableModel()
-        {
-            /**
-             * 
-             */
-            private static final long serialVersionUID = -8573364273165723214L;
-
+        tableModel = new AbstractTableModel() {
             @Override
-            public int getColumnCount()
-            {
+            public int getColumnCount() {
                 return columnNames.length;
             }
 
             @Override
-            public String getColumnName(int column)
-            {
+            public String getColumnName(final int column) {
                 return columnNames[column];
             }
 
             @Override
-            public int getRowCount()
-            {
+            public int getRowCount() {
                 return repositories.size();
             }
 
             @Override
-            public Object getValueAt(int row, int column)
-            {
+            public Object getValueAt(final int row, final int column) {
                 final RepositoryInfo reposInf = repositories.get(row);
 
-                switch (column)
-                {
-                    case 0:
-                        return reposInf.getName();
-
-                    case 1:
-                        return reposInf.getLocation();
-
-                    case 2:
-                        return Boolean.valueOf(reposInf.isEnabled());
-
-                }
-
-                return "";
+                return switch (column) {
+                    case 0 -> reposInf.getName();
+                    case 1 -> reposInf.getLocation();
+                    case 2 -> Boolean.valueOf(reposInf.isEnabled());
+                    default -> "";
+                };
             }
 
             @Override
-            public boolean isCellEditable(int row, int column)
-            {
+            public boolean isCellEditable(final int row, final int column) {
                 return (column == 2);
             }
 
             @Override
-            public void setValueAt(Object aValue, int rowIndex, int columnIndex)
-            {
+            public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
                 final RepositoryInfo reposInf = repositories.get(rowIndex);
 
-                switch (columnIndex)
-                {
+                switch (columnIndex) {
                     case 0:
                     case 1:
                         // read only
@@ -198,8 +140,7 @@ public class RepositoryPreferencePanel extends PreferencePanel implements ListSe
             }
 
             @Override
-            public Class<?> getColumnClass(int columnIndex)
-            {
+            public Class<?> getColumnClass(final int columnIndex) {
                 if (columnIndex == 2)
                     return Boolean.class;
 
@@ -254,52 +195,33 @@ public class RepositoryPreferencePanel extends PreferencePanel implements ListSe
     }
 
     @Override
-    protected void load()
-    {
+    protected void load() {
         repositories.clear();
         repositories.addAll(RepositoryPreferences.getRepositeries());
     }
 
     @Override
-    protected void save()
-    {
+    protected void save() {
         // save to rpeferences
         RepositoryPreferences.setRepositeries(repositories);
 
         // then reload online plugins and workspace as repositories changed
         PluginRepositoryLoader.reload();
-        WorkspaceRepositoryLoader.reload();
 
         // update repositories on Workspace and Plugin panel
         ((PluginLocalPreferencePanel) getPreferencePanel(PluginLocalPreferencePanel.class)).updateRepositories();
         ((PluginOnlinePreferencePanel) getPreferencePanel(PluginOnlinePreferencePanel.class)).updateRepositories();
-        ((WorkspaceOnlinePreferencePanel) getPreferencePanel(WorkspaceOnlinePreferencePanel.class))
-                .updateRepositories();
-        ((WorkspaceLocalPreferencePanel) getPreferencePanel(WorkspaceLocalPreferencePanel.class)).updateRepositories();
     }
 
-    private int getRepositeryIndex(RepositoryInfo reposInf)
-    {
+    private int getRepositeryIndex(final RepositoryInfo reposInf) {
         return repositories.indexOf(reposInf);
     }
 
-    private int getRepositeryModelIndex(RepositoryInfo reposInf)
-    {
+    private int getRepositeryModelIndex(final RepositoryInfo reposInf) {
         return getRepositeryIndex(reposInf);
     }
 
-    // private int getRepositeryTableIndex(RepositoryInfo reposInf)
-    // {
-    // final int ind = getRepositeryModelIndex(reposInf);
-    //
-    // if (ind != -1)
-    // return table.convertRowIndexToView(ind);
-    //
-    // return ind;
-    // }
-
-    RepositoryInfo getSelectedRepository()
-    {
+    RepositoryInfo getSelectedRepository() {
         int index;
 
         index = table.getSelectedRow();
@@ -313,12 +235,10 @@ public class RepositoryPreferencePanel extends PreferencePanel implements ListSe
         return repositories.get(index);
     }
 
-    boolean addRepository()
-    {
-        final RepositoryInfo reposInf = new RepositoryInfo("name", "http://");
+    boolean addRepository() {
+        final RepositoryInfo reposInf = new RepositoryInfo("name", "https://");
 
-        if (!new EditRepositoryDialog("Add a new repository", reposInf).isCanceled())
-        {
+        if (!new EditRepositoryDialog("Add a new repository", reposInf).isCanceled()) {
             // add new repository entry
             repositories.add(reposInf);
             // get index
@@ -332,19 +252,15 @@ public class RepositoryPreferencePanel extends PreferencePanel implements ListSe
         return false;
     }
 
-    boolean editRepository(final RepositoryInfo reposInf)
-    {
+    boolean editRepository(final RepositoryInfo reposInf) {
         final int ind = getRepositeryModelIndex(reposInf);
 
-        if (!new EditRepositoryDialog("Edit repository", reposInf).isCanceled())
-        {
-            try
-            {
+        if (!new EditRepositoryDialog("Edit repository", reposInf).isCanceled()) {
+            try {
                 // notify data changed
                 tableModel.fireTableRowsUpdated(ind, ind);
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 // ignore possible exception here
             }
 
@@ -354,12 +270,10 @@ public class RepositoryPreferencePanel extends PreferencePanel implements ListSe
         return false;
     }
 
-    boolean removeRepository(final RepositoryInfo reposInf)
-    {
+    boolean removeRepository(final RepositoryInfo reposInf) {
         final int ind = getRepositeryModelIndex(reposInf);
 
-        if (repositories.remove(reposInf))
-        {
+        if (repositories.remove(reposInf)) {
             // notify data changed
             tableModel.fireTableRowsDeleted(ind, ind);
 
@@ -369,8 +283,7 @@ public class RepositoryPreferencePanel extends PreferencePanel implements ListSe
         return false;
     }
 
-    private void udpateButtonsState()
-    {
+    private void udpateButtonsState() {
         final RepositoryInfo selectedRepos = getSelectedRepository();
         final boolean enabled = (selectedRepos != null) && !selectedRepos.isDefault();
 
@@ -379,8 +292,7 @@ public class RepositoryPreferencePanel extends PreferencePanel implements ListSe
     }
 
     @Override
-    public void valueChanged(ListSelectionEvent e)
-    {
+    public void valueChanged(ListSelectionEvent e) {
         udpateButtonsState();
     }
 

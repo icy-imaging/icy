@@ -1,37 +1,36 @@
 /*
  * Copyright 2010-2015 Institut Pasteur.
- * 
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <http://www.gnu.org/licenses/>.
  */
 package icy.math;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
-
 import icy.file.FileUtil;
+import icy.file.xls.XLSXUtil;
 import icy.gui.dialog.MessageDialog;
 import icy.gui.dialog.SaveDialog;
 import icy.type.TypeUtil;
 import icy.type.collection.array.ArrayUtil;
 import icy.util.StringUtil;
-import icy.util.XLSUtil;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * @author Stephane
@@ -49,7 +48,7 @@ public class Histogram
 
     /**
      * Create a histogram for the specified value range and the desired number of bins.
-     * 
+     *
      * @param minValue
      *        minimum value
      * @param maxValue
@@ -134,57 +133,42 @@ public class Histogram
 
     /**
      * Do the XLS export (display the save dialog)
-     * 
-     * @throws IOException
-     * @throws WriteException
      */
-    public void doXLSExport() throws IOException, WriteException
+    public void doXLSExport() throws IOException
     {
-        exportToXLS(SaveDialog.chooseFileForResult("Export histogram...", "histo", ".xls"));
+        exportToXLS(SaveDialog.chooseFileForResult("Export histogram...", "histo", XLSXUtil.FILE_DOT_EXTENSION));
     }
 
     /**
-     * Export the content of the histogram data inside an excel file (XLS format if file path extension is XLS, CSV
-     * otherwise)
-     * 
-     * @throws IOException
-     * @throws WriteException
+     * Export the content of the histogram data inside an excel file
+     * (XLSX format if file path extension is XLSX, CSV otherwise)
      */
-    public void exportToXLS(String path) throws IOException, WriteException
-    {
+    public void exportToXLS(final String path) throws IOException {
         if (StringUtil.isEmpty(path))
             return;
 
         final String csvContent = getCSVFormattedData();
 
         // CSV format wanted ?
-        if (!FileUtil.getFileExtension(path, false).toLowerCase().startsWith("xls"))
-        {
+        if (!FileUtil.getFileExtension(path, false).toLowerCase().startsWith(XLSXUtil.FILE_EXTENSION)) {
             // just write CSV content
             final PrintWriter out = new PrintWriter(path);
             out.println(csvContent);
             out.close();
         }
         // XLS export
-        else
-        {
-            final WritableWorkbook workbook = XLSUtil.createWorkbook(path);
-            final WritableSheet sheet = XLSUtil.createNewPage(workbook, "ROIS");
+        else {
+            final Workbook workbook = XLSXUtil.createWorkbook();
+            final Sheet sheet = XLSXUtil.createNewPage(workbook, "ROIS");
 
-            try
-            {
-                if (XLSUtil.setFromCSV(sheet, csvContent))
-                    XLSUtil.saveAndClose(workbook);
+            try {
+                if (XLSXUtil.setFromCSV(sheet, csvContent))
+                    XLSXUtil.saveAndClose(workbook, path);
                 else
-                {
-                    MessageDialog.showDialog("Error", "Error while exporting ROIs table content to XLS file.",
-                            MessageDialog.ERROR_MESSAGE);
-                }
+                    MessageDialog.showDialog("Error", "Error while exporting ROIs table content to XLSX file.", MessageDialog.ERROR_MESSAGE);
             }
-            catch (InterruptedException e1)
-            {
-                MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(),
-                        MessageDialog.ERROR_MESSAGE);
+            catch (final InterruptedException e) {
+                MessageDialog.showDialog("Operation interrupted", e.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
             }
         }
     }
@@ -210,7 +194,7 @@ public class Histogram
 
     /**
      * Add the specified array of values to the histogram
-     * 
+     *
      * @param signed
      *        false if the input array should be interpreted as unsigned values<br>
      *        (integer type only)

@@ -1,20 +1,19 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package icy.resource.icon;
@@ -22,36 +21,27 @@ package icy.resource.icon;
 import icy.image.ImageUtil;
 import icy.resource.ResourceUtil;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Image;
-
-import javax.swing.ImageIcon;
-
-import org.pushingpixels.flamingo.api.common.icon.ResizableIcon;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author fab &amp; stephane
  * @deprecated Do not use this, will be removed with Substance
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
-public class BasicResizableIcon implements ResizableIcon
-{
+public class BasicResizableIcon implements Icon {
     protected static final int DEFAULT_ICONSIZE = 48;
 
     protected ImageIcon icon;
     protected final Image image;
     protected Dimension dim;
 
-    public BasicResizableIcon(Image image)
-    {
+    public BasicResizableIcon(final Image image) {
         super();
 
         this.image = image;
 
-        if (image != null)
-        {
+        if (image != null) {
             // be sure image data are ready
             ImageUtil.waitImageReady(image);
             dim = new Dimension(image.getWidth(null), image.getHeight(null));
@@ -62,31 +52,25 @@ public class BasicResizableIcon implements ResizableIcon
         buildIcon(dim.width);
     }
 
-    public BasicResizableIcon(ImageIcon srcIcon)
-    {
+    public BasicResizableIcon(final ImageIcon srcIcon) {
         this(srcIcon.getImage());
     }
 
-    public BasicResizableIcon()
-    {
+    public BasicResizableIcon() {
         this((Image) null);
     }
 
-    protected void buildIcon(int size)
-    {
+    protected void buildIcon(final int size) {
         if (image != null)
             icon = ResourceUtil.getImageIcon(image, size);
         else
             icon = null;
     }
 
-    @Override
-    public void setDimension(Dimension dim)
-    {
+    public void setDimension(final Dimension dim) {
         this.dim = dim;
 
-        if (icon != null)
-        {
+        if (icon != null) {
             final int size = (int) dim.getWidth();
 
             if (size != icon.getIconWidth())
@@ -95,8 +79,7 @@ public class BasicResizableIcon implements ResizableIcon
     }
 
     @Override
-    public int getIconHeight()
-    {
+    public int getIconHeight() {
         if (icon != null)
             return icon.getIconHeight();
 
@@ -104,8 +87,7 @@ public class BasicResizableIcon implements ResizableIcon
     }
 
     @Override
-    public int getIconWidth()
-    {
+    public int getIconWidth() {
         if (icon != null)
             return icon.getIconWidth();
 
@@ -113,12 +95,10 @@ public class BasicResizableIcon implements ResizableIcon
     }
 
     @Override
-    public void paintIcon(Component c, Graphics g, int x, int y)
-    {
+    public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
         if (icon != null)
             icon.paintIcon(c, g, x, y);
-        else
-        {
+        else {
             g.drawLine(x, y, x + dim.width, y + dim.height);
             g.drawLine(x + dim.width, y, x, y + dim.height);
         }

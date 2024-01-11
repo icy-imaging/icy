@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,28 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.action;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.swing.JToggleButton;
 
 import icy.gui.dialog.IdConfirmDialog;
 import icy.gui.dialog.MessageDialog;
 import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.main.MainFrame;
-import icy.gui.sequence.tools.SequenceCanvasResizeFrame;
-import icy.gui.sequence.tools.SequenceDimensionAdjustFrame;
-import icy.gui.sequence.tools.SequenceDimensionConvertFrame;
-import icy.gui.sequence.tools.SequenceDimensionExtendFrame;
-import icy.gui.sequence.tools.SequenceDimensionMergeFrame;
-import icy.gui.sequence.tools.SequenceResizeFrame;
+import icy.gui.sequence.tools.*;
 import icy.gui.viewer.Viewer;
 import icy.image.cache.ImageCache;
 import icy.main.Icy;
@@ -52,6 +37,15 @@ import icy.type.DataIteratorUtil;
 import icy.type.DataType;
 import icy.undo.IcyUndoManager;
 import icy.util.ClassUtil;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Actions for "Sequence Operation" tab.
@@ -97,7 +91,7 @@ public final class SequenceOperationActions {
                             vout.getLut().setColorMaps(viewer.getLut(), false);
                         });
                     }
-                    catch (InterruptedException e1) {
+                    catch (final InterruptedException e1) {
                         // ignore
                     }
 
@@ -184,7 +178,7 @@ public final class SequenceOperationActions {
                         final Sequence out = SequenceUtil.convertColor(sequence, imageType, viewer.getLut());
                         Icy.getMainInterface().addSequence(out);
                     }
-                    catch (InterruptedException e1) {
+                    catch (final InterruptedException e1) {
                         // ignore
                     }
 
@@ -232,7 +226,7 @@ public final class SequenceOperationActions {
                     else
                         Icy.getMainInterface().addSequence(SequenceUtil.extractChannel(sequence, channel));
                 }
-                catch (InterruptedException e1) {
+                catch (final InterruptedException e1) {
                     // ignore
                 }
 
@@ -290,7 +284,7 @@ public final class SequenceOperationActions {
                     if (!canUndo)
                         sequence.clearUndoManager();
                 }
-                catch (InterruptedException e1) {
+                catch (final InterruptedException e1) {
                     // ignore
                 }
 
@@ -324,7 +318,7 @@ public final class SequenceOperationActions {
 
         final DimensionId dim;
 
-        public MergeDimensionAction(DimensionId dim) {
+        public MergeDimensionAction(final DimensionId dim) {
             super(
                     "Merge...",
                     //new IcyIcon(ResourceUtil.ICON_INDENT_INCREASE),
@@ -373,15 +367,15 @@ public final class SequenceOperationActions {
 
                 result = true;
             }
-            catch (OutOfMemoryError error) {
+            catch (final OutOfMemoryError error) {
                 errMess = "Not enough available memory to put back the sequence in memory (still in virtual state).";
                 result = false;
             }
-            catch (UnsupportedOperationException error) {
+            catch (final UnsupportedOperationException error) {
                 errMess = "Image cache engine is disable.";
                 result = false;
             }
-            catch (Throwable error) {
+            catch (final Throwable error) {
                 errMess = error.getMessage();
                 result = false;
             }
@@ -409,7 +403,7 @@ public final class SequenceOperationActions {
         }
 
         @Override
-        public void setSelected(boolean value) {
+        public void setSelected(final boolean value) {
             super.setSelected(value);
 
             if (!ImageCache.isEnabled())
@@ -456,7 +450,7 @@ public final class SequenceOperationActions {
                     vout.getLut().copyFrom(viewer.getLut());
                 });
             }
-            catch (InterruptedException e1) {
+            catch (final InterruptedException e1) {
                 // just ignore...
             }
 
@@ -546,7 +540,7 @@ public final class SequenceOperationActions {
                     new Viewer(out);
                 });
             }
-            catch (InterruptedException e1) {
+            catch (final InterruptedException e1) {
                 // just ignore...
             }
 
@@ -1041,13 +1035,13 @@ public final class SequenceOperationActions {
                 final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
 
                 if (mainFrame != null) {
-                    final double value = Icy.getMainInterface().getROIRibbonTask().getFillValue();
+                    final double value = 1d;
 
                     try {
-                        for (ROI roi : sequence.getSelectedROIs())
+                        for (final ROI roi : sequence.getSelectedROIs())
                             DataIteratorUtil.set(new SequenceDataIterator(sequence, roi, true), value);
                     }
-                    catch (InterruptedException e1) {
+                    catch (final InterruptedException e1) {
                         MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(),
                                 MessageDialog.ERROR_MESSAGE);
                     }
@@ -1070,51 +1064,51 @@ public final class SequenceOperationActions {
     };
 
     public static IcyAbstractAction getConvertSequenceAction(final DataType dataType, final boolean scaled) {
-        switch (dataType) {
-            case UBYTE:
+        return switch (dataType) {
+            case UBYTE -> {
                 if (scaled)
-                    return convertUByteScaledSequenceAction;
-                return convertUByteSequenceAction;
-
-            case BYTE:
+                    yield convertUByteScaledSequenceAction;
+                yield convertUByteSequenceAction;
+            }
+            case BYTE -> {
                 if (scaled)
-                    return convertByteScaledSequenceAction;
-                return convertByteSequenceAction;
-
-            case USHORT:
+                    yield convertByteScaledSequenceAction;
+                yield convertByteSequenceAction;
+            }
+            case USHORT -> {
                 if (scaled)
-                    return convertUShortScaledSequenceAction;
-                return convertUShortSequenceAction;
-
-            case SHORT:
+                    yield convertUShortScaledSequenceAction;
+                yield convertUShortSequenceAction;
+            }
+            case SHORT -> {
                 if (scaled)
-                    return convertShortScaledSequenceAction;
-                return convertShortSequenceAction;
-
-            case UINT:
+                    yield convertShortScaledSequenceAction;
+                yield convertShortSequenceAction;
+            }
+            case UINT -> {
                 if (scaled)
-                    return convertUIntScaledSequenceAction;
-                return convertUIntSequenceAction;
-
-            case INT:
+                    yield convertUIntScaledSequenceAction;
+                yield convertUIntSequenceAction;
+            }
+            case INT -> {
                 if (scaled)
-                    return convertIntScaledSequenceAction;
-                return convertIntSequenceAction;
-
-            case FLOAT:
+                    yield convertIntScaledSequenceAction;
+                yield convertIntSequenceAction;
+            }
+            case FLOAT -> {
                 if (scaled)
-                    return convertFloatScaledSequenceAction;
-                return convertFloatSequenceAction;
-
-            case DOUBLE:
+                    yield convertFloatScaledSequenceAction;
+                yield convertFloatSequenceAction;
+            }
+            case DOUBLE -> {
                 if (scaled)
-                    return convertDoubleScaledSequenceAction;
-                return convertDoubleSequenceAction;
-
-            default:
+                    yield convertDoubleScaledSequenceAction;
+                yield convertDoubleSequenceAction;
+            }
+            default ->
                 // not supported
-                return null;
-        }
+                    null;
+        };
     }
 
     public static final IcyAbstractAction undoAction = new IcyAbstractAction(
@@ -1122,7 +1116,7 @@ public final class SequenceOperationActions {
             //new IcyIcon(ResourceUtil.ICON_UNDO),
             "Undo last operation (Ctrl+Z)",
             KeyEvent.VK_Z,
-            SystemUtil.getMenuCtrlMask()
+            SystemUtil.getMenuCtrlMaskEx()
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -1145,7 +1139,7 @@ public final class SequenceOperationActions {
             //new IcyIcon(ResourceUtil.ICON_REDO),
             "Redo last operation (Ctrl+Y)",
             KeyEvent.VK_Y,
-            SystemUtil.getMenuCtrlMask()
+            SystemUtil.getMenuCtrlMaskEx()
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -1235,7 +1229,7 @@ public final class SequenceOperationActions {
                 else if (ClassUtil.isSubClass(type, IcyAbstractAction.class))
                     result.add((IcyAbstractAction) field.get(null));
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 // ignore
             }
         }

@@ -24,8 +24,8 @@ public class ImageCache
         {
             try
             {
-                //cache = new EHCache2(cacheSizeMB, path + "/icy_cache");
-                cache = new EHCache3(cacheSizeMB, path + "/icy_cache");
+                cache = new EHCache2(cacheSizeMB, path + "/icy_cache");
+                //cache = new EHCache3(cacheSizeMB, path + "/icy_cache");
 
                 System.out.println("Image cache initialized (reserved memory = " + cacheSizeMB
                         + " MB, disk cache location = '" + path + "/icy_cache')");

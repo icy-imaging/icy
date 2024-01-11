@@ -18,6 +18,7 @@
 
 package icy.gui.menu;
 
+import icy.action.GeneralActions;
 import icy.gui.component.menu.IcyMenuItem;
 import icy.network.NetworkUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
@@ -69,5 +70,11 @@ public final class ApplicationMenuHelp extends AbstractApplicationMenu {
             }
         });
         add(itemShowLog);
+
+        addSeparator();
+
+        final IcyMenuItem itemUpdate = new IcyMenuItem("Check for Update", GoogleMaterialDesignIcons.FILE_DOWNLOAD);
+        itemUpdate.addActionListener(GeneralActions.checkUpdateAction);
+        add(itemUpdate);
     }
 }

@@ -18,26 +18,16 @@
  */
 package icy.gui.preferences;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.io.File;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-
 import icy.gui.component.IcyTextField;
 import icy.gui.dialog.MessageDialog;
 import icy.math.MathUtil;
 import icy.preferences.ApplicationPreferences;
 import icy.preferences.GeneralPreferences;
 import icy.util.StringUtil;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
 
 /**
  * @author stephane
@@ -46,41 +36,31 @@ import icy.util.StringUtil;
 public class GeneralPreferencePanel extends PreferencePanel {
     public static final String NODE_NAME = "General";
 
+    private static final String DEFAULT_UPDATE_REPOSITORY = "Stable";
+    private static final String BETA_UPDATE_REPOSITORY = "Beta";
+
     /**
      * gui
      */
-    JCheckBox exitConfirm;
+    private JCheckBox exitConfirm;
     private JCheckBox sequencePersistence;
     private JCheckBox saveNewSequence;
-    JCheckBox autoUpdateCheckBox;
+    private JCheckBox autoUpdateCheckBox;
+    private JComboBox<String> updateRepository;
     private JCheckBox usageStatistics;
     private JSpinner maxMemoryMBSpinner;
-    private JLabel maxMemoryMBLabel;
     private JSpinner cacheMemoryPercent;
-    IcyTextField cachePath;
+    private IcyTextField cachePath;
     private JButton setCachePathButton;
     private JButton reenableAllToolTipButton;
     private JButton reenableAllConfirmButton;
-    private JSeparator separator;
-    private JLabel label;
-    private JPanel panel;
 
-    /**
-     * @param parent
-     */
-    GeneralPreferencePanel(PreferenceFrame parent) {
+    GeneralPreferencePanel(final PreferenceFrame parent) {
         super(parent, NODE_NAME, PreferenceFrame.NODE_NAME);
 
         final int maxMemMB = (int) MathUtil.prevMultiple(ApplicationPreferences.getMaxMemoryMBLimit(), 32);
 
         initializeGUI(maxMemMB);
-
-        // TODO: 31/01/2023 Remove this unused String
-        /*String maxMemoryMess = " MB  (max = " + maxMemMB + " MB";
-        if (SystemUtil.is32bits() && ((SystemUtil.getTotalMemory() / (1024 * 1024)) >= 1500))
-            maxMemoryMess += " - use 64bit JVM to allow more)";
-        else
-            maxMemoryMess += ")";*/
 
         reenableAllConfirmButton.addActionListener(e -> {
             // clear the saved tool tips preference to re-enable them
@@ -112,17 +92,16 @@ public class GeneralPreferencePanel extends PreferencePanel {
         load();
     }
 
-    private void initializeGUI(int maxMemMB) {
-        GridBagLayout gbl_mainPanel = new GridBagLayout();
+    private void initializeGUI(final int maxMemMB) {
+        final GridBagLayout gbl_mainPanel = new GridBagLayout();
         gbl_mainPanel.columnWidths = new int[]{200, 0, 80, 0, 4, 0};
         gbl_mainPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 8, 0};
         gbl_mainPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-        gbl_mainPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-                Double.MIN_VALUE};
+        gbl_mainPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
         mainPanel.setLayout(gbl_mainPanel);
 
         exitConfirm = new JCheckBox("Show confirmation when exiting application");
-        GridBagConstraints gbc_exitConfirm = new GridBagConstraints();
+        final GridBagConstraints gbc_exitConfirm = new GridBagConstraints();
         gbc_exitConfirm.anchor = GridBagConstraints.WEST;
         gbc_exitConfirm.gridwidth = 4;
         gbc_exitConfirm.insets = new Insets(0, 0, 5, 5);
@@ -130,7 +109,7 @@ public class GeneralPreferencePanel extends PreferencePanel {
         gbc_exitConfirm.gridy = 0;
         mainPanel.add(exitConfirm, gbc_exitConfirm);
         autoUpdateCheckBox = new JCheckBox("Enable application update");
-        GridBagConstraints gbc_autoUpdateCheckBox = new GridBagConstraints();
+        final GridBagConstraints gbc_autoUpdateCheckBox = new GridBagConstraints();
         gbc_autoUpdateCheckBox.anchor = GridBagConstraints.WEST;
         gbc_autoUpdateCheckBox.gridwidth = 4;
         gbc_autoUpdateCheckBox.insets = new Insets(0, 0, 5, 5);
@@ -138,8 +117,18 @@ public class GeneralPreferencePanel extends PreferencePanel {
         gbc_autoUpdateCheckBox.gridy = 1;
         mainPanel.add(autoUpdateCheckBox, gbc_autoUpdateCheckBox);
         autoUpdateCheckBox.setToolTipText("Enable automatic update for application as soon a new version is available");
+
+        updateRepository = new JComboBox<>(new String[]{DEFAULT_UPDATE_REPOSITORY, BETA_UPDATE_REPOSITORY});
+        final GridBagConstraints gbc_updateRepository = new GridBagConstraints();
+        gbc_updateRepository.anchor = GridBagConstraints.WEST;
+        gbc_updateRepository.gridwidth = 4;
+        gbc_updateRepository.gridx = 1;
+        gbc_updateRepository.gridy = 1;
+        mainPanel.add(updateRepository, gbc_updateRepository);
+        updateRepository.setToolTipText("Choose the update channel");
+
         sequencePersistence = new JCheckBox("Enable sequence persistence");
-        GridBagConstraints gbc_sequencePersistence = new GridBagConstraints();
+        final GridBagConstraints gbc_sequencePersistence = new GridBagConstraints();
         gbc_sequencePersistence.anchor = GridBagConstraints.WEST;
         gbc_sequencePersistence.gridwidth = 4;
         gbc_sequencePersistence.insets = new Insets(0, 0, 5, 5);
@@ -148,7 +137,7 @@ public class GeneralPreferencePanel extends PreferencePanel {
         mainPanel.add(sequencePersistence, gbc_sequencePersistence);
         sequencePersistence.setToolTipText("Enable the XML persistence for sequence (file is automatically loaded/saved when sequence is opened/closed)");
         saveNewSequence = new JCheckBox("Ask to save new sequence when closing them");
-        GridBagConstraints gbc_saveNewSequence = new GridBagConstraints();
+        final GridBagConstraints gbc_saveNewSequence = new GridBagConstraints();
         gbc_saveNewSequence.anchor = GridBagConstraints.WEST;
         gbc_saveNewSequence.gridwidth = 4;
         gbc_saveNewSequence.insets = new Insets(0, 0, 5, 5);
@@ -156,7 +145,7 @@ public class GeneralPreferencePanel extends PreferencePanel {
         gbc_saveNewSequence.gridy = 3;
         mainPanel.add(saveNewSequence, gbc_saveNewSequence);
         usageStatistics = new JCheckBox("Usage statistics report");
-        GridBagConstraints gbc_usageStatistics = new GridBagConstraints();
+        final GridBagConstraints gbc_usageStatistics = new GridBagConstraints();
         gbc_usageStatistics.gridwidth = 4;
         gbc_usageStatistics.anchor = GridBagConstraints.WEST;
         gbc_usageStatistics.insets = new Insets(0, 0, 5, 5);
@@ -165,8 +154,8 @@ public class GeneralPreferencePanel extends PreferencePanel {
         mainPanel.add(usageStatistics, gbc_usageStatistics);
         usageStatistics.setToolTipText("Report is 100% anonymous, very light on network trafic and help developers so keep it enabled please :)");
 
-        separator = new JSeparator();
-        GridBagConstraints gbc_separator = new GridBagConstraints();
+        final JSeparator separator = new JSeparator();
+        final GridBagConstraints gbc_separator = new GridBagConstraints();
         gbc_separator.anchor = GridBagConstraints.WEST;
         gbc_separator.fill = GridBagConstraints.VERTICAL;
         gbc_separator.gridwidth = 4;
@@ -175,8 +164,8 @@ public class GeneralPreferencePanel extends PreferencePanel {
         gbc_separator.gridy = 5;
         mainPanel.add(separator, gbc_separator);
 
-        JLabel label_1 = new JLabel(" Max memory (max = " + maxMemMB + " MB)");
-        GridBagConstraints gbc_label_1 = new GridBagConstraints();
+        final JLabel label_1 = new JLabel(" Max memory (max = " + maxMemMB + " MB)");
+        final GridBagConstraints gbc_label_1 = new GridBagConstraints();
         gbc_label_1.gridwidth = 2;
         gbc_label_1.anchor = GridBagConstraints.WEST;
         gbc_label_1.insets = new Insets(0, 0, 5, 5);
@@ -184,23 +173,23 @@ public class GeneralPreferencePanel extends PreferencePanel {
         gbc_label_1.gridy = 6;
         mainPanel.add(label_1, gbc_label_1);
         maxMemoryMBSpinner = new JSpinner(new SpinnerNumberModel(128, 64, maxMemMB, 32));
-        GridBagConstraints gbc_maxMemoryMBSpinner = new GridBagConstraints();
+        final GridBagConstraints gbc_maxMemoryMBSpinner = new GridBagConstraints();
         gbc_maxMemoryMBSpinner.fill = GridBagConstraints.HORIZONTAL;
         gbc_maxMemoryMBSpinner.insets = new Insets(0, 0, 5, 5);
         gbc_maxMemoryMBSpinner.gridx = 2;
         gbc_maxMemoryMBSpinner.gridy = 6;
         mainPanel.add(maxMemoryMBSpinner, gbc_maxMemoryMBSpinner);
         maxMemoryMBSpinner.setToolTipText("Change the maximum memory available for application");
-        maxMemoryMBLabel = new JLabel(" MB");
-        GridBagConstraints gbc_lblMbmax = new GridBagConstraints();
+        final JLabel maxMemoryMBLabel = new JLabel(" MB");
+        final GridBagConstraints gbc_lblMbmax = new GridBagConstraints();
         gbc_lblMbmax.anchor = GridBagConstraints.WEST;
         gbc_lblMbmax.insets = new Insets(0, 0, 5, 5);
         gbc_lblMbmax.gridx = 3;
         gbc_lblMbmax.gridy = 6;
         mainPanel.add(maxMemoryMBLabel, gbc_lblMbmax);
-        JLabel lblMemoryAllocatedFor = new JLabel(" Memory allocated for data cache ");
+        final JLabel lblMemoryAllocatedFor = new JLabel(" Memory allocated for data cache ");
         lblMemoryAllocatedFor.setToolTipText("Change the memory portion allocated for image data caching (higher value allow faster image processing but less memory for others taks)");
-        GridBagConstraints gbc_lblMemoryAllocatedFor = new GridBagConstraints();
+        final GridBagConstraints gbc_lblMemoryAllocatedFor = new GridBagConstraints();
         gbc_lblMemoryAllocatedFor.gridwidth = 2;
         gbc_lblMemoryAllocatedFor.anchor = GridBagConstraints.WEST;
         gbc_lblMemoryAllocatedFor.insets = new Insets(0, 0, 5, 5);
@@ -209,7 +198,7 @@ public class GeneralPreferencePanel extends PreferencePanel {
         mainPanel.add(lblMemoryAllocatedFor, gbc_lblMemoryAllocatedFor);
 
         cacheMemoryPercent = new JSpinner(new SpinnerNumberModel(40, 10, 80, 5));
-        GridBagConstraints gbc_cacheMemoryPercent = new GridBagConstraints();
+        final GridBagConstraints gbc_cacheMemoryPercent = new GridBagConstraints();
         gbc_cacheMemoryPercent.fill = GridBagConstraints.HORIZONTAL;
         gbc_cacheMemoryPercent.insets = new Insets(0, 0, 5, 5);
         gbc_cacheMemoryPercent.gridx = 2;
@@ -217,16 +206,16 @@ public class GeneralPreferencePanel extends PreferencePanel {
         mainPanel.add(cacheMemoryPercent, gbc_cacheMemoryPercent);
         cacheMemoryPercent.setToolTipText("Change the memory portion allocated for image data caching (higher value allow faster image processing but less memory for others taks)");
 
-        label = new JLabel("%");
-        GridBagConstraints gbc_label = new GridBagConstraints();
+        final JLabel label = new JLabel("%");
+        final GridBagConstraints gbc_label = new GridBagConstraints();
         gbc_label.anchor = GridBagConstraints.WEST;
         gbc_label.insets = new Insets(0, 0, 5, 5);
         gbc_label.gridx = 3;
         gbc_label.gridy = 7;
         mainPanel.add(label, gbc_label);
-        JLabel lblCacheLocation = new JLabel(" Disk data cache location");
+        final JLabel lblCacheLocation = new JLabel(" Disk data cache location");
         lblCacheLocation.setToolTipText("Folder used to store image data cache (it's recommended to use fast storage location as SSD disk)");
-        GridBagConstraints gbc_lblCacheLocation = new GridBagConstraints();
+        final GridBagConstraints gbc_lblCacheLocation = new GridBagConstraints();
         gbc_lblCacheLocation.anchor = GridBagConstraints.WEST;
         gbc_lblCacheLocation.insets = new Insets(0, 0, 5, 5);
         gbc_lblCacheLocation.gridx = 0;
@@ -234,7 +223,7 @@ public class GeneralPreferencePanel extends PreferencePanel {
         mainPanel.add(lblCacheLocation, gbc_lblCacheLocation);
 
         cachePath = new IcyTextField();
-        GridBagConstraints gbc_cachePath = new GridBagConstraints();
+        final GridBagConstraints gbc_cachePath = new GridBagConstraints();
         gbc_cachePath.fill = GridBagConstraints.HORIZONTAL;
         gbc_cachePath.gridwidth = 2;
         gbc_cachePath.insets = new Insets(0, 0, 5, 5);
@@ -246,22 +235,22 @@ public class GeneralPreferencePanel extends PreferencePanel {
 
         setCachePathButton = new JButton("...");
         //setCachePathButton.setPreferredSize(new Dimension(32, 23));
-        GridBagConstraints gbc_setCachePathButton = new GridBagConstraints();
+        final GridBagConstraints gbc_setCachePathButton = new GridBagConstraints();
         gbc_setCachePathButton.anchor = GridBagConstraints.WEST;
         gbc_setCachePathButton.insets = new Insets(0, 0, 5, 5);
         gbc_setCachePathButton.gridx = 3;
         gbc_setCachePathButton.gridy = 8;
         mainPanel.add(setCachePathButton, gbc_setCachePathButton);
 
-        panel = new JPanel();
-        GridBagConstraints gbc_panel = new GridBagConstraints();
+        final JPanel panel = new JPanel();
+        final GridBagConstraints gbc_panel = new GridBagConstraints();
         gbc_panel.insets = new Insets(0, 0, 5, 5);
         gbc_panel.gridwidth = 4;
         gbc_panel.fill = GridBagConstraints.BOTH;
         gbc_panel.gridx = 0;
         gbc_panel.gridy = 10;
         mainPanel.add(panel, gbc_panel);
-        GridBagLayout gbl_panel = new GridBagLayout();
+        final GridBagLayout gbl_panel = new GridBagLayout();
         gbl_panel.columnWidths = new int[]{16, 0, 0, 0, 16, 0};
         gbl_panel.rowHeights = new int[]{0, 0};
         gbl_panel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
@@ -269,7 +258,7 @@ public class GeneralPreferencePanel extends PreferencePanel {
         panel.setLayout(gbl_panel);
 
         reenableAllToolTipButton = new JButton("Reactivate tooltips");
-        GridBagConstraints gbc_reenableAllToolTipButton = new GridBagConstraints();
+        final GridBagConstraints gbc_reenableAllToolTipButton = new GridBagConstraints();
         gbc_reenableAllToolTipButton.insets = new Insets(0, 0, 0, 5);
         gbc_reenableAllToolTipButton.gridx = 1;
         gbc_reenableAllToolTipButton.gridy = 0;
@@ -277,7 +266,7 @@ public class GeneralPreferencePanel extends PreferencePanel {
         reenableAllToolTipButton.setToolTipText("All hidden tooltips will be made visible again");
 
         reenableAllConfirmButton = new JButton("Reactivate confirmations");
-        GridBagConstraints gbc_reenableAllConfirmButton = new GridBagConstraints();
+        final GridBagConstraints gbc_reenableAllConfirmButton = new GridBagConstraints();
         gbc_reenableAllConfirmButton.insets = new Insets(0, 0, 0, 5);
         gbc_reenableAllConfirmButton.gridx = 3;
         gbc_reenableAllConfirmButton.gridy = 0;
@@ -296,13 +285,17 @@ public class GeneralPreferencePanel extends PreferencePanel {
         sequencePersistence.setSelected(GeneralPreferences.getSequencePersistence());
         saveNewSequence.setSelected(GeneralPreferences.getSaveNewSequence());
         autoUpdateCheckBox.setSelected(GeneralPreferences.getAutomaticUpdate());
+        updateRepository.setSelectedItem(
+                (ApplicationPreferences.getUpdateRepositoryBase().equalsIgnoreCase(ApplicationPreferences.DEFAULT_UPDATE_REPOSITORY_BASE)) ?
+                        DEFAULT_UPDATE_REPOSITORY : BETA_UPDATE_REPOSITORY
+        );
         usageStatistics.setSelected(GeneralPreferences.getUsageStatisticsReport());
     }
 
     @Override
     protected void save() {
         int intValue;
-        String stringValue;
+        final String stringValue;
 
         intValue = ((Integer) maxMemoryMBSpinner.getValue()).intValue();
         // launcher setting modified, restart needed
@@ -326,5 +319,16 @@ public class GeneralPreferencePanel extends PreferencePanel {
         GeneralPreferences.setSaveNewSequence(saveNewSequence.isSelected());
         GeneralPreferences.setAutomaticUpdate(autoUpdateCheckBox.isSelected());
         GeneralPreferences.setUsageStatisticsReport(usageStatistics.isSelected());
+
+        final Object item = updateRepository.getSelectedItem();
+        if (item != null) {
+            switch (item.toString()) {
+                case DEFAULT_UPDATE_REPOSITORY:
+                    ApplicationPreferences.setUpdateRepositoryBase(ApplicationPreferences.DEFAULT_UPDATE_REPOSITORY_BASE);
+                    break;
+                case BETA_UPDATE_REPOSITORY:
+                    ApplicationPreferences.setUpdateRepositoryBase(ApplicationPreferences.BETA_UPDATE_REPOSITORY_BASE);
+            }
+        }
     }
 }

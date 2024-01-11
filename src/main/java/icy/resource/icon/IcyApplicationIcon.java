@@ -1,58 +1,48 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.resource.icon;
 
 import icy.resource.ResourceUtil;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-
-import javax.swing.Icon;
-
-import org.pushingpixels.flamingo.api.common.icon.ResizableIcon;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Stephane
  * @deprecated Do not use this, will be removed with Substance
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
-public class IcyApplicationIcon implements ResizableIcon
-{
+public class IcyApplicationIcon implements Icon {
     private static final int DEFAULT_SIZE = 32;
 
     private final Dimension dim;
     private Icon icon;
 
-    public IcyApplicationIcon()
-    {
+    public IcyApplicationIcon() {
         super();
 
         dim = new Dimension();
         setDimension(new Dimension(DEFAULT_SIZE, DEFAULT_SIZE));
     }
 
-    @Override
-    public void setDimension(Dimension value)
-    {
-        if (!dim.equals(value))
-        {
+    public void setDimension(final Dimension value) {
+        if (!dim.equals(value)) {
             final int w = value.width;
 
             dim.setSize(w, value.height);
@@ -67,20 +57,17 @@ public class IcyApplicationIcon implements ResizableIcon
     }
 
     @Override
-    public int getIconHeight()
-    {
+    public int getIconHeight() {
         return dim.height;
     }
 
     @Override
-    public int getIconWidth()
-    {
+    public int getIconWidth() {
         return dim.width;
     }
 
     @Override
-    public void paintIcon(Component c, Graphics g, int x, int y)
-    {
+    public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
         icon.paintIcon(c, g, x, y);
     }
 }

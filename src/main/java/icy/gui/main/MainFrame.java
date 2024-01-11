@@ -22,10 +22,7 @@ import icy.file.FileUtil;
 import icy.file.Loader;
 import icy.gui.frame.IcyExternalFrame;
 import icy.gui.inspector.InspectorPanel;
-import icy.gui.menu.ApplicationMenu;
 import icy.gui.menu.ApplicationMenuBar;
-import icy.gui.menu.MainRibbon;
-import icy.gui.menu.search.SearchBar;
 import icy.gui.toolbar.InspectorBar;
 import icy.gui.toolbar.StatusBar;
 import icy.gui.toolbar.container.StatusPanel;
@@ -409,13 +406,6 @@ public class MainFrame extends JFrame {
         amap.put(SequenceOperationActions.redoAction.getName(), SequenceOperationActions.redoAction);
     }*/
 
-    // FIXME: 03/10/2023 Crash when plugin want to access Ribbon
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public ApplicationMenu getApplicationMenu() {
-        //return (ApplicationMenu) getRibbon().getApplicationMenu();
-        return null;
-    }
-
     /**
      * Returns the center pane, this pane contains the desktop pane.<br>
      * Feel free to add temporary top/left/right or bottom pane to it.
@@ -423,17 +413,6 @@ public class MainFrame extends JFrame {
     @Deprecated(since = "3.0.0", forRemoval = true)
     public JSplitPane getCenterPanel() {
         return centerPanel;
-    }
-
-    /**
-     * Returns the {@link SearchBar} component.
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public SearchBar getSearchBar() {
-        /*if (mainRibbon != null)
-            return mainRibbon.getSearchBar();*/
-
-        return null;
     }
 
     /**
@@ -459,16 +438,6 @@ public class MainFrame extends JFrame {
     @Deprecated(since = "3.0.0", forRemoval = true)
     public InspectorPanel getInspector() {
         return inspector;
-    }
-
-    /**
-     * @return the mainRibbon
-     */
-    // FIXME: 03/10/2023 Crash when plugin want to access Ribbon
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public MainRibbon getMainRibbon() {
-        //return mainRibbon;
-        return null;
     }
 
     /**

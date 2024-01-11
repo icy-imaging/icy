@@ -163,28 +163,25 @@
     </build>
 
     <dependencies>
+        <!-- TODO replace ehcache2 with ehcache3 -->
         <dependency>
             <groupId>net.sf.ehcache</groupId>
             <artifactId>ehcache</artifactId>
             <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
             <version>3.10.8</version>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-bioformats</artifactId>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-insubstantial</artifactId>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
@@ -195,6 +192,7 @@
             <artifactId>flatlaf-intellij-themes</artifactId>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>com.github.jiconfont</groupId>
             <artifactId>jiconfont-swing</artifactId>
@@ -210,16 +208,14 @@
             <artifactId>jiconfont</artifactId>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-vtk</artifactId>
+            <artifactId>icy-vtk-all</artifactId>
+            <version>1.0.0</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>net.imagej</groupId>
-            <artifactId>ij</artifactId>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>javax.media</groupId>
             <artifactId>jai-core</artifactId>
@@ -230,6 +226,7 @@
             <artifactId>jai-codec</artifactId>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all</artifactId>
@@ -240,6 +237,7 @@
             <artifactId>jogl-all-natives-all</artifactId>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
@@ -250,35 +248,20 @@
             <artifactId>gluegen-rt-natives-all</artifactId>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
-            <groupId>net.sourceforge.jexcelapi</groupId>
-            <artifactId>jxl</artifactId>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-poi</artifactId>
+            <version>1.0.0</version>
             <scope>compile</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>5.2.5</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>5.2.5</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml-lite</artifactId>
-            <version>5.2.5</version>
-            <scope>compile</scope>
-        </dependency>
         <dependency>
             <groupId>org.swinglabs.swingx</groupId>
             <artifactId>swingx-all</artifactId>

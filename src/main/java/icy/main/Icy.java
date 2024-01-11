@@ -27,7 +27,6 @@ import icy.gui.dialog.IdConfirmDialog;
 import icy.gui.dialog.IdConfirmDialog.Confirmer;
 import icy.gui.frame.ExitFrame;
 import icy.gui.frame.IcyExternalFrame;
-import icy.gui.frame.SplashScreenFrame;
 import icy.gui.frame.progress.AnnounceFrame;
 import icy.gui.frame.progress.ToolTipFrame;
 import icy.gui.inspector.InspectorPanel;
@@ -58,10 +57,11 @@ import icy.system.thread.ThreadUtil;
 import icy.type.collection.CollectionUtil;
 import icy.update.IcyUpdater;
 import icy.util.StringUtil;
-import icy.workspace.WorkspaceInstaller;
-import icy.workspace.WorkspaceLoader;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import jiconfont.swing.IconFontSwing;
+import org.apache.poi.hssf.usermodel.HSSFWorkbookFactory;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbookFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import vtk.vtkNativeLibrary;
@@ -100,10 +100,11 @@ public class Icy {
      */
     static FileLock lock = null;
 
-    /**
+    // TODO remove splashscreen ?
+    /*
      * private splash for initial loading
      */
-    static SplashScreenFrame splashScreen = null;
+    //static SplashScreenFrame splashScreen = null;
 
     /**
      * VTK library loaded flag
@@ -207,7 +208,7 @@ public class Icy {
             // set LOCI debug level (do it immediately as it can quickly show some log messages)
             loci.common.DebugTools.enableLogging("ERROR");
 
-            if (!headless && !noSplash) {
+            /*if (!headless && !noSplash) {
                 // prepare splashScreen (ok to create it here as we are not yet in substance laf)
                 splashScreen = new SplashScreenFrame();
 
@@ -220,7 +221,7 @@ public class Icy {
                     // display splash screen
                     splashScreen.setVisible(true);
                 });
-            }
+            }*/
 
             // fast start
             // force image cache initialization so GUI won't wait after it (need preferences init)
@@ -229,11 +230,11 @@ public class Icy {
             // initialize network (need preferences init)
             new Thread(NetworkUtil::init, "Initializer: Network").start();
 
-            new Thread(() -> {
-                // load plugins classes (need preferences init)
-                PluginLoader.reloadAsynch();
-                WorkspaceLoader.reloadAsynch();
-            }, "Initializer: Plugin and WS").start();
+            // load plugins classes (need preferences init)
+            new Thread(PluginLoader::reloadAsynch, "Initializer: Plugin").start();
+
+            WorkbookFactory.addProvider(new HSSFWorkbookFactory());
+            WorkbookFactory.addProvider(new XSSFWorkbookFactory());
 
             // build main interface
             if (headless)
@@ -269,14 +270,14 @@ public class Icy {
         }
 
         // splash screen initialized --> hide it
-        if (splashScreen != null) {
+        /*if (splashScreen != null) {
             // then do less important stuff later
             ThreadUtil.invokeLater(() -> {
                 // we can now hide splash as we have interface
                 splashScreen.dispose();
                 splashScreen = null;
             });
-        }
+        }*/
 
         // show general informations
         IcyLogger.info(String.format("%s %s (%d bit)", SystemUtil.getJavaName(), SystemUtil.getJavaVersion(), SystemUtil.getJavaArchDataModel()));
@@ -366,7 +367,7 @@ public class Icy {
             Icy.getMainInterface().addSequence(Loader.loadSequence(FileUtil.getGenericPath(startupImage), 0, false));
 
         // wait while updates are occurring before starting command line plugin...
-        while (PluginUpdater.isCheckingForUpdate() || PluginInstaller.isProcessing() || WorkspaceInstaller.isProcessing())
+        while (PluginUpdater.isCheckingForUpdate() || PluginInstaller.isProcessing())
             ThreadUtil.sleep(1);
 
         if (startupPluginName != null) {
@@ -499,8 +500,8 @@ public class Icy {
 
     static void fatalError(@NotNull final Throwable t, final boolean headless) {
         // hide splashScreen if needed
-        if ((splashScreen != null) && (splashScreen.isVisible()))
-            splashScreen.dispose();
+        /*if ((splashScreen != null) && (splashScreen.isVisible()))
+            splashScreen.dispose();*/
 
         // show error in console
         IcyExceptionHandler.showErrorMessage(t, true);
@@ -585,7 +586,7 @@ public class Icy {
             return true;
 
         // PluginInstaller or WorkspaceInstaller not running
-        final boolean safeExit = (!PluginInstaller.isProcessing()) && (!WorkspaceInstaller.isProcessing());
+        final boolean safeExit = !PluginInstaller.isProcessing();
 
         // not safe, need confirmation
         if (!safeExit) {
@@ -930,7 +931,7 @@ public class Icy {
             for (final String path : nativeLibraries) {
                 final String[] split = path.split("\\.");
                 final String extension = split[split.length - 1].toLowerCase(Locale.ROOT);
-                if (!(extension.equals("dylib") || extension.equals("jnilib") || extension.equals("so") || extension.equals("dll"))) {
+                if (!(extension.equals("dylib") || extension.equals("jnilib") || extension.equals("so") || extension.equals("dll") || path.contains(".so."))) {
                     IcyLogger.warn(String.format("Wrong file format for a native library: %s", path));
                     filesToRemove.add(path);
                 }

@@ -1,36 +1,22 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.main;
-
-import java.awt.Window;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.PropertyVetoException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JLayeredPane;
-import javax.swing.event.EventListenerList;
 
 import icy.common.listener.AcceptListener;
 import icy.common.listener.weak.WeakListener;
@@ -40,9 +26,6 @@ import icy.gui.inspector.LayersPanel;
 import icy.gui.inspector.RoisPanel;
 import icy.gui.main.MainEvent.MainEventSourceType;
 import icy.gui.main.MainEvent.MainEventType;
-import icy.gui.menu.ApplicationMenu;
-import icy.gui.menu.ROITask;
-import icy.gui.menu.ToolRibbonTask;
 import icy.gui.toolbar.panel.OutputConsolePanel;
 import icy.gui.toolbar.panel.SequencePanel;
 import icy.gui.toolbar.panel.UndoManagerPanel;
@@ -53,7 +36,6 @@ import icy.gui.viewer.ViewerEvent;
 import icy.gui.viewer.ViewerListener;
 import icy.image.IcyBufferedImage;
 import icy.image.lut.LUT;
-import icy.imagej.ImageJWrapper;
 import icy.main.Icy;
 import icy.painter.Overlay;
 import icy.painter.OverlayWrapper;
@@ -73,29 +55,35 @@ import icy.system.thread.ThreadUtil;
 import icy.undo.IcyUndoManager;
 import icy.util.StringUtil;
 
+import javax.swing.*;
+import javax.swing.event.EventListenerList;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyVetoException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 /**
  * MainInterfaceGui
- * 
+ *
  * @author Fabrice de Chaumont &amp; Stephane
  */
-public class MainInterfaceGui implements MainInterface
-{
-    private class WeakAcceptListener extends WeakListener<AcceptListener> implements AcceptListener
-    {
-        public WeakAcceptListener(AcceptListener listener)
-        {
+public class MainInterfaceGui implements MainInterface {
+    private class WeakAcceptListener extends WeakListener<AcceptListener> implements AcceptListener {
+        public WeakAcceptListener(AcceptListener listener) {
             super(listener);
         }
 
         @Override
-        public void removeListener(Object source)
-        {
+        public void removeListener(Object source) {
             internalRemoveCanExitListener(this);
         }
 
         @Override
-        public boolean accept(Object source)
-        {
+        public boolean accept(Object source) {
             final AcceptListener listener = getListener();
 
             if (listener != null)
@@ -139,8 +127,7 @@ public class MainInterfaceGui implements MainInterface
      * Take care that MainInterface constructor do not call the {@link Icy#getMainInterface()} method.<br>
      * We use a separate {@link #init()} for that purpose.
      */
-    public MainInterfaceGui()
-    {
+    public MainInterfaceGui() {
         listeners = new EventListenerList();
         mainListeners = new ArrayList<MainListener>();
         globalViewerListeners = new ArrayList<GlobalViewerListener>();
@@ -155,21 +142,17 @@ public class MainInterfaceGui implements MainInterface
         taskFrameManager = new TaskFrameManager();
 
         // active viewer listener
-        activeViewerListener = new ViewerAdapter()
-        {
+        activeViewerListener = new ViewerAdapter() {
             @Override
-            public void viewerChanged(ViewerEvent event)
-            {
+            public void viewerChanged(ViewerEvent event) {
                 activeViewerChanged(event);
             }
         };
 
         // global sequence listener
-        sequenceListener = new SequenceAdapter()
-        {
+        sequenceListener = new SequenceAdapter() {
             @Override
-            public void sequenceChanged(SequenceEvent event)
-            {
+            public void sequenceChanged(SequenceEvent event) {
                 MainInterfaceGui.this.sequenceChanged(event);
             }
         };
@@ -182,8 +165,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public void init()
-    {
+    public void init() {
         // init toolbar panels first
         OutputConsolePanel.getInstance();
         SequencePanel.getInstance();
@@ -194,11 +176,9 @@ public class MainInterfaceGui implements MainInterface
         // build main frame
         mainFrame = new MainFrame();
         //mainFrame.init();
-        mainFrame.addWindowListener(new WindowAdapter()
-        {
+        mainFrame.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(WindowEvent e)
-            {
+            public void windowClosing(WindowEvent e) {
                 // exit application
                 Icy.exit(false);
             }
@@ -208,25 +188,20 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public boolean isHeadLess()
-    {
+    public boolean isHeadLess() {
         // we are not head less with this interface
         return false;
     }
 
     @Override
-    public void addSequence(Sequence sequence)
-    {
-        if (sequence != null)
-        {
+    public void addSequence(Sequence sequence) {
+        if (sequence != null) {
             final Sequence seq = sequence;
 
             // thread safe
-            ThreadUtil.invokeLater(new Runnable()
-            {
+            ThreadUtil.invokeLater(new Runnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     new Viewer(seq);
                 }
             });
@@ -234,8 +209,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public ArrayList<JFrame> getExternalFrames()
-    {
+    public ArrayList<JFrame> getExternalFrames() {
         final ArrayList<JFrame> result = new ArrayList<JFrame>();
         final Window[] windows = Window.getWindows();
 
@@ -247,8 +221,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public ArrayList<JInternalFrame> getInternalFrames()
-    {
+    public ArrayList<JInternalFrame> getInternalFrames() {
         if (mainFrame == null)
             return new ArrayList<JInternalFrame>();
 
@@ -260,14 +233,12 @@ public class MainInterfaceGui implements MainInterface
      * @return the preferences
      */
     @Override
-    public XMLPreferences getPreferences()
-    {
+    public XMLPreferences getPreferences() {
         return IcyPreferences.applicationRoot();
     }
 
     @Override
-    public InspectorPanel getInspector()
-    {
+    public InspectorPanel getInspector() {
         if (mainFrame == null)
             return null;
 
@@ -275,8 +246,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public RoisPanel getRoisPanel()
-    {
+    public RoisPanel getRoisPanel() {
         if (mainFrame == null)
             return null;
 
@@ -288,8 +258,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public LayersPanel getLayersPanel()
-    {
+    public LayersPanel getLayersPanel() {
         if (mainFrame == null)
             return null;
 
@@ -301,14 +270,11 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public ArrayList<Plugin> getActivePlugins()
-    {
+    public ArrayList<Plugin> getActivePlugins() {
         final ArrayList<Plugin> result = new ArrayList<Plugin>();
 
-        synchronized (activePlugins)
-        {
-            for (WeakReference<Plugin> ref : activePlugins)
-            {
+        synchronized (activePlugins) {
+            for (WeakReference<Plugin> ref : activePlugins) {
                 final Plugin plugin = ref.get();
 
                 if (plugin != null)
@@ -320,8 +286,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public LUT getActiveLUT()
-    {
+    public LUT getActiveLUT() {
         if (activeViewer != null)
             return activeViewer.getLut();
 
@@ -329,20 +294,17 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public Viewer getActiveViewer()
-    {
+    public Viewer getActiveViewer() {
         return activeViewer;
     }
 
     @Override
-    public Sequence getActiveSequence()
-    {
+    public Sequence getActiveSequence() {
         return activeSequence;
     }
 
     @Override
-    public IcyBufferedImage getActiveImage()
-    {
+    public IcyBufferedImage getActiveImage() {
         if (activeViewer != null)
             return activeViewer.getCurrentImage();
 
@@ -351,28 +313,24 @@ public class MainInterfaceGui implements MainInterface
 
     @Override
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public Viewer getFocusedViewer()
-    {
+    public Viewer getFocusedViewer() {
         return getActiveViewer();
     }
 
     @Override
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence getFocusedSequence()
-    {
+    public Sequence getFocusedSequence() {
         return getActiveSequence();
     }
 
     @Override
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage getFocusedImage()
-    {
+    public IcyBufferedImage getFocusedImage() {
         return getActiveImage();
     }
 
     @Override
-    public IcyUndoManager getUndoManager()
-    {
+    public IcyUndoManager getUndoManager() {
         if (activeSequence != null)
             return activeSequence.getUndoManager();
 
@@ -380,8 +338,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public boolean undo()
-    {
+    public boolean undo() {
         if (activeSequence != null)
             return activeSequence.undo();
 
@@ -389,8 +346,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public boolean redo()
-    {
+    public boolean redo() {
         if (activeSequence != null)
             return activeSequence.redo();
 
@@ -398,41 +354,27 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public ArrayList<Viewer> getViewers()
-    {
-        synchronized (viewers)
-        {
+    public ArrayList<Viewer> getViewers() {
+        synchronized (viewers) {
             return new ArrayList<Viewer>(viewers);
         }
     }
 
     @Override
-    public synchronized void setActiveViewer(Viewer viewer)
-    {
-        if (viewer != null)
-        {
-            // remove focus on ImageJ image
-            final ImageJWrapper ij = Icy.getMainInterface().getImageJ();
-            if (ij != null)
-                ij.setActiveImage(null);
-        }
-
+    public synchronized void setActiveViewer(Viewer viewer) {
         if (activeViewer == viewer)
             return;
 
         // got a previously active viewer ?
-        if (activeViewer != null)
-        {
+        if (activeViewer != null) {
             // remove active viewer listener
             activeViewer.removeListener(activeViewerListener);
 
             // force previous viewer internal frame to release focus
-            try
-            {
+            try {
                 activeViewer.getInternalFrame().setSelected(false);
             }
-            catch (PropertyVetoException e)
-            {
+            catch (PropertyVetoException e) {
                 // ignore
             }
         }
@@ -450,20 +392,17 @@ public class MainInterfaceGui implements MainInterface
 
     @Override
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public synchronized void setFocusedViewer(Viewer viewer)
-    {
+    public synchronized void setFocusedViewer(Viewer viewer) {
         setActiveViewer(viewer);
     }
 
     @Override
-    public synchronized void addToDesktopPane(JInternalFrame internalFrame)
-    {
+    public synchronized void addToDesktopPane(JInternalFrame internalFrame) {
         getDesktopPane().add(internalFrame, JLayeredPane.DEFAULT_LAYER);
     }
 
     @Override
-    public IcyDesktopPane getDesktopPane()
-    {
+    public IcyDesktopPane getDesktopPane() {
         if (mainFrame == null)
             return null;
 
@@ -471,25 +410,12 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public ApplicationMenu getApplicationMenu()
-    {
-        if (mainFrame == null)
-            return null;
-
-        return mainFrame.getApplicationMenu();
-    }
-
-    @Override
-    public TaskFrameManager getTaskWindowManager()
-    {
+    public TaskFrameManager getTaskWindowManager() {
         return taskFrameManager;
     }
 
-    private WeakReference<Plugin> getPluginReference(Plugin plugin)
-    {
-        synchronized (activePlugins)
-        {
+    private WeakReference<Plugin> getPluginReference(Plugin plugin) {
+        synchronized (activePlugins) {
             for (WeakReference<Plugin> ref : activePlugins)
                 if (ref.get() == plugin)
                     return ref;
@@ -500,23 +426,19 @@ public class MainInterfaceGui implements MainInterface
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void registerExternalFrame(JFrame frame)
-    {
+    public void registerExternalFrame(JFrame frame) {
 
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void unRegisterExternalFrame(JFrame frame)
-    {
+    public void unRegisterExternalFrame(JFrame frame) {
 
     }
 
     @Override
-    public synchronized void registerPlugin(Plugin plugin)
-    {
-        synchronized (activePlugins)
-        {
+    public synchronized void registerPlugin(Plugin plugin) {
+        synchronized (activePlugins) {
             activePlugins.add(new WeakReference<Plugin>(plugin));
         }
 
@@ -525,12 +447,10 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public synchronized void unRegisterPlugin(Plugin plugin)
-    {
+    public synchronized void unRegisterPlugin(Plugin plugin) {
         final WeakReference<Plugin> ref = getPluginReference(plugin);
 
-        synchronized (activePlugins)
-        {
+        synchronized (activePlugins) {
             // reference found
             if (ref != null)
                 activePlugins.remove(ref);
@@ -541,8 +461,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public synchronized void registerViewer(Viewer viewer)
-    {
+    public synchronized void registerViewer(Viewer viewer) {
         if (viewer == null)
             return;
 
@@ -551,8 +470,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public synchronized void unRegisterViewer(Viewer viewer)
-    {
+    public synchronized void unRegisterViewer(Viewer viewer) {
         if (viewer == null)
             return;
 
@@ -563,20 +481,16 @@ public class MainInterfaceGui implements MainInterface
         if (viewers.isEmpty())
             // set focus to null
             setActiveViewer(null);
-        else
-        {
+        else {
             final IcyFrame frame = IcyFrame.findIcyFrame(getDesktopPane().getSelectedFrame());
 
             if (frame instanceof Viewer)
                 ((Viewer) frame).requestFocus();
-            else
-            {
+            else {
                 // it was the active viewer ?
-                if (activeViewer == viewer)
-                {
+                if (activeViewer == viewer) {
                     // restore focus to previous active
-                    if (previousActiveViewer != null)
-                    {
+                    if (previousActiveViewer != null) {
                         setActiveViewer(previousActiveViewer);
                         // no more previous active now
                         previousActiveViewer = null;
@@ -591,26 +505,24 @@ public class MainInterfaceGui implements MainInterface
 
     @Override
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public MainFrame getFrame()
-    {
+    public MainFrame getFrame() {
         return getMainFrame();
     }
 
     @Override
-    public MainFrame getMainFrame()
-    {
+    public MainFrame getMainFrame() {
         return mainFrame;
     }
 
+    // TODO replace search bar
     @Override
-    public SearchEngine getSearchEngine()
-    {
-        return mainFrame.getSearchBar().getSearchEngine();
+    public SearchEngine getSearchEngine() {
+        //return mainFrame.getSearchBar().getSearchEngine();
+        return null;
     }
 
     @Override
-    public void closeSequence(Sequence sequence)
-    {
+    public void closeSequence(Sequence sequence) {
         // use copy as this actually modify viewers list
         for (Viewer v : getViewers())
             if (v.getSequence() == sequence)
@@ -619,43 +531,36 @@ public class MainInterfaceGui implements MainInterface
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void closeViewersOfSequence(Sequence sequence)
-    {
+    public void closeViewersOfSequence(Sequence sequence) {
         closeSequence(sequence);
     }
 
     @Override
-    public synchronized void closeAllViewers()
-    {
+    public synchronized void closeAllViewers() {
         // use copy as this actually modify viewers list
         for (Viewer viewer : getViewers())
             viewer.close();
     }
 
     @Override
-    public Viewer getFirstViewerContaining(ROI roi)
-    {
+    public Viewer getFirstViewerContaining(ROI roi) {
         return getFirstViewer(getFirstSequenceContaining(roi));
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public Viewer getFirstViewerContaining(Painter painter)
-    {
+    public Viewer getFirstViewerContaining(Painter painter) {
         return getFirstViewer(getFirstSequenceContaining(painter));
     }
 
     @Override
-    public Viewer getFirstViewerContaining(Overlay overlay)
-    {
+    public Viewer getFirstViewerContaining(Overlay overlay) {
         return getFirstViewer(getFirstSequenceContaining(overlay));
     }
 
     @Override
-    public Viewer getFirstViewer(Sequence sequence)
-    {
-        if (sequence != null)
-        {
+    public Viewer getFirstViewer(Sequence sequence) {
+        if (sequence != null) {
             for (Viewer viewer : getViewers())
                 if (viewer.getSequence() == sequence)
                     return viewer;
@@ -665,8 +570,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public ArrayList<Viewer> getViewers(Sequence sequence)
-    {
+    public ArrayList<Viewer> getViewers(Sequence sequence) {
         final ArrayList<Viewer> result = new ArrayList<Viewer>();
 
         for (Viewer v : getViewers())
@@ -677,31 +581,25 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public boolean isUniqueViewer(Viewer viewer)
-    {
+    public boolean isUniqueViewer(Viewer viewer) {
         final List<Viewer> viewers = getViewers(viewer.getSequence());
 
         return (viewers.size() == 1) && (viewers.get(0) == viewer);
     }
 
     @Override
-    public ArrayList<Sequence> getSequences()
-    {
-        synchronized (sequences)
-        {
+    public ArrayList<Sequence> getSequences() {
+        synchronized (sequences) {
             return new ArrayList<Sequence>(sequences);
         }
     }
 
     @Override
-    public ArrayList<Sequence> getSequences(String name)
-    {
+    public ArrayList<Sequence> getSequences(String name) {
         final ArrayList<Sequence> result = new ArrayList<Sequence>();
 
-        synchronized (viewers)
-        {
-            for (Viewer viewer : viewers)
-            {
+        synchronized (viewers) {
+            for (Viewer viewer : viewers) {
                 final Sequence sequence = viewer.getSequence();
 
                 // matching name and no duplicate
@@ -714,21 +612,18 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public boolean isOpened(Sequence sequence)
-    {
+    public boolean isOpened(Sequence sequence) {
         return getSequences().contains(sequence);
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public Sequence getFirstSequencesContaining(ROI roi)
-    {
+    public Sequence getFirstSequencesContaining(ROI roi) {
         return getFirstSequenceContaining(roi);
     }
 
     @Override
-    public Sequence getFirstSequenceContaining(ROI roi)
-    {
+    public Sequence getFirstSequenceContaining(ROI roi) {
         for (Sequence seq : getSequences())
             if (seq.contains(roi))
                 return seq;
@@ -738,15 +633,13 @@ public class MainInterfaceGui implements MainInterface
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public Sequence getFirstSequencesContaining(Painter painter)
-    {
+    public Sequence getFirstSequencesContaining(Painter painter) {
         return getFirstSequenceContaining(painter);
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public Sequence getFirstSequenceContaining(Painter painter)
-    {
+    public Sequence getFirstSequenceContaining(Painter painter) {
         for (Sequence seq : getSequences())
             if (seq.contains(painter))
                 return seq;
@@ -755,8 +648,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public Sequence getFirstSequenceContaining(Overlay overlay)
-    {
+    public Sequence getFirstSequenceContaining(Overlay overlay) {
         for (Sequence seq : getSequences())
             if (seq.contains(overlay))
                 return seq;
@@ -765,8 +657,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public ArrayList<Sequence> getSequencesContaining(ROI roi)
-    {
+    public ArrayList<Sequence> getSequencesContaining(ROI roi) {
         final ArrayList<Sequence> result = getSequences();
 
         for (int i = result.size() - 1; i >= 0; i--)
@@ -778,8 +669,7 @@ public class MainInterfaceGui implements MainInterface
 
     @Override
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public ArrayList<Sequence> getSequencesContaining(Painter painter)
-    {
+    public ArrayList<Sequence> getSequencesContaining(Painter painter) {
         final ArrayList<Sequence> result = getSequences();
 
         for (int i = result.size() - 1; i >= 0; i--)
@@ -790,8 +680,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public List<Sequence> getSequencesContaining(Overlay overlay)
-    {
+    public List<Sequence> getSequencesContaining(Overlay overlay) {
         final ArrayList<Sequence> result = getSequences();
 
         for (int i = result.size() - 1; i >= 0; i--)
@@ -802,8 +691,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public ArrayList<ROI> getROIs()
-    {
+    public ArrayList<ROI> getROIs() {
         // HashSet is better suited for add elements
         final HashSet<ROI> result = new HashSet<ROI>();
 
@@ -818,8 +706,7 @@ public class MainInterfaceGui implements MainInterface
 
     @Override
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public ROI getROI(Painter painter)
-    {
+    public ROI getROI(Painter painter) {
         if (painter instanceof Overlay)
             return getROI((Overlay) painter);
 
@@ -827,8 +714,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public ROI getROI(Overlay overlay)
-    {
+    public ROI getROI(Overlay overlay) {
         final List<ROI> rois = getROIs();
 
         for (ROI roi : rois)
@@ -840,8 +726,7 @@ public class MainInterfaceGui implements MainInterface
 
     @Override
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public ArrayList<Painter> getPainters()
-    {
+    public ArrayList<Painter> getPainters() {
         // HashSet better suited for add element
         final HashSet<Painter> result = new HashSet<Painter>();
 
@@ -854,8 +739,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public List<Overlay> getOverlays()
-    {
+    public List<Overlay> getOverlays() {
         // HashSet better suited for add element
         final HashSet<Overlay> result = new HashSet<Overlay>();
 
@@ -868,24 +752,13 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public SwimmingPool getSwimmingPool()
-    {
+    public SwimmingPool getSwimmingPool() {
         return swimmingPool;
     }
 
+    // TODO replace this function
     @Override
-    public ImageJWrapper getImageJ()
-    {
-        if (mainFrame == null)
-            return null;
-
-        //return mainFrame.getMainRibbon().getImageJ();
-        return null;
-    }
-
-    @Override
-    public String getSelectedTool()
-    {
+    public String getSelectedTool() {
         if (mainFrame == null)
             return null;
 
@@ -893,37 +766,15 @@ public class MainInterfaceGui implements MainInterface
         return "";
     }
 
+    // TODO replace this function
     @Override
-    public void setSelectedTool(String command)
-    {
+    public void setSelectedTool(String command) {
         /*if (mainFrame != null)
             getROIRibbonTask().setSelected(command);*/
     }
 
     @Override
-    public ROITask getROIRibbonTask()
-    {
-        if (mainFrame == null)
-            return null;
-
-        //return mainFrame.getMainRibbon().getROIRibbonTask();
-        return null;
-    }
-
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    @Override
-    public ToolRibbonTask getToolRibbon()
-    {
-        if (mainFrame == null)
-            return null;
-
-        //return mainFrame.getMainRibbon().getToolRibbon();
-        return null;
-    }
-
-    @Override
-    public boolean isAlwaysOnTop()
-    {
+    public boolean isAlwaysOnTop() {
         if (mainFrame == null)
             return false;
 
@@ -931,15 +782,13 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public void setAlwaysOnTop(boolean value)
-    {
+    public void setAlwaysOnTop(boolean value) {
         if (mainFrame != null)
             mainFrame.setAlwaysOnTop(value);
     }
 
     @Override
-    public boolean isDetachedMode()
-    {
+    public boolean isDetachedMode() {
         if (mainFrame == null)
             return false;
 
@@ -947,8 +796,7 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public void setDetachedMode(boolean value)
-    {
+    public void setDetachedMode(boolean value) {
         if (mainFrame != null) {
             mainFrame.setDetachedMode(value);
 
@@ -960,154 +808,131 @@ public class MainInterfaceGui implements MainInterface
 
     @Override
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public synchronized void addListener(MainListener listener)
-    {
+    public synchronized void addListener(MainListener listener) {
         if (listener != null)
             mainListeners.add(listener);
     }
 
     @Override
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public synchronized void removeListener(MainListener listener)
-    {
+    public synchronized void removeListener(MainListener listener) {
         mainListeners.remove(listener);
     }
 
     @Override
-    public synchronized void addGlobalViewerListener(GlobalViewerListener listener)
-    {
+    public synchronized void addGlobalViewerListener(GlobalViewerListener listener) {
         if (listener != null)
             globalViewerListeners.add(listener);
     }
 
     @Override
-    public synchronized void removeGlobalViewerListener(GlobalViewerListener listener)
-    {
+    public synchronized void removeGlobalViewerListener(GlobalViewerListener listener) {
         globalViewerListeners.remove(listener);
     }
 
     @Override
-    public synchronized void addGlobalSequenceListener(GlobalSequenceListener listener)
-    {
+    public synchronized void addGlobalSequenceListener(GlobalSequenceListener listener) {
         if (listener != null)
             globalSequenceListeners.add(listener);
     }
 
     @Override
-    public synchronized void removeGlobalSequenceListener(GlobalSequenceListener listener)
-    {
+    public synchronized void removeGlobalSequenceListener(GlobalSequenceListener listener) {
         globalSequenceListeners.remove(listener);
     }
 
     @Override
-    public synchronized void addGlobalROIListener(GlobalROIListener listener)
-    {
+    public synchronized void addGlobalROIListener(GlobalROIListener listener) {
         if (listener != null)
             globalROIListeners.add(listener);
     }
 
     @Override
-    public synchronized void removeGlobalROIListener(GlobalROIListener listener)
-    {
+    public synchronized void removeGlobalROIListener(GlobalROIListener listener) {
         globalROIListeners.remove(listener);
     }
 
     @Override
-    public synchronized void addGlobalOverlayListener(GlobalOverlayListener listener)
-    {
+    public synchronized void addGlobalOverlayListener(GlobalOverlayListener listener) {
         if (listener != null)
             globalOverlayListeners.add(listener);
     }
 
     @Override
-    public synchronized void removeGlobalOverlayListener(GlobalOverlayListener listener)
-    {
+    public synchronized void removeGlobalOverlayListener(GlobalOverlayListener listener) {
         globalOverlayListeners.remove(listener);
     }
 
     @Override
-    public synchronized void addGlobalPluginListener(GlobalPluginListener listener)
-    {
+    public synchronized void addGlobalPluginListener(GlobalPluginListener listener) {
         if (listener != null)
             listeners.add(GlobalPluginListener.class, listener);
     }
 
     @Override
-    public synchronized void removeGlobalPluginListener(GlobalPluginListener listener)
-    {
+    public synchronized void removeGlobalPluginListener(GlobalPluginListener listener) {
         listeners.remove(GlobalPluginListener.class, listener);
     }
 
     @Override
-    public synchronized void addCanExitListener(AcceptListener listener)
-    {
+    public synchronized void addCanExitListener(AcceptListener listener) {
         if (listener != null)
             listeners.add(WeakAcceptListener.class, new WeakAcceptListener(listener));
     }
 
     @Override
-    public synchronized void removeCanExitListener(AcceptListener listener)
-    {
+    public synchronized void removeCanExitListener(AcceptListener listener) {
         // we use weak reference so we have to find base listener...
         for (WeakAcceptListener l : listeners.getListeners(WeakAcceptListener.class))
             if (listener == l.getListener())
                 internalRemoveCanExitListener(l);
     }
 
-    public synchronized void internalRemoveCanExitListener(WeakAcceptListener listener)
-    {
+    public synchronized void internalRemoveCanExitListener(WeakAcceptListener listener) {
         listeners.remove(WeakAcceptListener.class, listener);
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public synchronized void addFocusedViewerListener(FocusedViewerListener listener)
-    {
+    public synchronized void addFocusedViewerListener(FocusedViewerListener listener) {
         listeners.add(FocusedViewerListener.class, listener);
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public synchronized void removeFocusedViewerListener(FocusedViewerListener listener)
-    {
+    public synchronized void removeFocusedViewerListener(FocusedViewerListener listener) {
         listeners.remove(FocusedViewerListener.class, listener);
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public synchronized void addFocusedSequenceListener(FocusedSequenceListener listener)
-    {
+    public synchronized void addFocusedSequenceListener(FocusedSequenceListener listener) {
         listeners.add(FocusedSequenceListener.class, listener);
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public synchronized void removeFocusedSequenceListener(FocusedSequenceListener listener)
-    {
+    public synchronized void removeFocusedSequenceListener(FocusedSequenceListener listener) {
         listeners.remove(FocusedSequenceListener.class, listener);
     }
 
     @Override
-    public synchronized void addActiveViewerListener(ActiveViewerListener listener)
-    {
+    public synchronized void addActiveViewerListener(ActiveViewerListener listener) {
         listeners.add(ActiveViewerListener.class, listener);
     }
 
     @Override
-    public synchronized void removeActiveViewerListener(ActiveViewerListener listener)
-    {
+    public synchronized void removeActiveViewerListener(ActiveViewerListener listener) {
         listeners.remove(ActiveViewerListener.class, listener);
     }
 
     @Override
-    public synchronized void addActiveSequenceListener(ActiveSequenceListener listener)
-    {
+    public synchronized void addActiveSequenceListener(ActiveSequenceListener listener) {
         listeners.add(ActiveSequenceListener.class, listener);
     }
 
     @Override
-    public synchronized void removeActiveSequenceListener(ActiveSequenceListener listener)
-    {
+    public synchronized void removeActiveSequenceListener(ActiveSequenceListener listener) {
         listeners.remove(ActiveSequenceListener.class, listener);
     }
 
@@ -1115,8 +940,7 @@ public class MainInterfaceGui implements MainInterface
      * fire plugin opened event
      */
     @SuppressWarnings("deprecation")
-    private void firePluginStartedEvent(Plugin plugin)
-    {
+    private void firePluginStartedEvent(Plugin plugin) {
         for (GlobalPluginListener listener : listeners.getListeners(GlobalPluginListener.class))
             listener.pluginStarted(plugin);
 
@@ -1130,8 +954,7 @@ public class MainInterfaceGui implements MainInterface
      * fire plugin closed event
      */
     @SuppressWarnings("deprecation")
-    private void firePluginEndedEvent(Plugin plugin)
-    {
+    private void firePluginEndedEvent(Plugin plugin) {
         for (GlobalPluginListener listener : listeners.getListeners(GlobalPluginListener.class))
             listener.pluginEnded(plugin);
 
@@ -1145,8 +968,7 @@ public class MainInterfaceGui implements MainInterface
      * fire viewer opened event
      */
     @SuppressWarnings("deprecation")
-    private void fireViewerOpenedEvent(Viewer viewer)
-    {
+    private void fireViewerOpenedEvent(Viewer viewer) {
         for (GlobalViewerListener listener : new ArrayList<GlobalViewerListener>(globalViewerListeners))
             listener.viewerOpened(viewer);
 
@@ -1160,8 +982,7 @@ public class MainInterfaceGui implements MainInterface
      * fire viewer close event
      */
     @SuppressWarnings("deprecation")
-    private void fireViewerClosedEvent(Viewer viewer)
-    {
+    private void fireViewerClosedEvent(Viewer viewer) {
         for (GlobalViewerListener listener : new ArrayList<GlobalViewerListener>(globalViewerListeners))
             listener.viewerClosed(viewer);
 
@@ -1174,8 +995,7 @@ public class MainInterfaceGui implements MainInterface
     /**
      * fire viewer deactive event
      */
-    private void fireViewerDeactivatedEvent(Viewer viewer)
-    {
+    private void fireViewerDeactivatedEvent(Viewer viewer) {
         for (ActiveViewerListener listener : listeners.getListeners(ActiveViewerListener.class))
             listener.viewerDeactivated(viewer);
     }
@@ -1184,8 +1004,7 @@ public class MainInterfaceGui implements MainInterface
      * fire viewer active event
      */
     @SuppressWarnings("deprecation")
-    private void fireViewerActivatedEvent(Viewer viewer)
-    {
+    private void fireViewerActivatedEvent(Viewer viewer) {
         for (ActiveViewerListener listener : listeners.getListeners(ActiveViewerListener.class))
             listener.viewerActivated(viewer);
 
@@ -1201,8 +1020,7 @@ public class MainInterfaceGui implements MainInterface
      * fire sequence opened event
      */
     @SuppressWarnings("deprecation")
-    private void fireSequenceOpenedEvent(Sequence sequence)
-    {
+    private void fireSequenceOpenedEvent(Sequence sequence) {
         for (GlobalSequenceListener listener : new ArrayList<GlobalSequenceListener>(globalSequenceListeners))
             listener.sequenceOpened(sequence);
 
@@ -1216,8 +1034,7 @@ public class MainInterfaceGui implements MainInterface
      * fire sequence active event
      */
     @SuppressWarnings("deprecation")
-    private void fireSequenceClosedEvent(Sequence sequence)
-    {
+    private void fireSequenceClosedEvent(Sequence sequence) {
         for (GlobalSequenceListener listener : new ArrayList<GlobalSequenceListener>(globalSequenceListeners))
             listener.sequenceClosed(sequence);
 
@@ -1230,8 +1047,7 @@ public class MainInterfaceGui implements MainInterface
     /**
      * fire sequence deactive event
      */
-    private void fireSequenceDeactivatedEvent(Sequence sequence)
-    {
+    private void fireSequenceDeactivatedEvent(Sequence sequence) {
         for (ActiveSequenceListener listener : listeners.getListeners(ActiveSequenceListener.class))
             listener.sequenceDeactivated(sequence);
     }
@@ -1240,8 +1056,7 @@ public class MainInterfaceGui implements MainInterface
      * fire sequence active event
      */
     @SuppressWarnings("deprecation")
-    private void fireSequenceActivatedEvent(Sequence sequence)
-    {
+    private void fireSequenceActivatedEvent(Sequence sequence) {
         for (ActiveSequenceListener listener : listeners.getListeners(ActiveSequenceListener.class))
             listener.sequenceActivated(sequence);
 
@@ -1257,8 +1072,7 @@ public class MainInterfaceGui implements MainInterface
      * fire ROI added event
      */
     @SuppressWarnings("deprecation")
-    private void fireRoiAddedEvent(ROI roi)
-    {
+    private void fireRoiAddedEvent(ROI roi) {
         for (GlobalROIListener listener : new ArrayList<GlobalROIListener>(globalROIListeners))
             listener.roiAdded(roi);
 
@@ -1272,8 +1086,7 @@ public class MainInterfaceGui implements MainInterface
      * fire ROI removed event
      */
     @SuppressWarnings("deprecation")
-    private void fireRoiRemovedEvent(ROI roi)
-    {
+    private void fireRoiRemovedEvent(ROI roi) {
         for (GlobalROIListener listener : new ArrayList<GlobalROIListener>(globalROIListeners))
             listener.roiRemoved(roi);
 
@@ -1287,8 +1100,7 @@ public class MainInterfaceGui implements MainInterface
      * fire painter added event
      */
     @SuppressWarnings("deprecation")
-    private void fireOverlayAddedEvent(Overlay overlay)
-    {
+    private void fireOverlayAddedEvent(Overlay overlay) {
         for (GlobalOverlayListener listener : new ArrayList<GlobalOverlayListener>(globalOverlayListeners))
             listener.overlayAdded(overlay);
 
@@ -1309,8 +1121,7 @@ public class MainInterfaceGui implements MainInterface
      * fire painter removed event
      */
     @SuppressWarnings("deprecation")
-    private void fireOverlayRemovedEvent(Overlay overlay)
-    {
+    private void fireOverlayRemovedEvent(Overlay overlay) {
         for (GlobalOverlayListener listener : new ArrayList<GlobalOverlayListener>(globalOverlayListeners))
             listener.overlayRemoved(overlay);
 
@@ -1331,8 +1142,7 @@ public class MainInterfaceGui implements MainInterface
      * fire active viewer changed event
      */
     @SuppressWarnings("deprecation")
-    private void fireActiveViewerChangedEvent(ViewerEvent event)
-    {
+    private void fireActiveViewerChangedEvent(ViewerEvent event) {
         for (ActiveViewerListener listener : listeners.getListeners(ActiveViewerListener.class))
             listener.activeViewerChanged(event);
 
@@ -1345,8 +1155,7 @@ public class MainInterfaceGui implements MainInterface
      * fire active sequence changed event
      */
     @SuppressWarnings("deprecation")
-    private void fireActiveSequenceChangedEvent(SequenceEvent event)
-    {
+    private void fireActiveSequenceChangedEvent(SequenceEvent event) {
         for (ActiveSequenceListener listener : listeners.getListeners(ActiveSequenceListener.class))
             listener.activeSequenceChanged(event);
 
@@ -1356,18 +1165,14 @@ public class MainInterfaceGui implements MainInterface
     }
 
     @Override
-    public boolean canExitExternal()
-    {
-        for (AcceptListener listener : listeners.getListeners(WeakAcceptListener.class))
-        {
+    public boolean canExitExternal() {
+        for (AcceptListener listener : listeners.getListeners(WeakAcceptListener.class)) {
             // should not be interrupted by an error
-            try
-            {
+            try {
                 if (!listener.accept(mainFrame))
                     return false;
             }
-            catch (Throwable error)
-            {
+            catch (Throwable error) {
                 // ignore
             }
         }
@@ -1377,22 +1182,19 @@ public class MainInterfaceGui implements MainInterface
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void beginUpdate()
-    {
+    public void beginUpdate() {
         // updater.beginUpdate();
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void endUpdate()
-    {
+    public void endUpdate() {
         // updater.endUpdate();
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public boolean isUpdating()
-    {
+    public boolean isUpdating() {
         return false;
         // return updater.isUpdating();
     }
@@ -1400,36 +1202,29 @@ public class MainInterfaceGui implements MainInterface
     /**
      * called when a plugin is opened
      */
-    private void pluginStarted(Plugin plugin)
-    {
+    private void pluginStarted(Plugin plugin) {
         firePluginStartedEvent(plugin);
     }
 
     /**
      * called when a plugin is closed
      */
-    private void pluginEnded(Plugin plugin)
-    {
+    private void pluginEnded(Plugin plugin) {
         firePluginEndedEvent(plugin);
     }
 
     /**
      * called when a viewer is opened
      */
-    private void viewerOpened(Viewer viewer)
-    {
+    private void viewerOpened(Viewer viewer) {
         final Sequence sequence = viewer.getSequence();
         boolean opened = true;
 
-        synchronized (viewers)
-        {
+        synchronized (viewers) {
             // check if the sequence has just been opened
-            if (sequence != null)
-            {
-                for (Viewer v : viewers)
-                {
-                    if (v.getSequence() == sequence)
-                    {
+            if (sequence != null) {
+                for (Viewer v : viewers) {
+                    if (v.getSequence() == sequence) {
                         opened = false;
                         break;
                     }
@@ -1452,8 +1247,7 @@ public class MainInterfaceGui implements MainInterface
     /**
      * called when viewer activation changed
      */
-    private void viewerActivationChanged(Viewer oldActive, Viewer newActive)
-    {
+    private void viewerActivationChanged(Viewer oldActive, Viewer newActive) {
         final Sequence sequence;
 
         // new active viewer is not null ? get active sequence
@@ -1465,8 +1259,7 @@ public class MainInterfaceGui implements MainInterface
         final Sequence oldActiveSequence = activeSequence;
 
         // sequence active changed ?
-        if (oldActiveSequence != sequence)
-        {
+        if (oldActiveSequence != sequence) {
             activeSequence = sequence;
             sequenceActivationChanged(oldActiveSequence, sequence);
         }
@@ -1479,8 +1272,7 @@ public class MainInterfaceGui implements MainInterface
     /**
      * called when the active viewer changed
      */
-    void activeViewerChanged(ViewerEvent event)
-    {
+    void activeViewerChanged(ViewerEvent event) {
         // propagate event if it comes from the active viewer
         // FIXME: why we need to test that ? it should always be the active viewer ?
         if (event.getSource() == activeViewer)
@@ -1490,8 +1282,7 @@ public class MainInterfaceGui implements MainInterface
     /**
      * called when a viewer is closed
      */
-    private void viewerClosed(Viewer viewer)
-    {
+    private void viewerClosed(Viewer viewer) {
         // retrieve the viewer LUT before we release it
         final LUT lut = viewer.getLut();
 
@@ -1499,8 +1290,7 @@ public class MainInterfaceGui implements MainInterface
         if (viewer == activeViewer)
             viewer.removeListener(activeViewerListener);
         // remove viewer from the viewer list
-        synchronized (viewers)
-        {
+        synchronized (viewers) {
             viewers.remove(viewer);
         }
         // fire viewer closed event (before sequence close)
@@ -1509,8 +1299,7 @@ public class MainInterfaceGui implements MainInterface
         final Sequence sequence = viewer.getSequence();
 
         // check if a sequence has been closed
-        if (sequence != null)
-        {
+        if (sequence != null) {
             // if no viewer for this sequence
             if (getViewers(sequence).isEmpty())
                 // sequence close
@@ -1521,11 +1310,9 @@ public class MainInterfaceGui implements MainInterface
     /**
      * called when a sequence is opened
      */
-    private void sequenceOpened(Sequence sequence)
-    {
+    private void sequenceOpened(Sequence sequence) {
         // add to sequence list
-        synchronized (sequences)
-        {
+        synchronized (sequences) {
             sequences.add(sequence);
         }
         // listen the sequence
@@ -1544,8 +1331,7 @@ public class MainInterfaceGui implements MainInterface
     /**
      * called when sequence activation changed
      */
-    private void sequenceActivationChanged(Sequence oldActive, Sequence newActive)
-    {
+    private void sequenceActivationChanged(Sequence oldActive, Sequence newActive) {
         // fire events
         fireSequenceDeactivatedEvent(oldActive);
         fireSequenceActivatedEvent(newActive);
@@ -1554,18 +1340,14 @@ public class MainInterfaceGui implements MainInterface
     /**
      * called when a sequence changed
      */
-    void sequenceChanged(SequenceEvent event)
-    {
+    void sequenceChanged(SequenceEvent event) {
         final Sequence sequence = event.getSequence();
 
         // handle event for active sequence only
-        if (isOpened(sequence))
-        {
-            switch (event.getSourceType())
-            {
+        if (isOpened(sequence)) {
+            switch (event.getSourceType()) {
                 case SEQUENCE_ROI:
-                    switch (event.getType())
-                    {
+                    switch (event.getType()) {
                         case ADDED:
                             checkRoiAdded((ROI) event.getSource(), false);
                             break;
@@ -1577,8 +1359,7 @@ public class MainInterfaceGui implements MainInterface
                     break;
 
                 case SEQUENCE_OVERLAY:
-                    switch (event.getType())
-                    {
+                    switch (event.getType()) {
                         case ADDED:
                             checkOverlayAdded((Overlay) event.getSource(), false);
                             break;
@@ -1598,14 +1379,11 @@ public class MainInterfaceGui implements MainInterface
 
     /**
      * Called when a sequence is closed.
-     * 
-     * @param sequence
-     *        the sequence which has been closed.
-     * @param userLut
-     *        the viewer's LUT used when sequence has been closed.
+     *
+     * @param sequence the sequence which has been closed.
+     * @param userLut  the viewer's LUT used when sequence has been closed.
      */
-    private void sequenceClosed(Sequence sequence, LUT userLut)
-    {
+    private void sequenceClosed(Sequence sequence, LUT userLut) {
         // check about Overlay remove event
         for (Overlay overlay : sequence.getOverlays())
             checkOverlayRemoved(overlay, true);
@@ -1616,8 +1394,7 @@ public class MainInterfaceGui implements MainInterface
         // remove from sequence listener
         sequence.removeListener(sequenceListener);
         // remove from the sequence list
-        synchronized (sequences)
-        {
+        synchronized (sequences) {
             sequences.remove(sequence);
         }
 
@@ -1631,8 +1408,7 @@ public class MainInterfaceGui implements MainInterface
         fireSequenceClosedEvent(sequence);
     }
 
-    private void checkRoiAdded(ROI roi, boolean checkBeforeAdd)
-    {
+    private void checkRoiAdded(ROI roi, boolean checkBeforeAdd) {
         final List<Sequence> sequencesContainingRoi = getSequencesContaining(roi);
 
         // only 1 sequence contains (or will contain) this roi ?
@@ -1641,8 +1417,7 @@ public class MainInterfaceGui implements MainInterface
             roiAdded(roi);
     }
 
-    private void checkRoiRemoved(ROI roi, boolean checkBeforeRemove)
-    {
+    private void checkRoiRemoved(ROI roi, boolean checkBeforeRemove) {
         final List<Sequence> sequencesContainingRoi = getSequencesContaining(roi);
 
         // no more sequence contains (or will contain) this roi ?
@@ -1651,8 +1426,7 @@ public class MainInterfaceGui implements MainInterface
             roiRemoved(roi);
     }
 
-    private void checkOverlayAdded(Overlay overlay, boolean checkBeforeAdd)
-    {
+    private void checkOverlayAdded(Overlay overlay, boolean checkBeforeAdd) {
         final List<Sequence> sequencesContainingOverlay = getSequencesContaining(overlay);
 
         // only 1 sequence contains (or will contain) this overlay ?
@@ -1661,8 +1435,7 @@ public class MainInterfaceGui implements MainInterface
             overlayAdded(overlay);
     }
 
-    private void checkOverlayRemoved(Overlay overlay, boolean checkBeforeRemove)
-    {
+    private void checkOverlayRemoved(Overlay overlay, boolean checkBeforeRemove) {
         final List<Sequence> sequencesContainingOverlay = getSequencesContaining(overlay);
 
         // no more sequence contains (or will contain) this overlay ?
@@ -1674,51 +1447,44 @@ public class MainInterfaceGui implements MainInterface
     /**
      * called when a roi is added for the first time in a sequence
      */
-    private void roiAdded(ROI roi)
-    {
+    private void roiAdded(ROI roi) {
         fireRoiAddedEvent(roi);
     }
 
     /**
      * called when a roi is removed from all sequence
      */
-    private void roiRemoved(ROI roi)
-    {
+    private void roiRemoved(ROI roi) {
         fireRoiRemovedEvent(roi);
     }
 
     /**
      * called when an overlay is added for the first time in a sequence
      */
-    private void overlayAdded(Overlay overlay)
-    {
+    private void overlayAdded(Overlay overlay) {
         fireOverlayAddedEvent(overlay);
     }
 
     /**
      * called when an overlay is removed from all sequence
      */
-    private void overlayRemoved(Overlay overlay)
-    {
+    private void overlayRemoved(Overlay overlay) {
         fireOverlayRemovedEvent(overlay);
     }
 
     @Override
-    public void setGlobalViewSyncId(int id)
-    {
+    public void setGlobalViewSyncId(int id) {
         for (Viewer viewer : getViewers())
             viewer.setViewSyncId(id);
     }
 
     @Override
-    public boolean isVirtualMode()
-    {
+    public boolean isVirtualMode() {
         return GeneralPreferences.getVirtualMode();
     }
 
     @Override
-    public void setVirtualMode(boolean value)
-    {
+    public void setVirtualMode(boolean value) {
         final InspectorPanel inspector = getInspector();
         if (inspector != null)
             inspector.setVirtualMode(value);

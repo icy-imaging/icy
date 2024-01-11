@@ -1,21 +1,21 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.frame;
 
 import icy.file.FileUtil;
@@ -24,59 +24,45 @@ import icy.resource.ResourceUtil;
 import icy.util.ClassUtil;
 import icy.util.Random;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
 /**
  * Animated ICY Logo.
- * 
- * @author Fab &amp; Stephane
+ *
+ * @author Fab
+ * @author Stephane
+ * @author Thomas MUSSET
  */
-public class SplashScreenFrame extends JFrame
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -519109094312389176L;
-
-    public class SplashPanel extends JPanel
-    {
-        private static final long serialVersionUID = -6955085853269659076L;
-
+@Deprecated(since = "3.0.0")
+public class SplashScreenFrame extends JFrame {
+    public static class SplashPanel extends JPanel {
         private static final String SPLASH_FOLDER = ResourceUtil.IMAGE_PATH + "splash";
         private static final int DEFAULT_WIDTH = 960;
         private static final int DEFAULT_HEIGTH = 300;
 
         private BufferedImage image;
 
-        public SplashPanel()
-        {
+        public SplashPanel() {
             image = null;
 
             String[] files = FileUtil.getFiles(SPLASH_FOLDER, null, false, false, false);
 
             if (files.length > 0)
                 image = ImageUtil.load(files[Random.nextInt(files.length)]);
-            else
-            {
-                try
-                {
+            else {
+                try {
                     files = ClassUtil.getResourcesInPackage(SPLASH_FOLDER, null, true, false, false, false).toArray(
                             new String[0]);
-                    if (files.length > 0)
-                    {
+                    if (files.length > 0) {
                         final URL url = getClass().getResource("/" + files[Random.nextInt(files.length)]);
                         if (url != null)
                             image = ImageUtil.load(url, true);
                     }
                 }
-                catch (Exception e)
-                {
+                catch (final Exception e) {
                     System.err.println("Warning: cannot load splashscreen image");
                 }
             }
@@ -88,8 +74,7 @@ public class SplashScreenFrame extends JFrame
         }
 
         @Override
-        public void paint(Graphics g)
-        {
+        public void paint(final Graphics g) {
             super.paint(g);
 
             if (image != null)
@@ -97,16 +82,10 @@ public class SplashScreenFrame extends JFrame
         }
     }
 
-    private final SplashPanel splash;
-
-    /**
-	 * 
-	 */
-    public SplashScreenFrame()
-    {
+    public SplashScreenFrame() {
         super("Icy");
 
-        splash = new SplashPanel();
+        final SplashPanel splash = new SplashPanel();
 
         setUndecorated(true);
 

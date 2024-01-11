@@ -18,27 +18,6 @@
  */
 package icy.sequence;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-
-import javax.swing.undo.UndoManager;
-
-import org.w3c.dom.Node;
-
 import icy.common.CollapsibleEvent;
 import icy.common.UpdateEventHandler;
 import icy.common.exception.TooLargeArrayException;
@@ -47,11 +26,7 @@ import icy.file.FileUtil;
 import icy.file.Loader;
 import icy.file.SequenceFileGroupImporter;
 import icy.gui.viewer.Viewer;
-import icy.image.IcyBufferedImage;
-import icy.image.IcyBufferedImageEvent;
-import icy.image.IcyBufferedImageListener;
-import icy.image.IcyBufferedImageUtil;
-import icy.image.ImageProvider;
+import icy.image.*;
 import icy.image.colormap.IcyColorMap;
 import icy.image.colormodel.IcyColorModel;
 import icy.image.colormodel.IcyColorModelEvent;
@@ -62,27 +37,13 @@ import icy.math.MathUtil;
 import icy.math.Scaler;
 import icy.math.UnitUtil;
 import icy.math.UnitUtil.UnitPrefix;
-import icy.painter.Overlay;
-import icy.painter.OverlayEvent;
+import icy.painter.*;
 import icy.painter.OverlayEvent.OverlayEventType;
-import icy.painter.OverlayListener;
-import icy.painter.OverlayWrapper;
-import icy.painter.Painter;
 import icy.preferences.GeneralPreferences;
-import icy.roi.ROI;
-import icy.roi.ROI2D;
-import icy.roi.ROI3D;
-import icy.roi.ROIEvent;
-import icy.roi.ROIListener;
+import icy.roi.*;
 import icy.sequence.SequenceEvent.SequenceEventSourceType;
 import icy.sequence.SequenceEvent.SequenceEventType;
-import icy.sequence.edit.DataSequenceEdit;
-import icy.sequence.edit.DefaultSequenceEdit;
-import icy.sequence.edit.MetadataSequenceEdit;
-import icy.sequence.edit.ROIAddSequenceEdit;
-import icy.sequence.edit.ROIAddsSequenceEdit;
-import icy.sequence.edit.ROIRemoveSequenceEdit;
-import icy.sequence.edit.ROIRemovesSequenceEdit;
+import icy.sequence.edit.*;
 import icy.system.IcyExceptionHandler;
 import icy.system.thread.ThreadUtil;
 import icy.type.DataType;
@@ -97,6 +58,16 @@ import icy.util.OMEUtil;
 import icy.util.StringUtil;
 import loci.formats.ome.OMEXMLMetadataImpl;
 import ome.xml.meta.OMEXMLMetadata;
+import org.w3c.dom.Node;
+
+import javax.swing.undo.UndoManager;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.List;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Image sequence object.<br>
@@ -4517,9 +4488,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     {
         final IcyColorModel cm = colorModel;
 
-        // preserve UNDEFINED here for backward compatibility (Math Operation for instance)
         if (cm == null)
-            return DataType.UNDEFINED;
+            return null;
 
         return cm.getDataType_();
     }

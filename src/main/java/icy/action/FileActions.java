@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -14,24 +13,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package icy.action;
 
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+package icy.action;
 
 import icy.file.Saver;
 import icy.gui.dialog.LoaderDialog;
 import icy.gui.dialog.MessageDialog;
 import icy.gui.dialog.SaverDialog;
-import icy.gui.menu.ApplicationMenu;
+import icy.gui.menu.ApplicationMenuFile;
 import icy.gui.viewer.Viewer;
 import icy.image.IcyBufferedImage;
 import icy.main.Icy;
@@ -45,6 +36,15 @@ import icy.type.DataType;
 import icy.util.ClassUtil;
 import icy.util.StringUtil;
 
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * File actions (open / save / close...)
  *
@@ -52,92 +52,6 @@ import icy.util.StringUtil;
  * @author Thomas MUSSET
  */
 public final class FileActions {
-    // public static class OpenSequenceRegionAction extends IcyAbstractAction
-    // {
-    // final int resolution;
-    //
-    // public OpenSequenceRegionAction(int resolution)
-    // {
-    // super("Open at resolution 1/" + ((int) Math.pow(2, resolution)), null,
-    // "Open image region at resolution 1/" + ((int) Math.pow(2, resolution)),
-    // "Open the selected region from the original image at resolution 1/"
-    // + ((int) Math.pow(2, resolution)),
-    // true, null);
-    //
-    // this.resolution = resolution;
-    // }
-    //
-    // @Override
-    // public boolean doAction(ActionEvent e)
-    // {
-    // final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-    //
-    // if (sequence != null)
-    // {
-    // final String path = sequence.getFilename();
-    //
-    // if (!StringUtil.isEmpty(path))
-    // {
-    // List<ROI> rois = sequence.getROIs();
-    // int size = rois.size();
-    //
-    // if (size == 0)
-    // {
-    // MessageDialog.showDialog(
-    // "There is no ROI in the current sequence.\nYou need a ROI to define the region to open.",
-    // MessageDialog.INFORMATION_MESSAGE);
-    // return false;
-    // }
-    // else if (size > 1)
-    // {
-    // rois = sequence.getSelectedROIs();
-    // size = rois.size();
-    //
-    // if (size == 0)
-    // {
-    // MessageDialog.showDialog("You need to select a ROI to do this operation.",
-    // MessageDialog.INFORMATION_MESSAGE);
-    // return false;
-    // }
-    // else if (size > 1)
-    // {
-    // MessageDialog.showDialog("You must have only one selected ROI to do this operation.",
-    // MessageDialog.INFORMATION_MESSAGE);
-    // return false;
-    // }
-    // }
-    //
-    // final ROI roi = rois.get(0);
-    // final Rectangle bounds = SequenceUtil
-    // .getOriginRectangle(roi.getBounds5D().toRectangle2D().getBounds(), sequence);
-    //
-    // if (!bounds.isEmpty())
-    // {
-    // final Sequence regionSequence = Loader.loadSequence(null, path, sequence.getSerieIndex(),
-    // resolution, bounds, -1, -1, -1, -1, -1, false, true);
-    //
-    // if (regionSequence != null)
-    // {
-    // Icy.getMainInterface().addSequence(regionSequence);
-    // return true;
-    // }
-    // }
-    // }
-    // }
-    //
-    // return false;
-    // }
-    //
-    // @Override
-    // public boolean isEnabled()
-    // {
-    // final Sequence seq = Icy.getMainInterface().getActiveSequence();
-    //
-    // return super.isEnabled() && (seq != null) && (!StringUtil.isEmpty(seq.getFilename()) &&
-    // seq.hasROI());
-    // }
-    // }
-
     // TODO: 17/02/2023 Change action to application menubar
     public static final IcyAbstractAction clearRecentFilesAction = new IcyAbstractAction(
             "Clear recent files",
@@ -147,14 +61,9 @@ public final class FileActions {
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
-            final ApplicationMenu appMenu = Icy.getMainInterface().getApplicationMenu();
-
-            if (appMenu != null) {
-                appMenu.getRecentFileList().clear();
-                return true;
-            }
-
-            return false;
+            final ApplicationMenuFile appMenu = ApplicationMenuFile.getInstance();
+            appMenu.getRecentFileList().clear();
+            return true;
         }
     };
 
@@ -226,7 +135,7 @@ public final class FileActions {
             //new IcyIcon(ResourceUtil.ICON_OPEN),
             "Open a file",
             "Display a file selection dialog and choose the file to open",
-            KeyEvent.VK_O, SystemUtil.getMenuCtrlMask()
+            KeyEvent.VK_O, SystemUtil.getMenuCtrlMaskEx()
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -273,9 +182,8 @@ public final class FileActions {
                 }
 
                 final ROI roi = rois.get(0);
-                Rectangle bounds = SequenceUtil.getOriginRectangle(roi.getBounds5D().toRectangle2D().getBounds(),
-                        sequence);
-                String path = sequence.getFilename();
+                final Rectangle bounds = SequenceUtil.getOriginRectangle(roi.getBounds5D().toRectangle2D().getBounds(), sequence);
+                final String path = sequence.getFilename();
 
                 if (!bounds.isEmpty())
                     new LoaderDialog(path, bounds, sequence.getSeries(), true);
@@ -332,7 +240,7 @@ public final class FileActions {
             "Save active sequence",
             "Save the active sequence under selected file name",
             KeyEvent.VK_S,
-            SystemUtil.getMenuCtrlMask()
+            SystemUtil.getMenuCtrlMaskEx()
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -357,7 +265,7 @@ public final class FileActions {
             "Save active sequence",
             "Save the active sequence under selected file name",
             KeyEvent.VK_S,
-            SystemUtil.getMenuCtrlMask()
+            SystemUtil.getMenuCtrlMaskEx()
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -445,7 +353,7 @@ public final class FileActions {
         public boolean doAction(final ActionEvent e) {
             final Viewer focusedViewer = Icy.getMainInterface().getActiveViewer();
 
-            for (Viewer viewer : Icy.getMainInterface().getViewers())
+            for (final Viewer viewer : Icy.getMainInterface().getViewers())
                 if (viewer != focusedViewer)
                     viewer.close();
 
@@ -481,7 +389,7 @@ public final class FileActions {
                 else if (ClassUtil.isSubClass(type, IcyAbstractAction.class))
                     result.add((IcyAbstractAction) field.get(null));
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 // ignore
             }
         }

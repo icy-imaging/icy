@@ -22,13 +22,9 @@ import icy.gui.util.LookAndFeelUtil;
 import icy.image.ImageUtil;
 import icy.resource.ResourceUtil;
 import icy.util.StringUtil;
-import org.pushingpixels.flamingo.api.common.icon.ResizableIcon;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
@@ -41,7 +37,7 @@ import java.awt.image.BufferedImage;
  * @deprecated Will be removed once IconFont fully implemented
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
-public class IcyIcon implements ResizableIcon {
+public class IcyIcon implements Icon {
     @Deprecated(since = "3.0.0", forRemoval = true)
     public static final int DEFAULT_SIZE = LookAndFeelUtil.getDefaultIconSizeAsInt();
 

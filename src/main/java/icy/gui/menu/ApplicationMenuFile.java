@@ -39,12 +39,14 @@ import icy.util.StringUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Thomas MUSSET
  */
-final class ApplicationMenuFile extends AbstractApplicationMenu {
+public final class ApplicationMenuFile extends AbstractApplicationMenu {
     @NotNull
     private static final ApplicationMenuFile instance = new ApplicationMenuFile();
 
@@ -206,6 +208,26 @@ final class ApplicationMenuFile extends AbstractApplicationMenu {
                 // TODO add plugin importer menu
             }
         });
+    }
+
+    // TODO change this action
+    public void addRecentFile(final String filename) {
+
+    }
+
+    // TODO change this action
+    public void addRecentFile(final List<String> filenames) {
+
+    }
+
+    // TODO change this action
+    public void addRecentLoadedFile(final File file) {
+
+    }
+
+    // TODO change this action
+    public List<File> getRecentFileList() {
+        return new ArrayList<>();
     }
 
     @Override

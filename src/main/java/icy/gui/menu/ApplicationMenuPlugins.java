@@ -47,8 +47,8 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
 
     @NotNull
     private final IcyMenuItem itemPluginsSettings;
-    @NotNull
-    private final IcyMenuItem itemPluginSearch;
+    //@NotNull
+    //private final IcyTextFieldHint itemPluginSearch;
 
     private ApplicationMenuPlugins() {
         super("Plugins");
@@ -56,10 +56,11 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
         itemPluginsSettings = new IcyMenuItem("Plugins Settings...", GoogleMaterialDesignIcons.EXTENSION);
         itemPluginsSettings.addActionListener(PreferencesActions.onlinePluginPreferencesAction);
 
-        itemPluginSearch = new IcyMenuItem("Search Plugin...", GoogleMaterialDesignIcons.SEARCH);
-        itemPluginSearch.setEnabled(false);
+        //itemPluginSearch = new IcyTextFieldHint(GoogleMaterialDesignIcons.SEARCH, "Search Plugin...");
+        //itemPluginSearch.setEnabled(false);
 
-        reloadPluginsMenu();
+        // wait for plugin reload
+        setEnabled(false);
 
         addPluginLoaderListener();
     }
@@ -69,12 +70,13 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
         removeAll();
 
         add(itemPluginsSettings);
-        add(itemPluginSearch);
+        //add(itemPluginSearch);
 
         addSeparator();
 
         ThreadUtil.invokeLater(() -> {
             final List<PluginDescriptor> plugins = PluginLoader.getActionablePlugins();
+            //final List<PluginDescriptor> plugins = PluginLoader.getPlugins();
 
             final Map<Character, List<PluginDescriptor>> characterListMap = new TreeMap<>();
             for (final PluginDescriptor descriptor : plugins) {
@@ -99,18 +101,22 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
                 for (final PluginDescriptor plugin : characterListEntry.getValue()) {
                     final IcyMenuItem itemPlugin = new IcyMenuItem(plugin.getName());
                     itemPlugin.setIcon(plugin.getIcon());
-                    itemPlugin.addActionListener(e -> PluginLauncher.start(plugin));
+                    if (plugin.isActionable())
+                        itemPlugin.addActionListener(e -> PluginLauncher.start(plugin));
                     if (!plugin.getShortDescription().isBlank())
                         itemPlugin.setToolTipText("<html>" + plugin.getShortDescription() + "</html>");
                     menuAuthor.add(itemPlugin);
                 }
                 add(menuAuthor);
             }
+
+            setEnabled(true);
         });
     }
 
     @Override
     public void pluginLoaderChanged(final PluginLoader.PluginLoaderEvent e) {
+        setEnabled(false);
         reloadPluginsMenu();
     }
 }

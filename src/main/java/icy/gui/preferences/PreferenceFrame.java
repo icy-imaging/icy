@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,28 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.preferences;
-
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JSplitPane;
-import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 
 import icy.gui.dialog.ConfirmDialog;
 import icy.gui.frame.IcyFrame;
@@ -46,6 +25,16 @@ import icy.gui.util.WindowPositionSaver;
 import icy.main.Icy;
 import icy.preferences.IcyPreferences;
 import icy.util.StringUtil;
+
+import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author fab &amp; stephane
@@ -72,7 +61,7 @@ public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
     // we need to keep reference on it as the object only use weak reference
     WindowPositionSaver positionSaver;
 
-    public PreferenceFrame(String section) {
+    public PreferenceFrame(final String section) {
         super(NODE_NAME, true, true, false, false);
 
         // frame already opened ?
@@ -99,16 +88,13 @@ public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
         preferencePanels.add(new PluginLocalPreferencePanel(this));
         preferencePanels.add(new PluginOnlinePreferencePanel(this));
         preferencePanels.add(new PluginStartupPreferencePanel(this));
-        preferencePanels.add(new WorkspacePreferencePanel(this));
-        preferencePanels.add(new WorkspaceLocalPreferencePanel(this));
-        preferencePanels.add(new WorkspaceOnlinePreferencePanel(this));
         // TODO : add here PreferencePanel type plugins
 
         // build selection tree
         node = new DefaultMutableTreeNode(NODE_NAME);
 
-        for (PreferencePanel panel : preferencePanels) {
-            DefaultMutableTreeNode node = getNode(panel.getParentName());
+        for (final PreferencePanel panel : preferencePanels) {
+            final DefaultMutableTreeNode node = getNode(panel.getParentName());
             if (node != null)
                 node.add(panel.getNode());
         }
@@ -144,7 +130,7 @@ public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
                 // clear all preferences
                 IcyPreferences.clear();
                 // reload
-                for (PreferencePanel panel : preferencePanels)
+                for (final PreferencePanel panel : preferencePanels)
                     panel.load();
             }
         });
@@ -156,7 +142,7 @@ public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
 
         okButton.addActionListener(e -> {
             // set back panel informations in preferences
-            for (PreferencePanel panel : preferencePanels)
+            for (final PreferencePanel panel : preferencePanels)
                 panel.save();
             // validate the need restart state
             doRestart = needRestart;
@@ -166,7 +152,7 @@ public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
 
         applyButton.addActionListener(e -> {
             // set back panel informations in preferences
-            for (PreferencePanel panel : preferencePanels)
+            for (final PreferencePanel panel : preferencePanels)
                 panel.save();
             // validate the need restart state
             doRestart = needRestart;
@@ -214,7 +200,7 @@ public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
     public void onClosed() {
         // test if we are on singleton frame
         if (preferencePanels != null) {
-            for (PreferencePanel panel : preferencePanels)
+            for (final PreferencePanel panel : preferencePanels)
                 panel.closed();
 
             instance = null;
@@ -229,7 +215,7 @@ public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
         super.onClosed();
     }
 
-    private DefaultMutableTreeNode getNode(String name) {
+    private DefaultMutableTreeNode getNode(final String name) {
         // first search directly on root node
         if (node.getUserObject().equals(name))
             return node;
@@ -252,7 +238,7 @@ public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
         if (treePath != null) {
             final Object selected = tree.getSelectionPath().getLastPathComponent();
 
-            for (PreferencePanel panel : preferencePanels) {
+            for (final PreferencePanel panel : preferencePanels) {
                 if (panel.getNode().equals(selected)) {
                     final int divLocation = mainPanel.getDividerLocation();
 
@@ -268,12 +254,12 @@ public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
     }
 
     @Override
-    public void valueChanged(TreeSelectionEvent e) {
+    public void valueChanged(final TreeSelectionEvent e) {
         updateRightPanel();
     }
 
-    public void setSelection(String selection) {
-        for (PreferencePanel panel : preferencePanels) {
+    public void setSelection(final String selection) {
+        for (final PreferencePanel panel : preferencePanels) {
             final DefaultMutableTreeNode node = panel.getNode();
 
             if (node.getUserObject().equals(selection)) {

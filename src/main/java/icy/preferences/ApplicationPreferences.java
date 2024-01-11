@@ -49,7 +49,8 @@ public class ApplicationPreferences
     public static final String ID_VERSION = "version";
     public static final String ID_SINGLE_INSTANCE = "singleInstance";
 
-    private final static String DEFAULT_UPDATE_REPOSITORY_BASE = NetworkUtil.WEBSITE_URL + "update/";
+    public final static String DEFAULT_UPDATE_REPOSITORY_BASE = NetworkUtil.WEBSITE_URL + "update/";
+    public final static String BETA_UPDATE_REPOSITORY_BASE = NetworkUtil.WEBSITE_URL + "update_test/";
     // private final static String DEFAULT_UPDATE_REPOSITORY_BASE = "https://icy.yhello.co/update/";
     private final static String DEFAULT_UPDATE_REPOSITORY_FILE = "update.php";
 

@@ -78,6 +78,15 @@
             <version>2.10.6</version>
             <files>
                 <file>
+                    <localpath>lib/ehcache2.jar</localpath>
+                </file>
+            </files>
+        </element>
+        <element>
+            <name>EHCache</name>
+            <version>3.10.8</version>
+            <files>
+                <file>
                     <localpath>lib/ehcache.jar</localpath>
                 </file>
             </files>
@@ -97,15 +106,6 @@
             <files>
                 <file>
                     <localpath>lib/jogl-all.jar</localpath>
-                </file>
-            </files>
-        </element>
-        <element>
-            <name>ImageJ</name>
-            <version>1.5.3.17</version>
-            <files>
-                <file>
-                    <localpath>ij/ij.jar</localpath>
                 </file>
             </files>
         </element>
@@ -131,11 +131,11 @@
             </files>
         </element>
         <element>
-            <name>JXL</name>
-            <version>2.6.12</version>
+            <name>POI</name>
+            <version>5.2.5</version>
             <files>
                 <file>
-                    <localpath>lib/jxl.jar</localpath>
+                    <localpath>lib/icy-poi.jar</localpath>
                 </file>
             </files>
         </element>
@@ -149,20 +149,29 @@
             </files>
         </element>
         <element>
-            <name>Substance</name>
-            <version>7.3.11</version>
+            <name>Flatlaf</name>
+            <version>3.2.5</version>
             <files>
                 <file>
-                    <localpath>lib/icy-insubstantial.jar</localpath>
+                    <localpath>lib/flatlaf.jar</localpath>
+                </file>
+            </files>
+        </element>
+        <element>
+            <name>Flatlaf-IntelliJ</name>
+            <version>3.2.5</version>
+            <files>
+                <file>
+                    <localpath>lib/flatlaf-intellij-themes.jar</localpath>
                 </file>
             </files>
         </element>
         <element>
             <name>VTK</name>
-            <version>9.2.6.0</version>
+            <version>9.2.6</version>
             <files>
                 <file>
-                    <localpath>lib/icy-vtk.jar</localpath>
+                    <localpath>lib/icy-vtk-all.jar</localpath>
                 </file>
                 <file>
                     <localpath>lib/mac64/vtk</localpath>
