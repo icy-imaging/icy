@@ -1,6 +1,8 @@
 package icy.image.cache;
 
 import icy.file.FileUtil;
+import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
@@ -14,10 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class EHCache2 extends AbstractCache {
     private class CustomCacheEventListener implements CacheEventListener {
@@ -224,7 +223,7 @@ public class EHCache2 extends AbstractCache {
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NotNull Collection<Integer> getAllKeys() throws CacheException {
+    public @NotNull Collection<Integer> getAllKeys() {
         if (profiling)
             startProf();
 
@@ -232,7 +231,9 @@ public class EHCache2 extends AbstractCache {
             return cache.getKeys();
         }
         catch (final Exception e) {
-            throw new CacheException("ImageCache: an error occured while retrieving all keys from cache", e);
+            IcyLogger.error("ImageCache: an error occured while retrieving all keys from cache");
+            //throw new CacheException("ImageCache: an error occured while retrieving all keys from cache", e);
+            return Collections.emptyList();
         }
         finally {
             if (profiling)

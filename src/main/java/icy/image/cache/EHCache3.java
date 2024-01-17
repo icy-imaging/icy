@@ -41,16 +41,6 @@ public final class EHCache3 extends AbstractCache {
     public EHCache3(final int cacheSizeMB, final @NotNull String path) {
         super();
 
-        // TODO: 05/12/2023 Check if it's still necessary to do this
-        // get old ehcache agent JAR files
-        /*final String[] oldFiles = FileUtil.getFiles(FileUtil.getTempDirectory(), pathname -> {
-            // old ehcache temp agent JAR files
-            return FileUtil.getFileName(pathname.getAbsolutePath(), false).startsWith("ehcache");
-        }, false, false, false);
-        // delete these files as ehcache don't do it itself
-        for (final String file : oldFiles)
-            FileUtil.delete(file, false);*/
-
         // delete previous cache file
         FileUtil.delete(path, true);
 
@@ -133,7 +123,7 @@ public final class EHCache3 extends AbstractCache {
     /**
      * Get an object from cache from its key
      */
-    // TODO check if data is rellay persistent (to prevent throwing exception)
+    // TODO check if data is really persistent (to prevent throwing exception)
     @Override
     public @NotNull Object get(final @NotNull Integer key) throws CacheException {
         if (profiling)
@@ -240,6 +230,8 @@ public final class EHCache3 extends AbstractCache {
         manager.close();
     }
 
+
+    // THIS CLASS CANNOT BE A RECORD !!!
     private static final class DataArray implements Serializable {
         private final Object array;
 

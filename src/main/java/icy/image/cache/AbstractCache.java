@@ -100,8 +100,7 @@ abstract class AbstractCache {
     /**
      * Get all element keys in the cache
      */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    @NotNull Collection<Integer> getAllKeys() throws CacheException {
+    @NotNull Collection<Integer> getAllKeys() {
         return Collections.emptyList();
     }
 

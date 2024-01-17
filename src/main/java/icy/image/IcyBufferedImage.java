@@ -790,15 +790,6 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
-     * Returns <code>true</code> if data is currently loaded in memory.<br>
-     * It returns <code>false</code> if data has not yet be initialized (see {@link #isDataInitialized()}) or if data is cached on disk (not anymore in memory)
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public boolean isDataInMemory() {
-        return (!ImageCache.isInit()) || ImageCache.isOnMemoryCache(this);
-    }
-
-    /**
      * Returns <code>true</code> if image data is volatile.<br>
      * Volatile data means <b>there is no strong reference on the internal data arrays</b> (data can be cached on disk) and so <b>any <i>external</i> changes on
      * them can be lost</b> if they has not been specifically set using setDataxx() methods.
@@ -1308,22 +1299,6 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     protected void saveRasterInCache(final WritableRaster wr) {
         //saveRasterDataInCache(getRasterData(wr), true);
         saveRasterDataInCache(getRasterData(wr));
-    }
-
-    /**
-     * @deprecated Use {@link #saveRasterDataInCache(Object)} instead.
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    protected void saveRasterDataInCache(final Object rasterData, final boolean eternal) {
-        // save data in cache (volatile image only)
-        if (isVolatile()) {
-            try {
-                ImageCache.set(this, rasterData, eternal);
-            }
-            catch (final Throwable e) {
-                System.err.println(e.getMessage());
-            }
-        }
     }
 
     protected void saveRasterDataInCache(final Object rasterData) {

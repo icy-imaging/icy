@@ -62,8 +62,10 @@ public final class ImageCache {
             // clean the cache
             cache.clean();
             // not empty ? --> cannot shutdown
-            if (!cache.isEmpty())
-                return false;
+            if (!cache.isEmpty()) {
+                if (!getAllKeys().isEmpty())
+                    return false;
+            }
 
             shutDown();
         }
@@ -96,28 +98,6 @@ public final class ImageCache {
     }
 
     /**
-     * @param image Image to check.
-     * @return {@code true} if the image is present on the RAM memory. {@code false} otherwise.
-     * @throws RuntimeException If the cache module has not been loaded.
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public static boolean isOnMemoryCache(final IcyBufferedImage image) throws RuntimeException {
-        checkCacheLoaded();
-        return cache.isOnMemoryCache(getKey(image));
-    }
-
-    /**
-     * @param image Image to check.
-     * @return {@code true} if the image is present in the cache but NOT on the RAM memory (it is stored on disk cache). {@code false} otherwise.
-     * @throws RuntimeException If the cache module has not been loaded.
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public static boolean isOnDiskCache(final IcyBufferedImage image) throws RuntimeException {
-        checkCacheLoaded();
-        return cache.isOnDiskCache(getKey(image));
-    }
-
-    /**
      * @return Used memory for cache (in bytes).
      * @throws RuntimeException If the cache module has not been loaded.
      */
@@ -139,11 +119,9 @@ public final class ImageCache {
      * Gets all data {@link IcyBufferedImage} in the cache.
      *
      * @return All images stored in the cache.
-     * @throws CacheException   If an image keys cannot be read from the cache.
      * @throws RuntimeException If the cache module has not been loaded.
      */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public static Collection<IcyBufferedImage> getAllKeys() throws CacheException, RuntimeException {
+    public static Collection<IcyBufferedImage> getAllKeys() throws RuntimeException {
         checkCacheLoaded();
         return getImages(cache.getAllKeys(), false);
     }
@@ -201,16 +179,9 @@ public final class ImageCache {
      *
      * @param key     Image used as key for the array.
      * @param object  Data array to store.
-     * @param eternal Whether the key should be kept indefinitely in the record.
      * @throws CacheException   If an error occurs during cache storage.
      * @throws RuntimeException If the cache module has not been loaded.
      */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public static void set(final IcyBufferedImage key, final Object object, final boolean eternal) throws CacheException, RuntimeException {
-        checkCacheLoaded();
-        cache.set(getKey(key), object, eternal);
-    }
-
     public static void set(final IcyBufferedImage key, final Object object) throws CacheException, RuntimeException {
         checkCacheLoaded();
         cache.set(getKey(key), object);

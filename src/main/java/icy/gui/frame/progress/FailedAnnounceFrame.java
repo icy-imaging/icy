@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,13 +18,12 @@
 
 package icy.gui.frame.progress;
 
-import icy.common.listener.SkinChangeListener;
-import icy.common.listener.weak.WeakSkinChangeListener;
 import icy.gui.util.LookAndFeelUtil;
 import icy.system.thread.ThreadUtil;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
 public class FailedAnnounceFrame extends AnnounceFrame {
     private static final int DEFAULT_LIVETIME = 0;
