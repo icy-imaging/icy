@@ -24,7 +24,7 @@ package icy.plugin.interface_;
  * Can be shared between severals plugins.
  *
  * @author Fabrice &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface PluginLibrary extends PluginNoEDTConstructor {
 }

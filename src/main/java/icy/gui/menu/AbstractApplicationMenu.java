@@ -32,7 +32,7 @@ import icy.sequence.SequenceEvent;
 import javax.swing.*;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class AbstractApplicationMenu extends JMenu implements GlobalSequenceListener, PluginLoaderListener, ActiveSequenceListener, GlobalROIListener {
 

@@ -22,7 +22,7 @@ package icy.plugin.classloader.exception;
  * General custom exception
  *
  * @author Kamran Zafar
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class JclException extends RuntimeException {
     /**

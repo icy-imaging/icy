@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class ApplicationMenuBar extends JMenuBar {
     @NotNull

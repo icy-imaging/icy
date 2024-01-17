@@ -32,7 +32,7 @@ import javax.swing.JColorChooser;
  * Color button used to select a specific color.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class ColorChooserButton extends JButton implements ActionListener {
     public interface ColorChangeListener extends EventListener {

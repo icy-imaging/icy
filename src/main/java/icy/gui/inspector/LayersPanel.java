@@ -60,7 +60,7 @@ import icy.util.StringUtil;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  * @deprecated USe {@link icy.gui.toolbar.panel.LayersPanel} instead.
  */
 @Deprecated(since = "3.0.0", forRemoval = true)

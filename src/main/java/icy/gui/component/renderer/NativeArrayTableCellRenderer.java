@@ -27,7 +27,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class NativeArrayTableCellRenderer extends DefaultTableCellRenderer {
     private final boolean signed;

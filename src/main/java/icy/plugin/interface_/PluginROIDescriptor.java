@@ -30,7 +30,7 @@ import java.util.Map;
  * of interest (ROI)
  *
  * @author Stephane Dallongeville, Alexandre Dufour
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface PluginROIDescriptor extends PluginNoEDTConstructor {
     /**

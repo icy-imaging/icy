@@ -34,7 +34,7 @@ import icy.util.ClassUtil;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class WindowActions {
     public static final IcyAbstractAction stayOnTopAction = new IcyAbstractAction(

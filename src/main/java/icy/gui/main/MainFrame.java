@@ -48,7 +48,7 @@ import java.util.List;
 
 /**
  * @author fab &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class MainFrame extends JFrame {
     private static Rectangle getDefaultBounds() {
@@ -821,7 +821,7 @@ public class MainFrame extends JFrame {
     public void refreshTitle() {
         final String login = GeneralPreferences.getUserLogin();
         final String userName = GeneralPreferences.getUserName();
-        final String virtual = ImageCache.isEnabled() && GeneralPreferences.getVirtualMode() ? " (virtual mode)" : "";
+        final String virtual = ImageCache.isInit() && GeneralPreferences.getVirtualMode() ? " (virtual mode)" : "";
 
         if (!StringUtil.isEmpty(userName))
             setTitle(TITLE + virtual + " - " + userName);

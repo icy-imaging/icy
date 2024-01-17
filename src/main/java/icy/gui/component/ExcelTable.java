@@ -35,7 +35,7 @@ import javax.swing.table.TableModel;
  *
  * @author Fabrice de Chaumont
  * @author Alexandre Dufour
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class ExcelTable extends JScrollPane {
     private final JTable table;

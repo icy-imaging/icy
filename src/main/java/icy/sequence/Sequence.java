@@ -1,21 +1,21 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.sequence;
 
 import icy.common.CollapsibleEvent;
@@ -34,7 +34,6 @@ import icy.image.colormodel.IcyColorModelListener;
 import icy.image.lut.LUT;
 import icy.main.Icy;
 import icy.math.MathUtil;
-import icy.math.Scaler;
 import icy.math.UnitUtil;
 import icy.math.UnitUtil.UnitPrefix;
 import icy.painter.*;
@@ -47,7 +46,6 @@ import icy.sequence.edit.*;
 import icy.system.IcyExceptionHandler;
 import icy.system.thread.ThreadUtil;
 import icy.type.DataType;
-import icy.type.TypeUtil;
 import icy.type.collection.CollectionUtil;
 import icy.type.collection.array.Array1DUtil;
 import icy.type.dimension.Dimension5D;
@@ -56,7 +54,6 @@ import icy.undo.IcyUndoManager;
 import icy.undo.IcyUndoableEdit;
 import icy.util.OMEUtil;
 import icy.util.StringUtil;
-import loci.formats.ome.OMEXMLMetadataImpl;
 import ome.xml.meta.OMEXMLMetadata;
 import org.w3c.dom.Node;
 
@@ -80,45 +77,14 @@ import java.util.Map.Entry;
  * The XYC dimensions are bounded into the {@link IcyBufferedImage} object so <code>Sequence</code> define a list of
  * {@link IcyBufferedImage} where each image is associated to a Z and T
  * information.
- * 
- * @author Fabrice de Chaumont &amp; Stephane
+ *
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
 
-public class Sequence implements SequenceModel, IcyColorModelListener, IcyBufferedImageListener, ChangeListener,
-        ROIListener, OverlayListener
-{
+public class Sequence implements SequenceModel, IcyColorModelListener, IcyBufferedImageListener, ChangeListener, ROIListener, OverlayListener, AutoCloseable {
     public static final String DEFAULT_NAME = "no name";
-
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final int TYPE_BYTE = TypeUtil.TYPE_BYTE;
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final int TYPE_DOUBLE = TypeUtil.TYPE_DOUBLE;
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final int TYPE_FLOAT = TypeUtil.TYPE_FLOAT;
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final int TYPE_INT = TypeUtil.TYPE_INT;
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final int TYPE_SHORT = TypeUtil.TYPE_SHORT;
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final int TYPE_UNDEFINED = TypeUtil.TYPE_UNDEFINED;
 
     public static final String ID_ID = "id";
     public static final String ID_NAME = "name";
@@ -166,7 +132,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * ROIs
      */
-    protected final Set<ROI> rois;
+    protected final Set<ROI> rois = new HashSet<>();
 
     /**
      * id of sequence (uniq during an Icy session)
@@ -238,25 +204,6 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * Metadata
      */
     protected OMEXMLMetadata metaData;
-    // /**
-    // * X, Y, Z resolution (in mm)
-    // */
-    // private double pixelSizeX;
-    // private double pixelSizeY;
-    // private double pixelSizeZ;
-    // /**
-    // * T resolution (in ms)
-    // */
-    // private double timeInterval;
-    // /**
-    // * channels name
-    // */
-    // private String channelsName[];
-
-    // /**
-    // * automatic update of component absolute bounds
-    // */
-    // private boolean componentAbsBoundsAutoUpdate;
     /**
      * automatic update of channel bounds
      */
@@ -287,34 +234,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Creates a new empty sequence with specified meta data object and name.
-     * 
-     * @param meta
-     *        OME metadata
-     * @param name
-     *        string
+     *
+     * @param meta OME metadata
+     * @param name string
      */
-    public Sequence(OMEXMLMetadata meta, String name)
-    {
+    public Sequence(final OMEXMLMetadata meta, final String name) {
         super();
 
         // set id
-        synchronized (Sequence.class)
-        {
+        synchronized (Sequence.class) {
             id = id_gen;
             id_gen++;
         }
 
         // set metadata object
-        if (meta == null)
-            metaData = MetaDataUtil.createMetadata(name);
-        else
-            metaData = meta;
+        metaData = Objects.requireNonNullElseGet(meta, () -> MetaDataUtil.createMetadata(name));
 
         // set name
         if (!StringUtil.isEmpty(name))
             MetaDataUtil.setName(metaData, 0, name);
-        else
-        {
+        else {
             // default name
             if (StringUtil.isEmpty(MetaDataUtil.getName(metaData, 0)))
                 MetaDataUtil.setName(metaData, 0, DEFAULT_NAME + StringUtil.toString(id, 3));
@@ -329,7 +268,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         originTMin = -1;
         originTMax = -1;
         originChannel = -1;
-        properties = new HashMap<String, String>();
+        properties = new HashMap<>();
 
         // default pixel size and time interval
         if (Double.isNaN(MetaDataUtil.getPixelSizeX(metaData, 0, Double.NaN)))
@@ -338,13 +277,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             MetaDataUtil.setPixelSizeY(metaData, 0, 1d);
         if (Double.isNaN(MetaDataUtil.getPixelSizeZ(metaData, 0, Double.NaN)))
             MetaDataUtil.setPixelSizeZ(metaData, 0, 1d);
-        if (Double.isNaN(MetaDataUtil.getTimeInterval(metaData, 0, Double.NaN)))
-        {
+        if (Double.isNaN(MetaDataUtil.getTimeInterval(metaData, 0, Double.NaN))) {
             final double ti = MetaDataUtil.getTimeIntervalFromTimePositions(metaData, 0);
             // we got something --> set it as the time interval
             if (ti != 0d)
                 MetaDataUtil.setTimeInterval(metaData, 0, ti);
-            // set to 1d by default
+                // set to 1d by default
             else
                 MetaDataUtil.setTimeInterval(metaData, 0, 1d);
         }
@@ -352,23 +290,21 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         double result = MetaDataUtil.getTimeInterval(metaData, 0, 0d);
 
         // not yet defined ?
-        if (result == 0d)
-        {
+        if (result == 0d) {
             result = MetaDataUtil.getTimeIntervalFromTimePositions(metaData, 0);
             // we got something --> set it as the time interval
             if (result != 0d)
                 MetaDataUtil.setTimeInterval(metaData, 0, result);
         }
 
-        volumetricImages = new TreeMap<Integer, VolumetricImage>();
-        overlays = new HashSet<Overlay>();
-        rois = new HashSet<ROI>();
+        volumetricImages = new TreeMap<>();
+        overlays = new HashSet<>();
         persistent = new SequencePersistent(this);
         undoManager = new IcyUndoManager(this, GeneralPreferences.getHistorySize());
 
         updater = new UpdateEventHandler(this, false);
-        listeners = new ArrayList<SequenceListener>();
-        modelListeners = new ArrayList<SequenceModelListener>();
+        listeners = new ArrayList<>();
+        modelListeners = new ArrayList<>();
 
         // no colorModel yet
         colorModel = null;
@@ -380,86 +316,51 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Use {@link #Sequence(OMEXMLMetadata, String)} instead.
-     * @param meta
-     *        OME metadata
-     * @param name
-     *        string
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence(OMEXMLMetadataImpl meta, String name)
-    {
-        this((OMEXMLMetadata) meta, name);
-    }
-
-    /**
      * Creates a sequence with specified name and containing the specified image
-     * 
-     * @param image
-     *        image
-     * @param name
-     *        string
+     *
+     * @param image image
+     * @param name  string
      */
-    public Sequence(String name, IcyBufferedImage image)
-    {
+    public Sequence(final String name, final IcyBufferedImage image) {
         this(name, (BufferedImage) image);
     }
 
     /**
      * Creates a sequence with specified name and containing the specified image
-     * 
-     * @param image
-     *        image
-     * @param name
-     *        string
+     *
+     * @param image image
+     * @param name  string
      */
-    public Sequence(String name, BufferedImage image)
-    {
-        this((OMEXMLMetadata) null, name);
+    public Sequence(final String name, final BufferedImage image) {
+        this(null, name);
 
         addImage(image);
     }
 
     /**
-     * @deprecated Use {@link #Sequence(OMEXMLMetadata)} instead.
-     * @param meta
-     *        OME metadata
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence(OMEXMLMetadataImpl meta)
-    {
-        this((OMEXMLMetadata) meta);
-    }
-
-    /**
      * Creates a new empty sequence with specified metadata.
-     * 
-     * @param meta
-     *        OME metadata
+     *
+     * @param meta OME metadata
      */
-    public Sequence(OMEXMLMetadata meta)
-    {
+    public Sequence(final OMEXMLMetadata meta) {
         this(meta, null);
     }
 
     /**
      * Creates a sequence containing the specified image.
-     * 
-     * @param image
-     *        image
+     *
+     * @param image image
      */
-    public Sequence(IcyBufferedImage image)
-    {
+    public Sequence(final IcyBufferedImage image) {
         this((BufferedImage) image);
     }
 
     /**
      * Creates a sequence containing the specified image.
-     * 
-     * @param image
+     *
+     * @param image image
      */
-    public Sequence(BufferedImage image)
-    {
+    public Sequence(final BufferedImage image) {
         this((OMEXMLMetadata) null, null);
 
         addImage(image);
@@ -467,48 +368,57 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Creates an empty sequence with specified name.
-     * 
-     * @param name
-     *        string
+     *
+     * @param name string
      */
-    public Sequence(String name)
-    {
-        this((OMEXMLMetadata) null, name);
+    public Sequence(final String name) {
+        this(null, name);
     }
 
     /**
      * Creates an empty sequence.
      */
-    public Sequence()
-    {
+    public Sequence() {
         this((OMEXMLMetadata) null, null);
     }
 
     @Override
-    protected void finalize() throws Throwable
-    {
+    @Deprecated(forRemoval = true)
+    protected void finalize() throws Throwable {
         // cancel any pending prefetch tasks for this sequence
         SequencePrefetcher.cancel(this);
 
-        try
-        {
+        try {
             // close image provider if needed
             if ((imageProvider != null) && (imageProvider instanceof Closeable))
                 ((Closeable) imageProvider).close();
         }
-        catch (IOException e)
-        {
+        catch (final IOException e) {
             // ignore
         }
 
         super.finalize();
     }
 
+    @Override
+    public void close() throws Exception {
+        // cancel any pending prefetch tasks for this sequence
+        SequencePrefetcher.cancel(this);
+
+        try {
+            // close image provider if needed
+            if ((imageProvider != null) && (imageProvider instanceof Closeable))
+                ((Closeable) imageProvider).close();
+        }
+        catch (final IOException e) {
+            // ignore
+        }
+    }
+
     /**
      * This method close all attached viewers
      */
-    public void close()
-    {
+    public void closeSequence() {
         Icy.getMainInterface().closeSequence(this);
     }
 
@@ -516,23 +426,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * Called when sequence has been closed (all viewers displaying it closed).<br>
      * <i>Used internally, you should not call it this method directly !</i>
      */
-    public void closed()
-    {
+    public void closed() {
         // cancel any pending prefetch tasks for this sequence
         SequencePrefetcher.cancel(this);
 
         // do this in background as it can take sometime
-        while (!ThreadUtil.bgRun(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // Sequence persistence enabled --> save XML
-                if (GeneralPreferences.getSequencePersistence())
-                    saveXMLData();
-            }
-        }))
-        {
+        while (!ThreadUtil.bgRun(() -> {
+            // Sequence persistence enabled --> save XML
+            if (GeneralPreferences.getSequencePersistence())
+                saveXMLData();
+        })) {
             // wait until the process execute
             ThreadUtil.sleep(10L);
         }
@@ -543,39 +446,29 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Copy data and metadata from the specified Sequence
-     * 
-     * @param source
-     *        the source sequence to copy data from
-     * @param copyName
-     *        if set to <code>true</code> it will also copy the name from the source sequence
-     * @throws InterruptedException
+     *
+     * @param source   the source sequence to copy data from
+     * @param copyName if set to <code>true</code> it will also copy the name from the source sequence
      */
-    public void copyFrom(Sequence source, boolean copyName) throws InterruptedException
-    {
+    public void copyFrom(final Sequence source, final boolean copyName) throws InterruptedException {
         copyDataFrom(source);
         copyMetaDataFrom(source, copyName);
     }
 
     /**
      * Copy data from the specified Sequence
-     * 
-     * @param source
-     *        sequence
-     * @throws InterruptedException
+     *
+     * @param source sequence
      */
-    public void copyDataFrom(Sequence source) throws InterruptedException
-    {
+    public void copyDataFrom(final Sequence source) throws InterruptedException {
         final int sizeT = source.getSizeT();
         final int sizeZ = source.getSizeZ();
 
         beginUpdate();
-        try
-        {
+        try {
             removeAllImages();
-            for (int t = 0; t < sizeT; t++)
-            {
-                for (int z = 0; z < sizeZ; z++)
-                {
+            for (int t = 0; t < sizeT; t++) {
+                for (int z = 0; z < sizeZ; z++) {
                     // check for interruption
                     if (Thread.interrupted())
                         throw new InterruptedException("Sequence copy data process interrupted.");
@@ -589,22 +482,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
                 }
             }
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
     }
 
     /**
      * Copy metadata from the specified Sequence
-     * 
-     * @param source
-     *        the source sequence to copy metadata from
-     * @param copyName
-     *        if set to <code>true</code> it will also copy the name from the source sequence
+     *
+     * @param source   the source sequence to copy metadata from
+     * @param copyName if set to <code>true</code> it will also copy the name from the source sequence
      */
-    public void copyMetaDataFrom(Sequence source, boolean copyName)
-    {
+    public void copyMetaDataFrom(final Sequence source, final boolean copyName) {
         // copy all metadata from source (preserve user name if we want to keep same name)
         metaData = OMEUtil.createOMEXMLMetadata(source.getOMEXMLMetadata(), !copyName);
 
@@ -618,86 +507,68 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Create a complete restore point for this sequence.
-     * 
-     * @param name
-     *        restore point name (visible in the History panel)
+     *
+     * @param name restore point name (visible in the History panel)
      * @return false if for some reason the operation failed (out of memory for instance)
-     * @throws InterruptedException
      * @see #undo()
      */
-    public boolean createUndoPoint(String name) throws InterruptedException
-    {
-        try
-        {
+    public boolean createUndoPoint(final String name) throws InterruptedException {
+        try {
             undoManager.addEdit(new DefaultSequenceEdit(SequenceUtil.getCopy(this, false, false, false), this));
             return true;
         }
-        catch (InterruptedException t)
-        {
+        catch (final InterruptedException t) {
             throw t;
         }
-        catch (Throwable t)
-        {
+        catch (final Throwable t) {
             return false;
         }
     }
 
     /**
      * Create a restore point for sequence data.
-     * 
-     * @param name
-     *        restore point name (visible in the History panel)
+     *
+     * @param name restore point name (visible in the History panel)
      * @return false if for some reason the operation failed (out of memory for instance)
-     * @throws InterruptedException
      * @see #undo()
      */
-    public boolean createUndoDataPoint(String name) throws InterruptedException
-    {
-        try
-        {
+    public boolean createUndoDataPoint(final String name) throws InterruptedException {
+        try {
             undoManager.addEdit(new DataSequenceEdit(SequenceUtil.getCopy(this, false, false, false), this, name));
             return true;
         }
-        catch (InterruptedException t)
-        {
+        catch (final InterruptedException t) {
             throw t;
         }
-        catch (Throwable t)
-        {
+        catch (final Throwable t) {
             return false;
         }
     }
 
     /**
      * Create a restore point for sequence metadata.
-     * 
-     * @param name
-     *        restore point name (visible in the History panel)
+     *
+     * @param name restore point name (visible in the History panel)
      * @return false if for some reason the operation failed (out of memory for instance)
      * @see #undo()
      */
-    public boolean createUndoMetadataPoint(String name)
-    {
-        try
-        {
+    public boolean createUndoMetadataPoint(final String name) {
+        try {
             undoManager.addEdit(new MetadataSequenceEdit(OMEUtil.createOMEXMLMetadata(metaData, false), this, name));
             return true;
         }
-        catch (Throwable t)
-        {
+        catch (final Throwable t) {
             return false;
         }
     }
 
     /**
      * Add an Undoable edit to the Sequence UndoManager
-     * 
-     * @param edit
-     *        the undoable edit to add
+     *
+     * @param edit the undoable edit to add
      * @return <code>false</code> if the operation failed
      */
-    public boolean addUndoableEdit(IcyUndoableEdit edit)
-    {
+    public boolean addUndoableEdit(final IcyUndoableEdit edit) {
         if (edit != null)
             return undoManager.addEdit(edit);
 
@@ -706,15 +577,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Undo to the last <i>Undoable</i> change set in the Sequence {@link UndoManager}
-     * 
+     *
      * @return <code>true</code> if the operation succeed
      * @see #createUndoPoint(String)
      * @see UndoManager#undo()
      */
-    public boolean undo()
-    {
-        if (undoManager.canUndo())
-        {
+    public boolean undo() {
+        if (undoManager.canUndo()) {
             undoManager.undo();
             return true;
         }
@@ -724,15 +593,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Redo the next <i>Undoable</i> change set in the Sequence {@link UndoManager}
-     * 
+     *
      * @return <code>true</code> if the operation succeed
      * @see #createUndoPoint(String)
      * @see UndoManager#redo()
      */
-    public boolean redo()
-    {
-        if (undoManager.canRedo())
-        {
+    public boolean redo() {
+        if (undoManager.canRedo()) {
             undoManager.redo();
             return true;
         }
@@ -745,13 +612,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * You should use this method after you modified the sequence without providing any <i>undo</i>
      * support.
      */
-    public void clearUndoManager()
-    {
+    public void clearUndoManager() {
         getUndoManager().discardAllEdits();
     }
 
-    protected void setColorModel(IcyColorModel cm)
-    {
+    protected void setColorModel(final IcyColorModel cm) {
         // remove listener
         if (colorModel != null)
             colorModel.removeListener(this);
@@ -771,187 +636,74 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Use {@link SequenceUtil#convertToType(Sequence, DataType, boolean)} instead.
-     * @param dataType
-     *        object
-     * @param rescale
-     *        boolean
-     * @return sequence
-     * @throws InterruptedException
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence convertToType(DataType dataType, boolean rescale) throws InterruptedException
-    {
-        return SequenceUtil.convertToType(this, dataType, rescale);
-    }
-
-    /**
-     * @deprecated Use {@link SequenceUtil#convertType(Sequence, DataType, Scaler[])} instead.
-     * @param dataType
-     *        object
-     * @param scaler
-     *        sclare
-     * @return sequence
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence convertToType(DataType dataType, Scaler scaler)
-    {
-        return SequenceUtil.convertToType(this, dataType, scaler);
-    }
-
-    /**
-     * @deprecated Use {@link SequenceUtil#convertToType(Sequence, DataType, boolean)} instead
-     * @param dataType
-     *        object
-     * @param rescale
-     *        boolena
-     * @param signed
-     *        boolean
-     * @return sequence
-     * @throws InterruptedException
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence convertToType(int dataType, boolean signed, boolean rescale) throws InterruptedException
-    {
-        return convertToType(DataType.getDataType(dataType, signed), rescale);
-    }
-
-    /**
-     * @deprecated Use {@link SequenceUtil#extractChannel(Sequence, int)} instead.
-     * @param channelNumber
-     *        int
-     * @return sequence
-     * @throws InterruptedException
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence extractChannel(int channelNumber) throws InterruptedException
-    {
-        return SequenceUtil.extractChannel(this, channelNumber);
-    }
-
-    /**
-     * @deprecated Use {@link SequenceUtil#extractChannels(Sequence, List)} instead.
-     * @param channelNumbers
-     *        list of channels
-     * @return sequence
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence extractChannels(List<Integer> channelNumbers)
-    {
-        return SequenceUtil.extractChannels(this, channelNumbers);
-    }
-
-    /**
-     * @deprecated Use {@link SequenceUtil#extractChannel(Sequence, int)} instead
-     * @param bandNumber
-     *        int
-     * @return sequence
-     * @throws InterruptedException
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence extractBand(int bandNumber) throws InterruptedException
-    {
-        return extractChannel(bandNumber);
-    }
-
-    /**
-     * @deprecated Use {@link SequenceUtil#extractChannels(Sequence, List)} instead
-     * @param bandNumbers
-     *        list of bandNumbers
-     * @return sequence
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence extractBands(List<Integer> bandNumbers)
-    {
-        return extractChannels(bandNumbers);
-    }
-
-    /**
      * @return all VolumetricImage as TreeMap (contains t position)
      */
-    public TreeMap<Integer, VolumetricImage> getVolumetricImages()
-    {
-        synchronized (volumetricImages)
-        {
-            return new TreeMap<Integer, VolumetricImage>(volumetricImages);
+    public TreeMap<Integer, VolumetricImage> getVolumetricImages() {
+        synchronized (volumetricImages) {
+            return new TreeMap<>(volumetricImages);
         }
     }
 
     /**
      * @return all VolumetricImage
      */
-    public ArrayList<VolumetricImage> getAllVolumetricImage()
-    {
-        synchronized (volumetricImages)
-        {
-            return new ArrayList<VolumetricImage>(volumetricImages.values());
+    public ArrayList<VolumetricImage> getAllVolumetricImage() {
+        synchronized (volumetricImages) {
+            return new ArrayList<>(volumetricImages.values());
         }
     }
 
     /**
      * @return first viewer attached to this sequence
      */
-    public Viewer getFirstViewer()
-    {
+    public Viewer getFirstViewer() {
         return Icy.getMainInterface().getFirstViewer(this);
     }
 
     /**
      * @return viewers attached to this sequence
      */
-    public ArrayList<Viewer> getViewers()
-    {
+    public ArrayList<Viewer> getViewers() {
         return Icy.getMainInterface().getViewers(this);
     }
 
     /**
      * Set the volatile state for this Sequence (see {@link IcyBufferedImage#setVolatile(boolean)}).<br>
-     * 
-     * @param value
-     *        boolean
-     * @throws OutOfMemoryError
-     *         if there is not enough memory available to store image
-     *         data when setting back to <i>non volatile</i> state
-     * @throws UnsupportedOperationException
-     *         if cache engine is not enabled
+     *
+     * @param value boolean
+     * @throws OutOfMemoryError              if there is not enough memory available to store image
+     *                                       data when setting back to <i>non volatile</i> state
+     * @throws UnsupportedOperationException if cache engine is not enabled
      */
-    public void setVolatile(boolean value) throws OutOfMemoryError, UnsupportedOperationException
-    {
+    public void setVolatile(final boolean value) throws OutOfMemoryError, UnsupportedOperationException {
         final boolean vol = isVolatile();
 
         // switching from volatile to not volatile ?
-        if (vol && !value)
-        {
-            try
-            {
+        if (vol && !value) {
+            try {
                 // check that can open the image
-                Loader.checkOpening(0, getSizeX(), getSizeY(), getSizeC(), getSizeZ(), getSizeT(), getDataType_(), "");
+                Loader.checkOpening(0, getSizeX(), getSizeY(), getSizeC(), getSizeZ(), getSizeT(), getDataType(), "");
             }
-            catch (OutOfMemoryError e)
-            {
+            catch (final OutOfMemoryError e) {
                 // better to keep trace of that in console...
-                System.err.println(
-                        "Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
+                System.err.println("Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
 
-                throw new OutOfMemoryError(
-                        "Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
+                throw new OutOfMemoryError("Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
             }
         }
 
-        try
-        {
+        try {
             // change volatile state for all images
-            for (IcyBufferedImage image : getAllImage())
+            for (final IcyBufferedImage image : getAllImage())
                 if (image != null)
                     image.setVolatile(value);
 
             if (vol != value)
                 metaChanged(ID_VIRTUAL);
         }
-        catch (OutOfMemoryError e)
-        {
+        catch (final OutOfMemoryError e) {
             // not enough memory to complete the operation --> restore previous state
-            for (IcyBufferedImage image : getAllImage())
+            for (final IcyBufferedImage image : getAllImage())
                 if (image != null)
                     image.setVolatile(!value);
 
@@ -961,25 +713,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Same as {@link #setVolatile(boolean)}
-     * 
-     * @param value
-     *        boolean
-     * @throws OutOfMemoryError
-     *         if there is not enough memory available to store image
-     *         data when setting back to <i>non volatile</i> state
-     * @throws UnsupportedOperationException
-     *         if cache engine is not initialized (error at initialization).
+     *
+     * @param value boolean
+     * @throws OutOfMemoryError              if there is not enough memory available to store image
+     *                                       data when setting back to <i>non volatile</i> state
+     * @throws UnsupportedOperationException if cache engine is not initialized (error at initialization).
      */
-    public void setVirtual(boolean value) throws OutOfMemoryError, UnsupportedOperationException
-    {
+    public void setVirtual(final boolean value) throws OutOfMemoryError, UnsupportedOperationException {
         setVolatile(value);
     }
 
     /**
      * @return true if this sequence contains volatile image (see {@link IcyBufferedImage#isVolatile()}).
      */
-    public boolean isVolatile()
-    {
+    public boolean isVolatile() {
         final IcyBufferedImage img = getFirstNonNullImage();
         if (img != null)
             return img.isVolatile();
@@ -990,34 +737,28 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return Same as {@link #isVolatile()}
      */
-    public boolean isVirtual()
-    {
+    public boolean isVirtual() {
         return isVolatile();
     }
 
     /**
      * @return get sequence id (this id is unique during an ICY session)
      */
-    public int getId()
-    {
+    public int getId() {
         return id;
     }
 
     /**
-     * @param value
-     *        Sequence name
+     * @param value Sequence name
      */
-    public void setName(String value)
-    {
-        if (getName() != value)
-        {
+    public void setName(final String value) {
+        if (!Objects.equals(getName(), value)) {
             MetaDataUtil.setName(metaData, 0, value);
             metaChanged(ID_NAME);
         }
     }
 
-    public String getName()
-    {
+    public String getName() {
         return MetaDataUtil.getName(metaData, 0);
     }
 
@@ -1025,16 +766,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * Returns the origin filename for the specified image position.<br>
      * This method is useful for sequence loaded from multiple files.
      *
-     * @param c
-     *        int
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param c int
+     * @param t int
+     * @param z int
      * @return the origin filename for the given image position
      */
-    public String getFilename(int t, int z, int c)
-    {
+    public String getFilename(final int t, final int z, final int c) {
         final ImageProvider importer = getImageProvider();
 
         // group importer ? we can retrieve the original filename
@@ -1050,11 +787,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * null / empty --&gt; no file attachment<br>
      * image file --&gt; single file attachment
      * directory or metadata file --&gt; multiples files attachment<br>
-     * 
+     *
      * @return the origin filename
      */
-    public String getFilename()
-    {
+    public String getFilename() {
         return filename;
     }
 
@@ -1065,14 +801,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * null / empty --&gt; no file attachment<br>
      * image file --&gt; single file attachment
      * directory or metadata file --&gt; multiples files attachment<br>
-     * 
-     * @param filename
-     *        the filename to set
+     *
+     * @param filename the filename to set
      */
-    public void setFilename(String filename)
-    {
-        if (this.filename != filename)
-        {
+    public void setFilename(final String filename) {
+        if (!Objects.equals(this.filename, filename)) {
             this.filename = filename;
         }
     }
@@ -1080,11 +813,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Returns the {@link ImageProvider} used to load the sequence data.<br>
      * It can return <code>null</code> if the Sequence was not loaded from a specific resource or if it was saved in between.<br>
-     * 
+     *
      * @return the {@link ImageProvider} used to load the Sequence
      */
-    public ImageProvider getImageProvider()
-    {
+    public ImageProvider getImageProvider() {
         return imageProvider;
     }
 
@@ -1093,20 +825,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * When you set the <i>ImageProvider</i> you need to ensure we can use it (should be opened for {@link SequenceIdImporter}).<br>
      * Also "sub part" informations has to be correctly set (setOriginXXX(...) methods) as we may use it to retrieve sequence data from the
      * {@link ImageProvider}.
-     * 
-     * @param value
-     *        image
+     *
+     * @param value image
      */
-    public void setImageProvider(ImageProvider value)
-    {
-        try
-        {
+    public void setImageProvider(final ImageProvider value) {
+        try {
             // close previous
             if ((imageProvider != null) && (imageProvider instanceof Closeable))
                 ((Closeable) imageProvider).close();
         }
-        catch (IOException e)
-        {
+        catch (final IOException e) {
             // ignore
         }
 
@@ -1114,14 +842,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param folderExt If the filename of this sequence refer a folder then we extend it with 'folderExt' to build the base name.
      * @return the output base filename.<br>
-     *         This function is supposed to be used internally only.
-     * @param folderExt
-     *        If the filename of this sequence refer a folder then we extend it with 'folderExt' to build the base name.
+     * This function is supposed to be used internally only.
      * @see #getOutputExtension()
      */
-    public String getOutputBaseName(String folderExt)
-    {
+    public String getOutputBaseName(final String folderExt) {
         String result = getFilename();
 
         if (StringUtil.isEmpty(result))
@@ -1133,7 +859,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         // filename reference a directory --> use "<directory>/<folderExt>"
         if (FileUtil.isDirectory(result))
             result += "/" + folderExt;
-        // otherwise remove extension
+            // otherwise remove extension
         else
             result = FileUtil.setExtension(result, "");
 
@@ -1142,12 +868,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the output filename extension (not the file extension, just extension from base name).<br>
-     *         The extension is based on some internals informations as serie index and resolution level.<br>
-     *         This function is supposed to be used internally only.
+     * The extension is based on some internals informations as serie index and resolution level.<br>
+     * This function is supposed to be used internally only.
      * @see #getOutputBaseName(String)
      */
-    public String getOutputExtension()
-    {
+    public String getOutputExtension() {
         String result = "";
 
         // retrieve the serie index
@@ -1176,8 +901,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final int zMax = getOriginZMax();
 
         // sub Z range --> add a specific extension
-        if ((zMin != -1) || (zMax != -1))
-        {
+        if ((zMin != -1) || (zMax != -1)) {
             if (zMin == zMax)
                 result += "_Z" + zMin;
             else
@@ -1189,8 +913,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final int tMax = getOriginTMax();
 
         // sub T range --> add a specific extension
-        if ((tMin != -1) || (tMax != -1))
-        {
+        if ((tMin != -1) || (tMax != -1)) {
             if (tMin == tMax)
                 result += "_T" + tMin;
             else
@@ -1208,16 +931,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param withExtension Add the original file extension is set to <code>true</code>
      * @return Return the desired output filename for this Sequence.<br>
-     *         It uses the origin filename and add a specific extension depending some internals properties.
-     * @param withExtension
-     *        Add the original file extension is set to <code>true</code>
+     * It uses the origin filename and add a specific extension depending some internals properties.
      * @see #getFilename()
      * @see #getOutputBaseName(String)
      * @see #getOutputExtension()
      */
-    public String getOutputFilename(boolean withExtension)
-    {
+    public String getOutputFilename(final boolean withExtension) {
         String result = getFilename();
 
         if (StringUtil.isEmpty(result))
@@ -1234,167 +955,145 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the resolution level from the origin image (defined by {@link #getFilename()}).<br>
-     *         By default it returns 0 if this sequence corresponds to the full resolution of the original image.<br>
-     *         1 --&gt; original resolution / 2<br>
-     *         2 --&gt; original resolution / 4<br>
-     *         3 --&gt; original resolution / 8<br>
-     *         ...
+     * By default it returns 0 if this sequence corresponds to the full resolution of the original image.<br>
+     * 1 --&gt; original resolution / 2<br>
+     * 2 --&gt; original resolution / 4<br>
+     * 3 --&gt; original resolution / 8<br>
+     * ...
      */
-    public int getOriginResolution()
-    {
+    public int getOriginResolution() {
         return originResolution;
     }
 
     /**
      * Internal use only, you should not directly use this method.
-     * 
-     * @param value
-     *        int
+     *
+     * @param value int
      * @see #getOriginResolution()
      */
-    public void setOriginResolution(int value)
-    {
+    public void setOriginResolution(final int value) {
         originResolution = value;
     }
 
     /**
      * @return the region (X,Y) from original image if this image is a crop of the original image (in original image
-     *         resolution).<br>
-     *         Default value is <code>null</code> (full size).
+     * resolution).<br>
+     * Default value is <code>null</code> (full size).
      */
-    public Rectangle getOriginXYRegion()
-    {
+    public Rectangle getOriginXYRegion() {
         return originXYRegion;
     }
 
     /**
      * Internal use only, you should not directly use this method.
-     * 
-     * @param value
-     *        rectangle
+     *
+     * @param value rectangle
      * @see #getOriginXYRegion()
      */
-    public void setOriginXYRegion(Rectangle value)
-    {
+    public void setOriginXYRegion(final Rectangle value) {
         // better to use a copy
         if (value != null)
             originXYRegion = new Rectangle(value);
-        // clear it
+            // clear it
         else
             originXYRegion = null;
     }
 
     /**
      * @return the Z range minimum from original image if this image is a crop in Z of the original image.<br>
-     *         Default value is -1 which mean we have the whole Z range.
+     * Default value is -1 which mean we have the whole Z range.
      */
-    public int getOriginZMin()
-    {
+    public int getOriginZMin() {
         return originZMin;
     }
 
     /**
      * Internal use only, you should not directly use this method.
-     * 
-     * @param value
-     *        int
+     *
+     * @param value int
      * @see #getOriginZMin()
      */
-    public void setOriginZMin(int value)
-    {
+    public void setOriginZMin(final int value) {
         originZMin = value;
     }
 
     /**
      * @return the Z range maximum from original image if this image is a crop in Z of the original image.<br>
-     *         Default value is -1 which mean we have the whole Z range.
+     * Default value is -1 which mean we have the whole Z range.
      */
-    public int getOriginZMax()
-    {
+    public int getOriginZMax() {
         return originZMax;
     }
 
     /**
      * Internal use only, you should not directly use this method.
-     * 
-     * @param value
-     *        int
+     *
+     * @param value int
      * @see #getOriginZMax()
      */
-    public void setOriginZMax(int value)
-    {
+    public void setOriginZMax(final int value) {
         originZMax = value;
     }
 
     /**
      * @return the T range minimum from original image if this image is a crop in T of the original image.<br>
-     *         Default value is -1 which mean we have the whole T range.
+     * Default value is -1 which mean we have the whole T range.
      */
-    public int getOriginTMin()
-    {
+    public int getOriginTMin() {
         return originTMin;
     }
 
     /**
      * Internal use only, you should not directly use this method.
-     * 
-     * @param value
-     *        int
+     *
+     * @param value int
      * @see #getOriginTMin()
      */
-    public void setOriginTMin(int value)
-    {
+    public void setOriginTMin(final int value) {
         originTMin = value;
     }
 
     /**
      * @return the T range maximum from original image if this image is a crop in T of the original image.<br>
-     *         Default value is -1 which mean we have the whole T range.
+     * Default value is -1 which mean we have the whole T range.
      */
-    public int getOriginTMax()
-    {
+    public int getOriginTMax() {
         return originTMax;
     }
 
     /**
      * Internal use only, you should not directly use this method.
-     * 
-     * @param value
-     *        int
+     *
+     * @param value int
      * @see #getOriginTMax()
      */
-    public void setOriginTMax(int value)
-    {
+    public void setOriginTMax(final int value) {
         originTMax = value;
     }
 
     /**
      * @return the channel position from original image if this image is a single channel extraction of the original
-     *         image.<br>
-     *         Default value is -1 which mean that all channels were preserved.
+     * image.<br>
+     * Default value is -1 which mean that all channels were preserved.
      */
-    public int getOriginChannel()
-    {
+    public int getOriginChannel() {
         return originChannel;
     }
 
     /**
      * Internal use only, you should not directly use this method.
-     * 
-     * @param value
-     *        int
+     *
+     * @param value int
      * @see #getOriginChannel()
      */
-    public void setOriginChannel(int value)
-    {
+    public void setOriginChannel(final int value) {
         originChannel = value;
     }
 
     /**
      * Reset origin information (used after saved operation normally, internal use only).
      */
-    public void resetOriginInformation()
-    {
+    public void resetOriginInformation() {
         setSeries(0);
         setOriginChannel(-1);
         setOriginResolution(0);
@@ -1407,16 +1106,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return series index if the Sequence comes from a multi serie image.<br>
-     *         By default it returns 0 if the sequence comes from a single serie image or if this is the
-     *         first series image.
+     * By default it returns 0 if the sequence comes from a single serie image or if this is the
+     * first series image.
      */
-    public int getSeries()
-    {
+    public int getSeries() {
         // retrieve the image ID (sequences are always single serie)
         final String id = MetaDataUtil.getImageID(getOMEXMLMetadata(), 0);
 
-        if (id.startsWith("Image:"))
-        {
+        if (id.startsWith("Image:")) {
             final String[] serieNums = id.substring(6).split(":");
 
             if (serieNums.length > 0)
@@ -1428,12 +1125,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set series index if the Sequence comes from a multi serie image (internal use only).
-     * 
-     * @param value
-     *        int
+     *
+     * @param value int
      */
-    public void setSeries(int value)
-    {
+    public void setSeries(final int value) {
         // retrieve the image ID (sequences are always single serie)
         final String id = MetaDataUtil.getImageID(getOMEXMLMetadata(), 0);
 
@@ -1442,33 +1137,19 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Use {@link #getSeries()} instead
-     * @return int
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getSerieIndex()
-    {
-        return getSeries();
-    }
-
-    /**
      * @return meta data object
      */
-    public OMEXMLMetadata getOMEXMLMetadata()
-    {
+    public OMEXMLMetadata getOMEXMLMetadata() {
         return metaData;
     }
 
     /**
      * Set the meta data object
-     * 
-     * @param metaData
-     *        OME metadata
+     *
+     * @param metaData OME metadata
      */
-    public void setMetaData(OMEXMLMetadata metaData)
-    {
-        if (this.metaData != metaData)
-        {
+    public void setMetaData(final OMEXMLMetadata metaData) {
+        if (this.metaData != metaData) {
             this.metaData = metaData;
             // all meta data changed
             metaChanged(null);
@@ -1476,83 +1157,57 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Use {@link #getOMEXMLMetadata()} instead.
-     * @return OME metadata
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public OMEXMLMetadataImpl getMetadata()
-    {
-        return (OMEXMLMetadataImpl) getOMEXMLMetadata();
-    }
-
-    /**
-     * @deprecated Use {@link #setMetaData(OMEXMLMetadata)} instead.
-     * @param metaData
-     *        OME metadata
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setMetaData(OMEXMLMetadataImpl metaData)
-    {
-        setMetaData((OMEXMLMetadata) metaData);
-    }
-
-    /**
      * @return the physical position [X,Y,Z] (in &micro;m) of the image represented by this Sequence.
-     *         This information can be used to represent the position of the image in the original sample (microscope
-     *         information) or the position of a sub image from the original image (crop operation).<br>
-     *         Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
-     *         interval
-     *         information to compute other positions.
+     * This information can be used to represent the position of the image in the original sample (microscope
+     * information) or the position of a sub image from the original image (crop operation).<br>
+     * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
+     * interval
+     * information to compute other positions.
      */
-    public double[] getPosition()
-    {
-        return new double[] {getPositionX(), getPositionY(), getPositionZ()};
+    public double[] getPosition() {
+        return new double[]{getPositionX(), getPositionY(), getPositionZ()};
     }
 
     /**
      * @return the X physical position / offset (in &micro;m) of the image represented by this Sequence.<br>
-     *         This information can be used to represent the position of the image in the original sample (microscope
-     *         information) or the position of a sub image the original image (crop operation).<br>
-     *         Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
-     *         interval
-     *         information to compute other positions.
+     * This information can be used to represent the position of the image in the original sample (microscope
+     * information) or the position of a sub image the original image (crop operation).<br>
+     * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
+     * interval
+     * information to compute other positions.
      */
-    public double getPositionX()
-    {
+    public double getPositionX() {
         return MetaDataUtil.getPositionX(metaData, 0, 0, 0, 0, 0d);
     }
 
     /**
      * @return the Y physical position / offset (in &micro;m) of the image represented by this Sequence.<br>
-     *         This information can be used to represent the position of the image in the original sample (microscope
-     *         information) or the position of a sub image the original image (crop operation).<br>
-     *         Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
-     *         interval
-     *         information to compute other positions.
+     * This information can be used to represent the position of the image in the original sample (microscope
+     * information) or the position of a sub image the original image (crop operation).<br>
+     * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
+     * interval
+     * information to compute other positions.
      */
-    public double getPositionY()
-    {
+    public double getPositionY() {
         return MetaDataUtil.getPositionY(metaData, 0, 0, 0, 0, 0d);
     }
 
     /**
      * @return the Z physical position / offset (in &micro;m) of the image represented by this Sequence.<br>
-     *         This information can be used to represent the position of the image in the original sample (microscope
-     *         information) or the position of a sub image the original image (crop operation).<br>
-     *         Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
-     *         interval
-     *         information to compute other positions.
+     * This information can be used to represent the position of the image in the original sample (microscope
+     * information) or the position of a sub image the original image (crop operation).<br>
+     * Note that OME store this information at Plane level (each Z,T,C), here we just use value from Plane(0,0,0) then we use the pixels size and time
+     * interval
+     * information to compute other positions.
      */
-    public double getPositionZ()
-    {
+    public double getPositionZ() {
         return MetaDataUtil.getPositionZ(metaData, 0, 0, 0, 0, 0d);
     }
 
     /**
      * @return Same as {@link #getTimeStamp()}
      */
-    public long getPositionT()
-    {
+    public long getPositionT() {
         return getTimeStamp();
     }
 
@@ -1561,8 +1216,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @see #getPositionTOffset(int, int, int)
      * @see #getTimeInterval()
      */
-    public long getTimeStamp()
-    {
+    public long getTimeStamp() {
         return MetaDataUtil.getTimeStamp(metaData, 0, 0L);
     }
 
@@ -1571,8 +1225,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @see #getTimeInterval()
      * @see #getTimeStamp()
      */
-    public double getPositionTOffset(int t, int z, int c)
-    {
+    public double getPositionTOffset(final int t, final int z, final int c) {
         return MetaDataUtil.getPositionTOffset(metaData, 0, t, z, c, 0d);
     }
 
@@ -1581,14 +1234,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we always use value from Plane(0,0,0)
-     * 
-     * @param value
-     *        double
+     *
+     * @param value double
      */
-    public void setPositionX(double value)
-    {
-        if (getPositionX() != value)
-        {
+    public void setPositionX(final double value) {
+        if (getPositionX() != value) {
             MetaDataUtil.setPositionX(metaData, 0, 0, 0, 0, value);
             metaChanged(ID_POSITION_X);
         }
@@ -1599,14 +1249,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we always use value from Plane(0,0,0)
-     * 
-     * @param value
-     *        double
+     *
+     * @param value double
      */
-    public void setPositionY(double value)
-    {
-        if (getPositionY() != value)
-        {
+    public void setPositionY(final double value) {
+        if (getPositionY() != value) {
             MetaDataUtil.setPositionY(metaData, 0, 0, 0, 0, value);
             metaChanged(ID_POSITION_Y);
         }
@@ -1617,41 +1264,33 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * This information can be used to represent the position of the image in the original sample (microscope
      * information) or the position of a sub image the original image (crop operation).<br>
      * Note that OME store this information at Plane level (each Z,T,C), here we always use value from Plane(0,0,0)
-     * 
-     * @param value
-     *        double
+     *
+     * @param value double
      */
-    public void setPositionZ(double value)
-    {
-        if (getPositionZ() != value)
-        {
+    public void setPositionZ(final double value) {
+        if (getPositionZ() != value) {
             MetaDataUtil.setPositionZ(metaData, 0, 0, 0, 0, value);
             metaChanged(ID_POSITION_Z);
         }
     }
 
     /**
-     * @param value
-     *        long
-     *        Same as {@link #setTimeStamp(long)}
+     * @param value long
+     *              Same as {@link #setTimeStamp(long)}
      */
-    public void setPositionT(long value)
-    {
+    public void setPositionT(final long value) {
         setTimeStamp(value);
     }
 
     /**
      * Sets the timestamp (elapsed milliseconds from the Java epoch of 1970-01-01 T00:00:00Z) for the image represented by this Sequence.
-     * 
+     *
+     * @param value long
      * @see #setPositionTOffset(int, int, int, double)
      * @see #setTimeInterval(double)
-     * @param value
-     *        long
      */
-    public void setTimeStamp(long value)
-    {
-        if (getTimeStamp() != value)
-        {
+    public void setTimeStamp(final long value) {
+        if (getTimeStamp() != value) {
             MetaDataUtil.setTimeStamp(metaData, 0, value);
             metaChanged(ID_POSITION_T);
         }
@@ -1659,16 +1298,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Sets the time position / offset (in second for OME compatibility) relative to first image for the image at specified (T,Z,C) position.
-     * 
+     *
+     * @param value long
      * @see #setTimeInterval(double)
      * @see #setTimeStamp(long)
-     * @param value
-     *        long
      */
-    public void setPositionTOffset(int t, int z, int c, double value)
-    {
-        if (getPositionTOffset(t, z, c) != value)
-        {
+    public void setPositionTOffset(final int t, final int z, final int c, final double value) {
+        if (getPositionTOffset(t, z, c) != value) {
             MetaDataUtil.setPositionTOffset(metaData, 0, t, z, c, value);
             metaChanged(ID_POSITION_T_OFFSET, t);
         }
@@ -1677,32 +1313,28 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return pixel size for [X,Y,Z] dimension (in &micro;m to be OME compatible)
      */
-    public double[] getPixelSize()
-    {
-        return new double[] {getPixelSizeX(), getPixelSizeY(), getPixelSizeZ()};
+    public double[] getPixelSize() {
+        return new double[]{getPixelSizeX(), getPixelSizeY(), getPixelSizeZ()};
     }
 
     /**
      * @return X pixel size (in &micro;m to be OME compatible)
      */
-    public double getPixelSizeX()
-    {
+    public double getPixelSizeX() {
         return MetaDataUtil.getPixelSizeX(metaData, 0, 1d);
     }
 
     /**
      * @return Y pixel size (in &micro;m to be OME compatible)
      */
-    public double getPixelSizeY()
-    {
+    public double getPixelSizeY() {
         return MetaDataUtil.getPixelSizeY(metaData, 0, 1d);
     }
 
     /**
      * @return Z pixel size (in &micro;m to be OME compatible)
      */
-    public double getPixelSizeZ()
-    {
+    public double getPixelSizeZ() {
         return MetaDataUtil.getPixelSizeZ(metaData, 0, 1d);
     }
 
@@ -1710,13 +1342,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return T time interval (in second for OME compatibility)
      * @see #getPositionTOffset(int, int, int)
      */
-    public double getTimeInterval()
-    {
+    public double getTimeInterval() {
         double result = MetaDataUtil.getTimeInterval(metaData, 0, 0d);
 
         // not yet defined ?
-        if (result == 0d)
-        {
+        if (result == 0d) {
             result = MetaDataUtil.getTimeIntervalFromTimePositions(metaData, 0);
             // we got something --> set it as the time interval
             if (result != 0d)
@@ -1728,14 +1358,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set X pixel size (in &micro;m to be OME compatible)
-     * 
-     * @param value
-     *        double
+     *
+     * @param value double
      */
-    public void setPixelSizeX(double value)
-    {
-        if (getPixelSizeX() != value)
-        {
+    public void setPixelSizeX(final double value) {
+        if (getPixelSizeX() != value) {
             MetaDataUtil.setPixelSizeX(metaData, 0, value);
             metaChanged(ID_PIXEL_SIZE_X);
         }
@@ -1743,14 +1370,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set Y pixel size (in &micro;m to be OME compatible)
-     * 
-     * @param value
-     *        double
+     *
+     * @param value double
      */
-    public void setPixelSizeY(double value)
-    {
-        if (getPixelSizeY() != value)
-        {
+    public void setPixelSizeY(final double value) {
+        if (getPixelSizeY() != value) {
             MetaDataUtil.setPixelSizeY(metaData, 0, value);
             metaChanged(ID_PIXEL_SIZE_Y);
         }
@@ -1758,14 +1382,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set Z pixel size (in &micro;m to be OME compatible)
-     * 
-     * @param value
-     *        double
+     *
+     * @param value double
      */
-    public void setPixelSizeZ(double value)
-    {
-        if (getPixelSizeZ() != value)
-        {
+    public void setPixelSizeZ(final double value) {
+        if (getPixelSizeZ() != value) {
             MetaDataUtil.setPixelSizeZ(metaData, 0, value);
             metaChanged(ID_PIXEL_SIZE_Z);
         }
@@ -1773,50 +1394,43 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set T time resolution (in second to be OME compatible)
-     * 
-     * @param value
-     *        double
+     *
+     * @param value double
      * @see #setPositionTOffset(int, int, int, double)
      */
-    public void setTimeInterval(double value)
-    {
-        if (MetaDataUtil.getTimeInterval(metaData, 0, 0d) != value)
-        {
+    public void setTimeInterval(final double value) {
+        if (MetaDataUtil.getTimeInterval(metaData, 0, 0d) != value) {
             MetaDataUtil.setTimeInterval(metaData, 0, value);
             metaChanged(ID_TIME_INTERVAL);
         }
     }
 
     /**
-     * @return the pixel size scaling factor to convert a number of pixel/voxel unit into <code>\u00B5m</code><br>
-     *         <br>
-     *         For instance to get the scale ration for 2D distance:<br>
-     *         <code>valueMicroMeter = pixelNum * getPixelSizeScaling(2, 1)</code><br>
-     *         For a 2D surface:<br>
-     *         <code>valueMicroMeter2 = pixelNum * getPixelSizeScaling(2, 2)</code><br>
-     *         For a 3D volume:<br>
-     *         <code>valueMicroMeter3 = pixelNum * getPixelSizeScaling(3, 3)</code><br>
-     * @param dimCompute
-     *        dimension order for size calculation<br>
-     *        <ul>
-     *        <li>1 --&gt; pixel size X used for conversion</li>
-     *        <li>2 --&gt; pixel size X and Y used for conversion</li>
-     *        <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
-     *        </ul>
-     * @param dimResult
-     *        dimension order for the result (unit)<br>
-     *        <ul>
-     *        <li>1 --&gt; distance</li>
-     *        <li>2 --&gt; area</li>
-     *        <li>3 or above --&gt; volume</li>
-     *        </ul>
+     * @param dimCompute dimension order for size calculation<br>
+     *                   <ul>
+     *                   <li>1 --&gt; pixel size X used for conversion</li>
+     *                   <li>2 --&gt; pixel size X and Y used for conversion</li>
+     *                   <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
+     *                   </ul>
+     * @param dimResult  dimension order for the result (unit)<br>
+     *                   <ul>
+     *                   <li>1 --&gt; distance</li>
+     *                   <li>2 --&gt; area</li>
+     *                   <li>3 or above --&gt; volume</li>
+     *                   </ul>
+     * @return the pixel size scaling factor to convert a number of pixel/voxel unit into <code>µm</code><br>
+     * <br>
+     * For instance to get the scale ration for 2D distance:<br>
+     * <code>valueMicroMeter = pixelNum * getPixelSizeScaling(2, 1)</code><br>
+     * For a 2D surface:<br>
+     * <code>valueMicroMeter2 = pixelNum * getPixelSizeScaling(2, 2)</code><br>
+     * For a 3D volume:<br>
+     * <code>valueMicroMeter3 = pixelNum * getPixelSizeScaling(3, 3)</code><br>
      */
-    public double getPixelSizeScaling(int dimCompute, int dimResult)
-    {
+    public double getPixelSizeScaling(final int dimCompute, final int dimResult) {
         double result;
 
-        switch (dimCompute)
-        {
+        switch (dimCompute) {
             case 0:
                 // incorrect
                 return 0d;
@@ -1840,11 +1454,23 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param dimCompute dimension order for size calculation<br>
+     *                   <ul>
+     *                   <li>1 --&gt; pixel size X used for conversion</li>
+     *                   <li>2 --&gt; pixel size X and Y used for conversion</li>
+     *                   <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
+     *                   </ul>
+     * @param dimResult  dimension order for the result (unit)<br>
+     *                   <ul>
+     *                   <li>1 --&gt; distance</li>
+     *                   <li>2 --&gt; area</li>
+     *                   <li>3 or above --&gt; volume</li>
+     *                   </ul>
      * @return the best pixel size unit for the specified dimension order given the sequence's pixel
-     *         size informations.<br>
-     *         Compute a 2D distance:
-     * 
-     *         <pre>
+     * size informations.<br>
+     * Compute a 2D distance:
+     *
+     * <pre>
      *         dimCompute = 2;
      *         dimUnit = 1;
      *         valueMicroMeter = pixelNum * getPixelSizeScaling(dimCompute);
@@ -1852,10 +1478,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *         finalValue = UnitUtil.getValueInUnit(valueMicroMeter, UnitPrefix.MICRO, bestUnit);
      *         valueString = Double.toString(finalValue) + &quot; &quot; + bestUnit.toString() + &quot;m&quot;;
      *         </pre>
-     * 
-     *         Compute a 2D surface:
-     * 
-     *         <pre>
+     * <p>
+     * Compute a 2D surface:
+     *
+     * <pre>
      *         dimCompute = 2;
      *         dimUnit = 2;
      *         valueMicroMeter = pixelNum * getPixelSizeScaling(dimCompute);
@@ -1863,10 +1489,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *         finalValue = UnitUtil.getValueInUnit(valueMicroMeter, UnitPrefix.MICRO, bestUnit);
      *         valueString = Double.toString(finalValue) + &quot; &quot; + bestUnit.toString() + &quot;m2&quot;;
      *         </pre>
-     * 
-     *         Compute a 3D volume:
-     * 
-     *         <pre>
+     * <p>
+     * Compute a 3D volume:
+     *
+     * <pre>
      *         dimCompute = 3;
      *         dimUnit = 3;
      *         valueMicroMeter = pixelNum * getPixelSizeScaling(dimCompute);
@@ -1874,161 +1500,121 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *         finalValue = UnitUtil.getValueInUnit(valueMicroMeter, UnitPrefix.MICRO, bestUnit);
      *         valueString = Double.toString(finalValue) + &quot; &quot; + bestUnit.toString() + &quot;m3&quot;;
      *         </pre>
-     * 
-     * @param dimCompute
-     *        dimension order for size calculation<br>
-     *        <ul>
-     *        <li>1 --&gt; pixel size X used for conversion</li>
-     *        <li>2 --&gt; pixel size X and Y used for conversion</li>
-     *        <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
-     *        </ul>
-     * @param dimResult
-     *        dimension order for the result (unit)<br>
-     *        <ul>
-     *        <li>1 --&gt; distance</li>
-     *        <li>2 --&gt; area</li>
-     *        <li>3 or above --&gt; volume</li>
-     *        </ul>
      * @see #calculateSizeBestUnit(double, int, int)
      */
-    public UnitPrefix getBestPixelSizeUnit(int dimCompute, int dimResult)
-    {
-        switch (dimResult)
-        {
-            case 0:
+    public UnitPrefix getBestPixelSizeUnit(final int dimCompute, final int dimResult) {
+        return switch (dimResult) {
+            case 0 ->
                 // keep original
-                return UnitPrefix.MICRO;
-
-            case 1:
-                return UnitUtil.getBestUnit((getPixelSizeScaling(dimCompute, dimResult) * 10), UnitPrefix.MICRO,
-                        dimResult);
-
-            case 2:
-                return UnitUtil.getBestUnit((getPixelSizeScaling(dimCompute, dimResult) * 100), UnitPrefix.MICRO,
-                        dimResult);
-
-            default:
-                return UnitUtil.getBestUnit((getPixelSizeScaling(dimCompute, dimResult) * 1000), UnitPrefix.MICRO,
-                        dimResult);
-        }
+                    UnitPrefix.MICRO;
+            case 1 -> UnitUtil.getBestUnit((getPixelSizeScaling(dimCompute, dimResult) * 10), UnitPrefix.MICRO, dimResult);
+            case 2 -> UnitUtil.getBestUnit((getPixelSizeScaling(dimCompute, dimResult) * 100), UnitPrefix.MICRO, dimResult);
+            default -> UnitUtil.getBestUnit((getPixelSizeScaling(dimCompute, dimResult) * 1000), UnitPrefix.MICRO, dimResult);
+        };
     }
 
     /**
+     * @param pixelNumber number of pixel
+     * @param dimCompute  dimension order for size calculation<br>
+     *                    <ul>
+     *                    <li>1 --&gt; pixel size X used for conversion</li>
+     *                    <li>2 --&gt; pixel size X and Y used for conversion</li>
+     *                    <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
+     *                    </ul>
+     * @param dimResult   dimension order for the result (unit)<br>
+     *                    <ul>
+     *                    <li>1 --&gt; distance</li>
+     *                    <li>2 --&gt; area</li>
+     *                    <li>3 or above --&gt; volume</li>
+     *                    </ul>
      * @return the size in &micro;m for the specified amount of sample/pixel value in the specified
-     *         dimension order.<br>
-     *         <br>
-     *         For the perimeter in &micro;m:<br>
-     *         <code>perimeter = calculateSize(contourInPixel, 2, 1)</code><br>
-     *         For a 2D surface in &micro;m2:<br>
-     *         <code>surface = calculateSize(interiorInPixel, 2, 2)</code><br>
-     *         For a 2D surface area in &micro;m2:<br>
-     *         <code>volume = calculateSize(contourInPixel, 3, 2)</code><br>
-     *         For a 3D volume in &micro;m3:<br>
-     *         <code>volume = calculateSize(interiorInPixel, 3, 3)</code><br>
-     * @param pixelNumber
-     *        number of pixel
-     * @param dimCompute
-     *        dimension order for size calculation<br>
-     *        <ul>
-     *        <li>1 --&gt; pixel size X used for conversion</li>
-     *        <li>2 --&gt; pixel size X and Y used for conversion</li>
-     *        <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
-     *        </ul>
-     * @param dimResult
-     *        dimension order for the result (unit)<br>
-     *        <ul>
-     *        <li>1 --&gt; distance</li>
-     *        <li>2 --&gt; area</li>
-     *        <li>3 or above --&gt; volume</li>
-     *        </ul>
+     * dimension order.<br>
+     * <br>
+     * For the perimeter in &micro;m:<br>
+     * <code>perimeter = calculateSize(contourInPixel, 2, 1)</code><br>
+     * For a 2D surface in &micro;m2:<br>
+     * <code>surface = calculateSize(interiorInPixel, 2, 2)</code><br>
+     * For a 2D surface area in &micro;m2:<br>
+     * <code>volume = calculateSize(contourInPixel, 3, 2)</code><br>
+     * For a 3D volume in &micro;m3:<br>
+     * <code>volume = calculateSize(interiorInPixel, 3, 3)</code><br>
      * @see #calculateSizeBestUnit(double, int, int)
      */
-    public double calculateSize(double pixelNumber, int dimCompute, int dimResult)
-    {
+    public double calculateSize(final double pixelNumber, final int dimCompute, final int dimResult) {
         return pixelNumber * getPixelSizeScaling(dimCompute, dimResult);
     }
 
     /**
+     * @param pixelNumber number of pixel
+     * @param dimCompute  dimension order for size calculation<br>
+     *                    <ul>
+     *                    <li>1 --&gt; pixel size X used for conversion</li>
+     *                    <li>2 --&gt; pixel size X and Y used for conversion</li>
+     *                    <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
+     *                    </ul>
+     * @param dimResult   dimension order for the result (unit)<br>
+     *                    <ul>
+     *                    <li>1 --&gt; distance</li>
+     *                    <li>2 --&gt; area</li>
+     *                    <li>3 or above --&gt; volume</li>
+     *                    </ul>
      * @return the size converted in the best unit (see {@link #getBestPixelSizeUnit(int, int)} for
-     *         the specified amount of sample/pixel value in the specified dimension order.<br>
-     *         Compute a 2D distance:
-     * 
-     *         <pre>
+     * the specified amount of sample/pixel value in the specified dimension order.<br>
+     * Compute a 2D distance:
+     *
+     * <pre>
      *         dimCompute = 2;
      *         dimUnit = 1;
      *         valueBestUnit = calculateSizeBestUnit(pixelNum, dimCompute, dimUnit);
      *         bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
      *         valueString = Double.toString(valueBestUnit) + &quot; &quot; + bestUnit.toString() + &quot;m&quot;;
      *         </pre>
-     * 
-     *         Compute a 2D surface:
-     * 
-     *         <pre>
+     * <p>
+     * Compute a 2D surface:
+     *
+     * <pre>
      *         dimCompute = 2;
      *         dimUnit = 2;
      *         valueBestUnit = calculateSizeBestUnit(pixelNum, dimCompute, dimUnit);
      *         bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
      *         valueString = Double.toString(valueBestUnit) + &quot; &quot; + bestUnit.toString() + &quot;m2&quot;;
      *         </pre>
-     * 
-     *         Compute a 3D volume:
-     * 
-     *         <pre>
+     * <p>
+     * Compute a 3D volume:
+     *
+     * <pre>
      *         dimCompute = 3;
      *         dimUnit = 3;
      *         valueBestUnit = calculateSizeBestUnit(pixelNum, dimCompute, dimUnit);
      *         bestUnit = getBestPixelSizeUnit(dimCompute, dimUnit);
      *         valueString = Double.toString(valueBestUnit) + &quot; &quot; + bestUnit.toString() + &quot;m3&quot;;
      *         </pre>
-     * 
-     * @param pixelNumber
-     *        number of pixel
-     * @param dimCompute
-     *        dimension order for size calculation<br>
-     *        <ul>
-     *        <li>1 --&gt; pixel size X used for conversion</li>
-     *        <li>2 --&gt; pixel size X and Y used for conversion</li>
-     *        <li>3 or above --&gt; pixel size X, Y and Z used for conversion</li>
-     *        </ul>
-     * @param dimResult
-     *        dimension order for the result (unit)<br>
-     *        <ul>
-     *        <li>1 --&gt; distance</li>
-     *        <li>2 --&gt; area</li>
-     *        <li>3 or above --&gt; volume</li>
-     *        </ul>
      * @see #calculateSize(double, int, int)
      * @see #getBestPixelSizeUnit(int, int)
      */
-    public double calculateSizeBestUnit(double pixelNumber, int dimCompute, int dimResult)
-    {
+    public double calculateSizeBestUnit(final double pixelNumber, final int dimCompute, final int dimResult) {
         final double value = calculateSize(pixelNumber, dimCompute, dimResult);
         final UnitPrefix unit = getBestPixelSizeUnit(dimCompute, dimResult);
         return UnitUtil.getValueInUnit(value, UnitPrefix.MICRO, unit, dimResult);
     }
 
     /**
+     * @param pixelNumber      number of pixel
+     * @param dimCompute       dimension order for the calculation
+     * @param dimResult        dimension order for the result (unit)
+     * @param significantDigit wanted significant digit for the result (0 for all)
      * @return the size and appropriate unit in form of String for specified amount of sample/pixel
-     *         value in the specified dimension order.<br>
-     *         <br>
-     *         For instance if you want to retrieve the 2D distance:<br>
-     *         <code>distanceStr = calculateSize(distanceInPixel, 2, 1, 5)</code><br>
-     *         For a 2D surface:<br>
-     *         <code>surfaceStr = calculateSize(surfaceInPixel, 2, 2, 5)</code><br>
-     *         For a 3D volume:<br>
-     *         <code>volumeStr = calculateSize(volumeInPixel, 3, 3, 5)</code><br>
-     * @param pixelNumber
-     *        number of pixel
-     * @param dimCompute
-     *        dimension order for the calculation
-     * @param dimResult
-     *        dimension order for the result (unit)
-     * @param significantDigit
-     *        wanted significant digit for the result (0 for all)
+     * value in the specified dimension order.<br>
+     * <br>
+     * For instance if you want to retrieve the 2D distance:<br>
+     * <code>distanceStr = calculateSize(distanceInPixel, 2, 1, 5)</code><br>
+     * For a 2D surface:<br>
+     * <code>surfaceStr = calculateSize(surfaceInPixel, 2, 2, 5)</code><br>
+     * For a 3D volume:<br>
+     * <code>volumeStr = calculateSize(volumeInPixel, 3, 3, 5)</code><br>
      * @see #calculateSize(double, int, int)
      */
-    public String calculateSize(double pixelNumber, int dimCompute, int dimResult, int significantDigit)
-    {
+    public String calculateSize(final double pixelNumber, final int dimCompute, final int dimResult, final int significantDigit) {
         double value = calculateSize(pixelNumber, dimCompute, dimResult);
         final String postFix = (dimResult > 1) ? StringUtil.toString(dimResult) : "";
         final UnitPrefix unit = UnitUtil.getBestUnit(value, UnitPrefix.MICRO, dimResult);
@@ -2038,41 +1624,33 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         if (significantDigit != 0)
             value = MathUtil.roundSignificant(value, significantDigit);
 
-        return StringUtil.toString(value) + " " + unit.toString() + "m" + postFix;
+        return StringUtil.toString(value) + " " + unit + "m" + postFix;
     }
 
     /**
-     * @param index
-     *        int
+     * @param index int
      * @return Get default name for specified channel
      */
-    public String getDefaultChannelName(int index)
-    {
+    public String getDefaultChannelName(final int index) {
         return MetaDataUtil.getDefaultChannelName(index);
     }
 
     /**
-     * @param index
-     *        int
+     * @param index int
      * @return Get name for specified channel
      */
-    public String getChannelName(int index)
-    {
+    public String getChannelName(final int index) {
         return MetaDataUtil.getChannelName(metaData, 0, index);
     }
 
     /**
      * Set name for specified channel
-     * 
-     * @param index
-     *        int
-     * @param value
-     *        string
+     *
+     * @param index int
+     * @param value string
      */
-    public void setChannelName(int index, String value)
-    {
-        if (!StringUtil.equals(getChannelName(index), value))
-        {
+    public void setChannelName(final int index, final String value) {
+        if (!StringUtil.equals(getChannelName(index), value)) {
             MetaDataUtil.setChannelName(metaData, 0, index, value);
             metaChanged(ID_CHANNEL_NAME, index);
         }
@@ -2080,68 +1658,41 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the user name of the person who created this Sequence (read only property).<br>
-     *         UserName generally refer to the user name environment variable value (logged user on the system) when the sequence has been created / acquired
-     *         on the microscope if this information is present, or later modified / generated using Icy.<br>
-     *         Note that you can have several user name as the original image may have been modified later by someone else, in which case you can use
-     *         {@link #getUserNames()} method instead
+     * UserName generally refer to the user name environment variable value (logged user on the system) when the sequence has been created / acquired
+     * on the microscope if this information is present, or later modified / generated using Icy.<br>
+     * Note that you can have several user name as the original image may have been modified later by someone else, in which case you can use
+     * {@link #getUserNames()} method instead
      */
-    public String getUserName()
-    {
+    public String getUserName() {
         return MetaDataUtil.getUserName(metaData);
     }
 
     /**
      * @return the user name(s) of the person(s) who created this Sequence (read only properties).<br>
-     *         UserName generally refer to the user name environment variable value (logged user on the system) when the sequence has been created / acquired
-     *         on the microscope if this information is present in the original metadata, or later modified / generated using Icy.<br>
+     * UserName generally refer to the user name environment variable value (logged user on the system) when the sequence has been created / acquired
+     * on the microscope if this information is present in the original metadata, or later modified / generated using Icy.<br>
      */
-    public List<String> getUserNames()
-    {
+    public List<String> getUserNames() {
         return MetaDataUtil.getUserNames(metaData);
-    }
-
-    /**
-     * @deprecated Use {@link #getAutoUpdateChannelBounds()} instead.
-     * @return boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean isComponentAbsBoundsAutoUpdate()
-    {
-        return getAutoUpdateChannelBounds();
-    }
-
-    /**
-     * @deprecated Use {@link #setAutoUpdateChannelBounds(boolean)} instead.
-     * @param value
-     *        boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentAbsBoundsAutoUpdate(boolean value)
-    {
-        // nothing here
     }
 
     /**
      * @return true is channel bounds are automatically updated when sequence data is modified.
      * @see #setAutoUpdateChannelBounds(boolean)
      */
-    public boolean getAutoUpdateChannelBounds()
-    {
+    public boolean getAutoUpdateChannelBounds() {
         return autoUpdateChannelBounds;
     }
 
     /**
-     * @param value
-     *        If set to <code>true</code> (default) then channel bounds will be automatically recalculated
-     *        when sequence data is modified.<br>
-     *        This can consume a lot of time if you make many updates on large sequence.<br>
-     *        In this case you should do your updates in a {@link #beginUpdate()} ... {@link #endUpdate()} block to avoid
-     *        severals recalculation.
+     * @param value If set to <code>true</code> (default) then channel bounds will be automatically recalculated
+     *              when sequence data is modified.<br>
+     *              This can consume a lot of time if you make many updates on large sequence.<br>
+     *              In this case you should do your updates in a {@link #beginUpdate()} ... {@link #endUpdate()} block to avoid
+     *              severals recalculation.
      */
-    public void setAutoUpdateChannelBounds(boolean value)
-    {
-        if (autoUpdateChannelBounds != value)
-        {
+    public void setAutoUpdateChannelBounds(final boolean value) {
+        if (autoUpdateChannelBounds != value) {
             if (value)
                 updateChannelsBounds(false);
 
@@ -2150,279 +1701,114 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Use {@link #getAutoUpdateChannelBounds()} instead.
-     * @return boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean isComponentUserBoundsAutoUpdate()
-    {
-        return getAutoUpdateChannelBounds();
-    }
-
-    /**
-     * @deprecated Use {@link #setAutoUpdateChannelBounds(boolean)} instead.
-     * @param value
-     *        boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentUserBoundsAutoUpdate(boolean value)
-    {
-        setAutoUpdateChannelBounds(value);
-    }
-
-    /**
-     * @return the AWT dispatching property
-     * @deprecated Don't use it, events should stay on current thread
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean isAWTDispatching()
-    {
-        return updater.isAwtDispatch();
-    }
-
-    /**
-     * All events are dispatched on AWT when true else they are dispatched on current thread
-     * 
-     * @deprecated Don't use it, events should stay on current thread
-     * @param value
-     *        boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setAWTDispatching(boolean value)
-    {
-        updater.setAwtDispatch(value);
-    }
-
-    /**
      * Add the specified listener to listeners list
-     * 
-     * @param listener
-     *        sequence listener
+     *
+     * @param listener sequence listener
      */
-    public void addListener(SequenceListener listener)
-    {
+    public void addListener(final SequenceListener listener) {
         listeners.add(listener);
     }
 
     /**
      * Remove the specified listener from listeners list
-     * 
-     * @param listener
-     *        sequence listener
+     *
+     * @param listener sequence listener
      */
-    public void removeListener(SequenceListener listener)
-    {
+    public void removeListener(final SequenceListener listener) {
         listeners.remove(listener);
     }
 
     /**
      * @return Get listeners list
      */
-    public SequenceListener[] getListeners()
-    {
+    public SequenceListener[] getListeners() {
         return listeners.toArray(new SequenceListener[0]);
     }
 
     /**
      * Add the specified {@link icy.sequence.SequenceModel.SequenceModelListener} to listeners list
-     * 
-     * @param listener
-     *        sequence listener
+     *
+     * @param listener sequence listener
      */
     @Override
-    public void addSequenceModelListener(SequenceModelListener listener)
-    {
+    public void addSequenceModelListener(final SequenceModelListener listener) {
         modelListeners.add(listener);
     }
 
     /**
      * Remove the specified {@link icy.sequence.SequenceModel.SequenceModelListener} from listeners
-     * 
-     * @param listener
-     *        sequence listener
+     *
+     * @param listener sequence listener
      */
     @Override
-    public void removeSequenceModelListener(SequenceModelListener listener)
-    {
+    public void removeSequenceModelListener(final SequenceModelListener listener) {
         modelListeners.remove(listener);
     }
 
     /**
      * @return Get the Undo manager of this sequence
      */
-    public IcyUndoManager getUndoManager()
-    {
+    public IcyUndoManager getUndoManager() {
         return undoManager;
     }
 
     /**
-     * @deprecated Use {@link #contains(Overlay)} instead.
-     * @param painter
-     *        Painter
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean contains(Painter painter)
-    {
-        return getOverlay(painter) != null;
-    }
-
-    /**
-     * @param overlay
-     *        overlay
+     * @param overlay overlay
      * @return true if the sequence contains the specified overlay
      */
-    public boolean contains(Overlay overlay)
-    {
+    public boolean contains(final Overlay overlay) {
         if (overlay == null)
             return false;
 
-        synchronized (overlays)
-        {
+        synchronized (overlays) {
             return overlays.contains(overlay);
         }
     }
 
     /**
-     * @param roi
-     *        ROI
+     * @param roi ROI
      * @return true if the sequence contains the specified ROI
      */
-    public boolean contains(ROI roi)
-    {
+    public boolean contains(final ROI roi) {
         if (roi == null)
             return false;
 
-        synchronized (rois)
-        {
+        synchronized (rois) {
             return rois.contains(roi);
         }
     }
 
     /**
-     * @deprecated Use {@link #hasOverlay()} instead.
-     * @return boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean hasPainter()
-    {
-        return hasOverlay();
-    }
-
-    /**
-     * @deprecated Use {@link #getOverlays()} instead.
-     * @return list of painter
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public ArrayList<Painter> getPainters()
-    {
-        final ArrayList<Painter> result = new ArrayList<Painter>(overlays.size());
-
-        synchronized (overlays)
-        {
-            for (Overlay overlay : overlays)
-            {
-                if (overlay instanceof OverlayWrapper)
-                    result.add(((OverlayWrapper) overlay).getPainter());
-                else
-                    result.add(overlay);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * @deprecated Use {@link #getOverlaySet()} instead.
-     * @return painter hash
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public HashSet<Painter> getPainterSet()
-    {
-        final HashSet<Painter> result = new HashSet<Painter>(overlays.size());
-
-        synchronized (overlays)
-        {
-            for (Overlay overlay : overlays)
-            {
-                if (overlay instanceof OverlayWrapper)
-                    result.add(((OverlayWrapper) overlay).getPainter());
-                else
-                    result.add(overlay);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * @deprecated Use {@link #getOverlays(Class)} instead.
-     * @param painterClass
-     *        class
-     * @return list of Painter
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public List<Painter> getPainters(Class<? extends Painter> painterClass)
-    {
-        final ArrayList<Painter> result = new ArrayList<Painter>(overlays.size());
-
-        synchronized (overlays)
-        {
-            for (Overlay overlay : overlays)
-            {
-                if (overlay instanceof OverlayWrapper)
-                {
-                    if (painterClass.isInstance(((OverlayWrapper) overlay).getPainter()))
-                        result.add(overlay);
-                }
-                else
-                {
-                    if (painterClass.isInstance(overlay))
-                        result.add(overlay);
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * @return true if the sequence contains at least one Overlay.
      */
-    public boolean hasOverlay()
-    {
+    public boolean hasOverlay() {
         return overlays.size() > 0;
     }
 
     /**
      * @return all overlays attached to this sequence
      */
-    public List<Overlay> getOverlays()
-    {
-        synchronized (overlays)
-        {
-            return new ArrayList<Overlay>(overlays);
+    public List<Overlay> getOverlays() {
+        synchronized (overlays) {
+            return new ArrayList<>(overlays);
         }
     }
 
     /**
      * @return all overlays attached to this sequence (HashSet form)
      */
-    public Set<Overlay> getOverlaySet()
-    {
-        synchronized (overlays)
-        {
-            return new HashSet<Overlay>(overlays);
+    public Set<Overlay> getOverlaySet() {
+        synchronized (overlays) {
+            return new HashSet<>(overlays);
         }
     }
 
     /**
      * @return true if the sequence contains Overlay of specified Overlay class.
      */
-    public boolean hasOverlay(Class<? extends Overlay> overlayClass)
-    {
-        synchronized (overlays)
-        {
-            for (Overlay overlay : overlays)
+    public boolean hasOverlay(final Class<? extends Overlay> overlayClass) {
+        synchronized (overlays) {
+            for (final Overlay overlay : overlays)
                 if (overlayClass.isInstance(overlay))
                     return true;
         }
@@ -2434,13 +1820,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return overlays of specified class attached to this sequence
      */
     @SuppressWarnings("unchecked")
-    public <T extends Overlay> List<T> getOverlays(Class<T> overlayClass)
-    {
-        final List<T> result = new ArrayList<T>(overlays.size());
+    public <T extends Overlay> List<T> getOverlays(final Class<T> overlayClass) {
+        final List<T> result = new ArrayList<>(overlays.size());
 
-        synchronized (overlays)
-        {
-            for (Overlay overlay : overlays)
+        synchronized (overlays) {
+            for (final Overlay overlay : overlays)
                 if (overlayClass.isInstance(overlay))
                     result.add((T) overlay);
         }
@@ -2451,28 +1835,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return true if the sequence contains at least one ROI.
      */
-    public boolean hasROI()
-    {
+    public boolean hasROI() {
         return rois.size() > 0;
     }
 
     /**
+     * @param sorted If true the returned list is ordered by the ROI id (creation order).
      * @return all ROIs attached to this sequence.
-     * @param sorted
-     *        If true the returned list is ordered by the ROI id (creation order).
      */
-    public List<ROI> getROIs(boolean sorted)
-    {
+    public List<ROI> getROIs(final boolean sorted) {
         final List<ROI> result;
 
-        synchronized (rois)
-        {
-            result = new ArrayList<ROI>(rois);
+        synchronized (rois) {
+            result = new ArrayList<>(rois);
         }
 
         // sort it if required
         if (sorted)
-            Collections.sort(result, ROI.idComparator);
+            result.sort(ROI.idComparator);
 
         return result;
     }
@@ -2480,41 +1860,35 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return all ROIs attached to this sequence.
      */
-    public ArrayList<ROI> getROIs()
-    {
+    public ArrayList<ROI> getROIs() {
         return (ArrayList<ROI>) getROIs(false);
     }
 
     /**
      * @return all ROIs attached to this sequence (HashSet form)
      */
-    public HashSet<ROI> getROISet()
-    {
-        synchronized (rois)
-        {
-            return new HashSet<ROI>(rois);
+    public HashSet<ROI> getROISet() {
+        synchronized (rois) {
+            return new HashSet<>(rois);
         }
     }
 
     /**
+     * @param sorted If true the returned list is ordered by the ROI id (creation order).
      * @return all 2D ROIs attached to this sequence.
-     * @param sorted
-     *        If true the returned list is ordered by the ROI id (creation order).
      */
-    public List<ROI2D> getROI2Ds(boolean sorted)
-    {
-        final List<ROI2D> result = new ArrayList<ROI2D>(rois.size());
+    public List<ROI2D> getROI2Ds(final boolean sorted) {
+        final List<ROI2D> result = new ArrayList<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roi instanceof ROI2D)
                     result.add((ROI2D) roi);
         }
 
         // sort it if required
         if (sorted)
-            Collections.sort(result, ROI.idComparator);
+            result.sort(ROI.idComparator);
 
         return result;
     }
@@ -2522,30 +1896,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return all 2D ROIs attached to this sequence.
      */
-    public ArrayList<ROI2D> getROI2Ds()
-    {
+    public ArrayList<ROI2D> getROI2Ds() {
         return (ArrayList<ROI2D>) getROI2Ds(false);
     }
 
     /**
+     * @param sorted If true the returned list is ordered by the ROI id (creation order).
      * @return all 3D ROIs attached to this sequence.
-     * @param sorted
-     *        If true the returned list is ordered by the ROI id (creation order).
      */
-    public List<ROI3D> getROI3Ds(boolean sorted)
-    {
-        final List<ROI3D> result = new ArrayList<ROI3D>(rois.size());
+    public List<ROI3D> getROI3Ds(final boolean sorted) {
+        final List<ROI3D> result = new ArrayList<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roi instanceof ROI3D)
                     result.add((ROI3D) roi);
         }
 
         // sort it if required
         if (sorted)
-            Collections.sort(result, ROI.idComparator);
+            result.sort(ROI.idComparator);
 
         return result;
     }
@@ -2553,21 +1923,17 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return all 3D ROIs attached to this sequence.
      */
-    public ArrayList<ROI3D> getROI3Ds()
-    {
+    public ArrayList<ROI3D> getROI3Ds() {
         return (ArrayList<ROI3D>) getROI3Ds(false);
     }
 
     /**
-     * @param roiClass
-     *        ROI class
+     * @param roiClass ROI class
      * @return true if the sequence contains ROI of specified ROI class.
      */
-    public boolean hasROI(Class<? extends ROI> roiClass)
-    {
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+    public boolean hasROI(final Class<? extends ROI> roiClass) {
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roiClass.isInstance(roi))
                     return true;
         }
@@ -2576,66 +1942,37 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param roiClass
-     *        ROI class
-     * @param <T>
-     *        generic object
-     * @param sorted
-     *        boolean
+     * @param roiClass ROI class
+     * @param <T>      generic object
+     * @param sorted   boolean
      * @return ROIs of specified class attached to this sequence
      */
     @SuppressWarnings("unchecked")
-    public <T extends ROI> List<T> getROIs(Class<T> roiClass, boolean sorted)
-    {
-        final List<T> result = new ArrayList<T>(rois.size());
+    public <T extends ROI> List<T> getROIs(final Class<T> roiClass, final boolean sorted) {
+        final List<T> result = new ArrayList<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roiClass.isInstance(roi))
                     result.add((T) roi);
         }
 
         // sort it if required
         if (sorted)
-            Collections.sort(result, ROI.idComparator);
+            result.sort(ROI.idComparator);
 
         return result;
     }
 
     /**
-     * @deprecated Use {@link #getROIs(Class, boolean)} instead
-     * @param roiClass
-     *        ROID Class
-     * @return list of ROI
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public List<ROI> getROIs(Class<? extends ROI> roiClass)
-    {
-        final List<ROI> result = new ArrayList<ROI>(rois.size());
-
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
-                if (roiClass.isInstance(roi))
-                    result.add(roi);
-        }
-
-        return result;
-    }
-
-    /**
-     * @param roiClass
-     *        ROI Class
+     * @param roiClass ROI Class
      * @return the number of ROI of specified ROI class attached to the sequence.
      */
-    public int getROICount(Class<? extends ROI> roiClass)
-    {
+    public int getROICount(final Class<? extends ROI> roiClass) {
         int result = 0;
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roiClass.isInstance(roi))
                     result++;
         }
@@ -2646,19 +1983,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return true if the sequence contains at least one selected ROI.
      */
-    public boolean hasSelectedROI()
-    {
+    public boolean hasSelectedROI() {
         return getSelectedROI() != null;
     }
 
     /**
      * @return the first selected ROI found (null if no ROI selected)
      */
-    public ROI getSelectedROI()
-    {
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+    public ROI getSelectedROI() {
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roi.isSelected())
                     return roi;
         }
@@ -2669,11 +2003,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the first selected 2D ROI found (null if no 2D ROI selected)
      */
-    public ROI2D getSelectedROI2D()
-    {
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+    public ROI2D getSelectedROI2D() {
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if ((roi instanceof ROI2D) && roi.isSelected())
                     return (ROI2D) roi;
         }
@@ -2684,11 +2016,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the first selected 3D ROI found (null if no 3D ROI selected)
      */
-    public ROI3D getSelectedROI3D()
-    {
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+    public ROI3D getSelectedROI3D() {
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if ((roi instanceof ROI3D) && roi.isSelected())
                     return (ROI3D) roi;
         }
@@ -2697,19 +2027,15 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param roiClass     ROI class restriction
+     * @param wantReadOnly also return ROI with read only state
      * @return all selected ROI of given class (Set format).
-     * @param roiClass
-     *        ROI class restriction
-     * @param wantReadOnly
-     *        also return ROI with read only state
      */
-    public Set<ROI> getSelectedROISet(Class<? extends ROI> roiClass, boolean wantReadOnly)
-    {
-        final Set<ROI> result = new HashSet<ROI>(rois.size());
+    public Set<ROI> getSelectedROISet(final Class<? extends ROI> roiClass, final boolean wantReadOnly) {
+        final Set<ROI> result = new HashSet<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roi.isSelected() && roiClass.isInstance(roi))
                     if (wantReadOnly || !roi.isReadOnly())
                         result.add(roi);
@@ -2719,20 +2045,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param roiClass ROI class restriction
+     * @param <T>      generic object
      * @return all selected ROI of given class (Set format).
-     * @param roiClass
-     *        ROI class restriction
-     * @param <T>
-     *        generic object
      */
     @SuppressWarnings("unchecked")
-    public <T extends ROI> Set<T> getSelectedROISet(Class<T> roiClass)
-    {
-        final Set<T> result = new HashSet<T>(rois.size());
+    public <T extends ROI> Set<T> getSelectedROISet(final Class<T> roiClass) {
+        final Set<T> result = new HashSet<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roi.isSelected() && roiClass.isInstance(roi))
                     result.add((T) roi);
         }
@@ -2743,13 +2065,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return all selected ROI (Set format).
      */
-    public Set<ROI> getSelectedROISet()
-    {
-        final Set<ROI> result = new HashSet<ROI>(rois.size());
+    public Set<ROI> getSelectedROISet() {
+        final Set<ROI> result = new HashSet<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roi.isSelected())
                     result.add(roi);
         }
@@ -2758,49 +2078,39 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param roiClass     ROI class restriction
+     * @param sorted       If true the returned list is ordered by the ROI id (creation order)
+     * @param wantReadOnly also return ROI with read only state
+     * @param <T>          generic object
      * @return all selected ROI of given class.
-     * @param roiClass
-     *        ROI class restriction
-     * @param sorted
-     *        If true the returned list is ordered by the ROI id (creation order)
-     * @param wantReadOnly
-     *        also return ROI with read only state
-     * @param <T>
-     *        generic object
      */
     @SuppressWarnings("unchecked")
-    public <T extends ROI> List<T> getSelectedROIs(Class<T> roiClass, boolean sorted, boolean wantReadOnly)
-    {
-        final List<T> result = new ArrayList<T>(rois.size());
+    public <T extends ROI> List<T> getSelectedROIs(final Class<T> roiClass, final boolean sorted, final boolean wantReadOnly) {
+        final List<T> result = new ArrayList<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roi.isSelected() && roiClass.isInstance(roi))
                     result.add((T) roi);
         }
 
         // sort it if required
         if (sorted)
-            Collections.sort(result, ROI.idComparator);
+            result.sort(ROI.idComparator);
 
         return result;
     }
 
     /**
+     * @param roiClass     ROI class restriction
+     * @param wantReadOnly also return ROI with read only state
      * @return all selected ROI of given class.
-     * @param roiClass
-     *        ROI class restriction
-     * @param wantReadOnly
-     *        also return ROI with read only state
      */
-    public List<ROI> getSelectedROIs(Class<? extends ROI> roiClass, boolean wantReadOnly)
-    {
-        final List<ROI> result = new ArrayList<ROI>(rois.size());
+    public List<ROI> getSelectedROIs(final Class<? extends ROI> roiClass, final boolean wantReadOnly) {
+        final List<ROI> result = new ArrayList<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roi.isSelected() && roiClass.isInstance(roi))
                     if (wantReadOnly || !roi.isReadOnly())
                         result.add(roi);
@@ -2812,13 +2122,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return all selected ROI
      */
-    public ArrayList<ROI> getSelectedROIs()
-    {
-        final ArrayList<ROI> result = new ArrayList<ROI>(rois.size());
+    public ArrayList<ROI> getSelectedROIs() {
+        final ArrayList<ROI> result = new ArrayList<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roi.isSelected())
                     result.add(roi);
         }
@@ -2829,13 +2137,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return all selected 2D ROI
      */
-    public ArrayList<ROI2D> getSelectedROI2Ds()
-    {
-        final ArrayList<ROI2D> result = new ArrayList<ROI2D>(rois.size());
+    public ArrayList<ROI2D> getSelectedROI2Ds() {
+        final ArrayList<ROI2D> result = new ArrayList<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if ((roi instanceof ROI2D) && roi.isSelected())
                     result.add((ROI2D) roi);
         }
@@ -2846,13 +2152,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return all selected 3D ROI
      */
-    public ArrayList<ROI3D> getSelectedROI3Ds()
-    {
-        final ArrayList<ROI3D> result = new ArrayList<ROI3D>(rois.size());
+    public ArrayList<ROI3D> getSelectedROI3Ds() {
+        final ArrayList<ROI3D> result = new ArrayList<>(rois.size());
 
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if ((roi instanceof ROI3D) && roi.isSelected())
                     result.add((ROI3D) roi);
         }
@@ -2863,11 +2167,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the current focused ROI (null if no ROI focused)
      */
-    public ROI getFocusedROI()
-    {
-        synchronized (rois)
-        {
-            for (ROI roi : rois)
+    public ROI getFocusedROI() {
+        synchronized (rois) {
+            for (final ROI roi : rois)
                 if (roi.isFocused())
                     return roi;
         }
@@ -2880,31 +2182,25 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * Specifying a <code>null</code> ROI here will actually clear all ROI selection.<br>
      * Note that you can use {@link #setSelectedROIs(List)} or {@link ROI#setSelected(boolean)} for
      * multiple ROI selection.
-     * 
-     * @param roi
-     *        the ROI to select.
+     *
+     * @param roi the ROI to select.
      * @return <code>false</code> is the specified ROI is not attached to the sequence.
      */
-    public boolean setSelectedROI(ROI roi)
-    {
+    public boolean setSelectedROI(final ROI roi) {
         beginUpdate();
-        try
-        {
-            synchronized (rois)
-            {
-                for (ROI currentRoi : rois)
+        try {
+            synchronized (rois) {
+                for (final ROI currentRoi : rois)
                     if (currentRoi != roi)
                         currentRoi.setSelected(false);
             }
 
-            if (contains(roi))
-            {
+            if (contains(roi)) {
                 roi.setSelected(true);
                 return true;
             }
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
 
@@ -2912,47 +2208,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Use {@link #setSelectedROI(ROI)} instead.
-     * @param roi
-     *        ROI
-     * @param exclusive
-     *        boolean
-     * @return boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean setSelectedROI(ROI roi, boolean exclusive)
-    {
-        if (exclusive)
-            return setSelectedROI(roi);
-
-        if (contains(roi))
-        {
-            roi.setSelected(true);
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @deprecated Use {@link #setSelectedROIs(List)} instead.
-     * @param selected
-     *        list of ROI
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setSelectedROIs(ArrayList<ROI> selected)
-    {
-        setSelectedROIs((List<ROI>) selected);
-    }
-
-    /**
      * Set selected ROI (unselected all others)
-     * 
-     * @param selected
-     *        list of ROI
+     *
+     * @param selected list of ROI
      */
-    public void setSelectedROIs(List<? extends ROI> selected)
-    {
+    public void setSelectedROIs(final List<? extends ROI> selected) {
         final List<ROI> oldSelected = getSelectedROIs();
 
         final int newSelectedSize = (selected == null) ? 0 : selected.size();
@@ -2966,30 +2226,25 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         // use HashSet for fast .contains() !
         if (selected != null)
-            newSelected = new HashSet<ROI>(selected);
+            newSelected = new HashSet<>(selected);
         else
-            newSelected = new HashSet<ROI>();
+            newSelected = new HashSet<>();
 
         // selection changed ?
-        if (!CollectionUtil.equals(oldSelected, newSelected))
-        {
+        if (!CollectionUtil.equals(oldSelected, newSelected)) {
             beginUpdate();
-            try
-            {
-                if (newSelectedSize > 0)
-                {
-                    for (ROI roi : getROIs())
+            try {
+                if (newSelectedSize > 0) {
+                    for (final ROI roi : getROIs())
                         roi.setSelected(newSelected.contains(roi));
                 }
-                else
-                {
+                else {
                     // unselected all ROIs
-                    for (ROI roi : getROIs())
+                    for (final ROI roi : getROIs())
                         roi.setSelected(false);
                 }
             }
-            finally
-            {
+            finally {
                 endUpdate();
             }
         }
@@ -2997,30 +2252,25 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set the focused ROI
-     * 
-     * @param roi
-     *        ROI
+     *
+     * @param roi ROI
      */
-    public boolean setFocusedROI(ROI roi)
-    {
+    public boolean setFocusedROI(final ROI roi) {
         // faster .contain()
         final Set<ROI> listRoi = getROISet();
 
         beginUpdate();
-        try
-        {
-            for (ROI currentRoi : listRoi)
+        try {
+            for (final ROI currentRoi : listRoi)
                 if (currentRoi != roi)
                     currentRoi.internalUnfocus();
 
-            if (listRoi.contains(roi))
-            {
+            if (listRoi.contains(roi)) {
                 roi.internalFocus();
                 return true;
             }
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
 
@@ -3029,31 +2279,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Add the specified collection of ROI to the sequence.
-     * 
-     * @param rois
-     *        the collection of ROI to attach to the sequence
-     * @param canUndo
-     *        If true the action can be canceled by the undo manager.
+     *
+     * @param rois    the collection of ROI to attach to the sequence
+     * @param canUndo If true the action can be canceled by the undo manager.
      * @return <code>true</code> if the operation succeed or <code>false</code> if some ROIs could
-     *         not be added (already present)
+     * not be added (already present)
      */
-    public boolean addROIs(Collection<? extends ROI> rois, boolean canUndo)
-    {
-        if (!rois.isEmpty())
-        {
-            final List<ROI> addedRois = new ArrayList<ROI>();
+    public boolean addROIs(final Collection<? extends ROI> rois, final boolean canUndo) {
+        if (!rois.isEmpty()) {
+            final List<ROI> addedRois = new ArrayList<>();
 
             beginUpdate();
-            try
-            {
-                for (ROI roi : rois)
-                {
+            try {
+                for (final ROI roi : rois) {
                     if (addROI(roi, false))
                         addedRois.add(roi);
                 }
             }
-            finally
-            {
+            finally {
                 endUpdate();
             }
 
@@ -3067,32 +2310,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param roi ROI to attach to the sequence
      * @return Add the specified ROI to the sequence.
-     * @param roi
-     *        ROI to attach to the sequence
      */
-    public boolean addROI(ROI roi)
-    {
+    public boolean addROI(final ROI roi) {
         return addROI(roi, false);
     }
 
     /**
      * Add the specified ROI to the sequence.
-     * 
-     * @param roi
-     *        ROI to attach to the sequence
-     * @param canUndo
-     *        If true the action can be canceled by the undo manager.
+     *
+     * @param roi     ROI to attach to the sequence
+     * @param canUndo If true the action can be canceled by the undo manager.
      * @return <code>true</code> if the operation succeed or <code>false</code> otherwise (already
-     *         present)
+     * present)
      */
-    public boolean addROI(ROI roi, boolean canUndo)
-    {
+    public boolean addROI(final ROI roi, final boolean canUndo) {
         if ((roi == null) || contains(roi))
             return false;
 
-        synchronized (rois)
-        {
+        synchronized (rois) {
             rois.add(roi);
         }
         // add listener to ROI
@@ -3110,35 +2347,28 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param roi ROI to detach from the sequence
      * @return Remove the specified ROI from the sequence.
-     * @param roi
-     *        ROI to detach from the sequence
      */
-    public boolean removeROI(ROI roi)
-    {
+    public boolean removeROI(final ROI roi) {
         return removeROI(roi, false);
     }
 
     /**
      * Remove the specified ROI from the sequence.
-     * 
-     * @param roi
-     *        ROI to detach from the sequence
-     * @param canUndo
-     *        If true the action can be canceled by the undo manager.
+     *
+     * @param roi     ROI to detach from the sequence
+     * @param canUndo If true the action can be canceled by the undo manager.
      * @return <code>false</code> if the ROI was not found in the sequence.<br>
-     *         Returns <code>true</code> otherwise.
+     * Returns <code>true</code> otherwise.
      */
-    public boolean removeROI(ROI roi, boolean canUndo)
-    {
-        if (contains(roi))
-        {
+    public boolean removeROI(final ROI roi, final boolean canUndo) {
+        if (contains(roi)) {
             // remove ROI overlay first
             removeOverlay(roi.getOverlay());
 
             // remove ROI
-            synchronized (rois)
-            {
+            synchronized (rois) {
                 rois.remove(roi);
             }
             // remove listener
@@ -3157,21 +2387,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Remove the specified collection of ROI from the sequence.
-     * 
-     * @param rois
-     *        the collection of ROI to remove from the sequence
-     * @param canUndo
-     *        If true the action can be canceled by the undo manager.
+     *
+     * @param rois    the collection of ROI to remove from the sequence
+     * @param canUndo If true the action can be canceled by the undo manager.
      * @return <code>true</code> if all ROI from the collection has been correctly removed.
      */
-    public boolean removeROIs(Collection<? extends ROI> rois, boolean canUndo)
-    {
-        if (!rois.isEmpty())
-        {
-            final List<ROI> removedRois = new ArrayList<ROI>();
+    public boolean removeROIs(final Collection<? extends ROI> rois, final boolean canUndo) {
+        if (!rois.isEmpty()) {
+            final List<ROI> removedRois = new ArrayList<>();
 
-            for (ROI roi : rois)
-            {
+            for (final ROI roi : rois) {
                 if (removeROI(roi, false))
                     removedRois.add(roi);
             }
@@ -3187,40 +2412,31 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Remove all selected ROI from the sequence.
-     * 
-     * @param removeReadOnly
-     *        Specify if we should also remove <i>read only</i> ROI (see {@link ROI#isReadOnly()})
+     *
+     * @param removeReadOnly Specify if we should also remove <i>read only</i> ROI (see {@link ROI#isReadOnly()})
      * @return <code>true</code> if at least one ROI was removed.<br>
-     *         Returns <code>false</code> otherwise
+     * Returns <code>false</code> otherwise
      */
-    public boolean removeSelectedROIs(boolean removeReadOnly)
-    {
+    public boolean removeSelectedROIs(final boolean removeReadOnly) {
         return removeSelectedROIs(removeReadOnly, false);
     }
 
     /**
      * Remove all selected ROI from the sequence.
-     * 
-     * @param removeReadOnly
-     *        Specify if we should also remove <i>read only</i> ROI (see {@link ROI#isReadOnly()})
-     * @param canUndo
-     *        If true the action can be canceled by the undo manager.
+     *
+     * @param removeReadOnly Specify if we should also remove <i>read only</i> ROI (see {@link ROI#isReadOnly()})
+     * @param canUndo        If true the action can be canceled by the undo manager.
      * @return <code>true</code> if at least one ROI was removed.<br>
-     *         Returns <code>false</code> otherwise
+     * Returns <code>false</code> otherwise
      */
-    public boolean removeSelectedROIs(boolean removeReadOnly, boolean canUndo)
-    {
-        final List<ROI> undoList = new ArrayList<ROI>();
+    public boolean removeSelectedROIs(final boolean removeReadOnly, final boolean canUndo) {
+        final List<ROI> undoList = new ArrayList<>();
 
         beginUpdate();
-        try
-        {
-            synchronized (rois)
-            {
-                for (ROI roi : getROIs())
-                {
-                    if (roi.isSelected() && (removeReadOnly || !roi.isReadOnly()))
-                    {
+        try {
+            synchronized (rois) {
+                for (final ROI roi : getROIs()) {
+                    if (roi.isSelected() && (removeReadOnly || !roi.isReadOnly())) {
                         // remove ROI overlay first
                         removeOverlay(roi.getOverlay());
 
@@ -3239,8 +2455,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             if (canUndo)
                 undoManager.addEdit(new ROIRemovesSequenceEdit(this, undoList));
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
 
@@ -3250,25 +2465,21 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Remove all ROI from the sequence.
      */
-    public void removeAllROI()
-    {
+    public void removeAllROI() {
         removeAllROI(false);
     }
 
     /**
      * Remove all ROI from the sequence.
-     * 
-     * @param canUndo
-     *        If true the action can be canceled by the undo manager.
+     *
+     * @param canUndo If true the action can be canceled by the undo manager.
      */
-    public void removeAllROI(boolean canUndo)
-    {
-        if (!rois.isEmpty())
-        {
+    public void removeAllROI(final boolean canUndo) {
+        if (!rois.isEmpty()) {
             final List<ROI> allROIs = getROIs();
 
             // remove all ROI
-            for (ROI roi : allROIs)
+            for (final ROI roi : allROIs)
                 removeROI(roi, false);
 
             if (canUndo)
@@ -3277,19 +2488,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param painter Used only for backward compatibility with {@link Painter} interface.
      * @return Return the overlay associated to the specified painter.<br>
-     * @param painter
-     *        Used only for backward compatibility with {@link Painter} interface.
      */
-    @SuppressWarnings("deprecation")
-    protected Overlay getOverlay(Painter painter)
-    {
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    protected Overlay getOverlay(final Painter painter) {
         if (painter instanceof Overlay)
             return (Overlay) painter;
 
-        synchronized (overlays)
-        {
-            for (Overlay overlay : overlays)
+        synchronized (overlays) {
+            for (final Overlay overlay : overlays)
                 if (overlay instanceof OverlayWrapper)
                     if (((OverlayWrapper) overlay).getPainter() == painter)
                         return overlay;
@@ -3299,52 +2507,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Use {@link #addOverlay(Overlay)} instead.
-     * @param painter
-     *        Painter
-     * @return boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean addPainter(Painter painter)
-    {
-        if (painter instanceof Overlay)
-            return addOverlay((Overlay) painter);
-
-        if ((painter == null) || contains(painter))
-            return false;
-
-        addOverlay(new OverlayWrapper(painter, "Overlay wrapper"));
-
-        return true;
-    }
-
-    /**
-     * @deprecated Use {@link #removeOverlay(Overlay)} instead.
-     * @param painter
-     *        Painter
-     * @return boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean removePainter(Painter painter)
-    {
-        if (painter instanceof Overlay)
-            return removeOverlay((Overlay) painter);
-
-        return removeOverlay(getOverlay(painter));
-    }
-
-    /**
-     * @param overlay
-     *        overlay
+     * @param overlay overlay
      * @return Add an overlay to the sequence.
      */
-    public boolean addOverlay(Overlay overlay)
-    {
+    public boolean addOverlay(final Overlay overlay) {
         if ((overlay == null) || contains(overlay))
             return false;
 
-        synchronized (overlays)
-        {
+        synchronized (overlays) {
             overlays.add(overlay);
         }
 
@@ -3357,21 +2527,17 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param overlay
-     *        overlay
+     * @param overlay overlay
      * @return Remove an overlay from the sequence.
      */
-    public boolean removeOverlay(Overlay overlay)
-    {
-        boolean result;
+    public boolean removeOverlay(final Overlay overlay) {
+        final boolean result;
 
-        synchronized (overlays)
-        {
+        synchronized (overlays) {
             result = overlays.remove(overlay);
         }
 
-        if (result)
-        {
+        if (result) {
             // remove listener
             overlay.removeOverlayListener(this);
             // notify overlay removed
@@ -3382,28 +2548,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return Return <i>true</i> if image data at given position is loaded.
      */
-    public boolean isDataLoaded(int t, int z)
-    {
+    public boolean isDataLoaded(final int t, final int z) {
         final IcyBufferedImage img = getImage(t, z, false);
 
         return (img != null) && img.isDataInitialized();
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return the VolumetricImage at position t
      */
-    public VolumetricImage getVolumetricImage(int t)
-    {
-        synchronized (volumetricImages)
-        {
+    public VolumetricImage getVolumetricImage(final int t) {
+        synchronized (volumetricImages) {
             return volumetricImages.get(Integer.valueOf(t));
         }
     }
@@ -3411,12 +2571,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the first VolumetricImage
      */
-    protected VolumetricImage getFirstVolumetricImage()
-    {
+    protected VolumetricImage getFirstVolumetricImage() {
         final Entry<Integer, VolumetricImage> entry;
 
-        synchronized (volumetricImages)
-        {
+        synchronized (volumetricImages) {
             entry = volumetricImages.firstEntry();
         }
 
@@ -3429,12 +2587,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the last VolumetricImage
      */
-    protected VolumetricImage getLastVolumetricImage()
-    {
+    protected VolumetricImage getLastVolumetricImage() {
         final Entry<Integer, VolumetricImage> entry;
 
-        synchronized (volumetricImages)
-        {
+        synchronized (volumetricImages) {
             entry = volumetricImages.lastEntry();
         }
 
@@ -3447,23 +2603,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return Add an empty volumetricImage at last index + 1
      */
-    public VolumetricImage addVolumetricImage()
-    {
+    public VolumetricImage addVolumetricImage() {
         return setVolumetricImage(getSizeT());
     }
 
     /**
      * @return Add an empty volumetricImage at t position
      */
-    protected VolumetricImage setVolumetricImage(int t)
-    {
+    protected VolumetricImage setVolumetricImage(final int t) {
         // remove old volumetric image if any
         removeAllImages(t);
 
         final VolumetricImage volImg = new VolumetricImage(this);
 
-        synchronized (volumetricImages)
-        {
+        synchronized (volumetricImages) {
             volumetricImages.put(Integer.valueOf(t), volImg);
         }
 
@@ -3471,31 +2624,25 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param volImg
-     *        img
-     * @param t
-     *        int
+     * @param volImg img
+     * @param t      int
      * @return Add a volumetricImage at t position<br>
-     *         It actually create a new volumetricImage and add it to the sequence<br>
-     *         The new created volumetricImage is returned
+     * It actually create a new volumetricImage and add it to the sequence<br>
+     * The new created volumetricImage is returned
      */
-    public VolumetricImage addVolumetricImage(int t, VolumetricImage volImg)
-    {
-        if (volImg != null)
-        {
+    public VolumetricImage addVolumetricImage(final int t, final VolumetricImage volImg) {
+        if (volImg != null) {
             final VolumetricImage result;
 
             beginUpdate();
-            try
-            {
+            try {
                 // get new volumetric image (remove old one if any)
                 result = setVolumetricImage(t);
 
-                for (Entry<Integer, IcyBufferedImage> entry : volImg.getImages().entrySet())
+                for (final Entry<Integer, IcyBufferedImage> entry : volImg.getImages().entrySet())
                     setImage(t, entry.getKey().intValue(), entry.getValue());
             }
-            finally
-            {
+            finally {
                 endUpdate();
             }
 
@@ -3506,24 +2653,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Use {@link #removeAllImages(int)} instead.
-     * @param t
-     *        int
-     * @return boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean removeVolumetricImage(int t)
-    {
-        return removeAllImages(t);
-    }
-
-    /**
-     * @param t
-     *        int
+     * @param t int
      * @return the last image of VolumetricImage[t]
      */
-    public IcyBufferedImage getLastImage(int t)
-    {
+    public IcyBufferedImage getLastImage(final int t) {
         final VolumetricImage volImg = getVolumetricImage(t);
 
         if (volImg != null)
@@ -3535,8 +2668,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the first image of first VolumetricImage
      */
-    public IcyBufferedImage getFirstImage()
-    {
+    public IcyBufferedImage getFirstImage() {
         final VolumetricImage volImg = getFirstVolumetricImage();
 
         if (volImg != null)
@@ -3548,12 +2680,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the first non null image if exist
      */
-    public IcyBufferedImage getFirstNonNullImage()
-    {
-        synchronized (volumetricImages)
-        {
-            for (VolumetricImage volImg : volumetricImages.values())
-            {
+    public IcyBufferedImage getFirstNonNullImage() {
+        synchronized (volumetricImages) {
+            for (final VolumetricImage volImg : volumetricImages.values()) {
                 final IcyBufferedImage img = volImg.getFirstNonNullImage();
                 if (img != null)
                     return img;
@@ -3566,8 +2695,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the last image of last VolumetricImage
      */
-    public IcyBufferedImage getLastImage()
-    {
+    public IcyBufferedImage getLastImage() {
         final VolumetricImage volImg = getLastVolumetricImage();
 
         if (volImg != null)
@@ -3577,24 +2705,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param c if <code>(c == -1)</code> then this method is equivalent to {@link #getImage(int, int)}<br>
+     *          if <code>((c == 0) || (sizeC == 1))</code> then this method is equivalent to {@link #getImage(int, int)}<br>
+     *          if <code>((c &lt; 0) || (c &gt;= sizeC))</code> then it returns <code>null</code>
+     * @param t int
+     * @param z int
      * @return a single component image corresponding to the component c of the image
-     *         at time t and depth z.<br>
-     *         This actually create a new image which share its data with internal image
-     *         so any modifications to one affect the other.<br>
-     * @param c
-     *        if <code>(c == -1)</code> then this method is equivalent to {@link #getImage(int, int)}<br>
-     *        if <code>((c == 0) || (sizeC == 1))</code> then this method is equivalent to {@link #getImage(int, int)}<br>
-     *        if <code>((c &lt; 0) || (c &gt;= sizeC))</code> then it returns <code>null</code>
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * at time t and depth z.<br>
+     * This actually create a new image which share its data with internal image
+     * so any modifications to one affect the other.<br>
      * @see IcyBufferedImageUtil#extractChannel(IcyBufferedImage, int)
      * @since version 1.0.3.3b
      */
     @Override
-    public IcyBufferedImage getImage(int t, int z, int c)
-    {
+    public IcyBufferedImage getImage(final int t, final int z, final int c) {
         final IcyBufferedImage src = getImage(t, z);
 
         if ((src == null) || (c == -1))
@@ -3604,20 +2728,15 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param loadData if <code>true</code> then we ensure that image data is loaded (in case of lazy loading) before returning the image
+     * @param t        int
+     * @param z        int
      * @return image at time t and depth z.
-     * @param loadData
-     *        if <code>true</code> then we ensure that image data is loaded (in case of lazy loading) before returning the image
-     * @param t
-     *        int
-     * @param z
-     *        int
      */
-    protected IcyBufferedImage getImage(int t, int z, boolean loadData)
-    {
+    protected IcyBufferedImage getImage(final int t, final int z, final boolean loadData) {
         final VolumetricImage volImg = getVolumetricImage(t);
 
-        if (volImg != null)
-        {
+        if (volImg != null) {
             final IcyBufferedImage result = volImg.getImage(z);
 
             if ((result != null) && loadData)
@@ -3630,15 +2749,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return image at time t and depth z
      */
     @Override
-    public IcyBufferedImage getImage(int t, int z)
-    {
+    public IcyBufferedImage getImage(final int t, final int z) {
         // get image (no data loading at this point)
         final IcyBufferedImage result = getImage(t, z, false);
 
@@ -3647,19 +2763,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final int prefetchRange = 2;
 
         // dumb data prefetch around T
-        for (int i = -prefetchRange; i <= prefetchRange; i++)
-        {
+        for (int i = -prefetchRange; i <= prefetchRange; i++) {
             final int pt = t + i;
 
             if ((pt != t) && (pt >= 0) && (pt < sizeT))
                 SequencePrefetcher.prefetch(this, pt, z);
         }
         // 3D stack ?
-        if (z > 0)
-        {
+        if (z > 0) {
             // dumb data prefetch around current Z
-            for (int i = -prefetchRange; i <= prefetchRange; i++)
-            {
+            for (int i = -prefetchRange; i <= prefetchRange; i++) {
                 final int pz = z + i;
 
                 if ((pz != z) && (pz >= 0) && (pz < sizeZ))
@@ -3671,24 +2784,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return all images at specified t position
      */
-    public ArrayList<IcyBufferedImage> getImages(int t)
-    {
+    public ArrayList<IcyBufferedImage> getImages(final int t) {
         final VolumetricImage volImg = getVolumetricImage(t);
 
         if (volImg != null)
             return volImg.getAllImage();
 
-        return new ArrayList<IcyBufferedImage>();
+        return new ArrayList<>();
     }
 
     /**
      * @return all images of sequence in [ZT] order:<br>
-     * 
-     *         <pre>
+     *
+     * <pre>
      * T=0 Z=0
      * T=0 Z=1
      * T=0 Z=2
@@ -3697,13 +2808,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * ...
      *         </pre>
      */
-    public ArrayList<IcyBufferedImage> getAllImage()
-    {
-        final ArrayList<IcyBufferedImage> result = new ArrayList<IcyBufferedImage>();
+    public ArrayList<IcyBufferedImage> getAllImage() {
+        final ArrayList<IcyBufferedImage> result = new ArrayList<>();
 
-        synchronized (volumetricImages)
-        {
-            for (VolumetricImage volImg : volumetricImages.values())
+        synchronized (volumetricImages) {
+            for (final VolumetricImage volImg : volumetricImages.values())
                 result.addAll(volImg.getAllImage());
         }
 
@@ -3712,29 +2821,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Put an image into the specified VolumetricImage at the given z location
-     * 
-     * @param volImg
-     *        image
-     * @param image
-     *        image
-     * @param z
-     *        int
+     *
+     * @param volImg image
+     * @param image  image
+     * @param z      int
      */
-    protected void setImage(VolumetricImage volImg, int z, BufferedImage image) throws IllegalArgumentException
-    {
-        if (volImg != null)
-        {
+    protected void setImage(final VolumetricImage volImg, final int z, final BufferedImage image) throws IllegalArgumentException {
+        if (volImg != null) {
             // not the same image ?
-            if (volImg.getImage(z) != image)
-            {
+            if (volImg.getImage(z) != image) {
                 final IcyColorModel cm = colorModel;
 
                 // this is different from removeImage as we don't remove empty VolumetricImage
                 if (image == null)
                     volImg.removeImage(z);
-                else
-                {
-                    IcyBufferedImage icyImg;
+                else {
+                    final IcyBufferedImage icyImg;
 
                     // convert to icyImage if needed
                     if (image instanceof IcyBufferedImage)
@@ -3774,16 +2876,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Set an image at the specified position.<br>
      * Note that the image will be transformed in IcyBufferedImage internally if needed
-     * 
-     * @param t
-     *        T position
-     * @param z
-     *        Z position
-     * @param image
-     *        the image to set
+     *
+     * @param t     T position
+     * @param z     Z position
+     * @param image the image to set
      */
-    public void setImage(int t, int z, BufferedImage image) throws IllegalArgumentException
-    {
+    public void setImage(final int t, final int z, final BufferedImage image) throws IllegalArgumentException {
         final boolean volImgCreated;
 
         if (image == null)
@@ -3791,21 +2889,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         VolumetricImage volImg = getVolumetricImage(t);
 
-        if (volImg == null)
-        {
+        if (volImg == null) {
             volImg = setVolumetricImage(t);
             volImgCreated = true;
         }
         else
             volImgCreated = false;
 
-        try
-        {
+        try {
             // set image
             setImage(volImg, z, image);
         }
-        catch (IllegalArgumentException e)
-        {
+        catch (final IllegalArgumentException e) {
             // image set failed ? remove empty image list if needed
             if (volImgCreated)
                 removeAllImages(t);
@@ -3817,12 +2912,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Add an image (image is added in Z dimension).<br>
      * This method is equivalent to <code>setImage(max(getSizeT() - 1, 0), getSizeZ(t), image)</code>
-     * 
-     * @param image
-     *        image
+     *
+     * @param image image
      */
-    public void addImage(BufferedImage image) throws IllegalArgumentException
-    {
+    public void addImage(final BufferedImage image) throws IllegalArgumentException {
         final int t = Math.max(getSizeT() - 1, 0);
 
         setImage(t, getSizeZ(t), image);
@@ -3831,35 +2924,27 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Add an image at specified T position.<br>
      * This method is equivalent to <code>setImage(t, getSizeZ(t), image)</code>
-     * 
-     * @param image
-     *        image
-     * @param t
-     *        int
+     *
+     * @param image image
+     * @param t     int
      */
-    public void addImage(int t, BufferedImage image) throws IllegalArgumentException
-    {
+    public void addImage(final int t, final BufferedImage image) throws IllegalArgumentException {
         setImage(t, getSizeZ(t), image);
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return Remove the image at the specified position.
      */
-    public boolean removeImage(int t, int z)
-    {
+    public boolean removeImage(final int t, final int z) {
         final VolumetricImage volImg = getVolumetricImage(t);
 
-        if (volImg != null)
-        {
+        if (volImg != null) {
             final boolean result;
 
             beginUpdate();
-            try
-            {
+            try {
                 result = volImg.removeImage(z);
 
                 // empty ?
@@ -3867,8 +2952,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
                     // remove it
                     removeAllImages(t);
             }
-            finally
-            {
+            finally {
                 endUpdate();
             }
 
@@ -3879,16 +2963,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return Remove all images at position <code>t</code>
      */
-    public boolean removeAllImages(int t)
-    {
+    public boolean removeAllImages(final int t) {
         final VolumetricImage volImg;
 
-        synchronized (volumetricImages)
-        {
+        synchronized (volumetricImages) {
             volImg = volumetricImages.remove(Integer.valueOf(t));
         }
 
@@ -3902,15 +2983,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Remove all images
      */
-    public void removeAllImages()
-    {
+    public void removeAllImages() {
         beginUpdate();
-        try
-        {
-            synchronized (volumetricImages)
-            {
-                while (!volumetricImages.isEmpty())
-                {
+        try {
+            synchronized (volumetricImages) {
+                while (!volumetricImages.isEmpty()) {
                     final VolumetricImage volImg = volumetricImages.pollFirstEntry().getValue();
                     // we do manual clear to dispatch events correctly
                     if (volImg != null)
@@ -3918,54 +2995,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
                 }
             }
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
     }
 
     /**
-     * @deprecated Use {@link #removeAllImages(int)} instead.
-     * @param t
-     *        int
-     * @return true
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean removeAllImage(int t)
-    {
-        return removeAllImages(t);
-    }
-
-    /**
-     * @deprecated Use {@link #removeAllImages()} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void removeAllImage()
-    {
-        removeAllImages();
-    }
-
-    /**
      * Remove empty element of image list
      */
-    public void packImageList()
-    {
+    public void packImageList() {
         beginUpdate();
-        try
-        {
-            synchronized (volumetricImages)
-            {
-                for (Entry<Integer, VolumetricImage> entry : volumetricImages.entrySet())
-                {
+        try {
+            synchronized (volumetricImages) {
+                for (final Entry<Integer, VolumetricImage> entry : volumetricImages.entrySet()) {
                     final VolumetricImage volImg = entry.getValue();
                     final int t = entry.getKey().intValue();
 
-                    if (volImg == null)
-                    {
+                    if (volImg == null) {
                         removeAllImages(t);
                     }
-                    else
-                    {
+                    else {
                         // pack the list
                         volImg.pack();
                         // empty ? --> remove it
@@ -3975,8 +3024,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
                 }
             }
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
     }
@@ -3984,13 +3032,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return return the number of loaded image
      */
-    public int getNumImage()
-    {
+    public int getNumImage() {
         int result = 0;
 
-        synchronized (volumetricImages)
-        {
-            for (VolumetricImage volImg : volumetricImages.values())
+        synchronized (volumetricImages) {
+            for (final VolumetricImage volImg : volumetricImages.values())
                 if (volImg != null)
                     result += volImg.getNumImage();
         }
@@ -4001,11 +3047,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return return true if no image in sequence
      */
-    public boolean isEmpty()
-    {
-        synchronized (volumetricImages)
-        {
-            for (VolumetricImage volImg : volumetricImages.values())
+    public boolean isEmpty() {
+        synchronized (volumetricImages) {
+            for (final VolumetricImage volImg : volumetricImages.values())
                 if ((volImg != null) && (!volImg.isEmpty()))
                     return false;
         }
@@ -4016,41 +3060,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return true if the sequence uses default attributed name
      */
-    public boolean isDefaultName()
-    {
+    public boolean isDefaultName() {
         return getName().startsWith(DEFAULT_NAME);
     }
 
     /**
-     * @param index
-     *        int
+     * @param index int
      * @return true is the specified channel uses default attributed name
      */
-    public boolean isDefaultChannelName(int index)
-    {
+    public boolean isDefaultChannelName(final int index) {
         return StringUtil.equals(getChannelName(index), getDefaultChannelName(index));
-    }
-
-    /**
-     * @return the number of volumetricImage in the sequence<br>
-     *         Use getSizeT instead
-     * @see #getSizeT
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getLength()
-    {
-        return getSizeT();
     }
 
     /**
      * @return return the number of volumetricImage in the sequence
      */
     @Override
-    public int getSizeT()
-    {
-        synchronized (volumetricImages)
-        {
+    public int getSizeT() {
+        synchronized (volumetricImages) {
             if (volumetricImages.isEmpty())
                 return 0;
 
@@ -4060,22 +3087,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * @return the global number of z stack in the sequence.
-     *         Use getSizeZ instead
-     * @see #getSizeZ
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getDepth()
-    {
-        return getSizeZ();
-    }
-
-    /**
-     * @return the global number of z stack in the sequence.
      */
     @Override
-    public int getSizeZ()
-    {
+    public int getSizeZ() {
         final int sizeT = getSizeT();
 
         int result = 0;
@@ -4088,8 +3102,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the number of z stack for the volumetricImage[t].
      */
-    public int getSizeZ(int t)
-    {
+    public int getSizeZ(final int t) {
         // t = -1 means global Z size
         if (t == -1)
             return getSizeZ();
@@ -4103,23 +3116,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @return the number of component/channel/band per image.<br>
-     *         Use getSizeC instead
-     * @see #getSizeC
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getNumComponents()
-    {
-        return getSizeC();
-    }
-
-    /**
      * @return the number of component/channel/band per image
      */
     @Override
-    public int getSizeC()
-    {
+    public int getSizeC() {
         final IcyColorModel cm = colorModel;
 
         // color model defined ? --> get it from color model
@@ -4133,8 +3133,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return Same as {@link #getSizeY()}
      */
-    public int getHeight()
-    {
+    public int getHeight() {
         return getSizeY();
     }
 
@@ -4142,8 +3141,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return the height of the sequence (0 if the sequence contains no image).
      */
     @Override
-    public int getSizeY()
-    {
+    public int getSizeY() {
         // try to get from image first
         final IcyBufferedImage img = getFirstNonNullImage();
 
@@ -4157,8 +3155,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return Same as {@link #getSizeX()}
      */
-    public int getWidth()
-    {
+    public int getWidth() {
         return getSizeX();
     }
 
@@ -4166,8 +3163,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return the width of the sequence (0 if the sequence contains no image).
      */
     @Override
-    public int getSizeX()
-    {
+    public int getSizeX() {
         final IcyBufferedImage img = getFirstNonNullImage();
 
         // try to get it from image first
@@ -4181,58 +3177,36 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the size of the specified dimension
      */
-    public int getSize(DimensionId dim)
-    {
-        switch (dim)
-        {
-            case X:
-                return getSizeX();
-            case Y:
-                return getSizeY();
-            case C:
-                return getSizeC();
-            case Z:
-                return getSizeZ();
-            case T:
-                return getSizeT();
-            default:
-            case NULL:
-                return 0;
-        }
+    public int getSize(final DimensionId dim) {
+        return switch (dim) {
+            case X -> getSizeX();
+            case Y -> getSizeY();
+            case C -> getSizeC();
+            case Z -> getSizeZ();
+            case T -> getSizeT();
+            default -> 0;
+        };
     }
 
     /**
      * @return 2D dimension of sequence {sizeX, sizeY}
      */
-    public Dimension getDimension2D()
-    {
+    public Dimension getDimension2D() {
         return new Dimension(getSizeX(), getSizeY());
     }
 
     /**
      * @return 5D dimension of sequence {sizeX, sizeY, sizeZ, sizeT, sizeC}
      */
-    public Dimension5D.Integer getDimension5D()
-    {
+    public Dimension5D.Integer getDimension5D() {
         return new Dimension5D.Integer(getSizeX(), getSizeY(), getSizeZ(), getSizeT(), getSizeC());
-    }
-
-    /**
-     * @deprecated Use {@link #getDimension2D()} instead.
-     * @return diemension
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Dimension getDimension()
-    {
-        return getDimension2D();
     }
 
     /**
      * @return 2D bounds of sequence {0, 0, sizeX, sizeY}
      * @see #getDimension2D()
      */
-    public Rectangle getBounds2D()
-    {
+    public Rectangle getBounds2D() {
         return new Rectangle(getSizeX(), getSizeY());
     }
 
@@ -4240,38 +3214,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return 5D bounds of sequence {0, 0, 0, 0, 0, sizeX, sizeY, sizeZ, sizeT, sizeC}
      * @see #getDimension5D()
      */
-    public Rectangle5D.Integer getBounds5D()
-    {
+    public Rectangle5D.Integer getBounds5D() {
         return new Rectangle5D.Integer(0, 0, 0, 0, 0, getSizeX(), getSizeY(), getSizeZ(), getSizeT(), getSizeC());
     }
 
     /**
-     * @deprecated Use {@link #getBounds2D()} instead
-     * @return rectangle
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Rectangle getBounds()
-    {
-        return getBounds2D();
-    }
-
-    /**
      * @return the number of sample.<br>
-     *         This is equivalent to<br>
-     *         <code>getSizeX() * getSizeY() * getSizeC() * getSizeZ() * getSizeT()</code>
+     * This is equivalent to<br>
+     * <code>getSizeX() * getSizeY() * getSizeC() * getSizeZ() * getSizeT()</code>
      */
-    public int getNumSample()
-    {
+    public int getNumSample() {
         return getSizeX() * getSizeY() * getSizeC() * getSizeZ() * getSizeT();
     }
 
     /**
-     * @param image
-     *        image
+     * @param image image
      * @return Test if the specified image is compatible with current loaded images in sequence
      */
-    public boolean isCompatible(IcyBufferedImage image)
-    {
+    public boolean isCompatible(final IcyBufferedImage image) {
         if ((colorModel == null) || isEmpty())
             return true;
 
@@ -4280,12 +3240,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param cm
-     *        color model
+     * @param cm color model
      * @return Test if the specified colorModel is compatible with sequence colorModel
      */
-    public boolean isCompatible(IcyColorModel cm)
-    {
+    public boolean isCompatible(final IcyColorModel cm) {
         final IcyColorModel currentCM = colorModel;
 
         // test that colorModel are compatible
@@ -4296,12 +3254,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param lut
-     *        LUT
+     * @param lut LUT
      * @return true if specified LUT is compatible with sequence LUT
      */
-    public boolean isLutCompatible(LUT lut)
-    {
+    public boolean isLutCompatible(final LUT lut) {
         IcyColorModel cm = colorModel;
         // not yet defined ? use default one
         if (cm == null)
@@ -4313,16 +3269,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the colorModel
      */
-    public IcyColorModel getColorModel()
-    {
+    public IcyColorModel getColorModel() {
         return colorModel;
     }
 
     /**
      * @return Same as {@link #createCompatibleLUT()}
      */
-    public LUT getDefaultLUT()
-    {
+    public LUT getDefaultLUT() {
         // color model not anymore compatible with user LUT --> reset it
         if ((defaultLut == null) || ((colorModel != null) && !defaultLut.isCompatible(colorModel)))
             defaultLut = createCompatibleLUT();
@@ -4333,18 +3287,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return <code>true</code> if a user LUT has be defined for this sequence.
      */
-    public boolean hasUserLUT()
-    {
+    public boolean hasUserLUT() {
         return (userLut != null);
     }
 
     /**
      * @return the users LUT.<br>
-     *         If user LUT is not defined then a new default LUT is returned.
+     * If user LUT is not defined then a new default LUT is returned.
      * @see #getDefaultLUT()
      */
-    public LUT getUserLUT()
-    {
+    public LUT getUserLUT() {
         // color model not anymore compatible with user LUT --> reset it
         if ((userLut == null) || ((colorModel != null) && !userLut.isCompatible(colorModel)))
             userLut = getDefaultLUT();
@@ -4353,21 +3305,18 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param lut
-     *        Sets the user LUT (saved in XML persistent metadata).
+     * @param lut Sets the user LUT (saved in XML persistent metadata).
      */
-    public void setUserLUT(LUT lut)
-    {
+    public void setUserLUT(final LUT lut) {
         if ((colorModel == null) || lut.isCompatible(colorModel))
             userLut = lut;
     }
 
     /**
      * @return Creates and returns the default LUT for this sequence.<br>
-     *         If the sequence is empty it returns a default ARGB LUT.
+     * If the sequence is empty it returns a default ARGB LUT.
      */
-    public LUT createCompatibleLUT()
-    {
+    public LUT createCompatibleLUT() {
         final IcyColorModel cm = colorModel;
         final IcyColorModel result;
 
@@ -4381,13 +3330,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param channel channel we want to set the colormap
      * @return Get the default colormap for the specified channel
-     * @param channel
-     *        channel we want to set the colormap
      * @see #getColorMap(int)
      */
-    public IcyColorMap getDefaultColorMap(int channel)
-    {
+    public IcyColorMap getDefaultColorMap(final int channel) {
         final IcyColorModel cm = colorModel;
 
         if (cm != null)
@@ -4398,17 +3345,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set the default colormap for the specified channel
-     * 
-     * @param channel
-     *        channel we want to set the colormap
-     * @param map
-     *        source colormap to copy
-     * @param setAlpha
-     *        also copy the alpha information
+     *
+     * @param channel  channel we want to set the colormap
+     * @param map      source colormap to copy
+     * @param setAlpha also copy the alpha information
      * @see #getDefaultColorMap(int)
      */
-    public void setDefaultColormap(int channel, IcyColorMap map, boolean setAlpha)
-    {
+    public void setDefaultColormap(final int channel, final IcyColorMap map, final boolean setAlpha) {
         final IcyColorModel cm = colorModel;
 
         if (cm != null)
@@ -4417,27 +3360,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set the default colormap for the specified channel
-     * 
-     * @param channel
-     *        channel we want to set the colormap
-     * @param map
-     *        source colormap to copy
+     *
+     * @param channel channel we want to set the colormap
+     * @param map     source colormap to copy
      * @see #getDefaultColorMap(int)
      */
-    public void setDefaultColormap(int channel, IcyColorMap map)
-    {
+    public void setDefaultColormap(final int channel, final IcyColorMap map) {
         setDefaultColormap(channel, map, map.isAlpha());
     }
 
     /**
+     * @param channel channel we want to set the colormap
      * @return Get the user colormap for the specified channel.<br>
-     *         User colormap is saved in the XML persistent data and reloaded when opening the Sequence.
-     * @param channel
-     *        channel we want to set the colormap
+     * User colormap is saved in the XML persistent data and reloaded when opening the Sequence.
      * @see #getDefaultColorMap(int)
      */
-    public IcyColorMap getColorMap(int channel)
-    {
+    public IcyColorMap getColorMap(final int channel) {
         final LUT lut = getUserLUT();
 
         if (channel < lut.getNumChannel())
@@ -4449,17 +3387,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Set the user colormap for the specified channel.<br>
      * User colormap is saved in the XML persistent data and reloaded when opening the Sequence.
-     * 
-     * @param channel
-     *        channel we want to set the colormap
-     * @param map
-     *        source colormap to copy
-     * @param setAlpha
-     *        also copy the alpha information
+     *
+     * @param channel  channel we want to set the colormap
+     * @param map      source colormap to copy
+     * @param setAlpha also copy the alpha information
      * @see #getColorMap(int)
      */
-    public void setColormap(int channel, IcyColorMap map, boolean setAlpha)
-    {
+    public void setColormap(final int channel, final IcyColorMap map, final boolean setAlpha) {
         final LUT lut = getUserLUT();
 
         if (channel < lut.getNumChannel())
@@ -4469,43 +3403,31 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Set the user colormap for the specified channel.<br>
      * User colormap is saved in the XML persistent data and reloaded when opening the Sequence.
-     * 
-     * @param channel
-     *        channel we want to set the colormap
-     * @param map
-     *        source colormap to copy
+     *
+     * @param channel channel we want to set the colormap
+     * @param map     source colormap to copy
      * @see #getColorMap(int)
      */
-    public void setColormap(int channel, IcyColorMap map)
-    {
+    public void setColormap(final int channel, final IcyColorMap map) {
         setColormap(channel, map, map.isAlpha());
     }
 
     /**
-     * @return the data type of sequence
+     * @deprecated Use {@link #getDataType()} instead.
      */
-    public DataType getDataType_()
-    {
-        final IcyColorModel cm = colorModel;
-
-        if (cm == null)
-            return null;
-
-        return cm.getDataType_();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public DataType getDataType_() {
+        return getDataType();
     }
 
     /**
      * @return the data type of sequence
-     * @deprecated use {@link #getDataType_()} instead
      */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getDataType()
-    {
+    public DataType getDataType() {
         final IcyColorModel cm = colorModel;
 
-        // preserve UNDEFINED here for backward compatibility (Math Operation for instance)
         if (cm == null)
-            return TypeUtil.TYPE_UNDEFINED;
+            return null;
 
         return cm.getDataType();
     }
@@ -4513,33 +3435,27 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return true if this is a float data type sequence
      */
-    public boolean isFloatDataType()
-    {
-        return getDataType_().isFloat();
+    public boolean isFloatDataType() {
+        return getDataType().isFloat();
     }
 
     /**
      * @return true if this is a signed data type sequence
      */
-    public boolean isSignedDataType()
-    {
-        return getDataType_().isSigned();
+    public boolean isSignedDataType() {
+        return getDataType().isSigned();
     }
 
     /**
-     * @param curBounds
-     *        2D array
-     * @param bounds
-     *        2D array
+     * @param curBounds 2D array
+     * @param bounds    2D array
      * @return Internal use only.
      */
-    private static double[][] adjustBounds(double[][] curBounds, double[][] bounds)
-    {
+    private static double[][] adjustBounds(final double[][] curBounds, final double[][] bounds) {
         if (bounds == null)
             return curBounds;
 
-        for (int comp = 0; comp < bounds.length; comp++)
-        {
+        for (int comp = 0; comp < bounds.length; comp++) {
             final double[] compBounds = bounds[comp];
             final double[] curCompBounds = curBounds[comp];
 
@@ -4556,8 +3472,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * Recalculate all image channels bounds (min and max values).<br>
      * Internal use only.
      */
-    protected void recalculateAllImageChannelsBounds()
-    {
+    protected void recalculateAllImageChannelsBounds() {
         // nothing to do...
         if ((colorModel == null) || isEmpty())
             return;
@@ -4565,15 +3480,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final List<VolumetricImage> volumes = getAllVolumetricImage();
 
         beginUpdate();
-        try
-        {
+        try {
             // recalculate images bounds (automatically update sequence bounds with event)
-            for (VolumetricImage volImg : volumes)
-                for (IcyBufferedImage img : volImg.getAllImage())
+            for (final VolumetricImage volImg : volumes)
+                for (final IcyBufferedImage img : volImg.getAllImage())
                     img.updateChannelsBounds();
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
     }
@@ -4583,8 +3496,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * At this point we assume images has correct channels bounds information.<br>
      * Internal use only.
      */
-    protected void internalUpdateChannelsBounds()
-    {
+    protected void internalUpdateChannelsBounds() {
         final IcyColorModel cm = colorModel;
 
         // nothing to do...
@@ -4595,34 +3507,32 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         bounds = null;
         // recalculate bounds from all images
-        synchronized (volumetricImages)
-        {
-            for (VolumetricImage volImg : volumetricImages.values())
-            {
-                for (IcyBufferedImage img : volImg.getAllImage())
-                {
+        synchronized (volumetricImages) {
+            for (final VolumetricImage volImg : volumetricImages.values()) {
+                for (final IcyBufferedImage img : volImg.getAllImage()) {
                     if (img != null)
                         bounds = adjustBounds(img.getChannelsTypeBounds(), bounds);
                 }
             }
         }
 
+        assert bounds != null;
+
         // set new computed bounds
         cm.setComponentsAbsBounds(bounds);
 
         bounds = null;
         // recalculate user bounds from all images
-        synchronized (volumetricImages)
-        {
-            for (VolumetricImage volImg : volumetricImages.values())
-            {
-                for (IcyBufferedImage img : volImg.getAllImage())
-                {
+        synchronized (volumetricImages) {
+            for (final VolumetricImage volImg : volumetricImages.values()) {
+                for (final IcyBufferedImage img : volImg.getAllImage()) {
                     if (img != null)
                         bounds = adjustBounds(img.getChannelsBounds(), bounds);
                 }
             }
         }
+
+        assert bounds != null;
 
         // set new computed bounds
         cm.setComponentsUserBounds(bounds);
@@ -4630,14 +3540,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Update channels bounds (min and max values).<br>
-     * 
-     * @param forceRecalculation
-     *        If true we force all images channels bounds recalculation (this can take sometime). <br>
-     *        You can left this flag to false if sequence images have their bounds updated (which
-     *        should be the case by default).
+     *
+     * @param forceRecalculation If true we force all images channels bounds recalculation (this can take sometime). <br>
+     *                           You can left this flag to false if sequence images have their bounds updated (which
+     *                           should be the case by default).
      */
-    public void updateChannelsBounds(boolean forceRecalculation)
-    {
+    public void updateChannelsBounds(final boolean forceRecalculation) {
         // force calculation of all images bounds
         if (forceRecalculation)
             recalculateAllImageChannelsBounds();
@@ -4649,42 +3557,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * Update channels bounds (min and max values).<br>
      * All images channels bounds are recalculated (this can take sometime).
      */
-    public void updateChannelsBounds()
-    {
-        // force recalculation
-        updateChannelsBounds(true);
-    }
-
-    /**
-     * @deprecated Use {@link #updateChannelsBounds(boolean)} instead.
-     * @param adjustByteToo
-     *        boolean
-     * @param forceRecalculation
-     *        boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void updateComponentsBounds(boolean forceRecalculation, boolean adjustByteToo)
-    {
-        updateChannelsBounds(forceRecalculation);
-    }
-
-    /**
-     * @deprecated Use {@link #updateChannelsBounds(boolean)} instead.
-     * @param forceRecalculation
-     *        boolean
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void updateComponentsBounds(boolean forceRecalculation)
-    {
-        updateChannelsBounds(forceRecalculation);
-    }
-
-    /**
-     * @deprecated Use {@link #updateChannelsBounds(boolean)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void updateComponentsBounds()
-    {
+    public void updateChannelsBounds() {
         // force recalculation
         updateChannelsBounds(true);
     }
@@ -4692,34 +3565,29 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return Get the data type minimum value.
      */
-    public double getDataTypeMin()
-    {
-        return getDataType_().getMinValue();
+    public double getDataTypeMin() {
+        return getDataType().getMinValue();
     }
 
     /**
      * @return Get the data type maximum value.
      */
-    public double getDataTypeMax()
-    {
-        return getDataType_().getMaxValue();
+    public double getDataTypeMax() {
+        return getDataType().getMaxValue();
     }
 
     /**
      * @return Get data type bounds (min and max values).
      */
-    public double[] getDataTypeBounds()
-    {
-        return new double[] {getDataTypeMin(), getDataTypeMax()};
+    public double[] getDataTypeBounds() {
+        return new double[]{getDataTypeMin(), getDataTypeMax()};
     }
 
     /**
-     * @param channel
-     *        int
+     * @param channel int
      * @return Get the preferred data type minimum value in the whole sequence for the specified channel.
      */
-    public double getChannelTypeMin(int channel)
-    {
+    public double getChannelTypeMin(final int channel) {
         final IcyColorModel cm = colorModel;
 
         if (cm == null)
@@ -4729,12 +3597,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param channel
-     *        int
+     * @param channel int
      * @return Get the preferred data type maximum value in the whole sequence for the specified channel.
      */
-    public double getChannelTypeMax(int channel)
-    {
+    public double getChannelTypeMax(final int channel) {
         final IcyColorModel cm = colorModel;
 
         if (cm == null)
@@ -4744,27 +3610,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param channel
-     *        int
+     * @param channel int
      * @return Get the preferred data type bounds (min and max values) in the whole sequence for the
-     *         specified channel.
+     * specified channel.
      */
-    public double[] getChannelTypeBounds(int channel)
-    {
+    public double[] getChannelTypeBounds(final int channel) {
         final IcyColorModel cm = colorModel;
 
         if (cm == null)
-            return new double[] {0d, 0d};
+            return new double[]{0d, 0d};
 
         return cm.getComponentAbsBounds(channel);
     }
 
     /**
      * @return Get the preferred data type bounds (min and max values) in the whole sequence for all
-     *         channels.
+     * channels.
      */
-    public double[][] getChannelsTypeBounds()
-    {
+    public double[][] getChannelsTypeBounds() {
         final int sizeC = getSizeC();
         final double[][] result = new double[sizeC][];
 
@@ -4777,13 +3640,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return Get the global preferred data type bounds (min and max values) for all channels.
      */
-    public double[] getChannelsGlobalTypeBounds()
-    {
+    public double[] getChannelsGlobalTypeBounds() {
         final int sizeC = getSizeC();
         final double[] result = getChannelTypeBounds(0);
 
-        for (int c = 1; c < sizeC; c++)
-        {
+        for (int c = 1; c < sizeC; c++) {
             final double[] bounds = getChannelTypeBounds(c);
             result[0] = Math.min(bounds[0], result[0]);
             result[1] = Math.max(bounds[1], result[1]);
@@ -4793,88 +3654,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Use {@link #getChannelsGlobalTypeBounds()} instead
-     * @return array of double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[] getChannelTypeGlobalBounds()
-    {
-        return getChannelsGlobalTypeBounds();
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelTypeGlobalBounds()} instead.
-     * @return array of double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[] getGlobalChannelTypeBounds()
-    {
-        return getChannelTypeGlobalBounds();
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelTypeMin(int)} instead.
-     * @param component
-     *        int
-     * @return double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getComponentAbsMinValue(int component)
-    {
-        return getChannelTypeMin(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelTypeMax(int)} instead.
-     * @param component
-     *        int
-     * @return double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getComponentAbsMaxValue(int component)
-    {
-        return getChannelTypeMax(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelTypeBounds(int)} instead.
-     * @param component
-     *        int
-     * @return array of double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[] getComponentAbsBounds(int component)
-    {
-        return getChannelTypeBounds(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelsTypeBounds()} instead.
-     * @return 2D array of double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[][] getComponentsAbsBounds()
-    {
-        return getChannelsTypeBounds();
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelsGlobalTypeBounds()} instead.
-     * @return array of double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[] getGlobalComponentAbsBounds()
-    {
-        return getChannelsGlobalTypeBounds();
-    }
-
-    /**
-     * @param channel
-     *        int
+     * @param channel int
      * @return Get the minimum value in the whole sequence for the specified channel.
      */
-    public double getChannelMin(int channel)
-    {
+    public double getChannelMin(final int channel) {
         if (colorModel == null)
             return 0d;
 
@@ -4882,12 +3665,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param channel
-     *        int
+     * @param channel int
      * @return Get maximum value in the whole sequence for the specified channel.
      */
-    public double getChannelMax(int channel)
-    {
+    public double getChannelMax(final int channel) {
         final IcyColorModel cm = colorModel;
 
         if (cm == null)
@@ -4897,20 +3678,17 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param channel
-     *        int
+     * @param channel int
      * @return Get bounds (min and max values) in the whole sequence for the specified channel.
      */
-    public double[] getChannelBounds(int channel)
-    {
+    public double[] getChannelBounds(final int channel) {
         final IcyColorModel cm = colorModel;
 
         if (cm == null)
-            return new double[] {0d, 0d};
+            return new double[]{0d, 0d};
 
         // lazy channel bounds update
-        if (channelBoundsInvalid)
-        {
+        if (channelBoundsInvalid) {
             channelBoundsInvalid = false;
             // images channels bounds are valid at this point
             internalUpdateChannelsBounds();
@@ -4922,8 +3700,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return Get bounds (min and max values) in the whole sequence for all channels.
      */
-    public double[][] getChannelsBounds()
-    {
+    public double[][] getChannelsBounds() {
         final int sizeC = getSizeC();
         final double[][] result = new double[sizeC][];
 
@@ -4936,16 +3713,14 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return Get global bounds (min and max values) in the whole sequence for all channels.
      */
-    public double[] getChannelsGlobalBounds()
-    {
+    public double[] getChannelsGlobalBounds() {
         final int sizeC = getSizeC();
         final double[] result = new double[2];
 
         result[0] = Double.MAX_VALUE;
         result[1] = -Double.MAX_VALUE;
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final double[] bounds = getChannelBounds(c);
 
             if (bounds[0] < result[0])
@@ -4958,78 +3733,25 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Use {@link #getChannelMin(int)} instead
-     * @param component
-     *        int
-     * @return double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getComponentUserMinValue(int component)
-    {
-        return getChannelMin(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelMax(int)} instead.
-     * @param component
-     *        int
-     * @return double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getComponentUserMaxValue(int component)
-    {
-        return getChannelMax(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelBounds(int)} instead.
-     * @param component
-     *        int
-     * @return array of double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[] getComponentUserBounds(int component)
-    {
-        return getChannelBounds(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelsBounds()} instead.
-     * @return 2 array of double
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[][] getComponentsUserBounds()
-    {
-        return getChannelsBounds();
-    }
-
-    /**
      * Force all image data to be loaded (so channels bounds can be correctly computed).<br>
      * Be careful, this function can take sometime.
      */
-    public void loadAllData()
-    {
-        for (IcyBufferedImage image : getAllImage())
+    public void loadAllData() {
+        for (final IcyBufferedImage image : getAllImage())
             if (image != null)
                 image.loadData();
     }
 
     /**
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param c
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
+     * @param x int
+     * @param y int
+     * @param c int
+     * @param z int
+     * @param t int
      * @return the data value located at position (t, z, c, y, x) as double.<br>
-     *         It returns 0d if value is not found.
+     * It returns 0d if value is not found.
      */
-    public double getData(int t, int z, int c, int y, int x)
-    {
+    public double getData(final int t, final int z, final int c, final int y, final int x) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5039,22 +3761,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param c
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
+     * @param x int
+     * @param y int
+     * @param c int
+     * @param z int
+     * @param t int
      * @return the data value located at position (t, z, c, y, x) as double.<br>
-     *         The value is interpolated depending the current double (x,y,z) coordinates.<br>
-     *         It returns 0d if value is out of range.
+     * The value is interpolated depending the current double (x,y,z) coordinates.<br>
+     * It returns 0d if value is out of range.
      */
-    public double getDataInterpolated(int t, double z, int c, double y, double x)
-    {
+    public double getDataInterpolated(final int t, final double z, final int c, final double y, final double x) {
         final int zi = (int) z;
         final double ratioNextZ = z - (double) zi;
 
@@ -5062,15 +3778,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         IcyBufferedImage img;
 
         img = getImage(t, zi);
-        if (img != null)
-        {
+        if (img != null) {
             final double ratioCurZ = 1d - ratioNextZ;
             if (ratioCurZ > 0d)
                 result += img.getDataInterpolated(x, y, c) * ratioCurZ;
         }
         img = getImage(t, zi + 1);
-        if (img != null)
-        {
+        if (img != null) {
             if (ratioNextZ > 0d)
                 result += img.getDataInterpolated(x, y, c) * ratioNextZ;
         }
@@ -5081,58 +3795,38 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a direct reference to 4D array data [T][Z][C][XY]
      */
-    public Object getDataXYCZT()
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataXYCZTAsByte();
-            case SHORT:
-                return getDataXYCZTAsShort();
-            case INT:
-                return getDataXYCZTAsInt();
-            case FLOAT:
-                return getDataXYCZTAsFloat();
-            case DOUBLE:
-                return getDataXYCZTAsDouble();
-            default:
-                return null;
-        }
+    public Object getDataXYCZT() {
+        return switch (getDataType().getJavaType()) {
+            case BYTE -> getDataXYCZTAsByte();
+            case SHORT -> getDataXYCZTAsShort();
+            case INT -> getDataXYCZTAsInt();
+            case FLOAT -> getDataXYCZTAsFloat();
+            case DOUBLE -> getDataXYCZTAsDouble();
+            default -> null;
+        };
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a direct reference to 3D array data [Z][C][XY] for specified t
      */
-    public Object getDataXYCZ(int t)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataXYCZAsByte(t);
-            case SHORT:
-                return getDataXYCZAsShort(t);
-            case INT:
-                return getDataXYCZAsInt(t);
-            case FLOAT:
-                return getDataXYCZAsFloat(t);
-            case DOUBLE:
-                return getDataXYCZAsDouble(t);
-            default:
-                return null;
-        }
+    public Object getDataXYCZ(final int t) {
+        return switch (getDataType().getJavaType()) {
+            case BYTE -> getDataXYCZAsByte(t);
+            case SHORT -> getDataXYCZAsShort(t);
+            case INT -> getDataXYCZAsInt(t);
+            case FLOAT -> getDataXYCZAsFloat(t);
+            case DOUBLE -> getDataXYCZAsDouble(t);
+            default -> null;
+        };
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a direct reference to 2D array data [C][XY] for specified t, z
      */
-    public Object getDataXYC(int t, int z)
-    {
+    public Object getDataXYC(final int t, final int z) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5142,16 +3836,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param c int
+     * @param t int
+     * @param z int
      * @return a direct reference to 1D array data [XY] for specified t, z, c
      */
-    public Object getDataXY(int t, int z, int c)
-    {
+    public Object getDataXY(final int t, final int z, final int c) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5161,155 +3851,104 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
-    public Object getDataXYZT(int c)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataXYZTAsByte(c);
-            case SHORT:
-                return getDataXYZTAsShort(c);
-            case INT:
-                return getDataXYZTAsInt(c);
-            case FLOAT:
-                return getDataXYZTAsFloat(c);
-            case DOUBLE:
-                return getDataXYZTAsDouble(c);
-            default:
-                return null;
-        }
+    public Object getDataXYZT(final int c) {
+        return switch (getDataType().getJavaType()) {
+            case BYTE -> getDataXYZTAsByte(c);
+            case SHORT -> getDataXYZTAsShort(c);
+            case INT -> getDataXYZTAsInt(c);
+            case FLOAT -> getDataXYZTAsFloat(c);
+            case DOUBLE -> getDataXYZTAsDouble(c);
+            default -> null;
+        };
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
+     * @param c int
+     * @param t int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
-    public Object getDataXYZ(int t, int c)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataXYZAsByte(t, c);
-            case SHORT:
-                return getDataXYZAsShort(t, c);
-            case INT:
-                return getDataXYZAsInt(t, c);
-            case FLOAT:
-                return getDataXYZAsFloat(t, c);
-            case DOUBLE:
-                return getDataXYZAsDouble(t, c);
-            default:
-                return null;
-        }
+    public Object getDataXYZ(final int t, final int c) {
+        return switch (getDataType().getJavaType()) {
+            case BYTE -> getDataXYZAsByte(t, c);
+            case SHORT -> getDataXYZAsShort(t, c);
+            case INT -> getDataXYZAsInt(t, c);
+            case FLOAT -> getDataXYZAsFloat(t, c);
+            case DOUBLE -> getDataXYZAsDouble(t, c);
+            default -> null;
+        };
     }
 
     /**
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]
      */
-    public Object getDataCopyXYCZT()
-    {
+    public Object getDataCopyXYCZT() {
         return getDataCopyXYCZT(null, 0);
     }
 
     /**
-     * @param out
-     *        object
-     * @param off
-     *        int
+     * @param out object
+     * @param off int
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     *         If (out != null) then it's used to store result at the specified offset
+     * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyXYCZT(Object out, int off)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataCopyXYCZTAsByte((byte[]) out, off);
-            case SHORT:
-                return getDataCopyXYCZTAsShort((short[]) out, off);
-            case INT:
-                return getDataCopyXYCZTAsInt((int[]) out, off);
-            case FLOAT:
-                return getDataCopyXYCZTAsFloat((float[]) out, off);
-            case DOUBLE:
-                return getDataCopyXYCZTAsDouble((double[]) out, off);
-            default:
-                return null;
-        }
+    public Object getDataCopyXYCZT(final Object out, final int off) {
+        return switch (getDataType().getJavaType()) {
+            case BYTE -> getDataCopyXYCZTAsByte((byte[]) out, off);
+            case SHORT -> getDataCopyXYCZTAsShort((short[]) out, off);
+            case INT -> getDataCopyXYCZTAsInt((int[]) out, off);
+            case FLOAT -> getDataCopyXYCZTAsFloat((float[]) out, off);
+            case DOUBLE -> getDataCopyXYCZTAsDouble((double[]) out, off);
+            default -> null;
+        };
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public Object getDataCopyXYCZ(int t)
-    {
+    public Object getDataCopyXYCZ(final int t) {
         return getDataCopyXYCZ(t, null, 0);
     }
 
     /**
-     * @param out
-     *        object
-     * @param t
-     *        int
-     * @param off
-     *        int
+     * @param out object
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     *         If (out != null) then it's used to store result at the specified offset
+     * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyXYCZ(int t, Object out, int off)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataCopyXYCZAsByte(t, (byte[]) out, off);
-            case SHORT:
-                return getDataCopyXYCZAsShort(t, (short[]) out, off);
-            case INT:
-                return getDataCopyXYCZAsInt(t, (int[]) out, off);
-            case FLOAT:
-                return getDataCopyXYCZAsFloat(t, (float[]) out, off);
-            case DOUBLE:
-                return getDataCopyXYCZAsDouble(t, (double[]) out, off);
-            default:
-                return null;
-        }
+    public Object getDataCopyXYCZ(final int t, final Object out, final int off) {
+        return switch (getDataType().getJavaType()) {
+            case BYTE -> getDataCopyXYCZAsByte(t, (byte[]) out, off);
+            case SHORT -> getDataCopyXYCZAsShort(t, (short[]) out, off);
+            case INT -> getDataCopyXYCZAsInt(t, (int[]) out, off);
+            case FLOAT -> getDataCopyXYCZAsFloat(t, (float[]) out, off);
+            case DOUBLE -> getDataCopyXYCZAsDouble(t, (double[]) out, off);
+            default -> null;
+        };
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
-    public Object getDataCopyXYC(int t, int z)
-    {
+    public Object getDataCopyXYC(final int t, final int z) {
         return getDataCopyXYC(t, z, null, 0);
     }
 
     /**
-     * @param out
-     *        object
-     * @param off
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
+     * @param out object
+     * @param off int
+     * @param z   int
+     * @param t   int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     *         If (out != null) then it's used to store result at the specified offset
+     * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyXYC(int t, int z, Object out, int off)
-    {
+    public Object getDataCopyXYC(final int t, final int z, final Object out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5319,35 +3958,25 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param c int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
-    public Object getDataCopyXY(int t, int z, int c)
-    {
+    public Object getDataCopyXY(final int t, final int z, final int c) {
         return getDataCopyXY(t, z, c, null, 0);
     }
 
     /**
-     * @param out
-     *        object
-     * @param off
-     *        int
-     * @param t
-     *        int
-     * @param c
-     *        int
-     * @param z
-     *        int
+     * @param out object
+     * @param off int
+     * @param t   int
+     * @param c   int
+     * @param z   int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     *         If (out != null) then it's used to store result at the specified offset
+     * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyXY(int t, int z, int c, Object out, int off)
-    {
+    public Object getDataCopyXY(final int t, final int z, final int c, final Object out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5359,103 +3988,71 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]
      */
-    public Object getDataCopyCXYZT()
-    {
+    public Object getDataCopyCXYZT() {
         return getDataCopyCXYZT(null, 0);
     }
 
     /**
-     * @param out
-     *        object
-     * @param off
-     *        int
+     * @param out object
+     * @param off int
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     *         If (out != null) then it's used to store result at the specified offset
+     * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyCXYZT(Object out, int off)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataCopyCXYZTAsByte((byte[]) out, off);
-            case SHORT:
-                return getDataCopyCXYZTAsShort((short[]) out, off);
-            case INT:
-                return getDataCopyCXYZTAsInt((int[]) out, off);
-            case FLOAT:
-                return getDataCopyCXYZTAsFloat((float[]) out, off);
-            case DOUBLE:
-                return getDataCopyCXYZTAsDouble((double[]) out, off);
-            default:
-                return null;
-        }
+    public Object getDataCopyCXYZT(final Object out, final int off) {
+        return switch (getDataType().getJavaType()) {
+            case BYTE -> getDataCopyCXYZTAsByte((byte[]) out, off);
+            case SHORT -> getDataCopyCXYZTAsShort((short[]) out, off);
+            case INT -> getDataCopyCXYZTAsInt((int[]) out, off);
+            case FLOAT -> getDataCopyCXYZTAsFloat((float[]) out, off);
+            case DOUBLE -> getDataCopyCXYZTAsDouble((double[]) out, off);
+            default -> null;
+        };
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public Object getDataCopyCXYZ(int t)
-    {
+    public Object getDataCopyCXYZ(final int t) {
         return getDataCopyCXYZ(t, null, 0);
     }
 
     /**
-     * @param out
-     *        object
-     * @param off
-     *        int
-     * @param t
-     *        int
+     * @param out object
+     * @param off int
+     * @param t   int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     *         If (out != null) then it's used to store result at the specified offset
+     * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyCXYZ(int t, Object out, int off)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataCopyCXYZAsByte(t, (byte[]) out, off);
-            case SHORT:
-                return getDataCopyCXYZAsShort(t, (short[]) out, off);
-            case INT:
-                return getDataCopyCXYZAsInt(t, (int[]) out, off);
-            case FLOAT:
-                return getDataCopyCXYZAsFloat(t, (float[]) out, off);
-            case DOUBLE:
-                return getDataCopyCXYZAsDouble(t, (double[]) out, off);
-            default:
-                return null;
-        }
+    public Object getDataCopyCXYZ(final int t, final Object out, final int off) {
+        return switch (getDataType().getJavaType()) {
+            case BYTE -> getDataCopyCXYZAsByte(t, (byte[]) out, off);
+            case SHORT -> getDataCopyCXYZAsShort(t, (short[]) out, off);
+            case INT -> getDataCopyCXYZAsInt(t, (int[]) out, off);
+            case FLOAT -> getDataCopyCXYZAsFloat(t, (float[]) out, off);
+            case DOUBLE -> getDataCopyCXYZAsDouble(t, (double[]) out, off);
+            default -> null;
+        };
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
-    public Object getDataCopyCXY(int t, int z)
-    {
+    public Object getDataCopyCXY(final int t, final int z) {
         return getDataCopyCXY(t, z, null, 0);
     }
 
     /**
-     * @param out
-     *        Object
-     * @param off
-     *        int
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param out Object
+     * @param off int
+     * @param t   int
+     * @param z   int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     *         If (out != null) then it's used to store result at the specified offset
+     * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyCXY(int t, int z, Object out, int off)
-    {
+    public Object getDataCopyCXY(final int t, final int z, final Object out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5465,38 +4062,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
+     * @param x int
+     * @param y int
+     * @param z int
+     * @param t int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
-    public Object getDataCopyC(int t, int z, int x, int y)
-    {
+    public Object getDataCopyC(final int t, final int z, final int x, final int y) {
         return getDataCopyC(t, z, x, y, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param x   int
+     * @param y   int
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public Object getDataCopyC(int t, int z, int x, int y, Object out, int off)
-    {
+    public Object getDataCopyC(final int t, final int z, final int x, final int y, final Object out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5506,91 +4091,62 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
-    public Object getDataCopyXYZT(int c)
-    {
+    public Object getDataCopyXYZT(final int c) {
         return getDataCopyXYZT(c, null, 0);
     }
 
     /**
-     * @param c
-     *        int
-     * @param out
-     *        object
-     * @param off
-     *        int
+     * @param c   int
+     * @param out object
+     * @param off int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     *         If (out != null) then it's used to store result at the specified offset
+     * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyXYZT(int c, Object out, int off)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataCopyXYZTAsByte(c, (byte[]) out, off);
-            case SHORT:
-                return getDataCopyXYZTAsShort(c, (short[]) out, off);
-            case INT:
-                return getDataCopyXYZTAsInt(c, (int[]) out, off);
-            case FLOAT:
-                return getDataCopyXYZTAsFloat(c, (float[]) out, off);
-            case DOUBLE:
-                return getDataCopyXYZTAsDouble(c, (double[]) out, off);
-            default:
-                return null;
-        }
+    public Object getDataCopyXYZT(final int c, final Object out, final int off) {
+        return switch (getDataType().getJavaType()) {
+            case BYTE -> getDataCopyXYZTAsByte(c, (byte[]) out, off);
+            case SHORT -> getDataCopyXYZTAsShort(c, (short[]) out, off);
+            case INT -> getDataCopyXYZTAsInt(c, (int[]) out, off);
+            case FLOAT -> getDataCopyXYZTAsFloat(c, (float[]) out, off);
+            case DOUBLE -> getDataCopyXYZTAsDouble(c, (double[]) out, off);
+            default -> null;
+        };
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
+     * @param c int
+     * @param t int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
      */
-    public Object getDataCopyXYZ(int t, int c)
-    {
+    public Object getDataCopyXYZ(final int t, final int c) {
         return getDataCopyXYZ(t, c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param off int
+     * @param c   int
+     * @param t   int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param off
-     *        int
-     * @param c
-     *        int
-     * @param t
-     *        int
      */
-    public Object getDataCopyXYZ(int t, int c, Object out, int off)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataCopyXYZAsByte(t, c, (byte[]) out, off);
-            case SHORT:
-                return getDataCopyXYZAsShort(t, c, (short[]) out, off);
-            case INT:
-                return getDataCopyXYZAsInt(t, c, (int[]) out, off);
-            case FLOAT:
-                return getDataCopyXYZAsFloat(t, c, (float[]) out, off);
-            case DOUBLE:
-                return getDataCopyXYZAsDouble(t, c, (double[]) out, off);
-            default:
-                return null;
-        }
+    public Object getDataCopyXYZ(final int t, final int c, final Object out, final int off) {
+        return switch (getDataType().getJavaType()) {
+            case BYTE -> getDataCopyXYZAsByte(t, c, (byte[]) out, off);
+            case SHORT -> getDataCopyXYZAsShort(t, c, (short[]) out, off);
+            case INT -> getDataCopyXYZAsInt(t, c, (int[]) out, off);
+            case FLOAT -> getDataCopyXYZAsFloat(t, c, (float[]) out, off);
+            case DOUBLE -> getDataCopyXYZAsDouble(t, c, (double[]) out, off);
+            default -> null;
+        };
     }
 
     /**
      * @return a direct reference to 4D byte array data [T][Z][C][XY]
      */
-    public byte[][][][] getDataXYCZTAsByte()
-    {
+    public byte[][][][] getDataXYCZTAsByte() {
         final int sizeT = getSizeT();
         final byte[][][][] result = new byte[sizeT][][][];
 
@@ -5604,8 +4160,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a direct reference to 4D byte array data [T][Z][C][XY]
      */
-    public short[][][][] getDataXYCZTAsShort()
-    {
+    public short[][][][] getDataXYCZTAsShort() {
         final int sizeT = getSizeT();
         final short[][][][] result = new short[sizeT][][][];
 
@@ -5618,8 +4173,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a direct reference to 4D byte array data [T][Z][C][XY]
      */
-    public int[][][][] getDataXYCZTAsInt()
-    {
+    public int[][][][] getDataXYCZTAsInt() {
         final int sizeT = getSizeT();
         final int[][][][] result = new int[sizeT][][][];
 
@@ -5632,8 +4186,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a direct reference to 4D byte array data [T][Z][C][XY]
      */
-    public float[][][][] getDataXYCZTAsFloat()
-    {
+    public float[][][][] getDataXYCZTAsFloat() {
         final int sizeT = getSizeT();
         final float[][][][] result = new float[sizeT][][][];
 
@@ -5646,8 +4199,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a direct reference to 4D byte array data [T][Z][C][XY]
      */
-    public double[][][][] getDataXYCZTAsDouble()
-    {
+    public double[][][][] getDataXYCZTAsDouble() {
         final int sizeT = getSizeT();
         final double[][][][] result = new double[sizeT][][][];
 
@@ -5658,12 +4210,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a direct reference to 3D byte array data [Z][C][XY] for specified t
      */
-    public byte[][][] getDataXYCZAsByte(int t)
-    {
+    public byte[][][] getDataXYCZAsByte(final int t) {
         final int sizeZ = getSizeZ(t);
         final byte[][][] result = new byte[sizeZ][][];
 
@@ -5674,12 +4224,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a direct reference to 3D byte array data [Z][C][XY] for specified t
      */
-    public short[][][] getDataXYCZAsShort(int t)
-    {
+    public short[][][] getDataXYCZAsShort(final int t) {
         final int sizeZ = getSizeZ(t);
         final short[][][] result = new short[sizeZ][][];
 
@@ -5690,12 +4238,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a direct reference to 3D byte array data [Z][C][XY] for specified t
      */
-    public int[][][] getDataXYCZAsInt(int t)
-    {
+    public int[][][] getDataXYCZAsInt(final int t) {
         final int sizeZ = getSizeZ(t);
         final int[][][] result = new int[sizeZ][][];
 
@@ -5706,12 +4252,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     *        Returns a direct reference to 3D byte array data [Z][C][XY] for specified t
+     * @param t int
+     *          Returns a direct reference to 3D byte array data [Z][C][XY] for specified t
      */
-    public float[][][] getDataXYCZAsFloat(int t)
-    {
+    public float[][][] getDataXYCZAsFloat(final int t) {
         final int sizeZ = getSizeZ(t);
         final float[][][] result = new float[sizeZ][][];
 
@@ -5722,12 +4266,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a direct reference to 3D byte array data [Z][C][XY] for specified t
      */
-    public double[][][] getDataXYCZAsDouble(int t)
-    {
+    public double[][][] getDataXYCZAsDouble(final int t) {
         final int sizeZ = getSizeZ(t);
         final double[][][] result = new double[sizeZ][][];
 
@@ -5738,14 +4280,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a direct reference to 2D byte array data [C][XY] for specified t, z
      */
-    public byte[][] getDataXYCAsByte(int t, int z)
-    {
+    public byte[][] getDataXYCAsByte(final int t, final int z) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5755,14 +4294,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z
-     *        int
-     * @param t
-     *        int
+     * @param z int
+     * @param t int
      * @return a direct reference to 2D byte array data [C][XY] for specified t, z
      */
-    public short[][] getDataXYCAsShort(int t, int z)
-    {
+    public short[][] getDataXYCAsShort(final int t, final int z) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5772,14 +4308,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a direct reference to 2D byte array data [C][XY] for specified t, z
      */
-    public int[][] getDataXYCAsInt(int t, int z)
-    {
+    public int[][] getDataXYCAsInt(final int t, final int z) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5789,14 +4322,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z
-     *        int
-     * @param t
-     *        int
+     * @param z int
+     * @param t int
      * @return a direct reference to 2D byte array data [C][XY] for specified t, z
      */
-    public float[][] getDataXYCAsFloat(int t, int z)
-    {
+    public float[][] getDataXYCAsFloat(final int t, final int z) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5806,14 +4336,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a direct reference to 2D byte array data [C][XY] for specified t, z
      */
-    public double[][] getDataXYCAsDouble(int t, int z)
-    {
+    public double[][] getDataXYCAsDouble(final int t, final int z) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5823,16 +4350,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param c
-     *        int
+     * @param z int
+     * @param t int
+     * @param c int
      * @return a direct reference to 1D byte array data [XY] for specified t, z, c
      */
-    public byte[] getDataXYAsByte(int t, int z, int c)
-    {
+    public byte[] getDataXYAsByte(final int t, final int z, final int c) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5842,16 +4365,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param c int
+     * @param t int
+     * @param z int
      * @return a direct reference to 1D byte array data [XY] for specified t, z, c
      */
-    public short[] getDataXYAsShort(int t, int z, int c)
-    {
+    public short[] getDataXYAsShort(final int t, final int z, final int c) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5861,16 +4380,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param c
-     *        int
+     * @param z int
+     * @param t int
+     * @param c int
      * @return a direct reference to 1D byte array data [XY] for specified t, z, c
      */
-    public int[] getDataXYAsInt(int t, int z, int c)
-    {
+    public int[] getDataXYAsInt(final int t, final int z, final int c) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5880,16 +4395,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param c int
+     * @param t int
+     * @param z int
      * @return a direct reference to 1D byte array data [XY] for specified t, z, c
      */
-    public float[] getDataXYAsFloat(int t, int z, int c)
-    {
+    public float[] getDataXYAsFloat(final int t, final int z, final int c) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5899,16 +4410,12 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param c
-     *        int
+     * @param z int
+     * @param t int
+     * @param c int
      * @return a direct reference to 1D byte array data [XY] for specified t, z, c
      */
-    public double[] getDataXYAsDouble(int t, int z, int c)
-    {
+    public double[] getDataXYAsDouble(final int t, final int z, final int c) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -5918,12 +4425,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
-    public byte[][][] getDataXYZTAsByte(int c)
-    {
+    public byte[][][] getDataXYZTAsByte(final int c) {
         final int sizeT = getSizeT();
         final byte[][][] result = new byte[sizeT][][];
 
@@ -5934,12 +4439,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
-    public short[][][] getDataXYZTAsShort(int c)
-    {
+    public short[][][] getDataXYZTAsShort(final int c) {
         final int sizeT = getSizeT();
         final short[][][] result = new short[sizeT][][];
 
@@ -5950,12 +4453,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
-    public int[][][] getDataXYZTAsInt(int c)
-    {
+    public int[][][] getDataXYZTAsInt(final int c) {
         final int sizeT = getSizeT();
         final int[][][] result = new int[sizeT][][];
 
@@ -5966,12 +4467,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
-    public float[][][] getDataXYZTAsFloat(int c)
-    {
+    public float[][][] getDataXYZTAsFloat(final int c) {
         final int sizeT = getSizeT();
         final float[][][] result = new float[sizeT][][];
 
@@ -5982,12 +4481,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a direct reference to 3D byte array data [T][Z][XY] for specified c
      */
-    public double[][][] getDataXYZTAsDouble(int c)
-    {
+    public double[][][] getDataXYZTAsDouble(final int c) {
         final int sizeT = getSizeT();
         final double[][][] result = new double[sizeT][][];
 
@@ -5998,14 +4495,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
+     * @param c int
+     * @param t int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
-    public byte[][] getDataXYZAsByte(int t, int c)
-    {
+    public byte[][] getDataXYZAsByte(final int t, final int c) {
         final int sizeZ = getSizeZ(t);
         final byte[][] result = new byte[sizeZ][];
 
@@ -6016,14 +4510,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param c
-     *        int
+     * @param t int
+     * @param c int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
-    public short[][] getDataXYZAsShort(int t, int c)
-    {
+    public short[][] getDataXYZAsShort(final int t, final int c) {
         final int sizeZ = getSizeZ(t);
         final short[][] result = new short[sizeZ][];
 
@@ -6034,14 +4525,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
+     * @param c int
+     * @param t int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
-    public int[][] getDataXYZAsInt(int t, int c)
-    {
+    public int[][] getDataXYZAsInt(final int t, final int c) {
         final int sizeZ = getSizeZ(t);
         final int[][] result = new int[sizeZ][];
 
@@ -6052,14 +4540,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param c
-     *        int
+     * @param t int
+     * @param c int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
-    public float[][] getDataXYZAsFloat(int t, int c)
-    {
+    public float[][] getDataXYZAsFloat(final int t, final int c) {
         final int sizeZ = getSizeZ(t);
         final float[][] result = new float[sizeZ][];
 
@@ -6070,14 +4555,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
+     * @param c int
+     * @param t int
      * @return a direct reference to 2D byte array data [Z][XY] for specified t, c
      */
-    public double[][] getDataXYZAsDouble(int t, int c)
-    {
+    public double[][] getDataXYZAsDouble(final int t, final int c) {
         final int sizeZ = getSizeZ(t);
         final double[][] result = new double[sizeZ][];
 
@@ -6090,20 +4572,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]
      */
-    public byte[] getDataCopyXYCZTAsByte()
-    {
+    public byte[] getDataCopyXYCZTAsByte() {
         return getDataCopyXYCZTAsByte(null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param off int
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param off
-     *        int
      */
-    public byte[] getDataCopyXYCZTAsByte(byte[] out, int off)
-    {
+    public byte[] getDataCopyXYCZTAsByte(final byte[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -6112,8 +4590,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final byte[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyXYCZAsByte(t, result, offset);
             offset += len;
         }
@@ -6124,20 +4601,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]
      */
-    public short[] getDataCopyXYCZTAsShort()
-    {
+    public short[] getDataCopyXYCZTAsShort() {
         return getDataCopyXYCZTAsShort(null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param off int
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param off
-     *        int
      */
-    public short[] getDataCopyXYCZTAsShort(short[] out, int off)
-    {
+    public short[] getDataCopyXYCZTAsShort(final short[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -6146,8 +4619,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final short[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyXYCZAsShort(t, result, offset);
             offset += len;
         }
@@ -6158,20 +4630,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]
      */
-    public int[] getDataCopyXYCZTAsInt()
-    {
+    public int[] getDataCopyXYCZTAsInt() {
         return getDataCopyXYCZTAsInt(null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param off int
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param off
-     *        int
      */
-    public int[] getDataCopyXYCZTAsInt(int[] out, int off)
-    {
+    public int[] getDataCopyXYCZTAsInt(final int[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -6180,8 +4648,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final int[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyXYCZAsInt(t, result, offset);
             offset += len;
         }
@@ -6192,20 +4659,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return Returns a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]
      */
-    public float[] getDataCopyXYCZTAsFloat()
-    {
+    public float[] getDataCopyXYCZTAsFloat() {
         return getDataCopyXYCZTAsFloat(null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param off int
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param off
-     *        int
      */
-    public float[] getDataCopyXYCZTAsFloat(float[] out, int off)
-    {
+    public float[] getDataCopyXYCZTAsFloat(final float[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -6214,8 +4677,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final float[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyXYCZAsFloat(t, result, offset);
             offset += len;
         }
@@ -6226,20 +4688,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]
      */
-    public double[] getDataCopyXYCZTAsDouble()
-    {
+    public double[] getDataCopyXYCZTAsDouble() {
         return getDataCopyXYCZTAsDouble(null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param off int
      * @return a 1D array data copy [XYCZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param off
-     *        int
      */
-    public double[] getDataCopyXYCZTAsDouble(double[] out, int off)
-    {
+    public double[] getDataCopyXYCZTAsDouble(final double[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -6248,8 +4706,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final double[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyXYCZAsDouble(t, result, offset);
             offset += len;
         }
@@ -6258,26 +4715,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public byte[] getDataCopyXYCZAsByte(int t)
-    {
+    public byte[] getDataCopyXYCZAsByte(final int t) {
         return getDataCopyXYCZAsByte(t, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public byte[] getDataCopyXYCZAsByte(int t, byte[] out, int off)
-    {
+    public byte[] getDataCopyXYCZAsByte(final int t, final byte[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -6286,8 +4737,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final byte[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYCAsByte(t, z, result, offset);
             offset += len;
         }
@@ -6298,22 +4748,17 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public short[] getDataCopyXYCZAsShort(int t)
-    {
+    public short[] getDataCopyXYCZAsShort(final int t) {
         return getDataCopyXYCZAsShort(t, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param off int
+     * @param t   int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param off
-     *        int
-     * @param t
-     *        int
      */
-    public short[] getDataCopyXYCZAsShort(int t, short[] out, int off)
-    {
+    public short[] getDataCopyXYCZAsShort(final int t, final short[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -6322,8 +4767,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final short[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYCAsShort(t, z, result, offset);
             offset += len;
         }
@@ -6334,22 +4778,17 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public int[] getDataCopyXYCZAsInt(int t)
-    {
+    public int[] getDataCopyXYCZAsInt(final int t) {
         return getDataCopyXYCZAsInt(t, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public int[] getDataCopyXYCZAsInt(int t, int[] out, int off)
-    {
+    public int[] getDataCopyXYCZAsInt(final int t, final int[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -6358,8 +4797,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final int[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYCAsInt(t, z, result, offset);
             offset += len;
         }
@@ -6368,26 +4806,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param t int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t
-     * @param t
-     *        int
      */
-    public float[] getDataCopyXYCZAsFloat(int t)
-    {
+    public float[] getDataCopyXYCZAsFloat(final int t) {
         return getDataCopyXYCZAsFloat(t, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public float[] getDataCopyXYCZAsFloat(int t, float[] out, int off)
-    {
+    public float[] getDataCopyXYCZAsFloat(final int t, final float[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -6396,8 +4828,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final float[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYCAsFloat(t, z, result, offset);
             offset += len;
         }
@@ -6406,26 +4837,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public double[] getDataCopyXYCZAsDouble(int t)
-    {
+    public double[] getDataCopyXYCZAsDouble(final int t) {
         return getDataCopyXYCZAsDouble(t, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XYCZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public double[] getDataCopyXYCZAsDouble(int t, double[] out, int off)
-    {
+    public double[] getDataCopyXYCZAsDouble(final int t, final double[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -6434,8 +4859,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final double[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYCAsDouble(t, z, result, offset);
             offset += len;
         }
@@ -6444,30 +4868,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
-    public byte[] getDataCopyXYCAsByte(int t, int z)
-    {
+    public byte[] getDataCopyXYCAsByte(final int t, final int z) {
         return getDataCopyXYCAsByte(t, z, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public byte[] getDataCopyXYCAsByte(int t, int z, byte[] out, int off)
-    {
+    public byte[] getDataCopyXYCAsByte(final int t, final int z, final byte[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -6477,30 +4893,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
-    public short[] getDataCopyXYCAsShort(int t, int z)
-    {
+    public short[] getDataCopyXYCAsShort(final int t, final int z) {
         return getDataCopyXYCAsShort(t, z, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public short[] getDataCopyXYCAsShort(int t, int z, short[] out, int off)
-    {
+    public short[] getDataCopyXYCAsShort(final int t, final int z, final short[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -6510,30 +4918,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
-    public int[] getDataCopyXYCAsInt(int t, int z)
-    {
+    public int[] getDataCopyXYCAsInt(final int t, final int z) {
         return getDataCopyXYCAsInt(t, z, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public int[] getDataCopyXYCAsInt(int t, int z, int[] out, int off)
-    {
+    public int[] getDataCopyXYCAsInt(final int t, final int z, final int[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -6543,30 +4943,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
-    public float[] getDataCopyXYCAsFloat(int t, int z)
-    {
+    public float[] getDataCopyXYCAsFloat(final int t, final int z) {
         return getDataCopyXYCAsFloat(t, z, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public float[] getDataCopyXYCAsFloat(int t, int z, float[] out, int off)
-    {
+    public float[] getDataCopyXYCAsFloat(final int t, final int z, final float[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -6576,30 +4968,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z
      */
-    public double[] getDataCopyXYCAsDouble(int t, int z)
-    {
+    public double[] getDataCopyXYCAsDouble(final int t, final int z) {
         return getDataCopyXYCAsDouble(t, z, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return Returns a 1D array data copy [XYC] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public double[] getDataCopyXYCAsDouble(int t, int z, double[] out, int off)
-    {
+    public double[] getDataCopyXYCAsDouble(final int t, final int z, final double[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -6609,34 +4993,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
-     * @param c
-     *        int
+     * @param t int
+     * @param z int
+     * @param c int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
-    public byte[] getDataCopyXYAsByte(int t, int z, int c)
-    {
+    public byte[] getDataCopyXYAsByte(final int t, final int z, final int c) {
         return getDataCopyXYAsByte(t, z, c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param c   int
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param c
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public byte[] getDataCopyXYAsByte(int t, int z, int c, byte[] out, int off)
-    {
+    public byte[] getDataCopyXYAsByte(final int t, final int z, final int c, final byte[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -6646,34 +5020,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
-     * @param c
-     *        int
+     * @param t int
+     * @param z int
+     * @param c int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
-    public short[] getDataCopyXYAsShort(int t, int z, int c)
-    {
+    public short[] getDataCopyXYAsShort(final int t, final int z, final int c) {
         return getDataCopyXYAsShort(t, z, c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param c   int
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param c
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public short[] getDataCopyXYAsShort(int t, int z, int c, short[] out, int off)
-    {
+    public short[] getDataCopyXYAsShort(final int t, final int z, final int c, final short[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -6683,34 +5047,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
-     * @param c
-     *        int
+     * @param t int
+     * @param z int
+     * @param c int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
-    public int[] getDataCopyXYAsInt(int t, int z, int c)
-    {
+    public int[] getDataCopyXYAsInt(final int t, final int z, final int c) {
         return getDataCopyXYAsInt(t, z, c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param c   int
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param c
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public int[] getDataCopyXYAsInt(int t, int z, int c, int[] out, int off)
-    {
+    public int[] getDataCopyXYAsInt(final int t, final int z, final int c, final int[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -6720,34 +5074,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
-     * @param c
-     *        int
+     * @param t int
+     * @param z int
+     * @param c int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
-    public float[] getDataCopyXYAsFloat(int t, int z, int c)
-    {
+    public float[] getDataCopyXYAsFloat(final int t, final int z, final int c) {
         return getDataCopyXYAsFloat(t, z, c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param c   int
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param c
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public float[] getDataCopyXYAsFloat(int t, int z, int c, float[] out, int off)
-    {
+    public float[] getDataCopyXYAsFloat(final int t, final int z, final int c, final float[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -6757,34 +5101,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param c int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c
      */
-    public double[] getDataCopyXYAsDouble(int t, int z, int c)
-    {
+    public double[] getDataCopyXYAsDouble(final int t, final int z, final int c) {
         return getDataCopyXYAsDouble(t, z, c, null, 0);
     }
 
     /**
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param c
-     *        int
-     * @param off
-     *        int
+     * @param z   int
+     * @param t   int
+     * @param c   int
+     * @param off int
+     * @param out If (out != null) then it's used to store result at the specified offset
      * @return a 1D array data copy [XY] of internal 1D array data [XY] for specified t, z, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
      */
-    public double[] getDataCopyXYAsDouble(int t, int z, int c, double[] out, int off)
-    {
+    public double[] getDataCopyXYAsDouble(final int t, final int z, final int c, final double[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -6796,20 +5130,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]
      */
-    public byte[] getDataCopyCXYZTAsByte()
-    {
+    public byte[] getDataCopyCXYZTAsByte() {
         return getDataCopyCXYZTAsByte(null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param off int
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param off
-     *        int
      */
-    public byte[] getDataCopyCXYZTAsByte(byte[] out, int off)
-    {
+    public byte[] getDataCopyCXYZTAsByte(final byte[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -6818,8 +5148,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final byte[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyCXYZAsByte(t, result, offset);
             offset += len;
         }
@@ -6830,20 +5159,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]
      */
-    public short[] getDataCopyCXYZTAsShort()
-    {
+    public short[] getDataCopyCXYZTAsShort() {
         return getDataCopyCXYZTAsShort(null, 0);
     }
 
     /**
+     * @param off If (out != null) then it's used to store result at the specified offset
+     * @param out int
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param off
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param out
-     *        int
      */
-    public short[] getDataCopyCXYZTAsShort(short[] out, int off)
-    {
+    public short[] getDataCopyCXYZTAsShort(final short[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -6852,8 +5177,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final short[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyCXYZAsShort(t, result, offset);
             offset += len;
         }
@@ -6864,20 +5188,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]
      */
-    public int[] getDataCopyCXYZTAsInt()
-    {
+    public int[] getDataCopyCXYZTAsInt() {
         return getDataCopyCXYZTAsInt(null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param off int
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param off
-     *        int
      */
-    public int[] getDataCopyCXYZTAsInt(int[] out, int off)
-    {
+    public int[] getDataCopyCXYZTAsInt(final int[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -6886,8 +5206,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final int[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyCXYZAsInt(t, result, offset);
             offset += len;
         }
@@ -6898,20 +5217,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]
      */
-    public float[] getDataCopyCXYZTAsFloat()
-    {
+    public float[] getDataCopyCXYZTAsFloat() {
         return getDataCopyCXYZTAsFloat(null, 0);
     }
 
     /**
+     * @param off If (out != null) then it's used to store result at the specified offset
+     * @param out int
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param off
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param out
-     *        int
      */
-    public float[] getDataCopyCXYZTAsFloat(float[] out, int off)
-    {
+    public float[] getDataCopyCXYZTAsFloat(final float[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -6920,8 +5235,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final float[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyCXYZAsFloat(t, result, offset);
             offset += len;
         }
@@ -6932,20 +5246,16 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]
      */
-    public double[] getDataCopyCXYZTAsDouble()
-    {
+    public double[] getDataCopyCXYZTAsDouble() {
         return getDataCopyCXYZTAsDouble(null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param off int
      * @return a 1D array data copy [CXYZT] of internal 4D array data [T][Z][C][XY]<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param off
-     *        int
      */
-    public double[] getDataCopyCXYZTAsDouble(double[] out, int off)
-    {
+    public double[] getDataCopyCXYZTAsDouble(final double[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -6954,8 +5264,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final double[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyCXYZAsDouble(t, result, offset);
             offset += len;
         }
@@ -6964,26 +5273,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public byte[] getDataCopyCXYZAsByte(int t)
-    {
+    public byte[] getDataCopyCXYZAsByte(final int t) {
         return getDataCopyCXYZAsByte(t, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public byte[] getDataCopyCXYZAsByte(int t, byte[] out, int off)
-    {
+    public byte[] getDataCopyCXYZAsByte(final int t, final byte[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -6992,8 +5295,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final byte[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyCXYAsByte(t, z, result, offset);
             offset += len;
         }
@@ -7002,26 +5304,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public short[] getDataCopyCXYZAsShort(int t)
-    {
+    public short[] getDataCopyCXYZAsShort(final int t) {
         return getDataCopyCXYZAsShort(t, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public short[] getDataCopyCXYZAsShort(int t, short[] out, int off)
-    {
+    public short[] getDataCopyCXYZAsShort(final int t, final short[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -7030,8 +5326,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final short[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyCXYAsShort(t, z, result, offset);
             offset += len;
         }
@@ -7040,24 +5335,19 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public int[] getDataCopyCXYZAsInt(int t)
-    {
+    public int[] getDataCopyCXYZAsInt(final int t) {
         return getDataCopyCXYZAsInt(t, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
      */
-    public int[] getDataCopyCXYZAsInt(int t, int[] out, int off)
-    {
+    public int[] getDataCopyCXYZAsInt(final int t, final int[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -7066,8 +5356,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final int[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyCXYAsInt(t, z, result, offset);
             offset += len;
         }
@@ -7076,26 +5365,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public float[] getDataCopyCXYZAsFloat(int t)
-    {
+    public float[] getDataCopyCXYZAsFloat(final int t) {
         return getDataCopyCXYZAsFloat(t, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public float[] getDataCopyCXYZAsFloat(int t, float[] out, int off)
-    {
+    public float[] getDataCopyCXYZAsFloat(final int t, final float[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -7104,8 +5387,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final float[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyCXYAsFloat(t, z, result, offset);
             offset += len;
         }
@@ -7114,26 +5396,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
+     * @param t int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t
      */
-    public double[] getDataCopyCXYZAsDouble(int t)
-    {
+    public double[] getDataCopyCXYZAsDouble(final int t) {
         return getDataCopyCXYZAsDouble(t, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [CXYZ] of internal 3D array data [Z][C][XY] for specified t<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public double[] getDataCopyCXYZAsDouble(int t, double[] out, int off)
-    {
+    public double[] getDataCopyCXYZAsDouble(final int t, final double[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeC();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -7142,8 +5418,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final double[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyCXYAsDouble(t, z, result, offset);
             offset += len;
         }
@@ -7152,30 +5427,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
-    public byte[] getDataCopyCXYAsByte(int t, int z)
-    {
+    public byte[] getDataCopyCXYAsByte(final int t, final int z) {
         return getDataCopyCXYAsByte(t, z, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public byte[] getDataCopyCXYAsByte(int t, int z, byte[] out, int off)
-    {
+    public byte[] getDataCopyCXYAsByte(final int t, final int z, final byte[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7185,30 +5452,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
-    public short[] getDataCopyCXYAsShort(int t, int z)
-    {
+    public short[] getDataCopyCXYAsShort(final int t, final int z) {
         return getDataCopyCXYAsShort(t, z, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public short[] getDataCopyCXYAsShort(int t, int z, short[] out, int off)
-    {
+    public short[] getDataCopyCXYAsShort(final int t, final int z, final short[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7218,31 +5477,23 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
-    public int[] getDataCopyCXYAsInt(int t, int z)
-    {
+    public int[] getDataCopyCXYAsInt(final int t, final int z) {
         return getDataCopyCXYAsInt(t, z, null, 0);
     }
 
     /**
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
-     * @param out
-     *        int
+     * @param z   int
+     * @param t   int
+     * @param off int
+     * @param out int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     *         If (out != null) then it's used to store result at the specified offset
+     * If (out != null) then it's used to store result at the specified offset
      */
-    public int[] getDataCopyCXYAsInt(int t, int z, int[] out, int off)
-    {
+    public int[] getDataCopyCXYAsInt(final int t, final int z, final int[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7252,30 +5503,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
-    public float[] getDataCopyCXYAsFloat(int t, int z)
-    {
+    public float[] getDataCopyCXYAsFloat(final int t, final int z) {
         return getDataCopyCXYAsFloat(t, z, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public float[] getDataCopyCXYAsFloat(int t, int z, float[] out, int off)
-    {
+    public float[] getDataCopyCXYAsFloat(final int t, final int z, final float[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7285,30 +5528,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
+     * @param t int
+     * @param z int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z
      */
-    public double[] getDataCopyCXYAsDouble(int t, int z)
-    {
+    public double[] getDataCopyCXYAsDouble(final int t, final int z) {
         return getDataCopyCXYAsDouble(t, z, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [CXY] of internal 2D array data [C][XY] for specified t, z<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public double[] getDataCopyCXYAsDouble(int t, int z, double[] out, int off)
-    {
+    public double[] getDataCopyCXYAsDouble(final int t, final int z, final double[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7318,38 +5553,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
-     * @param y
-     *        int
-     * @param x
-     *        int
+     * @param t int
+     * @param z int
+     * @param y int
+     * @param x int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
-    public byte[] getDataCopyCAsByte(int t, int z, int x, int y)
-    {
+    public byte[] getDataCopyCAsByte(final int t, final int z, final int x, final int y) {
         return getDataCopyCAsByte(t, z, x, y, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param x   int
+     * @param y   int
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public byte[] getDataCopyCAsByte(int t, int z, int x, int y, byte[] out, int off)
-    {
+    public byte[] getDataCopyCAsByte(final int t, final int z, final int x, final int y, final byte[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7359,38 +5582,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
-     * @param y
-     *        int
-     * @param x
-     *        int
+     * @param t int
+     * @param z int
+     * @param y int
+     * @param x int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
-    public short[] getDataCopyCAsShort(int t, int z, int x, int y)
-    {
+    public short[] getDataCopyCAsShort(final int t, final int z, final int x, final int y) {
         return getDataCopyCAsShort(t, z, x, y, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param x   int
+     * @param y   int
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public short[] getDataCopyCAsShort(int t, int z, int x, int y, short[] out, int off)
-    {
+    public short[] getDataCopyCAsShort(final int t, final int z, final int x, final int y, final short[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7400,38 +5611,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
-     * @param y
-     *        int
-     * @param x
-     *        int
+     * @param t int
+     * @param z int
+     * @param y int
+     * @param x int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
-    public int[] getDataCopyCAsInt(int t, int z, int x, int y)
-    {
+    public int[] getDataCopyCAsInt(final int t, final int z, final int x, final int y) {
         return getDataCopyCAsInt(t, z, x, y, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param x   int
+     * @param y   int
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public int[] getDataCopyCAsInt(int t, int z, int x, int y, int[] out, int off)
-    {
+    public int[] getDataCopyCAsInt(final int t, final int z, final int x, final int y, final int[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7441,38 +5640,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
-     * @param y
-     *        int
-     * @param x
-     *        int
+     * @param t int
+     * @param z int
+     * @param y int
+     * @param x int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
-    public float[] getDataCopyCAsFloat(int t, int z, int x, int y)
-    {
+    public float[] getDataCopyCAsFloat(final int t, final int z, final int x, final int y) {
         return getDataCopyCAsFloat(t, z, x, y, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param x   int
+     * @param y   int
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public float[] getDataCopyCAsFloat(int t, int z, int x, int y, float[] out, int off)
-    {
+    public float[] getDataCopyCAsFloat(final int t, final int z, final int x, final int y, final float[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7482,38 +5669,26 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param t
-     *        int
-     * @param z
-     *        int
-     * @param y
-     *        int
-     * @param x
-     *        int
+     * @param t int
+     * @param z int
+     * @param y int
+     * @param x int
      * @return a 1D array data copy [C] of specified t, z, x, y
      */
-    public double[] getDataCopyCAsDouble(int t, int z, int x, int y)
-    {
+    public double[] getDataCopyCAsDouble(final int t, final int z, final int x, final int y) {
         return getDataCopyCAsDouble(t, z, x, y, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param x   int
+     * @param y   int
+     * @param z   int
+     * @param t   int
+     * @param off int
      * @return a 1D array data copy [C] of specified t, z, x, y<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param z
-     *        int
-     * @param t
-     *        int
-     * @param off
-     *        int
      */
-    public double[] getDataCopyCAsDouble(int t, int z, int x, int y, double[] out, int off)
-    {
+    public double[] getDataCopyCAsDouble(final int t, final int z, final int x, final int y, final double[] out, final int off) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7523,26 +5698,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
-    public byte[] getDataCopyXYZTAsByte(int c)
-    {
+    public byte[] getDataCopyXYZTAsByte(final int c) {
         return getDataCopyXYZTAsByte(c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param c   int
+     * @param off int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param c
-     *        int
-     * @param off
-     *        int
      */
-    public byte[] getDataCopyXYZTAsByte(int c, byte[] out, int off)
-    {
+    public byte[] getDataCopyXYZTAsByte(final int c, final byte[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -7551,8 +5720,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final byte[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyXYZAsByte(t, c, result, offset);
             offset += len;
         }
@@ -7561,26 +5729,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
-    public short[] getDataCopyXYZTAsShort(int c)
-    {
+    public short[] getDataCopyXYZTAsShort(final int c) {
         return getDataCopyXYZTAsShort(c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param c   int
+     * @param off int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param c
-     *        int
-     * @param off
-     *        int
      */
-    public short[] getDataCopyXYZTAsShort(int c, short[] out, int off)
-    {
+    public short[] getDataCopyXYZTAsShort(final int c, final short[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -7589,8 +5751,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final short[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyXYZAsShort(t, c, result, offset);
             offset += len;
         }
@@ -7599,26 +5760,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
-    public int[] getDataCopyXYZTAsInt(int c)
-    {
+    public int[] getDataCopyXYZTAsInt(final int c) {
         return getDataCopyXYZTAsInt(c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param c   int
+     * @param off int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param c
-     *        int
-     * @param off
-     *        int
      */
-    public int[] getDataCopyXYZTAsInt(int c, int[] out, int off)
-    {
+    public int[] getDataCopyXYZTAsInt(final int c, final int[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -7627,8 +5782,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final int[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyXYZAsInt(t, c, result, offset);
             offset += len;
         }
@@ -7637,26 +5791,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
-    public float[] getDataCopyXYZTAsFloat(int c)
-    {
+    public float[] getDataCopyXYZTAsFloat(final int c) {
         return getDataCopyXYZTAsFloat(c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param c   int
+     * @param off int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param c
-     *        int
-     * @param off
-     *        int
      */
-    public float[] getDataCopyXYZTAsFloat(int c, float[] out, int off)
-    {
+    public float[] getDataCopyXYZTAsFloat(final int c, final float[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -7665,8 +5813,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final float[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyXYZAsFloat(t, c, result, offset);
             offset += len;
         }
@@ -7675,26 +5822,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
+     * @param c int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c
      */
-    public double[] getDataCopyXYZTAsDouble(int c)
-    {
+    public double[] getDataCopyXYZTAsDouble(final int c) {
         return getDataCopyXYZTAsDouble(c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param c   int
+     * @param off int
      * @return a 1D array data copy [XYZT] of internal 3D array data [T][Z][XY] for specified c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param c
-     *        int
-     * @param off
-     *        int
      */
-    public double[] getDataCopyXYZTAsDouble(int c, double[] out, int off)
-    {
+    public double[] getDataCopyXYZTAsDouble(final int c, final double[] out, final int off) {
         final long sizeT = getSizeT();
         final long len = (long) getSizeX() * (long) getSizeY() * (long) getSizeZ();
         if ((len * sizeT) >= Integer.MAX_VALUE)
@@ -7703,8 +5844,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final double[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeT));
         int offset = off;
 
-        for (int t = 0; t < sizeT; t++)
-        {
+        for (int t = 0; t < sizeT; t++) {
             getDataCopyXYZAsDouble(t, c, result, offset);
             offset += len;
         }
@@ -7713,30 +5853,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
+     * @param c int
+     * @param t int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
      */
-    public byte[] getDataCopyXYZAsByte(int t, int c)
-    {
+    public byte[] getDataCopyXYZAsByte(final int t, final int c) {
         return getDataCopyXYZAsByte(t, c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param c   int
+     * @param off int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param c
-     *        int
-     * @param off
-     *        int
      */
-    public byte[] getDataCopyXYZAsByte(int t, int c, byte[] out, int off)
-    {
+    public byte[] getDataCopyXYZAsByte(final int t, final int c, final byte[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -7745,8 +5877,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final byte[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYAsByte(t, z, c, result, offset);
             offset += len;
         }
@@ -7755,30 +5886,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
+     * @param c int
+     * @param t int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
      */
-    public short[] getDataCopyXYZAsShort(int t, int c)
-    {
+    public short[] getDataCopyXYZAsShort(final int t, final int c) {
         return getDataCopyXYZAsShort(t, c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param c   int
+     * @param off int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param c
-     *        int
-     * @param off
-     *        int
      */
-    public short[] getDataCopyXYZAsShort(int t, int c, short[] out, int off)
-    {
+    public short[] getDataCopyXYZAsShort(final int t, final int c, final short[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -7787,8 +5910,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final short[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYAsShort(t, z, c, result, offset);
             offset += len;
         }
@@ -7797,30 +5919,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param c int
+     * @param t int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
-     * @param c
-     *        int
-     * @param t
-     *        int
      */
-    public int[] getDataCopyXYZAsInt(int t, int c)
-    {
+    public int[] getDataCopyXYZAsInt(final int t, final int c) {
         return getDataCopyXYZAsInt(t, c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param c   int
+     * @param off int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param c
-     *        int
-     * @param off
-     *        int
      */
-    public int[] getDataCopyXYZAsInt(int t, int c, int[] out, int off)
-    {
+    public int[] getDataCopyXYZAsInt(final int t, final int c, final int[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -7829,8 +5943,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final int[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYAsInt(t, z, c, result, offset);
             offset += len;
         }
@@ -7839,30 +5952,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @param c
-     *        int
-     * @param t
-     *        int
+     * @param c int
+     * @param t int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
      */
-    public float[] getDataCopyXYZAsFloat(int t, int c)
-    {
+    public float[] getDataCopyXYZAsFloat(final int t, final int c) {
         return getDataCopyXYZAsFloat(t, c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param c   int
+     * @param off int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param c
-     *        int
-     * @param off
-     *        int
      */
-    public float[] getDataCopyXYZAsFloat(int t, int c, float[] out, int off)
-    {
+    public float[] getDataCopyXYZAsFloat(final int t, final int c, final float[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -7871,8 +5976,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final float[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYAsFloat(t, z, c, result, offset);
             offset += len;
         }
@@ -7881,28 +5985,21 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
+     * @param c int
+     * @param t int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c
-     * @param c
-     *        int
-     * @param t
-     *        int
      */
-    public double[] getDataCopyXYZAsDouble(int t, int c)
-    {
+    public double[] getDataCopyXYZAsDouble(final int t, final int c) {
         return getDataCopyXYZAsDouble(t, c, null, 0);
     }
 
     /**
+     * @param out If (out != null) then it's used to store result at the specified offset
+     * @param t   int
+     * @param c   int
      * @return a 1D array data copy [XYZ] of internal 2D array data [Z][XY] for specified t, c<br>
-     * @param out
-     *        If (out != null) then it's used to store result at the specified offset
-     * @param t
-     *        int
-     * @param c
-     *        int
      */
-    public double[] getDataCopyXYZAsDouble(int t, int c, double[] out, int off)
-    {
+    public double[] getDataCopyXYZAsDouble(final int t, final int c, final double[] out, final int off) {
         final long sizeZ = getSizeZ();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeZ) >= Integer.MAX_VALUE)
@@ -7911,8 +6008,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         final double[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeZ));
         int offset = off;
 
-        for (int z = 0; z < sizeZ; z++)
-        {
+        for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYAsDouble(t, z, c, result, offset);
             offset += len;
         }
@@ -7922,18 +6018,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Sets 1D array data [XY] for specified t, z, c
-     * 
-     * @param t
-     *        int
-     * @param c
-     *        int
-     * @param z
-     *        int
-     * @param value
-     *        object
+     *
+     * @param t     int
+     * @param c     int
+     * @param z     int
+     * @param value object
      */
-    public void setDataXY(int t, int z, int c, Object value)
-    {
+    public void setDataXY(final int t, final int z, final int c, final Object value) {
         final IcyBufferedImage img = getImage(t, z);
 
         if (img != null)
@@ -7941,78 +6032,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @deprecated Uses {@link SequenceUtil#getSubSequence(Sequence, int, int, int, int, int, int, int, int)} instead.
-     * @param startX
-     *        int
-     * @param sizeZ
-     *        int
-     * @param sizeT
-     *        int
-     * @param sizeY
-     *        int
-     * @param sizeX
-     *        int
-     * @param startT
-     *        int
-     * @param startY
-     *        int
-     * @param startZ
-     *        int
-     * @return sequence
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence getSubSequence(int startX, int startY, int startZ, int startT, int sizeX, int sizeY, int sizeZ,
-            int sizeT)
-    {
-        return SequenceUtil.getSubSequence(this, startX, startY, startZ, startT, sizeX, sizeY, sizeZ, sizeT);
-    }
-
-    /**
-     * @deprecated Use {@link SequenceUtil#getCopy(Sequence)} instead.
-     * @return sequence
-     * @throws InterruptedException
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence getCopy() throws InterruptedException
-    {
-        return SequenceUtil.getCopy(this);
-    }
-
-    /**
-     * Set all viewer containing this sequence to time t.
-     * 
-     * @deprecated Use this piece of code instead :<br>
-     *             <code>for(Viewer v: Icy.getMainInterface().getViewers(sequence))</code><br>
-     *             <code>   v.setT(...)</code>
-     * @param t
-     *        int
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setT(int t)
-    {
-        for (Viewer viewer : Icy.getMainInterface().getViewers())
-            if (viewer.getSequence() == this)
-                viewer.setT(t);
-    }
-
-    /**
      * @return Retrieve all custom ROI properties (map of (Key,Value)).
      */
-    public Map<String, String> getProperties()
-    {
-        return new HashMap<String, String>(properties);
+    public Map<String, String> getProperties() {
+        return new HashMap<>(properties);
     }
 
     /**
+     * @param name Property name.<br>
+     *             Note that it can be default property name (as {@value #PROPERTY_POSITION_X}) in which case the value will be
+     *             returned in String format if possible or launch an {@link IllegalArgumentException} when not possible.
      * @return Retrieve a Sequence property value.<br>
-     *         Returns <code>null</code> if the property value is empty.
-     * @param name
-     *        Property name.<br>
-     *        Note that it can be default property name (as {@value #PROPERTY_POSITION_X}) in which case the value will be
-     *        returned in String format if possible or launch an {@link IllegalArgumentException} when not possible.
+     * Returns <code>null</code> if the property value is empty.
      */
-    public String getProperty(String name)
-    {
+    public String getProperty(final String name) {
         if (name == null)
             return null;
 
@@ -8047,24 +6080,20 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         if (StringUtil.equals(adjName, PROPERTY_CHANNEL_NAME) || StringUtil.equals(adjName, PROPERTY_POSITION_T_OFFSET))
             throw new IllegalArgumentException("Cannot return value of property '" + adjName + "' as String");
 
-        synchronized (properties)
-        {
+        synchronized (properties) {
             return properties.get(adjName);
         }
     }
 
     /**
      * Generic way to set Sequence property value.
-     * 
-     * @param name
-     *        Property name.<br>
-     *        Note that it can be default property name (as {@value #PROPERTY_POSITION_X}) in which case the value will be
-     *        set in String format if possible or launch an {@link IllegalArgumentException} when not possible.
-     * @param value
-     *        the value to set in the property (for instance "0.0" for {@link #PROPERTY_POSITION_X})
+     *
+     * @param name  Property name.<br>
+     *              Note that it can be default property name (as {@value #PROPERTY_POSITION_X}) in which case the value will be
+     *              set in String format if possible or launch an {@link IllegalArgumentException} when not possible.
+     * @param value the value to set in the property (for instance "0.0" for {@link #PROPERTY_POSITION_X})
      */
-    public void setProperty(String name, String value)
-    {
+    public void setProperty(final String name, final String value) {
         if (name == null)
             return;
 
@@ -8096,8 +6125,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
                 || StringUtil.equals(adjName, PROPERTY_POSITION_T_OFFSET))
             throw new IllegalArgumentException("Cannot set value of property '" + adjName + "'");
 
-        synchronized (properties)
-        {
+        synchronized (properties) {
             properties.put(adjName, value);
         }
 
@@ -8109,11 +6137,10 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * This method should only be called once when the sequence has just be loaded from file.<br>
      * Note that it uses {@link #getFilename()} to define the XML filename so be sure that it is correctly filled before
      * calling this method.
-     * 
+     *
      * @return <code>true</code> if XML data has been correctly loaded, <code>false</code> otherwise.
      */
-    public boolean loadXMLData()
-    {
+    public boolean loadXMLData() {
         return persistent.loadXMLData();
     }
 
@@ -8122,29 +6149,24 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * This function refresh all the meta data and ROIs of the sequence and put it in the current
      * XML document.
      */
-    public void refreshXMLData()
-    {
+    public void refreshXMLData() {
         persistent.refreshXMLData();
     }
 
     /**
      * @return Save attached XML data.
      */
-    public boolean saveXMLData()
-    {
+    public boolean saveXMLData() {
         Exception exc = null;
         int retry = 0;
 
         // definitely ugly but the XML parser may throw some exception in multi thread environnement
         // and we really don't want to lost the sequence metadata !
-        while (retry < 5)
-        {
-            try
-            {
+        while (retry < 5) {
+            try {
                 return persistent.saveXMLData();
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 exc = e;
             }
 
@@ -8158,26 +6180,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     /**
-     * @return true if the specified XML data node exist
-     * @param name
-     *        name of node
+     * @param name name of node
+     * @return {@link Node} if the specified XML data node exist
      * @see #getNode(String)
      */
-    public Node isNodeExisting(String name)
-    {
+    public Node isNodeExisting(final String name) {
         return persistent.getNode(name);
     }
 
     /**
+     * @param name name of wanted node
      * @return Get XML data node identified by specified name.<br>
-     *         The node is created if needed.<br>
-     *         Note that the following node names are reserved: <i>image, name, meta, rois, lut</i><br>
-     * @param name
-     *        name of wanted node
+     * The node is created if needed.<br>
+     * Note that the following node names are reserved: <i>image, name, meta, rois, lut</i><br>
      * @see #isNodeExisting(String)
      */
-    public Node getNode(String name)
-    {
+    public Node getNode(final String name) {
         final Node result = persistent.getNode(name);
 
         if (result == null)
@@ -8186,33 +6204,17 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         return result;
     }
 
-    /**
-     * @deprecated Use {@link #getNode(String)} instead.
-     * @param name
-     *        string
-     * @return Node
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public Node setNode(String name)
-    {
-        return persistent.setNode(name);
-    }
-
     @Override
-    public String toString()
-    {
-        return "Sequence: " + getName() + " - " + getSizeX() + " x " + getSizeY() + " x " + getSizeZ() + " x "
-                + getSizeT() + " - " + getSizeC() + " ch (" + getDataType_() + ")";
+    public String toString() {
+        return String.format("Sequence: %s - %d x %d x %d x %d - %d ch (%s)", getName(), getSizeX(), getSizeY(), getSizeZ(), getSizeT(), getSizeC(), getDataType());
     }
 
     /**
      * Do common job on "image add" here
-     * 
-     * @param image
-     *        image
+     *
+     * @param image image
      */
-    public void onImageAdded(IcyBufferedImage image)
-    {
+    public void onImageAdded(final IcyBufferedImage image) {
         // colorModel not yet defined ?
         if (colorModel == null)
             // define it from the image colorModel
@@ -8227,28 +6229,23 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Do common job on "image replaced" here
-     * 
-     * @param newImage
-     *        image
-     * @param oldImage
-     *        image
+     *
+     * @param newImage image
+     * @param oldImage image
      */
-    public void onImageReplaced(IcyBufferedImage oldImage, IcyBufferedImage newImage)
-    {
+    public void onImageReplaced(final IcyBufferedImage oldImage, final IcyBufferedImage newImage) {
         // we replaced the only present image
         final boolean typeChange = getNumImage() == 1;
         final IcyColorModel cm = colorModel;
 
         beginUpdate();
-        try
-        {
-            if (typeChange)
-            {
+        try {
+            if (typeChange) {
                 // colorModel not compatible ?
                 if (!isCompatible(newImage.getIcyColorModel()))
                     // define it from the new image colorModel
                     setColorModel(IcyColorModel.createInstance(newImage.getIcyColorModel(), true, true));
-                // only inform about a type change if sequence sizeX and sizeY changed
+                    // only inform about a type change if sequence sizeX and sizeY changed
                 else if ((oldImage.getSizeX() != newImage.getSizeX()) || (oldImage.getSizeY() != newImage.getSizeY()))
                     typeChanged();
             }
@@ -8267,20 +6264,17 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             // notify about new image added
             dataChanged(newImage, SequenceEventType.ADDED);
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
     }
 
     /**
      * Do common job on "image remove" here
-     * 
-     * @param image
-     *        image
+     *
+     * @param image image
      */
-    public void onImageRemoved(IcyBufferedImage image)
-    {
+    public void onImageRemoved(final IcyBufferedImage image) {
         // TODO: improve cleaning here
         // need that to avoid memory leak as we manually patch the image colorspace
         if (colorModel != null)
@@ -8298,21 +6292,17 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * fire change event
-     * 
-     * @param e
-     *        event
+     *
+     * @param e event
      */
-    @SuppressWarnings("deprecation")
-    protected void fireChangedEvent(SequenceEvent e)
-    {
-        final List<SequenceListener> cachedListeners = new ArrayList<SequenceListener>(listeners);
+    protected void fireChangedEvent(final SequenceEvent e) {
+        final List<SequenceListener> cachedListeners = new ArrayList<>(listeners);
 
-        for (SequenceListener listener : cachedListeners)
+        for (final SequenceListener listener : cachedListeners)
             listener.sequenceChanged(e);
 
         // provide backward compatibility for painter
-        if (e.getSourceType() == SequenceEventSourceType.SEQUENCE_OVERLAY)
-        {
+        if (e.getSourceType() == SequenceEventSourceType.SEQUENCE_OVERLAY) {
             final Painter painter;
 
             if (e.getSource() instanceof OverlayWrapper)
@@ -8323,7 +6313,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             final SequenceEvent event = new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_PAINTER, painter,
                     e.getType(), e.getParam());
 
-            for (SequenceListener listener : cachedListeners)
+            for (final SequenceListener listener : cachedListeners)
                 listener.sequenceChanged(event);
         }
     }
@@ -8331,9 +6321,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * fire close event
      */
-    protected void fireClosedEvent()
-    {
-        for (SequenceListener listener : new ArrayList<SequenceListener>(listeners))
+    protected void fireClosedEvent() {
+        for (final SequenceListener listener : new ArrayList<>(listeners))
             listener.sequenceClosed(this);
     }
 
@@ -8341,9 +6330,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * fire model image changed event
      */
     @Override
-    public void fireModelImageChangedEvent()
-    {
-        for (SequenceModelListener listener : new ArrayList<SequenceModelListener>(modelListeners))
+    public void fireModelImageChangedEvent() {
+        for (final SequenceModelListener listener : new ArrayList<>(modelListeners))
             listener.imageChanged();
     }
 
@@ -8351,27 +6339,22 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * fire model dimension changed event
      */
     @Override
-    public void fireModelDimensionChangedEvent()
-    {
-        for (SequenceModelListener listener : new ArrayList<SequenceModelListener>(modelListeners))
+    public void fireModelDimensionChangedEvent() {
+        for (final SequenceModelListener listener : new ArrayList<>(modelListeners))
             listener.dimensionChanged();
     }
 
-    public void beginUpdate()
-    {
+    public void beginUpdate() {
         updater.beginUpdate();
     }
 
-    public void endUpdate()
-    {
+    public void endUpdate() {
         updater.endUpdate();
 
         // no more updating
-        if (!updater.isUpdating())
-        {
+        if (!updater.isUpdating()) {
             // lazy channel bounds update
-            if (channelBoundsInvalid)
-            {
+            if (channelBoundsInvalid) {
                 channelBoundsInvalid = false;
                 // images channels bounds are valid at this point
                 internalUpdateChannelsBounds();
@@ -8379,151 +6362,90 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         }
     }
 
-    public boolean isUpdating()
-    {
+    public boolean isUpdating() {
         return updater.isUpdating();
     }
 
     /**
-     * @param metaName
-     *        sequence meta has changed
+     * @param metaName sequence meta has changed
      */
-    public void metaChanged(String metaName)
-    {
+    public void metaChanged(final String metaName) {
         updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_META, metaName));
     }
 
     /**
-     * @param metaName
-     *        sequence meta has changed
-     * @param param
-     *        int
+     * @param metaName sequence meta has changed
+     * @param param    int
      */
-    public void metaChanged(String metaName, int param)
-    {
+    public void metaChanged(final String metaName, final int param) {
         updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_META, metaName, null, param));
     }
 
     /**
      * sequence type (colorModel, size) changed
      */
-    protected void typeChanged()
-    {
+    protected void typeChanged() {
         updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_TYPE));
     }
 
     /**
-     * @param colorModel
-     *        sequence colorMap changed
-     * @param component
-     *        component
+     * @param colorModel sequence colorMap changed
+     * @param component  component
      */
-    protected void colormapChanged(IcyColorModel colorModel, int component)
-    {
+    protected void colormapChanged(final IcyColorModel colorModel, final int component) {
         updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_COLORMAP, colorModel, component));
     }
 
     /**
-     * @param colorModel
-     *        sequence component bounds changed
-     * @param component
-     *        component
+     * @param colorModel sequence component bounds changed
+     * @param component  component
      */
-    protected void componentBoundsChanged(IcyColorModel colorModel, int component)
-    {
+    protected void componentBoundsChanged(final IcyColorModel colorModel, final int component) {
         updater.changed(
                 new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_COMPONENTBOUNDS, colorModel, component));
     }
 
-    // /**
-    // * @deprecated Use {@link #overlayChanged(Overlay, SequenceEventType)} instead.
-    // */
-    // @Deprecated
-    // private void painterChanged(Painter painter, SequenceEventType type)
-    // {
-    // updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_PAINTER, painter,
-    // type));
-    // }
-
     /**
-     * @deprecated Use {@link #overlayChanged(Overlay)} instead.
-     * @param painter
-     *        painter
+     * @param overlay overlay painter has changed
+     * @param type    sequence event
      */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void painterChanged(Painter painter)
-    {
-        updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_OVERLAY, getOverlay(painter),
-                SequenceEventType.CHANGED));
-        // painterChanged(painter, SequenceEventType.CHANGED);
-    }
-
-    /**
-     * @param overlay
-     *        overlay painter has changed
-     * @param type
-     *        sequence event
-     */
-    protected void overlayChanged(Overlay overlay, SequenceEventType type)
-    {
+    protected void overlayChanged(final Overlay overlay, final SequenceEventType type) {
         updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_OVERLAY, overlay, type));
     }
 
     /**
-     * @param overlay
-     *        Notify specified painter of overlay has changed (the sequence should contains the specified
-     *        Overlay)
+     * @param overlay Notify specified painter of overlay has changed (the sequence should contains the specified
+     *                Overlay)
      */
-    public void overlayChanged(Overlay overlay)
-    {
+    public void overlayChanged(final Overlay overlay) {
         if (contains(overlay))
             overlayChanged(overlay, SequenceEventType.CHANGED);
     }
 
     /**
-     * @param event
-     *        Called when an overlay has changed (internal method).<br>
-     *        Use {@link #overlayChanged(Overlay)} instead.
+     * @param event Called when an overlay has changed (internal method).<br>
+     *              Use {@link #overlayChanged(Overlay)} instead.
      */
     @Override
-    public void overlayChanged(OverlayEvent event)
-    {
+    public void overlayChanged(final OverlayEvent event) {
         // only take care about overlay painter change here (need redraw)
         if (event.getType() == OverlayEventType.PAINTER_CHANGED)
             overlayChanged(event.getSource(), SequenceEventType.CHANGED);
     }
 
     /**
-     * @deprecated Use {@link #roiChanged(ROI)} method instead.
+     * @param roi Notify specified roi has changed (the sequence should contains the specified ROI)
      */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void roiChanged()
-    {
-        final Iterator<ROI> it = rois.iterator();
-
-        // send a event for all ROI
-        while (it.hasNext())
-            roiChanged(it.next(), SequenceEventType.CHANGED);
-    }
-
-    /**
-     * @param roi
-     *        Notify specified roi has changed (the sequence should contains the specified ROI)
-     */
-    public void roiChanged(ROI roi)
-    {
+    public void roiChanged(final ROI roi) {
         if (contains(roi))
             roiChanged(roi, SequenceEventType.CHANGED);
     }
 
     /**
-     * @param roi
-     *        Notify specified roi has changed
-     * @param type
-     *        sequence event
+     * @param roi  Notify specified roi has changed
+     * @param type sequence event
      */
-    protected void roiChanged(ROI roi, SequenceEventType type)
-    {
+    protected void roiChanged(final ROI roi, final SequenceEventType type) {
         updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_ROI, roi, type));
     }
 
@@ -8531,27 +6453,21 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * Data has changed (global change)<br>
      * Be careful, this implies all component bounds are recalculated, can be heavy !
      */
-    public void dataChanged()
-    {
+    public void dataChanged() {
         updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_DATA, null));
     }
 
     /**
-     * @param image
-     *        data has changed
-     * @param type
-     *        sequence event
+     * @param image data has changed
+     * @param type  sequence event
      */
-    protected void dataChanged(IcyBufferedImage image, SequenceEventType type)
-    {
+    protected void dataChanged(final IcyBufferedImage image, final SequenceEventType type) {
         updater.changed(new SequenceEvent(this, SequenceEventSourceType.SEQUENCE_DATA, image, type, 0));
     }
 
     @Override
-    public void colorModelChanged(IcyColorModelEvent e)
-    {
-        switch (e.getType())
-        {
+    public void colorModelChanged(final IcyColorModelEvent e) {
+        switch (e.getType()) {
             case COLORMAP_CHANGED:
                 colormapChanged(e.getColorModel(), e.getComponent());
                 break;
@@ -8563,16 +6479,13 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     @Override
-    public void imageChanged(IcyBufferedImageEvent e)
-    {
+    public void imageChanged(final IcyBufferedImageEvent e) {
         final IcyBufferedImage image = e.getImage();
 
-        switch (e.getType())
-        {
+        switch (e.getType()) {
             case BOUNDS_CHANGED:
                 // update sequence channel bounds
-                if (autoUpdateChannelBounds)
-                {
+                if (autoUpdateChannelBounds) {
                     // updating sequence ? delay update
                     if (isUpdating())
                         channelBoundsInvalid = true;
@@ -8594,28 +6507,23 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     @Override
-    public void roiChanged(ROIEvent event)
-    {
+    public void roiChanged(final ROIEvent event) {
         // notify the ROI has changed
         roiChanged(event.getSource(), SequenceEventType.CHANGED);
     }
 
     /**
-     * @param e
-     *        process on sequence change
+     * @param e process on sequence change
      */
     @Override
-    public void onChanged(CollapsibleEvent e)
-    {
+    public void onChanged(final CollapsibleEvent e) {
         final SequenceEvent event = (SequenceEvent) e;
 
-        switch (event.getSourceType())
-        {
+        switch (event.getSourceType()) {
             // do here global process on sequence data change
             case SEQUENCE_DATA:
                 // automatic channel bounds update enabled
-                if (autoUpdateChannelBounds)
-                {
+                if (autoUpdateChannelBounds) {
                     // generic CHANGED event
                     if (event.getSource() == null)
                         // recalculate all images bounds (automatically update sequence bounds in imageChange event)
@@ -8655,5 +6563,4 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         // notify listener we have changed
         fireChangedEvent(event);
     }
-
 }

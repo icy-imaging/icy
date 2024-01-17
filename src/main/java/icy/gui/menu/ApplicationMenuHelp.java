@@ -30,7 +30,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class ApplicationMenuHelp extends AbstractApplicationMenu {
     @NotNull

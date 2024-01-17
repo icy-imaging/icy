@@ -27,7 +27,7 @@ import javax.swing.*;
  * Override the getListCellRendererComponent() or updateItem() methods to do your own rendering.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class CustomComboBoxRenderer extends DefaultListCellRenderer {
     private final JComboBox<?> combo;

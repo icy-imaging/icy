@@ -38,7 +38,7 @@ import javax.swing.JRootPane;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyExternalFrame extends JFrame {
     private class CloseAction extends IcyAbstractAction {

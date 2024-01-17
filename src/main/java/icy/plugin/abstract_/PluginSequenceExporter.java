@@ -25,7 +25,7 @@ import icy.sequence.SequenceExporter;
  * Plugin specialized for Sequence export operation (see the {@link SequenceExporter} interface)
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  * @see PluginSequenceFileExporter
  */
 public abstract class PluginSequenceExporter extends Plugin implements SequenceExporter, PluginNoEDTConstructor {

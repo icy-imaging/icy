@@ -25,7 +25,7 @@ import icy.sequence.SequenceImporter;
  * Plugin specialized for Sequence import operation (see the {@link SequenceImporter} interface)
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  * @see PluginImporter
  * @see PluginFileImporter
  * @see PluginSequenceFileImporter

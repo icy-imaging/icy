@@ -46,7 +46,7 @@ import icy.roi.ROIUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class RoiSettingPanel extends JPanel implements ActionListener, ItemListener {
     // GUI

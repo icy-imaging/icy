@@ -28,7 +28,7 @@ import javax.swing.*;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyButton extends JButton {
     private boolean flat;

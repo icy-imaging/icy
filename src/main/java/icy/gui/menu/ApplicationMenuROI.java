@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class ApplicationMenuROI extends AbstractApplicationMenu {
 

@@ -45,7 +45,7 @@ import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 /**
  * @author stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class ColormapPanel extends JPanel implements IcyColorMapListener {
     private static final String DEFAULT_COLORMAP_DIR = IcyColorMap.DEFAULT_COLORMAP_DIR;

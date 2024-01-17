@@ -50,7 +50,7 @@ import java.awt.Font;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener {
     // GUI

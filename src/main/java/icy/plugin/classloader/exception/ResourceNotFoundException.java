@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Kamran Zafar
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class ResourceNotFoundException extends JclException {
     private String resourceName;

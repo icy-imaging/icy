@@ -1,55 +1,22 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.image;
-
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentSampleModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferDouble;
-import java.awt.image.DataBufferFloat;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferShort;
-import java.awt.image.DataBufferUShort;
-import java.awt.image.ImageObserver;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Array;
-import java.nio.channels.ClosedByInterruptException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-
-import javax.media.jai.PlanarImage;
 
 import icy.common.CollapsibleEvent;
 import icy.common.UpdateEventHandler;
@@ -66,51 +33,55 @@ import icy.image.colormodel.IcyColorModelListener;
 import icy.image.lut.LUT;
 import icy.math.ArrayMath;
 import icy.math.MathUtil;
-import icy.math.Scaler;
 import icy.preferences.GeneralPreferences;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceIdImporter;
 import icy.system.SystemUtil;
 import icy.system.thread.Processor;
 import icy.type.DataType;
-import icy.type.TypeUtil;
 import icy.type.collection.array.Array1DUtil;
 import icy.type.collection.array.Array2DUtil;
 import icy.type.collection.array.ArrayUtil;
 import icy.type.collection.array.ByteArrayConvert;
 import icy.util.StringUtil;
-import loci.formats.FormatException;
-import loci.formats.IFormatReader;
 import loci.formats.gui.SignedByteBuffer;
 import loci.formats.gui.SignedShortBuffer;
 import loci.formats.gui.UnsignedIntBuffer;
-import plugins.kernel.importer.LociImporterPlugin;
+
+import javax.media.jai.PlanarImage;
+import java.awt.*;
+import java.awt.image.*;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
+import java.nio.channels.ClosedByInterruptException;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 /**
  * @author stephane
  */
-public class IcyBufferedImage extends BufferedImage implements IcyColorModelListener, ChangeListener
-{
-    static class WeakIcyBufferedImageReference extends WeakReference<IcyBufferedImage>
-    {
+public class IcyBufferedImage extends BufferedImage implements IcyColorModelListener, ChangeListener, AutoCloseable {
+    static class WeakIcyBufferedImageReference extends WeakReference<IcyBufferedImage> {
         final int hc;
 
-        WeakIcyBufferedImageReference(IcyBufferedImage image)
-        {
+        WeakIcyBufferedImageReference(final IcyBufferedImage image) {
             super(image);
 
             hc = System.identityHashCode(image);
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return hc;
         }
 
         @Override
-        public boolean equals(Object obj)
-        {
+        public boolean equals(final Object obj) {
             if (obj instanceof WeakIcyBufferedImageReference)
                 return obj.hashCode() == hashCode();
 
@@ -118,56 +89,31 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         }
     }
 
-    public static class ImageSourceInfo
-    {
-        // importer
-        public final SequenceIdImporter imp;
-        // series index
-        public final int series;
-        // resolution
-        public final int resolution;
-        // region
-        public final Rectangle region;
-        // T, Z, C position
-        public final int t;
-        public final int z;
-        public final int c;
-
-        public ImageSourceInfo(SequenceIdImporter imp, int series, int resolution, Rectangle region, int t, int z,
-                int c)
-        {
-            super();
-
-            this.imp = imp;
-            this.series = series;
-            this.resolution = resolution;
-            this.region = region;
-            this.t = t;
-            this.z = z;
-            this.c = c;
-        }
-
+    /**
+     * @param imp        importer
+     * @param series     series index
+     * @param resolution resolution
+     * @param region     region
+     * @param t          T, Z, C position
+     */
+    public record ImageSourceInfo(SequenceIdImporter imp, int series, int resolution, Rectangle region, int t, int z, int c) {
         @Override
-        public String toString()
-        {
+        public String toString() {
             return imp.toString() + " s=" + series + " r=" + resolution + " t=" + t + " z=" + z + " c=" + c;
         }
     }
 
-    private static class ImageDataLoaderWorker implements Callable<Object>
-    {
+    private static class ImageDataLoaderWorker implements Callable<Object> {
         final WeakReference<IcyBufferedImage> imageRef;
 
-        ImageDataLoaderWorker(IcyBufferedImage image)
-        {
+        ImageDataLoaderWorker(final IcyBufferedImage image) {
             super();
 
-            this.imageRef = new WeakReference<IcyBufferedImage>(image);
+            this.imageRef = new WeakReference<>(image);
         }
 
         @Override
-        public Object call() throws Exception
-        {
+        public Object call() throws Exception {
             final IcyBufferedImage image = imageRef.get();
 
             // image has been released, we probably don't need its data anymore...
@@ -185,10 +131,10 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             final int sizeC = image.getSizeC();
             // create the result array (always 2D native type)
             final Object[] result = Array2DUtil.createArray(image.getDataType_(), sizeC);
+            assert result != null;
 
             // all channels ?
-            if ((imageSourceInfo.c == -1) && (sizeC > 1))
-            {
+            if ((imageSourceInfo.c == -1) && (sizeC > 1)) {
                 // better to directly load image
                 final IcyBufferedImage newImage = imp.getImage(imageSourceInfo.series, imageSourceInfo.resolution,
                         imageSourceInfo.region, imageSourceInfo.z, imageSourceInfo.t);
@@ -198,8 +144,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 for (int c = 0; c < sizeC; c++)
                     result[c] = newImage.getDataXY(c);
             }
-            else
-            {
+            else {
                 // all channel for single channel image --> channel 0
                 final int startC = (imageSourceInfo.c == -1) ? 0 : imageSourceInfo.c;
                 // directly load pixel data
@@ -211,53 +156,44 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             return result;
         }
 
-        IcyBufferedImage getImage()
-        {
+        IcyBufferedImage getImage() {
             return imageRef.get();
         }
     }
 
-    private static class ImageDataLoaderTask extends FutureTask<Object>
-    {
+    private static class ImageDataLoaderTask extends FutureTask<Object> {
         final ImageDataLoaderWorker worker;
 
-        ImageDataLoaderTask(ImageDataLoaderWorker worker)
-        {
+        ImageDataLoaderTask(final ImageDataLoaderWorker worker) {
             super(worker);
 
             this.worker = worker;
         }
 
-        IcyBufferedImage getImage()
-        {
+        IcyBufferedImage getImage() {
             return worker.getImage();
         }
     }
 
-    private static class ImageDataLoader
-    {
+    private static class ImageDataLoader {
         final Processor processor;
 
-        public ImageDataLoader()
-        {
+        public ImageDataLoader() {
             super();
 
             processor = new Processor(SystemUtil.getNumberOfCPUs() * 2);
             processor.setThreadName("Image data loader");
         }
 
-        Object loadImageData(IcyBufferedImage image) throws ExecutionException, InterruptedException
-        {
+        Object loadImageData(final IcyBufferedImage image) throws ExecutionException, InterruptedException {
             final ImageDataLoaderTask task = new ImageDataLoaderTask(new ImageDataLoaderWorker(image));
 
             processor.execute(task);
 
-            try
-            {
+            try {
                 return task.get();
             }
-            catch (InterruptedException e)
-            {
+            catch (final InterruptedException e) {
                 // process interrupted ? remove task from executor queue if possible
                 processor.remove(task);
                 // cancel the task (without interrupting current running task as this close the importer)
@@ -268,15 +204,12 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             }
         }
 
-        void cancelTasks(IcyBufferedImage image)
-        {
-            final List<ImageDataLoaderTask> tasks = new ArrayList<ImageDataLoaderTask>();
+        void cancelTasks(final IcyBufferedImage image) {
+            final List<ImageDataLoaderTask> tasks = new ArrayList<>();
             final BlockingQueue<Runnable> queue = processor.getQueue();
 
-            synchronized (queue)
-            {
-                for (Runnable task : queue)
-                {
+            synchronized (queue) {
+                for (final Runnable task : queue) {
                     final ImageDataLoaderTask imgTask = (ImageDataLoaderTask) task;
                     final IcyBufferedImage imgImage = imgTask.getImage();
 
@@ -286,8 +219,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             }
 
             // remove pending tasks for that image
-            for (ImageDataLoaderTask task : tasks)
-            {
+            for (final ImageDataLoaderTask task : tasks) {
                 processor.remove(task);
                 task.cancel(false);
             }
@@ -302,17 +234,15 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Used internally to find out an image from its identity hash code
      */
-    static final Map<Integer, WeakIcyBufferedImageReference> images = new HashMap<Integer, WeakIcyBufferedImageReference>();
+    static final Map<Integer, WeakIcyBufferedImageReference> images = new HashMap<>();
 
     /**
      * Retrieve an {@link IcyBufferedImage} from its identity hash code
      */
-    public static IcyBufferedImage getIcyBufferedImage(Integer idHashCode)
-    {
+    public static IcyBufferedImage getIcyBufferedImage(final Integer idHashCode) {
         final WeakIcyBufferedImageReference ref;
 
-        synchronized (images)
-        {
+        synchronized (images) {
             ref = images.get(idHashCode);
         }
 
@@ -325,105 +255,26 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Retrieve an {@link IcyBufferedImage} from its identity hash code
      */
-    public static IcyBufferedImage getIcyBufferedImage(int idHashCode)
-    {
+    public static IcyBufferedImage getIcyBufferedImage(final int idHashCode) {
         return getIcyBufferedImage(Integer.valueOf(idHashCode));
-    }
-
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static int TYPE_BYTE = TypeUtil.TYPE_BYTE;
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static int TYPE_DOUBLE = TypeUtil.TYPE_DOUBLE;
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static int TYPE_FLOAT = TypeUtil.TYPE_FLOAT;
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static int TYPE_INT = TypeUtil.TYPE_INT;
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static int TYPE_SHORT = TypeUtil.TYPE_SHORT;
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static int TYPE_UNDEFINED = TypeUtil.TYPE_UNDEFINED;
-
-    /**
-     * @deprecated Use {@link IcyBufferedImageUtil.FilterType} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static enum FilterType
-    {
-        NEAREST, BILINEAR, BICUBIC
-    };
-
-    /**
-     * @deprecated
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    protected static IcyBufferedImageUtil.FilterType getNewFilterType(FilterType ft)
-    {
-        switch (ft)
-        {
-            default:
-            case NEAREST:
-                return IcyBufferedImageUtil.FilterType.NEAREST;
-            case BILINEAR:
-                return IcyBufferedImageUtil.FilterType.BILINEAR;
-            case BICUBIC:
-                return IcyBufferedImageUtil.FilterType.BICUBIC;
-        }
-    }
-
-    /**
-     * Convert a list of BufferedImage to an IcyBufferedImage (multi component).<br>
-     * IMPORTANT : source images can be used as part or as the whole result<br>
-     * so consider them as "lost"
-     * 
-     * @param imageList
-     *        list of {@link BufferedImage}
-     * @return {@link IcyBufferedImage}
-     * @deprecated
-     *             use {@link #createFrom} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage convert(List<BufferedImage> imageList)
-    {
-        return createFrom(imageList);
     }
 
     /**
      * Create an IcyBufferedImage (multi component) from a list of BufferedImage.<br>
      * IMPORTANT: source images can be used as part or as the whole result so consider them as 'lost'.
-     * 
-     * @param imageList
-     *        list of {@link BufferedImage}
+     *
+     * @param imageList list of {@link BufferedImage}
      * @return {@link IcyBufferedImage}
-     * @throws IllegalArgumentException
-     *         if imageList is empty or contains incompatible images.
+     * @throws IllegalArgumentException if imageList is empty or contains incompatible images.
      */
-    public static IcyBufferedImage createFrom(List<? extends BufferedImage> imageList) throws IllegalArgumentException
-    {
+    public static IcyBufferedImage createFrom(final List<? extends BufferedImage> imageList) throws IllegalArgumentException {
         if (imageList.size() == 0)
             throw new IllegalArgumentException("imageList should contains at least 1 image");
 
-        final List<IcyBufferedImage> icyImageList = new ArrayList<IcyBufferedImage>();
+        final List<IcyBufferedImage> icyImageList = new ArrayList<>();
 
         // transform images to icy images
-        for (BufferedImage image : imageList)
+        for (final BufferedImage image : imageList)
             icyImageList.add(IcyBufferedImage.createFrom(image));
 
         final IcyBufferedImage firstImage = icyImageList.get(0);
@@ -437,23 +288,22 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
         // calculate channel number
         int numChannel = 0;
-        for (IcyBufferedImage image : icyImageList)
+        for (final IcyBufferedImage image : icyImageList)
             numChannel += image.getSizeC();
 
         final Object[] data = Array2DUtil.createArray(dataType, numChannel);
+        assert data != null;
         final IcyColorMap[] colormaps = new IcyColorMap[numChannel];
 
         // get data from all images
         int destC = 0;
-        for (IcyBufferedImage image : icyImageList)
-        {
+        for (final IcyBufferedImage image : icyImageList) {
             if (dataType != image.getDataType_())
                 throw new IllegalArgumentException("All images contained in imageList should have the same dataType");
             if ((width != image.getWidth()) || (height != image.getHeight()))
                 throw new IllegalArgumentException("All images contained in imageList should have the same dimension");
 
-            for (int c = 0; c < image.getSizeC(); c++)
-            {
+            for (int c = 0; c < image.getSizeC(); c++) {
                 data[destC] = image.getDataXY(c);
                 colormaps[destC++] = image.getColorMap(c);
             }
@@ -470,69 +320,41 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
-     * Convert a BufferedImage to an IcyBufferedImage.<br>
-     * IMPORTANT : source image can be used as part or as the whole result<br>
-     * so consider it as "lost"
-     * 
-     * @param image
-     *        {@link BufferedImage}
-     * @return {@link IcyBufferedImage}
-     * @deprecated
-     *             use {@link #createFrom} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage convert(BufferedImage image)
-    {
-        return createFrom(image);
-    }
-
-    /**
      * Create an IcyBufferedImage from a {@link PlanarImage}.<br>
      * IMPORTANT : source image can be used as part or as the whole result<br>
      * so consider it as lost.
-     * 
-     * @param image
-     *        {@link PlanarImage}
+     *
+     * @param image {@link PlanarImage}
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage createFrom(PlanarImage image, boolean signedDataType)
-    {
+    public static IcyBufferedImage createFrom(final PlanarImage image, final boolean signedDataType) {
         final DataBuffer db = image.getData().getDataBuffer();
         final int w = image.getWidth();
         final int h = image.getHeight();
 
-        if (db instanceof DataBufferByte)
-            return new IcyBufferedImage(w, h, ((DataBufferByte) db).getBankData(), signedDataType);
-        else if (db instanceof DataBufferShort)
-            return new IcyBufferedImage(w, h, ((DataBufferShort) db).getBankData(), signedDataType);
-        else if (db instanceof DataBufferUShort)
-            return new IcyBufferedImage(w, h, ((DataBufferUShort) db).getBankData(), signedDataType);
-        else if (db instanceof DataBufferInt)
-            return new IcyBufferedImage(w, h, ((DataBufferInt) db).getBankData(), signedDataType);
-        else if (db instanceof DataBufferFloat)
-            return new IcyBufferedImage(w, h, ((DataBufferFloat) db).getBankData(), true);
-        else if (db instanceof javax.media.jai.DataBufferFloat)
-            return new IcyBufferedImage(w, h, ((javax.media.jai.DataBufferFloat) db).getBankData(), true);
-        else if (db instanceof DataBufferDouble)
-            return new IcyBufferedImage(w, h, ((DataBufferDouble) db).getBankData(), true);
-        else if (db instanceof javax.media.jai.DataBufferDouble)
-            return new IcyBufferedImage(w, h, ((javax.media.jai.DataBufferDouble) db).getBankData(), true);
-        else
+        return switch (db) {
+            case final DataBufferByte dataBufferByte -> new IcyBufferedImage(w, h, dataBufferByte.getBankData(), signedDataType);
+            case final DataBufferShort dataBufferShort -> new IcyBufferedImage(w, h, dataBufferShort.getBankData(), signedDataType);
+            case final DataBufferUShort dataBufferUShort -> new IcyBufferedImage(w, h, dataBufferUShort.getBankData(), signedDataType);
+            case final DataBufferInt dataBufferInt -> new IcyBufferedImage(w, h, dataBufferInt.getBankData(), signedDataType);
+            case final DataBufferFloat dataBufferFloat -> new IcyBufferedImage(w, h, dataBufferFloat.getBankData(), true);
+            case final javax.media.jai.DataBufferFloat dataBufferFloat -> new IcyBufferedImage(w, h, dataBufferFloat.getBankData(), true);
+            case final DataBufferDouble dataBufferDouble -> new IcyBufferedImage(w, h, dataBufferDouble.getBankData(), true);
+            case final javax.media.jai.DataBufferDouble dataBufferDouble -> new IcyBufferedImage(w, h, dataBufferDouble.getBankData(), true);
             // JAI keep dataType and others stuff in their BufferedImage
-            return IcyBufferedImage.createFrom(image.getAsBufferedImage());
+            case null, default -> IcyBufferedImage.createFrom(image.getAsBufferedImage());
+        };
     }
 
     /**
      * Create an IcyBufferedImage from a {@link PlanarImage}.<br>
      * IMPORTANT : source image can be used as part or as the whole result<br>
      * so consider it as lost.
-     * 
-     * @param image
-     *        {@link PlanarImage}
+     *
+     * @param image {@link PlanarImage}
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage createFrom(PlanarImage image)
-    {
+    public static IcyBufferedImage createFrom(final PlanarImage image) {
         return createFrom(image, false);
     }
 
@@ -540,13 +362,11 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Create an IcyBufferedImage from a BufferedImage.<br>
      * IMPORTANT : source image can be used as part or as the whole result<br>
      * so consider it as lost.
-     * 
-     * @param image
-     *        {@link BufferedImage}
+     *
+     * @param image {@link BufferedImage}
      * @return {@link IcyBufferedImage}
      */
-    public static IcyBufferedImage createFrom(BufferedImage image)
-    {
+    public static IcyBufferedImage createFrom(final BufferedImage image) {
         // IcyBufferedImage --> no conversion needed
         if (image instanceof IcyBufferedImage)
             return (IcyBufferedImage) image;
@@ -555,7 +375,8 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         if (image.getColorModel() instanceof IcyColorModel)
             return new IcyBufferedImage(
                     IcyColorModel.createInstance((IcyColorModel) image.getColorModel(), false, false),
-                    image.getRaster());
+                    image.getRaster()
+            );
 
         final int w = image.getWidth();
         final int h = image.getHeight();
@@ -564,8 +385,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final Graphics g;
 
         // we first want a component based image
-        switch (type)
-        {
+        switch (type) {
             case BufferedImage.TYPE_INT_RGB:
             case BufferedImage.TYPE_INT_BGR:
             case BufferedImage.TYPE_USHORT_555_RGB:
@@ -593,8 +413,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             default:
                 // if we have severals components with an unknown / incompatible sampleModel
                 if ((image.getColorModel().getNumComponents() > 1)
-                        && (!(image.getSampleModel() instanceof ComponentSampleModel)))
-                {
+                        && (!(image.getSampleModel() instanceof ComponentSampleModel))) {
                     // change it to a basic ABGR components image
                     temp = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
                     g = temp.createGraphics();
@@ -618,8 +437,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         result.copyData(temp);
 
         // in some case we want to restore colormaps from source image
-        switch (type)
-        {
+        switch (type) {
             case BufferedImage.TYPE_BYTE_BINARY:
             case BufferedImage.TYPE_BYTE_INDEXED:
                 if (numComponents == 2)
@@ -636,59 +454,6 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         }
 
         return result;
-    }
-
-    /**
-     * @deprecated Use
-     *             {@link LociImporterPlugin#getThumbnailCompatible(IFormatReader, int, int, int)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage createCompatibleThumbnailFrom(IFormatReader reader, int z, int t)
-            throws FormatException, IOException
-    {
-        return LociImporterPlugin.getThumbnailCompatible(reader, z, t, -1);
-    }
-
-    /**
-     * @deprecated Use {@link LociImporterPlugin#getThumbnail(IFormatReader, int, int, int)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage createThumbnailFrom(IFormatReader reader, int z, int t)
-            throws FormatException, IOException
-    {
-        return LociImporterPlugin.getThumbnail(reader, z, t, -1);
-    }
-
-    /**
-     * @deprecated Use {@link LociImporterPlugin#getImage(IFormatReader, Rectangle, int, int, int, int)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage createFrom(IFormatReader reader, int x, int y, int w, int h, int z, int t, int c)
-            throws FormatException, IOException
-    {
-        return LociImporterPlugin.getImage(reader, new Rectangle(x, y, w, h), z, t, c, 0);
-    }
-
-    /**
-     * @deprecated Use {@link LociImporterPlugin#getImage(IFormatReader, Rectangle, int, int)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage createFrom(IFormatReader reader, int z, int t) throws FormatException, IOException
-    {
-        return LociImporterPlugin.getImage(reader, null, z, t);
-    }
-
-    /**
-     * @deprecated Use {@link #IcyBufferedImage(int, int, IcyColorModel)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage createEmptyImage(int width, int height, IcyColorModel cm)
-    {
-        return new IcyBufferedImage(width, height, cm);
     }
 
     /**
@@ -742,30 +507,22 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Build an Icy formatted BufferedImage, takes an IcyColorModel and a WritableRaster as input
-     * 
-     * @param cm
-     *        {@link IcyColorModel}
-     * @param wr
-     *        {@link WritableRaster}
-     * @param autoUpdateChannelBounds
-     *        If true then channel bounds are automatically calculated.
-     * @param dataInitialized
-     *        When set to <code>true</code> (default), we assume the image is created with initialized data (stored in the {@link WritableRaster} object)
-     *        otherwise data will be initialized / loaded on first data request (lazy loading).
-     * @param forceVolatileData
-     *        If set to <code>true</code> then image data is volatile regardless of {@link GeneralPreferences#getVirtualMode()} state and can be lost if not
-     *        specifically stored using <code>setDataxx(..)</code> methods.<br>
-     *        Image cache is used to handle data storage and can move data on disk when memory is getting low.<br>
-     *        Note that Default value for this parameter is <code>false</code>.
+     *
+     * @param cm                      {@link IcyColorModel}
+     * @param wr                      {@link WritableRaster}
+     * @param autoUpdateChannelBounds If true then channel bounds are automatically calculated.
+     * @param dataInitialized         When set to <code>true</code> (default), we assume the image is created with initialized data (stored in the {@link WritableRaster} object)
+     *                                otherwise data will be initialized / loaded on first data request (lazy loading).
+     * @param forceVolatileData       If set to <code>true</code> then image data is volatile regardless of {@link GeneralPreferences#getVirtualMode()} state and can be lost if not
+     *                                specifically stored using <code>setDataxx(..)</code> methods.<br>
+     *                                Image cache is used to handle data storage and can move data on disk when memory is getting low.<br>
+     *                                Note that Default value for this parameter is <code>false</code>.
      */
-    protected IcyBufferedImage(IcyColorModel cm, WritableRaster wr, boolean autoUpdateChannelBounds,
-            boolean dataInitialized, boolean forceVolatileData)
-    {
+    protected IcyBufferedImage(final IcyColorModel cm, final WritableRaster wr, final boolean autoUpdateChannelBounds, final boolean dataInitialized, final boolean forceVolatileData) {
         super(cm, cm.createDummyWritableRaster(wr.getWidth(), wr.getHeight()), false, null);
 
         // store it in the hashmap (weak reference)
-        synchronized (images)
-        {
+        synchronized (images) {
             images.put(Integer.valueOf(System.identityHashCode(this)), new WeakIcyBufferedImageReference(this));
         }
 
@@ -782,16 +539,14 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         this.autoUpdateChannelBounds = autoUpdateChannelBounds;
 
         updater = new UpdateEventHandler(this, false);
-        listeners = new ArrayList<IcyBufferedImageListener>();
+        listeners = new ArrayList<>();
 
         // we want volatile data ?
-        if (forceVolatileData || GeneralPreferences.getVirtualMode())
-        {
+        if (forceVolatileData || GeneralPreferences.getVirtualMode()) {
             volatile_ = true;
             raster = null;
         }
-        else
-        {
+        else {
             volatile_ = false;
             raster = wr;
         }
@@ -799,8 +554,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         this.dataInitialized = dataInitialized;
 
         // we have initialized data ? --> save them in cache
-        if (dataInitialized)
-        {
+        if (dataInitialized) {
             // save data in cache (for volatile image)
             saveRasterInCache(wr);
             // update image components bounds
@@ -816,29 +570,22 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Build an Icy formatted BufferedImage, takes an IcyColorModel and a WritableRaster as input
-     * 
-     * @param cm
-     *        {@link IcyColorModel}
-     * @param wr
-     *        {@link WritableRaster}
-     * @param autoUpdateChannelBounds
-     *        If true then channel bounds are automatically calculated.<br>
+     *
+     * @param cm                      {@link IcyColorModel}
+     * @param wr                      {@link WritableRaster}
+     * @param autoUpdateChannelBounds If true then channel bounds are automatically calculated.<br>
      */
-    protected IcyBufferedImage(IcyColorModel cm, WritableRaster wr, boolean autoUpdateChannelBounds)
-    {
+    protected IcyBufferedImage(final IcyColorModel cm, final WritableRaster wr, final boolean autoUpdateChannelBounds) {
         this(cm, wr, autoUpdateChannelBounds, true, false);
     }
 
     /**
      * Create an Icy formatted BufferedImage, takes an IcyColorModel and a WritableRaster as input
-     * 
-     * @param cm
-     *        {@link IcyColorModel}
-     * @param wr
-     *        {@link WritableRaster}
+     *
+     * @param cm {@link IcyColorModel}
+     * @param wr {@link WritableRaster}
      */
-    protected IcyBufferedImage(IcyColorModel cm, WritableRaster wr)
-    {
+    protected IcyBufferedImage(final IcyColorModel cm, final WritableRaster wr) {
         this(cm, wr, false, true, false);
     }
 
@@ -846,8 +593,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Create an Icy formatted BufferedImage with specified IcyColorModel, width and height.<br>
      * Private version, {@link IcyColorModel} is directly used internally.
      */
-    protected IcyBufferedImage(IcyColorModel cm, int width, int height, boolean forceVolatileData)
-    {
+    protected IcyBufferedImage(final IcyColorModel cm, final int width, final int height, final boolean forceVolatileData) {
         this(cm, cm.createCompatibleWritableRaster(width, height), false, false, forceVolatileData);
     }
 
@@ -855,8 +601,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Create an Icy formatted BufferedImage with specified IcyColorModel, width and height.<br>
      * Private version, {@link IcyColorModel} is directly used internally.
      */
-    protected IcyBufferedImage(IcyColorModel cm, int width, int height)
-    {
+    protected IcyBufferedImage(final IcyColorModel cm, final int width, final int height) {
         this(cm, cm.createCompatibleWritableRaster(width, height), false, false, false);
     }
 
@@ -866,24 +611,18 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * <br>
      * This constructor provides the best performance for massive image creation and computation as it allow you to
      * directly send the data array and disable the channel bounds calculation.
-     * 
-     * @param cm
-     *        the color model
-     * @param width
-     * @param height
-     * @param data
-     *        image data<br>
-     *        Should be a 2D array with first dimension giving the number of component<br>
-     *        and second dimension equals to <code>width * height</code><br>
-     *        The array data type specify the internal data type and should match the given color
-     *        model parameter.
-     * @param autoUpdateChannelBounds
-     *        If true then channel bounds are automatically calculated.<br>
-     *        When set to false, you have to set bounds manually by calling
-     *        {@link #updateChannelsBounds()} or #setC
+     *
+     * @param cm                      the color model
+     * @param data                    image data<br>
+     *                                Should be a 2D array with first dimension giving the number of component<br>
+     *                                and second dimension equals to <code>width * height</code><br>
+     *                                The array data type specify the internal data type and should match the given color
+     *                                model parameter.
+     * @param autoUpdateChannelBounds If true then channel bounds are automatically calculated.<br>
+     *                                When set to false, you have to set bounds manually by calling
+     *                                {@link #updateChannelsBounds()} or #setC
      */
-    protected IcyBufferedImage(IcyColorModel cm, Object[] data, int width, int height, boolean autoUpdateChannelBounds)
-    {
+    protected IcyBufferedImage(final IcyColorModel cm, final Object[] data, final int width, final int height, final boolean autoUpdateChannelBounds) {
         this(cm, cm.createWritableRaster(data, width, height), autoUpdateChannelBounds);
     }
 
@@ -893,61 +632,44 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * <br>
      * This constructor provides the best performance for massive image creation and computation as
      * it allow you to directly send the data array and disable the channel bounds calculation.
-     * 
-     * @param width
-     * @param height
-     * @param data
-     *        image data<br>
-     *        Should be a 2D array with first dimension giving the number of component<br>
-     *        and second dimension equals to <code>width * height</code><br>
-     *        The array data type specify the internal data type.
-     * @param signed
-     *        use signed data for data type
-     * @param autoUpdateChannelBounds
-     *        If true then channel bounds are automatically calculated.<br>
-     *        When set to false, you have to set bounds manually by calling
-     *        {@link #updateChannelsBounds()} or #setC
+     *
+     * @param data                    image data<br>
+     *                                Should be a 2D array with first dimension giving the number of component<br>
+     *                                and second dimension equals to <code>width * height</code><br>
+     *                                The array data type specify the internal data type.
+     * @param signed                  use signed data for data type
+     * @param autoUpdateChannelBounds If true then channel bounds are automatically calculated.<br>
+     *                                When set to false, you have to set bounds manually by calling
+     *                                {@link #updateChannelsBounds()} or #setC
      */
-    public IcyBufferedImage(int width, int height, Object[] data, boolean signed, boolean autoUpdateChannelBounds)
-    {
-        this(IcyColorModel.createInstance(data.length, ArrayUtil.getDataType(data[0], signed)), data, width, height,
-                autoUpdateChannelBounds);
+    public IcyBufferedImage(final int width, final int height, final Object[] data, final boolean signed, final boolean autoUpdateChannelBounds) {
+        this(IcyColorModel.createInstance(data.length, ArrayUtil.getDataType(data[0], signed)), data, width, height, autoUpdateChannelBounds);
     }
 
     /**
      * Create an Icy formatted BufferedImage with specified width, height and input data.<br>
      * ex : <code>img = new IcyBufferedImage(640, 480, new byte[3][640 * 480]);</code>
-     * 
-     * @param width
-     * @param height
-     * @param data
-     *        image data<br>
-     *        Should be a 2D array with first dimension giving the number of component<br>
-     *        and second dimension equals to <code>width * height</code><br>
-     *        The array data type specify the internal data type.
-     * @param signed
-     *        use signed data for data type
+     *
+     * @param data   image data<br>
+     *               Should be a 2D array with first dimension giving the number of component<br>
+     *               and second dimension equals to <code>width * height</code><br>
+     *               The array data type specify the internal data type.
+     * @param signed use signed data for data type
      */
-    public IcyBufferedImage(int width, int height, Object[] data, boolean signed)
-    {
-        this(IcyColorModel.createInstance(data.length, ArrayUtil.getDataType(data[0], signed)), data, width, height,
-                false);
+    public IcyBufferedImage(final int width, final int height, final Object[] data, final boolean signed) {
+        this(IcyColorModel.createInstance(data.length, ArrayUtil.getDataType(data[0], signed)), data, width, height, false);
     }
 
     /**
      * Create an Icy formatted BufferedImage with specified width, height and input data.<br>
      * ex : <code>img = new IcyBufferedImage(640, 480, new byte[3][640 * 480]);</code>
-     * 
-     * @param width
-     * @param height
-     * @param data
-     *        image data<br>
-     *        Should be a 2D array with first dimension giving the number of component<br>
-     *        and second dimension equals to <code>width * height</code><br>
-     *        The array data type specify the internal data type.
+     *
+     * @param data image data<br>
+     *             Should be a 2D array with first dimension giving the number of component<br>
+     *             and second dimension equals to <code>width * height</code><br>
+     *             The array data type specify the internal data type.
      */
-    public IcyBufferedImage(int width, int height, Object[] data)
-    {
+    public IcyBufferedImage(final int width, final int height, final Object[] data) {
         this(width, height, data, false);
     }
 
@@ -957,23 +679,17 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * <br>
      * This constructor provides the best performance for massive image creation and computation as it allow you to
      * directly send the data array and disable the channel bounds calculation.
-     * 
-     * @param width
-     * @param height
-     * @param data
-     *        image data array.<br>
-     *        The length of the array should be equals to <code>width * height</code>.<br>
-     *        The array data type specify the internal data type.
-     * @param signed
-     *        use signed data for data type
-     * @param autoUpdateChannelBounds
-     *        If true then channel bounds are automatically calculated.<br>
-     *        When set to false, you have to set bounds manually by calling
-     *        {@link #updateChannelsBounds()} or #setC
+     *
+     * @param data                    image data array.<br>
+     *                                The length of the array should be equals to <code>width * height</code>.<br>
+     *                                The array data type specify the internal data type.
+     * @param signed                  use signed data for data type
+     * @param autoUpdateChannelBounds If true then channel bounds are automatically calculated.<br>
+     *                                When set to false, you have to set bounds manually by calling
+     *                                {@link #updateChannelsBounds()} or #setC
      * @see #IcyBufferedImage(int, int, Object[], boolean, boolean)
      */
-    public IcyBufferedImage(int width, int height, Object data, boolean signed, boolean autoUpdateChannelBounds)
-    {
+    public IcyBufferedImage(final int width, final int height, final Object data, final boolean signed, final boolean autoUpdateChannelBounds) {
         this(width, height, ArrayUtil.encapsulate(data), signed, autoUpdateChannelBounds);
     }
 
@@ -981,18 +697,13 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Create a single channel Icy formatted BufferedImage with specified width, height and input
      * data.<br>
      * ex : <code>img = new IcyBufferedImage(640, 480, new byte[640 * 480]);</code>
-     * 
-     * @param width
-     * @param height
-     * @param data
-     *        image data<br>
-     *        The length of the array should be equals to <code>width * height</code>.<br>
-     *        The array data type specify the internal data type.
-     * @param signed
-     *        use signed data for data type
+     *
+     * @param data   image data<br>
+     *               The length of the array should be equals to <code>width * height</code>.<br>
+     *               The array data type specify the internal data type.
+     * @param signed use signed data for data type
      */
-    public IcyBufferedImage(int width, int height, Object data, boolean signed)
-    {
+    public IcyBufferedImage(final int width, final int height, final Object data, final boolean signed) {
         this(width, height, ArrayUtil.encapsulate(data), signed);
     }
 
@@ -1000,46 +711,32 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Create a single channel Icy formatted BufferedImage with specified width, height and input
      * data.<br>
      * ex : <code>img = new IcyBufferedImage(640, 480, new byte[640 * 480]);</code>
-     * 
-     * @param width
-     * @param height
-     * @param data
-     *        image data<br>
-     *        The length of the array should be equals to <code>width * height</code>.<br>
-     *        The array data type specify the internal data type.
+     *
+     * @param data image data<br>
+     *             The length of the array should be equals to <code>width * height</code>.<br>
+     *             The array data type specify the internal data type.
      */
-    public IcyBufferedImage(int width, int height, Object data)
-    {
+    public IcyBufferedImage(final int width, final int height, final Object data) {
         this(width, height, ArrayUtil.encapsulate(data));
     }
 
     /**
      * Create an ICY formatted BufferedImage with specified width, height,<br>
      * number of component and dataType.
-     * 
-     * @param width
-     * @param height
-     * @param numComponents
-     * @param dataType
-     *        image data type {@link DataType}
+     *
+     * @param dataType image data type {@link DataType}
      */
-    public IcyBufferedImage(int width, int height, int numComponents, DataType dataType, boolean forceVolatileData)
-    {
+    public IcyBufferedImage(final int width, final int height, final int numComponents, final DataType dataType, final boolean forceVolatileData) {
         this(IcyColorModel.createInstance(numComponents, dataType), width, height, forceVolatileData);
     }
 
     /**
      * Create an ICY formatted BufferedImage with specified width, height,<br>
      * number of component and dataType.
-     * 
-     * @param width
-     * @param height
-     * @param numComponents
-     * @param dataType
-     *        image data type {@link DataType}
+     *
+     * @param dataType image data type {@link DataType}
      */
-    public IcyBufferedImage(int width, int height, int numComponents, DataType dataType)
-    {
+    public IcyBufferedImage(final int width, final int height, final int numComponents, final DataType dataType) {
         this(IcyColorModel.createInstance(numComponents, dataType), width, height, false);
     }
 
@@ -1047,76 +744,48 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Create an ICY formatted BufferedImage with specified width, height and IcyColorModel
      * type.<br>
      */
-    public IcyBufferedImage(int width, int height, IcyColorModel cm)
-    {
-        this(width, height, cm.getNumComponents(), cm.getDataType_());
-    }
-
-    /**
-     * @deprecated use {@link #IcyBufferedImage(int, int, int, DataType)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage(int width, int height, int numComponents, int dataType, boolean signed)
-    {
-        this(IcyColorModel.createInstance(numComponents, dataType, signed), width, height);
-    }
-
-    /**
-     * @deprecated use {@link #IcyBufferedImage(int, int, int, DataType)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage(int width, int height, int numComponents, int dataType)
-    {
-        this(IcyColorModel.createInstance(numComponents, dataType, false), width, height);
+    public IcyBufferedImage(final int width, final int height, final IcyColorModel cm) {
+        this(width, height, cm.getNumComponents(), cm.getDataType());
     }
 
     @Override
-    protected void finalize() throws Throwable
-    {
+    public void close() throws Exception {
         // cancel any pending loading tasks for this image
         imageDataLoader.cancelTasks(this);
         // image has been released, be sure to clear cache
-        if (ImageCache.isEnabled())
+        if (ImageCache.isInit())
             ImageCache.remove(this);
 
         // remove it from hashmap
-        synchronized (images)
-        {
+        synchronized (images) {
             images.remove(Integer.valueOf(System.identityHashCode(this)));
         }
-
-        super.finalize();
     }
 
-    public ImageSourceInfo getImageSourceInfo()
-    {
+    public ImageSourceInfo getImageSourceInfo() {
         return imageSourceInfo;
     }
 
     /**
      * Set the image source information that will be used later for lazy image data loading.
      */
-    public void setImageSourceInfo(SequenceIdImporter imp, int series, int resolution, Rectangle region, int t, int z,
-            int c)
-    {
+    public void setImageSourceInfo(final SequenceIdImporter imp, final int series, final int resolution, final Rectangle region, final int t, final int z, final int c) {
         imageSourceInfo = new ImageSourceInfo(imp, series, resolution, region, t, z, c);
     }
 
     /**
      * Returns <code>true</code> if data is initialized
      */
-    public boolean isDataInitialized()
-    {
+    public boolean isDataInitialized() {
         return dataInitialized;
     }
 
     /**
      * Same as {@link #isDataInitialized()}
-     * 
+     *
      * @see #isDataInitialized()
      */
-    public boolean isDataLoaded()
-    {
+    public boolean isDataLoaded() {
         return isDataInitialized();
     }
 
@@ -1124,9 +793,9 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Returns <code>true</code> if data is currently loaded in memory.<br>
      * It returns <code>false</code> if data has not yet be initialized (see {@link #isDataInitialized()}) or if data is cached on disk (not anymore in memory)
      */
-    public boolean isDataInMemory()
-    {
-        return (!ImageCache.isEnabled()) || ImageCache.isOnMemoryCache(this);
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public boolean isDataInMemory() {
+        return (!ImageCache.isInit()) || ImageCache.isOnMemoryCache(this);
     }
 
     /**
@@ -1134,11 +803,10 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Volatile data means <b>there is no strong reference on the internal data arrays</b> (data can be cached on disk) and so <b>any <i>external</i> changes on
      * them can be lost</b> if they has not been specifically set using setDataxx() methods.
      * Volatile is useful when you want to load many images with low memory consumption but you should use it carefully as it has some limitations.<br>
-     * 
+     *
      * @see #setVolatile(boolean)
      */
-    public boolean isVolatile()
-    {
+    public boolean isVolatile() {
         return volatile_;
     }
 
@@ -1149,30 +817,25 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Volatile is useful when you want to load many images with low memory consumption but you should use it carefully as it has some limitations.<br>
      * Setting the image to volatile <b>immediately release internal strong reference on data arrays</b> (see {@link #lockRaster()} and
      * {@link #releaseRaster(boolean)} methods).<br>
-     * 
-     * @throws OutOfMemoryError
-     *         if there is not enough memory available to store image
-     *         data when setting back to <i>non volatile</i> state
-     * @throws UnsupportedOperationException
-     *         if cache engine is not initialized (error at initialization).
+     *
+     * @throws OutOfMemoryError              if there is not enough memory available to store image
+     *                                       data when setting back to <i>non volatile</i> state
+     * @throws UnsupportedOperationException if cache engine is not initialized (error at initialization).
      */
-    public void setVolatile(boolean value) throws OutOfMemoryError, UnsupportedOperationException
-    {
+    public void setVolatile(final boolean value) throws OutOfMemoryError, UnsupportedOperationException {
         if (value == volatile_)
             return;
 
         // we want volatile data but cache engine isn't enabled ?
-        if (value && !ImageCache.isEnabled())
+        if (value && !ImageCache.isInit())
             throw new UnsupportedOperationException("IcyBufferedImage.setVolatile(..) error: Image cache is disabled.");
 
         // important to set it before doing state switch
         volatile_ = value;
 
         // we want volatile data ?
-        if (value)
-        {
-            if (raster != null)
-            {
+        if (value) {
+            if (raster != null) {
                 // save data in cache as we will release the strong reference
                 saveRasterInCache(raster);
                 // immediately remove strong reference to data
@@ -1180,29 +843,25 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             }
         }
         // no volatile anymore ?
-        else
-        {
-            try
-            {
+        else {
+            try {
                 // data not yet initialized ? we don't want to force data loading for that
                 if (!isDataInitialized())
                     raster = buildRaster(createEmptyRasterData());
-                // otherwise we just load the data and store it
+                    // otherwise we just load the data and store it
                 else
                     raster = getRaster();
 
                 // clear data set in cache (no more used)
                 ImageCache.remove(this);
             }
-            catch (OutOfMemoryError e)
-            {
+            catch (final OutOfMemoryError e) {
                 System.err.println(e.getMessage());
                 System.err.println(
                         "IcyBufferedImage.setVolatile(false) error: not enough memory to set image data back in memory.");
                 throw e;
             }
-            catch (Throwable e)
-            {
+            catch (final Throwable e) {
                 System.err.println("IcyBufferedImage.setVolatile(..) error:");
                 System.err.println(e.getMessage());
             }
@@ -1212,21 +871,18 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Force loading data for this image (so channel bounds can be correctly computed even with lazy loading)
      */
-    public void loadData()
-    {
+    public void loadData() {
         if (!isDataInitialized())
             // that is enough to get data loaded
             getRaster();
     }
 
-    protected synchronized WritableRaster getRasterInternal()
-    {
+    protected synchronized WritableRaster getRasterInternal() {
         // always try first from direct reference
         WritableRaster result = raster;
 
         // data not yet initialized ?
-        if (constructed && !isDataInitialized())
-        {
+        if (constructed && !isDataInitialized()) {
             // initialize data
             final Object rasterData = initializeData();
 
@@ -1235,7 +891,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 return buildRaster(createEmptyRasterData());
 
             // save them in cache (for volatile image) but don't need to be eternal
-            saveRasterDataInCache(rasterData, false);
+            saveRasterDataInCache(rasterData);
             // we have the parent raster ? --> update its data (important to do it before setting data initialized)
             if (result != null)
                 setRasterData(result, rasterData);
@@ -1257,20 +913,15 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public ColorModel getColorModel()
-    {
+    public ColorModel getColorModel() {
         return colorModel;
     }
 
     /**
      * Set the {@link IcyColorModel}
-     * 
-     * @param cm
      */
-    public void setColorModel(IcyColorModel cm)
-    {
-        if (colorModel != cm)
-        {
+    public void setColorModel(final IcyColorModel cm) {
+        if (colorModel != cm) {
             if (colorModel instanceof IcyColorModel)
                 ((IcyColorModel) colorModel).removeListener(this);
 
@@ -1282,49 +933,43 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public int getTransparency()
-    {
+    public int getTransparency() {
         return getColorModel().getTransparency();
     }
 
     @Override
-    public boolean isAlphaPremultiplied()
-    {
+    public boolean isAlphaPremultiplied() {
         return getColorModel().isAlphaPremultiplied();
     }
 
     @Override
-    public WritableRaster getRaster()
-    {
+    public WritableRaster getRaster() {
         return getRasterInternal();
     }
 
     @Override
-    public WritableRaster getAlphaRaster()
-    {
+    public WritableRaster getAlphaRaster() {
         return getColorModel().getAlphaRaster(getRaster());
     }
 
     /**
      * @return <code>true</code> if raster data is strongly referenced, <code>false</code> otherwise.<br>
-     *         Note that it doesn't necessary mean that we called {@link #lockRaster()} method.
+     * Note that it doesn't necessary mean that we called {@link #lockRaster()} method.
      * @see #lockRaster()
      * @see #isVolatile()
      */
-    public synchronized boolean isRasterLocked()
-    {
+    public synchronized boolean isRasterLocked() {
         return raster != null;
     }
 
     /**
      * Ensure raster data remains strongly referenced until we call {@link #releaseRaster(boolean)}.<br>
      * This is important to lock / release raster for Volatile image when you are modifying data externally otherwise data could be lost.
-     * 
+     *
      * @see #releaseRaster(boolean)
      * @see #isVolatile()
      */
-    public synchronized void lockRaster()
-    {
+    public synchronized void lockRaster() {
         if (lockedCount++ != 0)
             return;
 
@@ -1334,20 +979,16 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Release the raster object.
-     * 
-     * @param saveInCache
-     *        force to save raster data in cache (for volatile image only)
+     *
+     * @param saveInCache force to save raster data in cache (for volatile image only)
      */
-    public synchronized void releaseRaster(boolean saveInCache)
-    {
+    public synchronized void releaseRaster(final boolean saveInCache) {
         if (--lockedCount != 0)
             return;
 
         // volatile data ?
-        if (isVolatile())
-        {
-            if (raster != null)
-            {
+        if (isVolatile()) {
+            if (raster != null) {
                 // force saving changed data in cache before releasing raster
                 if (saveInCache)
                     saveRasterInCache(raster);
@@ -1358,93 +999,79 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public int getWidth()
-    {
+    public int getWidth() {
         return width;
     }
 
     @Override
-    public int getHeight()
-    {
+    public int getHeight() {
         return height;
     }
 
     @Override
-    public int getWidth(ImageObserver observer)
-    {
+    public int getWidth(final ImageObserver observer) {
         return width;
     }
 
     @Override
-    public int getHeight(ImageObserver observer)
-    {
+    public int getHeight(final ImageObserver observer) {
         return height;
     }
 
     @Override
-    public int getMinX()
-    {
+    public int getMinX() {
         return minX;
     }
 
     @Override
-    public int getMinY()
-    {
+    public int getMinY() {
         return minY;
     }
 
     @Override
-    public int getTileWidth()
-    {
+    public int getTileWidth() {
         return getWidth();
     }
 
     @Override
-    public int getTileHeight()
-    {
+    public int getTileHeight() {
         return getHeight();
     }
 
     @Override
-    public int getTileGridXOffset()
-    {
+    public int getTileGridXOffset() {
         return offsetX;
     }
 
     @Override
-    public int getTileGridYOffset()
-    {
+    public int getTileGridYOffset() {
         return offsetY;
     }
 
     @Override
-    public SampleModel getSampleModel()
-    {
+    public SampleModel getSampleModel() {
         return getRaster().getSampleModel();
     }
 
     @Override
-    public void coerceData(boolean isAlphaPremultiplied)
-    {
+    public void coerceData(final boolean isAlphaPremultiplied) {
         // don't need to do any conversion here...
     }
 
     @Override
-    public WritableRaster copyData(WritableRaster outRaster)
-    {
+    public WritableRaster copyData(final WritableRaster outRaster) {
         if (outRaster == null)
             return (WritableRaster) getData();
 
         final WritableRaster wr = getRaster();
-        int width = outRaster.getWidth();
-        int height = outRaster.getHeight();
-        int startX = outRaster.getMinX();
-        int startY = outRaster.getMinY();
+        final int width = outRaster.getWidth();
+        final int height = outRaster.getHeight();
+        final int startX = outRaster.getMinX();
+        final int startY = outRaster.getMinY();
 
         Object tdata = null;
 
-        for (int i = startY; i < startY + height; i++)
-        {
+        for (int i = startY; i < startY + height; i++) {
             tdata = wr.getDataElements(startX, i, width, 1, tdata);
             outRaster.setDataElements(startX, i, width, 1, tdata);
         }
@@ -1453,8 +1080,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public Raster getTile(int tileX, int tileY)
-    {
+    public Raster getTile(final int tileX, final int tileY) {
         if ((tileX == 0) && (tileY == 0))
             return getRaster();
 
@@ -1462,37 +1088,32 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public WritableRaster getWritableTile(int tileX, int tileY)
-    {
+    public WritableRaster getWritableTile(final int tileX, final int tileY) {
         lockRaster();
         return getRaster();
     }
 
     @Override
-    public void releaseWritableTile(int tileX, int tileY)
-    {
+    public void releaseWritableTile(final int tileX, final int tileY) {
         releaseRaster(true);
     }
 
     @Override
-    public Raster getData()
-    {
+    public Raster getData() {
         final WritableRaster wr = getRaster();
-        final WritableRaster result = Raster.createWritableRaster(wr.getSampleModel(),
-                new Point(wr.getSampleModelTranslateX(), wr.getSampleModelTranslateY()));
+        final WritableRaster result = Raster.createWritableRaster(wr.getSampleModel(), new Point(wr.getSampleModelTranslateX(), wr.getSampleModelTranslateY()));
 
         // REMIND : this allocates a whole new tile if raster is a
         // subtile. (It only copies in the requested area)
         // We should do something smarter.
-        int width = wr.getWidth();
-        int height = wr.getHeight();
-        int startX = wr.getMinX();
-        int startY = wr.getMinY();
+        final int width = wr.getWidth();
+        final int height = wr.getHeight();
+        final int startX = wr.getMinX();
+        final int startY = wr.getMinY();
 
         Object tdata = null;
 
-        for (int i = startY; i < startY + height; i++)
-        {
+        for (int i = startY; i < startY + height; i++) {
             tdata = wr.getDataElements(startX, i, width, 1, tdata);
             result.setDataElements(startX, i, width, 1, tdata);
         }
@@ -1501,21 +1122,19 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public Raster getData(Rectangle rect)
-    {
+    public Raster getData(final Rectangle rect) {
         final WritableRaster wr = getRaster();
         final SampleModel sm = wr.getSampleModel();
         final SampleModel nsm = sm.createCompatibleSampleModel(rect.width, rect.height);
         final WritableRaster result = Raster.createWritableRaster(nsm, rect.getLocation());
-        int width = rect.width;
-        int height = rect.height;
-        int startX = rect.x;
-        int startY = rect.y;
+        final int width = rect.width;
+        final int height = rect.height;
+        final int startX = rect.x;
+        final int startY = rect.y;
 
         Object tdata = null;
 
-        for (int i = startY; i < startY + height; i++)
-        {
+        for (int i = startY; i < startY + height; i++) {
             tdata = wr.getDataElements(startX, i, width, 1, tdata);
             result.setDataElements(startX, i, width, 1, tdata);
         }
@@ -1524,8 +1143,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public void setData(Raster r)
-    {
+    public void setData(final Raster r) {
         final WritableRaster wr = getRaster();
         int width = r.getWidth();
         int height = r.getHeight();
@@ -1535,9 +1153,9 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         int[] tdata = null;
 
         // Clip to the current Raster
-        Rectangle rclip = new Rectangle(startX, startY, width, height);
-        Rectangle bclip = new Rectangle(0, 0, wr.getWidth(), wr.getHeight());
-        Rectangle intersect = rclip.intersection(bclip);
+        final Rectangle rclip = new Rectangle(startX, startY, width, height);
+        final Rectangle bclip = new Rectangle(0, 0, wr.getWidth(), wr.getHeight());
+        final Rectangle intersect = rclip.intersection(bclip);
 
         // empty --> nothing to do
         if (intersect.isEmpty())
@@ -1550,8 +1168,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
         // remind use get/setDataElements for speed if Rasters are
         // compatible
-        for (int i = startY; i < startY + height; i++)
-        {
+        for (int i = startY; i < startY + height; i++) {
             tdata = r.getPixels(startX, i, width, 1, tdata);
             wr.setPixels(startX, i, width, 1, tdata);
         }
@@ -1563,47 +1180,31 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public int getRGB(int x, int y)
-    {
+    public int getRGB(final int x, final int y) {
         return getColorModel().getRGB(getRaster().getDataElements(x, y, null));
     }
 
     @Override
-    public int[] getRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize)
-    {
+    public int[] getRGB(final int startX, final int startY, final int w, final int h, int[] rgbArray, final int offset, final int scansize) {
         final IcyColorModel cm = getIcyColorModel();
         final WritableRaster wr = getRaster();
         int yoff = offset;
         int off;
-        Object data;
-        int nbands = wr.getNumBands();
-        int dataType = wr.getDataBuffer().getDataType();
-        switch (dataType)
-        {
-            case DataBuffer.TYPE_BYTE:
-                data = new byte[nbands];
-                break;
-            case DataBuffer.TYPE_USHORT:
-                data = new short[nbands];
-                break;
-            case DataBuffer.TYPE_INT:
-                data = new int[nbands];
-                break;
-            case DataBuffer.TYPE_FLOAT:
-                data = new float[nbands];
-                break;
-            case DataBuffer.TYPE_DOUBLE:
-                data = new double[nbands];
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown data buffer type: " + dataType);
-        }
+        final int nbands = wr.getNumBands();
+        final int dataType = wr.getDataBuffer().getDataType();
+        final Object data = switch (dataType) {
+            case DataBuffer.TYPE_BYTE -> new byte[nbands];
+            case DataBuffer.TYPE_USHORT -> new short[nbands];
+            case DataBuffer.TYPE_INT -> new int[nbands];
+            case DataBuffer.TYPE_FLOAT -> new float[nbands];
+            case DataBuffer.TYPE_DOUBLE -> new double[nbands];
+            default -> throw new IllegalArgumentException("Unknown data buffer type: " + dataType);
+        };
 
         if (rgbArray == null)
             rgbArray = new int[offset + h * scansize];
 
-        for (int y = startY; y < startY + h; y++, yoff += scansize)
-        {
+        for (int y = startY; y < startY + h; y++, yoff += scansize) {
             off = yoff;
             for (int x = startX; x < startX + w; x++)
                 rgbArray[off++] = cm.getRGB(wr.getDataElements(x, y, data));
@@ -1613,8 +1214,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public synchronized void setRGB(int x, int y, int rgb)
-    {
+    public synchronized void setRGB(final int x, final int y, final int rgb) {
         final WritableRaster wr = getRaster();
         wr.setDataElements(x, y, getColorModel().getDataElements(rgb, null));
         // FIXME: implement delayed cache saving to avoid very poor performance here
@@ -1622,19 +1222,16 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public void setRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize)
-    {
+    public void setRGB(final int startX, final int startY, final int w, final int h, final int[] rgbArray, final int offset, final int scansize) {
         final IcyColorModel cm = getIcyColorModel();
         final WritableRaster wr = getRaster();
         int yoff = offset;
         int off;
         Object pixel = null;
 
-        for (int y = startY; y < startY + h; y++, yoff += scansize)
-        {
+        for (int y = startY; y < startY + h; y++, yoff += scansize) {
             off = yoff;
-            for (int x = startX; x < startX + w; x++)
-            {
+            for (int x = startX; x < startX + w; x++) {
                 pixel = cm.getDataElements(rgbArray[off++], pixel);
                 wr.setDataElements(x, y, pixel);
             }
@@ -1649,55 +1246,48 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return the owner sequence (can be null if the image is not owned in any Sequence)
      */
-    public Sequence getOwnerSequence()
-    {
+    public Sequence getOwnerSequence() {
         // just use the listeners to find it (Sequence always listen image event)
-        for (IcyBufferedImageListener listener : listeners)
+        for (final IcyBufferedImageListener listener : listeners)
             if (listener instanceof Sequence)
                 return (Sequence) listener;
 
         return null;
     }
 
-    protected WritableRaster loadRasterFromCache()
-    {
+    protected WritableRaster loadRasterFromCache() {
         Object rasterData = null;
         boolean datalost = false;
 
-        try
-        {
+        try {
             // get data from cache
             rasterData = ImageCache.get(this);
         }
-        catch (Throwable e)
-        {
+        catch (final Throwable e) {
             datalost = true;
             System.err.println(e.getMessage());
         }
 
         // should happen only for unmodified data
-        if (rasterData == null)
-        {
+        if (rasterData == null) {
             // we should be able to initialize data back
             rasterData = initializeData();
 
             // couldn't initialize data ? create empty data without saving in cache (we want to retry later)
-            if (rasterData == null)
-            {
+            if (rasterData == null) {
                 rasterData = createEmptyRasterData();
 
                 //// don't notify twice
                 // if (!datalost)
                 // System.err.println("IcyBufferedImage.loadRasterFromCache: cannot get image data (data lost)");
             }
-            else
-            {
+            else {
                 // data could not be loaded from cache but was correctly restored
                 if (datalost)
                     System.out.println("Data re-initialized (changes are lost)");
 
                 // save it in cache (not eternal here as this is default data)
-                saveRasterDataInCache(rasterData, false);
+                saveRasterDataInCache(rasterData);
             }
         }
 
@@ -1706,129 +1296,104 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Explicitly save the image data in cache (only for volatile image)
-     * 
+     *
      * @see #isVolatile()
      */
-    public void saveDataInCache()
-    {
+    public void saveDataInCache() {
         // need to be saved only if initialized
         if (isDataInitialized())
             saveRasterInCache(getRaster());
     }
 
-    protected void saveRasterInCache(WritableRaster wr)
-    {
-        saveRasterDataInCache(getRasterData(wr), true);
+    protected void saveRasterInCache(final WritableRaster wr) {
+        //saveRasterDataInCache(getRasterData(wr), true);
+        saveRasterDataInCache(getRasterData(wr));
     }
 
-    protected void saveRasterDataInCache(Object rasterData, boolean eternal)
-    {
+    /**
+     * @deprecated Use {@link #saveRasterDataInCache(Object)} instead.
+     */
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    protected void saveRasterDataInCache(final Object rasterData, final boolean eternal) {
         // save data in cache (volatile image only)
-        if (isVolatile())
-        {
-            try
-            {
+        if (isVolatile()) {
+            try {
                 ImageCache.set(this, rasterData, eternal);
             }
-            catch (Throwable e)
-            {
+            catch (final Throwable e) {
                 System.err.println(e.getMessage());
             }
         }
     }
 
-    protected void saveRasterDataInCache(Object rasterData)
-    {
-        saveRasterDataInCache(rasterData, true);
+    protected void saveRasterDataInCache(final Object rasterData) {
+        //saveRasterDataInCache(rasterData, true);
+        if (isVolatile()) {
+            try {
+                ImageCache.set(this, rasterData);
+            }
+            catch (final Throwable e) {
+                System.err.println(e.getMessage());
+            }
+        }
     }
 
     /**
      * Build raster from an Object (internally the Object is always a 2D array of native data type)
      */
-    protected WritableRaster buildRaster(Object data)
-    {
+    protected WritableRaster buildRaster(final Object data) {
         return IcyColorModel.createWritableRaster(data, getWidth(), getHeight());
     }
 
     /**
      * Returns raster data in Object format (internally we always have a 2D array of native data type)
      */
-    protected static Object getRasterData(WritableRaster wr)
-    {
+    protected static Object getRasterData(final WritableRaster wr) {
         final DataBuffer db = wr.getDataBuffer();
 
-        switch (db.getDataType())
-        {
-            case DataBuffer.TYPE_BYTE:
-                return ((DataBufferByte) db).getBankData();
-            case DataBuffer.TYPE_USHORT:
-                return ((DataBufferUShort) db).getBankData();
-            case DataBuffer.TYPE_SHORT:
-                return ((DataBufferShort) db).getBankData();
-            case DataBuffer.TYPE_INT:
-                return ((DataBufferInt) db).getBankData();
-            case DataBuffer.TYPE_FLOAT:
-                return ((DataBufferFloat) db).getBankData();
-            case DataBuffer.TYPE_DOUBLE:
-                return ((DataBufferDouble) db).getBankData();
-            default:
-                return null;
-        }
+        return switch (db.getDataType()) {
+            case DataBuffer.TYPE_BYTE -> ((DataBufferByte) db).getBankData();
+            case DataBuffer.TYPE_USHORT -> ((DataBufferUShort) db).getBankData();
+            case DataBuffer.TYPE_SHORT -> ((DataBufferShort) db).getBankData();
+            case DataBuffer.TYPE_INT -> ((DataBufferInt) db).getBankData();
+            case DataBuffer.TYPE_FLOAT -> ((DataBufferFloat) db).getBankData();
+            case DataBuffer.TYPE_DOUBLE -> ((DataBufferDouble) db).getBankData();
+            default -> null;
+        };
     }
 
     /**
      * Set raster data (Object is always a 2D array of native data type)
      */
-    protected void setRasterData(WritableRaster wr, Object data)
-    {
-        final Object dest;
+    @SuppressWarnings("SuspiciousSystemArraycopy")
+    protected void setRasterData(final WritableRaster wr, final Object data) {
         final DataBuffer db = wr.getDataBuffer();
 
-        switch (db.getDataType())
-        {
-            case DataBuffer.TYPE_BYTE:
-                dest = ((DataBufferByte) db).getBankData();
-                break;
-            case DataBuffer.TYPE_USHORT:
-                dest = ((DataBufferUShort) db).getBankData();
-                break;
-            case DataBuffer.TYPE_SHORT:
-                dest = ((DataBufferShort) db).getBankData();
-                break;
-            case DataBuffer.TYPE_INT:
-                dest = ((DataBufferInt) db).getBankData();
-                break;
-            case DataBuffer.TYPE_FLOAT:
-                dest = ((DataBufferFloat) db).getBankData();
-                break;
-            case DataBuffer.TYPE_DOUBLE:
-                dest = ((DataBufferDouble) db).getBankData();
-                break;
-            default:
-                dest = null;
-                break;
-        }
+        final Object dest = switch (db.getDataType()) {
+            case DataBuffer.TYPE_BYTE -> ((DataBufferByte) db).getBankData();
+            case DataBuffer.TYPE_USHORT -> ((DataBufferUShort) db).getBankData();
+            case DataBuffer.TYPE_SHORT -> ((DataBufferShort) db).getBankData();
+            case DataBuffer.TYPE_INT -> ((DataBufferInt) db).getBankData();
+            case DataBuffer.TYPE_FLOAT -> ((DataBufferFloat) db).getBankData();
+            case DataBuffer.TYPE_DOUBLE -> ((DataBufferDouble) db).getBankData();
+            default -> null;
+        };
 
-        if (dest != null)
-        {
+        if (dest != null) {
             final int len = Array.getLength(dest);
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 final Object destSub = Array.get(dest, i);
                 System.arraycopy(Array.get(data, i), 0, destSub, 0, Array.getLength(destSub));
             }
         }
     }
 
-    protected Object initializeData()
-    {
-        try
-        {
+    protected Object initializeData() {
+        try {
             // load data from importer
             return loadDataFromImporter();
         }
-        catch (InterruptedException e)
-        {
+        catch (final InterruptedException e) {
             // FIXME: better to disable it as when we interrupt ROI descriptor computation (by switching or closing an image)
             // then we can have a lot of those messages appearing
             // System.err.println(
@@ -1839,35 +1404,31 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
             return null;
         }
-        catch (ClosedByInterruptException e)
-        {
+        catch (final ClosedByInterruptException e) {
             // this one should never happen as loading is done in a separate thread (executor)
-            System.err.println(
-                    "IcyBufferedImage.loadDataFromImporter() error: image loading from ImageProvider was interrupted (further image won't be loaded) !");
+            System.err.println("IcyBufferedImage.loadDataFromImporter() error: image loading from ImageProvider was interrupted (further image won't be loaded) !");
 
             // we want to keep the interrupted state here
             Thread.currentThread().interrupt();
 
             return null;
         }
-        catch (Exception e)
-        {
-            System.err.println(e);
-            System.err.println(
-                    "IcyBufferedImage.loadDataFromImporter() warning: cannot get image from ImageProvider (possible data loss).");
+        catch (final Exception e) {
+            System.err.println(e.getLocalizedMessage());
+            System.err.println("IcyBufferedImage.loadDataFromImporter() warning: cannot get image from ImageProvider (possible data loss).");
 
             return null;
         }
     }
 
-    protected Object createEmptyRasterData()
-    {
+    protected Object createEmptyRasterData() {
         final DataType dataType = getDataType_();
         final int sizeC = getSizeC();
         final int sizeXY = getSizeX() * getSizeY();
 
         // create the result array (always 2D native type)
         final Object[] result = Array2DUtil.createArray(dataType, sizeC);
+        assert result != null;
 
         for (int c = 0; c < sizeC; c++)
             result[c] = Array1DUtil.createArray(dataType, sizeXY);
@@ -1875,19 +1436,16 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         return result;
     }
 
-    protected Object loadDataFromImporter() throws UnsupportedFormatException, IOException, InterruptedException
-    {
+    protected Object loadDataFromImporter() throws UnsupportedFormatException, IOException, InterruptedException {
         // image source information not defined (not attached to importer) ? --> create empty data
         if (imageSourceInfo == null)
             return createEmptyRasterData();
 
-        try
-        {
+        try {
             // get data from importer using
             return imageDataLoader.loadImageData(this);
         }
-        catch (ExecutionException e)
-        {
+        catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
 
             if (cause instanceof UnsupportedFormatException)
@@ -1902,8 +1460,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * @return true is channel bounds are automatically updated when image data is modified.
      * @see #setAutoUpdateChannelBounds(boolean)
      */
-    public boolean getAutoUpdateChannelBounds()
-    {
+    public boolean getAutoUpdateChannelBounds() {
         return autoUpdateChannelBounds;
     }
 
@@ -1915,183 +1472,13 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * block to avoid
      * severals recalculation.
      */
-    public void setAutoUpdateChannelBounds(boolean value)
-    {
-        if (autoUpdateChannelBounds != value)
-        {
+    public void setAutoUpdateChannelBounds(final boolean value) {
+        if (autoUpdateChannelBounds != value) {
             if (value)
                 updateChannelsBounds();
 
             autoUpdateChannelBounds = value;
         }
-    }
-
-    /**
-     * @throws InterruptedException
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, BufferedImage, LUT)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage convertToBufferedImage(BufferedImage out, LUT lut) throws InterruptedException
-    {
-        return IcyBufferedImageUtil.toBufferedImage(this, out, lut);
-    }
-
-    /**
-     * @throws InterruptedException
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, BufferedImage)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage convertToBufferedImage(BufferedImage out) throws InterruptedException
-    {
-        return IcyBufferedImageUtil.toBufferedImage(this, out);
-    }
-
-    /**
-     * @throws InterruptedException
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, BufferedImage, LUT)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage getARGBImage(LUT lut, BufferedImage out) throws InterruptedException
-    {
-        return IcyBufferedImageUtil.getARGBImage(this, lut, out);
-    }
-
-    /**
-     * @throws InterruptedException
-     * @deprecated Use {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, BufferedImage)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage getARGBImage(BufferedImage out) throws InterruptedException
-    {
-        return IcyBufferedImageUtil.getARGBImage(this, out);
-    }
-
-    /**
-     * @throws InterruptedException
-     * @deprecated Use {@link IcyBufferedImageUtil#getARGBImage(IcyBufferedImage, LUT)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage getARGBImage(LUT lut) throws InterruptedException
-    {
-        return IcyBufferedImageUtil.getARGBImage(this, lut);
-    }
-
-    /**
-     * @throws InterruptedException
-     * @deprecated Use {@link IcyBufferedImageUtil#getARGBImage(IcyBufferedImage)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage getARGBImage() throws InterruptedException
-    {
-        return IcyBufferedImageUtil.getARGBImage(this);
-    }
-
-    /**
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#convertType(IcyBufferedImage, DataType, Scaler[])}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage convertToType(DataType dataType, Scaler scaler)
-    {
-        return IcyBufferedImageUtil.convertToType(this, dataType, scaler);
-    }
-
-    /**
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#convertType(IcyBufferedImage,DataType, Scaler[])}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage convertToType(int dataType, boolean signed, Scaler scaler)
-    {
-        return IcyBufferedImageUtil.convertToType(this, DataType.getDataType(dataType, signed), scaler);
-    }
-
-    /**
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#convertToType(IcyBufferedImage, DataType, boolean)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage convertToType(DataType dataType, boolean rescale)
-    {
-        return IcyBufferedImageUtil.convertToType(this, dataType, rescale);
-    }
-
-    /**
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#convertToType(IcyBufferedImage,DataType, boolean)}
-     *             instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage convertToType(int dataType, boolean signed, boolean rescale)
-    {
-        return convertToType(DataType.getDataType(dataType, signed), rescale);
-    }
-
-    /**
-     * @throws InterruptedException
-     * @deprecated Use {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, int, LUT)}
-     *             instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage convertToBufferedImage(LUT lut, int imageType) throws InterruptedException
-    {
-        return IcyBufferedImageUtil.toBufferedImage(this, imageType, lut);
-    }
-
-    /**
-     * @throws InterruptedException
-     * @deprecated Use {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, int, LUT)}
-     *             instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage convertToBufferedImage(int imageType, LUT lut) throws InterruptedException
-    {
-        return IcyBufferedImageUtil.toBufferedImage(this, imageType, lut);
-    }
-
-    /**
-     * @deprecated Use {@link IcyBufferedImageUtil#getCopy(IcyBufferedImage)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage getCopy()
-    {
-        return IcyBufferedImageUtil.getCopy(this);
-    }
-
-    /**
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#getSubImage(IcyBufferedImage, int, int, int, int)}
-     *             instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage getSubImageCopy(int x, int y, int w, int h)
-    {
-        return IcyBufferedImageUtil.getSubImage(this, x, y, w, h);
-    }
-
-    /**
-     * Not supported on IcyBufferedImage, use getSubImageCopy instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    @Override
-    public IcyBufferedImage getSubimage(int x, int y, int w, int h)
-    {
-        // IcyBufferedImage doesn't support subImaging (incorrect draw and copy operation)
-        throw new UnsupportedOperationException(
-                "IcyBufferedImage doesn't support getSubimage method, use getSubImageCopy instead.");
-
-        // return new IcyBufferedImage(getIcyColorModel(), getRaster().createWritableChild(x, y, w,
-        // h, 0, 0, null));
     }
 
     /**
@@ -2101,12 +1488,11 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * if <code>(c == -1)</code> then current image is directly returned<br>
      * if <code>((c == 0) || (sizeC == 1))</code> then current image is directly returned<br>
      * if <code>((c &lt; 0) || (c &gt;= sizeC))</code> then it returns <code>null</code>
-     * 
+     *
      * @see IcyBufferedImageUtil#extractChannel(IcyBufferedImage, int)
      * @since version 1.0.3.3b
      */
-    public IcyBufferedImage getImage(int c)
-    {
+    public IcyBufferedImage getImage(final int c) {
         if (c == -1)
             return this;
 
@@ -2121,112 +1507,12 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
-     * @deprecated Use {@link IcyBufferedImageUtil#extractChannel(IcyBufferedImage, int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage extractChannel(int channelNumber)
-    {
-        return IcyBufferedImageUtil.extractChannel(this, channelNumber);
-    }
-
-    /**
-     * @deprecated Use {@link IcyBufferedImageUtil#extractChannels(IcyBufferedImage, List)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage extractChannels(List<Integer> channelNumbers)
-    {
-        return IcyBufferedImageUtil.extractChannels(this, channelNumbers);
-    }
-
-    /**
-     * @deprecated Use {@link IcyBufferedImageUtil#extractChannel(IcyBufferedImage, int)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage extractBand(int bandNumber)
-    {
-        return IcyBufferedImageUtil.extractChannel(this, bandNumber);
-    }
-
-    /**
-     * @deprecated Use {@link IcyBufferedImageUtil#extractChannels(IcyBufferedImage, List)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage extractBands(List<Integer> bandNumbers)
-    {
-        return IcyBufferedImageUtil.extractChannels(this, bandNumbers);
-    }
-
-    /**
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#scale(IcyBufferedImage, int, int, boolean, int, int, IcyBufferedImageUtil.FilterType)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage getScaledCopy(int width, int height, boolean resizeContent, int xAlign, int yAlign,
-            FilterType filterType)
-    {
-        return IcyBufferedImageUtil.scale(this, width, height, resizeContent, xAlign, yAlign,
-                getNewFilterType(filterType));
-    }
-
-    /**
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#scale(IcyBufferedImage, int, int, boolean, int, int)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage getScaledCopy(int width, int height, boolean resizeContent, int xAlign, int yAlign)
-    {
-        return IcyBufferedImageUtil.scale(this, width, height, resizeContent, xAlign, yAlign);
-    }
-
-    /**
-     * @deprecated Uses
-     *             {@link IcyBufferedImageUtil#scale(IcyBufferedImage, int, int, IcyBufferedImageUtil.FilterType)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage getScaledCopy(int width, int height, FilterType filterType)
-    {
-        return IcyBufferedImageUtil.scale(this, width, height, getNewFilterType(filterType));
-    }
-
-    /**
-     * @deprecated Use {@link IcyBufferedImageUtil#scale(IcyBufferedImage, int, int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage getScaledCopy(int width, int height)
-    {
-        return IcyBufferedImageUtil.scale(this, width, height);
-    }
-
-    /**
-     * @deprecated Use {@link IcyBufferedImageUtil#translate(IcyBufferedImage, int, int, int)}
-     *             instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void translate(int dx, int dy, int channel)
-    {
-        IcyBufferedImageUtil.translate(this, dx, dy, channel);
-    }
-
-    /**
-     * @deprecated Use {@link IcyBufferedImageUtil#translate(IcyBufferedImage, int, int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void translate(int dx, int dy)
-    {
-        IcyBufferedImageUtil.translate(this, dx, dy);
-    }
-
-    /**
      * Get calculated image channel bounds (min and max values)
      */
-    protected double[] getCalculatedChannelBounds(int channel)
-    {
+    protected double[] getCalculatedChannelBounds(final int channel) {
         // don't load data for that, just wait that data is loaded naturally
         if (!isDataInitialized())
-            return new double[] {0d, 0d};
+            return new double[]{0d, 0d};
 
         final DataType dataType = getDataType_();
 
@@ -2236,22 +1522,20 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final double min = ArrayMath.min(data, signed);
         final double max = ArrayMath.max(data, signed);
 
-        return new double[] {min, max};
+        return new double[]{min, max};
     }
 
     /**
      * Adjust specified bounds depending internal data type
      */
-    protected double[] adjustBoundsForDataType(double[] bounds)
-    {
+    protected double[] adjustBoundsForDataType(final double[] bounds) {
         double min, max;
 
         min = bounds[0];
         max = bounds[1];
 
         // only for integer data type
-        if (!isFloatDataType())
-        {
+        if (!isFloatDataType()) {
             // we force min to 0 if > 0
             if (min > 0d)
                 min = 0d;
@@ -2262,8 +1546,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
         final DataType dataType = getDataType_();
 
-        switch (dataType.getJavaType())
-        {
+        switch (dataType.getJavaType()) {
             default:
             case BYTE:
                 // return default bounds ([0..255] / [-128..127])
@@ -2279,70 +1562,62 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             case FLOAT:
             case DOUBLE:
                 // if [min..max] is included in [-1..1]
-                if ((min >= -1d) && (max <= 1d))
-                {
+                if ((min >= -1d) && (max <= 1d)) {
                     min = MathUtil.prevPow10(min);
                     max = MathUtil.nextPow10(max);
                 }
                 break;
         }
 
-        return new double[] {min, max};
+        return new double[]{min, max};
     }
 
     /**
      * Get the data type minimum value.
      */
-    public double getDataTypeMin()
-    {
+    public double getDataTypeMin() {
         return getDataType_().getMinValue();
     }
 
     /**
      * Get the data type maximum value.
      */
-    public double getDataTypeMax()
-    {
+    public double getDataTypeMax() {
         return getDataType_().getMaxValue();
     }
 
     /**
      * Get data type bounds (min and max values)
      */
-    public double[] getDataTypeBounds()
-    {
-        return new double[] {getDataTypeMin(), getDataTypeMax()};
+    public double[] getDataTypeBounds() {
+        return new double[]{getDataTypeMin(), getDataTypeMax()};
     }
 
     /**
      * Get the minimum type value for the specified channel.
      */
-    public double getChannelTypeMin(int channel)
-    {
+    public double getChannelTypeMin(final int channel) {
         return getIcyColorModel().getComponentAbsMinValue(channel);
     }
 
     /**
      * Get the maximum type value for the specified channel.
      */
-    public double getChannelTypeMax(int channel)
-    {
+    public double getChannelTypeMax(final int channel) {
         return getIcyColorModel().getComponentAbsMaxValue(channel);
     }
 
     /**
      * Get type bounds (min and max values) for the specified channel.
      */
-    public double[] getChannelTypeBounds(int channel)
-    {
+    public double[] getChannelTypeBounds(final int channel) {
         return getIcyColorModel().getComponentAbsBounds(channel);
     }
 
     /**
      * Get type bounds (min and max values) for all channels.
      */
-    public double[][] getChannelsTypeBounds()
-    {
+    public double[][] getChannelsTypeBounds() {
         final int sizeC = getSizeC();
         final double[][] result = new double[sizeC][];
 
@@ -2355,13 +1630,11 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Get global type bounds (min and max values) for all channels.
      */
-    public double[] getChannelsGlobalTypeBounds()
-    {
+    public double[] getChannelsGlobalTypeBounds() {
         final int sizeC = getSizeC();
         final double[] result = getChannelTypeBounds(0);
 
-        for (int c = 1; c < sizeC; c++)
-        {
+        for (int c = 1; c < sizeC; c++) {
             final double[] bounds = getChannelTypeBounds(c);
             result[0] = Math.min(bounds[0], result[0]);
             result[1] = Math.max(bounds[1], result[1]);
@@ -2371,97 +1644,30 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
-     * @deprecated Use {@link #getChannelsGlobalTypeBounds()} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[] getChannelTypeGlobalBounds()
-    {
-        return getChannelsGlobalTypeBounds();
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelTypeGlobalBounds()} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[] getGlobalChannelTypeBounds()
-    {
-        return getChannelTypeGlobalBounds();
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelTypeMin(int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getComponentAbsMinValue(int component)
-    {
-        return getChannelTypeMin(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelTypeMax(int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getComponentAbsMaxValue(int component)
-    {
-        return getChannelTypeMax(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelTypeBounds(int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[] getComponentAbsBounds(int component)
-    {
-        return getChannelTypeBounds(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelsTypeBounds()} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[][] getComponentsAbsBounds()
-    {
-        return getChannelsTypeBounds();
-    }
-
-    /**
-     * @deprecated Use {@link #getGlobalChannelTypeBounds()} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[] getGlobalComponentAbsBounds()
-    {
-        return getChannelTypeGlobalBounds();
-    }
-
-    /**
      * Get the minimum value for the specified channel.
      */
-    public double getChannelMin(int channel)
-    {
+    public double getChannelMin(final int channel) {
         return getIcyColorModel().getComponentUserMinValue(channel);
     }
 
     /**
      * Get maximum value for the specified channel.
      */
-    public double getChannelMax(int channel)
-    {
+    public double getChannelMax(final int channel) {
         return getIcyColorModel().getComponentUserMaxValue(channel);
     }
 
     /**
      * Get bounds (min and max values) for the specified channel.
      */
-    public double[] getChannelBounds(int channel)
-    {
+    public double[] getChannelBounds(final int channel) {
         return getIcyColorModel().getComponentUserBounds(channel);
     }
 
     /**
      * Get bounds (min and max values) for all channels.
      */
-    public double[][] getChannelsBounds()
-    {
+    public double[][] getChannelsBounds() {
         final int sizeC = getSizeC();
         final double[][] result = new double[sizeC][];
 
@@ -2474,16 +1680,14 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Get global bounds (min and max values) for all channels.
      */
-    public double[] getChannelsGlobalBounds()
-    {
+    public double[] getChannelsGlobalBounds() {
         final int sizeC = getSizeC();
         final double[] result = new double[2];
 
         result[0] = Double.MAX_VALUE;
         result[1] = -Double.MAX_VALUE;
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final double[] bounds = getChannelBounds(c);
 
             if (bounds[0] < result[0])
@@ -2496,54 +1700,16 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
-     * @deprecated Use {@link #getChannelMin(int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getComponentUserMinValue(int component)
-    {
-        return getChannelMin(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelMax(int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getComponentUserMaxValue(int component)
-    {
-        return getChannelMax(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelBounds(int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[] getComponentUserBounds(int component)
-    {
-        return getChannelBounds(component);
-    }
-
-    /**
-     * @deprecated Use {@link #getChannelsBounds()} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public double[][] getComponentsUserBounds()
-    {
-        return getChannelsBounds();
-    }
-
-    /**
      * Set the preferred data type minimum value for the specified channel.
      */
-    public void setChannelTypeMin(int channel, double min)
-    {
+    public void setChannelTypeMin(final int channel, final double min) {
         getIcyColorModel().setComponentAbsMinValue(channel, min);
     }
 
     /**
      * Set the preferred data type maximum value for the specified channel.
      */
-    public void setChannelTypeMax(int channel, double max)
-    {
+    public void setChannelTypeMax(final int channel, final double max) {
         getIcyColorModel().setComponentAbsMaxValue(channel, max);
     }
 
@@ -2551,69 +1717,21 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * /**
      * Set the preferred data type min and max values for the specified channel.
      */
-    public void setChannelTypeBounds(int channel, double min, double max)
-    {
+    public void setChannelTypeBounds(final int channel, final double min, final double max) {
         getIcyColorModel().setComponentAbsBounds(channel, min, max);
     }
 
     /**
      * Set the preferred data type bounds (min and max values) for all channels.
      */
-    public void setChannelsTypeBounds(double[][] bounds)
-    {
+    public void setChannelsTypeBounds(final double[][] bounds) {
         getIcyColorModel().setComponentsAbsBounds(bounds);
-    }
-
-    /**
-     * @deprecated Use {@link #setChannelTypeMin(int, double)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentAbsMinValue(int component, double min)
-    {
-        setChannelTypeMin(component, min);
-    }
-
-    /**
-     * @deprecated Use {@link #setChannelTypeMax(int, double)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentAbsMaxValue(int component, double max)
-    {
-        setChannelTypeMax(component, max);
-    }
-
-    /**
-     * @deprecated Use {@link #setChannelTypeBounds(int, double, double)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentAbsBounds(int component, double[] bounds)
-    {
-        setChannelTypeBounds(component, bounds[0], bounds[1]);
-    }
-
-    /**
-     * @deprecated Use {@link #setChannelTypeBounds(int, double, double)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentAbsBounds(int component, double min, double max)
-    {
-        setChannelTypeBounds(component, min, max);
-    }
-
-    /**
-     * @deprecated Use {@link #setChannelsTypeBounds(double[][])} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentsAbsBounds(double[][] bounds)
-    {
-        setChannelsTypeBounds(bounds);
     }
 
     /**
      * Set channel minimum value.
      */
-    public void setChannelMin(int channel, double min)
-    {
+    public void setChannelMin(final int channel, final double min) {
         final IcyColorModel cm = getIcyColorModel();
 
         if ((min < cm.getComponentAbsMinValue(channel)))
@@ -2624,8 +1742,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set channel maximum value.
      */
-    public void setChannelMax(int channel, double max)
-    {
+    public void setChannelMax(final int channel, final double max) {
         final IcyColorModel cm = getIcyColorModel();
 
         if ((max > cm.getComponentAbsMaxValue(channel)))
@@ -2636,8 +1753,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set channel bounds (min and max values)
      */
-    public void setChannelBounds(int channel, double min, double max)
-    {
+    public void setChannelBounds(final int channel, final double min, final double max) {
         final IcyColorModel cm = getIcyColorModel();
         final double[] typeBounds = cm.getComponentAbsBounds(channel);
 
@@ -2649,74 +1765,24 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set all channel bounds (min and max values)
      */
-    public void setChannelsBounds(double[][] bounds)
-    {
+    public void setChannelsBounds(final double[][] bounds) {
         // we use the setChannelBounds(..) method so we do range check
-        for (int c = 0; c < bounds.length; c++)
-        {
+        for (int c = 0; c < bounds.length; c++) {
             final double[] b = bounds[c];
             setChannelBounds(c, b[0], b[1]);
         }
     }
 
     /**
-     * @deprecated Use {@link #setChannelMin(int, double)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentUserMinValue(int component, double min)
-    {
-        setChannelMin(component, min);
-    }
-
-    /**
-     * @deprecated Use {@link #setChannelMax(int, double)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentUserMaxValue(int component, double max)
-    {
-        setChannelMax(component, max);
-    }
-
-    /**
-     * @deprecated Use {@link #setChannelBounds(int, double, double)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentUserBounds(int component, double[] bounds)
-    {
-        setChannelBounds(component, bounds[0], bounds[1]);
-    }
-
-    /**
-     * @deprecated Use {@link #setChannelBounds(int, double, double)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentUserBounds(int component, double min, double max)
-    {
-        setChannelBounds(component, min, max);
-    }
-
-    /**
-     * @deprecated Use {@link #setChannelsBounds(double[][])} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setComponentsUserBounds(double[][] bounds)
-    {
-        setChannelsBounds(bounds);
-    }
-
-    /**
      * Update channels bounds (min and max values).
      */
-    public void updateChannelsBounds()
-    {
+    public void updateChannelsBounds() {
         final IcyColorModel cm = getIcyColorModel();
 
-        if (cm != null)
-        {
+        if (cm != null) {
             final int sizeC = getSizeC();
 
-            for (int c = 0; c < sizeC; c++)
-            {
+            for (int c = 0; c < sizeC; c++) {
                 // get data type bounds
                 final double[] bounds = getCalculatedChannelBounds(c);
 
@@ -2731,141 +1797,103 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     /**
-     * @deprecated Use {@link #updateChannelsBounds()} instead.
-     */
-    @SuppressWarnings("unused")
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void updateComponentsBounds(boolean updateChannelBounds, boolean adjustByteToo)
-    {
-        updateChannelsBounds();
-    }
-
-    /**
-     * @deprecated Use {@link #updateChannelsBounds()} instead.
-     */
-    @SuppressWarnings("unused")
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void updateComponentsBounds(boolean updateUserBounds)
-    {
-        updateChannelsBounds();
-    }
-
-    /**
      * Return true if point is inside the image
      */
-    public boolean isInside(Point p)
-    {
+    public boolean isInside(final Point p) {
         return isInside(p.x, p.y);
     }
 
     /**
      * Return true if point of coordinate (x, y) is inside the image
      */
-    public boolean isInside(int x, int y)
-    {
+    public boolean isInside(final int x, final int y) {
         return (x >= 0) && (x < getSizeX()) && (y >= 0) && (y < getSizeY());
     }
 
     /**
      * Return true if point of coordinate (x, y) is inside the image
      */
-    public boolean isInside(double x, double y)
-    {
+    public boolean isInside(final double x, final double y) {
         return (x >= 0) && (x < getSizeX()) && (y >= 0) && (y < getSizeY());
     }
 
     /**
      * Return the IcyColorModel
-     * 
+     *
      * @return IcyColorModel
      */
-    public IcyColorModel getIcyColorModel()
-    {
+    public IcyColorModel getIcyColorModel() {
         return (IcyColorModel) getColorModel();
     }
 
     /**
      * Return the data type of this image
-     * 
+     *
      * @return dataType
      * @see DataType
+     * @deprecated Use {@link #getDataType()} instead.
      */
-    public DataType getDataType_()
-    {
-        return getIcyColorModel().getDataType_();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public DataType getDataType_() {
+        return getDataType();
     }
 
     /**
-     * @deprecated use {@link #getDataType_()} instead
+     * Return the data type of this image
+     *
+     * @return dataType
+     * @see DataType
      */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getDataType()
-    {
+    public DataType getDataType() {
         return getIcyColorModel().getDataType();
     }
 
     /**
      * Return true if this is a float data type image
      */
-    public boolean isFloatDataType()
-    {
-        return getDataType_().isFloat();
+    public boolean isFloatDataType() {
+        return getDataType().isFloat();
     }
 
     /**
      * Return true if this is a signed data type image
      */
-    public boolean isSignedDataType()
-    {
-        return getDataType_().isSigned();
-    }
-
-    /**
-     * @deprecated Use {@link #getSizeC()} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getNumComponents()
-    {
-        return getSizeC();
+    public boolean isSignedDataType() {
+        return getDataType().isSigned();
     }
 
     /**
      * @return the number of components of this image
      */
-    public int getSizeC()
-    {
+    public int getSizeC() {
         return getColorModel().getNumComponents();
     }
 
     /**
      * @return the width of the image
      */
-    public int getSizeX()
-    {
+    public int getSizeX() {
         return getWidth();
     }
 
     /**
      * @return the height of the image
      */
-    public int getSizeY()
-    {
+    public int getSizeY() {
         return getHeight();
     }
 
     /**
      * Return 2D dimension of image {sizeX, sizeY}
      */
-    public Dimension getDimension()
-    {
+    public Dimension getDimension() {
         return new Dimension(getSizeX(), getSizeY());
     }
 
     /**
      * Return 2D bounds of image {0, 0, sizeX, sizeY}
      */
-    public Rectangle getBounds()
-    {
+    public Rectangle getBounds() {
         return new Rectangle(getSizeX(), getSizeY());
     }
 
@@ -2874,29 +1902,25 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * This is equivalent to<br>
      * <code>getSizeX() * getSizeY() * getSizeC()</code>
      */
-    public int getNumSample()
-    {
+    public int getNumSample() {
         return getSizeX() * getSizeY() * getSizeC();
     }
 
     /**
      * Return the offset for specified (x, y) location
      */
-    public int getOffset(int x, int y)
-    {
+    public int getOffset(final int x, final int y) {
         return (y * getWidth()) + x;
     }
 
     /**
      * create a compatible LUT for this image.
-     * 
-     * @param createColorModel
-     *        set to <code>true</code> to create a LUT using a new compatible ColorModel else it
-     *        will use the image
-     *        internal ColorModel
+     *
+     * @param createColorModel set to <code>true</code> to create a LUT using a new compatible ColorModel else it
+     *                         will use the image
+     *                         internal ColorModel
      */
-    public LUT createCompatibleLUT(boolean createColorModel)
-    {
+    public LUT createCompatibleLUT(final boolean createColorModel) {
         final IcyColorModel cm;
 
         if (createColorModel)
@@ -2910,70 +1934,42 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * create a compatible LUT for this image
      */
-    public LUT createCompatibleLUT()
-    {
+    public LUT createCompatibleLUT() {
         return createCompatibleLUT(true);
-    }
-
-    /**
-     * @deprecated No attached LUT to an image.<br>
-     *             Use {@link #createCompatibleLUT(boolean)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public LUT getLUT()
-    {
-        return createCompatibleLUT();
     }
 
     /**
      * Return a direct reference to internal 2D array data [C][XY]
      */
-    public Object getDataXYC()
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataXYCAsByte();
-            case SHORT:
-                return getDataXYCAsShort();
-            case INT:
-                return getDataXYCAsInt();
-            case FLOAT:
-                return getDataXYCAsFloat();
-            case DOUBLE:
-                return getDataXYCAsDouble();
-            default:
-                return null;
-        }
+    public Object getDataXYC() {
+        return switch (getDataType_().getJavaType()) {
+            case BYTE -> getDataXYCAsByte();
+            case SHORT -> getDataXYCAsShort();
+            case INT -> getDataXYCAsInt();
+            case FLOAT -> getDataXYCAsFloat();
+            case DOUBLE -> getDataXYCAsDouble();
+            default -> null;
+        };
     }
 
     /**
      * Return a direct reference to internal 1D array data [XY] for specified c
      */
-    public Object getDataXY(int c)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataXYAsByte(c);
-            case SHORT:
-                return getDataXYAsShort(c);
-            case INT:
-                return getDataXYAsInt(c);
-            case FLOAT:
-                return getDataXYAsFloat(c);
-            case DOUBLE:
-                return getDataXYAsDouble(c);
-            default:
-                return null;
-        }
+    public Object getDataXY(final int c) {
+        return switch (getDataType_().getJavaType()) {
+            case BYTE -> getDataXYAsByte(c);
+            case SHORT -> getDataXYAsShort(c);
+            case INT -> getDataXYAsInt(c);
+            case FLOAT -> getDataXYAsFloat(c);
+            case DOUBLE -> getDataXYAsDouble(c);
+            default -> null;
+        };
     }
 
     /**
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY]
      */
-    public Object getDataCopyXYC()
-    {
+    public Object getDataCopyXYC() {
         return getDataCopyXYC(null, 0);
     }
 
@@ -2981,30 +1977,21 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY]<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyXYC(Object out, int offset)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataCopyXYCAsByte((byte[]) out, offset);
-            case SHORT:
-                return getDataCopyXYCAsShort((short[]) out, offset);
-            case INT:
-                return getDataCopyXYCAsInt((int[]) out, offset);
-            case FLOAT:
-                return getDataCopyXYCAsFloat((float[]) out, offset);
-            case DOUBLE:
-                return getDataCopyXYCAsDouble((double[]) out, offset);
-            default:
-                return null;
-        }
+    public Object getDataCopyXYC(final Object out, final int offset) {
+        return switch (getDataType_().getJavaType()) {
+            case BYTE -> getDataCopyXYCAsByte((byte[]) out, offset);
+            case SHORT -> getDataCopyXYCAsShort((short[]) out, offset);
+            case INT -> getDataCopyXYCAsInt((int[]) out, offset);
+            case FLOAT -> getDataCopyXYCAsFloat((float[]) out, offset);
+            case DOUBLE -> getDataCopyXYCAsDouble((double[]) out, offset);
+            default -> null;
+        };
     }
 
     /**
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c
      */
-    public Object getDataCopyXY(int c)
-    {
+    public Object getDataCopyXY(final int c) {
         return getDataCopyXY(c, null, 0);
     }
 
@@ -3012,30 +1999,21 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyXY(int c, Object out, int offset)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataCopyXYAsByte(c, (byte[]) out, offset);
-            case SHORT:
-                return getDataCopyXYAsShort(c, (short[]) out, offset);
-            case INT:
-                return getDataCopyXYAsInt(c, (int[]) out, offset);
-            case FLOAT:
-                return getDataCopyXYAsFloat(c, (float[]) out, offset);
-            case DOUBLE:
-                return getDataCopyXYAsDouble(c, (double[]) out, offset);
-            default:
-                return null;
-        }
+    public Object getDataCopyXY(final int c, final Object out, final int offset) {
+        return switch (getDataType_().getJavaType()) {
+            case BYTE -> getDataCopyXYAsByte(c, (byte[]) out, offset);
+            case SHORT -> getDataCopyXYAsShort(c, (short[]) out, offset);
+            case INT -> getDataCopyXYAsInt(c, (int[]) out, offset);
+            case FLOAT -> getDataCopyXYAsFloat(c, (float[]) out, offset);
+            case DOUBLE -> getDataCopyXYAsDouble(c, (double[]) out, offset);
+            default -> null;
+        };
     }
 
     /**
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]
      */
-    public Object getDataCopyCXY()
-    {
+    public Object getDataCopyCXY() {
         return getDataCopyCXY(null, 0);
     }
 
@@ -3043,31 +2021,22 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyCXY(Object out, int offset)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataCopyCXYAsByte((byte[]) out, offset);
-            case SHORT:
-                return getDataCopyCXYAsShort((short[]) out, offset);
-            case INT:
-                return getDataCopyCXYAsInt((int[]) out, offset);
-            case FLOAT:
-                return getDataCopyCXYAsFloat((float[]) out, offset);
-            case DOUBLE:
-                return getDataCopyCXYAsDouble((double[]) out, offset);
-            default:
-                return null;
-        }
+    public Object getDataCopyCXY(final Object out, final int offset) {
+        return switch (getDataType_().getJavaType()) {
+            case BYTE -> getDataCopyCXYAsByte((byte[]) out, offset);
+            case SHORT -> getDataCopyCXYAsShort((short[]) out, offset);
+            case INT -> getDataCopyCXYAsInt((int[]) out, offset);
+            case FLOAT -> getDataCopyCXYAsFloat((float[]) out, offset);
+            case DOUBLE -> getDataCopyCXYAsDouble((double[]) out, offset);
+            default -> null;
+        };
 
     }
 
     /**
      * Return a 1D array data copy [C] of specified (x, y) position
      */
-    public Object getDataCopyC(int x, int y)
-    {
+    public Object getDataCopyC(final int x, final int y) {
         return getDataCopyC(x, y, null, 0);
     }
 
@@ -3075,37 +2044,26 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [C] of specified (x, y) position<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public Object getDataCopyC(int x, int y, Object out, int offset)
-    {
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-                return getDataCopyCAsByte(x, y, (byte[]) out, offset);
-            case SHORT:
-                return getDataCopyCAsShort(x, y, (short[]) out, offset);
-            case INT:
-                return getDataCopyCAsInt(x, y, (int[]) out, offset);
-            case FLOAT:
-                return getDataCopyCAsFloat(x, y, (float[]) out, offset);
-            case DOUBLE:
-                return getDataCopyCAsDouble(x, y, (double[]) out, offset);
-            default:
-                return null;
-        }
+    public Object getDataCopyC(final int x, final int y, final Object out, final int offset) {
+        return switch (getDataType_().getJavaType()) {
+            case BYTE -> getDataCopyCAsByte(x, y, (byte[]) out, offset);
+            case SHORT -> getDataCopyCAsShort(x, y, (short[]) out, offset);
+            case INT -> getDataCopyCAsInt(x, y, (int[]) out, offset);
+            case FLOAT -> getDataCopyCAsFloat(x, y, (float[]) out, offset);
+            case DOUBLE -> getDataCopyCAsDouble(x, y, (double[]) out, offset);
+            default -> null;
+        };
     }
 
     /**
      * Set internal 1D byte array data ([XY]) for specified component
      */
-    public void setDataXY(int c, Object values)
-    {
+    public void setDataXY(final int c, final Object values) {
         lockRaster();
-        try
-        {
+        try {
             ArrayUtil.arrayToArray(values, getDataXY(c), getDataType_().isSigned());
         }
-        finally
-        {
+        finally {
             releaseRaster(true);
         }
 
@@ -3116,10 +2074,8 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set 1D array data [C] of specified (x, y) position
      */
-    public void setDataC(int x, int y, Object values)
-    {
-        switch (getDataType_().getJavaType())
-        {
+    public void setDataC(final int x, final int y, final Object values) {
+        switch (getDataType_().getJavaType()) {
             case BYTE:
                 setDataCAsByte(x, y, (byte[]) values);
                 break;
@@ -3149,16 +2105,14 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a direct reference to internal 2D array data [C][XY]
      */
-    public byte[][] getDataXYCAsByte()
-    {
+    public byte[][] getDataXYCAsByte() {
         return ((DataBufferByte) getRaster().getDataBuffer()).getBankData();
     }
 
     /**
      * Return a direct reference to internal 2D array data [C][XY]
      */
-    public short[][] getDataXYCAsShort()
-    {
+    public short[][] getDataXYCAsShort() {
         final DataBuffer db = getRaster().getDataBuffer();
         if (db instanceof DataBufferUShort)
             return ((DataBufferUShort) db).getBankData();
@@ -3168,40 +2122,35 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a direct reference to internal 2D array data [C][XY]
      */
-    public int[][] getDataXYCAsInt()
-    {
+    public int[][] getDataXYCAsInt() {
         return ((DataBufferInt) getRaster().getDataBuffer()).getBankData();
     }
 
     /**
      * Return a direct reference to internal 2D array data [C][XY]
      */
-    public float[][] getDataXYCAsFloat()
-    {
+    public float[][] getDataXYCAsFloat() {
         return ((DataBufferFloat) getRaster().getDataBuffer()).getBankData();
     }
 
     /**
      * Return a direct reference to internal 2D array data [C][XY]
      */
-    public double[][] getDataXYCAsDouble()
-    {
+    public double[][] getDataXYCAsDouble() {
         return ((DataBufferDouble) getRaster().getDataBuffer()).getBankData();
     }
 
     /**
      * Return a direct reference to internal 1D array data [XY] for specified c
      */
-    public byte[] getDataXYAsByte(int c)
-    {
+    public byte[] getDataXYAsByte(final int c) {
         return ((DataBufferByte) getRaster().getDataBuffer()).getData(c);
     }
 
     /**
      * Return a direct reference to internal 1D array data [XY] for specified c
      */
-    public short[] getDataXYAsShort(int c)
-    {
+    public short[] getDataXYAsShort(final int c) {
         final DataBuffer db = getRaster().getDataBuffer();
         if (db instanceof DataBufferUShort)
             return ((DataBufferUShort) db).getData(c);
@@ -3211,32 +2160,28 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a direct reference to internal 1D array data [XY] for specified c
      */
-    public int[] getDataXYAsInt(int c)
-    {
+    public int[] getDataXYAsInt(final int c) {
         return ((DataBufferInt) getRaster().getDataBuffer()).getData(c);
     }
 
     /**
      * Return a direct reference to internal 1D array data [XY] for specified c
      */
-    public float[] getDataXYAsFloat(int c)
-    {
+    public float[] getDataXYAsFloat(final int c) {
         return ((DataBufferFloat) getRaster().getDataBuffer()).getData(c);
     }
 
     /**
      * Return a direct reference to internal 1D array data [XY] for specified c
      */
-    public double[] getDataXYAsDouble(int c)
-    {
+    public double[] getDataXYAsDouble(final int c) {
         return ((DataBufferDouble) getRaster().getDataBuffer()).getData(c);
     }
 
     /**
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY]
      */
-    public byte[] getDataCopyXYCAsByte()
-    {
+    public byte[] getDataCopyXYCAsByte() {
         return getDataCopyXYCAsByte(null, 0);
     }
 
@@ -3244,8 +2189,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY] If (out != null) then
      * it's used to store result at the specified offset
      */
-    public byte[] getDataCopyXYCAsByte(byte[] out, int off)
-    {
+    public byte[] getDataCopyXYCAsByte(final byte[] out, final int off) {
         final long sizeC = getSizeC();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeC) >= Integer.MAX_VALUE)
@@ -3255,8 +2199,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final byte[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeC));
         int offset = off;
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final byte[] src = banks[c];
             System.arraycopy(src, 0, result, offset, (int) len);
             offset += len;
@@ -3268,8 +2211,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY]
      */
-    public short[] getDataCopyXYCAsShort()
-    {
+    public short[] getDataCopyXYCAsShort() {
         return getDataCopyXYCAsShort(null, 0);
     }
 
@@ -3277,8 +2219,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY] If (out != null) then
      * it's used to store result at the specified offset
      */
-    public short[] getDataCopyXYCAsShort(short[] out, int off)
-    {
+    public short[] getDataCopyXYCAsShort(final short[] out, final int off) {
         final long sizeC = getSizeC();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeC) >= Integer.MAX_VALUE)
@@ -3293,8 +2234,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final short[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeC));
         int offset = off;
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final short[] src = banks[c];
             System.arraycopy(src, 0, result, offset, (int) len);
             offset += len;
@@ -3306,8 +2246,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY]
      */
-    public int[] getDataCopyXYCAsInt()
-    {
+    public int[] getDataCopyXYCAsInt() {
         return getDataCopyXYCAsInt(null, 0);
     }
 
@@ -3315,8 +2254,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY] If (out != null) then
      * it's used to store result at the specified offset
      */
-    public int[] getDataCopyXYCAsInt(int[] out, int off)
-    {
+    public int[] getDataCopyXYCAsInt(final int[] out, final int off) {
         final long sizeC = getSizeC();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeC) >= Integer.MAX_VALUE)
@@ -3326,8 +2264,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final int[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeC));
         int offset = off;
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final int[] src = banks[c];
             System.arraycopy(src, 0, result, offset, (int) len);
             offset += len;
@@ -3339,8 +2276,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY]
      */
-    public float[] getDataCopyXYCAsFloat()
-    {
+    public float[] getDataCopyXYCAsFloat() {
         return getDataCopyXYCAsFloat(null, 0);
     }
 
@@ -3348,8 +2284,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY] If (out != null) then
      * it's used to store result at the specified offset
      */
-    public float[] getDataCopyXYCAsFloat(float[] out, int off)
-    {
+    public float[] getDataCopyXYCAsFloat(final float[] out, final int off) {
         final long sizeC = getSizeC();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeC) >= Integer.MAX_VALUE)
@@ -3359,8 +2294,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final float[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeC));
         int offset = off;
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final float[] src = banks[c];
             System.arraycopy(src, 0, result, offset, (int) len);
             offset += len;
@@ -3372,8 +2306,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY]
      */
-    public double[] getDataCopyXYCAsDouble()
-    {
+    public double[] getDataCopyXYCAsDouble() {
         return getDataCopyXYCAsDouble(null, 0);
     }
 
@@ -3381,8 +2314,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XYC] of internal 2D array data [C][XY] If (out != null) then
      * it's used to store result at the specified offset
      */
-    public double[] getDataCopyXYCAsDouble(double[] out, int off)
-    {
+    public double[] getDataCopyXYCAsDouble(final double[] out, final int off) {
         final long sizeC = getSizeC();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeC) >= Integer.MAX_VALUE)
@@ -3392,8 +2324,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final double[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeC));
         int offset = off;
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final double[] src = banks[c];
             System.arraycopy(src, 0, result, offset, (int) len);
             offset += len;
@@ -3405,8 +2336,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      */
-    public byte[] getDataCopyXYAsByte(int c)
-    {
+    public byte[] getDataCopyXYAsByte(final int c) {
         return getDataCopyXYAsByte(c, null, 0);
     }
 
@@ -3414,8 +2344,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public byte[] getDataCopyXYAsByte(int c, byte[] out, int off)
-    {
+    public byte[] getDataCopyXYAsByte(final int c, final byte[] out, final int off) {
         final int len = getSizeX() * getSizeY();
         final byte[] src = ((DataBufferByte) getRaster().getDataBuffer()).getData(c);
         final byte[] result = Array1DUtil.allocIfNull(out, len);
@@ -3428,8 +2357,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      */
-    public short[] getDataCopyXYAsShort(int c)
-    {
+    public short[] getDataCopyXYAsShort(final int c) {
         return getDataCopyXYAsShort(c, null, 0);
     }
 
@@ -3437,8 +2365,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public short[] getDataCopyXYAsShort(int c, short[] out, int off)
-    {
+    public short[] getDataCopyXYAsShort(final int c, final short[] out, final int off) {
         final int len = getSizeX() * getSizeY();
         final DataBuffer db = getRaster().getDataBuffer();
         final short[] src;
@@ -3456,8 +2383,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      */
-    public int[] getDataCopyXYAsInt(int c)
-    {
+    public int[] getDataCopyXYAsInt(final int c) {
         return getDataCopyXYAsInt(c, null, 0);
     }
 
@@ -3465,8 +2391,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public int[] getDataCopyXYAsInt(int c, int[] out, int off)
-    {
+    public int[] getDataCopyXYAsInt(final int c, final int[] out, final int off) {
         final int len = getSizeX() * getSizeY();
         final int[] src = ((DataBufferInt) getRaster().getDataBuffer()).getData(c);
         final int[] result = Array1DUtil.allocIfNull(out, len);
@@ -3479,8 +2404,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      */
-    public float[] getDataCopyXYAsFloat(int c)
-    {
+    public float[] getDataCopyXYAsFloat(final int c) {
         return getDataCopyXYAsFloat(c, null, 0);
     }
 
@@ -3488,8 +2412,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public float[] getDataCopyXYAsFloat(int c, float[] out, int off)
-    {
+    public float[] getDataCopyXYAsFloat(final int c, final float[] out, final int off) {
         final int len = getSizeX() * getSizeY();
         final float[] src = ((DataBufferFloat) getRaster().getDataBuffer()).getData(c);
         final float[] result = Array1DUtil.allocIfNull(out, len);
@@ -3502,8 +2425,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      */
-    public double[] getDataCopyXYAsDouble(int c)
-    {
+    public double[] getDataCopyXYAsDouble(final int c) {
         return getDataCopyXYAsDouble(c, null, 0);
     }
 
@@ -3511,8 +2433,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [XY] of internal 1D array data [XY] for specified c<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public double[] getDataCopyXYAsDouble(int c, double[] out, int off)
-    {
+    public double[] getDataCopyXYAsDouble(final int c, final double[] out, final int off) {
         final int len = getSizeX() * getSizeY();
         final double[] src = ((DataBufferDouble) getRaster().getDataBuffer()).getData(c);
         final double[] result = Array1DUtil.allocIfNull(out, len);
@@ -3525,8 +2446,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      */
-    public byte[] getDataCopyCXYAsByte()
-    {
+    public byte[] getDataCopyCXYAsByte() {
         return getDataCopyCXYAsByte(null, 0);
     }
 
@@ -3534,8 +2454,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public byte[] getDataCopyCXYAsByte(byte[] out, int off)
-    {
+    public byte[] getDataCopyCXYAsByte(final byte[] out, final int off) {
         final long sizeC = getSizeC();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeC) >= Integer.MAX_VALUE)
@@ -3544,8 +2463,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final byte[][] banks = ((DataBufferByte) getRaster().getDataBuffer()).getBankData();
         final byte[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeC));
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final byte[] src = banks[c];
             int offset = c + off;
             for (int i = 0; i < len; i++, offset += sizeC)
@@ -3558,8 +2476,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      */
-    public short[] getDataCopyCXYAsShort()
-    {
+    public short[] getDataCopyCXYAsShort() {
         return getDataCopyCXYAsShort(null, 0);
     }
 
@@ -3567,8 +2484,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public short[] getDataCopyCXYAsShort(short[] out, int off)
-    {
+    public short[] getDataCopyCXYAsShort(final short[] out, final int off) {
         final long sizeC = getSizeC();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeC) >= Integer.MAX_VALUE)
@@ -3582,8 +2498,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             banks = ((DataBufferShort) db).getBankData();
         final short[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeC));
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final short[] src = banks[c];
             int offset = c + off;
             for (int i = 0; i < len; i++, offset += sizeC)
@@ -3596,8 +2511,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      */
-    public int[] getDataCopyCXYAsInt()
-    {
+    public int[] getDataCopyCXYAsInt() {
         return getDataCopyCXYAsInt(null, 0);
     }
 
@@ -3605,8 +2519,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public int[] getDataCopyCXYAsInt(int[] out, int off)
-    {
+    public int[] getDataCopyCXYAsInt(final int[] out, final int off) {
         final long sizeC = getSizeC();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeC) >= Integer.MAX_VALUE)
@@ -3615,8 +2528,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final int[][] banks = ((DataBufferInt) getRaster().getDataBuffer()).getBankData();
         final int[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeC));
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final int[] src = banks[c];
             int offset = c + off;
             for (int i = 0; i < len; i++, offset += sizeC)
@@ -3629,8 +2541,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      */
-    public float[] getDataCopyCXYAsFloat()
-    {
+    public float[] getDataCopyCXYAsFloat() {
         return getDataCopyCXYAsFloat(null, 0);
     }
 
@@ -3638,8 +2549,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public float[] getDataCopyCXYAsFloat(float[] out, int off)
-    {
+    public float[] getDataCopyCXYAsFloat(final float[] out, final int off) {
         final long sizeC = getSizeC();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeC) >= Integer.MAX_VALUE)
@@ -3648,8 +2558,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final float[][] banks = ((DataBufferFloat) getRaster().getDataBuffer()).getBankData();
         final float[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeC));
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final float[] src = banks[c];
             int offset = c + off;
             for (int i = 0; i < len; i++, offset += sizeC)
@@ -3662,8 +2571,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      */
-    public double[] getDataCopyCXYAsDouble()
-    {
+    public double[] getDataCopyCXYAsDouble() {
         return getDataCopyCXYAsDouble(null, 0);
     }
 
@@ -3671,8 +2579,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [CXY] of internal 2D array data [C][XY]<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public double[] getDataCopyCXYAsDouble(double[] out, int off)
-    {
+    public double[] getDataCopyCXYAsDouble(final double[] out, final int off) {
         final long sizeC = getSizeC();
         final long len = (long) getSizeX() * (long) getSizeY();
         if ((len * sizeC) >= Integer.MAX_VALUE)
@@ -3681,8 +2588,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final double[][] banks = ((DataBufferDouble) getRaster().getDataBuffer()).getBankData();
         final double[] result = Array1DUtil.allocIfNull(out, (int) (len * sizeC));
 
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             final double[] src = banks[c];
             int offset = c + off;
             for (int i = 0; i < len; i++, offset += sizeC)
@@ -3695,8 +2601,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [C] of specified (x, y) position
      */
-    public byte[] getDataCopyCAsByte(int x, int y)
-    {
+    public byte[] getDataCopyCAsByte(final int x, final int y) {
         return getDataCopyCAsByte(x, y, null, 0);
     }
 
@@ -3704,8 +2609,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [C] of specified (x, y) position<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public byte[] getDataCopyCAsByte(int x, int y, byte[] out, int off)
-    {
+    public byte[] getDataCopyCAsByte(final int x, final int y, final byte[] out, final int off) {
         final int sizeC = getSizeC();
         final int offset = x + (y * getWidth());
         final byte[][] data = ((DataBufferByte) getRaster().getDataBuffer()).getBankData();
@@ -3721,8 +2625,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [C] of specified (x, y) position
      */
-    public short[] getDataCopyCAsShort(int x, int y)
-    {
+    public short[] getDataCopyCAsShort(final int x, final int y) {
         return getDataCopyCAsShort(x, y, null, 0);
     }
 
@@ -3730,8 +2633,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [C] of specified (x, y) position<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public short[] getDataCopyCAsShort(int x, int y, short[] out, int off)
-    {
+    public short[] getDataCopyCAsShort(final int x, final int y, final short[] out, final int off) {
         final int sizeC = getSizeC();
         final int offset = x + (y * getWidth());
         final DataBuffer db = getRaster().getDataBuffer();
@@ -3752,8 +2654,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [C] of specified (x, y) position
      */
-    public int[] getDataCopyCAsInt(int x, int y)
-    {
+    public int[] getDataCopyCAsInt(final int x, final int y) {
         return getDataCopyCAsInt(x, y, null, 0);
     }
 
@@ -3761,8 +2662,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [C] of specified (x, y) position<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public int[] getDataCopyCAsInt(int x, int y, int[] out, int off)
-    {
+    public int[] getDataCopyCAsInt(final int x, final int y, final int[] out, final int off) {
         final int sizeC = getSizeC();
         final int offset = x + (y * getWidth());
         final int[][] data = ((DataBufferInt) getRaster().getDataBuffer()).getBankData();
@@ -3778,8 +2678,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [C] of specified (x, y) position
      */
-    public float[] getDataCopyCAsFloat(int x, int y)
-    {
+    public float[] getDataCopyCAsFloat(final int x, final int y) {
         return getDataCopyCAsFloat(x, y, null, 0);
     }
 
@@ -3787,8 +2686,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [C] of specified (x, y) position<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public float[] getDataCopyCAsFloat(int x, int y, float[] out, int off)
-    {
+    public float[] getDataCopyCAsFloat(final int x, final int y, final float[] out, final int off) {
         final int sizeC = getSizeC();
         final int offset = x + (y * getWidth());
         final float[][] data = ((DataBufferFloat) getRaster().getDataBuffer()).getBankData();
@@ -3804,8 +2702,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return a 1D array data copy [C] of specified (x, y) position
      */
-    public double[] getDataCopyCAsDouble(int x, int y)
-    {
+    public double[] getDataCopyCAsDouble(final int x, final int y) {
         return getDataCopyCAsDouble(x, y, null, 0);
     }
 
@@ -3813,8 +2710,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return a 1D array data copy [C] of specified (x, y) position<br>
      * If (out != null) then it's used to store result at the specified offset
      */
-    public double[] getDataCopyCAsDouble(int x, int y, double[] out, int off)
-    {
+    public double[] getDataCopyCAsDouble(final int x, final int y, final double[] out, final int off) {
         final int sizeC = getSizeC();
         final int offset = x + (y * getWidth());
         final double[][] data = ((DataBufferDouble) getRaster().getDataBuffer()).getBankData();
@@ -3830,15 +2726,12 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set internal 1D byte array data ([XY]) for specified component
      */
-    public void setDataXYAsByte(int c, byte[] values)
-    {
+    public void setDataXYAsByte(final int c, final byte[] values) {
         lockRaster();
-        try
-        {
+        try {
             System.arraycopy(values, 0, getDataXYAsByte(c), 0, getSizeX() * getSizeY());
         }
-        finally
-        {
+        finally {
             releaseRaster(true);
         }
 
@@ -3849,15 +2742,12 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set internal 1D byte array data ([XY]) for specified component
      */
-    public void setDataXYAsShort(int c, short[] values)
-    {
+    public void setDataXYAsShort(final int c, final short[] values) {
         lockRaster();
-        try
-        {
+        try {
             System.arraycopy(values, 0, getDataXYAsShort(c), 0, getSizeX() * getSizeY());
         }
-        finally
-        {
+        finally {
             releaseRaster(true);
         }
 
@@ -3868,15 +2758,12 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set internal 1D byte array data ([XY]) for specified component
      */
-    public void setDataXYAsInt(int c, int[] values)
-    {
+    public void setDataXYAsInt(final int c, final int[] values) {
         lockRaster();
-        try
-        {
+        try {
             System.arraycopy(values, 0, getDataXYAsInt(c), 0, getSizeX() * getSizeY());
         }
-        finally
-        {
+        finally {
             releaseRaster(true);
         }
 
@@ -3887,15 +2774,12 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set internal 1D byte array data ([XY]) for specified component
      */
-    public void setDataXYAsFloat(int c, float[] values)
-    {
+    public void setDataXYAsFloat(final int c, final float[] values) {
         lockRaster();
-        try
-        {
+        try {
             System.arraycopy(values, 0, getDataXYAsFloat(c), 0, getSizeX() * getSizeY());
         }
-        finally
-        {
+        finally {
             releaseRaster(true);
         }
 
@@ -3906,15 +2790,12 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set internal 1D byte array data ([XY]) for specified component
      */
-    public void setDataXYAsDouble(int c, double[] values)
-    {
+    public void setDataXYAsDouble(final int c, final double[] values) {
         lockRaster();
-        try
-        {
+        try {
             System.arraycopy(values, 0, getDataXYAsDouble(c), 0, getSizeX() * getSizeY());
         }
-        finally
-        {
+        finally {
             releaseRaster(true);
         }
 
@@ -3925,8 +2806,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set 1D array data [C] of specified (x, y) position
      */
-    public void setDataCAsByte(int x, int y, byte[] values)
-    {
+    public void setDataCAsByte(final int x, final int y, final byte[] values) {
         final int offset = x + (y * getWidth());
         final int len = values.length;
         final WritableRaster wr = getRaster();
@@ -3945,8 +2825,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set 1D array data [C] of specified (x, y) position
      */
-    public void setDataCAsShort(int x, int y, short[] values)
-    {
+    public void setDataCAsShort(final int x, final int y, final short[] values) {
         final int offset = x + (y * getWidth());
         final int len = values.length;
         final WritableRaster wr = getRaster();
@@ -3970,8 +2849,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set 1D array data [C] of specified (x, y) position
      */
-    public void setDataCAsInt(int x, int y, int[] values)
-    {
+    public void setDataCAsInt(final int x, final int y, final int[] values) {
         final int offset = x + (y * getWidth());
         final int len = values.length;
         final WritableRaster wr = getRaster();
@@ -3990,8 +2868,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set 1D array data [C] of specified (x, y) position
      */
-    public void setDataCAsFloat(int x, int y, float[] values)
-    {
+    public void setDataCAsFloat(final int x, final int y, final float[] values) {
         final int offset = x + (y * getWidth());
         final int len = values.length;
         final WritableRaster wr = getRaster();
@@ -4010,8 +2887,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set 1D array data [C] of specified (x, y) position
      */
-    public void setDataCAsDouble(int x, int y, double[] values)
-    {
+    public void setDataCAsDouble(final int x, final int y, final double[] values) {
         final int offset = x + (y * getWidth());
         final int len = values.length;
         final WritableRaster wr = getRaster();
@@ -4031,8 +2907,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Return the value located at (x, y, c) position as a double
      * whatever is the internal data type
      */
-    public double getData(int x, int y, int c)
-    {
+    public double getData(final int x, final int y, final int c) {
         return Array1DUtil.getValue(getDataXY(c), getOffset(x, y), getDataType_());
     }
 
@@ -4040,16 +2915,13 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * Set the value located at (x, y, c) position as a double
      * whatever is the internal data type
      */
-    public void setData(int x, int y, int c, double value)
-    {
+    public void setData(final int x, final int y, final int c, final double value) {
         lockRaster();
-        try
-        {
+        try {
             // set value
             Array1DUtil.setValue(getDataXY(c), getOffset(x, y), getDataType_(), value);
         }
-        finally
-        {
+        finally {
             // FIXME : save changed data in cache (need to do cache behind here and still that is terribly slow !!)
             releaseRaster(true);
         }
@@ -4063,8 +2935,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * The value is interpolated depending the current double (x,y) coordinates.<br>
      * It returns 0d if value is out of range.
      */
-    public double getDataInterpolated(double x, double y, int c)
-    {
+    public double getDataInterpolated(final double x, final double y, final int c) {
         final int xi = (int) x;
         final int xip = xi + 1;
         final int yi = (int) y;
@@ -4075,22 +2946,19 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         double result = 0d;
 
         // at least one pixel inside
-        if ((xi < sx) && (yi < sy) && (xip >= 0) && (yip >= 0))
-        {
+        if ((xi < sx) && (yi < sy) && (xip >= 0) && (yip >= 0)) {
             final double ratioNextX = x - (double) xi;
             final double ratioCurX = 1d - ratioNextX;
             final double ratioNextY = y - (double) yi;
             final double ratioCurY = 1d - ratioNextY;
 
-            if (yi >= 0)
-            {
+            if (yi >= 0) {
                 if (xi >= 0)
                     result += getData(xi, yi, c) * (ratioCurX * ratioCurY);
                 if (xip < sx)
                     result += getData(xip, yi, c) * (ratioNextX * ratioCurY);
             }
-            if (yip < sy)
-            {
+            if (yip < sy) {
                 if (xi >= 0)
                     result += getData(xi, yip, c) * (ratioCurX * ratioNextY);
                 if (xip < sx)
@@ -4104,8 +2972,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return the value located at (x, y, c) position
      */
-    public byte getDataAsByte(int x, int y, int c)
-    {
+    public byte getDataAsByte(final int x, final int y, final int c) {
         // ignore band offset as it's always 0 here
         return (((DataBufferByte) getRaster().getDataBuffer()).getData(c))[x + (y * getWidth())];
     }
@@ -4113,8 +2980,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set the value located at (x, y, c) position
      */
-    public void setDataAsByte(int x, int y, int c, byte value)
-    {
+    public void setDataAsByte(final int x, final int y, final int c, final byte value) {
         final WritableRaster wr = getRaster();
         // ignore band offset as it's always 0 here
         (((DataBufferByte) wr.getDataBuffer()).getData(c))[x + (y * getWidth())] = value;
@@ -4127,8 +2993,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return the value located at (x, y, c) position
      */
-    public short getDataAsShort(int x, int y, int c)
-    {
+    public short getDataAsShort(final int x, final int y, final int c) {
         // ignore band offset as it's always 0 here
         final DataBuffer db = getRaster().getDataBuffer();
 
@@ -4141,8 +3006,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set the value located at (x, y, c) position
      */
-    public void setDataAsShort(int x, int y, int c, short value)
-    {
+    public void setDataAsShort(final int x, final int y, final int c, final short value) {
         final WritableRaster wr = getRaster();
         final DataBuffer db = wr.getDataBuffer();
         if (db instanceof DataBufferUShort)
@@ -4159,8 +3023,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return the value located at (x, y, c) position
      */
-    public int getDataAsInt(int x, int y, int c)
-    {
+    public int getDataAsInt(final int x, final int y, final int c) {
         // ignore band offset as it's always 0 here
         return (((DataBufferInt) getRaster().getDataBuffer()).getData(c))[x + (y * getWidth())];
     }
@@ -4168,8 +3031,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set the value located at (x, y, c) position
      */
-    public void setDataAsInt(int x, int y, int c, int value)
-    {
+    public void setDataAsInt(final int x, final int y, final int c, final int value) {
         final WritableRaster wr = getRaster();
         // ignore band offset as it's always 0 here
         (((DataBufferInt) wr.getDataBuffer()).getData(c))[x + (y * getWidth())] = value;
@@ -4182,8 +3044,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return the value located at (x, y, c) position
      */
-    public float getDataAsFloat(int x, int y, int c)
-    {
+    public float getDataAsFloat(final int x, final int y, final int c) {
         // ignore band offset as it's always 0 here
         return (((DataBufferFloat) getRaster().getDataBuffer()).getData(c))[x + (y * getWidth())];
     }
@@ -4191,8 +3052,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set the value located at (x, y, c) position
      */
-    public void setDataAsFloat(int x, int y, int c, float value)
-    {
+    public void setDataAsFloat(final int x, final int y, final int c, final float value) {
         final WritableRaster wr = getRaster();
         // ignore band offset as it's always 0 here
         (((DataBufferFloat) wr.getDataBuffer()).getData(c))[x + (y * getWidth())] = value;
@@ -4205,8 +3065,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Return the value located at (x, y, c) position
      */
-    public double getDataAsDouble(int x, int y, int c)
-    {
+    public double getDataAsDouble(final int x, final int y, final int c) {
         // ignore band offset as it's always 0 here
         return (((DataBufferDouble) getRaster().getDataBuffer()).getData(c))[x + (y * getWidth())];
     }
@@ -4214,8 +3073,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Set the value located at (x, y, c) position
      */
-    public void setDataAsDouble(int x, int y, int c, double value)
-    {
+    public void setDataAsDouble(final int x, final int y, final int c, final double value) {
         final WritableRaster wr = getRaster();
         // ignore band offset as it's always 0 here
         (((DataBufferDouble) wr.getDataBuffer()).getData(c))[x + (y * getWidth())] = value;
@@ -4227,44 +3085,36 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Same as getRGB but by using the specified LUT instead of internal one
-     * 
+     *
      * @see java.awt.image.BufferedImage#getRGB(int, int)
      */
-    public int getRGB(int x, int y, LUT lut)
-    {
+    public int getRGB(final int x, final int y, final LUT lut) {
         return getIcyColorModel().getRGB(getRaster().getDataElements(x, y, null), lut);
     }
 
     /**
      * Internal copy data from an icy image (notify data changed)
-     * 
-     * @param srcImage
-     *        source icy image
-     * @param srcRect
-     *        source region
-     * @param dstPt
-     *        destination X,Y position
-     * @param srcChannel
-     *        source channel
-     * @param dstChannel
-     *        destination channel
+     *
+     * @param srcImage   source icy image
+     * @param srcRect    source region
+     * @param dstPt      destination X,Y position
+     * @param srcChannel source channel
+     * @param dstChannel destination channel
      */
-    protected void fastCopyData(IcyBufferedImage srcImage, Rectangle srcRect, Point dstPt, int srcChannel,
-            int dstChannel)
-    {
+    protected void fastCopyData(final IcyBufferedImage srcImage, final Rectangle srcRect, final Point dstPt, final int srcChannel, final int dstChannel) {
         final int srcSizeX = srcImage.getSizeX();
         final int dstSizeX = getSizeX();
 
         // limit to source image size
-        Rectangle adjSrcRect = srcRect.intersection(new Rectangle(srcSizeX, srcImage.getSizeY()));
+        final Rectangle adjSrcRect = srcRect.intersection(new Rectangle(srcSizeX, srcImage.getSizeY()));
         // negative destination x position
         if (dstPt.x < 0)
             // adjust source rect
-            adjSrcRect.x += -dstPt.x;
+            adjSrcRect.x -= dstPt.x;
         // negative destination y position
         if (dstPt.y < 0)
             // adjust source rect
-            adjSrcRect.y += -dstPt.y;
+            adjSrcRect.y -= dstPt.y;
 
         final Rectangle dstRect = new Rectangle(dstPt.x, dstPt.y, adjSrcRect.width, adjSrcRect.height);
         // limit to destination image size
@@ -4278,8 +3128,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             return;
 
         lockRaster();
-        try
-        {
+        try {
             final boolean signed = srcImage.getDataType_().isSigned();
             final Object src = srcImage.getDataXY(srcChannel);
             final Object dst = getDataXY(dstChannel);
@@ -4287,15 +3136,13 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             int srcOffset = adjSrcRect.x + (adjSrcRect.y * srcSizeX);
             int dstOffset = adjDstRect.x + (adjDstRect.y * dstSizeX);
 
-            for (int y = 0; y < h; y++)
-            {
+            for (int y = 0; y < h; y++) {
                 ArrayUtil.arrayToArray(src, srcOffset, dst, dstOffset, w, signed);
                 srcOffset += srcSizeX;
                 dstOffset += dstSizeX;
             }
         }
-        finally
-        {
+        finally {
             releaseRaster(true);
         }
 
@@ -4305,45 +3152,32 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Internal copy data from a compatible image (notify data changed)
-     * 
-     * @param srcChannel
-     *        source image
-     * @param dstChannel
-     *        int
-     * @param src_db
-     *        buffer
-     * @param dst_db
-     *        buffer
-     * @param indices
-     *        array
-     * @param band_offsets
-     *        array
-     * @param pixelStride_src
-     *        int
-     * @param scanlineStride_src
-     *        int
-     * @param bank_offsets
-     *        array
-     * @param decOffsetSrc
-     *        int
-     * @param maxX
-     *        int
-     * @param maxY
-     *        int
+     *
+     * @param srcChannel         source image
+     * @param dstChannel         int
+     * @param src_db             buffer
+     * @param dst_db             buffer
+     * @param indices            array
+     * @param band_offsets       array
+     * @param pixelStride_src    int
+     * @param scanlineStride_src int
+     * @param bank_offsets       array
+     * @param decOffsetSrc       int
+     * @param maxX               int
+     * @param maxY               int
      */
-    protected void internalCopyData(int srcChannel, int dstChannel, DataBuffer src_db, DataBuffer dst_db, int[] indices,
-            int[] band_offsets, int[] bank_offsets, int scanlineStride_src, int pixelStride_src, int maxX, int maxY,
-            int decOffsetSrc)
-    {
+    protected void internalCopyData(
+            final int srcChannel, final int dstChannel, final DataBuffer src_db, final DataBuffer dst_db,
+            final int[] indices, final int[] band_offsets, final int[] bank_offsets, final int scanlineStride_src,
+            final int pixelStride_src, final int maxX, final int maxY, final int decOffsetSrc
+    ) {
         final int scanlineStride_dst = getSizeX();
 
         final int bank = indices[srcChannel];
         final int offset = band_offsets[srcChannel] + bank_offsets[bank] - decOffsetSrc;
 
-        switch (getDataType_().getJavaType())
-        {
-            case BYTE:
-            {
+        switch (getDataType_().getJavaType()) {
+            case BYTE: {
                 final byte[] src;
                 final byte[] dst = ((DataBufferByte) dst_db).getData(dstChannel);
 
@@ -4355,13 +3189,11 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
                 int offset_src = offset;
                 int offset_dst = 0;
-                for (int y = 0; y < maxY; y++)
-                {
+                for (int y = 0; y < maxY; y++) {
                     int offset_src_pix = offset_src;
                     int offset_dst_pix = offset_dst;
 
-                    for (int x = 0; x < maxX; x++)
-                    {
+                    for (int x = 0; x < maxX; x++) {
                         dst[offset_dst_pix] = src[offset_src_pix];
                         offset_src_pix += pixelStride_src;
                         offset_dst_pix++;
@@ -4373,8 +3205,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 break;
             }
 
-            case SHORT:
-            {
+            case SHORT: {
                 final short[] src;
                 final short[] dst;
 
@@ -4393,13 +3224,11 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
                 int offset_src = offset;
                 int offset_dst = 0;
-                for (int y = 0; y < maxY; y++)
-                {
+                for (int y = 0; y < maxY; y++) {
                     int offset_src_pix = offset_src;
                     int offset_dst_pix = offset_dst;
 
-                    for (int x = 0; x < maxX; x++)
-                    {
+                    for (int x = 0; x < maxX; x++) {
                         dst[offset_dst_pix] = src[offset_src_pix];
                         offset_src_pix += pixelStride_src;
                         offset_dst_pix++;
@@ -4411,8 +3240,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 break;
             }
 
-            case INT:
-            {
+            case INT: {
                 final int[] src;
                 final int[] dst = ((DataBufferInt) dst_db).getData(dstChannel);
 
@@ -4424,13 +3252,11 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
                 int offset_src = offset;
                 int offset_dst = 0;
-                for (int y = 0; y < maxY; y++)
-                {
+                for (int y = 0; y < maxY; y++) {
                     int offset_src_pix = offset_src;
                     int offset_dst_pix = offset_dst;
 
-                    for (int x = 0; x < maxX; x++)
-                    {
+                    for (int x = 0; x < maxX; x++) {
                         dst[offset_dst_pix] = src[offset_src_pix];
                         offset_src_pix += pixelStride_src;
                         offset_dst_pix++;
@@ -4442,20 +3268,17 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 break;
             }
 
-            case FLOAT:
-            {
+            case FLOAT: {
                 final float[] src = ((DataBufferFloat) src_db).getData(bank);
                 final float[] dst = ((DataBufferFloat) dst_db).getData(dstChannel);
 
                 int offset_src = offset;
                 int offset_dst = 0;
-                for (int y = 0; y < maxY; y++)
-                {
+                for (int y = 0; y < maxY; y++) {
                     int offset_src_pix = offset_src;
                     int offset_dst_pix = offset_dst;
 
-                    for (int x = 0; x < maxX; x++)
-                    {
+                    for (int x = 0; x < maxX; x++) {
                         dst[offset_dst_pix] = src[offset_src_pix];
                         offset_src_pix += pixelStride_src;
                         offset_dst_pix++;
@@ -4467,20 +3290,17 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 break;
             }
 
-            case DOUBLE:
-            {
+            case DOUBLE: {
                 final double[] src = ((DataBufferDouble) src_db).getData(bank);
                 final double[] dst = ((DataBufferDouble) dst_db).getData(dstChannel);
 
                 int offset_src = offset;
                 int offset_dst = 0;
-                for (int y = 0; y < maxY; y++)
-                {
+                for (int y = 0; y < maxY; y++) {
                     int offset_src_pix = offset_src;
                     int offset_dst_pix = offset_dst;
 
-                    for (int x = 0; x < maxX; x++)
-                    {
+                    for (int x = 0; x < maxX; x++) {
                         dst[offset_dst_pix] = src[offset_src_pix];
                         offset_src_pix += pixelStride_src;
                         offset_dst_pix++;
@@ -4500,20 +3320,14 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Copy channel data from a compatible sample model and writable raster (notify data changed).
-     * 
-     * @param sampleModel
-     *        source sample model
-     * @param srcChannel
-     *        source channel (-1 for all channels)
-     * @param dstChannel
-     *        destination channel (only significant if source channel != -1)
-     * @param sourceRaster
-     *        WritableRaster
+     *
+     * @param sampleModel  source sample model
+     * @param srcChannel   source channel (-1 for all channels)
+     * @param dstChannel   destination channel (only significant if source channel != -1)
+     * @param sourceRaster WritableRaster
      * @return <code>true</code> if the copy operation succeed, <code>false</code> otherwise
      */
-    public boolean copyData(ComponentSampleModel sampleModel, WritableRaster sourceRaster, int srcChannel,
-            int dstChannel)
-    {
+    public boolean copyData(final ComponentSampleModel sampleModel, final WritableRaster sourceRaster, final int srcChannel, final int dstChannel) {
         // not compatible sample model
         if (DataType.getDataTypeFromDataBufferType(sampleModel.getDataType()) != getDataType_())
             return false;
@@ -4532,16 +3346,14 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 + (sourceRaster.getSampleModelTranslateY() * scanlineStride_src);
 
         // all channels
-        if (srcChannel == -1)
-        {
+        if (srcChannel == -1) {
             final int numBands = sampleModel.getNumBands();
 
             for (int band = 0; band < numBands; band++)
                 internalCopyData(band, band, src_db, dst_db, indices, band_offsets, bank_offsets, scanlineStride_src,
                         pixelStride_src, maxX, maxY, decOffsetSrc);
         }
-        else
-        {
+        else {
             internalCopyData(srcChannel, dstChannel, src_db, dst_db, indices, band_offsets, bank_offsets,
                     scanlineStride_src, pixelStride_src, maxX, maxY, decOffsetSrc);
         }
@@ -4556,21 +3368,15 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Copy data to specified location from an data array.
-     * 
-     * @param data
-     *        source data array (should be same type than image data type)
-     * @param dataDim
-     *        source data dimension (array length should be &gt;= Dimension.width * Dimension.heigth)
-     * @param signed
-     *        if the source data array should be considered as signed data (meaningful for integer
-     *        data type only)
-     * @param dstPt
-     *        destination X,Y position (assume [0,0] if null)
-     * @param dstChannel
-     *        destination channel
+     *
+     * @param data       source data array (should be same type than image data type)
+     * @param dataDim    source data dimension (array length should be &gt;= Dimension.width * Dimension.heigth)
+     * @param signed     if the source data array should be considered as signed data (meaningful for integer
+     *                   data type only)
+     * @param dstPt      destination X,Y position (assume [0,0] if null)
+     * @param dstChannel destination channel
      */
-    public void copyData(Object data, Dimension dataDim, boolean signed, Point dstPt, int dstChannel)
-    {
+    public void copyData(final Object data, final Dimension dataDim, final boolean signed, final Point dstPt, final int dstChannel) {
         if ((data == null) || (dataDim == null))
             return;
 
@@ -4579,11 +3385,11 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         // negative destination x position
         if (dstPt.x < 0)
             // adjust source rect
-            adjSrcRect.x += -dstPt.x;
+            adjSrcRect.x -= dstPt.x;
         // negative destination y position
         if (dstPt.y < 0)
             // adjust source rect
-            adjSrcRect.y += -dstPt.y;
+            adjSrcRect.y -= dstPt.y;
 
         final Rectangle dstRect = new Rectangle(dstPt.x, dstPt.y, adjSrcRect.width, adjSrcRect.height);
         // limit to destination image size
@@ -4597,8 +3403,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             return;
 
         lockRaster();
-        try
-        {
+        try {
             final Object dst = getDataXY(dstChannel);
             final int srcSizeX = dataDim.width;
             final int dstSizeX = getSizeX();
@@ -4606,16 +3411,14 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             int srcOffset = adjSrcRect.x + (adjSrcRect.y * srcSizeX);
             int dstOffset = adjDstRect.x + (adjDstRect.y * dstSizeX);
 
-            for (int y = 0; y < h; y++)
-            {
+            for (int y = 0; y < h; y++) {
                 // do data copy (and conversion if needed)
                 ArrayUtil.arrayToArray(data, srcOffset, dst, dstOffset, w, signed);
                 srcOffset += srcSizeX;
                 dstOffset += dstSizeX;
             }
         }
-        finally
-        {
+        finally {
             releaseRaster(true);
         }
 
@@ -4625,48 +3428,34 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Copy data from an image (notify data changed)
-     * 
-     * @param srcImage
-     *        source image
-     * @param srcRect
-     *        source region to copy (assume whole image if null)
-     * @param dstPt
-     *        destination X,Y position (assume [0,0] if null)
-     * @param srcChannel
-     *        source channel (-1 for all channels)
-     * @param dstChannel
-     *        destination channel (only significant if source channel != -1)
+     *
+     * @param srcImage   source image
+     * @param srcRect    source region to copy (assume whole image if null)
+     * @param dstPt      destination X,Y position (assume [0,0] if null)
+     * @param srcChannel source channel (-1 for all channels)
+     * @param dstChannel destination channel (only significant if source channel != -1)
      */
-    public void copyData(IcyBufferedImage srcImage, Rectangle srcRect, Point dstPt, int srcChannel, int dstChannel)
-    {
+    public void copyData(final IcyBufferedImage srcImage, final Rectangle srcRect, final Point dstPt, final int srcChannel, final int dstChannel) {
         if (srcImage == null)
             return;
 
         final Rectangle adjSrcRect;
         final Point adjDstPt;
 
-        if (srcRect == null)
-            adjSrcRect = new Rectangle(srcImage.getSizeX(), srcImage.getSizeY());
-        else
-            adjSrcRect = srcRect;
-        if (dstPt == null)
-            adjDstPt = new Point(0, 0);
-        else
-            adjDstPt = dstPt;
+        adjSrcRect = Objects.requireNonNullElseGet(srcRect, () -> new Rectangle(srcImage.getSizeX(), srcImage.getSizeY()));
+
+        adjDstPt = Objects.requireNonNullElseGet(dstPt, () -> new Point(0, 0));
 
         // copy all possible components
-        if (srcChannel == -1)
-        {
+        if (srcChannel == -1) {
             final int sizeC = Math.min(srcImage.getSizeC(), getSizeC());
 
             beginUpdate();
-            try
-            {
+            try {
                 for (int c = 0; c < sizeC; c++)
                     fastCopyData(srcImage, adjSrcRect, adjDstPt, c, c);
             }
-            finally
-            {
+            finally {
                 endUpdate();
             }
         }
@@ -4676,16 +3465,12 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Copy data from an image (notify data changed)
-     * 
-     * @param srcImage
-     *        source image
-     * @param srcRect
-     *        source region to copy (assume whole image if null)
-     * @param dstPt
-     *        destination (assume [0,0] if null)
+     *
+     * @param srcImage source image
+     * @param srcRect  source region to copy (assume whole image if null)
+     * @param dstPt    destination (assume [0,0] if null)
      */
-    public void copyData(IcyBufferedImage srcImage, Rectangle srcRect, Point dstPt)
-    {
+    public void copyData(final IcyBufferedImage srcImage, final Rectangle srcRect, final Point dstPt) {
         if (srcImage == null)
             return;
 
@@ -4694,23 +3479,18 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Copy data from an image (notify data changed)
-     * 
-     * @param srcImage
-     *        source image
-     * @param srcChannel
-     *        source channel to copy (-1 for all channels)
-     * @param dstChannel
-     *        destination channel to receive data (only significant if source channel != -1)
+     *
+     * @param srcImage   source image
+     * @param srcChannel source channel to copy (-1 for all channels)
+     * @param dstChannel destination channel to receive data (only significant if source channel != -1)
      */
-    public void copyData(BufferedImage srcImage, int srcChannel, int dstChannel)
-    {
+    public void copyData(final BufferedImage srcImage, final int srcChannel, final int dstChannel) {
         if (srcImage == null)
             return;
 
         if (srcImage instanceof IcyBufferedImage)
             copyData(((IcyBufferedImage) srcImage), null, null, srcChannel, dstChannel);
-        else
-        {
+        else {
             final boolean done;
 
             // try to use faster copy for compatible image
@@ -4720,8 +3500,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             else
                 done = false;
 
-            if (!done)
-            {
+            if (!done) {
                 final WritableRaster wr = getRaster();
                 // image not compatible, use generic (and slow) data copy
                 srcImage.copyData(wr);
@@ -4735,29 +3514,22 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Copy data from an image (notify data changed)
-     * 
-     * @param srcImage
-     *        source image
+     *
+     * @param srcImage source image
      */
-    public void copyData(BufferedImage srcImage)
-    {
+    public void copyData(final BufferedImage srcImage) {
         copyData(srcImage, -1, -1);
     }
 
     /**
      * Return raw data component as an array of byte
-     * 
-     * @param c
-     *        component index
-     * @param out
-     *        output array (can be null)
-     * @param offset
-     *        output offset
-     * @param little
-     *        little endian order
+     *
+     * @param c      component index
+     * @param out    output array (can be null)
+     * @param offset output offset
+     * @param little little endian order
      */
-    public byte[] getRawData(int c, byte[] out, int offset, boolean little)
-    {
+    public byte[] getRawData(final int c, final byte[] out, final int offset, final boolean little) {
         // alloc output array if needed
         final byte[] result = Array1DUtil.allocIfNull(out,
                 offset + (getSizeX() * getSizeY() * getDataType_().getSize()));
@@ -4767,29 +3539,22 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Return raw data component as an array of byte
-     * 
-     * @param c
-     *        component index
-     * @param little
-     *        little endian order
+     *
+     * @param c      component index
+     * @param little little endian order
      */
-    public byte[] getRawData(int c, boolean little)
-    {
+    public byte[] getRawData(final int c, final boolean little) {
         return getRawData(c, null, 0, little);
     }
 
     /**
      * Return raw data for all components as an array of byte
-     * 
-     * @param out
-     *        output array (can be null)
-     * @param offset
-     *        output offset
-     * @param little
-     *        little endian order
+     *
+     * @param out    output array (can be null)
+     * @param offset output offset
+     * @param little little endian order
      */
-    public byte[] getRawData(byte[] out, int offset, boolean little)
-    {
+    public byte[] getRawData(final byte[] out, final int offset, final boolean little) {
         final int sizeXY = getSizeX() * getSizeY();
         final int sizeC = getSizeC();
         final int sizeType = getDataType_().getSize();
@@ -4798,8 +3563,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final byte[] result = Array1DUtil.allocIfNull(out, offset + (sizeC * sizeXY * sizeType));
 
         int outOff = offset;
-        for (int c = 0; c < sizeC; c++)
-        {
+        for (int c = 0; c < sizeC; c++) {
             getRawData(c, result, outOff, little);
             outOff += sizeXY * sizeType;
         }
@@ -4809,39 +3573,30 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Return raw data for all components as an array of byte
-     * 
-     * @param little
-     *        little endian order
+     *
+     * @param little little endian order
      */
-    public byte[] getRawData(boolean little)
-    {
+    public byte[] getRawData(final boolean little) {
         return getRawData(null, 0, little);
     }
 
     /**
      * Set raw data component from an array of byte (notify data changed)
-     * 
-     * @param c
-     *        component index
-     * @param data
-     *        data as byte array
-     * @param offset
-     *        input offset
-     * @param little
-     *        little endian order
+     *
+     * @param c      component index
+     * @param data   data as byte array
+     * @param offset input offset
+     * @param little little endian order
      */
-    public void setRawData(int c, byte[] data, int offset, boolean little)
-    {
+    public void setRawData(final int c, final byte[] data, final int offset, final boolean little) {
         if (data == null)
             return;
 
         lockRaster();
-        try
-        {
+        try {
             ByteArrayConvert.byteArrayTo(data, offset, getDataXY(c), 0, -1, little);
         }
-        finally
-        {
+        finally {
             releaseRaster(true);
         }
 
@@ -4851,32 +3606,24 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     /**
      * Set raw data component from an array of byte (notify data changed)
-     * 
-     * @param c
-     *        component index
-     * @param data
-     *        data as byte array
-     * @param little
-     *        little endian order
+     *
+     * @param c      component index
+     * @param data   data as byte array
+     * @param little little endian order
      */
-    public void setRawData(int c, byte[] data, boolean little)
-    {
+    public void setRawData(final int c, final byte[] data, final boolean little) {
         setRawData(c, data, 0, little);
     }
 
     /**
      * Set raw data for all components from an array of byte (notify data changed).<br>
      * Data are arranged in the following dimension order: XYC
-     * 
-     * @param data
-     *        data as byte array
-     * @param offset
-     *        input offset
-     * @param little
-     *        little endian order
+     *
+     * @param data   data as byte array
+     * @param offset input offset
+     * @param little little endian order
      */
-    public void setRawData(byte[] data, int offset, boolean little)
-    {
+    public void setRawData(final byte[] data, final int offset, final boolean little) {
         if (data == null)
             return;
 
@@ -4885,190 +3632,119 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final int sizeType = getDataType_().getSize();
 
         beginUpdate();
-        try
-        {
+        try {
             int inOff = offset;
-            for (int c = 0; c < sizeC; c++)
-            {
+            for (int c = 0; c < sizeC; c++) {
                 setRawData(c, data, inOff, little);
                 inOff += sizeXY * sizeType;
             }
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
     }
 
     /**
      * Set raw data for all components from an array of byte (notify data changed)
-     * 
-     * @param data
-     *        data as byte array
-     * @param little
-     *        little endian order
+     *
+     * @param data   data as byte array
+     * @param little little endian order
      */
-    public void setRawData(byte[] data, boolean little)
-    {
+    public void setRawData(final byte[] data, final boolean little) {
         setRawData(data, 0, little);
     }
 
     /**
      * Return the colormap of the specified channel.
      */
-    public IcyColorMap getColorMap(int channel)
-    {
+    public IcyColorMap getColorMap(final int channel) {
         return getIcyColorModel().getColorMap(channel);
-    }
-
-    /**
-     * @deprecated Use {@link #getColorMap(int)} instead (different case).
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyColorMap getColormap(int channel)
-    {
-        return getColorMap(channel);
-    }
-
-    /**
-     * @deprecated Use {@link #setColorMaps(BufferedImage)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void copyColormap(BufferedImage srcImage)
-    {
-        setColorMaps(srcImage);
     }
 
     /**
      * Set colormaps from specified image.
      */
-    public void setColorMaps(BufferedImage srcImage)
-    {
+    public void setColorMaps(final BufferedImage srcImage) {
         getIcyColorModel().setColorMaps(srcImage.getColorModel());
     }
 
     /**
-     * @deprecated Use {@link #setColorMaps(BufferedImage)} instead (different case).
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setColormaps(BufferedImage srcImage)
-    {
-        setColorMaps(srcImage);
-    }
-
-    /**
      * Set the colormap for the specified channel.
-     * 
-     * @param channel
-     *        channel we want to set the colormap
-     * @param map
-     *        source colorspace to copy
-     * @param setAlpha
-     *        also set the alpha information
+     *
+     * @param channel  channel we want to set the colormap
+     * @param map      source colorspace to copy
+     * @param setAlpha also set the alpha information
      */
-    public void setColorMap(int channel, IcyColorMap map, boolean setAlpha)
-    {
+    public void setColorMap(final int channel, final IcyColorMap map, final boolean setAlpha) {
         getIcyColorModel().setColorMap(channel, map, setAlpha);
     }
 
     /**
      * Set the colormap for the specified channel.
-     * 
-     * @param channel
-     *        channel we want to set the colormap
-     * @param map
-     *        source colorspace to copy
+     *
+     * @param channel channel we want to set the colormap
+     * @param map     source colorspace to copy
      */
-    public void setColorMap(int channel, IcyColorMap map)
-    {
+    public void setColorMap(final int channel, final IcyColorMap map) {
         getIcyColorModel().setColorMap(channel, map, map.isAlpha());
-    }
-
-    /**
-     * @deprecated Use {@link #setColorMap(int, IcyColorMap, boolean)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setColormap(int channel, IcyColorMap map)
-    {
-        setColorMap(channel, map, true);
     }
 
     /**
      * notify image data has changed
      */
-    public void dataChanged()
-    {
+    public void dataChanged() {
         updater.changed(new IcyBufferedImageEvent(this, IcyBufferedImageEventType.DATA_CHANGED));
     }
 
     /**
      * notify image colorMap has changed
      */
-    protected void colormapChanged(int component)
-    {
+    protected void colormapChanged(final int component) {
         updater.changed(new IcyBufferedImageEvent(this, IcyBufferedImageEventType.COLORMAP_CHANGED, component));
     }
 
     /**
      * notify image channels bounds has changed
      */
-    public void channelBoundsChanged(int channel)
-    {
+    public void channelBoundsChanged(final int channel) {
         updater.changed(new IcyBufferedImageEvent(this, IcyBufferedImageEventType.BOUNDS_CHANGED, channel));
-    }
-
-    /**
-     * @deprecated Use {@link #channelBoundsChanged(int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public void componentBoundsChanged(int component)
-    {
-        channelBoundsChanged(component);
     }
 
     /**
      * fire change event
      */
-    protected void fireChangeEvent(IcyBufferedImageEvent e)
-    {
-        for (IcyBufferedImageListener listener : new ArrayList<IcyBufferedImageListener>(listeners))
+    protected void fireChangeEvent(final IcyBufferedImageEvent e) {
+        for (final IcyBufferedImageListener listener : new ArrayList<>(listeners))
             listener.imageChanged(e);
     }
 
-    public void addListener(IcyBufferedImageListener listener)
-    {
+    public void addListener(final IcyBufferedImageListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(IcyBufferedImageListener listener)
-    {
+    public void removeListener(final IcyBufferedImageListener listener) {
         listeners.remove(listener);
     }
 
-    public void beginUpdate()
-    {
+    public void beginUpdate() {
         updater.beginUpdate();
         lockRaster();
     }
 
-    public void endUpdate()
-    {
+    public void endUpdate() {
         updater.endUpdate();
     }
 
-    public boolean isUpdating()
-    {
+    public boolean isUpdating() {
         releaseRaster(true);
         return updater.isUpdating();
     }
 
     @Override
-    public void onChanged(CollapsibleEvent object)
-    {
-        IcyBufferedImageEvent event = (IcyBufferedImageEvent) object;
+    public void onChanged(final CollapsibleEvent object) {
+        final IcyBufferedImageEvent event = (IcyBufferedImageEvent) object;
 
-        switch (event.getType())
-        {
+        switch (event.getType()) {
             // do here global process on image data change
             case DATA_CHANGED:
                 // update image components bounds
@@ -5090,10 +3766,8 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public void colorModelChanged(IcyColorModelEvent e)
-    {
-        switch (e.getType())
-        {
+    public void colorModelChanged(final IcyColorModelEvent e) {
+        switch (e.getType()) {
             case COLORMAP_CHANGED:
                 colormapChanged(e.getComponent());
                 break;
@@ -5105,9 +3779,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     }
 
     @Override
-    public String toString()
-    {
-        return "IcyBufferedImage: " + getSizeX() + " x " + getSizeY() + " - " + getSizeC() + " ch (" + getDataType_()
-                + ")";
+    public String toString() {
+        return "IcyBufferedImage: " + getSizeX() + " x " + getSizeY() + " - " + getSizeC() + " ch (" + getDataType_() + ")";
     }
 }

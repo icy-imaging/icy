@@ -66,7 +66,7 @@ import java.util.Map.Entry;
  * Sequence / Image loader class.
  *
  * @author Fabrice de Chaumont &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class Loader {
     /**
@@ -999,53 +999,11 @@ public class Loader {
     }
 
     /**
-     * @deprecated Use {@link IcyBufferedImage#createFrom(IFormatReader, int, int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage loadImage(final IFormatReader reader, final int z, final int t) throws FormatException, IOException {
-        // return an icy image
-        return IcyBufferedImage.createFrom(reader, z, t);
-    }
-
-    /**
-     * @deprecated Use {@link IcyBufferedImage#createFrom(IFormatReader, int, int)} with Z and T
-     * parameters set to 0.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage loadImage(final IFormatReader reader) throws FormatException, IOException {
-        // return an icy image
-        return IcyBufferedImage.createFrom(reader, 0, 0);
-    }
-
-    /**
-     * @deprecated Use {@link #loadImage(String, int, int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage loadImage(final File file, final int z, final int t) throws FormatException, IOException {
-        return loadImage(file.getAbsolutePath(), z, t);
-    }
-
-    /**
      * @deprecated Use {@link #loadImage(String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     public static IcyBufferedImage loadImage(final File file) throws Exception {
         return loadImage(file.getAbsolutePath());
-    }
-
-    /**
-     * @deprecated Use {@link #loadImage(String, int, int, int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage loadImage(final String path, final int z, final int t) throws FormatException, IOException {
-        try (final IFormatReader reader = getReader(path)) {
-            // disable file grouping
-            reader.setGroupFiles(false);
-            // set file path
-            reader.setId(path);
-            // return an icy image
-            return IcyBufferedImage.createFrom(reader, z, t);
-        }
     }
 
     /**
@@ -2927,7 +2885,7 @@ public class Loader {
             adjMaxT = Math.min(maxT, sizeT - 1);
 
         // we want volatile image
-        boolean volatileImage = (forceVolatile && ImageCache.isEnabled()) || GeneralPreferences.getVirtualMode();
+        boolean volatileImage = (forceVolatile && ImageCache.isInit()) || GeneralPreferences.getVirtualMode();
 
         try {
             // volatile image ? --> we just need to check the plane size
@@ -2939,7 +2897,7 @@ public class Loader {
                         " Try to open a sub resolution or sub part of the image only.");
         }
         catch (final OutOfMemoryError e) {
-            if (!ImageCache.isEnabled())
+            if (!ImageCache.isInit())
                 throw new OutOfMemoryError("Not enough memory to load the dataset, enable the Virtual Mode and retry.");
 
             // force volatile image if we don't have enough memory to open the image

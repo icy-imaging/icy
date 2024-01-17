@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -35,8 +35,8 @@ import java.awt.*;
  * ROI Panel component displayed in the Icy inspector.<br>
  * Use the {@link AbstractRoisPanel} if you want to embed the ROI table in your own component.
  *
- * @author Stephane
- * @author Thomas MUSSET
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
 public final class RoisPanel extends AbstractRoisPanel {
     private static RoisPanel instance = null;

@@ -34,7 +34,7 @@ import java.util.ArrayList;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class RepositoryPreferencePanel extends PreferencePanel implements ListSelectionListener {
     public static final String NODE_NAME = "Repository";

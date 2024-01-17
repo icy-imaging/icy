@@ -73,7 +73,7 @@ import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class RoiControlPanel extends JPanel implements ColorChangeListener, TextChangeListener, ClipboardListener, ChangeListener, ActionListener {
     // GUI

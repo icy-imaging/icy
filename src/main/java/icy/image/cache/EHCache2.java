@@ -10,6 +10,8 @@ import net.sf.ehcache.config.PersistenceConfiguration.Strategy;
 import net.sf.ehcache.event.CacheEventListener;
 import net.sf.ehcache.statistics.StatisticsGateway;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.Collection;
@@ -173,7 +175,7 @@ public class EHCache2 extends AbstractCache {
     }
 
     @Override
-    public boolean isOnMemoryCache(final Integer key) {
+    public boolean isOnMemoryCache(final @NotNull Integer key) {
         if (profiling)
             startProf();
 
@@ -187,7 +189,7 @@ public class EHCache2 extends AbstractCache {
     }
 
     @Override
-    public boolean isOnDiskCache(final Integer key) {
+    public boolean isOnDiskCache(final @NotNull Integer key) {
         if (profiling)
             startProf();
 
@@ -201,7 +203,7 @@ public class EHCache2 extends AbstractCache {
     }
 
     @Override
-    public boolean isInCache(final Integer key) {
+    public boolean isInCache(final @NotNull Integer key) {
         if (profiling)
             startProf();
 
@@ -222,7 +224,7 @@ public class EHCache2 extends AbstractCache {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<Integer> getAllKeys() throws CacheException {
+    public @NotNull Collection<Integer> getAllKeys() throws CacheException {
         if (profiling)
             startProf();
 
@@ -239,7 +241,7 @@ public class EHCache2 extends AbstractCache {
     }
 
     @Override
-    public Object get(final Integer key) throws CacheException {
+    public @Nullable Object get(final @NotNull Integer key) throws CacheException {
         if (profiling)
             startProf();
 
@@ -270,13 +272,13 @@ public class EHCache2 extends AbstractCache {
     }
 
     @Override
-    public void set(final Integer key, final Object object, final boolean eternal) throws CacheException {
+    public void set(final @NotNull Integer key, final @NotNull Object object, final boolean eternal) throws CacheException {
         if (profiling)
             startProf();
 
         synchronized (eternalStoredKeys) {
             // save in keyset (only for non null eternal data)
-            if ((object != null) && eternal)
+            if (eternal)
                 eternalStoredKeys.add(key);
             else
                 eternalStoredKeys.remove(key);
@@ -295,6 +297,14 @@ public class EHCache2 extends AbstractCache {
             if (profiling)
                 endProf();
         }
+    }
+
+    /**
+     * Put an object in cache with its associated key
+     */
+    @Override
+    void set(@NotNull final Integer key, @NotNull final Object object) throws CacheException {
+        set(key, object, false);
     }
 
     @SuppressWarnings("unchecked")
@@ -336,7 +346,7 @@ public class EHCache2 extends AbstractCache {
     }
 
     @Override
-    public void remove(final Integer key) throws CacheException {
+    public void remove(final @NotNull Integer key) throws CacheException {
         if (profiling)
             startProf();
 
@@ -365,7 +375,7 @@ public class EHCache2 extends AbstractCache {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return "EHCache 2";
     }
 

@@ -31,7 +31,7 @@ import java.awt.event.ActionListener;
 /**
  * Create a menu item that can launch a plugin on click
  *
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyPluginMenuItem extends IcyMenuItem implements ActionListener {
     private final PluginDescriptor descriptor;

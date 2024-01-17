@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 /**
  * Defines some informations for Icy plugin.
  *
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

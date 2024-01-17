@@ -41,7 +41,7 @@ import java.util.*;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class PluginInstaller implements Runnable {
     public interface PluginInstallerListener extends EventListener {

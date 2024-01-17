@@ -29,7 +29,7 @@ import icy.search.SearchResultProducer.SearchWord;
 import icy.util.StringUtil;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class PluginSearchResult extends SearchResult {
     protected final PluginDescriptor plugin;

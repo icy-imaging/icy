@@ -37,7 +37,7 @@ import java.awt.*;
  * </ul>
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface ImageProvider {
     /**

@@ -43,7 +43,7 @@ import javax.swing.ListSelectionModel;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class PluginUpdateFrame extends ActionFrame {
     JList<PluginDescriptor> pluginList;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class ConsoleButton extends IcyToggleButton implements ActionListener {
     public ConsoleButton() {

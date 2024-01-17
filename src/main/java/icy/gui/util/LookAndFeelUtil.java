@@ -42,7 +42,7 @@ import java.util.Set;
 /**
  * LookAndFeelUtil class. Use to install all skins used by Icy and helps manipulating UI manager.
  *
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class LookAndFeelUtil {
     @NotNull

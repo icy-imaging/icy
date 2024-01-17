@@ -70,7 +70,7 @@ import icy.util.StringUtil;
  *
  * @author Fabrice de Chaumont
  * @author Stephane Dallongeville
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyFrame implements InternalFrameListener, WindowListener, ImageObserver, PropertyChangeListener {
     private class SwitchStateAction extends IcyAbstractAction {

@@ -24,7 +24,6 @@ import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.main.MainFrame;
 import icy.gui.sequence.tools.*;
 import icy.gui.viewer.Viewer;
-import icy.image.cache.ImageCache;
 import icy.main.Icy;
 import icy.roi.ROI;
 import icy.sequence.DimensionId;
@@ -51,7 +50,7 @@ import java.util.List;
  * Actions for "Sequence Operation" tab.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class SequenceOperationActions {
     static final class SequenceConvertAction extends IcyAbstractAction {
@@ -406,7 +405,7 @@ public final class SequenceOperationActions {
         public void setSelected(final boolean value) {
             super.setSelected(value);
 
-            if (!ImageCache.isEnabled())
+            if (Icy.isCacheDisabled())
                 setDescription("Image cache is disabled, cannot use virtual sequence");
             else if (value)
                 setDescription("Disable virtual sequence (caching)");
@@ -416,7 +415,7 @@ public final class SequenceOperationActions {
 
         @Override
         public boolean isEnabled() {
-            return super.isEnabled() && ImageCache.isEnabled();
+            return super.isEnabled() && !Icy.isCacheDisabled();
         }
     }
 

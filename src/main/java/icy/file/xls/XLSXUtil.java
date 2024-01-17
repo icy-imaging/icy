@@ -32,7 +32,7 @@ import java.util.Date;
 /**
  * XLSX (excel) utilities class (create and write XLSX documents).
  *
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class XLSXUtil {
     public static final String FILE_EXTENSION = "xlsx";

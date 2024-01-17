@@ -24,7 +24,7 @@ import java.awt.Image;
  * Defines an item in the SearchResultPanel.
  *
  * @author Thomas Provoost &amp; Stephane Dallongeville
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class SearchResult implements Comparable<SearchResult> {
     private final SearchResultProducer producer;

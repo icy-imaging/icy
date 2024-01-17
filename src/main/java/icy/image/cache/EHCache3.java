@@ -19,36 +19,37 @@
 package icy.image.cache;
 
 import icy.file.FileUtil;
-import icy.system.logging.IcyLogger;
 import org.ehcache.Cache;
-import org.ehcache.CacheManager;
+import org.ehcache.PersistentCacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.ehcache.config.units.MemoryUnit;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Iterator;
 
 public final class EHCache3 extends AbstractCache {
-    private final Set<Integer> eternalStoredKeys;
-    private final Cache<Integer, Object> cache;
+    private final @NotNull PersistentCacheManager manager;
 
-    public EHCache3(final int cacheSizeMB, final String path) {
+    private static final @NotNull String ALIAS = "ehCache3";
+
+    public EHCache3(final int cacheSizeMB, final @NotNull String path) {
         super();
-
-        eternalStoredKeys = new HashSet<>();
 
         // TODO: 05/12/2023 Check if it's still necessary to do this
         // get old ehcache agent JAR files
-        final String[] oldFiles = FileUtil.getFiles(FileUtil.getTempDirectory(), pathname -> {
+        /*final String[] oldFiles = FileUtil.getFiles(FileUtil.getTempDirectory(), pathname -> {
             // old ehcache temp agent JAR files
             return FileUtil.getFileName(pathname.getAbsolutePath(), false).startsWith("ehcache");
         }, false, false, false);
         // delete these files as ehcache don't do it itself
         for (final String file : oldFiles)
-            FileUtil.delete(file, false);
+            FileUtil.delete(file, false);*/
 
         // delete previous cache file
         FileUtil.delete(path, true);
@@ -57,23 +58,26 @@ public final class EHCache3 extends AbstractCache {
         // subtract 200 MB to available space for safety, use 64 MB at min (well, not realy usefull then)
         final long freeMB = (freeBytes <= 0) ? Long.MAX_VALUE : Math.max(64, (freeBytes / (1024 * 1024)) - 200);
 
-        try (final CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                .withCache(
-                        "ehCache3",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                                Integer.class,
-                                Object.class,
-                                ResourcePoolsBuilder.heap(10L)
-                        ))
-                .build()) {
-            cacheManager.init();
+        manager = CacheManagerBuilder.newCacheManagerBuilder()
+                .with(CacheManagerBuilder.persistence(new File(path)))
+                .withCache(ALIAS,
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer.class, DataArray.class,
+                                ResourcePoolsBuilder.newResourcePoolsBuilder()
+                                        //.heap(10, EntryUnit.ENTRIES)
+                                        .heap(cacheSizeMB, MemoryUnit.MB)
+                                        //.offheap((cacheSizeMB), MemoryUnit.MB)
+                                        .disk(Math.min(freeMB, 500000L), MemoryUnit.MB, true)
+                        )
+                ).build();
+        manager.init();
+    }
 
-            cache = cacheManager.getCache("ehCache3", Integer.class, Object.class);
-        }
+    private @NotNull Cache<Integer, DataArray> getCache() {
+        return manager.getCache(ALIAS, Integer.class, DataArray.class);
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return "EHCache 3";
     }
 
@@ -82,6 +86,7 @@ public final class EHCache3 extends AbstractCache {
      */
     @Override
     public boolean isEmpty() {
+        final Cache<Integer, DataArray> cache = getCache();
         return !cache.iterator().hasNext();
     }
 
@@ -89,23 +94,8 @@ public final class EHCache3 extends AbstractCache {
      * Test presence of a key in the cache
      */
     @Override
-    public boolean isInCache(final Integer key) {
-        return cache.containsKey(key);
-    }
-
-    /**
-     * Test presence of a key in the cache
-     */
-    @Override
-    public boolean isOnMemoryCache(final Integer key) {
-        return cache.containsKey(key);
-    }
-
-    /**
-     * Test presence of a key in the cache
-     */
-    @Override
-    public boolean isOnDiskCache(final Integer key) {
+    public boolean isInCache(final @NotNull Integer key) {
+        final Cache<Integer, DataArray> cache = getCache();
         return cache.containsKey(key);
     }
 
@@ -114,7 +104,7 @@ public final class EHCache3 extends AbstractCache {
      */
     @Override
     public long usedMemory() {
-        return 0;
+        return 0L;
     }
 
     /**
@@ -122,44 +112,47 @@ public final class EHCache3 extends AbstractCache {
      */
     @Override
     public long usedDisk() {
-        return 0;
+        return 0L;
     }
 
     /**
      * Get all element keys in the cache
      */
     @Override
-    public Collection<Integer> getAllKeys() throws CacheException {
-        return null;
+    @NotNull Collection<Integer> getAllKeys() {
+        final Cache<Integer, DataArray> cache = getCache();
+        final Iterator<Cache.Entry<Integer, DataArray>> iterator = cache.iterator();
+        final ArrayList<Integer> list = new ArrayList<>();
+        while (iterator.hasNext()) {
+            final Cache.Entry<Integer, DataArray> entry = iterator.next();
+            list.add(entry.getKey());
+        }
+        return list;
     }
 
     /**
      * Get an object from cache from its key
      */
+    // TODO check if data is rellay persistent (to prevent throwing exception)
     @Override
-    public Object get(final Integer key) throws CacheException {
+    public @NotNull Object get(final @NotNull Integer key) throws CacheException {
         if (profiling)
             startProf();
 
-        final boolean checkNull;
-        Object result = null;
-
-        // test if we need to check for null result
-        synchronized (eternalStoredKeys) {
-            checkNull = eternalStoredKeys.contains(key);
-        }
+        DataArray result = null;
 
         try {
-            final Object o = cache.get(key);
+            final Cache<Integer, DataArray> cache = getCache();
+            final DataArray o = cache.get(key);
 
             if (o != null)
                 result = o;
 
             // check if eternal data was lost (it seems that sometime EhCache loss data put in eternal state !!)
-            if (checkNull && (result == null))
+            if (result == null)
                 throw new CacheException("ImageCache error: data '" + key + "' couldn't be retrieved (data lost)");
 
-            return result;
+            return result.getArray();
         }
         finally {
             if (profiling)
@@ -171,21 +164,14 @@ public final class EHCache3 extends AbstractCache {
      * Put an object in cache with its associated key
      */
     @Override
-    public void set(final Integer key, final Object object, final boolean eternal) throws CacheException {
+    public void set(final @NotNull Integer key, final @NotNull Object object) throws CacheException {
         if (profiling)
             startProf();
 
-        synchronized (eternalStoredKeys) {
-            if ((object != null) && eternal)
-                eternalStoredKeys.add(key);
-            else
-                eternalStoredKeys.remove(key);
-        }
-
         try {
-            cache.put(key, object);
+            final Cache<Integer, DataArray> cache = getCache();
 
-            IcyLogger.debug(String.format("Image put in cache : %d", key.intValue()));
+            cache.put(key, new DataArray(object));
         }
         catch (final Exception e) {
             throw new CacheException("ImageCache error: data '" + key + "' couldn't be saved in cache", e);
@@ -212,9 +198,8 @@ public final class EHCache3 extends AbstractCache {
         if (profiling)
             startProf();
 
-        eternalStoredKeys.clear();
-
         try {
+            final Cache<Integer, DataArray> cache = getCache();
             cache.clear();
         }
         catch (final Exception e) {
@@ -230,16 +215,12 @@ public final class EHCache3 extends AbstractCache {
      * Remove an object from the cache from its key
      */
     @Override
-    public void remove(final Integer key) throws CacheException {
+    public void remove(final @NotNull Integer key) throws CacheException {
         if (profiling)
             startProf();
 
-        synchronized (eternalStoredKeys) {
-            // remove from keyset
-            eternalStoredKeys.remove(key);
-        }
-
         try {
+            final Cache<Integer, DataArray> cache = getCache();
             cache.remove(key);
         }
         catch (final Exception e) {
@@ -256,6 +237,18 @@ public final class EHCache3 extends AbstractCache {
      */
     @Override
     public void end() {
+        manager.close();
+    }
 
+    private static final class DataArray implements Serializable {
+        private final Object array;
+
+        public DataArray(final Object array) {
+            this.array = array;
+        }
+
+        public Object getArray() {
+            return array;
+        }
     }
 }

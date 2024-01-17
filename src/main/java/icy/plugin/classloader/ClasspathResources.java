@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  *
  * @author Kamran Zafar
  * @author Stephane Dallongeville
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class ClasspathResources extends JarResources {
     private static final Logger logger = Logger.getLogger(ClasspathResources.class.getName());

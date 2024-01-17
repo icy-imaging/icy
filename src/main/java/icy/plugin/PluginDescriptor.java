@@ -55,7 +55,7 @@ import java.util.Set;
  *
  * @author Fabrice de Chaumont
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  * @see PluginLauncher
  */
 public class PluginDescriptor implements XMLPersistent {

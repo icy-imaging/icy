@@ -25,7 +25,7 @@ import icy.plugin.interface_.PluginNoEDTConstructor;
  * Plugin specialized for import operation (see the {@link Importer} interface)
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  * @see PluginFileImporter
  * @see PluginSequenceImporter
  * @see PluginSequenceFileImporter

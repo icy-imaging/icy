@@ -36,7 +36,7 @@ import java.util.List;
  * But free feel to override more methods to provide better support and/or better performance.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class AbstractImageProvider implements ImageProvider {
     /**

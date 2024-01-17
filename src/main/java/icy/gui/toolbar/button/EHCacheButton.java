@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -32,15 +32,21 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class EHCacheButton extends IcyToggleButton implements ActionListener {
     public EHCacheButton() {
         super(GoogleMaterialDesignIcons.FLASH_OFF, GoogleMaterialDesignIcons.FLASH_ON);
         setFocusable(false);
-        setSelected(GeneralPreferences.getVirtualMode());
-        setToolTipText((GeneralPreferences.getVirtualMode())? "Click to deactivate cache" : "Click to activate cache");
-        addActionListener(this);
+        if (Icy.isCacheDisabled()) {
+            super.setEnabled(false);
+            setToolTipText("Image cache is disabled, cannot use the virtual mode");
+        }
+        else {
+            setSelected(GeneralPreferences.getVirtualMode());
+            setToolTipText((GeneralPreferences.getVirtualMode()) ? "Click to deactivate cache" : "Click to activate cache");
+            addActionListener(this);
+        }
     }
 
     /**
@@ -61,7 +67,8 @@ public final class EHCacheButton extends IcyToggleButton implements ActionListen
                 ok = ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
             else
                 ok = ImageCache.shutDownIfEmpty();
-        } catch (final Exception e) {
+        }
+        catch (final Exception e) {
             System.err.println(e.getMessage());
         }
 
@@ -78,7 +85,7 @@ public final class EHCacheButton extends IcyToggleButton implements ActionListen
 
         // switch virtual mode state
         GeneralPreferences.setVirtualMode(value);
-        setToolTipText((value)? "Click to deactivate cache" : "Click to activate cache");
+        setToolTipText((value) ? "Click to deactivate cache" : "Click to activate cache");
 
         // refresh viewers toolbar
         for (final Viewer viewer : Icy.getMainInterface().getViewers())
@@ -87,5 +94,13 @@ public final class EHCacheButton extends IcyToggleButton implements ActionListen
         final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
         if (mainFrame != null)
             mainFrame.refreshTitle();
+    }
+
+    /**
+     * Method disable to prevent use from public access.
+     */
+    @Override
+    public void setEnabled(final boolean b) {
+        // Do nothing
     }
 }

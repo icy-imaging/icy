@@ -38,7 +38,7 @@ import java.util.List;
 
 /**
  * @author fab &amp; stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
     public static final String NODE_NAME = "Preferences";

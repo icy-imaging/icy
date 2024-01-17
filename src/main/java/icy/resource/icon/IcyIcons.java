@@ -28,7 +28,7 @@ import java.io.InputStream;
 /**
  * Implemantation of JIconFont for custom icons
  *
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public enum IcyIcons implements IconCode {
     ;

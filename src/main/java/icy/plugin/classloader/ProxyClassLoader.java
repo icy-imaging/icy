@@ -25,7 +25,7 @@ import java.util.Enumeration;
 
 /**
  * @author Kamran Zafar
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class ProxyClassLoader implements Comparable<ProxyClassLoader> {
     protected int order;

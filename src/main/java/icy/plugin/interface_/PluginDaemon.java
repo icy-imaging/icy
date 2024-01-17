@@ -26,7 +26,7 @@ package icy.plugin.interface_;
  * They can be enabled / disabled from the Icy preferences window.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface PluginDaemon extends PluginThreaded {
     /**

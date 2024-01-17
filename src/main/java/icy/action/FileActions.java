@@ -49,7 +49,7 @@ import java.util.List;
  * File actions (open / save / close...)
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class FileActions {
     // TODO: 17/02/2023 Change action to application menubar

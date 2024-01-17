@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
     @NotNull

@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class ApplicationMenuFile extends AbstractApplicationMenu {
     @NotNull

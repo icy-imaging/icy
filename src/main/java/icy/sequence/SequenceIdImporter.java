@@ -36,7 +36,7 @@ import java.io.IOException;
  * from file(s).
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface SequenceIdImporter extends ImageProvider, AutoCloseable {
     int FLAG_METADATA_MASK = 0x0003;

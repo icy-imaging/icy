@@ -26,7 +26,7 @@ import icy.plugin.interface_.PluginNoEDTConstructor;
  * interface)
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  * @see PluginSequenceExporter
  */
 public abstract class PluginSequenceFileExporter extends Plugin implements SequenceFileExporter, PluginNoEDTConstructor {

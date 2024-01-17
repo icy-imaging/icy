@@ -25,7 +25,7 @@ import java.awt.*;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class LabelComboBoxRenderer extends CustomComboBoxRenderer {
     public LabelComboBoxRenderer(JComboBox<JLabel> combo) {

@@ -55,7 +55,7 @@ import java.util.*;
  * Note that this importer is limited to single series group, we don't allow group mixing several series.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class SequenceFileGroupImporter extends AbstractImageProvider implements SequenceFileImporter {
     static final int MAX_IMPORTER = 16;

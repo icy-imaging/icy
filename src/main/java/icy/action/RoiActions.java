@@ -66,7 +66,7 @@ import java.util.List;
  * Roi actions (open / save / copy / paste / merge...)
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class RoiActions {
     public static final String DEFAULT_ROI_DIR = "roi";

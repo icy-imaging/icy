@@ -18,20 +18,6 @@
  */
 package icy.gui.system;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import javax.swing.JPanel;
-
 import icy.image.cache.ImageCache;
 import icy.math.UnitUtil;
 import icy.network.NetworkUtil;
@@ -43,11 +29,18 @@ import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import jiconfont.swing.IconFontSwing;
 import vtk.vtkObjectBase;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Memory monitor.
  * 
  * @author Fab &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
 public class MemoryMonitorPanel extends JPanel implements MouseListener {
@@ -239,7 +232,7 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener {
         setInfo(0, "Memory: " + UnitUtil.getBytesString(usedMemory) + " / "
                 + UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory()));
         setInfo(1, "CPU: " + cpuLoad + "%");
-        if (ImageCache.isEnabled()) {
+        if (ImageCache.isInit()) {
             // don't update cache stats (take sometime) at each frame
             if (--lastCacheUpdate == 0) {
             	try {

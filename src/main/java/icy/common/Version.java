@@ -29,7 +29,7 @@ import java.util.Locale;
  * This class is used to describe a version number encoded on 3 digits.<br>
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class Version implements Comparable<Version> {
     public enum Snapshot {

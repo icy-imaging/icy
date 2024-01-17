@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -48,8 +48,8 @@ import java.io.Writer;
 import java.util.EventListener;
 
 /**
- * @author Stephane
- * @author Thomas MUSSET
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
 public final class OutputConsolePanel extends ToolbarPanel implements ClipboardOwner {
     private static OutputConsolePanel instance = null;
@@ -57,6 +57,7 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
     public static OutputConsolePanel getInstance() {
         if (instance == null)
             instance = new OutputConsolePanel();
+
         return instance;
     }
 

@@ -1,38 +1,22 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.image;
-
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import java.util.List;
-
-import javax.media.jai.BorderExtender;
-import javax.media.jai.Interpolation;
-import javax.media.jai.JAI;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.RotateDescriptor;
-import javax.media.jai.operator.ScaleDescriptor;
-import javax.swing.SwingConstants;
 
 import icy.image.lut.LUT;
 import icy.math.Scaler;
@@ -41,64 +25,46 @@ import icy.type.collection.array.Array1DUtil;
 import icy.type.collection.array.ArrayType;
 import icy.type.collection.array.ArrayUtil;
 
+import javax.media.jai.BorderExtender;
+import javax.media.jai.Interpolation;
+import javax.media.jai.JAI;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.RotateDescriptor;
+import javax.media.jai.operator.ScaleDescriptor;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.Objects;
+
 /**
  * {@link IcyBufferedImage} utilities class.<br>
  * You can find here tools to clone, manipulate the image data type, its size...
- * 
+ *
  * @author Stephane
  */
-public class IcyBufferedImageUtil
-{
-    public static enum FilterType
-    {
+public class IcyBufferedImageUtil {
+    public enum FilterType {
         NEAREST, BILINEAR, BICUBIC
-    };
+    }
 
     /**
      * used for getARGBImage method (fast conversion)
      */
-    private static ARGBImageBuilder argbImageBuilder = new ARGBImageBuilder();
-
-    /**
-     * @deprecated Use {@link IcyBufferedImage#createFrom(BufferedImage)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage toIcyBufferedImage(BufferedImage image)
-    {
-        return IcyBufferedImage.createFrom(image);
-    }
-
-    /**
-     * @deprecated Use {@link IcyBufferedImage#createFrom(List)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage toIcyBufferedImage(List<BufferedImage> images)
-    {
-        return IcyBufferedImage.createFrom(images);
-    }
+    private static final ARGBImageBuilder argbImageBuilder = new ARGBImageBuilder();
 
     /**
      * Draw the source {@link IcyBufferedImage} into the destination {@link BufferedImage}<br>
      * If <code>dest</code> is <code>null</code> then a new TYPE_INT_ARGB {@link BufferedImage} is
      * returned.<br>
-     * 
-     * @param source
-     *        source image
-     * @param dest
-     *        destination image
-     * @param lut
-     *        {@link LUT} is used for color calculation (internal lut is used if null).
-     * @throws InterruptedException
+     *
+     * @param source source image
+     * @param dest   destination image
+     * @param lut    {@link LUT} is used for color calculation (internal lut is used if null).
      */
-    public static BufferedImage toBufferedImage(IcyBufferedImage source, BufferedImage dest, LUT lut)
-            throws InterruptedException
-    {
+    public static BufferedImage toBufferedImage(final IcyBufferedImage source, final BufferedImage dest, final LUT lut) throws InterruptedException {
         final BufferedImage result;
 
-        if (dest == null)
-            result = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        else
-            result = dest;
+        result = Objects.requireNonNullElseGet(dest, () -> new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_ARGB));
 
         // else we need to convert to wanted type...
         final Graphics2D g = result.createGraphics();
@@ -113,37 +79,27 @@ public class IcyBufferedImageUtil
     /**
      * Draw the source {@link IcyBufferedImage} into the destination {@link BufferedImage}<br>
      * If <code>dest</code> is null then a new TYPE_INT_ARGB {@link BufferedImage} is returned.
-     * 
-     * @param source
-     *        source image
-     * @param dest
-     *        destination image
-     * @throws InterruptedException
+     *
+     * @param source source image
+     * @param dest   destination image
      */
-    public static BufferedImage toBufferedImage(IcyBufferedImage source, BufferedImage dest) throws InterruptedException
-    {
+    public static BufferedImage toBufferedImage(final IcyBufferedImage source, final BufferedImage dest) throws InterruptedException {
         return toBufferedImage(source, dest, null);
     }
 
     /**
      * Convert the current {@link IcyBufferedImage} into a {@link BufferedImage} of the specified
      * type.
-     * 
-     * @param source
-     *        source image
-     * @param imageType
-     *        wanted image type, only the following is accepted :<br>
-     *        BufferedImage.TYPE_INT_ARGB<br>
-     *        BufferedImage.TYPE_INT_RGB<br>
-     *        BufferedImage.TYPE_BYTE_GRAY<br>
-     * @param lut
-     *        lut used for color calculation (source image lut is used if null)
+     *
+     * @param source    source image
+     * @param imageType wanted image type, only the following is accepted :<br>
+     *                  BufferedImage.TYPE_INT_ARGB<br>
+     *                  BufferedImage.TYPE_INT_RGB<br>
+     *                  BufferedImage.TYPE_BYTE_GRAY<br>
+     * @param lut       lut used for color calculation (source image lut is used if null)
      * @return BufferedImage
-     * @throws InterruptedException
      */
-    public static BufferedImage toBufferedImage(IcyBufferedImage source, int imageType, LUT lut)
-            throws InterruptedException
-    {
+    public static BufferedImage toBufferedImage(final IcyBufferedImage source, final int imageType, final LUT lut) throws InterruptedException {
         if (source == null)
             return null;
 
@@ -157,105 +113,32 @@ public class IcyBufferedImageUtil
     /**
      * Convert the current {@link IcyBufferedImage} into a {@link BufferedImage} of the specified
      * type.
-     * 
-     * @param source
-     *        source image
-     * @param imageType
-     *        wanted image type, only the following is accepted :<br>
-     *        BufferedImage.TYPE_INT_ARGB<br>
-     *        BufferedImage.TYPE_INT_RGB<br>
-     *        BufferedImage.TYPE_BYTE_GRAY<br>
+     *
+     * @param source    source image
+     * @param imageType wanted image type, only the following is accepted :<br>
+     *                  BufferedImage.TYPE_INT_ARGB<br>
+     *                  BufferedImage.TYPE_INT_RGB<br>
+     *                  BufferedImage.TYPE_BYTE_GRAY<br>
      * @return BufferedImage
-     * @throws InterruptedException 
      */
-    public static BufferedImage toBufferedImage(IcyBufferedImage source, int imageType) throws InterruptedException
-    {
+    public static BufferedImage toBufferedImage(final IcyBufferedImage source, final int imageType) throws InterruptedException {
         return toBufferedImage(source, imageType, null);
-    }
-
-    /**
-     * Draw the source {@link IcyBufferedImage} into the destination ARGB {@link BufferedImage}<br>
-     * If <code>dest</code> is <code>null</code> then a new ARGB {@link BufferedImage} is
-     * returned.<br>
-     * This function is faster for ARGB conversion than
-     * {@link #toBufferedImage(IcyBufferedImage, BufferedImage, LUT)}
-     * but the output {@link BufferedImage} is fixed to ARGB type (TYPE_INT_ARGB) and the image
-     * cannot be volatile, use {@link #toBufferedImage(IcyBufferedImage, BufferedImage, LUT)} for no
-     * ARGB image or if you want volatile accelerated image.
-     * 
-     * @param source
-     *        source image
-     * @param dest
-     *        destination image. Note that we access image data so it can't be volatile anymore
-     *        which may result in slower drawing
-     * @param lut
-     *        {@link LUT} is used for color calculation (internal lut is used if null).
-     * @throws InterruptedException
-     * @deprecated Use {@link #toBufferedImage(IcyBufferedImage, BufferedImage, LUT)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage getARGBImage(IcyBufferedImage source, LUT lut, BufferedImage dest)
-            throws InterruptedException
-    {
-        if (source == null)
-            return null;
-
-        // use image lut when no specific lut
-        if (lut == null)
-        {
-            // manually update bounds if needed before doing RGB conversion from internal LUT
-            if (!source.getAutoUpdateChannelBounds())
-                source.updateChannelsBounds();
-
-            return argbImageBuilder.buildARGBImage(source, source.createCompatibleLUT(false), dest);
-        }
-
-        return argbImageBuilder.buildARGBImage(source, lut, dest);
-    }
-
-    /**
-     * Draw the source {@link IcyBufferedImage} into the destination ARGB {@link BufferedImage}<br>
-     * If <code>dest</code> is null then a new ARGB {@link BufferedImage} is returned.<br>
-     * <br>
-     * This function is faster for ARGB conversion than
-     * {@link #toBufferedImage(IcyBufferedImage, BufferedImage)}
-     * but the output {@link BufferedImage} is fixed to ARGB type (TYPE_INT_ARGB) and the image
-     * cannot be volatile, use {@link #toBufferedImage(IcyBufferedImage, BufferedImage)} for no
-     * ARGB image or if you want volatile accelerated image.
-     * 
-     * @param source
-     *        source image
-     * @param dest
-     *        destination image. Note that we access image data so it can't be volatile anymore
-     *        which may result in slower drawing
-     * @throws InterruptedException
-     * @deprecated Use {@link #toBufferedImage(IcyBufferedImage, BufferedImage)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage getARGBImage(IcyBufferedImage source, BufferedImage dest) throws InterruptedException
-    {
-        return getARGBImage(source, null, dest);
     }
 
     /**
      * Convert the current {@link IcyBufferedImage} into a ARGB {@link BufferedImage}.<br>
      * Note that we access image data so it can't be volatile anymore which may result in slower
      * drawing.
-     * 
-     * @param source
-     *        source image
-     * @param lut
-     *        {@link LUT} is used for color calculation (internal lut is used if null).
-     * @throws InterruptedException
+     *
+     * @param source source image
+     * @param lut    {@link LUT} is used for color calculation (internal lut is used if null).
      */
-    public static BufferedImage getARGBImage(IcyBufferedImage source, LUT lut) throws InterruptedException
-    {
+    public static BufferedImage getARGBImage(final IcyBufferedImage source, final LUT lut) throws InterruptedException {
         if (source == null)
             return null;
 
         // use image lut when no specific lut
-        if (lut == null)
-        {
+        if (lut == null) {
             // manually update bounds if needed before doing RGB conversion from internal LUT
             if (!source.getAutoUpdateChannelBounds())
                 source.updateChannelsBounds();
@@ -270,40 +153,31 @@ public class IcyBufferedImageUtil
      * Convert the current {@link IcyBufferedImage} into a ARGB {@link BufferedImage}.<br>
      * Note that we access image data so it can't be volatile anymore which may result in slower
      * drawing.
-     * 
-     * @param source
-     *        source image
-     * @throws InterruptedException
+     *
+     * @param source source image
      */
-    public static BufferedImage getARGBImage(IcyBufferedImage source) throws InterruptedException
-    {
-        return getARGBImage(source, (LUT) null);
+    public static BufferedImage getARGBImage(final IcyBufferedImage source) throws InterruptedException {
+        return getARGBImage(source, null);
     }
 
     /**
      * Convert the source image to the specified data type.<br>
      * This method returns a new image (the source image is not modified).
-     * 
-     * @param source
-     *        source image
-     * @param dataType
-     *        data type wanted
-     * @param scalers
-     *        scalers for scaling internal data during conversion (1 scaler per channel).<br>
-     *        Can be set to <code>null</code> to avoid value conversion.
+     *
+     * @param source   source image
+     * @param dataType data type wanted
+     * @param scalers  scalers for scaling internal data during conversion (1 scaler per channel).<br>
+     *                 Can be set to <code>null</code> to avoid value conversion.
      * @return converted image
      */
-    @SuppressWarnings("deprecation")
-    public static IcyBufferedImage convertType(IcyBufferedImage source, DataType dataType, Scaler[] scalers)
-    {
+    public static IcyBufferedImage convertType(final IcyBufferedImage source, final DataType dataType, final Scaler[] scalers) {
         if (source == null)
             return null;
 
-        final DataType srcDataType = source.getDataType_();
+        final DataType srcDataType = source.getDataType();
 
         // can't convert
-        if ((srcDataType == null) || (srcDataType == DataType.UNDEFINED) || (dataType == null)
-                || (dataType == DataType.UNDEFINED))
+        if ((srcDataType == null) || (dataType == null))
             return null;
 
         final boolean srcSigned = srcDataType.isSigned();
@@ -312,16 +186,13 @@ public class IcyBufferedImageUtil
         final IcyBufferedImage result = new IcyBufferedImage(source.getSizeX(), source.getSizeY(), sizeC, dataType);
 
         result.lockRaster();
-        try
-        {
-            for (int c = 0; c < sizeC; c++)
-            {
+        try {
+            for (int c = 0; c < sizeC; c++) {
                 // no rescale ?
                 if ((scalers == null) || (c >= scalers.length) || scalers[c].isNull())
                     // simple type change
                     ArrayUtil.arrayToSafeArray(source.getDataXY(c), result.getDataXY(c), srcSigned, dstSigned);
-                else
-                {
+                else {
                     // first we convert in double
                     final double[] darray = Array1DUtil.arrayToDoubleArray(source.getDataXY(c), srcSigned);
                     // then we scale data
@@ -331,61 +202,7 @@ public class IcyBufferedImageUtil
                 }
             }
         }
-        finally
-        {
-            result.releaseRaster(true);
-        }
-
-        // copy colormap from source image
-        result.setColorMaps(source);
-        // notify we modified data
-        result.dataChanged();
-
-        return result;
-    }
-
-    /**
-     * @deprecated Use {@link #convertType(IcyBufferedImage, DataType, Scaler[])} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage convertToType(IcyBufferedImage source, DataType dataType, Scaler scaler)
-    {
-        if (source == null)
-            return null;
-
-        final DataType srcDataType = source.getDataType_();
-
-        // can't convert
-        if ((srcDataType == DataType.UNDEFINED) || (dataType == DataType.UNDEFINED))
-            return null;
-
-        final boolean srcSigned = srcDataType.isSigned();
-        final boolean dstSigned = dataType.isSigned();
-        final int sizeC = source.getSizeC();
-        final IcyBufferedImage result = new IcyBufferedImage(source.getSizeX(), source.getSizeY(), sizeC, dataType);
-
-        result.lockRaster();
-        try
-        {
-            for (int c = 0; c < sizeC; c++)
-            {
-                // no rescale ?
-                if ((scaler == null) || scaler.isNull())
-                    // simple type change
-                    ArrayUtil.arrayToSafeArray(source.getDataXY(c), result.getDataXY(c), srcSigned, dstSigned);
-                else
-                {
-                    // first we convert in double
-                    final double[] darray = Array1DUtil.arrayToDoubleArray(source.getDataXY(c), srcSigned);
-                    // then we scale data
-                    scaler.scale(darray);
-                    // and finally we convert in wanted datatype
-                    Array1DUtil.doubleArrayToSafeArray(darray, result.getDataXY(c), dstSigned);
-                }
-            }
-        }
-        finally
-        {
+        finally {
             result.releaseRaster(true);
         }
 
@@ -400,19 +217,14 @@ public class IcyBufferedImageUtil
     /**
      * Convert the source image to the specified data type.<br>
      * This method returns a new image (the source image is not modified).
-     * 
-     * @param dataType
-     *        Data type wanted
-     * @param rescale
-     *        Indicate if we want to scale data value according to data (or data type) range
-     * @param useDataBounds
-     *        Only used when <code>rescale</code> parameter is true.<br>
-     *        Specify if we use the data bounds for rescaling instead of data type bounds.
+     *
+     * @param dataType      Data type wanted
+     * @param rescale       Indicate if we want to scale data value according to data (or data type) range
+     * @param useDataBounds Only used when <code>rescale</code> parameter is true.<br>
+     *                      Specify if we use the data bounds for rescaling instead of data type bounds.
      * @return converted image
      */
-    public static IcyBufferedImage convertToType(IcyBufferedImage source, DataType dataType, boolean rescale,
-            boolean useDataBounds)
-    {
+    public static IcyBufferedImage convertToType(final IcyBufferedImage source, final DataType dataType, final boolean rescale, final boolean useDataBounds) {
         if (source == null)
             return null;
 
@@ -420,14 +232,13 @@ public class IcyBufferedImageUtil
             return convertType(source, dataType, null);
 
         // convert with rescale
-        final double boundsDst[] = dataType.getDefaultBounds();
+        final double[] boundsDst = dataType.getDefaultBounds();
         final int sizeC = source.getSizeC();
         final Scaler[] scalers = new Scaler[sizeC];
 
         // build scalers
-        for (int c = 0; c < sizeC; c++)
-        {
-            final double boundsSrc[];
+        for (int c = 0; c < sizeC; c++) {
+            final double[] boundsSrc;
 
             if (useDataBounds)
                 boundsSrc = source.getChannelBounds(c);
@@ -444,29 +255,24 @@ public class IcyBufferedImageUtil
     /**
      * Convert the source image to the specified data type.<br>
      * This method returns a new image (the source image is not modified).
-     * 
-     * @param dataType
-     *        data type wanted
-     * @param rescale
-     *        indicate if we want to scale data value according to data type range
+     *
+     * @param dataType data type wanted
+     * @param rescale  indicate if we want to scale data value according to data type range
      * @return converted image
      */
-    public static IcyBufferedImage convertToType(IcyBufferedImage source, DataType dataType, boolean rescale)
-    {
+    public static IcyBufferedImage convertToType(final IcyBufferedImage source, final DataType dataType, final boolean rescale) {
         return convertToType(source, dataType, rescale, false);
     }
 
     /**
      * Create a copy of the specified image.
      */
-    public static IcyBufferedImage getCopy(IcyBufferedImage source)
-    {
+    public static IcyBufferedImage getCopy(final IcyBufferedImage source) {
         if (source == null)
             return null;
 
         // create a compatible image
-        final IcyBufferedImage result = new IcyBufferedImage(source.getSizeX(), source.getSizeY(), source.getSizeC(),
-                source.getDataType_());
+        final IcyBufferedImage result = new IcyBufferedImage(source.getSizeX(), source.getSizeY(), source.getSizeC(), source.getDataType());
         // copy data from this image
         result.copyData(source);
 
@@ -476,8 +282,7 @@ public class IcyBufferedImageUtil
     /**
      * Creates a new image from the specified region of the source image.
      */
-    public static IcyBufferedImage getSubImage(IcyBufferedImage source, Rectangle region, int c, int sizeC)
-    {
+    public static IcyBufferedImage getSubImage(final IcyBufferedImage source, final Rectangle region, final int c, final int sizeC) {
         if (source == null)
             return null;
 
@@ -489,35 +294,29 @@ public class IcyBufferedImageUtil
         final int endC;
 
         // infinite X dimension ?
-        if ((region.x == Integer.MIN_VALUE) && (region.width == Integer.MAX_VALUE))
-        {
+        if ((region.x == Integer.MIN_VALUE) && (region.width == Integer.MAX_VALUE)) {
             startX = 0;
             endX = source.getSizeX();
         }
-        else
-        {
+        else {
             startX = Math.max(0, region.x);
             endX = Math.min(source.getSizeX(), region.x + region.width);
         }
         // infinite Y dimension ?
-        if ((region.y == Integer.MIN_VALUE) && (region.height == Integer.MAX_VALUE))
-        {
+        if ((region.y == Integer.MIN_VALUE) && (region.height == Integer.MAX_VALUE)) {
             startY = 0;
             endY = source.getSizeY();
         }
-        else
-        {
+        else {
             startY = Math.max(0, region.y);
             endY = Math.min(source.getSizeY(), region.y + region.height);
         }
         // infinite C dimension ?
-        if ((c == Integer.MIN_VALUE) && (sizeC == Integer.MAX_VALUE))
-        {
+        if ((c == Integer.MIN_VALUE) && (sizeC == Integer.MAX_VALUE)) {
             startC = 0;
             endC = source.getSizeC();
         }
-        else
-        {
+        else {
             startC = Math.max(0, c);
             endC = Math.min(source.getSizeC(), c + sizeC);
         }
@@ -530,33 +329,29 @@ public class IcyBufferedImageUtil
             return null;
 
         // adjust rectangle
-        final DataType dataType = source.getDataType_();
+        final DataType dataType = source.getDataType();
         final boolean signed = dataType.isSigned();
 
         final IcyBufferedImage result = new IcyBufferedImage(sizeX, sizeY, adjSizeC, dataType);
         final int srcSizeX = source.getSizeX();
 
         result.lockRaster();
-        try
-        {
-            for (int ch = startC; ch < endC; ch++)
-            {
+        try {
+            for (int ch = startC; ch < endC; ch++) {
                 final Object src = source.getDataXY(ch);
                 final Object dst = result.getDataXY(ch - startC);
 
                 int srcOffset = source.getOffset(startX, startY);
                 int dstOffset = 0;
 
-                for (int curY = 0; curY < sizeY; curY++)
-                {
+                for (int curY = 0; curY < sizeY; curY++) {
                     Array1DUtil.arrayToArray(src, srcOffset, dst, dstOffset, sizeX, signed);
                     srcOffset += srcSizeX;
                     dstOffset += sizeX;
                 }
             }
         }
-        finally
-        {
+        finally {
             result.releaseRaster(true);
         }
 
@@ -567,83 +362,42 @@ public class IcyBufferedImageUtil
 
     /**
      * Creates a new image which is a sub part of the source image from the specified region.
-     * 
+     *
      * @see #getSubImage(IcyBufferedImage, Rectangle, int, int)
      */
-    public static IcyBufferedImage getSubImage(IcyBufferedImage source, Rectangle region)
-    {
+    public static IcyBufferedImage getSubImage(final IcyBufferedImage source, final Rectangle region) {
         return getSubImage(source, region, 0, source.getSizeC());
-    }
-
-    /**
-     * @deprecated Use {@link #getSubImage(IcyBufferedImage, Rectangle, int, int)} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage getSubImage(IcyBufferedImage source, int x, int y, int c, int sizeX, int sizeY,
-            int sizeC)
-    {
-        return getSubImage(source, new Rectangle(x, y, sizeX, sizeY), c, sizeC);
     }
 
     /**
      * Creates a new image which is a sub part of the source image from the specified
      * coordinates and dimensions.
      */
-    public static IcyBufferedImage getSubImage(IcyBufferedImage source, int x, int y, int w, int h)
-    {
+    public static IcyBufferedImage getSubImage(final IcyBufferedImage source, final int x, final int y, final int w, final int h) {
         return getSubImage(source, new Rectangle(x, y, w, h), 0, source.getSizeC());
     }
 
     /**
      * Build a new single channel image (greyscale) from the specified source image channel.
      */
-    public static IcyBufferedImage extractChannel(IcyBufferedImage source, int channel)
-    {
+    public static IcyBufferedImage extractChannel(final IcyBufferedImage source, final int channel) {
         return extractChannels(source, channel);
-    }
-
-    /**
-     * @deprecated Use {@link #extractChannels(IcyBufferedImage, int[])} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IcyBufferedImage extractChannels(IcyBufferedImage source, List<Integer> channelNumbers)
-    {
-        if (source == null)
-            return null;
-
-        // create output
-        final IcyBufferedImage result = new IcyBufferedImage(source.getSizeX(), source.getSizeY(),
-                channelNumbers.size(), source.getDataType_());
-        final int sizeC = source.getSizeC();
-
-        // set data from specified band
-        for (int i = 0; i < channelNumbers.size(); i++)
-        {
-            final int channel = channelNumbers.get(i).intValue();
-
-            if (channel < sizeC)
-                result.setDataXY(i, source.getDataXY(channel));
-        }
-
-        return result;
     }
 
     /**
      * Build a new image from the specified source image channels.
      */
-    public static IcyBufferedImage extractChannels(IcyBufferedImage source, int... channels)
-    {
+    public static IcyBufferedImage extractChannels(final IcyBufferedImage source, final int... channels) {
         if ((source == null) || (channels == null) || (channels.length == 0))
             return null;
 
         // create output
         final IcyBufferedImage result = new IcyBufferedImage(source.getSizeX(), source.getSizeY(), channels.length,
-                source.getDataType_());
+                source.getDataType());
         final int sizeC = source.getSizeC();
 
         // set data from specified band
-        for (int i = 0; i < channels.length; i++)
-        {
+        for (int i = 0; i < channels.length; i++) {
             final int channel = channels[i];
 
             if (channel < sizeC)
@@ -655,29 +409,23 @@ public class IcyBufferedImageUtil
 
     /**
      * Add empty channel(s) to the specified image and return result as a new image.
-     * 
-     * @param source
-     *        source image.
-     * @param index
-     *        position where we want to add channel(s).
-     * @param num
-     *        number of channel(s) to add.
+     *
+     * @param source source image.
+     * @param index  position where we want to add channel(s).
+     * @param num    number of channel(s) to add.
      */
-    public static IcyBufferedImage addChannels(IcyBufferedImage source, int index, int num)
-    {
+    public static IcyBufferedImage addChannels(final IcyBufferedImage source, final int index, final int num) {
         if (source == null)
             return null;
 
         final IcyBufferedImage result = new IcyBufferedImage(source.getSizeX(), source.getSizeY(),
-                source.getSizeC() + num, source.getDataType_());
+                source.getSizeC() + num, source.getDataType());
 
-        for (int c = 0; c < index; c++)
-        {
+        for (int c = 0; c < index; c++) {
             result.copyData(source, c, c);
             result.setColorMap(c, source.getColorMap(c), false);
         }
-        for (int c = index; c < source.getSizeC(); c++)
-        {
+        for (int c = index; c < source.getSizeC(); c++) {
             result.copyData(source, c, c + num);
             result.setColorMap(c + num, source.getColorMap(c), false);
         }
@@ -687,65 +435,41 @@ public class IcyBufferedImageUtil
 
     /**
      * Add an empty channel to the specified image and return result as a new image.
-     * 
-     * @param source
-     *        source image.
-     * @param index
-     *        position where we want to add channel.
+     *
+     * @param source source image.
+     * @param index  position where we want to add channel.
      */
-    public static IcyBufferedImage addChannel(IcyBufferedImage source, int index)
-    {
+    public static IcyBufferedImage addChannel(final IcyBufferedImage source, final int index) {
         return addChannels(source, index, 1);
     }
 
     /**
      * Add an empty channel to the specified image and return result as a new image.
-     * 
-     * @param source
-     *        source image.
+     *
+     * @param source source image.
      */
-    public static IcyBufferedImage addChannel(IcyBufferedImage source)
-    {
+    public static IcyBufferedImage addChannel(final IcyBufferedImage source) {
         return addChannels(source, source.getSizeC(), 1);
     }
 
     /**
      * Return a rotated version of the source image with specified parameters.
-     * 
-     * @param source
-     *        source image
-     * @param xOrigin
-     *        X origin for the rotation
-     * @param yOrigin
-     *        Y origin for the rotation
-     * @param angle
-     *        rotation angle in radian
-     * @param filterType
-     *        filter resampling method used
+     *
+     * @param source     source image
+     * @param xOrigin    X origin for the rotation
+     * @param yOrigin    Y origin for the rotation
+     * @param angle      rotation angle in radian
+     * @param filterType filter resampling method used
      */
-    public static IcyBufferedImage rotate(IcyBufferedImage source, double xOrigin, double yOrigin, double angle,
-            FilterType filterType)
-    {
+    public static IcyBufferedImage rotate(final IcyBufferedImage source, final double xOrigin, final double yOrigin, final double angle, final FilterType filterType) {
         if (source == null)
             return null;
 
-        final Interpolation interpolation;
-
-        switch (filterType)
-        {
-            default:
-            case NEAREST:
-                interpolation = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
-                break;
-
-            case BILINEAR:
-                interpolation = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
-                break;
-
-            case BICUBIC:
-                interpolation = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
-                break;
-        }
+        final Interpolation interpolation = switch (filterType) {
+            default -> Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+            case BILINEAR -> Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
+            case BICUBIC -> Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
+        };
 
         // use JAI scaler (use a copy to avoid source alteration)
         final RenderedOp renderedOp = RotateDescriptor.create(getCopy(source), Float.valueOf((float) xOrigin),
@@ -757,16 +481,12 @@ public class IcyBufferedImageUtil
 
     /**
      * Return a rotated version of the source image with specified parameters.
-     * 
-     * @param source
-     *        source image
-     * @param angle
-     *        rotation angle in radian
-     * @param filterType
-     *        filter resampling method used
+     *
+     * @param source     source image
+     * @param angle      rotation angle in radian
+     * @param filterType filter resampling method used
      */
-    public static IcyBufferedImage rotate(IcyBufferedImage source, double angle, FilterType filterType)
-    {
+    public static IcyBufferedImage rotate(final IcyBufferedImage source, final double angle, final FilterType filterType) {
         if (source == null)
             return null;
 
@@ -775,14 +495,11 @@ public class IcyBufferedImageUtil
 
     /**
      * Return a rotated version of the source image with specified parameters.
-     * 
-     * @param source
-     *        source image
-     * @param angle
-     *        rotation angle in radian
+     *
+     * @param source source image
+     * @param angle  rotation angle in radian
      */
-    public static IcyBufferedImage rotate(IcyBufferedImage source, double angle)
-    {
+    public static IcyBufferedImage rotate(final IcyBufferedImage source, final double angle) {
         if (source == null)
             return null;
 
@@ -793,47 +510,34 @@ public class IcyBufferedImageUtil
      * Returns a down scaled by a factor of 2 of the input image data (X and Y resolution are
      * divided by 2).<br>
      * This function is specifically optimized for factor 2 down scaling.
-     * 
-     * @param input
-     *        input image byte data array
-     * @param sizeX
-     *        width of source image
-     * @param sizeY
-     *        height of source image
-     * @param signed
-     *        consider input byte data as signed (only meaningful when filter is enabled)
-     * @param filter
-     *        enable pixel blending for better representation of the down sampled result image
-     *        (otherwise nearest neighbor is used)
-     * @param output
-     *        output buffer (single dimension array with same data type as source image data array).
+     *
+     * @param input  input image byte data array
+     * @param sizeX  width of source image
+     * @param sizeY  height of source image
+     * @param signed consider input byte data as signed (only meaningful when filter is enabled)
+     * @param filter enable pixel blending for better representation of the down sampled result image
+     *               (otherwise nearest neighbor is used)
+     * @param output output buffer (single dimension array with same data type as source image data array).
      */
-    static void downscaleBy2(byte[] input, int sizeX, int sizeY, boolean signed, boolean filter, byte[] output)
-    {
+    static void downscaleBy2(final byte[] input, final int sizeX, final int sizeY, final boolean signed, final boolean filter, final byte[] output) {
         final int halfSizeX = sizeX / 2;
         final int halfSizeY = sizeY / 2;
 
-        if (filter)
-        {
-            int inOff = 0;
-            int outOff = 0;
-
-            for (int y = 0; y < halfSizeY; y++)
-            {
-                for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2)
-                {
+        int inOff = 0;
+        int outOff = 0;
+        if (filter) {
+            for (int y = 0; y < halfSizeY; y++) {
+                for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2) {
                     int val;
 
-                    if (signed)
-                    {
+                    if (signed) {
                         // accumulate 4 pixels
                         val = input[inOffset + 0];
                         val += input[inOffset + 1];
                         val += input[inOffset + sizeX + 0];
                         val += input[inOffset + sizeX + 1];
                     }
-                    else
-                    {
+                    else {
                         // accumulate 4 pixels
                         val = input[inOffset + 0] & 0xFF;
                         val += input[inOffset + 1] & 0xFF;
@@ -851,13 +555,8 @@ public class IcyBufferedImageUtil
                 inOff += sizeX * 2;
             }
         }
-        else
-        {
-            int inOff = 0;
-            int outOff = 0;
-
-            for (int y = 0; y < halfSizeY; y++)
-            {
+        else {
+            for (int y = 0; y < halfSizeY; y++) {
                 for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2)
                     output[outOff++] = input[inOffset];
 
@@ -870,47 +569,34 @@ public class IcyBufferedImageUtil
      * Returns a down scaled by a factor of 2 of the input image data (X and Y resolution are
      * divided by 2).<br>
      * This function is specifically optimized for factor 2 down scaling.
-     * 
-     * @param input
-     *        input image byte data array
-     * @param sizeX
-     *        width of source image
-     * @param sizeY
-     *        height of source image
-     * @param signed
-     *        consider input byte data as signed (only meaningful when filter is enabled)
-     * @param filter
-     *        enable pixel blending for better representation of the down sampled result image
-     *        (otherwise nearest neighbor is used)
-     * @param output
-     *        output buffer (single dimension array with same data type as source image data array).
+     *
+     * @param input  input image byte data array
+     * @param sizeX  width of source image
+     * @param sizeY  height of source image
+     * @param signed consider input byte data as signed (only meaningful when filter is enabled)
+     * @param filter enable pixel blending for better representation of the down sampled result image
+     *               (otherwise nearest neighbor is used)
+     * @param output output buffer (single dimension array with same data type as source image data array).
      */
-    static void downscaleBy2(short[] input, int sizeX, int sizeY, boolean signed, boolean filter, short[] output)
-    {
+    static void downscaleBy2(final short[] input, final int sizeX, final int sizeY, final boolean signed, final boolean filter, final short[] output) {
         final int halfSizeX = sizeX / 2;
         final int halfSizeY = sizeY / 2;
 
-        if (filter)
-        {
-            int inOff = 0;
-            int outOff = 0;
-
-            for (int y = 0; y < halfSizeY; y++)
-            {
-                for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2)
-                {
+        int inOff = 0;
+        int outOff = 0;
+        if (filter) {
+            for (int y = 0; y < halfSizeY; y++) {
+                for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2) {
                     int val;
 
-                    if (signed)
-                    {
+                    if (signed) {
                         // accumulate 4 pixels
                         val = input[inOffset + 0];
                         val += input[inOffset + 1];
                         val += input[inOffset + sizeX + 0];
                         val += input[inOffset + sizeX + 1];
                     }
-                    else
-                    {
+                    else {
                         // accumulate 4 pixels
                         val = input[inOffset + 0] & 0xFFFF;
                         val += input[inOffset + 1] & 0xFFFF;
@@ -928,13 +614,8 @@ public class IcyBufferedImageUtil
                 inOff += sizeX * 2;
             }
         }
-        else
-        {
-            int inOff = 0;
-            int outOff = 0;
-
-            for (int y = 0; y < halfSizeY; y++)
-            {
+        else {
+            for (int y = 0; y < halfSizeY; y++) {
                 for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2)
                     output[outOff++] = input[inOffset];
 
@@ -947,47 +628,34 @@ public class IcyBufferedImageUtil
      * Returns a down scaled by a factor of 2 of the input image data (X and Y resolution are
      * divided by 2).<br>
      * This function is specifically optimized for factor 2 down scaling.
-     * 
-     * @param input
-     *        input image byte data array
-     * @param sizeX
-     *        width of source image
-     * @param sizeY
-     *        height of source image
-     * @param signed
-     *        consider input byte data as signed (only meaningful when filter is enabled)
-     * @param filter
-     *        enable pixel blending for better representation of the down sampled result image
-     *        (otherwise nearest neighbor is used)
-     * @param output
-     *        output buffer (single dimension array with same data type as source image data array).
+     *
+     * @param input  input image byte data array
+     * @param sizeX  width of source image
+     * @param sizeY  height of source image
+     * @param signed consider input byte data as signed (only meaningful when filter is enabled)
+     * @param filter enable pixel blending for better representation of the down sampled result image
+     *               (otherwise nearest neighbor is used)
+     * @param output output buffer (single dimension array with same data type as source image data array).
      */
-    static void downscaleBy2(int[] input, int sizeX, int sizeY, boolean signed, boolean filter, int[] output)
-    {
+    static void downscaleBy2(final int[] input, final int sizeX, final int sizeY, final boolean signed, final boolean filter, final int[] output) {
         final int halfSizeX = sizeX / 2;
         final int halfSizeY = sizeY / 2;
 
-        if (filter)
-        {
-            int inOff = 0;
-            int outOff = 0;
-
-            for (int y = 0; y < halfSizeY; y++)
-            {
-                for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2)
-                {
+        int inOff = 0;
+        int outOff = 0;
+        if (filter) {
+            for (int y = 0; y < halfSizeY; y++) {
+                for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2) {
                     long val;
 
-                    if (signed)
-                    {
+                    if (signed) {
                         // accumulate 4 pixels
                         val = input[inOffset + 0];
                         val += input[inOffset + 1];
                         val += input[inOffset + sizeX + 0];
                         val += input[inOffset + sizeX + 1];
                     }
-                    else
-                    {
+                    else {
                         // accumulate 4 pixels
                         val = input[inOffset + 0] & 0xFFFFFFFFL;
                         val += input[inOffset + 1] & 0xFFFFFFFFL;
@@ -1005,13 +673,8 @@ public class IcyBufferedImageUtil
                 inOff += sizeX * 2;
             }
         }
-        else
-        {
-            int inOff = 0;
-            int outOff = 0;
-
-            for (int y = 0; y < halfSizeY; y++)
-            {
+        else {
+            for (int y = 0; y < halfSizeY; y++) {
                 for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2)
                     output[outOff++] = input[inOffset];
 
@@ -1024,33 +687,23 @@ public class IcyBufferedImageUtil
      * Returns a down scaled by a factor of 2 of the input image data (X and Y resolution are
      * divided by 2).<br>
      * This function is specifically optimized for factor 2 down scaling.
-     * 
-     * @param input
-     *        input image byte data array
-     * @param sizeX
-     *        width of source image
-     * @param sizeY
-     *        height of source image
-     * @param filter
-     *        enable pixel blending for better representation of the down sampled result image
-     *        (otherwise nearest neighbor is used)
-     * @param output
-     *        output buffer (single dimension array with same data type as source image data array).
+     *
+     * @param input  input image byte data array
+     * @param sizeX  width of source image
+     * @param sizeY  height of source image
+     * @param filter enable pixel blending for better representation of the down sampled result image
+     *               (otherwise nearest neighbor is used)
+     * @param output output buffer (single dimension array with same data type as source image data array).
      */
-    static void downscaleBy2(float[] input, int sizeX, int sizeY, boolean filter, float[] output)
-    {
+    static void downscaleBy2(final float[] input, final int sizeX, final int sizeY, final boolean filter, final float[] output) {
         final int halfSizeX = sizeX / 2;
         final int halfSizeY = sizeY / 2;
 
-        if (filter)
-        {
-            int inOff = 0;
-            int outOff = 0;
-
-            for (int y = 0; y < halfSizeY; y++)
-            {
-                for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2)
-                {
+        int inOff = 0;
+        int outOff = 0;
+        if (filter) {
+            for (int y = 0; y < halfSizeY; y++) {
+                for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2) {
                     float val;
 
                     // accumulate 4 pixels
@@ -1068,13 +721,8 @@ public class IcyBufferedImageUtil
                 inOff += sizeX * 2;
             }
         }
-        else
-        {
-            int inOff = 0;
-            int outOff = 0;
-
-            for (int y = 0; y < halfSizeY; y++)
-            {
+        else {
+            for (int y = 0; y < halfSizeY; y++) {
                 for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2)
                     output[outOff++] = input[inOffset];
 
@@ -1087,33 +735,23 @@ public class IcyBufferedImageUtil
      * Returns a down scaled by a factor of 2 of the input image data (X and Y resolution are
      * divided by 2).<br>
      * This function is specifically optimized for factor 2 down scaling.
-     * 
-     * @param input
-     *        input image byte data array
-     * @param sizeX
-     *        width of source image
-     * @param sizeY
-     *        height of source image
-     * @param filter
-     *        enable pixel blending for better representation of the down sampled result image
-     *        (otherwise nearest neighbor is used)
-     * @param output
-     *        output buffer (single dimension array with same data type as source image data array).
+     *
+     * @param input  input image byte data array
+     * @param sizeX  width of source image
+     * @param sizeY  height of source image
+     * @param filter enable pixel blending for better representation of the down sampled result image
+     *               (otherwise nearest neighbor is used)
+     * @param output output buffer (single dimension array with same data type as source image data array).
      */
-    static void downscaleBy2(double[] input, int sizeX, int sizeY, boolean filter, double[] output)
-    {
+    static void downscaleBy2(final double[] input, final int sizeX, final int sizeY, final boolean filter, final double[] output) {
         final int halfSizeX = sizeX / 2;
         final int halfSizeY = sizeY / 2;
 
-        if (filter)
-        {
-            int inOff = 0;
-            int outOff = 0;
-
-            for (int y = 0; y < halfSizeY; y++)
-            {
-                for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2)
-                {
+        int inOff = 0;
+        int outOff = 0;
+        if (filter) {
+            for (int y = 0; y < halfSizeY; y++) {
+                for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2) {
                     double val;
 
                     // accumulate 4 pixels
@@ -1131,13 +769,8 @@ public class IcyBufferedImageUtil
                 inOff += sizeX * 2;
             }
         }
-        else
-        {
-            int inOff = 0;
-            int outOff = 0;
-
-            for (int y = 0; y < halfSizeY; y++)
-            {
+        else {
+            for (int y = 0; y < halfSizeY; y++) {
                 for (int x = 0, inOffset = inOff; x < halfSizeX; x++, inOffset += 2)
                     output[outOff++] = input[inOffset];
 
@@ -1150,25 +783,18 @@ public class IcyBufferedImageUtil
      * Returns a down scaled by a factor of 2 of the input image data (X and Y resolution are
      * divided by 2).<br>
      * This function is specifically optimized for factor 2 down scaling.
-     * 
-     * @param input
-     *        input image data array (single dimension)
-     * @param sizeX
-     *        width of source image
-     * @param sizeY
-     *        height of source image
-     * @param signed
-     *        consider input byte data as signed (only meaningful when filter is enabled)
-     * @param filter
-     *        enable pixel blending for better representation of the down sampled result image
-     *        (otherwise nearest neighbor is used)
-     * @param output
-     *        output buffer (single dimension array with same data type as source image data array).
-     *        If set to <code>null</code> a new array is allocated.
+     *
+     * @param input  input image data array (single dimension)
+     * @param sizeX  width of source image
+     * @param sizeY  height of source image
+     * @param signed consider input byte data as signed (only meaningful when filter is enabled)
+     * @param filter enable pixel blending for better representation of the down sampled result image
+     *               (otherwise nearest neighbor is used)
+     * @param output output buffer (single dimension array with same data type as source image data array).
+     *               If set to <code>null</code> a new array is allocated.
      * @return output buffer containing the down scaled version of input image data.
      */
-    public static Object downscaleBy2(Object input, int sizeX, int sizeY, boolean signed, boolean filter, Object output)
-    {
+    public static Object downscaleBy2(final Object input, final int sizeX, final int sizeY, final boolean signed, final boolean filter, final Object output) {
         if (input == null)
             return output;
 
@@ -1197,8 +823,7 @@ public class IcyBufferedImageUtil
                 downscaleBy2((double[]) input, sizeX, sizeY, filter, (double[]) result);
                 break;
             default:
-                throw new UnsupportedOperationException(
-                        "Unsupported data type: " + arrayType.getDataType().getJavaType());
+                throw new UnsupportedOperationException("Unsupported data type: " + arrayType.getDataType().getJavaType());
         }
 
         return result;
@@ -1208,22 +833,16 @@ public class IcyBufferedImageUtil
      * Returns a down scaled by a factor of 2 of the input image data (X and Y resolution are
      * divided by 2).<br>
      * This function is specifically optimized for factor 2 down scaling.
-     * 
-     * @param input
-     *        input image data array (single dimension)
-     * @param sizeX
-     *        width of source image
-     * @param sizeY
-     *        height of source image
-     * @param signed
-     *        consider input byte data as signed (only meaningful when filter is enabled)
-     * @param filter
-     *        enable pixel blending for better representation of the down sampled result image
-     *        (otherwise nearest neighbor is used)
+     *
+     * @param input  input image data array (single dimension)
+     * @param sizeX  width of source image
+     * @param sizeY  height of source image
+     * @param signed consider input byte data as signed (only meaningful when filter is enabled)
+     * @param filter enable pixel blending for better representation of the down sampled result image
+     *               (otherwise nearest neighbor is used)
      * @return output buffer containing the down scaled version of input image data.
      */
-    public static Object downscaleBy2(Object input, int sizeX, int sizeY, boolean signed, boolean filter)
-    {
+    public static Object downscaleBy2(final Object input, final int sizeX, final int sizeY, final boolean signed, final boolean filter) {
         return downscaleBy2(input, sizeX, sizeY, signed, filter, null);
     }
 
@@ -1231,19 +850,15 @@ public class IcyBufferedImageUtil
      * Returns a down scaled by a factor of 2 of the input image (X and Y resolution are divided by
      * 2).<br>
      * This function is specifically optimized for factor 2 down scaling.
-     * 
-     * @param input
-     *        input image
-     * @param filter
-     *        enable pixel blending for better representation of the down sampled result image
-     *        (otherwise nearest neighbor is used)
-     * @param output
-     *        output image receiving the result (should be of same type as input image with X and Y
-     *        resolution divided
-     *        by 2). If set to <code>null</code> a new image is created.
+     *
+     * @param input  input image
+     * @param filter enable pixel blending for better representation of the down sampled result image
+     *               (otherwise nearest neighbor is used)
+     * @param output output image receiving the result (should be of same type as input image with X and Y
+     *               resolution divided
+     *               by 2). If set to <code>null</code> a new image is created.
      */
-    public static IcyBufferedImage downscaleBy2(IcyBufferedImage input, boolean filter, IcyBufferedImage output)
-    {
+    public static IcyBufferedImage downscaleBy2(final IcyBufferedImage input, final boolean filter, final IcyBufferedImage output) {
         if (input == null)
             return output;
 
@@ -1252,11 +867,8 @@ public class IcyBufferedImageUtil
         final int sizeY = input.getSizeY();
         final int sizeC = input.getSizeC();
 
-        if (output != null)
-            result = output;
-        else
-            // create an empty image with specified size and current colormodel description
-            result = new IcyBufferedImage(sizeX / 2, sizeY / 2, input.getIcyColorModel());
+        // create an empty image with specified size and current colormodel description
+        result = Objects.requireNonNullElseGet(output, () -> new IcyBufferedImage(sizeX / 2, sizeY / 2, input.getIcyColorModel()));
 
         for (int c = 0; c < sizeC; c++)
             downscaleBy2(input.getDataXY(c), sizeX, sizeY, input.isSignedDataType(), filter, result.getDataXY(c));
@@ -1268,39 +880,31 @@ public class IcyBufferedImageUtil
      * Returns a down scaled by a factor of 2 of the input image (X and Y resolution are divided by
      * 2).<br>
      * This function is specifically optimized for factor 2 down scaling.
-     * 
-     * @param input
-     *        input image
-     * @param filter
-     *        enable pixel blending for better representation of the down sampled result image
-     *        (otherwise nearest neighbor is used)
+     *
+     * @param input  input image
+     * @param filter enable pixel blending for better representation of the down sampled result image
+     *               (otherwise nearest neighbor is used)
      */
-    public static IcyBufferedImage downscaleBy2(IcyBufferedImage input, boolean filter)
-    {
+    public static IcyBufferedImage downscaleBy2(final IcyBufferedImage input, final boolean filter) {
         return downscaleBy2(input, filter, null);
     }
 
     /**
      * Down scale the specified image with the given down scale factor.<br>
      * If down scale factor equals <code>0</code> then the input image is directly returned.
-     * 
-     * @param source
-     *        input image
-     * @param filter
-     *        enable pixel blending for better representation of the down sampled result image
-     *        (otherwise nearest neighbor is used)
-     * @param level
-     *        number of downscale to process: scale level = 1/2^level
+     *
+     * @param source input image
+     * @param filter enable pixel blending for better representation of the down sampled result image
+     *               (otherwise nearest neighbor is used)
+     * @param level  number of downscale to process: scale level = 1/2^level
      * @return scaled image or source image is scale level equals <code>0</code>
      */
-    public static IcyBufferedImage downscaleBy2(IcyBufferedImage source, boolean filter, int level)
-    {
+    public static IcyBufferedImage downscaleBy2(final IcyBufferedImage source, final boolean filter, final int level) {
         IcyBufferedImage result = source;
         int it = level;
 
         // process fast down scaling
-        while (it-- > 0)
-        {
+        while (it-- > 0) {
             // don't waste cache space with temporary image
             if (result != source)
                 result.setVolatile(false);
@@ -1312,23 +916,16 @@ public class IcyBufferedImageUtil
 
     /**
      * Return a copy of the source image with specified size, alignment rules and filter type.
-     * 
-     * @param source
-     *        source image
-     * @param resizeContent
-     *        indicate if content should be resized or not (empty area are 0 filled)
-     * @param xAlign
-     *        horizontal image alignment (SwingConstants.LEFT / CENTER / RIGHT)<br>
-     *        (used only if resizeContent is false)
-     * @param yAlign
-     *        vertical image alignment (SwingConstants.TOP / CENTER / BOTTOM)<br>
-     *        (used only if resizeContent is false)
-     * @param filterType
-     *        filter method used for scale (used only if resizeContent is true)
+     *
+     * @param source        source image
+     * @param resizeContent indicate if content should be resized or not (empty area are 0 filled)
+     * @param xAlign        horizontal image alignment (SwingConstants.LEFT / CENTER / RIGHT)<br>
+     *                      (used only if resizeContent is false)
+     * @param yAlign        vertical image alignment (SwingConstants.TOP / CENTER / BOTTOM)<br>
+     *                      (used only if resizeContent is false)
+     * @param filterType    filter method used for scale (used only if resizeContent is true)
      */
-    public static IcyBufferedImage scale(IcyBufferedImage source, int width, int height, boolean resizeContent,
-            int xAlign, int yAlign, FilterType filterType)
-    {
+    public static IcyBufferedImage scale(final IcyBufferedImage source, final int width, final int height, final boolean resizeContent, final int xAlign, final int yAlign, final FilterType filterType) {
         if (source == null)
             return null;
 
@@ -1338,80 +935,45 @@ public class IcyBufferedImageUtil
         final boolean resize = resizeContent && ((width != srcW) || (height != srcH));
 
         // no content resize ?
-        if (!resize)
-        {
+        if (!resize) {
             final int xt;
             final int yt;
 
             // calculate translation values
             final int dx = width - srcW;
-            switch (xAlign)
-            {
-                default:
-                case SwingConstants.LEFT:
-                    xt = 0;
-                    break;
-
-                case SwingConstants.CENTER:
-                    xt = dx / 2;
-                    break;
-
-                case SwingConstants.RIGHT:
-                    xt = dx;
-                    break;
-            }
+            xt = switch (xAlign) {
+                default -> 0;
+                case SwingConstants.CENTER -> dx / 2;
+                case SwingConstants.RIGHT -> dx;
+            };
 
             final int dy = height - srcH;
-            switch (yAlign)
-            {
-                default:
-                case SwingConstants.TOP:
-                    yt = 0;
-                    break;
-
-                case SwingConstants.CENTER:
-                    yt = dy / 2;
-                    break;
-
-                case SwingConstants.BOTTOM:
-                    yt = dy;
-                    break;
-            }
+            yt = switch (yAlign) {
+                default -> 0;
+                case SwingConstants.CENTER -> dy / 2;
+                case SwingConstants.BOTTOM -> dy;
+            };
 
             // create an empty image with specified size and current colormodel description
             result = new IcyBufferedImage(width, height, source.getIcyColorModel());
             // copy data from current image to specified destination
             result.copyData(source, null, new Point(xt, yt));
         }
-        else
-        {
+        else {
             final Float xScale = Float.valueOf((float) width / srcW);
             final Float yScale = Float.valueOf((float) height / srcH);
-            final Interpolation interpolation;
-
-            switch (filterType)
-            {
-                default:
-                case NEAREST:
-                    interpolation = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
-                    break;
-
-                case BILINEAR:
-                    interpolation = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
-                    break;
-
-                case BICUBIC:
-                    interpolation = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
-                    break;
-            }
+            final Interpolation interpolation = switch (filterType) {
+                default -> Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+                case BILINEAR -> Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
+                case BICUBIC -> Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
+            };
 
             // use a copy as JAI may alter source data
             final IcyBufferedImage srcCopy = getCopy(source);
 
             // better to lock raster during JAI operation
             srcCopy.lockRaster();
-            try
-            {
+            try {
                 // use JAI scaler
                 final RenderedOp renderedOp = ScaleDescriptor.create(srcCopy, xScale, yScale, Float.valueOf(0f),
                         Float.valueOf(0f), interpolation, new RenderingHints(JAI.KEY_BORDER_EXTENDER,
@@ -1420,8 +982,7 @@ public class IcyBufferedImageUtil
                 // get result
                 result = IcyBufferedImage.createFrom(renderedOp, source.isSignedDataType());
             }
-            finally
-            {
+            finally {
                 srcCopy.releaseRaster(false);
             }
         }
@@ -1432,34 +993,26 @@ public class IcyBufferedImageUtil
     /**
      * Return a copy of the image with specified size.<br>
      * By default the FilterType.BILINEAR is used as filter method if resizeContent is true
-     * 
-     * @param source
-     *        source image
-     * @param resizeContent
-     *        indicate if content should be resized or not (empty area are 0 filled)
-     * @param xAlign
-     *        horizontal image alignment (SwingConstants.LEFT / CENTER / RIGHT)<br>
-     *        (used only if resizeContent is false)
-     * @param yAlign
-     *        vertical image alignment (SwingConstants.TOP / CENTER / BOTTOM)<br>
-     *        (used only if resizeContent is false)
+     *
+     * @param source        source image
+     * @param resizeContent indicate if content should be resized or not (empty area are 0 filled)
+     * @param xAlign        horizontal image alignment (SwingConstants.LEFT / CENTER / RIGHT)<br>
+     *                      (used only if resizeContent is false)
+     * @param yAlign        vertical image alignment (SwingConstants.TOP / CENTER / BOTTOM)<br>
+     *                      (used only if resizeContent is false)
      */
-    public static IcyBufferedImage scale(IcyBufferedImage source, int width, int height, boolean resizeContent,
-            int xAlign, int yAlign)
-    {
+    public static IcyBufferedImage scale(final IcyBufferedImage source, final int width, final int height, final boolean resizeContent,
+                                         final int xAlign, final int yAlign) {
         return scale(source, width, height, resizeContent, xAlign, yAlign, FilterType.BILINEAR);
     }
 
     /**
      * Return a copy of the image with specified size<br>
-     * 
-     * @param source
-     *        source image
-     * @param filterType
-     *        filter method used for scale (used only if resizeContent is true)
+     *
+     * @param source     source image
+     * @param filterType filter method used for scale (used only if resizeContent is true)
      */
-    public static IcyBufferedImage scale(IcyBufferedImage source, int width, int height, FilterType filterType)
-    {
+    public static IcyBufferedImage scale(final IcyBufferedImage source, final int width, final int height, final FilterType filterType) {
         return scale(source, width, height, true, 0, 0, filterType);
     }
 
@@ -1467,8 +1020,7 @@ public class IcyBufferedImageUtil
      * Return a copy of the image with specified size.<br>
      * By default the FilterType.BILINEAR is used as filter method.
      */
-    public static IcyBufferedImage scale(IcyBufferedImage source, int width, int height)
-    {
+    public static IcyBufferedImage scale(final IcyBufferedImage source, final int width, final int height) {
         return scale(source, width, height, FilterType.BILINEAR);
     }
 
@@ -1476,8 +1028,7 @@ public class IcyBufferedImageUtil
      * Translate image internal data of specified channel by the specified (x,y) vector.<br>
      * Data going "outside" image bounds is lost.
      */
-    public static void translate(IcyBufferedImage source, int dx, int dy, int channel)
-    {
+    public static void translate(final IcyBufferedImage source, final int dx, final int dy, final int channel) {
         if (source == null)
             return;
 
@@ -1498,16 +1049,14 @@ public class IcyBufferedImageUtil
         final int toCopy;
         final int wCopy;
 
-        if (adx < 0)
-        {
+        if (adx < 0) {
             fromCopy = -adx;
             toCopy = 0;
             wCopy = sizeX + adx;
             fromFill = wCopy;
             toFill = sizeX;
         }
-        else
-        {
+        else {
             fromFill = 0;
             toFill = adx;
             fromCopy = fromFill;
@@ -1516,19 +1065,16 @@ public class IcyBufferedImageUtil
         }
 
         source.lockRaster();
-        try
-        {
+        try {
             final Object data = source.getDataXY(channel);
 
-            if (ady < 0)
-            {
+            if (ady < 0) {
                 final int hCopy = sizeY + ady;
                 int toOffset = 0;
                 int fromOffset = -ady * sizeX;
 
                 // copy
-                for (int y = 0; y < hCopy; y++)
-                {
+                for (int y = 0; y < hCopy; y++) {
                     // copy first
                     Array1DUtil.innerCopy(data, fromOffset + fromCopy, toOffset + toCopy, wCopy);
                     // then fill
@@ -1540,15 +1086,13 @@ public class IcyBufferedImageUtil
                 // fill
                 Array1DUtil.fill(data, toOffset, fromOffset, 0d);
             }
-            else
-            {
+            else {
                 final int hCopy = sizeY - ady;
                 int toOffset = (sizeY - 1) * sizeX;
                 int fromOffset = toOffset - (ady * sizeX);
 
                 // copy
-                for (int y = 0; y < hCopy; y++)
-                {
+                for (int y = 0; y < hCopy; y++) {
                     // copy first
                     Array1DUtil.innerCopy(data, fromOffset + fromCopy, toOffset + toCopy, wCopy);
                     // then fill
@@ -1561,8 +1105,7 @@ public class IcyBufferedImageUtil
                 Array1DUtil.fill(data, 0, 0 + (ady * sizeX), 0d);
             }
         }
-        finally
-        {
+        finally {
             source.releaseRaster(true);
         }
 
@@ -1574,20 +1117,16 @@ public class IcyBufferedImageUtil
      * Translate image internal data (all channels) by the specified (x,y) vector.<br>
      * Data going "outside" image bounds is lost.
      */
-    public static void translate(IcyBufferedImage source, int dx, int dy)
-    {
-        if (source != null)
-        {
+    public static void translate(final IcyBufferedImage source, final int dx, final int dy) {
+        if (source != null) {
             final int sizeC = source.getSizeC();
 
             source.beginUpdate();
-            try
-            {
+            try {
                 for (int c = 0; c < sizeC; c++)
                     translate(source, dx, dy, c);
             }
-            finally
-            {
+            finally {
                 source.endUpdate();
             }
         }

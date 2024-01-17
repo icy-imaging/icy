@@ -29,7 +29,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class ImageTableCellRenderer extends DefaultTableCellRenderer {
     final int size;

@@ -31,7 +31,7 @@ import javax.swing.*;
  * Basically a JTabbedPane with checkbox in tab.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class CheckTabbedPane extends JTabbedPane {
     private class CheckTabComponent extends JPanel {

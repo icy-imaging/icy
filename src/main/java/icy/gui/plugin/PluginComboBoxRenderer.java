@@ -29,7 +29,7 @@ import java.awt.*;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class PluginComboBoxRenderer extends CustomComboBoxRenderer {
     private final boolean showLabel;

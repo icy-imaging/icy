@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -34,8 +34,8 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * @author Stephane
- * @author Thomas MUSSET
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
 public final class LayerControlPanel extends JPanel implements ChangeListener {
     // GUI

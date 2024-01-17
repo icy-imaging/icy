@@ -176,6 +176,8 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- TODO implement imglib2 -->
+
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-bioformats</artifactId>

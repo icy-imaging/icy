@@ -31,7 +31,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class ApplicationMenuSequence extends AbstractApplicationMenu {
 

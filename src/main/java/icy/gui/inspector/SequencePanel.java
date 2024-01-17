@@ -33,7 +33,7 @@ import javax.swing.*;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  *
  * @deprecated Use {@link icy.gui.toolbar.panel.SequencePanel} instead.
  */

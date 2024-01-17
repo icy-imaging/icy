@@ -37,7 +37,7 @@ import java.util.concurrent.Callable;
  * The launch can be in a decicated thread or in the EDT.
  *
  * @author Fabrice de Chaumont &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class PluginLauncher {
     protected static class PluginExecutor implements Callable<Boolean>, Runnable {

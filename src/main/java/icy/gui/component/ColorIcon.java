@@ -28,7 +28,7 @@ import javax.swing.Icon;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class ColorIcon implements Icon {
     private final Color color;

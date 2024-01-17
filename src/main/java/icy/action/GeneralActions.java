@@ -48,7 +48,7 @@ import java.util.List;
  * General actions.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class GeneralActions {
     public static final IcyAbstractAction searchAction = new IcyAbstractAction(

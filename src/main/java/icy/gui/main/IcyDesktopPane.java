@@ -41,7 +41,7 @@ import java.util.List;
  * the IcyDesktopPane.repaint() method to update overlays.
  *
  * @author Fabrice &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyDesktopPane extends JDesktopPane implements ContainerListener, MouseListener, MouseMotionListener, MouseWheelListener {
     public interface DesktopOverlay extends MouseListener, MouseMotionListener, MouseWheelListener {

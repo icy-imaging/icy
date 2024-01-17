@@ -39,7 +39,7 @@ import javax.swing.*;
  * Setting panel for Canvas2D
  * 
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 // TODO: 23/01/2023 Should be in gui package
 public class Canvas2DSettingPanel extends JPanel {

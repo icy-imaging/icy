@@ -36,7 +36,7 @@ import javax.swing.event.ListSelectionEvent;
  * Use the {@link AbstractRoisPanel} if you want to embed the ROI table in your own component.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  * @deprecated Use {@link icy.gui.toolbar.panel.RoisPanel} instead.
  */
 @Deprecated(since = "3.0.0", forRemoval = true)

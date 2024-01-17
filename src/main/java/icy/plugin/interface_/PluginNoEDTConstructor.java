@@ -26,7 +26,7 @@ package icy.plugin.interface_;
  * others classes make lock the EDT for severals second just with some heavy class loading work.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface PluginNoEDTConstructor {
 }

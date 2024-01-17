@@ -46,7 +46,6 @@ import icy.gui.plugin.PluginComboBoxRenderer;
 import icy.gui.util.LookAndFeelUtil;
 import icy.gui.viewer.ViewerEvent.ViewerEventType;
 import icy.image.IcyBufferedImage;
-import icy.image.cache.ImageCache;
 import icy.image.lut.LUT;
 import icy.main.Icy;
 import icy.plugin.PluginLoader;
@@ -78,13 +77,14 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Vector;
 
 /**
  * Viewer send an event if the IcyCanvas change.
  *
  * @author Fabrice de Chaumont &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class Viewer extends IcyFrame implements KeyListener, SequenceListener, IcyCanvasListener, PluginLoaderListener {
     private class ViewerMainPanel extends JPanel {
@@ -670,7 +670,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         virtualButton.setSelected(virtual);
         // update enable state of the button
         //((IcyAbstractAction) virtualButton.getAction()).enabledChanged();
-        if (!ImageCache.isEnabled()) {
+        if (Icy.isCacheDisabled()) {
             virtualButton.setToolTipText("Image cache is disabled, cannot use virtual sequence");
             virtualButton.setEnabled(false);
         }

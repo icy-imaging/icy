@@ -34,7 +34,7 @@ import javax.swing.*;
 import java.util.List;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class ApplicationMenuView extends AbstractApplicationMenu {
 

@@ -50,7 +50,7 @@ import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
  * This window shows all details about the current sequence.
  *
  * @author Fabrice de Chaumont &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
 public class InspectorPanel extends ExternalizablePanel implements ActiveViewerListener, ActiveSequenceListener {
@@ -199,6 +199,10 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
         return outputConsolePanel;
     }
 
+    /**
+     * @deprecated Use {@link GeneralPreferences#getVirtualMode()} instead.
+     */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static boolean getVirtualMode() {
         return GeneralPreferences.getVirtualMode();
     }

@@ -47,7 +47,7 @@ import java.util.List;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class LoaderOptionPanel extends JPanel {
     public enum LoaderLoadingType {

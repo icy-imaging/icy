@@ -33,7 +33,7 @@ import javax.swing.tree.TreeCellRenderer;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class VisibleCellRenderer extends JLabel implements TableCellRenderer, TreeCellRenderer {
     @Deprecated(since = "3.0.0", forRemoval = true)

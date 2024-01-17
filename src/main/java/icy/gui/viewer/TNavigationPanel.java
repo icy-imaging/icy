@@ -52,7 +52,7 @@ import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class TNavigationPanel extends JPanel {
     private static final int DEFAULT_FRAME_RATE = 15;

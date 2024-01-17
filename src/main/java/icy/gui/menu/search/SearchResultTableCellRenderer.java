@@ -35,7 +35,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  * This class is a renderer to display the filtered data.
  *
  * @author Thomas Provoost &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class SearchResultTableCellRenderer extends DefaultTableCellRenderer {
     @Override

@@ -21,7 +21,7 @@ package icy.common.listener;
 import java.util.EventListener;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface SkinChangeListener extends EventListener {
     void skinChanged();

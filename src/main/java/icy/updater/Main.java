@@ -41,7 +41,7 @@ import java.util.*;
 
 /**
  * @author stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class Main {
     static class OutPrintStream extends PrintStream {

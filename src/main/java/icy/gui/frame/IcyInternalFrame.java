@@ -37,7 +37,7 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyInternalFrame extends JInternalFrame {
     private class CloseAction extends IcyAbstractAction {

@@ -35,7 +35,7 @@ import java.io.IOException;
  * Plugin specialized for Sequence file import operation (see the {@link SequenceFileImporter} interface)
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  * @see PluginImporter
  * @see PluginFileImporter
  * @see PluginSequenceIdImporter

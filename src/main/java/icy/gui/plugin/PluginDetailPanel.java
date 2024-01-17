@@ -59,7 +59,7 @@ import javax.swing.event.HyperlinkListener;
 
 /**
  * @author stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
     private class ExecuteActionButton extends JButton implements ActionListener {

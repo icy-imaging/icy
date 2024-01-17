@@ -27,7 +27,7 @@ import icy.type.point.Point5D;
  * The plugin will appears in the ROI list.<br>
  *
  * @author Fab &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface PluginROI extends PluginNoEDTConstructor {
     /**

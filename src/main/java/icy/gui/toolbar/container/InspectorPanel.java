@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
 import javax.swing.*;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class InspectorPanel extends ToolbarContainer {
     private static InspectorPanel instance = null;
@@ -37,6 +37,7 @@ public final class InspectorPanel extends ToolbarContainer {
     protected void showParent(@Nonnull final JSplitPane pane) {
         pane.setDividerLocation(pane.getWidth() - getPreferredSize().width - 5);
         pane.setEnabled(true);
+        pane.updateUI();
     }
 
     @Override

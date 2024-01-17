@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  *
  * @author Kamran Zafar
  * @author Stephane Dallongeville
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class AbstractClassLoader extends ClassLoader {
     protected final List<ProxyClassLoader> loaders = new ArrayList<>();

@@ -50,7 +50,7 @@ import icy.system.thread.ThreadUtil;
  * display all local and online requests when characters are being typed in the {@link SearchBar}.
  *
  * @author Thomas Provoost &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class SearchResultPanel extends JWindow implements ListSelectionListener {
     private static final int ROW_HEIGHT = 48;

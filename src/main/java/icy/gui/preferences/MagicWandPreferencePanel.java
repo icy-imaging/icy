@@ -33,7 +33,7 @@ import plugins.kernel.roi.tool.MagicWand.MagicWandGradientToleranceMode;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class MagicWandPreferencePanel extends PreferencePanel {
     public static final String NODE_NAME = "Magic Wand";

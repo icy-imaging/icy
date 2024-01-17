@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
  * General configuration using System properties
  *
  * @author Kamran Zafar
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class Configuration {
     private static final String JCL_SUPPRESS_COLLISION_EXCEPTION = "jcl.suppressCollisionException";

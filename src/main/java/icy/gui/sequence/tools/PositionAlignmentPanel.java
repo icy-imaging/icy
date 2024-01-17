@@ -34,7 +34,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.EventListenerList;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class PositionAlignmentPanel extends JPanel {
     public static class PositionBox extends IcyToggleButton {

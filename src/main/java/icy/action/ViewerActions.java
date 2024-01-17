@@ -39,7 +39,7 @@ import plugins.kernel.canvas.VtkCanvas;
  * Viewer associated actions (Duplicate, externalize...)
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class ViewerActions {
     public static final IcyAbstractAction duplicateAction = new IcyAbstractAction(

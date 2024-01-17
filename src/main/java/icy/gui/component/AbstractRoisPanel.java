@@ -122,7 +122,7 @@ import plugins.kernel.roi.descriptor.property.ROISizeZDescriptor;
 /**
  * Abstract ROI panel component
  *
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSequenceListener, TextChangeListener, ListSelectionListener, PluginLoaderListener {
     protected static final String ID_VIEW = "view";

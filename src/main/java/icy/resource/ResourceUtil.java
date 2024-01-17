@@ -35,7 +35,7 @@ import java.util.ArrayList;
  * Resources (images, icons...) utilities class.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class ResourceUtil {
     // image and icon path

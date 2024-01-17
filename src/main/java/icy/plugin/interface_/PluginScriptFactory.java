@@ -24,7 +24,7 @@ import javax.script.ScriptEngineFactory;
  * Plugin interface to provide scripting language factory (see {@link ScriptEngineFactory})
  *
  * @author Stephane Dallongeville
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface PluginScriptFactory {
     /**

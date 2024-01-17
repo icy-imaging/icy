@@ -47,7 +47,7 @@ import java.util.TimerTask;
  * Dialog used to select which serie to open for multi serie image.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class SeriesSelectionDialog extends ActionDialog implements Runnable {
     protected static final int NUM_COL = 4;

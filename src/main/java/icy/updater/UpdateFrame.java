@@ -26,7 +26,7 @@ import java.awt.*;
 
 /**
  * @author stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class UpdateFrame extends JFrame {
     /**

@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  *
  * @author Kamran Zafar
  * @author Stephane Dallongeville
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class JarClassLoader extends AbstractClassLoader {
     /**

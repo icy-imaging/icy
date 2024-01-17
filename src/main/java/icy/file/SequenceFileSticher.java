@@ -47,7 +47,7 @@ import java.util.concurrent.Future;
  * This class is an utility class aim to help in grouping a list of <i>file path</i> representing image to form a complete and valid Sequence.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class SequenceFileSticher {
     public static class SequenceType {

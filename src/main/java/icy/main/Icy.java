@@ -27,9 +27,9 @@ import icy.gui.dialog.IdConfirmDialog;
 import icy.gui.dialog.IdConfirmDialog.Confirmer;
 import icy.gui.frame.ExitFrame;
 import icy.gui.frame.IcyExternalFrame;
+import icy.gui.frame.SplashScreenFrame;
 import icy.gui.frame.progress.AnnounceFrame;
 import icy.gui.frame.progress.ToolTipFrame;
-import icy.gui.inspector.InspectorPanel;
 import icy.gui.main.MainFrame;
 import icy.gui.main.MainInterface;
 import icy.gui.main.MainInterfaceBatch;
@@ -79,7 +79,7 @@ import java.util.*;
  * Entry point for Icy.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class Icy {
     public static final String LIB_PATH = "lib";
@@ -100,11 +100,10 @@ public class Icy {
      */
     static FileLock lock = null;
 
-    // TODO remove splashscreen ?
-    /*
+    /**
      * private splash for initial loading
      */
-    //static SplashScreenFrame splashScreen = null;
+    static SplashScreenFrame splashScreen = null;
 
     /**
      * VTK library loaded flag
@@ -208,7 +207,7 @@ public class Icy {
             // set LOCI debug level (do it immediately as it can quickly show some log messages)
             loci.common.DebugTools.enableLogging("ERROR");
 
-            /*if (!headless && !noSplash) {
+            if (!headless && !noSplash) {
                 // prepare splashScreen (ok to create it here as we are not yet in substance laf)
                 splashScreen = new SplashScreenFrame();
 
@@ -221,11 +220,12 @@ public class Icy {
                     // display splash screen
                     splashScreen.setVisible(true);
                 });
-            }*/
+            }
 
             // fast start
             // force image cache initialization so GUI won't wait after it (need preferences init)
-            new Thread(ImageCache::isEnabled, "Initializer: Cache").start();
+            // TODO I don't know what is supposed to do, it just check if the cache is null, it does not init EhCache
+            new Thread(ImageCache::isInit, "Initializer: Cache").start();
 
             // initialize network (need preferences init)
             new Thread(NetworkUtil::init, "Initializer: Network").start();
@@ -270,14 +270,14 @@ public class Icy {
         }
 
         // splash screen initialized --> hide it
-        /*if (splashScreen != null) {
+        if (splashScreen != null) {
             // then do less important stuff later
             ThreadUtil.invokeLater(() -> {
                 // we can now hide splash as we have interface
                 splashScreen.dispose();
                 splashScreen = null;
             });
-        }*/
+        }
 
         // show general informations
         IcyLogger.info(String.format("%s %s (%d bit)", SystemUtil.getJavaName(), SystemUtil.getJavaVersion(), SystemUtil.getJavaArchDataModel()));
@@ -292,12 +292,12 @@ public class Icy {
             IcyLogger.info("Image cache is disabled.");
 
             // disable virtual mode button from inspector
-            final InspectorPanel inspector = getMainInterface().getInspector();
+            /*final InspectorPanel inspector = getMainInterface().getInspector();
             if (inspector != null)
-                inspector.imageCacheDisabled();
+                inspector.imageCacheDisabled();*/
         }
         // virtual mode enabled ? --> initialize image cache
-        else if (InspectorPanel.getVirtualMode())
+        else if (GeneralPreferences.getVirtualMode())
             ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
 
         if (headless) {
@@ -500,8 +500,8 @@ public class Icy {
 
     static void fatalError(@NotNull final Throwable t, final boolean headless) {
         // hide splashScreen if needed
-        /*if ((splashScreen != null) && (splashScreen.isVisible()))
-            splashScreen.dispose();*/
+        if ((splashScreen != null) && (splashScreen.isVisible()))
+            splashScreen.dispose();
 
         // show error in console
         IcyExceptionHandler.showErrorMessage(t, true);

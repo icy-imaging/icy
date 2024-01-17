@@ -28,7 +28,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class IcyIconFont implements Icon {
     @NotNull

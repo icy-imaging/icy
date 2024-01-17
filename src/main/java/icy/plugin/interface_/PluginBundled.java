@@ -31,7 +31,7 @@ import icy.plugin.PluginLoader;
  * This class will also hide your plugin from the plugin list in {@link PluginLoader}.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface PluginBundled {
     String getMainPluginClassName();

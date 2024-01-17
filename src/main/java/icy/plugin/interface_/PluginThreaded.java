@@ -31,7 +31,7 @@ package icy.plugin.interface_;
  * in the EDT (which is the case for default plugin).
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface PluginThreaded extends Runnable {
 }

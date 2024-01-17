@@ -36,7 +36,7 @@ import icy.util.StringUtil;
  * Icy basic AbstractAction class.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class IcyAbstractAction extends AbstractAction {
     /**

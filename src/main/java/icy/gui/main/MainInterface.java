@@ -43,8 +43,9 @@ import java.util.List;
 /**
  * MainInterface
  *
- * @author Fabrice de Chaumont &amp; Stephane
- * @author Thomas MUSSET
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  * @see icy.gui.main.MainInterfaceGui
  */
 public interface MainInterface {
@@ -104,19 +105,25 @@ public interface MainInterface {
      * Returns the inspector object (right informations panel)
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    InspectorPanel getInspector();
+    default InspectorPanel getInspector() {
+        return null;
+    }
 
     /**
      * Returns the ROI manager panel
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    RoisPanel getRoisPanel();
+    default RoisPanel getRoisPanel() {
+        return null;
+    }
 
     /**
      * Returns the Layer manager panel
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    LayersPanel getLayersPanel();
+    default LayersPanel getLayersPanel() {
+        return null;
+    }
 
     /**
      * Returns the currently active plugins
@@ -152,19 +159,25 @@ public interface MainInterface {
      * @deprecated Use {@link #getActiveViewer()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    Viewer getFocusedViewer();
+    default Viewer getFocusedViewer() {
+        return getActiveViewer();
+    }
 
     /**
      * @deprecated Use {@link #getActiveSequence()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    Sequence getFocusedSequence();
+    default Sequence getFocusedSequence() {
+        return getActiveSequence();
+    }
 
     /**
      * @deprecated Use {@link #getActiveImage()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    IcyBufferedImage getFocusedImage();
+    default IcyBufferedImage getFocusedImage() {
+        return getActiveImage();
+    }
 
     /**
      * Returns the current active {@link UndoManager} (UndoManager from active sequence).
@@ -206,7 +219,9 @@ public interface MainInterface {
      * @deprecated Use {@link #setActiveViewer(Viewer)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void setFocusedViewer(Viewer viewer);
+    default void setFocusedViewer(final Viewer viewer) {
+        setActiveViewer(viewer);
+    }
 
     /**
      * Set all active viewers to specified synchronization group id (0 means unsynchronized).
@@ -224,10 +239,14 @@ public interface MainInterface {
     TaskFrameManager getTaskWindowManager();
 
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void registerExternalFrame(JFrame frame);
+    default void registerExternalFrame(final JFrame frame) {
+
+    }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void unRegisterExternalFrame(JFrame frame);
+    default void unRegisterExternalFrame(final JFrame frame) {
+
+    }
 
     void registerPlugin(Plugin plugin);
 
@@ -241,7 +260,9 @@ public interface MainInterface {
      * @deprecated Use {@link #getMainFrame()} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    MainFrame getFrame();
+    default MainFrame getFrame() {
+        return getMainFrame();
+    }
 
     /**
      * Get Icy main frame
@@ -262,7 +283,9 @@ public interface MainInterface {
      * @deprecated Use {@link #closeSequence(Sequence)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void closeViewersOfSequence(Sequence sequence);
+    default void closeViewersOfSequence(final Sequence sequence) {
+        closeSequence(sequence);
+    }
 
     /**
      * Close all viewers
@@ -280,7 +303,9 @@ public interface MainInterface {
      * @deprecated use {@link #getFirstViewerContaining(Overlay)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    Viewer getFirstViewerContaining(Painter painter);
+    default Viewer getFirstViewerContaining(final Painter painter) {
+        return getFirstViewerContaining((Overlay) painter);
+    }
 
     /**
      * Returns first viewer for the sequence containing specified Overlay
@@ -323,7 +348,9 @@ public interface MainInterface {
      * @deprecated
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    Sequence getFirstSequencesContaining(ROI roi);
+    default Sequence getFirstSequencesContaining(final ROI roi) {
+        return getFirstSequenceContaining(roi);
+    }
 
     /**
      * Use {@link #getFirstSequenceContaining(Overlay)} instead
@@ -331,7 +358,9 @@ public interface MainInterface {
      * @deprecated
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    Sequence getFirstSequencesContaining(Painter painter);
+    default Sequence getFirstSequencesContaining(final Painter painter) {
+        return getFirstSequenceContaining((Overlay) painter);
+    }
 
     /**
      * Returns the first active sequence containing the specified ROI
@@ -344,7 +373,9 @@ public interface MainInterface {
      * @deprecated Use {@link #getFirstSequenceContaining(Overlay)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    Sequence getFirstSequenceContaining(Painter painter);
+    default Sequence getFirstSequenceContaining(final Painter painter) {
+        return getFirstSequenceContaining((Overlay) painter);
+    }
 
     /**
      * Returns the first active sequence containing the specified Overlay
@@ -362,7 +393,9 @@ public interface MainInterface {
      * @deprecated Use {@link #getSequencesContaining(Overlay)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    ArrayList<Sequence> getSequencesContaining(Painter painter);
+    default ArrayList<Sequence> getSequencesContaining(final Painter painter) {
+        return (ArrayList<Sequence>) getSequencesContaining((Overlay) painter);
+    }
 
     /**
      * Returns all active sequence containing the specified Overlay
@@ -380,7 +413,9 @@ public interface MainInterface {
      * @deprecated Use {@link #getROI(Overlay)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    ROI getROI(Painter painter);
+    default ROI getROI(final Painter painter) {
+        return getROI((Overlay) painter);
+    }
 
     /**
      * Returns the ROI containing the specified overlay (if any)
@@ -393,7 +428,9 @@ public interface MainInterface {
      * @deprecated Use {@link #getOverlays()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    ArrayList<Painter> getPainters();
+    default ArrayList<Painter> getPainters() {
+        return new ArrayList<>(getOverlays());
+    }
 
     /**
      * Returns all active Overlay.
@@ -439,13 +476,17 @@ public interface MainInterface {
      * @deprecated Use addGlobalXXXListener instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void addListener(MainListener listener);
+    default void addListener(final MainListener listener) {
+
+    }
 
     /**
      * @deprecated Use removeGlobalXXXListener instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void removeListener(MainListener listener);
+    default void removeListener(final MainListener listener) {
+
+    }
 
     /**
      * Add global Viewer listener
@@ -501,13 +542,17 @@ public interface MainInterface {
      * @deprecated Use {@link #addActiveViewerListener(ActiveViewerListener)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void addFocusedViewerListener(FocusedViewerListener listener);
+    default void addFocusedViewerListener(final FocusedViewerListener listener) {
+        addActiveViewerListener((ActiveViewerListener) listener);
+    }
 
     /**
      * @deprecated Use {@link #removeActiveViewerListener(ActiveViewerListener)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void removeFocusedViewerListener(FocusedViewerListener listener);
+    default void removeFocusedViewerListener(final FocusedViewerListener listener) {
+        removeActiveViewerListener((ActiveViewerListener) listener);
+    }
 
     /**
      * Add active viewer listener.<br>
@@ -525,13 +570,17 @@ public interface MainInterface {
      * @deprecated Use {@link #addActiveSequenceListener(ActiveSequenceListener)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void addFocusedSequenceListener(FocusedSequenceListener listener);
+    default void addFocusedSequenceListener(final FocusedSequenceListener listener) {
+        addActiveSequenceListener((ActiveSequenceListener) listener);
+    }
 
     /**
      * @deprecated Use {@link #removeActiveSequenceListener(ActiveSequenceListener)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void removeFocusedSequenceListener(FocusedSequenceListener listener);
+    default void removeFocusedSequenceListener(final FocusedSequenceListener listener) {
+        removeActiveSequenceListener((ActiveSequenceListener) listener);
+    }
 
     /**
      * Add active sequence listener.<br>
@@ -562,17 +611,23 @@ public interface MainInterface {
      * @deprecated
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void beginUpdate();
+    default void beginUpdate() {
+
+    }
 
     /**
      * @deprecated
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    void endUpdate();
+    default void endUpdate() {
+
+    }
 
     /**
      * @deprecated
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    boolean isUpdating();
+    default boolean isUpdating() {
+        return false;
+    }
 }

@@ -45,7 +45,7 @@ import javax.swing.table.TableColumnModel;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
 public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, ListSelectionListener, IcyUndoManagerListener, ChangeListener {

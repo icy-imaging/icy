@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Yoann Le Montagner
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class NumberTextField extends IcyTextField {
     /**

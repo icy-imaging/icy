@@ -51,7 +51,7 @@ import javax.swing.table.TableColumnModel;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class SwimmingPoolPanel extends JPanel implements TextChangeListener, ListSelectionListener, SwimmingPoolListener {
     static final String[] columnNames = {"", "Name", "Type"};

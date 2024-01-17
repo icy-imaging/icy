@@ -23,7 +23,7 @@ package icy.plugin.interface_;
  * Means the plugin has the ability to undo.
  *
  * @author Fab
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public interface PluginUndoable {
 }

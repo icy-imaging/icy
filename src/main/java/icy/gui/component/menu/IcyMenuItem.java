@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyMenuItem extends JMenuItem {
     public IcyMenuItem(@Nullable final String text, @NotNull final IconCode defaultIcon, @NotNull final IconCode disabledIcon, @NotNull final IconCode selectedIcon, final float size) {

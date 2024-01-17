@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,16 +19,16 @@
 package icy.gui.toolbar.container;
 
 import icy.gui.toolbar.panel.ToolbarPanel;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * Base for container panel in Icy's toolbar
  *
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class ToolbarContainer extends JPanel {
     private static final Dimension DEFAULT_DIMENSION = new Dimension(0, 0);
@@ -56,9 +56,9 @@ public abstract class ToolbarContainer extends JPanel {
             panel.setSaveSize(new Dimension(getWidth(), getHeight()));
     }
 
-    protected abstract void showParent(@Nonnull final JSplitPane pane);
+    protected abstract void showParent(@NotNull final JSplitPane pane);
 
-    public final void show(@Nonnull final ToolbarPanel panel) {
+    public final void show(@NotNull final ToolbarPanel panel) {
         removeAll();
         this.panel = panel;
         add(panel, BorderLayout.CENTER);
@@ -71,7 +71,7 @@ public abstract class ToolbarContainer extends JPanel {
             showParent((JSplitPane) c);
     }
 
-    protected abstract void closeParent(@Nonnull final JSplitPane pane);
+    protected abstract void closeParent(@NotNull final JSplitPane pane);
 
     public final void close() {
         saveSize();

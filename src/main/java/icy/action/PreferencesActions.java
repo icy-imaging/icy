@@ -31,7 +31,7 @@ import java.util.List;
  * Preference actions.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class PreferencesActions {
     public static final IcyAbstractAction preferencesAction = new IcyAbstractAction(

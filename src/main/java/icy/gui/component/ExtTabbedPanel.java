@@ -31,7 +31,7 @@ import javax.swing.*;
  * Basically a JTabbedPane which can handle ExternalizablePanel.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
 public class ExtTabbedPanel extends JTabbedPane {

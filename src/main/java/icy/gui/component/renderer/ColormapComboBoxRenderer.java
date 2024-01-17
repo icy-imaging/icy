@@ -27,7 +27,7 @@ import icy.image.colormap.IcyColorMap;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class ColormapComboBoxRenderer extends CustomComboBoxRenderer {
     /**

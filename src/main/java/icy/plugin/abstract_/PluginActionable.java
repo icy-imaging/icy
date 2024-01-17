@@ -25,7 +25,7 @@ package icy.plugin.abstract_;
  * Also it should implement the "run()" method which contains the main process code.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class PluginActionable extends Plugin implements Runnable {
 }

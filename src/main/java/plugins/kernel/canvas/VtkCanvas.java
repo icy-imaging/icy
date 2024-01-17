@@ -109,7 +109,7 @@ import vtk.vtkTextProperty;
  * VTK 3D canvas class.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 @SuppressWarnings("deprecation")
 public class VtkCanvas extends Canvas3D implements ActionListener, SettingChangeListener {

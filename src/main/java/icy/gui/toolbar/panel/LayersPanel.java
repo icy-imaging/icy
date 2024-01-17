@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -51,8 +51,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Stephane
- * @author Thomas MUSSET
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
 public final class LayersPanel extends ToolbarPanel implements ActiveViewerListener, CanvasLayerListener, TextChangeListener, ListSelectionListener {
     private static LayersPanel instance = null;
@@ -207,18 +207,15 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
 
                 final Layer layer = layers.get(row);
 
-                switch (column) {
-                    case 0:
+                return switch (column) {
+                    case 0 ->
                         // layer name
-                        return layer.getName();
-
-                    case 1:
+                            layer.getName();
+                    case 1 ->
                         // layer visibility
-                        return Boolean.valueOf(layer.isVisible());
-
-                    default:
-                        return "";
-                }
+                            Boolean.valueOf(layer.isVisible());
+                    default -> "";
+                };
             }
 
             @Override
@@ -268,18 +265,17 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
                 return editable;
             }
 
+            @SuppressWarnings("SwitchStatementWithTooFewBranches")
             @Override
             public Class<?> getColumnClass(final int columnIndex) {
-                switch (columnIndex) {
-                    default:
-                    case 0:
+                return switch (columnIndex) {
+                    default ->
                         // layer name
-                        return String.class;
-
-                    case 1:
+                            String.class;
+                    case 1 ->
                         // layer visibility
-                        return Boolean.class;
-                }
+                            Boolean.class;
+                };
             }
         };
         // set table model

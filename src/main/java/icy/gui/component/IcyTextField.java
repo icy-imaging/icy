@@ -36,7 +36,7 @@ import javax.swing.event.DocumentListener;
  * IcyTextField extends JFormattedTextField and provide easier text change handling.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyTextField extends JFormattedTextField implements DocumentListener, ActionListener, FocusListener {
     public interface TextChangeListener extends EventListener {

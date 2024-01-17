@@ -34,9 +34,8 @@ import java.net.URL;
  *
  * @author Fab
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
-@Deprecated(since = "3.0.0")
 public class SplashScreenFrame extends JFrame {
     public static class SplashPanel extends JPanel {
         private static final String SPLASH_FOLDER = ResourceUtil.IMAGE_PATH + "splash";
@@ -54,8 +53,7 @@ public class SplashScreenFrame extends JFrame {
                 image = ImageUtil.load(files[Random.nextInt(files.length)]);
             else {
                 try {
-                    files = ClassUtil.getResourcesInPackage(SPLASH_FOLDER, null, true, false, false, false).toArray(
-                            new String[0]);
+                    files = ClassUtil.getResourcesInPackage(SPLASH_FOLDER, null, true, false, false, false).toArray(new String[0]);
                     if (files.length > 0) {
                         final URL url = getClass().getResource("/" + files[Random.nextInt(files.length)]);
                         if (url != null)

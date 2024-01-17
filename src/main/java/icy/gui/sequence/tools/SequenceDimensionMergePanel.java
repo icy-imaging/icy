@@ -51,7 +51,7 @@ import javax.swing.event.ChangeListener;
  * Frame for dimension merge operation.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class SequenceDimensionMergePanel extends JPanel {
     static class SequenceChannelEntry {

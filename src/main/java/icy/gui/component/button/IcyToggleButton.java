@@ -28,7 +28,7 @@ import javax.swing.*;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyToggleButton extends JToggleButton {
     private boolean flat;

@@ -34,7 +34,7 @@ import java.beans.PropertyChangeListener;
  * OSX application compatibility class
  *
  * @author stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class AppleUtil {
     //static final Thread fixThread = new Thread(AppleUtil::appleFixLiveRun, "AppleFix");

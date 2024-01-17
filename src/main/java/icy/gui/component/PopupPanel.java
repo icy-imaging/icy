@@ -34,7 +34,7 @@ import javax.swing.*;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class PopupPanel extends JPanel {
     private class PopupTitlePanel extends IcyToggleButton {

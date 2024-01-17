@@ -54,7 +54,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 @SuppressWarnings("deprecation") // TODO: 13/02/2023 Check deprecated extension
 public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, SequenceListener {

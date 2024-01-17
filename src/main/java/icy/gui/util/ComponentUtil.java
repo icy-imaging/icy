@@ -57,7 +57,7 @@ import javax.swing.tree.TreePath;
  * General component utilities class.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class ComponentUtil {
     public static void setPreferredWidth(Component c, int w) {

@@ -45,7 +45,7 @@ import java.util.*;
  * This class is used to load plugins from "plugins" package and "plugins" directory
  *
  * @author Stephane
- * @author Thommas MUSSET
+ * @author Thommas Musset
  */
 public class PluginLoader {
     public final static String PLUGIN_PACKAGE = "plugins";

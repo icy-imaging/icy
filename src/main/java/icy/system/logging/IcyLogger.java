@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
  * <br>
  * Supports both <code>GUI</code> and <code>Headless</code> mode.
  *
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class IcyLogger {
     @MagicConstant(intValues = {DEBUG, INFO, WARN, ERROR})

@@ -29,7 +29,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyTextFieldHint extends JTextField implements FocusListener {
     private final IcyIconFont icon;

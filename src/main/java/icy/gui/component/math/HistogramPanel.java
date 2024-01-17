@@ -34,7 +34,7 @@ import java.util.EventListener;
  * Histogram component.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class HistogramPanel extends BorderedPanel {
     public interface HistogramPanelListener extends EventListener {

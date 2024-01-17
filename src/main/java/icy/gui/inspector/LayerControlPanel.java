@@ -40,7 +40,7 @@ import javax.swing.event.ChangeListener;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  * @deprecated Use {@link icy.gui.toolbar.panel.LayerControlPanel} instead
  */
 @Deprecated(since = "3.0.0", forRemoval = true)

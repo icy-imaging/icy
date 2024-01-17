@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,16 +18,23 @@
 
 package icy.gui.toolbar.panel;
 
+import icy.common.listener.SkinChangeListener;
+import icy.gui.util.LookAndFeelUtil;
+
 import javax.swing.*;
 import java.awt.*;
 
-public abstract class ToolbarPanel extends JPanel {
+/**
+ * @author Thomas Musset
+ */
+public abstract class ToolbarPanel extends JPanel implements SkinChangeListener {
     private Dimension saveSize;
 
     protected ToolbarPanel(final Dimension dimension) {
         super(new BorderLayout());
         setPreferredSize(dimension);
         saveSize = dimension;
+        LookAndFeelUtil.addListener(this);
     }
 
     public final Dimension getSaveSize() {
@@ -39,5 +46,22 @@ public abstract class ToolbarPanel extends JPanel {
             saveSize = getPreferredSize();
         else
             saveSize = dimension;
+    }
+
+    @Override
+    public void skinChanged() {
+        this.updateUI();
+
+        for (final Component c : this.getComponents()) {
+            updateComponentUI(c);
+        }
+    }
+
+    private void updateComponentUI(final Component component) {
+        if (component instanceof final JComponent jc) {
+            jc.updateUI();
+            for (final Component c : jc.getComponents())
+                updateComponentUI(c);
+        }
     }
 }

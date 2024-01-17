@@ -31,7 +31,7 @@ import javax.swing.JSlider;
  * value plus the extent.
  * </p>
  *
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class RangeSlider extends JSlider {
     /**

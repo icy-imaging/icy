@@ -63,7 +63,7 @@ import javax.swing.event.EventListenerList;
 
 /**
  * @author stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class ColormapViewer extends BorderedPanel implements MouseListener, MouseMotionListener, LUTChannelListener {
     private enum ActionType {

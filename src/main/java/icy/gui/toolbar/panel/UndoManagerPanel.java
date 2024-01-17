@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -25,7 +25,6 @@ import icy.main.Icy;
 import icy.preferences.GeneralPreferences;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
-import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.undo.AbstractIcyUndoableEdit;
 import icy.undo.IcyUndoManager;
@@ -46,7 +45,7 @@ import java.awt.*;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class UndoManagerPanel extends ToolbarPanel implements ActiveSequenceListener, ListSelectionListener, IcyUndoManagerListener, ChangeListener {
     private static UndoManagerPanel instance = null;

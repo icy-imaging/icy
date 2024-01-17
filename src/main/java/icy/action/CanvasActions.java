@@ -41,7 +41,7 @@ import icy.util.ClassUtil;
  * Canvas associated actions (disable/enable layers, fit, remove layer...)
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class CanvasActions {
     public static final class ToggleLayersAction extends IcyAbstractAction implements ActiveViewerListener {

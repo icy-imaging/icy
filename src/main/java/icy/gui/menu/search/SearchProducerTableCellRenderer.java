@@ -27,7 +27,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class SearchProducerTableCellRenderer extends DefaultTableCellRenderer {
     @Override

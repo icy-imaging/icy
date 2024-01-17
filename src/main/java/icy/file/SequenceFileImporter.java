@@ -39,7 +39,7 @@ import java.util.List;
  * and {@link AbstractImageProvider} abstract class helper.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  * @see SequenceIdImporter
  */
 public interface SequenceFileImporter extends SequenceIdImporter {

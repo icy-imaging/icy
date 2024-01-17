@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public final class MemoryMonitorButton extends IcyButton implements MouseListener {
 
@@ -84,8 +84,8 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
         final int percentMemoryUsed = (int) Math.ceil((usedMemory / SystemUtil.getJavaMaxMemory()) * 100);
         final int cpuLoad = SystemUtil.getCpuLoad();
 
-        final String cpu = (cpuLoad == 100)? String.valueOf(cpuLoad) : (cpuLoad >= 10)? " " + cpuLoad : "  " + cpuLoad;
-        final String ram = (percentMemoryUsed == 100)? String.valueOf(percentMemoryUsed) : (percentMemoryUsed >= 10)? " " + percentMemoryUsed : "  " + percentMemoryUsed;
+        final String cpu = (cpuLoad == 100) ? String.valueOf(cpuLoad) : (cpuLoad >= 10) ? " " + cpuLoad : "  " + cpuLoad;
+        final String ram = (percentMemoryUsed == 100) ? String.valueOf(percentMemoryUsed) : (percentMemoryUsed >= 10) ? " " + percentMemoryUsed : "  " + percentMemoryUsed;
 
         final String s = String.format("CPU: %s%% | RAM: %s%%", cpu, ram);
 

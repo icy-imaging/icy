@@ -57,7 +57,7 @@ import java.util.List;
  * If the plugin implements the {@link PluginThreaded} there is no more guarantee that is the case.
  *
  * @author Fabrice de Chaumont &amp; Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public abstract class Plugin implements AutoCloseable {
     @Nullable
@@ -236,7 +236,7 @@ public abstract class Plugin implements AutoCloseable {
      * @param sequence the sequence to close
      */
     public void removeSequence(@NotNull final Sequence sequence) {
-        sequence.close();
+        sequence.closeSequence();
     }
 
     /**

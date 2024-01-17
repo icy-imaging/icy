@@ -38,7 +38,7 @@ import javax.swing.SwingConstants;
  * JTabbedPane with close button (configurable) in tab.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class CloseableTabbedPane extends JTabbedPane {
     public interface CloseableTabbedPaneListener extends EventListener {

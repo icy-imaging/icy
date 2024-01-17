@@ -31,7 +31,7 @@ import java.io.File;
 
 /**
  * @author stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class GeneralPreferencePanel extends PreferencePanel {
     public static final String NODE_NAME = "General";

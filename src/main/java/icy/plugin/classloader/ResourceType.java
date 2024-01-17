@@ -22,7 +22,7 @@ package icy.plugin.classloader;
  * Enumeration for different resource types
  *
  * @author Kamran
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public enum ResourceType {
     CLASS, XML, PROPERTIES, UNKNOWN;

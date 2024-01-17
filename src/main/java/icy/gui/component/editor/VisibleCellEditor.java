@@ -33,7 +33,7 @@ import icy.gui.component.renderer.VisibleCellRenderer;
 
 /**
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class VisibleCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor {
     protected JLabel label;

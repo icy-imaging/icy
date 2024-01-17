@@ -25,7 +25,7 @@ import icy.preferences.XMLPreferences.XMLPreferencesRoot;
  * Global class for Preferences.
  *
  * @author Stephane
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class IcyPreferences {
     private static final String DEFAULT_NAME = "setting.xml";

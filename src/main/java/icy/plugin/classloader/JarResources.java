@@ -46,7 +46,7 @@ import java.util.zip.ZipInputStream;
  *
  * @author Kamran Zafar
  * @author Stephane Dallongeville
- * @author Thomas MUSSET
+ * @author Thomas Musset
  */
 public class JarResources {
     // <resourceName, content> map
