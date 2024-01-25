@@ -24,6 +24,7 @@ import icy.gui.component.menu.IcyMenuItem;
 import icy.gui.util.LookAndFeelUtil;
 import icy.math.UnitUtil;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import jiconfont.swing.IconFontSwing;
@@ -113,9 +114,12 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
             final double released = freeAfter - freeBefore;
             final double usedMemory = SystemUtil.getJavaUsedMemory();
 
-            System.out.println("Max / Used memory: " + UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())
-                    + " / " + UnitUtil.getBytesString((usedMemory > 0) ? usedMemory : 0) + " (released by GC: "
-                    + UnitUtil.getBytesString((released > 0) ? released : 0) + ")");
+            IcyLogger.info(MemoryMonitorButton.class, String.format(
+                    "Max / Used memory: %s / %s (released by GC: %s)",
+                    UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory()),
+                    UnitUtil.getBytesString((usedMemory > 0) ? usedMemory : 0),
+                    UnitUtil.getBytesString((released > 0) ? released : 0)
+            ));
         });
     }
 
@@ -126,7 +130,7 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
         // TODO: 19/06/2023 Check if still needs to be done in EDT or it crashes on OSX
         ThreadUtil.bgRun(() -> {
             vtkObjectBase.JAVA_OBJECT_MANAGER.gc(true);
-            System.out.println("VTK GC forced");
+            IcyLogger.info(MemoryMonitorButton.class, "VTK GC forced");
         });
     }
 

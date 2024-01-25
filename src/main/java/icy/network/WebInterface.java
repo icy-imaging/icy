@@ -1,12 +1,22 @@
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package icy.network;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.w3c.dom.Document;
 
 import icy.main.Icy;
 import icy.math.UnitUtil;
@@ -14,14 +24,24 @@ import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginDescriptor.PluginIdent;
 import icy.plugin.PluginLoader;
 import icy.preferences.ApplicationPreferences;
-import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
+import org.w3c.dom.Document;
 
-public class WebInterface
-{
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
+ */
+public class WebInterface {
     public static final String BASE_URL = NetworkUtil.WEBSITE_URL + "interface/";
 
     public static final String PARAM_ACTION = "action";
@@ -57,7 +77,7 @@ public class WebInterface
 
     /**
      * Process search on the website in a specific resource and return result in a XML Document.
-     * 
+     *
      * @param text
      *        Text used for the search request, it can contains several words and use operators.<br>
      *        Examples:<br>
@@ -77,13 +97,10 @@ public class WebInterface
      *        <li>null (all resources)</li>
      *        </ul>
      * @return result in XML Document format
-     * @throws UnsupportedEncodingException
      */
-    public static Document doSearch(String text, String type) throws UnsupportedEncodingException
-    {
+    public static Document doSearch(final String text, final String type) {
         // build request (encode search text in UTF8)
-        String request = BASE_URL + "?" + PARAM_ACTION + "=" + ACTION_TYPE_SEARCH + "&" + PARAM_SEARCH + "="
-                + URLEncoder.encode(text, "UTF-8");
+        String request = BASE_URL + "?" + PARAM_ACTION + "=" + ACTION_TYPE_SEARCH + "&" + PARAM_SEARCH + "=" + URLEncoder.encode(text, StandardCharsets.UTF_8);
 
         // specific type ?
         if (!StringUtil.isEmpty(type))
@@ -99,7 +116,7 @@ public class WebInterface
 
     /**
      * Process search on the website in all resources and return result in a XML Document.
-     * 
+     *
      * @param text
      *        Text used for the search request, it can contains several words and use operators.<br>
      *        Examples:<br>
@@ -110,16 +127,14 @@ public class WebInterface
      *        <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
      *        </ul>
      * @return result in XML Document format
-     * @throws UnsupportedEncodingException
      */
-    public static Document doSearch(String text) throws UnsupportedEncodingException
-    {
+    public static Document doSearch(final String text) {
         return doSearch(text, null);
     }
 
     /**
      * Report an error log from a given plugin or developer id to Icy web site.
-     * 
+     *
      * @param plugin
      *        The plugin responsible of the error or <code>null</code> if the error comes from the
      *        application or if we are not able to get the plugin descriptor.
@@ -129,15 +144,14 @@ public class WebInterface
      * @param errorLog
      *        Error log to report.
      */
-    public static void reportError(PluginDescriptor plugin, String devId, String errorLog)
-    {
+    public static void reportError(final PluginDescriptor plugin, final String devId, final String errorLog) {
         final String icyId;
         final String javaId;
         final String osId;
         final String memory;
         String pluginId;
-        String pluginDepsId;
-        final Map<String, String> values = new HashMap<String, String>();
+        final StringBuilder pluginDepsId;
+        final Map<String, String> values = new HashMap<>();
 
         // bug report action
         values.put(PARAM_ACTION, ACTION_TYPE_BUGREPORT);
@@ -158,28 +172,25 @@ public class WebInterface
                 + ")<br>";
         memory = "Max java memory : " + UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory()) + "<br>";
 
-        if (plugin != null)
-        {
+        if (plugin != null) {
             // default
-            pluginId = "Plugin " + plugin.toString();
+            pluginId = "Plugin " + plugin;
             // determine main plugin (default = plugin)
             PluginDescriptor mainPlugin = plugin;
 
             // bundled plugin ?
-            if (plugin.isBundled())
-            {
+            if (plugin.isBundled()) {
                 // try to get main plugin
                 mainPlugin = plugin.getMainPlugin();
 
                 // add bundle info
-                if (mainPlugin == null)
-                {
+                if (mainPlugin == null) {
                     pluginId += " bundled (could not retrieve main plugin)";
                     // use current plugin
                     mainPlugin = plugin;
                 }
                 else
-                    pluginId += " bundled in " + mainPlugin.toString();
+                    pluginId += " bundled in " + mainPlugin;
             }
 
             pluginId += "<br><br>";
@@ -190,30 +201,27 @@ public class WebInterface
             values.put(PARAM_PLUGINCLASSNAME, className);
             values.put(PARAM_PLUGINVERSION, mainPlugin.getVersion().toString());
 
-            if (mainPlugin.getRequired().size() > 0)
-            {
-                pluginDepsId = "Dependances:<br>";
-                for (PluginIdent ident : mainPlugin.getRequired())
-                {
+            if (mainPlugin.getRequired().size() > 0) {
+                pluginDepsId = new StringBuilder("Dependances:<br>");
+                for (final PluginIdent ident : mainPlugin.getRequired()) {
                     final PluginDescriptor installed = PluginLoader.getPlugin(ident.getClassName());
 
                     if (installed == null)
-                        pluginDepsId += "Class " + ident.getClassName() + " not found !<br>";
+                        pluginDepsId.append("Class ").append(ident.getClassName()).append(" not found !<br>");
                     else
-                        pluginDepsId += "Plugin " + installed.toString() + " is correctly installed<br>";
+                        pluginDepsId.append("Plugin ").append(installed).append(" is correctly installed<br>");
                 }
-                pluginDepsId += "<br>";
+                pluginDepsId.append("<br>");
             }
             else
-                pluginDepsId = "";
+                pluginDepsId = new StringBuilder();
         }
-        else
-        {
+        else {
             // no plugin information available
             values.put(PARAM_PLUGINCLASSNAME, "");
             values.put(PARAM_PLUGINVERSION, "");
             pluginId = "";
-            pluginDepsId = "";
+            pluginDepsId = new StringBuilder();
         }
 
         // add dev id
@@ -235,23 +243,15 @@ public class WebInterface
                 icyId + javaId + osId + memory + "<br>" + pluginId + pluginDepsId + errorLog.replaceAll("\n", "<br>"));
 
         // send report in background task (we don't want to wait for response from server)
-        ThreadUtil.bgRun(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                try
-                {
-                    final String result = NetworkUtil.postData(BASE_URL, values);
+        ThreadUtil.bgRun(() -> {
+            try {
+                final String result = NetworkUtil.postData(BASE_URL, values);
 
-                    if (result == null)
-                        System.out.println("Error while reporting data, verifying your internet connection.");
-                }
-                catch (IOException e)
-                {
-                    System.out.println("Error while reporting data :");
-                    IcyExceptionHandler.showErrorMessage(e, false, false);
-                }
+                if (result == null)
+                    IcyLogger.warn(WebInterface.class, "Error while reporting data, verifying your internet connection.");
+            }
+            catch (final IOException e) {
+                IcyLogger.error(WebInterface.class, e, "Error while reporting data.");
             }
         });
     }

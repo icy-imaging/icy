@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,41 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package plugins.kernel.canvas;
 
-import java.awt.AWTException;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import javax.swing.JToolBar;
-
-import icy.canvas.Canvas3D;
-import icy.canvas.CanvasLayerEvent;
+import icy.canvas.*;
 import icy.canvas.CanvasLayerEvent.LayersEventType;
-import icy.canvas.IcyCanvas;
-import icy.canvas.IcyCanvasEvent;
 import icy.canvas.IcyCanvasEvent.IcyCanvasEventType;
-import icy.canvas.Layer;
 import icy.common.exception.TooLargeArrayException;
 import icy.gui.component.button.IcyToggleButton;
 import icy.gui.util.ComponentUtil;
@@ -70,6 +40,7 @@ import icy.sequence.DimensionId;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent.SequenceEventType;
 import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.type.collection.array.Array1DUtil;
 import icy.type.point.Point3D;
@@ -81,37 +52,25 @@ import icy.vtk.VtkImageVolume;
 import icy.vtk.VtkImageVolume.VtkVolumeBlendType;
 import icy.vtk.VtkUtil;
 import plugins.kernel.canvas.VtkSettingPanel.SettingChangeListener;
-import vtk.vtkAbstractVolumeMapper;
-import vtk.vtkActor;
-import vtk.vtkActor2D;
-import vtk.vtkAxesActor;
-import vtk.vtkCamera;
-import vtk.vtkColorTransferFunction;
-import vtk.vtkCubeAxesActor;
-import vtk.vtkCubeSource;
-import vtk.vtkCutter;
-import vtk.vtkDelaunay2D;
-import vtk.vtkImageData;
-import vtk.vtkInformation;
-import vtk.vtkInformationIntegerKey;
-import vtk.vtkLight;
-import vtk.vtkPicker;
-import vtk.vtkPiecewiseFunction;
-import vtk.vtkPlane;
-import vtk.vtkPolyDataMapper;
-import vtk.vtkProp;
-import vtk.vtkRenderWindow;
-import vtk.vtkRenderer;
-import vtk.vtkTextActor;
-import vtk.vtkTextProperty;
+import vtk.*;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * VTK 3D canvas class.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
-@SuppressWarnings("deprecation")
 public class VtkCanvas extends Canvas3D implements ActionListener, SettingChangeListener {
     /**
      * icons
@@ -216,7 +175,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     protected final EDTTask<Object> edtTask;
     protected boolean initialized;
 
-    public VtkCanvas(Viewer viewer) {
+    public VtkCanvas(final Viewer viewer) {
         super(viewer);
 
         initialized = false;
@@ -500,7 +459,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             // be sure there is no more processing here
             propertiesUpdater.join();
         }
-        catch (InterruptedException e) {
+        catch (final InterruptedException e) {
             // can ignore safely
         }
         overlayUpdater.interrupt();
@@ -508,7 +467,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             // be sure there is no more processing here
             overlayUpdater.join();
         }
-        catch (InterruptedException e) {
+        catch (final InterruptedException e) {
             // can ignore safely
         }
 
@@ -582,7 +541,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    public void customizeToolbar(JToolBar toolBar) {
+    public void customizeToolbar(final JToolBar toolBar) {
         toolBar.addSeparator();
         toolBar.add(axesButton);
         toolBar.addSeparator();
@@ -683,7 +642,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * Sets rendering background color
      */
-    public void setBackgroundColor(Color value) {
+    public void setBackgroundColor(final Color value) {
         settingPanel.setBackgroundColor(value);
     }
 
@@ -697,7 +656,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * Enable / disable volume bounding box display.
      */
-    public void setBoundingBoxVisible(boolean value) {
+    public void setBoundingBoxVisible(final boolean value) {
         if (boundingBoxButton.isSelected() != value)
             boundingBoxButton.doClick();
     }
@@ -712,7 +671,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * Enable / disable volume bounding box grid display.
      */
-    public void setBoundingBoxGridVisible(boolean value) {
+    public void setBoundingBoxGridVisible(final boolean value) {
         if (gridButton.isSelected() != value)
             gridButton.doClick();
     }
@@ -727,7 +686,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * Enable / disable volume bounding box ruler display.
      */
-    public void setBoundingBoxRulerVisible(boolean value) {
+    public void setBoundingBoxRulerVisible(final boolean value) {
         if (rulerButton.isSelected() != value)
             rulerButton.doClick();
     }
@@ -742,7 +701,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * Enable / disable volume bounding box ruler labels display.
      */
-    public void setBoundingBoxRulerLabelsVisible(boolean value) {
+    public void setBoundingBoxRulerLabelsVisible(final boolean value) {
         if (rulerLabelButton.isSelected() != value)
             rulerLabelButton.doClick();
     }
@@ -757,7 +716,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * Enable / disable volume slicer.
      */
-    public void setVolumeSlicerEnable(boolean value) {
+    public void setVolumeSlicerEnable(final boolean value) {
         if (volumeSlicerButton.isSelected() != value)
             volumeSlicerButton.doClick();
     }
@@ -766,14 +725,14 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      * @deprecated USe {@link #setBackgroundColorInternal(Color)}
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setBoundingBoxColor(Color color) {
+    public void setBoundingBoxColor(final Color color) {
         setBackgroundColorInternal(color);
     }
 
     /**
      * Set background color (internal)
      */
-    public void setBackgroundColorInternal(Color color) {
+    public void setBackgroundColorInternal(final Color color) {
         renderer.SetBackground(Array1DUtil.floatArrayToDoubleArray(color.getColorComponents(null)));
 
         final Color oppositeColor;
@@ -822,7 +781,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * Enable / disable 3D axis display.
      */
-    public void setAxisVisible(boolean value) {
+    public void setAxisVisible(final boolean value) {
         if (axesButton.isSelected() != value)
             axesButton.doClick();
     }
@@ -837,7 +796,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @see VtkImageVolume#setBlendingMode(VtkVolumeBlendType)
      */
-    public void setVolumeBlendingMode(VtkVolumeBlendType value) {
+    public void setVolumeBlendingMode(final VtkVolumeBlendType value) {
         settingPanel.setVolumeBlendingMode(value);
     }
 
@@ -851,7 +810,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @see VtkImageVolume#setSampleResolution(double)
      */
-    public void setVolumeSample(int value) {
+    public void setVolumeSample(final int value) {
         settingPanel.setVolumeSample(value);
     }
 
@@ -865,7 +824,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @see VtkImageVolume#setShade(boolean)
      */
-    public void setVolumeShadingEnable(boolean value) {
+    public void setVolumeShadingEnable(final boolean value) {
         settingPanel.setVolumeShading(value);
     }
 
@@ -879,7 +838,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @see VtkImageVolume#setAmbient(double)
      */
-    public void setVolumeAmbient(double value) {
+    public void setVolumeAmbient(final double value) {
         settingPanel.setVolumeAmbient(value);
     }
 
@@ -893,7 +852,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @see VtkImageVolume#setDiffuse(double)
      */
-    public void setVolumeDiffuse(double value) {
+    public void setVolumeDiffuse(final double value) {
         settingPanel.setVolumeDiffuse(value);
     }
 
@@ -907,7 +866,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @see VtkImageVolume#setSpecular(double)
      */
-    public void setVolumeSpecular(double value) {
+    public void setVolumeSpecular(final double value) {
         settingPanel.setVolumeSpecular(value);
     }
 
@@ -921,7 +880,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @see VtkImageVolume#setInterpolationMode(int)
      */
-    public void setVolumeInterpolation(int value) {
+    public void setVolumeInterpolation(final int value) {
         settingPanel.setVolumeInterpolation(value);
     }
 
@@ -935,7 +894,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * @see VtkImageVolume#setGPURendering(boolean)
      */
-    public void setGPURendering(boolean value) {
+    public void setGPURendering(final boolean value) {
         settingPanel.setGPURendering(value);
     }
 
@@ -952,7 +911,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      *
      * @see VtkImageVolume#setVisible(boolean)
      */
-    public void setVolumeVisible(boolean value) {
+    public void setVolumeVisible(final boolean value) {
         imageVolume.setVisible(value);
     }
 
@@ -981,7 +940,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void setVolumeDistanceSample(int value) {
+    public void setVolumeDistanceSample(final int value) {
         setVolumeSample(value);
     }
 
@@ -1022,7 +981,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      * @deprecated Always enable now
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setPickOnMouseMove(boolean value) {
+    public void setPickOnMouseMove(final boolean value) {
         // if (pickOnMouseMoveButton.isSelected() != value)
         // pickOnMouseMoveButton.doClick();
     }
@@ -1040,7 +999,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      * @deprecated use {@link #pickProp(int, int)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public vtkActor pick(int x, int y) {
+    public vtkActor pick(final int x, final int y) {
         return (vtkActor) panel3D.pick(x, y);
     }
 
@@ -1050,14 +1009,14 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      * @see #getPickedObject()
      * @see icy.vtk.IcyVtkPanel#pick(int, int)
      */
-    public vtkProp pickProp(int x, int y) {
+    public vtkProp pickProp(final int x, final int y) {
         return panel3D.pick(x, y);
     }
 
     /**
      * Return reached z world position (normalized) for specified display position
      */
-    public double getWorldZ(int x, int y) {
+    public double getWorldZ(final int x, final int y) {
         final vtkRenderer r = getRenderer();
         final vtkRenderWindow rw = getRenderWindow();
 
@@ -1066,17 +1025,17 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
 
         final float[] scale = panel3D.getCurrentSurfaceScale(new float[2]);
         // need to revert Y axis
-        return r.GetZ((int)(x * scale[0]), (int)(rw.GetSize()[1] - (y * scale[1])));
+        return r.GetZ((int) (x * scale[0]), (int) (rw.GetSize()[1] - (y * scale[1])));
     }
 
-    public double getWorldZ(Point pt) {
+    public double getWorldZ(final Point pt) {
         return getWorldZ(pt.x, pt.y);
     }
 
     /**
      * Convert world coordinates to display coordinates
      */
-    public Point3D worldToDisplay(Point3D pt) {
+    public Point3D worldToDisplay(final Point3D pt) {
         if (pt == null)
             return new Point3D.Double();
 
@@ -1086,7 +1045,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * Convert world coordinates to display coordinates
      */
-    public Point3D worldToDisplay(double x, double y, double z) {
+    public Point3D worldToDisplay(final double x, final double y, final double z) {
         final vtkRenderer r = getRenderer();
         final vtkRenderWindow rw = getRenderWindow();
 
@@ -1096,7 +1055,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         r.SetWorldPoint(x, y, z, 1d);
         r.WorldToDisplay();
         final Point3D result = new Point3D.Double(r.GetDisplayPoint());
-        float[] scale = panel3D.getCurrentSurfaceScale(new float[2]);
+        final float[] scale = panel3D.getCurrentSurfaceScale(new float[2]);
 
         // reverse surface scaling
         result.setX(result.getX() / scale[0]);
@@ -1109,7 +1068,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * Convert display coordinates to world coordinates.
      */
-    public Point3D displayToWorld(Point pt) {
+    public Point3D displayToWorld(final Point pt) {
         if (pt == null)
             return new Point3D.Double();
 
@@ -1119,7 +1078,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * Convert display coordinates to world coordinates.<br>
      */
-    public Point3D displayToWorld(int x, int y) {
+    public Point3D displayToWorld(final int x, final int y) {
         // get camera focal point
         final double[] fp = camera.GetFocalPoint();
         // transform it to display position (with Z info)
@@ -1133,7 +1092,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      * Convert display coordinates to world coordinates.<br>
      * Default value for Z should be 0d
      */
-    public Point3D displayToWorld(Point pt, double z) {
+    public Point3D displayToWorld(final Point pt, final double z) {
         if (pt == null)
             return new Point3D.Double();
 
@@ -1144,7 +1103,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      * Convert display coordinates to world coordinates.<br>
      * Default value for Z is 0d
      */
-    public Point3D displayToWorld(double x, double y, double z) {
+    public Point3D displayToWorld(final double x, final double y, final double z) {
         final vtkRenderer r = getRenderer();
         final vtkRenderWindow rw = getRenderWindow();
 
@@ -1182,7 +1141,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    public Point imageToCanvas(double x, double y, double z) {
+    public Point imageToCanvas(final double x, final double y, final double z) {
         final double[] scaling = getVolumeScale();
         final Point3D result = worldToDisplay(x * scaling[0], y * scaling[1], z * scaling[2]);
 
@@ -1193,11 +1152,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    public Point3D.Double canvasToImage(int x, int y) {
+    public Point3D.Double canvasToImage(final int x, final int y) {
         final double[] scaling = getVolumeScale();
 
         // check scaling does not contains any 0
-        for (double d : scaling) {
+        for (final double d : scaling) {
             if (d == 0d)
                 return new Point3D.Double();
         }
@@ -1237,11 +1196,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      * @deprecated Use {@link VtkUtil#getLayerProps(Layer)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    protected vtkProp[] getLayerActors(Layer layer) {
+    protected vtkProp[] getLayerActors(final Layer layer) {
         return VtkUtil.getLayerProps(layer);
     }
 
-    protected void addLayerActors(Layer layer) {
+    protected void addLayerActors(final Layer layer) {
         // not yet (or no more) initialized
         if (overlayUpdater == null)
             return;
@@ -1249,7 +1208,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         overlayUpdater.addProps(VtkUtil.getLayerProps(layer));
     }
 
-    protected void removeLayerActors(Layer layer) {
+    protected void removeLayerActors(final Layer layer) {
         // not yet (or no more) initialized
         if (overlayUpdater == null)
             return;
@@ -1257,7 +1216,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         overlayUpdater.removeProps(VtkUtil.getLayerProps(layer));
     }
 
-    protected void addLayersActors(List<Layer> layers) {
+    protected void addLayersActors(final List<Layer> layers) {
         // not yet (or no more) initialized
         if (overlayUpdater == null)
             return;
@@ -1284,11 +1243,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         try {
             return VtkUtil.getImageData(getSequence(), getPositionT(), getPositionC());
         }
-        catch (TooLargeArrayException e) {
+        catch (final TooLargeArrayException e) {
             // cannot allocate a such large contiguous array
             return null;
         }
-        catch (OutOfMemoryError e) {
+        catch (final OutOfMemoryError e) {
             // just not enough memory
             return null;
         }
@@ -1297,7 +1256,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     /**
      * update image data
      */
-    protected void updateImageData(vtkImageData data) {
+    protected void updateImageData(final vtkImageData data) {
         if (data != null) {
             imageVolume.setVolumeData(data);
             imageVolume.getVolume().SetVisibility(getImageLayer().isVisible() ? 1 : 0);
@@ -1389,12 +1348,12 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      * Set scaling for image volume rendering
      */
     @Override
-    public void setVolumeScale(double x, double y, double z) {
+    public void setVolumeScale(final double x, final double y, final double z) {
         propertyChange(PROPERTY_SCALE, new double[]{x, y, z});
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {
+    public void keyPressed(final KeyEvent e) {
         // send to overlays
         super.keyPressed(e);
 
@@ -1459,7 +1418,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {
+    public void keyReleased(final KeyEvent e) {
         // send to overlays
         super.keyReleased(e);
 
@@ -1468,12 +1427,12 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    protected void setPositionZInternal(int z) {
+    protected void setPositionZInternal(final int z) {
         // not supported, Z should stay at -1
     }
 
     @Override
-    protected void setPositionCInternal(int c) {
+    protected void setPositionCInternal(final int c) {
         // single channel mode is not possible here
         if (c != -1)
             return;
@@ -1512,28 +1471,28 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    public void setMouseImagePosX(double value) {
+    public void setMouseImagePosX(final double value) {
         // just ignore NaN position (canvasToImage(..) can return NaN for specific dimension)
         if (!Double.isNaN(value))
             super.setMouseImagePosX(value);
     }
 
     @Override
-    public void setMouseImagePosY(double value) {
+    public void setMouseImagePosY(final double value) {
         // just ignore NaN position (canvasToImage(..) can return NaN for specific dimension)
         if (!Double.isNaN(value))
             super.setMouseImagePosY(value);
     }
 
     @Override
-    public void setMouseImagePosZ(double value) {
+    public void setMouseImagePosZ(final double value) {
         // just ignore NaN position (canvasToImage(..) can return NaN for specific dimension)
         if (!Double.isNaN(value))
             super.setMouseImagePosZ(value);
     }
 
     @Override
-    public BufferedImage getRenderedImage(int t, int c) {
+    public BufferedImage getRenderedImage(final int t, final int c) {
         final CustomVtkPanel vp = panel3D;
         if (vp == null)
             return null;
@@ -1573,7 +1532,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                 // do the capture
                 return robot.createScreenCapture(bounds);
             }
-            catch (AWTException e) {
+            catch (final AWTException e) {
                 IcyExceptionHandler.showErrorMessage(e, true);
                 return null;
             }
@@ -1613,7 +1572,6 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             // }
             // catch (AWTException e)
             // {
-            // // TODO Auto-generated catch block
             // e.printStackTrace();
             // }
             //
@@ -1655,17 +1613,16 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    public BufferedImage getRenderedImage(int t, int z, int c, boolean canvasView) {
+    public BufferedImage getRenderedImage(final int t, final int z, final int c, final boolean canvasView) {
         if (z != -1)
-            throw new UnsupportedOperationException(
-                    "Error: getRenderedImage(..) with z != -1 not supported on Canvas3D.");
+            throw new UnsupportedOperationException("Error: getRenderedImage(..) with z != -1 not supported on Canvas3D.");
         if (!canvasView)
-            System.out.println("Warning: getRenderedImage(..) with canvasView = false not supported on Canvas3D.");
+            IcyLogger.warn(VtkCanvas.class, "getRenderedImage(..) with canvasView = false not supported on Canvas3D.");
 
         return getRenderedImage(t, c);
     }
 
-    protected void invokeOnEDT(Runnable task) throws InterruptedException {
+    protected void invokeOnEDT(final Runnable task) throws InterruptedException {
         // in initialization --> just execute
         if (edtTask == null) {
             task.run();
@@ -1677,26 +1634,26 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         try {
             ThreadUtil.invokeNow(edtTask);
         }
-        catch (InterruptedException e) {
+        catch (final InterruptedException e) {
             throw e;
         }
-        catch (Exception t) {
+        catch (final Exception t) {
             // just ignore as this is async process
-            System.out.println("[VTKCanvas] Warning:" + t);
+            IcyLogger.warn(VtkCanvas.class, t, "[VTKCanvas] Warning.");
         }
     }
 
-    protected void invokeOnEDTSilent(Runnable task) {
+    protected void invokeOnEDTSilent(final Runnable task) {
         try {
             invokeOnEDT(task);
         }
-        catch (InterruptedException e) {
+        catch (final InterruptedException e) {
             // just ignore
         }
     }
 
     @Override
-    public void changed(IcyCanvasEvent event) {
+    public void changed(final IcyCanvasEvent event) {
         super.changed(event);
 
         // avoid useless process during canvas initialization
@@ -1726,7 +1683,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    protected void lutChanged(int channel) {
+    protected void lutChanged(final int channel) {
         super.lutChanged(channel);
 
         // avoid useless process during canvas initialization
@@ -1737,7 +1694,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    protected void sequenceOverlayChanged(Overlay overlay, SequenceEventType type) {
+    protected void sequenceOverlayChanged(final Overlay overlay, final SequenceEventType type) {
         super.sequenceOverlayChanged(overlay, type);
 
         if (!initialized)
@@ -1748,7 +1705,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    protected void sequenceDataChanged(IcyBufferedImage image, SequenceEventType type) {
+    protected void sequenceDataChanged(final IcyBufferedImage image, final SequenceEventType type) {
         super.sequenceDataChanged(image, type);
 
         // rebuild image data and bounds
@@ -1757,7 +1714,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    protected void sequenceMetaChanged(String metadataName) {
+    protected void sequenceMetaChanged(final String metadataName) {
         super.sequenceMetaChanged(metadataName);
 
         final Sequence sequence = getSequence();
@@ -1773,7 +1730,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    protected void layerChanged(CanvasLayerEvent event) {
+    protected void layerChanged(final CanvasLayerEvent event) {
         super.layerChanged(event);
 
         if (!initialized)
@@ -1789,14 +1746,14 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    protected void layerAdded(Layer layer) {
+    protected void layerAdded(final Layer layer) {
         super.layerAdded(layer);
 
         addLayerActors(layer);
     }
 
     @Override
-    protected void layerRemoved(Layer layer) {
+    protected void layerRemoved(final Layer layer) {
         super.layerRemoved(layer);
 
         removeLayerActors(layer);
@@ -1808,7 +1765,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
         final Object source = e.getSource();
 
         // translate button action to property change event
@@ -1828,7 +1785,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         // preferences.putBoolean(ID_PICKONMOUSEMOVE, pickOnMouseMoveButton.isSelected());
     }
 
-    protected void propertyChange(String name, Object value) {
+    protected void propertyChange(final String name, final Object value) {
         // we can ignore it in this case
         if (propertiesUpdater == null)
             return;
@@ -1842,7 +1799,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      * Called when one of the value in setting panel has changed
      */
     @Override
-    public void settingChange(PropertyChangeEvent evt) {
+    public void settingChange(final PropertyChangeEvent evt) {
         propertyChange(evt.getPropertyName(), evt.getNewValue());
     }
 
@@ -1852,7 +1809,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     @Override
-    protected void synchronizeCanvas(List<IcyCanvas> canvasList, IcyCanvasEvent event, boolean processAll) {
+    protected void synchronizeCanvas(final List<IcyCanvas> canvasList, final IcyCanvasEvent event, final boolean processAll) {
         final IcyCanvasEventType type = event.getType();
         final DimensionId dim = event.getDim();
 
@@ -1864,13 +1821,13 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                     // only support T positioning
                     final int t = getPositionT();
 
-                    for (IcyCanvas cnv : canvasList) {
+                    for (final IcyCanvas cnv : canvasList) {
                         if (t != -1)
                             cnv.setPositionT(t);
                     }
                 }
                 else {
-                    for (IcyCanvas cnv : canvasList) {
+                    for (final IcyCanvas cnv : canvasList) {
                         final int pos = getPosition(dim);
                         if (pos != -1)
                             cnv.setPosition(dim, pos);
@@ -1882,24 +1839,24 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         // view synchronization
         if (isSynchOnView()) {
             // always do full view synchronization here
-            vtkRenderer ren = getRenderer();
-            double[] worldPoint = ren.GetWorldPoint();
-            double[] displayPoint = ren.GetDisplayPoint();
+            final vtkRenderer ren = getRenderer();
+            final double[] worldPoint = ren.GetWorldPoint();
+            final double[] displayPoint = ren.GetDisplayPoint();
 
-            vtkCamera cam = getCamera();
-            double[] pos = cam.GetPosition();
-            double[] dir = cam.GetFocalPoint();
-            double[] viewUp = cam.GetViewUp();
-            int parallelProjection = cam.GetParallelProjection();
-            double viewAngle = cam.GetViewAngle();
+            final vtkCamera cam = getCamera();
+            final double[] pos = cam.GetPosition();
+            final double[] dir = cam.GetFocalPoint();
+            final double[] viewUp = cam.GetViewUp();
+            final int parallelProjection = cam.GetParallelProjection();
+            final double viewAngle = cam.GetViewAngle();
 
-            for (IcyCanvas canvas : canvasList) {
-                VtkCanvas canvasVtk = ((VtkCanvas) canvas);
+            for (final IcyCanvas canvas : canvasList) {
+                final VtkCanvas canvasVtk = ((VtkCanvas) canvas);
                 canvasVtk.beginUpdate();
                 canvasVtk.getVtkPanel().lock();
                 try {
-                    vtkRenderer canvasRen = canvasVtk.getRenderer();
-                    vtkCamera canvasCam = canvasVtk.getCamera();
+                    final vtkRenderer canvasRen = canvasVtk.getRenderer();
+                    final vtkCamera canvasCam = canvasVtk.getCamera();
 
                     canvasRen.SetWorldPoint(worldPoint);
                     canvasRen.SetDisplayPoint(displayPoint);
@@ -1934,11 +1891,11 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                     final double mouseImagePosY = getMouseImagePosY();
                     final double mouseImagePosZ = getMouseImagePosZ();
 
-                    for (IcyCanvas cnv : canvasList)
+                    for (final IcyCanvas cnv : canvasList)
                         ((VtkCanvas) cnv).setMouseImagePos(mouseImagePosX, mouseImagePosY, mouseImagePosZ);
                 }
                 else {
-                    for (IcyCanvas cnv : canvasList)
+                    for (final IcyCanvas cnv : canvasList)
                         cnv.setMouseImagePos(dim, getMouseImagePos(dim));
                 }
             }
@@ -1948,7 +1905,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     protected static class EDTTask<T> implements Callable<T> {
         protected Runnable task;
 
-        public void setTask(Runnable task) {
+        public void setTask(final Runnable task) {
             this.task = task;
         }
 
@@ -1961,11 +1918,6 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
     }
 
     protected class CustomVtkPanel extends IcyVtkPanel {
-        /**
-         *
-         */
-        private static final long serialVersionUID = -7399887230624608711L;
-
         long lastRefreshTime;
         boolean forceFineRendering;
 
@@ -1982,7 +1934,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             return forceFineRendering;
         }
 
-        public void setForceFineRendering(boolean value) {
+        public void setForceFineRendering(final boolean value) {
             forceFineRendering = value;
         }
 
@@ -1991,7 +1943,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
          *
          * @param consumedByCanvas boolean
          */
-        protected void updateCursor(boolean consumedByCanvas) {
+        protected void updateCursor(final boolean consumedByCanvas) {
             // don't change custom cursor
             if (getCursor().getType() == Cursor.CUSTOM_CURSOR)
                 return;
@@ -2020,7 +1972,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                 final List<ROI> selectedRois = seq.getSelectedROIs();
 
                 // search if we are overriding ROI control points
-                for (ROI selectedRoi : selectedRois) {
+                for (final ROI selectedRoi : selectedRois) {
                     final Layer layer = getLayer(selectedRoi);
 
                     if ((layer != null) && layer.isVisible() && selectedRoi.hasSelectedPoint()) {
@@ -2034,7 +1986,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void paint(Graphics g) {
+        public void paint(final Graphics g) {
             if (forceFineRendering)
                 setFineRendering();
             else {
@@ -2055,7 +2007,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         /**
          * Paint layers
          */
-        protected void paintLayers(List<Layer> sortedLayers, final Layer imageLayer, Sequence seq) {
+        protected void paintLayers(final List<Layer> sortedLayers, final Layer imageLayer, final Sequence seq) {
             final boolean lv = isLayersVisible();
 
             // call paint in inverse order to have first overlay "at top"
@@ -2066,7 +2018,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                     continue;
 
                 // update VTK visibility flag
-                for (vtkProp prop : VtkUtil.getLayerProps(layer)) {
+                for (final vtkProp prop : VtkUtil.getLayerProps(layer)) {
                     // image layer is not impacted by global layer visibility
                     if (layer == imageLayer) {
                         // we have a non empty image --> display it if layer is visible
@@ -2115,7 +2067,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void mouseEntered(MouseEvent e) {
+        public void mouseEntered(final MouseEvent e) {
             // send mouse event to overlays
             VtkCanvas.this.mouseEntered(e, getMouseImagePos5D());
 
@@ -2123,7 +2075,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void mouseExited(MouseEvent e) {
+        public void mouseExited(final MouseEvent e) {
             // send mouse event to overlays
             VtkCanvas.this.mouseExited(e, getMouseImagePos5D());
 
@@ -2131,7 +2083,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void mouseClicked(MouseEvent e) {
+        public void mouseClicked(final MouseEvent e) {
             // send mouse event to overlays
             VtkCanvas.this.mouseClick(e, getMouseImagePos5D());
 
@@ -2139,7 +2091,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void mouseMoved(MouseEvent e) {
+        public void mouseMoved(final MouseEvent e) {
             // update mouse position
             setMousePos(e.getPoint());
 
@@ -2157,7 +2109,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void mouseDragged(MouseEvent e) {
+        public void mouseDragged(final MouseEvent e) {
             final boolean oc, nc;
 
             // update mouse position
@@ -2186,7 +2138,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void mousePressed(MouseEvent e) {
+        public void mousePressed(final MouseEvent e) {
             // send mouse event to overlays
             VtkCanvas.this.mousePressed(e, getMouseImagePos5D());
 
@@ -2194,7 +2146,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void mouseReleased(MouseEvent e) {
+        public void mouseReleased(final MouseEvent e) {
             // send mouse event to overlays
             VtkCanvas.this.mouseReleased(e, getMouseImagePos5D());
 
@@ -2202,7 +2154,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void mouseWheelMoved(MouseWheelEvent e) {
+        public void mouseWheelMoved(final MouseWheelEvent e) {
             // send mouse event to overlays
             VtkCanvas.this.mouseWheelMoved(e, getMouseImagePos5D());
 
@@ -2210,7 +2162,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void keyPressed(KeyEvent e) {
+        public void keyPressed(final KeyEvent e) {
             if (!e.isConsumed()) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_R:
@@ -2242,19 +2194,19 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void zoomView(vtkCamera c, vtkRenderer r, double factor) {
+        public void zoomView(final vtkCamera c, final vtkRenderer r, final double factor) {
             super.zoomView(c, r, factor);
             VtkCanvas.this.scaleChanged(DimensionId.NULL);
         }
 
         @Override
-        public void rotateView(vtkCamera c, vtkRenderer r, int dx, int dy) {
+        public void rotateView(final vtkCamera c, final vtkRenderer r, final int dx, final int dy) {
             super.rotateView(c, r, dx, dy);
             VtkCanvas.this.rotationChanged(DimensionId.NULL);
         }
 
         @Override
-        public void translateView(vtkCamera c, vtkRenderer r, double dx, double dy) {
+        public void translateView(final vtkCamera c, final vtkRenderer r, final double dx, final double dy) {
             super.translateView(c, r, dx, dy);
             VtkCanvas.this.positionChanged(DimensionId.NULL);
         }
@@ -2272,7 +2224,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas) {
+        public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
             // nothing here
         }
 
@@ -2290,7 +2242,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         String name;
         Object value;
 
-        public Property(String name, Object value) {
+        public Property(final String name, final Object value) {
             super();
 
             this.name = name;
@@ -2298,7 +2250,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (obj instanceof Property)
                 return name.equals(((Property) obj).name);
 
@@ -2323,7 +2275,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             toUpdate = new LinkedBlockingQueue<>(256);
         }
 
-        public synchronized void submit(Property prop) {
+        public synchronized void submit(final Property prop) {
             // remove previous property of same name
             if (toUpdate.remove(prop)) {
                 // if we already had a layers visible update then we update all layers
@@ -2335,7 +2287,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             toUpdate.add(prop);
         }
 
-        protected void updateProperty(Property prop) throws InterruptedException {
+        protected void updateProperty(final Property prop) throws InterruptedException {
             final String name = prop.name;
             final Object value = prop.value;
 
@@ -2565,7 +2517,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                 try {
                     updateProperty(toUpdate.take());
                 }
-                catch (InterruptedException e) {
+                catch (final InterruptedException e) {
                     // just end process
                     break;
                 }
@@ -2594,7 +2546,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             propToRemove = new LinkedList<>();
         }
 
-        public void addProp(vtkProp prop) {
+        public void addProp(final vtkProp prop) {
             synchronized (propToAdd) {
                 synchronized (propToRemove) {
                     propToAdd.add(prop);
@@ -2603,7 +2555,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             }
         }
 
-        public void removeProp(vtkProp prop) {
+        public void removeProp(final vtkProp prop) {
             synchronized (propToRemove) {
                 synchronized (propToAdd) {
                     propToRemove.add(prop);
@@ -2612,7 +2564,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             }
         }
 
-        public void addProps(List<vtkProp> props) {
+        public void addProps(final List<vtkProp> props) {
             synchronized (propToAdd) {
                 synchronized (propToRemove) {
                     propToAdd.addAll(props);
@@ -2621,7 +2573,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             }
         }
 
-        public void removeProps(List<vtkProp> props) {
+        public void removeProps(final List<vtkProp> props) {
             synchronized (propToRemove) {
                 synchronized (propToAdd) {
                     propToRemove.addAll(props);
@@ -2630,10 +2582,10 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             }
         }
 
-        public void addProps(vtkProp[] props) {
+        public void addProps(final vtkProp[] props) {
             synchronized (propToAdd) {
                 synchronized (propToRemove) {
-                    for (vtkProp prop : props) {
+                    for (final vtkProp prop : props) {
                         propToAdd.add(prop);
                         propToRemove.remove(prop);
                     }
@@ -2641,10 +2593,10 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
             }
         }
 
-        public void removeProps(vtkProp[] props) {
+        public void removeProps(final vtkProp[] props) {
             synchronized (propToRemove) {
                 synchronized (propToAdd) {
-                    for (vtkProp prop : props) {
+                    for (final vtkProp prop : props) {
                         propToRemove.add(prop);
                         propToAdd.remove(prop);
                     }

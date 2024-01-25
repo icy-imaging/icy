@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -37,6 +37,7 @@ import icy.sequence.Sequence;
 import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
 import icy.system.audit.Audit;
+import icy.system.logging.IcyLogger;
 import icy.util.ClassUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,7 +57,8 @@ import java.util.List;
  * By default the constructor of a Plugin class is called in the EDT (Event Dispatch Thread).<br>
  * If the plugin implements the {@link PluginThreaded} there is no more guarantee that is the case.
  *
- * @author Fabrice de Chaumont &amp; Stephane
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public abstract class Plugin implements AutoCloseable {
@@ -85,9 +87,11 @@ public abstract class Plugin implements AutoCloseable {
         if (descriptor == null) {
             // descriptor not found (don't check for anonymous plugin class) ?
             if (!getClass().isAnonymousClass()) {
-                System.out.println(
-                        "Warning : Plugin '" + getClass().getName() + "' started but not found in PluginLoader !");
-                System.out.println("Local XML plugin description file is probably incorrect.");
+                final String[] messages = new String[]{
+                        "Plugin '" + getClass().getName() + "' started but not found in PluginLoader !",
+                        "Local XML plugin description file is probably incorrect."
+                };
+                IcyLogger.warn(Plugin.class, messages);
             }
 
             // create dummy descriptor
@@ -450,7 +454,7 @@ public abstract class Plugin implements AutoCloseable {
             return extractResourceTo(SystemUtil.getTempLibraryDirectory() + FileUtil.separator + mappedlibName, libUrl);
         }
         catch (final IOException e) {
-            System.err.println("Error while extracting packed library " + libName + ": " + e);
+            IcyLogger.error(Plugin.class, e, "Error while extracting packed library " + libName);
         }
 
         return null;

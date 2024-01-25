@@ -1,45 +1,42 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.file;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-
 import icy.network.NetworkUtil;
-import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 
+import java.io.*;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 /**
- * @author stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class FileUtil
-{
+public class FileUtil {
     public static final char separatorChar = '/';
     public static final String separator = "/";
 
@@ -48,12 +45,10 @@ public class FileUtil
     /**
      * Cleanup the file path (replace some problematic character by "_")
      */
-    public static String cleanPath(String filePath)
-    {
+    public static String cleanPath(final String filePath) {
         String result = filePath;
 
-        if (result != null)
-        {
+        if (result != null) {
             // remove ':' other than for drive separation
             if (result.length() >= 2)
                 result = result.substring(0, 2) + result.substring(2).replaceAll(":", "_");
@@ -70,8 +65,7 @@ public class FileUtil
      * Transform any system specific path in java generic path form.<br>
      * Ex: "C:\windows" --&gt; "C:/windows"
      */
-    public static String getGenericPath(String path)
-    {
+    public static String getGenericPath(final String path) {
         if (path != null)
             return path.replace('\\', '/');
 
@@ -85,8 +79,7 @@ public class FileUtil
      * <code>/tmp</code><br>
      * Same as {@link SystemUtil#getTempDirectory()}
      */
-    public static String getTempDirectory()
-    {
+    public static String getTempDirectory() {
         final String result = FileUtil.getGenericPath(SystemUtil.getProperty("java.io.tmpdir"));
         final int len = result.length();
 
@@ -104,8 +97,7 @@ public class FileUtil
      * "c:\file.out" --&gt; "c:\file.dat"
      * "" --&gt; ""
      */
-    public static String setExtension(String path, String extension)
-    {
+    public static String setExtension(final String path, final String extension) {
         final String finalPath = getGenericPath(path);
 
         if (StringUtil.isEmpty(finalPath))
@@ -116,8 +108,7 @@ public class FileUtil
 
         final int dotIndex = result.lastIndexOf(".");
         // ensure we are modifying an extension
-        if (dotIndex >= 0 && (len - dotIndex) <= 5)
-        {
+        if (dotIndex >= 0 && (len - dotIndex) <= 5) {
             // we consider that an extension starting with a digit is not an extension
             if (((dotIndex + 1) == len) || !Character.isDigit(result.charAt(dotIndex + 1)))
                 result = result.substring(0, dotIndex);
@@ -129,13 +120,11 @@ public class FileUtil
         return result;
     }
 
-    public static void ensureParentDirExist(String filename)
-    {
+    public static void ensureParentDirExist(final String filename) {
         ensureParentDirExist(new File(getGenericPath(filename)));
     }
 
-    public static boolean ensureParentDirExist(File file)
-    {
+    public static boolean ensureParentDirExist(final File file) {
         final String dir = file.getParent();
 
         if (dir != null)
@@ -144,39 +133,36 @@ public class FileUtil
         return true;
     }
 
-    public static boolean createDir(String dirname)
-    {
+    public static boolean createDir(final String dirname) {
         return createDir(new File(getGenericPath(dirname)));
     }
 
-    public static boolean createDir(File dir)
-    {
+    public static boolean createDir(final File dir) {
         if (!dir.exists())
             return dir.mkdirs();
 
         return true;
     }
 
-    public static File createFile(String filename)
-    {
+    public static File createFile(final String filename) {
         return createFile(new File(getGenericPath(filename)));
     }
 
-    public static File createFile(File file)
-    {
-        if (!file.exists())
-        {
+    public static File createFile(final File file) {
+        if (!file.exists()) {
             // create parent directory if not exist
             ensureParentDirExist(file);
 
-            try
-            {
-                file.createNewFile();
+            try {
+                if (file.createNewFile())
+                    return file;
+                else {
+                    IcyLogger.error(FileUtil.class, "Can't create file '" + file.getAbsolutePath() + "'");
+                    return null;
+                }
             }
-            catch (Exception e)
-            {
-                System.err.println("Error: can't create file '" + file.getAbsolutePath() + "':");
-                IcyExceptionHandler.showErrorMessage(e, false);
+            catch (final Exception e) {
+                IcyLogger.error(FileUtil.class, e, "Can't create file '" + file.getAbsolutePath() + "'");
                 return null;
             }
         }
@@ -187,8 +173,7 @@ public class FileUtil
     /**
      * Transform the specified list of path to file.
      */
-    public static File[] toFiles(String[] paths)
-    {
+    public static File[] toFiles(final String[] paths) {
         final File[] result = new File[paths.length];
 
         for (int i = 0; i < paths.length; i++)
@@ -200,11 +185,10 @@ public class FileUtil
     /**
      * Transform the specified list of path to file.
      */
-    public static List<File> toFiles(List<String> paths)
-    {
-        final List<File> result = new ArrayList<File>(paths.size());
+    public static List<File> toFiles(final List<String> paths) {
+        final List<File> result = new ArrayList<>(paths.size());
 
-        for (String path : paths)
+        for (final String path : paths)
             result.add(new File(path));
 
         return result;
@@ -213,8 +197,7 @@ public class FileUtil
     /**
      * Transform the specified list of file to path.
      */
-    public static String[] toPaths(File[] files)
-    {
+    public static String[] toPaths(final File[] files) {
         final String[] result = new String[files.length];
 
         for (int i = 0; i < files.length; i++)
@@ -226,11 +209,10 @@ public class FileUtil
     /**
      * Transform the specified list of file to path.
      */
-    public static List<String> toPaths(List<File> files)
-    {
-        final List<String> result = new ArrayList<String>(files.size());
+    public static List<String> toPaths(final List<File> files) {
+        final List<String> result = new ArrayList<>(files.size());
 
-        for (File file : files)
+        for (final File file : files)
             result.add(getGenericPath(file.getAbsolutePath()));
 
         return result;
@@ -239,29 +221,24 @@ public class FileUtil
     /**
      * Create a symbolic link file
      */
-    public static boolean createLink(String path, String target)
-    {
+    public static boolean createLink(final String path, final String target) {
         final String finalPath = getGenericPath(path);
 
         ensureParentDirExist(finalPath);
 
         // use OS dependent command (FIXME : replace by java 7 API when available)
-        if (SystemUtil.isLinkSupported())
-        {
+        if (SystemUtil.isLinkSupported()) {
             final Process process = SystemUtil.exec("ln -s " + target + " " + finalPath);
 
             // error while executing command
             if (process == null)
                 return false;
 
-            try
-            {
+            try {
                 return (process.waitFor() == 0);
             }
-            catch (InterruptedException e)
-            {
-                System.err.println("FileUtil.createLink(" + path + ", " + target + ") error :");
-                IcyExceptionHandler.showErrorMessage(e, false);
+            catch (final InterruptedException e) {
+                IcyLogger.error(FileUtil.class, e, "FileUtil.createLink(" + path + ", " + target + ") error.");
                 return false;
             }
         }
@@ -270,40 +247,34 @@ public class FileUtil
         return copy(target, finalPath, true, false, false);
     }
 
-    public static byte[] load(String path, boolean displayError)
-    {
+    public static byte[] load(final String path, final boolean displayError) {
         return load(new File(getGenericPath(path)), displayError);
     }
 
-    public static byte[] load(File file, boolean displayError)
-    {
+    public static byte[] load(final File file, final boolean displayError) {
         return NetworkUtil.download(file, null, displayError);
     }
 
-    public static boolean save(String path, byte[] data, boolean displayError)
-    {
+    public static boolean save(final String path, final byte[] data, final boolean displayError) {
         return save(new File(getGenericPath(path)), data, displayError);
     }
 
-    public static boolean save(File file, byte[] data, boolean displayError)
-    {
+    public static boolean save(final File file, final byte[] data, final boolean displayError) {
         final File f = createFile(file);
 
-        if (f != null)
-        {
-            try
-            {
+        if (f != null) {
+            try {
                 final FileOutputStream out = new FileOutputStream(f);
 
                 out.write(data, 0, data.length);
                 out.close();
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 if (displayError)
-                    System.err.println(e.getMessage());
+                    IcyLogger.error(FileUtil.class, e, "Unable to write into file: " + file.getAbsolutePath());
                 // delete incorrect file
-                f.delete();
+                //f.delete();
+                delete(f, false);
                 return false;
             }
 
@@ -317,12 +288,10 @@ public class FileUtil
      * Returns the path where the application is located (current directory).<br>
      * Ex: "D:/Apps/Icy"
      */
-    public static String getApplicationDirectory()
-    {
+    public static String getApplicationDirectory() {
         String result;
 
-        try
-        {
+        try {
             // try to get from sources
             final File f = new File(FileUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
@@ -332,29 +301,20 @@ public class FileUtil
             else
                 result = f.getParentFile().getAbsolutePath();
         }
-        catch (Exception e1)
-        {
-            try
-            {
+        catch (final Exception e1) {
+            try {
                 // try to get from resource (this sometime return incorrect folder on mac osx)
-                result = new File(ClassLoader.getSystemClassLoader().getResource(".").toURI()).getAbsolutePath();
+                final URL url = ClassLoader.getSystemClassLoader().getResource(".");
+                result = new File(Objects.requireNonNull(url).toURI()).getAbsolutePath();
             }
-            catch (Exception e2)
-            {
+            catch (final Exception e2) {
                 // use launch directory (which may be different from application directory)
                 result = new File(System.getProperty("user.dir")).getAbsolutePath();
             }
         }
 
-        try
-        {
-            // so we replace any %20 sequence in space
-            result = URLDecoder.decode(result, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            // ignore
-        }
+        // so we replace any %20 sequence in space
+        result = URLDecoder.decode(result, StandardCharsets.UTF_8);
 
         return getGenericPath(result);
     }
@@ -363,8 +323,7 @@ public class FileUtil
      * @deprecated Use {@link #getApplicationDirectory()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getCurrentDirectory()
-    {
+    public static String getCurrentDirectory() {
         return getApplicationDirectory();
     }
 
@@ -376,12 +335,10 @@ public class FileUtil
      * getDrive("C:file.txt") --&gt; "C:"<br>
      * getDrive("file.txt") --&gt; ""<br>
      */
-    public static String getDrive(String path)
-    {
+    public static String getDrive(final String path) {
         File fp = new File(path);
         File f;
-        do
-        {
+        do {
             f = fp;
             fp = f.getParentFile();
         }
@@ -389,7 +346,7 @@ public class FileUtil
 
         return f.getAbsolutePath();
     }
-    
+
     /**
      * Returns directory information from specified path<br>
      * <br>
@@ -404,12 +361,10 @@ public class FileUtil
      * getDirectory("file") --&gt; ""<br>
      * getDirectory(null) --&gt; ""
      */
-    public static String getDirectory(String path, boolean wantSeparator)
-    {
+    public static String getDirectory(final String path, final boolean wantSeparator) {
         final String finalPath = getGenericPath(path);
 
-        if (!StringUtil.isEmpty(finalPath))
-        {
+        if (!StringUtil.isEmpty(finalPath)) {
             int index = finalPath.lastIndexOf(FileUtil.separatorChar);
             if (index != -1)
                 return finalPath.substring(0, index + (wantSeparator ? 1 : 0));
@@ -434,8 +389,7 @@ public class FileUtil
      * getDirectory("file") --&gt; ""<br>
      * getDirectory(null) --&gt; ""
      */
-    public static String getDirectory(String path)
-    {
+    public static String getDirectory(final String path) {
         return getDirectory(path, true);
     }
 
@@ -448,8 +402,7 @@ public class FileUtil
      * getFileName("file.txt") --&gt; "file.txt"<br>
      * getFileName(null) --&gt; ""
      */
-    public static String getFileName(String path)
-    {
+    public static String getFileName(final String path) {
         return getFileName(path, true);
     }
 
@@ -463,8 +416,7 @@ public class FileUtil
      * getFileName("file.txt") --&gt; "file(.txt)"<br>
      * getFileName(null) --&gt; ""
      */
-    public static String getFileName(String path, boolean withExtension)
-    {
+    public static String getFileName(final String path, final boolean withExtension) {
         final String finalPath = getGenericPath(path);
 
         if (StringUtil.isEmpty(finalPath))
@@ -475,8 +427,7 @@ public class FileUtil
 
         if (index != -1)
             fileName = finalPath.substring(index + 1);
-        else
-        {
+        else {
             index = finalPath.lastIndexOf(':');
 
             if (index != -1)
@@ -508,8 +459,7 @@ public class FileUtil
      * getFileExtension(".txt") --&gt; "(.)txt)"<br>
      * getFileExtension(null) --&gt; ""
      */
-    public static String getFileExtension(String path, boolean withDot)
-    {
+    public static String getFileExtension(final String path, final boolean withDot) {
         final String finalPath = getGenericPath(path);
 
         if (StringUtil.isEmpty(finalPath))
@@ -530,7 +480,7 @@ public class FileUtil
     /**
      * Rename the specified <code>src</code> file to <code>dst</code> file.
      * Return false if the method failed.
-     * 
+     *
      * @param src
      *        the source filename we want to rename from.
      * @param dst
@@ -540,8 +490,7 @@ public class FileUtil
      *        existing.
      * @see File#renameTo(File)
      */
-    public static boolean rename(String src, String dst, boolean force)
-    {
+    public static boolean rename(final String src, final String dst, final boolean force) {
         return rename(new File(getGenericPath(src)), new File(getGenericPath(dst)), force);
     }
 
@@ -549,41 +498,38 @@ public class FileUtil
      * @deprecated Use {@link #rename(String, String, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean rename(String src, String dst, boolean force, boolean wantHidden)
-    {
+    public static boolean rename(final String src, final String dst, final boolean force, final boolean wantHidden) {
         return rename(src, dst, force);
     }
 
     /**
      * Rename the specified 'src' file to 'dst' file.
      * Return false if the method failed.
-     * 
+     *
      * @see File#renameTo(File)
      */
-    public static boolean rename(File src, File dst, boolean force)
-    {
-        if (src.exists())
-        {
-            if (dst.exists())
-            {
-                if (force)
-                {
-                    if (!delete(dst, true))
-                    {
-                        System.err.println(
-                                "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'");
-                        System.err.println("Reason: destination cannot be overwritten.");
-                        System.err.println("Make sure it is not locked by another program (e.g. Eclipse)");
-                        System.err.println("Also check that you have the rights to do this operation.");
+    public static boolean rename(final File src, final File dst, final boolean force) {
+        if (src.exists()) {
+            if (dst.exists()) {
+                if (force) {
+                    if (!delete(dst, true)) {
+                        final String[] messages = new String[]{
+                                "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
+                                "Reason: destination cannot be overwritten.",
+                                "Make sure it is not locked by another program (e.g. Eclipse)",
+                                "Also check that you have the rights to do this operation."
+                        };
+                        IcyLogger.error(FileUtil.class, messages);
                         return false;
                     }
                 }
-                else
-                {
-                    System.err.println(
-                            "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'");
-                    System.err.println("The destination already exists.");
-                    System.err.println("Use the 'force' flag to force the operation.");
+                else {
+                    final String[] messages = new String[]{
+                            "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
+                            "The destination already exists.",
+                            "Use the 'force' flag to force the operation."
+                    };
+                    IcyLogger.error(FileUtil.class, messages);
                     return false;
                 }
             }
@@ -600,8 +546,7 @@ public class FileUtil
             // renameTo is not very reliable, better to do several try
             boolean done = src.renameTo(dst);
 
-            while (!done && (System.currentTimeMillis() - start) < (10 * 1000))
-            {
+            while (!done && (System.currentTimeMillis() - start) < (10 * 1000)) {
                 // try to release objects which maintain lock
                 System.gc();
                 ThreadUtil.sleep(1000);
@@ -614,10 +559,12 @@ public class FileUtil
                 done = src.renameTo(dst);
             }
 
-            if (!done)
-            {
-                System.err.println("Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'");
-                System.err.println("Check that the source file is not locked.");
+            if (!done) {
+                final String[] messages = new String[]{
+                        "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
+                        "Check that the source file is not locked."
+                };
+                IcyLogger.error(FileUtil.class, messages);
                 return false;
             }
 
@@ -625,9 +572,11 @@ public class FileUtil
         }
 
         // missing input file
-        System.err.println("Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'");
-        System.err.println("Input file '" + src.getAbsolutePath() + "' not found !");
-
+        final String[] messages = new String[]{
+                "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
+                "Input file '" + src.getAbsolutePath() + "' not found !"
+        };
+        IcyLogger.error(FileUtil.class, messages);
         return false;
     }
 
@@ -635,8 +584,7 @@ public class FileUtil
      * @deprecated Use {@link #rename(File, File, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean rename(File src, File dst, boolean force, boolean wantHidden)
-    {
+    public static boolean rename(final File src, final File dst, final boolean force, final boolean wantHidden) {
         return rename(src, dst, force);
     }
 
@@ -644,8 +592,7 @@ public class FileUtil
      * @deprecated Use {@link #rename(String, String, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean move(String src, String dst, boolean force)
-    {
+    public static boolean move(final String src, final String dst, final boolean force) {
         return rename(src, dst, force);
     }
 
@@ -653,8 +600,7 @@ public class FileUtil
      * @deprecated Use {@link #move(String, String, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean move(String src, String dst, boolean force, boolean wantHidden)
-    {
+    public static boolean move(final String src, final String dst, final boolean force, final boolean wantHidden) {
         return move(src, dst, force);
     }
 
@@ -662,8 +608,7 @@ public class FileUtil
      * @deprecated Use {@link #rename(File, File, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean move(File src, File dst, boolean force)
-    {
+    public static boolean move(final File src, final File dst, final boolean force) {
         return rename(src, dst, force);
     }
 
@@ -671,15 +616,14 @@ public class FileUtil
      * @deprecated Use {@link #move(File, File, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean move(File src, File dst, boolean force, boolean wantHidden)
-    {
+    public static boolean move(final File src, final File dst, final boolean force, final boolean wantHidden) {
         return move(src, dst, force);
     }
 
     /**
      * Copy src to dst.<br>
      * Return true if file(s) successfully copied, false otherwise.
-     * 
+     *
      * @param src
      *        source file or directory
      * @param dst
@@ -690,8 +634,7 @@ public class FileUtil
      *        also copy sub directory
      * @return boolean
      */
-    public static boolean copy(String src, String dst, boolean force, boolean recursive)
-    {
+    public static boolean copy(final String src, final String dst, final boolean force, final boolean recursive) {
         return copy(new File(getGenericPath(src)), new File(getGenericPath(dst)), force, recursive);
     }
 
@@ -699,8 +642,7 @@ public class FileUtil
      * @deprecated Use {@link #copy(String, String, boolean, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean copy(String src, String dst, boolean force, boolean wantHidden, boolean recursive)
-    {
+    public static boolean copy(final String src, final String dst, final boolean force, final boolean wantHidden, final boolean recursive) {
         return copy(src, dst, force, recursive);
     }
 
@@ -710,7 +652,7 @@ public class FileUtil
      * That means if you try to copy a hidden file with wantHidden set to false then true is
      * returned<br>
      * even if the file is not copied.
-     * 
+     *
      * @param src
      *        source file or directory
      * @param dst
@@ -721,8 +663,7 @@ public class FileUtil
      *        also copy sub directory
      * @return boolean
      */
-    public static boolean copy(File src, File dst, boolean force, boolean recursive)
-    {
+    public static boolean copy(final File src, final File dst, final boolean force, final boolean recursive) {
         return copy_(src, dst, force, recursive, false);
     }
 
@@ -730,19 +671,16 @@ public class FileUtil
      * @deprecated Use {@link #copy(File, File, boolean, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean copy(File src, File dst, boolean force, boolean wantHidden, boolean recursive)
-    {
+    public static boolean copy(final File src, final File dst, final boolean force, final boolean wantHidden, final boolean recursive) {
         return copy(src, dst, force, recursive);
     }
 
     /**
      * internal copy
      */
-    private static boolean copy_(File src, File dst, boolean force, boolean recursive, boolean inRecurse)
-    {
+    private static boolean copy_(final File src, final File dst, final boolean force, final boolean recursive, final boolean inRecurse) {
         // directory copy ?
-        if (src.isDirectory())
-        {
+        if (src.isDirectory()) {
             // no recursive copy --> end
             if (inRecurse && !recursive)
                 return true;
@@ -752,98 +690,87 @@ public class FileUtil
 
             boolean result = true;
             // get files list
-            final String files[] = src.list();
+            final String[] files = src.list();
             // recursive copy
-            for (int i = 0; i < files.length; i++)
-                result = result & copy_(new File(src, files[i]), new File(dst, files[i]), force, recursive, true);
+            if (files != null) {
+                for (final String file : files)
+                    result = result & copy_(new File(src, file), new File(dst, file), force, recursive, true);
+            }
 
             return result;
         }
 
         // single file copy
-        if (src.exists())
-        {
+        if (src.exists()) {
             // destination already exist ?
-            if (dst.exists())
-            {
+            if (dst.exists()) {
                 // copy only if force flag == true
-                if (force)
-                {
-                    if (!delete(dst, true))
-                    {
-                        System.err.println(
-                                "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'");
-                        System.err.println("Reason : destination cannot be overwritten.");
-                        System.err.println("Make sure it is not locked by another program (e.g. Eclipse)");
-                        System.err.println("Also check that you have the rights to do this operation.");
+                if (force) {
+                    if (!delete(dst, true)) {
+                        final String[] messages = new String[]{
+                                "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
+                                "Reason : destination cannot be overwritten.",
+                                "Make sure it is not locked by another program (e.g. Eclipse)",
+                                "Also check that you have the rights to do this operation."
+                        };
+                        IcyLogger.error(FileUtil.class, messages);
                         return false;
                     }
                 }
-                else
-                {
-                    System.err
-                            .println("Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'");
-                    System.err.println("The destination already exists.");
-                    System.err.println("Use the 'force' flag to force file copy.");
+                else {
+                    final String[] messages = new String[]{
+                            "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
+                            "The destination already exists.",
+                            "Use the 'force' flag to force file copy."
+                    };
+                    IcyLogger.error(FileUtil.class, messages);
                     return false;
                 }
             }
 
             boolean lnk;
 
-            try
-            {
+            try {
                 lnk = isLink(src);
             }
-            catch (IOException e)
-            {
+            catch (final IOException e) {
                 lnk = false;
             }
 
             // link file and link supported by OS ?
-            if (lnk && SystemUtil.isLinkSupported())
-            {
+            if (lnk && SystemUtil.isLinkSupported()) {
                 // use OS dependent command (FIXME : replace by java 7 API when available)
                 final Process process = SystemUtil.exec("cp -pRP " + src.getPath() + " " + dst.getPath());
                 int res = 1;
 
-                if (process != null)
-                {
-                    try
-                    {
+                if (process != null) {
+                    try {
                         res = process.waitFor();
                     }
-                    catch (InterruptedException e1)
-                    {
+                    catch (final InterruptedException e1) {
                         // ignore;
                     }
                 }
 
                 // error while executing command
-                if ((res != 0))
-                {
-                    System.err.println("FileUtil.copy(...) error while creating link '" + src.getPath() + "' to '"
-                            + dst.getPath() + "'");
+                if ((res != 0)) {
+                    IcyLogger.error(FileUtil.class, "FileUtil.copy(...) error while creating link '" + src.getPath() + "' to '" + dst.getPath() + "'");
 
-                    if (process != null)
-                    {
+                    if (process != null) {
                         // get error output and redirect it
-                        final BufferedReader stderr = new BufferedReader(
-                                new InputStreamReader(process.getErrorStream()));
+                        final BufferedReader stderr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
-                        try
-                        {
-                            System.err.println(stderr.readLine());
+                        try {
+                            IcyLogger.error(FileUtil.class, stderr.readLine());
                             if (stderr.ready())
-                                System.err.println(stderr.readLine());
+                                IcyLogger.error(FileUtil.class, stderr.readLine());
                         }
-                        catch (IOException e)
-                        {
+                        catch (final IOException e) {
                             // ignore
                         }
                     }
                     else if (res == 1)
-                        System.err.println("Process interrupted.");
+                        IcyLogger.error(FileUtil.class, "Process interrupted.");
 
                     return false;
                 }
@@ -854,11 +781,9 @@ public class FileUtil
             // get data to copy from src
             final byte[] data = load(src, true);
             // source data correctly loaded
-            if (data != null)
-            {
+            if (data != null) {
                 // save in dst
-                if (save(dst, data, true))
-                {
+                if (save(dst, data, true)) {
                     // and set the last modified info.
                     dst.setLastModified(src.lastModified());
                     return true;
@@ -868,16 +793,20 @@ public class FileUtil
             }
 
             // cannot load input file
-            System.err.println("Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'");
-            System.err.println("Input file '" + src.getAbsolutePath() + "' data cannot be loaded !");
-
+            final String[] messages = new String[]{
+                    "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
+                    "Input file '" + src.getAbsolutePath() + "' data cannot be loaded !"
+            };
+            IcyLogger.error(FileUtil.class, messages);
             return false;
         }
 
         // missing input file
-        System.err.println("Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'");
-        System.err.println("Input file '" + src.getAbsolutePath() + "' not found !");
-
+        final String[] messages = new String[]{
+                "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
+                "Input file '" + src.getAbsolutePath() + "' not found !"
+        };
+        IcyLogger.error(FileUtil.class, messages);
         return false;
     }
 
@@ -885,18 +814,16 @@ public class FileUtil
      * Backup the specified file.<br>
      * Basically create a .bak version of the file. If the backup file already exist a postfix
      * number is automatically added.
-     * 
+     *
      * @param filename
      *        file to backup
      * @return the backup filename is the operation success else return <code>null</code>
      */
-    public static String backup(String filename)
-    {
+    public static String backup(final String filename) {
         int postfix = 0;
         String backupName = filename + ".bak";
 
-        while (exists(backupName))
-        {
+        while (exists(backupName)) {
             backupName = filename + "_" + StringUtil.toString(postfix, 3) + ".bak";
             postfix++;
         }
@@ -910,39 +837,34 @@ public class FileUtil
     /**
      * Transform all directory entries by their sub files list
      */
-    public static File[] explode(File[] files, FileFilter filter, boolean recursive, boolean wantHidden)
-    {
-        final List<File> result = new ArrayList<File>();
+    public static File[] explode(final File[] files, final FileFilter filter, final boolean recursive, final boolean wantHidden) {
+        final List<File> result = new ArrayList<>();
 
-        for (File file : files)
-        {
+        for (final File file : files) {
             if (file.isDirectory())
                 getFiles(file, filter, recursive, true, false, wantHidden, result);
             else
                 result.add(file);
         }
 
-        return result.toArray(new File[result.size()]);
+        return result.toArray(new File[0]);
     }
 
     /**
      * @deprecated Use {@link #explode(List, FileFilter, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static List<File> explode(List<File> files, boolean recursive, boolean wantHidden)
-    {
+    public static List<File> explode(final List<File> files, final boolean recursive, final boolean wantHidden) {
         return explode(files, null, recursive, wantHidden);
     }
 
     /**
      * Transform all directory entries by their sub files list
      */
-    public static List<File> explode(List<File> files, FileFilter filter, boolean recursive, boolean wantHidden)
-    {
-        final List<File> result = new ArrayList<File>();
+    public static List<File> explode(final List<File> files, final FileFilter filter, final boolean recursive, final boolean wantHidden) {
+        final List<File> result = new ArrayList<>();
 
-        for (File file : files)
-        {
+        for (final File file : files) {
             if (file.isDirectory())
                 getFiles(file, filter, recursive, true, false, wantHidden, result);
             else
@@ -954,37 +876,29 @@ public class FileUtil
 
     /**
      * Get file list from specified directory applying the specified parameters.
-     * 
+     *
      * @param extension
      *        the wanted extension file (without the dot character).<br>
      *        Set it to <code>null</code> to accept all files.<br>
      *        If you only want files without extension then use an empty String extension.
      */
-    private static void getFiles(File folder, String extension, boolean ignoreExtensionCase, boolean recursive,
-            List<File> list)
-    {
+    private static void getFiles(final File folder, final String extension, final boolean ignoreExtensionCase, final boolean recursive, final List<File> list) {
         final File[] files = folder.listFiles();
 
-        if (files != null)
-        {
-            for (File file : files)
-            {
-                if (file.isDirectory())
-                {
+        if (files != null) {
+            for (final File file : files) {
+                if (file.isDirectory()) {
                     if (recursive)
                         getFiles(file, extension, ignoreExtensionCase, recursive, list);
                 }
-                else if (extension != null)
-                {
+                else if (extension != null) {
                     final String fileExt = getFileExtension(file.getAbsolutePath(), false);
 
-                    if (ignoreExtensionCase)
-                    {
+                    if (ignoreExtensionCase) {
                         if (extension.equalsIgnoreCase(fileExt))
                             list.add(file);
                     }
-                    else
-                    {
+                    else {
                         if (extension.equals(fileExt))
                             list.add(file);
                     }
@@ -998,20 +912,18 @@ public class FileUtil
     /**
      * Get file list from specified folder applying the specified parameters.
      */
-    public static File[] getFiles(File folder, String extension, boolean ignoreExtensionCase, boolean recursive)
-    {
-        final List<File> result = new ArrayList<File>();
+    public static File[] getFiles(final File folder, final String extension, final boolean ignoreExtensionCase, final boolean recursive) {
+        final List<File> result = new ArrayList<>();
 
         getFiles(folder, extension, ignoreExtensionCase, recursive, result);
 
-        return result.toArray(new File[result.size()]);
+        return result.toArray(new File[0]);
     }
 
     /**
      * Get file list from specified folder applying the specified parameters.
      */
-    public static String[] getFiles(String folder, String extension, boolean ignoreExtensionCase, boolean recursive)
-    {
+    public static String[] getFiles(final String folder, final String extension, final boolean ignoreExtensionCase, final boolean recursive) {
         final File[] files = getFiles(new File(getGenericPath(folder)), extension, ignoreExtensionCase, recursive);
         final String[] result = new String[files.length];
 
@@ -1024,19 +936,13 @@ public class FileUtil
     /**
      * Get file list from specified directory applying the specified parameters.
      */
-    private static void getFiles(File f, FileFilter filter, boolean recursive, boolean wantFile, boolean wantDirectory,
-            boolean wantHidden, List<File> list)
-    {
+    private static void getFiles(final File f, final FileFilter filter, final boolean recursive, final boolean wantFile, final boolean wantDirectory, final boolean wantHidden, final List<File> list) {
         final File[] files = f.listFiles(filter);
 
-        if (files != null)
-        {
-            for (File file : files)
-            {
-                if ((!file.isHidden()) || wantHidden)
-                {
-                    if (file.isDirectory())
-                    {
+        if (files != null) {
+            for (final File file : files) {
+                if ((!file.isHidden()) || wantHidden) {
+                    if (file.isDirectory()) {
                         if (wantDirectory)
                             list.add(file);
                         if (recursive)
@@ -1052,18 +958,17 @@ public class FileUtil
     /**
      * Get directory list from specified directory applying the specified parameters
      */
-    public static File[] getDirectories(File file, FileFilter filter, boolean recursive, boolean wantHidden)
-    {
-        final List<File> result = new ArrayList<File>();
+    public static File[] getDirectories(final File file, final FileFilter filter, final boolean recursive, final boolean wantHidden) {
+        final List<File> result = new ArrayList<>();
 
         getFiles(file, filter, recursive, false, true, wantHidden, result);
 
-        return result.toArray(new File[result.size()]);
+        return result.toArray(new File[0]);
     }
 
     /**
      * Returns an array of file denoting content of specified directory and parameters.
-     * 
+     *
      * @param directory
      *        The directory we want to retrieve content.<br>
      * @param filter
@@ -1081,20 +986,18 @@ public class FileUtil
      *        also returned.
      * @see File#listFiles(FileFilter)
      */
-    public static File[] getFiles(File directory, FileFilter filter, boolean recursive, boolean wantDirectory,
-            boolean wantHidden)
-    {
-        final List<File> result = new ArrayList<File>();
+    public static File[] getFiles(final File directory, final FileFilter filter, final boolean recursive, final boolean wantDirectory, final boolean wantHidden) {
+        final List<File> result = new ArrayList<>();
 
         getFiles(directory, filter, recursive, true, wantDirectory, wantHidden, result);
 
-        return result.toArray(new File[result.size()]);
+        return result.toArray(new File[0]);
     }
 
     /**
      * Returns an array of file path denoting content of specified directory and parameters
      * (String format).
-     * 
+     *
      * @param directory
      *        The directory we want to retrieve content.<br>
      * @param filter
@@ -1111,11 +1014,8 @@ public class FileUtil
      *        If <code>true</code> then file or directory with <code>hidden</code> attribute are
      *        also returned.
      */
-    public static String[] getFiles(String directory, FileFilter filter, boolean recursive, boolean wantDirectory,
-            boolean wantHidden)
-    {
-        final File[] files = getFiles(new File(getGenericPath(directory)), filter, recursive, wantDirectory,
-                wantHidden);
+    public static String[] getFiles(final String directory, final FileFilter filter, final boolean recursive, final boolean wantDirectory, final boolean wantHidden) {
+        final File[] files = getFiles(new File(getGenericPath(directory)), filter, recursive, wantDirectory, wantHidden);
         final String[] result = new String[files.length];
 
         for (int i = 0; i < files.length; i++)
@@ -1128,10 +1028,8 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<File> getFileList(String path, FileFilter filter, boolean recursive, boolean wantDirectory,
-            boolean wantHidden)
-    {
-        final ArrayList<File> result = new ArrayList<File>();
+    public static ArrayList<File> getFileList(final String path, final FileFilter filter, final boolean recursive, final boolean wantDirectory, final boolean wantHidden) {
+        final ArrayList<File> result = new ArrayList<>();
 
         getFiles(new File(getGenericPath(path)), filter, recursive, true, wantDirectory, wantHidden, result);
 
@@ -1142,10 +1040,8 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<File> getFileList(File file, FileFilter filter, boolean recursive, boolean wantDirectory,
-            boolean wantHidden)
-    {
-        final ArrayList<File> result = new ArrayList<File>();
+    public static ArrayList<File> getFileList(final File file, final FileFilter filter, final boolean recursive, final boolean wantDirectory, final boolean wantHidden) {
+        final ArrayList<File> result = new ArrayList<>();
 
         getFiles(file, filter, recursive, true, wantDirectory, wantHidden, result);
 
@@ -1156,8 +1052,7 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<File> getFileList(String path, FileFilter filter, boolean recursive, boolean wantHidden)
-    {
+    public static ArrayList<File> getFileList(final String path, final FileFilter filter, final boolean recursive, final boolean wantHidden) {
         return getFileList(path, filter, recursive, false, wantHidden);
     }
 
@@ -1165,8 +1060,7 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<File> getFileList(File file, FileFilter filter, boolean recursive, boolean wantHidden)
-    {
+    public static ArrayList<File> getFileList(final File file, final FileFilter filter, final boolean recursive, final boolean wantHidden) {
         return getFileList(file, filter, recursive, false, wantHidden);
     }
 
@@ -1174,8 +1068,7 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<File> getFileList(String path, boolean recursive, boolean wantDirectory, boolean wantHidden)
-    {
+    public static ArrayList<File> getFileList(final String path, final boolean recursive, final boolean wantDirectory, final boolean wantHidden) {
         return getFileList(new File(getGenericPath(path)), null, recursive, wantDirectory, wantHidden);
     }
 
@@ -1183,8 +1076,7 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<File> getFileList(File file, boolean recursive, boolean wantDirectory, boolean wantHidden)
-    {
+    public static ArrayList<File> getFileList(final File file, final boolean recursive, final boolean wantDirectory, final boolean wantHidden) {
         return getFileList(file, null, recursive, wantDirectory, wantHidden);
     }
 
@@ -1192,8 +1084,7 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<File> getFileList(File file, boolean recursive, boolean wantHidden)
-    {
+    public static ArrayList<File> getFileList(final File file, final boolean recursive, final boolean wantHidden) {
         return getFileList(file, recursive, false, wantHidden);
     }
 
@@ -1201,8 +1092,7 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(File, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<File> getFileList(String path, boolean recursive, boolean wantHidden)
-    {
+    public static ArrayList<File> getFileList(final String path, final boolean recursive, final boolean wantHidden) {
         return getFileList(path, recursive, false, wantHidden);
     }
 
@@ -1210,13 +1100,11 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(String, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<String> getFileListAsString(String path, FileFilter filter, boolean recursive,
-            boolean wantDirectory, boolean wantHidden)
-    {
+    public static ArrayList<String> getFileListAsString(final String path, final FileFilter filter, final boolean recursive, final boolean wantDirectory, final boolean wantHidden) {
         final ArrayList<File> files = getFileList(path, filter, recursive, wantDirectory, wantHidden);
-        final ArrayList<String> result = new ArrayList<String>();
+        final ArrayList<String> result = new ArrayList<>();
 
-        for (File file : files)
+        for (final File file : files)
             result.add(file.getPath());
 
         return result;
@@ -1226,9 +1114,7 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(String, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<String> getFileListAsString(String path, boolean recursive, boolean wantDirectory,
-            boolean wantHidden)
-    {
+    public static ArrayList<String> getFileListAsString(final String path, final boolean recursive, final boolean wantDirectory, final boolean wantHidden) {
         return getFileListAsString(path, null, recursive, wantDirectory, wantHidden);
     }
 
@@ -1236,9 +1122,7 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(String, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<String> getFileListAsString(String path, FileFilter filter, boolean recursive,
-            boolean wantHidden)
-    {
+    public static ArrayList<String> getFileListAsString(final String path, final FileFilter filter, final boolean recursive, final boolean wantHidden) {
         return getFileListAsString(path, filter, recursive, false, wantHidden);
     }
 
@@ -1246,57 +1130,47 @@ public class FileUtil
      * @deprecated Use {@link #getFiles(String, FileFilter, boolean, boolean, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<String> getFileListAsString(String path, boolean recursive, boolean wantHidden)
-    {
+    public static ArrayList<String> getFileListAsString(final String path, final boolean recursive, final boolean wantHidden) {
         return getFileListAsString(path, recursive, false, wantHidden);
     }
 
     /**
      * Return true if the file described by specified path exists
-     * 
+     *
      * @deprecated use {@link #exists(String)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean exist(String path)
-    {
+    public static boolean exist(final String path) {
         return exists(path);
     }
 
     /**
      * Return true if the file described by specified path exists
      */
-    public static boolean exists(String path)
-    {
+    public static boolean exists(final String path) {
         return new File(getGenericPath(path)).exists();
     }
 
     /**
      * Return true if the specified file is a directory
      */
-    public static boolean isDirectory(String path)
-    {
+    public static boolean isDirectory(final String path) {
         return new File(getGenericPath(path)).isDirectory();
     }
 
     /**
      * Return true if the specified file is a link<br>
      * Be careful, it does work in almost case, but not all
-     * 
-     * @throws IOException
      */
-    public static boolean isLink(String path) throws IOException
-    {
+    public static boolean isLink(final String path) throws IOException {
         return isLink(new File(getGenericPath(path)));
     }
 
     /**
      * Return true if the specified file is a link<br>
      * Be careful, it does work in almost case, but not all
-     * 
-     * @throws IOException
      */
-    public static boolean isLink(File file) throws IOException
-    {
+    public static boolean isLink(final File file) throws IOException {
         if (file == null)
             return false;
 
@@ -1311,27 +1185,21 @@ public class FileUtil
         return !canon.getCanonicalFile().getAbsolutePath().equalsIgnoreCase(canon.getAbsolutePath());
     }
 
-    public static boolean delete(String path, boolean recursive)
-    {
+    public static boolean delete(final String path, final boolean recursive) {
         return delete(new File(getGenericPath(path)), recursive);
     }
 
-    public static boolean delete(File f, boolean recursive)
-    {
+    public static boolean delete(final File f, final boolean recursive) {
         boolean result = true;
 
-        if (f.isDirectory())
-        {
+        if (f.isDirectory()) {
             final File[] files = f.listFiles();
 
             // can return null...
-            if (files != null)
-            {
+            if (files != null) {
                 // delete files
-                for (File file : files)
-                {
-                    if (file.isDirectory())
-                    {
+                for (final File file : files) {
+                    if (file.isDirectory()) {
                         if (recursive)
                             result = result & delete(file, true);
                     }
@@ -1343,8 +1211,7 @@ public class FileUtil
             // then delete empty directory
             result = result & f.delete();
         }
-        else if (f.exists())
-        {
+        else if (f.exists()) {
             final long start = System.currentTimeMillis();
 
             // we can need that first to delete file
@@ -1354,8 +1221,7 @@ public class FileUtil
             result = f.delete();
 
             // retry for locked file (we try for 15s max)
-            while ((!result) && (System.currentTimeMillis() - start) < (10 * 1000))
-            {
+            while ((!result) && (System.currentTimeMillis() - start) < (10 * 1000)) {
                 // can help for file deletion...
                 System.gc();
                 ThreadUtil.sleep(1000);

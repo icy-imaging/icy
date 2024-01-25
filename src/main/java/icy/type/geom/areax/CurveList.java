@@ -10,7 +10,7 @@
  */
 package icy.type.geom.areax;
 
-abstract class CurveList {
+public abstract class CurveList {
 
 	private static CurveX[] emptyCurves = new CurveX[0];
 

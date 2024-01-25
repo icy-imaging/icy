@@ -1,42 +1,41 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.preferences;
 
+import icy.system.logging.IcyLogger;
 import icy.util.ClassUtil;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class XMLPreferences
-{
-    public static class XMLPreferencesRoot
-    {
+public class XMLPreferences {
+    public static class XMLPreferencesRoot {
         private final String filename;
         private Document doc;
 
@@ -44,8 +43,7 @@ public class XMLPreferences
         Element element;
         XMLPreferences preferences;
 
-        public XMLPreferencesRoot(String filename)
-        {
+        public XMLPreferencesRoot(final String filename) {
             this.filename = filename;
 
             load();
@@ -54,8 +52,7 @@ public class XMLPreferences
         /**
          * Load preferences from file
          */
-        public void load()
-        {
+        public void load() {
             load(filename);
         }
 
@@ -63,16 +60,13 @@ public class XMLPreferences
          * Load preferences from file
          * @param filename string
          */
-        public void load(String filename)
-        {
-            try
-            {
+        public void load(final String filename) {
+            try {
                 // get document
                 doc = XMLUtil.loadDocument(new File(filename));
             }
-            catch (Throwable t)
-            {
-                System.err.println("Error: " + filename + " preferences file is corrupted, cannot recover settings.");
+            catch (final Throwable t) {
+                IcyLogger.error(XMLPreferences.class, t, filename + " preferences file is corrupted, cannot recover settings.");
                 // corrupted XML file
                 doc = null;
             }
@@ -91,8 +85,7 @@ public class XMLPreferences
         /**
          * Save preferences to file
          */
-        public void save()
-        {
+        public void save() {
             save(filename);
         }
 
@@ -100,8 +93,7 @@ public class XMLPreferences
          * Save preferences to file
          * @param filename string
          */
-        public void save(String filename)
-        {
+        public void save(final String filename) {
             if (doc != null)
                 XMLUtil.saveDocument(doc, new File(filename));
         }
@@ -109,16 +101,14 @@ public class XMLPreferences
         /**
          * @return the element
          */
-        public Element getElement()
-        {
+        public Element getElement() {
             return element;
         }
 
         /**
          * @return the preferences
          */
-        public XMLPreferences getPreferences()
-        {
+        public XMLPreferences getPreferences() {
             return preferences;
         }
     }
@@ -134,45 +124,37 @@ public class XMLPreferences
      * <code>new XMLPreferencesRoot(filename).getPreferences()</code><br>
      * to load preferences from file.
      */
-    XMLPreferences(XMLPreferencesRoot root, Element element)
-    {
+    XMLPreferences(final XMLPreferencesRoot root, final Element element) {
         super();
 
         this.root = root;
         currentElement = element;
     }
 
-    public String absolutePath()
-    {
-        String result = "/" + name();
+    public String absolutePath() {
+        final StringBuilder result = new StringBuilder("/" + name());
 
-        synchronized (root)
-        {
+        synchronized (root) {
             Element parent = XMLUtil.getParentElement(currentElement);
-            while ((parent != null) && (parent != root.element))
-            {
-                result = "/" + XMLUtil.getGenericElementName(parent) + result;
+            while ((parent != null) && (parent != root.element)) {
+                result.insert(0, "/" + XMLUtil.getGenericElementName(parent));
                 parent = XMLUtil.getParentElement(parent);
             }
         }
 
-        return result;
+        return result.toString();
     }
 
-    public String name()
-    {
-        synchronized (root)
-        {
+    public String name() {
+        synchronized (root) {
             return XMLUtil.getGenericElementName(currentElement);
         }
     }
 
-    public XMLPreferences getParent()
-    {
+    public XMLPreferences getParent() {
         final Element parent;
 
-        synchronized (root)
-        {
+        synchronized (root) {
             parent = XMLUtil.getParentElement(currentElement);
         }
 
@@ -182,37 +164,32 @@ public class XMLPreferences
         return null;
     }
 
-    public ArrayList<XMLPreferences> getChildren()
-    {
-        final ArrayList<XMLPreferences> result = new ArrayList<XMLPreferences>();
+    public ArrayList<XMLPreferences> getChildren() {
+        final ArrayList<XMLPreferences> result = new ArrayList<>();
         final List<Element> elements;
 
-        synchronized (root)
-        {
+        synchronized (root) {
             elements = XMLUtil.getGenericElements(currentElement, TYPE_SECTION);
         }
 
-        for (Element element : elements)
+        for (final Element element : elements)
             result.add(new XMLPreferences(root, element));
 
         return result;
     }
 
-    public ArrayList<String> childrenNames()
-    {
-        final ArrayList<String> result = new ArrayList<String>();
+    public ArrayList<String> childrenNames() {
+        final ArrayList<String> result = new ArrayList<>();
 
-        synchronized (root)
-        {
-            for (Element element : XMLUtil.getGenericElements(currentElement, TYPE_SECTION))
+        synchronized (root) {
+            for (final Element element : XMLUtil.getGenericElements(currentElement, TYPE_SECTION))
                 result.add(XMLUtil.getGenericElementName(element));
         }
 
         return result;
     }
 
-    private Element getSection(String name)
-    {
+    private Element getSection(final String name) {
         if (StringUtil.isEmpty(name))
             return currentElement;
 
@@ -221,8 +198,7 @@ public class XMLPreferences
         // absolute path
         if (name.startsWith("/"))
             element = root.element;
-        else
-        {
+        else {
             // we test first current node is still existing
             if (!exists())
                 return null;
@@ -230,9 +206,8 @@ public class XMLPreferences
             element = currentElement;
         }
 
-        synchronized (root)
-        {
-            for (String subName : name.split("/"))
+        synchronized (root) {
+            for (final String subName : name.split("/"))
                 if (!subName.isEmpty())
                     element = XMLUtil.getGenericElement(element, TYPE_SECTION, subName);
         }
@@ -240,8 +215,7 @@ public class XMLPreferences
         return element;
     }
 
-    private Element setSection(String name)
-    {
+    private Element setSection(final String name) {
         if (StringUtil.isEmpty(name))
             return currentElement;
 
@@ -250,8 +224,7 @@ public class XMLPreferences
         // absolute path
         if (name.startsWith("/"))
             element = root.element;
-        else
-        {
+        else {
             // we test first current node is still existing
             if (!exists())
                 return null;
@@ -259,9 +232,8 @@ public class XMLPreferences
             element = currentElement;
         }
 
-        synchronized (root)
-        {
-            for (String subName : name.split("/"))
+        synchronized (root) {
+            for (final String subName : name.split("/"))
                 if (!subName.isEmpty())
                     element = XMLUtil.setGenericElement(element, TYPE_SECTION, subName);
         }
@@ -273,8 +245,7 @@ public class XMLPreferences
      * @param name string
      * @return Return XMLPreferences of specified node.<br>
      */
-    public XMLPreferences node(String name)
-    {
+    public XMLPreferences node(final String name) {
         final Element element = setSection(name);
 
         if (element != null)
@@ -289,8 +260,7 @@ public class XMLPreferences
      * Ex : <code>nodeForClass("text") == node("java.lang.String")</code>
      * @param object object
      */
-    public XMLPreferences nodeForClass(Object object)
-    {
+    public XMLPreferences nodeForClass(final Object object) {
         if (object != null)
             return node(ClassUtil.getPathFromQualifiedName(object.getClass().getName()));
 
@@ -300,26 +270,22 @@ public class XMLPreferences
     /**
      * @return Return the {@link XMLPreferences} node as an XML node.
      */
-    public Element getXMLNode()
-    {
+    public Element getXMLNode() {
         return currentElement;
     }
 
     /**
      * @return Return true if current node is existing
      */
-    public boolean exists()
-    {
+    public boolean exists() {
         // root element, always exists
         if (currentElement == root.element)
             return true;
 
-        synchronized (root)
-        {
+        synchronized (root) {
             // try to reach root from current element
             Element parent = XMLUtil.getParentElement(currentElement);
-            while (parent != null)
-            {
+            while (parent != null) {
                 // we reached root so the element still exist
                 if (parent == root.element)
                     return true;
@@ -336,8 +302,7 @@ public class XMLPreferences
      * @param name string
      * @return Return true if specified node exists
      */
-    public boolean nodeExists(String name)
-    {
+    public boolean nodeExists(final String name) {
         return getSection(name) != null;
     }
 
@@ -347,21 +312,18 @@ public class XMLPreferences
      * Ex : <code>nodeForClassExists("text") == nodeExists("java.lang.String")</code>
      * @param object object
      */
-    public boolean nodeForClassExists(Object object)
-    {
+    public boolean nodeForClassExists(final Object object) {
         if (object != null)
             return nodeExists(ClassUtil.getPathFromQualifiedName(object.getClass().getName()));
 
         return false;
     }
 
-    public ArrayList<String> keys()
-    {
-        final ArrayList<String> result = new ArrayList<String>();
+    public ArrayList<String> keys() {
+        final ArrayList<String> result = new ArrayList<>();
 
-        synchronized (root)
-        {
-            for (Element element : XMLUtil.getGenericElements(currentElement, TYPE_KEY))
+        synchronized (root) {
+            for (final Element element : XMLUtil.getGenericElements(currentElement, TYPE_KEY))
                 result.add(XMLUtil.getGenericElementName(element));
         }
 
@@ -371,14 +333,11 @@ public class XMLPreferences
     /**
      * Remove all non element nodes
      */
-    public void clean()
-    {
-        synchronized (root)
-        {
+    public void clean() {
+        synchronized (root) {
             final List<Node> nodes = XMLUtil.getChildren(currentElement);
 
-            for (Node node : nodes)
-            {
+            for (final Node node : nodes) {
                 final String nodeName = node.getNodeName();
 
                 if (!(nodeName.equals(TYPE_KEY) || nodeName.equals(TYPE_SECTION)))
@@ -390,10 +349,8 @@ public class XMLPreferences
     /**
      * Remove all direct children of this node
      */
-    public void clear()
-    {
-        synchronized (root)
-        {
+    public void clear() {
+        synchronized (root) {
             XMLUtil.removeChildren(currentElement, TYPE_KEY);
         }
     }
@@ -401,12 +358,9 @@ public class XMLPreferences
     /**
      * Remove specified element
      */
-    private void remove(Element element)
-    {
-        if (element != null)
-        {
-            synchronized (root)
-            {
+    private void remove(final Element element) {
+        if (element != null) {
+            synchronized (root) {
                 final Element parent = XMLUtil.getParentElement(element);
 
                 if (parent != null)
@@ -418,8 +372,7 @@ public class XMLPreferences
     /**
      * Remove current section
      */
-    public void remove()
-    {
+    public void remove() {
         remove(currentElement);
     }
 
@@ -427,130 +380,99 @@ public class XMLPreferences
      * Remove specified section
      * @param name string
      */
-    public void remove(String name)
-    {
+    public void remove(final String name) {
         remove(getSection(name));
     }
 
     /**
      * Remove all sections
      */
-    public void removeChildren()
-    {
-        synchronized (root)
-        {
+    public void removeChildren() {
+        synchronized (root) {
             XMLUtil.removeChildren(currentElement, TYPE_SECTION);
         }
     }
 
-    public String get(String key, String def)
-    {
-        synchronized (root)
-        {
+    public String get(final String key, final String def) {
+        synchronized (root) {
             return XMLUtil.getGenericElementValue(currentElement, TYPE_KEY, key, def);
         }
     }
 
-    public boolean getBoolean(String key, boolean def)
-    {
-        synchronized (root)
-        {
+    public boolean getBoolean(final String key, final boolean def) {
+        synchronized (root) {
             return XMLUtil.getGenericElementBooleanValue(currentElement, TYPE_KEY, key, def);
         }
     }
 
-    public byte[] getBytes(String key, byte[] def)
-    {
-        synchronized (root)
-        {
+    public byte[] getBytes(final String key, final byte[] def) {
+        synchronized (root) {
             return XMLUtil.getGenericElementBytesValue(currentElement, TYPE_KEY, key, def);
         }
     }
 
-    public double getDouble(String key, double def)
-    {
-        synchronized (root)
-        {
+    public double getDouble(final String key, final double def) {
+        synchronized (root) {
             return XMLUtil.getGenericElementDoubleValue(currentElement, TYPE_KEY, key, def);
         }
     }
 
-    public float getFloat(String key, float def)
-    {
-        synchronized (root)
-        {
+    public float getFloat(final String key, final float def) {
+        synchronized (root) {
             return XMLUtil.getGenericElementFloatValue(currentElement, TYPE_KEY, key, def);
         }
     }
 
-    public int getInt(String key, int def)
-    {
-        synchronized (root)
-        {
+    public int getInt(final String key, final int def) {
+        synchronized (root) {
             return XMLUtil.getGenericElementIntValue(currentElement, TYPE_KEY, key, def);
         }
     }
 
-    public long getLong(String key, long def)
-    {
-        synchronized (root)
-        {
+    public long getLong(final String key, final long def) {
+        synchronized (root) {
             return XMLUtil.getGenericElementLongValue(currentElement, TYPE_KEY, key, def);
         }
     }
 
-    public void put(String key, String value)
-    {
-        synchronized (root)
-        {
+    public void put(final String key, final String value) {
+        synchronized (root) {
             XMLUtil.setGenericElementValue(currentElement, TYPE_KEY, key, value);
         }
     }
 
-    public void putBoolean(String key, boolean value)
-    {
-        synchronized (root)
-        {
+    public void putBoolean(final String key, final boolean value) {
+        synchronized (root) {
             XMLUtil.setGenericElementBooleanValue(currentElement, TYPE_KEY, key, value);
         }
     }
 
-    public void putBytes(String key, byte[] value)
-    {
-        synchronized (root)
-        {
+    public void putBytes(final String key, final byte[] value) {
+        synchronized (root) {
             XMLUtil.setGenericElementBytesValue(currentElement, TYPE_KEY, key, value.clone());
         }
     }
 
-    public void putDouble(String key, double value)
-    {
-        synchronized (root)
-        {
+    public void putDouble(final String key, final double value) {
+        synchronized (root) {
             XMLUtil.setGenericElementDoubleValue(currentElement, TYPE_KEY, key, value);
         }
     }
 
-    public void putFloat(String key, float value)
-    {
-        synchronized (root)
-        {
+    public void putFloat(final String key, final float value) {
+        synchronized (root) {
             XMLUtil.setGenericElementFloatValue(currentElement, TYPE_KEY, key, value);
         }
     }
 
-    public void putInt(String key, int value)
-    {
-        synchronized (root)
-        {
+    public void putInt(final String key, final int value) {
+        synchronized (root) {
             XMLUtil.setGenericElementIntValue(currentElement, TYPE_KEY, key, value);
         }
     }
 
-    public void putLong(String key, long value)
-    {
-        synchronized (root)
-        {
+    public void putLong(final String key, final long value) {
+        synchronized (root) {
             XMLUtil.setGenericElementLongValue(currentElement, TYPE_KEY, key, value);
         }
     }

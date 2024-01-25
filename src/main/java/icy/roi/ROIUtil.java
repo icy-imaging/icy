@@ -1,34 +1,22 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package icy.roi;
 
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+package icy.roi;
 
 import icy.image.IcyBufferedImage;
 import icy.image.IntensityInfo;
@@ -40,6 +28,7 @@ import icy.plugin.interface_.PluginROIDescriptor;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceDataIterator;
 import icy.sequence.SequenceUtil;
+import icy.system.logging.IcyLogger;
 import icy.type.DataIteratorUtil;
 import icy.type.DataType;
 import icy.type.collection.CollectionUtil;
@@ -57,20 +46,8 @@ import icy.type.rectangle.Rectangle4D;
 import icy.type.rectangle.Rectangle5D;
 import icy.util.ShapeUtil.BooleanOperator;
 import icy.util.StringUtil;
-import plugins.kernel.roi.descriptor.intensity.ROIIntensityDescriptorsPlugin;
-import plugins.kernel.roi.descriptor.intensity.ROIMaxIntensityDescriptor;
-import plugins.kernel.roi.descriptor.intensity.ROIMeanIntensityDescriptor;
-import plugins.kernel.roi.descriptor.intensity.ROIMinIntensityDescriptor;
-import plugins.kernel.roi.descriptor.intensity.ROIStandardDeviationDescriptor;
-import plugins.kernel.roi.descriptor.intensity.ROISumIntensityDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIAreaDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIBasicMeasureDescriptorsPlugin;
-import plugins.kernel.roi.descriptor.measure.ROIContourDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIInteriorDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIMassCenterDescriptorsPlugin;
-import plugins.kernel.roi.descriptor.measure.ROIPerimeterDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROISurfaceAreaDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIVolumeDescriptor;
+import plugins.kernel.roi.descriptor.intensity.*;
+import plugins.kernel.roi.descriptor.measure.*;
 import plugins.kernel.roi.morphology.ROIDilationCalculator;
 import plugins.kernel.roi.morphology.ROIDistanceTransformCalculator;
 import plugins.kernel.roi.morphology.ROIErosionCalculator;
@@ -84,27 +61,25 @@ import plugins.kernel.roi.roi2d.ROI2DPolygon;
 import plugins.kernel.roi.roi2d.ROI2DRectShape;
 import plugins.kernel.roi.roi2d.ROI2DRectangle;
 import plugins.kernel.roi.roi2d.ROI2DShape;
-import plugins.kernel.roi.roi3d.ROI3DArea;
-import plugins.kernel.roi.roi3d.ROI3DBox;
-import plugins.kernel.roi.roi3d.ROI3DCylinder;
-import plugins.kernel.roi.roi3d.ROI3DFlatPolygon;
-import plugins.kernel.roi.roi3d.ROI3DPoint;
-import plugins.kernel.roi.roi3d.ROI3DShape;
-import plugins.kernel.roi.roi3d.ROI3DStack;
-import plugins.kernel.roi.roi3d.ROI3DStackEllipse;
-import plugins.kernel.roi.roi3d.ROI3DStackPolygon;
-import plugins.kernel.roi.roi3d.ROI3DStackRectangle;
-import plugins.kernel.roi.roi3d.ROI3DZShape;
+import plugins.kernel.roi.roi3d.*;
 import plugins.kernel.roi.roi4d.ROI4DArea;
 import plugins.kernel.roi.roi5d.ROI5DArea;
 
+import java.awt.*;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.List;
+import java.util.*;
+import java.util.Map.Entry;
+
 /**
  * ROI utilities class.
- * 
- * @author Stephane
+ *
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class ROIUtil
-{
+public class ROIUtil {
     final public static String ZEXT_SUFFIX = " Z extended";
     final public static String STACK_SUFFIX = " stack";
     final public static String MASK_SUFFIX = " mask";
@@ -118,12 +93,11 @@ public class ROIUtil
      * This list can be extended by installing new plugin(s) implementing the {@link PluginROIDescriptor}
      * interface.<br>
      * This method is an alias of {@link ROIDescriptor#getDescriptors()}
-     * 
+     *
      * @see ROIDescriptor#compute(ROI, Sequence)
      * @see PluginROIDescriptor#compute(ROI, Sequence)
      */
-    public static Map<ROIDescriptor, PluginROIDescriptor> getROIDescriptors()
-    {
+    public static Map<ROIDescriptor, PluginROIDescriptor> getROIDescriptors() {
         return ROIDescriptor.getDescriptors();
     }
 
@@ -131,7 +105,7 @@ public class ROIUtil
      * Computes the specified descriptor from the input {@link ROIDescriptor} set on given ROI
      * and returns the result (or <code>null</code> if the descriptor is not found).<br>
      * This method is an alias of {@link ROIDescriptor#computeDescriptor(Collection, String, ROI, Sequence)}
-     * 
+     *
      * @param roiDescriptors
      *        the input {@link ROIDescriptor} set (see {@link #getROIDescriptors()} method)
      * @param descriptorId
@@ -143,27 +117,20 @@ public class ROIUtil
      *        an optional sequence where the pixel size can be retrieved
      * @return the computed descriptor or <code>null</code> if the descriptor if not found in the
      *         specified set
-     * @throws InterruptedException
      * @throws UnsupportedOperationException
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it, or if
      *         the specified Z, T or C position are not supported by the descriptor
      */
-    public static Object computeDescriptor(Collection<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi, Sequence sequence)
-            throws UnsupportedOperationException, InterruptedException
-    {
+    public static Object computeDescriptor(final Collection<ROIDescriptor> roiDescriptors, final String descriptorId, final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
         return ROIDescriptor.computeDescriptor(roiDescriptors, descriptorId, roi, sequence);
     }
 
     /**
-     * @throws InterruptedException
-     * @throws UnsupportedOperationException
      * @deprecated Use {@link ROIDescriptor#computeDescriptor(Collection, String, ROI, Sequence)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Object computeDescriptor(Set<ROIDescriptor> roiDescriptors, String descriptorId, ROI roi, Sequence sequence)
-            throws UnsupportedOperationException, InterruptedException
-    {
+    public static Object computeDescriptor(final Set<ROIDescriptor> roiDescriptors, final String descriptorId, final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
         return ROIDescriptor.computeDescriptor(roiDescriptors, descriptorId, roi, sequence);
     }
 
@@ -171,7 +138,7 @@ public class ROIUtil
      * Computes the specified descriptor on given ROI and returns the result (or <code>null</code> if the descriptor is
      * not found).<br>
      * This method is an alias of {@link ROIDescriptor#computeDescriptor(String, ROI, Sequence)}
-     * 
+     *
      * @param descriptorId
      *        the id of the descriptor we want to compute ({@link ROIBasicMeasureDescriptorsPlugin#ID_VOLUME} for
      *        instance)
@@ -181,14 +148,12 @@ public class ROIUtil
      *        an optional sequence where the pixel size can be retrieved
      * @return the computed descriptor or <code>null</code> if the descriptor if not found in the
      *         specified set
-     * @throws InterruptedException
      * @throws UnsupportedOperationException
      *         if the type of the given ROI is not supported by this descriptor, or if <code>sequence</code> is
      *         <code>null</code> while the calculation requires it, or if
      *         the specified Z, T or C position are not supported by the descriptor
      */
-    public static Object computeDescriptor(String descriptorId, ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException
-    {
+    public static Object computeDescriptor(final String descriptorId, final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
         return ROIDescriptor.computeDescriptor(descriptorId, roi, sequence);
     }
 
@@ -197,10 +162,8 @@ public class ROIUtil
      *             method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double getStandardDeviation(Sequence sequence, ROI roi, int z, int t, int c)
-    {
-        try
-        {
+    public static double getStandardDeviation(final Sequence sequence, final ROI roi, final int z, final int t, final int c) {
+        try {
             final SequenceDataIterator it = new SequenceDataIterator(sequence, roi, false, z, t, c);
 
             long numPixels = 0;
@@ -208,8 +171,7 @@ public class ROIUtil
             double sum2 = 0;
 
             // faster to do all calculation in a single iteration run
-            while (!it.done())
-            {
+            while (!it.done()) {
                 final double value = it.get();
 
                 sum += value;
@@ -219,17 +181,15 @@ public class ROIUtil
                 it.next();
             }
 
-            if (numPixels > 0)
-            {
-                double x1 = (sum2 / numPixels);
+            if (numPixels > 0) {
+                final double x1 = (sum2 / numPixels);
                 double x2 = sum / numPixels;
                 x2 *= x2;
 
                 return Math.sqrt(x1 - x2);
             }
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             // we can have exception as the process can be really long
             // and size modified during this period
         }
@@ -242,10 +202,8 @@ public class ROIUtil
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IntensityInfo getIntensityInfo(Sequence sequence, ROI roi, int z, int t, int c)
-    {
-        try
-        {
+    public static IntensityInfo getIntensityInfo(final Sequence sequence, final ROI roi, final int z, final int t, final int c) {
+        try {
             final IntensityInfo result = new IntensityInfo();
             final SequenceDataIterator it = new SequenceDataIterator(sequence, roi, false, z, t, c);
 
@@ -255,8 +213,7 @@ public class ROIUtil
             double sum = 0;
 
             // faster to do all calculation in a single iteration run
-            while (!it.done())
-            {
+            while (!it.done()) {
                 final double value = it.get();
 
                 if (value < min)
@@ -269,14 +226,12 @@ public class ROIUtil
                 it.next();
             }
 
-            if (numPixels > 0)
-            {
+            if (numPixels > 0) {
                 result.minIntensity = min;
                 result.maxIntensity = max;
                 result.meanIntensity = sum / numPixels;
             }
-            else
-            {
+            else {
                 result.minIntensity = 0d;
                 result.maxIntensity = 0d;
                 result.meanIntensity = 0d;
@@ -284,8 +239,7 @@ public class ROIUtil
 
             return result;
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             // we can have exception as the process can be really long
             // and size modified during this period
             return null;
@@ -294,7 +248,7 @@ public class ROIUtil
 
     /**
      * Returns the number of sequence pixels contained in the specified ROI.
-     * 
+     *
      * @param sequence
      *        The sequence we want to get the number of pixel.
      * @param roi
@@ -308,54 +262,44 @@ public class ROIUtil
      * @param c
      *        The specific C position (channel) where we want to compute the number of pixel or <code>-1</code> to use
      *        the ROI C dimension information.
-     * @throws InterruptedException
      */
-    public static long getNumPixel(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
-    {
+    public static long getNumPixel(final Sequence sequence, final ROI roi, final int z, final int t, final int c) throws InterruptedException {
         return DataIteratorUtil.count(new SequenceDataIterator(sequence, roi, false, z, t, c));
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMinIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double getMinIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
-    {
+    public static double getMinIntensity(final Sequence sequence, final ROI roi, final int z, final int t, final int c) throws InterruptedException {
         return DataIteratorMath.min(new SequenceDataIterator(sequence, roi, false, z, t, c));
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMaxIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double getMaxIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
-    {
+    public static double getMaxIntensity(final Sequence sequence, final ROI roi, final int z, final int t, final int c) throws InterruptedException {
         return DataIteratorMath.max(new SequenceDataIterator(sequence, roi, false, z, t, c));
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMeanIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double getMeanIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
-    {
+    public static double getMeanIntensity(final Sequence sequence, final ROI roi, final int z, final int t, final int c) throws InterruptedException {
         return DataIteratorMath.mean(new SequenceDataIterator(sequence, roi, false, z, t, c));
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROISumIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double getSumIntensity(Sequence sequence, ROI roi, int z, int t, int c) throws InterruptedException
-    {
+    public static double getSumIntensity(final Sequence sequence, final ROI roi, final int z, final int t, final int c) throws InterruptedException {
         return DataIteratorMath.sum(new SequenceDataIterator(sequence, roi, false, z, t, c));
     }
 
@@ -364,8 +308,7 @@ public class ROIUtil
      *             method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double getStandardDeviation(Sequence sequence, ROI roi)
-    {
+    public static double getStandardDeviation(final Sequence sequence, final ROI roi) {
         return getStandardDeviation(sequence, roi, -1, -1, -1);
     }
 
@@ -374,75 +317,60 @@ public class ROIUtil
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static IntensityInfo getIntensityInfo(Sequence sequence, ROI roi)
-    {
+    public static IntensityInfo getIntensityInfo(final Sequence sequence, final ROI roi) {
         return getIntensityInfo(sequence, roi, -1, -1, -1);
     }
 
     /**
      * Returns the number of sequence pixels contained in the specified ROI.
-     * 
-     * @throws InterruptedException
      */
-    public static long getNumPixel(Sequence sequence, ROI roi) throws InterruptedException
-    {
+    public static long getNumPixel(final Sequence sequence, final ROI roi) throws InterruptedException {
         return getNumPixel(sequence, roi, -1, -1, -1);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMinIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double getMinIntensity(Sequence sequence, ROI roi) throws InterruptedException
-    {
+    public static double getMinIntensity(final Sequence sequence, final ROI roi) throws InterruptedException {
         return getMinIntensity(sequence, roi, -1, -1, -1);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMaxIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double getMaxIntensity(Sequence sequence, ROI roi) throws InterruptedException
-    {
+    public static double getMaxIntensity(final Sequence sequence, final ROI roi) throws InterruptedException {
         return getMaxIntensity(sequence, roi, -1, -1, -1);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMeanIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double getMeanIntensity(Sequence sequence, ROI roi) throws InterruptedException
-    {
+    public static double getMeanIntensity(final Sequence sequence, final ROI roi) throws InterruptedException {
         return getMeanIntensity(sequence, roi, -1, -1, -1);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROISumIntensityDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double getSumIntensity(Sequence sequence, ROI roi) throws InterruptedException
-    {
+    public static double getSumIntensity(final Sequence sequence, final ROI roi) throws InterruptedException {
         return getSumIntensity(sequence, roi, -1, -1, -1);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Point5D getMassCenter(ROI roi) throws InterruptedException
-    {
-        switch (roi.getDimension())
-        {
+    public static Point5D getMassCenter(final ROI roi) throws InterruptedException {
+        switch (roi.getDimension()) {
             case 2:
                 final ROI2D roi2d = (ROI2D) roi;
                 final Point2D pt2d = getMassCenter(roi2d);
@@ -467,28 +395,23 @@ public class ROIUtil
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Point2D getMassCenter(ROI2D roi) throws InterruptedException
-    {
+    public static Point2D getMassCenter(final ROI2D roi) throws InterruptedException {
         double x = 0, y = 0;
         long len = 0;
 
         final BooleanMask2D mask = roi.getBooleanMask(true);
-        final boolean m[] = mask.mask;
+        final boolean[] m = mask.mask;
         final int h = mask.bounds.height;
         final int w = mask.bounds.width;
 
         int off = 0;
-        for (int j = 0; j < h; j++)
-        {
-            for (int i = 0; i < w; i++)
-            {
-                if (m[off++])
-                {
+        for (int j = 0; j < h; j++) {
+            for (int i = 0; i < w; i++) {
+                if (m[off++]) {
                     x += i;
                     y += j;
                     len++;
@@ -507,38 +430,31 @@ public class ROIUtil
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Point3D getMassCenter(ROI3D roi) throws InterruptedException
-    {
+    public static Point3D getMassCenter(final ROI3D roi) throws InterruptedException {
         double x = 0, y = 0, z = 0;
         long len = 0;
         final BooleanMask3D mask3d = roi.getBooleanMask(true);
 
-        for (Integer zSlice : mask3d.mask.keySet())
-        {
+        for (final Integer zSlice : mask3d.mask.keySet()) {
             final int zi = zSlice.intValue();
-            final double zd = zi;
             final BooleanMask2D mask = mask3d.getMask2D(zi);
-            final boolean m[] = mask.mask;
+            final boolean[] m = mask.mask;
             final double bx = mask.bounds.x;
             final double by = mask.bounds.y;
             final int h = mask.bounds.height;
             final int w = mask.bounds.width;
 
             int off = 0;
-            for (int j = 0; j < h; j++)
-            {
-                for (int i = 0; i < w; i++)
-                {
-                    if (m[off++])
-                    {
+            for (int j = 0; j < h; j++) {
+                for (int i = 0; i < w; i++) {
+                    if (m[off++]) {
                         x += bx + i;
                         y += by + j;
-                        z += zd;
+                        z += zi;
                         len++;
                     }
                 }
@@ -556,45 +472,36 @@ public class ROIUtil
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Point4D getMassCenter(ROI4D roi) throws InterruptedException
-    {
+    public static Point4D getMassCenter(final ROI4D roi) throws InterruptedException {
         final BooleanMask4D mask4d = roi.getBooleanMask(true);
         double x = 0, y = 0, z = 0, t = 0;
         long len = 0;
 
-        for (Integer tFrame : mask4d.mask.keySet())
-        {
+        for (final Integer tFrame : mask4d.mask.keySet()) {
             final int ti = tFrame.intValue();
-            final double td = ti;
             final BooleanMask3D mask3d = mask4d.getMask3D(ti);
 
-            for (Integer zSlice : mask3d.mask.keySet())
-            {
+            for (final Integer zSlice : mask3d.mask.keySet()) {
                 final int zi = zSlice.intValue();
-                final double zd = zi;
                 final BooleanMask2D mask = mask3d.getMask2D(zi);
-                final boolean m[] = mask.mask;
+                final boolean[] m = mask.mask;
                 final double bx = mask.bounds.x;
                 final double by = mask.bounds.y;
                 final int h = mask.bounds.height;
                 final int w = mask.bounds.width;
 
                 int off = 0;
-                for (int j = 0; j < h; j++)
-                {
-                    for (int i = 0; i < w; i++)
-                    {
-                        if (m[off++])
-                        {
+                for (int j = 0; j < h; j++) {
+                    for (int i = 0; i < w; i++) {
+                        if (m[off++]) {
                             x += bx + i;
                             y += by + j;
-                            z += zd;
-                            t += td;
+                            z += zi;
+                            t += ti;
                             len++;
                         }
                     }
@@ -614,52 +521,41 @@ public class ROIUtil
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIMassCenterDescriptorsPlugin} or {@link #computeDescriptor(String, ROI, Sequence)}
      *             method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Point5D getMassCenter(ROI5D roi) throws InterruptedException
-    {
+    public static Point5D getMassCenter(final ROI5D roi) throws InterruptedException {
         final BooleanMask5D mask5d = roi.getBooleanMask(true);
         double x = 0, y = 0, z = 0, t = 0, c = 0;
         long len = 0;
 
-        for (Integer cChannel : mask5d.mask.keySet())
-        {
+        for (final Integer cChannel : mask5d.mask.keySet()) {
             final int ci = cChannel.intValue();
-            final double cd = ci;
             final BooleanMask4D mask4d = mask5d.getMask4D(ci);
 
-            for (Integer tFrame : mask4d.mask.keySet())
-            {
+            for (final Integer tFrame : mask4d.mask.keySet()) {
                 final int ti = tFrame.intValue();
-                final double td = ti;
                 final BooleanMask3D mask3d = mask4d.getMask3D(ti);
 
-                for (Integer zSlice : mask3d.mask.keySet())
-                {
+                for (final Integer zSlice : mask3d.mask.keySet()) {
                     final int zi = zSlice.intValue();
-                    final double zd = zi;
                     final BooleanMask2D mask = mask3d.getMask2D(zi);
-                    final boolean m[] = mask.mask;
+                    final boolean[] m = mask.mask;
                     final double bx = mask.bounds.x;
                     final double by = mask.bounds.y;
                     final int h = mask.bounds.height;
                     final int w = mask.bounds.width;
 
                     int off = 0;
-                    for (int j = 0; j < h; j++)
-                    {
-                        for (int i = 0; i < w; i++)
-                        {
-                            if (m[off++])
-                            {
+                    for (int j = 0; j < h; j++) {
+                        for (int i = 0; i < w; i++) {
+                            if (m[off++]) {
                                 x += bx + i;
                                 y += by + j;
-                                z += zd;
-                                t += td;
-                                c += cd;
+                                z += zi;
+                                t += ti;
+                                c += ci;
                                 len++;
                             }
                         }
@@ -682,8 +578,7 @@ public class ROIUtil
      * @deprecated
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    private static double getMultiplier(Sequence sequence, ROI roi, int dim)
-    {
+    private static double getMultiplier(final Sequence sequence, final ROI roi, final int dim) {
         final int dimRoi = roi.getDimension();
 
         // cannot give this information for this roi
@@ -693,49 +588,44 @@ public class ROIUtil
         final Rectangle5D boundsRoi = roi.getBounds5D();
         double mul = 1d;
 
-        switch (dim)
-        {
+        switch (dim) {
             case 5:
-                if (dimRoi == 4)
-                {
+                if (dimRoi == 4) {
                     final int sizeC = sequence.getSizeC();
 
                     if ((boundsRoi.getSizeC() == Double.POSITIVE_INFINITY) && (sizeC > 1))
                         mul *= sizeC;
-                    // cannot give this information for this roi
+                        // cannot give this information for this roi
                     else
                         mul = 0d;
                 }
             case 4:
-                if (dimRoi == 3)
-                {
+                if (dimRoi == 3) {
                     final int sizeT = sequence.getSizeT();
 
                     if ((boundsRoi.getSizeT() == Double.POSITIVE_INFINITY) && (sizeT > 1))
                         mul *= sizeT;
-                    // cannot give this information for this roi
+                        // cannot give this information for this roi
                     else
                         mul = 0d;
                 }
             case 3:
-                if (dimRoi == 2)
-                {
+                if (dimRoi == 2) {
                     final int sizeZ = sequence.getSizeZ();
 
                     if ((boundsRoi.getSizeZ() == Double.POSITIVE_INFINITY) && (sizeZ > 1))
                         mul *= sizeZ;
-                    // cannot give this information for this roi
+                        // cannot give this information for this roi
                     else
                         mul = 0d;
                 }
             case 2:
-                if (dimRoi == 1)
-                {
+                if (dimRoi == 1) {
                     final int sizeY = sequence.getSizeY();
 
                     if ((boundsRoi.getSizeY() == Double.POSITIVE_INFINITY) && (sizeY > 1))
                         mul *= sizeY;
-                    // cannot give this information for this roi
+                        // cannot give this information for this roi
                     else
                         mul = 0d;
                 }
@@ -748,8 +638,7 @@ public class ROIUtil
      * @deprecated Use {@link ROIContourDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getContourSize(Sequence sequence, double contourPoints, ROI roi, int dim, int roundSignificant)
-    {
+    public static String getContourSize(final Sequence sequence, final double contourPoints, final ROI roi, final int dim, final int roundSignificant) {
         final double mul = getMultiplier(sequence, roi, dim);
 
         // 0 means the operation is not supported for this ROI
@@ -760,22 +649,18 @@ public class ROIUtil
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIContourDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getContourSize(Sequence sequence, ROI roi, int dim, int roundSignificant) throws InterruptedException
-    {
+    public static String getContourSize(final Sequence sequence, final ROI roi, final int dim, final int roundSignificant) throws InterruptedException {
         return getContourSize(sequence, roi.getNumberOfContourPoints(), roi, dim, roundSignificant);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIContourDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getContourSize(Sequence sequence, ROI roi, int dim) throws InterruptedException
-    {
+    public static String getContourSize(final Sequence sequence, final ROI roi, final int dim) throws InterruptedException {
         return getContourSize(sequence, roi, dim, 0);
     }
 
@@ -784,8 +669,7 @@ public class ROIUtil
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getInteriorSize(Sequence sequence, double interiorPoints, ROI roi, int dim, int roundSignificant)
-    {
+    public static String getInteriorSize(final Sequence sequence, final double interiorPoints, final ROI roi, final int dim, final int roundSignificant) {
         final double mul = getMultiplier(sequence, roi, dim);
 
         // 0 means the operation is not supported for this ROI
@@ -796,123 +680,100 @@ public class ROIUtil
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIInteriorDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getInteriorSize(Sequence sequence, ROI roi, int dim, int roundSignificant) throws InterruptedException
-    {
+    public static String getInteriorSize(final Sequence sequence, final ROI roi, final int dim, final int roundSignificant) throws InterruptedException {
         return getInteriorSize(sequence, roi.getNumberOfPoints(), roi, dim, roundSignificant);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIInteriorDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getInteriorSize(Sequence sequence, ROI roi, int dim) throws InterruptedException
-    {
+    public static String getInteriorSize(final Sequence sequence, final ROI roi, final int dim) throws InterruptedException {
         return getInteriorSize(sequence, roi, dim, 0);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIPerimeterDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getPerimeter(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
-    {
+    public static String getPerimeter(final Sequence sequence, final ROI roi, final int roundSignificant) throws InterruptedException {
         return getContourSize(sequence, roi, 2, roundSignificant);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIPerimeterDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getPerimeter(Sequence sequence, ROI roi) throws InterruptedException
-    {
+    public static String getPerimeter(final Sequence sequence, final ROI roi) throws InterruptedException {
         return getPerimeter(sequence, roi, 0);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getArea(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
-    {
+    public static String getArea(final Sequence sequence, final ROI roi, final int roundSignificant) throws InterruptedException {
         return getInteriorSize(sequence, roi, 2, roundSignificant);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getArea(Sequence sequence, ROI roi) throws InterruptedException
-    {
+    public static String getArea(final Sequence sequence, final ROI roi) throws InterruptedException {
         return getArea(sequence, roi, 0);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROISurfaceAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getSurfaceArea(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
-    {
+    public static String getSurfaceArea(final Sequence sequence, final ROI roi, final int roundSignificant) throws InterruptedException {
         return getContourSize(sequence, roi, 3, roundSignificant);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROISurfaceAreaDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getSurfaceArea(Sequence sequence, ROI roi) throws InterruptedException
-    {
+    public static String getSurfaceArea(final Sequence sequence, final ROI roi) throws InterruptedException {
         return getSurfaceArea(sequence, roi, 0);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIVolumeDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getVolume(Sequence sequence, ROI roi, int roundSignificant) throws InterruptedException
-    {
+    public static String getVolume(final Sequence sequence, final ROI roi, final int roundSignificant) throws InterruptedException {
         return getInteriorSize(sequence, roi, 3, roundSignificant);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link ROIVolumeDescriptor} or {@link #computeDescriptor(String, ROI, Sequence)} method instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getVolume(Sequence sequence, ROI roi) throws InterruptedException
-    {
+    public static String getVolume(final Sequence sequence, final ROI roi) throws InterruptedException {
         return getVolume(sequence, roi, 0);
     }
 
     /**
      * Returns the effective ROI number of dimension needed for the specified bounds.
      */
-    public static int getEffectiveDimension(Rectangle5D bounds)
-    {
+    public static int getEffectiveDimension(final Rectangle5D bounds) {
         int result = 5;
 
-        if (bounds.isInfiniteC() || (bounds.getSizeC() <= 1d))
-        {
+        if (bounds.isInfiniteC() || (bounds.getSizeC() <= 1d)) {
             result--;
-            if (bounds.isInfiniteT() || (bounds.getSizeT() <= 1d))
-            {
+            if (bounds.isInfiniteT() || (bounds.getSizeT() <= 1d)) {
                 result--;
                 if (bounds.isInfiniteZ() || (bounds.getSizeZ() <= 1d))
                     result--;
@@ -925,12 +786,10 @@ public class ROIUtil
     /**
      * Return 5D dimension for specified operation dimension
      */
-    private static Dimension5D.Integer getOpDim(int dim, Rectangle5D.Integer bounds)
-    {
+    private static Dimension5D.Integer getOpDim(final int dim, final Rectangle5D.Integer bounds) {
         final Dimension5D.Integer result = new Dimension5D.Integer();
 
-        switch (dim)
-        {
+        switch (dim) {
             case 2: // XY ROI with fixed ZTC
                 result.sizeZ = 1;
                 result.sizeT = 1;
@@ -962,25 +821,21 @@ public class ROIUtil
     /**
      * Get ROI result for specified 5D mask and operation dimension.
      */
-    private static ROI getOpResult(int dim, BooleanMask5D mask, Rectangle5D.Integer bounds)
-    {
+    private static ROI getOpResult(final int dim, final BooleanMask5D mask, final Rectangle5D.Integer bounds) {
         final ROI result;
 
-        switch (dim)
-        {
+        switch (dim) {
             case 2: // XY ROI with fixed ZTC
                 result = new ROI2DArea(mask.getMask2D(bounds.z, bounds.t, bounds.c));
 
                 // set ZTC position
                 result.beginUpdate();
-                try
-                {
+                try {
                     ((ROI2D) result).setZ(bounds.z);
                     ((ROI2D) result).setT(bounds.t);
                     ((ROI2D) result).setC(bounds.c);
                 }
-                finally
-                {
+                finally {
                     result.endUpdate();
                 }
                 break;
@@ -990,13 +845,11 @@ public class ROIUtil
 
                 // set TC position
                 result.beginUpdate();
-                try
-                {
+                try {
                     ((ROI3D) result).setT(bounds.t);
                     ((ROI3D) result).setC(bounds.c);
                 }
-                finally
-                {
+                finally {
                     result.endUpdate();
                 }
                 break;
@@ -1022,11 +875,9 @@ public class ROIUtil
      * Compute the resulting bounds for <i>union</i> operation between specified ROIs.<br>
      * It throws an exception if the <i>union</i> operation cannot be done (incompatible dimension).
      */
-    public static Rectangle5D getUnionBounds(ROI roi1, ROI roi2) throws UnsupportedOperationException
-    {
+    public static Rectangle5D getUnionBounds(final ROI roi1, final ROI roi2) throws UnsupportedOperationException {
         // null checking
-        if (roi1 == null)
-        {
+        if (roi1 == null) {
             if (roi2 == null)
                 return new Rectangle5D.Double();
             return roi2.getBounds5D();
@@ -1071,8 +922,7 @@ public class ROIUtil
      * Compute the resulting bounds for <i>intersection</i> operation between specified ROIs.<br>
      * It throws an exception if the <i>intersection</i> operation cannot be done (incompatible dimension).
      */
-    protected static Rectangle5D getIntersectionBounds(ROI roi1, ROI roi2) throws UnsupportedOperationException
-    {
+    protected static Rectangle5D getIntersectionBounds(final ROI roi1, final ROI roi2) throws UnsupportedOperationException {
         // null checking
         if ((roi1 == null) || (roi2 == null))
             return new Rectangle5D.Double();
@@ -1102,8 +952,7 @@ public class ROIUtil
      * Compute the resulting bounds for <i>subtraction</i> of (roi1 - roi2).<br>
      * It throws an exception if the <i>subtraction</i> operation cannot be done (incompatible dimension).
      */
-    protected static Rectangle5D getSubtractionBounds(ROI roi1, ROI roi2) throws UnsupportedOperationException
-    {
+    protected static Rectangle5D getSubtractionBounds(final ROI roi1, final ROI roi2) throws UnsupportedOperationException {
         // null checking
         if (roi1 == null)
             return new Rectangle5D.Double();
@@ -1135,14 +984,10 @@ public class ROIUtil
 
     /**
      * Computes union of specified <code>ROI</code> and return result in a new <code>ROI</code>.
-     * 
-     * @throws InterruptedException
      */
-    public static ROI getUnion(ROI roi1, ROI roi2) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI getUnion(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
         // null checking
-        if (roi1 == null)
-        {
+        if (roi1 == null) {
             // return empty ROI
             if (roi2 == null)
                 return new ROI2DArea();
@@ -1162,18 +1007,15 @@ public class ROIUtil
         final Rectangle3D.Integer bounds3D = (Rectangle3D.Integer) bounds.toRectangle3D();
         final Rectangle4D.Integer bounds4D = (Rectangle4D.Integer) bounds.toRectangle4D();
 
-        final BooleanMask4D mask5D[] = new BooleanMask4D[roiSize.sizeC];
+        final BooleanMask4D[] mask5D = new BooleanMask4D[roiSize.sizeC];
 
-        for (int c = 0; c < roiSize.sizeC; c++)
-        {
-            final BooleanMask3D mask4D[] = new BooleanMask3D[roiSize.sizeT];
+        for (int c = 0; c < roiSize.sizeC; c++) {
+            final BooleanMask3D[] mask4D = new BooleanMask3D[roiSize.sizeT];
 
-            for (int t = 0; t < roiSize.sizeT; t++)
-            {
-                final BooleanMask2D mask3D[] = new BooleanMask2D[roiSize.sizeZ];
+            for (int t = 0; t < roiSize.sizeT; t++) {
+                final BooleanMask2D[] mask3D = new BooleanMask2D[roiSize.sizeZ];
 
-                for (int z = 0; z < roiSize.sizeZ; z++)
-                {
+                for (int z = 0; z < roiSize.sizeZ; z++) {
                     mask3D[z] = BooleanMask2D.getUnion(roi1.getBooleanMask2D(bounds.z + z, bounds.t + t, bounds.c + c, true),
                             roi2.getBooleanMask2D(bounds.z + z, bounds.t + t, bounds.c + c, true));
                 }
@@ -1199,11 +1041,8 @@ public class ROIUtil
 
     /**
      * Computes intersection of specified <code>ROI</code> and return result in a new <code>ROI</code>.
-     * 
-     * @throws InterruptedException
      */
-    public static ROI getIntersection(ROI roi1, ROI roi2) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI getIntersection(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
         // null checking
         if ((roi1 == null) || (roi2 == null))
             // return empty ROI
@@ -1220,18 +1059,15 @@ public class ROIUtil
         final Rectangle3D.Integer bounds3D = (Rectangle3D.Integer) bounds.toRectangle3D();
         final Rectangle4D.Integer bounds4D = (Rectangle4D.Integer) bounds.toRectangle4D();
 
-        final BooleanMask4D mask5D[] = new BooleanMask4D[roiSize.sizeC];
+        final BooleanMask4D[] mask5D = new BooleanMask4D[roiSize.sizeC];
 
-        for (int c = 0; c < roiSize.sizeC; c++)
-        {
-            final BooleanMask3D mask4D[] = new BooleanMask3D[roiSize.sizeT];
+        for (int c = 0; c < roiSize.sizeC; c++) {
+            final BooleanMask3D[] mask4D = new BooleanMask3D[roiSize.sizeT];
 
-            for (int t = 0; t < roiSize.sizeT; t++)
-            {
-                final BooleanMask2D mask3D[] = new BooleanMask2D[roiSize.sizeZ];
+            for (int t = 0; t < roiSize.sizeT; t++) {
+                final BooleanMask2D[] mask3D = new BooleanMask2D[roiSize.sizeZ];
 
-                for (int z = 0; z < roiSize.sizeZ; z++)
-                {
+                for (int z = 0; z < roiSize.sizeZ; z++) {
                     final BooleanMask2D roi1Mask2D = new BooleanMask2D(new Rectangle(bounds2D),
                             roi1.getBooleanMask2D(bounds2D, bounds.z + z, bounds.t + t, bounds.c + c, true));
                     final BooleanMask2D roi2Mask2D = new BooleanMask2D(new Rectangle(bounds2D),
@@ -1261,14 +1097,10 @@ public class ROIUtil
 
     /**
      * Compute exclusive union of specified <code>ROI</code> and return result in a new <code>ROI</code>.
-     * 
-     * @throws InterruptedException
      */
-    public static ROI getExclusiveUnion(ROI roi1, ROI roi2) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI getExclusiveUnion(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
         // null checking
-        if (roi1 == null)
-        {
+        if (roi1 == null) {
             // return empty ROI
             if (roi2 == null)
                 return new ROI2DArea();
@@ -1288,18 +1120,15 @@ public class ROIUtil
         final Rectangle3D.Integer bounds3D = (Rectangle3D.Integer) bounds.toRectangle3D();
         final Rectangle4D.Integer bounds4D = (Rectangle4D.Integer) bounds.toRectangle4D();
 
-        final BooleanMask4D mask5D[] = new BooleanMask4D[roiSize.sizeC];
+        final BooleanMask4D[] mask5D = new BooleanMask4D[roiSize.sizeC];
 
-        for (int c = 0; c < roiSize.sizeC; c++)
-        {
-            final BooleanMask3D mask4D[] = new BooleanMask3D[roiSize.sizeT];
+        for (int c = 0; c < roiSize.sizeC; c++) {
+            final BooleanMask3D[] mask4D = new BooleanMask3D[roiSize.sizeT];
 
-            for (int t = 0; t < roiSize.sizeT; t++)
-            {
-                final BooleanMask2D mask3D[] = new BooleanMask2D[roiSize.sizeZ];
+            for (int t = 0; t < roiSize.sizeT; t++) {
+                final BooleanMask2D[] mask3D = new BooleanMask2D[roiSize.sizeZ];
 
-                for (int z = 0; z < roiSize.sizeZ; z++)
-                {
+                for (int z = 0; z < roiSize.sizeZ; z++) {
                     mask3D[z] = BooleanMask2D.getExclusiveUnion(roi1.getBooleanMask2D(bounds.z + z, bounds.t + t, bounds.c + c, true),
                             roi2.getBooleanMask2D(bounds.z + z, bounds.t + t, bounds.c + c, true));
                 }
@@ -1325,11 +1154,8 @@ public class ROIUtil
 
     /**
      * Computes the subtraction of roi1 - roi2 and returns result in a new <code>ROI</code>.
-     * 
-     * @throws InterruptedException
      */
-    public static ROI getSubtraction(ROI roi1, ROI roi2) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI getSubtraction(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
         // return empty ROI
         if (roi1 == null)
             return new ROI2DArea();
@@ -1347,18 +1173,15 @@ public class ROIUtil
         final Rectangle3D.Integer bounds3D = (Rectangle3D.Integer) bounds.toRectangle3D();
         final Rectangle4D.Integer bounds4D = (Rectangle4D.Integer) bounds.toRectangle4D();
 
-        final BooleanMask4D mask5D[] = new BooleanMask4D[roiSize.sizeC];
+        final BooleanMask4D[] mask5D = new BooleanMask4D[roiSize.sizeC];
 
-        for (int c = 0; c < roiSize.sizeC; c++)
-        {
-            final BooleanMask3D mask4D[] = new BooleanMask3D[roiSize.sizeT];
+        for (int c = 0; c < roiSize.sizeC; c++) {
+            final BooleanMask3D[] mask4D = new BooleanMask3D[roiSize.sizeT];
 
-            for (int t = 0; t < roiSize.sizeT; t++)
-            {
-                final BooleanMask2D mask3D[] = new BooleanMask2D[roiSize.sizeZ];
+            for (int t = 0; t < roiSize.sizeT; t++) {
+                final BooleanMask2D[] mask3D = new BooleanMask2D[roiSize.sizeZ];
 
-                for (int z = 0; z < roiSize.sizeZ; z++)
-                {
+                for (int z = 0; z < roiSize.sizeZ; z++) {
                     mask3D[z] = BooleanMask2D.getSubtraction(roi1.getBooleanMask2D(bounds.z + z, bounds.t + t, bounds.c + c, true),
                             roi2.getBooleanMask2D(bounds.z + z, bounds.t + t, bounds.c + c, true));
                 }
@@ -1384,25 +1207,22 @@ public class ROIUtil
 
     /**
      * Merge the specified array of {@link ROI} with the given {@link BooleanOperator}.<br>
-     * 
+     *
      * @param rois
      *        ROIs we want to merge.
      * @param operator
      *        {@link BooleanOperator} to apply.
      * @return {@link ROI} representing the result of the merge operation.
-     * @throws InterruptedException
      */
-    public static ROI merge(List<? extends ROI> rois, BooleanOperator operator) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI merge(final List<? extends ROI> rois, final BooleanOperator operator) throws UnsupportedOperationException, InterruptedException {
         if (rois.size() == 0)
             return null;
 
-        final List<ROI2DShape> roi2dShapes = new ArrayList();
-        final List<ROI> roiOthers = new ArrayList();
+        final List<ROI2DShape> roi2dShapes = new ArrayList<>();
+        final List<ROI> roiOthers = new ArrayList<>();
 
         // classify roi by type
-        for (ROI roi : rois)
-        {
+        for (final ROI roi : rois) {
             if (roi instanceof ROI2DShape)
                 roi2dShapes.add((ROI2DShape) roi);
             else
@@ -1416,22 +1236,18 @@ public class ROIUtil
             result = rois.get(0).getCopy();
 
         // copy can fail...
-        if (result != null)
-        {
-            switch (operator)
-            {
+        if (result != null) {
+            switch (operator) {
                 case AND:
                     // ROI2DShape optimization
-                    if (!roi2dShapes.isEmpty())
-                    {
+                    if (!roi2dShapes.isEmpty()) {
                         roiOthers.addAll(((ROI2DPath) result).intersectFast(roi2dShapes));
                         ((ROI2DPath) result).updatePath();
                     }
 
-                    for (int i = 0; i < roiOthers.size(); i++)
-                    {
+                    for (int i = 0; i < roiOthers.size(); i++) {
                         // interrupt task
-                        if (Thread.currentThread().interrupted())
+                        if (Thread.currentThread().isInterrupted())
                             throw new InterruptedException("ROI AND merging process interrupted.");
                         result = result.intersect(rois.get(i), true);
                     }
@@ -1439,16 +1255,14 @@ public class ROIUtil
 
                 case OR:
                     // ROI2DShape optimization
-                    if (!roi2dShapes.isEmpty())
-                    {
+                    if (!roi2dShapes.isEmpty()) {
                         roiOthers.addAll(((ROI2DPath) result).addFast(roi2dShapes));
                         ((ROI2DPath) result).updatePath();
                     }
 
-                    for (int i = 0; i < roiOthers.size(); i++)
-                    {
+                    for (int i = 0; i < roiOthers.size(); i++) {
                         // interrupt task
-                        if (Thread.currentThread().interrupted())
+                        if (Thread.currentThread().isInterrupted())
                             throw new InterruptedException("ROI OR merging process interrupted.");
                         result = result.add(rois.get(i), true);
                     }
@@ -1456,16 +1270,14 @@ public class ROIUtil
 
                 case XOR:
                     // ROI2DShape optimization
-                    if (!roi2dShapes.isEmpty())
-                    {
+                    if (!roi2dShapes.isEmpty()) {
                         roiOthers.addAll(((ROI2DPath) result).exclusiveAddFast(roi2dShapes));
                         ((ROI2DPath) result).updatePath();
                     }
 
-                    for (int i = 0; i < roiOthers.size(); i++)
-                    {
+                    for (int i = 0; i < roiOthers.size(); i++) {
                         // interrupt task
-                        if (Thread.currentThread().interrupted())
+                        if (Thread.currentThread().isInterrupted())
                             throw new InterruptedException("ROI XOR merging process interrupted.");
                         result = result.exclusiveAdd(rois.get(i), true);
                     }
@@ -1473,96 +1285,62 @@ public class ROIUtil
             }
         }
 
-        // for (int i = 1; i < rois.size(); i++)
-        // {
-        // final ROI roi = rois.get(i);
-        //
-        // switch (operator)
-        // {
-        // case AND:
-        // result = result.getIntersection(roi);
-        // break;
-        // case OR:
-        // result = result.getUnion(roi);
-        // break;
-        // case XOR:
-        // result = result.getExclusiveUnion(roi);
-        // break;
-        // }
-        // }
-
         return result;
 
     }
 
     /**
      * Builds and returns a ROI corresponding to the union of the specified ROI list.
-     * 
-     * @throws InterruptedException
      */
-    public static ROI getUnion(List<? extends ROI> rois) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI getUnion(final List<? extends ROI> rois) throws UnsupportedOperationException, InterruptedException {
         return merge(rois, BooleanOperator.OR);
     }
 
     /**
      * Builds and returns a ROI corresponding to the exclusive union of the specified ROI list.
-     * 
-     * @throws InterruptedException
      */
-    public static ROI getExclusiveUnion(List<? extends ROI> rois) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI getExclusiveUnion(final List<? extends ROI> rois) throws UnsupportedOperationException, InterruptedException {
         return merge(rois, BooleanOperator.XOR);
     }
 
     /**
      * Builds and returns a ROI corresponding to the intersection of the specified ROI list.
-     * 
-     * @throws InterruptedException
      */
-    public static ROI getIntersection(List<? extends ROI> rois) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI getIntersection(final List<? extends ROI> rois) throws UnsupportedOperationException, InterruptedException {
         return merge(rois, BooleanOperator.AND);
     }
 
     /**
      * Subtract the content of the roi2 from the roi1 and return the result as a new {@link ROI}.<br>
      * This is equivalent to: <code>roi1.getSubtraction(roi2)</code>
-     * 
+     *
      * @return {@link ROI} representing the result of subtraction.
-     * @throws InterruptedException
      */
-    public static ROI subtract(ROI roi1, ROI roi2) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI subtract(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
         return roi1.getSubtraction(roi2);
     }
 
     /**
      * Converts the specified ROI to a ROI Point ({@link ROI2DPoint} or {@link ROI3DPoint}) representing the mass center of the input ROI.
-     * 
+     *
      * @return the ROI point representing the mass center of the input ROI.
-     * @throws InterruptedException
      */
-    public static ROI convertToPoint(ROI roi) throws InterruptedException
-    {
+    public static ROI convertToPoint(final ROI roi) throws InterruptedException {
         final ROI result;
         final Point5D pt = ROIMassCenterDescriptorsPlugin.computeMassCenter(roi);
 
-        if (roi instanceof ROI2D)
-        {
+        if (roi instanceof ROI2D) {
             result = new ROI2DPoint(pt.getX(), pt.getY());
             ((ROI2DPoint) result).setZ(((ROI2D) roi).getZ());
             ((ROI2DPoint) result).setT(((ROI2D) roi).getT());
             ((ROI2DPoint) result).setC(((ROI2D) roi).getC());
         }
-        else if (roi instanceof ROI3D)
-        {
+        else if (roi instanceof ROI3D) {
             result = new ROI3DPoint(pt.getX(), pt.getY(), pt.getZ());
             ((ROI3DPoint) result).setT(((ROI3D) roi).getT());
             ((ROI3DPoint) result).setC(((ROI3D) roi).getC());
         }
-        else
-        {
+        else {
             result = new ROI3DPoint(pt.getX(), pt.getY(), pt.getZ());
             ((ROI3DPoint) result).setT((int) pt.getT());
             ((ROI3DPoint) result).setC((int) pt.getC());
@@ -1576,31 +1354,26 @@ public class ROIUtil
 
     /**
      * Converts the specified ROI to a 2D ellipse type ROI centered on the mass center of the input ROI.
-     * 
+     *
      * @return the 2D ellipse ROI centered on the mass center of the input ROI.
-     * @throws InterruptedException
      */
-    public static ROI2DEllipse convertToEllipse(ROI roi, double radiusX, double radiusY) throws InterruptedException
-    {
+    public static ROI2DEllipse convertToEllipse(final ROI roi, final double radiusX, final double radiusY) throws InterruptedException {
         final Point5D pt = ROIMassCenterDescriptorsPlugin.computeMassCenter(roi);
         final double x = pt.getX();
         final double y = pt.getY();
         final ROI2DEllipse result = new ROI2DEllipse(x - radiusX, y - radiusY, x + radiusX, y + radiusY);
 
-        if (roi instanceof ROI2D)
-        {
+        if (roi instanceof ROI2D) {
             result.setZ(((ROI2D) roi).getZ());
             result.setT(((ROI2D) roi).getT());
             result.setC(((ROI2D) roi).getC());
         }
-        else if (roi instanceof ROI3D)
-        {
+        else if (roi instanceof ROI3D) {
             result.setZ((int) pt.getZ());
             result.setT(((ROI3D) roi).getT());
             result.setC(((ROI3D) roi).getC());
         }
-        else
-        {
+        else {
             result.setZ((int) pt.getZ());
             result.setT((int) pt.getT());
             result.setC((int) pt.getC());
@@ -1614,12 +1387,10 @@ public class ROIUtil
 
     /**
      * Converts the specified ROI to a 2D rectangle type ROI centered on the mass center of the input ROI.
-     * 
+     *
      * @return the 2D rectangle ROI centered on the mass center of the input ROI.
-     * @throws InterruptedException
      */
-    public static ROI2DRectangle convertToRectangle(ROI roi, double width, double height) throws InterruptedException
-    {
+    public static ROI2DRectangle convertToRectangle(final ROI roi, final double width, final double height) throws InterruptedException {
         final Point5D pt = ROIMassCenterDescriptorsPlugin.computeMassCenter(roi);
         final double x = pt.getX();
         final double y = pt.getY();
@@ -1627,20 +1398,17 @@ public class ROIUtil
         final double rh = height / 2;
         final ROI2DRectangle result = new ROI2DRectangle(x - rw, y - rh, x + rw, y + rh);
 
-        if (roi instanceof ROI2D)
-        {
+        if (roi instanceof ROI2D) {
             result.setZ(((ROI2D) roi).getZ());
             result.setT(((ROI2D) roi).getT());
             result.setC(((ROI2D) roi).getC());
         }
-        else if (roi instanceof ROI3D)
-        {
+        else if (roi instanceof ROI3D) {
             result.setZ((int) pt.getZ());
             result.setT(((ROI3D) roi).getT());
             result.setC(((ROI3D) roi).getC());
         }
-        else
-        {
+        else {
             result.setZ((int) pt.getZ());
             result.setT((int) pt.getT());
             result.setC((int) pt.getC());
@@ -1653,12 +1421,10 @@ public class ROIUtil
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link #convertTo3D(ROI2D, double, double)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ROI convertToStack(ROI2D roi, int zMin, int zMax) throws InterruptedException
-    {
+    public static ROI convertToStack(final ROI2D roi, final int zMin, final int zMax) throws InterruptedException {
         ROI result = null;
 
         if (roi instanceof ROI2DRectangle)
@@ -1668,12 +1434,11 @@ public class ROIUtil
         else if (roi instanceof ROI2DPolygon)
             result = new ROI3DStackPolygon(((ROI2DPolygon) roi).getPolygon2D(), zMin, zMax);
         else if (roi instanceof ROI2DArea)
-            result = new ROI3DArea(((ROI2DArea) roi).getBooleanMask(true), zMin, zMax);
+            result = new ROI3DArea(roi.getBooleanMask(true), zMin, zMax);
         else if (roi != null)
             result = new ROI3DArea(roi.getBooleanMask2D(roi.getZ(), roi.getT(), roi.getC(), true), zMin, zMax);
 
-        if ((roi != null) && (result != null))
-        {
+        if ((roi != null) && (result != null)) {
             // unselect all control points
             result.unselectAllPoints();
             // keep original ROI informations
@@ -1685,51 +1450,44 @@ public class ROIUtil
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link #convertTo2D(ROI3D)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ROI[] unstack(ROI3D roi) throws InterruptedException
-    {
+    public static ROI[] unstack(final ROI3D roi) throws InterruptedException {
         return convertTo2D(roi);
     }
 
     /**
      * Converts the specified 2D ROI to 3D ROI by elongating it along the Z axis with the given Z position and size Z parameters.
-     * 
+     *
      * @return the converted 3D ROI
-     * @throws InterruptedException
      */
-    public static ROI convertTo3D(ROI2D roi, double z, double sizeZ) throws InterruptedException
-    {
+    public static ROI convertTo3D(final ROI2D roi, final double z, final double sizeZ) throws InterruptedException {
         ROI result = null;
 
-        if (roi instanceof ROI2DRectangle)
-            result = new ROI3DBox(roi.getBounds2D(), z, sizeZ);
-        else if (roi instanceof ROI2DEllipse)
-            result = new ROI3DCylinder(roi.getBounds2D(), z, sizeZ);
-        else if (roi instanceof ROI2DPolygon)
-            result = new ROI3DFlatPolygon(((ROI2DPolygon) roi).getPolygon2D(), z, sizeZ);
-        else
-        {
-            int zMin = (int) z;
-            int zMax = (int) (z + sizeZ);
-            // integer ? --> decrement by one
-            if ((double) zMax == (z + sizeZ))
-                zMax--;
+        switch (roi) {
+            case final ROI2DRectangle roi2DRectangle -> result = new ROI3DBox(roi.getBounds2D(), z, sizeZ);
+            case final ROI2DEllipse roi2DEllipse -> result = new ROI3DCylinder(roi.getBounds2D(), z, sizeZ);
+            case final ROI2DPolygon roi2DPolygon -> result = new ROI3DFlatPolygon(roi2DPolygon.getPolygon2D(), z, sizeZ);
+            case null, default -> {
+                final int zMin = (int) z;
+                int zMax = (int) (z + sizeZ);
+                // integer ? --> decrement by one
+                if ((double) zMax == (z + sizeZ))
+                    zMax--;
 
-            // empty
-            if (zMin > zMax)
-                return null;
+                // empty
+                if (zMin > zMax)
+                    return null;
 
-            if (roi instanceof ROI2DArea)
-                result = new ROI3DArea(((ROI2DArea) roi).getBooleanMask(true), zMin, zMax);
-            else
-                result = new ROI3DArea(roi.getBooleanMask2D(roi.getZ(), roi.getT(), roi.getC(), true), zMin, zMax);
+                if (roi instanceof ROI2DArea)
+                    result = new ROI3DArea(roi.getBooleanMask(true), zMin, zMax);
+                else if (roi != null)
+                    result = new ROI3DArea(roi.getBooleanMask2D(roi.getZ(), roi.getT(), roi.getC(), true), zMin, zMax);
+            }
         }
 
-        if (result != null)
-        {
+        if (result != null) {
             // unselect all control points
             result.unselectAllPoints();
             // preserve origin name is not the default name
@@ -1745,34 +1503,26 @@ public class ROIUtil
     /**
      * Converts the specified 3D ROI to 2D ROI(s).<br>
      * 3D stack ROI are converted to multiple ROI2D representing each Z slice of the original 3D stack.
-     * 
+     *
      * @return the converted 2D ROIs or <code>null</code> if the input ROI was null
-     * @throws InterruptedException
      */
-    public static ROI[] convertTo2D(ROI3D roi) throws InterruptedException
-    {
+    public static ROI[] convertTo2D(final ROI3D roi) throws InterruptedException {
         ROI[] result = null;
 
-        if (roi instanceof ROI3DPoint)
-        {
-            ROI3DPoint roi3d = ((ROI3DPoint) roi);
-            Point3D position = roi3d.getPosition3D();
-            ROI2DPoint roi2d = new ROI2DPoint(position.getX(), position.getY());
+        if (roi instanceof final ROI3DPoint roi3d) {
+            final Point3D position = roi3d.getPosition3D();
+            final ROI2DPoint roi2d = new ROI2DPoint(position.getX(), position.getY());
             roi2d.c = roi3d.c;
             roi2d.t = roi3d.t;
             roi2d.z = (int) Math.round(position.getZ());
-            result = new ROI[] {roi2d};
+            result = new ROI[]{roi2d};
         }
-        else if (roi instanceof ROI3DStack)
-        {
-            ROI3DStack<?> roi3d = ((ROI3DStack<?>) roi);
-            List<ROI> rois2d = new ArrayList<ROI>(roi3d.getSizeZ());
-            int z0 = (int) Math.floor(roi3d.getBounds3D().getZ());
-            for (int z = z0; z < z0 + roi3d.getSizeZ(); z++)
-            {
+        else if (roi instanceof final ROI3DStack<?> roi3d) {
+            final List<ROI> rois2d = new ArrayList<>(roi3d.getSizeZ());
+            final int z0 = (int) Math.floor(roi3d.getBounds3D().getZ());
+            for (int z = z0; z < z0 + roi3d.getSizeZ(); z++) {
                 ROI2D roi2d = roi3d.getSlice(z);
-                if (roi2d != null)
-                {
+                if (roi2d != null) {
                     roi2d = (ROI2D) roi2d.getCopy();
                     roi2d.setZ(z);
                     roi2d.setC(roi3d.c);
@@ -1780,58 +1530,47 @@ public class ROIUtil
                     rois2d.add(roi2d);
                 }
             }
-            result = rois2d.toArray(new ROI[rois2d.size()]);
+            result = rois2d.toArray(new ROI[0]);
         }
-        else if (roi instanceof ROI3DZShape)
-        {
-            ROI3DZShape roi3d = ((ROI3DZShape) roi);
+        else if (roi instanceof final ROI3DZShape roi3d) {
             ROI2DShape roi2d = roi3d.getShape2DROI();
-            if (roi2d != null)
-            {
+            if (roi2d != null) {
                 roi2d = (ROI2DShape) roi2d.getCopy();
                 roi2d.setZ(-1);
                 roi2d.setC(roi3d.c);
                 roi2d.setT(roi3d.t);
             }
-            result = new ROI[] {roi2d};
+            result = new ROI[]{roi2d};
         }
-        else if (roi instanceof ROI3DArea)
-        {
-            ROI3DArea roi3d = ((ROI3DArea) roi);
-            List<ROI> rois2d = new ArrayList<ROI>(roi3d.getSizeZ());
-            int z0 = (int) Math.floor(roi3d.getBounds3D().getZ());
-            for (int z = z0; z < z0 + roi3d.getSizeZ(); z++)
-            {
-                ROI2DArea roi2d = new ROI2DArea(roi3d.getBooleanMask2D(z, true));
+        else if (roi instanceof final ROI3DArea roi3d) {
+            final List<ROI> rois2d = new ArrayList<>(roi3d.getSizeZ());
+            final int z0 = (int) Math.floor(roi3d.getBounds3D().getZ());
+            for (int z = z0; z < z0 + roi3d.getSizeZ(); z++) {
+                final ROI2DArea roi2d = new ROI2DArea(roi3d.getBooleanMask2D(z, true));
                 roi2d.setZ(z);
                 roi2d.setC(roi3d.c);
                 roi2d.setT(roi3d.t);
                 rois2d.add(roi2d);
             }
-            result = rois2d.toArray(new ROI[rois2d.size()]);
+            result = rois2d.toArray(new ROI[0]);
         }
-        else if (roi != null)
-        {
-            ROI3D roi3d = ((ROI3D) roi);
-            int sizeZ = (int) Math.round(roi3d.getBounds3D().getSizeZ());
-            List<ROI> rois2d = new ArrayList<ROI>(sizeZ);
-            for (int z = (int) Math.floor(roi3d.getBounds3D().getZ()); z <= sizeZ; z++)
-            {
-                BooleanMask2D mask2d = roi3d.getBooleanMask2D(z, true);
-                if (mask2d != null && !mask2d.isEmpty())
-                {
-                    ROI2DArea roi2d = new ROI2DArea(mask2d);
+        else if (roi != null) {
+            final int sizeZ = (int) Math.round(roi.getBounds3D().getSizeZ());
+            final List<ROI> rois2d = new ArrayList<>(sizeZ);
+            for (int z = (int) Math.floor(roi.getBounds3D().getZ()); z <= sizeZ; z++) {
+                final BooleanMask2D mask2d = roi.getBooleanMask2D(z, true);
+                if (mask2d != null && !mask2d.isEmpty()) {
+                    final ROI2DArea roi2d = new ROI2DArea(mask2d);
                     roi2d.setZ(z);
-                    roi2d.setC(roi3d.c);
-                    roi2d.setT(roi3d.t);
+                    roi2d.setC(roi.c);
+                    roi2d.setT(roi.t);
                     rois2d.add(roi2d);
                 }
             }
-            result = rois2d.toArray(new ROI[rois2d.size()]);
+            result = rois2d.toArray(new ROI[0]);
         }
 
-        if ((roi != null) && (result != null))
-        {
+        if ((roi != null) && (result != null)) {
             String name = roi.getName();
 
             // remove "stack" suffix is present
@@ -1841,8 +1580,7 @@ public class ROIUtil
                 name = StringUtil.removeLast(name, ZEXT_SUFFIX.length());
 
             // unselect all control points
-            for (ROI roi2d : result)
-            {
+            for (final ROI roi2d : result) {
                 roi2d.unselectAllPoints();
                 // preserve origin name is not the default name
                 if (!roi.isDefaultName())
@@ -1857,13 +1595,11 @@ public class ROIUtil
 
     /**
      * Converts the specified ROI to a boolean mask type ROI (ROI AreaX).
-     * 
+     *
      * @return the ROI AreaX corresponding to the input ROI.<br>
      *         If the ROI is already of boolean mask type then it's directly returned without any conversion.
-     * @throws InterruptedException
      */
-    public static ROI convertToMask(ROI roi) throws InterruptedException
-    {
+    public static ROI convertToMask(final ROI roi) throws InterruptedException {
         // no conversion needed
         if ((roi instanceof ROI2DArea) || (roi instanceof ROI3DArea) || (roi instanceof ROI4DArea) || (roi instanceof ROI5DArea))
             return roi;
@@ -1880,15 +1616,13 @@ public class ROIUtil
         final Rectangle4D.Integer bounds4D = (Rectangle4D.Integer) bounds.toRectangle4D();
 
         // build 5D mask result
-        final BooleanMask4D mask5D[] = new BooleanMask4D[roiSize.sizeC];
+        final BooleanMask4D[] mask5D = new BooleanMask4D[roiSize.sizeC];
 
-        for (int c = 0; c < roiSize.sizeC; c++)
-        {
-            final BooleanMask3D mask4D[] = new BooleanMask3D[roiSize.sizeT];
+        for (int c = 0; c < roiSize.sizeC; c++) {
+            final BooleanMask3D[] mask4D = new BooleanMask3D[roiSize.sizeT];
 
-            for (int t = 0; t < roiSize.sizeT; t++)
-            {
-                final BooleanMask2D mask3D[] = new BooleanMask2D[roiSize.sizeZ];
+            for (int t = 0; t < roiSize.sizeT; t++) {
+                final BooleanMask2D[] mask3D = new BooleanMask2D[roiSize.sizeZ];
 
                 for (int z = 0; z < roiSize.sizeZ; z++)
                     mask3D[z] = new BooleanMask2D(new Rectangle(bounds2D), roi.getBooleanMask2D(bounds2D, bounds.z + z, bounds.t + t, bounds.c + c, true));
@@ -1923,7 +1657,7 @@ public class ROIUtil
 
     /**
      * Converts the specified ROI to a shape type ROI (ROI Polygon or ROI Mesh).
-     * 
+     *
      * @param roi
      *        the roi to convert to shape type ROI
      * @param maxDeviation
@@ -1931,27 +1665,23 @@ public class ROIUtil
      *        Use <code>-1</code> for automatic maximum deviation calculation.
      * @return the ROI Polygon or ROI Mesh corresponding to the input ROI.<br>
      *         If the ROI is already of shape type then it's directly returned without any conversion.
-     * @throws InterruptedException
      */
-    public static ROI convertToShape(ROI roi, double maxDeviation) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI convertToShape(final ROI roi, final double maxDeviation) throws UnsupportedOperationException, InterruptedException {
         if (roi instanceof ROI2DShape)
             return roi;
 
-        if (roi instanceof ROI2D)
-        {
+        if (roi instanceof ROI2D) {
             final BooleanMask2D[] componentMasks = ((ROI2D) roi).getBooleanMask(true).getComponents();
             final AreaX area = new AreaX();
             ROI2DShape result = new ROI2DPolygon();
 
             // for each component
-            for (BooleanMask2D componentMask : componentMasks)
-            {
+            for (final BooleanMask2D componentMask : componentMasks) {
                 // get contour points in connected order
                 final List<Point> points = componentMask.getConnectedContourPoints();
                 // convert to point2D and center points in observed pixel
-                final List<Point2D> points2D = new ArrayList<Point2D>(points.size());
-                for (Point pt : points)
+                final List<Point2D> points2D = new ArrayList<>(points.size());
+                for (final Point pt : points)
                     points2D.add(new Point2D.Double(pt.x + 0.5d, pt.y + 0.5d));
 
                 final double dev;
@@ -1968,7 +1698,7 @@ public class ROIUtil
                 // single component ? --> create polygon ROI
                 if (componentMasks.length == 1)
                     result = new ROI2DPolygon(polygon);
-                // add polygon to area
+                    // add polygon to area
                 else
                     area.add(new AreaX(polygon));
             }
@@ -1991,8 +1721,7 @@ public class ROIUtil
             return result;
         }
 
-        if (roi instanceof ROI3D)
-        {
+        if (roi instanceof ROI3D) {
             // not yet supported
             throw new UnsupportedOperationException("ROIUtil.convertToShape(ROI): Operation not supported for 3D ROI.");
 
@@ -2003,24 +1732,17 @@ public class ROIUtil
 
     /**
      * Returns connected component from specified ROI as a list of ROI (AreaX type).
-     * 
-     * @throws InterruptedException
      */
-    public static List<ROI> getConnectedComponents(ROI roi) throws UnsupportedOperationException, InterruptedException
-    {
-        final List<ROI> result = new ArrayList<ROI>();
+    public static List<ROI> getConnectedComponents(final ROI roi) throws UnsupportedOperationException, InterruptedException {
+        final List<ROI> result = new ArrayList<>();
 
-        if (roi instanceof ROI2D)
-        {
-            final ROI2D roi2d = (ROI2D) roi;
+        if (roi instanceof final ROI2D roi2d) {
             int ind = 0;
 
-            for (BooleanMask2D component : roi2d.getBooleanMask(true).getComponents())
-            {
+            for (final BooleanMask2D component : roi2d.getBooleanMask(true).getComponents()) {
                 final ROI2DArea componentRoi = new ROI2DArea(component);
 
-                if (!componentRoi.isEmpty())
-                {
+                if (!componentRoi.isEmpty()) {
                     // keep original ROI informations
                     componentRoi.setName(roi.getName() + OBJECT_SUFFIX + " #" + ind++);
                     copyROIProperties(roi, componentRoi, false);
@@ -2032,17 +1754,13 @@ public class ROIUtil
             return result;
         }
 
-        if (roi instanceof ROI3D)
-        {
-            final ROI3D roi3d = (ROI3D) roi;
+        if (roi instanceof final ROI3D roi3d) {
             int ind = 0;
 
-            for (BooleanMask3D component : roi3d.getBooleanMask(true).getComponents())
-            {
+            for (final BooleanMask3D component : roi3d.getBooleanMask(true).getComponents()) {
                 final ROI3DArea componentRoi = new ROI3DArea(component);
 
-                if (!componentRoi.isEmpty())
-                {
+                if (!componentRoi.isEmpty()) {
                     // keep original ROI informations
                     componentRoi.setName(roi.getName() + " object #" + ind++);
                     componentRoi.setT(roi3d.t);
@@ -2058,26 +1776,22 @@ public class ROIUtil
         throw new UnsupportedOperationException("ROIUtil.getConnectedComponents(ROI): Operation not supported for this ROI: " + roi.getName());
     }
 
-    static boolean computePolysFromLine(Line2D line, Point2D edgePt1, Point2D edgePt2, Polygon2D poly1, Polygon2D poly2, boolean inner)
-    {
+    static boolean computePolysFromLine(final Line2D line, final Point2D edgePt1, final Point2D edgePt2, final Polygon2D poly1, final Polygon2D poly2, final boolean inner) {
         final Line2D edgeLine = new Line2D.Double(edgePt1, edgePt2);
 
         // they intersect ?
-        if (edgeLine.intersectsLine(line))
-        {
+        if (edgeLine.intersectsLine(line)) {
             final Point2D intersection = GeomUtil.getIntersection(edgeLine, line);
 
             // are we inside poly2 ?
-            if (inner)
-            {
+            if (inner) {
                 // add intersection to poly2
                 poly2.addPoint(intersection);
                 // add intersection and pt2 to poly1
                 poly1.addPoint(intersection);
                 poly1.addPoint(edgePt2);
             }
-            else
-            {
+            else {
                 // add intersection to poly1
                 poly1.addPoint(intersection);
                 // add intersection and pt2 to poly2
@@ -2103,12 +1817,8 @@ public class ROIUtil
      * Cut the specified ROI with the given Line2D (extended to ROI bounds) and return the 2 resulting ROI in a
      * list.<br>
      * If the specified ROI cannot be cut by the given Line2D then <code>null</code> is returned.
-     * 
-     * @throws InterruptedException
-     * @throws UnsupportedOperationException
      */
-    public static List<ROI> split(ROI roi, Line2D line) throws UnsupportedOperationException, InterruptedException
-    {
+    public static List<ROI> split(final ROI roi, final Line2D line) throws UnsupportedOperationException, InterruptedException {
         final Rectangle2D bounds2d = roi.getBounds5D().toRectangle2D();
         // need to enlarge bounds a bit to avoid roundness issues on line intersection
         final Rectangle2D extendedBounds2d = Rectangle2DUtil.getScaledRectangle(bounds2d, 1.1d, true);
@@ -2116,9 +1826,8 @@ public class ROIUtil
         final Line2D extendedLine = Rectangle2DUtil.getIntersectionLine(extendedBounds2d, line);
 
         // if the extended line intersects the ROI bounds
-        if ((extendedLine != null) && bounds2d.intersectsLine(extendedLine))
-        {
-            final List<ROI> result = new ArrayList<ROI>();
+        if ((extendedLine != null) && bounds2d.intersectsLine(extendedLine)) {
+            final List<ROI> result = new ArrayList<>();
             final Point2D topLeft = new Point2D.Double(bounds2d.getMinX(), bounds2d.getMinY());
             final Point2D topRight = new Point2D.Double(bounds2d.getMaxX(), bounds2d.getMinY());
             final Point2D bottomRight = new Point2D.Double(bounds2d.getMaxX(), bounds2d.getMaxY());
@@ -2160,7 +1869,7 @@ public class ROIUtil
 
     /**
      * Convert a list of ROI into a binary / labeled Sequence.
-     * 
+     *
      * @param inputRois
      *        list of ROI to convert
      * @param sizeX
@@ -2188,21 +1897,17 @@ public class ROIUtil
      * @param label
      *        if set to <code>true</code> then each ROI will be draw as a separate label (value) in the sequence
      *        starting from 1.
-     * @throws InterruptedException
      */
-    public static Sequence convertToSequence(List<ROI> inputRois, int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT, DataType dataType, boolean label)
-            throws InterruptedException
-    {
-        final List<ROI> rois = new ArrayList<ROI>();
+    public static Sequence convertToSequence(final List<ROI> inputRois, final int sizeX, final int sizeY, final int sizeC, final int sizeZ, final int sizeT, final DataType dataType, final boolean label)
+            throws InterruptedException {
+        final List<ROI> rois = new ArrayList<>();
         final Rectangle5D bounds = new Rectangle5D.Double();
         // we cannot merge ROI for labeled sequence
         boolean canMerge = !label;
 
         // can merge ROI ? (faster)
-        if (canMerge)
-        {
-            try
-            {
+        if (canMerge) {
+            try {
                 // compute the union of all ROI
                 final ROI roi = ROIUtil.merge(inputRois, BooleanOperator.OR);
                 // get bounds of result
@@ -2210,20 +1915,16 @@ public class ROIUtil
                 // add this single ROI to list
                 rois.add(roi);
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 // merge failed
                 canMerge = false;
             }
         }
 
-        if (!canMerge)
-        {
-            for (ROI roi : inputRois)
-            {
+        if (!canMerge) {
+            for (final ROI roi : inputRois) {
                 // compute global bounds
-                if (roi != null)
-                {
+                if (roi != null) {
                     bounds.add(roi.getBounds5D());
                     rois.add(roi);
                 }
@@ -2262,8 +1963,7 @@ public class ROIUtil
         final Sequence out = new Sequence("ROI conversion");
 
         out.beginUpdate();
-        try
-        {
+        try {
             for (int t = 0; t < sT; t++)
                 for (int z = 0; z < sZ; z++)
                     out.setImage(t, z, new IcyBufferedImage(sX, sY, sC, dataType));
@@ -2271,8 +1971,7 @@ public class ROIUtil
             double fillValue = 1d;
 
             // set value from ROI(s)
-            for (ROI roi : rois)
-            {
+            for (final ROI roi : rois) {
                 if (!roi.getBounds5D().isEmpty())
                     DataIteratorUtil.set(new SequenceDataIterator(out, roi), fillValue);
 
@@ -2283,8 +1982,7 @@ public class ROIUtil
             // notify data changed
             out.dataChanged();
         }
-        finally
-        {
+        finally {
             out.endUpdate();
         }
 
@@ -2293,7 +1991,7 @@ public class ROIUtil
 
     /**
      * Convert a list of ROI into a binary / labeled Sequence.
-     * 
+     *
      * @param inputRois
      *        list of ROI to convert
      * @param sequence
@@ -2303,144 +2001,120 @@ public class ROIUtil
      * @param label
      *        if set to <code>true</code> then each ROI will be draw as a separate label (value) in the sequence
      *        starting from 1.
-     * @throws InterruptedException
      */
-    public static Sequence convertToSequence(List<ROI> inputRois, Sequence sequence, boolean label) throws InterruptedException
-    {
+    public static Sequence convertToSequence(final List<ROI> inputRois, final Sequence sequence, final boolean label) throws InterruptedException {
         if (sequence == null)
             return convertToSequence(inputRois, 0, 0, 0, 0, 0, label ? ((inputRois.size() > 255) ? DataType.USHORT : DataType.UBYTE) : DataType.UBYTE, label);
 
-        return convertToSequence(inputRois, sequence.getSizeX(), sequence.getSizeY(), 1, sequence.getSizeZ(), sequence.getSizeT(), sequence.getDataType_(),
-                label);
+        return convertToSequence(inputRois, sequence.getSizeX(), sequence.getSizeY(), 1, sequence.getSizeZ(), sequence.getSizeT(), sequence.getDataType(), label);
     }
 
     /**
      * Convert a single ROI into a binary / labeled Sequence.
-     * 
+     *
      * @param inputRoi
      *        ROI to convert
      * @param sequence
      *        the sequence used to define the wanted sequence dimension in return.<br>
      *        If this field is <code>null</code> then the global ROI bounds will be used to define the Sequence
      *        dimension
-     * @throws InterruptedException
      */
-    public static Sequence convertToSequence(ROI inputRoi, Sequence sequence) throws InterruptedException
-    {
+    public static Sequence convertToSequence(final ROI inputRoi, final Sequence sequence) throws InterruptedException {
         return convertToSequence(CollectionUtil.createArrayList(inputRoi), sequence, false);
     }
 
     /**
      * Scale (3D) the given ROI by specified X,Y,Z factors.<br>
      * Only {@link ROI2DShape} and {@link ROI3DShape} are supported !
-     * 
+     *
      * @param roi
      *        input ROI we want to rescale
      * @throws UnsupportedOperationException
      *         if input ROI is not ROI2DShape or ROI3DShape (scaling supported only for these ROI)
      */
-    public static void scale(ROI roi, double scaleX, double scaleY, double scaleZ) throws UnsupportedOperationException
-    {
+    public static void scale(final ROI roi, final double scaleX, final double scaleY, final double scaleZ) throws UnsupportedOperationException {
         // shape ROI --> can rescale easily
-        if (roi instanceof ROI2DRectShape)
-        {
-            final ROI2DRectShape roi2DRectShape = (ROI2DRectShape) roi;
+        switch (roi) {
+            case final ROI2DRectShape roi2DRectShape -> {
+                roi2DRectShape.beginUpdate();
+                try {
+                    final Rectangle2D bounds = roi2DRectShape.getBounds2D();
 
-            roi2DRectShape.beginUpdate();
-            try
-            {
-                final Rectangle2D bounds = roi2DRectShape.getBounds2D();
+                    // reshape directly
+                    bounds.setFrame(bounds.getX() * scaleX, bounds.getY() * scaleY, bounds.getWidth() * scaleX, bounds.getHeight() * scaleY);
+                    roi2DRectShape.setBounds2D(bounds);
 
-                // reshape directly
-                bounds.setFrame(bounds.getX() * scaleX, bounds.getY() * scaleY, bounds.getWidth() * scaleX, bounds.getHeight() * scaleY);
-                roi2DRectShape.setBounds2D(bounds);
+                    final int z = roi2DRectShape.getZ();
 
-                final int z = roi2DRectShape.getZ();
-
-                // re scale Z position if needed
-                if ((z != -1) && (scaleZ != 1d))
-                    roi2DRectShape.setZ((int) (z * scaleZ));
-            }
-            finally
-            {
-                roi2DRectShape.endUpdate();
-            }
-        }
-        else if (roi instanceof ROI2DShape)
-        {
-            final ROI2DShape roi2DShape = (ROI2DShape) roi;
-
-            roi2DShape.beginUpdate();
-            try
-            {
-                // adjust control point position directly
-                for (Anchor2D pt : roi2DShape.getControlPoints())
-                {
-                    final Point2D pos = pt.getPosition();
-                    // change control point position
-                    pt.setPosition(pos.getX() * scaleX, pos.getY() * scaleY);
+                    // re scale Z position if needed
+                    if ((z != -1) && (scaleZ != 1d))
+                        roi2DRectShape.setZ((int) (z * scaleZ));
                 }
-
-                final int z = roi2DShape.getZ();
-
-                // re scale Z position if needed
-                if ((z != -1) && (scaleZ != 1d))
-                    roi2DShape.setZ((int) (z * scaleZ));
-            }
-            finally
-            {
-                roi2DShape.endUpdate();
-            }
-        }
-        else if (roi instanceof ROI3DShape)
-        {
-            final ROI3DShape roi3DShape = (ROI3DShape) roi;
-
-            roi3DShape.beginUpdate();
-            try
-            {
-                // adjust control point position directly
-                for (Anchor3D pt : roi3DShape.getControlPoints())
-                {
-                    final Point3D pos = pt.getPosition();
-                    // change control point position
-                    pt.setPosition(pos.getX() * scaleX, pos.getY() * scaleY, pos.getZ() * scaleZ);
+                finally {
+                    roi2DRectShape.endUpdate();
                 }
             }
-            finally
-            {
-                roi3DShape.endUpdate();
+            case final ROI2DShape roi2DShape -> {
+                roi2DShape.beginUpdate();
+                try {
+                    // adjust control point position directly
+                    for (final Anchor2D pt : roi2DShape.getControlPoints()) {
+                        final Point2D pos = pt.getPosition();
+                        // change control point position
+                        pt.setPosition(pos.getX() * scaleX, pos.getY() * scaleY);
+                    }
+
+                    final int z = roi2DShape.getZ();
+
+                    // re scale Z position if needed
+                    if ((z != -1) && (scaleZ != 1d))
+                        roi2DShape.setZ((int) (z * scaleZ));
+                }
+                finally {
+                    roi2DShape.endUpdate();
+                }
             }
+            case final ROI3DShape roi3DShape -> {
+                roi3DShape.beginUpdate();
+                try {
+                    // adjust control point position directly
+                    for (final Anchor3D pt : roi3DShape.getControlPoints()) {
+                        final Point3D pos = pt.getPosition();
+                        // change control point position
+                        pt.setPosition(pos.getX() * scaleX, pos.getY() * scaleY, pos.getZ() * scaleZ);
+                    }
+                }
+                finally {
+                    roi3DShape.endUpdate();
+                }
+            }
+            case null, default -> throw new UnsupportedOperationException("ROIUtil.scale: cannot rescale " + roi.getSimpleClassName() + " !");
         }
-        else
-            throw new UnsupportedOperationException("ROIUtil.scale: cannot rescale " + roi.getSimpleClassName() + " !");
     }
 
     /**
      * Scale (2D) the given ROI by specified X/Y factor.<br>
      * Only {@link ROI2DShape} and {@link ROI3DShape} are supported !
-     * 
+     *
      * @param roi
      *        input ROI we want to rescale
      * @throws UnsupportedOperationException
      *         if input ROI is not ROI2DShape or ROI3DShape (scaling supported only for these ROI)
      */
-    public static void scale(ROI roi, double scaleX, double scaleY) throws UnsupportedOperationException
-    {
+    public static void scale(final ROI roi, final double scaleX, final double scaleY) throws UnsupportedOperationException {
         scale(roi, scaleX, scaleY, 1d);
     }
 
     /**
      * Scale the given ROI by specified scale factor.<br>
      * Only {@link ROI2DShape} and {@link ROI3DShape} are supported !
-     * 
+     *
      * @param roi
      *        input ROI we want to rescale
      * @throws UnsupportedOperationException
      *         if input ROI is not ROI2DShape or ROI3DShape (scaling supported only for these ROI)
      */
-    public static void scale(ROI roi, double scale) throws UnsupportedOperationException
-    {
+    public static void scale(final ROI roi, final double scale) throws UnsupportedOperationException {
         scale(roi, scale, scale, scale);
     }
 
@@ -2448,7 +2122,7 @@ public class ROIUtil
      * Create and returns a new ROI which is a 2x up/down scaled version of the input ROI.<br>
      * Note that the returned ROI can be ROI2DArea or ROI3DArea if original ROI format doesn't support 2X scale
      * operation.
-     * 
+     *
      * @param roi
      *        input ROI we want to get the up scaled form
      * @param scaleOnZ
@@ -2457,10 +2131,8 @@ public class ROIUtil
      *        Set to <code>true</code> for down scaling and <code>false</code> for up scaling operation
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D (up scaling not supported for these ROI)
-     * @throws InterruptedException
      */
-    public static ROI get2XScaled(ROI roi, boolean scaleOnZ, boolean down) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI get2XScaled(final ROI roi, final boolean scaleOnZ, final boolean down) throws UnsupportedOperationException, InterruptedException {
         if (roi == null)
             return null;
 
@@ -2470,12 +2142,10 @@ public class ROIUtil
         // shape ROI --> can rescale easily
         if ((result instanceof ROI2DShape) || (result instanceof ROI3DShape))
             scale(result, scaling, scaling, scaleOnZ ? scaling : 1d);
-        else if (result instanceof ROI2D)
-        {
+        else if (result instanceof ROI2D) {
             final ROI2DArea roi2DArea;
 
-            if (result instanceof ROI2DArea)
-            {
+            if (result instanceof ROI2DArea) {
                 roi2DArea = (ROI2DArea) result;
 
                 // scale
@@ -2488,8 +2158,7 @@ public class ROIUtil
                 if ((roi2DArea.getZ() != -1) && scaleOnZ)
                     roi2DArea.setZ((int) (roi2DArea.getZ() * scaling));
             }
-            else
-            {
+            else {
                 final BooleanMask2D bm = ((ROI2D) result).getBooleanMask(true);
 
                 // scale
@@ -2521,45 +2190,38 @@ public class ROIUtil
                 result = roi2DArea;
             }
         }
-        else if (result instanceof ROI3D)
-        {
+        else if (result instanceof ROI3D) {
             final ROI3DArea roi3DArea;
 
             // we want a ROI2DArea
-            if (result instanceof ROI3DArea)
-            {
+            if (result instanceof ROI3DArea) {
                 roi3DArea = (ROI3DArea) result;
 
                 // scale
-                if (down)
-                {
+                if (down) {
                     if (scaleOnZ)
                         roi3DArea.downscale();
                     else
                         roi3DArea.downscale2D();
                 }
-                else
-                {
+                else {
                     if (scaleOnZ)
                         roi3DArea.upscale();
                     else
                         roi3DArea.upscale2D();
                 }
             }
-            else
-            {
+            else {
                 final BooleanMask3D bm = ((ROI3D) result).getBooleanMask(true);
 
                 // scale
-                if (down)
-                {
+                if (down) {
                     if (scaleOnZ)
                         roi3DArea = new ROI3DArea(bm.downscale());
                     else
                         roi3DArea = new ROI3DArea(bm.downscale2D());
                 }
-                else
-                {
+                else {
                     if (scaleOnZ)
                         roi3DArea = new ROI3DArea(bm.upscale());
                     else
@@ -2596,17 +2258,15 @@ public class ROIUtil
      * Create and returns a new ROI which is a 2x up scaled version of the input ROI.<br>
      * Note that the returned ROI can be ROI2DArea or ROI3DArea if original ROI format doesn't support up scale
      * operation.
-     * 
+     *
      * @param roi
      *        input ROI we want to get the up scaled form
      * @param scaleOnZ
      *        Set to <code>true</code> to scale as well on Z dimension (XY dimension only otherwise)
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D (up scaling not supported for these ROI)
-     * @throws InterruptedException
      */
-    public static ROI getUpscaled(ROI roi, boolean scaleOnZ) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI getUpscaled(final ROI roi, final boolean scaleOnZ) throws UnsupportedOperationException, InterruptedException {
         return get2XScaled(roi, scaleOnZ, false);
     }
 
@@ -2614,17 +2274,15 @@ public class ROIUtil
      * Create and returns a new ROI which is a 2x down scaled version of the input ROI.<br>
      * Note that the returned ROI can be ROI2DArea or ROI3DArea if original ROI format doesn't support up scale
      * operation.
-     * 
+     *
      * @param roi
      *        input ROI we want to get the up scaled form
      * @param scaleOnZ
      *        Set to <code>true</code> to scale as well on Z dimension (XY dimension only otherwise)
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D (up scaling not supported for these ROI)
-     * @throws InterruptedException
      */
-    public static ROI getDownscaled(ROI roi, boolean scaleOnZ) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI getDownscaled(final ROI roi, final boolean scaleOnZ) throws UnsupportedOperationException, InterruptedException {
         return get2XScaled(roi, scaleOnZ, true);
     }
 
@@ -2634,7 +2292,7 @@ public class ROIUtil
      * The resulting ROI can be scaled if the {@link Sequence#getPixelSize()} are not identical on the 2 sequences<br>
      * Note that the returned ROI can have a Boolean Mask format if we can't re-use original ROI format, also the scale operation may not be possible depending
      * the original ROI format.
-     * 
+     *
      * @param roi
      *        input ROI we want to adjust
      * @param source
@@ -2651,19 +2309,16 @@ public class ROIUtil
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D while scaling is required (scaling not supported for these ROI) and <code>ignoreErrorOnScale</code> is set to
      *         <code>FALSE</code>
-     * @throws InterruptedException
      */
-    public static ROI adjustToSequence(ROI roi, Sequence source, Sequence destination, boolean translate, boolean scale, boolean ignoreErrorOnScale)
-            throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI adjustToSequence(final ROI roi, final Sequence source, final Sequence destination, final boolean translate, final boolean scale, final boolean ignoreErrorOnScale)
+            throws UnsupportedOperationException, InterruptedException {
         if (roi == null)
             return null;
 
         // create a copy
         ROI result = roi.getCopy();
 
-        if (scale)
-        {
+        if (scale) {
             final double scaleX = source.getPixelSizeX() / destination.getPixelSizeX();
             final double scaleY = source.getPixelSizeY() / destination.getPixelSizeY();
             final double scaleZ = source.getPixelSizeZ() / destination.getPixelSizeZ();
@@ -2671,16 +2326,14 @@ public class ROIUtil
             // ROI is a 2D or 3D shape ? --> use easy scaling
             if ((result instanceof ROI2DShape) || (result instanceof ROI3DShape))
                 scale(result, scaleX, scaleY, scaleZ);
-            else
-            {
+            else {
                 boolean doRescale = true;
                 boolean doRescaleZ = true;
 
-                if (MathUtil.round(scaleX / scaleY, 3) != 1d)
-                {
+                if (MathUtil.round(scaleX / scaleY, 3) != 1d) {
                     doRescale = false;
                     if (ignoreErrorOnScale)
-                        System.out.println("[Warning] ROIUtil.adjustToSequence: cannot rescale ROI with different X/Y scale ratio.");
+                        IcyLogger.warn(ROIUtil.class, "ROIUtil.adjustToSequence: cannot rescale ROI with different X/Y scale ratio.");
                     else
                         throw new UnsupportedOperationException("ROIUtil.adjustToSequence: cannot rescale ROI (different X/Y scale ratio) !");
                 }
@@ -2689,11 +2342,10 @@ public class ROIUtil
                 final double resDelta = MathUtil.round(Math.log(scaleX) / Math.log(2), 1);
 
                 // too far from 2^x scaling
-                if (Math.round(resDelta) != resDelta)
-                {
+                if (Math.round(resDelta) != resDelta) {
                     doRescale = false;
                     if (ignoreErrorOnScale)
-                        System.out.println("[Warning] ROIUtil.adjustToSequence: cannot rescale ROI with scale XY = " + scaleX);
+                        IcyLogger.warn(ROIUtil.class, "ROIUtil.adjustToSequence: cannot rescale ROI with scale XY = " + scaleX);
                     else
                         throw new UnsupportedOperationException("ROIUtil.adjustToSequence: cannot rescale ROI (scale XY = " + scaleX + ") !");
                 }
@@ -2701,11 +2353,10 @@ public class ROIUtil
                 // get log2 of scaleZ (round it a bit)
                 final double resDeltaZ = MathUtil.round(Math.log(scaleZ) / Math.log(2), 1);
 
-                if (Math.round(resDeltaZ) != resDeltaZ)
-                {
+                if (Math.round(resDeltaZ) != resDeltaZ) {
                     doRescaleZ = false;
                     if (ignoreErrorOnScale)
-                        System.out.println("[Warning] ROIUtil.adjustToSequence: ignoring ROI Z rescaling (scale Z = " + scaleZ + ")");
+                        IcyLogger.warn(ROIUtil.class, "ROIUtil.adjustToSequence: ignoring ROI Z rescaling (scale Z = " + scaleZ + ")");
                     else
                         throw new UnsupportedOperationException("ROIUtil.adjustToSequence: cannot rescale ROI (scale Z = " + scaleZ + ") !");
                 }
@@ -2713,40 +2364,32 @@ public class ROIUtil
                 final boolean zScaling = resDeltaZ != 0d;
 
                 // Z rescaling needed ? --> we need to have same XY and Z scale ratio
-                if (zScaling && (MathUtil.round(resDeltaZ / resDelta, 3) != 1d))
-                {
+                if (zScaling && (MathUtil.round(resDeltaZ / resDelta, 3) != 1d)) {
                     doRescaleZ = false;
                     if (ignoreErrorOnScale)
-                        System.out.println(
-                                "[Warning] ROIUtil.adjustToSequence: ignoring ROI Z rescaling (scale XY = " + scaleX + " while scale Z = " + scaleZ + ")");
+                        IcyLogger.warn(ROIUtil.class, "ROIUtil.adjustToSequence: ignoring ROI Z rescaling (scale XY = " + scaleX + " while scale Z = " + scaleZ + ")");
                     else
-                        throw new UnsupportedOperationException(
-                                "ROIUtil.adjustToSequence: cannot rescale ROI (scale XY = " + scaleX + " while scale Z = " + scaleZ + ") !");
+                        throw new UnsupportedOperationException("ROIUtil.adjustToSequence: cannot rescale ROI (scale XY = " + scaleX + " while scale Z = " + scaleZ + ") !");
                 }
 
-                try
-                {
-                    if (doRescale)
-                    {
+                try {
+                    if (doRescale) {
                         int i = (int) resDelta;
 
                         // destination resolution level > source resolution level
-                        if (resDelta > 0)
-                        {
+                        if (resDelta > 0) {
                             // down scaling
                             while (i-- > 0)
                                 result = getUpscaled(result, zScaling && doRescaleZ);
                         }
-                        else
-                        {
+                        else {
                             // up scaling
                             while (i++ < 0)
                                 result = getDownscaled(result, zScaling && doRescaleZ);
                         }
                     }
                 }
-                catch (UnsupportedOperationException e)
-                {
+                catch (final UnsupportedOperationException e) {
                     // we should propagate it then
                     if (!ignoreErrorOnScale)
                         throw e;
@@ -2755,14 +2398,12 @@ public class ROIUtil
         }
 
         // can set position ? --> relocate it
-        if (translate && result.canSetPosition())
-        {
+        if (translate && result.canSetPosition()) {
             // get current position
             final Point5D pos = result.getPosition5D();
 
             // can change it Z position ?
-            if (!Double.isInfinite(pos.getZ()))
-            {
+            if (!Double.isInfinite(pos.getZ())) {
                 // we just want to get offset as scaling already taken care of converting relative ROI position
                 final Point3D offset = SequenceUtil.convertPoint(new Point3D.Double(), source, destination);
 
@@ -2771,8 +2412,7 @@ public class ROIUtil
                 pos.setY(pos.getY() + offset.getY());
                 pos.setZ(pos.getZ() + offset.getZ());
             }
-            else
-            {
+            else {
                 // we just want to get offset as scaling already taken care of converting relative ROI position
                 final Point2D offset = SequenceUtil.convertPoint(new Point2D.Double(), source, destination);
 
@@ -2782,13 +2422,11 @@ public class ROIUtil
             }
 
             // can change it ? (we don't scale T dimension)
-            if (!Double.isInfinite(pos.getT()))
-            {
+            if (!Double.isInfinite(pos.getT())) {
                 // get time interval in ms
                 final double timeIntervalMs = destination.getTimeInterval() * 1000d;
 
-                if (timeIntervalMs > 0d)
-                {
+                if (timeIntervalMs > 0d) {
                     // get delta in timestamp (ms)
                     final double deltaT = source.getPositionT() - destination.getPositionT();
                     // get wanted destination T offset
@@ -2813,7 +2451,7 @@ public class ROIUtil
      * The resulting ROI can be scaled if the {@link Sequence#getPixelSize()} are not identical on the 2 sequences<br>
      * Note that the returned ROI can have a Boolean Mask format if we can't re-use original ROI format, also the scale operation may not be possible depending
      * the original ROI format.
-     * 
+     *
      * @param roi
      *        input ROI we want to adjust
      * @param source
@@ -2828,11 +2466,8 @@ public class ROIUtil
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D while scaling is required (scaling not supported for these ROI) and <code>ignoreErrorOnScale</code> is set to
      *         <code>FALSE</code>
-     * @throws InterruptedException
      */
-    public static ROI adjustToSequence(ROI roi, Sequence source, Sequence destination, boolean translate, boolean scale)
-            throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI adjustToSequence(final ROI roi, final Sequence source, final Sequence destination, final boolean translate, final boolean scale) throws UnsupportedOperationException, InterruptedException {
         return adjustToSequence(roi, source, destination, translate, scale, false);
     }
 
@@ -2842,7 +2477,7 @@ public class ROIUtil
      * The resulting ROI can be scaled if the {@link Sequence#getPixelSize()} are not identical on the 2 sequences<br>
      * Note that the returned ROI can have a Boolean Mask format if we can't re-use original ROI format, also the scale operation may not be possible depending
      * the original ROI format.
-     * 
+     *
      * @param roi
      *        input ROI we want to adjust
      * @param source
@@ -2852,10 +2487,8 @@ public class ROIUtil
      * @return adjusted ROI
      * @throws UnsupportedOperationException
      *         if input ROI is ROI4D or ROI5D while scaling is required (scaling not supported for these ROI)
-     * @throws InterruptedException
      */
-    public static ROI adjustToSequence(ROI roi, Sequence source, Sequence destination) throws UnsupportedOperationException, InterruptedException
-    {
+    public static ROI adjustToSequence(final ROI roi, final Sequence source, final Sequence destination) throws UnsupportedOperationException, InterruptedException {
         return adjustToSequence(roi, source, destination, true, true);
     }
 
@@ -3028,8 +2661,7 @@ public class ROIUtil
     /**
      * Copy properties (name, color...) from <code>source</code> ROI and apply it to <code>destination</code> ROI.
      */
-    public static void copyROIProperties(ROI source, ROI destination, boolean copyName)
-    {
+    public static void copyROIProperties(final ROI source, final ROI destination, final boolean copyName) {
         if ((source == null) || (destination == null))
             return;
 
@@ -3044,21 +2676,18 @@ public class ROIUtil
         // destination.setGroupId(source.getGroupId());
 
         // copy extended properties
-        for (Entry<String, String> propertyEntry : source.getProperties().entrySet())
+        for (final Entry<String, String> propertyEntry : source.getProperties().entrySet())
             destination.setProperty(propertyEntry.getKey(), propertyEntry.getValue());
     }
 
-    public static Sequence computeDistanceMap(ROI roi, Dimension5D imageSize, Dimension3D pixelSize, boolean constrainBorders) throws InterruptedException
-    {
-        ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, constrainBorders);
+    public static Sequence computeDistanceMap(final ROI roi, final Dimension5D imageSize, final Dimension3D pixelSize, final boolean constrainBorders) throws InterruptedException {
+        final ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, constrainBorders);
         dt.addROI(roi);
         return dt.getDistanceMap();
     }
 
-    public static Sequence computeDistanceMap(Collection<? extends ROI> selectedROIs, Dimension5D imageSize, Dimension3D pixelSize, boolean constrainBorders)
-            throws InterruptedException
-    {
-        ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, constrainBorders);
+    public static Sequence computeDistanceMap(final Collection<? extends ROI> selectedROIs, final Dimension5D imageSize, final Dimension3D pixelSize, final boolean constrainBorders) throws InterruptedException {
+        final ROIDistanceTransformCalculator dt = new ROIDistanceTransformCalculator(imageSize, pixelSize, constrainBorders);
         dt.addAll(selectedROIs);
         return dt.getDistanceMap();
     }
@@ -3076,26 +2705,21 @@ public class ROIUtil
      * @throws InterruptedException
      *         If the process gets interrupted.
      */
-    public static List<ROI> computeWatershedSeparation(Collection<? extends ROI> selectedRois, List<? extends ROI> seedRois, Dimension5D imageSize,
-            Dimension3D pixelSize) throws InterruptedException
-    {
-        ROIWatershedCalculator.Builder wsBuilder = new ROIWatershedCalculator.Builder(imageSize, pixelSize);
+    public static List<ROI> computeWatershedSeparation(final Collection<? extends ROI> selectedRois, final List<? extends ROI> seedRois, final Dimension5D imageSize, final Dimension3D pixelSize) throws InterruptedException {
+        final ROIWatershedCalculator.Builder wsBuilder = new ROIWatershedCalculator.Builder(imageSize, pixelSize);
 
         wsBuilder.addObjects(selectedRois);
         wsBuilder.addSeeds(seedRois);
         wsBuilder.setNewBasinsAllowed(false);
-        ROIWatershedCalculator wsCalculator = wsBuilder.build();
+        final ROIWatershedCalculator wsCalculator = wsBuilder.build();
 
-        try
-        {
+        try {
             wsCalculator.call();
         }
-        catch (InterruptedException e)
-        {
+        catch (final InterruptedException e) {
             throw e;
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             throw new RuntimeException("Error computing watershed: " + e.getMessage(), e);
         }
 
@@ -3103,34 +2727,24 @@ public class ROIUtil
     }
 
     /**
-     * @param selectedRois
-     * @param imageSize
-     * @param pixelSize
      * @param usedSeedRois
      *        collection where detected seeds will be stored.
-     * @return
-     * @throws InterruptedException
      */
-    public static List<ROI> computeWatershedSeparation(Collection<? extends ROI> selectedRois, Dimension5D imageSize, Dimension3D pixelSize,
-            List<ROI> usedSeedRois) throws InterruptedException
-    {
-        ROIWatershedCalculator.Builder wsBuilder = new ROIWatershedCalculator.Builder(imageSize, pixelSize);
+    public static List<ROI> computeWatershedSeparation(final Collection<? extends ROI> selectedRois, final Dimension5D imageSize, final Dimension3D pixelSize, final List<ROI> usedSeedRois) throws InterruptedException {
+        final ROIWatershedCalculator.Builder wsBuilder = new ROIWatershedCalculator.Builder(imageSize, pixelSize);
 
         wsBuilder.addObjects(selectedRois);
         wsBuilder.addSeeds(usedSeedRois);
         wsBuilder.setNewBasinsAllowed(false);
-        ROIWatershedCalculator wsCalculator = wsBuilder.build();
+        final ROIWatershedCalculator wsCalculator = wsBuilder.build();
 
-        try
-        {
+        try {
             wsCalculator.call();
         }
-        catch (InterruptedException e)
-        {
+        catch (final InterruptedException e) {
             throw e;
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             throw new RuntimeException("Error computing watershed: " + e.getMessage(), e);
         }
 
@@ -3139,25 +2753,22 @@ public class ROIUtil
         return wsCalculator.getLabelRois();
     }
 
-    public static List<ROI> computeSkeleton(List<ROI2D> selectedROIs, Dimension3D pixelSize, double distance) throws InterruptedException
-    {
-        List<ROI> result = new ArrayList<ROI>();
-        for (ROI roi : selectedROIs)
-        {
+    public static List<ROI> computeSkeleton(final List<ROI2D> selectedROIs, final Dimension3D pixelSize, final double distance) throws InterruptedException {
+        final List<ROI> result = new ArrayList<>();
+        for (final ROI roi : selectedROIs) {
             if (roi.getBounds5D().getSizeX() == 0)
                 continue;
 
-            Point5D oldPosition = new Point5D.Double();
+            final Point5D oldPosition = new Point5D.Double();
             oldPosition.setLocation(roi.getPosition5D());
             roi.setPosition5D(new Point5D.Double());
-            try
-            {
-                ROISkeletonCalculator skeletonizer = new ROISkeletonCalculator(roi, pixelSize);
-                ROI skeletonRoi = skeletonizer.getSkeletonROI();
+            try {
+                final ROISkeletonCalculator skeletonizer = new ROISkeletonCalculator(roi, pixelSize);
+                final ROI skeletonRoi = skeletonizer.getSkeletonROI();
                 if (skeletonRoi != null && skeletonRoi.getBounds5D().getSizeX() > 0)
                 // TODO remove equals null
                 {
-                    Point5D skeletonPosition = skeletonRoi.getPosition5D();
+                    final Point5D skeletonPosition = skeletonRoi.getPosition5D();
                     skeletonPosition.setX(skeletonPosition.getX() + oldPosition.getX());
                     skeletonPosition.setY(skeletonPosition.getY() + oldPosition.getY());
                     skeletonPosition.setZ(skeletonPosition.getZ() + oldPosition.getZ());
@@ -3165,24 +2776,21 @@ public class ROIUtil
                     result.add(skeletonRoi);
                 }
             }
-            finally
-            {
+            finally {
                 roi.setPosition5D(oldPosition);
             }
         }
         return result;
     }
 
-    public static List<ROI> computeDilation(List<? extends ROI> selectedROIs, Dimension3D pixelSize, double distance) throws InterruptedException
-    {
-        List<ROI> result = new ArrayList<ROI>();
-        for (ROI roi : selectedROIs)
-        {
+    public static List<ROI> computeDilation(final List<? extends ROI> selectedROIs, final Dimension3D pixelSize, final double distance) throws InterruptedException {
+        final List<ROI> result = new ArrayList<>();
+        for (final ROI roi : selectedROIs) {
             if (roi.getBounds5D().getSizeX() == 0)
                 continue;
 
-            Rectangle5D oldBounds = new Rectangle5D.Double(roi.getBounds5D());
-            Rectangle5D processingBounds = new Rectangle5D.Double(roi.getBounds5D());
+            final Rectangle5D oldBounds = new Rectangle5D.Double(roi.getBounds5D());
+            final Rectangle5D processingBounds = new Rectangle5D.Double(roi.getBounds5D());
             processingBounds.setX(0);
             processingBounds.setY(0);
             processingBounds.setZ(0);
@@ -3193,52 +2801,43 @@ public class ROIUtil
             processingBounds.setSizeZ(1);
             processingBounds.setSizeC(1);
             processingBounds.setSizeT(1);
-            if (roi.getBounds5D().getSizeZ() > 1 && Double.isFinite(roi.getBounds5D().getSizeZ()))
-            {
+            if (roi.getBounds5D().getSizeZ() > 1 && Double.isFinite(roi.getBounds5D().getSizeZ())) {
                 processingBounds.setZ(0);
                 processingBounds.setSizeZ(oldBounds.getSizeZ());
             }
             roi.setBounds5D(processingBounds);
-            if (roi instanceof ROI2DArea)
-            {
+            if (roi instanceof ROI2DArea) {
                 ((ROI2DArea) roi).setPosition2D(new Point2D.Double(0, 0));
             }
 
-            try
-            {
-                ROIDilationCalculator dilator = new ROIDilationCalculator(roi, pixelSize, distance);
-                ROI dilationRoi = dilator.getDilation();
-                Rectangle5D dilationBounds = dilationRoi.getBounds5D();
-                if (dilationBounds.getSizeX() > 0)
-                {
-                    Point5D dPos = dilationBounds.getPosition();
-                    Point5D oPos = oldBounds.getPosition();
+            try {
+                final ROIDilationCalculator dilator = new ROIDilationCalculator(roi, pixelSize, distance);
+                final ROI dilationRoi = dilator.getDilation();
+                final Rectangle5D dilationBounds = dilationRoi.getBounds5D();
+                if (dilationBounds.getSizeX() > 0) {
+                    final Point5D dPos = dilationBounds.getPosition();
+                    final Point5D oPos = oldBounds.getPosition();
                     dilationBounds.setX(dPos.getX() + oPos.getX());
                     dilationBounds.setY(dPos.getY() + oPos.getY());
-                    if (Double.isFinite(oldBounds.getSizeZ()))
-                    {
+                    if (Double.isFinite(oldBounds.getSizeZ())) {
                         dilationBounds.setZ(dPos.getZ() + oPos.getZ());
-                        if (Double.isFinite(oldBounds.getSizeZ()) && Double.isInfinite(dilationBounds.getSizeZ()))
-                        {
+                        if (Double.isFinite(oldBounds.getSizeZ()) && Double.isInfinite(dilationBounds.getSizeZ())) {
                             dilationBounds.setSizeZ(oldBounds.getSizeZ());
                         }
                     }
 
-                    if (Double.isFinite(oldBounds.getSizeT()))
-                    {
+                    if (Double.isFinite(oldBounds.getSizeT())) {
                         dilationBounds.setT(oPos.getT());
                         dilationBounds.setSizeT(oldBounds.getSizeT());
                     }
 
                     if (dilationRoi.canSetBounds())
                         dilationRoi.setBounds5D(dilationBounds);
-                    else if (dilationRoi instanceof ROI2DArea)
-                    {
-                        ROI2DArea areaRoi = (ROI2DArea) dilationRoi;
+                    else if (dilationRoi instanceof final ROI2DArea areaRoi) {
                         areaRoi.setC(Double.isFinite(dilationBounds.getC()) ? (int) dilationBounds.getC() : -1);
                         areaRoi.setZ(Double.isFinite(dilationBounds.getZ()) ? (int) dilationBounds.getZ() : -1);
                         areaRoi.setT(Double.isFinite(dilationBounds.getT()) ? (int) dilationBounds.getT() : -1);
-                        Rectangle2D bounds = areaRoi.getBounds2D();
+                        final Rectangle2D bounds = areaRoi.getBounds2D();
                         areaRoi.translate(dilationBounds.getX() - bounds.getX(), dilationBounds.getY() - bounds.getY());
                     }
 
@@ -3246,11 +2845,9 @@ public class ROIUtil
                 result.add(dilationRoi);
 
             }
-            finally
-            {
+            finally {
                 roi.setBounds5D(oldBounds);
-                if (roi instanceof ROI2DArea)
-                {
+                if (roi instanceof ROI2DArea) {
                     ((ROI2DArea) roi).setPosition2D(new Point2D.Double(oldBounds.getX(), oldBounds.getY()));
                 }
             }
@@ -3258,24 +2855,20 @@ public class ROIUtil
         return result;
     }
 
-    public static List<ROI> computeErosion(List<? extends ROI> selectedROIs, Dimension3D pixelSize, double distance) throws InterruptedException
-    {
-        List<ROI> result = new ArrayList<ROI>();
-        for (ROI roi : selectedROIs)
-        {
+    public static List<ROI> computeErosion(final List<? extends ROI> selectedROIs, final Dimension3D pixelSize, final double distance) throws InterruptedException {
+        final List<ROI> result = new ArrayList<>();
+        for (final ROI roi : selectedROIs) {
             if (roi.getBounds5D().getSizeX() == 0)
                 continue;
 
-            Point5D oldPosition = new Point5D.Double();
+            final Point5D oldPosition = new Point5D.Double();
             oldPosition.setLocation(roi.getPosition5D());
             roi.setPosition5D(new Point5D.Double());
-            try
-            {
-                ROIErosionCalculator eroder = new ROIErosionCalculator(roi, pixelSize, distance);
-                ROI erosionRoi = eroder.getErosion();
-                if (erosionRoi.getBounds5D().getSizeX() > 0)
-                {
-                    Point5D erosionPosition = erosionRoi.getPosition5D();
+            try {
+                final ROIErosionCalculator eroder = new ROIErosionCalculator(roi, pixelSize, distance);
+                final ROI erosionRoi = eroder.getErosion();
+                if (erosionRoi.getBounds5D().getSizeX() > 0) {
+                    final Point5D erosionPosition = erosionRoi.getPosition5D();
                     erosionPosition.setX(erosionPosition.getX() + oldPosition.getX());
                     erosionPosition.setY(erosionPosition.getY() + oldPosition.getY());
                     erosionPosition.setZ(erosionPosition.getZ() + oldPosition.getZ());
@@ -3283,8 +2876,7 @@ public class ROIUtil
                     result.add(erosionRoi);
                 }
             }
-            finally
-            {
+            finally {
                 roi.setPosition5D(oldPosition);
             }
         }

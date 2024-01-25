@@ -1,29 +1,41 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
+import icy.file.FileUtil;
+import icy.network.AuthenticationInfo;
+import icy.network.NetworkUtil;
+import icy.network.URLUtil;
+import icy.system.logging.IcyLogger;
+import icy.type.DataType;
+import icy.type.collection.array.ArrayUtil;
+import org.w3c.dom.*;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,42 +43,13 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.DocumentType;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import icy.file.FileUtil;
-import icy.network.AuthenticationInfo;
-import icy.network.NetworkUtil;
-import icy.network.URLUtil;
-import icy.system.IcyExceptionHandler;
-import icy.type.DataType;
-import icy.type.collection.array.ArrayUtil;
-
 /**
  * XML utilities class (parse, read, create and write XML documents).
- * 
- * @author Stephane
+ *
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class XMLUtil
-{
+public class XMLUtil {
     public static final String FILE_EXTENSION = "xml";
     public static final String FILE_DOT_EXTENSION = "." + FILE_EXTENSION;
 
@@ -76,20 +59,18 @@ public class XMLUtil
     private static final String ATTR_VALUE_NAME = "value";
 
     // static document builder factory
-    private static DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+    private static final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
     // static transformer factory
-    private static TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
     // static Deflater
     // private static Deflater deflater = new Deflater(2, true);
-    private static Deflater deflater = new Deflater(2);
+    private static final Deflater deflater = new Deflater(2);
     // static Inflater
     // private static Inflater inflater = new Inflater(true);
-    private static Inflater inflater = new Inflater();
+    private static final Inflater inflater = new Inflater();
 
-    static
-    {
-        try
-        {
+    static {
+        try {
             docBuilderFactory.setNamespaceAware(false);
             docBuilderFactory.setValidating(false);
             docBuilderFactory.setFeature("http://xml.org/sax/features/namespaces", false);
@@ -97,8 +78,7 @@ public class XMLUtil
             docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
             docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             // ignore this
         }
     }
@@ -118,14 +98,11 @@ public class XMLUtil
     /**
      * Create and returns a new DocumentBuilder.
      */
-    public static DocumentBuilder createDocumentBuilder()
-    {
-        try
-        {
+    public static DocumentBuilder createDocumentBuilder() {
+        try {
             return docBuilderFactory.newDocumentBuilder();
         }
-        catch (ParserConfigurationException e)
-        {
+        catch (final ParserConfigurationException e) {
             e.printStackTrace();
             return null;
         }
@@ -134,17 +111,14 @@ public class XMLUtil
     /**
      * Create and returns a new Transformer.
      */
-    public static Transformer createTransformer()
-    {
+    public static Transformer createTransformer() {
         final Transformer result;
 
-        try
-        {
+        try {
             result = transformerFactory.newTransformer();
         }
-        catch (TransformerConfigurationException e)
-        {
-            IcyExceptionHandler.showErrorMessage(e, true, true);
+        catch (final TransformerConfigurationException e) {
+            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
             return null;
         }
 
@@ -160,8 +134,7 @@ public class XMLUtil
     /**
      * Create and returns a new Transformer.
      */
-    public static Transformer createTransformerSafe() throws TransformerConfigurationException
-    {
+    public static Transformer createTransformerSafe() throws TransformerConfigurationException {
         final Transformer result = transformerFactory.newTransformer();
 
         result.setOutputProperty(OutputKeys.METHOD, "xml");
@@ -176,8 +149,7 @@ public class XMLUtil
     /**
      * Create and return an empty XML Document.
      */
-    public static Document createDocument(boolean createRoot)
-    {
+    public static Document createDocument(final boolean createRoot) {
         final DocumentBuilder docBuilder = createDocumentBuilder();
 
         // an error occurred
@@ -196,12 +168,8 @@ public class XMLUtil
 
     /**
      * Parse the specified string and convert it to XML Document (throw an exception if an error occurred).
-     * 
-     * @throws IOException
-     * @throws SAXException
      */
-    public static Document createDocument(String xmlString) throws SAXException, IOException
-    {
+    public static Document createDocument(final String xmlString) throws SAXException, IOException {
         final DocumentBuilder docBuilder = createDocumentBuilder();
 
         // an error occurred
@@ -215,21 +183,18 @@ public class XMLUtil
      * @deprecated Use {@link #createDocument(String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Document getDocument(String xmlString)
-    {
+    public static Document getDocument(final String xmlString) {
         final DocumentBuilder docBuilder = createDocumentBuilder();
 
         // an error occurred
         if (docBuilder == null)
             return null;
 
-        try
-        {
+        try {
             return docBuilder.parse(new InputSource(new StringReader(filterString(xmlString))));
         }
-        catch (Exception e)
-        {
-            IcyExceptionHandler.showErrorMessage(e, true);
+        catch (final Exception e) {
+            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
         }
 
         // return empty document
@@ -240,8 +205,7 @@ public class XMLUtil
      * @deprecated Use {@link #createDocument(String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Document getDocumentSafe(String xmlString) throws SAXException, IOException
-    {
+    public static Document getDocumentSafe(final String xmlString) throws SAXException, IOException {
         return createDocument(xmlString);
     }
 
@@ -249,8 +213,7 @@ public class XMLUtil
      * Load XML Document from specified path.<br>
      * Return null if no document can be loaded.
      */
-    public static Document loadDocument(String path)
-    {
+    public static Document loadDocument(final String path) {
         return loadDocument(path, null, false);
     }
 
@@ -258,8 +221,7 @@ public class XMLUtil
      * Load XML Document from specified path.<br>
      * Return null if no document can be loaded.
      */
-    public static Document loadDocument(String path, boolean showError)
-    {
+    public static Document loadDocument(final String path, final boolean showError) {
         return loadDocument(path, null, showError);
     }
 
@@ -267,12 +229,10 @@ public class XMLUtil
      * Load XML Document from specified path with specified authentication.<br>
      * Return null if no document can be loaded.
      */
-    public static Document loadDocument(String path, AuthenticationInfo auth, boolean showError)
-    {
-        if (StringUtil.isEmpty(path))
-        {
+    public static Document loadDocument(final String path, final AuthenticationInfo auth, final boolean showError) {
+        if (StringUtil.isEmpty(path)) {
             if (showError)
-                System.err.println("XMLUtil.loadDocument('" + path + "') error: empty path !");
+                IcyLogger.error(XMLUtil.class, "XMLUtil.loadDocument('" + path + "') error: empty path !");
 
             return null;
         }
@@ -291,8 +251,7 @@ public class XMLUtil
      * Load XML Document from specified file.<br>
      * Return null if no document can be loaded.
      */
-    public static Document loadDocument(File f)
-    {
+    public static Document loadDocument(final File f) {
         return loadDocument(f, false);
     }
 
@@ -300,43 +259,25 @@ public class XMLUtil
      * Load XML Document from specified file.<br>
      * Return null if no document can be loaded.
      */
-    public static Document loadDocument(File f, boolean showError)
-    {
-        if ((f == null) || !f.exists())
-        {
+    public static Document loadDocument(final File f, final boolean showError) {
+        if ((f == null) || !f.exists()) {
             if (showError)
-                System.err.println("XMLUtil.loadDocument('" + f + "') error: file not found !");
+                IcyLogger.error(XMLUtil.class, "XMLUtil.loadDocument('" + f + "') error: file not found !");
 
             return null;
         }
 
-        try
-        {
-            final FileInputStream is = new FileInputStream(f);
-
-            try
-            {
+        try {
+            try (final FileInputStream is = new FileInputStream(f)) {
                 return loadDocument(is);
             }
-            finally
-            {
-                try
-                {
-                    is.close();
-                }
-                catch (Exception e)
-                {
-                    // ignore
-                }
+            catch (final IOException e) {
+                // ignore
             }
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             if (showError)
-            {
-                System.err.println("XMLUtil.loadDocument('" + f.getPath() + "') error:");
-                IcyExceptionHandler.showErrorMessage(e, false);
-            }
+                IcyLogger.error(XMLUtil.class, e, "XMLUtil.loadDocument('" + f.getPath() + "') error.");
         }
 
         return null;
@@ -346,8 +287,7 @@ public class XMLUtil
      * Load XML Document from specified URL.<br>
      * Return null if no document can be loaded.
      */
-    public static Document loadDocument(URL url)
-    {
+    public static Document loadDocument(final URL url) {
         return loadDocument(url, null, false);
     }
 
@@ -355,8 +295,7 @@ public class XMLUtil
      * Load XML Document from specified URL.<br>
      * Return null if no document can be loaded.
      */
-    public static Document loadDocument(URL url, boolean showError)
-    {
+    public static Document loadDocument(final URL url, final boolean showError) {
         return loadDocument(url, null, showError);
     }
 
@@ -364,19 +303,15 @@ public class XMLUtil
      * Load XML Document from specified URL with authentication informations.<br>
      * Return null if no document can be loaded.
      */
-    public static Document loadDocument(URL url, AuthenticationInfo auth, boolean showError)
-    {
+    public static Document loadDocument(final URL url, final AuthenticationInfo auth, final boolean showError) {
         // use file loading if possible
-        if (URLUtil.isFileURL(url))
-        {
+        if (URLUtil.isFileURL(url)) {
             File f;
 
-            try
-            {
+            try {
                 f = new File(url.toURI());
             }
-            catch (URISyntaxException e)
-            {
+            catch (final URISyntaxException e) {
                 f = new File(url.getPath());
             }
 
@@ -385,27 +320,17 @@ public class XMLUtil
 
         final InputStream is = NetworkUtil.getInputStream(url, auth, true, showError);
 
-        if (is != null)
-        {
-            try
-            {
+        if (is != null) {
+            try (is) {
                 return loadDocument(is);
             }
-            finally
-            {
-                try
-                {
-                    is.close();
-                }
-                catch (IOException e)
-                {
-                    // ignore
-                }
+            catch (final IOException e) {
+                // ignore
             }
         }
 
         if (showError)
-            System.err.println("XMLUtil.loadDocument('" + url + "') failed.");
+            IcyLogger.error(XMLUtil.class, "XMLUtil.loadDocument('" + url + "') failed.");
 
         return null;
     }
@@ -414,20 +339,15 @@ public class XMLUtil
      * Load XML Document from specified InputStream.<br>
      * Return null if no document can be loaded.
      */
-    public static Document loadDocument(InputStream is)
-    {
+    public static Document loadDocument(final InputStream is) {
         final DocumentBuilder builder = createDocumentBuilder();
 
-        if (builder != null)
-        {
-            try
-            {
+        if (builder != null) {
+            try {
                 return builder.parse(is);
             }
-            catch (Exception e)
-            {
-                System.err.println("XMLUtil.loadDocument('" + is.toString() + "') error :");
-                IcyExceptionHandler.showErrorMessage(e, false);
+            catch (final Exception e) {
+                IcyLogger.error(XMLUtil.class, e, "XMLUtil.loadDocument('" + is.toString() + "') error :");
             }
         }
 
@@ -438,8 +358,7 @@ public class XMLUtil
      * Save the specified XML Document to specified filename.<br>
      * Return false if an error occurred.
      */
-    public static boolean saveDocument(Document doc, String filename)
-    {
+    public static boolean saveDocument(final Document doc, final String filename) {
         return saveDocument(doc, FileUtil.createFile(filename));
     }
 
@@ -447,11 +366,9 @@ public class XMLUtil
      * Save the specified XML Document to specified file.<br>
      * Return false if an error occurred.
      */
-    public static boolean saveDocument(Document doc, File f)
-    {
-        if ((doc == null) || (f == null))
-        {
-            System.err.println("XMLUtil.saveDocument(...) error: specified document or file is null !");
+    public static boolean saveDocument(final Document doc, final File f) {
+        if ((doc == null) || (f == null)) {
+            IcyLogger.error(XMLUtil.class, "XMLUtil.saveDocument(...) error: specified document or file is null !");
 
             return false;
         }
@@ -468,10 +385,8 @@ public class XMLUtil
         final DOMSource domSource = new DOMSource(doc);
         final StreamResult streamResult = new StreamResult(f.getAbsolutePath());
 
-        try
-        {
-            if (doctype != null)
-            {
+        try {
+            if (doctype != null) {
                 transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, doctype.getPublicId());
                 transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, doctype.getSystemId());
             }
@@ -480,9 +395,8 @@ public class XMLUtil
 
             return true;
         }
-        catch (Exception e)
-        {
-            IcyExceptionHandler.showErrorMessage(e, true);
+        catch (final Exception e) {
+            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
         }
 
         return false;
@@ -490,11 +404,8 @@ public class XMLUtil
 
     /**
      * Return the XML String from the specified document.
-     * 
-     * @throws TransformerException
      */
-    public static String getXMLString(Document document) throws TransformerException
-    {
+    public static String getXMLString(final Document document) throws TransformerException {
         if (document == null)
             return "";
 
@@ -509,16 +420,14 @@ public class XMLUtil
     /**
      * Create root element for specified document if it does not already exist and return it
      */
-    public static Element createRootElement(Document doc)
-    {
+    public static Element createRootElement(final Document doc) {
         return createRootElement(doc, NODE_ROOT_NAME);
     }
 
     /**
      * Create root element for specified document if it does not already exist and return it
      */
-    public static Element createRootElement(Document doc, String name)
-    {
+    public static Element createRootElement(final Document doc, final String name) {
         return getRootElement(doc, true, name);
     }
 
@@ -526,14 +435,11 @@ public class XMLUtil
      * Return the root element for specified document<br>
      * Create if it does not already exist with the specified name
      */
-    private static Element getRootElement(Document doc, boolean create, String name)
-    {
-        if (doc != null)
-        {
+    private static Element getRootElement(final Document doc, final boolean create, final String name) {
+        if (doc != null) {
             Element result = doc.getDocumentElement();
 
-            if ((result == null) && create)
-            {
+            if ((result == null) && create) {
                 result = doc.createElement(name);
                 doc.appendChild(result);
             }
@@ -548,28 +454,24 @@ public class XMLUtil
      * Return the root element for specified document<br>
      * Create if it does not already exist with the default {@link #NODE_ROOT_NAME}
      */
-    public static Element getRootElement(Document doc, boolean create)
-    {
+    public static Element getRootElement(final Document doc, final boolean create) {
         return getRootElement(doc, create, NODE_ROOT_NAME);
     }
 
     /**
      * Return the root element for specified document (null if not found)<br>
      */
-    public static Element getRootElement(Document doc)
-    {
+    public static Element getRootElement(final Document doc) {
         return getRootElement(doc, false);
     }
 
     /**
      * Get parent element of specified element
      */
-    public static Element getParentElement(Element element)
-    {
+    public static Element getParentElement(final Element element) {
         Node parent = element.getParentNode();
 
-        while (parent != null)
-        {
+        while (parent != null) {
             if (parent instanceof Element)
                 return (Element) parent;
 
@@ -582,24 +484,18 @@ public class XMLUtil
     /**
      * Get all child node of specified node.
      */
-    @SuppressWarnings("null")
-    public static ArrayList<Node> getChildren(Node node)
-    {
-        final ArrayList<Node> result = new ArrayList<Node>();
+    public static ArrayList<Node> getChildren(final Node node) {
+        final ArrayList<Node> result = new ArrayList<>();
         int tries = 3;
         RuntimeException exception = null;
 
         // sometime the XML library fails so we make several attempts
-        while (tries > 0)
-        {
-            try
-            {
+        while (tries > 0) {
+            try {
                 final NodeList nodeList = node.getChildNodes();
 
-                if (nodeList != null)
-                {
-                    for (int i = 0; i < nodeList.getLength(); i++)
-                    {
+                if (nodeList != null) {
+                    for (int i = 0; i < nodeList.getLength(); i++) {
                         final Node n = nodeList.item(i);
 
                         if (n != null)
@@ -609,8 +505,7 @@ public class XMLUtil
 
                 return result;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -624,23 +519,17 @@ public class XMLUtil
      * Get the first child node with specified name from node.<br>
      * Return null if not found.
      */
-    @SuppressWarnings("null")
-    public static Node getChild(Node node, String name)
-    {
+    public static Node getChild(final Node node, final String name) {
         int tries = 3;
         RuntimeException exception = null;
 
         // have to make several attempts as sometime XML library fails to correctly retrieve XML data
-        while (tries > 0)
-        {
+        while (tries > 0) {
             final NodeList nodeList = node.getChildNodes();
 
-            try
-            {
-                if (nodeList != null)
-                {
-                    for (int i = 0; i < nodeList.getLength(); i++)
-                    {
+            try {
+                if (nodeList != null) {
+                    for (int i = 0; i < nodeList.getLength(); i++) {
                         final Node n = nodeList.item(i);
 
                         if ((n != null) && n.getNodeName().equals(name))
@@ -650,8 +539,7 @@ public class XMLUtil
 
                 return null;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -664,24 +552,18 @@ public class XMLUtil
     /**
      * Get all child nodes with specified name from node.
      */
-    @SuppressWarnings("null")
-    public static ArrayList<Node> getChildren(Node node, String name)
-    {
-        final ArrayList<Node> result = new ArrayList<Node>();
+    public static ArrayList<Node> getChildren(final Node node, final String name) {
+        final ArrayList<Node> result = new ArrayList<>();
         int tries = 3;
         RuntimeException exception = null;
 
         // have to make several attempts as sometime XML library fails to correctly retrieve XML data
-        while (tries > 0)
-        {
+        while (tries > 0) {
             final NodeList nodeList = node.getChildNodes();
 
-            try
-            {
-                if (nodeList != null)
-                {
-                    for (int i = 0; i < nodeList.getLength(); i++)
-                    {
+            try {
+                if (nodeList != null) {
+                    for (int i = 0; i < nodeList.getLength(); i++) {
                         final Node n = nodeList.item(i);
 
                         if ((n != null) && n.getNodeName().equals(name))
@@ -691,8 +573,7 @@ public class XMLUtil
 
                 return result;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -706,8 +587,7 @@ public class XMLUtil
      * @deprecated Use {@link #getChildren(Node)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<Node> getSubNodes(Node node)
-    {
+    public static ArrayList<Node> getSubNodes(final Node node) {
         return getChildren(node);
     }
 
@@ -715,8 +595,7 @@ public class XMLUtil
      * @deprecated Use {@link #getChild(Node, String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Node getSubNode(Node node, String name)
-    {
+    public static Node getSubNode(final Node node, final String name) {
         return getChild(node, name);
     }
 
@@ -724,32 +603,25 @@ public class XMLUtil
      * @deprecated Use {@link #getChildren(Node, String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<Node> getSubNodes(Node node, String name)
-    {
+    public static ArrayList<Node> getSubNodes(final Node node, final String name) {
         return getChildren(node, name);
     }
 
     /**
      * Get all child element of specified node.
      */
-    @SuppressWarnings("null")
-    public static ArrayList<Element> getElements(Node node)
-    {
-        final ArrayList<Element> result = new ArrayList<Element>();
+    public static ArrayList<Element> getElements(final Node node) {
+        final ArrayList<Element> result = new ArrayList<>();
         int tries = 3;
         RuntimeException exception = null;
 
         // have to make several attempts as sometime XML library fails to correctly retrieve XML data
-        while (tries > 0)
-        {
+        while (tries > 0) {
             final NodeList nodeList = node.getChildNodes();
 
-            try
-            {
-                if (nodeList != null)
-                {
-                    for (int i = 0; i < nodeList.getLength(); i++)
-                    {
+            try {
+                if (nodeList != null) {
+                    for (int i = 0; i < nodeList.getLength(); i++) {
                         final Node n = nodeList.item(i);
 
                         if (n instanceof Element)
@@ -759,8 +631,7 @@ public class XMLUtil
 
                 return result;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -774,9 +645,7 @@ public class XMLUtil
      * Get the first child element with specified name from node.<br>
      * Return null if not found.
      */
-    @SuppressWarnings("null")
-    public static Element getElement(Node node, String name)
-    {
+    public static Element getElement(final Node node, final String name) {
         if (node == null)
             return null;
 
@@ -785,16 +654,12 @@ public class XMLUtil
         RuntimeException exception = null;
 
         // have to make several attempts as sometime XML library fails to correctly retrieve XML data
-        while (tries > 0)
-        {
-            try
-            {
+        while (tries > 0) {
+            try {
                 final NodeList nodeList = node.getChildNodes();
 
-                if (nodeList != null)
-                {
-                    for (int i = 0; i < nodeList.getLength(); i++)
-                    {
+                if (nodeList != null) {
+                    for (int i = 0; i < nodeList.getLength(); i++) {
                         final Node n = nodeList.item(i);
 
                         if ((n instanceof Element) && n.getNodeName().equals(filteredName))
@@ -804,8 +669,7 @@ public class XMLUtil
 
                 return null;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -818,25 +682,19 @@ public class XMLUtil
     /**
      * Get all child element with specified name of specified node.
      */
-    @SuppressWarnings("null")
-    public static ArrayList<Element> getElements(Node node, String name)
-    {
-        final ArrayList<Element> result = new ArrayList<Element>();
+    public static ArrayList<Element> getElements(final Node node, final String name) {
+        final ArrayList<Element> result = new ArrayList<>();
         final String filteredName = filterString(name);
         int tries = 3;
         RuntimeException exception = null;
 
         // have to make several attempts as sometime XML library fails to correctly retrieve XML data
-        while (tries > 0)
-        {
+        while (tries > 0) {
             final NodeList nodeList = node.getChildNodes();
 
-            try
-            {
-                if (nodeList != null)
-                {
-                    for (int i = 0; i < nodeList.getLength(); i++)
-                    {
+            try {
+                if (nodeList != null) {
+                    for (int i = 0; i < nodeList.getLength(); i++) {
                         final Node n = nodeList.item(i);
 
                         if ((n instanceof Element) && n.getNodeName().equals(filteredName))
@@ -845,8 +703,7 @@ public class XMLUtil
                 }
                 return result;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -860,8 +717,7 @@ public class XMLUtil
      * @deprecated Use {@link #getElements(Node)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<Element> getSubElements(Node node)
-    {
+    public static ArrayList<Element> getSubElements(final Node node) {
         return getElements(node);
     }
 
@@ -869,8 +725,7 @@ public class XMLUtil
      * @deprecated Use {@link #getElement(Node, String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Element getSubElement(Node node, String name)
-    {
+    public static Element getSubElement(final Node node, final String name) {
         return getElement(node, name);
     }
 
@@ -878,33 +733,26 @@ public class XMLUtil
      * @deprecated Use {@link #getElements(Node, String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<Element> getSubElements(Node node, String name)
-    {
+    public static ArrayList<Element> getSubElements(final Node node, final String name) {
         return getElements(node, name);
     }
 
     /**
      * Get all child element with specified type (name) from specified node.
      */
-    @SuppressWarnings("null")
-    public static ArrayList<Element> getGenericElements(Node node, String type)
-    {
-        final ArrayList<Element> result = new ArrayList<Element>();
+    public static ArrayList<Element> getGenericElements(final Node node, final String type) {
+        final ArrayList<Element> result = new ArrayList<>();
         final String filteredType = filterString(type);
         int tries = 3;
         RuntimeException exception = null;
 
         // have to make several attempts as sometime XML library fails to correctly retrieve XML data
-        while (tries > 0)
-        {
+        while (tries > 0) {
             final NodeList nodeList = node.getChildNodes();
 
-            try
-            {
-                if (nodeList != null)
-                {
-                    for (int i = 0; i < nodeList.getLength(); i++)
-                    {
+            try {
+                if (nodeList != null) {
+                    for (int i = 0; i < nodeList.getLength(); i++) {
                         final Node n = nodeList.item(i);
 
                         if ((n instanceof Element) && n.getNodeName().equals(filteredType))
@@ -914,8 +762,7 @@ public class XMLUtil
 
                 return result;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -929,31 +776,23 @@ public class XMLUtil
      * Get all child element with specified type (name) and name ('name attribute value')
      * from specified node.
      */
-    @SuppressWarnings("null")
-    public static ArrayList<Element> getGenericElements(Node node, String type, String name)
-    {
-        final ArrayList<Element> result = new ArrayList<Element>();
+    public static ArrayList<Element> getGenericElements(final Node node, final String type, final String name) {
+        final ArrayList<Element> result = new ArrayList<>();
         final String filteredName = filterString(name);
         final String filteredType = filterString(type);
         int tries = 3;
         RuntimeException exception = null;
 
         // have to make several attempts as sometime XML library fails to correctly retrieve XML data
-        while (tries > 0)
-        {
+        while (tries > 0) {
             final NodeList nodeList = node.getChildNodes();
 
-            try
-            {
-                if (nodeList != null)
-                {
-                    for (int i = 0; i < nodeList.getLength(); i++)
-                    {
+            try {
+                if (nodeList != null) {
+                    for (int i = 0; i < nodeList.getLength(); i++) {
                         final Node n = nodeList.item(i);
 
-                        if ((n instanceof Element) && n.getNodeName().equals(filteredType))
-                        {
-                            final Element element = (Element) n;
+                        if ((n instanceof Element element) && n.getNodeName().equals(filteredType)) {
 
                             if (element.getAttribute(ATTR_NAME_NAME).equals(filteredName))
                                 result.add(element);
@@ -963,8 +802,7 @@ public class XMLUtil
 
                 return result;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -978,8 +816,7 @@ public class XMLUtil
      * @deprecated Use {@link #getGenericElements(Node, String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<Element> getSubGenericElements(Node node, String type)
-    {
+    public static ArrayList<Element> getSubGenericElements(final Node node, final String type) {
         return getGenericElements(node, type);
     }
 
@@ -987,8 +824,7 @@ public class XMLUtil
      * @deprecated Use {@link #getGenericElements(Node, String, String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<Element> getSubGenericElements(Node node, String type, String name)
-    {
+    public static ArrayList<Element> getSubGenericElements(final Node node, final String type, final String name) {
         return getGenericElements(node, type, name);
     }
 
@@ -996,31 +832,22 @@ public class XMLUtil
      * Get child element with specified type (name) and name ('name attribute value')
      * from specified node.
      */
-    @SuppressWarnings("null")
-    public static Element getGenericElement(Node node, String type, String name)
-    {
+    public static Element getGenericElement(final Node node, final String type, final String name) {
         final String filteredName = filterString(name);
         final String filteredType = filterString(type);
         int tries = 3;
         RuntimeException exception = null;
 
         // have to make several attempts as sometime XML library fails to correctly retrieve XML data
-        while (tries > 0)
-        {
+        while (tries > 0) {
             final NodeList nodeList = node.getChildNodes();
 
-            try
-            {
-                if (nodeList != null)
-                {
-                    for (int i = 0; i < nodeList.getLength(); i++)
-                    {
+            try {
+                if (nodeList != null) {
+                    for (int i = 0; i < nodeList.getLength(); i++) {
                         final Node n = nodeList.item(i);
 
-                        if ((n instanceof Element) && n.getNodeName().equals(filteredType))
-                        {
-                            final Element element = (Element) n;
-
+                        if ((n instanceof final Element element) && n.getNodeName().equals(filteredType)) {
                             if (element.getAttribute(ATTR_NAME_NAME).equals(filteredName))
                                 return element;
                         }
@@ -1029,8 +856,7 @@ public class XMLUtil
 
                 return null;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -1043,8 +869,7 @@ public class XMLUtil
     /**
      * Get name of specified generic element
      */
-    public static String getGenericElementName(Element element)
-    {
+    public static String getGenericElementName(final Element element) {
         if (element != null)
             return element.getAttribute(ATTR_NAME_NAME);
 
@@ -1054,18 +879,16 @@ public class XMLUtil
     /**
      * Get value of specified generic element
      */
-    public static String getGenericElementValue(Element element, String def)
-    {
+    public static String getGenericElementValue(final Element element, final String def) {
         return getAttributeValue(element, ATTR_VALUE_NAME, def);
     }
 
     /**
      * Get all attributes of the specified element
      */
-    public static ArrayList<Attr> getAllAttributes(Element element)
-    {
+    public static ArrayList<Attr> getAllAttributes(final Element element) {
         final NamedNodeMap nodeMap = element.getAttributes();
-        final ArrayList<Attr> result = new ArrayList<Attr>();
+        final ArrayList<Attr> result = new ArrayList<>();
 
         for (int i = 0; i < nodeMap.getLength(); i++)
             result.add((Attr) nodeMap.item(i));
@@ -1073,77 +896,63 @@ public class XMLUtil
         return result;
     }
 
-    private static boolean getBoolean(String value, boolean def)
-    {
+    private static boolean getBoolean(final String value, final boolean def) {
         return StringUtil.parseBoolean(value, def);
     }
 
-    private static int getInt(String value, int def)
-    {
+    private static int getInt(final String value, final int def) {
         return StringUtil.parseInt(value, def);
     }
 
-    private static long getLong(String value, long def)
-    {
+    private static long getLong(final String value, final long def) {
         return StringUtil.parseLong(value, def);
     }
 
-    private static float getFloat(String value, float def)
-    {
+    private static float getFloat(final String value, final float def) {
         return StringUtil.parseFloat(value, def);
     }
 
-    private static double getDouble(String value, double def)
-    {
+    private static double getDouble(final String value, final double def) {
         return StringUtil.parseDouble(value, def);
     }
 
-    public static byte[] getBytes(String value, byte[] def) throws DataFormatException
-    {
+    public static byte[] getBytes(final String value, final byte[] def) throws DataFormatException {
         if (value == null)
             return def;
 
         // get packed byte data
         final byte[] result = (byte[]) ArrayUtil.stringToArray1D(value, DataType.BYTE, true, ":");
 
-        synchronized (inflater)
-        {
+        synchronized (inflater) {
             // unpack and return
             return ZipUtil.unpack(inflater, result);
         }
     }
 
-    private static String toString(boolean value)
-    {
+    private static String toString(final boolean value) {
         return StringUtil.toString(value);
     }
 
-    private static String toString(int value)
-    {
+    private static String toString(final int value) {
         return StringUtil.toString(value);
     }
 
-    private static String toString(long value)
-    {
+    private static String toString(final long value) {
         return StringUtil.toString(value);
     }
 
-    private static String toString(float value)
-    {
+    private static String toString(final float value) {
         return StringUtil.toString(value);
     }
 
-    private static String toString(double value)
-    {
+    private static String toString(final double value) {
         return StringUtil.toString(value);
     }
 
-    public static String toString(byte[] value)
-    {
+    public static String toString(final byte[] value) {
         final byte[] packed;
 
-        synchronized (deflater)
-        {
+        synchronized (deflater) {
             packed = ZipUtil.pack(deflater, value, -1);
         }
 
@@ -1154,8 +963,7 @@ public class XMLUtil
     /**
      * Get an attribute from the specified Element
      */
-    public static Attr getAttribute(Element element, String attribute)
-    {
+    public static Attr getAttribute(final Element element, final String attribute) {
         if (element != null)
             return element.getAttributeNode(attribute);
 
@@ -1166,9 +974,7 @@ public class XMLUtil
      * Get attribute value from the specified Element.<br>
      * If no attribute found 'def' value is returned.
      */
-    @SuppressWarnings("null")
-    public static String getAttributeValue(Element element, String attribute, String def)
-    {
+    public static String getAttributeValue(final Element element, final String attribute, final String def) {
         if (element == null)
             return def;
 
@@ -1177,10 +983,8 @@ public class XMLUtil
         RuntimeException exception = null;
 
         // sometime the XML library fails so we make several attempts
-        while (tries > 0)
-        {
-            try
-            {
+        while (tries > 0) {
+            try {
                 final Attr attr = element.getAttributeNode(filteredAttr);
 
                 if (attr != null)
@@ -1188,8 +992,7 @@ public class XMLUtil
 
                 return def;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -1203,8 +1006,7 @@ public class XMLUtil
      * Get attribute value as Boolean from the specified Element.<br>
      * If no attribute found 'def' value is returned.
      */
-    public static boolean getAttributeBooleanValue(Element element, String attribute, boolean def)
-    {
+    public static boolean getAttributeBooleanValue(final Element element, final String attribute, final boolean def) {
         return getBoolean(getAttributeValue(element, attribute, ""), def);
     }
 
@@ -1213,18 +1015,15 @@ public class XMLUtil
      * If the attribute is not found 'def' value is returned.<br>
      * If an error occurred or if element is <code>null</code> then <code>null</code> is returned.
      */
-    public static byte[] getAttributeBytesValue(Element element, String attribute, byte[] def)
-    {
-        try
-        {
+    public static byte[] getAttributeBytesValue(final Element element, final String attribute, final byte[] def) {
+        try {
             return getBytes(getAttributeValue(element, attribute, ""), def);
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
 
-            IcyExceptionHandler.showErrorMessage(e, true);
+            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
             return null;
         }
     }
@@ -1233,8 +1032,7 @@ public class XMLUtil
      * Get attribute value as integer from the specified Element.<br>
      * If no attribute found 'def' value is returned.
      */
-    public static int getAttributeIntValue(Element element, String attribute, int def)
-    {
+    public static int getAttributeIntValue(final Element element, final String attribute, final int def) {
         return getInt(getAttributeValue(element, attribute, ""), def);
     }
 
@@ -1242,8 +1040,7 @@ public class XMLUtil
      * Get attribute value as long from the specified Element.<br>
      * If no attribute found 'def' value is returned.
      */
-    public static long getAttributeLongValue(Element element, String attribute, long def)
-    {
+    public static long getAttributeLongValue(final Element element, final String attribute, final long def) {
         return getLong(getAttributeValue(element, attribute, ""), def);
     }
 
@@ -1251,8 +1048,7 @@ public class XMLUtil
      * Get attribute value as float from the specified Element.<br>
      * If no attribute found 'def' value is returned.
      */
-    public static float getAttributeFloatValue(Element element, String attribute, float def)
-    {
+    public static float getAttributeFloatValue(final Element element, final String attribute, final float def) {
         return getFloat(getAttributeValue(element, attribute, ""), def);
     }
 
@@ -1260,8 +1056,7 @@ public class XMLUtil
      * Get attribute value as double from the specified Element.<br>
      * If no attribute found 'def' value is returned.
      */
-    public static double getAttributeDoubleValue(Element element, String attribute, double def)
-    {
+    public static double getAttributeDoubleValue(final Element element, final String attribute, final double def) {
         return getDouble(getAttributeValue(element, attribute, ""), def);
     }
 
@@ -1269,9 +1064,7 @@ public class XMLUtil
      * Get first value (value of first child) from the specified Element.<br>
      * If no value found 'def' value is returned.
      */
-    @SuppressWarnings("null")
-    public static String getFirstValue(Element element, String def)
-    {
+    public static String getFirstValue(final Element element, final String def) {
         if (element == null)
             return def;
 
@@ -1279,10 +1072,8 @@ public class XMLUtil
         RuntimeException exception = null;
 
         // sometime the XML library fails so we make several attempts
-        while (tries > 0)
-        {
-            try
-            {
+        while (tries > 0) {
+            try {
                 final Node child = element.getFirstChild();
 
                 if (child != null)
@@ -1290,8 +1081,7 @@ public class XMLUtil
 
                 return def;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -1305,9 +1095,7 @@ public class XMLUtil
      * Get all values (value of all child) from the specified Element.<br>
      * If no value found 'def' value is returned.
      */
-    @SuppressWarnings("null")
-    public static String getAllValues(Element element, String def)
-    {
+    public static String getAllValues(final Element element, final String def) {
         if (element == null)
             return def;
 
@@ -1315,23 +1103,19 @@ public class XMLUtil
         RuntimeException exception = null;
 
         // sometime the XML library fails so we make several attempts
-        while (tries > 0)
-        {
-            try
-            {
+        while (tries > 0) {
+            try {
                 final StringBuilder str = new StringBuilder();
 
                 Node child = element.getFirstChild();
-                while (child != null)
-                {
+                while (child != null) {
                     str.append(child.getNodeValue());
                     child = child.getNextSibling();
                 }
 
                 return str.toString();
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // try again
                 exception = e;
                 tries--;
@@ -1345,16 +1129,14 @@ public class XMLUtil
      * Get all values (value of all child) as String from the specified Element.<br>
      * If no value found 'def' value is returned.
      */
-    public static String getValue(Element element, String def)
-    {
+    public static String getValue(final Element element, final String def) {
         return getAllValues(element, def);
     }
 
     /**
      * Get all values (value of all child) as Boolean from the specified Element.
      */
-    public static boolean getBooleanValue(Element element, boolean def)
-    {
+    public static boolean getBooleanValue(final Element element, final boolean def) {
         return getBoolean(getFirstValue(element, ""), def);
     }
 
@@ -1362,8 +1144,7 @@ public class XMLUtil
      * Get value as integer from the specified Element.<br>
      * If no integer value found 'def' value is returned.
      */
-    public static int getIntValue(Element element, int def)
-    {
+    public static int getIntValue(final Element element, final int def) {
         return getInt(getFirstValue(element, ""), def);
     }
 
@@ -1371,8 +1152,7 @@ public class XMLUtil
      * Get value as long from the specified Element.<br>
      * If no integer value found 'def' value is returned.
      */
-    public static long getLongValue(Element element, long def)
-    {
+    public static long getLongValue(final Element element, final long def) {
         return getLong(getFirstValue(element, ""), def);
     }
 
@@ -1380,8 +1160,7 @@ public class XMLUtil
      * Get value as float from the specified Element.<br>
      * If no float value found 'def' value is returned.
      */
-    public static float getFloatValue(Element element, float def)
-    {
+    public static float getFloatValue(final Element element, final float def) {
         return getFloat(getFirstValue(element, ""), def);
     }
 
@@ -1389,8 +1168,7 @@ public class XMLUtil
      * Get value as double from the specified Element.<br>
      * If no double value found 'def' value is returned.
      */
-    public static double getDoubleValue(Element element, double def)
-    {
+    public static double getDoubleValue(final Element element, final double def) {
         return getDouble(getFirstValue(element, ""), def);
     }
 
@@ -1399,18 +1177,15 @@ public class XMLUtil
      * If no byte array value found 'def' value is returned.<br>
      * Return <code>null</code> if an error happened.
      */
-    public static byte[] getBytesValue(Element element, byte[] def)
-    {
-        try
-        {
+    public static byte[] getBytesValue(final Element element, final byte[] def) {
+        try {
             return getBytes(getFirstValue(element, ""), def);
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
 
-            IcyExceptionHandler.showErrorMessage(e, true);
+            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
             return null;
         }
     }
@@ -1419,8 +1194,7 @@ public class XMLUtil
      * Get first element value from the specified node.<br>
      * If no value found 'def' value is returned.
      */
-    public static String getElementFirstValue(Node node, String name, String def)
-    {
+    public static String getElementFirstValue(final Node node, final String name, final String def) {
         return getFirstValue(getElement(node, name), def);
     }
 
@@ -1428,8 +1202,7 @@ public class XMLUtil
      * Get all element values from the specified node.<br>
      * If no value found 'def' value is returned.
      */
-    public static String getElementAllValues(Node node, String name, String def)
-    {
+    public static String getElementAllValues(final Node node, final String name, final String def) {
         return getAllValues(getElement(node, name), def);
     }
 
@@ -1437,16 +1210,14 @@ public class XMLUtil
      * Get element value as string from the specified node.<br>
      * If no value found 'def' value is returned.
      */
-    public static String getElementValue(Node node, String name, String def)
-    {
+    public static String getElementValue(final Node node, final String name, final String def) {
         return getValue(getElement(node, name), def);
     }
 
     /**
      * Get element value as boolean from the specified node.
      */
-    public static boolean getElementBooleanValue(Node node, String name, boolean def)
-    {
+    public static boolean getElementBooleanValue(final Node node, final String name, final boolean def) {
         return getBoolean(getElementValue(node, name, ""), def);
     }
 
@@ -1454,8 +1225,7 @@ public class XMLUtil
      * Get element value as integer from the specified node.<br>
      * If no integer value found 'def' value is returned.
      */
-    public static int getElementIntValue(Node node, String name, int def)
-    {
+    public static int getElementIntValue(final Node node, final String name, final int def) {
         return getInt(getElementValue(node, name, ""), def);
     }
 
@@ -1463,8 +1233,7 @@ public class XMLUtil
      * Get element value as long from the specified node.<br>
      * If no integer value found 'def' value is returned.
      */
-    public static long getElementLongValue(Node node, String name, long def)
-    {
+    public static long getElementLongValue(final Node node, final String name, final long def) {
         return getLong(getElementValue(node, name, ""), def);
     }
 
@@ -1472,8 +1241,7 @@ public class XMLUtil
      * Get element value as float from the specified node.<br>
      * If no float value found 'def' value is returned.
      */
-    public static float getElementFloatValue(Node node, String name, float def)
-    {
+    public static float getElementFloatValue(final Node node, final String name, final float def) {
         return getFloat(getElementValue(node, name, ""), def);
     }
 
@@ -1481,8 +1249,7 @@ public class XMLUtil
      * Get element value as double from the specified node.<br>
      * If no double value found 'def' value is returned.
      */
-    public static double getElementDoubleValue(Node node, String name, double def)
-    {
+    public static double getElementDoubleValue(final Node node, final String name, final double def) {
         return getDouble(getElementValue(node, name, ""), def);
     }
 
@@ -1491,18 +1258,15 @@ public class XMLUtil
      * If no byte array value found 'def' value is returned.<br>
      * Return <code>null</code> if an error happened.
      */
-    public static byte[] getElementBytesValue(Node node, String name, byte[] def)
-    {
-        try
-        {
+    public static byte[] getElementBytesValue(final Node node, final String name, final byte[] def) {
+        try {
             return getBytes(getElementValue(node, name, ""), def);
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
 
-            IcyExceptionHandler.showErrorMessage(e, true);
+            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
             return null;
         }
     }
@@ -1512,8 +1276,7 @@ public class XMLUtil
      * and name ('name' attribute value).<br>
      * If no value found 'def' value is returned.
      */
-    public static String getGenericElementValue(Node node, String type, String name, String def)
-    {
+    public static String getGenericElementValue(final Node node, final String type, final String name, final String def) {
         return getGenericElementValue(getGenericElement(node, type, name), def);
     }
 
@@ -1522,8 +1285,7 @@ public class XMLUtil
      * and name ('name' attribute value).<br>
      * If no byte array value found 'def' value is returned.
      */
-    public static boolean getGenericElementBooleanValue(Node node, String type, String name, boolean def)
-    {
+    public static boolean getGenericElementBooleanValue(final Node node, final String type, final String name, final boolean def) {
         return getBoolean(getGenericElementValue(node, type, name, ""), def);
     }
 
@@ -1532,8 +1294,7 @@ public class XMLUtil
      * and name ('name' attribute value).<br>
      * If no integer value found 'def' value is returned.
      */
-    public static int getGenericElementIntValue(Node node, String type, String name, int def)
-    {
+    public static int getGenericElementIntValue(final Node node, final String type, final String name, final int def) {
         return getInt(getGenericElementValue(node, type, name, ""), def);
     }
 
@@ -1542,8 +1303,7 @@ public class XMLUtil
      * and name ('name' attribute value).<br>
      * If no integer value found 'def' value is returned.
      */
-    public static long getGenericElementLongValue(Node node, String type, String name, long def)
-    {
+    public static long getGenericElementLongValue(final Node node, final String type, final String name, final long def) {
         return getLong(getGenericElementValue(node, type, name, ""), def);
     }
 
@@ -1552,8 +1312,7 @@ public class XMLUtil
      * and name ('name' attribute value).<br>
      * If no float value found 'def' value is returned.
      */
-    public static float getGenericElementFloatValue(Node node, String type, String name, float def)
-    {
+    public static float getGenericElementFloatValue(final Node node, final String type, final String name, final float def) {
         return getFloat(getGenericElementValue(node, type, name, ""), def);
     }
 
@@ -1562,8 +1321,7 @@ public class XMLUtil
      * and name ('name' attribute value).<br>
      * If no double value found 'def' value is returned.
      */
-    public static double getGenericElementDoubleValue(Node node, String type, String name, double def)
-    {
+    public static double getGenericElementDoubleValue(final Node node, final String type, final String name, final double def) {
         return getDouble(getGenericElementValue(node, type, name, ""), def);
     }
 
@@ -1573,18 +1331,15 @@ public class XMLUtil
      * If no byte array value found 'def' value is returned.<br>
      * Return <code>null</code> if an error happened.
      */
-    public static byte[] getGenericElementBytesValue(Node node, String type, String name, byte[] def)
-    {
-        try
-        {
+    public static byte[] getGenericElementBytesValue(final Node node, final String type, final String name, final byte[] def) {
+        try {
             return getBytes(getElementValue(node, name, ""), def);
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
 
-            IcyExceptionHandler.showErrorMessage(e, true);
+            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
             return null;
         }
     }
@@ -1592,16 +1347,14 @@ public class XMLUtil
     /**
      * Add the specified node to specified parent node
      */
-    public static Node addNode(Node parent, Node node)
-    {
+    public static Node addNode(final Node parent, final Node node) {
         return parent.appendChild(node);
     }
 
     /**
      * Add a value to the specified node
      */
-    public static Node addValue(Node node, String value)
-    {
+    public static Node addValue(final Node node, final String value) {
         final Node newNode;
         final String filteredValue = filterString(value);
 
@@ -1619,8 +1372,7 @@ public class XMLUtil
     /**
      * Add a named element to the specified node
      */
-    public static Element addElement(Node node, String name)
-    {
+    public static Element addElement(final Node node, final String name) {
         final Element element;
         final String filteredName = filterString(name);
 
@@ -1637,8 +1389,7 @@ public class XMLUtil
     /**
      * Add a named element with a value to the specified node
      */
-    public static Element addElement(Node node, String name, String value)
-    {
+    public static Element addElement(final Node node, final String name, final String value) {
         final Element element = addElement(node, name);
 
         if (!StringUtil.isEmpty(value))
@@ -1650,8 +1401,7 @@ public class XMLUtil
     /**
      * Add a generic element with specified type and name to the specified node
      */
-    public static Element addGenericElement(Node node, String type, String name)
-    {
+    public static Element addGenericElement(final Node node, final String type, final String name) {
         final Element element = addElement(node, type);
 
         setGenericElementName(element, name);
@@ -1662,8 +1412,7 @@ public class XMLUtil
     /**
      * Add a generic element with specified type, name and value to the specified node
      */
-    public static Element addGenericElement(Node node, String type, String name, String value)
-    {
+    public static Element addGenericElement(final Node node, final String type, final String name, final String value) {
         final Element element = addElement(node, type);
 
         setGenericElementName(element, name);
@@ -1675,8 +1424,7 @@ public class XMLUtil
     /**
      * Set name of specified generic element
      */
-    public static void setGenericElementName(Element element, String name)
-    {
+    public static void setGenericElementName(final Element element, final String name) {
         if (element != null)
             element.setAttribute(ATTR_NAME_NAME, filterString(name));
     }
@@ -1684,8 +1432,7 @@ public class XMLUtil
     /**
      * Set value of specified generic element
      */
-    public static void setGenericElementValue(Element element, String value)
-    {
+    public static void setGenericElementValue(final Element element, final String value) {
         if (element != null)
             element.setAttribute(ATTR_VALUE_NAME, filterString(value));
     }
@@ -1694,8 +1441,7 @@ public class XMLUtil
      * Set the specified node to the specified parent node.<br>
      * The new node replace the previous existing node with the same name.
      */
-    public static Node setNode(Node parent, Node node)
-    {
+    public static Node setNode(final Node parent, final Node node) {
         final String name = node.getNodeName();
 
         XMLUtil.removeNode(parent, name);
@@ -1707,8 +1453,7 @@ public class XMLUtil
      * Set a element with specified name to specified node.<br>
      * If the Element was already existing then it's just returned.
      */
-    public static Element setElement(Node node, String name)
-    {
+    public static Element setElement(final Node node, final String name) {
         // get element
         final Element element = getElement(node, name);
         if (element != null)
@@ -1721,8 +1466,7 @@ public class XMLUtil
      * Set a generic element with specified type and name to specified node.<br>
      * If the generic element was already existing then it's just returned.
      */
-    public static Element setGenericElement(Node node, String type, String name)
-    {
+    public static Element setGenericElement(final Node node, final String type, final String name) {
         // get generic element
         final Element element = getGenericElement(node, type, name);
         if (element != null)
@@ -1734,64 +1478,56 @@ public class XMLUtil
     /**
      * Set an attribute and his value to the specified node
      */
-    public static void setAttributeValue(Element element, String attribute, String value)
-    {
+    public static void setAttributeValue(final Element element, final String attribute, final String value) {
         element.setAttribute(attribute, filterString(value));
     }
 
     /**
      * Set an attribute and his value as boolean to the specified node
      */
-    public static void setAttributeBooleanValue(Element element, String attribute, boolean value)
-    {
+    public static void setAttributeBooleanValue(final Element element, final String attribute, final boolean value) {
         setAttributeValue(element, attribute, toString(value));
     }
 
     /**
      * Set an attribute and his value as integer to the specified node
      */
-    public static void setAttributeIntValue(Element element, String attribute, int value)
-    {
+    public static void setAttributeIntValue(final Element element, final String attribute, final int value) {
         setAttributeValue(element, attribute, toString(value));
     }
 
     /**
      * Set an attribute and his value as integer to the specified node
      */
-    public static void setAttributeLongValue(Element element, String attribute, long value)
-    {
+    public static void setAttributeLongValue(final Element element, final String attribute, final long value) {
         setAttributeValue(element, attribute, toString(value));
     }
 
     /**
      * Set an attribute and his value as float to the specified node
      */
-    public static void setAttributeFloatValue(Element element, String attribute, float value)
-    {
+    public static void setAttributeFloatValue(final Element element, final String attribute, final float value) {
         setAttributeValue(element, attribute, toString(value));
     }
 
     /**
      * Set an attribute and his value as double to the specified node
      */
-    public static void setAttributeDoubleValue(Element element, String attribute, double value)
-    {
+    public static void setAttributeDoubleValue(final Element element, final String attribute, final double value) {
         setAttributeValue(element, attribute, toString(value));
     }
 
     /**
      * Set an attribute and his value as byte array to the specified node
      */
-    public static void setAttributeBytesValue(Element element, String attribute, byte[] value)
-    {
+    public static void setAttributeBytesValue(final Element element, final String attribute, final byte[] value) {
         setAttributeValue(element, attribute, toString(value));
     }
 
     /**
      * Set value to the specified element
      */
-    public static void setValue(Element element, String value)
-    {
+    public static void setValue(final Element element, final String value) {
         // remove child nodes
         removeAllChildren(element);
         // add value
@@ -1801,12 +1537,10 @@ public class XMLUtil
     /**
      * Remove all characters that are valid XML markups.
      */
-    public static String removeXMLMarkups(String s)
-    {
-        final StringBuffer out = new StringBuffer();
+    public static String removeXMLMarkups(final String s) {
+        final StringBuilder out = new StringBuilder();
 
-        for (char c : s.toCharArray())
-        {
+        for (final char c : s.toCharArray()) {
             if ((c == '\'') || (c == '<') || (c == '>') || (c == '&') || (c == '\"'))
                 continue;
 
@@ -1819,13 +1553,12 @@ public class XMLUtil
     /**
      * Remove any invalid XML character from the specified string.
      */
-    public static String removeInvalidXMLCharacters(String text)
-    {
+    public static String removeInvalidXMLCharacters(final String text) {
         if (text == null)
             return "";
 
-        final String xml10pattern = "[^" + "\u0009\r\n" + "\u0020-\uD7FF" + "\uE000-\uFFFD"
-                + "\ud800\udc00-\udbff\udfff" + "]";
+        //final String xml10pattern = "[^" + "\u0009\r\n" + "\u0020-\uD7FF" + "\uE000-\uFFFD" + "\ud800\udc00-\udbff\udfff" + "]";
+        final String xml10pattern = "[^" + "\t\r\n" + " -\uD7FF" + "\uE000-\uFFFD" + "\ud800\udc00-\udbff\udfff" + "]";
         // final String xml11pattern = "[^" + "\u0001-\uD7FF" + "\uE000-\uFFFD" +
         // "\ud800\udc00-\udbff\udfff" + "]+";
 
@@ -1836,64 +1569,56 @@ public class XMLUtil
     /**
      * Same as {@link #removeInvalidXMLCharacters(String)}
      */
-    public static String filterString(String text)
-    {
+    public static String filterString(final String text) {
         return removeInvalidXMLCharacters(text);
     }
 
     /**
      * Set value as boolean to the specified element
      */
-    public static void setBooleanValue(Element element, boolean value)
-    {
+    public static void setBooleanValue(final Element element, final boolean value) {
         setValue(element, toString(value));
     }
 
     /**
      * Set value as integer to the specified element
      */
-    public static void setIntValue(Element element, int value)
-    {
+    public static void setIntValue(final Element element, final int value) {
         setValue(element, toString(value));
     }
 
     /**
      * Set value as long to the specified element
      */
-    public static void setLongValue(Element element, long value)
-    {
+    public static void setLongValue(final Element element, final long value) {
         setValue(element, toString(value));
     }
 
     /**
      * Set value as float to the specified element
      */
-    public static void setFloatValue(Element element, float value)
-    {
+    public static void setFloatValue(final Element element, final float value) {
         setValue(element, toString(value));
     }
 
     /**
      * Set value as double to the specified element
      */
-    public static void setDoubleValue(Element element, double value)
-    {
+    public static void setDoubleValue(final Element element, final double value) {
         setValue(element, toString(value));
     }
 
     /**
      * Set value as byte array to the specified element
      */
-    public static void setBytesValue(Element element, byte[] value)
-    {
+    public static void setBytesValue(final Element element, final byte[] value) {
         setValue(element, toString(value));
     }
 
     /**
      * Set an element with specified name and his value to the specified node
      */
-    public static void setElementValue(Node node, String name, String value)
-    {
+    public static void setElementValue(final Node node, final String name, final String value) {
         // get element (create it if needed)
         final Element element = setElement(node, name);
         // set value
@@ -1903,56 +1628,49 @@ public class XMLUtil
     /**
      * Set an element with specified name and his value as boolean to the specified node
      */
-    public static void setElementBooleanValue(Node node, String name, boolean value)
-    {
+    public static void setElementBooleanValue(final Node node, final String name, final boolean value) {
         setElementValue(node, name, toString(value));
     }
 
     /**
      * Set an element with specified name and his value as integer to the specified node
      */
-    public static void setElementIntValue(Node node, String name, int value)
-    {
+    public static void setElementIntValue(final Node node, final String name, final int value) {
         setElementValue(node, name, toString(value));
     }
 
     /**
      * Set an element with specified name and his value as long to the specified node
      */
-    public static void setElementLongValue(Node node, String name, long value)
-    {
+    public static void setElementLongValue(final Node node, final String name, final long value) {
         setElementValue(node, name, toString(value));
     }
 
     /**
      * Set an element with specified name and his value as float to the specified node
      */
-    public static void setElementFloatValue(Node node, String name, float value)
-    {
+    public static void setElementFloatValue(final Node node, final String name, final float value) {
         setElementValue(node, name, toString(value));
     }
 
     /**
      * Set an element with specified name and his value as double to the specified node
      */
-    public static void setElementDoubleValue(Node node, String name, double value)
-    {
+    public static void setElementDoubleValue(final Node node, final String name, final double value) {
         setElementValue(node, name, toString(value));
     }
 
     /**
      * Set an element with specified name and his value as byte array to the specified node
      */
-    public static void setElementBytesValue(Node node, String name, byte[] value)
-    {
+    public static void setElementBytesValue(final Node node, final String name, final byte[] value) {
         setElementValue(node, name, toString(value));
     }
 
     /**
      * Set a generic element with specified type and name and his value to the specified node
      */
-    public static void setGenericElementValue(Node node, String type, String name, String value)
-    {
+    public static void setGenericElementValue(final Node node, final String type, final String name, final String value) {
         // get generic element (create it if needed)
         final Element element = setGenericElement(node, type, name);
 
@@ -1963,56 +1681,49 @@ public class XMLUtil
     /**
      * Set an element with specified type and name and his value as boolean to the specified node
      */
-    public static void setGenericElementBooleanValue(Node node, String type, String name, boolean value)
-    {
+    public static void setGenericElementBooleanValue(final Node node, final String type, final String name, final boolean value) {
         setGenericElementValue(node, type, name, toString(value));
     }
 
     /**
      * Set an element with specified type and name and his value as integer to the specified node
      */
-    public static void setGenericElementIntValue(Node node, String type, String name, int value)
-    {
+    public static void setGenericElementIntValue(final Node node, final String type, final String name, final int value) {
         setGenericElementValue(node, type, name, toString(value));
     }
 
     /**
      * Set an element with specified type and name and his value as long to the specified node
      */
-    public static void setGenericElementLongValue(Node node, String type, String name, long value)
-    {
+    public static void setGenericElementLongValue(final Node node, final String type, final String name, final long value) {
         setGenericElementValue(node, type, name, toString(value));
     }
 
     /**
      * Set an element with specified type and name and his value as float to the specified node
      */
-    public static void setGenericElementFloatValue(Node node, String type, String name, float value)
-    {
+    public static void setGenericElementFloatValue(final Node node, final String type, final String name, final float value) {
         setGenericElementValue(node, type, name, toString(value));
     }
 
     /**
      * Set an element with specified type and name and his value as double to the specified node
      */
-    public static void setGenericElementDoubleValue(Node node, String type, String name, double value)
-    {
+    public static void setGenericElementDoubleValue(final Node node, final String type, final String name, final double value) {
         setGenericElementValue(node, type, name, toString(value));
     }
 
     /**
      * Set an element with specified type and name and his value as byte array to the specified node
      */
-    public static void setGenericElementBytesValue(Node node, String type, String name, byte[] value)
-    {
+    public static void setGenericElementBytesValue(final Node node, final String type, final String name, final byte[] value) {
         setGenericElementValue(node, type, name, toString(value));
     }
 
     /**
      * Remove a node with specified name from the specified node
      */
-    public static boolean removeNode(Node node, String name)
-    {
+    public static boolean removeNode(final Node node, final String name) {
         final Node subNode = getSubNode(node, name);
 
         if (subNode != null)
@@ -2024,21 +1735,17 @@ public class XMLUtil
     /**
      * Remove the specified node from the specified parent node
      */
-    public static boolean removeNode(Node parent, Node child)
-    {
+    public static boolean removeNode(final Node parent, final Node child) {
         int tries = 3;
         // RuntimeException exception = null;
 
         // have to make several attempts as sometime XML library fails to correctly retrieve XML data
-        while (tries > 0)
-        {
-            try
-            {
+        while (tries > 0) {
+            try {
                 parent.removeChild(child);
                 return true;
             }
-            catch (RuntimeException e)
-            {
+            catch (final RuntimeException e) {
                 // exception = e;
                 tries--;
             }
@@ -2052,16 +1759,14 @@ public class XMLUtil
      * @deprecated Use {@link #removeAllChildren(Node)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void removeAllChilds(Node node)
-    {
+    public static void removeAllChilds(final Node node) {
         removeAllChildren(node);
     }
 
     /**
      * Remove all children from the specified node
      */
-    public static void removeAllChildren(Node node)
-    {
+    public static void removeAllChildren(final Node node) {
         while (node.hasChildNodes())
             node.removeChild(node.getLastChild());
     }
@@ -2070,20 +1775,17 @@ public class XMLUtil
      * @deprecated Use {@link #removeChildren(Node, String)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void removeChilds(Node node, String name)
-    {
+    public static void removeChilds(final Node node, final String name) {
         removeChildren(node, name);
     }
 
     /**
      * Remove all children with specified name from the specified node
      */
-    public static void removeChildren(Node node, String name)
-    {
+    public static void removeChildren(final Node node, final String name) {
         Node currentChild = node.getFirstChild();
 
-        while (currentChild != null)
-        {
+        while (currentChild != null) {
             final Node nextChild = currentChild.getNextSibling();
 
             if (currentChild.getNodeName().equals(name))
@@ -2096,16 +1798,14 @@ public class XMLUtil
     /**
      * Remove an attribute from the specified element
      */
-    public static void removeAttribute(Element element, String name)
-    {
+    public static void removeAttribute(final Element element, final String name) {
         element.removeAttribute(name);
     }
 
     /**
      * Remove all attribute from the specified element
      */
-    public static void removeAllAttributes(Element element)
-    {
+    public static void removeAllAttributes(final Element element) {
         final NamedNodeMap nodeMap = element.getAttributes();
 
         for (int i = 0; i < nodeMap.getLength(); i++)

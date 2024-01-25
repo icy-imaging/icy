@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ import icy.plugin.PluginDescriptor.PluginOnlineIdent;
 import icy.preferences.PluginPreferences;
 import icy.preferences.RepositoryPreferences;
 import icy.preferences.RepositoryPreferences.RepositoryInfo;
-import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.SingleProcessor;
 import icy.system.thread.ThreadUtil;
 import icy.util.XMLUtil;
@@ -38,7 +38,8 @@ import javax.swing.event.EventListenerList;
 import java.util.*;
 
 /**
- * @author stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
 public class PluginRepositoryLoader {
     public interface PluginRepositoryLoaderListener extends EventListener {
@@ -83,7 +84,7 @@ public class PluginRepositoryLoader {
                 //plugins = newPlugins;
             }
             catch (final Exception e) {
-                IcyExceptionHandler.showErrorMessage(e, true);
+                IcyLogger.error(PluginRepositoryLoader.class, e, e.getLocalizedMessage());
                 failed = true;
                 return;
             }
@@ -165,7 +166,7 @@ public class PluginRepositoryLoader {
         // error
         if (document == null) {
             if (networkAddr && !NetworkUtil.hasInternetAccess())
-                System.out.println("You are not connected to internet.");
+                IcyLogger.warn(PluginRepositoryLoader.class, "You are not connected to internet.");
 
             return null;
         }
@@ -225,21 +226,6 @@ public class PluginRepositoryLoader {
         instance.load();
     }
 
-    /*
-     * Load the list of online plugins located at specified repository
-     */
-    // public static void load(final RepositoryInfo repos, boolean asynch, final boolean
-    // loadDescriptor,
-    // final boolean loadImages)
-    // {
-    // instance.loadSingleRunner.setParameters(repos, loadDescriptor, loadImages);
-    //
-    // if (asynch)
-    // ThreadUtil.bgRunSingle(instance.loadAllRunner);
-    // else
-    // instance.loadAllRunner.run();
-    // }
-
     /**
      * Load and return the list of online plugins located at specified repository
      */
@@ -249,7 +235,7 @@ public class PluginRepositoryLoader {
 
         // error while retrieving identifiers ?
         if (idents == null) {
-            System.out.println("Can't access repository '" + repos.getName() + "'");
+            IcyLogger.error(PluginRepositoryLoader.class, "Can't access repository '" + repos.getName() + "'");
             return null;
         }
 
@@ -260,8 +246,7 @@ public class PluginRepositoryLoader {
                 result.add(new PluginDescriptor(ident, repos));
             }
             catch (final Exception e) {
-                System.out.println("PluginRepositoryLoader.load('" + repos.getLocation() + "') error :");
-                IcyExceptionHandler.showErrorMessage(e, false);
+                IcyLogger.error(PluginRepositoryLoader.class, e, "PluginRepositoryLoader.load('" + repos.getLocation() + "') error.");
             }
         }
 

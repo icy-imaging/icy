@@ -21,6 +21,7 @@ package icy.gui.frame;
 import icy.file.FileUtil;
 import icy.image.ImageUtil;
 import icy.resource.ResourceUtil;
+import icy.system.logging.IcyLogger;
 import icy.util.ClassUtil;
 import icy.util.Random;
 
@@ -32,8 +33,8 @@ import java.net.URL;
 /**
  * Animated ICY Logo.
  *
- * @author Fab
- * @author Stephane
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class SplashScreenFrame extends JFrame {
@@ -61,7 +62,7 @@ public class SplashScreenFrame extends JFrame {
                     }
                 }
                 catch (final Exception e) {
-                    System.err.println("Warning: cannot load splashscreen image");
+                    IcyLogger.warn(SplashScreenFrame.class, e, "Cannot load splashscreen image.");
                 }
             }
 

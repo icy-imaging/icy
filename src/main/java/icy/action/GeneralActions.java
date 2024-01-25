@@ -21,7 +21,6 @@ package icy.action;
 import icy.clipboard.Clipboard;
 import icy.clipboard.TransferableImage;
 import icy.gui.frame.AboutFrame;
-import icy.gui.main.MainFrame;
 import icy.gui.viewer.Viewer;
 import icy.image.ImageUtil;
 import icy.main.Icy;
@@ -29,8 +28,8 @@ import icy.network.NetworkUtil;
 import icy.plugin.PluginUpdater;
 import icy.preferences.GeneralPreferences;
 import icy.sequence.Sequence;
-import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.update.IcyUpdater;
 import icy.util.ClassUtil;
 
@@ -47,7 +46,7 @@ import java.util.List;
 /**
  * General actions.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public final class GeneralActions {
@@ -59,7 +58,7 @@ public final class GeneralActions {
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
-            final MainFrame mf = Icy.getMainInterface().getMainFrame();
+            //final MainFrame mf = Icy.getMainInterface().getMainFrame();
 
             // TODO replace search bar
             /*if (mf != null) {
@@ -135,8 +134,7 @@ public final class GeneralActions {
                         return true;
                     }
                     catch (final Throwable e1) {
-                        System.err.println("Can't copy image to clipboard:");
-                        IcyExceptionHandler.showErrorMessage(e1, false);
+                        IcyLogger.error(GeneralActions.class, e1, "Can't copy image to clipboard.");
                     }
                 }
             }
@@ -170,8 +168,7 @@ public final class GeneralActions {
                 }
             }
             catch (final Throwable e1) {
-                System.err.println("Can't paste image from clipboard:");
-                IcyExceptionHandler.showErrorMessage(e1, false);
+                IcyLogger.error(GeneralActions.class, e1, "Can't paste image from clipboard.");
             }
 
             return false;

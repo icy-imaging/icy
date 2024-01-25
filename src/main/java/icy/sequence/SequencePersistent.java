@@ -1,22 +1,34 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.sequence;
+
+import icy.file.FileUtil;
+import icy.file.xml.XMLPersistent;
+import icy.image.lut.LUT;
+import icy.painter.Overlay;
+import icy.roi.ROI;
+import icy.system.logging.IcyLogger;
+import icy.util.StringUtil;
+import icy.util.XMLUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -24,24 +36,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
-import icy.file.FileUtil;
-import icy.file.xml.XMLPersistent;
-import icy.image.lut.LUT;
-import icy.painter.Overlay;
-import icy.roi.ROI;
-import icy.system.IcyExceptionHandler;
-import icy.util.StringUtil;
-import icy.util.XMLUtil;
-
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class SequencePersistent implements XMLPersistent
-{
+public class SequencePersistent implements XMLPersistent {
     private final static String ID_META = "meta";
     private final static String ID_ROIS = "rois";
     private final static String ID_OVERLAYS = "overlays";
@@ -52,11 +51,7 @@ public class SequencePersistent implements XMLPersistent
 
     private Document document;
 
-    /**
-     * 
-     */
-    public SequencePersistent(Sequence sequence)
-    {
+    public SequencePersistent(final Sequence sequence) {
         super();
 
         this.sequence = sequence;
@@ -67,8 +62,7 @@ public class SequencePersistent implements XMLPersistent
     /**
      * Should return <code>null</code> if Sequence is not identified (no file name)
      */
-    private String getXMLFileName()
-    {
+    private String getXMLFileName() {
         final String baseName = sequence.getOutputFilename(false);
 
         if (StringUtil.isEmpty(baseName))
@@ -81,45 +75,43 @@ public class SequencePersistent implements XMLPersistent
      * Load XML persistent data.<br>
      * Return true if XML data has been correctly loaded.
      */
-    public boolean loadXMLData()
-    {
+    public boolean loadXMLData() {
         final String xmlFilename = getXMLFileName();
         boolean result;
         Exception exc = null;
 
-        if ((xmlFilename != null) && FileUtil.exists(xmlFilename))
-        {
-            try
-            {
+        if ((xmlFilename != null) && FileUtil.exists(xmlFilename)) {
+            try {
                 // load xml file into document
                 document = XMLUtil.loadDocument(xmlFilename, true);
 
                 // load data from XML document
                 if (document != null)
                     result = loadFromXML(getRootNode());
-                else
-                {
+                else {
                     document = XMLUtil.createDocument(true);
                     result = false;
                 }
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 exc = e;
                 result = false;
             }
 
             // an error occurred
-            if (!result)
-            {
+            if (!result) {
                 // backup the problematic file
-                String backupName = FileUtil.backup(xmlFilename);
+                final String backupName = FileUtil.backup(xmlFilename);
 
-                System.err.println("Error while loading Sequence XML persistent data.");
-                System.err.println("The faulty file '" + xmlFilename + "' has been backuped as '" + backupName);
+                final String[] messages = new String[]{
+                        "Error while loading Sequence XML persistent data.",
+                        "The faulty file '" + xmlFilename + "' has been backuped as '" + backupName
+                };
 
                 if (exc != null)
-                    IcyExceptionHandler.showErrorMessage(exc, true);
+                    IcyLogger.error(SequencePersistent.class, exc, messages);
+                else
+                    IcyLogger.error(SequencePersistent.class, messages);
 
                 return false;
             }
@@ -132,8 +124,7 @@ public class SequencePersistent implements XMLPersistent
      * Save XML persistent data.<br>
      * Return true if XML data has been correctly saved.
      */
-    public boolean saveXMLData() throws Exception
-    {
+    public boolean saveXMLData() {
         final String xmlFilename = getXMLFileName();
 
         if (xmlFilename == null)
@@ -146,15 +137,13 @@ public class SequencePersistent implements XMLPersistent
         return XMLUtil.saveDocument(document, xmlFilename);
     }
 
-    public void refreshXMLData()
-    {
+    public void refreshXMLData() {
         // force the new format when we save the XML
         saveToXML(getRootNode());
     }
 
     @Override
-    public boolean loadFromXML(Node node)
-    {
+    public boolean loadFromXML(final Node node) {
         boolean result = true;
         final String name = XMLUtil.getElementValue(node, Sequence.ID_NAME, "");
 
@@ -176,8 +165,7 @@ public class SequencePersistent implements XMLPersistent
         return result;
     }
 
-    private boolean loadMetaDataFromXML(Node node)
-    {
+    private boolean loadMetaDataFromXML(final Node node) {
         final Node nodeMeta = XMLUtil.getElement(node, ID_META);
 
         // no node --> nothing to load...
@@ -185,7 +173,7 @@ public class SequencePersistent implements XMLPersistent
             return true;
 
         double d;
-        long l;
+        final long l;
         String s;
 
         d = XMLUtil.getElementDoubleValue(nodeMeta, Sequence.ID_POSITION_X, Double.NaN);
@@ -214,8 +202,7 @@ public class SequencePersistent implements XMLPersistent
         if (!Double.isNaN(d))
             sequence.setTimeInterval(d);
 
-        for (int c = 0; c < sequence.getSizeC(); c++)
-        {
+        for (int c = 0; c < sequence.getSizeC(); c++) {
             s = XMLUtil.getElementValue(nodeMeta, Sequence.ID_CHANNEL_NAME + c, "");
 
             if (!StringUtil.isEmpty(s))
@@ -230,8 +217,7 @@ public class SequencePersistent implements XMLPersistent
         return true;
     }
 
-    private boolean loadROIsFromXML(Node node)
-    {
+    private boolean loadROIsFromXML(final Node node) {
         final Node roisNode = XMLUtil.getElement(node, ID_ROIS);
 
         // no node --> nothing to load...
@@ -242,15 +228,14 @@ public class SequencePersistent implements XMLPersistent
         final List<ROI> rois = ROI.loadROIsFromXML(roisNode);
 
         // add to sequence
-        for (ROI roi : rois)
+        for (final ROI roi : rois)
             sequence.addROI(roi);
 
         // return true if we got the expected number of ROI
         return (roiCount == rois.size());
     }
 
-    private boolean loadOverlaysFromXML(Node node)
-    {
+    private boolean loadOverlaysFromXML(final Node node) {
         final Node overlaysNode = XMLUtil.getElement(node, ID_OVERLAYS);
 
         // no node --> nothing to load...
@@ -261,15 +246,14 @@ public class SequencePersistent implements XMLPersistent
         final List<Overlay> overlays = Overlay.loadOverlaysFromXML(overlaysNode);
 
         // add to sequence
-        for (Overlay overlay : overlays)
+        for (final Overlay overlay : overlays)
             sequence.addOverlay(overlay);
 
         // return true if we got the expected number of ROI
         return (overlayCount == overlays.size());
     }
 
-    private boolean loadLUTFromXML(Node node)
-    {
+    private boolean loadLUTFromXML(final Node node) {
         final Node nodeLut = XMLUtil.getElement(node, ID_LUT);
 
         // no node --> nothing to load...
@@ -285,18 +269,15 @@ public class SequencePersistent implements XMLPersistent
         return true;
     }
 
-    private boolean loadPropertiesFromXML(Node node)
-    {
+    private boolean loadPropertiesFromXML(final Node node) {
         final Map<String, String> properties = sequence.properties;
 
         properties.clear();
 
         final Node propertiesNode = XMLUtil.getElement(node, ID_PROPERTIES);
-        if (propertiesNode != null)
-        {
-            synchronized (properties)
-            {
-                for (Element element : XMLUtil.getElements(propertiesNode))
+        if (propertiesNode != null) {
+            synchronized (properties) {
+                for (final Element element : XMLUtil.getElements(propertiesNode))
                     properties.put(element.getNodeName(), XMLUtil.getValue(element, ""));
             }
         }
@@ -305,8 +286,7 @@ public class SequencePersistent implements XMLPersistent
     }
 
     @Override
-    public boolean saveToXML(Node node)
-    {
+    public boolean saveToXML(final Node node) {
         XMLUtil.setElementValue(node, Sequence.ID_NAME, sequence.getName());
 
         saveMetaDataToXML(node);
@@ -318,12 +298,10 @@ public class SequencePersistent implements XMLPersistent
         return true;
     }
 
-    private void saveMetaDataToXML(Node node)
-    {
+    private void saveMetaDataToXML(final Node node) {
         final Node nodeMeta = XMLUtil.setElement(node, ID_META);
 
-        if (nodeMeta != null)
-        {
+        if (nodeMeta != null) {
             XMLUtil.setElementDoubleValue(nodeMeta, Sequence.ID_POSITION_X, sequence.getPositionX());
             XMLUtil.setElementDoubleValue(nodeMeta, Sequence.ID_POSITION_Y, sequence.getPositionY());
             XMLUtil.setElementDoubleValue(nodeMeta, Sequence.ID_POSITION_Z, sequence.getPositionZ());
@@ -340,12 +318,10 @@ public class SequencePersistent implements XMLPersistent
         }
     }
 
-    private void saveROIsToXML(Node node)
-    {
+    private void saveROIsToXML(final Node node) {
         final Node nodeROIs = XMLUtil.setElement(node, ID_ROIS);
 
-        if (nodeROIs != null)
-        {
+        if (nodeROIs != null) {
             XMLUtil.removeAllChildren(nodeROIs);
 
             // get sorted ROIs
@@ -356,18 +332,16 @@ public class SequencePersistent implements XMLPersistent
         }
     }
 
-    private void saveOverlaysToXML(Node node)
-    {
+    private void saveOverlaysToXML(final Node node) {
         final Node nodeOverlays = XMLUtil.setElement(node, ID_OVERLAYS);
 
-        if (nodeOverlays != null)
-        {
+        if (nodeOverlays != null) {
             XMLUtil.removeAllChildren(nodeOverlays);
 
             // get overlays in linked list for faster remove operation
-            final List<Overlay> overlays = new LinkedList<Overlay>(sequence.getOverlays());
+            final List<Overlay> overlays = new LinkedList<>(sequence.getOverlays());
             // remove overlays from ROI as they are be automatically created from ROI
-            for (ROI roi : sequence.getROIs(false))
+            for (final ROI roi : sequence.getROIs(false))
                 overlays.remove(roi.getOverlay());
 
             // set overlays in the XML node
@@ -375,20 +349,16 @@ public class SequencePersistent implements XMLPersistent
         }
     }
 
-    private void saveLUTToXML(Node node)
-    {
+    private void saveLUTToXML(final Node node) {
         // save only if we have a custom LUT
-        if (sequence.hasUserLUT())
-        {
+        if (sequence.hasUserLUT()) {
             final LUT lut = sequence.getUserLUT();
 
             // something to save ?
-            if (lut != null)
-            {
+            if (lut != null) {
                 final Node nodeLut = XMLUtil.setElement(node, ID_LUT);
 
-                if (nodeLut != null)
-                {
+                if (nodeLut != null) {
                     XMLUtil.removeAllChildren(nodeLut);
                     lut.saveToXML(nodeLut);
                 }
@@ -397,15 +367,13 @@ public class SequencePersistent implements XMLPersistent
     }
 
     // save custom properties
-    private void savePropertiesToXML(Node node)
-    {
+    private void savePropertiesToXML(final Node node) {
         final Map<String, String> properties = sequence.properties;
         final Element propertiesNode = XMLUtil.setElement(node, ID_PROPERTIES);
         final Set<Entry<String, String>> entries = properties.entrySet();
 
-        synchronized (properties)
-        {
-            for (Entry<String, String> entry : entries)
+        synchronized (properties) {
+            for (final Entry<String, String> entry : entries)
                 XMLUtil.setElementValue(propertiesNode, entry.getKey(), entry.getValue());
         }
     }
@@ -413,39 +381,35 @@ public class SequencePersistent implements XMLPersistent
     /**
      * Get Sequence XML root node
      */
-    public Node getRootNode()
-    {
+    public Node getRootNode() {
         return XMLUtil.getRootElement(document);
     }
 
     /**
      * Get XML data node identified by specified name
-     * 
+     *
      * @param name
      *        name of wanted node
      */
-    public Node getNode(String name)
-    {
+    public Node getNode(final String name) {
         return XMLUtil.getChild(getRootNode(), name);
     }
 
     /**
      * Create a new node with specified name and return it.<br>
      * If the node already exists the existing node is returned.
-     * 
+     *
      * @param name
      *        name of node to set in attached XML data
      */
-    public Node setNode(String name)
-    {
+    public Node setNode(final String name) {
         return XMLUtil.setElement(getRootNode(), name);
     }
 
     /**
      * Returns <code>true</code> if the specified Document represents a valid XML persistence document.
      */
-    public static boolean isValidXMLPersitence(Document doc)
-    {
+    public static boolean isValidXMLPersitence(final Document doc) {
         if (doc == null)
             return false;
 
@@ -459,16 +423,12 @@ public class SequencePersistent implements XMLPersistent
     /**
      * Returns <code>true</code> if the specified path represents a valid XML persistence file.
      */
-    public static boolean isValidXMLPersitence(String path)
-    {
-        if ((path != null) && FileUtil.exists(path))
-        {
-            try
-            {
+    public static boolean isValidXMLPersitence(final String path) {
+        if ((path != null) && FileUtil.exists(path)) {
+            try {
                 return isValidXMLPersitence(XMLUtil.loadDocument(path, true));
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 // ignore
             }
         }

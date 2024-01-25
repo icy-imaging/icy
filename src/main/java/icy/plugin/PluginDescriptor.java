@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,8 +18,6 @@
 
 package icy.plugin;
 
-import com.drew.lang.annotations.NotNull;
-import com.drew.lang.annotations.Nullable;
 import icy.common.Version;
 import icy.file.FileUtil;
 import icy.file.xml.XMLPersistent;
@@ -33,10 +31,13 @@ import icy.plugin.interface_.IcyPlugin;
 import icy.plugin.interface_.PluginBundled;
 import icy.preferences.RepositoryPreferences.RepositoryInfo;
 import icy.resource.ResourceUtil;
+import icy.system.logging.IcyLogger;
 import icy.util.ClassUtil;
 import icy.util.JarUtil;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -414,8 +415,7 @@ public class PluginDescriptor implements XMLPersistent {
         if (document != null) {
             // load xml
             if (!loadFromXML(document.getDocumentElement())) {
-                System.err.println("Can't find valid XML file from '" + xmlUrl + "' for plugin class '"
-                        + ident.getClassName() + "'");
+                IcyLogger.error(PluginDescriptor.class, "Can't find valid XML file from '" + xmlUrl + "' for plugin class '" + ident.getClassName() + "'");
                 return false;
             }
 
@@ -424,8 +424,7 @@ public class PluginDescriptor implements XMLPersistent {
 
         // display error only for first load
         if (!reload)
-            System.err.println(
-                    "Can't load XML file from '" + xmlUrl + "' for plugin class '" + ident.getClassName() + "'");
+            IcyLogger.error(PluginDescriptor.class, "Can't load XML file from '" + xmlUrl + "' for plugin class '" + ident.getClassName() + "'");
 
         return false;
     }
@@ -453,10 +452,10 @@ public class PluginDescriptor implements XMLPersistent {
                 return true;
             }
 
-            System.err.println("Can't find valid XML file from '" + xmlUrl + "' for plugin class '" + ident.getClassName() + "'");
+            IcyLogger.error(PluginDescriptor.class, "Can't find valid XML file from '" + xmlUrl + "' for plugin class '" + ident.getClassName() + "'");
         }
 
-        System.err.println("Can't load XML file from '" + xmlUrl + "' for plugin class '" + ident.getClassName() + "'");
+        IcyLogger.error(PluginDescriptor.class, "Can't load XML file from '" + xmlUrl + "' for plugin class '" + ident.getClassName() + "'");
 
         return false;
     }
@@ -642,8 +641,8 @@ public class PluginDescriptor implements XMLPersistent {
             }
         }
         else {*/
-            icon = ResourceUtil.getImageIcon(ImageUtil.load(NetworkUtil.getInputStream(url,
-                    (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false), ICON_SIZE);
+        icon = ResourceUtil.getImageIcon(ImageUtil.load(NetworkUtil.getInputStream(url,
+                (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false), ICON_SIZE);
         //}
 
         // get default icon

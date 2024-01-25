@@ -1,32 +1,28 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.util;
-
-import java.awt.Color;
-
-import org.w3c.dom.Document;
 
 import icy.image.IcyBufferedImage;
 import icy.sequence.MetaDataUtil;
 import icy.sequence.Sequence;
-import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.type.DataType;
 import icy.type.TypeUtil;
 import loci.common.services.DependencyException;
@@ -47,26 +43,30 @@ import ome.xml.model.XMLAnnotation;
 import ome.xml.model.primitives.NonNegativeInteger;
 import ome.xml.model.primitives.PositiveFloat;
 import ome.xml.model.primitives.PositiveInteger;
+import org.w3c.dom.Document;
+
+import java.awt.*;
+import java.util.Objects;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class OMEUtil
-{
+public class OMEUtil {
     private static ServiceFactory factory;
     private static OMEXMLService OMEService;
 
-    static
-    {
-        try
-        {
+    static {
+        try {
             factory = new ServiceFactory();
             OMEService = factory.getInstance(OMEXMLService.class);
         }
-        catch (DependencyException e)
-        {
-            System.err.println("Error create OME Service:" + e.getMessage());
-            System.err.println("Using default service implementation...");
+        catch (final DependencyException e) {
+            final String[] messages = new String[]{
+                    "Error create OME Service:" + e.getLocalizedMessage(),
+                    "Using default service implementation..."
+            };
+            IcyLogger.error(OMEUtil.class, e, messages);
 
             factory = null;
             OMEService = new OMEXMLServiceImpl();
@@ -77,8 +77,7 @@ public class OMEUtil
      * Safe integer evaluation from PositiveInteger object.<br>
      * Return defaultValue if specified object is null.
      */
-    public static int getValue(PositiveInteger obj, int defaultValue)
-    {
+    public static int getValue(final PositiveInteger obj, final int defaultValue) {
         if (obj == null)
             return defaultValue;
 
@@ -89,8 +88,7 @@ public class OMEUtil
      * Safe integer evaluation from NonNegativeInteger object.<br>
      * Return defaultValue if specified object is null.
      */
-    public static int getValue(NonNegativeInteger obj, int defaultValue)
-    {
+    public static int getValue(final NonNegativeInteger obj, final int defaultValue) {
         if (obj == null)
             return defaultValue;
 
@@ -102,8 +100,7 @@ public class OMEUtil
      * Return <code>defaultValue</code> if <code>obj</code> is null or equal to infinite with <code>allowInfinite</code>
      * set to false.
      */
-    public static double getValue(PositiveFloat obj, double defaultValue, boolean allowInfinite)
-    {
+    public static double getValue(final PositiveFloat obj, final double defaultValue, final boolean allowInfinite) {
         if (obj == null)
             return defaultValue;
 
@@ -114,8 +111,7 @@ public class OMEUtil
      * Safe float evaluation from PositiveFloat object.<br>
      * Return defaultValue if specified object is null.
      */
-    public static double getValue(PositiveFloat obj, double defaultValue)
-    {
+    public static double getValue(final PositiveFloat obj, final double defaultValue) {
         return getValue(obj, defaultValue, true);
     }
 
@@ -123,8 +119,7 @@ public class OMEUtil
      * Convert specified Length to double value in &micro;m (for backward compatibility).<br>
      * Return defaultValue if specified object is <code>null</code>.
      */
-    public static double getValue(Length obj, double defaultValue)
-    {
+    public static double getValue(final Length obj, final double defaultValue) {
         if (obj == null)
             return defaultValue;
 
@@ -139,8 +134,7 @@ public class OMEUtil
      * Convert specified Time to double value in second (for backward compatibility).<br>
      * Return defaultValue if specified object is <code>null</code>.
      */
-    public static double getValue(Time obj, double defaultValue)
-    {
+    public static double getValue(final Time obj, final double defaultValue) {
         if (obj == null)
             return defaultValue;
 
@@ -154,48 +148,42 @@ public class OMEUtil
     /**
      * Return a PositiveFloat object representing the specified value
      */
-    public static PositiveFloat getPositiveFloat(double value)
-    {
+    public static PositiveFloat getPositiveFloat(final double value) {
         return new PositiveFloat(Double.valueOf(value));
     }
 
     /**
      * Return a PositiveInteger object representing the specified value
      */
-    public static PositiveInteger getPositiveInteger(int value)
-    {
+    public static PositiveInteger getPositiveInteger(final int value) {
         return new PositiveInteger(Integer.valueOf(value));
     }
 
     /**
      * Return a NonNegativeInteger object representing the specified value
      */
-    public static NonNegativeInteger getNonNegativeInteger(int value)
-    {
+    public static NonNegativeInteger getNonNegativeInteger(final int value) {
         return new NonNegativeInteger(Integer.valueOf(value));
     }
 
     /**
      * Return a Length object representing the specified value (in &micro;m)
      */
-    public static Length getLength(double value)
-    {
+    public static Length getLength(final double value) {
         return new Length(Double.valueOf(value), UNITS.MICROMETER);
     }
 
     /**
      * Return a Time object representing the specified value (in second)
      */
-    public static Time getTime(double value)
-    {
+    public static Time getTime(final double value) {
         return new Time(Double.valueOf(value), UNITS.SECOND);
     }
 
     /**
      * Return a java Color object from a OME Color object
      */
-    public static Color getJavaColor(ome.xml.model.primitives.Color value)
-    {
+    public static Color getJavaColor(final ome.xml.model.primitives.Color value) {
         if (value == null)
             return null;
 
@@ -205,23 +193,19 @@ public class OMEUtil
     /**
      * Return a OME Color object from a java Color object
      */
-    public static ome.xml.model.primitives.Color getOMEColor(Color value)
-    {
+    public static ome.xml.model.primitives.Color getOMEColor(final Color value) {
         return new ome.xml.model.primitives.Color(value.getRed(), value.getGreen(), value.getBlue(), value.getAlpha());
     }
 
     /**
      * Create a new empty OME Metadata object.
      */
-    public synchronized static OMEXMLMetadata createOMEXMLMetadata()
-    {
-        try
-        {
+    public synchronized static OMEXMLMetadata createOMEXMLMetadata() {
+        try {
             return OMEService.createOMEXMLMetadata();
         }
-        catch (Exception e)
-        {
-            IcyExceptionHandler.showErrorMessage(e, true);
+        catch (final Exception e) {
+            IcyLogger.error(OMEUtil.class, e, "Unable to create OME XML metada.");
             return null;
         }
     }
@@ -230,33 +214,28 @@ public class OMEUtil
      * @deprecated Use {@link #createOMEXMLMetadata()} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static OMEXMLMetadataImpl createOMEMetadata()
-    {
+    public static OMEXMLMetadataImpl createOMEMetadata() {
         return (OMEXMLMetadataImpl) createOMEXMLMetadata();
     }
 
     /**
      * Create a new OME Metadata object from the specified Metadata object.<br>
-     * 
+     *
      * @param setUserName
      *        set the experimenter user name from current User Name environment var
      *        otherwise we preserve old user name (in case of simple image loading / duplicating / saving..)
      */
-    public static OMEXMLMetadata createOMEXMLMetadata(MetadataRetrieve metadata, boolean setUserName)
-    {
+    public static OMEXMLMetadata createOMEXMLMetadata(final MetadataRetrieve metadata, final boolean setUserName) {
         final OMEXMLMetadata result = createOMEXMLMetadata();
 
         // TODO: remove that when annotations loading will be fixed in Bio-Formats
-        if (metadata instanceof OMEXMLMetadata)
-        {
+        if (metadata instanceof OMEXMLMetadata) {
             final OME root = (OME) ((OMEXMLMetadata) metadata).getRoot();
             final StructuredAnnotations annotations = root.getStructuredAnnotations();
 
             // clean up annotation
-            if (annotations != null)
-            {
-                for (int i = annotations.sizeOfXMLAnnotationList() - 1; i >= 0; i--)
-                {
+            if (annotations != null) {
+                for (int i = annotations.sizeOfXMLAnnotationList() - 1; i >= 0; i--) {
                     final XMLAnnotation annotation = annotations.getXMLAnnotation(i);
 
                     if (StringUtil.isEmpty(annotation.getValue()))
@@ -265,8 +244,7 @@ public class OMEUtil
             }
         }
 
-        synchronized (OMEService)
-        {
+        synchronized (OMEService) {
             // need to cast to get rid of this old loci package stuff
             OMEService.convertMetadata((loci.formats.meta.MetadataRetrieve) metadata,
                     (loci.formats.meta.MetadataStore) result);
@@ -282,8 +260,7 @@ public class OMEUtil
     /**
      * Create a new OME Metadata object from the specified Metadata object.<br>
      */
-    public static OMEXMLMetadata createOMEXMLMetadata(MetadataRetrieve metadata)
-    {
+    public static OMEXMLMetadata createOMEXMLMetadata(final MetadataRetrieve metadata) {
         return createOMEXMLMetadata(metadata, false);
     }
 
@@ -291,19 +268,17 @@ public class OMEUtil
      * @deprecated Use {@link #createOMEXMLMetadata(MetadataRetrieve)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public synchronized static OMEXMLMetadataImpl createOMEMetadata(loci.formats.meta.MetadataRetrieve metadata)
-    {
+    public synchronized static OMEXMLMetadataImpl createOMEMetadata(final loci.formats.meta.MetadataRetrieve metadata) {
         return (OMEXMLMetadataImpl) createOMEXMLMetadata(metadata);
     }
 
     /**
      * Create a new single serie OME Metadata object from the specified Metadata object.
-     * 
+     *
      * @param serie
      *        Index of the serie we want to keep.
      */
-    public static OMEXMLMetadata createOMEXMLMetadata(MetadataRetrieve metadata, int serie)
-    {
+    public static OMEXMLMetadata createOMEXMLMetadata(final MetadataRetrieve metadata, final int serie) {
         // generally used on loading so preserve user name here
         final OMEXMLMetadata result = OMEUtil.createOMEXMLMetadata(metadata, false);
 
@@ -316,11 +291,10 @@ public class OMEUtil
     }
 
     /**
-     * @deprecated Use {@link #createOMEXMLMetadata(MetadataRetrieve,int)} instead
+     * @deprecated Use {@link #createOMEXMLMetadata(MetadataRetrieve, int)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static OMEXMLMetadataImpl createOMEMetadata(loci.formats.meta.MetadataRetrieve metadata, int serie)
-    {
+    public static OMEXMLMetadataImpl createOMEMetadata(final loci.formats.meta.MetadataRetrieve metadata, final int serie) {
         return (OMEXMLMetadataImpl) createOMEXMLMetadata(metadata, serie);
     }
 
@@ -328,8 +302,7 @@ public class OMEUtil
      * Convert the specified Metadata object to OME Metadata.<br>
      * If the specified Metadata is already OME no conversion is done.
      */
-    public static OMEXMLMetadata getOMEXMLMetadata(MetadataRetrieve metadata)
-    {
+    public static OMEXMLMetadata getOMEXMLMetadata(final MetadataRetrieve metadata) {
         if (metadata instanceof OMEXMLMetadata)
             return (OMEXMLMetadata) metadata;
 
@@ -340,23 +313,19 @@ public class OMEUtil
      * @deprecated Use {@link #getOMEXMLMetadata(MetadataRetrieve)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static OMEXMLMetadataImpl getOMEMetadata(loci.formats.meta.MetadataRetrieve metadata)
-    {
+    public static OMEXMLMetadataImpl getOMEMetadata(final loci.formats.meta.MetadataRetrieve metadata) {
         return (OMEXMLMetadataImpl) getOMEXMLMetadata(metadata);
     }
 
     /**
      * Return a XML document from the specified Metadata object
      */
-    public static Document getXMLDocument(OMEXMLMetadata metadata)
-    {
-        try
-        {
+    public static Document getXMLDocument(final OMEXMLMetadata metadata) {
+        try {
             return XMLUtil.createDocument(metadata.dumpXML());
         }
-        catch (Exception e)
-        {
-            IcyExceptionHandler.showErrorMessage(e, true);
+        catch (final Exception e) {
+            IcyLogger.error(OMEUtil.class, e, "Unable to get XML document.");
         }
 
         // return empty document
@@ -367,8 +336,7 @@ public class OMEUtil
      * @deprecated Use {@link #getXMLDocument(OMEXMLMetadata)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Document getXMLDocument(loci.formats.meta.MetadataRetrieve metadata)
-    {
+    public static Document getXMLDocument(final loci.formats.meta.MetadataRetrieve metadata) {
         return getXMLDocument(getOMEXMLMetadata(metadata));
     }
 
@@ -377,15 +345,11 @@ public class OMEUtil
      *             instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static OMEXMLMetadataImpl generateMetaData(OMEXMLMetadataImpl metadata, int sizeX, int sizeY, int sizeC,
-            int sizeZ, int sizeT, DataType dataType, boolean separateChannel)
-    {
+    public static OMEXMLMetadataImpl generateMetaData(final OMEXMLMetadataImpl metadata, final int sizeX, final int sizeY, final int sizeC,
+                                                      final int sizeZ, final int sizeT, final DataType dataType, final boolean separateChannel) {
         final OMEXMLMetadata result;
 
-        if (metadata == null)
-            result = MetaDataUtil.createMetadata("Sample");
-        else
-            result = metadata;
+        result = Objects.requireNonNullElseGet(metadata, () -> MetaDataUtil.createMetadata("Sample"));
 
         MetaDataUtil.setMetaData(result, sizeX, sizeY, sizeC, sizeZ, sizeT, dataType, separateChannel);
 
@@ -396,9 +360,7 @@ public class OMEUtil
      * @deprecated Uses {@link MetaDataUtil#generateMetaData(int, int, int, int, int, DataType, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, int sizeZ, int sizeT,
-            DataType dataType, boolean separateChannel) throws ServiceException
-    {
+    public static OMEXMLMetadata generateMetaData(final int sizeX, final int sizeY, final int sizeC, final int sizeZ, final int sizeT, final DataType dataType, final boolean separateChannel) throws ServiceException {
         return MetaDataUtil.generateMetaData(sizeX, sizeY, sizeC, sizeZ, sizeT, dataType, separateChannel);
     }
 
@@ -406,9 +368,7 @@ public class OMEUtil
      * @deprecated Use {@link MetaDataUtil#generateMetaData(int, int, int, DataType, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static OMEXMLMetadata generateMetaData(int sizeX, int sizeY, int sizeC, DataType dataType,
-            boolean separateChannel) throws ServiceException
-    {
+    public static OMEXMLMetadata generateMetaData(final int sizeX, final int sizeY, final int sizeC, final DataType dataType, final boolean separateChannel) throws ServiceException {
         return MetaDataUtil.generateMetaData(sizeX, sizeY, sizeC, dataType, separateChannel);
     }
 
@@ -416,9 +376,7 @@ public class OMEUtil
      * @deprecated Use {@link MetaDataUtil#generateMetaData(IcyBufferedImage, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static OMEXMLMetadata generateMetaData(IcyBufferedImage image, boolean separateChannel)
-            throws ServiceException
-    {
+    public static OMEXMLMetadata generateMetaData(final IcyBufferedImage image, final boolean separateChannel) throws ServiceException {
         return MetaDataUtil.generateMetaData(image, separateChannel);
     }
 
@@ -426,9 +384,7 @@ public class OMEUtil
      * @deprecated Use {@link MetaDataUtil#generateMetaData(Sequence, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static OMEXMLMetadata generateMetaData(Sequence sequence, boolean useZ, boolean useT,
-            boolean separateChannel)
-    {
+    public static OMEXMLMetadata generateMetaData(final Sequence sequence, final boolean useZ, final boolean useT, final boolean separateChannel) {
         return MetaDataUtil.generateMetaData(sequence, separateChannel);
     }
 
@@ -436,8 +392,7 @@ public class OMEUtil
      * @deprecated Use {@link MetaDataUtil#generateMetaData(Sequence, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static OMEXMLMetadata generateMetaData(Sequence sequence, int sizeZ, int sizeT, boolean separateChannel)
-    {
+    public static OMEXMLMetadata generateMetaData(final Sequence sequence, final int sizeZ, final int sizeT, final boolean separateChannel) {
         return MetaDataUtil.generateMetaData(sequence, separateChannel);
     }
 
@@ -445,21 +400,18 @@ public class OMEUtil
      * @deprecated Use {@link MetaDataUtil#generateMetaData(Sequence, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static OMEXMLMetadata generateMetaData(Sequence sequence, boolean separateChannel)
-    {
+    public static OMEXMLMetadata generateMetaData(final Sequence sequence, final boolean separateChannel) {
         return MetaDataUtil.generateMetaData(sequence, separateChannel);
     }
 
     /**
      * Report and upload the specified filename to LOCI team.
      */
-    public static boolean reportLociError(String fileName, String errorMessage)
-    {
+    public static boolean reportLociError(final String fileName, final String errorMessage) {
         // TODO: implement this when done in LOCI
         // final IssueReporter reporter = new IssueReporter();
         // return reporter.reportBug(fileName, errorMessage);
 
         return false;
     }
-
 }

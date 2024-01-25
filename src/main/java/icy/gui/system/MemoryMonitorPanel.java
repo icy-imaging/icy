@@ -1,27 +1,28 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.system;
 
 import icy.image.cache.ImageCache;
 import icy.math.UnitUtil;
 import icy.network.NetworkUtil;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.ColorUtil;
 import icy.util.GraphicsUtil;
@@ -38,8 +39,9 @@ import java.util.TimerTask;
 
 /**
  * Memory monitor.
- * 
- * @author Fab &amp; Stephane
+ *
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
@@ -51,7 +53,6 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener {
      */
     private final double[][] valeur;
     private final String[] infos;
-    private final Timer updateTimer;
 
     //private final Color cacheTextColor = ColorUtil.mix(Color.yellow, Color.white);
     private final Color cacheTextColor = ColorUtil.mix(Color.yellow, Color.darkGray);
@@ -80,7 +81,7 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener {
     public MemoryMonitorPanel() {
         super();
 
-        updateTimer = new Timer("Memory / CPU monitor");
+        final Timer updateTimer = new Timer("Memory / CPU monitor");
 
         // init tables
         valeur = new double[NBVAL][2];
@@ -101,11 +102,9 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener {
 
         addMouseListener(this);
 
-        updateTimer.scheduleAtFixedRate(new TimerTask()
-        {
+        updateTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
-            public void run()
-            {
+            public void run() {
                 updateStats();
             }
         }, 100, 100);
@@ -235,15 +234,15 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener {
         if (ImageCache.isInit()) {
             // don't update cache stats (take sometime) at each frame
             if (--lastCacheUpdate == 0) {
-            	try {
-            		setInfo(2, "Cache - Memory: " + UnitUtil.getBytesString(ImageCache.usedMemory()) + "  Disk: "
-                        + UnitUtil.getBytesString(ImageCache.usedDisk()));
-            	}
-            	catch(Throwable t) {
-            		// can happen when we exit Icy as the cache engine may be shutdown
-            		// we can ignore safely
-            	}
-            	
+                try {
+                    setInfo(2, "Cache - Memory: " + UnitUtil.getBytesString(ImageCache.usedMemory()) + "  Disk: "
+                            + UnitUtil.getBytesString(ImageCache.usedDisk()));
+                }
+                catch (final Throwable t) {
+                    // can happen when we exit Icy as the cache engine may be shutdown
+                    // we can ignore safely
+                }
+
                 lastCacheUpdate = 10;
             }
         }
@@ -256,21 +255,19 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener {
     /**
      * Scroll les valeurs et en ajoute ( un seeker serait plus joli...)
      */
-    public void newValue(int curve, double val) {
+    public void newValue(final int curve, final double val) {
         for (int i = 0; i < NBVAL - 1; i++)
             valeur[i][curve] = valeur[i + 1][curve];
 
         valeur[NBVAL - 1][curve] = val;
     }
 
-    public void setInfo(int infonb, String info) {
+    public void setInfo(final int infonb, final String info) {
         infos[infonb] = info;
     }
 
     @Override
-    public void mouseClicked(MouseEvent event) {
-        final MouseEvent e = event;
-
+    public void mouseClicked(final MouseEvent event) {
         ThreadUtil.bgRun(() -> {
             final double freeBefore = SystemUtil.getJavaFreeMemory();
 
@@ -281,35 +278,38 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener {
             final double released = freeAfter - freeBefore;
             final double usedMemory = SystemUtil.getJavaUsedMemory();
 
-            System.out.println("Max / Used memory: " + UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())
-                    + " / " + UnitUtil.getBytesString((usedMemory > 0) ? usedMemory : 0) + " (released by GC: "
-                    + UnitUtil.getBytesString((released > 0) ? released : 0) + ")");
+            IcyLogger.info(MemoryMonitorPanel.class, String.format(
+                    "Max / Used memory: %s / %s (released by GC: %s)",
+                    UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory()),
+                    UnitUtil.getBytesString((usedMemory > 0) ? usedMemory : 0),
+                    UnitUtil.getBytesString((released > 0) ? released : 0)
+            ));
         });
 
         // double click --> force VTK garbage collection (need to be done in EDT or it crashes on OSX)
-        if (e.getClickCount() > 1) {
+        if (event.getClickCount() > 1) {
             vtkObjectBase.JAVA_OBJECT_MANAGER.gc(true);
-            System.out.println("VTK GC forced");
+            IcyLogger.info(MemoryMonitorPanel.class, "VTK GC forced");
         }
     }
 
     @Override
-    public void mouseEntered(MouseEvent arg0) {
+    public void mouseEntered(final MouseEvent arg0) {
         displayHelpMessage = true;
     }
 
     @Override
-    public void mouseExited(MouseEvent arg0) {
+    public void mouseExited(final MouseEvent arg0) {
         displayHelpMessage = false;
     }
 
     @Override
-    public void mousePressed(MouseEvent arg0) {
+    public void mousePressed(final MouseEvent arg0) {
 
     }
 
     @Override
-    public void mouseReleased(MouseEvent arg0) {
+    public void mouseReleased(final MouseEvent arg0) {
 
     }
 }

@@ -37,6 +37,7 @@ import icy.preferences.GeneralPreferences;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceIdImporter;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.Processor;
 import icy.type.DataType;
 import icy.type.collection.array.Array1DUtil;
@@ -847,14 +848,11 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 ImageCache.remove(this);
             }
             catch (final OutOfMemoryError e) {
-                System.err.println(e.getMessage());
-                System.err.println(
-                        "IcyBufferedImage.setVolatile(false) error: not enough memory to set image data back in memory.");
+                IcyLogger.error(IcyBufferedImage.class, e, "IcyBufferedImage.setVolatile(false) error: not enough memory to set image data back in memory.");
                 throw e;
             }
             catch (final Throwable e) {
-                System.err.println("IcyBufferedImage.setVolatile(..) error:");
-                System.err.println(e.getMessage());
+                IcyLogger.error(IcyBufferedImage.class, e, "IcyBufferedImage.setVolatile(..) error.");
             }
         }
     }
@@ -1256,7 +1254,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         }
         catch (final Throwable e) {
             datalost = true;
-            System.err.println(e.getMessage());
+            IcyLogger.error(IcyBufferedImage.class, e, "Data lost: " + e.getLocalizedMessage());
         }
 
         // should happen only for unmodified data
@@ -1275,7 +1273,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             else {
                 // data could not be loaded from cache but was correctly restored
                 if (datalost)
-                    System.out.println("Data re-initialized (changes are lost)");
+                    IcyLogger.error(IcyBufferedImage.class, "Data re-initialized (changes are lost).");
 
                 // save it in cache (not eternal here as this is default data)
                 saveRasterDataInCache(rasterData);
@@ -1308,7 +1306,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 ImageCache.set(this, rasterData);
             }
             catch (final Throwable e) {
-                System.err.println(e.getMessage());
+                IcyLogger.error(IcyBufferedImage.class, e, "Unable to save raster data in cache.");
             }
         }
     }
@@ -1381,7 +1379,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         }
         catch (final ClosedByInterruptException e) {
             // this one should never happen as loading is done in a separate thread (executor)
-            System.err.println("IcyBufferedImage.loadDataFromImporter() error: image loading from ImageProvider was interrupted (further image won't be loaded) !");
+            IcyLogger.error(IcyBufferedImage.class, "IcyBufferedImage.loadDataFromImporter() error: image loading from ImageProvider was interrupted (further image won't be loaded) !");
 
             // we want to keep the interrupted state here
             Thread.currentThread().interrupt();
@@ -1389,8 +1387,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             return null;
         }
         catch (final Exception e) {
-            System.err.println(e.getLocalizedMessage());
-            System.err.println("IcyBufferedImage.loadDataFromImporter() warning: cannot get image from ImageProvider (possible data loss).");
+            IcyLogger.error(IcyBufferedImage.class, e, "IcyBufferedImage.loadDataFromImporter() warning: cannot get image from ImageProvider (possible data loss).");
 
             return null;
         }

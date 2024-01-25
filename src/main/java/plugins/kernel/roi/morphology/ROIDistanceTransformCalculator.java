@@ -1,8 +1,22 @@
-package plugins.kernel.roi.morphology;
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+package plugins.kernel.roi.morphology;
 
 import icy.image.IcyBufferedImage;
 import icy.roi.ROI;
@@ -11,10 +25,15 @@ import icy.roi.ROI3D;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceDataIterator;
 import icy.sequence.VolumetricImage;
+import icy.system.logging.IcyLogger;
 import icy.type.DataIteratorUtil;
 import icy.type.DataType;
 import icy.type.dimension.Dimension3D;
 import icy.type.dimension.Dimension5D;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * This class computes the distance transform of a list containing {@link ROI}s. As a result, an area ROI is generated as a result of the size of
@@ -22,45 +41,40 @@ import icy.type.dimension.Dimension5D;
  * {@code pixelSize}.
  * The method for computing the distance transform is based on the algorithm proposed in the article "New Algorithms for euclidean distance transformation of an
  * n-dimensional digitized picture with applications" by Toyofumi Saito and Jun-Ichiro Toriwaki published in Pattern Recognition Vol. 27 No. 11, 1994.
- * 
+ *
  * @author Daniel Felipe Gonzalez Obando
+ * @author Thomas Musset
  */
-public class ROIDistanceTransformCalculator
-{
-    private Dimension5D imageSize;
-    private Dimension3D pixelSize;
-    private boolean constrainImageBorders;
-    private List<ROI> rois;
+public class ROIDistanceTransformCalculator {
+    private final Dimension5D imageSize;
+    private final Dimension3D pixelSize;
+    private final boolean constrainImageBorders;
+    private final List<ROI> rois;
 
-    public ROIDistanceTransformCalculator(Dimension5D imageSize, Dimension3D pixelSize, boolean constrainImageBorders)
-    {
+    public ROIDistanceTransformCalculator(final Dimension5D imageSize, final Dimension3D pixelSize, final boolean constrainImageBorders) {
         this.imageSize = imageSize;
         this.pixelSize = pixelSize;
         this.constrainImageBorders = constrainImageBorders;
         this.rois = new ArrayList<>();
     }
 
-    public <T extends ROI> void addROI(T roi)
-    {
+    public <T extends ROI> void addROI(final T roi) {
         rois.add(roi);
     }
 
-    public <T extends ROI> void addAll(Collection<T> rois)
-    {
+    public <T extends ROI> void addAll(final Collection<T> rois) {
         this.rois.addAll(rois);
     }
 
     Sequence distanceMap;
 
-    public Sequence getDistanceMap() throws InterruptedException
-    {
+    public Sequence getDistanceMap() throws InterruptedException {
         if (distanceMap == null)
             compute();
         return distanceMap;
     }
 
-    public void compute() throws InterruptedException
-    {
+    public void compute() throws InterruptedException {
         initializeDistanceMap();
         drawROIs();
         processTimePoints();
@@ -68,18 +82,15 @@ public class ROIDistanceTransformCalculator
 
     double[] buffer;
 
-    private void initializeDistanceMap()
-    {
+    private void initializeDistanceMap() {
         distanceMap = new Sequence();
         distanceMap.setPixelSizeX(pixelSize.getSizeX());
         distanceMap.setPixelSizeY(pixelSize.getSizeY());
         distanceMap.setPixelSizeZ(pixelSize.getSizeZ());
-        for (int m = 0; m < imageSize.getSizeT(); m++)
-        {
-            VolumetricImage volume = new VolumetricImage();
-            for (int k = 0; k < imageSize.getSizeZ(); k++)
-            {
-                IcyBufferedImage plane = new IcyBufferedImage((int) imageSize.getSizeX(), (int) imageSize.getSizeY(), 1,
+        for (int m = 0; m < imageSize.getSizeT(); m++) {
+            final VolumetricImage volume = new VolumetricImage();
+            for (int k = 0; k < imageSize.getSizeZ(); k++) {
+                final IcyBufferedImage plane = new IcyBufferedImage((int) imageSize.getSizeX(), (int) imageSize.getSizeY(), 1,
                         DataType.DOUBLE);
                 volume.setImage(k, plane);
             }
@@ -88,37 +99,26 @@ public class ROIDistanceTransformCalculator
         buffer = new double[Math.max((int) imageSize.getSizeY(), (int) imageSize.getSizeZ())];
     }
 
-    private void drawROIs() throws InterruptedException
-    {
-        for (ROI roi : rois)
-        {
-            synchronized (roi)
-            {
-                int oldC = 0;
-                if (roi instanceof ROI2D)
-                {
-                    oldC = ((ROI2D) roi).getC();
-                    ((ROI2D) roi).setC(0);
+    private void drawROIs() throws InterruptedException {
+        for (final ROI roi : rois) {
+            int oldC = 0;
+            if (roi instanceof ROI2D) {
+                oldC = ((ROI2D) roi).getC();
+                ((ROI2D) roi).setC(0);
+            }
+            else if (roi instanceof ROI3D) {
+                oldC = ((ROI3D) roi).getC();
+                ((ROI3D) roi).setC(0);
+            }
+            try {
+                DataIteratorUtil.set(new SequenceDataIterator(distanceMap, roi, true), 1d);
+            }
+            finally {
+                if (roi instanceof ROI2D) {
+                    ((ROI2D) roi).setC(oldC);
                 }
-                else if (roi instanceof ROI3D)
-                {
-                    oldC = ((ROI3D) roi).getC();
-                    ((ROI3D) roi).setC(0);
-                }
-                try
-                {
-                    DataIteratorUtil.set(new SequenceDataIterator(distanceMap, roi, true), 1d);
-                }
-                finally
-                {
-                    if (roi instanceof ROI2D)
-                    {
-                        ((ROI2D) roi).setC(oldC);
-                    }
-                    else if (roi instanceof ROI3D)
-                    {
-                        ((ROI3D) roi).setC(oldC);
-                    }
+                else if (roi instanceof ROI3D) {
+                    ((ROI3D) roi).setC(oldC);
                 }
             }
         }
@@ -126,10 +126,8 @@ public class ROIDistanceTransformCalculator
 
     private VolumetricImage currentVolumeImage;
 
-    private void processTimePoints() throws InterruptedException
-    {
-        for (int t = 0; t < imageSize.getSizeT(); t++)
-        {
+    private void processTimePoints() throws InterruptedException {
+        for (int t = 0; t < imageSize.getSizeT(); t++) {
             if (Thread.interrupted())
                 throw new InterruptedException("ROI distance transform descriptor computation interrupted.");
             currentVolumeImage = distanceMap.getVolumetricImage(t);
@@ -147,8 +145,7 @@ public class ROIDistanceTransformCalculator
     private double squaredSizeZ;
     private double maxDistance;
 
-    private void processCurrentVolume() throws InterruptedException
-    {
+    private void processCurrentVolume() throws InterruptedException {
         currentVolumePlanes = new double[(int) imageSize.getSizeZ()][];
         squaredSizeY = pixelSize.getSizeY() * pixelSize.getSizeY();
         squaredSizeZ = pixelSize.getSizeZ() * pixelSize.getSizeZ();
@@ -156,98 +153,79 @@ public class ROIDistanceTransformCalculator
                 Math.max(imageSize.getSizeX() * pixelSize.getSizeX(), imageSize.getSizeY() * pixelSize.getSizeY()),
                 imageSize.getSizeZ() * pixelSize.getSizeZ());
         maxDistance *= maxDistance;
-        for (int k = 0; k < imageSize.getSizeZ(); k++)
-        {
+        for (int k = 0; k < imageSize.getSizeZ(); k++) {
             if (Thread.interrupted())
                 throw new InterruptedException("ROI distance transform descriptor computation interrupted.");
 
-            double[] currentPlaneData = currentVolumeImage.getImage(k).getDataXYAsDouble(0);
+            final double[] currentPlaneData = currentVolumeImage.getImage(k).getDataXYAsDouble(0);
             currentVolumePlanes[k] = currentPlaneData;
             currentK = k;
             processCurrentPlane();
         }
 
-        if (imageSize.getSizeZ() > 1)
-        {
-            for (int j = 0; j < imageSize.getSizeY(); j++)
-            {
+        if (imageSize.getSizeZ() > 1) {
+            for (int j = 0; j < imageSize.getSizeY(); j++) {
                 if (Thread.interrupted())
                     throw new InterruptedException("ROI distance transform descriptor computation interrupted.");
 
                 currentJ = j;
-                for (int i = 0; i < imageSize.getSizeX(); i++)
-                {
+                for (int i = 0; i < imageSize.getSizeX(); i++) {
                     currentI = i;
                     processCurrentFiber();
                 }
             }
         }
-        for (int k = 0; k < imageSize.getSizeZ(); k++)
-        {
+        for (int k = 0; k < imageSize.getSizeZ(); k++) {
             if (Thread.interrupted())
                 throw new InterruptedException("ROI distance transform descriptor computation interrupted.");
 
-            for (int j = 0; j < imageSize.getSizeY(); j++)
-            {
+            for (int j = 0; j < imageSize.getSizeY(); j++) {
                 currentJ = j;
-                for (int i = 0; i < imageSize.getSizeX(); i++)
-                {
+                for (int i = 0; i < imageSize.getSizeX(); i++) {
                     setValueAt(i, j, k, Math.sqrt(getValueAt(i, j, k)));
                 }
             }
         }
     }
 
-    private void processCurrentPlane()
-    {
-        for (int j = 0; j < imageSize.getSizeY(); j++)
-        {
+    private void processCurrentPlane() {
+        for (int j = 0; j < imageSize.getSizeY(); j++) {
             currentJ = j;
             processCurrentRow();
         }
 
-        for (int i = 0; i < imageSize.getSizeX(); i++)
-        {
+        for (int i = 0; i < imageSize.getSizeX(); i++) {
             currentI = i;
             processCurrentCol();
         }
     }
 
-    private void processCurrentRow()
-    {
+    private void processCurrentRow() {
         forwardPassCurrentRow();
         backwardPassCurrentRow();
     }
 
-    private void forwardPassCurrentRow()
-    {
+    private void forwardPassCurrentRow() {
         double affectedValue = constrainImageBorders ? 0 : maxDistance;
 
-        for (int i = 0; i < imageSize.getSizeX(); i++)
-        {
-            if (getValueAt(i, currentJ, currentK) != 0d)
-            {
+        for (int i = 0; i < imageSize.getSizeX(); i++) {
+            if (getValueAt(i, currentJ, currentK) != 0d) {
                 affectedValue = affectedValue + pixelSize.getSizeX();
             }
-            else
-            {
+            else {
                 affectedValue = 0d;
             }
             setValueAt(i, currentJ, currentK, affectedValue * affectedValue);
         }
     }
 
-    private void backwardPassCurrentRow()
-    {
+    private void backwardPassCurrentRow() {
         double affectedValue = constrainImageBorders ? 0 : maxDistance;
-        for (int i = (int) imageSize.getSizeX() - 1; i >= 0; i--)
-        {
-            if (getValueAt(i, currentJ, currentK) != 0d)
-            {
+        for (int i = (int) imageSize.getSizeX() - 1; i >= 0; i--) {
+            if (getValueAt(i, currentJ, currentK) != 0d) {
                 affectedValue = affectedValue + pixelSize.getSizeX();
             }
-            else
-            {
+            else {
                 affectedValue = 0d;
             }
             setValueAt(i, currentJ, currentK,
@@ -255,44 +233,36 @@ public class ROIDistanceTransformCalculator
         }
     }
 
-    private void processCurrentCol()
-    {
-        for (int j = 0; j < imageSize.getSizeY(); j++)
-        {
+    private void processCurrentCol() {
+        for (int j = 0; j < imageSize.getSizeY(); j++) {
             buffer[j] = getValueAt(currentI, j, currentK);
         }
         forwardPassCurrentCol();
         backwardPassCurrentCol();
     }
 
-    private void forwardPassCurrentCol()
-    {
+    private void forwardPassCurrentCol() {
         int a = 0;
-        for (int j = constrainImageBorders ? 0 : 1; j < imageSize.getSizeY(); j++)
-        {
+        for (int j = constrainImageBorders ? 0 : 1; j < imageSize.getSizeY(); j++) {
             if (a > 0)
                 a--;
-            double dj = buffer[j] / squaredSizeY;
-            double dj1 = (j == 0) ? 0d : (buffer[j - 1] / squaredSizeY);
-            if (dj > dj1 + 1d)
-            {
+            final double dj = buffer[j] / squaredSizeY;
+            final double dj1 = (j == 0) ? 0d : (buffer[j - 1] / squaredSizeY);
+            if (dj > dj1 + 1d) {
                 double b = Math.ceil((dj - dj1 - 1d) / 2d);
                 if (j + b > imageSize.getSizeY())
                     b = (int) imageSize.getSizeY() - j;
-                int bi = (int) b;
-                for (int n = a; n < bi; n++)
-                {
+                final int bi = (int) b;
+                for (int n = a; n < bi; n++) {
                     int nSq = n + 1;
                     nSq *= nSq;
-                    double m = dj1 + nSq;
-                    try
-                    {
+                    final double m = dj1 + nSq;
+                    try {
                         if (buffer[j + n] / squaredSizeY <= m)
                             break;
                     }
-                    catch (Exception e)
-                    {
-                        System.out.println(e);
+                    catch (final Exception e) {
+                        IcyLogger.error(ROIDistanceTransformCalculator.class, e, e.getLocalizedMessage());
                         throw e;
                     }
                     if (m < getValueAt(currentI, j + n, currentK) / squaredSizeY)
@@ -300,34 +270,29 @@ public class ROIDistanceTransformCalculator
                 }
                 a = bi;
             }
-            else
-            {
+            else {
                 a = 0;
             }
         }
     }
 
-    private void backwardPassCurrentCol()
-    {
+    private void backwardPassCurrentCol() {
         int a = 0;
-        for (int j = (int) imageSize.getSizeY() - (constrainImageBorders ? 1 : 2); j >= 0; j--)
-        {
+        for (int j = (int) imageSize.getSizeY() - (constrainImageBorders ? 1 : 2); j >= 0; j--) {
             if (a > 0)
                 a--;
-            double dj = buffer[j] / squaredSizeY;
-            double dj1 = (j == (int) imageSize.getSizeY() - 1) ? 0 : (buffer[j + 1] / squaredSizeY);
-            if (dj > dj1)
-            {
+            final double dj = buffer[j] / squaredSizeY;
+            final double dj1 = (j == (int) imageSize.getSizeY() - 1) ? 0 : (buffer[j + 1] / squaredSizeY);
+            if (dj > dj1) {
                 double b = Math.ceil((dj - dj1 - 1d) / 2d);
                 if (j - b < 0)
                     b = j;
-                int bi = (int) b;
+                final int bi = (int) b;
 
-                for (int n = a; n <= bi; n++)
-                {
+                for (int n = a; n <= bi; n++) {
                     double nSq = n + 1;
                     nSq *= nSq;
-                    double m = dj1 + nSq;
+                    final double m = dj1 + nSq;
                     if (buffer[j - n] / squaredSizeY <= m)
                         break;
                     if (m < getValueAt(currentI, j - n, currentK) / squaredSizeY)
@@ -335,43 +300,36 @@ public class ROIDistanceTransformCalculator
                 }
                 a = bi;
             }
-            else
-            {
+            else {
                 a = 0;
             }
         }
     }
 
-    private void processCurrentFiber()
-    {
-        for (int k = 0; k < imageSize.getSizeZ(); k++)
-        {
+    private void processCurrentFiber() {
+        for (int k = 0; k < imageSize.getSizeZ(); k++) {
             buffer[k] = getValueAt(currentI, currentJ, k);
         }
         forwardPassCurrentFiber();
         backwardPassCurrentFiber();
     }
 
-    private void forwardPassCurrentFiber()
-    {
+    private void forwardPassCurrentFiber() {
         int a = 0;
-        for (int k = constrainImageBorders ? 0 : 1; k < imageSize.getSizeZ(); k++)
-        {
+        for (int k = constrainImageBorders ? 0 : 1; k < imageSize.getSizeZ(); k++) {
             if (a > 0)
                 a--;
-            double dk = buffer[k] / squaredSizeZ;
-            double dk1 = (k == 0) ? 0d : (buffer[k - 1] / squaredSizeZ);
-            if (dk > dk1 + 1d)
-            {
+            final double dk = buffer[k] / squaredSizeZ;
+            final double dk1 = (k == 0) ? 0d : (buffer[k - 1] / squaredSizeZ);
+            if (dk > dk1 + 1d) {
                 double b = Math.ceil((dk - dk1 - 1d) / 2d);
                 if (k + b > imageSize.getSizeZ())
                     b = (int) imageSize.getSizeZ() - k;
-                int bi = (int) b;
-                for (int n = a; n < bi; n++)
-                {
+                final int bi = (int) b;
+                for (int n = a; n < bi; n++) {
                     int nSq = n + 1;
                     nSq *= nSq;
-                    double m = dk1 + nSq;
+                    final double m = dk1 + nSq;
                     if (buffer[k + n] / squaredSizeZ <= m)
                         break;
                     if (m < getValueAt(currentI, currentJ, k + n) / squaredSizeZ)
@@ -379,34 +337,29 @@ public class ROIDistanceTransformCalculator
                 }
                 a = bi;
             }
-            else
-            {
+            else {
                 a = 0;
             }
         }
 
     }
 
-    private void backwardPassCurrentFiber()
-    {
+    private void backwardPassCurrentFiber() {
         int a = 0;
-        for (int k = (int) imageSize.getSizeZ() - (constrainImageBorders ? 1 : 2); k >= 0; k--)
-        {
+        for (int k = (int) imageSize.getSizeZ() - (constrainImageBorders ? 1 : 2); k >= 0; k--) {
             if (a > 0)
                 a--;
-            double dk = buffer[k] / squaredSizeZ;
-            double dk1 = (k == (int) imageSize.getSizeZ() - 1) ? 0 : (buffer[k + 1] / squaredSizeZ);
-            if (dk > dk1 + 1d)
-            {
+            final double dk = buffer[k] / squaredSizeZ;
+            final double dk1 = (k == (int) imageSize.getSizeZ() - 1) ? 0 : (buffer[k + 1] / squaredSizeZ);
+            if (dk > dk1 + 1d) {
                 double b = (int) Math.ceil((dk - dk1 - 1d) / 2d);
                 if (k - b < 0)
                     b = k;
-                int bi = (int) b;
-                for (int n = a; n <= bi; n++)
-                {
+                final int bi = (int) b;
+                for (int n = a; n <= bi; n++) {
                     double nSq = n + 1;
                     nSq *= nSq;
-                    double m = dk1 + nSq;
+                    final double m = dk1 + nSq;
                     if (buffer[k - n] / squaredSizeZ <= m)
                         break;
                     if (m < getValueAt(currentI, currentJ, k - n) / squaredSizeZ)
@@ -414,20 +367,17 @@ public class ROIDistanceTransformCalculator
                 }
                 a = bi;
             }
-            else
-            {
+            else {
                 a = 0;
             }
         }
     }
 
-    private double getValueAt(int x, int y, int z)
-    {
+    private double getValueAt(final int x, final int y, final int z) {
         return currentVolumePlanes[z][y * (int) imageSize.getSizeX() + x];
     }
 
-    private void setValueAt(int x, int y, int z, double value)
-    {
+    private void setValueAt(final int x, final int y, final int z, final double value) {
         currentVolumePlanes[z][y * (int) imageSize.getSizeX() + x] = value;
     }
 

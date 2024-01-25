@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -14,15 +13,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package icy.system;
 
-import java.io.File;
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+package icy.system;
 
 import icy.gui.dialog.MessageDialog;
 import icy.gui.frame.progress.FailedAnnounceFrame;
@@ -31,13 +25,21 @@ import icy.main.Icy;
 import icy.network.WebInterface;
 import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginLoader;
+import icy.system.logging.IcyLogger;
 import icy.util.ClassUtil;
 import icy.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
 public class IcyExceptionHandler implements UncaughtExceptionHandler {
     private static final double ERROR_ANTISPAM_TIME = 15 * 1000;
@@ -53,6 +55,7 @@ public class IcyExceptionHandler implements UncaughtExceptionHandler {
     /**
      * Display the specified Throwable message in error output.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static void showErrorMessage(final Throwable t, final boolean printStackTrace) {
         showErrorMessage(t, printStackTrace, true);
     }
@@ -61,16 +64,22 @@ public class IcyExceptionHandler implements UncaughtExceptionHandler {
      * Display the specified Throwable message in console.<br>
      * If <i>error</i> is true the message is considerer as an error and then written in error
      * output.
+     * @deprecated Use {@link IcyLogger#error(Class, Throwable, String...)} instead.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static void showErrorMessage(final Throwable t, final boolean printStackTrace, final boolean error) {
-        final String mess = getErrorMessage(t, printStackTrace);
+        /*final String mess = getErrorMessage(t, printStackTrace);
 
         if (!StringUtil.isEmpty(mess)) {
             if (error)
-                System.err.println(mess);
+                IcyLogger.error(IcyExceptionHandler.class, mess);
             else
-                System.out.println(mess);
-        }
+                IcyLogger.info(IcyExceptionHandler.class, mess);
+        }*/
+        if (error)
+            IcyLogger.error(IcyExceptionHandler.class, t, t.getLocalizedMessage());
+        else
+            IcyLogger.info(IcyExceptionHandler.class, t, t.getLocalizedMessage());
     }
 
     /**
@@ -157,14 +166,11 @@ public class IcyExceptionHandler implements UncaughtExceptionHandler {
             message += getErrorMessage(t, printStackStrace);
 
             // write message in console if wanted or if spam error message
-            if ((t instanceof OutOfMemoryError) || printStackStrace
-                    || ((current - lastErrorDialog) < ERROR_ANTISPAM_TIME)) {
+            if ((t instanceof OutOfMemoryError) || printStackStrace || ((current - lastErrorDialog) < ERROR_ANTISPAM_TIME)) {
                 if (plugin != null)
-                    System.err.println("An error occured while plugin '" + plugin.getName() + "' was running :");
+                    IcyLogger.error(plugin.getClass(), t, "An error occured while plugin '" + plugin.getName() + "' was running.");
                 else if (!StringUtil.isEmpty(devId))
-                    System.err.println("An error occured while a plugin was running :");
-
-                System.err.println(message);
+                    IcyLogger.error(IcyExceptionHandler.class, t, "An error occured while a plugin was running.");
             }
 
             // do report (anti spam protected)
@@ -177,7 +183,8 @@ public class IcyExceptionHandler implements UncaughtExceptionHandler {
                         new FailedAnnounceFrame(
                                 "Not enough memory to complete the process ! " +
                                         "Try to use 'Virtual Mode' (image caching) or increase the 'Maximum Memory' parameter in Preferences.",
-                                30);
+                                30
+                        );
                 }
                 else
                     // just report the error

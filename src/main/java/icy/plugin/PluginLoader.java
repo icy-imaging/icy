@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -30,6 +30,7 @@ import icy.plugin.interface_.PluginBundled;
 import icy.plugin.interface_.PluginDaemon;
 import icy.preferences.PluginPreferences;
 import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.SingleProcessor;
 import icy.system.thread.ThreadUtil;
 import icy.util.ClassUtil;
@@ -44,7 +45,7 @@ import java.util.*;
  * Plugin Loader class.<br>
  * This class is used to load plugins from "plugins" package and "plugins" directory
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thommas Musset
  */
 public class PluginLoader {
@@ -205,8 +206,7 @@ public class PluginLoader {
             ClassUtil.findClassNamesInPath(PLUGIN_PATH, PLUGIN_PACKAGE, true, classes);
         }
         catch (final IOException e) {
-            System.err.println("Error loading plugins :");
-            IcyExceptionHandler.showErrorMessage(e, true);
+            IcyLogger.error(PluginLoader.class, e, "Error loading plugins.");
         }
 
         for (final String className : classes) {
@@ -229,12 +229,15 @@ public class PluginLoader {
             }
             catch (final NoClassDefFoundError e) {
                 // fatal error
-                System.err.println("Class '" + className + "' cannot be loaded :");
-                System.err.println("Required class '" + ClassUtil.getQualifiedNameFromPath(e.getMessage()) + "' not found.");
+                final String[] messages = new String[]{
+                        "Class '" + className + "' cannot be loaded :",
+                        "Required class '" + ClassUtil.getQualifiedNameFromPath(e.getLocalizedMessage()) + "' not found."
+                };
+                IcyLogger.fatal(PluginLoader.class, e, messages);
             }
             catch (final UnsupportedClassVersionError e) {
                 // java version error (here we just notify in the console)
-                System.err.println(NEWER_JAVA_REQUIRED + " for class '" + className + "' (discarded)");
+                IcyLogger.warn(PluginLoader.class, e, NEWER_JAVA_REQUIRED + " for class '" + className + "' (discarded).");
             }
             catch (final ClassCastException e) {
                 // ignore ClassCastException (for classes which doesn't extend Plugin)
@@ -244,8 +247,7 @@ public class PluginLoader {
             }
             catch (final Error | Exception e) {
                 // fatal error
-                IcyExceptionHandler.showErrorMessage(e, false);
-                System.err.println("Class '" + className + "' is discarded");
+                IcyLogger.fatal(PluginLoader.class, "Class '" + className + "' is discarded.");
             }
         }
 

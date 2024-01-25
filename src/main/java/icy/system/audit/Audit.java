@@ -1,29 +1,22 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.system.audit;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 import icy.file.FileUtil;
 import icy.gui.frame.progress.CancelableProgressFrame;
@@ -34,19 +27,25 @@ import icy.plugin.abstract_.Plugin;
 import icy.preferences.ApplicationPreferences;
 import icy.preferences.GeneralPreferences;
 import icy.preferences.XMLPreferences;
-import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * General audit tools class.
- * 
- * @author Stephane
+ *
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class Audit
-{
+public class Audit {
     // network URL
     static final String URL_REGISTER = NetworkUtil.WEBSITE_URL + "register/registerClient.php?";
     static final String URL_LINK_USER = NetworkUtil.WEBSITE_URL + "register/linkUser.php?";
@@ -85,8 +84,7 @@ public class Audit
      * Audit process on application start.<br>
      * Check id, register...
      */
-    public static synchronized void prepare()
-    {
+    public static synchronized void prepare() {
         if (initialized)
             return;
 
@@ -94,8 +92,7 @@ public class Audit
         prefs = ApplicationPreferences.getPreferences();
 
         // probably a new installation --> need to reset id
-        if (needToResetId())
-        {
+        if (needToResetId()) {
             // reset user info if needed
             unlinkUser();
             // reset id
@@ -110,26 +107,19 @@ public class Audit
         final int id = ApplicationPreferences.getId();
 
         // id assigned ?
-        if (id != -1)
-        {
+        if (id != -1) {
             final long currentTime = System.currentTimeMillis();
             final long dayInterval = 1000 * 60 * 60 * 24;
 
             // upload each 24 hours
-            if (currentTime > (prefs.getLong(ID_LAST_UPLOAD_DATE, 0L) + dayInterval))
-            {
+            if (currentTime > (prefs.getLong(ID_LAST_UPLOAD_DATE, 0L) + dayInterval)) {
                 // save upload time whatever happened
                 prefs.putLong(ID_LAST_UPLOAD_DATE, System.currentTimeMillis());
 
                 // do that in background as it can take sometime if website does not reply...
-                ThreadUtil.bgRun(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        // upload usage statistics
-                        storage.upload(id);
-                    }
+                ThreadUtil.bgRun(() -> {
+                    // upload usage statistics
+                    storage.upload(id);
                 });
             }
         }
@@ -141,8 +131,7 @@ public class Audit
     /**
      * Audit process on network connection
      */
-    public static void onConnect()
-    {
+    public static void onConnect() {
         prepare();
 
         if (!auditDone)
@@ -159,8 +148,7 @@ public class Audit
     /**
      * Save audit data
      */
-    public static void save()
-    {
+    public static void save() {
         // save audit data
         if (initialized)
             storage.save();
@@ -169,8 +157,7 @@ public class Audit
     /**
      * Plugin launched event audit
      */
-    public static void pluginLaunched(Plugin plugin)
-    {
+    public static void pluginLaunched(final Plugin plugin) {
         // we don't want to wait for initialization here (can lock the application loading for sometime)
         // and we don't care about init usage stats (ROI and daemons plugins)...
         if (!initialized)
@@ -182,8 +169,7 @@ public class Audit
     /**
      * Plugin instanced event audit
      */
-    public static void pluginInstanced(Plugin plugin)
-    {
+    public static void pluginInstanced(final Plugin plugin) {
         // we don't want to wait for initialization here (can lock the application loading for sometime)
         // and we don't care about init usage stats (ROI and daemons plugins)...
         if (!initialized)
@@ -195,8 +181,7 @@ public class Audit
     /**
      * Returns <code>true</code> if we need to reset the internal id (usually mean new installation)
      */
-    private static boolean needToResetId()
-    {
+    private static boolean needToResetId() {
         if (!StringUtil.equals(ApplicationPreferences.getOs(), SystemUtil.getOSArchIdString()))
             return true;
 
@@ -218,32 +203,28 @@ public class Audit
     /**
      * Store system and application informations in preferences
      */
-    private static void storeInfos()
-    {
+    private static void storeInfos() {
         ApplicationPreferences.setOs(SystemUtil.getOSArchIdString());
         prefs.putInt(ID_CLIENT_CPUNUMBER, SystemUtil.getNumberOfCPUs());
         prefs.putLong(ID_CLIENT_TOTAL_MEMORY, SystemUtil.getTotalMemory());
         ApplicationPreferences.setAppFolder(FileUtil.APPLICATION_DIRECTORY);
     }
 
-    private static void processIdAudit()
-    {
-        final Map<String, String> values = new HashMap<String, String>();
+    private static void processIdAudit() {
+        final Map<String, String> values = new HashMap<>();
         final int id = ApplicationPreferences.getId();
 
         values.put(ID_CLIENT_ARCH, SystemUtil.getOSArchIdString());
         values.put(ID_CLIENT_VERSION, Icy.VERSION.toString());
 
         // need to register
-        if (id == -1)
-        {
+        if (id == -1) {
             // ask for registration
             values.put(ID_REQUEST, "1");
 
             final Document doc = XMLUtil.loadDocument(URL_REGISTER + NetworkUtil.getContentString(values));
 
-            if (doc != null)
-            {
+            if (doc != null) {
                 final Node root = XMLUtil.getRootElement(doc);
                 final int newId = XMLUtil.getElementIntValue(root, XMLID_CLIENT_ID_REQUESTED, -1);
 
@@ -252,8 +233,7 @@ public class Audit
                     ApplicationPreferences.setId(newId);
             }
         }
-        else
-        {
+        else {
             // just audit infos
             values.put(ID_CLIENT_ID, Integer.toString(id));
 
@@ -264,12 +244,10 @@ public class Audit
             values.put(ID_JAVA_VERSION, SystemUtil.getJavaVersion());
             values.put(ID_JAVA_ARCH, Integer.toString(SystemUtil.getJavaArchDataModel()));
 
-            try
-            {
+            try {
                 NetworkUtil.postData(URL_AUDIT_VERSION, values);
             }
-            catch (IOException e)
-            {
+            catch (final IOException e) {
                 // silent fail...
                 // IcyExceptionHandler.showErrorMessage(e, false, false);
             }
@@ -278,14 +256,12 @@ public class Audit
         auditDone = true;
     }
 
-    private static Map<String, String> getIdParam()
-    {
+    private static Map<String, String> getIdParam() {
         final int id = ApplicationPreferences.getId();
 
         // id ok ?
-        if (id != -1)
-        {
-            final Map<String, String> values = new HashMap<String, String>();
+        if (id != -1) {
+            final Map<String, String> values = new HashMap<>();
 
             // set id
             values.put(ID_ICY_ID, Integer.toString(id));
@@ -296,18 +272,15 @@ public class Audit
         return null;
     }
 
-    public static void updateUserLink()
-    {
+    public static void updateUserLink() {
         final Map<String, String> params = getIdParam();
 
         // id param ok ?
-        if (params != null)
-        {
+        if (params != null) {
             // and retrieve user infos
             final Document doc = XMLUtil.loadDocument(URL_GET_USER_INFO + NetworkUtil.getContentString(params));
 
-            if (doc != null)
-            {
+            if (doc != null) {
                 final Node root = XMLUtil.getRootElement(doc);
 
                 // set attached user login and name
@@ -317,92 +290,69 @@ public class Audit
         }
     }
 
-    public static boolean isUserLinked()
-    {
+    public static boolean isUserLinked() {
         return !StringUtil.isEmpty(GeneralPreferences.getUserLogin());
     }
 
-    public static void linkUser()
-    {
+    public static void linkUser() {
         final int id = ApplicationPreferences.getId();
 
         // id ok ?
-        if (id != -1)
-        {
+        if (id != -1) {
             // launch browser with link identity request
             NetworkUtil.openBrowser(URL_LINK_USER + ID_ICY_ID + "=" + id + "&" + ID_ACTION + "=link");
 
-            if (!Icy.getMainInterface().isHeadLess())
-            {
+            if (!Icy.getMainInterface().isHeadLess()) {
                 // display linking in progress
-                new Thread(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        final CancelableProgressFrame waitFrame = new CancelableProgressFrame(
-                                "Waiting for user to link account...");
+                new Thread(() -> {
+                    final CancelableProgressFrame waitFrame = new CancelableProgressFrame(
+                            "Waiting for user to link account...");
 
-                        while (!Thread.interrupted() && !waitFrame.isCancelRequested())
-                        {
-                            try
-                            {
-                                Thread.sleep(1000);
-                                updateUserLink();
+                    while (!Thread.interrupted() && !waitFrame.isCancelRequested()) {
+                        try {
+                            Thread.sleep(1000);
+                            updateUserLink();
 
-                                // user linked !
-                                if (isUserLinked())
-                                {
-                                    // stop wait
-                                    waitFrame.cancel();
-
-                                    // refresh user infos (in title)
-                                    final MainFrame frame = Icy.getMainInterface().getMainFrame();
-                                    if (frame != null)
-                                        frame.refreshTitle();
-                                }
-                            }
-                            catch (InterruptedException e)
-                            {
+                            // user linked !
+                            if (isUserLinked()) {
+                                // stop wait
                                 waitFrame.cancel();
+
+                                // refresh user infos (in title)
+                                final MainFrame frame = Icy.getMainInterface().getMainFrame();
+                                if (frame != null)
+                                    frame.refreshTitle();
                             }
                         }
-
-                        // close wait frame
-                        waitFrame.close();
+                        catch (final InterruptedException e) {
+                            waitFrame.cancel();
+                        }
                     }
+
+                    // close wait frame
+                    waitFrame.close();
                 }).start();
             }
         }
     }
 
-    public static void unlinkUser()
-    {
+    public static void unlinkUser() {
         final Map<String, String> params = getIdParam();
 
         // id param ok ?
-        if (params != null)
-        {
+        if (params != null) {
             // do that in background as it can take sometime...
-            ThreadUtil.bgRun(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    // set action
-                    params.put(ID_ACTION, "unlink");
+            ThreadUtil.bgRun(() -> {
+                // set action
+                params.put(ID_ACTION, "unlink");
 
-                    try
-                    {
-                        // and post
-                        NetworkUtil.postData(URL_LINK_USER, params);
-                    }
-                    catch (IOException e)
-                    {
-                        // can't unlink on web site, not a big deal...
-                        System.err.print("Warning: cannot unlink online user infos.");
-                        IcyExceptionHandler.showErrorMessage(e, false, false);
-                    }
+                try {
+                    // and post
+                    NetworkUtil.postData(URL_LINK_USER, params);
+                }
+                catch (final IOException e) {
+                    // can't unlink on web site, not a big deal...
+                    IcyLogger.warn(Audit.class, e, "Cannot unlink online user infos.");
                 }
             });
         }

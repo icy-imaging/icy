@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -27,6 +27,7 @@ import icy.network.URLUtil;
 import icy.plugin.PluginDescriptor.PluginIdent;
 import icy.preferences.RepositoryPreferences.RepositoryInfo;
 import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.update.Updater;
 import icy.util.StringUtil;
@@ -40,7 +41,7 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class PluginInstaller implements Runnable {
@@ -52,18 +53,18 @@ public class PluginInstaller implements Runnable {
 
     public record PluginInstallInfo(PluginDescriptor plugin, boolean showProgress) {
         @Override
-            public boolean equals(@Nullable final Object obj) {
-                if (obj instanceof PluginInstallInfo)
-                    return ((PluginInstallInfo) obj).plugin.equals(plugin);
+        public boolean equals(@Nullable final Object obj) {
+            if (obj instanceof PluginInstallInfo)
+                return ((PluginInstallInfo) obj).plugin.equals(plugin);
 
-                return false;
-            }
-
-            @Override
-            public int hashCode() {
-                return plugin.hashCode();
-            }
+            return false;
         }
+
+        @Override
+        public int hashCode() {
+            return plugin.hashCode();
+        }
+    }
 
     private static final String ERROR_DOWNLOAD = "Error while downloading ";
     private static final String ERROR_SAVE = "Error while saving";
@@ -128,13 +129,7 @@ public class PluginInstaller implements Runnable {
     public static void install(final PluginDescriptor plugin, final boolean showProgress) {
         if ((plugin != null) && isEnabled()) {
             if (!NetworkUtil.hasInternetAccess()) {
-                final String text = "Cannot install '" + plugin.getName()
-                        + "' plugin : you are not connected to Internet.";
-
-                if (Icy.getMainInterface().isHeadLess())
-                    System.err.println(text);
-                else
-                    new FailedAnnounceFrame(text, 10);
+                IcyLogger.error(PluginInstaller.class, "Cannot install '" + plugin.getName() + "' plugin : you are not connected to Internet.");
 
                 return;
             }
@@ -411,8 +406,11 @@ public class PluginInstaller implements Runnable {
 
         // save data
         if (!FileUtil.save(savePath, data, displayError)) {
-            System.err.println("Can't write '" + savePath + "' !");
-            System.err.println("File may be locked or you don't own the rights to write files here.");
+            final String[] messages = new String[]{
+                    "Can't write '" + savePath + "' !",
+                    "File may be locked or you don't own the rights to write files here."
+            };
+            IcyLogger.error(PluginInstaller.class, messages);
             return ERROR_SAVE + savePath;
         }
 
@@ -421,14 +419,14 @@ public class PluginInstaller implements Runnable {
 
     private static boolean deletePlugin(@NotNull final PluginDescriptor plugin) {
         if (!FileUtil.delete(plugin.getJarFilename(), false)) {
-            System.err.println("Can't delete '" + plugin.getJarFilename() + "' file !");
+            IcyLogger.error(PluginInstaller.class, "Can't delete '" + plugin.getJarFilename() + "' file !");
             // fatal error
             return false;
         }
 
         if (FileUtil.exists(plugin.getXMLFilename()))
             if (!FileUtil.delete(plugin.getXMLFilename(), false))
-                System.err.println("Can't delete '" + plugin.getXMLFilename() + "' file !");
+                IcyLogger.error(PluginInstaller.class, "Can't delete '" + plugin.getXMLFilename() + "' file !");
 
         FileUtil.delete(plugin.getImageFilename(), false);
         FileUtil.delete(plugin.getIconFilename(), false);
@@ -532,6 +530,7 @@ public class PluginInstaller implements Runnable {
 
             getLocalDependenciesOf(result, sources, sources.get(0));
 
+            // FIXME this loop does nothing
             // add last to first dep
             for (int i = deps.size() - 1; i >= 0; i--)
                 PluginDescriptor.addToList(result, deps.get(i));
@@ -578,14 +577,21 @@ public class PluginInstaller implements Runnable {
                 if (onlinePlugin == null) {
                     // error
                     if (showError) {
-                        System.err.println("Can't resolve dependencies for plugin '" + plugin.getName() + "' :");
+                        final String[] messages;
 
                         if (localPlugin == null)
-                            System.err.println("Plugin class '" + ident.getClassName() + " not found !");
-                        else {
-                            System.err.println(localPlugin.getName() + " " + localPlugin.getVersion() + " installed");
-                            System.err.println("but version " + ident.getVersion() + " or greater needed.");
-                        }
+                            messages = new String[]{
+                                    "Can't resolve dependencies for plugin '" + plugin.getName() + "' :",
+                                    "Plugin class '" + ident.getClassName() + " not found !"
+                            };
+                        else
+                            messages = new String[]{
+                                    "Can't resolve dependencies for plugin '" + plugin.getName() + "' :",
+                                    localPlugin.getName() + " " + localPlugin.getVersion() + " installed",
+                                    "but version " + ident.getVersion() + " or greater needed."
+                            };
+
+                        IcyLogger.error(PluginInstaller.class, messages);
                     }
 
                     return false;
@@ -594,9 +600,12 @@ public class PluginInstaller implements Runnable {
                 else if (ident.getVersion().isGreater(onlinePlugin.getVersion())) {
                     // error
                     if (showError) {
-                        System.err.println("Can't resolve dependencies for plugin '" + plugin.getName() + "' :");
-                        System.err.println(onlinePlugin.getName() + " " + onlinePlugin.getVersion() + " found in repository");
-                        System.err.println("but version " + ident.getVersion() + " or greater needed.");
+                        final String[] messages = new String[]{
+                                "Can't resolve dependencies for plugin '" + plugin.getName() + "' :",
+                                onlinePlugin.getName() + " " + onlinePlugin.getVersion() + " found in repository",
+                                "but version " + ident.getVersion() + " or greater needed."
+                        };
+                        IcyLogger.error(PluginInstaller.class, messages);
                     }
 
                     return false;
@@ -735,7 +744,7 @@ public class PluginInstaller implements Runnable {
                 else {
                     pluginsNOk.add(plugin);
                     // print error
-                    System.err.println(error);
+                    IcyLogger.error(PluginInstaller.class, error);
                 }
             }
 
@@ -751,12 +760,15 @@ public class PluginInstaller implements Runnable {
 
                 // send report when we have verification error
                 if (!StringUtil.isEmpty(error)) {
-                    final String mess = "Fatal error while loading '" + plugin.getClassName() + "' class from " + plugin.getJarFilename() + " :\n" + error;
+                    final String[] messages = new String[]{
+                            "Fatal error while loading '" + plugin.getClassName() + "' class from " + plugin.getJarFilename() + " :",
+                            error
+                    };
 
                     // new java version required ?
                     if (error.contains(PluginLoader.NEWER_JAVA_REQUIRED)) {
                         // print error in console
-                        System.err.println(mess);
+                        IcyLogger.fatal(PluginInstaller.class, messages);
                         // add to list
                         pluginsNewJava.add(plugin);
                     }
@@ -764,7 +776,7 @@ public class PluginInstaller implements Runnable {
                         // report error to developer
                         IcyExceptionHandler.report(plugin, "An error occured while installing the plugin :\n" + error);
                         // print error
-                        System.err.println(mess);
+                        IcyLogger.fatal(PluginInstaller.class, messages);
                         // add to list
                         pluginsNOk.add(plugin);
                     }
@@ -776,36 +788,36 @@ public class PluginInstaller implements Runnable {
             pluginsOk.removeAll(pluginsNewJava);
 
             if (!pluginsNOk.isEmpty()) {
-                System.err.println();
-                System.err.println("Installation of the following plugin(s) failed:");
+                final ArrayList<String> messages = new ArrayList<>();
+                messages.add("Installation of the following plugin(s) failed:");
                 for (final PluginDescriptor plugin : pluginsNOk) {
-                    System.err.println(plugin.getName() + " " + plugin.getVersion());
+                    messages.add(plugin.getName() + " " + plugin.getVersion());
                     // notify about installation fails
                     fireInstalledEvent(plugin, false);
                 }
-                System.err.println();
+                IcyLogger.error(PluginInstaller.class, messages.toArray(new String[0]));
             }
 
             if (!pluginsOk.isEmpty()) {
-                System.out.println();
-                System.out.println("The following plugin(s) has been correctly installed:");
+                final ArrayList<String> messages = new ArrayList<>();
+                messages.add("The following plugin(s) has been correctly installed:");
                 for (final PluginDescriptor plugin : pluginsOk) {
-                    System.out.println(plugin.getName() + " " + plugin.getVersion());
+                    messages.add(plugin.getName() + " " + plugin.getVersion());
                     // notify about installation successes
                     fireInstalledEvent(plugin, true);
                 }
-                System.out.println();
+                IcyLogger.info(PluginInstaller.class, messages.toArray(new String[0]));
             }
 
             if (!pluginsNewJava.isEmpty()) {
-                System.err.println();
-                System.err.println("The following plugin(s) require a newer version of java:");
+                final ArrayList<String> messages = new ArrayList<>();
+                messages.add("The following plugin(s) require a newer version of java:");
                 for (final PluginDescriptor plugin : pluginsNewJava) {
-                    System.err.println(plugin.getName() + " " + plugin.getVersion());
+                    messages.add(plugin.getName() + " " + plugin.getVersion());
                     // notify about installation even fails
                     fireInstalledEvent(plugin, false);
                 }
-                System.err.println();
+                IcyLogger.error(PluginInstaller.class, messages.toArray(new String[0]));
             }
 
             if (showProgress && !Icy.getMainInterface().isHeadLess()) {
@@ -816,8 +828,7 @@ public class PluginInstaller implements Runnable {
                 else if (pluginsNOk.isEmpty() && pluginsNewJava.isEmpty())
                     new SuccessfullAnnounceFrame("Plugin(s) installation was successful !", 10);
                 else if (!pluginsNOk.isEmpty())
-                    new FailedAnnounceFrame(
-                            "Some plugin(s) installation failed (looks at the output console for detail) !", 10);
+                    new FailedAnnounceFrame("Some plugin(s) installation failed (looks at the output console for detail) !", 10);
 
                 // notify about new java version required
                 for (final PluginDescriptor plugin : pluginsNewJava)
@@ -881,9 +892,9 @@ public class PluginInstaller implements Runnable {
                 }
 
                 if (result)
-                    System.out.println("Plugin '" + plugDesc + "' correctly removed.");
+                    IcyLogger.info(PluginInstaller.class, "Plugin '" + plugDesc + "' correctly removed.");
                 else
-                    System.err.println("Plugin '" + plugDesc + "' delete operation failed !");
+                    IcyLogger.error(PluginInstaller.class, "Plugin '" + plugDesc + "' delete operation failed !");
             }
         }
         finally {

@@ -1,39 +1,43 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.update;
-
-import java.io.File;
-import java.util.ArrayList;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import icy.file.FileUtil;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.update.ElementDescriptor.ElementFile;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
 import icy.util.ZipUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
-public class Updater
-{
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Objects;
+
+/**
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
+ */
+public class Updater {
     public static final String ICYKERNEL_NAME = "ICY Kernel";
     public static final String ICYUPDATER_NAME = "ICY Updater";
 
@@ -102,11 +106,9 @@ public class Updater
      * Validate the specified list of elements against local files.<br>
      * This actually remove missing files and update the file modification date.
      */
-    public static void validateElements(ArrayList<ElementDescriptor> elements)
-    {
+    public static void validateElements(final ArrayList<ElementDescriptor> elements) {
         // validate elements against local files
-        for (int i = elements.size() - 1; i >= 0; i--)
-        {
+        for (int i = elements.size() - 1; i >= 0; i--) {
             final ElementDescriptor element = elements.get(i);
 
             // validate element
@@ -122,11 +124,9 @@ public class Updater
      * Get the list of local elements.<br>
      * Elements are fetched from local version.xml file then validated with local files.
      */
-    public static ArrayList<ElementDescriptor> getLocalElements()
-    {
+    public static ArrayList<ElementDescriptor> getLocalElements() {
         // get local elements from XML file
-        final ArrayList<ElementDescriptor> result = loadElementsFromXML(
-                FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + VERSION_NAME);
+        final ArrayList<ElementDescriptor> result = loadElementsFromXML(FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + VERSION_NAME);
 
         // validate elements
         validateElements(result);
@@ -137,8 +137,7 @@ public class Updater
     /**
      * Get the list of online elements (online update.xml file)
      */
-    public static ArrayList<ElementDescriptor> getOnlineElements()
-    {
+    public static ArrayList<ElementDescriptor> getOnlineElements() {
         return loadElementsFromXML(UPDATE_DIRECTORY + FileUtil.separator + UPDATE_NAME);
     }
 
@@ -147,14 +146,12 @@ public class Updater
      * Compare specified local elements with online element and return a list of element<br>
      * which need to be updated.
      */
-    public static ArrayList<ElementDescriptor> getUpdateElements(ArrayList<ElementDescriptor> localElements)
-    {
-        final ArrayList<ElementDescriptor> result = new ArrayList<ElementDescriptor>();
+    public static ArrayList<ElementDescriptor> getUpdateElements(final ArrayList<ElementDescriptor> localElements) {
+        final ArrayList<ElementDescriptor> result = new ArrayList<>();
         final ArrayList<ElementDescriptor> onlineElements = getOnlineElements();
 
         // build update list
-        for (ElementDescriptor onlineElement : onlineElements)
-        {
+        for (final ElementDescriptor onlineElement : onlineElements) {
             final ElementDescriptor localElement = findElement(onlineElement.getName(), localElements);
             // get update element (differences between online and local element)
             final ElementDescriptor updateElement = ElementDescriptor.getUpdateElement(localElement, onlineElement);
@@ -170,14 +167,12 @@ public class Updater
     /**
      * Get the list of obsoletes files
      */
-    public static ArrayList<String> getObsoletes()
-    {
-        final ArrayList<String> result = new ArrayList<String>();
+    public static ArrayList<String> getObsoletes() {
+        final ArrayList<String> result = new ArrayList<>();
 
         final Document document = XMLUtil.loadDocument(UPDATE_DIRECTORY + FileUtil.separator + UPDATE_NAME, false);
 
-        if (document != null)
-        {
+        if (document != null) {
             // TODO: check if we can really remove that
             // document.normalizeDocument();
 
@@ -186,10 +181,8 @@ public class Updater
 
             // get all local path
             final ArrayList<Node> nodesLocalpath = XMLUtil.getChildren(obsoletes, ID_LOCALPATH);
-            if (nodesLocalpath != null)
-            {
-                for (Node n : nodesLocalpath)
-                {
+            if (nodesLocalpath != null) {
+                for (final Node n : nodesLocalpath) {
                     final String value = XMLUtil.getValue((Element) n, "");
                     if (!StringUtil.isEmpty(value, true))
                         result.add(value);
@@ -200,14 +193,12 @@ public class Updater
         return result;
     }
 
-    public static ArrayList<ElementDescriptor> loadElementsFromXML(String path)
-    {
-        final ArrayList<ElementDescriptor> result = new ArrayList<ElementDescriptor>();
+    public static ArrayList<ElementDescriptor> loadElementsFromXML(final String path) {
+        final ArrayList<ElementDescriptor> result = new ArrayList<>();
 
         final Document document = XMLUtil.loadDocument(path, true);
 
-        if (document != null)
-        {
+        if (document != null) {
             // TODO: check if we can really remove that
             // document.normalizeDocument();
 
@@ -216,9 +207,8 @@ public class Updater
 
             // get elements
             final ArrayList<Node> nodesElement = XMLUtil.getChildren(elements, ID_ELEMENT);
-            if (nodesElement != null)
-            {
-                for (Node n : nodesElement)
+            if (nodesElement != null) {
+                for (final Node n : nodesElement)
                     result.add(new ElementDescriptor(n));
             }
         }
@@ -229,14 +219,13 @@ public class Updater
     /**
      * Save the specified elements to the specified filename
      */
-    public static boolean saveElementsToXML(ArrayList<ElementDescriptor> elements, String path, boolean onlineSave)
-    {
+    public static boolean saveElementsToXML(final ArrayList<ElementDescriptor> elements, final String path, final boolean onlineSave) {
         final Document document = XMLUtil.createDocument(true);
 
-        final Element elementsNode = XMLUtil.addElement(document.getDocumentElement(), ID_ELEMENTS);
+        final Element elementsNode = XMLUtil.addElement(Objects.requireNonNull(document).getDocumentElement(), ID_ELEMENTS);
 
         // set elements
-        for (ElementDescriptor element : elements)
+        for (final ElementDescriptor element : elements)
             element.saveToNode(XMLUtil.addElement(elementsNode, ID_ELEMENT), onlineSave);
 
         return XMLUtil.saveDocument(document, path);
@@ -245,16 +234,15 @@ public class Updater
     /**
      * Find an element in the specified list
      */
-    public static ElementDescriptor findElement(String name, ArrayList<ElementDescriptor> list)
-    {
-        for (ElementDescriptor element : list)
+    public static ElementDescriptor findElement(final String name, final ArrayList<ElementDescriptor> list) {
+        for (final ElementDescriptor element : list)
             if (name.equals(element.getName()))
                 return element;
 
         return null;
     }
 
-    /**
+    /*
      * Find an element from his local path in the specified list
      */
     // private static ElementDescriptor findElementFromLocalPath(String path,
@@ -270,12 +258,10 @@ public class Updater
     /**
      * Return true if some update files are present in the update directory
      */
-    public static boolean hasUpdateFiles()
-    {
+    public static boolean hasUpdateFiles() {
         final String[] paths = FileUtil.getFiles(UPDATE_DIRECTORY, null, true, false, false);
 
-        for (String path : paths)
-        {
+        for (final String path : paths) {
             final String filename = FileUtil.getFileName(path);
 
             // check if we have others files other than updater and XML definitions
@@ -289,16 +275,13 @@ public class Updater
     /**
      * Update the specified "update" element (move files from update to application directory)<br>
      * then modify local elements list according to changes made.
-     * 
+     *
      * @return true if update succeed, false otherwise
-     * @throws InterruptedException
      */
-    public static boolean udpateElement(ElementDescriptor updateElement, ArrayList<ElementDescriptor> localElements)
-            throws InterruptedException
-    {
+    public static boolean udpateElement(final ElementDescriptor updateElement, final ArrayList<ElementDescriptor> localElements)
+            throws InterruptedException {
         // update all element files
-        if (Updater.updateFiles(updateElement.getFiles()))
-        {
+        if (Updater.updateFiles(updateElement.getFiles())) {
             // then modify local elements list
             updateElementInfos(updateElement, localElements);
             return true;
@@ -310,8 +293,7 @@ public class Updater
     /**
      * Update local elements according to changes presents in updateElement
      */
-    public static void clearElementInfos(ElementDescriptor updateElement, ArrayList<ElementDescriptor> localElements)
-    {
+    public static void clearElementInfos(final ElementDescriptor updateElement, final ArrayList<ElementDescriptor> localElements) {
         // find corresponding current local element
         final ElementDescriptor localElement = Updater.findElement(updateElement.getName(), localElements);
 
@@ -322,8 +304,7 @@ public class Updater
     /**
      * Update local elements according to changes presents in updateElement
      */
-    public static void updateElementInfos(ElementDescriptor updateElement, ArrayList<ElementDescriptor> localElements)
-    {
+    public static void updateElementInfos(final ElementDescriptor updateElement, final ArrayList<ElementDescriptor> localElements) {
         // find corresponding current local element
         final ElementDescriptor localElement = Updater.findElement(updateElement.getName(), localElements);
 
@@ -338,12 +319,9 @@ public class Updater
 
     /**
      * Update the specified files
-     * 
-     * @throws InterruptedException
      */
-    public static boolean updateFiles(ArrayList<ElementFile> files) throws InterruptedException
-    {
-        for (ElementFile file : files)
+    public static boolean updateFiles(final ArrayList<ElementFile> files) {
+        for (final ElementFile file : files)
             // if update fails --> exit
             if (!updateFile(file))
                 return false;
@@ -353,16 +331,12 @@ public class Updater
 
     /**
      * Update the specified local file
-     * 
-     * @throws InterruptedException
      */
-    public static boolean updateFile(ElementFile file) throws InterruptedException
-    {
+    public static boolean updateFile(final ElementFile file) {
         final String localPath = file.getLocalPath();
 
         // directory type file --> extract it
-        if (file.isDirectory())
-        {
+        if (file.isDirectory()) {
             final String dirName = UPDATE_DIRECTORY + FileUtil.separator + localPath;
             final String zipName = dirName + ".zip";
 
@@ -374,13 +348,11 @@ public class Updater
                 return false;
         }
 
-        if (updateFile(localPath, file.getDateModif()))
-        {
+        if (updateFile(localPath, file.getDateModif())) {
             final File dest = new File(FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + localPath);
 
             // there is no reason the file doesn't exists but anyway...
-            if (dest.exists())
-            {
+            if (dest.exists()) {
                 if (file.isExecutable())
                     dest.setExecutable(true, false);
                 if (file.isWritable())
@@ -388,16 +360,14 @@ public class Updater
                         dest.setWritable(true, true);
 
                 // apply to sub files
-                if (file.isDirectory() && file.isExecutable())
-                {
+                if (file.isDirectory() && file.isExecutable()) {
                     final String dirName = FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + localPath;
 
                     // we need to sign library files on OSX Catalina or later otherwise we can get INVALID SIGNATURE crash on library loading
-                    if (SystemUtil.isMac())
-                    {
-                        for (String libFile : FileUtil.getFiles(dirName, "dylib", true, true))
+                    if (SystemUtil.isMac()) {
+                        for (final String libFile : FileUtil.getFiles(dirName, "dylib", true, true))
                             codeSign(libFile);
-                        for (String libFile : FileUtil.getFiles(dirName, "jnilib", true, true))
+                        for (final String libFile : FileUtil.getFiles(dirName, "jnilib", true, true))
                             codeSign(libFile);
                     }
                 }
@@ -409,8 +379,7 @@ public class Updater
         return false;
     }
 
-    public static boolean codeSign(String libFile) throws InterruptedException
-    {
+    public static boolean codeSign(final String libFile) {
         return true;
         // not a good idea to sign libraries !
 //        return SystemUtil.exec("codesign --force --deep -s - " + FileUtil.getGenericPath(libFile)).waitFor() == 0;
@@ -419,12 +388,10 @@ public class Updater
     /**
      * Backup the specified local file
      */
-    public static boolean backup(String localPath)
-    {
+    public static boolean backup(final String localPath) {
         final String src = FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + localPath;
         // file exist ? backup it
-        if (FileUtil.exists(src))
-        {
+        if (FileUtil.exists(src)) {
             final String dest = BACKUP_DIRECTORY + FileUtil.separator + localPath;
 
             if (!FileUtil.copy(src, dest, true, true))
@@ -440,28 +407,24 @@ public class Updater
     /**
      * Update the specified local file
      */
-    public static boolean updateFile(String localPath, long dateModif)
-    {
+    public static boolean updateFile(final String localPath, final long dateModif) {
         // no update needed
         if (!needUpdate(localPath, dateModif))
             return true;
 
         // backup file
-        if (!backup(localPath))
-        {
+        if (!backup(localPath)) {
             // backup failed
-            System.err.println("Updater.udpateFile(" + localPath + ") failed :");
+            IcyLogger.error(Updater.class, "Updater.udpateFile(" + localPath + ") failed.");
             // System.err.println("Cannot backup file to '" + BACKUP_DIRECTORY + FileUtil.separator
             // + localPath);
             return false;
         }
 
         // move file
-        if (!FileUtil.rename(UPDATE_DIRECTORY + FileUtil.separator + localPath,
-                FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + localPath, true))
-        {
+        if (!FileUtil.rename(UPDATE_DIRECTORY + FileUtil.separator + localPath, FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + localPath, true)) {
             // move failed
-            System.err.println("Updater.udpateFile('" + localPath + "') failed !");
+            IcyLogger.error(Updater.class, "Updater.udpateFile('" + localPath + "') failed !");
             // System.err.println("Cannot rename file from '" + UPDATE_DIRECTORY +
             // FileUtil.separator + localPath
             // + "' to '" + localPath + "'");
@@ -474,8 +437,7 @@ public class Updater
     /**
      * Return true if specified file is different from the update file (in Update directory)
      */
-    public static boolean needUpdate(String localPath, long dateModif)
-    {
+    public static boolean needUpdate(final String localPath, final long dateModif) {
         final File localFile = new File(FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + localPath);
 
         return (!localFile.exists()) || (dateModif == 0L) || (localFile.lastModified() != dateModif);
@@ -484,25 +446,22 @@ public class Updater
     /**
      * Process to restoration (in case the update failed)
      */
-    public static boolean restore()
-    {
+    public static boolean restore() {
         final int len = BACKUP_DIRECTORY.length();
         // get files only (no directory)
         final String[] paths = FileUtil.getFiles(BACKUP_DIRECTORY, null, true, false, false);
         boolean result = true;
 
-        for (String backupPath : paths)
-        {
+        for (final String backupPath : paths) {
             final String finalPath = backupPath.substring(len + 1);
 
             // don't restore updater
             if (finalPath.equals(UPDATER_NAME))
                 continue;
 
-            if (!FileUtil.rename(backupPath, finalPath, true))
-            {
+            if (!FileUtil.rename(backupPath, finalPath, true)) {
                 // rename failed (FileUtil.rename is already displaying error messages if needed)
-                System.err.println("Updater.restore() cannot restore '" + finalPath + "', you should do it manually.");
+                IcyLogger.error(Updater.class, "Updater.restore() cannot restore '" + finalPath + "', you should do it manually.");
                 result = false;
             }
         }
@@ -513,10 +472,9 @@ public class Updater
     /**
      * Delete obsoletes files
      */
-    public static void deleteObsoletes()
-    {
+    public static void deleteObsoletes() {
         // delete obsolete files
-        for (String obsolete : getObsoletes())
+        for (final String obsolete : getObsoletes())
             FileUtil.delete(obsolete, true);
     }
 }

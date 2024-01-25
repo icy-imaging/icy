@@ -1,42 +1,22 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.roi;
-
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import icy.canvas.IcyCanvas;
 import icy.common.CollapsibleEvent;
@@ -56,14 +36,13 @@ import icy.roi.ROIEvent.ROIPointEventType;
 import icy.roi.edit.PositionROIEdit;
 import icy.sequence.Sequence;
 import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.type.point.Point5D;
 import icy.type.rectangle.Rectangle5D;
-import icy.util.ClassUtil;
-import icy.util.ColorUtil;
-import icy.util.EventUtil;
+import icy.util.*;
 import icy.util.ShapeUtil.BooleanOperator;
-import icy.util.StringUtil;
-import icy.util.XMLUtil;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import plugins.kernel.canvas.VtkCanvas;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import plugins.kernel.roi.roi3d.ROI3DArea;
@@ -71,13 +50,24 @@ import plugins.kernel.roi.roi4d.ROI4DArea;
 import plugins.kernel.roi.roi5d.ROI5DArea;
 import vtk.vtkProp;
 
-public abstract class ROI implements ChangeListener, XMLPersistent
-{
-    public static class ROIIdComparator implements Comparator<ROI>
-    {
+import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+import java.lang.reflect.Constructor;
+import java.util.List;
+import java.util.*;
+import java.util.Map.Entry;
+
+/**
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
+ */
+public abstract class ROI implements ChangeListener, XMLPersistent {
+    public static class ROIIdComparator implements Comparator<ROI> {
         @Override
-        public int compare(ROI roi1, ROI roi2)
-        {
+        public int compare(final ROI roi1, final ROI roi2) {
             if (roi1 == roi2)
                 return 0;
 
@@ -86,20 +76,13 @@ public abstract class ROI implements ChangeListener, XMLPersistent
             if (roi2 == null)
                 return 1;
 
-            if (roi1.id < roi2.id)
-                return -1;
-            if (roi1.id > roi2.id)
-                return 1;
-
-            return 0;
+            return Integer.compare(roi1.id, roi2.id);
         }
     }
 
-    public static class ROINameComparator implements Comparator<ROI>
-    {
+    public static class ROINameComparator implements Comparator<ROI> {
         @Override
-        public int compare(ROI roi1, ROI roi2)
-        {
+        public int compare(final ROI roi1, final ROI roi2) {
             if (roi1 == roi2)
                 return 0;
 
@@ -114,11 +97,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
 
     /**
      * Group if for ROI (used to do group type operation)
-     * 
+     *
      * @author Stephane
      */
-    public static enum ROIGroupId
-    {
+    public enum ROIGroupId {
         A, B
     }
 
@@ -173,29 +155,25 @@ public abstract class ROI implements ChangeListener, XMLPersistent
 
     /**
      * Create a ROI from its class name or {@link PluginROI} class name.
-     * 
+     *
      * @param className
      *        roi class name or {@link PluginROI} class name.
      * @return ROI (null if command is an incorrect ROI class name)
      */
-    public static ROI create(String className)
-    {
+    public static ROI create(final String className) {
         ROI result = null;
 
-        try
-        {
+        try {
             // search for the specified className
             final Class<?> clazz = ClassUtil.findClass(className);
 
             // class found
-            if (clazz != null)
-            {
-                try
-                {
+            if (clazz != null) {
+                try {
                     // we first check if we have a PluginROI class here
                     final Class<? extends PluginROI> roiClazz = clazz.asSubclass(PluginROI.class);
                     // create the plugin
-                    final PluginROI plugin = roiClazz.newInstance();
+                    final PluginROI plugin = roiClazz.getDeclaredConstructor().newInstance(); // roiClazz.newInstance();
                     // create ROI
                     result = plugin.createROI();
                     // set ROI icon from plugin icon
@@ -203,32 +181,24 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                     if (icon != null)
                         result.setIcon(icon);
                 }
-                catch (ClassCastException e0)
-                {
+                catch (final ClassCastException e0) {
                     // check if this is a ROI class
                     final Class<? extends ROI> roiClazz = clazz.asSubclass(ROI.class);
 
                     // default constructor
-                    final Constructor<? extends ROI> constructor = roiClazz.getConstructor(new Class[] {});
+                    final Constructor<? extends ROI> constructor = roiClazz.getConstructor();
                     // build ROI
                     result = constructor.newInstance();
                 }
             }
         }
-        catch (NoSuchMethodException e)
-        {
-            IcyExceptionHandler.handleException(
-                    new NoSuchMethodException(
-                            "Default constructor not found in class '" + className + "', cannot create the ROI."),
-                    true);
+        catch (final NoSuchMethodException e) {
+            IcyExceptionHandler.handleException(new NoSuchMethodException("Default constructor not found in class '" + className + "', cannot create the ROI."), true);
         }
-        catch (ClassNotFoundException e)
-        {
-            IcyExceptionHandler.handleException(
-                    new ClassNotFoundException("Cannot find '" + className + "' class, cannot create the ROI."), true);
+        catch (final ClassNotFoundException e) {
+            IcyExceptionHandler.handleException(new ClassNotFoundException("Cannot find '" + className + "' class, cannot create the ROI."), true);
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             IcyExceptionHandler.handleException(e, true);
         }
 
@@ -237,34 +207,30 @@ public abstract class ROI implements ChangeListener, XMLPersistent
 
     /**
      * Create a ROI from its class name or {@link PluginROI} class name (interactive mode).
-     * 
+     *
      * @param className
      *        roi class name or {@link PluginROI} class name.
      * @param imagePoint
      *        initial point position in image coordinates (interactive mode).
      * @return ROI (null if the specified class name is an incorrect ROI class name)
      */
-    public static ROI create(String className, Point5D imagePoint)
-    {
+    public static ROI create(final String className, final Point5D imagePoint) {
         if (imagePoint == null)
             return create(className);
 
         ROI result = null;
 
-        try
-        {
+        try {
             // search for the specified className
             final Class<?> clazz = ClassUtil.findClass(className);
 
             // class found
-            if (clazz != null)
-            {
-                try
-                {
+            if (clazz != null) {
+                try {
                     // we first check if we have a PluginROI class here
                     final Class<? extends PluginROI> roiClazz = clazz.asSubclass(PluginROI.class);
                     // create the plugin
-                    final PluginROI plugin = roiClazz.newInstance();
+                    final PluginROI plugin = roiClazz.getDeclaredConstructor().newInstance(); // roiClazz.newInstance();
 
                     // then create ROI with the Point5D constructor
                     result = plugin.createROI(imagePoint);
@@ -277,35 +243,27 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                     if (icon != null)
                         result.setIcon(icon);
                 }
-                catch (ClassCastException e0)
-                {
+                catch (final ClassCastException e0) {
                     // check if this is a ROI class
                     final Class<? extends ROI> roiClazz = clazz.asSubclass(ROI.class);
 
-                    try
-                    {
+                    try {
                         // get constructor (Point5D)
-                        final Constructor<? extends ROI> constructor = roiClazz
-                                .getConstructor(new Class[] {Point5D.class});
+                        final Constructor<? extends ROI> constructor = roiClazz.getConstructor(Point5D.class);
                         // build ROI
-                        result = constructor.newInstance(new Object[] {imagePoint});
+                        result = constructor.newInstance(imagePoint);
                     }
-                    catch (NoSuchMethodException e1)
-                    {
+                    catch (final NoSuchMethodException e1) {
                         // try default constructor as last chance...
-                        final Constructor<? extends ROI> constructor = roiClazz.getConstructor(new Class[] {});
+                        final Constructor<? extends ROI> constructor = roiClazz.getConstructor();
                         // build ROI
                         result = constructor.newInstance();
                     }
                 }
             }
         }
-        catch (Exception e)
-        {
-            IcyExceptionHandler.handleException(
-                    new NoSuchMethodException(
-                            "Default constructor not found in class '" + className + "', cannot create the ROI."),
-                    true);
+        catch (final Exception e) {
+            IcyExceptionHandler.handleException(new NoSuchMethodException("Default constructor not found in class '" + className + "', cannot create the ROI."), true);
         }
 
         return result;
@@ -320,8 +278,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return ROI
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ROI create(String className, Point2D imagePoint)
-    {
+    public static ROI create(final String className, final Point2D imagePoint) {
         return create(className, new Point5D.Double(imagePoint.getX(), imagePoint.getY(), -1d, -1d, -1d));
     }
 
@@ -338,8 +295,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return ROI
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ROI create(String className, Sequence seq, Point2D imagePoint, boolean creation)
-    {
+    public static ROI create(final String className, final Sequence seq, final Point2D imagePoint, final boolean creation) {
         final ROI result = create(className, imagePoint);
 
         // attach to sequence once ROI is initialized
@@ -351,13 +307,12 @@ public abstract class ROI implements ChangeListener, XMLPersistent
 
     /**
      * Create a ROI from a xml definition
-     * 
+     *
      * @param node
      *        xml node defining the roi
      * @return ROI (null if node is an incorrect ROI definition)
      */
-    public static ROI createFromXML(Node node)
-    {
+    public static ROI createFromXML(final Node node) {
         if (node == null)
             return null;
 
@@ -367,8 +322,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
 
         final ROI roi = create(className);
         // load properties from XML
-        if (roi != null)
-        {
+        if (roi != null) {
             // error while loading infos --> return null
             if (!roi.loadFromXML(node))
                 return null;
@@ -379,8 +333,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         return roi;
     }
 
-    public static double getAdjustedStroke(IcyCanvas canvas, double stroke)
-    {
+    public static double getAdjustedStroke(final IcyCanvas canvas, final double stroke) {
         final double adjStrkX = canvas.canvasToImageLogDeltaX((int) stroke);
         final double adjStrkY = canvas.canvasToImageLogDeltaY((int) stroke);
 
@@ -394,11 +347,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        ROI class
      * @return Return ROI of specified type from the ROI list
      */
-    public static List<ROI> getROIList(List<? extends ROI> rois, Class<? extends ROI> clazz)
-    {
-        final List<ROI> result = new ArrayList<ROI>();
+    public static List<ROI> getROIList(final List<? extends ROI> rois, final Class<? extends ROI> clazz) {
+        final List<ROI> result = new ArrayList<>();
 
-        for (ROI roi : rois)
+        for (final ROI roi : rois)
             if (clazz.isInstance(roi))
                 result.add(roi);
 
@@ -414,11 +366,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return list of ROI
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ArrayList<ROI> getROIList(ArrayList<? extends ROI> rois, Class<? extends ROI> clazz)
-    {
-        final ArrayList<ROI> result = new ArrayList<ROI>();
+    public static ArrayList<ROI> getROIList(final ArrayList<? extends ROI> rois, final Class<? extends ROI> clazz) {
+        final ArrayList<ROI> result = new ArrayList<>();
 
-        for (ROI roi : rois)
+        for (final ROI roi : rois)
             if (clazz.isInstance(roi))
                 result.add(roi);
 
@@ -434,11 +385,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return list of ROI
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static List<ROI> getROIList(ROI rois[], Class<? extends ROI> clazz)
-    {
-        final List<ROI> result = new ArrayList<ROI>();
+    public static List<ROI> getROIList(final ROI[] rois, final Class<? extends ROI> clazz) {
+        final List<ROI> result = new ArrayList<>();
 
-        for (ROI roi : rois)
+        for (final ROI roi : rois)
             if (clazz.isInstance(roi))
                 result.add(roi);
 
@@ -446,15 +396,13 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     }
 
     /**
-     * @return Return the number of ROI defined in the specified XML node.
+     * Return the number of ROI defined in the specified XML node.
      * @param node
      *        XML node defining the ROI list
      * @return the number of ROI defined in the XML node.
      */
-    public static int getROICount(Node node)
-    {
-        if (node != null)
-        {
+    public static int getROICount(final Node node) {
+        if (node != null) {
             final List<Node> nodesROI = XMLUtil.getChildren(node, ID_ROI);
 
             if (nodesROI != null)
@@ -466,23 +414,19 @@ public abstract class ROI implements ChangeListener, XMLPersistent
 
     /**
      * Return a list of ROI from a XML node.
-     * 
+     *
      * @param node
      *        XML node defining the ROI list
      * @return a list of ROI
      */
-    public static List<ROI> loadROIsFromXML(Node node)
-    {
-        final List<ROI> result = new ArrayList<ROI>();
+    public static List<ROI> loadROIsFromXML(final Node node) {
+        final List<ROI> result = new ArrayList<>();
 
-        if (node != null)
-        {
+        if (node != null) {
             final List<Node> nodesROI = XMLUtil.getChildren(node, ID_ROI);
 
-            if (nodesROI != null)
-            {
-                for (Node n : nodesROI)
-                {
+            if (nodesROI != null) {
+                for (final Node n : nodesROI) {
                     final ROI roi = createFromXML(n);
 
                     if (roi != null)
@@ -501,31 +445,26 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return List of ROI
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static List<ROI> getROIsFromXML(Node node)
-    {
+    public static List<ROI> getROIsFromXML(final Node node) {
         return loadROIsFromXML(node);
     }
 
     /**
      * Set a list of ROI to a XML node.
-     * 
+     *
      * @param node
      *        XML node which is used to store the list of ROI
      * @param rois
      *        the list of ROI to store in the XML node
      */
-    public static void saveROIsToXML(Node node, List<ROI> rois)
-    {
-        if (node != null)
-        {
-            for (ROI roi : rois)
-            {
+    public static void saveROIsToXML(final Node node, final List<ROI> rois) {
+        if (node != null) {
+            for (final ROI roi : rois) {
                 final Node nodeROI = XMLUtil.addElement(node, ID_ROI);
 
-                if (!roi.saveToXML(nodeROI))
-                {
+                if (!roi.saveToXML(nodeROI)) {
                     XMLUtil.removeNode(node, nodeROI);
-                    System.err.println("Error: the roi " + roi.getName() + " was not correctly saved to XML !");
+                    IcyLogger.error(ROI.class, "The roi " + roi.getName() + " was not correctly saved to XML !");
                 }
             }
         }
@@ -539,67 +478,54 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        list of ROI
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void setROIsFromXML(Node node, List<ROI> rois)
-    {
+    public static void setROIsFromXML(final Node node, final List<ROI> rois) {
         saveROIsToXML(node, rois);
     }
 
-    public static Color getDefaultColor()
-    {
+    public static Color getDefaultColor() {
         if (defaultColor == null)
-            defaultColor = new Color(
-                    GeneralPreferences.getPreferencesRoiOverlay().getInt(ID_COLOR, DEFAULT_COLOR.getRGB()));
+            defaultColor = new Color(GeneralPreferences.getPreferencesRoiOverlay().getInt(ID_COLOR, DEFAULT_COLOR.getRGB()));
 
         return defaultColor;
     }
 
-    public static float getDefaultOpacity()
-    {
+    public static float getDefaultOpacity() {
         if (defaultOpacity == null)
-            defaultOpacity = Float
-                    .valueOf(GeneralPreferences.getPreferencesRoiOverlay().getFloat(ID_OPACITY, DEFAULT_OPACITY));
+            defaultOpacity = Float.valueOf(GeneralPreferences.getPreferencesRoiOverlay().getFloat(ID_OPACITY, DEFAULT_OPACITY));
 
         return defaultOpacity.floatValue();
     }
 
-    public static double getDefaultStroke()
-    {
+    public static double getDefaultStroke() {
         if (defaultStroke == null)
-            defaultStroke = Double
-                    .valueOf(GeneralPreferences.getPreferencesRoiOverlay().getDouble(ID_STROKE, DEFAULT_STROKE));
+            defaultStroke = Double.valueOf(GeneralPreferences.getPreferencesRoiOverlay().getDouble(ID_STROKE, DEFAULT_STROKE));
 
         return defaultStroke.doubleValue();
     }
 
-    public static boolean getDefaultShowName()
-    {
+    public static boolean getDefaultShowName() {
         if (defaultShowName == null)
-            defaultShowName = Boolean
-                    .valueOf(GeneralPreferences.getPreferencesRoiOverlay().getBoolean(ID_SHOWNAME, false));
+            defaultShowName = Boolean.valueOf(GeneralPreferences.getPreferencesRoiOverlay().getBoolean(ID_SHOWNAME, false));
 
         return defaultShowName.booleanValue();
     }
 
-    public static void setDefaultColor(Color value)
-    {
+    public static void setDefaultColor(final Color value) {
         defaultColor = value;
         GeneralPreferences.getPreferencesRoiOverlay().putInt(ID_COLOR, value.getRGB());
     }
 
-    public static void setDefaultOpacity(float value)
-    {
+    public static void setDefaultOpacity(final float value) {
         defaultOpacity = Float.valueOf(value);
         GeneralPreferences.getPreferencesRoiOverlay().putFloat(ID_OPACITY, value);
     }
 
-    public static void setDefaultStroke(double value)
-    {
+    public static void setDefaultStroke(final double value) {
         defaultStroke = Double.valueOf(value);
         GeneralPreferences.getPreferencesRoiOverlay().putDouble(ID_STROKE, value);
     }
 
-    public static void setDefaultShowName(boolean value)
-    {
+    public static void setDefaultShowName(final boolean value) {
         defaultShowName = Boolean.valueOf(value);
         GeneralPreferences.getPreferencesRoiOverlay().putBoolean(ID_SHOWNAME, value);
     }
@@ -613,8 +539,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double canvasToImageDeltaX(IcyCanvas canvas, int value)
-    {
+    public static double canvasToImageDeltaX(final IcyCanvas canvas, final int value) {
         return canvas.canvasToImageDeltaX(value);
     }
 
@@ -629,8 +554,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double canvasToImageLogDeltaX(IcyCanvas canvas, double value, double logFactor)
-    {
+    public static double canvasToImageLogDeltaX(final IcyCanvas canvas, final double value, final double logFactor) {
         return canvas.canvasToImageLogDeltaX((int) value, logFactor);
     }
 
@@ -643,8 +567,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double canvasToImageLogDeltaX(IcyCanvas canvas, double value)
-    {
+    public static double canvasToImageLogDeltaX(final IcyCanvas canvas, final double value) {
         return canvas.canvasToImageLogDeltaX((int) value);
     }
 
@@ -659,8 +582,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double canvasToImageLogDeltaX(IcyCanvas canvas, int value, double logFactor)
-    {
+    public static double canvasToImageLogDeltaX(final IcyCanvas canvas, final int value, final double logFactor) {
         return canvas.canvasToImageLogDeltaX(value, logFactor);
     }
 
@@ -673,8 +595,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double canvasToImageLogDeltaX(IcyCanvas canvas, int value)
-    {
+    public static double canvasToImageLogDeltaX(final IcyCanvas canvas, final int value) {
         return canvas.canvasToImageLogDeltaX(value);
     }
 
@@ -687,8 +608,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double canvasToImageDeltaY(IcyCanvas canvas, int value)
-    {
+    public static double canvasToImageDeltaY(final IcyCanvas canvas, final int value) {
         return canvas.canvasToImageDeltaY(value);
     }
 
@@ -703,8 +623,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return doubme
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double canvasToImageLogDeltaY(IcyCanvas canvas, double value, double logFactor)
-    {
+    public static double canvasToImageLogDeltaY(final IcyCanvas canvas, final double value, final double logFactor) {
         return canvas.canvasToImageLogDeltaY((int) value, logFactor);
     }
 
@@ -717,8 +636,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double canvasToImageLogDeltaY(IcyCanvas canvas, double value)
-    {
+    public static double canvasToImageLogDeltaY(final IcyCanvas canvas, final double value) {
         return canvas.canvasToImageLogDeltaY((int) value);
     }
 
@@ -733,8 +651,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double canvasToImageLogDeltaY(IcyCanvas canvas, int value, double logFactor)
-    {
+    public static double canvasToImageLogDeltaY(final IcyCanvas canvas, final int value, final double logFactor) {
         return canvas.canvasToImageLogDeltaY(value, logFactor);
     }
 
@@ -747,16 +664,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return double
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static double canvasToImageLogDeltaY(IcyCanvas canvas, int value)
-    {
+    public static double canvasToImageLogDeltaY(final IcyCanvas canvas, final int value) {
         return canvas.canvasToImageLogDeltaY(value);
     }
 
     /**
      * Abstract basic class for ROI overlay
      */
-    public abstract class ROIPainter extends Overlay implements VtkPainter
-    {
+    public abstract class ROIPainter extends Overlay implements VtkPainter {
         /**
          * Overlay properties
          */
@@ -771,8 +686,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          */
         protected final Point5D.Double mousePos;
 
-        public ROIPainter()
-        {
+        public ROIPainter() {
             super("ROI painter", OverlayPriority.SHAPE_NORMAL);
 
             stroke = getDefaultStroke();
@@ -789,8 +703,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         /**
          * @return Return the ROI painter stroke.
          */
-        public double getStroke()
-        {
+        public double getStroke() {
             return painter.stroke;
         }
 
@@ -799,8 +712,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          *        canvas
          * @return Get adjusted stroke for the current canvas transformation
          */
-        public double getAdjustedStroke(IcyCanvas canvas)
-        {
+        public double getAdjustedStroke(final IcyCanvas canvas) {
             return ROI.getAdjustedStroke(canvas, getStroke());
         }
 
@@ -808,10 +720,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @param value
          *        Set ROI painter stroke.
          */
-        public void setStroke(double value)
-        {
-            if (stroke != value)
-            {
+        public void setStroke(final double value) {
+            if (stroke != value) {
                 stroke = value;
                 // painter changed event is done on property changed
                 ROI.this.propertyChanged(PROPERTY_STROKE);
@@ -821,8 +731,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         /**
          * @return Returns the content opacity factor (0 = transparent while 1 means opaque).
          */
-        public float getOpacity()
-        {
+        public float getOpacity() {
             return opacity;
         }
 
@@ -830,10 +739,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @param value
          *        Sets the content opacity factor (0 = transparent while 1 means opaque).
          */
-        public void setOpacity(float value)
-        {
-            if (opacity != value)
-            {
+        public void setOpacity(final float value) {
+            if (opacity != value) {
                 opacity = value;
                 // painter changed event is done on property changed
                 ROI.this.propertyChanged(PROPERTY_OPACITY);
@@ -843,8 +750,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         /**
          * @return Returns the color for focused state
          */
-        public Color getFocusedColor()
-        {
+        public Color getFocusedColor() {
             final int lum = ColorUtil.getLuminance(getColor());
 
             if (lum < (256 - 32))
@@ -858,16 +764,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @return color
          */
         @Deprecated(since = "2.4.3", forRemoval = true)
-        public Color getSelectedColor()
-        {
+        public Color getSelectedColor() {
             return getColor();
         }
 
         /**
          * @return Returns the color used to display the ROI depending its current state.
          */
-        public Color getDisplayColor()
-        {
+        public Color getDisplayColor() {
             if (isFocused())
                 return getFocusedColor();
 
@@ -877,8 +781,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         /**
          * @return Return the ROI painter base color.
          */
-        public Color getColor()
-        {
+        public Color getColor() {
             return color;
         }
 
@@ -886,10 +789,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @param value
          *        Set the ROI painter base color.
          */
-        public void setColor(Color value)
-        {
-            if ((color != null) && (color != value))
-            {
+        public void setColor(final Color value) {
+            if ((color != null) && (color != value)) {
                 color = value;
                 // painter changed event is done on property changed
                 ROI.this.propertyChanged(PROPERTY_COLOR);
@@ -899,8 +800,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         /**
          * @return Return <code>true</code> if ROI painter should display the ROI name at draw time.<br>
          */
-        public boolean getShowName()
-        {
+        public boolean getShowName() {
             return showName;
         }
 
@@ -908,10 +808,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @param value
          *        When set to <code>true</code> the ROI painter display the ROI name at draw time.
          */
-        public void setShowName(boolean value)
-        {
-            if (showName != value)
-            {
+        public void setShowName(final boolean value) {
+            if (showName != value) {
                 showName = value;
                 ROI.this.propertyChanged(PROPERTY_SHOWNAME);
             }
@@ -923,8 +821,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          *        color
          */
         @Deprecated(since = "2.4.3", forRemoval = true)
-        public void setSelectedColor(Color value)
-        {
+        public void setSelectedColor(final Color value) {
             //
         }
 
@@ -933,8 +830,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @return double of 5D point
          */
         @Deprecated(since = "2.4.3", forRemoval = true)
-        public Point5D.Double getMousePos()
-        {
+        public Point5D.Double getMousePos() {
             return mousePos;
         }
 
@@ -944,14 +840,12 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          *        5DPoint
          */
         @Deprecated(since = "2.4.3", forRemoval = true)
-        public void setMousePos(Point5D pos)
-        {
+        public void setMousePos(final Point5D pos) {
             if (!mousePos.equals(pos))
                 mousePos.setLocation(pos);
         }
 
-        public void computePriority()
-        {
+        public void computePriority() {
             if (isFocused())
                 setPriority(OverlayPriority.SHAPE_TOP);
             else if (isSelected())
@@ -961,29 +855,25 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         @Override
-        public boolean isReadOnly()
-        {
+        public boolean isReadOnly() {
             // use ROI read only property
             return ROI.this.isReadOnly();
         }
 
         @Override
-        public void setReadOnly(boolean readOnly)
-        {
+        public void setReadOnly(final boolean readOnly) {
             super.setReadOnly(readOnly);
             ROI.this.setReadOnly(readOnly);
         }
 
         @Override
-        public String getName()
-        {
+        public String getName() {
             // use ROI name property
             return ROI.this.getName();
         }
 
         @Override
-        public void setName(String name)
-        {
+        public void setName(final String name) {
             // modifying layer name modify ROI name
             ROI.this.setName(name);
         }
@@ -997,8 +887,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @param e
          *        event
          */
-        protected boolean updateFocus(InputEvent e, Point5D imagePoint, IcyCanvas canvas)
-        {
+        protected boolean updateFocus(final InputEvent e, final Point5D imagePoint, final IcyCanvas canvas) {
             // empty implementation by default
             return false;
         }
@@ -1012,18 +901,15 @@ public abstract class ROI implements ChangeListener, XMLPersistent
          * @param canvas
          *        canvas
          */
-        protected boolean updateSelect(InputEvent e, Point5D imagePoint, IcyCanvas canvas)
-        {
+        protected boolean updateSelect(final InputEvent e, final Point5D imagePoint, final IcyCanvas canvas) {
             // nothing to do if the ROI does not have focus
             if (!isFocused())
                 return false;
 
             // union selection
-            if (EventUtil.isShiftDown(e))
-            {
+            if (EventUtil.isShiftDown(e)) {
                 // not already selected --> add ROI to selection
-                if (!isSelected())
-                {
+                if (!isSelected()) {
                     setSelected(true);
                     return true;
                 }
@@ -1039,8 +925,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
             // exclusive selection
             {
                 // not selected --> exclusive ROI selection
-                if (!isSelected())
-                {
+                if (!isSelected()) {
                     // exclusive selection can fail if we use embedded ROI (as ROIStack)
                     if (!canvas.getSequence().setSelectedROI(ROI.this))
                         ROI.this.setSelected(true);
@@ -1052,21 +937,17 @@ public abstract class ROI implements ChangeListener, XMLPersistent
             return false;
         }
 
-        protected boolean updateDrag(InputEvent e, Point5D imagePoint, IcyCanvas canvas)
-        {
+        protected boolean updateDrag(final InputEvent e, final Point5D imagePoint, final IcyCanvas canvas) {
             // empty implementation by default
             return false;
         }
 
         @Override
-        public void keyPressed(KeyEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
-            if (!e.isConsumed())
-            {
+        public void keyPressed(final KeyEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
+            if (!e.isConsumed()) {
                 final Sequence seq = canvas.getSequence();
 
-                switch (e.getKeyCode())
-                {
+                switch (e.getKeyCode()) {
                     case KeyEvent.VK_ESCAPE:
                         // has selected ROI ? --> global unselect ROI
                         if (!seq.getSelectedROIs().isEmpty())
@@ -1081,7 +962,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                         // has selected ROI ? --> remove all selected ROI from the sequence
                         if (!seq.getSelectedROIs().isEmpty())
                             canvas.getSequence().removeSelectedROIs(true, true);
-                        // roi focused ? --> delete ROI
+                            // roi focused ? --> delete ROI
                         else if (isFocused())
                             canvas.getSequence().removeROI(ROI.this, true);
 
@@ -1092,12 +973,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                     case KeyEvent.VK_K:
                         final List<ROI> selectedROIs = seq.getSelectedROIs();
 
-                        if (!selectedROIs.isEmpty())
-                        {
+                        if (!selectedROIs.isEmpty()) {
                             int numRO = 0;
 
                             // has selected ROI ? --> global unselect ROI
-                            for (ROI roi : selectedROIs)
+                            for (final ROI roi : selectedROIs)
                                 if (roi.isReadOnly())
                                     numRO++;
 
@@ -1105,13 +985,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                             final boolean ro = numRO > (selectedROIs.size() / 2);
 
                             seq.beginUpdate();
-                            try
-                            {
-                                for (ROI roi : selectedROIs)
+                            try {
+                                for (final ROI roi : selectedROIs)
                                     roi.setReadOnly(!ro);
                             }
-                            finally
-                            {
+                            finally {
                                 seq.endUpdate();
                             }
                         }
@@ -1122,29 +1000,23 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                 }
 
                 // only for selected and modifiable ROIs not necessary visible
-                if (isSelected() && !isReadOnly())
-                {
+                if (isSelected() && !isReadOnly()) {
                     // shift modifier is used for ROI special actions
-                    if (EventUtil.isShiftDown(e))
-                    {
-                        switch (e.getKeyCode())
-                        {
+                    if (EventUtil.isShiftDown(e)) {
+                        switch (e.getKeyCode()) {
                             case KeyEvent.VK_T:
                                 // attach to current T position
-                                if (imagePoint.getT() != -1)
-                                {
+                                if (imagePoint.getT() != -1) {
                                     final int t = (int) imagePoint.getT();
                                     final Point5D savePos = getPosition5D();
 
-                                    if ((ROI.this instanceof ROI2D) && (((ROI2D) ROI.this).getT() != t))
-                                    {
+                                    if ((ROI.this instanceof ROI2D) && (((ROI2D) ROI.this).getT() != t)) {
                                         ((ROI2D) ROI.this).setT(t);
                                         // add position change to undo manager
                                         Icy.getMainInterface().getUndoManager()
                                                 .addEdit(new PositionROIEdit(ROI.this, savePos, false));
                                     }
-                                    else if ((ROI.this instanceof ROI3D) && (((ROI3D) ROI.this).getT() != t))
-                                    {
+                                    else if ((ROI.this instanceof ROI3D) && (((ROI3D) ROI.this).getT() != t)) {
                                         ((ROI3D) ROI.this).setT(t);
                                         // add position change to undo manager
                                         Icy.getMainInterface().getUndoManager()
@@ -1155,12 +1027,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
 
                             case KeyEvent.VK_Z:
                                 // attach to current Z position
-                                if (imagePoint.getZ() != -1)
-                                {
+                                if (imagePoint.getZ() != -1) {
                                     final int z = (int) imagePoint.getZ();
 
-                                    if ((ROI.this instanceof ROI2D) && (((ROI2D) ROI.this).getZ() != z))
-                                    {
+                                    if ((ROI.this instanceof ROI2D) && (((ROI2D) ROI.this).getZ() != z)) {
                                         final Point5D savePos = getPosition5D();
                                         ((ROI2D) ROI.this).setZ(z);
                                         // add position change to undo manager
@@ -1174,22 +1044,16 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                 }
 
                 // only if ROI is visible / active for current position
-                if (isActiveFor(canvas))
-                {
+                if (isActiveFor(canvas)) {
                     // only for selected and modifiable ROIs
-                    if (isSelected() && !isReadOnly())
-                    {
+                    if (isSelected() && !isReadOnly()) {
                         // control modifier is used for ROI modification from keyboard
-                        if (EventUtil.isMenuControlDown(e))
-                        {
-                            switch (e.getKeyCode())
-                            {
+                        if (EventUtil.isMenuControlDown(e)) {
+                            switch (e.getKeyCode()) {
                                 case KeyEvent.VK_LEFT:
-                                    if (EventUtil.isAltDown(e))
-                                    {
+                                    if (EventUtil.isAltDown(e)) {
                                         // resize
-                                        if (canSetBounds())
-                                        {
+                                        if (canSetBounds()) {
                                             final Rectangle5D bnd = getBounds5D();
                                             if (EventUtil.isShiftDown(e))
                                                 bnd.setSizeX(Math.max(1, bnd.getSizeX() - 10));
@@ -1199,11 +1063,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                                             e.consume();
                                         }
                                     }
-                                    else
-                                    {
+                                    else {
                                         // move
-                                        if (canSetPosition())
-                                        {
+                                        if (canSetPosition()) {
                                             final Point5D pos = getPosition5D();
                                             if (EventUtil.isShiftDown(e))
                                                 pos.setX(pos.getX() - 10);
@@ -1216,11 +1078,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                                     break;
 
                                 case KeyEvent.VK_RIGHT:
-                                    if (EventUtil.isAltDown(e))
-                                    {
+                                    if (EventUtil.isAltDown(e)) {
                                         // resize
-                                        if (canSetBounds())
-                                        {
+                                        if (canSetBounds()) {
                                             final Rectangle5D bnd = getBounds5D();
                                             if (EventUtil.isShiftDown(e))
                                                 bnd.setSizeX(Math.max(1, bnd.getSizeX() + 10));
@@ -1230,11 +1090,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                                             e.consume();
                                         }
                                     }
-                                    else
-                                    {
+                                    else {
                                         // move
-                                        if (canSetPosition())
-                                        {
+                                        if (canSetPosition()) {
                                             final Point5D pos = getPosition5D();
                                             if (EventUtil.isShiftDown(e))
                                                 pos.setX(pos.getX() + 10);
@@ -1247,11 +1105,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                                     break;
 
                                 case KeyEvent.VK_UP:
-                                    if (EventUtil.isAltDown(e))
-                                    {
+                                    if (EventUtil.isAltDown(e)) {
                                         // resize
-                                        if (canSetBounds())
-                                        {
+                                        if (canSetBounds()) {
                                             final Rectangle5D bnd = getBounds5D();
                                             if (EventUtil.isShiftDown(e))
                                                 bnd.setSizeY(Math.max(1, bnd.getSizeY() - 10));
@@ -1261,11 +1117,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                                             e.consume();
                                         }
                                     }
-                                    else
-                                    {
+                                    else {
                                         // move
-                                        if (canSetPosition())
-                                        {
+                                        if (canSetPosition()) {
                                             final Point5D pos = getPosition5D();
                                             if (EventUtil.isShiftDown(e))
                                                 pos.setY(pos.getY() - 10);
@@ -1278,11 +1132,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                                     break;
 
                                 case KeyEvent.VK_DOWN:
-                                    if (EventUtil.isAltDown(e))
-                                    {
+                                    if (EventUtil.isAltDown(e)) {
                                         // resize
-                                        if (canSetBounds())
-                                        {
+                                        if (canSetBounds()) {
                                             final Rectangle5D bnd = getBounds5D();
                                             if (EventUtil.isShiftDown(e))
                                                 bnd.setSizeY(Math.max(1, bnd.getSizeY() + 10));
@@ -1292,11 +1144,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                                             e.consume();
                                         }
                                     }
-                                    else
-                                    {
+                                    else {
                                         // move
-                                        if (canSetPosition())
-                                        {
+                                        if (canSetPosition()) {
                                             final Point5D pos = getPosition5D();
                                             if (EventUtil.isShiftDown(e))
                                                 pos.setY(pos.getY() + 10);
@@ -1318,13 +1168,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         @Override
-        public void keyReleased(KeyEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void keyReleased(final KeyEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // this allow to keep the backward compatibility
             super.keyReleased(e, imagePoint, canvas);
 
-            if (isActiveFor(canvas))
-            {
+            if (isActiveFor(canvas)) {
                 // just for the shift key state change
                 if (!isReadOnly())
                     updateDrag(e, imagePoint, canvas);
@@ -1332,31 +1180,25 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         @Override
-        public void mousePressed(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void mousePressed(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // this allow to keep the backward compatibility
             super.mousePressed(e, imagePoint, canvas);
 
             // not yet consumed...
-            if (!e.isConsumed())
-            {
-                if (isActiveFor(canvas))
-                {
+            if (!e.isConsumed()) {
+                if (isActiveFor(canvas)) {
                     // left button action
-                    if (EventUtil.isLeftMouseButton(e))
-                    {
+                    if (EventUtil.isLeftMouseButton(e)) {
                         ROI.this.beginUpdate();
-                        try
-                        {
+                        try {
                             // update selection
                             if (updateSelect(e, imagePoint, canvas))
                                 e.consume();
-                            // always consume when focused to enable dragging
+                                // always consume when focused to enable dragging
                             else if (isFocused())
                                 e.consume();
                         }
-                        finally
-                        {
+                        finally {
                             ROI.this.endUpdate();
                         }
                     }
@@ -1365,48 +1207,39 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         @Override
-        public void mouseReleased(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void mouseReleased(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // this allow to keep the backward compatibility
             super.mouseReleased(e, imagePoint, canvas);
         }
 
         @Override
-        public void mouseClick(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void mouseClick(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // this allow to keep the backward compatibility
             super.mouseClick(e, imagePoint, canvas);
 
             // not yet consumed...
-            if (!e.isConsumed())
-            {
+            if (!e.isConsumed()) {
                 // and process ROI stuff now
-                if (isActiveFor(canvas))
-                {
+                if (isActiveFor(canvas)) {
                     final int clickCount = e.getClickCount();
 
                     // single click
-                    if (clickCount == 1)
-                    {
+                    if (clickCount == 1) {
                         // right click action
-                        if (EventUtil.isRightMouseButton(e))
-                        {
+                        if (EventUtil.isRightMouseButton(e)) {
                             // unselect (don't consume event)
                             if (isSelected())
                                 ROI.this.setSelected(false);
                         }
                     }
                     // double click
-                    else if (clickCount == 2)
-                    {
+                    else if (clickCount == 2) {
                         // focused ?
-                        if (isFocused())
-                        {
+                        if (isFocused()) {
                             // show in ROI panel
                             final RoisPanel roiPanel = Icy.getMainInterface().getRoisPanel();
 
-                            if (roiPanel != null)
-                            {
+                            if (roiPanel != null) {
                                 roiPanel.scrollTo(ROI.this);
                                 // consume event
                                 e.consume();
@@ -1418,8 +1251,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         @Override
-        public void mouseDrag(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void mouseDrag(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // this allow to keep the backward compatibility
             super.mouseDrag(e, imagePoint, canvas);
 
@@ -1427,16 +1259,13 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         @Override
-        public void mouseMove(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void mouseMove(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // this allow to keep the backward compatibility
             super.mouseMove(e, imagePoint, canvas);
 
             // update focus
-            if (!e.isConsumed())
-            {
-                if (isActiveFor(canvas))
-                {
+            if (!e.isConsumed()) {
+                if (isActiveFor(canvas)) {
                     if (updateFocus(e, imagePoint, canvas))
                         e.consume();
                 }
@@ -1444,11 +1273,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         @Override
-        public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas)
-        {
+        public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
             // special case of VTK canvas
-            if (canvas instanceof VtkCanvas)
-            {
+            if (canvas instanceof VtkCanvas) {
                 // hide object is not active for canvas
                 if (!isActiveFor(canvas))
                     hideVtkObjects();
@@ -1456,22 +1283,19 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         @Override
-        public boolean loadFromXML(Node node)
-        {
+        public boolean loadFromXML(final Node node) {
             if (node == null)
                 return false;
 
             beginUpdate();
-            try
-            {
+            try {
                 // we just load specific info from painter (not a proper XML load as it will be restored from ROI)
                 setColor(new Color(XMLUtil.getElementIntValue(node, ID_COLOR, getDefaultColor().getRGB())));
                 setStroke(XMLUtil.getElementDoubleValue(node, ID_STROKE, getDefaultStroke()));
                 setOpacity(XMLUtil.getElementFloatValue(node, ID_OPACITY, getDefaultOpacity()));
                 setShowName(XMLUtil.getElementBooleanValue(node, ID_SHOWNAME, getDefaultShowName()));
             }
-            finally
-            {
+            finally {
                 endUpdate();
             }
 
@@ -1479,8 +1303,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         @Override
-        public boolean saveToXML(Node node)
-        {
+        public boolean saveToXML(final Node node) {
             if (node == null)
                 return false;
 
@@ -1494,15 +1317,13 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
 
         @Override
-        public vtkProp[] getProps()
-        {
+        public vtkProp[] getProps() {
             // default implementation
             return new vtkProp[0];
         }
 
-        public void hideVtkObjects()
-        {
-            for (vtkProp prop : getProps())
+        public void hideVtkObjects() {
+            for (final vtkProp prop : getProps())
                 prop.SetVisibility(0);
         }
     }
@@ -1548,8 +1369,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      */
     protected final UpdateEventHandler updater;
 
-    public ROI()
-    {
+    public ROI() {
         super();
 
         // ensure unique id
@@ -1561,7 +1381,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         creating = false;
         focused = false;
         selected = false;
-        properties = new HashMap<String, String>();
+        properties = new HashMap<>();
 
         cachedBounds = new Rectangle5D.Double();
         cachedNumberOfPoints = 0d;
@@ -1570,7 +1390,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         numberOfPointsInvalid = true;
         numberOfContourPointsInvalid = true;
 
-        listeners = new ArrayList<ROIListener>();
+        listeners = new ArrayList<>();
         updater = new UpdateEventHandler(this, false);
 
         // default icon & name
@@ -1592,8 +1412,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @return generate unique id
      */
-    private static synchronized int generateId()
-    {
+    private static synchronized int generateId() {
         return id_generator++;
     }
 
@@ -1603,8 +1422,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        sequence
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void attachTo(Sequence sequence)
-    {
+    public void attachTo(final Sequence sequence) {
         if (sequence != null)
             sequence.addROI(this);
     }
@@ -1615,8 +1433,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        sequence
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void detachFrom(Sequence sequence)
-    {
+    public void detachFrom(final Sequence sequence) {
         if (sequence != null)
             sequence.removeROI(this);
     }
@@ -1627,8 +1444,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        boolean
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void detachFromAll(boolean canUndo)
-    {
+    public void detachFromAll(final boolean canUndo) {
         remove(canUndo);
     }
 
@@ -1636,8 +1452,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @deprecated Use {@link #remove()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void detachFromAll()
-    {
+    public void detachFromAll() {
         remove(false);
     }
 
@@ -1646,8 +1461,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        sequence
      * @return Return true is this ROI is attached to at least one sequence
      */
-    public boolean isAttached(Sequence sequence)
-    {
+    public boolean isAttached(final Sequence sequence) {
         if (sequence != null)
             return sequence.contains(this);
 
@@ -1657,16 +1471,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @return Return first sequence where ROI is attached
      */
-    public Sequence getFirstSequence()
-    {
+    public Sequence getFirstSequence() {
         return Icy.getMainInterface().getFirstSequenceContaining(this);
     }
 
     /**
      * @return Return sequences where ROI is attached
      */
-    public ArrayList<Sequence> getSequences()
-    {
+    public ArrayList<Sequence> getSequences() {
         return Icy.getMainInterface().getSequencesContaining(this);
     }
 
@@ -1674,19 +1486,17 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param canUndo
      *        Remove this ROI (detach from all sequence)
      */
-    public void remove(boolean canUndo)
-    {
+    public void remove(final boolean canUndo) {
         final List<Sequence> sequences = Icy.getMainInterface().getSequencesContaining(this);
 
-        for (Sequence sequence : sequences)
+        for (final Sequence sequence : sequences)
             sequence.removeROI(this, canUndo);
     }
 
     /**
      * Remove this ROI (detach from all sequence)
      */
-    public void remove()
-    {
+    public void remove() {
         remove(true);
     }
 
@@ -1696,8 +1506,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        boolean
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void delete(boolean canUndo)
-    {
+    public void delete(final boolean canUndo) {
         remove(canUndo);
     }
 
@@ -1705,26 +1514,22 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @deprecated Use {@link #remove()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void delete()
-    {
+    public void delete() {
         remove(true);
     }
 
-    public String getClassName()
-    {
+    public String getClassName() {
         return getClass().getName();
     }
 
-    public String getSimpleClassName()
-    {
+    public String getSimpleClassName() {
         return ClassUtil.getSimpleClassName(getClassName());
     }
 
     /**
      * @return ROI unique id
      */
-    public int getId()
-    {
+    public int getId() {
         return id;
     }
 
@@ -1733,24 +1538,21 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return ROI painter
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public ROIPainter getPainter()
-    {
+    public ROIPainter getPainter() {
         return getOverlay();
     }
 
     /**
      * @return Returns the ROI overlay (used to draw and interact with {@link ROI} on {@link IcyCanvas})
      */
-    public ROIPainter getOverlay()
-    {
+    public ROIPainter getOverlay() {
         return painter;
     }
 
     /**
      * @return Return the ROI painter stroke.
      */
-    public double getStroke()
-    {
+    public double getStroke() {
         return getOverlay().getStroke();
     }
 
@@ -1759,8 +1561,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        canvas
      * @return Get adjusted stroke for the current canvas transformation
      */
-    public double getAdjustedStroke(IcyCanvas canvas)
-    {
+    public double getAdjustedStroke(final IcyCanvas canvas) {
         return getOverlay().getAdjustedStroke(canvas);
     }
 
@@ -1768,16 +1569,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        Set ROI painter stroke.
      */
-    public void setStroke(double value)
-    {
+    public void setStroke(final double value) {
         getOverlay().setStroke(value);
     }
 
     /**
      * @return Returns the ROI painter opacity factor (0 = transparent while 1 means opaque).
      */
-    public float getOpacity()
-    {
+    public float getOpacity() {
         return getOverlay().getOpacity();
     }
 
@@ -1785,16 +1584,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        Sets the ROI painter content opacity factor (0 = transparent while 1 means opaque).
      */
-    public void setOpacity(float value)
-    {
+    public void setOpacity(final float value) {
         getOverlay().setOpacity(value);
     }
 
     /**
      * @return Return the ROI painter focused color.
      */
-    public Color getFocusedColor()
-    {
+    public Color getFocusedColor() {
         return getOverlay().getFocusedColor();
     }
 
@@ -1803,24 +1600,21 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return color
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public Color getSelectedColor()
-    {
+    public Color getSelectedColor() {
         return getOverlay().getSelectedColor();
     }
 
     /**
      * @return Returns the color used to display the ROI depending its current state.
      */
-    public Color getDisplayColor()
-    {
+    public Color getDisplayColor() {
         return getOverlay().getDisplayColor();
     }
 
     /**
      * @return Return the ROI painter base color.
      */
-    public Color getColor()
-    {
+    public Color getColor() {
         return getOverlay().getColor();
     }
 
@@ -1828,8 +1622,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        Set the ROI painter base color.
      */
-    public void setColor(Color value)
-    {
+    public void setColor(final Color value) {
         getOverlay().setColor(value);
     }
 
@@ -1839,16 +1632,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        color
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setSelectedColor(Color value)
-    {
+    public void setSelectedColor(final Color value) {
         //
     }
 
     /**
      * @return the icon
      */
-    public Image getIcon()
-    {
+    public Image getIcon() {
         return icon;
     }
 
@@ -1856,57 +1647,31 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        the icon to set
      */
-    public void setIcon(Image value)
-    {
-        if (icon != value)
-        {
+    public void setIcon(final Image value) {
+        if (icon != value) {
             icon = value;
             propertyChanged(PROPERTY_ICON);
         }
     }
 
-    // /**
-    // * @return the group id
-    // */
-    // public ROIGroupId getGroupId()
-    // {
-    // return groupid;
-    // }
-    //
-    // /**
-    // * @param value
-    // * the group id to set
-    // */
-    // public void setGroupId(ROIGroupId value)
-    // {
-    // if (groupid != value)
-    // {
-    // groupid = value;
-    // propertyChanged(PROPERTY_GROUPID);
-    // }
-    // }
-
     /**
      * @return the default name for this ROI class
      */
-    public String getDefaultName()
-    {
+    public String getDefaultName() {
         return "ROI";
     }
 
     /**
      * @return Returns <code>true</code> if the ROI has its default name
      */
-    public boolean isDefaultName()
-    {
+    public boolean isDefaultName() {
         return getName().equals(getDefaultName());
     }
 
     /**
      * @return the name
      */
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
@@ -1914,10 +1679,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        the name to set
      */
-    public void setName(String value)
-    {
-        if (name != value)
-        {
+    public void setName(final String value) {
+        if (!Objects.equals(name, value)) {
             name = value;
             propertyChanged(PROPERTY_NAME);
             // painter name is ROI name so we notify it
@@ -1928,9 +1691,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @return Retrieve all custom ROI properties (map of (Key,Value)).
      */
-    public Map<String, String> getProperties()
-    {
-        return new HashMap<String, String>(properties);
+    public Map<String, String> getProperties() {
+        return new HashMap<>(properties);
     }
 
     /**
@@ -1941,8 +1703,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        Note that it can be default property name (as {@value #PROPERTY_READONLY}) in which case the value will be
      *        returned in String format if possible or launch an {@link IllegalArgumentException} when not possible.
      */
-    public String getProperty(String name)
-    {
+    public String getProperty(final String name) {
         if (name == null)
             return null;
 
@@ -1965,15 +1726,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         if (StringUtil.equals(adjName, PROPERTY_COLOR) || StringUtil.equals(adjName, PROPERTY_ICON))
             throw new IllegalArgumentException("Cannot return value of property '" + adjName + "' as String");
 
-        synchronized (properties)
-        {
+        synchronized (properties) {
             return properties.get(adjName);
         }
     }
 
     /**
      * Generic way to set ROI property value.
-     * 
+     *
      * @param name
      *        Property name.<br>
      *        Note that it can be default property name (as {@value #PROPERTY_READONLY}) in which case the value will be
@@ -1981,8 +1741,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        the value to set in the property (for instance "FALSE" for {@link #PROPERTY_READONLY})
      */
-    public void setProperty(String name, String value)
-    {
+    public void setProperty(final String name, final String value) {
         if (name == null)
             return;
 
@@ -2005,8 +1764,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         if (StringUtil.equals(adjName, PROPERTY_COLOR) || StringUtil.equals(adjName, PROPERTY_ICON))
             throw new IllegalArgumentException("Cannot set value of property '" + adjName + "' as String");
 
-        synchronized (properties)
-        {
+        synchronized (properties) {
             properties.put(adjName, value);
         }
 
@@ -2020,8 +1778,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return object
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public Object getPropertyValue(String propertyName)
-    {
+    public Object getPropertyValue(final String propertyName) {
         if (StringUtil.equals(propertyName, PROPERTY_COLOR))
             return getColor();
         if (StringUtil.equals(propertyName, PROPERTY_CREATING))
@@ -2050,8 +1807,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        object
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setPropertyValue(String propertyName, Object value)
-    {
+    public void setPropertyValue(final String propertyName, final Object value) {
         if (StringUtil.equals(propertyName, PROPERTY_COLOR))
             setColor((Color) value);
         if (StringUtil.equals(propertyName, PROPERTY_CREATING))
@@ -2073,8 +1829,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @return the creating
      */
-    public boolean isCreating()
-    {
+    public boolean isCreating() {
         return creating;
     }
 
@@ -2084,13 +1839,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        The ROI interaction behave differently when in <i>creation mode</i>.<br>
      *        You should not set this state when you create an ROI from the code.
      */
-    public void setCreating(boolean value)
-    {
-        if (creating != value)
-        {
+    public void setCreating(final boolean value) {
+        if (creating != value) {
             creating = value;
             propertyChanged(PROPERTY_CREATING);
-            // // TODO Is this a good idea?
+            // TODO Is this a good idea?
             // if (!value) {
             // setReadOnly(true);
             // }
@@ -2106,16 +1859,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * Remove focus/selected state on all (control) points.<br>
      * Override this method depending implementation
      */
-    public void unselectAllPoints()
-    {
+    public void unselectAllPoints() {
         // do nothing by default
-    };
+    }
 
     /**
      * @return the focused
      */
-    public boolean isFocused()
-    {
+    public boolean isFocused() {
         return focused;
     }
 
@@ -2123,21 +1874,18 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        the focused to set
      */
-    public void setFocused(boolean value)
-    {
+    public void setFocused(final boolean value) {
         boolean done = false;
 
-        if (value)
-        {
+        if (value) {
             // only one ROI focused per sequence
             final List<Sequence> attachedSeqs = Icy.getMainInterface().getSequencesContaining(this);
 
-            for (Sequence seq : attachedSeqs)
+            for (final Sequence seq : attachedSeqs)
                 done |= seq.setFocusedROI(this);
         }
 
-        if (!done)
-        {
+        if (!done) {
             if (value)
                 internalFocus();
             else
@@ -2145,19 +1893,15 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         }
     }
 
-    public void internalFocus()
-    {
-        if (focused != true)
-        {
+    public void internalFocus() {
+        if (!focused) {
             focused = true;
             focusChanged();
         }
     }
 
-    public void internalUnfocus()
-    {
-        if (focused != false)
-        {
+    public void internalUnfocus() {
+        if (focused) {
             focused = false;
             focusChanged();
         }
@@ -2166,22 +1910,19 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @return the selected
      */
-    public boolean isSelected()
-    {
+    public boolean isSelected() {
         return selected;
     }
 
     /**
      * Set the selected state of this ROI.<br>
      * Use {@link Sequence#setSelectedROI(ROI)} for exclusive ROI selection.
-     * 
+     *
      * @param value
      *        the selected to set
      */
-    public void setSelected(boolean value)
-    {
-        if (selected != value)
-        {
+    public void setSelected(final boolean value) {
+        if (selected != value) {
             selected = value;
             // as soon ROI has been unselected, we're not in create mode anymore
             if (!value)
@@ -2200,14 +1941,12 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        boolean
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setSelected(boolean value, boolean exclusive)
-    {
-        if (exclusive)
-        {
+    public void setSelected(final boolean value, final boolean exclusive) {
+        if (exclusive) {
             // use the sequence for ROI selection with exclusive parameter
             final List<Sequence> attachedSeqs = Icy.getMainInterface().getSequencesContaining(this);
 
-            for (Sequence seq : attachedSeqs)
+            for (final Sequence seq : attachedSeqs)
                 seq.setSelectedROI(value ? this : null);
         }
         else
@@ -2218,10 +1957,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @deprecated Use {@link #setSelected(boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void internalUnselect()
-    {
-        if (selected != false)
-        {
+    public void internalUnselect() {
+        if (selected) {
             selected = false;
             // as soon ROI has been unselected, we're not in create mode anymore
             setCreating(false);
@@ -2233,10 +1970,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @deprecated Use {@link #setSelected(boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void internalSelect()
-    {
-        if (selected != true)
-        {
+    public void internalSelect() {
+        if (!selected) {
             selected = true;
             selectionChanged();
         }
@@ -2247,8 +1982,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @return boolean
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean isEditable()
-    {
+    public boolean isEditable() {
         return !isReadOnly();
     }
 
@@ -2258,16 +1992,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        boolean
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setEditable(boolean value)
-    {
+    public void setEditable(final boolean value) {
         setReadOnly(!value);
     }
 
     /**
      * @return Return true if ROI is in <i>read only</i> state (cannot be modified from GUI).
      */
-    public boolean isReadOnly()
-    {
+    public boolean isReadOnly() {
         return readOnly;
     }
 
@@ -2275,10 +2007,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param value
      *        Set the <i>read only</i> state of ROI.
      */
-    public void setReadOnly(boolean value)
-    {
-        if (readOnly != value)
-        {
+    public void setReadOnly(final boolean value) {
+        if (readOnly != value) {
             readOnly = value;
 
             propertyChanged(PROPERTY_READONLY);
@@ -2288,8 +2018,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @return Return <code>true</code> if ROI should display its name at draw time.<br>
      */
-    public boolean getShowName()
-    {
+    public boolean getShowName() {
         return getOverlay().getShowName();
     }
 
@@ -2298,8 +2027,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        Set the <i>show name</i> property of ROI.<br>
      *        When set to <code>true</code> the ROI shows its name at draw time.
      */
-    public void setShowName(boolean value)
-    {
+    public void setShowName(final boolean value) {
         getOverlay().setShowName(value);
     }
 
@@ -2321,15 +2049,13 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * Returns the bounding box of the <code>ROI</code>. Note that there is no guarantee that the
      * returned {@link Rectangle5D} is the smallest bounding box that encloses the <code>ROI</code>,
      * only that the <code>ROI</code> lies entirely within the indicated <code>Rectangle5D</code>.
-     * 
+     *
      * @return an instance of <code>Rectangle5D</code> that is a bounding box of the <code>ROI</code>.
      * @see #computeBounds5D()
      */
-    public Rectangle5D getBounds5D()
-    {
+    public Rectangle5D getBounds5D() {
         // we need to recompute bounds
-        if (boundsInvalid)
-        {
+        if (boundsInvalid) {
             cachedBounds = computeBounds5D();
             boundsInvalid = false;
         }
@@ -2342,8 +2068,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         bounds.<br>
      * @see #getBounds5D()
      */
-    public Point5D getPosition5D()
-    {
+    public Point5D getPosition5D() {
         return getBounds5D().getPosition();
     }
 
@@ -2361,7 +2086,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * Set the <code>ROI</code> bounds.<br>
      * Note that not all ROI supports bounds modification and you should call {@link #canSetBounds()} first to test if
      * the operation is supported.<br>
-     * 
+     *
      * @param bounds
      *        new ROI bounds
      */
@@ -2371,7 +2096,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * Set the <code>ROI</code> position.<br>
      * Note that not all ROI supports position modification and you should call {@link #canSetPosition()} first to test
      * if the operation is supported.<br>
-     * 
+     *
      * @param position
      *        new ROI position
      */
@@ -2380,14 +2105,13 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @return Returns <code>true</code> if the ROI is empty (does not contains anything).
      */
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return getBounds5D().isEmpty();
     }
 
     /**
      * Tests if a specified 5D point is inside the ROI.
-     * 
+     *
      * @return <code>true</code> if the specified <code>Point5D</code> is inside the boundary of the <code>ROI</code>;
      *         <code>false</code> otherwise.
      * @param x
@@ -2405,14 +2129,13 @@ public abstract class ROI implements ChangeListener, XMLPersistent
 
     /**
      * Tests if a specified {@link Point5D} is inside the ROI.
-     * 
+     *
      * @param p
      *        the specified <code>Point5D</code> to be tested
      * @return <code>true</code> if the specified <code>Point2D</code> is inside the boundary of the <code>ROI</code>;
      *         <code>false</code> otherwise.
      */
-    public boolean contains(Point5D p)
-    {
+    public boolean contains(final Point5D p) {
         if (p == null)
             return false;
 
@@ -2433,7 +2156,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * </ul>
      * This means that for some {@code ROIs} this method might return {@code false} even though the {@code ROI} contains
      * the rectangular area.
-     * 
+     *
      * @param x
      *        the X coordinate of the start corner of the specified rectangular area
      * @param y
@@ -2460,8 +2183,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         the containment
      *         calculations would be too expensive to perform.
      */
-    public abstract boolean contains(double x, double y, double z, double t, double c, double sizeX, double sizeY,
-            double sizeZ, double sizeT, double sizeC);
+    public abstract boolean contains(double x, double y, double z, double t, double c, double sizeX, double sizeY, double sizeZ, double sizeT, double sizeC);
 
     /**
      * Tests if the <code>ROI</code> entirely contains the specified <code>Rectangle5D</code>. The
@@ -2473,7 +2195,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * </ul>
      * This means that for some ROIs this method might return {@code false} even though the {@code ROI} contains the
      * {@code Rectangle5D}.
-     * 
+     *
      * @param r
      *        The specified <code>Rectangle5D</code>
      * @return <code>true</code> if the interior of the <code>ROI</code> entirely contains the <code>Rectangle5D</code>;
@@ -2483,13 +2205,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         expensive to perform.
      * @see #contains(double, double, double, double, double, double, double, double, double, double)
      */
-    public boolean contains(Rectangle5D r)
-    {
+    public boolean contains(final Rectangle5D r) {
         if (r == null)
             return false;
 
-        return contains(r.getX(), r.getY(), r.getZ(), r.getT(), r.getC(), r.getSizeX(), r.getSizeY(), r.getSizeZ(),
-                r.getSizeT(), r.getSizeC());
+        return contains(r.getX(), r.getY(), r.getZ(), r.getT(), r.getC(), r.getSizeX(), r.getSizeY(), r.getSizeZ(), r.getSizeT(), r.getSizeC());
     }
 
     /**
@@ -2498,10 +2218,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        WARNING: this method may be "pixel accurate" only depending the internal implementation.
      * @return <code>true</code> if the current <code>ROI</code> entirely contains the
      *         specified <code>ROI</code>; <code>false</code> otherwise.
-     * @throws InterruptedException
      */
-    public boolean contains(ROI roi) throws InterruptedException
-    {
+    public boolean contains(final ROI roi) throws InterruptedException {
         // default implementation using BooleanMask
         final Rectangle5D.Integer bounds = getBounds5D().toInteger();
         final Rectangle5D.Integer roiBounds = roi.getBounds5D().toInteger();
@@ -2515,44 +2233,37 @@ public abstract class ROI implements ChangeListener, XMLPersistent
             return contains(roiBounds.getPosition());
 
         // simple bounds contains test
-        if (bounds.contains(roiBounds))
-        {
+        if (bounds.contains(roiBounds)) {
             final Rectangle5D.Integer containedBounds = bounds.createIntersection(roiBounds).toInteger();
-            int minZ;
-            int maxZ;
-            int minT;
-            int maxT;
-            int minC;
-            int maxC;
+            final int minZ;
+            final int maxZ;
+            final int minT;
+            final int maxT;
+            final int minC;
+            final int maxC;
 
             // special infinite case
-            if (containedBounds.isInfiniteZ())
-            {
+            if (containedBounds.isInfiniteZ()) {
                 minZ = -1;
                 maxZ = -1;
             }
-            else
-            {
+            else {
                 minZ = (int) containedBounds.getMinZ();
                 maxZ = (int) containedBounds.getMaxZ();
             }
-            if (containedBounds.isInfiniteT())
-            {
+            if (containedBounds.isInfiniteT()) {
                 minT = -1;
                 maxT = -1;
             }
-            else
-            {
+            else {
                 minT = (int) containedBounds.getMinT();
                 maxT = (int) containedBounds.getMaxT();
             }
-            if (containedBounds.isInfiniteC())
-            {
+            if (containedBounds.isInfiniteC()) {
                 minC = -1;
                 maxC = -1;
             }
-            else
-            {
+            else {
                 minC = (int) containedBounds.getMinC();
                 maxC = (int) containedBounds.getMaxC();
             }
@@ -2560,12 +2271,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
             final Rectangle containedBounds2D = (Rectangle) containedBounds.toRectangle2D();
 
             // slow method using the boolean mask
-            for (int c = minC; c <= maxC; c++)
-            {
-                for (int t = minT; t <= maxT; t++)
-                {
-                    for (int z = minZ; z <= maxZ; z++)
-                    {
+            for (int c = minC; c <= maxC; c++) {
+                for (int t = minT; t <= maxT; t++) {
+                    for (int z = minZ; z <= maxZ; z++) {
                         BooleanMask2D mask;
                         BooleanMask2D roiMask;
 
@@ -2636,8 +2344,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         rectangular area intersect, or are both highly likely to intersect and intersection
      *         calculations would be too expensive to perform; <code>false</code> otherwise.
      */
-    public abstract boolean intersects(double x, double y, double z, double t, double c, double sizeX, double sizeY,
-            double sizeZ, double sizeT, double sizeC);
+    public abstract boolean intersects(double x, double y, double z, double t, double c, double sizeX, double sizeY, double sizeZ, double sizeT, double sizeC);
 
     /**
      * Tests if the interior of the <code>ROI</code> intersects the interior of a specified
@@ -2651,7 +2358,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * <li>there is a high probability that the rectangular area and the <code>ROI</code> intersect, but
      * <li>the calculations to accurately determine this intersection are prohibitively expensive.
      * </ul>
-     * 
+     *
      * @param r
      *        This means that for some {@code ROIs} this method might return {@code true} even though the rectangular area does
      *        not intersect the {@code ROI}.
@@ -2659,13 +2366,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         rectangular area intersect, or are both highly likely to intersect and intersection
      *         calculations would be too expensive to perform; <code>false</code> otherwise.
      */
-    public boolean intersects(Rectangle5D r)
-    {
+    public boolean intersects(final Rectangle5D r) {
         if (r == null)
             return false;
 
-        return intersects(r.getX(), r.getY(), r.getZ(), r.getT(), r.getC(), r.getSizeX(), r.getSizeY(), r.getSizeZ(),
-                r.getSizeT(), r.getSizeC());
+        return intersects(r.getX(), r.getY(), r.getZ(), r.getT(), r.getC(), r.getSizeX(), r.getSizeY(), r.getSizeZ(), r.getSizeT(), r.getSizeC());
     }
 
     /**
@@ -2673,61 +2378,50 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        Tests if the current <code>ROI</code> intersects the specified <code>ROI</code>.<br>
      *        Note that this method may be "pixel accurate" only depending the internal implementation.
      * @return <code>true</code> if <code>ROI</code> intersect, <code>false</code> otherwise.
-     * @throws InterruptedException
      */
-    public boolean intersects(ROI roi) throws InterruptedException
-    {
+    public boolean intersects(final ROI roi) throws InterruptedException {
         // default implementation using BooleanMask
         final Rectangle5D.Integer bounds = getBounds5D().toInteger();
         final Rectangle5D.Integer roiBounds = roi.getBounds5D().toInteger();
         final Rectangle5D.Integer intersection = bounds.createIntersection(roiBounds).toInteger();
 
-        int minZ;
-        int maxZ;
-        int minT;
-        int maxT;
-        int minC;
-        int maxC;
+        final int minZ;
+        final int maxZ;
+        final int minT;
+        final int maxT;
+        final int minC;
+        final int maxC;
 
         // special infinite case
-        if (intersection.isInfiniteZ())
-        {
+        if (intersection.isInfiniteZ()) {
             minZ = -1;
             maxZ = -1;
         }
-        else
-        {
+        else {
             minZ = (int) intersection.getMinZ();
             maxZ = (int) intersection.getMaxZ();
         }
-        if (intersection.isInfiniteT())
-        {
+        if (intersection.isInfiniteT()) {
             minT = -1;
             maxT = -1;
         }
-        else
-        {
+        else {
             minT = (int) intersection.getMinT();
             maxT = (int) intersection.getMaxT();
         }
-        if (intersection.isInfiniteC())
-        {
+        if (intersection.isInfiniteC()) {
             minC = -1;
             maxC = -1;
         }
-        else
-        {
+        else {
             minC = (int) intersection.getMinC();
             maxC = (int) intersection.getMaxC();
         }
 
         // slow method using the boolean mask
-        for (int c = minC; c <= maxC; c++)
-        {
-            for (int t = minT; t <= maxT; t++)
-            {
-                for (int z = minZ; z <= maxZ; z++)
-                {
+        for (int c = minC; c <= maxC; c++) {
+            for (int t = minT; t <= maxT; t++) {
+                for (int z = minZ; z <= maxZ; z++) {
                     if (getBooleanMask2D(z, t, c, true).intersects(roi.getBooleanMask2D(z, t, c, true)))
                         return true;
                 }
@@ -2745,7 +2439,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * <code>&nbsp; result[((y1 - y) * width) + (x1 - x)] = true</code><br>
      * If pixel (x1, y1, c, z, t) is not contained in the roi:<br>
      * <code>&nbsp; result[((y1 - y) * width) + (x1 - x)] = false</code><br>
-     * 
+     *
      * @param x
      *        the X coordinate of the upper-left corner of the specified rectangular region
      * @param y
@@ -2763,19 +2457,15 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
      * @return the boolean bitmap mask
-     * @throws InterruptedException
      */
-    public boolean[] getBooleanMask2D(int x, int y, int width, int height, int z, int t, int c, boolean inclusive)
-            throws InterruptedException
-    {
+    public boolean[] getBooleanMask2D(final int x, final int y, final int width, final int height, final int z, final int t, final int c, final boolean inclusive)
+            throws InterruptedException {
         final boolean[] result = new boolean[Math.max(0, width) * Math.max(0, height)];
 
         // simple and basic implementation, override it to have better performance
         int offset = 0;
-        for (int j = 0; j < height; j++)
-        {
-            for (int i = 0; i < width; i++)
-            {
+        for (int j = 0; j < height; j++) {
+            for (int i = 0; i < width; i++) {
                 if (inclusive)
                     result[offset] = intersects(x + i, y + j, z, t, c, 1d, 1d, 1d, 1d, 1d);
                 else
@@ -2807,11 +2497,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        C position we want to retrieve the boolean mask
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
-     * @throws InterruptedException
      */
-    public boolean[] getBooleanMask2D(Rectangle rect, int z, int t, int c, boolean inclusive)
-            throws InterruptedException
-    {
+    public boolean[] getBooleanMask2D(final Rectangle rect, final int z, final int t, final int c, final boolean inclusive) throws InterruptedException {
         return getBooleanMask2D(rect.x, rect.y, rect.width, rect.height, z, t, c, inclusive);
     }
 
@@ -2834,10 +2521,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        Set it to -1 to retrieve the mask whatever is the C position of ROI2D/ROI3D/ROI4D.
      * @param inclusive
      *        If true then all partially contained (intersected) pixels are included in the mask.
-     * @throws InterruptedException
      */
-    public BooleanMask2D getBooleanMask2D(int z, int t, int c, boolean inclusive) throws InterruptedException
-    {
+    public BooleanMask2D getBooleanMask2D(final int z, final int t, final int c, final boolean inclusive) throws InterruptedException {
         final Rectangle bounds2D = getBounds5D().toRectangle2D().getBounds();
 
         // empty ROI --> return empty mask
@@ -2866,9 +2551,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * approximation. Override to optimize for specific ROI.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    protected ROI computeOperation(ROI roi, BooleanOperator op) throws UnsupportedOperationException
-    {
-        System.out.println("Deprecated method " + getClassName() + ".computeOperation(ROI, BooleanOperator) called !");
+    protected ROI computeOperation(final ROI roi, final BooleanOperator op) throws UnsupportedOperationException {
+        IcyLogger.warn(ROI.class, "Deprecated method " + getClassName() + ".computeOperation(ROI, BooleanOperator) called !");
         return null;
     }
 
@@ -2880,7 +2564,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter is set to
      * <code>false</code>, if the parameter is set to <code>true</code> the result may be returned
      * in a new created ROI.
-     * 
+     *
      * @param roi
      *        the <code>ROI</code> to merge with current <code>ROI</code>
      * @param op
@@ -2894,25 +2578,14 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         and <code>allowCreate</code> parameter was set to <code>true</code>
      * @throws UnsupportedOperationException
      *         if the two ROI cannot be merged together.
-     * @throws InterruptedException
      * @see ROI#merge(ROI, BooleanOperator)
      */
-    public ROI mergeWith(ROI roi, BooleanOperator op, boolean allowCreate)
-            throws UnsupportedOperationException, InterruptedException
-    {
-        switch (op)
-        {
-            case AND:
-                return intersect(roi, allowCreate);
-
-            case OR:
-                return add(roi, allowCreate);
-
-            case XOR:
-                return exclusiveAdd(roi, allowCreate);
-        }
-
-        return this;
+    public ROI mergeWith(final ROI roi, final BooleanOperator op, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
+        return switch (op) {
+            case AND -> intersect(roi, allowCreate);
+            case OR -> add(roi, allowCreate);
+            case XOR -> exclusiveAdd(roi, allowCreate);
+        };
     }
 
     /**
@@ -2923,11 +2596,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * If that is not the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter
      * is set to <code>false</code>, if the parameter is set to <code>true</code> the result may be returned in a new
      * created ROI.
-     * 
+     *
      * <pre>
      *     // Example:
      *      roi1 (before)     +         roi2       =    roi1 (after)
-     * 
+     *
      *     ################     ################     ################
      *     ##############         ##############     ################
      *     ############             ############     ################
@@ -2937,7 +2610,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
-     * 
+     *
      * @param roi
      *        the <code>ROI</code> to be added to the current <code>ROI</code>
      * @param allowCreate
@@ -2949,11 +2622,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         and <code>allowCreate</code> parameter was set to <code>true</code>
      * @throws UnsupportedOperationException
      *         if the two ROI cannot be added together.
-     * @throws InterruptedException
      * @see #getUnion(ROI)
      */
-    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
-    {
+    public ROI add(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
         // nothing to do
         if (roi == null)
             return this;
@@ -2972,11 +2643,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * If that is not the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter
      * is set to <code>false</code>, if the parameter is set to <code>true</code> the result may be returned in a new
      * created ROI.
-     * 
+     *
      * <pre>
      *     // Example:
      *     roi1 (before) intersect    roi2        =   roi1 (after)
-     * 
+     *
      *     ################     ################     ################
      *     ##############         ##############       ############
      *     ############             ############         ########
@@ -2986,7 +2657,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *     ####                             ####
      *     ##                                 ##
      * </pre>
-     * 
+     *
      * @param roi
      *        the <code>ROI</code> to be intersected to the current <code>ROI</code>
      * @param allowCreate
@@ -2998,11 +2669,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         and <code>allowCreate</code> parameter was set to <code>true</code>
      * @throws UnsupportedOperationException
      *         if the two ROI cannot be intersected together.
-     * @throws InterruptedException
      * @see #getIntersection(ROI)
      */
-    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
-    {
+    public ROI intersect(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
         // nothing to do
         if (roi == null)
             return this;
@@ -3023,11 +2692,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter is set to
      * <code>false</code>, if the parameter is set to <code>true</code> the result may be returned
      * in a new created ROI.
-     * 
+     *
      * <pre>
      *     // Example:
      *      roi1 (before)   xor      roi2         =    roi1 (after)
-     * 
+     *
      *     ################     ################
      *     ##############         ##############     ##            ##
      *     ############             ############     ####        ####
@@ -3037,7 +2706,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *     ####                             ####     ####        ####
      *     ##                                 ##     ##            ##
      * </pre>
-     * 
+     *
      * @param roi
      *        the <code>ROI</code> to be exclusively added to the current <code>ROI</code>
      * @param allowCreate
@@ -3049,11 +2718,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         and <code>allowCreate</code> parameter was set to <code>true</code>
      * @throws UnsupportedOperationException
      *         if the two ROI cannot be exclusively added together.
-     * @throws InterruptedException
      * @see #getExclusiveUnion(ROI)
      */
-    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
-    {
+    public ROI exclusiveAdd(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
         // nothing to do
         if (roi == null)
             return this;
@@ -3070,7 +2737,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * If that is not the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter
      * is set to <code>false</code>, if the parameter is set to <code>true</code> the result may be returned in a new
      * created ROI.
-     * 
+     *
      * @param roi
      *        the <code>ROI</code> to subtract from the current <code>ROI</code>
      * @param allowCreate
@@ -3082,11 +2749,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         and <code>allowCreate</code> parameter was set to <code>true</code>
      * @throws UnsupportedOperationException
      *         if we can't subtract the specified <code>ROI</code> from this <code>ROI</code>
-     * @throws InterruptedException
      * @see #getSubtraction(ROI)
      */
-    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
-    {
+    public ROI subtract(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
         // nothing to do
         if (roi == null)
             return this;
@@ -3099,29 +2764,20 @@ public abstract class ROI implements ChangeListener, XMLPersistent
 
     /**
      * Compute the boolean operation with specified <code>ROI</code> and return result in a new <code>ROI</code>.
-     * 
+     *
      * @param op
      *        boolean
      * @param roi
      *        ROI
      * @return ROI
-     * @throws InterruptedException
      */
-    public ROI merge(ROI roi, BooleanOperator op) throws UnsupportedOperationException, InterruptedException
-    {
-        switch (op)
-        {
-            case AND:
-                return getIntersection(roi);
+    public ROI merge(final ROI roi, final BooleanOperator op) throws UnsupportedOperationException, InterruptedException {
+        return switch (op) {
+            case AND -> getIntersection(roi);
+            case OR -> getUnion(roi);
+            case XOR -> getExclusiveUnion(roi);
+        };
 
-            case OR:
-                return getUnion(roi);
-
-            case XOR:
-                return getExclusiveUnion(roi);
-        }
-
-        return null;
     }
 
     /**
@@ -3129,10 +2785,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         The default implementation use <code>ROIUtil.getUnion(ROI, ROI)</code> internally but it maybe overridden.
      * @param roi
      *        ROI
-     * @throws InterruptedException
      */
-    public ROI getUnion(ROI roi) throws UnsupportedOperationException, InterruptedException
-    {
+    public ROI getUnion(final ROI roi) throws UnsupportedOperationException, InterruptedException {
         return ROIUtil.getUnion(this, roi);
     }
 
@@ -3141,10 +2795,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         The default implementation use <code>ROIUtil.getIntersection(ROI, ROI)</code> internally but it maybe overridden.
      * @param roi
      *        ROI
-     * @throws InterruptedException
      */
-    public ROI getIntersection(ROI roi) throws UnsupportedOperationException, InterruptedException
-    {
+    public ROI getIntersection(final ROI roi) throws UnsupportedOperationException, InterruptedException {
         return ROIUtil.getIntersection(this, roi);
     }
 
@@ -3153,10 +2805,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         The default implementation use <code>ROIUtil.getExclusiveUnion(ROI, ROI)</code> internally but it maybe overridden.
      * @param roi
      *        ROI
-     * @throws InterruptedException
      */
-    public ROI getExclusiveUnion(ROI roi) throws UnsupportedOperationException, InterruptedException
-    {
+    public ROI getExclusiveUnion(final ROI roi) throws UnsupportedOperationException, InterruptedException {
         return ROIUtil.getExclusiveUnion(this, roi);
     }
 
@@ -3165,10 +2815,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         The default implementation use <code>ROIUtil.getSubtraction(ROI, ROI)</code> internally but it maybe overridden.
      * @param roi
      *        ROI
-     * @throws InterruptedException
      */
-    public ROI getSubtraction(ROI roi) throws UnsupportedOperationException, InterruptedException
-    {
+    public ROI getSubtraction(final ROI roi) throws UnsupportedOperationException, InterruptedException {
         return ROIUtil.getSubtraction(this, roi);
     }
 
@@ -3183,14 +2831,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @return Returns the number of point (pixel) composing the ROI contour.<br>
      *         It is used to calculate the perimeter (2D) or surface area (3D) of the ROI.
-     * @throws InterruptedException
      * @see #computeNumberOfContourPoints()
      */
-    public double getNumberOfContourPoints() throws InterruptedException
-    {
+    public double getNumberOfContourPoints() throws InterruptedException {
         // we need to recompute the number of edge point
-        if (numberOfContourPointsInvalid)
-        {
+        if (numberOfContourPointsInvalid) {
             cachedNumberOfContourPoints = computeNumberOfContourPoints();
             numberOfContourPointsInvalid = false;
         }
@@ -3209,13 +2854,10 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @return Returns the number of point (pixel) contained in the ROI.<br>
      *         It is used to calculate the area (2D) or volume (3D) of the ROI.
-     * @throws InterruptedException
      */
-    public double getNumberOfPoints() throws InterruptedException
-    {
+    public double getNumberOfPoints() throws InterruptedException {
         // we need to recompute the number of point
-        if (numberOfPointsInvalid)
-        {
+        if (numberOfPointsInvalid) {
             cachedNumberOfPoints = computeNumberOfPoints();
             numberOfPointsInvalid = false;
         }
@@ -3231,22 +2873,18 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *         Throws a UnsupportedOperationException if the operation is not supported for this ROI.
      * @param sequence
      *        sequence
-     * @throws InterruptedException
      * @see #getNumberOfContourPoints()
      */
-    public double getLength(Sequence sequence) throws UnsupportedOperationException, InterruptedException
-    {
+    public double getLength(final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
         return sequence.calculateSize(getNumberOfContourPoints(), getDimension(), 1);
     }
 
     /**
      * @deprecated Use {@link #getLength(Sequence)} or {@link #getNumberOfContourPoints()} instead.
      * @return double
-     * @throws InterruptedException
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getPerimeter() throws InterruptedException
-    {
+    public double getPerimeter() throws InterruptedException {
         return getNumberOfContourPoints();
     }
 
@@ -3254,11 +2892,9 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @deprecated Only for ROI3D object, use {@link #getNumberOfPoints()} instead for other type of
      *             ROI.
      * @return double
-     * @throws InterruptedException
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getVolume() throws InterruptedException
-    {
+    public double getVolume() throws InterruptedException {
         return getNumberOfPoints();
     }
 
@@ -3268,8 +2904,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        2D point
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setMousePos(Point2D pos)
-    {
+    public void setMousePos(final Point2D pos) {
         if (pos != null)
             getOverlay().setMousePos(new Point5D.Double(pos.getX(), pos.getY(), -1, -1, -1));
     }
@@ -3277,8 +2912,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * @return Returns a copy of the ROI or <code>null</code> if the operation failed.
      */
-    public ROI getCopy()
-    {
+    public ROI getCopy() {
         // use XML persistence for cloning
         final Node node = XMLUtil.createDocument(true).getDocumentElement();
         int retry;
@@ -3289,9 +2923,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         while ((retry > 0) && !saveToXML(node))
             retry--;
 
-        if (retry <= 0)
-        {
-            System.err.println("Cannot get a copy of roi " + getName() + ": XML save operation failed.");
+        if (retry <= 0) {
+            IcyLogger.error(ROI.class, "Cannot get a copy of roi " + getName() + ": XML save operation failed.");
             // throw new RuntimeException("Cannot get a copy of roi " + getName() + ": XML save
             // operation failed !");
             return null;
@@ -3302,15 +2935,13 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         // XML methods sometime fails, better to offer retry (hacky)
         retry = 3;
         result = null;
-        while ((retry > 0) && (result == null))
-        {
+        while ((retry > 0) && (result == null)) {
             result = createFromXML(node);
             retry--;
         }
 
-        if (result == null)
-        {
-            System.err.println("Cannot get a copy of roi " + getName() + ": creation from XML failed.");
+        if (result == null) {
+            IcyLogger.error(ROI.class, "Cannot get a copy of roi " + getName() + ": creation from XML failed.");
             // throw new RuntimeException("Cannot get a copy of roi " + getName() + ": creation from
             // XML failed !");
             return null;
@@ -3336,28 +2967,24 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        the specific C position (channel) we want to retrieve (<code>-1</code> to retrieve the
      *        whole ROI C dimension)
      */
-    static public String getNameSuffix(int z, int t, int c)
-    {
+    static public String getNameSuffix(final int z, final int t, final int c) {
         String result = "";
 
-        if (z != -1)
-        {
+        if (z != -1) {
             if (StringUtil.isEmpty(result))
                 result = " [";
             else
                 result += ", ";
             result += "Z=" + z;
         }
-        if (t != -1)
-        {
+        if (t != -1) {
             if (StringUtil.isEmpty(result))
                 result = " [";
             else
                 result += ", ";
             result += "T=" + t;
         }
-        if (c != -1)
-        {
+        if (c != -1) {
             if (StringUtil.isEmpty(result))
                 result = " [";
             else
@@ -3385,14 +3012,11 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param c
      *        the specific C position (channel) we want to retrieve (<code>-1</code> to retrieve the
      *        whole ROI C dimension)
-     * @throws InterruptedException
      */
-    public ROI getSubROI(int z, int t, int c) throws InterruptedException
-    {
+    public ROI getSubROI(final int z, final int t, final int c) throws InterruptedException {
         final ROI result;
 
-        switch (getDimension())
-        {
+        switch (getDimension()) {
             default:
                 result = new ROI2DArea(getBooleanMask2D(z, t, c, false));
                 break;
@@ -3401,69 +3025,59 @@ public abstract class ROI implements ChangeListener, XMLPersistent
                 if (z == -1)
                     result = new ROI3DArea(((ROI3D) this).getBooleanMask3D(z, t, c, false));
                 else
-                    result = new ROI2DArea(((ROI3D) this).getBooleanMask2D(z, t, c, false));
+                    result = new ROI2DArea(this.getBooleanMask2D(z, t, c, false));
                 break;
 
             case 4:
-                if (z == -1)
-                {
+                if (z == -1) {
                     if (t == -1)
                         result = new ROI4DArea(((ROI4D) this).getBooleanMask4D(z, t, c, false));
                     else
                         result = new ROI3DArea(((ROI4D) this).getBooleanMask3D(z, t, c, false));
                 }
-                else
-                {
+                else {
                     if (t == -1)
                         result = new ROI4DArea(((ROI4D) this).getBooleanMask4D(z, t, c, false));
                     else
-                        result = new ROI2DArea(((ROI4D) this).getBooleanMask2D(z, t, c, false));
+                        result = new ROI2DArea(this.getBooleanMask2D(z, t, c, false));
                 }
                 break;
 
             case 5:
-                if (z == -1)
-                {
-                    if (t == -1)
-                    {
+                if (z == -1) {
+                    if (t == -1) {
                         if (c == -1)
                             result = new ROI5DArea(((ROI5D) this).getBooleanMask5D(z, t, c, false));
                         else
                             result = new ROI4DArea(((ROI5D) this).getBooleanMask4D(z, t, c, false));
                     }
-                    else
-                    {
+                    else {
                         if (c == -1)
                             result = new ROI5DArea(((ROI5D) this).getBooleanMask5D(z, t, c, false));
                         else
                             result = new ROI3DArea(((ROI5D) this).getBooleanMask3D(z, t, c, false));
                     }
                 }
-                else
-                {
-                    if (t == -1)
-                    {
+                else {
+                    if (t == -1) {
                         if (c == -1)
                             result = new ROI5DArea(((ROI5D) this).getBooleanMask5D(z, t, c, false));
                         else
                             result = new ROI4DArea(((ROI5D) this).getBooleanMask4D(z, t, c, false));
                     }
-                    else
-                    {
+                    else {
                         if (c == -1)
                             result = new ROI5DArea(((ROI5D) this).getBooleanMask5D(z, t, c, false));
                         else
-                            result = new ROI2DArea(((ROI5D) this).getBooleanMask2D(z, t, c, false));
+                            result = new ROI2DArea(this.getBooleanMask2D(z, t, c, false));
                     }
                 }
                 break;
         }
 
         result.beginUpdate();
-        try
-        {
-            if (result.canSetPosition())
-            {
+        try {
+            if (result.canSetPosition()) {
                 final Point5D pos = result.getPosition5D();
 
                 // set Z, T, C position
@@ -3484,8 +3098,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
             result.setStroke(getStroke());
             result.setShowName(getShowName());
         }
-        finally
-        {
+        finally {
             result.endUpdate();
         }
 
@@ -3500,8 +3113,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        need to also copy internal id from source ROI
      * @return <code>false</code> if the operation failed
      */
-    public boolean copyFrom(ROI roi, boolean copyId)
-    {
+    public boolean copyFrom(final ROI roi, final boolean copyId) {
         // use XML persistence for cloning
         final Node node = XMLUtil.createDocument(true).getDocumentElement();
 
@@ -3525,24 +3137,20 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        All compatible properties from the source ROI are copied into current ROI (even the internal id).
      * @return <code>false</code> if the operation failed
      */
-    public boolean copyFrom(ROI roi)
-    {
+    public boolean copyFrom(final ROI roi) {
         return copyFrom(roi, true);
     }
 
     @Override
-    public boolean loadFromXML(Node node)
-    {
+    public boolean loadFromXML(final Node node) {
         if (node == null)
             return false;
 
         beginUpdate();
-        try
-        {
+        try {
             id = XMLUtil.getElementIntValue(node, ID_ID, 0);
             propertyChanged(PROPERTY_ID);
-            synchronized (ROI.class)
-            {
+            synchronized (ROI.class) {
                 // avoid having same id
                 if (id_generator <= id)
                     id_generator = id + 1;
@@ -3555,26 +3163,22 @@ public abstract class ROI implements ChangeListener, XMLPersistent
             properties.clear();
 
             final Node propertiesNode = XMLUtil.getElement(node, ID_PROPERTIES);
-            if (propertiesNode != null)
-            {
-                synchronized (properties)
-                {
-                    for (Element element : XMLUtil.getElements(propertiesNode))
+            if (propertiesNode != null) {
+                synchronized (properties) {
+                    for (final Element element : XMLUtil.getElements(propertiesNode))
                         properties.put(element.getNodeName(), XMLUtil.getValue(element, ""));
                 }
             }
 
             return painter.loadFromXML(node);
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
     }
 
     @Override
-    public boolean saveToXML(Node node)
-    {
+    public boolean saveToXML(final Node node) {
         if (node == null)
             return false;
 
@@ -3588,9 +3192,8 @@ public abstract class ROI implements ChangeListener, XMLPersistent
         final Element propertiesNode = XMLUtil.setElement(node, ID_PROPERTIES);
         final Set<Entry<String, String>> entries = properties.entrySet();
 
-        synchronized (properties)
-        {
-            for (Entry<String, String> entry : entries)
+        synchronized (properties) {
+            for (final Entry<String, String> entry : entries)
                 XMLUtil.setElementValue(propertiesNode, entry.getKey(), entry.getValue());
         }
 
@@ -3605,20 +3208,18 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      *        ROI event
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void roiChanged(ROIPointEventType pointEventType, Object point)
-    {
+    public void roiChanged(final ROIPointEventType pointEventType, final Object point) {
         // handle with updater
         updater.changed(new ROIEvent(this, ROIEventType.ROI_CHANGED, pointEventType, point));
     }
 
     /**
      * Called when ROI has changed its content and/or position.<br>
-     * 
+     *
      * @param contentChanged
      *        mean that ROI content has changed otherwise we consider only a position change
      */
-    public void roiChanged(boolean contentChanged)
-    {
+    public void roiChanged(final boolean contentChanged) {
         // handle with updater
         if (contentChanged)
             updater.changed(new ROIEvent(this, ROIEventType.ROI_CHANGED, ROI_CHANGED_ALL));
@@ -3630,8 +3231,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @deprecated Use {@link #roiChanged(boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void roiChanged()
-    {
+    public void roiChanged() {
         // handle with updater
         roiChanged(true);
     }
@@ -3639,8 +3239,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * Called when ROI selected state changed.
      */
-    public void selectionChanged()
-    {
+    public void selectionChanged() {
         // handle with updater
         updater.changed(new ROIEvent(this, ROIEventType.SELECTION_CHANGED));
     }
@@ -3648,32 +3247,29 @@ public abstract class ROI implements ChangeListener, XMLPersistent
     /**
      * Called when ROI focus state changed.
      */
-    public void focusChanged()
-    {
+    public void focusChanged() {
         // handle with updater
         updater.changed(new ROIEvent(this, ROIEventType.FOCUS_CHANGED));
     }
 
     /**
      * Called when ROI painter changed.
-     * 
+     *
      * @deprecated
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void painterChanged()
-    {
+    public void painterChanged() {
         // handle with updater
         updater.changed(new ROIEvent(this, ROIEventType.PAINTER_CHANGED));
     }
 
     /**
      * Called when ROI name has changed.
-     * 
+     *
      * @deprecated Use {@link #propertyChanged(String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void nameChanged()
-    {
+    public void nameChanged() {
         // handle with updater
         updater.changed(new ROIEvent(this, ROIEventType.NAME_CHANGED));
     }
@@ -3682,8 +3278,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent
      * @param propertyName
      *        Called when ROI property has changed
      */
-    public void propertyChanged(String propertyName)
-    {
+    public void propertyChanged(final String propertyName) {
         // handle with updater
         updater.changed(new ROIEvent(this, propertyName));
 
@@ -3694,65 +3289,56 @@ public abstract class ROI implements ChangeListener, XMLPersistent
 
     /**
      * Add a listener
-     * 
+     *
      * @param listener
      *        ROI listener
      */
-    public void addListener(ROIListener listener)
-    {
+    public void addListener(final ROIListener listener) {
         if (listener != null)
             listeners.add(listener);
     }
 
     /**
      * Remove a listener
-     * 
+     *
      * @param listener
      *        ROI listener
      */
-    public void removeListener(ROIListener listener)
-    {
+    public void removeListener(final ROIListener listener) {
         if (listener != null)
             listeners.remove(listener);
     }
 
-    private void fireChangedEvent(ROIEvent event)
-    {
-        for (ROIListener listener : new ArrayList<ROIListener>(listeners))
+    private void fireChangedEvent(final ROIEvent event) {
+        for (final ROIListener listener : new ArrayList<>(listeners))
             listener.roiChanged(event);
     }
 
-    public void beginUpdate()
-    {
+    public void beginUpdate() {
         updater.beginUpdate();
         painter.beginUpdate();
     }
 
-    public void endUpdate()
-    {
+    public void endUpdate() {
         painter.endUpdate();
         updater.endUpdate();
     }
 
-    public boolean isUpdating()
-    {
+    public boolean isUpdating() {
         return updater.isUpdating();
     }
 
     @Override
-    public void onChanged(CollapsibleEvent object)
-    {
+    public void onChanged(final CollapsibleEvent object) {
         final ROIEvent event = (ROIEvent) object;
 
         // do here global process on ROI change
-        switch (event.getType())
-        {
+        switch (event.getType()) {
             case ROI_CHANGED:
                 // cached properties need to be recomputed
                 boundsInvalid = true;
                 // need to recompute points
-                if (StringUtil.equals(event.getPropertyName(), ROI_CHANGED_ALL))
-                {
+                if (StringUtil.equals(event.getPropertyName(), ROI_CHANGED_ALL)) {
                     numberOfContourPointsInvalid = true;
                     numberOfPointsInvalid = true;
                 }

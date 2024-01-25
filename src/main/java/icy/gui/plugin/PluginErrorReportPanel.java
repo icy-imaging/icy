@@ -1,57 +1,43 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.plugin;
 
 import icy.gui.frame.error.ErrorReportFrame;
 import icy.plugin.PluginDescriptor;
-import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.util.StringUtil;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * @deprecated Use {@link ErrorReportFrame} instead
  */
 @Deprecated(since = "2.4.3", forRemoval = true)
-public class PluginErrorReportPanel extends JPanel
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -2875740914347175762L;
-
+public class PluginErrorReportPanel extends JPanel {
     // GUI
     JTextPane errorMessageTextPane;
     JLabel label;
@@ -68,8 +54,7 @@ public class PluginErrorReportPanel extends JPanel
     final String title;
     final String message;
 
-    public PluginErrorReportPanel(PluginDescriptor plugin, String devId, String title, String message)
-    {
+    public PluginErrorReportPanel(final PluginDescriptor plugin, final String devId, final String title, final String message) {
         super();
 
         this.plugin = plugin;
@@ -95,54 +80,45 @@ public class PluginErrorReportPanel extends JPanel
 
         label.setText(str);
 
-        try
-        {
+        try {
             errorMessageTextPane.getStyledDocument().insertString(errorMessageTextPane.getStyledDocument().getLength(),
                     message, new SimpleAttributeSet());
         }
-        catch (BadLocationException e)
-        {
-            System.err.println("PluginErrorReport(...) error :");
-            IcyExceptionHandler.showErrorMessage(e, true);
+        catch (final BadLocationException e) {
+            IcyLogger.error(PluginErrorReportPanel.class, e, "PluginErrorReport(...) error.");
         }
         errorMessageTextPane.setCaretPosition(0);
 
         final Document doc = commentTextPane.getDocument();
 
-        try
-        {
-            SimpleAttributeSet attributes = new SimpleAttributeSet();
+        try {
+            final SimpleAttributeSet attributes = new SimpleAttributeSet();
             StyleConstants.setItalic(attributes, true);
             StyleConstants.setForeground(attributes, Color.GRAY);
             doc.insertString(0, "Please type here your comment", attributes);
         }
-        catch (BadLocationException e1)
-        {
-
+        catch (final BadLocationException e1) {
+            // ignore
         }
 
-        commentTextPane.addMouseListener(new MouseAdapter()
-        {
+        commentTextPane.addMouseListener(new MouseAdapter() {
             // Displays a message at the beginning that
             // disappears when first clicked
             boolean firstClickDone = false;
 
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (!firstClickDone)
-                {
+            public void mouseClicked(final MouseEvent e) {
+                if (!firstClickDone) {
                     commentTextPane.setText("");
 
-                    SimpleAttributeSet attributes = new SimpleAttributeSet();
+                    final SimpleAttributeSet attributes = new SimpleAttributeSet();
                     StyleConstants.setItalic(attributes, false);
                     StyleConstants.setForeground(attributes, Color.BLACK);
-                    try
-                    {
+                    try {
                         doc.insertString(0, " ", attributes);
                     }
-                    catch (BadLocationException e1)
-                    {
+                    catch (final BadLocationException e1) {
+                        // ignore
                     }
 
                     firstClickDone = true;
@@ -151,16 +127,12 @@ public class PluginErrorReportPanel extends JPanel
         });
     }
 
-    /**
-     * @wbp.parser.constructor
-     */
-    PluginErrorReportPanel()
-    {
+    @SuppressWarnings("unused")
+    PluginErrorReportPanel() {
         this(new PluginDescriptor(plugins.kernel.canvas.Canvas2DPlugin.class), null, null, "Error !!");
     }
 
-    private void initialize()
-    {
+    private void initialize() {
         if (plugin != null)
             label = new JLabel("", plugin.getIcon(), SwingConstants.CENTER);
         else
@@ -181,8 +153,7 @@ public class PluginErrorReportPanel extends JPanel
         // comment pane
         commentTextPane = new JTextPane();
         commentTextPane.setEditable(true);
-        commentTextPane
-                .setToolTipText("Give here some informations about the context or how to reproduce the bug to help the developer in resolving the issue");
+        commentTextPane.setToolTipText("Give here some informations about the context or how to reproduce the bug to help the developer in resolving the issue");
 
         final JScrollPane scComment = new JScrollPane(commentTextPane);
         scComment.setPreferredSize(new Dimension(23, 60));
@@ -197,7 +168,7 @@ public class PluginErrorReportPanel extends JPanel
         reportButton = new JButton("Report");
         closeButton = new JButton("Close");
 
-        JPanel buttonsPanel = new JPanel();
+        final JPanel buttonsPanel = new JPanel();
         buttonsPanel.add(reportButton);
         buttonsPanel.add(closeButton);
 

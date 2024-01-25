@@ -26,6 +26,7 @@ import icy.image.cache.ImageCache;
 import icy.main.Icy;
 import icy.preferences.ApplicationPreferences;
 import icy.preferences.GeneralPreferences;
+import icy.system.logging.IcyLogger;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import java.awt.event.ActionEvent;
@@ -69,7 +70,7 @@ public final class EHCacheButton extends IcyToggleButton implements ActionListen
                 ok = ImageCache.shutDownIfEmpty();
         }
         catch (final Exception e) {
-            System.err.println(e.getMessage());
+            IcyLogger.error(EHCacheButton.class, e, "Unable to init/shutdown image cache.");
         }
 
         // failed to change virtual mode state ?

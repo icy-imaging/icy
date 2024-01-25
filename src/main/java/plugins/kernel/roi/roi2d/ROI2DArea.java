@@ -1,44 +1,22 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package plugins.kernel.roi.roi2d;
-
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.IndexColorModel;
-import java.lang.ref.WeakReference;
-import java.util.Arrays;
-
-import org.w3c.dom.Node;
 
 import icy.canvas.IcyCanvas;
 import icy.canvas.IcyCanvas2D;
@@ -53,33 +31,38 @@ import icy.roi.ROI2D;
 import icy.roi.ROIEvent;
 import icy.roi.edit.Area2DChangeROIEdit;
 import icy.sequence.Sequence;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.type.point.Point5D;
 import icy.type.point.Point5D.Double;
 import icy.type.rectangle.Rectangle3D;
-import icy.util.EventUtil;
-import icy.util.GraphicsUtil;
-import icy.util.ShapeUtil;
-import icy.util.StringUtil;
-import icy.util.XMLUtil;
+import icy.util.*;
 import icy.vtk.IcyVtkPanel;
 import icy.vtk.VtkUtil;
+import org.w3c.dom.Node;
 import plugins.kernel.canvas.VtkCanvas;
-import vtk.vtkActor;
-import vtk.vtkImageData;
-import vtk.vtkInformation;
-import vtk.vtkPolyData;
-import vtk.vtkPolyDataMapper;
-import vtk.vtkProp;
+import vtk.*;
+
+import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
 
 /**
  * ROI Area type.<br>
  * Use a bitmap mask internally for fast boolean mask operation.<br>
- * 
+ *
  * @author Stephane
  */
-public class ROI2DArea extends ROI2D
-{
+public class ROI2DArea extends ROI2D {
     protected static final float DEFAULT_CURSOR_SIZE = 15f;
 
     // we want to keep a static brush
@@ -88,8 +71,7 @@ public class ROI2DArea extends ROI2D
     protected static Color brushColor = Color.red;
     protected static float brushSize = DEFAULT_CURSOR_SIZE;
 
-    public class ROI2DAreaPainter extends ROI2DPainter implements Runnable
-    {
+    public class ROI2DAreaPainter extends ROI2DPainter implements Runnable {
         /**
          * @deprecated Use {@link #getOpacity()} instead.
          */
@@ -109,7 +91,7 @@ public class ROI2DArea extends ROI2D
         protected vtkActor surfaceActor;
         // 3D internal
         protected boolean needRebuild;
-        protected double scaling[];
+        protected double[] scaling;
         protected WeakReference<VtkCanvas> canvas3d;
         protected int lastBuildPosZ;
         protected boolean hovered;
@@ -117,8 +99,7 @@ public class ROI2DArea extends ROI2D
         // internal
         protected final Point2D brushPosition;
 
-        public ROI2DAreaPainter()
-        {
+        public ROI2DAreaPainter() {
             super();
 
             brushPosition = new Point2D.Double();
@@ -135,14 +116,13 @@ public class ROI2DArea extends ROI2D
             Arrays.fill(scaling, 1d);
 
             needRebuild = true;
-            canvas3d = new WeakReference<VtkCanvas>(null);
+            canvas3d = new WeakReference<>(null);
             lastBuildPosZ = getZ();
             hovered = false;
         }
 
         @Override
-        protected void finalize() throws Throwable
-        {
+        protected void finalize() throws Throwable {
             super.finalize();
 
             // release allocated VTK resources
@@ -150,34 +130,29 @@ public class ROI2DArea extends ROI2D
                 surfaceActor.Delete();
             if (polyMapper != null)
                 polyMapper.Delete();
-            if (polyData != null)
-            {
+            if (polyData != null) {
                 polyData.GetPointData().GetScalars().Delete();
                 polyData.GetPointData().Delete();
                 polyData.Delete();
             }
-            if (outlineActor != null)
-            {
+            if (outlineActor != null) {
                 outlineActor.SetPropertyKeys(null);
                 outlineActor.Delete();
             }
-            if (vtkInfo != null)
-            {
+            if (vtkInfo != null) {
                 vtkInfo.Remove(VtkCanvas.visibilityKey);
                 vtkInfo.Delete();
             }
             if (outlineMapper != null)
                 outlineMapper.Delete();
-            if (outline != null)
-            {
+            if (outline != null) {
                 outline.GetPointData().GetScalars().Delete();
                 outline.GetPointData().Delete();
                 outline.Delete();
             }
-        };
+        }
 
-        protected void initVtkObjects()
-        {
+        protected void initVtkObjects() {
             outline = VtkUtil.getOutline(0d, 1d, 0d, 1d, 0d, 1d);
             outlineMapper = new vtkPolyDataMapper();
             outlineMapper.SetInputData(outline);
@@ -209,12 +184,8 @@ public class ROI2DArea extends ROI2D
 
         /**
          * rebuild VTK objects (called only when VTK canvas is selected).
-         * 
-         * @throws InterruptedException
-         * @throws IllegalArgumentException
          */
-        protected void rebuildVtkObjects() throws IllegalArgumentException, InterruptedException
-        {
+        protected void rebuildVtkObjects() throws IllegalArgumentException, InterruptedException {
             final VtkCanvas canvas = canvas3d.get();
             // canvas was closed
             if (canvas == null)
@@ -247,23 +218,20 @@ public class ROI2DArea extends ROI2D
             bounds.setSizeX(bounds.getSizeX() * scaling[0]);
             bounds.setY(bounds.getY() * scaling[1]);
             bounds.setSizeY(bounds.getSizeY() * scaling[1]);
-            if (bounds.isInfiniteZ())
-            {
+            if (bounds.isInfiniteZ()) {
                 bounds.setZ(0);
                 bounds.setSizeZ(seq.getSizeZ() * scaling[2]);
                 lastBuildPosZ = -1;
             }
-            else
-            {
+            else {
                 lastBuildPosZ = getZ();
                 bounds.setZ(bounds.getZ() * scaling[2]);
-                bounds.setSizeZ(1d * scaling[2]);
+                bounds.setSizeZ(/*1d * */scaling[2]);
             }
 
             // actor can be accessed in canvas3d for rendering so we need to synchronize access
             vtkPanel.lock();
-            try
-            {
+            try {
                 // update outline data
                 VtkUtil.setOutlineBounds(outline, bounds.getMinX(), bounds.getMaxX(), bounds.getMinY(),
                         bounds.getMaxY(), bounds.getMinZ(), bounds.getMaxZ(), canvas);
@@ -281,15 +249,13 @@ public class ROI2DArea extends ROI2D
                 imageData.Delete();
 
                 // release previous polydata
-                if (previousPolyData != null)
-                {
+                if (previousPolyData != null) {
                     previousPolyData.GetPointData().GetScalars().Delete();
                     previousPolyData.GetPointData().Delete();
                     previousPolyData.Delete();
                 }
             }
-            finally
-            {
+            finally {
                 vtkPanel.unlock();
             }
 
@@ -297,8 +263,7 @@ public class ROI2DArea extends ROI2D
             updateVtkDisplayProperties();
         }
 
-        protected void updateVtkDisplayProperties()
-        {
+        protected void updateVtkDisplayProperties() {
             if (surfaceActor == null)
                 return;
 
@@ -315,18 +280,15 @@ public class ROI2DArea extends ROI2D
             // we need to lock canvas as actor can be accessed during rendering
             if (vtkPanel != null)
                 vtkPanel.lock();
-            try
-            {
+            try {
                 // set actors color
                 outlineActor.GetProperty().SetColor(r, g, b);
-                if (isSelected())
-                {
+                if (isSelected()) {
                     outlineActor.GetProperty().SetRepresentationToWireframe();
                     outlineActor.SetVisibility(1);
                     vtkInfo.Set(VtkCanvas.visibilityKey, 1);
                 }
-                else
-                {
+                else {
                     outlineActor.GetProperty().SetRepresentationToPoints();
                     outlineActor.SetVisibility(0);
                     vtkInfo.Set(VtkCanvas.visibilityKey, 0);
@@ -336,8 +298,7 @@ public class ROI2DArea extends ROI2D
                 // surfaceActor.GetProperty().SetOpacity(opacity);
                 setVtkObjectsColor(col);
             }
-            finally
-            {
+            finally {
                 if (vtkPanel != null)
                     vtkPanel.unlock();
             }
@@ -346,16 +307,14 @@ public class ROI2DArea extends ROI2D
             painterChanged();
         }
 
-        protected void setVtkObjectsColor(Color color)
-        {
+        protected void setVtkObjectsColor(final Color color) {
             if (outline != null)
                 VtkUtil.setPolyDataColor(outline, color, canvas3d.get());
             if (polyData != null)
                 VtkUtil.setPolyDataColor(polyData, color, canvas3d.get());
         }
 
-        protected void updateVtkObjectsBounds()
-        {
+        protected void updateVtkObjectsBounds() {
             final VtkCanvas canvas = canvas3d.get();
             // canvas was closed
             if (canvas == null)
@@ -377,21 +336,18 @@ public class ROI2DArea extends ROI2D
             bounds.setSizeX(bounds.getSizeX() * scaling[0]);
             bounds.setY(bounds.getY() * scaling[1]);
             bounds.setSizeY(bounds.getSizeY() * scaling[1]);
-            if (bounds.isInfiniteZ())
-            {
+            if (bounds.isInfiniteZ()) {
                 bounds.setZ(0);
                 bounds.setSizeZ(seq.getSizeZ() * scaling[2]);
             }
-            else
-            {
+            else {
                 bounds.setZ(bounds.getZ() * scaling[2]);
-                bounds.setSizeZ(1d * scaling[2]);
+                bounds.setSizeZ(/*1d * */scaling[2]);
             }
 
             // actor can be accessed in canvas3d for rendering so we need to synchronize access
             vtkPanel.lock();
-            try
-            {
+            try {
                 // update outline position
                 VtkUtil.setOutlineBounds(outline, bounds.getMinX(), bounds.getMaxX(), bounds.getMinY(),
                         bounds.getMaxY(), bounds.getMinZ(), bounds.getMaxZ(), canvas);
@@ -400,14 +356,12 @@ public class ROI2DArea extends ROI2D
                 // update actor position
                 surfaceActor.SetPosition(bounds.getX(), bounds.getY(), bounds.getZ());
             }
-            finally
-            {
+            finally {
                 vtkPanel.unlock();
             }
         }
 
-        void updateCursor()
-        {
+        void updateCursor() {
             final double x = brushPosition.getX();
             final double y = brushPosition.getY();
 
@@ -421,18 +375,15 @@ public class ROI2DArea extends ROI2D
         /**
          * Returns the brush position.
          */
-        public Point2D getBrushPosition()
-        {
+        public Point2D getBrushPosition() {
             return (Point) brushPosition.clone();
         }
 
         /**
          * Set the brush position.
          */
-        public void setBrushPosition(Point2D position)
-        {
-            if (!brushPosition.equals(position))
-            {
+        public void setBrushPosition(final Point2D position) {
+            if (!brushPosition.equals(position)) {
                 brushPosition.setLocation(position);
                 updateCursor();
             }
@@ -442,8 +393,7 @@ public class ROI2DArea extends ROI2D
          * @deprecated Use {@link #getBrushPosition()} instead.
          */
         @Deprecated(since = "2.4.3", forRemoval = true)
-        public Point2D getCursorPosition()
-        {
+        public Point2D getCursorPosition() {
             return getBrushPosition();
         }
 
@@ -451,28 +401,24 @@ public class ROI2DArea extends ROI2D
          * @deprecated Use {@link #setBrushPosition(Point2D)} instead.
          */
         @Deprecated(since = "2.4.3", forRemoval = true)
-        public void setCursorPosition(Point2D position)
-        {
+        public void setCursorPosition(final Point2D position) {
             setBrushPosition(position);
         }
 
         /**
          * Returns the brush size.
          */
-        public float getBrushSize()
-        {
+        public float getBrushSize() {
             return brushSize;
         }
 
         /**
          * Sets the brush size.
          */
-        public void setBrushSize(float value)
-        {
+        public void setBrushSize(final float value) {
             final float adjValue = Math.max(Math.min(value, MAX_CURSOR_SIZE), MIN_CURSOR_SIZE);
 
-            if (brushSize != adjValue)
-            {
+            if (brushSize != adjValue) {
                 brushSize = adjValue;
                 updateCursor();
             }
@@ -482,8 +428,7 @@ public class ROI2DArea extends ROI2D
          * @deprecated Use {@link #getBrushSize()} instead
          */
         @Deprecated(since = "2.4.3", forRemoval = true)
-        public float getCursorSize()
-        {
+        public float getCursorSize() {
             return getBrushSize();
         }
 
@@ -491,26 +436,22 @@ public class ROI2DArea extends ROI2D
          * @deprecated Use {@link #setBrushSize(float)} instead
          */
         @Deprecated(since = "2.4.3", forRemoval = true)
-        public void setCursorSize(float value)
-        {
+        public void setCursorSize(final float value) {
             setBrushSize(value);
         }
 
         /**
          * Returns the brush color
          */
-        public Color getBrushColor()
-        {
+        public Color getBrushColor() {
             return brushColor;
         }
 
         /**
          * Sets the brush color
          */
-        public void setBrushColor(Color value)
-        {
-            if (!brushColor.equals(value))
-            {
+        public void setBrushColor(final Color value) {
+            if (!brushColor.equals(value)) {
                 brushColor = value;
                 painterChanged();
             }
@@ -520,8 +461,7 @@ public class ROI2DArea extends ROI2D
          * @deprecated Use {@link #getBrushColor()} instead
          */
         @Deprecated(since = "2.4.3", forRemoval = true)
-        public Color getCursorColor()
-        {
+        public Color getCursorColor() {
             return getBrushColor();
         }
 
@@ -529,37 +469,31 @@ public class ROI2DArea extends ROI2D
          * @deprecated Use {@link #setBrushColor(Color)} instead
          */
         @Deprecated(since = "2.4.3", forRemoval = true)
-        public void setCursorColor(Color value)
-        {
+        public void setCursorColor(final Color value) {
             setBrushColor(value);
         }
 
-        public void addToMask(Point2D pos)
-        {
+        public void addToMask(final Point2D pos) {
             setBrushPosition(pos);
             updateMask(brush, false);
         }
 
-        public void removeFromMask(Point2D pos)
-        {
+        public void removeFromMask(final Point2D pos) {
             setBrushPosition(pos);
             updateMask(brush, true);
         }
 
         @Override
-        public void painterChanged()
-        {
+        public void painterChanged() {
             updateMaskColor(true);
 
             super.painterChanged();
         }
 
         @Override
-        protected boolean updateFocus(InputEvent e, Point5D imagePoint, IcyCanvas canvas)
-        {
+        protected boolean updateFocus(final InputEvent e, final Point5D imagePoint, final IcyCanvas canvas) {
             // specific VTK canvas processing
-            if (canvas instanceof VtkCanvas)
-            {
+            if (canvas instanceof VtkCanvas) {
                 // mouse is over the ROI actor ? --> focus the ROI
                 final boolean focus = (surfaceActor != null) && (surfaceActor == ((VtkCanvas) canvas).getPickedObject());
 
@@ -567,29 +501,25 @@ public class ROI2DArea extends ROI2D
 
                 return focus;
             }
-            
+
             setHovered(contains(imagePoint.getX(), imagePoint.getY()));
-            
+
             return super.updateFocus(e, imagePoint, canvas);
         }
 
-        public void setHovered(boolean value)
-        {
-            if (hovered != value)
-            {
+        public void setHovered(final boolean value) {
+            if (hovered != value) {
                 hovered = value;
                 painterChanged();
             }
         }
 
-        public boolean isHovered()
-        {
+        public boolean isHovered() {
             return hovered;
         }
 
         @Override
-        public void keyPressed(KeyEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void keyPressed(final KeyEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // send event to parent first
             super.keyPressed(e, imagePoint, canvas);
 
@@ -598,35 +528,28 @@ public class ROI2DArea extends ROI2D
                 return;
 
             // not yet consumed and ROI editable...
-            if (!e.isConsumed() && !isReadOnly())
-            {
+            if (!e.isConsumed() && !isReadOnly()) {
                 // then process it here
-                if (isActiveFor(canvas))
-                {
+                if (isActiveFor(canvas)) {
                     ROI2DArea.this.beginUpdate();
-                    try
-                    {
-                        switch (e.getKeyChar())
-                        {
+                    try {
+                        switch (e.getKeyChar()) {
                             case '+':
-                                if (isSelected())
-                                {
+                                if (isSelected()) {
                                     setBrushSize(getBrushSize() * 1.1f);
                                     e.consume();
                                 }
                                 break;
 
                             case '-':
-                                if (isSelected())
-                                {
+                                if (isSelected()) {
                                     setBrushSize(getBrushSize() * 0.9f);
                                     e.consume();
                                 }
                                 break;
                         }
                     }
-                    finally
-                    {
+                    finally {
                         ROI2DArea.this.endUpdate();
                     }
                 }
@@ -634,8 +557,7 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public void mousePressed(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void mousePressed(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // send event to parent first
             super.mousePressed(e, imagePoint, canvas);
 
@@ -647,45 +569,37 @@ public class ROI2DArea extends ROI2D
                 return;
 
             // not yet consumed, ROI editable, selected and not focused...
-            if (!e.isConsumed() && !isReadOnly() && isSelected() && !isFocused())
-            {
+            if (!e.isConsumed() && !isReadOnly() && isSelected() && !isFocused()) {
                 // then process it here
-                if (isActiveFor(canvas))
-                {
+                if (isActiveFor(canvas)) {
                     // keep trace of roi changes from user mouse action
                     roiModifiedByMouse = false;
-                    try
-                    {
+                    try {
                         // save current ROI
                         undoSave = getBooleanMask(true);
                     }
-                    catch (InterruptedException e1)
-                    {
+                    catch (final InterruptedException e1) {
                         undoSave = null;
                     }
 
                     ROI2DArea.this.beginUpdate();
-                    try
-                    {
+                    try {
                         // left button action
-                        if (EventUtil.isLeftMouseButton(e))
-                        {
+                        if (EventUtil.isLeftMouseButton(e)) {
                             // add point first
                             addToMask(imagePoint.toPoint2D());
                             roiModifiedByMouse = true;
                             e.consume();
                         }
                         // right button action
-                        else if (EventUtil.isRightMouseButton(e))
-                        {
+                        else if (EventUtil.isRightMouseButton(e)) {
                             // remove point
                             removeFromMask(imagePoint.toPoint2D());
                             roiModifiedByMouse = true;
                             e.consume();
                         }
                     }
-                    finally
-                    {
+                    finally {
                         ROI2DArea.this.endUpdate();
                     }
                 }
@@ -693,25 +607,19 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public void mouseReleased(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void mouseReleased(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // send event to parent first
             super.mouseReleased(e, imagePoint, canvas);
 
             // update only on release as it can be long
-            if (!isReadOnly())
-            {
-                if (roiModifiedByMouse)
-                {
-                    if (boundsNeedUpdate)
-                    {
-                        if (optimizeBounds())
-                        {
+            if (!isReadOnly()) {
+                if (roiModifiedByMouse) {
+                    if (boundsNeedUpdate) {
+                        if (optimizeBounds()) {
                             roiChanged(true);
 
                             // empty ? delete ROI
-                            if (bounds.isEmpty())
-                            {
+                            if (bounds.isEmpty()) {
                                 ROI2DArea.this.remove();
                                 // nothing more to do
                                 return;
@@ -722,22 +630,19 @@ public class ROI2DArea extends ROI2D
                     final Sequence sequence = canvas.getSequence();
 
                     // add undo operation
-                    try
-                    {
+                    try {
                         if ((sequence != null) && (undoSave != null))
                             sequence.addUndoableEdit(new Area2DChangeROIEdit(ROI2DArea.this, undoSave));
                     }
-                    catch (OutOfMemoryError err)
-                    {
+                    catch (final OutOfMemoryError err) {
                         // can't create undo operation, show message and clear undo manager
-                        System.out.println("Warning: not enough memory to create undo point for ROI area change");
+                        IcyLogger.warn(ROI2DArea.class, err, "Not enough memory to create undo point for ROI area change.");
                         if (sequence != null)
                             sequence.clearUndoManager();
                     }
-                    catch (InterruptedException e1)
-                    {
+                    catch (final InterruptedException e1) {
                         // can't create undo operation, show message and clear undo manager
-                        System.out.println("Warning: interrupted undo point creation for ROI area change");
+                        IcyLogger.warn(ROI2DArea.class, e1, "Interrupted undo point creation for ROI area change.");
                     }
 
                     // release save
@@ -748,8 +653,7 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public void mouseClick(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void mouseClick(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // provide backward compatibility
             if (imagePoint != null)
                 mouseClick(e, imagePoint.toPoint2D(), canvas);
@@ -757,24 +661,19 @@ public class ROI2DArea extends ROI2D
                 mouseClick(e, (Point2D) null, canvas);
 
             // not yet consumed...
-            if (!e.isConsumed())
-            {
+            if (!e.isConsumed()) {
                 // and process ROI stuff now
-                if (isActiveFor(canvas))
-                {
+                if (isActiveFor(canvas)) {
                     final int clickCount = e.getClickCount();
 
                     // double click
-                    if (clickCount == 2)
-                    {
+                    if (clickCount == 2) {
                         // focused ?
-                        if (isFocused())
-                        {
+                        if (isFocused()) {
                             // show in ROI panel
                             final RoisPanel roiPanel = Icy.getMainInterface().getRoisPanel();
 
-                            if (roiPanel != null)
-                            {
+                            if (roiPanel != null) {
                                 roiPanel.scrollTo(ROI2DArea.this);
                                 // consume event
                                 e.consume();
@@ -787,8 +686,7 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public void mouseMove(MouseEvent e, Double imagePoint, IcyCanvas canvas)
-        {
+        public void mouseMove(final MouseEvent e, final Double imagePoint, final IcyCanvas canvas) {
             // send event to parent first
             super.mouseMove(e, imagePoint, canvas);
 
@@ -800,19 +698,16 @@ public class ROI2DArea extends ROI2D
                 return;
 
             // not yet consumed, ROI editable and selected...
-            if (!e.isConsumed() && !isReadOnly() && isSelected())
-            {
+            if (!e.isConsumed() && !isReadOnly() && isSelected()) {
                 // then process it here
-                if (isActiveFor(canvas))
-                {
+                if (isActiveFor(canvas)) {
                     setBrushPosition(imagePoint.toPoint2D());
                 }
             }
         }
 
         @Override
-        public void mouseDrag(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-        {
+        public void mouseDrag(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             // send event to parent first
             super.mouseDrag(e, imagePoint, canvas);
 
@@ -824,33 +719,27 @@ public class ROI2DArea extends ROI2D
                 return;
 
             // not yet consumed, ROI editable and selected...
-            if (!e.isConsumed() && !isReadOnly() && isSelected())
-            {
+            if (!e.isConsumed() && !isReadOnly() && isSelected()) {
                 // then process it here
-                if (isActiveFor(canvas))
-                {
+                if (isActiveFor(canvas)) {
                     ROI2DArea.this.beginUpdate();
-                    try
-                    {
+                    try {
                         // left button action
-                        if (EventUtil.isLeftMouseButton(e))
-                        {
+                        if (EventUtil.isLeftMouseButton(e)) {
                             // add point first
                             addToMask(imagePoint.toPoint2D());
                             roiModifiedByMouse = true;
                             e.consume();
                         }
                         // right button action
-                        else if (EventUtil.isRightMouseButton(e))
-                        {
+                        else if (EventUtil.isRightMouseButton(e)) {
                             // remove point
                             removeFromMask(imagePoint.toPoint2D());
                             roiModifiedByMouse = true;
                             e.consume();
                         }
                     }
-                    finally
-                    {
+                    finally {
                         ROI2DArea.this.endUpdate();
                     }
                 }
@@ -858,12 +747,10 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas)
-        {
+        public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
             super.paint(g, sequence, canvas);
 
-            if (isActiveFor(canvas))
-            {
+            if (isActiveFor(canvas)) {
                 // ROI selected ? draw cursor
                 if (isSelected() && !isFocused() && !isReadOnly())
                     drawCursor(g, sequence, canvas);
@@ -874,10 +761,8 @@ public class ROI2DArea extends ROI2D
          * Draw the ROI itself
          */
         @Override
-        public void drawROI(Graphics2D g, Sequence sequence, IcyCanvas canvas)
-        {
-            if (canvas instanceof IcyCanvas2D)
-            {
+        public void drawROI(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
+            if (canvas instanceof IcyCanvas2D) {
                 // not supported
                 if (g == null)
                     return;
@@ -886,29 +771,25 @@ public class ROI2DArea extends ROI2D
                 // trivial paint optimization
                 final boolean shapeVisible = GraphicsUtil.isVisible(g, bounds);
 
-                if (shapeVisible)
-                {
+                if (shapeVisible) {
                     final Graphics2D g2 = (Graphics2D) g.create();
                     final boolean small;
 
                     // disable LOD when creating the ROI
                     if (isCreating())
                         small = false;
-                    else
-                    {
+                    else {
                         final double scale = Math.max(Math.abs(canvas.getScaleX()), Math.abs(canvas.getScaleY()));
                         small = Math.max(scale * bounds.getWidth(), scale * bounds.getHeight()) < LOD_SMALL;
                     }
 
                     // simplified draw
-                    if (small)
-                    {
+                    if (small) {
                         g2.setColor(getDisplayColor());
                         g2.drawImage(imageMask, null, bounds.x, bounds.y);
                     }
                     // normal draw
-                    else
-                    {
+                    else {
                         final AlphaComposite prevAlpha = (AlphaComposite) g2.getComposite();
                         float newAlpha = prevAlpha.getAlpha() * getOpacity();
                         newAlpha = Math.min(1f, newAlpha);
@@ -924,14 +805,12 @@ public class ROI2DArea extends ROI2D
                         g2.setComposite(prevAlpha);
 
                         // draw border
-                        if (isSelected())
-                        {
+                        if (isSelected()) {
                             g2.setStroke(new BasicStroke((float) ROI.getAdjustedStroke(canvas, stroke + 1d)));
                             g2.setColor(getDisplayColor());
                             g2.draw(bounds);
                         }
-                        else if (isFocused() || isHovered())
-                        {
+                        else if (isFocused() || isHovered()) {
                             // outside border
                             g2.setStroke(new BasicStroke((float) ROI.getAdjustedStroke(canvas, stroke + 1d)));
                             g2.setColor(Color.black);
@@ -950,13 +829,11 @@ public class ROI2DArea extends ROI2D
                 // g2.drawRect((int) pt.getX(), (int) pt.getY(), 1, 1);
             }
 
-            if (canvas instanceof VtkCanvas)
-            {
+            if (canvas instanceof final VtkCanvas cnv) {
                 // 3D canvas
-                final VtkCanvas cnv = (VtkCanvas) canvas;
                 // update reference if needed
                 if (canvas3d.get() != cnv)
-                    canvas3d = new WeakReference<VtkCanvas>(cnv);
+                    canvas3d = new WeakReference<>(cnv);
 
                 // initialize VTK objects if not yet done
                 if (surfaceActor == null)
@@ -966,8 +843,7 @@ public class ROI2DArea extends ROI2D
                 final double[] s = cnv.getVolumeScale();
 
                 // scaling changed ?
-                if (!Arrays.equals(scaling, s))
-                {
+                if (!Arrays.equals(scaling, s)) {
                     // update scaling
                     scaling = s;
                     // need rebuild
@@ -975,8 +851,7 @@ public class ROI2DArea extends ROI2D
                 }
 
                 // need to rebuild 3D data structures ?
-                if (needRebuild)
-                {
+                if (needRebuild) {
                     // request rebuild 3D objects
                     ThreadUtil.runSingle(this);
                     needRebuild = false;
@@ -987,10 +862,8 @@ public class ROI2DArea extends ROI2D
         /**
          * draw the ROI cursor
          */
-        protected void drawCursor(Graphics2D g, Sequence sequence, IcyCanvas canvas)
-        {
-            if (canvas instanceof IcyCanvas2D)
-            {
+        protected void drawCursor(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
+            if (canvas instanceof IcyCanvas2D) {
                 // not supported
                 if (g == null)
                     return;
@@ -999,31 +872,27 @@ public class ROI2DArea extends ROI2D
                 // trivial paint optimization
                 final boolean shapeVisible = GraphicsUtil.isVisible(g, bounds);
 
-                if (shapeVisible)
-                {
+                if (shapeVisible) {
                     final Graphics2D g2 = (Graphics2D) g.create();
                     final boolean tiny;
 
                     // disable LOD when creating the ROI
                     if (isCreating())
                         tiny = false;
-                    else
-                    {
+                    else {
                         final double scale = Math.max(canvas.getScaleX(), canvas.getScaleY());
                         tiny = Math.max(scale * bounds.getWidth(), scale * bounds.getHeight()) < LOD_TINY;
                     }
 
                     // simplified draw
-                    if (tiny)
-                    {
+                    if (tiny) {
                         // cursor color
                         g2.setColor(brushColor);
                         // draw cursor
                         g2.fill(brush);
                     }
                     // normal draw
-                    else
-                    {
+                    else {
                         final AlphaComposite prevAlpha = (AlphaComposite) g2.getComposite();
                         float newAlpha = prevAlpha.getAlpha() * getOpacity() * 2f;
                         newAlpha = Math.min(1f, newAlpha);
@@ -1047,29 +916,23 @@ public class ROI2DArea extends ROI2D
         }
 
         @Override
-        public vtkProp[] getProps()
-        {
+        public vtkProp[] getProps() {
             // initialize VTK objects if not yet done
             if (surfaceActor == null)
                 initVtkObjects();
 
-            return new vtkActor[] {surfaceActor, outlineActor};
+            return new vtkActor[]{surfaceActor, outlineActor};
         }
 
         @Override
-        public void run()
-        {
-            try
-            {
+        public void run() {
+            try {
                 rebuildVtkObjects();
             }
-            catch (IllegalArgumentException e)
-            {
-                System.err.println("Error: couldn't rebuild VTK objects");
-                System.err.println(e.getMessage());
+            catch (final IllegalArgumentException e) {
+                IcyLogger.error(ROI2DArea.class, e, "Couldn't rebuild VTK objects.");
             }
-            catch (InterruptedException ie)
-            {
+            catch (final InterruptedException ie) {
                 // ignore
             }
         }
@@ -1108,8 +971,7 @@ public class ROI2DArea extends ROI2D
     /**
      * Create a ROI2D Area type from the specified {@link BooleanMask2D}.
      */
-    public ROI2DArea()
-    {
+    public ROI2DArea() {
         super();
 
         bounds = new Rectangle();
@@ -1147,16 +1009,14 @@ public class ROI2DArea extends ROI2D
      * @deprecated Use {@link #ROI2DArea(Point5D)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public ROI2DArea(Point2D position, boolean cm)
-    {
+    public ROI2DArea(final Point2D position, final boolean cm) {
         this(position);
     }
 
     /**
      * Create a ROI2D Area type with a single point.
      */
-    public ROI2DArea(Point2D position)
-    {
+    public ROI2DArea(final Point2D position) {
         this();
 
         // add current point to mask
@@ -1166,16 +1026,14 @@ public class ROI2DArea extends ROI2D
     /**
      * Generic constructor for interactive mode.
      */
-    public ROI2DArea(Point5D position)
-    {
+    public ROI2DArea(final Point5D position) {
         this(position.toPoint2D());
     }
 
     /**
      * Create a ROI2D Area type from the specified {@link BooleanMask2D}.
      */
-    public ROI2DArea(BooleanMask2D mask)
-    {
+    public ROI2DArea(final BooleanMask2D mask) {
         this();
 
         setAsBooleanMask(mask);
@@ -1184,8 +1042,7 @@ public class ROI2DArea extends ROI2D
     /**
      * Create a copy of the specified 2D Area ROI
      */
-    public ROI2DArea(ROI2DArea area)
-    {
+    public ROI2DArea(final ROI2DArea area) {
         super();
 
         bounds = new Rectangle();
@@ -1223,32 +1080,27 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public String getDefaultName()
-    {
+    public String getDefaultName() {
         return "Area2D";
     }
 
-    void addToBounds(Rectangle bnd)
-    {
+    void addToBounds(final Rectangle bnd) {
         final Rectangle newBounds;
 
         if (bounds.isEmpty())
             newBounds = new Rectangle(bnd);
-        else
-        {
+        else {
             newBounds = new Rectangle(bounds);
             newBounds.add(bnd);
         }
 
-        try
-        {
+        try {
             // update image to the new bounds
             updateImage(newBounds);
         }
-        catch (Error E)
-        {
+        catch (final Error e) {
             // perhaps a "out of memory" error, restore back old bounds
-            System.err.println("can't enlarge ROI, no enough memory !");
+            IcyLogger.error(ROI2DArea.class, e, "can't enlarge ROI, no enough memory !");
         }
     }
 
@@ -1256,8 +1108,7 @@ public class ROI2DArea extends ROI2D
      * @deprecated Use {@link #optimizeBounds()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void optimizeBounds(boolean removeIfEmpty)
-    {
+    public void optimizeBounds(final boolean removeIfEmpty) {
         optimizeBounds();
         if (removeIfEmpty && bounds.isEmpty())
             remove();
@@ -1267,14 +1118,13 @@ public class ROI2DArea extends ROI2D
      * Returns true if the ROI is empty (the mask does not contains any point).
      */
     @Override
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         if (bounds.isEmpty())
             return true;
 
         final byte[] data = maskData;
 
-        for (byte b : data)
+        for (final byte b : data)
             if (b != 0)
                 return false;
 
@@ -1285,8 +1135,7 @@ public class ROI2DArea extends ROI2D
      * Optimize the bounds size to the minimum surface which still include all mask<br>
      * You should call it after consecutive remove operations.
      */
-    public boolean optimizeBounds()
-    {
+    public boolean optimizeBounds() {
         // bounds are being updated
         boundsNeedUpdate = false;
 
@@ -1294,8 +1143,7 @@ public class ROI2DArea extends ROI2D
         final Rectangle bnds;
 
         // recompute bound from the mask data
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -1308,20 +1156,15 @@ public class ROI2DArea extends ROI2D
         boolean empty = true;
         int offset = 0;
 
-        for (int y = 0; y < sizeY; y++)
-        {
-            for (int x = 0; x < sizeX; x++)
-            {
-                if (data[offset++] != 0)
-                {
-                    if (empty)
-                    {
+        for (int y = 0; y < sizeY; y++) {
+            for (int x = 0; x < sizeX; x++) {
+                if (data[offset++] != 0) {
+                    if (empty) {
                         minX = maxX = x;
                         minY = maxY = y;
                         empty = false;
                     }
-                    else
-                    {
+                    else {
                         if (x < minX)
                             minX = x;
                         else if (x > maxX)
@@ -1347,18 +1190,15 @@ public class ROI2DArea extends ROI2D
      * @deprecated Use {@link #getDisplayColor()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public Color getMaskColor()
-    {
+    public Color getMaskColor() {
         return getOverlay().getDisplayColor();
     }
 
-    void updateMaskColor(boolean rebuildImage)
-    {
+    void updateMaskColor(final boolean rebuildImage) {
         final Color color = getOverlay().getDisplayColor();
 
         // roi color changed ?
-        if (!previousColor.equals(color))
-        {
+        if (!previousColor.equals(color)) {
             // update colormap
             red[1] = (byte) color.getRed();
             green[1] = (byte) color.getGreen();
@@ -1379,18 +1219,15 @@ public class ROI2DArea extends ROI2D
     /**
      * Returns the internal image mask.
      */
-    public BufferedImage getImageMask()
-    {
+    public BufferedImage getImageMask() {
         return imageMask;
     }
 
-    boolean updateImage(Rectangle newBnd)
-    {
+    boolean updateImage(final Rectangle newBnd) {
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -1404,13 +1241,11 @@ public class ROI2DArea extends ROI2D
         newBounds.translate(-bnds.x, -bnds.y);
 
         // dimension changed ?
-        if ((oldBounds.width != newBounds.width) || (oldBounds.height != newBounds.height))
-        {
+        if ((oldBounds.width != newBounds.width) || (oldBounds.height != newBounds.height)) {
             final BufferedImage newImageMask;
             final byte[] newMaskData;
 
-            if (!newBounds.isEmpty())
-            {
+            if (!newBounds.isEmpty()) {
                 // new bounds not empty
                 newImageMask = new BufferedImage(newBounds.width, newBounds.height, BufferedImage.TYPE_BYTE_INDEXED,
                         colorModel);
@@ -1418,8 +1253,7 @@ public class ROI2DArea extends ROI2D
 
                 final Rectangle intersect = newBounds.intersection(oldBounds);
 
-                if (!intersect.isEmpty())
-                {
+                if (!intersect.isEmpty()) {
                     int offSrc = 0;
                     int offDst = 0;
 
@@ -1430,13 +1264,12 @@ public class ROI2DArea extends ROI2D
                         offSrc += intersect.y * oldBounds.width;
                     // adjust offset in destination mask
                     if (newBounds.x < 0)
-                        offDst += -newBounds.x;
+                        offDst -= newBounds.x;
                     if (newBounds.y < 0)
                         offDst += -newBounds.y * newBounds.width;
 
                     // preserve data
-                    for (int j = 0; j < intersect.height; j++)
-                    {
+                    for (int j = 0; j < intersect.height; j++) {
                         System.arraycopy(data, offSrc, newMaskData, offDst, intersect.width);
 
                         offSrc += oldBounds.width;
@@ -1444,15 +1277,13 @@ public class ROI2DArea extends ROI2D
                     }
                 }
             }
-            else
-            {
+            else {
                 // new bounds empty --> use single pixel image to avoid NPE
                 newImageMask = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_INDEXED, colorModel);
                 newMaskData = ((DataBufferByte) newImageMask.getRaster().getDataBuffer()).getData();
             }
 
-            synchronized (this)
-            {
+            synchronized (this) {
                 // set new image and maskData
                 imageMask = newImageMask;
                 maskData = newMaskData;
@@ -1470,18 +1301,15 @@ public class ROI2DArea extends ROI2D
      * Don't forget to call optimizeBounds() after consecutive remove operation to refresh the mask
      * bounds.
      */
-    public void setPoint(int x, int y, boolean value)
-    {
+    public void setPoint(final int x, final int y, final boolean value) {
         final byte[] data;
         final Rectangle bnds;
 
-        if (value)
-        {
+        if (value) {
             // set point in mask
             addToBounds(new Rectangle(x, y, 1, 1));
 
-            synchronized (this)
-            {
+            synchronized (this) {
                 data = maskData;
                 bnds = bounds;
             }
@@ -1491,16 +1319,13 @@ public class ROI2DArea extends ROI2D
             // notify roi changed
             roiChanged(true);
         }
-        else
-        {
-            synchronized (this)
-            {
+        else {
+            synchronized (this) {
                 data = maskData;
                 bnds = bounds;
             }
 
-            if (bnds.contains(x, y))
-            {
+            if (bnds.contains(x, y)) {
                 // remove point from mask
                 data[(x - bnds.x) + ((y - bnds.y) * bnds.width)] = 0;
                 // mark that bounds need to be updated
@@ -1515,16 +1340,14 @@ public class ROI2DArea extends ROI2D
      * @deprecated Use {@link #setPoint(int, int, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void updateMask(int x, int y, boolean remove)
-    {
+    public void updateMask(final int x, final int y, final boolean remove) {
         setPoint(x, y, !remove);
     }
 
     /**
      * Add the specified {@link ROI2DArea} content to this ROI2DArea
      */
-    public void add(ROI2DArea roi)
-    {
+    public void add(final ROI2DArea roi) {
         final Rectangle boundsToAdd = roi.getBounds();
         final byte[] maskToAdd = roi.maskData;
 
@@ -1535,8 +1358,7 @@ public class ROI2DArea extends ROI2D
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -1545,8 +1367,7 @@ public class ROI2DArea extends ROI2D
         offDst = ((boundsToAdd.y - bnds.y) * bnds.width) + (boundsToAdd.x - bnds.x);
         offSrc = 0;
 
-        for (int y = 0; y < boundsToAdd.height; y++)
-        {
+        for (int y = 0; y < boundsToAdd.height; y++) {
             for (int x = 0; x < boundsToAdd.width; x++)
                 if (maskToAdd[offSrc++] != 0)
                     data[offDst + x] = 1;
@@ -1561,8 +1382,7 @@ public class ROI2DArea extends ROI2D
     /**
      * Add the specified {@link BooleanMask2D} content to this ROI2DArea
      */
-    public void add(BooleanMask2D mask)
-    {
+    public void add(final BooleanMask2D mask) {
         final Rectangle boundsToAdd = mask.bounds;
         final boolean[] maskToAdd = mask.mask;
 
@@ -1573,8 +1393,7 @@ public class ROI2DArea extends ROI2D
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -1583,8 +1402,7 @@ public class ROI2DArea extends ROI2D
         offDst = ((boundsToAdd.y - bnds.y) * bnds.width) + (boundsToAdd.x - bnds.x);
         offSrc = 0;
 
-        for (int y = 0; y < boundsToAdd.height; y++)
-        {
+        for (int y = 0; y < boundsToAdd.height; y++) {
             for (int x = 0; x < boundsToAdd.width; x++)
                 if (maskToAdd[offSrc++])
                     data[offDst + x] = 1;
@@ -1598,10 +1416,10 @@ public class ROI2DArea extends ROI2D
 
     /**
      * Exclusively add the specified {@link ROI2DArea} content to this ROI2DArea:
-     * 
+     *
      * <pre>
      *          mask1       xor      mask2        =       result
-     * 
+     *
      *     ################     ################
      *     ##############         ##############     ##            ##
      *     ############             ############     ####        ####
@@ -1612,8 +1430,7 @@ public class ROI2DArea extends ROI2D
      *     ##                                 ##     ##            ##
      * </pre>
      */
-    public void exclusiveAdd(ROI2DArea roi)
-    {
+    public void exclusiveAdd(final ROI2DArea roi) {
         final Rectangle boundsToXAdd = roi.getBounds();
         final byte[] maskToXAdd = roi.maskData;
 
@@ -1624,8 +1441,7 @@ public class ROI2DArea extends ROI2D
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -1634,8 +1450,7 @@ public class ROI2DArea extends ROI2D
         offDst = ((boundsToXAdd.y - bnds.y) * bnds.width) + (boundsToXAdd.x - bnds.x);
         offSrc = 0;
 
-        for (int y = 0; y < boundsToXAdd.height; y++)
-        {
+        for (int y = 0; y < boundsToXAdd.height; y++) {
             for (int x = 0; x < boundsToXAdd.width; x++)
                 if (maskToXAdd[offSrc++] != 0)
                     data[offDst + x] ^= 1;
@@ -1655,10 +1470,10 @@ public class ROI2DArea extends ROI2D
 
     /**
      * Exclusively add the specified {@link BooleanMask2D} content to this ROI2DArea:
-     * 
+     *
      * <pre>
      *          mask1       xor      mask2        =       result
-     * 
+     *
      *     ################     ################
      *     ##############         ##############     ##            ##
      *     ############             ############     ####        ####
@@ -1669,8 +1484,7 @@ public class ROI2DArea extends ROI2D
      *     ##                                 ##     ##            ##
      * </pre>
      */
-    public void exclusiveAdd(BooleanMask2D mask)
-    {
+    public void exclusiveAdd(final BooleanMask2D mask) {
         final Rectangle boundsToXAdd = mask.bounds;
         final boolean[] maskToXAdd = mask.mask;
 
@@ -1681,8 +1495,7 @@ public class ROI2DArea extends ROI2D
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -1691,8 +1504,7 @@ public class ROI2DArea extends ROI2D
         offDst = ((boundsToXAdd.y - bnds.y) * bnds.width) + (boundsToXAdd.x - bnds.x);
         offSrc = 0;
 
-        for (int y = 0; y < boundsToXAdd.height; y++)
-        {
+        for (int y = 0; y < boundsToXAdd.height; y++) {
             for (int x = 0; x < boundsToXAdd.width; x++)
                 if (maskToXAdd[offSrc++])
                     data[offDst + x] ^= 1;
@@ -1713,15 +1525,13 @@ public class ROI2DArea extends ROI2D
     /**
      * Subtract the specified {@link ROI2DArea} from this ROI2DArea
      */
-    public void subtract(ROI2DArea roi)
-    {
+    public void subtract(final ROI2DArea roi) {
         final Rectangle boundsToRemove = roi.getBounds();
         final byte[] maskToRemove = roi.maskData;
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -1737,8 +1547,7 @@ public class ROI2DArea extends ROI2D
         int offDst = ((intersection.y - bnds.y) * bnds.width) + (intersection.x - bnds.x);
         int offSrc = ((intersection.y - boundsToRemove.y) * boundsToRemove.width) + (intersection.x - boundsToRemove.x);
 
-        for (int y = 0; y < intersection.height; y++)
-        {
+        for (int y = 0; y < intersection.height; y++) {
             for (int x = 0; x < intersection.width; x++)
                 if (maskToRemove[offSrc + x] != 0)
                     data[offDst + x] = 0;
@@ -1760,15 +1569,13 @@ public class ROI2DArea extends ROI2D
     /**
      * Subtract the specified {@link BooleanMask2D} from this ROI2DArea
      */
-    public void subtract(BooleanMask2D mask)
-    {
+    public void subtract(final BooleanMask2D mask) {
         final Rectangle boundsToRemove = mask.bounds;
         final boolean[] maskToRemove = mask.mask;
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -1784,8 +1591,7 @@ public class ROI2DArea extends ROI2D
         int offDst = ((intersection.y - bnds.y) * bnds.width) + (intersection.x - bnds.x);
         int offSrc = ((intersection.y - boundsToRemove.y) * boundsToRemove.width) + (intersection.x - boundsToRemove.x);
 
-        for (int y = 0; y < intersection.height; y++)
-        {
+        for (int y = 0; y < intersection.height; y++) {
             for (int x = 0; x < intersection.width; x++)
                 if (maskToRemove[offSrc + x])
                     data[offDst + x] = 0;
@@ -1808,8 +1614,7 @@ public class ROI2DArea extends ROI2D
      * @deprecated Use {@link #subtract(ROI2DArea)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void remove(ROI2DArea roi)
-    {
+    public void remove(final ROI2DArea roi) {
         subtract(roi);
     }
 
@@ -1817,14 +1622,13 @@ public class ROI2DArea extends ROI2D
      * @deprecated Use {@link #subtract(BooleanMask2D)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void remove(BooleanMask2D mask)
-    {
+    public void remove(final BooleanMask2D mask) {
         subtract(mask);
     }
 
     /**
      * Update mask by adding/removing the specified shape to/from it.
-     * 
+     *
      * @param shape
      *        the shape to add in or remove from the mask
      * @param remove
@@ -1839,10 +1643,8 @@ public class ROI2DArea extends ROI2D
      *        (only meaningful for a
      *        remove operation)
      */
-    public void updateMask(Shape shape, boolean remove, boolean inclusive, boolean accurate, boolean immediateUpdate)
-    {
-        if (remove)
-        {
+    public void updateMask(final Shape shape, final boolean remove, final boolean inclusive, final boolean accurate, final boolean immediateUpdate) {
+        if (remove) {
             // outside bounds ? --> nothing to remove so nothing to do...
             if (!bounds.intersects(shape.getBounds2D()))
                 return;
@@ -1891,33 +1693,28 @@ public class ROI2DArea extends ROI2D
     /**
      * Update mask from specified shape
      */
-    public void updateMask(Shape shape, boolean remove)
-    {
+    public void updateMask(final Shape shape, final boolean remove) {
         updateMask(shape, remove, true, false, false);
     }
 
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public ROI2DAreaPainter getPainter()
-    {
+    public ROI2DAreaPainter getPainter() {
         return getOverlay();
     }
 
     @Override
-    public ROI2DAreaPainter getOverlay()
-    {
+    public ROI2DAreaPainter getOverlay() {
         return (ROI2DAreaPainter) super.painter;
     }
 
     @Override
-    protected ROI2DAreaPainter createPainter()
-    {
+    protected ROI2DAreaPainter createPainter() {
         return new ROI2DAreaPainter();
     }
 
     @Override
-    public boolean hasSelectedPoint()
-    {
+    public boolean hasSelectedPoint() {
         return false;
     }
 
@@ -1925,8 +1722,7 @@ public class ROI2DArea extends ROI2D
      * @deprecated useless method.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean canAddPoint()
-    {
+    public boolean canAddPoint() {
         return true;
     }
 
@@ -1934,8 +1730,7 @@ public class ROI2DArea extends ROI2D
      * @deprecated useless method.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean canRemovePoint()
-    {
+    public boolean canRemovePoint() {
         return true;
     }
 
@@ -1943,8 +1738,7 @@ public class ROI2DArea extends ROI2D
      * @deprecated Use {@link #addBrush(Point2D)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean addPointAt(Point2D pos, boolean ctrl)
-    {
+    public boolean addPointAt(final Point2D pos, final boolean ctrl) {
         addBrush(pos);
         return true;
     }
@@ -1953,8 +1747,7 @@ public class ROI2DArea extends ROI2D
      * @deprecated Use {@link #removeBrush(Point2D)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean removePointAt(IcyCanvas canvas, Point2D pos)
-    {
+    public boolean removePointAt(final IcyCanvas canvas, final Point2D pos) {
         removeBrush(pos);
         return true;
     }
@@ -1963,8 +1756,7 @@ public class ROI2DArea extends ROI2D
      * @deprecated Useless method.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    protected boolean removeSelectedPoint(IcyCanvas canvas, Point2D imagePoint)
-    {
+    protected boolean removeSelectedPoint(final IcyCanvas canvas, final Point2D imagePoint) {
         // no selected point for this ROI
         return false;
     }
@@ -1972,8 +1764,7 @@ public class ROI2DArea extends ROI2D
     /**
      * Add brush point at specified position.
      */
-    public void addBrush(Point2D pos)
-    {
+    public void addBrush(final Point2D pos) {
         getOverlay().addToMask(pos);
     }
 
@@ -1982,24 +1773,21 @@ public class ROI2DArea extends ROI2D
      * Don't forget to call optimizeBounds() after consecutive remove operation
      * to refresh the mask bounds.
      */
-    public void removeBrush(Point2D pos)
-    {
+    public void removeBrush(final Point2D pos) {
         getOverlay().removeFromMask(pos);
     }
 
     /**
      * Add a point to the mask
      */
-    public void addPoint(Point pos)
-    {
+    public void addPoint(final Point pos) {
         addPoint(pos.x, pos.y);
     }
 
     /**
      * Add a point to the mask
      */
-    public void addPoint(int x, int y)
-    {
+    public void addPoint(final int x, final int y) {
         setPoint(x, y, true);
     }
 
@@ -2008,8 +1796,7 @@ public class ROI2DArea extends ROI2D
      * Don't forget to call optimizeBounds() after consecutive remove operation
      * to refresh the mask bounds.
      */
-    public void removePoint(Point pos)
-    {
+    public void removePoint(final Point pos) {
         removePoint(pos.x, pos.y);
     }
 
@@ -2018,24 +1805,21 @@ public class ROI2DArea extends ROI2D
      * Don't forget to call optimizeBounds() after consecutive remove operation
      * to refresh the mask bounds.
      */
-    public void removePoint(int x, int y)
-    {
+    public void removePoint(final int x, final int y) {
         setPoint(x, y, false);
     }
 
     /**
      * Add a rectangle to the mask
      */
-    public void addRect(Rectangle r)
-    {
+    public void addRect(final Rectangle r) {
         updateMask(r, false, false, true, true);
     }
 
     /**
      * Add a rectangle to the mask
      */
-    public void addRect(int x, int y, int w, int h)
-    {
+    public void addRect(final int x, final int y, final int w, final int h) {
         addRect(new Rectangle(x, y, w, h));
     }
 
@@ -2044,8 +1828,7 @@ public class ROI2DArea extends ROI2D
      * Don't forget to call optimizeBounds() after consecutive remove operation<br>
      * to refresh the mask bounds.
      */
-    public void removeRect(Rectangle r)
-    {
+    public void removeRect(final Rectangle r) {
         updateMask(r, true, false, true, true);
     }
 
@@ -2054,16 +1837,14 @@ public class ROI2DArea extends ROI2D
      * Don't forget to call optimizeBounds() after consecutive remove operation<br>
      * to refresh the mask bounds.
      */
-    public void removeRect(int x, int y, int w, int h)
-    {
+    public void removeRect(final int x, final int y, final int w, final int h) {
         removeRect(new Rectangle(x, y, w, h));
     }
 
     /**
      * Add a shape to the mask
      */
-    public void addShape(Shape s)
-    {
+    public void addShape(final Shape s) {
         updateMask(s, false, false, true, true);
     }
 
@@ -2072,21 +1853,16 @@ public class ROI2DArea extends ROI2D
      * Don't forget to call optimizeBounds() after consecutive remove operation<br>
      * to refresh the mask bounds.
      */
-    public void removeShape(Shape s)
-    {
+    public void removeShape(final Shape s) {
         updateMask(s, true, false, true, true);
     }
 
     @Override
-    public ROI add(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
-    {
-        if (roi instanceof ROI2D)
-        {
-            final ROI2D roi2d = (ROI2D) roi;
+    public ROI add(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
+        if (roi instanceof final ROI2D roi2d) {
 
             // only if on same position
-            if ((getZ() == roi2d.getZ()) && (getT() == roi2d.getT()) && (getC() == roi2d.getC()))
-            {
+            if ((getZ() == roi2d.getZ()) && (getT() == roi2d.getT()) && (getC() == roi2d.getC())) {
                 if (roi2d instanceof ROI2DArea)
                     add((ROI2DArea) roi2d);
                 else if (roi2d instanceof ROI2DShape)
@@ -2102,15 +1878,11 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public ROI intersect(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
-    {
-        if (roi instanceof ROI2D)
-        {
-            final ROI2D roi2d = (ROI2D) roi;
+    public ROI intersect(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
+        if (roi instanceof final ROI2D roi2d) {
 
             // only if on same position
-            if ((getZ() == roi2d.getZ()) && (getT() == roi2d.getT()) && (getC() == roi2d.getC()))
-            {
+            if ((getZ() == roi2d.getZ()) && (getT() == roi2d.getT()) && (getC() == roi2d.getC())) {
                 final Rectangle intersection = getBounds().intersection(roi2d.getBounds());
                 final BooleanMask2D mask = new BooleanMask2D(intersection, getBooleanMask(intersection, true));
                 final BooleanMask2D roiMask = new BooleanMask2D(intersection, roi2d.getBooleanMask(intersection, true));
@@ -2125,15 +1897,11 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public ROI exclusiveAdd(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
-    {
-        if (roi instanceof ROI2D)
-        {
-            final ROI2D roi2d = (ROI2D) roi;
+    public ROI exclusiveAdd(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
+        if (roi instanceof final ROI2D roi2d) {
 
             // only if on same position
-            if ((getZ() == roi2d.getZ()) && (getT() == roi2d.getT()) && (getC() == roi2d.getC()))
-            {
+            if ((getZ() == roi2d.getZ()) && (getT() == roi2d.getT()) && (getC() == roi2d.getC())) {
                 if (roi2d instanceof ROI2DArea)
                     exclusiveAdd((ROI2DArea) roi2d);
                 else
@@ -2147,15 +1915,11 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public ROI subtract(ROI roi, boolean allowCreate) throws UnsupportedOperationException, InterruptedException
-    {
-        if (roi instanceof ROI2D)
-        {
-            final ROI2D roi2d = (ROI2D) roi;
+    public ROI subtract(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
+        if (roi instanceof final ROI2D roi2d) {
 
             // only if on same position
-            if ((getZ() == roi2d.getZ()) && (getT() == roi2d.getT()) && (getC() == roi2d.getC()))
-            {
+            if ((getZ() == roi2d.getZ()) && (getT() == roi2d.getT()) && (getC() == roi2d.getC())) {
                 if (roi2d instanceof ROI2DArea)
                     subtract((ROI2DArea) roi2d);
                 else if (roi2d instanceof ROI2DShape)
@@ -2173,23 +1937,20 @@ public class ROI2DArea extends ROI2D
     /**
      * Return true if bounds need to be updated by calling optimizeBounds() method.
      */
-    public boolean getBoundsNeedUpdate()
-    {
+    public boolean getBoundsNeedUpdate() {
         return boundsNeedUpdate;
     }
 
     /**
      * Clear the mask
      */
-    public void clear()
-    {
+    public void clear() {
         // reset image with new rectangle
         updateImage(new Rectangle());
     }
 
     @Override
-    public boolean isOverEdge(IcyCanvas canvas, double x, double y)
-    {
+    public boolean isOverEdge(final IcyCanvas canvas, final double x, final double y) {
         // use bigger stroke for isOverEdge test for easier intersection
         final double strk = getAdjustedStroke(canvas) * 3;
         final Rectangle2D rect = new Rectangle2D.Double(x - (strk * 0.5), y - (strk * 0.5), strk, strk);
@@ -2203,13 +1964,11 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public boolean contains(double x, double y)
-    {
+    public boolean contains(final double x, final double y) {
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -2226,13 +1985,11 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public boolean contains(double x, double y, double w, double h)
-    {
+    public boolean contains(final double x, final double y, final double w, final double h) {
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -2249,8 +2006,7 @@ public class ROI2DArea extends ROI2D
 
         // scan all pixels, can take sometime if mask is large
         int offset = (yi * bnds.width) + xi;
-        for (int j = 0; j < hi; j++)
-        {
+        for (int j = 0; j < hi; j++) {
             for (int i = 0; i < wi; i++)
                 if (data[offset++] == 0)
                     return false;
@@ -2265,8 +2021,7 @@ public class ROI2DArea extends ROI2D
      * already calculated
      */
     @Override
-    public Rectangle2D computeBounds2D()
-    {
+    public Rectangle2D computeBounds2D() {
         return bounds;
     }
 
@@ -2274,19 +2029,16 @@ public class ROI2DArea extends ROI2D
      * We can override directly this method as we use our own bounds calculation method here
      */
     @Override
-    public Rectangle2D getBounds2D()
-    {
+    public Rectangle2D getBounds2D() {
         return bounds;
     }
 
     @Override
-    public boolean intersects(double x, double y, double w, double h)
-    {
+    public boolean intersects(final double x, final double y, final double w, final double h) {
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -2302,13 +2054,11 @@ public class ROI2DArea extends ROI2D
         int hi = (int) (y + h) - (int) y;
 
         // adjust box to mask size
-        if (xi < 0)
-        {
+        if (xi < 0) {
             wi += xi;
             xi = 0;
         }
-        if (yi < 0)
-        {
+        if (yi < 0) {
             hi += yi;
             yi = 0;
         }
@@ -2319,8 +2069,7 @@ public class ROI2DArea extends ROI2D
 
         // scan all pixels, can take sometime if mask is large
         int offset = (yi * bnds.width) + xi;
-        for (int j = 0; j < hi; j++)
-        {
+        for (int j = 0; j < hi; j++) {
             for (int i = 0; i < wi; i++)
                 if (data[offset++] != 0)
                     return true;
@@ -2332,14 +2081,12 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public boolean[] getBooleanMask(int x, int y, int w, int h, boolean inclusive) throws InterruptedException
-    {
+    public boolean[] getBooleanMask(final int x, final int y, final int w, final int h, final boolean inclusive) throws InterruptedException {
         final boolean[] result = new boolean[Math.max(0, w) * Math.max(0, h)];
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (this)
-        {
+        synchronized (this) {
             data = maskData;
             bnds = bounds;
         }
@@ -2366,8 +2113,7 @@ public class ROI2DArea extends ROI2D
         if (bnds.y > y)
             offDst += (bnds.y - y) * w;
 
-        for (int j = 0; j < intersect.height; j++)
-        {
+        for (int j = 0; j < intersect.height; j++) {
             for (int i = 0; i < intersect.width; i++)
                 result[offDst++] = (data[offSrc++] != 0);
 
@@ -2383,28 +2129,25 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public double computeNumberOfPoints()
-    {
+    public double computeNumberOfPoints() {
         // just count the number of point contained in the mask
         double result = 0d;
         final byte[] data = maskData;
 
-        for (int i = 0; i < data.length; i++)
-            if (data[i] != 0)
+        for (final byte datum : data)
+            if (datum != 0)
                 result += 1d;
 
         return result;
     }
 
     @Override
-    public boolean canTranslate()
-    {
+    public boolean canTranslate() {
         return true;
     }
 
     @Override
-    public void translate(double dx, double dy)
-    {
+    public void translate(final double dx, final double dy) {
         translateX += dx;
         translateY += dy;
 
@@ -2415,22 +2158,19 @@ public class ROI2DArea extends ROI2D
         translateX -= dxi;
         translateY -= dyi;
 
-        if ((dxi != 0) || (dyi != 0))
-        {
+        if ((dxi != 0) || (dyi != 0)) {
             bounds.translate(dxi, dyi);
             roiChanged(false);
         }
     }
 
     @Override
-    public boolean canSetPosition()
-    {
+    public boolean canSetPosition() {
         return true;
     }
 
     @Override
-    public void setPosition2D(Point2D newPosition)
-    {
+    public void setPosition2D(final Point2D newPosition) {
         bounds = new Rectangle((int) newPosition.getX(), (int) newPosition.getY(), bounds.width, bounds.height);
 
         roiChanged(false);
@@ -2440,12 +2180,11 @@ public class ROI2DArea extends ROI2D
      * Set the mask from a BooleanMask2D object.<br>
      * If specified mask is <i>null</i> then ROI is cleared.
      */
-    public void setAsBooleanMask(BooleanMask2D mask)
-    {
+    public void setAsBooleanMask(final BooleanMask2D mask) {
         // mask empty ? --> just clear the ROI
         if ((mask == null) || mask.isEmpty())
             clear();
-        // don't need bounds optimization as BooleanMask2D should be already optimized
+            // don't need bounds optimization as BooleanMask2D should be already optimized
         else
             setAsBooleanMask(mask.bounds, mask.mask, false);
     }
@@ -2453,7 +2192,7 @@ public class ROI2DArea extends ROI2D
     /**
      * Set the mask from a boolean array.<br>
      * r represents the region defined by the boolean array.
-     * 
+     *
      * @param r
      *        rectangle
      * @param mask
@@ -2461,15 +2200,13 @@ public class ROI2DArea extends ROI2D
      * @param doBoundsOptimization
      *        boolean
      */
-    protected void setAsByteMask(Rectangle r, byte[] mask, boolean doBoundsOptimization)
-    {
+    protected void setAsByteMask(final Rectangle r, final byte[] mask, final boolean doBoundsOptimization) {
         // reset image with new rectangle
         updateImage(r);
 
         System.arraycopy(mask, 0, maskData, 0, r.width * r.height);
 
-        if (doBoundsOptimization)
-        {
+        if (doBoundsOptimization) {
             // optimize bounds
             if (isUpdating())
                 boundsNeedUpdate = true;
@@ -2484,12 +2221,8 @@ public class ROI2DArea extends ROI2D
     /**
      * Set the mask from a boolean array.<br>
      * r represents the region defined by the boolean array.
-     * 
-     * @param r
-     * @param booleanMask
      */
-    protected void setAsBooleanMask(Rectangle r, boolean[] booleanMask, boolean doBoundsOptimization)
-    {
+    protected void setAsBooleanMask(final Rectangle r, final boolean[] booleanMask, final boolean doBoundsOptimization) {
         // reset image with new rectangle
         updateImage(r);
 
@@ -2498,8 +2231,7 @@ public class ROI2DArea extends ROI2D
         for (int i = 0; i < data.length; i++)
             data[i] = (byte) (booleanMask[i] ? 1 : 0);
 
-        if (doBoundsOptimization)
-        {
+        if (doBoundsOptimization) {
             // optimize bounds
             if (isUpdating())
                 boundsNeedUpdate = true;
@@ -2514,66 +2246,50 @@ public class ROI2DArea extends ROI2D
     /**
      * Set the mask from a boolean array.<br>
      * r represents the region defined by the boolean array.
-     * 
-     * @param r
-     * @param booleanMask
      */
-    public void setAsBooleanMask(Rectangle r, boolean[] booleanMask)
-    {
+    public void setAsBooleanMask(final Rectangle r, final boolean[] booleanMask) {
         setAsBooleanMask(r, booleanMask, true);
     }
 
-    public void setAsBooleanMask(int x, int y, int w, int h, boolean[] booleanMask)
-    {
+    public void setAsBooleanMask(final int x, final int y, final int w, final int h, final boolean[] booleanMask) {
         setAsBooleanMask(new Rectangle(x, y, w, h), booleanMask);
     }
 
     /**
      * Fast up scaling by a factor of 2 (each point become a 2x2 block points)
-     * 
-     * @throws InterruptedException
      */
-    public void upscale() throws InterruptedException
-    {
+    public void upscale() throws InterruptedException {
         setAsBooleanMask(getBooleanMask(true).upscale());
     }
 
     /**
-     * Fast 2x down scaling (each 2x2 block points become 1 point).<br>
-     * 
+     * Fast 2x down scaling (each 2x2 block points become 1 point).
+     *
      * @param nbPointForTrue
      *        the minimum number of <code>true</code>points from a 2x2 block to give a <code>true</code> resulting
      *        point.<br>
      *        Accepted value: 1 to 4
-     * @throws InterruptedException
      */
-    public void downscale(int nbPointForTrue) throws InterruptedException
-    {
+    public void downscale(final int nbPointForTrue) throws InterruptedException {
         setAsBooleanMask(getBooleanMask(true).downscale(nbPointForTrue));
     }
 
     /**
-     * Fast 2x down scaling (each 2x2 block points become 1 point).<br>
-     * 
-     * @throws InterruptedException
+     * Fast 2x down scaling (each 2x2 block points become 1 point).
      */
-    public void downscale() throws InterruptedException
-    {
+    public void downscale() throws InterruptedException {
         setAsBooleanMask(getBooleanMask(true).downscale());
     }
 
     @Override
-    public void onChanged(CollapsibleEvent object)
-    {
+    public void onChanged(final CollapsibleEvent object) {
         final ROIEvent event = (ROIEvent) object;
 
         // do here global process on ROI change
-        switch (event.getType())
-        {
+        switch (event.getType()) {
             case ROI_CHANGED:
                 // update bounds if needed
-                if (boundsNeedUpdate && !roiModifiedByMouse)
-                {
+                if (boundsNeedUpdate && !roiModifiedByMouse) {
                     if (optimizeBounds())
                         // need to send a new change event !
                         roiChanged(true);
@@ -2581,14 +2297,13 @@ public class ROI2DArea extends ROI2D
                 // we need to rebuild shape
                 if (StringUtil.equals(event.getPropertyName(), ROI_CHANGED_ALL))
                     getOverlay().needRebuild = true;
-                else
-                {
+                else {
                     final ROI2DAreaPainter overlay = getOverlay();
 
                     // z position change ? --> need total rebuild
                     if (overlay.lastBuildPosZ != getZ())
                         overlay.needRebuild = true;
-                    // just need to change position
+                        // just need to change position
                     else
                         overlay.updateVtkObjectsBounds();
                 }
@@ -2615,11 +2330,9 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public boolean loadFromXML(Node node)
-    {
+    public boolean loadFromXML(final Node node) {
         beginUpdate();
-        try
-        {
+        try {
             if (!super.loadFromXML(node))
                 return false;
 
@@ -2641,8 +2354,7 @@ public class ROI2DArea extends ROI2D
             // set the ROI from the unpacked boolean mask
             setAsByteMask(rect, data, false);
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
 
@@ -2650,16 +2362,14 @@ public class ROI2DArea extends ROI2D
     }
 
     @Override
-    public boolean saveToXML(Node node)
-    {
+    public boolean saveToXML(final Node node) {
         if (!super.saveToXML(node))
             return false;
 
         final byte[] data;
         final Rectangle bnds;
 
-        synchronized (maskData)
-        {
+        synchronized (maskData) {
             // need to duplicate to avoid array change during XML saving (ZIP packing don't like that)
             data = maskData.clone();
             bnds = new Rectangle(bounds);

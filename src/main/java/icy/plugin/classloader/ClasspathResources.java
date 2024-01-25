@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ import icy.file.FileUtil;
 import icy.network.NetworkUtil;
 import icy.plugin.classloader.exception.JclException;
 import icy.plugin.classloader.exception.ResourceNotFoundException;
-import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -61,8 +61,7 @@ public class ClasspathResources extends JarResources {
                 loadJar(url);
             }
             catch (final IOException e) {
-                System.err.println("JarResources.loadJar(" + url + ") error:");
-                IcyExceptionHandler.showErrorMessage(e, false, true);
+                IcyLogger.error(ClasspathResources.class, e, "JarResources.loadJar(" + url + ") error.");
             }
             return;
         }
@@ -140,8 +139,7 @@ public class ClasspathResources extends JarResources {
                     loadJar(fol.toURI().toURL());
                 }
                 catch (final IOException e) {
-                    System.err.println("JarResources.loadJar(" + fol.getAbsolutePath() + ") error:");
-                    IcyExceptionHandler.showErrorMessage(e, false, true);
+                    IcyLogger.error(ClasspathResources.class, e, "JarResources.loadJar(" + fol.getAbsolutePath() + ") error.");
                 }
             }
             else
@@ -199,8 +197,7 @@ public class ClasspathResources extends JarResources {
             if (logger.isLoggable(Level.SEVERE))
                 logger.finest("Error while loading: " + entryName);
 
-            System.err.println("JarResources.loadResourceInternal(" + file.getAbsolutePath() + ") error:");
-            IcyExceptionHandler.showErrorMessage(e, false, true);
+            IcyLogger.error(ClasspathResources.class, e, "JarResources.loadResourceInternal(" + file.getAbsolutePath() + ") error:");
         }
     }
 

@@ -108,7 +108,6 @@ public final class ApplicationMenuFile extends AbstractApplicationMenu {
         for (int i = 0; i < nbRecentFiles; i ++) {
             final String entry = recentFileList.getEntryAsName(i, 100, true);
             if (!StringUtil.isEmpty(entry)) {
-                System.err.println(entry);
                 final IcyMenuItem itemFile = new IcyMenuItem(entry);
                 final String[] paths = recentFileList.getEntry(i);
                 itemFile.addActionListener(e -> Loader.load(CollectionUtil.asList(paths), false, true, true));

@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,14 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.inspector;
-
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Point;
-
-import javax.swing.*;
 
 import icy.gui.component.ExtTabbedPanel;
 import icy.gui.component.ExternalizablePanel;
@@ -32,7 +25,6 @@ import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.main.ActiveSequenceListener;
 import icy.gui.main.ActiveViewerListener;
 import icy.gui.main.MainFrame;
-import icy.gui.system.MemoryMonitorPanel;
 import icy.gui.system.OutputConsolePanel;
 import icy.gui.util.LookAndFeelUtil;
 import icy.gui.viewer.Viewer;
@@ -43,13 +35,18 @@ import icy.preferences.ApplicationPreferences;
 import icy.preferences.GeneralPreferences;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * This window shows all details about the current sequence.
  *
- * @author Fabrice de Chaumont &amp; Stephane
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
@@ -207,7 +204,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
         return GeneralPreferences.getVirtualMode();
     }
 
-    public void setVirtualMode(boolean value) {
+    public void setVirtualMode(final boolean value) {
         virtualModeBtn.setSelected(value);
 
         setVirtualModeInternal(value);
@@ -215,7 +212,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
 
     // TODO: 25/01/2023 Return value never used
     @Deprecated(since = "3.0.0", forRemoval = true)
-    boolean setVirtualModeInternal(boolean value) {
+    boolean setVirtualModeInternal(final boolean value) {
         boolean ok = false;
         try {
             // start / end image cache
@@ -223,8 +220,9 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
                 ok = ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
             else
                 ok = ImageCache.shutDownIfEmpty();
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
+        }
+        catch (final Exception e) {
+            IcyLogger.error(InspectorPanel.class, e, e.getLocalizedMessage());
         }
 
         // failed to change virtual mode state ?
@@ -241,7 +239,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
         // switch virtual mode state
         GeneralPreferences.setVirtualMode(value);
         // refresh viewers toolbar
-        for (Viewer viewer : Icy.getMainInterface().getViewers())
+        for (final Viewer viewer : Icy.getMainInterface().getViewers())
             viewer.refreshToolBar();
         // refresh title (display virtual mode or not)
         final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
@@ -264,18 +262,18 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
     /**
      * Return the index of specified tab component
      */
-    protected int getIndexOfTab(Component component) {
+    protected int getIndexOfTab(final Component component) {
         return mainPane.indexOfComponent(component);
     }
 
     @Override
-    public void viewerActivated(Viewer viewer) {
+    public void viewerActivated(final Viewer viewer) {
         sequencePanel.viewerActivated(viewer);
         layersPanel.viewerActivated(viewer);
     }
 
     @Override
-    public void viewerDeactivated(Viewer viewer) {
+    public void viewerDeactivated(final Viewer viewer) {
         // nothing to do here
     }
 
@@ -283,20 +281,20 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
      * Called when focused viewer has changed
      */
     @Override
-    public void activeViewerChanged(ViewerEvent event) {
+    public void activeViewerChanged(final ViewerEvent event) {
         sequencePanel.activeViewerChanged(event);
         layersPanel.activeViewerChanged(event);
     }
 
     @Override
-    public void sequenceActivated(Sequence sequence) {
+    public void sequenceActivated(final Sequence sequence) {
         sequencePanel.sequenceActivated(sequence);
         roisPanel.sequenceActivated(sequence);
         historyPanel.sequenceActivated(sequence);
     }
 
     @Override
-    public void sequenceDeactivated(Sequence sequence) {
+    public void sequenceDeactivated(final Sequence sequence) {
         // nothing to do here
     }
 
@@ -304,7 +302,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
      * Called by mainInterface when focused sequence has changed
      */
     @Override
-    public void activeSequenceChanged(SequenceEvent event) {
+    public void activeSequenceChanged(final SequenceEvent event) {
         sequencePanel.activeSequenceChanged(event);
         roisPanel.activeSequenceChanged(event);
     }

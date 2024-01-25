@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@ import icy.plugin.interface_.PluginNoEDTConstructor;
 import icy.plugin.interface_.PluginThreaded;
 import icy.system.IcyExceptionHandler;
 import icy.system.audit.Audit;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.ClassUtil;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +37,8 @@ import java.util.concurrent.Callable;
  * This class launch plugins and register them to the main application.<br>
  * The launch can be in a decicated thread or in the EDT.
  *
- * @author Fabrice de Chaumont &amp; Stephane
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class PluginLauncher {
@@ -107,8 +109,8 @@ public class PluginLauncher {
             if (Icy.getMainInterface().isHeadLess())
                 executor.call();
                 // keep backward compatibility
-            //else if (plugin instanceof PluginStartAsThread)
-            //    new Thread(executor, plugin.getName()).start();
+                //else if (plugin instanceof PluginStartAsThread)
+                //    new Thread(executor, plugin.getName()).start();
                 // direct launch in EDT now (no thread creation)
             else
                 ThreadUtil.invokeNow((Callable<Boolean>) executor);
@@ -173,8 +175,7 @@ public class PluginLauncher {
                 return result;
             }
             catch (final IllegalAccessException | InstantiationException e) {
-                System.err.println("Cannot start plugin " + plugin.getName() + " :");
-                System.err.println(e.getMessage());
+                IcyLogger.error(PluginLoader.class, e, "Cannot start plugin " + plugin.getName() + ".");
                 return null;
             }
         }

@@ -26,6 +26,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import icy.gui.util.LookAndFeelUtil;
 import icy.main.Icy;
@@ -115,6 +117,9 @@ public class GUICanvasPreferencePanel extends PreferencePanel
         gbc_uiFontSizeSpinner.gridx = 1;
         gbc_uiFontSizeSpinner.gridy = 3;
         mainPanel.add(uiFontSizeSpinner, gbc_uiFontSizeSpinner);
+        uiFontSizeSpinner.addChangeListener(e -> {
+            LookAndFeelUtil.setFontSize((Integer) uiFontSizeSpinner.getValue());
+        });
 
         GridBagConstraints gbc_lblMouseWheelSensivity = new GridBagConstraints();
         gbc_lblMouseWheelSensivity.anchor = GridBagConstraints.WEST;

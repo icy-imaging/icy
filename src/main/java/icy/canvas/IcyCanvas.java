@@ -1,47 +1,22 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.canvas;
-
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.image.BufferedImage;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.swing.JPanel;
-import javax.swing.JToolBar;
-import javax.swing.event.ChangeEvent;
 
 import icy.action.CanvasActions;
 import icy.action.GeneralActions;
@@ -55,12 +30,7 @@ import icy.common.UpdateEventHandler;
 import icy.common.listener.ChangeListener;
 import icy.common.listener.ProgressListener;
 import icy.gui.util.GuiUtil;
-import icy.gui.viewer.MouseImageInfosPanel;
-import icy.gui.viewer.TNavigationPanel;
-import icy.gui.viewer.Viewer;
-import icy.gui.viewer.ViewerEvent;
-import icy.gui.viewer.ViewerListener;
-import icy.gui.viewer.ZNavigationPanel;
+import icy.gui.viewer.*;
 import icy.image.IcyBufferedImage;
 import icy.image.colormodel.IcyColorModel;
 import icy.image.lut.LUT;
@@ -80,7 +50,7 @@ import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.sequence.SequenceEvent.SequenceEventType;
 import icy.sequence.SequenceListener;
-import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.type.point.Point5D;
 import icy.util.ClassUtil;
@@ -88,6 +58,17 @@ import icy.util.EventUtil;
 import icy.util.OMEUtil;
 import plugins.kernel.canvas.Canvas2DPlugin;
 import plugins.kernel.canvas.VtkCanvasPlugin;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.image.BufferedImage;
+import java.lang.reflect.Constructor;
+import java.util.List;
+import java.util.*;
 
 /**
  * @author Fabrice de Chaumont &amp; Stephane Dallongeville<br>
@@ -106,13 +87,9 @@ import plugins.kernel.canvas.VtkCanvasPlugin;
  *         (Canvas2D and Canvas3D derives from IcyCanvas)<br>
  */
 // TODO: 23/01/2023 Should be in gui package (extends JPanel)
-public abstract class IcyCanvas extends JPanel
-        implements KeyListener, ViewerListener, SequenceListener, LUTListener, ChangeListener, LayerListener
-{
-    protected class IcyCanvasImageOverlay extends Overlay
-    {
-        public IcyCanvasImageOverlay()
-        {
+public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerListener, SequenceListener, LUTListener, ChangeListener, LayerListener {
+    protected class IcyCanvasImageOverlay extends Overlay {
+        public IcyCanvasImageOverlay() {
             super((getSequence() == null) ? "Image" : getSequence().getName(), OverlayPriority.IMAGE_NORMAL);
 
             // we fix the image overlay
@@ -121,8 +98,7 @@ public abstract class IcyCanvas extends JPanel
         }
 
         @Override
-        public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas)
-        {
+        public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
             // default lazy implementation (very slow)
             if (g != null)
                 g.drawImage(getCurrentImage(), null, 0, 0);
@@ -132,14 +108,12 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Returns all {@link PluginCanvas} plugins (plugins.kernel plugin are returned first).
      */
-    public static List<PluginDescriptor> getCanvasPlugins()
-    {
+    public static List<PluginDescriptor> getCanvasPlugins() {
         // get all canvas plugins
         final List<PluginDescriptor> result = PluginLoader.getPlugins(PluginCanvas.class);
 
         // VTK is not loaded ?
-        if (!Icy.isVtkLibraryLoaded())
-        {
+        if (!Icy.isVtkLibraryLoaded()) {
             // remove VtkCanvas
             final int ind = PluginDescriptor.getIndex(result, VtkCanvasPlugin.class.getName());
             if (ind != -1)
@@ -147,16 +121,14 @@ public abstract class IcyCanvas extends JPanel
         }
 
         // sort plugins list
-        Collections.sort(result, new Comparator<PluginDescriptor>()
-        {
+        result.sort(new Comparator<PluginDescriptor>() {
             @Override
-            public int compare(PluginDescriptor o1, PluginDescriptor o2)
-            {
-                return Integer.valueOf(getOrder(o1)).compareTo(Integer.valueOf(getOrder(o2)));
+            public int compare(final PluginDescriptor o1, final PluginDescriptor o2) {
+                //return Integer.valueOf(getOrder(o1)).compareTo(Integer.valueOf(getOrder(o2)));
+                return Integer.compare(getOrder(o1), getOrder(o2));
             }
 
-            int getOrder(PluginDescriptor p)
-            {
+            int getOrder(final PluginDescriptor p) {
                 if (p.getClassName().equals(Canvas2DPlugin.class.getName()))
                     return 0;
                 if (p.getClassName().equals(VtkCanvasPlugin.class.getName()))
@@ -172,13 +144,12 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Returns all {@link PluginCanvas} plugins class name (plugins.kernel plugin are returned first).
      */
-    public static List<String> getCanvasPluginNames()
-    {
+    public static List<String> getCanvasPluginNames() {
         // get all canvas plugins
         final List<PluginDescriptor> plugins = getCanvasPlugins();
-        final List<String> result = new ArrayList<String>();
+        final List<String> result = new ArrayList<>();
 
-        for (PluginDescriptor plugin : plugins)
+        for (final PluginDescriptor plugin : plugins)
             result.add(plugin.getClassName());
 
         return result;
@@ -188,10 +159,8 @@ public abstract class IcyCanvas extends JPanel
      * Returns the plugin class name corresponding to the specified Canvas class name.<br>
      * Returns <code>null</code> if we can't find a corresponding plugin.
      */
-    public static String getPluginClassName(String canvasClassName)
-    {
-        for (PluginDescriptor plugin : IcyCanvas.getCanvasPlugins())
-        {
+    public static String getPluginClassName(final String canvasClassName) {
+        for (final PluginDescriptor plugin : IcyCanvas.getCanvasPlugins()) {
             final String className = getCanvasClassName(plugin);
 
             // we found the corresponding plugin
@@ -207,20 +176,17 @@ public abstract class IcyCanvas extends JPanel
      * Returns the canvas class name corresponding to the specified {@link PluginCanvas} plugin.<br>
      * Returns <code>null</code> if we can't retrieve the corresponding canvas class name.
      */
-    public static String getCanvasClassName(PluginDescriptor plugin)
-    {
-        try
-        {
-            if (plugin != null)
-            {
-                final PluginCanvas pluginCanvas = (PluginCanvas) plugin.getPluginClass().newInstance();
+    public static String getCanvasClassName(final PluginDescriptor plugin) {
+        try {
+            if (plugin != null) {
+                //final PluginCanvas pluginCanvas = (PluginCanvas) plugin.getPluginClass().newInstance();
+                final PluginCanvas pluginCanvas = (PluginCanvas) plugin.getPluginClass().getDeclaredConstructor().newInstance();
                 // return canvas class name
                 return pluginCanvas.getCanvasClassName();
             }
         }
-        catch (Exception e)
-        {
-            IcyExceptionHandler.showErrorMessage(e, true);
+        catch (final Exception e) {
+            IcyLogger.error(IcyCanvas.class, e, "Unable to start plugin canvas: " + plugin.getName());
         }
 
         return null;
@@ -230,8 +196,7 @@ public abstract class IcyCanvas extends JPanel
      * Returns the canvas class name corresponding to the specified {@link PluginCanvas} class name. <br>
      * Returns <code>null</code> if we can't find retrieve the corresponding canvas class name.
      */
-    public static String getCanvasClassName(String pluginClassName)
-    {
+    public static String getCanvasClassName(final String pluginClassName) {
         return getCanvasClassName(PluginLoader.getPlugin(pluginClassName));
     }
 
@@ -269,7 +234,7 @@ public abstract class IcyCanvas extends JPanel
      * Create a {@link IcyCanvas} object from its class name or {@link PluginCanvas} class name.<br>
      * Throws an exception if an error occurred (canvas class was not found or it could not be
      * creatd).
-     * 
+     *
      * @param viewer
      *        {@link Viewer} to which to canvas is attached.
      * @throws ClassCastException
@@ -277,39 +242,34 @@ public abstract class IcyCanvas extends JPanel
      * @throws Exception
      *         if the specified canvas cannot be created for some reasons
      */
-    public static IcyCanvas create(String className, Viewer viewer) throws ClassCastException, Exception
-    {
+    public static IcyCanvas create(final String className, final Viewer viewer) throws ClassCastException, Exception {
         // search for the specified className
         final Class<?> clazz = ClassUtil.findClass(className);
         final Class<? extends PluginCanvas> pluginCanvasClazz;
 
-        try
-        {
+        try {
             // we first check if we have a IcyCanvas Plugin class here
             pluginCanvasClazz = clazz.asSubclass(PluginCanvas.class);
         }
-        catch (ClassCastException e0)
-        {
+        catch (final ClassCastException e0) {
             // check if this is a IcyCanvas class
             final Class<? extends IcyCanvas> canvasClazz = clazz.asSubclass(IcyCanvas.class);
 
             // get constructor (Viewer)
-            final Constructor<? extends IcyCanvas> constructor = canvasClazz.getConstructor(new Class[] {Viewer.class});
+            final Constructor<? extends IcyCanvas> constructor = canvasClazz.getConstructor(Viewer.class);
             // build canvas
-            return constructor.newInstance(new Object[] {viewer});
+            return constructor.newInstance(viewer);
         }
 
         // create canvas from plugin
-        return pluginCanvasClazz.newInstance().createCanvas(viewer);
+        //return pluginCanvasClazz.newInstance().createCanvas(viewer);
+        return pluginCanvasClazz.getDeclaredConstructor().newInstance().createCanvas(viewer);
     }
 
-    public static void addVisibleLayerToList(final Layer layer, ArrayList<Layer> list)
-    {
+    public static void addVisibleLayerToList(final Layer layer, final ArrayList<Layer> list) {
         if ((layer != null) && (layer.isVisible()))
             list.add(layer);
     }
-
-    private static final long serialVersionUID = -8461229450296203011L;
 
     public static final String PROPERTY_LAYERS_VISIBLE = "layersVisible";
 
@@ -363,7 +323,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Priority ordered layers.
      */
-    protected List<Layer> orderedLayers;
+    protected final List<Layer> orderedLayers;
 
     /**
      * internal updater
@@ -372,7 +332,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * listeners
      */
-    protected final List<IcyCanvasListener> listeners;
+    protected final List<IcyCanvasListener> listeners = new ArrayList<>();
     protected final List<CanvasLayerListener> layerListeners;
 
     /**
@@ -407,24 +367,21 @@ public abstract class IcyCanvas extends JPanel
     protected LUT lut;
     protected boolean synchMaster;
     protected boolean orderedLayersOutdated;
-    private Runnable guiUpdater;
+    private final Runnable guiUpdater;
     protected boolean isLoopingT;
 
     /**
      * Constructor
-     * 
-     * @param viewer
      */
-    public IcyCanvas(Viewer viewer)
-    {
+    public IcyCanvas(final Viewer viewer) {
         super();
 
         // default
         this.viewer = viewer;
 
         layersVisible = true;
-        layers = new HashMap<Overlay, Layer>();
-        orderedLayers = new ArrayList<Layer>();
+        layers = new HashMap<>();
+        orderedLayers = new ArrayList<>();
         syncId = 0;
         synchMaster = false;
         orderedLayersOutdated = false;
@@ -441,40 +398,22 @@ public abstract class IcyCanvas extends JPanel
         // GUI stuff
         panel = new JPanel();
 
-        listeners = new ArrayList<IcyCanvasListener>();
-        layerListeners = new ArrayList<CanvasLayerListener>();
+        layerListeners = new ArrayList<>();
 
         // Z navigation
         zNav = new ZNavigationPanel();
-        zNav.addChangeListener(new javax.swing.event.ChangeListener()
-        {
-            @Override
-            public void stateChanged(ChangeEvent e)
-            {
-                // set the new Z position
-                setPositionZ(zNav.getValue());
-            }
+        zNav.addChangeListener(e -> {
+            // set the new Z position
+            setPositionZ(zNav.getValue());
         });
 
         // T navigation
         tNav = new TNavigationPanel();
-        tNav.addChangeListener(new javax.swing.event.ChangeListener()
-        {
-            @Override
-            public void stateChanged(ChangeEvent e)
-            {
-                // set the new T position
-                setPositionT(tNav.getValue());
-            }
+        tNav.addChangeListener(e -> {
+            // set the new T position
+            setPositionT(tNav.getValue());
         });
-        tNav.addLoopingStateChangeListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                isLoopingT = tNav.isRepeat();
-            }
-        });
+        tNav.addLoopingStateChangeListener(e -> isLoopingT = tNav.isRepeat());
 
         isLoopingT = tNav.isRepeat();
 
@@ -488,80 +427,65 @@ public abstract class IcyCanvas extends JPanel
         add(GuiUtil.createPageBoxPanel(tNav, mouseInfPanel), BorderLayout.SOUTH);
 
         // asynchronous updater for GUI
-        guiUpdater = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                ThreadUtil.invokeNow(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        // update sliders bounds if needed
-                        updateZNav();
-                        updateTNav();
+        guiUpdater = () -> ThreadUtil.invokeNow(() -> {
+            // update sliders bounds if needed
+            updateZNav();
+            updateTNav();
 
-                        // adjust X position if needed
-                        final int maxX = getMaxPositionX();
-                        final int curX = getPositionX();
-                        if ((curX != -1) && (curX > maxX))
-                            setPositionX(maxX);
+            // adjust X position if needed
+            final int maxX = getMaxPositionX();
+            final int curX = getPositionX();
+            if ((curX != -1) && (curX > maxX))
+                setPositionX(maxX);
 
-                        // adjust Y position if needed
-                        final int maxY = getMaxPositionY();
-                        final int curY = getPositionY();
-                        if ((curY != -1) && (curY > maxY))
-                            setPositionY(maxY);
+            // adjust Y position if needed
+            final int maxY = getMaxPositionY();
+            final int curY = getPositionY();
+            if ((curY != -1) && (curY > maxY))
+                setPositionY(maxY);
 
-                        // adjust C position if needed
-                        final int maxC = getMaxPositionC();
-                        final int curC = getPositionC();
-                        if ((curC != -1) && (curC > maxC))
-                            setPositionC(maxC);
+            // adjust C position if needed
+            final int maxC = getMaxPositionC();
+            final int curC = getPositionC();
+            if ((curC != -1) && (curC > maxC))
+                setPositionC(maxC);
 
-                        // adjust Z position if needed
-                        final int maxZ = getMaxPositionZ();
-                        final int curZ = getPositionZ();
-                        if ((curZ != -1) && (curZ > maxZ))
-                            setPositionZ(maxZ);
+            // adjust Z position if needed
+            final int maxZ = getMaxPositionZ();
+            final int curZ = getPositionZ();
+            if ((curZ != -1) && (curZ > maxZ))
+                setPositionZ(maxZ);
 
-                        // adjust T position if needed
-                        final int maxT = getMaxPositionT();
-                        final int curT = getPositionT();
-                        if ((curT != -1) && (curT > maxT))
-                            setPositionT(maxT);
+            // adjust T position if needed
+            final int maxT = getMaxPositionT();
+            final int curT = getPositionT();
+            if ((curT != -1) && (curT > maxT))
+                setPositionT(maxT);
 
-                        // refresh mouse panel informations (data values can have changed)
-                        mouseInfPanel.updateInfos(IcyCanvas.this);
-                    }
-                });
-            }
-        };
+            // refresh mouse panel informations (data values can have changed)
+            mouseInfPanel.updateInfos(IcyCanvas.this);
+        });
 
         // create image overlay
         imageOverlay = createImageOverlay();
 
         // create layers from overlays
         beginUpdate();
-        try
-        {
+        try {
             // first add image layer
             imageLayer = addLayer(getImageOverlay());
 
             final Sequence sequence = getSequence();
 
-            if (sequence != null)
-            {
+            if (sequence != null) {
                 // then add sequence overlays to layer list
-                for (Overlay overlay : sequence.getOverlays())
+                for (final Overlay overlay : sequence.getOverlays())
                     addLayer(overlay);
             }
             else
-                System.err.println("Sequence null when canvas created");
+                IcyLogger.error(IcyCanvas.class, "Sequence null when canvas created.");
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
 
@@ -581,8 +505,7 @@ public abstract class IcyCanvas extends JPanel
      * Be careful to not restore previous state here (as the colormap) because generally <code>shutdown</code> is called
      * <b>after</b> the creation of the other canvas.
      */
-    public void shutDown()
-    {
+    public void shutDown() {
         // remove navigation panel listener
         zNav.removeAllChangeListener();
         tNav.removeAllChangeListener();
@@ -597,29 +520,24 @@ public abstract class IcyCanvas extends JPanel
 
         // remove all layers
         beginUpdate();
-        try
-        {
-            for (Layer layer : getLayers())
+        try {
+            for (final Layer layer : getLayers())
                 removeLayer(layer);
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
 
         // release layers
-        synchronized (orderedLayers)
-        {
+        synchronized (orderedLayers) {
             orderedLayers.clear();
         }
 
         // remove all IcyCanvas & Layer listeners
-        synchronized (listeners)
-        {
+        synchronized (listeners) {
             listeners.clear();
         }
-        synchronized (layerListeners)
-        {
+        synchronized (layerListeners) {
             layerListeners.clear();
         }
     }
@@ -629,8 +547,7 @@ public abstract class IcyCanvas extends JPanel
      */
     public abstract void refresh();
 
-    protected Overlay createImageOverlay()
-    {
+    protected Overlay createImageOverlay() {
         // default image overlay
         return new IcyCanvasImageOverlay();
     }
@@ -638,16 +555,14 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Returns the {@link Overlay} used to display the current sequence image
      */
-    public Overlay getImageOverlay()
-    {
+    public Overlay getImageOverlay() {
         return imageOverlay;
     }
 
     /**
      * Returns the {@link Layer} object used to display the current sequence image
      */
-    public Layer getImageLayer()
-    {
+    public Layer getImageLayer() {
         return imageLayer;
     }
 
@@ -655,8 +570,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #isLayersVisible()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean getDrawLayers()
-    {
+    public boolean getDrawLayers() {
         return isLayersVisible();
     }
 
@@ -664,31 +578,26 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #setLayersVisible(boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setDrawLayers(boolean value)
-    {
+    public void setDrawLayers(final boolean value) {
         setLayersVisible(value);
     }
 
     /**
      * Return true if layers are visible on the canvas.
      */
-    public boolean isLayersVisible()
-    {
+    public boolean isLayersVisible() {
         return layersVisible;
     }
 
-    public boolean isLoopingInT()
-    {
+    public boolean isLoopingInT() {
         return isLoopingT;
     }
 
     /**
      * Make layers visible on this canvas (default = true).
      */
-    public void setLayersVisible(boolean value)
-    {
-        if (layersVisible != value)
-        {
+    public void setLayersVisible(final boolean value) {
+        if (layersVisible != value) {
             layersVisible = value;
             layersVisibleChanged();
             firePropertyChange(PROPERTY_LAYERS_VISIBLE, !value, value);
@@ -698,8 +607,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Global layers visibility changed
      */
-    protected void layersVisibleChanged()
-    {
+    protected void layersVisibleChanged() {
         final Component comp = getViewComponent();
 
         if (comp != null)
@@ -709,16 +617,14 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @return the viewer
      */
-    public Viewer getViewer()
-    {
+    public Viewer getViewer() {
         return viewer;
     }
 
     /**
      * @return the sequence
      */
-    public Sequence getSequence()
-    {
+    public Sequence getSequence() {
         return viewer.getSequence();
     }
 
@@ -730,32 +636,28 @@ public abstract class IcyCanvas extends JPanel
     /**
      * @return the Z navigation bar panel
      */
-    public ZNavigationPanel getZNavigationPanel()
-    {
+    public ZNavigationPanel getZNavigationPanel() {
         return zNav;
     }
 
     /**
      * @return the T navigation bar panel
      */
-    public TNavigationPanel getTNavigationPanel()
-    {
+    public TNavigationPanel getTNavigationPanel() {
         return tNav;
     }
 
     /**
      * @return the mouse image informations panel
      */
-    public MouseImageInfosPanel getMouseImageInfosPanel()
-    {
+    public MouseImageInfosPanel getMouseImageInfosPanel() {
         return mouseInfPanel;
     }
 
     /**
      * @return the LUT
      */
-    public LUT getLut()
-    {
+    public LUT getLut() {
         // ensure we have the good lut
         setLut(viewer.getLut(), true);
 
@@ -765,10 +667,8 @@ public abstract class IcyCanvas extends JPanel
     /**
      * set canvas LUT
      */
-    private void setLut(LUT lut, boolean event)
-    {
-        if (this.lut != lut)
-        {
+    private void setLut(final LUT lut, final boolean event) {
+        if (this.lut != lut) {
             if (this.lut != null)
                 this.lut.removeListener(this);
 
@@ -789,20 +689,18 @@ public abstract class IcyCanvas extends JPanel
      */
     @SuppressWarnings("unused")
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void addViewerToolbarComponents(JToolBar toolBar)
-    {
+    public void addViewerToolbarComponents(final JToolBar toolBar) {
 
     }
 
     /**
      * Called by the parent viewer when building the toolbar.<br>
      * This way the canvas can customize it by adding specific command for instance.<br>
-     * 
+     *
      * @param toolBar
      *        the parent toolbar to customize
      */
-    public void customizeToolbar(JToolBar toolBar)
-    {
+    public void customizeToolbar(final JToolBar toolBar) {
         addViewerToolbarComponents(toolBar);
     }
 
@@ -810,38 +708,33 @@ public abstract class IcyCanvas extends JPanel
      * Returns the setting panel of this canvas.<br>
      * The setting panel is displayed in the inspector so user can change canvas parameters.
      */
-    public JPanel getPanel()
-    {
+    public JPanel getPanel() {
         return panel;
     }
 
     /**
      * Returns all layers attached to this canvas.<br>
-     * 
+     *
      * @param sorted
      *        If <code>true</code> the returned list is sorted on the layer priority.<br>
      *        Sort operation is cached so the method could take sometime when sort cache need to be
      *        rebuild.
      */
-    public List<Layer> getLayers(boolean sorted)
-    {
-        if (sorted)
-        {
+    public List<Layer> getLayers(final boolean sorted) {
+        if (sorted) {
             // need to rebuild sorted layer list ?
-            if (orderedLayersOutdated)
-            {
+            if (orderedLayersOutdated) {
                 // build and sort the list
-                synchronized (layers)
-                {
-                    orderedLayers = new ArrayList<Layer>(layers.values());
+                synchronized (layers) {
+                    orderedLayers.clear();
+                    orderedLayers.addAll(layers.values());
+                    //orderedLayers = new ArrayList<Layer>(layers.values());
                 }
 
-                try
-                {
+                try {
                     Collections.sort(orderedLayers);
                 }
-                catch (Exception e)
-                {
+                catch (final Exception e) {
                     // catch exceptions here as some we can have "IllegalArgumentException: Comparison method violates
                     // its general contract!"
                 }
@@ -849,12 +742,11 @@ public abstract class IcyCanvas extends JPanel
                 orderedLayersOutdated = false;
             }
 
-            return new ArrayList<Layer>(orderedLayers);
+            return new ArrayList<>(orderedLayers);
         }
 
-        synchronized (layers)
-        {
-            return new ArrayList<Layer>(layers.values());
+        synchronized (layers) {
+            return new ArrayList<>(layers.values());
         }
     }
 
@@ -863,26 +755,24 @@ public abstract class IcyCanvas extends JPanel
      * The returned list is sorted on the layer priority.<br>
      * Sort operation is cached so the method could take sometime when cache need to be rebuild.
      */
-    public List<Layer> getLayers()
-    {
+    public List<Layer> getLayers() {
         return getLayers(true);
     }
 
     /**
      * Returns all visible layers (visible property set to <code>true</code>) attached to this
      * canvas.
-     * 
+     *
      * @param sorted
      *        If <code>true</code> the returned list is sorted on the layer priority.<br>
      *        Sort operation is cached so the method could take sometime when sort cache need to be
      *        rebuild.
      */
-    public List<Layer> getVisibleLayers(boolean sorted)
-    {
+    public List<Layer> getVisibleLayers(final boolean sorted) {
         final List<Layer> olayers = getLayers(sorted);
-        final List<Layer> result = new ArrayList<Layer>(olayers.size());
+        final List<Layer> result = new ArrayList<>(olayers.size());
 
-        for (Layer l : olayers)
+        for (final Layer l : olayers)
             if (l.isVisible())
                 result.add(l);
 
@@ -894,8 +784,7 @@ public abstract class IcyCanvas extends JPanel
      * canvas.<br>
      * The list is sorted on the layer priority.
      */
-    public ArrayList<Layer> getVisibleLayers()
-    {
+    public ArrayList<Layer> getVisibleLayers() {
         return (ArrayList<Layer>) getVisibleLayers(true);
     }
 
@@ -903,8 +792,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getLayers()} instead (sorted on Layer priority).
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public List<Layer> getOrderedLayersForEvent()
-    {
+    public List<Layer> getOrderedLayersForEvent() {
         return getLayers();
     }
 
@@ -912,8 +800,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getVisibleLayers()} instead (sorted on Layer priority).
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public List<Layer> getVisibleOrderedLayersForEvent()
-    {
+    public List<Layer> getVisibleOrderedLayersForEvent() {
         return getVisibleLayers();
     }
 
@@ -921,12 +808,10 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getOverlays()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public List<Painter> getLayersPainter()
-    {
-        final ArrayList<Painter> result = new ArrayList<Painter>();
+    public List<Painter> getLayersPainter() {
+        final ArrayList<Painter> result = new ArrayList<>();
 
-        for (Overlay overlay : getOverlays())
-        {
+        for (final Overlay overlay : getOverlays()) {
             if (overlay instanceof OverlayWrapper)
                 result.add(((OverlayWrapper) overlay).getPainter());
             else
@@ -939,36 +824,31 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Directly returns a {@link Set} of all Overlay displayed by this canvas.
      */
-    public Set<Overlay> getOverlays()
-    {
-        synchronized (layers)
-        {
-            return new HashSet<Overlay>(layers.keySet());
+    public Set<Overlay> getOverlays() {
+        synchronized (layers) {
+            return new HashSet<>(layers.keySet());
         }
     }
 
     /**
      * @return the SyncId
      */
-    public int getSyncId()
-    {
+    public int getSyncId() {
         return syncId;
     }
 
     /**
      * Set the synchronization group id (0 means unsynchronized).<br>
-     * 
+     *
      * @return <code>false</code> if the canvas do not support synchronization group.
      * @param id
      *        the syncId to set
      */
-    public boolean setSyncId(int id)
-    {
+    public boolean setSyncId(final int id) {
         if (!isSynchronizationSupported())
             return false;
 
-        if (this.syncId != id)
-        {
+        if (this.syncId != id) {
             this.syncId = id;
 
             // notify sync has changed
@@ -981,8 +861,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Return true if this canvas support synchronization
      */
-    public boolean isSynchronizationSupported()
-    {
+    public boolean isSynchronizationSupported() {
         // default (override it when supported)
         return false;
     }
@@ -990,16 +869,14 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Return true if this canvas is synchronized
      */
-    public boolean isSynchronized()
-    {
+    public boolean isSynchronized() {
         return syncId > 0;
     }
 
     /**
      * Return true if current canvas is synchronized and is currently the synchronize leader.
      */
-    public boolean isSynchMaster()
-    {
+    public boolean isSynchMaster() {
         return synchMaster;
     }
 
@@ -1007,23 +884,20 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #isSynchMaster()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean isSynchHeader()
-    {
+    public boolean isSynchHeader() {
         return isSynchMaster();
     }
 
     /**
      * Return true if current canvas is synchronized and it's not the synchronize master
      */
-    public boolean isSynchSlave()
-    {
-        if (isSynchronized())
-        {
+    public boolean isSynchSlave() {
+        if (isSynchronized()) {
             if (isSynchMaster())
                 return false;
 
             // search for a master in synchronized canvas
-            for (IcyCanvas cnv : getSynchronizedCanvas())
+            for (final IcyCanvas cnv : getSynchronizedCanvas())
                 if (cnv.isSynchMaster())
                     return true;
         }
@@ -1034,32 +908,28 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Return true if this canvas is synchronized on view (offset, zoom and rotation).
      */
-    public boolean isSynchOnView()
-    {
+    public boolean isSynchOnView() {
         return (syncId == 1) || (syncId == 2) || (syncId == 3);
     }
 
     /**
      * Return true if this canvas is synchronized on slice (T and Z position)
      */
-    public boolean isSynchOnSlice()
-    {
+    public boolean isSynchOnSlice() {
         return (syncId == 1) || (syncId == 2) || (syncId == 4);
     }
 
     /**
      * Return true if this canvas is synchronized on cursor (mouse cursor)
      */
-    public boolean isSynchOnCursor()
-    {
+    public boolean isSynchOnCursor() {
         return (syncId > 0);
     }
 
     /**
      * Return true if we get the synchronizer master from synchronized canvas
      */
-    protected boolean getSynchMaster()
-    {
+    protected boolean getSynchMaster() {
         return getSynchMaster(getSynchronizedCanvas());
     }
 
@@ -1067,17 +937,15 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getSynchMaster()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    protected boolean getSynchHeader()
-    {
+    protected boolean getSynchHeader() {
         return getSynchMaster();
     }
 
     /**
      * Return true if we get the synchronizer master from specified canvas list.
      */
-    protected boolean getSynchMaster(List<IcyCanvas> canvasList)
-    {
-        for (IcyCanvas canvas : canvasList)
+    protected boolean getSynchMaster(final List<IcyCanvas> canvasList) {
+        for (final IcyCanvas canvas : canvasList)
             if (canvas.isSynchMaster())
                 return canvas == this;
 
@@ -1091,16 +959,14 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getSynchMaster(List)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    protected boolean getSynchHeader(List<IcyCanvas> canvasList)
-    {
+    protected boolean getSynchHeader(final List<IcyCanvas> canvasList) {
         return getSynchMaster(canvasList);
     }
 
     /**
      * Release synchronizer master
      */
-    protected void releaseSynchMaster()
-    {
+    protected void releaseSynchMaster() {
         synchMaster = false;
     }
 
@@ -1108,32 +974,27 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #releaseSynchMaster()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    protected void releaseSynchHeader()
-    {
+    protected void releaseSynchHeader() {
         releaseSynchMaster();
     }
 
     /**
      * Return the list of canvas which are synchronized with the current one
      */
-    private List<IcyCanvas> getSynchronizedCanvas()
-    {
-        final List<IcyCanvas> result = new ArrayList<IcyCanvas>();
+    private List<IcyCanvas> getSynchronizedCanvas() {
+        final List<IcyCanvas> result = new ArrayList<>();
 
-        if (isSynchronized())
-        {
+        if (isSynchronized()) {
             final List<Viewer> viewers = Icy.getMainInterface().getViewers();
 
-            for (int i = viewers.size() - 1; i >= 0; i--)
-            {
+            for (int i = viewers.size() - 1; i >= 0; i--) {
                 final IcyCanvas cnv = viewers.get(i).getCanvas();
 
                 if ((cnv == this) || (cnv.getSyncId() != syncId))
                     viewers.remove(i);
             }
 
-            for (Viewer v : viewers)
-            {
+            for (final Viewer v : viewers) {
                 final IcyCanvas cnv = v.getCanvas();
 
                 // only permit same class
@@ -1148,27 +1009,22 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Synchronize views of specified list of canvas
      */
-    protected void synchronizeCanvas(List<IcyCanvas> canvasList, IcyCanvasEvent event, boolean processAll)
-    {
+    protected void synchronizeCanvas(final List<IcyCanvas> canvasList, final IcyCanvasEvent event, final boolean processAll) {
         final IcyCanvasEventType type = event.getType();
         final DimensionId dim = event.getDim();
 
         // position synchronization
-        if (isSynchOnSlice())
-        {
-            if (processAll || (type == IcyCanvasEventType.POSITION_CHANGED))
-            {
+        if (isSynchOnSlice()) {
+            if (processAll || (type == IcyCanvasEventType.POSITION_CHANGED)) {
                 // no information about dimension --> set all
-                if (processAll || (dim == DimensionId.NULL))
-                {
+                if (processAll || (dim == DimensionId.NULL)) {
                     final int x = getPositionX();
                     final int y = getPositionY();
                     final int z = getPositionZ();
                     final int t = getPositionT();
                     final int c = getPositionC();
 
-                    for (IcyCanvas cnv : canvasList)
-                    {
+                    for (final IcyCanvas cnv : canvasList) {
                         if (x != -1)
                             cnv.setPositionX(x);
                         if (y != -1)
@@ -1181,10 +1037,8 @@ public abstract class IcyCanvas extends JPanel
                             cnv.setPositionC(c);
                     }
                 }
-                else
-                {
-                    for (IcyCanvas cnv : canvasList)
-                    {
+                else {
+                    for (final IcyCanvas cnv : canvasList) {
                         final int pos = getPosition(dim);
                         if (pos != -1)
                             cnv.setPosition(dim, pos);
@@ -1194,21 +1048,17 @@ public abstract class IcyCanvas extends JPanel
         }
 
         // view synchronization
-        if (isSynchOnView())
-        {
-            if (processAll || (type == IcyCanvasEventType.SCALE_CHANGED))
-            {
+        if (isSynchOnView()) {
+            if (processAll || (type == IcyCanvasEventType.SCALE_CHANGED)) {
                 // no information about dimension --> set all
-                if (processAll || (dim == DimensionId.NULL))
-                {
+                if (processAll || (dim == DimensionId.NULL)) {
                     final double sX = getScaleX();
                     final double sY = getScaleY();
                     final double sZ = getScaleZ();
                     final double sT = getScaleT();
                     final double sC = getScaleC();
 
-                    for (IcyCanvas cnv : canvasList)
-                    {
+                    for (final IcyCanvas cnv : canvasList) {
                         cnv.setScaleX(sX);
                         cnv.setScaleY(sY);
                         cnv.setScaleZ(sZ);
@@ -1216,26 +1066,22 @@ public abstract class IcyCanvas extends JPanel
                         cnv.setScaleC(sC);
                     }
                 }
-                else
-                {
-                    for (IcyCanvas cnv : canvasList)
+                else {
+                    for (final IcyCanvas cnv : canvasList)
                         cnv.setScale(dim, getScale(dim));
                 }
             }
 
-            if (processAll || (type == IcyCanvasEventType.ROTATION_CHANGED))
-            {
+            if (processAll || (type == IcyCanvasEventType.ROTATION_CHANGED)) {
                 // no information about dimension --> set all
-                if (processAll || (dim == DimensionId.NULL))
-                {
+                if (processAll || (dim == DimensionId.NULL)) {
                     final double rotX = getRotationX();
                     final double rotY = getRotationY();
                     final double rotZ = getRotationZ();
                     final double rotT = getRotationT();
                     final double rotC = getRotationC();
 
-                    for (IcyCanvas cnv : canvasList)
-                    {
+                    for (final IcyCanvas cnv : canvasList) {
                         cnv.setRotationX(rotX);
                         cnv.setRotationY(rotY);
                         cnv.setRotationZ(rotZ);
@@ -1243,27 +1089,23 @@ public abstract class IcyCanvas extends JPanel
                         cnv.setRotationC(rotC);
                     }
                 }
-                else
-                {
-                    for (IcyCanvas cnv : canvasList)
+                else {
+                    for (final IcyCanvas cnv : canvasList)
                         cnv.setRotation(dim, getRotation(dim));
                 }
             }
 
             // process offset in last as it can be limited depending destination scale value
-            if (processAll || (type == IcyCanvasEventType.OFFSET_CHANGED))
-            {
+            if (processAll || (type == IcyCanvasEventType.OFFSET_CHANGED)) {
                 // no information about dimension --> set all
-                if (processAll || (dim == DimensionId.NULL))
-                {
+                if (processAll || (dim == DimensionId.NULL)) {
                     final int offX = getOffsetX();
                     final int offY = getOffsetY();
                     final int offZ = getOffsetZ();
                     final int offT = getOffsetT();
                     final int offC = getOffsetC();
 
-                    for (IcyCanvas cnv : canvasList)
-                    {
+                    for (final IcyCanvas cnv : canvasList) {
                         cnv.setOffsetX(offX);
                         cnv.setOffsetY(offY);
                         cnv.setOffsetZ(offZ);
@@ -1271,31 +1113,26 @@ public abstract class IcyCanvas extends JPanel
                         cnv.setOffsetC(offC);
                     }
                 }
-                else
-                {
-                    for (IcyCanvas cnv : canvasList)
+                else {
+                    for (final IcyCanvas cnv : canvasList)
                         cnv.setOffset(dim, getOffset(dim));
                 }
             }
         }
 
         // cursor synchronization
-        if (isSynchOnCursor())
-        {
+        if (isSynchOnCursor()) {
             // mouse synchronization
-            if (processAll || (type == IcyCanvasEventType.MOUSE_IMAGE_POSITION_CHANGED))
-            {
+            if (processAll || (type == IcyCanvasEventType.MOUSE_IMAGE_POSITION_CHANGED)) {
                 // no information about dimension --> set all
-                if (processAll || (dim == DimensionId.NULL))
-                {
+                if (processAll || (dim == DimensionId.NULL)) {
                     final double mipX = getMouseImagePosX();
                     final double mipY = getMouseImagePosY();
                     final double mipZ = getMouseImagePosZ();
                     final double mipT = getMouseImagePosT();
                     final double mipC = getMouseImagePosC();
 
-                    for (IcyCanvas cnv : canvasList)
-                    {
+                    for (final IcyCanvas cnv : canvasList) {
                         cnv.setMouseImagePosX(mipX);
                         cnv.setMouseImagePosY(mipY);
                         cnv.setMouseImagePosZ(mipZ);
@@ -1303,9 +1140,8 @@ public abstract class IcyCanvas extends JPanel
                         cnv.setMouseImagePosC(mipC);
                     }
                 }
-                else
-                {
-                    for (IcyCanvas cnv : canvasList)
+                else {
+                    for (final IcyCanvas cnv : canvasList)
                         cnv.setMouseImagePos(dim, getMouseImagePos(dim));
                 }
             }
@@ -1315,70 +1151,57 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Get position for specified dimension
      */
-    public int getPosition(DimensionId dim)
-    {
-        switch (dim)
-        {
-            case X:
-                return getPositionX();
-            case Y:
-                return getPositionY();
-            case Z:
-                return getPositionZ();
-            case T:
-                return getPositionT();
-            case C:
-                return getPositionC();
-        }
+    public int getPosition(final DimensionId dim) {
+        return switch (dim) {
+            case X -> getPositionX();
+            case Y -> getPositionY();
+            case Z -> getPositionZ();
+            case T -> getPositionT();
+            case C -> getPositionC();
+            default -> 0;
+        };
 
-        return 0;
     }
 
     /**
      * @return current X (-1 if all selected)
      */
-    public int getPositionX()
-    {
+    public int getPositionX() {
         return -1;
     }
 
     /**
      * @return current Y (-1 if all selected)
      */
-    public int getPositionY()
-    {
+    public int getPositionY() {
         return -1;
     }
 
     /**
      * @return current Z (-1 if all selected)
      */
-    public int getPositionZ()
-    {
+    public int getPositionZ() {
         return posZ;
     }
 
     /**
      * @return current T (-1 if all selected)
      */
-    public int getPositionT()
-    {
+    public int getPositionT() {
         return posT;
     }
 
     /**
      * @return current C (-1 if all selected)
      */
-    public int getPositionC()
-    {
+    public int getPositionC() {
         return posC;
     }
 
     /**
      * Returns the 5D canvas position (-1 mean that the complete dimension is selected)
      */
-    public Point5D.Integer getPosition5D()
-    {
+    public Point5D.Integer getPosition5D() {
         return new Point5D.Integer(getPositionX(), getPositionY(), getPositionZ(), getPositionT(), getPositionC());
     }
 
@@ -1387,8 +1210,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated uses getPositionZ() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getZ()
-    {
+    public int getZ() {
         return getPositionZ();
     }
 
@@ -1397,8 +1219,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated uses getPositionT() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getT()
-    {
+    public int getT() {
         return getPositionT();
     }
 
@@ -1407,38 +1228,29 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated uses getPositionC() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getC()
-    {
+    public int getC() {
         return getPositionC();
     }
 
     /**
      * Get maximum position for specified dimension
      */
-    public double getMaxPosition(DimensionId dim)
-    {
-        switch (dim)
-        {
-            case X:
-                return getMaxPositionX();
-            case Y:
-                return getMaxPositionY();
-            case Z:
-                return getMaxPositionZ();
-            case T:
-                return getMaxPositionT();
-            case C:
-                return getMaxPositionC();
-        }
+    public double getMaxPosition(final DimensionId dim) {
+        return switch (dim) {
+            case X -> getMaxPositionX();
+            case Y -> getMaxPositionY();
+            case Z -> getMaxPositionZ();
+            case T -> getMaxPositionT();
+            case C -> getMaxPositionC();
+            default -> 0;
+        };
 
-        return 0;
     }
 
     /**
      * Get maximum X value
      */
-    public int getMaxPositionX()
-    {
+    public int getMaxPositionX() {
         final Sequence sequence = getSequence();
 
         // have to test this as we release sequence reference on closed
@@ -1451,8 +1263,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Get maximum Y value
      */
-    public int getMaxPositionY()
-    {
+    public int getMaxPositionY() {
         final Sequence sequence = getSequence();
 
         // have to test this as we release sequence reference on closed
@@ -1465,8 +1276,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Get maximum Z value
      */
-    public int getMaxPositionZ()
-    {
+    public int getMaxPositionZ() {
         final Sequence sequence = getSequence();
 
         // have to test this as we release sequence reference on closed
@@ -1479,8 +1289,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Get maximum T value
      */
-    public int getMaxPositionT()
-    {
+    public int getMaxPositionT() {
         final Sequence sequence = getSequence();
 
         // have to test this as we release sequence reference on closed
@@ -1493,8 +1302,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Get maximum C value
      */
-    public int getMaxPositionC()
-    {
+    public int getMaxPositionC() {
         final Sequence sequence = getSequence();
 
         // have to test this as we release sequence reference on closed
@@ -1506,11 +1314,10 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Get the maximum 5D position for the canvas.
-     * 
+     *
      * @see #getPosition5D()
      */
-    public Point5D.Integer getMaxPosition5D()
-    {
+    public Point5D.Integer getMaxPosition5D() {
         return new Point5D.Integer(getMaxPositionX(), getMaxPositionY(), getMaxPositionZ(), getMaxPositionT(),
                 getMaxPositionC());
     }
@@ -1519,8 +1326,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getMaxPosition(DimensionId)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getMax(DimensionId dim)
-    {
+    public double getMax(final DimensionId dim) {
         return getMaxPosition(dim);
     }
 
@@ -1528,8 +1334,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getMaxPositionX()} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getMaxX()
-    {
+    public int getMaxX() {
         return getMaxPositionX();
     }
 
@@ -1537,8 +1342,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getMaxPositionY()} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getMaxY()
-    {
+    public int getMaxY() {
         return getMaxPositionY();
     }
 
@@ -1546,8 +1350,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getMaxPositionZ()} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getMaxZ()
-    {
+    public int getMaxZ() {
         return getMaxPositionZ();
     }
 
@@ -1555,8 +1358,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getMaxPositionT()} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getMaxT()
-    {
+    public int getMaxT() {
         return getMaxPositionT();
     }
 
@@ -1564,44 +1366,35 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getMaxPositionC()} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getMaxC()
-    {
+    public int getMaxC() {
         return getMaxPositionC();
     }
 
     /**
      * Get canvas view size for specified Dimension
      */
-    public int getCanvasSize(DimensionId dim)
-    {
-        switch (dim)
-        {
-            case X:
-                return getCanvasSizeX();
-            case Y:
-                return getCanvasSizeY();
-            case Z:
-                return getCanvasSizeZ();
-            case T:
-                return getCanvasSizeT();
-            case C:
-                return getCanvasSizeC();
-        }
+    public int getCanvasSize(final DimensionId dim) {
+        return switch (dim) {
+            case X -> getCanvasSizeX();
+            case Y -> getCanvasSizeY();
+            case Z -> getCanvasSizeZ();
+            case T -> getCanvasSizeT();
+            case C -> getCanvasSizeC();
+            default ->
+                // size not supported
+                    -1;
+        };
 
-        // size not supported
-        return -1;
     }
 
     /**
      * Returns the canvas view size X.
      */
-    public int getCanvasSizeX()
-    {
+    public int getCanvasSizeX() {
         final Component comp = getViewComponent();
         int res = 0;
 
-        if (comp != null)
-        {
+        if (comp != null) {
             // by default we use view component width
             res = comp.getWidth();
             // preferred width if size not yet set
@@ -1615,13 +1408,11 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Returns the canvas view size Y.
      */
-    public int getCanvasSizeY()
-    {
+    public int getCanvasSizeY() {
         final Component comp = getViewComponent();
         int res = 0;
 
-        if (comp != null)
-        {
+        if (comp != null) {
             // by default we use view component width
             res = comp.getHeight();
             // preferred width if size not yet set
@@ -1635,8 +1426,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Returns the canvas view size Z.
      */
-    public int getCanvasSizeZ()
-    {
+    public int getCanvasSizeZ() {
         // by default : no Z dimension
         return 1;
     }
@@ -1644,8 +1434,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Returns the canvas view size T.
      */
-    public int getCanvasSizeT()
-    {
+    public int getCanvasSizeT() {
         // by default : no T dimension
         return 1;
     }
@@ -1653,8 +1442,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Returns the canvas view size C.
      */
-    public int getCanvasSizeC()
-    {
+    public int getCanvasSizeC() {
         // by default : no C dimension
         return 1;
     }
@@ -1662,38 +1450,29 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Returns the mouse position (in canvas coordinate space).
      */
-    public Point getMousePos()
-    {
+    public Point getMousePos() {
         return (Point) mousePos.clone();
     }
 
     /**
      * Get mouse image position for specified Dimension
      */
-    public double getMouseImagePos(DimensionId dim)
-    {
-        switch (dim)
-        {
-            case X:
-                return getMouseImagePosX();
-            case Y:
-                return getMouseImagePosY();
-            case Z:
-                return getMouseImagePosZ();
-            case T:
-                return getMouseImagePosT();
-            case C:
-                return getMouseImagePosC();
-        }
+    public double getMouseImagePos(final DimensionId dim) {
+        return switch (dim) {
+            case X -> getMouseImagePosX();
+            case Y -> getMouseImagePosY();
+            case Z -> getMouseImagePosZ();
+            case T -> getMouseImagePosT();
+            case C -> getMouseImagePosC();
+            default -> 0;
+        };
 
-        return 0;
     }
 
     /**
      * mouse X image position
      */
-    public double getMouseImagePosX()
-    {
+    public double getMouseImagePosX() {
         // default implementation
         return getPositionX();
     }
@@ -1701,8 +1480,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * mouse Y image position
      */
-    public double getMouseImagePosY()
-    {
+    public double getMouseImagePosY() {
         // default implementation
         return getPositionY();
     }
@@ -1710,8 +1488,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * mouse Z image position
      */
-    public double getMouseImagePosZ()
-    {
+    public double getMouseImagePosZ() {
         // default implementation
         return getPositionZ();
     }
@@ -1719,8 +1496,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * mouse T image position
      */
-    public double getMouseImagePosT()
-    {
+    public double getMouseImagePosT() {
         // default implementation
         return getPositionT();
     }
@@ -1728,8 +1504,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * mouse C image position
      */
-    public double getMouseImagePosC()
-    {
+    public double getMouseImagePosC() {
         // default implementation
         return getPositionC();
     }
@@ -1737,8 +1512,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Returns the 5D mouse image position
      */
-    public Point5D.Double getMouseImagePos5D()
-    {
+    public Point5D.Double getMouseImagePos5D() {
         return new Point5D.Double(getMouseImagePosX(), getMouseImagePosY(), getMouseImagePosZ(), getMouseImagePosT(),
                 getMouseImagePosC());
     }
@@ -1746,389 +1520,325 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Get offset for specified Dimension
      */
-    public int getOffset(DimensionId dim)
-    {
-        switch (dim)
-        {
-            case X:
-                return getOffsetX();
-            case Y:
-                return getOffsetY();
-            case Z:
-                return getOffsetZ();
-            case T:
-                return getOffsetT();
-            case C:
-                return getOffsetC();
-        }
-
-        return 0;
+    public int getOffset(final DimensionId dim) {
+        return switch (dim) {
+            case X -> getOffsetX();
+            case Y -> getOffsetY();
+            case Z -> getOffsetZ();
+            case T -> getOffsetT();
+            case C -> getOffsetC();
+            default -> 0;
+        };
     }
 
     /**
      * X offset
      */
-    public int getOffsetX()
-    {
+    public int getOffsetX() {
         return 0;
     }
 
     /**
      * Y offset
      */
-    public int getOffsetY()
-    {
+    public int getOffsetY() {
         return 0;
     }
 
     /**
      * Z offset
      */
-    public int getOffsetZ()
-    {
+    public int getOffsetZ() {
         return 0;
     }
 
     /**
      * T offset
      */
-    public int getOffsetT()
-    {
+    public int getOffsetT() {
         return 0;
     }
 
     /**
      * C offset
      */
-    public int getOffsetC()
-    {
+    public int getOffsetC() {
         return 0;
     }
 
     /**
      * Returns the 5D offset.
      */
-    public Point5D.Integer getOffset5D()
-    {
+    public Point5D.Integer getOffset5D() {
         return new Point5D.Integer(getOffsetX(), getOffsetY(), getOffsetZ(), getOffsetT(), getOffsetC());
     }
 
     /**
      * X image offset
-     * 
+     *
      * @deprecated use getOffsetX() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageOffsetX()
-    {
+    public int getImageOffsetX() {
         return 0;
     }
 
     /**
      * Y image offset
-     * 
+     *
      * @deprecated use getOffsetY() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageOffsetY()
-    {
+    public int getImageOffsetY() {
         return 0;
     }
 
     /**
      * Z image offset
-     * 
+     *
      * @deprecated use getOffsetZ() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageOffsetZ()
-    {
+    public int getImageOffsetZ() {
         return 0;
     }
 
     /**
      * T image offset
-     * 
+     *
      * @deprecated use getOffsetT() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageOffsetT()
-    {
+    public int getImageOffsetT() {
         return 0;
     }
 
     /**
      * C image offset
-     * 
+     *
      * @deprecated use getOffsetC() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageOffsetC()
-    {
+    public int getImageOffsetC() {
         return 0;
     }
 
     /**
      * X canvas offset
-     * 
+     *
      * @deprecated use getOffsetX() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getCanvasOffsetX()
-    {
+    public int getCanvasOffsetX() {
         return 0;
     }
 
     /**
      * Y canvas offset
-     * 
+     *
      * @deprecated use getOffsetY() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getCanvasOffsetY()
-    {
+    public int getCanvasOffsetY() {
         return 0;
     }
 
     /**
      * Z canvas offset
-     * 
+     *
      * @deprecated use getOffsetZ() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getCanvasOffsetZ()
-    {
+    public int getCanvasOffsetZ() {
         return 0;
     }
 
     /**
      * T canvas offset
-     * 
+     *
      * @deprecated use getOffsetT() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getCanvasOffsetT()
-    {
+    public int getCanvasOffsetT() {
         return 0;
     }
 
     /**
      * C canvas offset
-     * 
+     *
      * @deprecated use getOffsetC() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getCanvasOffsetC()
-    {
+    public int getCanvasOffsetC() {
         return 0;
     }
 
     /**
      * X scale factor
-     * 
+     *
      * @deprecated use getScaleX() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getScaleFactorX()
-    {
+    public double getScaleFactorX() {
         return getScaleX();
     }
 
     /**
      * Y scale factor
-     * 
+     *
      * @deprecated use getScaleY() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getScaleFactorY()
-    {
+    public double getScaleFactorY() {
         return getScaleY();
     }
 
     /**
      * Z scale factor
-     * 
+     *
      * @deprecated use getScaleZ() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getScaleFactorZ()
-    {
+    public double getScaleFactorZ() {
         return getScaleZ();
     }
 
     /**
      * T scale factor
-     * 
+     *
      * @deprecated use getScaleT() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getScaleFactorT()
-    {
+    public double getScaleFactorT() {
         return getScaleT();
     }
 
     /**
      * C scale factor
-     * 
+     *
      * @deprecated use getScaleC() instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double getScaleFactorC()
-    {
+    public double getScaleFactorC() {
         return getScaleC();
     }
 
     /**
      * Get scale factor for specified Dimension
      */
-    public double getScale(DimensionId dim)
-    {
-        switch (dim)
-        {
-            case X:
-                return getScaleX();
-            case Y:
-                return getScaleY();
-            case Z:
-                return getScaleZ();
-            case T:
-                return getScaleT();
-            case C:
-                return getScaleC();
-        }
-
-        return 1d;
+    public double getScale(final DimensionId dim) {
+        return switch (dim) {
+            case X -> getScaleX();
+            case Y -> getScaleY();
+            case Z -> getScaleZ();
+            case T -> getScaleT();
+            case C -> getScaleC();
+            default -> 1d;
+        };
     }
 
     /**
      * X scale factor
      */
-    public double getScaleX()
-    {
+    public double getScaleX() {
         return 1d;
     }
 
     /**
      * Y scale factor
      */
-    public double getScaleY()
-    {
+    public double getScaleY() {
         return 1d;
     }
 
     /**
      * Z scale factor
      */
-    public double getScaleZ()
-    {
+    public double getScaleZ() {
         return 1d;
     }
 
     /**
      * T scale factor
      */
-    public double getScaleT()
-    {
+    public double getScaleT() {
         return 1d;
     }
 
     /**
      * C scale factor
      */
-    public double getScaleC()
-    {
+    public double getScaleC() {
         return 1d;
     }
 
     /**
      * Get rotation angle (radian) for specified Dimension
      */
-    public double getRotation(DimensionId dim)
-    {
-        switch (dim)
-        {
-            case X:
-                return getRotationX();
-            case Y:
-                return getRotationY();
-            case Z:
-                return getRotationZ();
-            case T:
-                return getRotationT();
-            case C:
-                return getRotationC();
-        }
-
-        return 1d;
+    public double getRotation(final DimensionId dim) {
+        return switch (dim) {
+            case X -> getRotationX();
+            case Y -> getRotationY();
+            case Z -> getRotationZ();
+            case T -> getRotationT();
+            case C -> getRotationC();
+            default -> 1d;
+        };
     }
 
     /**
      * X rotation angle (radian)
      */
-    public double getRotationX()
-    {
+    public double getRotationX() {
         return 0d;
     }
 
     /**
      * Y rotation angle (radian)
      */
-    public double getRotationY()
-    {
+    public double getRotationY() {
         return 0d;
     }
 
     /**
      * Z rotation angle (radian)
      */
-    public double getRotationZ()
-    {
+    public double getRotationZ() {
         return 0d;
     }
 
     /**
      * T rotation angle (radian)
      */
-    public double getRotationT()
-    {
+    public double getRotationT() {
         return 0d;
     }
 
     /**
      * C rotation angle (radian)
      */
-    public double getRotationC()
-    {
+    public double getRotationC() {
         return 0d;
     }
 
     /**
      * Get image size for specified Dimension
      */
-    public int getImageSize(DimensionId dim)
-    {
-        switch (dim)
-        {
-            case X:
-                return getImageSizeX();
-            case Y:
-                return getImageSizeY();
-            case Z:
-                return getImageSizeZ();
-            case T:
-                return getImageSizeT();
-            case C:
-                return getImageSizeC();
-        }
-
-        return 0;
+    public int getImageSize(final DimensionId dim) {
+        return switch (dim) {
+            case X -> getImageSizeX();
+            case Y -> getImageSizeY();
+            case Z -> getImageSizeZ();
+            case T -> getImageSizeT();
+            case C -> getImageSizeC();
+            default -> 0;
+        };
     }
 
     /**
      * Get image size X
      */
-    public int getImageSizeX()
-    {
+    public int getImageSizeX() {
         final Sequence seq = getSequence();
 
         if (seq != null)
@@ -2140,8 +1850,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Get image size Y
      */
-    public int getImageSizeY()
-    {
+    public int getImageSizeY() {
         final Sequence seq = getSequence();
 
         if (seq != null)
@@ -2153,8 +1862,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Get image size Z
      */
-    public int getImageSizeZ()
-    {
+    public int getImageSizeZ() {
         final Sequence seq = getSequence();
 
         if (seq != null)
@@ -2166,8 +1874,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Get image size T
      */
-    public int getImageSizeT()
-    {
+    public int getImageSizeT() {
         final Sequence seq = getSequence();
 
         if (seq != null)
@@ -2179,8 +1886,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Get image size C
      */
-    public int getImageSizeC()
-    {
+    public int getImageSizeC() {
         final Sequence seq = getSequence();
 
         if (seq != null)
@@ -2191,97 +1897,82 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Get image size in canvas pixel coordinate for specified Dimension
-     * 
+     *
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageCanvasSize(DimensionId dim)
-    {
-        switch (dim)
-        {
-            case X:
-                return getImageCanvasSizeX();
-            case Y:
-                return getImageCanvasSizeY();
-            case Z:
-                return getImageCanvasSizeZ();
-            case T:
-                return getImageCanvasSizeT();
-            case C:
-                return getImageCanvasSizeC();
-        }
-
-        return 0;
+    public int getImageCanvasSize(final DimensionId dim) {
+        return switch (dim) {
+            case X -> getImageCanvasSizeX();
+            case Y -> getImageCanvasSizeY();
+            case Z -> getImageCanvasSizeZ();
+            case T -> getImageCanvasSizeT();
+            case C -> getImageCanvasSizeC();
+            default -> 0;
+        };
     }
 
     /**
      * Get image size X in canvas pixel coordinate
-     * 
+     *
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageCanvasSizeX()
-    {
+    public int getImageCanvasSizeX() {
         return imageToCanvasDeltaX(getImageSizeX());
     }
 
     /**
      * Get image size Y in canvas pixel coordinate
-     * 
+     *
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageCanvasSizeY()
-    {
+    public int getImageCanvasSizeY() {
         return imageToCanvasDeltaY(getImageSizeY());
     }
 
     /**
      * Get image size Z in canvas pixel coordinate
-     * 
+     *
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageCanvasSizeZ()
-    {
+    public int getImageCanvasSizeZ() {
         return imageToCanvasDeltaZ(getImageSizeZ());
     }
 
     /**
      * Get image size T in canvas pixel coordinate
-     * 
+     *
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageCanvasSizeT()
-    {
+    public int getImageCanvasSizeT() {
         return imageToCanvasDeltaT(getImageSizeT());
     }
 
     /**
      * Get image size C in canvas pixel coordinate
-     * 
+     *
      * @deprecated doesn't take rotation transformation in account.<br>
      *             Use IcyCanvasXD.getImageCanvasSize(..) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int getImageCanvasSizeC()
-    {
+    public int getImageCanvasSizeC() {
         return imageToCanvasDeltaC(getImageSizeC());
     }
 
     /**
      * Set position for specified dimension
      */
-    public void setPosition(DimensionId dim, int value)
-    {
-        switch (dim)
-        {
+    public void setPosition(final DimensionId dim, final int value) {
+        switch (dim) {
             case X:
                 setPositionX(value);
                 break;
@@ -2302,42 +1993,38 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Set Z position
-     * 
+     *
      * @deprecated uses setPositionZ(int) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setZ(int z)
-    {
+    public void setZ(final int z) {
         setPositionZ(z);
     }
 
     /**
      * Set T position
-     * 
+     *
      * @deprecated uses setPositionT(int) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setT(int t)
-    {
+    public void setT(final int t) {
         setPositionT(t);
     }
 
     /**
      * Set C position
-     * 
+     *
      * @deprecated uses setPositionC(int) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setC(int c)
-    {
+    public void setC(final int c) {
         setPositionC(c);
     }
 
     /**
      * Set X position
      */
-    public void setPositionX(int x)
-    {
+    public void setPositionX(final int x) {
         final int adjX = Math.max(-1, Math.min(x, getMaxPositionX()));
 
         if (getPositionX() != adjX)
@@ -2347,8 +2034,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set Y position
      */
-    public void setPositionY(int y)
-    {
+    public void setPositionY(final int y) {
         final int adjY = Math.max(-1, Math.min(y, getMaxPositionY()));
 
         if (getPositionY() != adjY)
@@ -2358,8 +2044,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set Z position
      */
-    public void setPositionZ(int z)
-    {
+    public void setPositionZ(final int z) {
         final int adjZ = Math.max(-1, Math.min(z, getMaxPositionZ()));
 
         if (getPositionZ() != adjZ)
@@ -2369,8 +2054,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set T position
      */
-    public void setPositionT(int t)
-    {
+    public void setPositionT(final int t) {
         final int adjT = Math.max(-1, Math.min(t, getMaxPositionT()));
 
         if (getPositionT() != adjT)
@@ -2380,8 +2064,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set C position
      */
-    public void setPositionC(int c)
-    {
+    public void setPositionC(final int c) {
         final int adjC = Math.max(-1, Math.min(c, getMaxPositionC()));
 
         if (getPositionC() != adjC)
@@ -2391,8 +2074,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set X position internal
      */
-    protected void setPositionXInternal(int x)
-    {
+    protected void setPositionXInternal(final int x) {
         posX = x;
         // common process on position change
         positionChanged(DimensionId.X);
@@ -2401,8 +2083,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set Y position internal
      */
-    protected void setPositionYInternal(int y)
-    {
+    protected void setPositionYInternal(final int y) {
         posY = y;
         // common process on position change
         positionChanged(DimensionId.Y);
@@ -2411,8 +2092,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set Z position internal
      */
-    protected void setPositionZInternal(int z)
-    {
+    protected void setPositionZInternal(final int z) {
         posZ = z;
         // common process on position change
         positionChanged(DimensionId.Z);
@@ -2421,8 +2101,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set T position internal
      */
-    protected void setPositionTInternal(int t)
-    {
+    protected void setPositionTInternal(final int t) {
         posT = t;
         // common process on position change
         positionChanged(DimensionId.T);
@@ -2431,8 +2110,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set C position internal
      */
-    protected void setPositionCInternal(int c)
-    {
+    protected void setPositionCInternal(final int c) {
         posC = c;
         // common process on position change
         positionChanged(DimensionId.C);
@@ -2442,10 +2120,8 @@ public abstract class IcyCanvas extends JPanel
      * Set mouse position (in canvas coordinate space).<br>
      * The method returns <code>true</code> if the mouse position actually changed.
      */
-    public boolean setMousePos(int x, int y)
-    {
-        if ((mousePos.x != x) || (mousePos.y != y))
-        {
+    public boolean setMousePos(final int x, final int y) {
+        if ((mousePos.x != x) || (mousePos.y != y)) {
             mousePos.x = x;
             mousePos.y = y;
 
@@ -2461,18 +2137,15 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set mouse position (in canvas coordinate space)
      */
-    public void setMousePos(Point point)
-    {
+    public void setMousePos(final Point point) {
         setMousePos(point.x, point.y);
     }
 
     /**
      * Set mouse image position for specified dimension (required for synchronization)
      */
-    public void setMouseImagePos(DimensionId dim, double value)
-    {
-        switch (dim)
-        {
+    public void setMouseImagePos(final DimensionId dim, final double value) {
+        switch (dim) {
             case X:
                 setMouseImagePosX(value);
                 break;
@@ -2494,8 +2167,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set mouse X image position
      */
-    public void setMouseImagePosX(double value)
-    {
+    public void setMouseImagePosX(final double value) {
         if (getMouseImagePosX() != value)
             // internal set
             setMouseImagePosXInternal(value);
@@ -2504,8 +2176,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set mouse Y image position
      */
-    public void setMouseImagePosY(double value)
-    {
+    public void setMouseImagePosY(final double value) {
         if (getMouseImagePosY() != value)
             // internal set
             setMouseImagePosYInternal(value);
@@ -2514,8 +2185,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set mouse Z image position
      */
-    public void setMouseImagePosZ(double value)
-    {
+    public void setMouseImagePosZ(final double value) {
         if (getMouseImagePosZ() != value)
             // internal set
             setMouseImagePosZInternal(value);
@@ -2524,8 +2194,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set mouse T image position
      */
-    public void setMouseImagePosT(double value)
-    {
+    public void setMouseImagePosT(final double value) {
         if (getMouseImagePosT() != value)
             // internal set
             setMouseImagePosTInternal(value);
@@ -2534,8 +2203,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set mouse C image position
      */
-    public void setMouseImagePosC(double value)
-    {
+    public void setMouseImagePosC(final double value) {
         if (getMouseImagePosC() != value)
             // internal set
             setMouseImagePosCInternal(value);
@@ -2544,8 +2212,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset X internal
      */
-    protected void setMouseImagePosXInternal(double value)
-    {
+    protected void setMouseImagePosXInternal(final double value) {
         // notify change
         mouseImagePositionChanged(DimensionId.X);
     }
@@ -2553,8 +2220,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset Y internal
      */
-    protected void setMouseImagePosYInternal(double value)
-    {
+    protected void setMouseImagePosYInternal(final double value) {
         // notify change
         mouseImagePositionChanged(DimensionId.Y);
     }
@@ -2562,8 +2228,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset Z internal
      */
-    protected void setMouseImagePosZInternal(double value)
-    {
+    protected void setMouseImagePosZInternal(final double value) {
         // notify change
         mouseImagePositionChanged(DimensionId.Z);
     }
@@ -2571,8 +2236,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset T internal
      */
-    protected void setMouseImagePosTInternal(double value)
-    {
+    protected void setMouseImagePosTInternal(final double value) {
         // notify change
         mouseImagePositionChanged(DimensionId.T);
     }
@@ -2580,8 +2244,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset C internal
      */
-    protected void setMouseImagePosCInternal(double value)
-    {
+    protected void setMouseImagePosCInternal(final double value) {
         // notify change
         mouseImagePositionChanged(DimensionId.C);
     }
@@ -2589,10 +2252,8 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset for specified dimension
      */
-    public void setOffset(DimensionId dim, int value)
-    {
-        switch (dim)
-        {
+    public void setOffset(final DimensionId dim, final int value) {
+        switch (dim) {
             case X:
                 setOffsetX(value);
                 break;
@@ -2614,8 +2275,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset X
      */
-    public void setOffsetX(int value)
-    {
+    public void setOffsetX(final int value) {
         if (getOffsetX() != value)
             // internal set
             setOffsetXInternal(value);
@@ -2624,8 +2284,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset Y
      */
-    public void setOffsetY(int value)
-    {
+    public void setOffsetY(final int value) {
         if (getOffsetY() != value)
             // internal set
             setOffsetYInternal(value);
@@ -2634,8 +2293,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset Z
      */
-    public void setOffsetZ(int value)
-    {
+    public void setOffsetZ(final int value) {
         if (getOffsetZ() != value)
             // internal set
             setOffsetZInternal(value);
@@ -2644,8 +2302,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset T
      */
-    public void setOffsetT(int value)
-    {
+    public void setOffsetT(final int value) {
         if (getOffsetT() != value)
             // internal set
             setOffsetTInternal(value);
@@ -2654,8 +2311,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset C
      */
-    public void setOffsetC(int value)
-    {
+    public void setOffsetC(final int value) {
         if (getOffsetC() != value)
             // internal set
             setOffsetCInternal(value);
@@ -2664,8 +2320,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset X internal
      */
-    protected void setOffsetXInternal(int value)
-    {
+    protected void setOffsetXInternal(final int value) {
         // notify change
         offsetChanged(DimensionId.X);
     }
@@ -2673,8 +2328,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset Y internal
      */
-    protected void setOffsetYInternal(int value)
-    {
+    protected void setOffsetYInternal(final int value) {
         // notify change
         offsetChanged(DimensionId.Y);
     }
@@ -2682,8 +2336,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset Z internal
      */
-    protected void setOffsetZInternal(int value)
-    {
+    protected void setOffsetZInternal(final int value) {
         // notify change
         offsetChanged(DimensionId.Z);
     }
@@ -2691,8 +2344,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset T internal
      */
-    protected void setOffsetTInternal(int value)
-    {
+    protected void setOffsetTInternal(final int value) {
         // notify change
         offsetChanged(DimensionId.T);
     }
@@ -2700,8 +2352,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set offset C internal
      */
-    protected void setOffsetCInternal(int value)
-    {
+    protected void setOffsetCInternal(final int value) {
         // notify change
         offsetChanged(DimensionId.C);
     }
@@ -2709,10 +2360,8 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor for specified dimension
      */
-    public void setScale(DimensionId dim, double value)
-    {
-        switch (dim)
-        {
+    public void setScale(final DimensionId dim, final double value) {
+        switch (dim) {
             case X:
                 setScaleX(value);
                 break;
@@ -2734,8 +2383,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor X
      */
-    public void setScaleX(double value)
-    {
+    public void setScaleX(final double value) {
         if (getScaleX() != value)
             // internal set
             setScaleXInternal(value);
@@ -2744,8 +2392,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor Y
      */
-    public void setScaleY(double value)
-    {
+    public void setScaleY(final double value) {
         if (getScaleY() != value)
             // internal set
             setScaleYInternal(value);
@@ -2754,8 +2401,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor Z
      */
-    public void setScaleZ(double value)
-    {
+    public void setScaleZ(final double value) {
         if (getScaleZ() != value)
             // internal set
             setScaleZInternal(value);
@@ -2764,8 +2410,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor T
      */
-    public void setScaleT(double value)
-    {
+    public void setScaleT(final double value) {
         if (getScaleT() != value)
             // internal set
             setScaleTInternal(value);
@@ -2774,8 +2419,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor C
      */
-    public void setScaleC(double value)
-    {
+    public void setScaleC(final double value) {
         if (getScaleC() != value)
             // internal set
             setScaleCInternal(value);
@@ -2784,8 +2428,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor X internal
      */
-    protected void setScaleXInternal(double value)
-    {
+    protected void setScaleXInternal(final double value) {
         // notify change
         scaleChanged(DimensionId.X);
     }
@@ -2793,8 +2436,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor Y internal
      */
-    protected void setScaleYInternal(double value)
-    {
+    protected void setScaleYInternal(final double value) {
         // notify change
         scaleChanged(DimensionId.Y);
     }
@@ -2802,8 +2444,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor Z internal
      */
-    protected void setScaleZInternal(double value)
-    {
+    protected void setScaleZInternal(final double value) {
         // notify change
         scaleChanged(DimensionId.Z);
     }
@@ -2811,8 +2452,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor T internal
      */
-    protected void setScaleTInternal(double value)
-    {
+    protected void setScaleTInternal(final double value) {
         // notify change
         scaleChanged(DimensionId.T);
     }
@@ -2820,8 +2460,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set scale factor C internal
      */
-    protected void setScaleCInternal(double value)
-    {
+    protected void setScaleCInternal(final double value) {
         // notify change
         scaleChanged(DimensionId.C);
     }
@@ -2829,10 +2468,8 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set rotation angle (radian) for specified dimension
      */
-    public void setRotation(DimensionId dim, double value)
-    {
-        switch (dim)
-        {
+    public void setRotation(final DimensionId dim, final double value) {
+        switch (dim) {
             case X:
                 setRotationX(value);
                 break;
@@ -2854,8 +2491,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set X rotation angle (radian)
      */
-    public void setRotationX(double value)
-    {
+    public void setRotationX(final double value) {
         if (getRotationX() != value)
             // internal set
             setRotationXInternal(value);
@@ -2864,8 +2500,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set Y rotation angle (radian)
      */
-    public void setRotationY(double value)
-    {
+    public void setRotationY(final double value) {
         if (getRotationY() != value)
             // internal set
             setRotationYInternal(value);
@@ -2874,8 +2509,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set Z rotation angle (radian)
      */
-    public void setRotationZ(double value)
-    {
+    public void setRotationZ(final double value) {
         if (getRotationZ() != value)
             // internal set
             setRotationZInternal(value);
@@ -2884,8 +2518,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set T rotation angle (radian)
      */
-    public void setRotationT(double value)
-    {
+    public void setRotationT(final double value) {
         if (getRotationT() != value)
             // internal set
             setRotationTInternal(value);
@@ -2894,8 +2527,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set C rotation angle (radian)
      */
-    public void setRotationC(double value)
-    {
+    public void setRotationC(final double value) {
         if (getRotationC() != value)
             // internal set
             setRotationCInternal(value);
@@ -2904,8 +2536,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set X rotation angle internal
      */
-    protected void setRotationXInternal(double value)
-    {
+    protected void setRotationXInternal(final double value) {
         // notify change
         rotationChanged(DimensionId.X);
     }
@@ -2913,8 +2544,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set Y rotation angle internal
      */
-    protected void setRotationYInternal(double value)
-    {
+    protected void setRotationYInternal(final double value) {
         // notify change
         rotationChanged(DimensionId.Y);
     }
@@ -2922,8 +2552,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set Z rotation angle internal
      */
-    protected void setRotationZInternal(double value)
-    {
+    protected void setRotationZInternal(final double value) {
         // notify change
         rotationChanged(DimensionId.Z);
     }
@@ -2931,8 +2560,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set T rotation angle internal
      */
-    protected void setRotationTInternal(double value)
-    {
+    protected void setRotationTInternal(final double value) {
         // notify change
         rotationChanged(DimensionId.T);
     }
@@ -2940,8 +2568,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Set C rotation angle internal
      */
-    protected void setRotationCInternal(double value)
-    {
+    protected void setRotationCInternal(final double value) {
         // notify change
         rotationChanged(DimensionId.C);
     }
@@ -2949,8 +2576,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Called when mouse image position changed
      */
-    public void mouseImagePositionChanged(DimensionId dim)
-    {
+    public void mouseImagePositionChanged(final DimensionId dim) {
         // handle with updater
         updater.changed(new IcyCanvasEvent(this, IcyCanvasEventType.MOUSE_IMAGE_POSITION_CHANGED, dim));
     }
@@ -2958,8 +2584,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Called when canvas offset changed
      */
-    public void offsetChanged(DimensionId dim)
-    {
+    public void offsetChanged(final DimensionId dim) {
         // handle with updater
         updater.changed(new IcyCanvasEvent(this, IcyCanvasEventType.OFFSET_CHANGED, dim));
     }
@@ -2967,8 +2592,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Called when scale factor changed
      */
-    public void scaleChanged(DimensionId dim)
-    {
+    public void scaleChanged(final DimensionId dim) {
         // handle with updater
         updater.changed(new IcyCanvasEvent(this, IcyCanvasEventType.SCALE_CHANGED, dim));
     }
@@ -2976,8 +2600,7 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Called when rotation angle changed
      */
-    public void rotationChanged(DimensionId dim)
-    {
+    public void rotationChanged(final DimensionId dim) {
         // handle with updater
         updater.changed(new IcyCanvasEvent(this, IcyCanvasEventType.ROTATION_CHANGED, dim));
     }
@@ -2987,8 +2610,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageDeltaX(int value)
-    {
+    public double canvasToImageDeltaX(final int value) {
         return value / getScaleX();
     }
 
@@ -2997,8 +2619,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageDeltaY(int value)
-    {
+    public double canvasToImageDeltaY(final int value) {
         return value / getScaleY();
     }
 
@@ -3007,8 +2628,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageDeltaZ(int value)
-    {
+    public double canvasToImageDeltaZ(final int value) {
         return value / getScaleZ();
     }
 
@@ -3017,8 +2637,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageDeltaT(int value)
-    {
+    public double canvasToImageDeltaT(final int value) {
         return value / getScaleT();
     }
 
@@ -3027,8 +2646,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageDeltaC(int value)
-    {
+    public double canvasToImageDeltaC(final int value) {
         return value / getScaleC();
     }
 
@@ -3038,8 +2656,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageLogDeltaX(int value, double logFactor)
-    {
+    public double canvasToImageLogDeltaX(final int value, final double logFactor) {
         final double scaleFactor = getScaleX();
         // keep the zoom ratio but in a log perspective
         return value / (scaleFactor / Math.pow(10, Math.log10(scaleFactor) / logFactor));
@@ -3051,8 +2668,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageLogDeltaX(int value)
-    {
+    public double canvasToImageLogDeltaX(final int value) {
         return canvasToImageLogDeltaX(value, 5d);
     }
 
@@ -3062,8 +2678,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageLogDeltaY(int value, double logFactor)
-    {
+    public double canvasToImageLogDeltaY(final int value, final double logFactor) {
         final double scaleFactor = getScaleY();
         // keep the zoom ratio but in a log perspective
         return value / (scaleFactor / Math.pow(10, Math.log10(scaleFactor) / logFactor));
@@ -3075,8 +2690,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageLogDeltaY(int value)
-    {
+    public double canvasToImageLogDeltaY(final int value) {
         return canvasToImageLogDeltaY(value, 5d);
     }
 
@@ -3086,8 +2700,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageLogDeltaZ(int value, double logFactor)
-    {
+    public double canvasToImageLogDeltaZ(final int value, final double logFactor) {
         final double scaleFactor = getScaleZ();
         // keep the zoom ratio but in a log perspective
         return value / (scaleFactor / Math.pow(10, Math.log10(scaleFactor) / logFactor));
@@ -3099,68 +2712,62 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
      */
-    public double canvasToImageLogDeltaZ(int value)
-    {
+    public double canvasToImageLogDeltaZ(final int value) {
         return canvasToImageLogDeltaZ(value, 5d);
     }
 
     /**
      * Convert specified canvas X coordinate to image X coordinate
-     * 
+     *
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.canvasToImage(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double canvasToImageX(int value)
-    {
+    public double canvasToImageX(final int value) {
         return canvasToImageDeltaX(value - getOffsetX());
     }
 
     /**
      * Convert specified canvas Y coordinate to image Y coordinate
-     * 
+     *
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.canvasToImage(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double canvasToImageY(int value)
-    {
+    public double canvasToImageY(final int value) {
         return canvasToImageDeltaY(value - getOffsetY());
     }
 
     /**
      * Convert specified canvas Z coordinate to image Z coordinate
-     * 
+     *
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.canvasToImage(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double canvasToImageZ(int value)
-    {
+    public double canvasToImageZ(final int value) {
         return canvasToImageDeltaZ(value - getOffsetZ());
     }
 
     /**
      * Convert specified canvas T coordinate to image T coordinate
-     * 
+     *
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.canvasToImage(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double canvasToImageT(int value)
-    {
+    public double canvasToImageT(final int value) {
         return canvasToImageDeltaT(value - getOffsetT());
     }
 
     /**
      * Convert specified canvas C coordinate to image C coordinate
-     * 
+     *
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.canvasToImage(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public double canvasToImageC(int value)
-    {
+    public double canvasToImageC(final int value) {
         return canvasToImageDeltaC(value - getOffsetC());
     }
 
@@ -3169,8 +2776,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.imageToCanvasDelta(...) method instead for rotation transformed delta.
      */
-    public int imageToCanvasDeltaX(double value)
-    {
+    public int imageToCanvasDeltaX(final double value) {
         return (int) (value * getScaleX());
     }
 
@@ -3179,8 +2785,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.imageToCanvasDelta(...) method instead for rotation transformed delta.
      */
-    public int imageToCanvasDeltaY(double value)
-    {
+    public int imageToCanvasDeltaY(final double value) {
         return (int) (value * getScaleY());
     }
 
@@ -3189,8 +2794,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.imageToCanvasDelta(...) method instead for rotation transformed delta.
      */
-    public int imageToCanvasDeltaZ(double value)
-    {
+    public int imageToCanvasDeltaZ(final double value) {
         return (int) (value * getScaleZ());
     }
 
@@ -3199,8 +2803,7 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.imageToCanvasDelta(...) method instead for rotation transformed delta.
      */
-    public int imageToCanvasDeltaT(double value)
-    {
+    public int imageToCanvasDeltaT(final double value) {
         return (int) (value * getScaleT());
     }
 
@@ -3209,86 +2812,78 @@ public abstract class IcyCanvas extends JPanel
      * WARNING: Does not take in account the rotation transformation.<br>
      * Use the IcyCanvasXD.imageToCanvasDelta(...) method instead for rotation transformed delta.
      */
-    public int imageToCanvasDeltaC(double value)
-    {
+    public int imageToCanvasDeltaC(final double value) {
         return (int) (value * getScaleC());
     }
 
     /**
      * Convert specified image X coordinate to canvas X coordinate
-     * 
+     *
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.imageToCanvas(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int imageToCanvasX(double value)
-    {
+    public int imageToCanvasX(final double value) {
         return imageToCanvasDeltaX(value) + getOffsetX();
     }
 
     /**
      * Convert specified image Y coordinate to canvas Y coordinate
-     * 
+     *
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.imageToCanvas(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int imageToCanvasY(double value)
-    {
+    public int imageToCanvasY(final double value) {
         return imageToCanvasDeltaY(value) + getOffsetY();
     }
 
     /**
      * Convert specified image Z coordinate to canvas Z coordinate
-     * 
+     *
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.imageToCanvas(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int imageToCanvasZ(double value)
-    {
+    public int imageToCanvasZ(final double value) {
         return imageToCanvasDeltaZ(value) + getOffsetZ();
     }
 
     /**
      * Convert specified image T coordinate to canvas T coordinate
-     * 
+     *
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.imageToCanvas(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int imageToCanvasT(double value)
-    {
+    public int imageToCanvasT(final double value) {
         return imageToCanvasDeltaT(value) + getOffsetT();
     }
 
     /**
      * Convert specified image C coordinate to canvas C coordinate
-     * 
+     *
      * @deprecated Cannot give correct result if rotation is applied so use
      *             IcyCanvasXD.imageToCanvas(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public int imageToCanvasC(double value)
-    {
+    public int imageToCanvasC(final double value) {
         return imageToCanvasDeltaC(value) + getOffsetC();
     }
 
     /**
      * Helper to forward mouse press event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      * @param pt
      *        mouse image position
      */
-    public void mousePressed(MouseEvent event, Point5D.Double pt)
-    {
+    public void mousePressed(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
 
         // send mouse event to overlays after so mouse canvas position is ok
-        for (Layer layer : getLayers(true))
-        {
+        for (final Layer layer : getLayers(true)) {
             if ((globalVisible && layer.isVisible()) || layer.getReceiveMouseEventOnHidden())
                 layer.getOverlay().mousePressed(event, pt, this);
         }
@@ -3296,30 +2891,27 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Helper to forward mouse press event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      */
-    public void mousePressed(MouseEvent event)
-    {
+    public void mousePressed(final MouseEvent event) {
         mousePressed(event, getMouseImagePos5D());
     }
 
     /**
      * Helper to forward mouse release event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      * @param pt
      *        mouse image position
      */
-    public void mouseReleased(MouseEvent event, Point5D.Double pt)
-    {
+    public void mouseReleased(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
 
         // send mouse event to overlays after so mouse canvas position is ok
-        for (Layer layer : getLayers(true))
-        {
+        for (final Layer layer : getLayers(true)) {
             if ((globalVisible && layer.isVisible()) || layer.getReceiveMouseEventOnHidden())
                 layer.getOverlay().mouseReleased(event, pt, this);
         }
@@ -3327,30 +2919,27 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Helper to forward mouse release event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      */
-    public void mouseReleased(MouseEvent event)
-    {
+    public void mouseReleased(final MouseEvent event) {
         mouseReleased(event, getMouseImagePos5D());
     }
 
     /**
      * Helper to forward mouse click event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      * @param pt
      *        mouse image position
      */
-    public void mouseClick(MouseEvent event, Point5D.Double pt)
-    {
+    public void mouseClick(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
 
         // send mouse event to overlays after so mouse canvas position is ok
-        for (Layer layer : getLayers(true))
-        {
+        for (final Layer layer : getLayers(true)) {
             if ((globalVisible && layer.isVisible()) || layer.getReceiveMouseEventOnHidden())
                 layer.getOverlay().mouseClick(event, pt, this);
         }
@@ -3358,30 +2947,27 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Helper to forward mouse click event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      */
-    public void mouseClick(MouseEvent event)
-    {
+    public void mouseClick(final MouseEvent event) {
         mouseClick(event, getMouseImagePos5D());
     }
 
     /**
      * Helper to forward mouse move event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      * @param pt
      *        mouse image position
      */
-    public void mouseMove(MouseEvent event, Point5D.Double pt)
-    {
+    public void mouseMove(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
 
         // send mouse event to overlays after so mouse canvas position is ok
-        for (Layer layer : getLayers(true))
-        {
+        for (final Layer layer : getLayers(true)) {
             if ((globalVisible && layer.isVisible()) || layer.getReceiveMouseEventOnHidden())
                 layer.getOverlay().mouseMove(event, pt, this);
         }
@@ -3389,30 +2975,27 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Helper to forward mouse mouse event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      */
-    public void mouseMove(MouseEvent event)
-    {
+    public void mouseMove(final MouseEvent event) {
         mouseMove(event, getMouseImagePos5D());
     }
 
     /**
      * Helper to forward mouse drag event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      * @param pt
      *        mouse image position
      */
-    public void mouseDrag(MouseEvent event, Point5D.Double pt)
-    {
+    public void mouseDrag(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
 
         // send mouse event to overlays after so mouse canvas position is ok
-        for (Layer layer : getLayers(true))
-        {
+        for (final Layer layer : getLayers(true)) {
             if ((globalVisible && layer.isVisible()) || layer.getReceiveMouseEventOnHidden())
                 layer.getOverlay().mouseDrag(event, pt, this);
         }
@@ -3420,30 +3003,27 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Helper to forward mouse drag event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      */
-    public void mouseDrag(MouseEvent event)
-    {
+    public void mouseDrag(final MouseEvent event) {
         mouseDrag(event, getMouseImagePos5D());
     }
 
     /**
      * Helper to forward mouse enter event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      * @param pt
      *        mouse image position
      */
-    public void mouseEntered(MouseEvent event, Point5D.Double pt)
-    {
+    public void mouseEntered(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
 
         // send mouse event to overlays after so mouse canvas position is ok
-        for (Layer layer : getLayers(true))
-        {
+        for (final Layer layer : getLayers(true)) {
             if ((globalVisible && layer.isVisible()) || layer.getReceiveMouseEventOnHidden())
                 layer.getOverlay().mouseEntered(event, pt, this);
         }
@@ -3451,30 +3031,27 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Helper to forward mouse entered event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      */
-    public void mouseEntered(MouseEvent event)
-    {
+    public void mouseEntered(final MouseEvent event) {
         mouseEntered(event, getMouseImagePos5D());
     }
 
     /**
      * Helper to forward mouse exit event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      * @param pt
      *        mouse image position
      */
-    public void mouseExited(MouseEvent event, Point5D.Double pt)
-    {
+    public void mouseExited(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
 
         // send mouse event to overlays after so mouse canvas position is ok
-        for (Layer layer : getLayers(true))
-        {
+        for (final Layer layer : getLayers(true)) {
             if ((globalVisible && layer.isVisible()) || layer.getReceiveMouseEventOnHidden())
                 layer.getOverlay().mouseExited(event, pt, this);
         }
@@ -3482,30 +3059,27 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Helper to forward mouse exited event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      */
-    public void mouseExited(MouseEvent event)
-    {
+    public void mouseExited(final MouseEvent event) {
         mouseExited(event, getMouseImagePos5D());
     }
 
     /**
      * Helper to forward mouse wheel event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      * @param pt
      *        mouse image position
      */
-    public void mouseWheelMoved(MouseWheelEvent event, Point5D.Double pt)
-    {
+    public void mouseWheelMoved(final MouseWheelEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
 
         // send mouse event to overlays after so mouse canvas position is ok
-        for (Layer layer : getLayers(true))
-        {
+        for (final Layer layer : getLayers(true)) {
             if ((globalVisible && layer.isVisible()) || layer.getReceiveMouseEventOnHidden())
                 layer.getOverlay().mouseWheelMoved(event, pt, this);
         }
@@ -3513,45 +3087,36 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Helper to forward mouse wheel event to the overlays.
-     * 
+     *
      * @param event
      *        original mouse event
      */
-    public void mouseWheelMoved(MouseWheelEvent event)
-    {
+    public void mouseWheelMoved(final MouseWheelEvent event) {
         mouseWheelMoved(event, getMouseImagePos5D());
     }
 
     @Override
-    public void keyPressed(KeyEvent e)
-    {
+    public void keyPressed(final KeyEvent e) {
         final boolean globalVisible = isLayersVisible();
         final Point5D.Double pt = getMouseImagePos5D();
 
         // forward event to overlays
-        for (Layer layer : getLayers(true))
-        {
+        for (final Layer layer : getLayers(true)) {
             if ((globalVisible && layer.isVisible()) || layer.getReceiveKeyEventOnHidden())
                 layer.getOverlay().keyPressed(e, pt, this);
         }
 
-        if (!e.isConsumed())
-        {
-            switch (e.getKeyCode())
-            {
+        if (!e.isConsumed()) {
+            switch (e.getKeyCode()) {
                 case KeyEvent.VK_0:
-                    if (EventUtil.isShiftDown(e, true))
-                    {
-                        if (CanvasActions.globalDisableSyncAction.isEnabled())
-                        {
+                    if (EventUtil.isShiftDown(e, true)) {
+                        if (CanvasActions.globalDisableSyncAction.isEnabled()) {
                             CanvasActions.globalDisableSyncAction.execute();
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isNoModifier(e))
-                    {
-                        if (CanvasActions.disableSyncAction.isEnabled())
-                        {
+                    else if (EventUtil.isNoModifier(e)) {
+                        if (CanvasActions.disableSyncAction.isEnabled()) {
                             CanvasActions.disableSyncAction.execute();
                             e.consume();
                         }
@@ -3559,18 +3124,14 @@ public abstract class IcyCanvas extends JPanel
                     break;
 
                 case KeyEvent.VK_1:
-                    if (EventUtil.isShiftDown(e, true))
-                    {
-                        if (CanvasActions.globalSyncGroup1Action.isEnabled())
-                        {
+                    if (EventUtil.isShiftDown(e, true)) {
+                        if (CanvasActions.globalSyncGroup1Action.isEnabled()) {
                             CanvasActions.globalSyncGroup1Action.execute();
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isNoModifier(e))
-                    {
-                        if (CanvasActions.syncGroup1Action.isEnabled())
-                        {
+                    else if (EventUtil.isNoModifier(e)) {
+                        if (CanvasActions.syncGroup1Action.isEnabled()) {
                             CanvasActions.syncGroup1Action.execute();
                             e.consume();
                         }
@@ -3578,18 +3139,14 @@ public abstract class IcyCanvas extends JPanel
                     break;
 
                 case KeyEvent.VK_2:
-                    if (EventUtil.isShiftDown(e, true))
-                    {
-                        if (CanvasActions.globalSyncGroup2Action.isEnabled())
-                        {
+                    if (EventUtil.isShiftDown(e, true)) {
+                        if (CanvasActions.globalSyncGroup2Action.isEnabled()) {
                             CanvasActions.globalSyncGroup2Action.execute();
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isNoModifier(e))
-                    {
-                        if (CanvasActions.syncGroup2Action.isEnabled())
-                        {
+                    else if (EventUtil.isNoModifier(e)) {
+                        if (CanvasActions.syncGroup2Action.isEnabled()) {
                             CanvasActions.syncGroup2Action.execute();
                             e.consume();
                         }
@@ -3597,18 +3154,14 @@ public abstract class IcyCanvas extends JPanel
                     break;
 
                 case KeyEvent.VK_3:
-                    if (EventUtil.isShiftDown(e, true))
-                    {
-                        if (CanvasActions.globalSyncGroup3Action.isEnabled())
-                        {
+                    if (EventUtil.isShiftDown(e, true)) {
+                        if (CanvasActions.globalSyncGroup3Action.isEnabled()) {
                             CanvasActions.globalSyncGroup3Action.execute();
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isNoModifier(e))
-                    {
-                        if (CanvasActions.syncGroup3Action.isEnabled())
-                        {
+                    else if (EventUtil.isNoModifier(e)) {
+                        if (CanvasActions.syncGroup3Action.isEnabled()) {
                             CanvasActions.syncGroup3Action.execute();
                             e.consume();
                         }
@@ -3616,18 +3169,14 @@ public abstract class IcyCanvas extends JPanel
                     break;
 
                 case KeyEvent.VK_4:
-                    if (EventUtil.isShiftDown(e, true))
-                    {
-                        if (CanvasActions.globalSyncGroup4Action.isEnabled())
-                        {
+                    if (EventUtil.isShiftDown(e, true)) {
+                        if (CanvasActions.globalSyncGroup4Action.isEnabled()) {
                             CanvasActions.globalSyncGroup4Action.execute();
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isNoModifier(e))
-                    {
-                        if (CanvasActions.syncGroup4Action.isEnabled())
-                        {
+                    else if (EventUtil.isNoModifier(e)) {
+                        if (CanvasActions.syncGroup4Action.isEnabled()) {
                             CanvasActions.syncGroup4Action.execute();
                             e.consume();
                         }
@@ -3635,10 +3184,8 @@ public abstract class IcyCanvas extends JPanel
                     break;
 
                 case KeyEvent.VK_G:
-                    if (EventUtil.isShiftDown(e, true))
-                    {
-                        if (WindowActions.gridTileAction.isEnabled())
-                        {
+                    if (EventUtil.isShiftDown(e, true)) {
+                        if (WindowActions.gridTileAction.isEnabled()) {
                             WindowActions.gridTileAction.execute();
                             e.consume();
                         }
@@ -3646,10 +3193,8 @@ public abstract class IcyCanvas extends JPanel
                     break;
 
                 case KeyEvent.VK_H:
-                    if (EventUtil.isShiftDown(e, true))
-                    {
-                        if (WindowActions.horizontalTileAction.isEnabled())
-                        {
+                    if (EventUtil.isShiftDown(e, true)) {
+                        if (WindowActions.horizontalTileAction.isEnabled()) {
                             WindowActions.horizontalTileAction.execute();
                             e.consume();
                         }
@@ -3657,10 +3202,8 @@ public abstract class IcyCanvas extends JPanel
                     break;
 
                 case KeyEvent.VK_A:
-                    if (EventUtil.isMenuControlDown(e, true))
-                    {
-                        if (RoiActions.selectAllAction.isEnabled())
-                        {
+                    if (EventUtil.isMenuControlDown(e, true)) {
+                        if (RoiActions.selectAllAction.isEnabled()) {
                             RoiActions.selectAllAction.execute();
                             e.consume();
                         }
@@ -3668,31 +3211,24 @@ public abstract class IcyCanvas extends JPanel
                     break;
 
                 case KeyEvent.VK_V:
-                    if (EventUtil.isShiftDown(e, true))
-                    {
-                        if (WindowActions.verticalTileAction.isEnabled())
-                        {
+                    if (EventUtil.isShiftDown(e, true)) {
+                        if (WindowActions.verticalTileAction.isEnabled()) {
                             WindowActions.verticalTileAction.execute();
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isMenuControlDown(e, true))
-                    {
-                        if (GeneralActions.pasteImageAction.isEnabled())
-                        {
+                    else if (EventUtil.isMenuControlDown(e, true)) {
+                        if (GeneralActions.pasteImageAction.isEnabled()) {
                             GeneralActions.pasteImageAction.execute();
                             e.consume();
                         }
-                        else if (RoiActions.pasteAction.isEnabled())
-                        {
+                        else if (RoiActions.pasteAction.isEnabled()) {
                             RoiActions.pasteAction.execute();
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isAltDown(e, true))
-                    {
-                        if (RoiActions.pasteLinkAction.isEnabled())
-                        {
+                    else if (EventUtil.isAltDown(e, true)) {
+                        if (RoiActions.pasteLinkAction.isEnabled()) {
                             RoiActions.pasteLinkAction.execute();
                             e.consume();
                         }
@@ -3700,26 +3236,21 @@ public abstract class IcyCanvas extends JPanel
                     break;
 
                 case KeyEvent.VK_C:
-                    if (EventUtil.isMenuControlDown(e, true))
-                    {
+                    if (EventUtil.isMenuControlDown(e, true)) {
                         // do this one first else copyImage hide it
-                        if (RoiActions.copyAction.isEnabled())
-                        {
+                        if (RoiActions.copyAction.isEnabled()) {
                             // copy them to icy clipboard
                             RoiActions.copyAction.execute();
                             e.consume();
                         }
-                        else if (GeneralActions.copyImageAction.isEnabled())
-                        {
+                        else if (GeneralActions.copyImageAction.isEnabled()) {
                             // copy image to system clipboard
                             GeneralActions.copyImageAction.execute();
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isAltDown(e, true))
-                    {
-                        if (RoiActions.copyLinkAction.isEnabled())
-                        {
+                    else if (EventUtil.isAltDown(e, true)) {
+                        if (RoiActions.copyLinkAction.isEnabled()) {
                             // copy link of selected ROI to clipboard
                             RoiActions.copyLinkAction.execute();
                             e.consume();
@@ -3729,10 +3260,8 @@ public abstract class IcyCanvas extends JPanel
 
                 // global layer
                 case KeyEvent.VK_L:
-                    if (EventUtil.isShiftDown(e, true))
-                    {
-                        if (CanvasActions.globalToggleLayersAction.isEnabled())
-                        {
+                    if (EventUtil.isShiftDown(e, true)) {
+                        if (CanvasActions.globalToggleLayersAction.isEnabled()) {
                             CanvasActions.globalToggleLayersAction.execute();
                             e.consume();
                         }
@@ -3751,30 +3280,26 @@ public abstract class IcyCanvas extends JPanel
     }
 
     @Override
-    public void keyReleased(KeyEvent e)
-    {
+    public void keyReleased(final KeyEvent e) {
         final boolean globalVisible = isLayersVisible();
         final Point5D.Double pt = getMouseImagePos5D();
 
         // forward event to overlays
-        for (Layer layer : getLayers(true))
-        {
+        for (final Layer layer : getLayers(true)) {
             if ((globalVisible && layer.isVisible()) || layer.getReceiveKeyEventOnHidden())
                 layer.getOverlay().keyReleased(e, pt, this);
         }
     }
 
     @Override
-    public void keyTyped(KeyEvent e)
-    {
+    public void keyTyped(final KeyEvent e) {
         // nothing to do by default
     }
 
     /**
      * Gets the image at position (t, z, c).
      */
-    public IcyBufferedImage getImage(int t, int z, int c)
-    {
+    public IcyBufferedImage getImage(final int t, final int z, final int c) {
         if ((t == -1) || (z == -1))
             return null;
 
@@ -3791,36 +3316,30 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getImage(int, int, int)} with C = -1 instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage getImage(int t, int z)
-    {
+    public IcyBufferedImage getImage(final int t, final int z) {
         return getImage(t, z, -1);
     }
 
     /**
      * Get the current image.
      */
-    public IcyBufferedImage getCurrentImage()
-    {
+    public IcyBufferedImage getCurrentImage() {
         return getImage(getPositionT(), getPositionZ(), getPositionC());
     }
 
     /**
-     * @throws InterruptedException 
      * @deprecated use {@link #getRenderedImage(int, int, int, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public final BufferedImage getRenderedImage(int t, int z, int c, int imageType, boolean canvasView) throws InterruptedException
-    {
+    public final BufferedImage getRenderedImage(final int t, final int z, final int c, final int imageType, final boolean canvasView) throws InterruptedException {
         return getRenderedImage(t, z, c, canvasView);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated use {@link #getRenderedSequence(boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public final Sequence getRenderedSequence(int imageType, boolean canvasView) throws InterruptedException
-    {
+    public final Sequence getRenderedSequence(final int imageType, final boolean canvasView) throws InterruptedException {
         return getRenderedSequence(canvasView, null);
     }
 
@@ -3828,7 +3347,7 @@ public abstract class IcyCanvas extends JPanel
      * Returns a RGB or ARGB (depending support) BufferedImage representing the canvas view for
      * image at position (t, z, c).<br>
      * Free feel to the canvas to handle or not a specific dimension.
-     * 
+     *
      * @param t
      *        T position of wanted image (-1 for complete sequence)
      * @param z
@@ -3837,39 +3356,33 @@ public abstract class IcyCanvas extends JPanel
      *        C position of wanted image (-1 for all channels)
      * @param canvasView
      *        render with canvas view if true else use default sequence dimension
-     * @throws InterruptedException
      */
     public abstract BufferedImage getRenderedImage(int t, int z, int c, boolean canvasView) throws InterruptedException;
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link #getRenderedImage(int, int, int, boolean)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage getRenderedImage(int t, int z, int c) throws InterruptedException
-    {
+    public BufferedImage getRenderedImage(final int t, final int z, final int c) throws InterruptedException {
         return getRenderedImage(t, z, c, true);
     }
 
     /**
      * Return a sequence which contains rendered images.<br>
      * Default implementation, override it if needed in your canvas.
-     * 
+     *
      * @param canvasView
      *        render with canvas view if true else use default sequence dimension
      * @param progressListener
      *        progress listener which receive notifications about progression
-     * @throws InterruptedException
      */
-    public Sequence getRenderedSequence(boolean canvasView, ProgressListener progressListener)
-            throws InterruptedException
-    {
+    public Sequence getRenderedSequence(final boolean canvasView, final ProgressListener progressListener)
+            throws InterruptedException {
         final Sequence seqIn = getSequence();
         // create output sequence
         final Sequence result = new Sequence();
 
-        if (seqIn != null)
-        {
+        if (seqIn != null) {
             // derive original metadata
             result.setMetaData(OMEUtil.createOMEXMLMetadata(seqIn.getOMEXMLMetadata(), true));
 
@@ -3894,26 +3407,19 @@ public abstract class IcyCanvas extends JPanel
             // Painters have to take care of that, they should check the canvas position
             // in the paint() method
             beginUpdate();
-            try
-            {
-                if (t != -1)
-                {
-                    for (t = 0; t < sizeT; t++)
-                    {
-                        if (z != -1)
-                        {
-                            for (z = 0; z < sizeZ; z++)
-                            {
+            try {
+                if (t != -1) {
+                    for (t = 0; t < sizeT; t++) {
+                        if (z != -1) {
+                            for (z = 0; z < sizeZ; z++) {
                                 // check for interruption
                                 if (Thread.currentThread().isInterrupted())
                                     throw new InterruptedException("Canvas rendering interrupted..");
 
-                                if (c != -1)
-                                {
-                                    final List<BufferedImage> images = new ArrayList<BufferedImage>();
+                                if (c != -1) {
+                                    final List<BufferedImage> images = new ArrayList<>();
 
-                                    for (c = 0; c < sizeC; c++)
-                                    {
+                                    for (c = 0; c < sizeC; c++) {
                                         images.add(getRenderedImage(t, z, c, canvasView));
                                         pos++;
                                         if (progressListener != null)
@@ -3922,8 +3428,7 @@ public abstract class IcyCanvas extends JPanel
 
                                     result.setImage(t, z, IcyBufferedImage.createFrom(images));
                                 }
-                                else
-                                {
+                                else {
                                     result.setImage(t, z, getRenderedImage(t, z, -1, canvasView));
                                     pos++;
                                     if (progressListener != null)
@@ -3931,8 +3436,7 @@ public abstract class IcyCanvas extends JPanel
                                 }
                             }
                         }
-                        else
-                        {
+                        else {
                             result.setImage(t, 0, getRenderedImage(t, -1, -1, canvasView));
                             pos++;
                             if (progressListener != null)
@@ -3940,18 +3444,13 @@ public abstract class IcyCanvas extends JPanel
                         }
                     }
                 }
-                else
-                {
-                    if (z != -1)
-                    {
-                        for (z = 0; z < sizeZ; z++)
-                        {
-                            if (c != -1)
-                            {
-                                final ArrayList<BufferedImage> images = new ArrayList<BufferedImage>();
+                else {
+                    if (z != -1) {
+                        for (z = 0; z < sizeZ; z++) {
+                            if (c != -1) {
+                                final ArrayList<BufferedImage> images = new ArrayList<>();
 
-                                for (c = 0; c < sizeC; c++)
-                                {
+                                for (c = 0; c < sizeC; c++) {
                                     images.add(getRenderedImage(-1, z, c, canvasView));
                                     pos++;
                                     if (progressListener != null)
@@ -3960,8 +3459,7 @@ public abstract class IcyCanvas extends JPanel
 
                                 result.setImage(0, z, IcyBufferedImage.createFrom(images));
                             }
-                            else
-                            {
+                            else {
                                 result.setImage(0, z, getRenderedImage(-1, z, -1, canvasView));
                                 pos++;
                                 if (progressListener != null)
@@ -3969,14 +3467,11 @@ public abstract class IcyCanvas extends JPanel
                             }
                         }
                     }
-                    else
-                    {
-                        if (c != -1)
-                        {
-                            final ArrayList<BufferedImage> images = new ArrayList<BufferedImage>();
+                    else {
+                        if (c != -1) {
+                            final ArrayList<BufferedImage> images = new ArrayList<>();
 
-                            for (c = 0; c < sizeC; c++)
-                            {
+                            for (c = 0; c < sizeC; c++) {
                                 images.add(getRenderedImage(-1, -1, c, canvasView));
                                 pos++;
                                 if (progressListener != null)
@@ -3985,8 +3480,7 @@ public abstract class IcyCanvas extends JPanel
 
                             result.setImage(0, 0, IcyBufferedImage.createFrom(images));
                         }
-                        else
-                        {
+                        else {
                             result.setImage(0, 0, getRenderedImage(-1, -1, -1, canvasView));
                             pos++;
                             if (progressListener != null)
@@ -3998,8 +3492,7 @@ public abstract class IcyCanvas extends JPanel
                 result.setPixelSizeY(seqIn.getPixelSizeY() / (canvasView ? getScaleY() : 1d));
                 result.setPixelSizeZ(seqIn.getPixelSizeZ() / (canvasView ? getScaleZ() : 1d));
             }
-            finally
-            {
+            finally {
                 endUpdate();
                 result.endUpdate();
             }
@@ -4009,30 +3502,25 @@ public abstract class IcyCanvas extends JPanel
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link #getRenderedSequence(boolean, ProgressListener)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence getRenderedSequence(boolean canvasView) throws InterruptedException
-    {
+    public Sequence getRenderedSequence(final boolean canvasView) throws InterruptedException {
         return getRenderedSequence(canvasView, null);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use {@link #getRenderedSequence(boolean, ProgressListener)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public Sequence getRenderedSequence() throws InterruptedException
-    {
+    public Sequence getRenderedSequence() throws InterruptedException {
         return getRenderedSequence(true, null);
     }
 
     /**
      * Return the number of "selected" samples
      */
-    public int getNumSelectedSamples()
-    {
+    public int getNumSelectedSamples() {
         final Sequence sequence = getSequence();
 
         // have to test this as we release sequence reference on closed
@@ -4041,8 +3529,7 @@ public abstract class IcyCanvas extends JPanel
 
         final int base_len = getImageSizeX() * getImageSizeY() * getImageSizeC();
 
-        if (getPositionT() == -1)
-        {
+        if (getPositionT() == -1) {
             if (getPositionZ() == -1)
                 return base_len * getImageSizeZ() * getImageSizeT();
 
@@ -4058,30 +3545,26 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Returns the frame rate (given in frame per second) for play command (T navigation panel).
      */
-    public int getFrameRate()
-    {
+    public int getFrameRate() {
         return tNav.getFrameRate();
     }
 
     /**
      * Sets the frame rate (given in frame per second) for play command (T navigation panel).
      */
-    public void setFrameRate(int fps)
-    {
+    public void setFrameRate(final int fps) {
         tNav.setFrameRate(fps);
     }
 
     /**
      * update Z slider state
      */
-    protected void updateZNav()
-    {
+    protected void updateZNav() {
         final int maxZ = getMaxPositionZ();
         final int z = getPositionZ();
 
         zNav.setMaximum(maxZ);
-        if (z != -1)
-        {
+        if (z != -1) {
             zNav.setValue(z);
             zNav.setVisible(maxZ > 0);
         }
@@ -4092,14 +3575,12 @@ public abstract class IcyCanvas extends JPanel
     /**
      * update T slider state
      */
-    protected void updateTNav()
-    {
+    protected void updateTNav() {
         final int maxT = getMaxPositionT();
         final int t = getPositionT();
 
         tNav.setMaximum(maxT);
-        if (t != -1)
-        {
+        if (t != -1) {
             tNav.setValue(t);
             tNav.setVisible(maxT > 0);
         }
@@ -4111,9 +3592,8 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #getLayer(Overlay)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public Layer getLayer(Painter painter)
-    {
-        for (Layer layer : getLayers(false))
+    public Layer getLayer(final Painter painter) {
+        for (final Layer layer : getLayers(false))
             if (layer.getPainter() == painter)
                 return layer;
 
@@ -4123,16 +3603,14 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Find the layer corresponding to the specified Overlay
      */
-    public Layer getLayer(Overlay overlay)
-    {
+    public Layer getLayer(final Overlay overlay) {
         return layers.get(overlay);
     }
 
     /**
      * Find the layer corresponding to the specified ROI (use the ROI overlay internally).
      */
-    public Layer getLayer(ROI roi)
-    {
+    public Layer getLayer(final ROI roi) {
         return getLayer(roi.getOverlay());
     }
 
@@ -4140,32 +3618,27 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #hasLayer(Overlay)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean hasLayer(Painter painter)
-    {
+    public boolean hasLayer(final Painter painter) {
         return getLayer(painter) != null;
     }
 
     /**
      * Returns true if the canvas contains a layer for the specified {@link Overlay}.
      */
-    public boolean hasLayer(Overlay overlay)
-    {
-        synchronized (layers)
-        {
+    public boolean hasLayer(final Overlay overlay) {
+        synchronized (layers) {
             return layers.containsKey(overlay);
         }
     }
 
-    public boolean hasLayer(Layer layer)
-    {
+    public boolean hasLayer(final Layer layer) {
         final Overlay overlay = layer.getOverlay();
 
         // faster to test from overlay
         if (overlay != null)
             return hasLayer(overlay);
 
-        synchronized (layers)
-        {
+        synchronized (layers) {
             return layers.containsValue(layer);
         }
     }
@@ -4174,32 +3647,28 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #addLayer(Overlay)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void addLayer(Painter painter)
-    {
+    public void addLayer(final Painter painter) {
         if (!hasLayer(painter))
             addLayer(new Layer(painter));
     }
 
-    public Layer addLayer(Overlay overlay)
-    {
+    public Layer addLayer(final Overlay overlay) {
         if (!hasLayer(overlay))
             return addLayer(new Layer(overlay));
 
         return null;
     }
 
-    protected Layer addLayer(Layer layer)
-    {
-        if (layer != null)
-        {
+    protected Layer addLayer(final Layer layer) {
+        if (layer != null) {
             // listen layer
             layer.addListener(this);
 
             // add to list
-            synchronized (layers)
-            {
+            synchronized (layers) {
                 layers.put(layer.getOverlay(), layer);
-                if (Layer.DEFAULT_NAME.equals(layer))
+                //if (Layer.DEFAULT_NAME.equals(layer))
+                if (Layer.DEFAULT_NAME.equals(layer.getName()))
                     layer.setName("layer " + layers.size());
             }
 
@@ -4214,8 +3683,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #removeLayer(Overlay)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void removeLayer(Painter painter)
-    {
+    public void removeLayer(final Painter painter) {
         removeLayer(getLayer(painter));
     }
 
@@ -4223,18 +3691,15 @@ public abstract class IcyCanvas extends JPanel
      * Remove the layer for the specified {@link Overlay} from the canvas.<br>
      * Returns <code>true</code> if the method succeed.
      */
-    public boolean removeLayer(Overlay overlay)
-    {
+    public boolean removeLayer(final Overlay overlay) {
         final Layer layer;
 
         // remove from list
-        synchronized (layers)
-        {
+        synchronized (layers) {
             layer = layers.remove(overlay);
         }
 
-        if (layer != null)
-        {
+        if (layer != null) {
             // stop listening layer
             layer.removeListener(this);
             // notify remove
@@ -4249,16 +3714,14 @@ public abstract class IcyCanvas extends JPanel
     /**
      * Remove the specified layer from the canvas.
      */
-    public void removeLayer(Layer layer)
-    {
+    public void removeLayer(final Layer layer) {
         removeLayer(layer.getOverlay());
     }
 
     /**
      * Returns <code>true</code> if the specified overlay is visible in the canvas.<br>
      */
-    public boolean isVisible(Overlay overlay)
-    {
+    public boolean isVisible(final Overlay overlay) {
         final Layer layer = getLayer(overlay);
 
         if (layer != null)
@@ -4271,8 +3734,7 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #addLayerListener(CanvasLayerListener)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void addLayersListener(CanvasLayerListener listener)
-    {
+    public void addLayersListener(final CanvasLayerListener listener) {
         addLayerListener(listener);
     }
 
@@ -4280,31 +3742,24 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #removeLayerListener(CanvasLayerListener)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void removeLayersListener(CanvasLayerListener listener)
-    {
+    public void removeLayersListener(final CanvasLayerListener listener) {
         removeLayerListener(listener);
     }
 
     /**
      * Returns all canvas layer listener
      */
-    public List<CanvasLayerListener> getLayerListeners()
-    {
-        synchronized (layerListeners)
-        {
-            return new ArrayList<CanvasLayerListener>(layerListeners);
+    public List<CanvasLayerListener> getLayerListeners() {
+        synchronized (layerListeners) {
+            return new ArrayList<>(layerListeners);
         }
     }
 
     /**
      * Add a layer listener
-     * 
-     * @param listener
      */
-    public void addLayerListener(CanvasLayerListener listener)
-    {
-        synchronized (layerListeners)
-        {
+    public void addLayerListener(final CanvasLayerListener listener) {
+        synchronized (layerListeners) {
             if (listener != null)
                 layerListeners.add(listener);
         }
@@ -4312,99 +3767,74 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * Remove a layer listener
-     * 
-     * @param listener
      */
-    public void removeLayerListener(CanvasLayerListener listener)
-    {
-        synchronized (layerListeners)
-        {
+    public void removeLayerListener(final CanvasLayerListener listener) {
+        synchronized (layerListeners) {
             layerListeners.remove(listener);
         }
     }
 
-    protected void fireLayerChangedEvent(CanvasLayerEvent event)
-    {
-        for (CanvasLayerListener listener : getLayerListeners())
+    protected void fireLayerChangedEvent(final CanvasLayerEvent event) {
+        for (final CanvasLayerListener listener : getLayerListeners())
             listener.canvasLayerChanged(event);
     }
 
     /**
      * Returns all canvas listener
      */
-    public List<IcyCanvasListener> getListeners()
-    {
-        synchronized (listeners)
-        {
-            return new ArrayList<IcyCanvasListener>(listeners);
+    public List<IcyCanvasListener> getListeners() {
+        synchronized (listeners) {
+            return new ArrayList<>(listeners);
         }
     }
 
     /**
      * Add a IcyCanvas listener
-     * 
-     * @param listener
      */
-    public void addCanvasListener(IcyCanvasListener listener)
-    {
-        synchronized (listeners)
-        {
+    public void addCanvasListener(final IcyCanvasListener listener) {
+        synchronized (listeners) {
             listeners.add(listener);
         }
     }
 
     /**
      * Remove a IcyCanvas listener
-     * 
-     * @param listener
      */
-    public void removeCanvasListener(IcyCanvasListener listener)
-    {
-        synchronized (listeners)
-        {
+    public void removeCanvasListener(final IcyCanvasListener listener) {
+        synchronized (listeners) {
             listeners.remove(listener);
         }
     }
 
-    protected void fireCanvasChangedEvent(IcyCanvasEvent event)
-    {
-        for (IcyCanvasListener listener : getListeners())
+    protected void fireCanvasChangedEvent(final IcyCanvasEvent event) {
+        for (final IcyCanvasListener listener : getListeners())
             listener.canvasChanged(event);
     }
 
-    public void beginUpdate()
-    {
+    public void beginUpdate() {
         updater.beginUpdate();
     }
 
-    public void endUpdate()
-    {
+    public void endUpdate() {
         updater.endUpdate();
     }
 
-    public boolean isUpdating()
-    {
+    public boolean isUpdating() {
         return updater.isUpdating();
     }
 
     /**
      * layer added
-     * 
-     * @param layer
      */
-    protected void layerAdded(Layer layer)
-    {
+    protected void layerAdded(final Layer layer) {
         // handle with updater
         updater.changed(new CanvasLayerEvent(layer, LayersEventType.ADDED));
     }
 
     /**
      * layer removed
-     * 
-     * @param layer
      */
-    protected void layerRemoved(Layer layer)
-    {
+    protected void layerRemoved(final Layer layer) {
         // handle with updater
         updater.changed(new CanvasLayerEvent(layer, LayersEventType.REMOVED));
     }
@@ -4413,8 +3843,7 @@ public abstract class IcyCanvas extends JPanel
      * layer has changed
      */
     @Override
-    public void layerChanged(Layer layer, String propertyName)
-    {
+    public void layerChanged(final Layer layer, final String propertyName) {
         // handle with updater
         updater.changed(new CanvasLayerEvent(layer, LayersEventType.CHANGED, propertyName));
     }
@@ -4423,40 +3852,33 @@ public abstract class IcyCanvas extends JPanel
      * canvas changed (packed event).<br>
      * do global changes processing here
      */
-    public void changed(IcyCanvasEvent event)
-    {
+    public void changed(final IcyCanvasEvent event) {
         final IcyCanvasEventType eventType = event.getType();
 
         // handle synchronized canvas
-        if (isSynchronized())
-        {
+        if (isSynchronized()) {
             final List<IcyCanvas> synchCanvasList = getSynchronizedCanvas();
 
             // this is the synchronizer master so dispatch view changes to others canvas
-            if (getSynchMaster(synchCanvasList))
-            {
-                try
-                {
+            if (getSynchMaster(synchCanvasList)) {
+                try {
                     // synchronize all events when the view has just been synchronized
                     final boolean synchAll = (eventType == IcyCanvasEventType.SYNC_CHANGED);
                     synchronizeCanvas(synchCanvasList, event, synchAll);
                 }
-                finally
-                {
+                finally {
                     releaseSynchMaster();
                 }
             }
         }
 
-        switch (eventType)
-        {
+        switch (eventType) {
             case POSITION_CHANGED:
                 final int curZ = getPositionZ();
                 final int curT = getPositionT();
                 final int curC = getPositionC();
 
-                switch (event.getDim())
-                {
+                switch (event.getDim()) {
                     case Z:
                         // ensure Z slider position
                         if (curZ != -1)
@@ -4504,12 +3926,11 @@ public abstract class IcyCanvas extends JPanel
     /**
      * layer property has changed (packed event)
      */
-    protected void layerChanged(CanvasLayerEvent event)
-    {
+    protected void layerChanged(final CanvasLayerEvent event) {
         final String property = event.getProperty();
 
         // we need to rebuild sorted layer list
-        if ((event.getType() != LayersEventType.CHANGED) || (property == null) || (property == Layer.PROPERTY_PRIORITY))
+        if ((event.getType() != LayersEventType.CHANGED) || (property == null) || (Layer.PROPERTY_PRIORITY.equals(property)))
             orderedLayersOutdated = true;
 
         // notify listeners that layers have changed
@@ -4518,24 +3939,21 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * position has changed<br>
-     * 
+     *
      * @param dim
      *        define the position which has changed
      */
-    protected void positionChanged(DimensionId dim)
-    {
+    protected void positionChanged(final DimensionId dim) {
         // handle with updater
         updater.changed(new IcyCanvasEvent(this, IcyCanvasEventType.POSITION_CHANGED, dim));
     }
 
     @Override
-    public void lutChanged(LUTEvent event)
-    {
+    public void lutChanged(final LUTEvent event) {
         final int curC = getPositionC();
 
         // single channel mode ?
-        if (curC != -1)
-        {
+        if (curC != -1) {
             final int channel = event.getComponent();
 
             // channel is enabled --> change C position
@@ -4551,62 +3969,48 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * lut changed
-     * 
-     * @param component
      */
-    protected void lutChanged(int component)
-    {
+    protected void lutChanged(final int component) {
         // nothing to do by default
     }
 
     /**
      * sequence meta data has changed
      */
-    protected void sequenceMetaChanged(String metadataName)
-    {
+    protected void sequenceMetaChanged(final String metadataName) {
         // nothing to do by default
     }
 
     /**
      * sequence type has changed
      */
-    protected void sequenceTypeChanged()
-    {
+    protected void sequenceTypeChanged() {
         // nothing to do by default
     }
 
     /**
      * sequence component bounds has changed
-     * 
-     * @param colorModel
-     * @param component
      */
-    protected void sequenceComponentBoundsChanged(IcyColorModel colorModel, int component)
-    {
+    protected void sequenceComponentBoundsChanged(final IcyColorModel colorModel, final int component) {
         // nothing to do by default
     }
 
     /**
      * sequence component bounds has changed
-     * 
-     * @param colorModel
-     * @param component
      */
-    protected void sequenceColorMapChanged(IcyColorModel colorModel, int component)
-    {
+    protected void sequenceColorMapChanged(final IcyColorModel colorModel, final int component) {
         // nothing to do by default
     }
 
     /**
      * sequence data has changed
-     * 
+     *
      * @param image
      *        image which has changed (null if global data changed)
      * @param type
      *        event type
      */
-    protected void sequenceDataChanged(IcyBufferedImage image, SequenceEventType type)
-    {
+    protected void sequenceDataChanged(final IcyBufferedImage image, final SequenceEventType type) {
         ThreadUtil.runSingle(guiUpdater);
     }
 
@@ -4614,23 +4018,20 @@ public abstract class IcyCanvas extends JPanel
      * @deprecated Use {@link #sequenceOverlayChanged(Overlay, SequenceEventType)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    protected void sequencePainterChanged(Painter painter, SequenceEventType type)
-    {
+    protected void sequencePainterChanged(final Painter painter, final SequenceEventType type) {
         // no more stuff here
     }
 
     /**
      * Sequence overlay has changed
-     * 
+     *
      * @param overlay
      *        overlay which has changed
      * @param type
      *        event type
      */
-    protected void sequenceOverlayChanged(Overlay overlay, SequenceEventType type)
-    {
-        switch (type)
-        {
+    protected void sequenceOverlayChanged(final Overlay overlay, final SequenceEventType type) {
+        switch (type) {
             case ADDED:
                 addLayer(overlay);
                 break;
@@ -4647,23 +4048,20 @@ public abstract class IcyCanvas extends JPanel
 
     /**
      * sequence roi has changed
-     * 
+     *
      * @param roi
      *        roi which has changed (null if global roi changed)
      * @param type
      *        event type
      */
-    protected void sequenceROIChanged(ROI roi, SequenceEventType type)
-    {
+    protected void sequenceROIChanged(final ROI roi, final SequenceEventType type) {
         // nothing here
 
     }
 
     @Override
-    public void viewerChanged(ViewerEvent event)
-    {
-        switch (event.getType())
-        {
+    public void viewerChanged(final ViewerEvent event) {
+        switch (event.getType()) {
             case POSITION_CHANGED:
                 // ignore this event as we are launching it
                 break;
@@ -4680,16 +4078,13 @@ public abstract class IcyCanvas extends JPanel
     }
 
     @Override
-    public void viewerClosed(Viewer viewer)
-    {
+    public void viewerClosed(final Viewer viewer) {
         // nothing to do here
     }
 
     @Override
-    public final void sequenceChanged(SequenceEvent event)
-    {
-        switch (event.getSourceType())
-        {
+    public final void sequenceChanged(final SequenceEvent event) {
+        switch (event.getSourceType()) {
             case SEQUENCE_META:
                 sequenceMetaChanged((String) event.getSource());
                 break;
@@ -4716,7 +4111,6 @@ public abstract class IcyCanvas extends JPanel
                 sequenceOverlayChanged(overlay, event.getType());
 
                 // backward compatibility
-                @SuppressWarnings("deprecation")
                 final Painter painter;
 
                 if (overlay instanceof OverlayWrapper)
@@ -4734,14 +4128,12 @@ public abstract class IcyCanvas extends JPanel
     }
 
     @Override
-    public void sequenceClosed(Sequence sequence)
-    {
+    public void sequenceClosed(final Sequence sequence) {
         // nothing to do here
     }
 
     @Override
-    public void onChanged(CollapsibleEvent event)
-    {
+    public void onChanged(final CollapsibleEvent event) {
         if (event instanceof CanvasLayerEvent)
             layerChanged((CanvasLayerEvent) event);
 

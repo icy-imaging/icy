@@ -43,7 +43,7 @@ import icy.roi.*;
 import icy.sequence.SequenceEvent.SequenceEventSourceType;
 import icy.sequence.SequenceEvent.SequenceEventType;
 import icy.sequence.edit.*;
-import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.type.DataType;
 import icy.type.collection.CollectionUtil;
@@ -686,7 +686,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             }
             catch (final OutOfMemoryError e) {
                 // better to keep trace of that in console...
-                System.err.println("Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
+                IcyLogger.error(Sequence.class, e, "Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
 
                 throw new OutOfMemoryError("Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
             }
@@ -6173,8 +6173,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             retry++;
         }
 
-        System.err.println("Error while saving Sequence XML persistent data :");
-        IcyExceptionHandler.showErrorMessage(exc, true);
+        IcyLogger.error(Sequence.class, exc, "Error while saving Sequence XML persistent data.");
 
         return false;
     }

@@ -1,21 +1,21 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.plugin;
 
 import icy.gui.frame.error.ErrorReportFrame;
@@ -28,26 +28,25 @@ import icy.plugin.PluginInstaller;
 import icy.plugin.PluginRepositoryLoader;
 import icy.plugin.PluginUpdater;
 import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.Icon;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 
 /**
  * This class create a report from a plugin crash and ask the
  * user if he wants to send it to the dev team of the plugin.
- * 
- * @author Fabrice de Chaumont &amp; Stephane<br>
+ *
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class PluginErrorReport
-{
+public class PluginErrorReport {
     /**
      * Report an error thrown by the specified plugin.
-     * 
+     *
      * @param plugin
      *        {@link PluginDescriptor} of the plugin which thrown the error.
      * @param devId
@@ -57,12 +56,9 @@ public class PluginErrorReport
      * @param message
      *        Error message to report
      */
-    public static void report(final PluginDescriptor plugin, final String devId, final String title,
-            final String message)
-    {
+    public static void report(final PluginDescriptor plugin, final String devId, final String title, final String message) {
         // headless mode ?
-        if (Icy.getMainInterface().isHeadLess())
-        {
+        if (Icy.getMainInterface().isHeadLess()) {
             // do nothing
 
             // directly report
@@ -79,72 +75,45 @@ public class PluginErrorReport
             return;
 
         // always do that in background process
-        ThreadUtil.bgRun(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (plugin != null)
-                {
-                    final CancelableProgressFrame info = new CancelableProgressFrame("Plugin '" + plugin.getName()
-                            + "' has crashed, searching for update...");
+        ThreadUtil.bgRun(() -> {
+            if (plugin != null) {
+                final CancelableProgressFrame info = new CancelableProgressFrame("Plugin '" + plugin.getName() + "' has crashed, searching for update...");
 
-                    // wait for online basic info loaded
-                    PluginRepositoryLoader.waitLoaded();
+                // wait for online basic info loaded
+                PluginRepositoryLoader.waitLoaded();
 
-                    PluginDescriptor onlinePlugin = null;
+                PluginDescriptor onlinePlugin = null;
 
-                    try
-                    {
-                        // search for update
-                        if (!info.isCancelRequested())
-                            onlinePlugin = PluginUpdater.getUpdate(plugin);
-                    }
-                    finally
-                    {
-                        info.close();
-                    }
-
-                    // update found and not canceled
-                    if (!info.isCancelRequested() && (onlinePlugin != null))
-                    {
-                        PluginInstaller.install(onlinePlugin, true);
-                        new AnnounceFrame(
-                                "The plugin crashed but a new version has been found, try it again when installation is done",
-                                10);
-                        // don't need to report
-                        return;
-                    }
-
-                    // display report as no update were found
-                    ThreadUtil.invokeLater(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            doReport(plugin, null, title, message);
-                        }
-                    });
+                try {
+                    // search for update
+                    if (!info.isCancelRequested())
+                        onlinePlugin = PluginUpdater.getUpdate(plugin);
                 }
-                else
-                {
-                    // directly display report frame
-                    ThreadUtil.invokeLater(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            doReport(null, devId, title, message);
-                        }
-                    });
+                finally {
+                    info.close();
                 }
+
+                // update found and not canceled
+                if (!info.isCancelRequested() && (onlinePlugin != null)) {
+                    PluginInstaller.install(onlinePlugin, true);
+                    new AnnounceFrame("The plugin crashed but a new version has been found, try it again when installation is done", 10);
+                    // don't need to report
+                    return;
+                }
+
+                // display report as no update were found
+                ThreadUtil.invokeLater(() -> doReport(plugin, null, title, message));
+            }
+            else {
+                // directly display report frame
+                ThreadUtil.invokeLater(() -> doReport(null, devId, title, message));
             }
         });
     }
 
     /**
      * Report an error thrown by the specified plugin.
-     * 
+     *
      * @param plugin
      *        {@link PluginDescriptor} of the plugin which thrown the error.
      * @param devId
@@ -152,30 +121,26 @@ public class PluginErrorReport
      * @param message
      *        Error message to report
      */
-    public static void report(final PluginDescriptor plugin, final String devId, final String message)
-    {
+    public static void report(final PluginDescriptor plugin, final String devId, final String message) {
         report(plugin, devId, null, message);
     }
 
     /**
      * Report an error thrown by the specified plugin.
-     * 
+     *
      * @param plugin
      *        {@link PluginDescriptor} of the plugin which thrown the error.
      * @param message
      *        Error message to report
      */
-    public static void report(PluginDescriptor plugin, String message)
-    {
+    public static void report(final PluginDescriptor plugin, final String message) {
         report(plugin, null, null, message);
     }
 
     // internal use only
-    static void doReport(final PluginDescriptor plugin, final String devId, String title, String message)
-    {
+    static void doReport(final PluginDescriptor plugin, final String devId, final String title, final String message) {
         // headless mode
-        if (Icy.getMainInterface().isHeadLess())
-        {
+        if (Icy.getMainInterface().isHeadLess()) {
             // do not report
 
             // report directly
@@ -185,21 +150,18 @@ public class PluginErrorReport
         }
 
         String str;
-        Icon icon;
+        final Icon icon;
 
         // build title
-        if (plugin != null)
-        {
+        if (plugin != null) {
             str = "<html><br>The plugin named <b>" + plugin.getName() + "</b> has encountered a problem";
             icon = plugin.getIcon();
         }
-        else if (!StringUtil.isEmpty(devId))
-        {
+        else if (!StringUtil.isEmpty(devId)) {
             str = "<html><br>The plugin from the developer <b>" + devId + "</b> has encountered a problem";
             icon = null;
         }
-        else
-        {
+        else {
             str = "<html><br>The application has encountered a problem";
             icon = null;
         }
@@ -214,26 +176,17 @@ public class PluginErrorReport
         final ErrorReportFrame frame = new ErrorReportFrame(icon, str, message);
 
         // set specific report action here
-        frame.setReportAction(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                final ProgressFrame progressFrame = new ProgressFrame("Sending report...");
+        frame.setReportAction(e -> {
+            final ProgressFrame progressFrame = new ProgressFrame("Sending report...");
 
-                try
-                {
-                    IcyExceptionHandler.report(plugin, devId, frame.getReportMessage());
-                }
-                catch (BadLocationException ex)
-                {
-                    System.err.println("Error while reporting error :");
-                    IcyExceptionHandler.showErrorMessage(ex, true);
-                }
-                finally
-                {
-                    progressFrame.close();
-                }
+            try {
+                IcyExceptionHandler.report(plugin, devId, frame.getReportMessage());
+            }
+            catch (final BadLocationException ex) {
+                IcyLogger.error(PluginErrorReport.class, ex, "Error while reporting error.");
+            }
+            finally {
+                progressFrame.close();
             }
         });
     }

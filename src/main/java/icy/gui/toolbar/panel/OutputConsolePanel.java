@@ -25,7 +25,6 @@ import icy.gui.frame.progress.ProgressFrame;
 import icy.gui.util.GuiUtil;
 import icy.preferences.GeneralPreferences;
 import icy.system.IcyExceptionHandler;
-import icy.system.thread.ThreadUtil;
 import icy.util.EventUtil;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
@@ -45,7 +44,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
-import java.util.EventListener;
 
 /**
  * @author Stephane Dallongeville
@@ -59,10 +57,6 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
             instance = new OutputConsolePanel();
 
         return instance;
-    }
-
-    public interface OutputConsoleChangeListener extends EventListener {
-        void outputConsoleChanged(OutputConsolePanel source, boolean isError);
     }
 
     private class WindowsOutPrintStream extends PrintStream {
@@ -80,68 +74,169 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
                 super.write(buf, off, len);
 
                 final String text = new String(buf, off, len);
-                addText(text, isStdErr);
+                if (isStdErr)
+                    textPane.append(Color.RED.darker(), text);
+                textPane.appendANSI(text);
                 // want file log as well ?
-                if (fileLogButton.isSelected() && (logWriter != null)) {
+                /*if (fileLogButton.isSelected() && (logWriter != null)) {
                     // write and save to file immediately
                     logWriter.write(text);
                     logWriter.flush();
-                }
+                }*/
             }
             catch (final Throwable t) {
-                addText(t.getMessage(), isStdErr);
+                textPane.append(Color.RED.darker(), t.getLocalizedMessage());
             }
         }
     }
 
-    private final JTextPane textPane;
+    private class ColorPane extends JTextPane {
+        private static final Color D_Black = Color.getHSBColor(0.000f, 0.000f, 0.000f);
+        private static final Color D_Red = Color.getHSBColor(0.000f, 1.000f, 0.502f);
+        private static final Color D_Blue = Color.getHSBColor(0.667f, 1.000f, 0.502f);
+        private static final Color D_Magenta = Color.getHSBColor(0.833f, 1.000f, 0.502f);
+        private static final Color D_Green = Color.getHSBColor(0.333f, 1.000f, 0.502f);
+        private static final Color D_Yellow = Color.getHSBColor(0.167f, 1.000f, 0.502f);
+        private static final Color D_Cyan = Color.getHSBColor(0.500f, 1.000f, 0.502f);
+        private static final Color D_White = Color.getHSBColor(0.000f, 0.000f, 0.753f);
+        private static final Color B_Black = Color.getHSBColor(0.000f, 0.000f, 0.502f);
+        private static final Color B_Red = Color.getHSBColor(0.000f, 1.000f, 1.000f);
+        private static final Color B_Blue = Color.getHSBColor(0.667f, 1.000f, 1.000f);
+        private static final Color B_Magenta = Color.getHSBColor(0.833f, 1.000f, 1.000f);
+        private static final Color B_Green = Color.getHSBColor(0.333f, 1.000f, 1.000f);
+        private static final Color B_Yellow = Color.getHSBColor(0.167f, 1.000f, 1.000f);
+        private static final Color B_Cyan = Color.getHSBColor(0.500f, 1.000f, 1.000f);
+        private static final Color B_White = Color.getHSBColor(0.000f, 0.000f, 1.000f);
+        private static final Color cReset = Color.getHSBColor(0.000f, 0.000f, 1.000f);
+        private static Color colorCurrent = cReset;
+        String remaining = "";
+
+        public void append(final Color c, final String s) {
+            final StyleContext sc = StyleContext.getDefaultStyleContext();
+            final AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
+
+            synchronized (doc) {
+                try {
+                    doc.insertString(doc.getLength(), s, aset);
+                    setCaretPosition(doc.getLength());
+                    limitLog();
+                }
+                catch (final BadLocationException e) {
+                    // ignore
+                }
+            }
+        }
+
+        public void appendANSI(final String s) { // convert ANSI color codes first
+            int aPos = 0;   // current char position in addString
+            int aIndex; // index of next Escape sequence
+            int mIndex; // index of "m" terminating Escape sequence
+            String tmpString; // = "";
+            boolean stillSearching; // true until no more Escape sequences
+            final String addString = remaining + s;
+            remaining = "";
+
+            if (addString.length() > 0) {
+                aIndex = addString.indexOf("\u001B"); // find first escape
+                if (aIndex == -1) { // no escape/color change in this string, so just send it with current color
+                    append(colorCurrent, addString);
+                    return;
+                }
+                // otherwise There is an escape character in the string, so we must process it
+
+                if (aIndex > 0) { // Escape is not first char, so send text up to first escape
+                    tmpString = addString.substring(0, aIndex);
+                    append(colorCurrent, tmpString);
+                    aPos = aIndex;
+                }
+                // aPos is now at the beginning of the first escape sequence
+
+                stillSearching = true;
+                while (stillSearching) {
+                    mIndex = addString.indexOf("m", aPos); // find the end of the escape sequence
+                    if (mIndex < 0) { // the buffer ends halfway through the ansi string!
+                        remaining = addString.substring(aPos);
+                        stillSearching = false;
+                        continue;
+                    }
+                    else {
+                        tmpString = addString.substring(aPos, mIndex + 1);
+                        colorCurrent = getANSIColor(tmpString);
+                    }
+                    aPos = mIndex + 1;
+                    // now we have the color, send text that is in that color (up to next escape)
+
+                    aIndex = addString.indexOf("\u001B", aPos);
+
+                    if (aIndex == -1) { // if that was the last sequence of the input, send remaining text
+                        tmpString = addString.substring(aPos);
+                        append(colorCurrent, tmpString);
+                        stillSearching = false;
+                        continue; // jump out of loop early, as the whole string has been sent now
+                    }
+
+                    // there is another escape sequence, so send part of the string and prepare for the next
+                    tmpString = addString.substring(aPos, aIndex);
+                    aPos = aIndex;
+                    append(colorCurrent, tmpString);
+
+                } // while there's text in the input buffer
+            }
+        }
+
+        public Color getANSIColor(final String ANSIColor) {
+            return switch (ANSIColor) {
+                case "\u001B[30m", "\u001B[0;30m" -> D_Black;
+                case "\u001B[31m", "\u001B[0;31m" -> B_Red; //D_Red;
+                case "\u001B[32m", "\u001B[0;32m" -> B_Green; //D_Green;
+                case "\u001B[33m", "\u001B[0;33m" -> B_Yellow; //D_Yellow;
+                case "\u001B[34m", "\u001B[0;34m" -> D_Blue;
+                case "\u001B[35m", "\u001B[0;35m" -> D_Magenta;
+                case "\u001B[36m", "\u001B[0;36m" -> B_Cyan; //D_Cyan;
+                case "\u001B[37m", "\u001B[0;37m" -> D_White;
+                case "\u001B[1;30m" -> B_Black;
+                case "\u001B[1;31m" -> B_Red;
+                case "\u001B[1;32m" -> B_Green;
+                case "\u001B[1;33m" -> B_Yellow;
+                case "\u001B[1;34m" -> B_Blue;
+                case "\u001B[1;35m" -> B_Magenta;
+                case "\u001B[1;36m" -> B_Cyan;
+                case "\u001B[1;37m" -> B_White;
+                case "\u001B[0m" -> cReset;
+                default -> B_White;
+            };
+        }
+    }
+
+    private final ColorPane textPane;
     private final StyledDocument doc;
-    final SimpleAttributeSet normalAttributes;
-    final SimpleAttributeSet errorAttributes;
 
     private final JSpinner logMaxLineField;
     private final JTextField logMaxLineTextField;
-    private final IcyToggleButton scrollLockButton;
     private final IcyToggleButton fileLogButton;
 
-    int nbUpdate;
-    Writer logWriter;
+    //private Writer logWriter;
 
     public OutputConsolePanel() {
         super(new Dimension(300, 200));
 
-        textPane = new JTextPane();
+        textPane = new ColorPane();
         doc = textPane.getStyledDocument();
-        nbUpdate = 0;
-
-        errorAttributes = new SimpleAttributeSet();
-        normalAttributes = new SimpleAttributeSet();
-
-        StyleConstants.setFontFamily(errorAttributes, "arial");
-        StyleConstants.setFontSize(errorAttributes, 11);
-        StyleConstants.setForeground(errorAttributes, Color.red.brighter());
-
-        StyleConstants.setFontFamily(normalAttributes, "arial");
-        StyleConstants.setFontSize(normalAttributes, 11);
-        //StyleConstants.setForeground(normalAttributes, Color.black);
 
         logMaxLineField = new JSpinner(new SpinnerNumberModel(GeneralPreferences.getOutputLogSize(), 100, 1000000, 100));
         logMaxLineTextField = ((JSpinner.DefaultEditor) logMaxLineField.getEditor()).getTextField();
         final IcyButton clearLogButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
         final IcyButton copyLogButton = new IcyButton(GoogleMaterialDesignIcons.CONTENT_COPY);
         final IcyButton reportLogButton = new IcyButton(GoogleMaterialDesignIcons.BUG_REPORT);
-        scrollLockButton = new IcyToggleButton(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
+        final IcyToggleButton scrollLockButton = new IcyToggleButton(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
         fileLogButton = new IcyToggleButton(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
         fileLogButton.setSelected(GeneralPreferences.getOutputLogToFile());
 
-        // ComponentUtil.setFontSize(textPane, 10);
         textPane.setEditable(false);
-
-        //clearLogButton.setFlat(true);
-        //copyLogButton.setFlat(true);
-        //reportLogButton.setFlat(true);
-        //scrollLockButton.setFlat(true);
-        //fileLogButton.setFlat(true);
+        textPane.setRequestFocusEnabled(false);
+        textPane.setFocusable(false);
+        textPane.setDragEnabled(false);
+        textPane.setBackground(Color.DARK_GRAY);
 
         logMaxLineField.setPreferredSize(new Dimension(80, 24));
         // no focusable
@@ -191,7 +286,10 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
         copyLogButton.setToolTipText("Copy to clipboard");
         reportLogButton.setToolTipText("Report content to dev team");
         scrollLockButton.setToolTipText("Scroll Lock");
-        fileLogButton.setToolTipText("Enable/Disable log file saving (log.txt)");
+        fileLogButton.setToolTipText("Enable/Disable log file saving (icy.log)");
+
+        fileLogButton.setSelected(false);
+        fileLogButton.setEnabled(false);
 
         clearLogButton.addActionListener(e -> textPane.setText(""));
         copyLogButton.addActionListener(e -> {
@@ -210,12 +308,25 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
         });
         fileLogButton.addActionListener(e -> GeneralPreferences.setOutputLogFile(fileLogButton.isSelected()));
 
-        final JPanel bottomPanel = GuiUtil.createPageBoxPanel(Box.createVerticalStrut(4),
-                GuiUtil.createLineBoxPanel(clearLogButton, Box.createHorizontalStrut(4), copyLogButton,
-                        Box.createHorizontalStrut(4), reportLogButton, Box.createHorizontalGlue(),
-                        Box.createHorizontalStrut(4), new JLabel("Limit"), Box.createHorizontalStrut(4),
-                        logMaxLineField, Box.createHorizontalStrut(4), scrollLockButton, Box.createHorizontalStrut(4),
-                        fileLogButton));
+        final JPanel bottomPanel = GuiUtil.createPageBoxPanel(
+                Box.createVerticalStrut(4),
+                GuiUtil.createLineBoxPanel(
+                        clearLogButton,
+                        Box.createHorizontalStrut(4),
+                        copyLogButton,
+                        Box.createHorizontalStrut(4),
+                        reportLogButton,
+                        Box.createHorizontalGlue(),
+                        Box.createHorizontalStrut(4),
+                        new JLabel("Limit"),
+                        Box.createHorizontalStrut(4),
+                        logMaxLineField,
+                        Box.createHorizontalStrut(4),
+                        scrollLockButton,
+                        Box.createHorizontalStrut(4),
+                        fileLogButton
+                )
+        );
 
         final JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
@@ -234,48 +345,19 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
         System.setOut(new WindowsOutPrintStream(System.out, false));
         System.setErr(new WindowsOutPrintStream(System.err, true));
 
-        try {
+        /*try {
             // define log file writer (always clear log.txt file if present)
             logWriter = new FileWriter(FileUtil.getApplicationDirectory() + "/icy.log", false);
         }
         catch (final IOException e1) {
             logWriter = null;
-        }
-    }
-
-    public void addText(final String text, final boolean isError) {
-        ThreadUtil.invokeLater(() -> {
-            try {
-                nbUpdate++;
-
-                // insert text
-                synchronized (doc) {
-                    if (isError)
-                        doc.insertString(doc.getLength(), text, errorAttributes);
-                    else
-                        doc.insertString(doc.getLength(), text, normalAttributes);
-
-                    // do clean sometime..
-                    if ((nbUpdate & 0x7F) == 0)
-                        limitLog();
-
-                    // scroll lock feature
-                    if (!scrollLockButton.isSelected())
-                        textPane.setCaretPosition(doc.getLength());
-                }
-            }
-            catch (final Exception e) {
-                // ignore
-            }
-
-            changed(isError);
-        });
+        }*/
     }
 
     /**
      * Get console content.
      */
-    public String getText() {
+    private String getText() {
         try {
             synchronized (doc) {
                 return doc.getText(0, doc.getLength());
@@ -289,7 +371,7 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
     /**
      * Apply maximum line limitation to the log output
      */
-    public void limitLog() throws BadLocationException {
+    private void limitLog() throws BadLocationException {
         final Element root = doc.getDefaultRootElement();
         final int numLine = root.getElementCount();
         final int logMaxLine = getLogMaxLine();
@@ -305,32 +387,8 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
     /**
      * Returns maximum log line number
      */
-    public int getLogMaxLine() {
+    private int getLogMaxLine() {
         return ((Integer) logMaxLineField.getValue()).intValue();
-    }
-
-    /**
-     * Sets maximum log line number
-     */
-    public void setLogMaxLine(final int value) {
-        logMaxLineField.setValue(Integer.valueOf(value));
-    }
-
-    private void changed(final boolean isError) {
-        fireChangedEvent(isError);
-    }
-
-    public void fireChangedEvent(final boolean isError) {
-        for (final OutputConsoleChangeListener listener : listenerList.getListeners(OutputConsoleChangeListener.class))
-            listener.outputConsoleChanged(this, isError);
-    }
-
-    public void addOutputConsoleChangeListener(final OutputConsoleChangeListener listener) {
-        listenerList.add(OutputConsoleChangeListener.class, listener);
-    }
-
-    public void removeOutputConsoleChangeListener(final OutputConsoleChangeListener listener) {
-        listenerList.remove(OutputConsoleChangeListener.class, listener);
     }
 
     @Override

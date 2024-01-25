@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ import icy.gui.frame.progress.FileFrame;
 import icy.sequence.DimensionId;
 import icy.sequence.MetaDataUtil;
 import icy.sequence.SequenceIdImporter;
-import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.Processor;
 import icy.type.DataType;
 import icy.util.StringUtil;
@@ -46,7 +46,7 @@ import java.util.concurrent.Future;
 /**
  * This class is an utility class aim to help in grouping a list of <i>file path</i> representing image to form a complete and valid Sequence.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class SequenceFileSticher {
@@ -1321,7 +1321,7 @@ public class SequenceFileSticher {
             // normally we want the equality here
             if ((mt * mz * mc * my * mx) != size) {
                 // note that this can happen when thread is interrupted so just put a warning here
-                System.err.println("Warning: SequenceFileSticher - number of image doesn't match: " + size + " (expected = " + (mt * mz * mc * my * mx) + ")");
+                IcyLogger.warn(SequenceFileSticher.class, "SequenceFileSticher - number of image doesn't match: " + size + " (expected = " + (mt * mz * mc * my * mx) + ")");
             }
 
             // store final sequence dimension
@@ -1967,7 +1967,7 @@ public class SequenceFileSticher {
             if (t instanceof ClosedByInterruptException)
                 throw (ClosedByInterruptException) t;
 
-            IcyExceptionHandler.showErrorMessage(t, true);
+            IcyLogger.error(SequenceFileSticher.class, t, t.getLocalizedMessage());
             return null;
         }
     }

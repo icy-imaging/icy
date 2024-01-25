@@ -23,7 +23,6 @@ import icy.file.SequenceFileSticher.SequenceFileGroup;
 import icy.file.SequenceFileSticher.SequencePosition;
 import icy.gui.dialog.ImporterSelectionDialog;
 import icy.gui.dialog.SeriesSelectionDialog;
-import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.gui.frame.progress.FileFrame;
 import icy.gui.menu.ApplicationMenuFile;
 import icy.image.ChannelPosition;
@@ -39,6 +38,7 @@ import icy.preferences.GeneralPreferences;
 import icy.sequence.*;
 import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.type.DataType;
 import icy.type.collection.CollectionUtil;
@@ -165,9 +165,12 @@ public class Loader {
         if (t instanceof UnsupportedClassVersionError) {
             if (!warnedImporterPlugins.contains(pluginId)) {
                 // show a specific message in the output console
-                System.err.println("Plugin '" + plugin.getName() + "' " + plugin.getVersion() + " is not compatible with java "
-                        + ((int) Math.floor(SystemUtil.getJavaVersionAsNumber())));
-                System.err.println("You need to install a newer version of java to use it.");
+                IcyLogger.warn(
+                        Loader.class,
+                        t,
+                        "Plugin '" + plugin.getName() + "' " + plugin.getVersion() + " is not compatible with java " + ((int) Math.floor(SystemUtil.getJavaVersionAsNumber())),
+                        "You need to install a newer version of java to use it."
+                );
 
                 // add to the list of warned plugins
                 warnedImporterPlugins.add(pluginId);
@@ -176,7 +179,7 @@ public class Loader {
         else {
             if (!reportedImporterPlugins.contains(pluginId)) {
                 // show a message in the output console
-                IcyExceptionHandler.showErrorMessage(t, false, true);
+                IcyLogger.error(Loader.class, t, t.getLocalizedMessage());
                 // and send an error report (silent as we don't want a dialog appearing here)
                 IcyExceptionHandler.report(plugin, IcyExceptionHandler.getErrorMessage(t, true));
 
@@ -1295,10 +1298,10 @@ public class Loader {
 
             if (singlePaths.size() > 0) {
                 // just log in console
-                System.err.println("No compatible importer found for the following files:");
-                for (final String path : singlePaths)
-                    System.err.println(path);
-                System.err.println();
+                final ArrayList<String> messages = new ArrayList<>();
+                messages.add("No compatible importer found for the following files:");
+                messages.addAll(singlePaths);
+                IcyLogger.error(Loader.class, messages.toArray(new String[0]));
             }
         }
 
@@ -1387,10 +1390,7 @@ public class Loader {
         }
         catch (final Throwable t) {
             // just show the error
-            IcyExceptionHandler.showErrorMessage(t, true);
-
-            if (loadingFrame != null)
-                new FailedAnnounceFrame((t instanceof OutOfMemoryError) ? t.getMessage() : "Failed to open file(s), see the console output for more details.");
+            IcyLogger.error(Loader.class, t, "Failed to open file(s).");
         }
         finally {
             if (loadingFrame != null)
@@ -1635,10 +1635,10 @@ public class Loader {
 
                 if (singlePaths.size() > 0) {
                     // just log in console
-                    System.err.println("No compatible importer found for the following files:");
-                    for (final String path : singlePaths)
-                        System.err.println(path);
-                    System.err.println();
+                    final ArrayList<String> messages = new ArrayList<>();
+                    messages.add("No compatible importer found for the following files:");
+                    messages.addAll(singlePaths);
+                    IcyLogger.error(Loader.class, messages.toArray(new String[0]));
                 }
             }
         });
@@ -1686,9 +1686,7 @@ public class Loader {
         }
         catch (final Throwable t) {
             // just show the error
-            IcyExceptionHandler.showErrorMessage(t, true);
-            if (loadingFrame != null)
-                new FailedAnnounceFrame("Failed to open file(s), see the console output for more details.");
+            IcyLogger.error(Loader.class, t, "Failed to open file(s).");
         }
         finally {
             if (loadingFrame != null)
@@ -1879,11 +1877,7 @@ public class Loader {
             }
             catch (final Throwable t) {
                 // just show the error
-                IcyExceptionHandler.showErrorMessage(t, true);
-
-                if (loadingFrame != null)
-                    new FailedAnnounceFrame(
-                            (t instanceof OutOfMemoryError) ? t.getMessage() : "Failed to open file(s), see the console output for more details.");
+                IcyLogger.error(Loader.class, t, "Failed to open file(s).");
             }
             finally {
                 if (loadingFrame != null)
@@ -1990,11 +1984,7 @@ public class Loader {
             }
             catch (final Throwable t) {
                 // just show the error
-                IcyExceptionHandler.showErrorMessage(t, true);
-
-                if (loadingFrame != null)
-                    new FailedAnnounceFrame(
-                            (t instanceof OutOfMemoryError) ? t.getMessage() : "Failed to open file(s), see the console output for more details.");
+                IcyLogger.error(Loader.class, t, "Failed to open file(s).");
             }
             finally {
                 if (loadingFrame != null)
@@ -2100,10 +2090,10 @@ public class Loader {
 
                 if (singlePaths.size() > 0) {
                     // just log in console
-                    System.err.println("No compatible importer found for the following files:");
-                    for (final String path : singlePaths)
-                        System.err.println(path);
-                    System.err.println();
+                    final ArrayList<String> messages = new ArrayList<>();
+                    messages.add("No compatible importer found for the following files:");
+                    messages.addAll(singlePaths);
+                    IcyLogger.error(Loader.class, messages.toArray(new String[0]));
                 }
             }
         });
@@ -2227,8 +2217,7 @@ public class Loader {
                     selectedSerie = selectSerie(cloneSequenceFileImporter(imp), path, meta, 0);
                 }
                 catch (final Throwable t) {
-                    IcyExceptionHandler.showErrorMessage(t, true, true);
-                    System.err.print("Opening first series by default...");
+                    IcyLogger.error(Loader.class, t, "Opening first series by default...");
                     selectedSerie = 0;
                 }
 
@@ -2267,11 +2256,7 @@ public class Loader {
             }
 
             // just show the error
-            IcyExceptionHandler.showErrorMessage(t, true);
-
-            if (loadingFrame != null) {
-                new FailedAnnounceFrame((t instanceof OutOfMemoryError) ? t.getMessage() : "Failed to open file(s), see the console output for more details.");
-            }
+            IcyLogger.error(Loader.class, t, "Failed to open file(s).");
 
             return null;
         }
@@ -2387,10 +2372,7 @@ public class Loader {
         }
         catch (final Throwable t) {
             // just show the error
-            IcyExceptionHandler.showErrorMessage(t, true);
-
-            if (loadingFrame != null)
-                new FailedAnnounceFrame((t instanceof OutOfMemoryError) ? t.getMessage() : "Failed to open file(s), see the console output for more details.");
+            IcyLogger.error(Loader.class, t, "Failed to open file(s).");
         }
         finally {
             if (loadingFrame != null)
@@ -2703,13 +2685,11 @@ public class Loader {
             }
 
             if (remainingFiles.size() > 0) {
-                System.err.println("Cannot open the following file(s) (format not supported):");
-                for (final String path : remainingFiles)
-                    System.err.println(path);
+                final ArrayList<String> messages = new ArrayList<>();
+                messages.add("Cannot open the following file(s) (format not supported):");
+                messages.addAll(remainingFiles);
 
-                if (loadingFrame != null) {
-                    new FailedAnnounceFrame("Some file(s) could not be opened (format not supported). See the console output for more details.");
-                }
+                IcyLogger.error(Loader.class, messages.toArray(new String[0]));
             }
 
             // set default colormaps if none defined
@@ -2724,10 +2704,7 @@ public class Loader {
         }
         catch (final Throwable t) {
             // just show the error
-            IcyExceptionHandler.showErrorMessage(t, true);
-
-            if (loadingFrame != null)
-                new FailedAnnounceFrame((t instanceof OutOfMemoryError) ? t.getMessage() : "Failed to open file(s), see the console output for more details.");
+            IcyLogger.error(Loader.class, t, "Failed to open file(s).");
         }
         finally {
             if (loadingFrame != null)
@@ -3036,8 +3013,7 @@ public class Loader {
                         selectedSeries = selectSeries(cloneSequenceFileImporter(importer), path, meta, 0, false);
                 }
                 catch (final Throwable t) {
-                    IcyExceptionHandler.showErrorMessage(t, true, true);
-                    System.err.print("Opening first series by default...");
+                    IcyLogger.error(Loader.class, t, "Opening first series by default...");
                     selectedSeries = new int[]{0};
                 }
 
@@ -3063,8 +3039,7 @@ public class Loader {
                         throw e;
                     }
                     catch (final Throwable t) {
-                        IcyExceptionHandler.showErrorMessage(t, true, true);
-                        System.err.print("Couln't open, ignoring this series...");
+                        IcyLogger.error(Loader.class, t, "Couln't open, ignoring this series...");
                         continue;
                     }
                 }

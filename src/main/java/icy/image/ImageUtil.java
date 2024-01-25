@@ -1,40 +1,34 @@
 /*
  * Copyright 2010-2015 Institut Pasteur.
- * 
+ *
  * This file is part of Icy.
- * 
+ *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package icy.image;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Toolkit;
-import java.awt.Transparency;
+import icy.gui.util.FontUtil;
+import icy.network.URLUtil;
+import icy.system.logging.IcyLogger;
+import icy.system.thread.ThreadUtil;
+import icy.util.GraphicsUtil;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
-import java.awt.image.WritableRaster;
+import java.awt.image.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -42,83 +36,52 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.imageio.ImageIO;
-
-import icy.gui.util.FontUtil;
-import icy.network.URLUtil;
-import icy.system.thread.ThreadUtil;
-import icy.util.GraphicsUtil;
+import java.util.Objects;
 
 /**
  * Image utilities class.
- * 
- * @author stephane
+ *
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class ImageUtil
-{
-    public static String getImageTypeString(int type)
-    {
-        switch (type)
-        {
-            case BufferedImage.TYPE_CUSTOM:
-                return "TYPE_CUSTOM";
-            case BufferedImage.TYPE_INT_RGB:
-                return "TYPE_INT_RGB";
-            case BufferedImage.TYPE_INT_ARGB:
-                return "TYPE_INT_ARGB";
-            case BufferedImage.TYPE_INT_ARGB_PRE:
-                return "TYPE_INT_ARGB_PRE";
-            case BufferedImage.TYPE_INT_BGR:
-                return "TYPE_INT_BGR";
-            case BufferedImage.TYPE_3BYTE_BGR:
-                return "TYPE_3BYTE_BGR";
-            case BufferedImage.TYPE_4BYTE_ABGR:
-                return "TYPE_4BYTE_ABGR";
-            case BufferedImage.TYPE_4BYTE_ABGR_PRE:
-                return "TYPE_4BYTE_ABGR_PRE";
-            case BufferedImage.TYPE_USHORT_565_RGB:
-                return "TYPE_USHORT_565_RGB";
-            case BufferedImage.TYPE_USHORT_555_RGB:
-                return "TYPE_USHORT_555_RGB";
-            case BufferedImage.TYPE_BYTE_GRAY:
-                return "TYPE_BYTE_GRAY";
-            case BufferedImage.TYPE_USHORT_GRAY:
-                return "TYPE_USHORT_GRAY";
-            case BufferedImage.TYPE_BYTE_BINARY:
-                return "TYPE_BYTE_BINARY";
-            case BufferedImage.TYPE_BYTE_INDEXED:
-                return "TYPE_BYTE_INDEXED";
-            default:
-                return "UNKNOWN TYPE";
-        }
+public class ImageUtil {
+    public static String getImageTypeString(final int type) {
+        return switch (type) {
+            case BufferedImage.TYPE_CUSTOM -> "TYPE_CUSTOM";
+            case BufferedImage.TYPE_INT_RGB -> "TYPE_INT_RGB";
+            case BufferedImage.TYPE_INT_ARGB -> "TYPE_INT_ARGB";
+            case BufferedImage.TYPE_INT_ARGB_PRE -> "TYPE_INT_ARGB_PRE";
+            case BufferedImage.TYPE_INT_BGR -> "TYPE_INT_BGR";
+            case BufferedImage.TYPE_3BYTE_BGR -> "TYPE_3BYTE_BGR";
+            case BufferedImage.TYPE_4BYTE_ABGR -> "TYPE_4BYTE_ABGR";
+            case BufferedImage.TYPE_4BYTE_ABGR_PRE -> "TYPE_4BYTE_ABGR_PRE";
+            case BufferedImage.TYPE_USHORT_565_RGB -> "TYPE_USHORT_565_RGB";
+            case BufferedImage.TYPE_USHORT_555_RGB -> "TYPE_USHORT_555_RGB";
+            case BufferedImage.TYPE_BYTE_GRAY -> "TYPE_BYTE_GRAY";
+            case BufferedImage.TYPE_USHORT_GRAY -> "TYPE_USHORT_GRAY";
+            case BufferedImage.TYPE_BYTE_BINARY -> "TYPE_BYTE_BINARY";
+            case BufferedImage.TYPE_BYTE_INDEXED -> "TYPE_BYTE_INDEXED";
+            default -> "UNKNOWN TYPE";
+        };
     }
 
-    public static String getTransparencyString(int transparency)
-    {
-        switch (transparency)
-        {
-            case Transparency.OPAQUE:
-                return "OPAQUE";
-            case Transparency.BITMASK:
-                return "BITMASK";
-            case Transparency.TRANSLUCENT:
-                return "TRANSLUCENT";
-            default:
-                return "UNKNOWN TRANSPARENCY";
-        }
+    public static String getTransparencyString(final int transparency) {
+        return switch (transparency) {
+            case Transparency.OPAQUE -> "OPAQUE";
+            case Transparency.BITMASK -> "BITMASK";
+            case Transparency.TRANSLUCENT -> "TRANSLUCENT";
+            default -> "UNKNOWN TRANSPARENCY";
+        };
     }
 
     /**
      * Wait for dimension information of specified image being loaded.
-     * 
+     *
      * @param image
      *        image we are waiting informations for.
      */
-    public static void waitImageReady(Image image)
-    {
-        if (image != null)
-        {
+    public static void waitImageReady(final Image image) {
+        if (image != null) {
             final long st = System.currentTimeMillis();
 
             // wait 2 seconds max
@@ -131,9 +94,8 @@ public class ImageUtil
      * Create a 8 bits indexed buffered image from specified <code>IndexColorModel</code><br>
      * and byte array data.
      */
-    public static BufferedImage createIndexedImage(int w, int h, IndexColorModel cm, byte[] data)
-    {
-        final WritableRaster raster = Raster.createInterleavedRaster(new DataBufferByte(data, w * h, 0), w, h, w, 1, new int[] {0}, null);
+    public static BufferedImage createIndexedImage(final int w, final int h, final IndexColorModel cm, final byte[] data) {
+        final WritableRaster raster = Raster.createInterleavedRaster(new DataBufferByte(data, w * h, 0), w, h, w, 1, new int[]{0}, null);
 
         return new BufferedImage(cm, raster, false, null);
     }
@@ -141,35 +103,29 @@ public class ImageUtil
     /**
      * Load an image from specified path
      */
-    public static BufferedImage load(String path, boolean displayError)
-    {
+    public static BufferedImage load(final String path, final boolean displayError) {
         return load(URLUtil.getURL(path), displayError);
     }
 
     /**
      * Load an image from specified path
      */
-    public static BufferedImage load(String path)
-    {
+    public static BufferedImage load(final String path) {
         return load(path, true);
     }
 
     /**
      * Load an image from specified url
      */
-    public static BufferedImage load(URL url, boolean displayError)
-    {
-        if (url != null)
-        {
-            try
-            {
+    public static BufferedImage load(final URL url, final boolean displayError) {
+        if (url != null) {
+            try {
                 return ImageIO.read(url);
             }
             // important to catch Exception as sometime we got NPE here (inflater closed)
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 if (displayError)
-                    System.err.println("Can't load image from " + url);
+                    IcyLogger.error(ImageUtil.class, e, "Can't load image from " + url);
             }
         }
 
@@ -180,8 +136,7 @@ public class ImageUtil
      * Asynchronously load an image from specified url.<br>
      * Use {@link #waitImageReady(Image)} to know if width and height property
      */
-    public static Image loadAsync(URL url)
-    {
+    public static Image loadAsync(final URL url) {
         return Toolkit.getDefaultToolkit().createImage(url);
     }
 
@@ -189,34 +144,28 @@ public class ImageUtil
      * Asynchronously load an image from specified path.<br>
      * Use {@link #waitImageReady(Image)} to know if width and height property
      */
-    public static Image loadAsync(String path)
-    {
+    public static Image loadAsync(final String path) {
         return Toolkit.getDefaultToolkit().createImage(path);
     }
 
     /**
      * Load an image from specified url
      */
-    public static BufferedImage load(URL url)
-    {
+    public static BufferedImage load(final URL url) {
         return load(url, true);
     }
 
     /**
      * Load an image from specified file
      */
-    public static BufferedImage load(File file, boolean displayError)
-    {
-        if (file != null)
-        {
-            try
-            {
+    public static BufferedImage load(final File file, final boolean displayError) {
+        if (file != null) {
+            try {
                 return ImageIO.read(file);
             }
-            catch (IOException e)
-            {
+            catch (final IOException e) {
                 if (displayError)
-                    System.err.println("Can't load image from " + file);
+                    IcyLogger.error(ImageUtil.class, e, "Can't load image from " + file);
             }
         }
 
@@ -226,26 +175,21 @@ public class ImageUtil
     /**
      * Load an image from specified file
      */
-    public static BufferedImage load(File file)
-    {
+    public static BufferedImage load(final File file) {
         return load(file, true);
     }
 
     /**
      * Load an image from specified InputStream
      */
-    public static BufferedImage load(InputStream input, boolean displayError)
-    {
-        if (input != null)
-        {
-            try
-            {
+    public static BufferedImage load(final InputStream input, final boolean displayError) {
+        if (input != null) {
+            try {
                 return ImageIO.read(input);
             }
-            catch (Exception e)
-            {
+            catch (final Exception e) {
                 if (displayError)
-                    System.err.println("Can't load image from stream " + input);
+                    IcyLogger.error(ImageUtil.class, e, "Can't load image from stream " + input);
             }
         }
 
@@ -255,8 +199,7 @@ public class ImageUtil
     /**
      * Load an image from specified InputStream
      */
-    public static BufferedImage load(InputStream input)
-    {
+    public static BufferedImage load(final InputStream input) {
         return load(input, true);
     }
 
@@ -264,8 +207,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#load(String, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage loadImage(String path, boolean displayError)
-    {
+    public static BufferedImage loadImage(final String path, final boolean displayError) {
         return load(path, displayError);
     }
 
@@ -273,8 +215,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#load(String)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage loadImage(String path)
-    {
+    public static BufferedImage loadImage(final String path) {
         return load(path);
     }
 
@@ -282,8 +223,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#load(URL, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage loadImage(URL url, boolean displayError)
-    {
+    public static BufferedImage loadImage(final URL url, final boolean displayError) {
         return load(url, displayError);
     }
 
@@ -291,8 +231,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#load(URL)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Image loadImage(URL url)
-    {
+    public static Image loadImage(final URL url) {
         return load(url);
     }
 
@@ -300,8 +239,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#load(File, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage loadImage(File file, boolean displayError)
-    {
+    public static BufferedImage loadImage(final File file, final boolean displayError) {
         return load(file, displayError);
     }
 
@@ -309,8 +247,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#load(File)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage loadImage(File file)
-    {
+    public static BufferedImage loadImage(final File file) {
         return load(file);
     }
 
@@ -318,8 +255,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#load(InputStream, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage loadImage(InputStream input, boolean displayError)
-    {
+    public static BufferedImage loadImage(final InputStream input, final boolean displayError) {
         return load(input, displayError);
 
     }
@@ -328,8 +264,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#load(InputStream)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage loadImage(InputStream input)
-    {
+    public static BufferedImage loadImage(final InputStream input) {
         return load(input);
 
     }
@@ -337,17 +272,13 @@ public class ImageUtil
     /**
      * Save an image to specified path in specified format
      */
-    public static boolean save(RenderedImage image, String format, String path)
-    {
-        if (path != null)
-        {
-            try
-            {
+    public static boolean save(final RenderedImage image, final String format, final String path) {
+        if (path != null) {
+            try {
                 return ImageIO.write(image, format, new FileOutputStream(path));
             }
-            catch (IOException e)
-            {
-                System.err.println("Can't save image to " + path);
+            catch (final IOException e) {
+                IcyLogger.error(ImageUtil.class, e, "Can't save image to " + path);
             }
         }
 
@@ -357,17 +288,13 @@ public class ImageUtil
     /**
      * Save an image to specified file in specified format
      */
-    public static boolean save(RenderedImage image, String format, File file)
-    {
-        if (file != null)
-        {
-            try
-            {
+    public static boolean save(final RenderedImage image, final String format, final File file) {
+        if (file != null) {
+            try {
                 return ImageIO.write(image, format, file);
             }
-            catch (IOException e)
-            {
-                System.err.println("Can't save image to " + file);
+            catch (final IOException e) {
+                IcyLogger.error(ImageUtil.class, e, "Can't save image to " + file);
             }
         }
 
@@ -378,8 +305,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#save(RenderedImage, String, String)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean saveImage(RenderedImage image, String format, String path)
-    {
+    public static boolean saveImage(final RenderedImage image, final String format, final String path) {
         return save(image, format, path);
     }
 
@@ -387,16 +313,14 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#save(RenderedImage, String, File)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean saveImage(RenderedImage image, String format, File file)
-    {
+    public static boolean saveImage(final RenderedImage image, final String format, final File file) {
         return save(image, format, file);
     }
 
     /**
      * Return a RenderedImage from the given Image object.
      */
-    public static RenderedImage toRenderedImage(Image image)
-    {
+    public static RenderedImage toRenderedImage(final Image image) {
         return toBufferedImage(image);
     }
 
@@ -404,8 +328,7 @@ public class ImageUtil
      * Return a ARGB BufferedImage from the given Image object.
      * If the image is already a BufferedImage image then it's directly returned
      */
-    public static BufferedImage toBufferedImage(Image image)
-    {
+    public static BufferedImage toBufferedImage(final Image image) {
         if (image instanceof BufferedImage)
             return (BufferedImage) image;
 
@@ -423,10 +346,8 @@ public class ImageUtil
     /**
      * Scale an image with specified size.
      */
-    public static BufferedImage scale(Image image, int width, int height)
-    {
-        if (image != null)
-        {
+    public static BufferedImage scale(final Image image, final int width, final int height) {
+        if (image != null) {
             final BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             final Graphics2D g = result.createGraphics();
 
@@ -444,10 +365,8 @@ public class ImageUtil
     /**
      * Scale an image with specified size (try to keep best quality).
      */
-    public static BufferedImage scaleQuality(Image image, int width, int height)
-    {
-        if (image != null)
-        {
+    public static BufferedImage scaleQuality(final Image image, final int width, final int height) {
+        if (image != null) {
             Image current = image;
 
             // be sure image data are ready
@@ -456,10 +375,8 @@ public class ImageUtil
             int w = image.getWidth(null);
             int h = image.getHeight(null);
 
-            do
-            {
-                if (w > width)
-                {
+            do {
+                if (w > width) {
                     w /= 2;
                     if (w < width)
                         w = width;
@@ -467,8 +384,7 @@ public class ImageUtil
                 else
                     w = width;
 
-                if (h > height)
-                {
+                if (h > height) {
                     h /= 2;
                     if (h < height)
                         h = height;
@@ -499,18 +415,14 @@ public class ImageUtil
      * Convert an image to a BufferedImage.<br>
      * If <code>out</code>is null, by default a <code>BufferedImage.TYPE_INT_ARGB</code> is created.
      */
-    public static BufferedImage convert(Image in, BufferedImage out)
-    {
+    public static BufferedImage convert(final Image in, final BufferedImage out) {
         final BufferedImage result;
 
         // be sure image data are ready
         waitImageReady(in);
 
         // no output type specified ? use ARGB
-        if (out == null)
-            result = new BufferedImage(in.getWidth(null), in.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-        else
-            result = out;
+        result = Objects.requireNonNullElseGet(out, () -> new BufferedImage(in.getWidth(null), in.getHeight(null), BufferedImage.TYPE_INT_ARGB));
 
         final Graphics g = result.getGraphics();
         g.drawImage(in, 0, 0, null);
@@ -523,8 +435,7 @@ public class ImageUtil
      * Returns <code>true</code> if the specified image is a grayscale image whatever is the image
      * type (GRAY, RGB, ARGB...)
      */
-    public static boolean isGray(BufferedImage image)
-    {
+    public static boolean isGray(final BufferedImage image) {
         if (image == null)
             return false;
 
@@ -535,9 +446,8 @@ public class ImageUtil
 
         final int[] rgbArray = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
 
-        for (int value : rgbArray)
-        {
-            final int c0 = (value >> 0) & 0xFF;
+        for (final int value : rgbArray) {
+            final int c0 = (value/* >> 0*/) & 0xFF;
             final int c1 = (value >> 8) & 0xFF;
             if (c0 != c1)
                 return false;
@@ -553,10 +463,8 @@ public class ImageUtil
     /**
      * Convert an image to grey image (<code>BufferedImage.TYPE_BYTE_GRAY</code>).
      */
-    public static BufferedImage toGray(Image image)
-    {
-        if (image != null)
-        {
+    public static BufferedImage toGray(final Image image) {
+        if (image != null) {
             // be sure image data are ready
             waitImageReady(image);
             return convert(image, new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_BYTE_GRAY));
@@ -568,10 +476,8 @@ public class ImageUtil
     /**
      * Convert an image to RGB image (<code>BufferedImage.TYPE_INT_RGB</code>).
      */
-    public static BufferedImage toRGBImage(Image image)
-    {
-        if (image != null)
-        {
+    public static BufferedImage toRGBImage(final Image image) {
+        if (image != null) {
             // be sure image data are ready
             waitImageReady(image);
             return convert(image, new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB));
@@ -583,10 +489,8 @@ public class ImageUtil
     /**
      * Convert an image to ARGB image (<code>BufferedImage.TYPE_INT_ARGB</code>).
      */
-    public static BufferedImage toARGBImage(Image image)
-    {
-        if (image != null)
-        {
+    public static BufferedImage toARGBImage(final Image image) {
+        if (image != null) {
             // be sure image data are ready
             waitImageReady(image);
             return convert(image, new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB));
@@ -599,8 +503,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#scale(Image, int, int)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage scaleImage(Image image, int width, int height)
-    {
+    public static BufferedImage scaleImage(final Image image, final int width, final int height) {
         return scale(image, width, height);
     }
 
@@ -608,8 +511,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#scaleQuality(Image, int, int)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage scaleImageQuality(Image image, int width, int height)
-    {
+    public static BufferedImage scaleImageQuality(final Image image, final int width, final int height) {
         return scaleQuality(image, width, height);
     }
 
@@ -617,8 +519,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#convert(Image, BufferedImage)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage convertImage(Image in, BufferedImage out)
-    {
+    public static BufferedImage convertImage(final Image in, final BufferedImage out) {
         return convert(in, out);
     }
 
@@ -626,8 +527,7 @@ public class ImageUtil
      * @deprecated Use {@link ImageUtil#toGray(Image)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static BufferedImage toGrayImage(Image image)
-    {
+    public static BufferedImage toGrayImage(final Image image) {
         return toGray(image);
     }
 
@@ -635,23 +535,21 @@ public class ImageUtil
      * Create a copy of the input image.<br>
      * Result is always a <code>BufferedImage.TYPE_INT_ARGB</code> type image.
      */
-    public static BufferedImage getCopy(Image in)
-    {
+    public static BufferedImage getCopy(final Image in) {
         return convert(in, null);
     }
 
     /**
      * Return true if image has the same size
      */
-    public static boolean sameSize(BufferedImage im1, BufferedImage im2)
-    {
+    public static boolean sameSize(final BufferedImage im1, final BufferedImage im2) {
         return (im1.getWidth() == im2.getWidth()) && (im1.getHeight() == im2.getHeight());
     }
 
     /**
      * Get the list of tiles to cover the given XY region.<br>
      * Note that the resulting tiles surface may be larger than input region as we enforce using specified tile size / position to cover the whole region.
-     * 
+     *
      * @param region
      *        the XY region to cover
      * @param tileW
@@ -659,15 +557,16 @@ public class ImageUtil
      * @param tileH
      *        tile height
      */
-    public static List<Rectangle> getTileList(Rectangle region, int tileW, int tileH)
-    {
-        final List<Rectangle> result = new ArrayList<Rectangle>();
+    public static List<Rectangle> getTileList(final Rectangle region, final int tileW, final int tileH) {
+        final List<Rectangle> result = new ArrayList<>();
 
         if ((tileW <= 0) || (tileH <= 0) || region.isEmpty())
             return result;
 
-        int startX, startY;
-        int endX, endY;
+        final int startX;
+        final int startY;
+        final int endX;
+        final int endY;
 
         startX = (region.x / tileW) * tileW;
         startY = (region.y / tileH) * tileH;
@@ -684,7 +583,7 @@ public class ImageUtil
     /**
      * Get the list of tiles to fill the given XY plan size.<br>
      * Note that the resulting tiles surface may be larger than input region as we enforce using specified tile size / position to cover the whole region.
-     * 
+     *
      * @param sizeX
      *        plan sizeX
      * @param sizeY
@@ -694,18 +593,15 @@ public class ImageUtil
      * @param tileH
      *        tile height
      */
-    public static List<Rectangle> getTileList(int sizeX, int sizeY, int tileW, int tileH)
-    {
+    public static List<Rectangle> getTileList(final int sizeX, final int sizeY, final int tileW, final int tileH) {
         return getTileList(new Rectangle(0, 0, sizeX, sizeY), tileW, tileH);
     }
 
     /**
      * Apply simple color filter with specified alpha factor to the image
      */
-    public static void applyColorFilter(Image image, Color color, float alpha)
-    {
-        if (image != null)
-        {
+    public static void applyColorFilter(final Image image, final Color color, final float alpha) {
+        if (image != null) {
             // be sure image data are ready
             waitImageReady(image);
 
@@ -723,16 +619,14 @@ public class ImageUtil
     /**
      * Return an image which contains specified color depending original alpha intensity image
      */
-    public static Image getColorImageFromAlphaImage(Image alphaImage, Color color)
-    {
+    public static Image getColorImageFromAlphaImage(final Image alphaImage, final Color color) {
         return paintColorImageFromAlphaImage(alphaImage, null, color);
     }
 
     /**
      * Paint the specified color in 'out' image depending original alpha intensity from 'alphaImage'
      */
-    public static Image paintColorImageFromAlphaImage(Image alphaImage, Image out, Color color)
-    {
+    public static Image paintColorImageFromAlphaImage(final Image alphaImage, final Image out, final Color color) {
         if (alphaImage == null)
             return null;
 
@@ -740,8 +634,7 @@ public class ImageUtil
         final int h;
         final Image result;
 
-        if (out == null)
-        {
+        if (out == null) {
             // be sure image data are ready
             waitImageReady(alphaImage);
 
@@ -753,8 +646,7 @@ public class ImageUtil
 
             result = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         }
-        else
-        {
+        else {
             // be sure image data are ready
             waitImageReady(out);
 
@@ -791,8 +683,7 @@ public class ImageUtil
     /**
      * Draw text in the specified image with specified parameters.<br>
      */
-    public static void drawText(Image image, String text, float x, float y, int size, Color color)
-    {
+    public static void drawText(final Image image, final String text, final float x, final float y, final int size, final Color color) {
         final Graphics2D g = (Graphics2D) image.getGraphics();
 
         // prepare setting
@@ -809,8 +700,7 @@ public class ImageUtil
     /**
      * Draw text at top right in the specified image with specified parameters.<br>
      */
-    public static void drawTextTopRight(Image image, String text, int size, boolean bold, Color color)
-    {
+    public static void drawTextTopRight(final Image image, final String text, final int size, final boolean bold, final Color color) {
         final Graphics2D g = (Graphics2D) image.getGraphics();
 
         // prepare setting

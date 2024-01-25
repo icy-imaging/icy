@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,19 +24,21 @@ import icy.gui.dialog.IdConfirmDialog;
 import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.system.IcyExceptionHandler;
 import icy.system.IcyHandledException;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.OpenGLUtil;
 import icy.util.ReflectionUtil;
 import jogamp.opengl.GLDrawableHelper;
-import jogamp.opengl.GLOffscreenAutoDrawableImpl;
-import jogamp.opengl.es3.GLES3Impl;
 import vtk.*;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
-// kind of custom vtkJoglPanelComponent;
+/**
+ * Kind of custom vtkJoglPanelComponent
+ *
+ * @author Stephane Dallongeville
+ */
 public class VtkJoglPanel extends GLJPanel {
     class GLEventImpl implements GLEventListener {
         @Override
@@ -211,7 +213,7 @@ public class VtkJoglPanel extends GLJPanel {
                 rw = null;
             }
             else {
-                System.out.println("The renderwindow has been kept arount to prevent a crash");
+                IcyLogger.warn(VtkJoglPanel.class, "The renderwindow has been kept arount to prevent a crash");
             }
 
             // call it only once in parent as this can take a lot of time
@@ -245,6 +247,7 @@ public class VtkJoglPanel extends GLJPanel {
         removeGLEventListener(glEventImpl);
 
         try {
+            // TODO remove these, cannot be used anymore
             // hacky fix to avoid the infamous memory leak from ThreadLocal from GLPanel !
             final GLDrawableHelper helper = (GLDrawableHelper) ReflectionUtil.getFieldObject(this, "helper", true);
             final ThreadLocal threadLocal = (ThreadLocal) ReflectionUtil.getFieldObject(helper, "perThreadInitAction", true);

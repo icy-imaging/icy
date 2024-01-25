@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,55 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
-import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
-
-import icy.gui.component.button.IcyButton;
-import icy.gui.toolbar.panel.ToolbarPanel;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.sort.DefaultSortController;
-import org.jdesktop.swingx.table.DefaultTableColumnModelExt;
-import org.jdesktop.swingx.table.TableColumnExt;
 
 import icy.action.RoiActions;
 import icy.canvas.IcyCanvas;
 import icy.canvas.IcyCanvas2D;
 import icy.canvas.IcyCanvas3D;
 import icy.gui.component.IcyTextField.TextChangeListener;
+import icy.gui.component.button.IcyButton;
 import icy.gui.component.renderer.ImageTableCellRenderer;
 import icy.gui.inspector.RoiSettingFrame;
 import icy.gui.main.ActiveSequenceListener;
+import icy.gui.toolbar.panel.ToolbarPanel;
 import icy.gui.util.GuiUtil;
 import icy.gui.viewer.Viewer;
 import icy.main.Icy;
@@ -74,54 +37,49 @@ import icy.plugin.PluginLoader.PluginLoaderEvent;
 import icy.plugin.PluginLoader.PluginLoaderListener;
 import icy.plugin.interface_.PluginROIDescriptor;
 import icy.preferences.XMLPreferences;
-import icy.roi.ROI;
-import icy.roi.ROIDescriptor;
-import icy.roi.ROIEvent;
+import icy.roi.*;
 import icy.roi.ROIEvent.ROIEventType;
-import icy.roi.ROIListener;
-import icy.roi.ROIUtil;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.sequence.SequenceEvent.SequenceEventSourceType;
 import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.InstanceProcessor;
 import icy.system.thread.ThreadUtil;
 import icy.type.rectangle.Rectangle5D;
 import icy.util.ClassUtil;
 import icy.util.StringUtil;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.sort.DefaultSortController;
+import org.jdesktop.swingx.table.DefaultTableColumnModelExt;
+import org.jdesktop.swingx.table.TableColumnExt;
 import plugins.kernel.roi.descriptor.intensity.ROIMaxIntensityDescriptor;
 import plugins.kernel.roi.descriptor.intensity.ROIMeanIntensityDescriptor;
 import plugins.kernel.roi.descriptor.intensity.ROIMinIntensityDescriptor;
 import plugins.kernel.roi.descriptor.intensity.ROISumIntensityDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIAreaDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIContourDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIInteriorDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIMassCenterCDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIMassCenterTDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIMassCenterXDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIMassCenterYDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIMassCenterZDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIPerimeterDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROISurfaceAreaDescriptor;
-import plugins.kernel.roi.descriptor.measure.ROIVolumeDescriptor;
-import plugins.kernel.roi.descriptor.property.ROIColorDescriptor;
-import plugins.kernel.roi.descriptor.property.ROIIconDescriptor;
-import plugins.kernel.roi.descriptor.property.ROINameDescriptor;
-import plugins.kernel.roi.descriptor.property.ROIOpacityDescriptor;
-import plugins.kernel.roi.descriptor.property.ROIPositionCDescriptor;
-import plugins.kernel.roi.descriptor.property.ROIPositionTDescriptor;
-import plugins.kernel.roi.descriptor.property.ROIPositionXDescriptor;
-import plugins.kernel.roi.descriptor.property.ROIPositionYDescriptor;
-import plugins.kernel.roi.descriptor.property.ROIPositionZDescriptor;
-import plugins.kernel.roi.descriptor.property.ROISizeCDescriptor;
-import plugins.kernel.roi.descriptor.property.ROISizeTDescriptor;
-import plugins.kernel.roi.descriptor.property.ROISizeXDescriptor;
-import plugins.kernel.roi.descriptor.property.ROISizeYDescriptor;
-import plugins.kernel.roi.descriptor.property.ROISizeZDescriptor;
+import plugins.kernel.roi.descriptor.measure.*;
+import plugins.kernel.roi.descriptor.property.*;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.lang.ref.WeakReference;
+import java.util.List;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract ROI panel component
  *
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSequenceListener, TextChangeListener, ListSelectionListener, PluginLoaderListener {
@@ -197,7 +155,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     protected JLabel selectedRoiNumberLabel;
 
     // PluginDescriptors / ROIDescriptor map
-    protected Map<ROIDescriptor, PluginROIDescriptor> descriptorMap;
+    protected final Map<ROIDescriptor, PluginROIDescriptor> descriptorMap = new HashMap<>();
 
     // Descriptor / column info (static to the class)
     protected List<ColumnInfo> columnInfoList;
@@ -206,10 +164,10 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
 
     // ROI info list cache
     protected Set<ROI> roiSet;
-    protected Map<ROI, ROIResults> roiResultsMap;
+    protected final Map<ROI, ROIResults> roiResultsMap;
     protected List<ROI> filteredRoiList;
     protected List<ROIResults> filteredRoiResultsList;
-    protected List<SequenceEvent> savedSequenceEvents;
+    protected final List<SequenceEvent> savedSequenceEvents;
 
     // internals
     protected final XMLPreferences basePreferences;
@@ -238,7 +196,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
      *
      * @param preferences XML preferences node which will contains the ROI table settings
      */
-    public AbstractRoisPanel(XMLPreferences preferences) {
+    public AbstractRoisPanel(final XMLPreferences preferences) {
         //super("ROI", "roiPanel", new Point(100, 100), new Dimension(400, 600));
         super(new Dimension(400, 0));
 
@@ -312,7 +270,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         roiTable.setSortable(true);
         roiTable.addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent event) {
+            public void mousePressed(final MouseEvent event) {
                 if (event.getClickCount() == 2) {
                     final int c = roiTable.columnAtPoint(event.getPoint());
                     TableColumn col = null;
@@ -340,8 +298,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         final JPanel middlePanel = new JPanel(new BorderLayout(0, 0));
 
         middlePanel.add(roiTable.getTableHeader(), BorderLayout.NORTH);
-        middlePanel.add(new JScrollPane(roiTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
+        middlePanel.add(new JScrollPane(roiTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
         final IcyButton settingButton = new IcyButton(GoogleMaterialDesignIcons.SETTINGS);
         settingButton.addActionListener(RoiActions.settingAction);
@@ -393,7 +350,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         amap.put(RoiActions.pasteLinkAction.getName(), RoiActions.pasteLinkAction);
     }
 
-    protected ROIResults createNewROIResults(ROI roi) {
+    protected ROIResults createNewROIResults(final ROI roi) {
         return new ROIResults(roi);
     }
 
@@ -412,7 +369,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Returns roiTable column suffix for the specified channel
      */
-    protected String getChannelNameSuffix(int ch) {
+    protected String getChannelNameSuffix(final int ch) {
         final Sequence sequence = getSequence();
 
         if ((sequence != null) && (ch < getChannelCount()))
@@ -424,14 +381,14 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Returns ROI descriptor given its id.
      */
-    protected ROIDescriptor getROIDescriptor(String descriptorId) {
+    protected ROIDescriptor getROIDescriptor(final String descriptorId) {
         final ROIDescriptor[] descriptors;
 
         synchronized (descriptorMap) {
-            descriptors = descriptorMap.keySet().toArray(new ROIDescriptor[descriptorMap.size()]);
+            descriptors = descriptorMap.keySet().toArray(new ROIDescriptor[0]);
         }
 
-        for (ROIDescriptor descriptor : descriptors)
+        for (final ROIDescriptor descriptor : descriptors)
             if (descriptor.getId().equals(descriptorId))
                 return descriptor;
 
@@ -441,7 +398,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Get column info for specified column index.
      */
-    protected ColumnInfo getColumnInfo(List<ColumnInfo> columns, int column) {
+    protected ColumnInfo getColumnInfo(final List<ColumnInfo> columns, final int column) {
         if (column < columns.size())
             return columns.get(column);
 
@@ -451,29 +408,29 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Get column info for specified column index.
      */
-    protected ColumnInfo getColumnInfo(int column) {
+    protected ColumnInfo getColumnInfo(final int column) {
         return getColumnInfo(columnInfoList, column);
     }
 
-    protected ColumnInfo getColumnInfo(List<ColumnInfo> columns, ROIDescriptor descriptor, int channel) {
-        for (ColumnInfo ci : columns)
+    protected ColumnInfo getColumnInfo(final List<ColumnInfo> columns, final ROIDescriptor descriptor, final int channel) {
+        for (final ColumnInfo ci : columns)
             if (ci.descriptor.equals(descriptor) && (ci.channel == channel))
                 return ci;
 
         return null;
     }
 
-    protected ColumnInfo getColumnInfo(ROIDescriptor descriptor, int channel) {
+    protected ColumnInfo getColumnInfo(final ROIDescriptor descriptor, final int channel) {
         return getColumnInfo(columnInfoList, descriptor, channel);
     }
 
     protected abstract Sequence getSequence();
 
-    public void setNameFilter(String name) {
+    public void setNameFilter(final String name) {
         nameFilter.setText(name);
     }
 
-    protected boolean computeROIResults(ROIResults roiResults, Sequence seq, ColumnInfo columnInfo) {
+    protected boolean computeROIResults(final ROIResults roiResults, final Sequence seq, final ColumnInfo columnInfo) {
         final Map<ColumnInfo, DescriptorResult> results = roiResults.descriptorResults;
         final ROIDescriptor descriptor = columnInfo.descriptor;
         final DescriptorResult result;
@@ -510,7 +467,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                     else
                         newResults = plugin.compute(roiResults.roi, seq);
 
-                    for (Entry<ROIDescriptor, Object> entryNewResult : newResults.entrySet()) {
+                    for (final Entry<ROIDescriptor, Object> entryNewResult : newResults.entrySet()) {
                         // get the column for this result
                         final ColumnInfo resultColumnInfo = getColumnInfo(entryNewResult.getKey(), columnInfo.channel);
                         final DescriptorResult oResult;
@@ -528,7 +485,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                         }
                     }
                 }
-                catch (Throwable t) {
+                catch (final Throwable t) {
                     // not UnsupportedOperationException or InterruptedException ? --> show the error
                     if (!(t instanceof UnsupportedOperationException) && !(t instanceof InterruptedException))
                         IcyExceptionHandler.handleException(t, true);
@@ -537,7 +494,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
 
                     if (descriptors != null) {
                         // not supported --> clear associated results and set them as computed
-                        for (ROIDescriptor desc : descriptors) {
+                        for (final ROIDescriptor desc : descriptors) {
                             // get the column for this result
                             final ColumnInfo resultColumnInfo = getColumnInfo(desc, columnInfo.channel);
                             final DescriptorResult oResult;
@@ -566,7 +523,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Return index of specified ROI in the filtered ROI list
      */
-    protected int getRoiIndex(ROI roi) {
+    protected int getRoiIndex(final ROI roi) {
         final int result = Collections.binarySearch(filteredRoiList, roi, ROI.idComparator);
 
         if (result >= 0)
@@ -578,14 +535,14 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Return index of specified ROI in the model
      */
-    protected int getRoiModelIndex(ROI roi) {
+    protected int getRoiModelIndex(final ROI roi) {
         return getRoiIndex(roi);
     }
 
     /**
      * Return index of specified ROI in the table (view)
      */
-    protected int getRoiViewIndex(ROI roi) {
+    protected int getRoiViewIndex(final ROI roi) {
         final int ind = getRoiModelIndex(roi);
 
         if (ind == -1)
@@ -594,12 +551,12 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         try {
             return roiTable.convertRowIndexToView(ind);
         }
-        catch (IndexOutOfBoundsException e) {
+        catch (final IndexOutOfBoundsException e) {
             return -1;
         }
     }
 
-    protected ROIResults getRoiResults(int rowModelIndex) {
+    protected ROIResults getRoiResults(final int rowModelIndex) {
         final List<ROIResults> entries = filteredRoiResultsList;
 
         if ((rowModelIndex >= 0) && (rowModelIndex < entries.size()))
@@ -651,7 +608,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                             if ((index >= 0) && (index < roiResults.size()))
                                 result.add(roiResults.get(index).roi);
                         }
-                        catch (IndexOutOfBoundsException e) {
+                        catch (final IndexOutOfBoundsException e) {
                             // ignore
                         }
                     }
@@ -665,7 +622,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Select the specified list of ROI in the ROI Table
      */
-    protected void setSelectedRoisInternal(Set<ROI> newSelected) {
+    protected void setSelectedRoisInternal(final Set<ROI> newSelected) {
         final List<Integer> selectedIndexes = new ArrayList<>();
         final List<ROI> roiList = filteredRoiList;
 
@@ -680,7 +637,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                     // convert model index to view index
                     ind = roiTable.convertRowIndexToView(i);
                 }
-                catch (IndexOutOfBoundsException e) {
+                catch (final IndexOutOfBoundsException e) {
                     ind = -1;
                 }
 
@@ -696,7 +653,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                 // start by clearing selection
                 roiSelectionModel.clearSelection();
 
-                for (Integer index : selectedIndexes)
+                for (final Integer index : selectedIndexes)
                     roiSelectionModel.addSelectionInterval(index.intValue(), index.intValue());
             }
             finally {
@@ -706,7 +663,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
     }
 
-    protected Set<ROI> getFilteredSet(String filter) {
+    protected Set<ROI> getFilteredSet(final String filter) {
         final Set<ROI> rois = roiSet;
         final Set<ROI> result = new HashSet<>();
 
@@ -716,7 +673,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             final String text = filter.trim().toLowerCase();
 
             // filter on name
-            for (ROI roi : rois)
+            for (final ROI roi : rois)
                 if (roi.getName().toLowerCase().contains(text))
                     result.add(roi);
         }
@@ -727,7 +684,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Display the roi in the table (scroll if needed)
      */
-    public void scrollTo(ROI roi) {
+    public void scrollTo(final ROI roi) {
         final int index = getRoiViewIndex(roi);
 
         if (index != -1)
@@ -783,12 +740,12 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         final Set<ROI> removedSet = new HashSet<>();
 
         // build removed set
-        for (ROI roi : currentRoiSet)
+        for (final ROI roi : currentRoiSet)
             if (!newRoiSet.contains(roi))
                 removedSet.add(roi);
 
         // remove from ROI entry map
-        for (ROI roi : removedSet) {
+        for (final ROI roi : removedSet) {
             final ROIResults roiResults;
 
             // must be synchronized
@@ -848,7 +805,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         // sort on id
         newFilteredRoiList.sort(ROI.idComparator);
         // then build filtered results list
-        for (ROI roi : newFilteredRoiList) {
+        for (final ROI roi : newFilteredRoiList) {
             ROIResults roiResults;
 
             synchronized (roiResultsMap) {
@@ -881,7 +838,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
 
         // get all ROI results
         synchronized (roiResultsMap) {
-            allRoiResults = roiResultsMap.values().toArray(new ROIResults[roiResultsMap.size()]);
+            allRoiResults = roiResultsMap.values().toArray(new ROIResults[0]);
         }
 
         // get saved events
@@ -894,7 +851,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         final List<SequenceEvent> cleanedEvents = new ArrayList<>(events.size());
 
         // only keep meaningful events (ROI events are directly handled from ROI change event)
-        for (SequenceEvent event : events) {
+        for (final SequenceEvent event : events) {
             switch (event.getSourceType()) {
                 case SEQUENCE_DATA:
                 case SEQUENCE_META:
@@ -911,8 +868,8 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return;
 
         // notify ROI results that sequence has changed
-        for (ROIResults roiResults : allRoiResults)
-            for (SequenceEvent event : cleanedEvents)
+        for (final ROIResults roiResults : allRoiResults)
+            for (final SequenceEvent event : cleanedEvents)
                 roiResults.sequenceChanged(event);
 
         // refresh table data
@@ -943,7 +900,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                         // notify table data changed
                         roiTableModel.fireTableDataChanged();
                     }
-                    catch (Exception e) {
+                    catch (final Exception e) {
                         // Sorter don't like when we change data while it's sorting...
                     }
                 }
@@ -999,7 +956,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                     try {
                         roiTableModel.fireTableRowsUpdated(0, rowCount - 1);
                     }
-                    catch (Exception e) {
+                    catch (final Exception e) {
                         // Sorter don't like when we change data while it's sorting...
                     }
                 }
@@ -1044,7 +1001,11 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     }
 
     protected void refreshDescriptorList() {
-        descriptorMap = ROIUtil.getROIDescriptors();
+        synchronized (descriptorMap) {
+            //descriptorMap = ROIUtil.getROIDescriptors();
+            descriptorMap.clear();
+            descriptorMap.putAll(ROIUtil.getROIDescriptors());
+        }
         refreshColumnInfoList();
     }
 
@@ -1057,7 +1018,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         final List<ColumnInfo> newColumnInfos = new ArrayList<>();
         final int numChannel = getChannelCount();
 
-        for (ROIDescriptor descriptor : descriptorMap.keySet()) {
+        for (final ROIDescriptor descriptor : descriptorMap.keySet()) {
             for (int ch = 0; ch < (descriptor.separateChannel() ? numChannel : 1); ch++)
                 newColumnInfos.add(new ColumnInfo(descriptor, ch, viewPreferences, false));
         }
@@ -1073,19 +1034,19 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         });
     }
 
-    protected void requestDescriptorComputation(ROIResults results) {
+    protected void requestDescriptorComputation(final ROIResults results) {
         primaryDescriptorComputer.requestDescriptorComputation(results);
         basicDescriptorComputer.requestDescriptorComputation(results);
         advancedDescriptorComputer.requestDescriptorComputation(results);
     }
 
-    protected void cancelDescriptorComputation(ROIResults results) {
+    protected void cancelDescriptorComputation(final ROIResults results) {
         primaryDescriptorComputer.cancelDescriptorComputation(results);
         basicDescriptorComputer.cancelDescriptorComputation(results);
         advancedDescriptorComputer.cancelDescriptorComputation(results);
     }
 
-    protected void cancelDescriptorComputation(ROI roi) {
+    protected void cancelDescriptorComputation(final ROI roi) {
         primaryDescriptorComputer.cancelDescriptorComputation(roi);
         basicDescriptorComputer.cancelDescriptorComputation(roi);
         advancedDescriptorComputer.cancelDescriptorComputation(roi);
@@ -1128,9 +1089,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                         j);
 
                 // special case of double array
-                if (value instanceof double[]) {
-                    final double[] darray = (double[]) value;
-
+                if (value instanceof final double[] darray) {
                     for (int l = 0; l < darray.length; l++) {
                         sbf.append(darray[l]);
                         if (l < darray.length - 1)
@@ -1158,7 +1117,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         final int numChannel = getChannelCount();
 
         // get export column informations
-        for (ROIDescriptor descriptor : descriptorMap.keySet()) {
+        for (final ROIDescriptor descriptor : descriptorMap.keySet()) {
             for (int ch = 0; ch < (descriptor.separateChannel() ? numChannel : 1); ch++)
                 exportColumnInfos.add(new ColumnInfo(descriptor, ch, exportPreferences, true));
         }
@@ -1169,7 +1128,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         final StringBuilder sbf = new StringBuilder();
 
         // column title
-        for (ColumnInfo columnInfo : exportColumnInfos) {
+        for (final ColumnInfo columnInfo : exportColumnInfos) {
             if (columnInfo.visible) {
                 sbf.append(columnInfo.name);
                 sbf.append("\t");
@@ -1180,12 +1139,12 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         final List<ROI> rois = new ArrayList<>(filteredRoiList);
 
         // content
-        for (ROI roi : rois) {
+        for (final ROI roi : rois) {
             final ROIResults results = createNewROIResults(roi);
             final Map<ColumnInfo, DescriptorResult> descriptorResults = results.descriptorResults;
 
             // compute results
-            for (ColumnInfo columnInfo : exportColumnInfos) {
+            for (final ColumnInfo columnInfo : exportColumnInfos) {
                 if (columnInfo.visible) {
                     // try to retrieve result for this column
                     final DescriptorResult result = descriptorResults.get(columnInfo);
@@ -1199,7 +1158,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             }
 
             // display results
-            for (ColumnInfo columnInfo : exportColumnInfos) {
+            for (final ColumnInfo columnInfo : exportColumnInfos) {
                 if (columnInfo.visible) {
                     final DescriptorResult result = descriptorResults.get(columnInfo);
                     final String id = columnInfo.descriptor.getId();
@@ -1237,14 +1196,14 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     }
 
     @Override
-    public void textChanged(IcyTextField source, boolean validate) {
+    public void textChanged(final IcyTextField source, final boolean validate) {
         if (source == nameFilter)
             refreshFilteredRois();
     }
 
     // called when selection changed in the ROI table
     @Override
-    public void valueChanged(ListSelectionEvent e) {
+    public void valueChanged(final ListSelectionEvent e) {
         // currently changing the selection ? --> exit
         if (e.getValueIsAdjusting())
             return;
@@ -1306,7 +1265,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     }
 
     @Override
-    public void sequenceActivated(Sequence value) {
+    public void sequenceActivated(final Sequence value) {
         // refresh table columns
         refreshColumnInfoList();
         // refresh ROI list
@@ -1314,12 +1273,12 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     }
 
     @Override
-    public void sequenceDeactivated(Sequence sequence) {
+    public void sequenceDeactivated(final Sequence sequence) {
         // nothing here
     }
 
     @Override
-    public void activeSequenceChanged(SequenceEvent event) {
+    public void activeSequenceChanged(final SequenceEvent event) {
         // we are modifying externally
         // if (modifySelection.availablePermits() == 0)
         // return;
@@ -1350,7 +1309,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
 
             case SEQUENCE_META:
                 // refresh column name (unit can change when pixel size changed)
-                for (ColumnInfo col : columnInfoList)
+                for (final ColumnInfo col : columnInfoList)
                     col.refreshName();
 
                 // refresh column model
@@ -1377,16 +1336,11 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     }
 
     @Override
-    public void pluginLoaderChanged(PluginLoaderEvent e) {
+    public void pluginLoaderChanged(final PluginLoaderEvent e) {
         refreshDescriptorList();
     }
 
     protected class ROITableModel extends AbstractTableModel {
-        /**
-         *
-         */
-        private static final long serialVersionUID = -6537163170625368503L;
-
         public ROITableModel() {
             super();
         }
@@ -1397,7 +1351,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public String getColumnName(int column) {
+        public String getColumnName(final int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
             if ((ci != null) && (ci.showName))
@@ -1407,7 +1361,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public Class<?> getColumnClass(int column) {
+        public Class<?> getColumnClass(final int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
             if (ci != null)
@@ -1422,7 +1376,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public Object getValueAt(int row, int column) {
+        public Object getValueAt(final int row, final int column) {
             final ROIResults roiResults = getRoiResults(row);
 
             if (roiResults != null)
@@ -1432,7 +1386,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public void setValueAt(Object value, int row, int column) {
+        public void setValueAt(final Object value, final int row, final int column) {
             final ROIResults roiResults = getRoiResults(row);
 
             if (roiResults != null)
@@ -1440,7 +1394,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public boolean isCellEditable(int row, int column) {
+        public boolean isCellEditable(final int row, final int column) {
             final ROIResults roiResults = getRoiResults(row);
 
             if (roiResults != null)
@@ -1455,7 +1409,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         public final ROI roi;
         private final Map<Integer, WeakReference<ROI>> channelRois;
 
-        protected ROIResults(ROI roi) {
+        protected ROIResults(final ROI roi) {
             super();
 
             this.roi = roi;
@@ -1472,9 +1426,9 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             }
         }
 
-        public ROI getRoiForChannel(int channel) throws InterruptedException {
+        public ROI getRoiForChannel(final int channel) throws InterruptedException {
             final Integer key = Integer.valueOf(channel);
-            WeakReference<ROI> reference;
+            final WeakReference<ROI> reference;
             ROI result;
 
             synchronized (channelRois) {
@@ -1507,7 +1461,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return result;
         }
 
-        public boolean isEditable(int column) {
+        public boolean isEditable(final int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
             if (ci != null) {
@@ -1521,11 +1475,11 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return false;
         }
 
-        public Object formatValue(Object value, String id) {
+        public Object formatValue(final Object value, final String id) {
             return formatValue(value, id, true);
         }
 
-        public Object formatValue(Object value, String id, boolean truncateDouble) {
+        public Object formatValue(final Object value, final String id, final boolean truncateDouble) {
             Object result = value;
 
             // format result if needed
@@ -1601,20 +1555,15 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         /**
          * Retrieve the DescriptorResult for the specified column
          */
-        public DescriptorResult getDescriptorResult(ColumnInfo column) {
+        public DescriptorResult getDescriptorResult(final ColumnInfo column) {
             // get result for this descriptor
-            DescriptorResult result;
+            final DescriptorResult result;
 
             synchronized (descriptorResults) {
-                result = descriptorResults.get(column);
-
                 // no result --> create it and request computation
-                if (result == null) {
-                    // create descriptor result
-                    result = new DescriptorResult(column);
-                    // and put it in results map
-                    descriptorResults.put(column, result);
-                }
+                // create descriptor result
+                // and put it in results map
+                result = descriptorResults.computeIfAbsent(column, DescriptorResult::new);
             }
 
             return result;
@@ -1623,7 +1572,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         /**
          * Retrieve the value for the specified descriptor
          */
-        public Object getValue(ColumnInfo column) {
+        public Object getValue(final ColumnInfo column) {
             // get result for this descriptor
             final DescriptorResult result = getDescriptorResult(column);
 
@@ -1634,7 +1583,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return formatValue(result.getValue(), column.descriptor.getId());
         }
 
-        public Object getValueAt(int column) {
+        public Object getValueAt(final int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
             if (ci != null)
@@ -1643,7 +1592,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return null;
         }
 
-        public void setValueAt(Object aValue, int column) {
+        public void setValueAt(final Object aValue, final int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
             if (ci != null) {
@@ -1659,7 +1608,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public void roiChanged(ROIEvent event) {
+        public void roiChanged(final ROIEvent event) {
             switch (event.getType()) {
                 case ROI_CHANGED:
                 case PROPERTY_CHANGED:
@@ -1669,9 +1618,8 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                         entries = descriptorResults.entrySet().toArray();
                     }
 
-                    for (Object entryObj : entries) {
-                        if (entryObj instanceof Entry<?, ?>) {
-                            final Entry<?, ?> entry = (Entry<?, ?>) entryObj;
+                    for (final Object entryObj : entries) {
+                        if (entryObj instanceof final Entry<?, ?> entry) {
                             final Object key = entry.getKey();
                             final Object value = entry.getValue();
                             if (key instanceof ColumnInfo && value instanceof DescriptorResult) {
@@ -1714,16 +1662,15 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
          *
          * @param event Sequence change event
          */
-        public void sequenceChanged(SequenceEvent event) {
+        public void sequenceChanged(final SequenceEvent event) {
             final Object[] entries;
 
             synchronized (descriptorResults) {
                 entries = descriptorResults.entrySet().toArray();
             }
 
-            for (Object entryObj : entries) {
-                if (entryObj instanceof Entry<?, ?>) {
-                    final Entry<?, ?> entry = (Entry<?, ?>) entryObj;
+            for (final Object entryObj : entries) {
+                if (entryObj instanceof final Entry<?, ?> entry) {
                     final Object key = entry.getKey();
                     final Object value = entry.getValue();
                     if (key instanceof ColumnInfo && value instanceof DescriptorResult) {
@@ -1750,7 +1697,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         protected final LinkedHashSet<ROIResults> resultsToCompute;
         protected final DescriptorType type;
 
-        public DescriptorComputer(DescriptorType type) {
+        public DescriptorComputer(final DescriptorType type) {
             super("ROI " + type.toString() + " descriptor calculator");
 
             resultsToCompute = new LinkedHashSet<>(256);
@@ -1763,27 +1710,27 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return resultsToCompute.size() > 0;
         }
 
-        public boolean hasPendingComputation(ROIResults results) {
+        public boolean hasPendingComputation(final ROIResults results) {
             synchronized (resultsToCompute) {
                 return resultsToCompute.contains(results);
             }
         }
 
-        public void requestDescriptorComputation(ROIResults results) {
+        public void requestDescriptorComputation(final ROIResults results) {
             synchronized (resultsToCompute) {
                 resultsToCompute.add(results);
                 resultsToCompute.notifyAll();
             }
         }
 
-        public void cancelDescriptorComputation(ROIResults roiResults) {
+        public void cancelDescriptorComputation(final ROIResults roiResults) {
             synchronized (resultsToCompute) {
                 resultsToCompute.remove(roiResults);
                 resultsToCompute.notifyAll();
             }
         }
 
-        public void cancelDescriptorComputation(ROI roi) {
+        public void cancelDescriptorComputation(final ROI roi) {
             synchronized (resultsToCompute) {
 
                 // remove all results for this ROI
@@ -1833,25 +1780,24 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                         computeROIResults(roiResults, seq);
                 }
             }
-            catch (InterruptedException exc) {
+            catch (final InterruptedException exc) {
                 // just interrupt processing thread
             }
-            catch (Throwable t) {
-                System.err.println("Error while computing ROI descriptors:");
-                System.err.println(t.getMessage());
+            catch (final Throwable t) {
+                IcyLogger.error(AbstractRoisPanel.class, t, "Error while computing ROI descriptors.");
             }
         }
 
-        protected void computeROIResults(ROIResults roiResults, Sequence seq) {
+        protected void computeROIResults(final ROIResults roiResults, final Sequence seq) {
             final Map<ColumnInfo, DescriptorResult> results = roiResults.descriptorResults;
             final ColumnInfo[] columnInfos;
 
             synchronized (results) {
-                columnInfos = results.keySet().toArray(new ColumnInfo[results.size()]);
+                columnInfos = results.keySet().toArray(new ColumnInfo[0]);
             }
 
             boolean needUpdate = false;
-            for (ColumnInfo columnInfo : columnInfos) {
+            for (final ColumnInfo columnInfo : columnInfos) {
                 // only compute a specific kind of descriptor
                 if (columnInfo.getDescriptorType() == type)
                     needUpdate |= AbstractRoisPanel.this.computeROIResults(roiResults, seq, columnInfo);
@@ -1867,7 +1813,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         private Object value;
         private boolean outdated;
 
-        public DescriptorResult(ColumnInfo column) {
+        public DescriptorResult(final ColumnInfo column) {
             super();
 
             value = null;
@@ -1880,7 +1826,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return value;
         }
 
-        public void setValue(Object value) {
+        public void setValue(final Object value) {
             this.value = value;
         }
 
@@ -1888,7 +1834,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return outdated;
         }
 
-        public void setOutdated(boolean value) {
+        public void setOutdated(final boolean value) {
             outdated = value;
         }
     }
@@ -1905,7 +1851,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         public int order;
         public boolean visible;
 
-        public BaseColumnInfo(ROIDescriptor descriptor, XMLPreferences preferences, boolean export) {
+        public BaseColumnInfo(final ROIDescriptor descriptor, final XMLPreferences preferences, final boolean export) {
             super();
 
             this.descriptor = descriptor;
@@ -1913,7 +1859,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             load(preferences, export);
         }
 
-        public boolean load(XMLPreferences preferences, boolean export) {
+        public boolean load(final XMLPreferences preferences, final boolean export) {
             final XMLPreferences p = preferences.node(descriptor.getId());
 
             if (p != null) {
@@ -1929,7 +1875,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return false;
         }
 
-        public boolean save(XMLPreferences preferences) {
+        public boolean save(final XMLPreferences preferences) {
             final XMLPreferences p = preferences.node(descriptor.getId());
 
             if (p != null) {
@@ -1945,7 +1891,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return false;
         }
 
-        protected boolean getDefaultVisible(boolean export) {
+        protected boolean getDefaultVisible(final boolean export) {
             if (descriptor == null)
                 return false;
 
@@ -1966,10 +1912,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
 
             if (StringUtil.equals(id, ROIContourDescriptor.ID))
                 return true;
-            if (StringUtil.equals(id, ROIInteriorDescriptor.ID))
-                return true;
-
-            return false;
+            return StringUtil.equals(id, ROIInteriorDescriptor.ID);
         }
 
         protected int getDefaultOrder() {
@@ -2216,7 +2159,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public int compareTo(BaseColumnInfo obj) {
+        public int compareTo(final BaseColumnInfo obj) {
             return Integer.compare(order, obj.order);
         }
 
@@ -2226,7 +2169,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (obj instanceof BaseColumnInfo)
                 // equality on descriptor
                 return ((BaseColumnInfo) obj).descriptor.equals(descriptor);
@@ -2240,7 +2183,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         String name;
         final int channel;
 
-        public ColumnInfo(ROIDescriptor descriptor, int channel, XMLPreferences prefs, boolean export) {
+        public ColumnInfo(final ROIDescriptor descriptor, final int channel, final XMLPreferences prefs, final boolean export) {
             super(descriptor, prefs, export);
 
             this.channel = channel;
@@ -2268,11 +2211,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             final String id = descriptor.getId();
 
             // we don't want to display name for these descriptors
-            if (StringUtil.equals(id, ROIIconDescriptor.ID) || StringUtil.equals(id, ROIColorDescriptor.ID))
-                // || StringUtil.equals(id, ROIGroupIdDescriptor.ID))
-                showName = false;
-            else
-                showName = true;
+            showName = !StringUtil.equals(id, ROIIconDescriptor.ID) && !StringUtil.equals(id, ROIColorDescriptor.ID); // && !StringUtil.equals(id, ROIGroupIdDescriptor.ID))
         }
 
         @Override
@@ -2281,10 +2220,8 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof ColumnInfo) {
-                final ColumnInfo ci = (ColumnInfo) obj;
-
+        public boolean equals(final Object obj) {
+            if (obj instanceof final ColumnInfo ci) {
                 // equality on descriptor and channel number
                 //return (ci.descriptor.equals(descriptor) && (ci.channel == ci.channel));
                 return (ci.descriptor.equals(descriptor) && (ci.channel == channel));
@@ -2302,7 +2239,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
 
             // column info are sorted on their order
             int index = 0;
-            for (ColumnInfo ci : columnInfos) {
+            for (final ColumnInfo ci : columnInfos) {
                 final ROIDescriptor descriptor = ci.descriptor;
                 final TableColumnExt column = new TableColumnExt(index++);
 
@@ -2325,9 +2262,9 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                     column.setCellRenderer(new ImageTableCellRenderer());
                 else if (type == Color.class)
                     column.setCellRenderer(new ImageTableCellRenderer());
-                    // use the number cell renderer
+                // use the number cell renderer
                 //else if (ClassUtil.isSubClass(type, Number.class))
-                    //column.setCellRenderer(new SubstanceDefaultTableCellRenderer.NumberRenderer());
+                //column.setCellRenderer(new SubstanceDefaultTableCellRenderer.NumberRenderer());
                 // column.setCellRenderer(new NumberTableCellRenderer());
 
                 // and finally add to the model
@@ -2340,7 +2277,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         public void updateHeaders() {
             final List<ColumnInfo> columnInfos = columnInfoList;
             final List<TableColumn> columns = getColumns(true);
-            for (TableColumn column : columns) {
+            for (final TableColumn column : columns) {
                 final ColumnInfo ci = getColumnInfo(columnInfos, column.getModelIndex());
 
                 if (ci != null) {
@@ -2370,7 +2307,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             try {
                 super.sort();
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 // ignore this...
                 // System.err.println("ROI table column sort failed:");
                 // System.err.println(e.getMessage());
@@ -2378,11 +2315,11 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public int convertRowIndexToModel(int index) {
+        public int convertRowIndexToModel(final int index) {
             try {
                 return super.convertRowIndexToModel(index);
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 return 0;
 
                 // ignore this...
@@ -2400,7 +2337,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
          * @throws IndexOutOfBoundsException {@inheritDoc}
          */
         @Override
-        public Comparator<?> getComparator(int column) {
+        public Comparator<?> getComparator(final int column) {
             return comparator;
         }
 
@@ -2415,7 +2352,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
          * @throws IndexOutOfBoundsException {@inheritDoc}
          */
         @Override
-        protected boolean useToString(int column) {
+        protected boolean useToString(final int column) {
             return false;
         }
 
@@ -2429,6 +2366,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             }
 
             @Override
+            @SuppressWarnings("unchecked")
             public M getModel() {
                 return (M) roiTableModel;
             }
@@ -2444,17 +2382,17 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             }
 
             @Override
-            public Object getValueAt(int row, int column) {
+            public Object getValueAt(final int row, final int column) {
                 return roiTableModel.getValueAt(row, column);
             }
 
             @Override
-            public String getStringValueAt(int row, int column) {
+            public String getStringValueAt(final int row, final int column) {
                 return getStringValueProvider().getStringValue(row, column).getString(getValueAt(row, column));
             }
 
             @Override
-            public Integer getIdentifier(int index) {
+            public Integer getIdentifier(final int index) {
                 return Integer.valueOf(index);
             }
         }

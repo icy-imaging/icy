@@ -1,62 +1,22 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.network;
-
-import java.awt.Desktop;
-import java.awt.Desktop.Action;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
-import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
 
 import icy.common.Version;
 import icy.common.listener.ProgressListener;
@@ -64,17 +24,31 @@ import icy.common.listener.weak.WeakListener;
 import icy.file.FileUtil;
 import icy.main.Icy;
 import icy.preferences.NetworkPreferences;
-import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
 import icy.system.audit.Audit;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 
+import javax.net.ssl.*;
+import java.awt.*;
+import java.awt.Desktop.Action;
+import java.io.*;
+import java.lang.reflect.Method;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 /**
- * @author stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class NetworkUtil
-{
+public class NetworkUtil {
     /**
      * URL
      */
@@ -113,41 +87,35 @@ public class NetworkUtil
     public static final int SYSTEM_PROXY = 1;
     public static final int USER_PROXY = 2;
 
-    public interface InternetAccessListener
-    {
+    public interface InternetAccessListener {
         /**
          * Internet connection available.
          */
-        public void internetUp();
+        void internetUp();
 
         /**
          * Internet connection no more available.
          */
-        public void internetDown();
+        void internetDown();
     }
 
     /**
      * Weak listener wrapper for NetworkConnectionListener.
-     * 
+     *
      * @author Stephane
      */
-    public static class WeakInternetAccessListener extends WeakListener<InternetAccessListener>
-            implements InternetAccessListener
-    {
-        public WeakInternetAccessListener(InternetAccessListener listener)
-        {
+    public static class WeakInternetAccessListener extends WeakListener<InternetAccessListener> implements InternetAccessListener {
+        public WeakInternetAccessListener(final InternetAccessListener listener) {
             super(listener);
         }
 
         @Override
-        public void removeListener(Object source)
-        {
+        public void removeListener(final Object source) {
             removeInternetAccessListener(this);
         }
 
         @Override
-        public void internetUp()
-        {
+        public void internetUp() {
             final InternetAccessListener listener = getListener();
 
             if (listener != null)
@@ -155,8 +123,7 @@ public class NetworkUtil
         }
 
         @Override
-        public void internetDown()
-        {
+        public void internetDown() {
             final InternetAccessListener listener = getListener();
 
             if (listener != null)
@@ -167,20 +134,15 @@ public class NetworkUtil
     /**
      * Internet monitor thread
      */
-    private static class InternetMonitorThread extends Thread
-    {
-        public InternetMonitorThread()
-        {
+    private static class InternetMonitorThread extends Thread {
+        public InternetMonitorThread() {
             super("Internet monitor");
         }
 
         @Override
-        public void run()
-        {
-            while (!isInterrupted())
-            {
-                try
-                {
+        public void run() {
+            while (!isInterrupted()) {
+                try {
                     final Socket socket = new Socket();
 
                     // timeout = 3 seconds
@@ -191,15 +153,12 @@ public class NetworkUtil
                     // we have internet access
                     setInternetAccess(true);
                 }
-                catch (Throwable t1)
-                {
+                catch (final Throwable t1) {
                     // in case we use proxy
-                    try
-                    {
+                    try {
                         final URLConnection urlConnection = openConnection("https://www.google.com", true, false);
 
-                        if (urlConnection != null)
-                        {
+                        if (urlConnection != null) {
                             urlConnection.setConnectTimeout(3000);
                             urlConnection.setReadTimeout(3000);
                             urlConnection.getInputStream();
@@ -211,8 +170,7 @@ public class NetworkUtil
                             // we don't have internet access
                             setInternetAccess(false);
                     }
-                    catch (Throwable t2)
-                    {
+                    catch (final Throwable t2) {
                         // we don't have internet access
                         setInternetAccess(false);
                     }
@@ -222,30 +180,27 @@ public class NetworkUtil
                 ThreadUtil.sleep(hasInternetAccess() ? 30000 : 5000);
             }
         }
-    };
+    }
 
     /**
      * 'Accept all' host name verifier
      */
-    private static class FakeHostnameVerifier implements HostnameVerifier
-    {
-        public FakeHostnameVerifier()
-        {
+    private static class FakeHostnameVerifier implements HostnameVerifier {
+        public FakeHostnameVerifier() {
             super();
         }
 
         @Override
-        public boolean verify(String hostname, SSLSession session)
-        {
+        public boolean verify(final String hostname, final SSLSession session) {
             // always return true
             return true;
         }
-    };
+    }
 
     /**
      * List of all listeners on network connection changes.
      */
-    private final static Set<InternetAccessListener> listeners = new HashSet<InternetAccessListener>();;
+    private final static Set<InternetAccessListener> listeners = new HashSet<>();
 
     /**
      * Internet monitor
@@ -265,19 +220,17 @@ public class NetworkUtil
      */
     private static boolean httpsSupported;
 
-    public static void init()
-    {
+    public static void init() {
         internetAccess = false;
         httpsSupported = false;
 
-        if (networkEnabled)
-        {
+        if (networkEnabled) {
             // check for HTTPS "let's encrypt" certificate compatibility
             final Version javaVersion = SystemUtil.getJavaVersionAsVersion();
             final int javaInt = javaVersion.getMajor();
 
             if (javaInt == 7)
-                httpsSupported = javaVersion.isGreaterOrEqual(new Version(7,0, 111));
+                httpsSupported = javaVersion.isGreaterOrEqual(new Version(7, 0, 111));
             else if (javaInt == 8)
                 httpsSupported = javaVersion.isGreaterOrEqual(new Version(8, 0, 101));
             else
@@ -317,74 +270,59 @@ public class NetworkUtil
         // }
 
         // start monitor thread
-        if (networkEnabled || !Icy.getMainInterface().isHeadLess())
-        {
+        if (networkEnabled || !Icy.getMainInterface().isHeadLess()) {
             internetMonitor.setPriority(Thread.MIN_PRIORITY);
             internetMonitor.start();
         }
     }
 
-    private static void installTruster()
-    {
+    private static void installTruster() {
         // enable support for TLS v1.X (used by new Icy web site: TLS 1.2 or TLS 1.3)
         System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 
-        try
-        {
+        try {
             // install the accept all host name verifier
             HttpsURLConnection.setDefaultHostnameVerifier(new FakeHostnameVerifier());
 
             // create a trust manager that does not validate certificate chains (Accept all certificates)
-            final TrustManager[] trustAllCerts = new TrustManager[] {new javax.net.ssl.X509ExtendedTrustManager()
-            {
+            final TrustManager[] trustAllCerts = new TrustManager[]{new javax.net.ssl.X509ExtendedTrustManager() {
                 @Override
-                public java.security.cert.X509Certificate[] getAcceptedIssuers()
-                {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                     return null;
                 }
 
                 @Override
-                public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType)
-                {
+                public void checkClientTrusted(final java.security.cert.X509Certificate[] certs, final String authType) {
                     // ignore
                     // System.out.println(certs.length);
                 }
 
                 @Override
-                public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType)
-                {
+                public void checkServerTrusted(final java.security.cert.X509Certificate[] certs, final String authType) {
                     // ignore
                     // System.out.println(certs.length + " - " + authType);
                 }
 
                 @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket)
-                        throws CertificateException
-                {
+                public void checkClientTrusted(final X509Certificate[] chain, final String authType, final Socket socket) {
                     // ignore
                     // System.out.println(chain.length + " - " + authType);
                 }
 
                 @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine)
-                        throws CertificateException
-                {
+                public void checkClientTrusted(final X509Certificate[] chain, final String authType, final SSLEngine engine) {
                     // ignore
                     // System.out.println(chain.length + " - " + authType);
                 }
 
                 @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket)
-                        throws CertificateException
-                {
+                public void checkServerTrusted(final X509Certificate[] chain, final String authType, final Socket socket) {
                     // ignore
                     // System.out.println(chain.length + " - " + authType);
                 }
 
                 @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine)
-                        throws CertificateException
-                {
+                public void checkServerTrusted(final X509Certificate[] chain, final String authType, final SSLEngine engine) {
                     // ignore
                     // System.out.println(chain.length + " - " + authType);
                 }
@@ -394,33 +332,27 @@ public class NetworkUtil
             SSLContext sc;
 
             sc = SSLContext.getInstance("SSL");
-            if (sc != null)
-                sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
             sc = SSLContext.getInstance("TLS");
-            if (sc != null)
-                sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
         }
-        catch (Exception e)
-        {
-            IcyExceptionHandler.showErrorMessage(e, false, true);
+        catch (final Exception e) {
+            IcyLogger.error(NetworkUtil.class, e, e.getLocalizedMessage());
         }
     }
 
     /**
      * Update network setting from the actual preferences
      */
-    public static void updateNetworkSetting()
-    {
-        if (networkEnabled)
-        {
+    public static void updateNetworkSetting() {
+        if (networkEnabled) {
             HttpURLConnection.setFollowRedirects(false);
 
             final int proxySetting = NetworkPreferences.getProxySetting();
 
-            if (proxySetting == NO_PROXY)
-            {
+            if (proxySetting == NO_PROXY) {
                 // no proxy
                 disableProxySetting();
                 disableHTTPProxySetting();
@@ -429,8 +361,7 @@ public class NetworkUtil
                 disableSOCKSProxySetting();
                 disableSystemProxy();
             }
-            else if (proxySetting == SYSTEM_PROXY)
-            {
+            else if (proxySetting == SYSTEM_PROXY) {
                 // system proxy
                 disableProxySetting();
                 disableHTTPProxySetting();
@@ -439,8 +370,7 @@ public class NetworkUtil
                 disableSOCKSProxySetting();
                 enableSystemProxy();
             }
-            else
-            {
+            else {
                 final String user = NetworkPreferences.getProxyUser();
                 final String pass = NetworkPreferences.getProxyPassword();
                 final boolean auth = NetworkPreferences.getProxyAuthentication() && (!StringUtil.isEmpty(user))
@@ -448,13 +378,10 @@ public class NetworkUtil
                 String host;
 
                 // authentication enabled ?
-                if (auth)
-                {
-                    Authenticator.setDefault(new Authenticator()
-                    {
+                if (auth) {
+                    Authenticator.setDefault(new Authenticator() {
                         @Override
-                        public PasswordAuthentication getPasswordAuthentication()
-                        {
+                        public PasswordAuthentication getPasswordAuthentication() {
                             return new PasswordAuthentication(user, pass.toCharArray());
                         }
                     });
@@ -465,36 +392,31 @@ public class NetworkUtil
 
                 // HTTP proxy (use it as general proxy)
                 host = NetworkPreferences.getProxyHTTPHost();
-                if (!StringUtil.isEmpty(host))
-                {
+                if (!StringUtil.isEmpty(host)) {
                     final int port = NetworkPreferences.getProxyHTTPPort();
 
                     setProxyHost(host);
                     setProxyPort(port);
                     setHTTPProxyHost(host);
                     setHTTPProxyPort(port);
-                    if (auth)
-                    {
+                    if (auth) {
                         setHTTPProxyUser(user);
                         setHTTPProxyPassword(pass);
                     }
                     enableProxySetting();
                     enableHTTPProxySetting();
                 }
-                else
-                {
+                else {
                     disableProxySetting();
                     disableHTTPProxySetting();
                 }
 
                 // HTTPS proxy
                 host = NetworkPreferences.getProxyHTTPSHost();
-                if (!StringUtil.isEmpty(host))
-                {
+                if (!StringUtil.isEmpty(host)) {
                     setHTTPSProxyHost(host);
                     setHTTPSProxyPort(NetworkPreferences.getProxyHTTPSPort());
-                    if (auth)
-                    {
+                    if (auth) {
                         setHTTPSProxyUser(user);
                         setHTTPSProxyPassword(pass);
                     }
@@ -505,12 +427,10 @@ public class NetworkUtil
 
                 // FTP proxy
                 host = NetworkPreferences.getProxyFTPHost();
-                if (!StringUtil.isEmpty(host))
-                {
+                if (!StringUtil.isEmpty(host)) {
                     setFTPProxyHost(host);
                     setFTPProxyPort(NetworkPreferences.getProxyFTPPort());
-                    if (auth)
-                    {
+                    if (auth) {
                         setFTPProxyUser(user);
                         setFTPProxyPassword(pass);
                     }
@@ -521,12 +441,10 @@ public class NetworkUtil
 
                 // SOCKS proxy
                 host = NetworkPreferences.getProxySOCKSHost();
-                if (!StringUtil.isEmpty(host))
-                {
+                if (!StringUtil.isEmpty(host)) {
                     setSOCKSProxyHost(host);
                     setSOCKSProxyPort(NetworkPreferences.getProxySOCKSPort());
-                    if (auth)
-                    {
+                    if (auth) {
                         setSOCKSProxyUser(user);
                         setSOCKSProxyPassword(pass);
                     }
@@ -538,19 +456,15 @@ public class NetworkUtil
         }
     }
 
-    static void setInternetAccess(boolean value)
-    {
-        if (networkEnabled)
-        {
-            if (internetAccess != value)
-            {
+    static void setInternetAccess(final boolean value) {
+        if (networkEnabled) {
+            if (internetAccess != value) {
                 internetAccess = value;
 
                 fireInternetConnectionEvent(value);
 
                 // local stuff to do on connection recovery
-                if (value)
-                {
+                if (value) {
                     // process id audit
                     Audit.onConnect();
                 }
@@ -558,16 +472,13 @@ public class NetworkUtil
         }
     }
 
-    private static void fireInternetConnectionEvent(boolean value)
-    {
-        if (value)
-        {
-            for (InternetAccessListener l : listeners)
+    private static void fireInternetConnectionEvent(final boolean value) {
+        if (value) {
+            for (final InternetAccessListener l : listeners)
                 l.internetUp();
         }
-        else
-        {
-            for (InternetAccessListener l : listeners)
+        else {
+            for (final InternetAccessListener l : listeners)
                 l.internetDown();
         }
     }
@@ -575,24 +486,21 @@ public class NetworkUtil
     /**
      * Adds a new listener on internet access change.
      */
-    public static void addInternetAccessListener(InternetAccessListener listener)
-    {
+    public static void addInternetAccessListener(final InternetAccessListener listener) {
         listeners.add(listener);
     }
 
     /**
      * Removes a listener on internet access change.
      */
-    public static void removeInternetAccessListener(InternetAccessListener listener)
-    {
+    public static void removeInternetAccessListener(final InternetAccessListener listener) {
         listeners.remove(listener);
     }
 
     /**
      * Returns true if we currently have Internet connection.
      */
-    public static boolean hasInternetAccess()
-    {
+    public static boolean hasInternetAccess() {
         return internetAccess;
     }
 
@@ -600,41 +508,35 @@ public class NetworkUtil
      * @deprecated Use {@link #hasInternetAccess()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean hasInternetConnection()
-    {
+    public static boolean hasInternetConnection() {
         return hasInternetAccess();
     }
 
     /**
      * Returns true if HTTPS is supported for the new web site.
      */
-    public static boolean isHTTPSSupported()
-    {
+    public static boolean isHTTPSSupported() {
         return httpsSupported;
     }
 
     /**
      * Open an URL in the default system browser
      */
-    public static boolean openBrowser(String url)
-    {
+    public static boolean openBrowser(final String url) {
         return openBrowser(URLUtil.getURL(url));
     }
 
     /**
      * Open an URL in the default system browser
      */
-    public static boolean openBrowser(URL url)
-    {
+    public static boolean openBrowser(final URL url) {
         if (url == null)
             return false;
 
-        try
-        {
+        try {
             return openBrowser(url.toURI());
         }
-        catch (URISyntaxException e)
-        {
+        catch (final URISyntaxException e) {
             // use other method
             return systemOpenBrowser(url.toString());
         }
@@ -643,22 +545,18 @@ public class NetworkUtil
     /**
      * Open an URL in the default system browser
      */
-    public static boolean openBrowser(URI uri)
-    {
+    public static boolean openBrowser(final URI uri) {
         if (uri == null)
             return false;
 
         final Desktop desktop = SystemUtil.getDesktop();
 
-        if ((desktop != null) && desktop.isSupported(Action.BROWSE))
-        {
-            try
-            {
+        if ((desktop != null) && desktop.isSupported(Action.BROWSE)) {
+            try {
                 desktop.browse(uri);
                 return true;
             }
-            catch (IOException e)
-            {
+            catch (final IOException e) {
                 // ignore
             }
         }
@@ -670,42 +568,38 @@ public class NetworkUtil
     /**
      * Open an URL in the default system browser (low level method)
      */
-    private static boolean systemOpenBrowser(String url)
-    {
+    private static boolean systemOpenBrowser(final String url) {
         if (StringUtil.isEmpty(url))
             return false;
 
-        try
-        {
-            if (SystemUtil.isMac())
-            {
-                Class<?> fileMgr = Class.forName("com.apple.eio.FileManager");
-                Method openURL = fileMgr.getDeclaredMethod("openURL", new Class[] {String.class});
-                openURL.invoke(null, new Object[] {url});
+        try {
+            if (SystemUtil.isMac()) {
+                final Class<?> fileMgr = Class.forName("com.apple.eio.FileManager");
+                final Method openURL = fileMgr.getDeclaredMethod("openURL", String.class);
+                openURL.invoke(null, url);
             }
             else if (SystemUtil.isWindows())
+                // FIXME replace exec
                 Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
-            else
-            {
+            else {
                 // assume Unix or Linux
-                String[] browsers = {"firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
+                final String[] browsers = {"firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
                 String browser = null;
-                for (int count = 0; count < browsers.length && browser == null; count++)
-                {
+                for (int count = 0; count < browsers.length && browser == null; count++) {
+                    // FIXME replace exec
                     if (Runtime.getRuntime().exec("which " + browsers[count]).waitFor() == 0)
                         browser = browsers[count];
                 }
                 if (browser == null)
                     throw new Exception("Could not find web browser");
 
-                Runtime.getRuntime().exec(new String[] {browser, url});
+                Runtime.getRuntime().exec(new String[]{browser, url});
             }
 
             return true;
         }
-        catch (Exception e)
-        {
-            System.err.println("Error while opening system browser :\n" + e.toString());
+        catch (final Exception e) {
+            IcyLogger.error(NetworkUtil.class, e, "Error while opening system browser.");
             return false;
         }
     }
@@ -714,8 +608,7 @@ public class NetworkUtil
      * @deprecated Use {@link #openBrowser(String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void openURL(String url)
-    {
+    public static void openURL(final String url) {
         openBrowser(url);
     }
 
@@ -723,8 +616,7 @@ public class NetworkUtil
      * @deprecated Use {@link #openBrowser(URL)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void openURL(URL url)
-    {
+    public static void openURL(final URL url) {
         openBrowser(url);
     }
 
@@ -732,16 +624,14 @@ public class NetworkUtil
      * @deprecated Use {@link #openBrowser(URI)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void openURL(URI uri)
-    {
+    public static void openURL(final URI uri) {
         openBrowser(uri);
     }
 
     /**
      * Download data from specified URL string and return it as an array of byte
      */
-    public static byte[] download(String path, ProgressListener listener, boolean displayError)
-    {
+    public static byte[] download(final String path, final ProgressListener listener, final boolean displayError) {
         return download(path, null, null, listener, displayError);
     }
 
@@ -749,9 +639,7 @@ public class NetworkUtil
      * Download data from specified URL string and return it as an array of byte
      * Process authentication process if login / pass are not null.
      */
-    public static byte[] download(String path, String login, String pass, ProgressListener listener,
-            boolean displayError)
-    {
+    public static byte[] download(final String path, final String login, final String pass, final ProgressListener listener, final boolean displayError) {
         final File file = new File(FileUtil.getGenericPath(path));
 
         // path define a file ?
@@ -761,10 +649,9 @@ public class NetworkUtil
         final URL url = URLUtil.getURL(path);
 
         // error while building URL ?
-        if (url == null)
-        {
+        if (url == null) {
             if (displayError)
-                System.out.println("Can't download '" + path + "', incorrect path !");
+                IcyLogger.error(NetworkUtil.class, "Can't download '" + path + "', incorrect path !");
 
             return null;
         }
@@ -775,8 +662,7 @@ public class NetworkUtil
     /**
      * Download data from specified URL and return it as an array of byte
      */
-    public static byte[] download(URL url, ProgressListener listener, boolean displayError)
-    {
+    public static byte[] download(final URL url, final ProgressListener listener, final boolean displayError) {
         return download(url, null, null, listener, displayError);
     }
 
@@ -785,19 +671,15 @@ public class NetworkUtil
      * Process authentication process if login / pass fields are not null.<br>
      * It returns <code>null</code> if an error occurred.
      */
-    public static byte[] download(URL url, String login, String pass, ProgressListener listener, boolean displayError)
-    {
+    public static byte[] download(final URL url, final String login, final String pass, final ProgressListener listener, final boolean displayError) {
         // check if this is a file
-        if ((url != null) && URLUtil.isFileURL(url))
-        {
-            try
-            {
+        if (URLUtil.isFileURL(url)) {
+            try {
                 return download(new File(url.toURI()), listener, displayError);
             }
-            catch (URISyntaxException e)
-            {
+            catch (final URISyntaxException e) {
                 if (displayError)
-                    System.out.println("Can't download from '" + url + "', incorrect path !");
+                    IcyLogger.error(NetworkUtil.class, e, "Can't download from '" + url + "', incorrect path !");
 
                 return null;
             }
@@ -805,37 +687,21 @@ public class NetworkUtil
 
         // get connection object and connect it
         final URLConnection uc = openConnection(url, login, pass, true, true, displayError);
-        final InputStream ip = getInputStream(uc, displayError);
 
         // error --> exit
-        if (ip == null)
-            return null;
-
-        try
-        {
+        try (final InputStream ip = getInputStream(uc, displayError)) {
+            if (ip == null)
+                return null;
             return download(ip, uc.getContentLength(), listener);
         }
-        catch (Exception e)
-        {
-            if (displayError)
-            {
-                System.out.println("Error while downloading '" + uc.getURL() + "' :");
-                IcyExceptionHandler.showErrorMessage(e, false, false);
+        catch (final Exception e) {
+            if (displayError) {
+                IcyLogger.error(NetworkUtil.class, e, "Error while downloading '" + uc.getURL() + "'.");
             }
 
             return null;
         }
-        finally
-        {
-            try
-            {
-                ip.close();
-            }
-            catch (IOException e)
-            {
-                // ignore...
-            }
-        }
+        // ignore...
     }
 
     /**
@@ -843,24 +709,18 @@ public class NetworkUtil
      * It returns <code>null</code> if an error occurred (file not found or not existing, IO
      * error...)
      */
-    public static byte[] download(File f, ProgressListener listener, boolean displayError)
-    {
-        if (!f.exists())
-        {
-            System.err.println("File not found: " + f.getPath());
+    public static byte[] download(final File f, final ProgressListener listener, final boolean displayError) {
+        if (!f.exists()) {
+            IcyLogger.error(NetworkUtil.class, "File not found: " + f.getPath());
             return null;
         }
 
-        try
-        {
+        try {
             return download(new FileInputStream(f), f.length(), listener);
         }
-        catch (Exception e)
-        {
-            if (displayError)
-            {
-                System.out.println("NetworkUtil.download('" + f.getPath() + "',...) error :");
-                IcyExceptionHandler.showErrorMessage(e, false, false);
+        catch (final Exception e) {
+            if (displayError) {
+                IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.download('" + f.getPath() + "',...) error.");
             }
 
             return null;
@@ -871,8 +731,7 @@ public class NetworkUtil
      * Download data from specified InputStream and return it as an array of byte.<br>
      * Returns <code>null</code> if load operation was interrupted by user.
      */
-    public static byte[] download(InputStream in, long len, ProgressListener listener) throws IOException
-    {
+    public static byte[] download(final InputStream in, final long len, final ProgressListener listener) throws IOException {
         final int READ_BLOCKSIZE = 64 * 1024;
         final BufferedInputStream bin;
 
@@ -885,16 +744,13 @@ public class NetworkUtil
         // read per block of 64 KB
         final byte[] data = new byte[READ_BLOCKSIZE];
 
-        try
-        {
+        try {
             int off = 0;
             int count = 0;
 
-            while (count >= 0)
-            {
+            while (count >= 0) {
                 count = bin.read(data);
-                if (count <= 0)
-                {
+                if (count <= 0) {
                     // unexpected length
                     if ((len != -1) && (off != len))
                         throw new EOFException("Unexpected end of file at " + off + " (" + len + " expected)");
@@ -906,20 +762,17 @@ public class NetworkUtil
                 if (count > 0)
                     bout.write(data, 0, count);
 
-                if (listener != null)
-                {
+                if (listener != null) {
                     // download canceled ?
-                    if (!listener.notifyProgress(off, len))
-                    {
+                    if (!listener.notifyProgress(off, len)) {
                         in.close();
-                        System.out.println("Interrupted by user.");
+                        IcyLogger.warn(NetworkUtil.class, "Interrupted by user.");
                         return null;
                     }
                 }
             }
         }
-        finally
-        {
+        finally {
             bin.close();
         }
 
@@ -930,14 +783,13 @@ public class NetworkUtil
      * Download data from specified InputStream and return it as an array of byte.<br>
      * It returns <code>null</code> if an error occurred.
      */
-    public static byte[] download(InputStream in) throws IOException
-    {
+    public static byte[] download(final InputStream in) throws IOException {
         return download(in, -1, null);
     }
 
     /**
      * Returns a new {@link URLConnection} from specified URL (null if an error occurred).
-     * 
+     *
      * @param url
      *        url to connect.
      * @param login
@@ -953,26 +805,21 @@ public class NetworkUtil
      * @param displayError
      *        Display error message in console if something wrong happen.
      */
-    public static URLConnection openConnection(URL url, String login, String pass, boolean disableCache,
-            boolean doConnect, boolean displayError)
-    {
-        if (url == null)
-        {
+    public static URLConnection openConnection(final URL url, final String login, final String pass, final boolean disableCache, final boolean doConnect, final boolean displayError) {
+        if (url == null) {
             if (displayError)
-                System.out.println("NetworkUtil.openConnection(...) error: URL is null !");
+                IcyLogger.error(NetworkUtil.class, "NetworkUtil.openConnection(...) error: URL is null !");
 
             return null;
         }
 
         URLConnection uc = null;
 
-        try
-        {
+        try {
             uc = url.openConnection();
             boolean redirect;
 
-            do
-            {
+            do {
                 redirect = false;
 
                 if (disableCache)
@@ -982,16 +829,14 @@ public class NetworkUtil
                 if (!StringUtil.isEmpty(login) && !StringUtil.isEmpty(pass))
                     setAuthentication(uc, login, pass);
 
-                if (doConnect)
-                {
+                if (doConnect) {
                     // try to connect
                     if (!connect(uc, displayError))
                         // error ? --> return null
                         return null;
 
                     // we test response code for HTTP connection
-                    if (uc instanceof HttpURLConnection)
-                    {
+                    if (uc instanceof HttpURLConnection) {
                         final int respCode = ((HttpURLConnection) uc).getResponseCode();
 
                         redirect = (respCode == HttpURLConnection.HTTP_MOVED_PERM)
@@ -999,12 +844,12 @@ public class NetworkUtil
                                 || (respCode == HttpURLConnection.HTTP_SEE_OTHER);
 
                         // redirection ?
-                        if (redirect)
-                        {
+                        if (redirect) {
                             // restart connection with new URL
-                            String location = ((HttpURLConnection) uc).getHeaderField("Location");
+                            String location = uc.getHeaderField("Location");
                             ((HttpURLConnection) uc).disconnect();
-                            location = URLDecoder.decode(location, "UTF-8");
+                            location = URLDecoder.decode(location, StandardCharsets.UTF_8);
+                            // FIXME replace URL with URI.toURL()
                             uc = new URL(location).openConnection();
                         }
                     }
@@ -1014,22 +859,14 @@ public class NetworkUtil
 
             return uc;
         }
-        catch (IOException e)
-        {
-            if (displayError)
-            {
+        catch (final IOException e) {
+            if (displayError) {
                 // HTTPS not supported while we have a HTTPS connection to icy web site
-                if (!isHTTPSSupported() && (uc != null)
-                        && uc.getURL().toString().toLowerCase().startsWith("https://icy"))
-                {
-                    System.err.println("NetworkUtil.openConnection('" + uc.getURL()
-                            + "') error: HTTPS connection not supported (see detail below).");
-                    IcyExceptionHandler.showErrorMessage(e, false, false);
+                if (!isHTTPSSupported() && (uc != null) && uc.getURL().toString().toLowerCase().startsWith("https://icy")) {
+                    IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.openConnection('" + uc.getURL() + "') error: HTTPS connection not supported.");
                 }
-                else
-                {
-                    System.out.println("NetworkUtil.openConnection('" + url + "') error :");
-                    IcyExceptionHandler.showErrorMessage(e, false, false);
+                else {
+                    IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.openConnection('" + url + "') error.");
                 }
             }
 
@@ -1039,7 +876,7 @@ public class NetworkUtil
 
     /**
      * Returns a new {@link URLConnection} from specified URL (null if an error occurred).
-     * 
+     *
      * @param url
      *        url to connect.
      * @param login
@@ -1053,15 +890,13 @@ public class NetworkUtil
      * @param displayError
      *        Display error message in console if something wrong happen.
      */
-    public static URLConnection openConnection(URL url, String login, String pass, boolean disableCache,
-            boolean displayError)
-    {
+    public static URLConnection openConnection(final URL url, final String login, final String pass, final boolean disableCache, final boolean displayError) {
         return openConnection(url, login, pass, disableCache, false, displayError);
     }
 
     /**
      * Returns a new {@link URLConnection} from specified URL (null if an error occurred).
-     * 
+     *
      * @param url
      *        url to connect.
      * @param auth
@@ -1071,9 +906,7 @@ public class NetworkUtil
      * @param displayError
      *        Display error message in console if something wrong happen.
      */
-    public static URLConnection openConnection(URL url, AuthenticationInfo auth, boolean disableCache,
-            boolean displayError)
-    {
+    public static URLConnection openConnection(final URL url, final AuthenticationInfo auth, final boolean disableCache, final boolean displayError) {
         if ((auth != null) && auth.isEnabled())
             return openConnection(url, auth.getLogin(), auth.getPassword(), disableCache, displayError);
 
@@ -1082,7 +915,7 @@ public class NetworkUtil
 
     /**
      * Returns a new {@link URLConnection} from specified URL (null if an error occurred).
-     * 
+     *
      * @param url
      *        url to connect.
      * @param disableCache
@@ -1090,15 +923,14 @@ public class NetworkUtil
      * @param displayError
      *        Display error message in console if something wrong happen.
      */
-    public static URLConnection openConnection(URL url, boolean disableCache, boolean displayError)
-    {
+    public static URLConnection openConnection(final URL url, final boolean disableCache, final boolean displayError) {
         return openConnection(url, null, null, disableCache, displayError);
     }
 
     /**
      * Returns a new {@link URLConnection} from specified path.<br>
      * Returns <code>null</code> if an error occurred.
-     * 
+     *
      * @param path
      *        path to connect.
      * @param disableCache
@@ -1106,24 +938,21 @@ public class NetworkUtil
      * @param displayError
      *        Display error message in console if something wrong happen.
      */
-    public static URLConnection openConnection(String path, boolean disableCache, boolean displayError)
-    {
+    public static URLConnection openConnection(final String path, final boolean disableCache, final boolean displayError) {
         return openConnection(URLUtil.getURL(path), disableCache, displayError);
     }
 
     /**
      * Connect the specified {@link URLConnection}.<br>
      * Returns false if the connection failed or if response code is not ok.
-     * 
+     *
      * @param uc
      *        URLConnection to connect.
      * @param displayError
      *        Display error message in console if something wrong happen.
      */
-    public static boolean connect(URLConnection uc, boolean displayError)
-    {
-        try
-        {
+    public static boolean connect(final URLConnection uc, final boolean displayError) {
+        try {
             // final URL prevUrl = uc.getURL();
 
             // connect
@@ -1138,46 +967,31 @@ public class NetworkUtil
             // }
 
             // we test response code for HTTP connection
-            if (uc instanceof HttpURLConnection)
-            {
-                final HttpURLConnection huc = (HttpURLConnection) uc;
-
+            if (uc instanceof final HttpURLConnection huc) {
                 // not ok ?
-                if (huc.getResponseCode() >= 0x400)
-                {
-                    if (displayError)
-                    {
-                        System.out.println("NetworkUtil.connect('" + huc.getURL() + "' error:");
-                        System.out.println(huc.getResponseMessage());
+                if (huc.getResponseCode() >= 0x400) {
+                    if (displayError) {
+                        IcyLogger.error(NetworkUtil.class, "NetworkUtil.connect('" + huc.getURL() + "' error: " + huc.getResponseMessage());
                     }
 
                     return false;
                 }
             }
         }
-        catch (Exception e)
-        {
-            if (displayError)
-            {
+        catch (final Exception e) {
+            if (displayError) {
                 if (uc.getURL().getProtocol().equalsIgnoreCase("file"))
-                    IcyExceptionHandler.showErrorMessage(e, false, false);
-                else
-                {
+                    IcyLogger.error(NetworkUtil.class, e, e.getLocalizedMessage());
+                else {
                     if (!hasInternetAccess())
-                        System.out.println("Can't connect to '" + uc.getURL() + "' (no internet connection).");
-                    else
-                    {
+                        IcyLogger.error(NetworkUtil.class, "Can't connect to '" + uc.getURL() + "' (no internet connection).");
+                    else {
                         // HTTPS not supported while we have a HTTPS connection to icy web site
-                        if (!isHTTPSSupported() && uc.getURL().toString().toLowerCase().startsWith("https://icy"))
-                        {
-                            System.err.println("NetworkUtil.connect('" + uc.getURL()
-                                    + "') error: HTTPS connection not supported (see detail below).");
-                            IcyExceptionHandler.showErrorMessage(e, false, false);
+                        if (!isHTTPSSupported() && uc.getURL().toString().toLowerCase().startsWith("https://icy")) {
+                            IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.connect('" + uc.getURL() + "') error: HTTPS connection not supported (see detail below).");
                         }
-                        else
-                        {
-                            System.out.println("NetworkUtil.connect('" + uc.getURL() + "' error:");
-                            IcyExceptionHandler.showErrorMessage(e, false, false);
+                        else {
+                            IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.connect('" + uc.getURL() + "' error.");
                         }
                     }
                 }
@@ -1192,46 +1006,34 @@ public class NetworkUtil
     /**
      * Returns a new {@link InputStream} from specified {@link URLConnection} (null if an error
      * occurred).
-     * 
+     *
      * @param uc
      *        URLConnection object.
      * @param displayError
      *        Display error message in console if something wrong happen.
      */
-    public static InputStream getInputStream(URLConnection uc, boolean displayError)
-    {
-        if (uc == null)
-        {
-            if (displayError)
-            {
-                System.out.print("NetworkUtil.getInputStream(URLConnection uc) error: URLConnection object is null !");
+    public static InputStream getInputStream(final URLConnection uc, final boolean displayError) {
+        if (uc == null) {
+            if (displayError) {
+                IcyLogger.error(NetworkUtil.class, "NetworkUtil.getInputStream(URLConnection uc) error: URLConnection object is null !");
             }
 
             return null;
         }
 
-        try
-        {
+        try {
             return uc.getInputStream();
         }
-        catch (IOException e)
-        {
-            if (displayError)
-            {
+        catch (final IOException e) {
+            if (displayError) {
                 if (!hasInternetAccess())
-                    System.out.println("Can't connect to '" + uc.getURL() + "' (no internet connection).");
-                // HTTPS not supported while we have a HTTPS connection to icy web site
-                else if (!isHTTPSSupported() && (uc != null)
-                        && uc.getURL().toString().toLowerCase().startsWith("https://icy"))
-                {
-                    System.err.println("NetworkUtil.getInputStream('" + uc.getURL()
-                            + "') error: HTTPS connection not supported !");
-                    IcyExceptionHandler.showErrorMessage(e, false, false);
+                    IcyLogger.error(NetworkUtil.class, "Can't connect to '" + uc.getURL() + "' (no internet connection).");
+                    // HTTPS not supported while we have a HTTPS connection to icy web site
+                else if (!isHTTPSSupported() && uc.getURL().toString().toLowerCase().startsWith("https://icy")) {
+                    IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.getInputStream('" + uc.getURL() + "') error: HTTPS connection not supported !");
                 }
-                else
-                {
-                    System.out.println("NetworkUtil.getInputStream('" + uc.getURL() + "') error:");
-                    IcyExceptionHandler.showErrorMessage(e, false, false);
+                else {
+                    IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.getInputStream('" + uc.getURL() + "') error.");
                 }
             }
 
@@ -1241,7 +1043,7 @@ public class NetworkUtil
 
     /**
      * Returns a new {@link InputStream} from specified URL (null if an error occurred).
-     * 
+     *
      * @param url
      *        url we want to connect and retrieve the InputStream.
      * @param login
@@ -1255,9 +1057,7 @@ public class NetworkUtil
      * @param displayError
      *        Display error message in console if something wrong happen.
      */
-    public static InputStream getInputStream(URL url, String login, String pass, boolean disableCache,
-            boolean displayError)
-    {
+    public static InputStream getInputStream(final URL url, final String login, final String pass, final boolean disableCache, final boolean displayError) {
         final URLConnection uc = openConnection(url, login, pass, disableCache, true, displayError);
 
         if (uc != null)
@@ -1268,7 +1068,7 @@ public class NetworkUtil
 
     /**
      * Returns a new {@link InputStream} from specified URL (null if an error occurred).
-     * 
+     *
      * @param url
      *        url we want to connect and retrieve the InputStream.
      * @param auth
@@ -1278,17 +1078,14 @@ public class NetworkUtil
      * @param displayError
      *        Display error message in console if something wrong happen.
      */
-    public static InputStream getInputStream(URL url, AuthenticationInfo auth, boolean disableCache,
-            boolean displayError)
-    {
+    public static InputStream getInputStream(final URL url, final AuthenticationInfo auth, final boolean disableCache, final boolean displayError) {
         if ((auth != null) && (auth.isEnabled()))
             return getInputStream(url, auth.getLogin(), auth.getPassword(), disableCache, displayError);
 
         return getInputStream(url, null, null, disableCache, displayError);
     }
 
-    public static void disableCache(URLConnection uc)
-    {
+    public static void disableCache(final URLConnection uc) {
         uc.setDefaultUseCaches(false);
         uc.setUseCaches(false);
         uc.setRequestProperty("Cache-Control", "no-cache");
@@ -1298,8 +1095,7 @@ public class NetworkUtil
     /**
      * Process authentication on specified {@link URLConnection} with specified login and pass.
      */
-    public static void setAuthentication(URLConnection uc, String login, String pass)
-    {
+    public static void setAuthentication(final URLConnection uc, final String login, final String pass) {
         final String req = login + ":" + pass;
         final String encoded;
 
@@ -1312,30 +1108,19 @@ public class NetworkUtil
         uc.setRequestProperty("Authorization", "Basic " + encoded);
     }
 
-    public static String getContentString(Map<String, String> values)
-    {
-        String result = "";
+    public static String getContentString(final Map<String, String> values) {
+        final StringBuilder result = new StringBuilder();
 
-        for (Entry<String, String> entry : values.entrySet())
-        {
-            try
-            {
-                final String key = entry.getKey();
+        for (final Entry<String, String> entry : values.entrySet()) {
+            final String key = entry.getKey();
 
-                if (!StringUtil.isEmpty(key))
-                {
-                    final String value = entry.getValue();
+            if (!StringUtil.isEmpty(key)) {
+                final String value = entry.getValue();
 
-                    result += "&" + URLEncoder.encode(key, "UTF-8") + "=";
+                result.append("&").append(URLEncoder.encode(key, StandardCharsets.UTF_8)).append("=");
 
-                    if (!StringUtil.isEmpty(value))
-                        result += URLEncoder.encode(value, "UTF-8");
-                }
-            }
-            catch (UnsupportedEncodingException e)
-            {
-                // no encoding
-                result += "&" + entry.getKey() + "=" + entry.getValue();
+                if (!StringUtil.isEmpty(value))
+                    result.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
             }
         }
 
@@ -1343,15 +1128,12 @@ public class NetworkUtil
         return result.substring(1);
     }
 
-    public static String postData(String target, Map<String, String> values, String login, String pass)
-            throws IOException
-    {
+    public static String postData(final String target, final Map<String, String> values, final String login, final String pass) throws IOException {
         return postData(target, getContentString(values), login, pass);
     }
 
-    public static String postData(String target, String content, String login, String pass) throws IOException
-    {
-        String response = "";
+    public static String postData(final String target, final String content, final String login, final String pass) throws IOException {
+        final StringBuilder response = new StringBuilder();
 
         final URLConnection uc = openConnection(target, true, true);
 
@@ -1369,16 +1151,10 @@ public class NetworkUtil
         // make server believe we are form data...
         uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-        final DataOutputStream out = new DataOutputStream(uc.getOutputStream());
-        try
-        {
+        try (final DataOutputStream out = new DataOutputStream(uc.getOutputStream())) {
             // write out the bytes of the content string to the stream
             out.writeBytes(content);
             out.flush();
-        }
-        finally
-        {
-            out.close();
         }
 
         // read response from the input stream.
@@ -1386,29 +1162,20 @@ public class NetworkUtil
         if (inStream == null)
             return null;
 
-        final BufferedReader in = new BufferedReader(new InputStreamReader(inStream));
-
-        try
-        {
+        try (final BufferedReader in = new BufferedReader(new InputStreamReader(inStream))) {
             String temp;
             while ((temp = in.readLine()) != null)
-                response += temp + "\n";
-        }
-        finally
-        {
-            in.close();
+                response.append(temp).append("\n");
         }
 
-        return response;
+        return response.toString();
     }
 
-    public static String postData(String target, Map<String, String> values) throws IOException
-    {
+    public static String postData(final String target, final Map<String, String> values) throws IOException {
         return postData(target, values, null, null);
     }
 
-    public static String postData(String target, String content) throws IOException
-    {
+    public static String postData(final String target, final String content) throws IOException {
         return postData(target, content, null, null);
     }
 
@@ -1417,23 +1184,14 @@ public class NetworkUtil
      *             or {@link #postData(String, Map)} methods instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void report(final Map<String, String> values)
-    {
-        ThreadUtil.bgRun(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                try
-                {
-                    if (postData(REPORT_URL, values) == null)
-                        System.out.println("Error while reporting data, verifying your internet connection.");
-                }
-                catch (IOException e)
-                {
-                    System.out.println("Error while reporting data :");
-                    IcyExceptionHandler.showErrorMessage(e, false, false);
-                }
+    public static void report(final Map<String, String> values) {
+        ThreadUtil.bgRun(() -> {
+            try {
+                if (postData(REPORT_URL, values) == null)
+                    IcyLogger.error(NetworkUtil.class, "Error while reporting data, verifying your internet connection.");
+            }
+            catch (final IOException e) {
+                IcyLogger.error(NetworkUtil.class, e, "Error while reporting data.");
             }
         });
     }
@@ -1442,8 +1200,7 @@ public class NetworkUtil
      * @deprecated Use {@link #getContentString(Map)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String getContentString(HashMap<String, String> values)
-    {
+    public static String getContentString(final HashMap<String, String> values) {
         return getContentString((Map<String, String>) values);
     }
 
@@ -1451,9 +1208,8 @@ public class NetworkUtil
      * @deprecated Use {@link #postData(String, Map, String, String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String postData(String target, HashMap<String, String> values, String login, String pass)
-            throws IOException
-    {
+    public static String postData(final String target, final HashMap<String, String> values, final String login, final String pass)
+            throws IOException {
         return postData(target, (Map<String, String>) values, login, pass);
     }
 
@@ -1461,8 +1217,7 @@ public class NetworkUtil
      * @deprecated Use {@link #postData(String, Map)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static String postData(String target, HashMap<String, String> values) throws IOException
-    {
+    public static String postData(final String target, final HashMap<String, String> values) throws IOException {
         return postData(target, (Map<String, String>) values);
     }
 
@@ -1470,242 +1225,191 @@ public class NetworkUtil
      * @deprecated Use {@link #report(Map)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void report(final HashMap<String, String> values)
-    {
+    public static void report(final HashMap<String, String> values) {
         report((Map<String, String>) values);
     }
 
-    public static void enableSystemProxy()
-    {
+    public static void enableSystemProxy() {
         SystemUtil.setProperty("java.net.useSystemProxies", "true");
     }
 
-    public static void disableSystemProxy()
-    {
+    public static void disableSystemProxy() {
         SystemUtil.setProperty("java.net.useSystemProxies", "false");
     }
 
-    public static void enableProxySetting()
-    {
+    public static void enableProxySetting() {
         SystemUtil.setProperty("proxySet", "true");
     }
 
-    public static void disableProxySetting()
-    {
+    public static void disableProxySetting() {
         SystemUtil.setProperty("proxySet", "false");
     }
 
-    public static void enableHTTPProxySetting()
-    {
+    public static void enableHTTPProxySetting() {
         SystemUtil.setProperty("http.proxySet", "true");
     }
 
-    public static void disableHTTPProxySetting()
-    {
+    public static void disableHTTPProxySetting() {
         SystemUtil.setProperty("http.proxySet", "false");
     }
 
-    public static void enableHTTPSProxySetting()
-    {
+    public static void enableHTTPSProxySetting() {
         SystemUtil.setProperty("https.proxySet", "true");
     }
 
-    public static void disableHTTPSProxySetting()
-    {
+    public static void disableHTTPSProxySetting() {
         SystemUtil.setProperty("https.proxySet", "false");
     }
 
-    public static void enableFTPProxySetting()
-    {
+    public static void enableFTPProxySetting() {
         SystemUtil.setProperty("ftp.proxySet", "true");
     }
 
-    public static void disableFTPProxySetting()
-    {
+    public static void disableFTPProxySetting() {
         SystemUtil.setProperty("ftp.proxySet", "false");
     }
 
-    public static void enableSOCKSProxySetting()
-    {
+    public static void enableSOCKSProxySetting() {
         SystemUtil.setProperty("socksProxySet", "true");
     }
 
-    public static void disableSOCKSProxySetting()
-    {
+    public static void disableSOCKSProxySetting() {
         SystemUtil.setProperty("socksProxySet", "false");
     }
 
-    public static void setProxyHost(String host)
-    {
+    public static void setProxyHost(final String host) {
         SystemUtil.setProperty("proxy.server", host);
     }
 
-    public static void setProxyPort(int port)
-    {
+    public static void setProxyPort(final int port) {
         SystemUtil.setProperty("proxy.port", Integer.toString(port));
     }
 
-    public static void setHTTPProxyHost(String host)
-    {
+    public static void setHTTPProxyHost(final String host) {
         SystemUtil.setProperty("http.proxyHost", host);
     }
 
-    public static void setHTTPProxyPort(int port)
-    {
+    public static void setHTTPProxyPort(final int port) {
         SystemUtil.setProperty("http.proxyPort", Integer.toString(port));
     }
 
-    public static void setHTTPProxyUser(String user)
-    {
+    public static void setHTTPProxyUser(final String user) {
         SystemUtil.setProperty("http.proxyUser", user);
     }
 
-    public static void setHTTPProxyPassword(String password)
-    {
+    public static void setHTTPProxyPassword(final String password) {
         SystemUtil.setProperty("http.proxyPassword", password);
     }
 
-    public static void setHTTPSProxyHost(String host)
-    {
+    public static void setHTTPSProxyHost(final String host) {
         SystemUtil.setProperty("https.proxyHost", host);
     }
 
-    public static void setHTTPSProxyPort(int port)
-    {
+    public static void setHTTPSProxyPort(final int port) {
         SystemUtil.setProperty("https.proxyPort", Integer.toString(port));
     }
 
-    public static void setHTTPSProxyUser(String user)
-    {
+    public static void setHTTPSProxyUser(final String user) {
         SystemUtil.setProperty("https.proxyUser", user);
     }
 
-    public static void setHTTPSProxyPassword(String password)
-    {
+    public static void setHTTPSProxyPassword(final String password) {
         SystemUtil.setProperty("https.proxyPassword", password);
     }
 
-    public static void setFTPProxyHost(String host)
-    {
+    public static void setFTPProxyHost(final String host) {
         SystemUtil.setProperty("ftp.proxyHost", host);
     }
 
-    public static void setFTPProxyPort(int port)
-    {
+    public static void setFTPProxyPort(final int port) {
         SystemUtil.setProperty("ftp.proxyPort", Integer.toString(port));
     }
 
-    public static void setFTPProxyUser(String user)
-    {
+    public static void setFTPProxyUser(final String user) {
         SystemUtil.setProperty("ftp.proxyUser", user);
     }
 
-    public static void setFTPProxyPassword(String password)
-    {
+    public static void setFTPProxyPassword(final String password) {
         SystemUtil.setProperty("ftp.proxyPassword", password);
     }
 
-    public static void setSOCKSProxyHost(String host)
-    {
+    public static void setSOCKSProxyHost(final String host) {
         SystemUtil.setProperty("socksProxyHost", host);
     }
 
-    public static void setSOCKSProxyPort(int port)
-    {
+    public static void setSOCKSProxyPort(final int port) {
         SystemUtil.setProperty("socksProxyPort", Integer.toString(port));
     }
 
-    public static void setSOCKSProxyUser(String user)
-    {
+    public static void setSOCKSProxyUser(final String user) {
         SystemUtil.setProperty("socksProxyUser", user);
     }
 
-    public static void setSOCKSProxyPassword(String password)
-    {
+    public static void setSOCKSProxyPassword(final String password) {
         SystemUtil.setProperty("socksProxyPassword", password);
     }
 
-    public static String getProxyHost()
-    {
+    public static String getProxyHost() {
         return SystemUtil.getProperty("proxy.server");
     }
 
-    public static int getProxyPort()
-    {
-        try
-        {
+    public static int getProxyPort() {
+        try {
             return Integer.parseInt(SystemUtil.getProperty("proxy.port"));
         }
-        catch (NumberFormatException e)
-        {
+        catch (final NumberFormatException e) {
             return 0;
         }
     }
 
-    public static String getHTTPProxyHost()
-    {
+    public static String getHTTPProxyHost() {
         return SystemUtil.getProperty("http.proxyHost");
     }
 
-    public static int getHTTPProxyPort()
-    {
-        try
-        {
+    public static int getHTTPProxyPort() {
+        try {
             return Integer.parseInt(SystemUtil.getProperty("http.proxyPort"));
         }
-        catch (NumberFormatException e)
-        {
+        catch (final NumberFormatException e) {
             return 0;
         }
     }
 
-    public static String getHTTPSProxyHost()
-    {
+    public static String getHTTPSProxyHost() {
         return SystemUtil.getProperty("https.proxyHost");
     }
 
-    public static int getHTTPSProxyPort()
-    {
-        try
-        {
+    public static int getHTTPSProxyPort() {
+        try {
             return Integer.parseInt(SystemUtil.getProperty("https.proxyPort"));
         }
-        catch (NumberFormatException e)
-        {
+        catch (final NumberFormatException e) {
             return 0;
         }
     }
 
-    public static String getFTPProxyHost()
-    {
+    public static String getFTPProxyHost() {
         return SystemUtil.getProperty("ftp.proxyHost");
     }
 
-    public static int getFTPProxyPort()
-    {
-        try
-        {
+    public static int getFTPProxyPort() {
+        try {
             return Integer.parseInt(SystemUtil.getProperty("ftp.proxyPort"));
         }
-        catch (NumberFormatException e)
-        {
+        catch (final NumberFormatException e) {
             return 0;
         }
     }
 
-    public static String getSOCKSProxyHost()
-    {
+    public static String getSOCKSProxyHost() {
         return SystemUtil.getProperty("socksProxyHost");
     }
 
-    public static int getSOCKSProxyPort()
-    {
-        try
-        {
+    public static int getSOCKSProxyPort() {
+        try {
             return Integer.parseInt(SystemUtil.getProperty("socksProxyPort"));
         }
-        catch (NumberFormatException e)
-        {
+        catch (final NumberFormatException e) {
             return 0;
         }
     }

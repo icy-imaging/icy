@@ -10,7 +10,7 @@
  */
 package icy.type.geom.areax;
 
-final class EdgeX {
+public final class EdgeX {
 	static final int INIT_PARTS = 4;
 	static final int GROW_PARTS = 10;
 

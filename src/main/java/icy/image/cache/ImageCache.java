@@ -20,7 +20,7 @@ package icy.image.cache;
 
 import icy.image.IcyBufferedImage;
 import icy.main.Icy;
-import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 
 import java.util.*;
 
@@ -28,7 +28,7 @@ import java.util.*;
  * Image Cache static util class.<br>
  * The cache store and return 1D array data corresponding to the internal {@link IcyBufferedImage#getDataXY(int)} image data.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public final class ImageCache {
@@ -37,15 +37,19 @@ public final class ImageCache {
     public static synchronized boolean init(final int cacheSizeMB, final String path) {
         if (cache == null && !Icy.isCacheDisabled()) {
             try {
+                final String cacheName = "/icy3_cache";
                 //cache = new EHCache2(cacheSizeMB, path + "/icy_cache");
-                cache = new EHCache3(cacheSizeMB, path + "/icy3_cache");
+                cache = new EHCache3(cacheSizeMB, path + cacheName);
 
-                System.out.println("Image cache initialized (reserved memory = " + cacheSizeMB
-                        + " MB, disk cache location = '" + path + "/icy_cache')");
+                IcyLogger.info(ImageCache.class, String.format(
+                        "Image cache initialized (reserved memory = %d MB, disk cache location = '%s%s'",
+                        cacheSizeMB,
+                        path,
+                        cacheName
+                ));
             }
             catch (final Exception e) {
-                System.err.println("Error while initialize image cache:");
-                IcyExceptionHandler.showErrorMessage(e, false, true);
+                IcyLogger.error(ImageCache.class, e, "Error while initialize image cache.");
             }
         }
 
@@ -83,7 +87,7 @@ public final class ImageCache {
             cache.end();
             cache = null;
 
-            System.out.println("Image cache shutdown..");
+            IcyLogger.info(ImageCache.class, "Image cache shutdown..");
         }
     }
 

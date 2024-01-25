@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,7 +24,6 @@ import icy.file.FileUtil;
 import icy.main.Icy;
 import icy.system.logging.IcyLogger;
 import icy.type.collection.CollectionUtil;
-import icy.util.ReflectionUtil;
 import icy.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,14 +38,14 @@ import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
 /**
- * @author stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
 public class SystemUtil {
     public static final String SYSTEM_WINDOWS = "win";
@@ -189,8 +188,7 @@ public class SystemUtil {
             return Runtime.getRuntime().exec(cmd, null, new File(dir));
         }
         catch (final Exception e) {
-            System.err.println("SystemUtil.exec(" + cmd + ") error :");
-            IcyExceptionHandler.showErrorMessage(e, false);
+            IcyLogger.error(SystemUtil.class, e, "SystemUtil.exec(" + cmd + ") error.");
             return null;
         }
     }
@@ -208,7 +206,7 @@ public class SystemUtil {
             return Runtime.getRuntime().exec(cmdarray, null, new File(dir));
         }
         catch (final IOException e) {
-            IcyLogger.error("SystemUtil.exec(" + Arrays.toString(cmdarray) + ") error.");
+            IcyLogger.error(SystemUtil.class, e, "SystemUtil.exec(" + Arrays.toString(cmdarray) + ") error.");
             return null;
         }
     }
@@ -1058,12 +1056,12 @@ public class SystemUtil {
     @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean addToJavaLibraryPath(final String[] directories) {
         // can't patch library path on java 12 or above
-        if (getJavaVersionAsNumber() >= 12d) {
-            System.out.println("Java 12 (or above) don't support patching java library path.");
-            return false;
-        }
+        //if (getJavaVersionAsNumber() >= 12d) { // ALways true now
+        IcyLogger.warn(SystemUtil.class, "Java 12 (or above) don't support patching java library path.");
+        return false;
+        //}
 
-        try {
+        /*try {
             final String path_separator = System.getProperty("path.separator");
             // patch user library paths (no need to patch system ones)
             final Field pathsField = ReflectionUtil.getField(ClassLoader.class, "usr_paths", true);
@@ -1080,11 +1078,10 @@ public class SystemUtil {
             return true;
         }
         catch (final Throwable t) {
-            System.err.println(t.getMessage());
-            System.err.println("Cannot patch Java Library Path...");
+            IcyLogger.error(SystemUtil.class, t, "Cannot patch Java Library Path.");
 
             return false;
-        }
+        }*/
     }
 
     /**

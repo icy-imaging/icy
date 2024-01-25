@@ -160,11 +160,13 @@ public class Icy {
     public static void main(@NotNull final String[] args) {
         boolean headless = false;
 
-        IcyLogger.setConsoleLevel(IcyLogger.DEBUG);
+        System.setProperty("log4j.skipJansi", "false");
+
+        IcyLogger.setConsoleLevel(IcyLogger.TRACE);
         IcyLogger.setGUILevel(IcyLogger.ERROR);
 
         try {
-            IcyLogger.debug("Initializing...");
+            IcyLogger.info(Icy.class, "Initializing...");
 
             // handle arguments (must be the first thing to do)
             headless = handleAppArgs(args);
@@ -192,7 +194,7 @@ public class Icy {
                     ThreadUtil.invokeNow(confirmer);
 
                     if (!confirmer.getResult()) {
-                        IcyLogger.info("Exiting...");
+                        IcyLogger.info(Icy.class, "Exiting...");
                         // save preferences
                         IcyPreferences.save();
                         // and quit
@@ -225,7 +227,7 @@ public class Icy {
             // fast start
             // force image cache initialization so GUI won't wait after it (need preferences init)
             // TODO I don't know what is supposed to do, it just check if the cache is null, it does not init EhCache
-            new Thread(ImageCache::isInit, "Initializer: Cache").start();
+            //new Thread(ImageCache::isInit, "Initializer: Cache").start();
 
             // initialize network (need preferences init)
             new Thread(NetworkUtil::init, "Initializer: Network").start();
@@ -280,16 +282,16 @@ public class Icy {
         }
 
         // show general informations
-        IcyLogger.info(String.format("%s %s (%d bit)", SystemUtil.getJavaName(), SystemUtil.getJavaVersion(), SystemUtil.getJavaArchDataModel()));
-        IcyLogger.info(String.format("Running on %s %s (%s)", SystemUtil.getOSName(), SystemUtil.getOSVersion(), SystemUtil.getOSArch()));
-        IcyLogger.info(String.format("System total memory: %s", UnitUtil.getBytesString(SystemUtil.getTotalMemory())));
-        IcyLogger.info(String.format("System available memory: %s", UnitUtil.getBytesString(SystemUtil.getFreeMemory())));
-        IcyLogger.info(String.format("Max Java memory: %s", UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())));
+        IcyLogger.info(Icy.class, String.format("%s %s (%d bit)", SystemUtil.getJavaName(), SystemUtil.getJavaVersion(), SystemUtil.getJavaArchDataModel()));
+        IcyLogger.info(Icy.class, String.format("Running on %s %s (%s)", SystemUtil.getOSName(), SystemUtil.getOSVersion(), SystemUtil.getOSArch()));
+        IcyLogger.info(Icy.class, String.format("System total memory: %s", UnitUtil.getBytesString(SystemUtil.getTotalMemory())));
+        IcyLogger.info(Icy.class, String.format("System available memory: %s", UnitUtil.getBytesString(SystemUtil.getFreeMemory())));
+        IcyLogger.info(Icy.class, String.format("Max Java memory: %s", UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())));
 
         // image cache disabled from command line ?
         // TODO: 16/10/2023 Replace this with new Inspector mode
         if (isCacheDisabled()) {
-            IcyLogger.info("Image cache is disabled.");
+            IcyLogger.info(Icy.class, "Image cache is disabled.");
 
             // disable virtual mode button from inspector
             /*final InspectorPanel inspector = getMainInterface().getInspector();
@@ -301,7 +303,7 @@ public class Icy {
             ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
 
         if (headless) {
-            IcyLogger.info("Headless mode.");
+            IcyLogger.info(Icy.class, "Headless mode.");
         }
 
         // initialize OSX specific GUI stuff
@@ -358,7 +360,7 @@ public class Icy {
         //SystemUtil.setProperty("jogl.verbose", "TRUE");
         //SystemUtil.setProperty("jogl.debug", "TRUE");
 
-        IcyLogger.info(String.format("Icy v%s started.", VERSION.toShortString()));
+        IcyLogger.info(Icy.class, String.format("Icy v%s started.", VERSION.toShortString()));
 
         checkParameters();
 
@@ -376,9 +378,9 @@ public class Icy {
             final PluginDescriptor plugin = PluginLoader.getPlugin(startupPluginName);
 
             if (plugin == null) {
-                IcyLogger.error(String.format("Could not launch plugin '%s': the plugin was not found.", startupPluginName));
-                IcyLogger.info("Be sure you correctly wrote the complete class name and respected the case.");
-                IcyLogger.info("Ex: plugins.mydevid.analysis.MyPluginClass");
+                IcyLogger.error(Icy.class, String.format("Could not launch plugin '%s': the plugin was not found.", startupPluginName));
+                IcyLogger.info(Icy.class, "Be sure you correctly wrote the complete class name and respected the case.");
+                IcyLogger.info(Icy.class, "Ex: plugins.mydevid.analysis.MyPluginClass");
             }
             else
                 startupPlugin = PluginLauncher.start(plugin);
@@ -444,7 +446,7 @@ public class Icy {
         if ((ApplicationPreferences.getMaxMemoryMB() <= 128) && (ApplicationPreferences.getMaxMemoryMBLimit() > 256)) {
             final String text = "Your maximum memory setting is low, you should increase it in Preferences.";
 
-            IcyLogger.warn(text);
+            IcyLogger.warn(Icy.class, text);
 
             if (!Icy.getMainInterface().isHeadLess())
                 new ToolTipFrame("<html>" + text + "</html>", 15, "lowMemoryTip");
@@ -504,7 +506,7 @@ public class Icy {
             splashScreen.dispose();
 
         // show error in console
-        IcyExceptionHandler.showErrorMessage(t, true);
+        IcyLogger.fatal(Icy.class, t, t.getLocalizedMessage());
         // and show error in dialog if not headless
         if (!headless) {
             JOptionPane.showMessageDialog(
@@ -562,7 +564,7 @@ public class Icy {
 
         if (Icy.getMainInterface().isHeadLess()) {
             // just display this message
-            IcyLogger.info(mess);
+            IcyLogger.info(Icy.class, mess);
         }
         else {
             new AnnounceFrame(mess, "Restart Now", () -> {
@@ -629,7 +631,7 @@ public class Icy {
             // mark the application as exiting
             exiting = true;
 
-            IcyLogger.info("Exiting...");
+            IcyLogger.info(Icy.class, "Exiting...");
 
             // get main frame
             final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
@@ -745,7 +747,7 @@ public class Icy {
             if (doUpdate || restart)
                 IcyUpdater.launchUpdater(doUpdate, restart);
 
-            IcyLogger.info("Done.");
+            IcyLogger.info(Icy.class, "Done.");
 
             // good exit
             System.exit(0);
@@ -775,6 +777,7 @@ public class Icy {
     /**
      * Return true is VTK library loaded.
      */
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public static boolean isItkLibraryLoaded() {
         return itkLibraryLoaded;
     }
@@ -932,7 +935,7 @@ public class Icy {
                 final String[] split = path.split("\\.");
                 final String extension = split[split.length - 1].toLowerCase(Locale.ROOT);
                 if (!(extension.equals("dylib") || extension.equals("jnilib") || extension.equals("so") || extension.equals("dll") || path.contains(".so."))) {
-                    IcyLogger.warn(String.format("Wrong file format for a native library: %s", path));
+                    IcyLogger.warn(Icy.class, String.format("Wrong file format for a native library: %s", path));
                     filesToRemove.add(path);
                 }
             }
@@ -961,26 +964,24 @@ public class Icy {
             // still some remaining files not loaded ? --> display a warning
             if (!nativeLibraries.isEmpty())
                 for (final String lib : nativeLibraries)
-                    IcyLogger.warn(String.format("This VTK library file couldn't be loaded: %s", FileUtil.getFileName(lib)));
+                    IcyLogger.warn(Icy.class, String.format("This VTK library file couldn't be loaded: %s", FileUtil.getFileName(lib)));
 
             // at least one file was correctly loaded ? --> the library certainly loaded correctly then
             if (nativeLibraries.size() < numFile)
                 vtkLibraryLoaded = true;
         }
         catch (final Throwable e1) {
-            IcyExceptionHandler.showErrorMessage(e1, false, false);
+            IcyLogger.error(Icy.class, e1, e1.getLocalizedMessage());
         }
 
         if (vtkLibraryLoaded) {
             vtkNativeLibrary.DisableOutputWindow(new File("vtk.log"));
             final String vv = new vtkVersion().GetVTKVersion();
 
-            final String message = String.format("VTK %s library successfully loaded.", vv);
-            IcyLogger.success(message);
+            IcyLogger.success(Icy.class, String.format("VTK %s library successfully loaded.", vv));
         }
         else {
-            final String message = "Cannot load VTK library.";
-            IcyLogger.error(message);
+            IcyLogger.error(Icy.class, "Cannot load VTK library.");
         }
     }
 

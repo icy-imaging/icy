@@ -270,7 +270,7 @@ public final class XLSXUtil {
                 // use tab as separator
                 for (final String col : line.split(separator)) {
                     if (!setCellString(sheet, x, y, col))
-                        IcyLogger.warn(String.format("Cannot write in XLSX cell at position (%d, %d)", x, y));
+                        IcyLogger.warn(XLSXUtil.class, String.format("Cannot write in XLSX cell at position (%d, %d)", x, y));
                     x++;
                 }
 
@@ -315,7 +315,7 @@ public final class XLSXUtil {
      */
     public static boolean setFromCSVFile(final @NotNull Sheet sheet, final @NotNull File file, final @NotNull String separator) throws InterruptedException {
         if (!file.exists() || !file.isFile() || !file.canRead()) {
-            IcyLogger.error(String.format("Cannot read CSV file: %s", file.getAbsolutePath()));
+            IcyLogger.error(XLSXUtil.class, String.format("Cannot read CSV file: %s", file.getAbsolutePath()));
             return false;
         }
 

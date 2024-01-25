@@ -25,19 +25,20 @@ import com.formdev.flatlaf.intellijthemes.*;
 import icy.common.listener.SkinChangeListener;
 import icy.image.ImageUtil;
 import icy.preferences.GeneralPreferences;
-import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * LookAndFeelUtil class. Use to install all skins used by Icy and helps manipulating UI manager.
@@ -53,19 +54,25 @@ public final class LookAndFeelUtil {
     private static FlatLaf currentSkin = null;
     @Nullable
     private static UIDefaults defaults = null;
+    private static boolean fontInstalled = false;
+    private static int fontSize = getDefaultFontSize();
 
     @NotNull
     private static final Color RED_DARK = new Color(200, 64, 64);
     @NotNull
-    private static final Color RED_LIGHT = new Color(255, 128, 128);
+    private static final Color RED_BRIGHT = new Color(255, 128, 128);
     @NotNull
     private static final Color GREEN_DARK = new Color(64, 128, 64);
     @NotNull
-    private static final Color GREEN_LIGHT = new Color(128, 255, 128);
+    private static final Color GREEN_BRIGHT = new Color(128, 255, 128);
     @NotNull
     private static final Color BLUE_DARK = new Color(0, 85, 174);
     @NotNull
-    private static final Color BLUE_LIGHT = new Color(157, 205, 255);
+    private static final Color BLUE_BRIGHT = new Color(157, 205, 255);
+    @NotNull
+    private static final Color YELLOW_DARK = new Color(200, 100, 0);
+    @NotNull
+    private static final Color YELLOW_BRIGHT = new Color(255, 150, 0);
 
     public enum ColorType {
         UI_BUTTON_DEFAULT("Button.foreground"),
@@ -110,6 +117,18 @@ public final class LookAndFeelUtil {
             System.setProperty("apple.laf.useScreenMenuBar", "false");
         }
 
+        final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        try (final InputStream is = LookAndFeelUtil.class.getResourceAsStream("/fonts/JetBrainsMono-Medium.ttf")) {
+            if (is != null) {
+                ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, is));
+                fontInstalled = true;
+            }
+        }
+        catch (final IOException | FontFormatException e) {
+            IcyLogger.warn(LookAndFeelUtil.class, e, "Unable to install font.");
+            fontInstalled = false;
+        }
+
         // Default themes
         addSkin(new FlatLightLaf());
         addSkin(new FlatDarkLaf());
@@ -152,8 +171,9 @@ public final class LookAndFeelUtil {
 
         // get saved skin, if not found, get default skin and save it
         setSkin(GeneralPreferences.getGuiSkin());
+        setFontSize(GeneralPreferences.getGuiFontSize());
 
-        UIManager.put("SplitPaneDivider.gripDotCount", 0);
+        UIManager.put("SplitPaneDivider.gripDotCount", 1);
     }
 
     private static void addSkin(@NotNull final FlatLaf skin) {
@@ -197,7 +217,7 @@ public final class LookAndFeelUtil {
         if (isDarkMode())
             return RED_DARK;
         else
-            return RED_LIGHT;
+            return RED_BRIGHT;
     }
 
     @NotNull
@@ -205,7 +225,7 @@ public final class LookAndFeelUtil {
         if (isDarkMode())
             return GREEN_DARK;
         else
-            return GREEN_LIGHT;
+            return GREEN_BRIGHT;
     }
 
     @NotNull
@@ -213,19 +233,26 @@ public final class LookAndFeelUtil {
         if (isDarkMode())
             return BLUE_DARK;
         else
-            return BLUE_LIGHT;
+            return BLUE_BRIGHT;
+    }
+
+    public static Color getYellow() {
+        if (isDarkMode())
+            return YELLOW_DARK;
+        else
+            return YELLOW_BRIGHT;
     }
 
     public static boolean isRed(@Nullable final Color color) {
-        return (RED_DARK.equals(color) || RED_LIGHT.equals(color));
+        return (RED_DARK.equals(color) || RED_BRIGHT.equals(color));
     }
 
     public static boolean isGreen(@Nullable final Color color) {
-        return (GREEN_DARK.equals(color) || GREEN_LIGHT.equals(color));
+        return (GREEN_DARK.equals(color) || GREEN_BRIGHT.equals(color));
     }
 
     public static boolean isBlue(@Nullable final Color color) {
-        return (BLUE_DARK.equals(color) || BLUE_LIGHT.equals(color));
+        return (BLUE_DARK.equals(color) || BLUE_BRIGHT.equals(color));
     }
 
     public static boolean isDarkMode() {
@@ -291,14 +318,18 @@ public final class LookAndFeelUtil {
     /**
      * @return the default font size.
      */
-    // FIXME: 18/01/2023 does nothing with FlatLaf
     public static int getDefaultFontSize() {
         return 13;
     }
 
-    // FIXME: 10/11/2023 does nothing with FlatLaf
     public static void setFontSize(final int size) {
+        setUIFont(new FontUIResource("JetBrains Mono Medium", Font.TRUETYPE_FONT, size));
+        fontSize = size;
+        GeneralPreferences.setGuiFontSize(size);
+    }
 
+    public static int getFontSize() {
+        return fontSize;
     }
 
     public static float getDefaultIconSizeAsFloat() {
@@ -321,14 +352,15 @@ public final class LookAndFeelUtil {
                 try {
                     GeneralPreferences.setGuiSkin(skin.getName());
                     UIManager.setLookAndFeel(skin);
+                    if (fontInstalled)
+                        setUIFont(new FontUIResource("JetBrains Mono Medium", Font.TRUETYPE_FONT, getFontSize()));
                     setUIDefaults(skin.getDefaults());
                     currentSkin = skin;
 
                     updateUI();
                 }
                 catch (final Exception e) {
-                    System.err.println("LookAndFeelUtil.setSkin(" + skin.getName() + ") error :");
-                    IcyExceptionHandler.showErrorMessage(e, false);
+                    IcyLogger.error(LookAndFeelUtil.class, e, "LookAndFeelUtil.setSkin(" + skin.getName() + ") error.");
                 }
             });
         }
@@ -348,8 +380,7 @@ public final class LookAndFeelUtil {
                         setSkin(skin);
             }
             catch (final Exception e) {
-                System.err.println("LookAndFeelUtil.setSkin(" + skinName + ") error :");
-                IcyExceptionHandler.showErrorMessage(e, false);
+                IcyLogger.error(LookAndFeelUtil.class, e, "LookAndFeelUtil.setSkin(" + skinName + ") error.");
             }
     }
 
@@ -358,6 +389,16 @@ public final class LookAndFeelUtil {
             FlatLaf.updateUI();
             fireSkinChangeListeners();
         });
+    }
+
+    private static void setUIFont(final FontUIResource f) {
+        final Enumeration<Object> keys = UIManager.getDefaults().keys();
+        while (keys.hasMoreElements()) {
+            final Object key = keys.nextElement();
+            final Object value = UIManager.get(key);
+            if (value instanceof FontUIResource)
+                UIManager.put(key, f);
+        }
     }
 
     /**

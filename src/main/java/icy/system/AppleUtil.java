@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -25,6 +24,7 @@ import icy.gui.preferences.GeneralPreferencePanel;
 import icy.gui.preferences.PreferenceFrame;
 import icy.main.Icy;
 import icy.resource.ResourceUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 
 import java.awt.*;
@@ -33,7 +33,7 @@ import java.beans.PropertyChangeListener;
 /**
  * OSX application compatibility class
  *
- * @author stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class AppleUtil {
@@ -60,9 +60,8 @@ public class AppleUtil {
                 SystemUtil.setProperty("com.apple.mrj.application.apple.menu.about.name", "Icy");
                 SystemUtil.setProperty("apple.awt.application.name", "Icy");
             }
-            catch (Exception e) {
-                System.err.println("Warning: can't install MacOS application wrapper...");
-                System.err.println(e.getMessage());
+            catch (final Exception e) {
+                IcyLogger.warn(AppleUtil.class, e, "Can't install MacOS application wrapper.");
             }
         }
 
@@ -74,7 +73,8 @@ public class AppleUtil {
      * Apple fix live run (fixes specific OS X JVM stuff)
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    static void appleFixLiveRun() {
+    @SuppressWarnings("unused")
+    private static void appleFixLiveRun() {
         while (true) {
             final Toolkit toolkit = Toolkit.getDefaultToolkit();
 
@@ -83,7 +83,7 @@ public class AppleUtil {
             final PropertyChangeListener[] leak = toolkit.getPropertyChangeListeners("apple.awt.contentScaleFactor");
 
             // remove listener
-            for (PropertyChangeListener propertyChangeListener : leak)
+            for (final PropertyChangeListener propertyChangeListener : leak)
                 toolkit.removePropertyChangeListener("apple.awt.contentScaleFactor", propertyChangeListener);
 
             // no need more...

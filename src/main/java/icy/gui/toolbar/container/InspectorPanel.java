@@ -37,7 +37,6 @@ public final class InspectorPanel extends ToolbarContainer {
     protected void showParent(@Nonnull final JSplitPane pane) {
         pane.setDividerLocation(pane.getWidth() - getPreferredSize().width - 5);
         pane.setEnabled(true);
-        pane.updateUI();
     }
 
     @Override

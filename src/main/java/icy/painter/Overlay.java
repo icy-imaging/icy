@@ -1,21 +1,21 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.painter;
 
 import icy.canvas.IcyCanvas;
@@ -28,12 +28,15 @@ import icy.main.Icy;
 import icy.painter.OverlayEvent.OverlayEventType;
 import icy.sequence.Sequence;
 import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.type.point.Point5D;
 import icy.util.ClassUtil;
 import icy.util.StringUtil;
 import icy.util.XMLUtil;
+import org.w3c.dom.Node;
 
-import java.awt.Graphics2D;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -41,25 +44,21 @@ import java.awt.geom.Point2D;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JPanel;
-
-import org.w3c.dom.Node;
+import java.util.Objects;
 
 /**
  * Overlay class.<br>
  * <br>
  * This class allow interaction and rich informations display on Sequences.<br>
  * {@link IcyCanvas} subclasses should propagate mouse and key events to overlay.
- * 
- * @author Stephane
+ *
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-@SuppressWarnings("deprecation")
-public abstract class Overlay implements Painter, ChangeListener, Comparable<Overlay>, XMLPersistent
-{
+public abstract class Overlay implements Painter, ChangeListener, Comparable<Overlay>, XMLPersistent {
     /**
      * Define the overlay priority:
-     * 
+     *
      * <pre>
      * Lowest   |   BACKGROUND  (below image)
      *          |   IMAGE       (image level)
@@ -68,21 +67,20 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      *          |   TOOLTIP     (all over the rest)
      * Highest  |   TOPMOST     (absolute topmost)
      * </pre>
-     * 
+     *
      * You have 4 levels for each category (except TOPMOST) for finest adjustment:
-     * 
+     *
      * <pre>
      * Lowest   |   LOW
      *          |   NORMAL
      *          |   HIGH
      * Highest  |   TOP
      * </pre>
-     * 
+     *
      * TOP level should be used to give <i>focus</i> to a specific Overlay over all other in the same
      * category.
      */
-    public static enum OverlayPriority
-    {
+    public enum OverlayPriority {
         BACKGROUND_LOW, BACKGROUND_NORMAL, BACKGROUND_HIGH, BACKGROUND_TOP, IMAGE_LOW, IMAGE_NORMAL, IMAGE_HIGH, IMAGE_TOP, SHAPE_LOW, SHAPE_NORMAL, SHAPE_HIGH, SHAPE_TOP, TEXT_LOW, TEXT_NORMAL, TEXT_HIGH, TEXT_TOP, TOOLTIP_LOW, TOOLTIP_NORMAL, TOOLTIP_HIGH, TOOLTIP_TOP, TOPMOST
     }
 
@@ -115,15 +113,14 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Create a Overlay from a XML node.
-     * 
+     *
      * @param node
      *        XML node defining the overlay
      * @return the created Overlay or <code>null</code> if the Overlay class does not support XML
      *         persistence a default
      *         constructor
      */
-    public static Overlay createFromXML(Node node)
-    {
+    public static Overlay createFromXML(final Node node) {
         if (node == null)
             return null;
 
@@ -133,24 +130,21 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
         final Overlay result;
 
-        try
-        {
+        try {
             // search for the specified className
             final Class<?> clazz = ClassUtil.findClass(className);
 
             // class found
-            if (clazz != null)
-            {
+            if (clazz != null) {
                 final Class<? extends Overlay> overlayClazz = clazz.asSubclass(Overlay.class);
 
                 // default constructor
-                final Constructor<? extends Overlay> constructor = overlayClazz.getConstructor(new Class[] {});
+                final Constructor<? extends Overlay> constructor = overlayClazz.getConstructor();
                 // build Overlay
                 result = constructor.newInstance();
 
                 // load properties from XML
-                if (result != null)
-                {
+                if (result != null) {
                     // error while loading infos --> return null
                     if (!result.loadFromXML(node))
                         return null;
@@ -159,18 +153,13 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
                 return result;
             }
         }
-        catch (NoSuchMethodException e)
-        {
-            IcyExceptionHandler.handleException(new NoSuchMethodException("Default constructor not found in class '"
-                    + className + "', cannot create the Overlay."), true);
+        catch (final NoSuchMethodException e) {
+            IcyExceptionHandler.handleException(new NoSuchMethodException("Default constructor not found in class '" + className + "', cannot create the Overlay."), true);
         }
-        catch (ClassNotFoundException e)
-        {
-            IcyExceptionHandler.handleException(new ClassNotFoundException("Cannot find '" + className
-                    + "' class, cannot create the Overlay."), true);
+        catch (final ClassNotFoundException e) {
+            IcyExceptionHandler.handleException(new ClassNotFoundException("Cannot find '" + className + "' class, cannot create the Overlay."), true);
         }
-        catch (Exception e)
-        {
+        catch (final Exception e) {
             IcyExceptionHandler.handleException(e, true);
         }
 
@@ -179,15 +168,13 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Return the number of Overlay defined in the specified XML node.
-     * 
+     *
      * @param node
      *        XML node defining the Overlay list
      * @return the number of Overlay defined in the XML node.
      */
-    public static int getOverlayCount(Node node)
-    {
-        if (node != null)
-        {
+    public static int getOverlayCount(final Node node) {
+        if (node != null) {
             final List<Node> nodesOverlay = XMLUtil.getChildren(node, ID_OVERLAY);
 
             if (nodesOverlay != null)
@@ -199,27 +186,22 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Return a list of Overlay from a XML node.
-     * 
+     *
      * @param node
      *        XML node defining the Overlay list
      * @return a list of Overlay
      */
-    public static List<Overlay> loadOverlaysFromXML(Node node)
-    {
-        final List<Overlay> result = new ArrayList<Overlay>();
+    public static List<Overlay> loadOverlaysFromXML(final Node node) {
+        final List<Overlay> result = new ArrayList<>();
 
-        if (node != null)
-        {
+        if (node != null) {
             final List<Node> nodesOverlay = XMLUtil.getChildren(node, ID_OVERLAY);
 
-            if (nodesOverlay != null)
-            {
-                for (Node n : nodesOverlay)
-                {
+            if (nodesOverlay != null) {
+                for (final Node n : nodesOverlay) {
                     final Overlay overlay = createFromXML(n);
 
-                    if (overlay != null)
-                    {
+                    if (overlay != null) {
                         // we assume this overlay should stay persistent then
                         overlay.setPersistent(true);
                         result.add(overlay);
@@ -233,28 +215,22 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Set a list of Overlay to a XML node.
-     * 
+     *
      * @param node
      *        XML node which is used to store the list of Overlay
      * @param overlays
      *        the list of Overlay to store in the XML node
      */
-    public static void saveOverlaysToXML(Node node, List<Overlay> overlays)
-    {
-        if (node != null)
-        {
-            for (Overlay overlay : overlays)
-            {
+    public static void saveOverlaysToXML(final Node node, final List<Overlay> overlays) {
+        if (node != null) {
+            for (final Overlay overlay : overlays) {
                 // only save persistent overlay
-                if (overlay.isPersistent())
-                {
+                if (overlay.isPersistent()) {
                     final Node nodeOverlay = XMLUtil.addElement(node, ID_OVERLAY);
 
-                    if (!overlay.saveToXML(nodeOverlay))
-                    {
+                    if (!overlay.saveToXML(nodeOverlay)) {
                         XMLUtil.removeNode(node, nodeOverlay);
-                        System.err.println("Error: the overlay " + overlay.getName()
-                                + " was not correctly saved to XML !");
+                        IcyLogger.error(Overlay.class, "The overlay " + overlay.getName() + " was not correctly saved to XML !");
                     }
                 }
             }
@@ -279,12 +255,10 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     protected final List<OverlayListener> listeners;
     protected final UpdateEventHandler updater;
 
-    public Overlay(String name, OverlayPriority priority)
-    {
+    public Overlay(final String name, final OverlayPriority priority) {
         super();
 
-        synchronized (Overlay.class)
-        {
+        synchronized (Overlay.class) {
             id = id_gen++;
         }
 
@@ -297,12 +271,11 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
         receiveKeyEventOnHidden = false;
         receiveMouseEventOnHidden = false;
 
-        listeners = new ArrayList<OverlayListener>();
+        listeners = new ArrayList<>();
         updater = new UpdateEventHandler(this, false);
     }
 
-    public Overlay(String name)
-    {
+    public Overlay(final String name) {
         // create overlay with default priority
         this(name, OverlayPriority.SHAPE_NORMAL);
     }
@@ -310,8 +283,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     /**
      * @return the name
      */
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
@@ -319,10 +291,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param name
      *        the name to set
      */
-    public void setName(String name)
-    {
-        if (this.name != name)
-        {
+    public void setName(final String name) {
+        if (!Objects.equals(this.name, name)) {
             this.name = name;
             propertyChanged(PROPERTY_NAME);
         }
@@ -331,8 +301,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     /**
      * @return the priority
      */
-    public OverlayPriority getPriority()
-    {
+    public OverlayPriority getPriority() {
         return priority;
     }
 
@@ -340,10 +309,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param priority
      *        the priority to set
      */
-    public void setPriority(OverlayPriority priority)
-    {
-        if (this.priority != priority)
-        {
+    public void setPriority(final OverlayPriority priority) {
+        if (this.priority != priority) {
             this.priority = priority;
             propertyChanged(PROPERTY_PRIORITY);
         }
@@ -353,8 +320,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @return Returns <code>true</code> if the overlay is attached to the specified {@link Sequence}.
      * @param sequence sequence
      */
-    public boolean isAttached(Sequence sequence)
-    {
+    public boolean isAttached(final Sequence sequence) {
         if (sequence != null)
             return sequence.contains(this);
 
@@ -367,8 +333,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @return boolean
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean isFixed()
-    {
+    public boolean isFixed() {
         return !getCanBeRemoved();
     }
 
@@ -377,19 +342,17 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param value boolean
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setFixed(boolean value)
-    {
+    public void setFixed(final boolean value) {
         setCanBeRemoved(!value);
     }
 
     /**
      * @return Returns <code>true</code> if the overlay can be freely removed from the Canvas where it
      * appears and <code>false</code> otherwise.<br>
-     * 
+     *
      * @see #setCanBeRemoved(boolean)
      */
-    public boolean getCanBeRemoved()
-    {
+    public boolean getCanBeRemoved() {
         return canBeRemoved;
     }
 
@@ -399,10 +362,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * appears.
      * @param value boolean
      */
-    public void setCanBeRemoved(boolean value)
-    {
-        if (canBeRemoved != value)
-        {
+    public void setCanBeRemoved(final boolean value) {
+        if (canBeRemoved != value) {
             canBeRemoved = value;
             propertyChanged(PROPERTY_CANBEREMOVED);
         }
@@ -412,8 +373,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @return Return persistent property.<br>
      * When set to <code>true</code> the Overlay will be saved in the Sequence persistent XML data.
      */
-    public boolean isPersistent()
-    {
+    public boolean isPersistent() {
         return persistent;
     }
 
@@ -422,10 +382,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param value When set to <code>true</code> the Overlay will be saved in the Sequence persistent XML data
      * (default is <code>false</code>).
      */
-    public void setPersistent(boolean value)
-    {
-        if (persistent != value)
-        {
+    public void setPersistent(final boolean value) {
+        if (persistent != value) {
             persistent = value;
             propertyChanged(PROPERTY_PERSISTENT);
         }
@@ -435,8 +393,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @return Return read only property.<br>
      * When set to <code>true</code> we cannot anymore modify overlay properties from the GUI.
      */
-    public boolean isReadOnly()
-    {
+    public boolean isReadOnly() {
         return readOnly;
     }
 
@@ -444,10 +401,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * Set read only property.<br>
      * @param value When set to <code>true</code> we cannot anymore modify overlay properties from the GUI.
      */
-    public void setReadOnly(boolean value)
-    {
-        if (readOnly != value)
-        {
+    public void setReadOnly(final boolean value) {
+        if (readOnly != value) {
             readOnly = value;
             propertyChanged(PROPERTY_READONLY);
         }
@@ -457,8 +412,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @return <code>true</code> is the overlay should receive {@link KeyEvent} even when it is not
      *         visible.
      */
-    public boolean getReceiveKeyEventOnHidden()
-    {
+    public boolean getReceiveKeyEventOnHidden() {
         return receiveKeyEventOnHidden;
     }
 
@@ -466,10 +420,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param value Set to <code>true</code> if you want to overlay to receive {@link KeyEvent} even when it is
      * not visible.
      */
-    public void setReceiveKeyEventOnHidden(boolean value)
-    {
-        if (receiveKeyEventOnHidden != value)
-        {
+    public void setReceiveKeyEventOnHidden(final boolean value) {
+        if (receiveKeyEventOnHidden != value) {
             receiveKeyEventOnHidden = value;
             propertyChanged(PROPERTY_RECEIVEKEYEVENTONHIDDEN);
         }
@@ -479,8 +431,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @return <code>true</code> is the overlay should receive {@link MouseEvent} even when it is
      *         not visible.
      */
-    public boolean getReceiveMouseEventOnHidden()
-    {
+    public boolean getReceiveMouseEventOnHidden() {
         return receiveMouseEventOnHidden;
     }
 
@@ -489,10 +440,8 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * not visible.
      * @param value boolean
      */
-    public void setReceiveMouseEventOnHidden(boolean value)
-    {
-        if (receiveMouseEventOnHidden != value)
-        {
+    public void setReceiveMouseEventOnHidden(final boolean value) {
+        if (receiveMouseEventOnHidden != value) {
             receiveMouseEventOnHidden = value;
             propertyChanged(PROPERTY_RECEIVEMOUSEEVENTONHIDDEN);
         }
@@ -502,8 +451,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @return Override this method to provide an extra options panel for the overlay.<br>
      * The options panel will appears in the inspector when the layer's overlay is selected.
      */
-    public JPanel getOptionsPanel()
-    {
+    public JPanel getOptionsPanel() {
         return null;
     }
 
@@ -512,8 +460,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param sequence sequence
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void attachTo(Sequence sequence)
-    {
+    public void attachTo(final Sequence sequence) {
         if (sequence != null)
             sequence.addOverlay(this);
     }
@@ -523,8 +470,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param sequence seuqence
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void detachFrom(Sequence sequence)
-    {
+    public void detachFrom(final Sequence sequence) {
         if (sequence != null)
             sequence.removeOverlay(this);
     }
@@ -532,31 +478,27 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     /**
      * Remove the Overlay from all sequences and canvas where it is currently attached.
      */
-    public void remove()
-    {
-        for (Sequence sequence : getSequences())
+    public void remove() {
+        for (final Sequence sequence : getSequences())
             sequence.removeOverlay(this);
-        for (IcyCanvas canvas : getAttachedCanvas())
+        for (final IcyCanvas canvas : getAttachedCanvas())
             canvas.removeLayer(this);
     }
 
     /**
      * @return Returns all sequences where the overlay is currently attached.
      */
-    public List<Sequence> getSequences()
-    {
+    public List<Sequence> getSequences() {
         return Icy.getMainInterface().getSequencesContaining(this);
     }
 
     /**
      * @return Returns all canvas where the overlay is currently present as a layer.
      */
-    public List<IcyCanvas> getAttachedCanvas()
-    {
-        final List<IcyCanvas> result = new ArrayList<IcyCanvas>();
+    public List<IcyCanvas> getAttachedCanvas() {
+        final List<IcyCanvas> result = new ArrayList<>();
 
-        for (Viewer viewer : Icy.getMainInterface().getViewers())
-        {
+        for (final Viewer viewer : Icy.getMainInterface().getViewers()) {
             final IcyCanvas canvas = viewer.getCanvas();
 
             if ((canvas != null) && canvas.hasLayer(this))
@@ -566,18 +508,15 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
         return result;
     }
 
-    public void beginUpdate()
-    {
+    public void beginUpdate() {
         updater.beginUpdate();
     }
 
-    public void endUpdate()
-    {
+    public void endUpdate() {
         updater.endUpdate();
     }
 
-    public boolean isUpdating()
-    {
+    public boolean isUpdating() {
         return updater.isUpdating();
     }
 
@@ -585,8 +524,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @deprecated Use {@link #painterChanged()} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void changed()
-    {
+    public void changed() {
         painterChanged();
     }
 
@@ -594,8 +532,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * Notify the painter content has changed.<br>
      * All sequence containing the overlay will be repainted to reflect the change.
      */
-    public void painterChanged()
-    {
+    public void painterChanged() {
         updater.changed(new OverlayEvent(this, OverlayEventType.PAINTER_CHANGED));
     }
 
@@ -603,20 +540,17 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * Notify the overlay property has changed.
      * @param propertyName string
      */
-    public void propertyChanged(String propertyName)
-    {
+    public void propertyChanged(final String propertyName) {
         updater.changed(new OverlayEvent(this, OverlayEventType.PROPERTY_CHANGED, propertyName));
     }
 
     @Override
-    public void onChanged(CollapsibleEvent object)
-    {
+    public void onChanged(final CollapsibleEvent object) {
         fireOverlayChangedEvent((OverlayEvent) object);
     }
 
-    protected void fireOverlayChangedEvent(OverlayEvent event)
-    {
-        for (OverlayListener listener : new ArrayList<OverlayListener>(listeners))
+    protected void fireOverlayChangedEvent(final OverlayEvent event) {
+        for (final OverlayListener listener : new ArrayList<>(listeners))
             listener.overlayChanged(event);
     }
 
@@ -624,8 +558,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * Add a listener.
      * @param listener overlay listener
      */
-    public void addOverlayListener(OverlayListener listener)
-    {
+    public void addOverlayListener(final OverlayListener listener) {
         listeners.add(listener);
     }
 
@@ -633,8 +566,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * Remove a listener.
      * @param listener overlay listener
      */
-    public void removeOverlayListener(OverlayListener listener)
-    {
+    public void removeOverlayListener(final OverlayListener listener) {
         listeners.remove(listener);
     }
 
@@ -645,8 +577,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param g 2D graphics
      */
     @Override
-    public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas)
-    {
+    public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
         // nothing by default
     }
 
@@ -658,8 +589,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void mousePressed(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
-    {
+    public void mousePressed(final MouseEvent e, final Point2D imagePoint, final IcyCanvas canvas) {
         // no action by default
     }
 
@@ -671,8 +601,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void mouseReleased(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
-    {
+    public void mouseReleased(final MouseEvent e, final Point2D imagePoint, final IcyCanvas canvas) {
         // no action by default
     }
 
@@ -683,8 +612,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void mouseClick(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
-    {
+    public void mouseClick(final MouseEvent e, final Point2D imagePoint, final IcyCanvas canvas) {
         // no action by default
     }
 
@@ -696,8 +624,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void mouseMove(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
-    {
+    public void mouseMove(final MouseEvent e, final Point2D imagePoint, final IcyCanvas canvas) {
         // no action by default
     }
 
@@ -709,8 +636,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void mouseDrag(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
-    {
+    public void mouseDrag(final MouseEvent e, final Point2D imagePoint, final IcyCanvas canvas) {
         // no action by default
     }
 
@@ -721,8 +647,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas canvas
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void mouseEntered(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
-    {
+    public void mouseEntered(final MouseEvent e, final Point2D imagePoint, final IcyCanvas canvas) {
         // no action by default
     }
 
@@ -733,8 +658,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas canvas
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void mouseExited(MouseEvent e, Point2D imagePoint, IcyCanvas canvas)
-    {
+    public void mouseExited(final MouseEvent e, final Point2D imagePoint, final IcyCanvas canvas) {
         // no action by default
     }
 
@@ -745,8 +669,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas canvas
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void mouseWheelMoved(MouseWheelEvent e, Point2D imagePoint, IcyCanvas canvas)
-    {
+    public void mouseWheelMoved(final MouseWheelEvent e, final Point2D imagePoint, final IcyCanvas canvas) {
         // no action by default
     }
 
@@ -758,8 +681,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void keyPressed(KeyEvent e, Point2D imagePoint, IcyCanvas canvas)
-    {
+    public void keyPressed(final KeyEvent e, final Point2D imagePoint, final IcyCanvas canvas) {
         // no action by default
     }
 
@@ -771,14 +693,13 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     @Override
-    public void keyReleased(KeyEvent e, Point2D imagePoint, IcyCanvas canvas)
-    {
+    public void keyReleased(final KeyEvent e, final Point2D imagePoint, final IcyCanvas canvas) {
         // no action by default
     }
 
     /**
      * Mouse press event forwarded to the overlay.
-     * 
+     *
      * @param e
      *        mouse event
      * @param imagePoint
@@ -786,8 +707,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas
      *        icy canvas
      */
-    public void mousePressed(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-    {
+    public void mousePressed(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
         // provide backward compatibility
         if (imagePoint != null)
             mousePressed(e, imagePoint.toPoint2D(), canvas);
@@ -797,7 +717,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Mouse release event forwarded to the overlay.
-     * 
+     *
      * @param e
      *        mouse event
      * @param imagePoint
@@ -805,8 +725,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas
      *        icy canvas
      */
-    public void mouseReleased(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-    {
+    public void mouseReleased(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
         // provide backward compatibility
         if (imagePoint != null)
             mouseReleased(e, imagePoint.toPoint2D(), canvas);
@@ -816,7 +735,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Mouse click event forwarded to the overlay.
-     * 
+     *
      * @param e
      *        mouse event
      * @param imagePoint
@@ -824,8 +743,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas
      *        icy canvas
      */
-    public void mouseClick(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-    {
+    public void mouseClick(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
         // provide backward compatibility
         if (imagePoint != null)
             mouseClick(e, imagePoint.toPoint2D(), canvas);
@@ -835,7 +753,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Mouse move event forwarded to the overlay.
-     * 
+     *
      * @param e
      *        mouse event
      * @param imagePoint
@@ -843,8 +761,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas
      *        icy canvas
      */
-    public void mouseMove(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-    {
+    public void mouseMove(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
         // provide backward compatibility
         if (imagePoint != null)
             mouseMove(e, imagePoint.toPoint2D(), canvas);
@@ -854,7 +771,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Mouse drag event forwarded to the overlay.
-     * 
+     *
      * @param e
      *        mouse event
      * @param imagePoint
@@ -862,8 +779,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas
      *        icy canvas
      */
-    public void mouseDrag(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-    {
+    public void mouseDrag(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
         // provide backward compatibility
         if (imagePoint != null)
             mouseDrag(e, imagePoint.toPoint2D(), canvas);
@@ -873,7 +789,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Mouse enter event forwarded to the overlay.
-     * 
+     *
      * @param e
      *        mouse event
      * @param imagePoint
@@ -881,8 +797,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas
      *        icy canvas
      */
-    public void mouseEntered(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-    {
+    public void mouseEntered(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
         // provide backward compatibility
         if (imagePoint != null)
             mouseEntered(e, imagePoint.toPoint2D(), canvas);
@@ -892,7 +807,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Mouse exit event forwarded to the overlay.
-     * 
+     *
      * @param e
      *        mouse event
      * @param imagePoint
@@ -900,8 +815,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas
      *        icy canvas
      */
-    public void mouseExited(MouseEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-    {
+    public void mouseExited(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
         // provide backward compatibility
         if (imagePoint != null)
             mouseExited(e, imagePoint.toPoint2D(), canvas);
@@ -911,7 +825,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Mouse wheel moved event forwarded to the overlay.
-     * 
+     *
      * @param e
      *        mouse event
      * @param imagePoint
@@ -919,8 +833,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas
      *        icy canvas
      */
-    public void mouseWheelMoved(MouseWheelEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-    {
+    public void mouseWheelMoved(final MouseWheelEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
         // provide backward compatibility
         if (imagePoint != null)
             mouseWheelMoved(e, imagePoint.toPoint2D(), canvas);
@@ -930,7 +843,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Key press event forwarded to the overlay.
-     * 
+     *
      * @param e
      *        key event
      * @param imagePoint
@@ -938,8 +851,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas
      *        icy canvas
      */
-    public void keyPressed(KeyEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-    {
+    public void keyPressed(final KeyEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
         // provide backward compatibility
         if (imagePoint != null)
             keyPressed(e, imagePoint.toPoint2D(), canvas);
@@ -949,7 +861,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
 
     /**
      * Key release event forwarded to the overlay.
-     * 
+     *
      * @param e
      *        key event
      * @param imagePoint
@@ -957,8 +869,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
      * @param canvas
      *        icy canvas
      */
-    public void keyReleased(KeyEvent e, Point5D.Double imagePoint, IcyCanvas canvas)
-    {
+    public void keyReleased(final KeyEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
         // provide backward compatibility
         if (imagePoint != null)
             keyReleased(e, imagePoint.toPoint2D(), canvas);
@@ -966,20 +877,16 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
             keyReleased(e, (Point2D) null, canvas);
     }
 
-    public boolean loadFromXML(Node node, boolean preserveId)
-    {
+    public boolean loadFromXML(final Node node, final boolean preserveId) {
         if (node == null)
             return false;
 
         beginUpdate();
-        try
-        {
+        try {
             // FIXME : this can make duplicate id but it is also important to preserve id
-            if (!preserveId)
-            {
+            if (!preserveId) {
                 id = XMLUtil.getElementIntValue(node, ID_ID, 0);
-                synchronized (Overlay.class)
-                {
+                synchronized (Overlay.class) {
                     // avoid having same id
                     if (id_gen <= id)
                         id_gen = id + 1;
@@ -992,8 +899,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
             setReceiveKeyEventOnHidden(XMLUtil.getElementBooleanValue(node, ID_RECEIVEKEYEVENTONHIDDEN, false));
             setReceiveMouseEventOnHidden(XMLUtil.getElementBooleanValue(node, ID_RECEIVEMOUSEEVENTONHIDDEN, false));
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
 
@@ -1001,14 +907,12 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     @Override
-    public boolean loadFromXML(Node node)
-    {
+    public boolean loadFromXML(final Node node) {
         return loadFromXML(node, false);
     }
 
     @Override
-    public boolean saveToXML(Node node)
-    {
+    public boolean saveToXML(final Node node) {
         if (node == null)
             return false;
 
@@ -1024,8 +928,7 @@ public abstract class Overlay implements Painter, ChangeListener, Comparable<Ove
     }
 
     @Override
-    public int compareTo(Overlay o)
-    {
+    public int compareTo(final Overlay o) {
         // highest priority first
         return o.priority.ordinal() - priority.ordinal();
     }

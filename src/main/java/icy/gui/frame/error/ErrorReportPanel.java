@@ -1,49 +1,52 @@
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package icy.gui.frame.error;
 
 import icy.gui.component.IcyTextField;
 import icy.preferences.GeneralPreferences;
-import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.util.StringUtil;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-public class ErrorReportPanel extends JPanel
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -6672076887465746832L;
-
+/**
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
+ */
+public class ErrorReportPanel extends JPanel {
     // GUI
-    JTextPane errorMessageTextPane;
-    JTextPane commentTextPane;
-    IcyTextField emailTextField;
+    private JTextPane errorMessageTextPane;
+    private JTextPane commentTextPane;
+    private IcyTextField emailTextField;
     JButton reportButton;
     JButton closeButton;
-    JLabel label;
+    private JLabel label;
 
-    public ErrorReportPanel(Icon icon, String title, String message)
-    {
+    public ErrorReportPanel(final Icon icon, final String title, final String message) {
         super();
 
         initialize();
@@ -53,54 +56,44 @@ public class ErrorReportPanel extends JPanel
         if (icon != null)
             label.setIcon(icon);
 
-        try
-        {
-            errorMessageTextPane.getStyledDocument().insertString(errorMessageTextPane.getStyledDocument().getLength(),
-                    message, new SimpleAttributeSet());
+        try {
+            errorMessageTextPane.getStyledDocument().insertString(errorMessageTextPane.getStyledDocument().getLength(), message, new SimpleAttributeSet());
         }
-        catch (BadLocationException e)
-        {
-            System.err.println("PluginErrorReport(...) error :");
-            IcyExceptionHandler.showErrorMessage(e, true);
+        catch (final BadLocationException e) {
+            IcyLogger.error(ErrorReportPanel.class, e, "PluginErrorReport(...) error.");
         }
         errorMessageTextPane.setCaretPosition(0);
 
         final Document doc = commentTextPane.getDocument();
 
-        try
-        {
-            SimpleAttributeSet attributes = new SimpleAttributeSet();
+        try {
+            final SimpleAttributeSet attributes = new SimpleAttributeSet();
             StyleConstants.setItalic(attributes, true);
             StyleConstants.setForeground(attributes, Color.GRAY);
             doc.insertString(0, "Please type here your comment", attributes);
         }
-        catch (BadLocationException e1)
-        {
-
+        catch (final BadLocationException e1) {
+            // ignore
         }
 
-        commentTextPane.addMouseListener(new MouseAdapter()
-        {
+        commentTextPane.addMouseListener(new MouseAdapter() {
             // Displays a message at the beginning that
             // disappears when first clicked
             boolean firstClickDone = false;
 
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (!firstClickDone)
-                {
+            public void mouseClicked(final MouseEvent e) {
+                if (!firstClickDone) {
                     commentTextPane.setText("");
 
-                    SimpleAttributeSet attributes = new SimpleAttributeSet();
+                    final SimpleAttributeSet attributes = new SimpleAttributeSet();
                     StyleConstants.setItalic(attributes, false);
                     StyleConstants.setForeground(attributes, Color.BLACK);
-                    try
-                    {
+                    try {
                         doc.insertString(0, " ", attributes);
                     }
-                    catch (BadLocationException e1)
-                    {
+                    catch (final BadLocationException e1) {
+                        // ignore
                     }
 
                     firstClickDone = true;
@@ -112,32 +105,28 @@ public class ErrorReportPanel extends JPanel
         emailTextField.setText(GeneralPreferences.getUserEmail());
     }
 
-    /**
-     * @wbp.parser.constructor
-     */
-    ErrorReportPanel()
-    {
+    @SuppressWarnings("unused")
+    ErrorReportPanel() {
         this(null, "Test", "An error occured");
     }
 
-    private void initialize()
-    {
+    private void initialize() {
         // top
         label = new JLabel("An error occured !", SwingConstants.CENTER);
 
         // center
         errorMessageTextPane = new JTextPane();
         errorMessageTextPane.setEditable(false);
-        errorMessageTextPane.setContentType("text/html");
+        //errorMessageTextPane.setContentType("text/html");
 
-        JScrollPane messageScrollPane = new JScrollPane(errorMessageTextPane);
+        final JScrollPane messageScrollPane = new JScrollPane(errorMessageTextPane);
 
-        JPanel messagePanel = new JPanel();
+        final JPanel messagePanel = new JPanel();
         messagePanel.setBorder(new TitledBorder(null, "Message", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         messagePanel.setLayout(new BorderLayout(0, 0));
         messagePanel.add(messageScrollPane, BorderLayout.CENTER);
 
-        JPanel userPanel = new JPanel();
+        final JPanel userPanel = new JPanel();
         userPanel.setBorder(new TitledBorder(null, "Comment", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         userPanel.setLayout(new BorderLayout(0, 0));
 
@@ -145,17 +134,17 @@ public class ErrorReportPanel extends JPanel
         reportButton = new JButton("Report");
         closeButton = new JButton("Close");
 
-        JPanel buttonsPanel = new JPanel();
+        final JPanel buttonsPanel = new JPanel();
         buttonsPanel.add(reportButton);
         buttonsPanel.add(closeButton);
 
         // bottom
-        JPanel bottomPanel = new JPanel();
+        final JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BorderLayout(0, 0));
 
         bottomPanel.add(userPanel, BorderLayout.CENTER);
 
-        JPanel commentPanel = new JPanel();
+        final JPanel commentPanel = new JPanel();
         userPanel.add(commentPanel, BorderLayout.CENTER);
         commentPanel.setLayout(new BorderLayout(0, 0));
 
@@ -168,17 +157,17 @@ public class ErrorReportPanel extends JPanel
         scComment.setPreferredSize(new Dimension(23, 60));
         scComment.setMinimumSize(new Dimension(23, 60));
 
-        JPanel emailPanel = new JPanel();
+        final JPanel emailPanel = new JPanel();
         userPanel.add(emailPanel, BorderLayout.SOUTH);
-        GridBagLayout gbl_emailPanel = new GridBagLayout();
-        gbl_emailPanel.columnWidths = new int[] {0, 0, 0};
-        gbl_emailPanel.rowHeights = new int[] {0, 0};
-        gbl_emailPanel.columnWeights = new double[] {0.0, 1.0, Double.MIN_VALUE};
-        gbl_emailPanel.rowWeights = new double[] {0.0, Double.MIN_VALUE};
+        final GridBagLayout gbl_emailPanel = new GridBagLayout();
+        gbl_emailPanel.columnWidths = new int[]{0, 0, 0};
+        gbl_emailPanel.rowHeights = new int[]{0, 0};
+        gbl_emailPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+        gbl_emailPanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
         emailPanel.setLayout(gbl_emailPanel);
 
-        JLabel lblEmail = new JLabel("Your email");
-        GridBagConstraints gbc_lblEmail = new GridBagConstraints();
+        final JLabel lblEmail = new JLabel("Your email");
+        final GridBagConstraints gbc_lblEmail = new GridBagConstraints();
         gbc_lblEmail.insets = new Insets(0, 0, 0, 5);
         gbc_lblEmail.anchor = GridBagConstraints.WEST;
         gbc_lblEmail.gridx = 0;
@@ -187,7 +176,7 @@ public class ErrorReportPanel extends JPanel
 
         emailTextField = new IcyTextField();
         emailTextField.setToolTipText("You can enter your email so the developer can contact you if you wish");
-        GridBagConstraints gbc_emailTextField = new GridBagConstraints();
+        final GridBagConstraints gbc_emailTextField = new GridBagConstraints();
         gbc_emailTextField.fill = GridBagConstraints.HORIZONTAL;
         gbc_emailTextField.gridx = 1;
         gbc_emailTextField.gridy = 0;
@@ -204,19 +193,17 @@ public class ErrorReportPanel extends JPanel
 
     /**
      * @return Returns formatted report message (ready to send to web site).
-     * 
+     *
      * @throws BadLocationException exception
      */
-    public String getReportMessage() throws BadLocationException
-    {
+    public String getReportMessage() throws BadLocationException {
         final String email = emailTextField.getText();
         final Document commentDoc = commentTextPane.getDocument();
         final Document errorDoc = errorMessageTextPane.getDocument();
-        String comment = commentDoc.getText(0, commentDoc.getLength());
+        final String comment = commentDoc.getText(0, commentDoc.getLength());
         String result = "";
 
-        if (!StringUtil.isEmpty(email))
-        {
+        if (!StringUtil.isEmpty(email)) {
             result += "Email: " + email + "\n";
             GeneralPreferences.setUserEmail(email);
         }
@@ -227,5 +214,4 @@ public class ErrorReportPanel extends JPanel
 
         return result;
     }
-
 }

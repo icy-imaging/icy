@@ -25,16 +25,16 @@ import icy.system.thread.ThreadUtil;
  * @author Stephane Dallongeville
  * @author Thomas Musset
  */
-public class SuccessfullAnnounceFrame extends AnnounceFrame {
-    private static final int DEFAULT_LIVETIME = 10;
+public class WarningAnnounceFrame extends AnnounceFrame {
+    private static final int DEFAULT_LIVETIME = 0;
 
     /**
-     * Show a <i>success</i> announcement with specified parameters.
+     * Show a <i>failed</i> announcement with specified parameters.
      *
      * @param message  message to display in announcement
      * @param liveTime life time in second (0 = infinite)
      */
-    public SuccessfullAnnounceFrame(final String message, final int liveTime) {
+    public WarningAnnounceFrame(final String message, final int liveTime) {
         super(message, liveTime);
 
         // don't try to go further
@@ -43,17 +43,17 @@ public class SuccessfullAnnounceFrame extends AnnounceFrame {
 
         ThreadUtil.invokeLater(() -> {
             mainPanel.setOpaque(true);
-            mainPanel.setBackground(LookAndFeelUtil.getGreen());
+            mainPanel.setBackground(LookAndFeelUtil.getYellow());
             label.setForeground(LookAndFeelUtil.getAccentForeground());
         });
     }
 
     /**
-     * Show a <i>success</i> announcement with specified parameters.
+     * Show a <i>failed</i> announcement with specified parameters.
      *
      * @param message message to display in announcement
      */
-    public SuccessfullAnnounceFrame(final String message) {
+    public WarningAnnounceFrame(final String message) {
         this(message, DEFAULT_LIVETIME);
     }
 }

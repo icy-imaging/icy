@@ -1,7 +1,24 @@
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package icy.image.cache;
 
 import icy.file.FileUtil;
-import icy.system.IcyExceptionHandler;
 import icy.system.logging.IcyLogger;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -26,7 +43,7 @@ public class EHCache2 extends AbstractCache {
 
         @Override
         public void dispose() {
-            System.out.println("EHCache disposed");
+            IcyLogger.info(EHCache2.class, "EHCache disposed");
         }
 
         @Override
@@ -155,7 +172,7 @@ public class EHCache2 extends AbstractCache {
             clear();
         }
         catch (final CacheException e) {
-            System.err.println(e.getMessage());
+            IcyLogger.error(EHCache2.class, e, "Unable to clear cache");
         }
 
         cacheManager.shutdown();
@@ -231,7 +248,7 @@ public class EHCache2 extends AbstractCache {
             return cache.getKeys();
         }
         catch (final Exception e) {
-            IcyLogger.error("ImageCache: an error occured while retrieving all keys from cache");
+            IcyLogger.error(EHCache2.class, e, "ImageCache: an error occured while retrieving all keys from cache.");
             //throw new CacheException("ImageCache: an error occured while retrieving all keys from cache", e);
             return Collections.emptyList();
         }

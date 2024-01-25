@@ -169,7 +169,7 @@ public class Main {
 
             // wait for lock
             if (!waitForLock(icyJarPath)) {
-                IcyLogger.error(String.format("File %s is locked, aborting udpate...", icyJarPath));
+                IcyLogger.error(Main.class, String.format("File %s is locked, aborting udpate...", icyJarPath));
 
                 // send report of the error
                 report(strLog);
@@ -233,8 +233,8 @@ public class Main {
         setState("Checking java version", 1);
 
         if (!checkMinimumJavaVersion()) {
-            IcyLogger.error(String.format("Icy %s requires Java %d or above, please update your java version.", VERSION.toShortString(), MIN_JAVA_TARGET));
-            IcyLogger.info("You can download Java here: https://icy.bioimageanalysis.org/download/");
+            IcyLogger.error(Main.class, String.format("Icy %s requires Java %d or above, please update your java version.", VERSION.toShortString(), MIN_JAVA_TARGET));
+            IcyLogger.info(Main.class, "You can download Java here: https://icy.bioimageanalysis.org/download/");
             return false;
         }
 
@@ -270,7 +270,7 @@ public class Main {
                 }
             }
             catch (final InterruptedException exc) {
-                IcyLogger.error("Process interrupted !");
+                IcyLogger.error(Main.class, "Process interrupted !");
                 result = false;
             }
         }
@@ -279,27 +279,27 @@ public class Main {
         setState("Checking...", 60);
 
         if (!result) {
-            IcyLogger.error("Update processing has failed.");
+            IcyLogger.error(Main.class, "Update processing has failed.");
 
             // delete update directory to restart update from scratch
             FileUtil.delete(Updater.UPDATE_DIRECTORY, true);
 
             // restore backup
             if (Updater.restore()) {
-                IcyLogger.info("Files correctly restored.");
+                IcyLogger.info(Main.class, "Files correctly restored.");
                 // delete backup directory as we don't need it anymore
                 FileUtil.delete(Updater.BACKUP_DIRECTORY, true);
             }
             else {
-                IcyLogger.error("Some files cannot be restored, try to restore them manually from 'backup' directory.");
-                IcyLogger.error("If Icy doesn't start anymore you may need to reinstall the application.");
+                IcyLogger.error(Main.class, "Some files cannot be restored, try to restore them manually from 'backup' directory.");
+                IcyLogger.error(Main.class, "If Icy doesn't start anymore you may need to reinstall the application.");
             }
 
             // validate elements
             Updater.validateElements(localElements);
             // and save them
             if (!Updater.saveElementsToXML(localElements, Updater.VERSION_NAME, false))
-                IcyLogger.error(String.format("Error while saving %s file.", Updater.VERSION_NAME));
+                IcyLogger.error(Main.class, String.format("Error while saving %s file.", Updater.VERSION_NAME));
 
             // send report of the error
             report(strLog);
@@ -315,7 +315,7 @@ public class Main {
             FileUtil.delete(Updater.BACKUP_DIRECTORY, true);
 
             if (updateElements.size() == 0)
-                IcyLogger.info("Nothing to update.");
+                IcyLogger.info(Main.class, "Nothing to update.");
             else {
                 // update XML version file
                 setState("Updating XML...", 90);
@@ -324,11 +324,11 @@ public class Main {
                 Updater.validateElements(localElements);
 
                 if (!Updater.saveElementsToXML(localElements, Updater.VERSION_NAME, false)) {
-                    IcyLogger.warn(String.format("Error while saving %s file.", Updater.VERSION_NAME));
-                    IcyLogger.warn("The new version is correctly installed but version number informations will stay outdated until the next update.");
+                    IcyLogger.warn(Main.class, String.format("Error while saving %s file.", Updater.VERSION_NAME));
+                    IcyLogger.warn(Main.class, "The new version is correctly installed but version number informations will stay outdated until the next update.");
                 }
                 else
-                    IcyLogger.success("Update succefully completed.");
+                    IcyLogger.success(Main.class, "Update succefully completed.");
             }
         }
 
@@ -351,7 +351,7 @@ public class Main {
         try {
             Process p;
 
-            IcyLogger.info(String.format("Renaming app: %s", String.join(" ", cmdarray)));
+            IcyLogger.info(Main.class, String.format("Renaming app: %s", String.join(" ", cmdarray)));
             // execute it from parent folder for safety
             p = SystemUtil.exec(cmdarray, parentFolder);
             if (p == null)
@@ -362,11 +362,11 @@ public class Main {
             // output process stream
             outputStreams(p);
             // get error code
-            IcyLogger.debug(String.format("exit code = %d", p.waitFor()));
+            IcyLogger.debug(Main.class, String.format("exit code = %d", p.waitFor()));
             // wait a bit
             Thread.sleep(1000);
 
-            IcyLogger.info("Removing security check...");
+            IcyLogger.info(Main.class, "Removing security check...");
             // remove quarantine attribut from the new created icy.app
             //p = SystemUtil.exec("xattr -dr com.apple.quarantine " + newFile.getAbsolutePath(), parentFolder);
             p = SystemUtil.exec(new String[]{"xattr", "-dr", "com.apple.quarantine", newFile.getAbsolutePath()}, parentFolder);
@@ -378,14 +378,14 @@ public class Main {
             // output process stream
             outputStreams(p);
             // get error code
-            IcyLogger.debug(String.format("exit code = %d", p.waitFor()));
+            IcyLogger.debug(Main.class, String.format("exit code = %d", p.waitFor()));
             // wait a bit
             Thread.sleep(1000);
 
             return true;
         }
         catch (final Exception e) {
-            e.printStackTrace();
+            IcyLogger.error(Main.class, e, e.getLocalizedMessage());
         }
 
         return false;
@@ -456,7 +456,7 @@ public class Main {
 
         // process not even created --> critical error
         if (process == null) {
-            IcyLogger.fatal(String.format("Can't launch execJAR(%s, %s, %s, %s, %s)", ICY_JARNAME, Arrays.toString(getVMParamsArray()), getAppParams(), extraArgs, directory));
+            IcyLogger.fatal(Main.class, String.format("Can't launch execJAR(%s, %s, %s, %s, %s)", ICY_JARNAME, Arrays.toString(getVMParamsArray()), getAppParams(), extraArgs, directory));
             return false;
         }
 
@@ -471,8 +471,8 @@ public class Main {
                 try {
                     setState("Error while launching Icy", 0);
 
-                    IcyLogger.fatal(String.format("Can't launch execJAR(%s, %s, %s, %s, %s)", ICY_JARNAME, Arrays.toString(getVMParamsArray()), getAppParams(), extraArgs, directory));
-                    IcyLogger.info("Trying to launch without specific parameters...");
+                    IcyLogger.fatal(Main.class, String.format("Can't launch execJAR(%s, %s, %s, %s, %s)", ICY_JARNAME, Arrays.toString(getVMParamsArray()), getAppParams(), extraArgs, directory));
+                    IcyLogger.info(Main.class, "Trying to launch without specific parameters...");
                 }
                 catch (final Exception e) {
                     // ignore
@@ -485,7 +485,7 @@ public class Main {
             // thread still active --> means Icy properly launched !
         }
         catch (final Exception e) {
-            IcyLogger.fatal(String.format("Error while launching Icy: %s", e.getLocalizedMessage()));
+            IcyLogger.fatal(Main.class, e, "Error while launching Icy.");
             e.printStackTrace();
 
             return false;
@@ -504,8 +504,8 @@ public class Main {
 
         // process not even created --> critical error
         if (process == null) {
-            IcyLogger.fatal(String.format("Can't launch execJAR(%s, \"\", \"\", %s)", ICY_JARNAME, directory));
-            IcyLogger.info("Try to manually launch the following command : java -jar updater.jar");
+            IcyLogger.fatal(Main.class, String.format("Can't launch execJAR(%s, \"\", \"\", %s)", ICY_JARNAME, directory));
+            IcyLogger.info(Main.class, "Try to manually launch the following command : java -jar updater.jar");
             return false;
         }
 
@@ -519,8 +519,8 @@ public class Main {
             if (process.exitValue() != 0) {
                 try {
                     setState("Error while launching Icy (safe mode)", 0);
-                    IcyLogger.fatal(String.format("Can't launch execJAR(%s, \"\", \"\", %s)", ICY_JARNAME, directory));
-                    IcyLogger.info("Try to manually launch the following command : java -jar updater.jar");
+                    IcyLogger.fatal(Main.class, String.format("Can't launch execJAR(%s, \"\", \"\", %s)", ICY_JARNAME, directory));
+                    IcyLogger.info(Main.class, "Try to manually launch the following command : java -jar updater.jar");
                 }
                 catch (final Exception e) {
                     // ignore
@@ -533,7 +533,7 @@ public class Main {
             // thread still active --> means Icy properly launched !
         }
         catch (final Exception e) {
-            IcyLogger.fatal(String.format("Error while launching Icy: %s", e.getLocalizedMessage()));
+            IcyLogger.fatal(Main.class, e, "Error while launching Icy");
             e.printStackTrace();
 
             return false;
@@ -553,8 +553,8 @@ public class Main {
 
         // process not even created --> critical error
         if (process == null) {
-            IcyLogger.fatal("Can't launch Icy..");
-            IcyLogger.info("Try to launch it manually.");
+            IcyLogger.fatal(Main.class, "Can't launch Icy..");
+            IcyLogger.info(Main.class, "Try to launch it manually.");
             return false;
         }
 
@@ -568,8 +568,8 @@ public class Main {
             if (process.exitValue() != 0) {
                 try {
                     setState("Error while launching Icy", 0);
-                    IcyLogger.fatal("Can't launch Icy..");
-                    IcyLogger.info("Try to launch it manually.");
+                    IcyLogger.fatal(Main.class, "Can't launch Icy..");
+                    IcyLogger.info(Main.class, "Try to launch it manually.");
                 }
                 catch (final Exception e) {
                     // ignore
@@ -582,7 +582,7 @@ public class Main {
             // thread still active --> means Icy properly launched !
         }
         catch (final Exception e) {
-            IcyLogger.fatal(String.format("Error while launching Icy: %s", e.getLocalizedMessage()));
+            IcyLogger.fatal(Main.class, e, "Error while launching Icy");
             e.printStackTrace();
 
             return false;
@@ -643,7 +643,7 @@ public class Main {
             NetworkUtil.postData(WebInterface.BASE_URL, values);
         }
         catch (final IOException e) {
-            IcyLogger.error("Unable to send report.");
+            IcyLogger.error(Main.class, e, "Unable to send report.");
         }
     }
 
@@ -655,12 +655,12 @@ public class Main {
         try {
             outStr.write(' ');
             while (errReader.ready())
-                System.err.println(errReader.readLine());
+                IcyLogger.error(Main.class, errReader.readLine());
             while (inReader.ready())
-                System.out.println(inReader.readLine());
+                IcyLogger.info(Main.class, inReader.readLine());
         }
         catch (final Exception e) {
-            IcyLogger.error(e.getLocalizedMessage());
+            IcyLogger.error(Main.class, e, e.getLocalizedMessage());
         }
     }
 }

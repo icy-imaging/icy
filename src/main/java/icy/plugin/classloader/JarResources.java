@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -21,7 +21,6 @@ package icy.plugin.classloader;
 import icy.network.NetworkUtil;
 import icy.network.URLUtil;
 import icy.plugin.classloader.exception.JclException;
-import icy.system.IcyExceptionHandler;
 import icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.NotNull;
 
@@ -180,10 +179,9 @@ public class JarResources {
                     entryUrls.put(name, uri.toURL());
                 }
                 catch (final URISyntaxException e) {
-                    IcyLogger.warn("Cannot load resource with URI: " + name + "\n\rTrying with URL...");
+                    IcyLogger.warn(JarResources.class, e, "Cannot load resource with URI: " + name, "Trying with URL...");
                     // Trying with direct URL (DEPRECATED SINCE JDK 20)
-                    @SuppressWarnings("deprecation")
-                    final URL url = new URL(urlPrefix + name);
+                    @SuppressWarnings("deprecation") final URL url = new URL(urlPrefix + name);
                     entryUrls.put(name, url);
                 }
             }
@@ -197,8 +195,7 @@ public class JarResources {
             }
             catch (final IOException e) {
                 // not important
-                System.err.println("JarResources.loadJar(" + filePath + ") error:");
-                IcyExceptionHandler.showErrorMessage(e, false);
+                IcyLogger.warn(JarResources.class, e, "JarResources.loadJar(" + filePath + ") error.");
             }
         }
 
@@ -276,7 +273,7 @@ public class JarResources {
         // logger.finest("Done loading.");
         // }
         catch (final URISyntaxException e) {
-            IcyExceptionHandler.showErrorMessage(e, false);
+            IcyLogger.error(JarResources.class, e, e.getLocalizedMessage());
         }
         finally {
             if (zis != null) {
@@ -285,8 +282,7 @@ public class JarResources {
                 }
                 catch (final IOException e) {
                     // not important
-                    System.err.println("JarResources.loadJar(" + url + ") error:");
-                    IcyExceptionHandler.showErrorMessage(e, false, true);
+                    IcyLogger.warn(JarResources.class, e, "JarResources.loadJar(" + url + ") error.");
                 }
             }
 
@@ -296,8 +292,7 @@ public class JarResources {
                 }
                 catch (final IOException e) {
                     // not important
-                    System.err.println("JarResources.loadJar(" + url + ") error:");
-                    IcyExceptionHandler.showErrorMessage(e, false, true);
+                    IcyLogger.warn(JarResources.class, e, "JarResources.loadJar(" + url + ") error.");
                 }
             }
         }

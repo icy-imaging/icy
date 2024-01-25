@@ -21,6 +21,7 @@ package icy.gui.menu;
 import icy.action.GeneralActions;
 import icy.gui.component.menu.IcyMenuItem;
 import icy.network.NetworkUtil;
+import icy.system.logging.IcyLogger;
 import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jetbrains.annotations.NotNull;
 
@@ -66,7 +67,7 @@ public final class ApplicationMenuHelp extends AbstractApplicationMenu {
                     Desktop.getDesktop().open(log);
             }
             catch (final IOException ex) {
-                System.err.println("An error occured while opening log file");
+                IcyLogger.error(ApplicationMenuHelp.class, ex, "An error occured while opening log file.");
             }
         });
         add(itemShowLog);

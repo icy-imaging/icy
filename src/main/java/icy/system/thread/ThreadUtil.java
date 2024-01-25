@@ -1,67 +1,58 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.system.thread;
 
 import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 
-import java.awt.EventQueue;
+import javax.swing.*;
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-
-import javax.swing.SwingUtilities;
+import java.util.concurrent.*;
 
 /**
  * Thread utilities class.
- * 
- * @author Stephane
+ *
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class ThreadUtil
-{
+@SuppressWarnings("resource") // For keeping thread active
+public class ThreadUtil {
     /**
      * This class is used to catch exception in the EDT.
      */
-    public static class CaughtRunnable implements Runnable
-    {
+    public static class CaughtRunnable implements Runnable {
         private final Runnable runnable;
 
-        public CaughtRunnable(Runnable runnable)
-        {
+        public CaughtRunnable(final Runnable runnable) {
             super();
 
             this.runnable = runnable;
         }
 
         @Override
-        public void run()
-        {
-            try
-            {
+        public void run() {
+            try {
                 runnable.run();
             }
-            catch (Throwable t)
-            {
+            catch (final Throwable t) {
                 IcyExceptionHandler.handleException(t, true);
             }
         }
@@ -85,39 +76,24 @@ public class ThreadUtil
     // low priority background processor
     private static final Processor bgProcessor;
     // single Runnable / Callable instance processor
-    private static final InstanceProcessor instanceProcessors[];
+    private static final InstanceProcessor[] instanceProcessors;
     // low priority single Runnable / Callable instance processor
-    private static final InstanceProcessor bgInstanceProcessors[];
+    private static final InstanceProcessor[] bgInstanceProcessors;
 
-    static
-    {
-        if (SystemUtil.is32bits())
-        {
-            int wantedThread = SystemUtil.getNumberOfCPUs();
-            wantedThread = Math.max(wantedThread, 2);
+    static {
+        int wantedThread = SystemUtil.getNumberOfCPUs();
+        wantedThread = Math.max(wantedThread, 4);
 
-            // 32 bits JVM, limit the number of thread
-            bgProcessor = new Processor(Math.min(wantedThread, 8));
-            instanceProcessors = new InstanceProcessor[Math.min(wantedThread, 4)];
-            bgInstanceProcessors = new InstanceProcessor[Math.min(wantedThread, 4)];
-        }
-        else
-        {
-            int wantedThread = SystemUtil.getNumberOfCPUs();
-            wantedThread = Math.max(wantedThread, 4);
-
-            // 64 bits JVM, can have higher limit
-            bgProcessor = new Processor(Math.min(wantedThread, 16));
-            instanceProcessors = new InstanceProcessor[Math.min(wantedThread, 8)];
-            bgInstanceProcessors = new InstanceProcessor[Math.min(wantedThread, 8)];
-        }
+        // 64 bits JVM, can have higher limit
+        bgProcessor = new Processor(Math.min(wantedThread, 16));
+        instanceProcessors = new InstanceProcessor[Math.min(wantedThread, 8)];
+        bgInstanceProcessors = new InstanceProcessor[Math.min(wantedThread, 8)];
 
         bgProcessor.setPriority(MIN_PRIORITY);
         bgProcessor.setThreadName("Background processor");
         bgProcessor.setKeepAliveTime(3, TimeUnit.SECONDS);
 
-        for (int i = 0; i < instanceProcessors.length; i++)
-        {
+        for (int i = 0; i < instanceProcessors.length; i++) {
             // keep these thread active
             instanceProcessors[i] = new InstanceProcessor(NORM_PRIORITY);
             instanceProcessors[i].setThreadName("Background instance processor");
@@ -131,11 +107,9 @@ public class ThreadUtil
     /**
      * Shutdown all background runner.
      */
-    public static void shutdown()
-    {
+    public static void shutdown() {
         bgProcessor.shutdown();
-        for (int i = 0; i < instanceProcessors.length; i++)
-        {
+        for (int i = 0; i < instanceProcessors.length; i++) {
             instanceProcessors[i].shutdown();
             bgInstanceProcessors[i].shutdown();
         }
@@ -144,10 +118,8 @@ public class ThreadUtil
     /**
      * @return Return true if all background runner are shutdown and terminated.
      */
-    public static boolean isShutdownAndTerminated()
-    {
-        for (int i = 0; i < instanceProcessors.length; i++)
-        {
+    public static boolean isShutdownAndTerminated() {
+        for (int i = 0; i < instanceProcessors.length; i++) {
             if (!instanceProcessors[i].isTerminated())
                 return false;
             if (!bgInstanceProcessors[i].isTerminated())
@@ -159,8 +131,7 @@ public class ThreadUtil
     /**
      * @return true if the current thread is an AWT event dispatching thread.
      */
-    public static boolean isEventDispatchThread()
-    {
+    public static boolean isEventDispatchThread() {
         return EventQueue.isDispatchThread();
     }
 
@@ -174,8 +145,7 @@ public class ThreadUtil
      * @see #invokeLater(Runnable)
      * @see #invokeNow(Runnable)
      */
-    public static void invoke(Runnable runnable, boolean wait)
-    {
+    public static void invoke(final Runnable runnable, final boolean wait) {
         if (wait)
             invokeNow(runnable);
         else
@@ -187,8 +157,7 @@ public class ThreadUtil
      * @param runnable running task
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void invokeAndWait(Runnable runnable)
-    {
+    public static void invokeAndWait(final Runnable runnable) {
         invokeNow(runnable);
     }
 
@@ -200,36 +169,27 @@ public class ThreadUtil
      * Use this method carefully as it may lead to dead lock.
      * @param runnable running task
      */
-    public static void invokeNow(Runnable runnable)
-    {
-        if (isEventDispatchThread())
-        {
-            try
-            {
+    public static void invokeNow(final Runnable runnable) {
+        if (isEventDispatchThread()) {
+            try {
                 runnable.run();
             }
-            catch (Throwable t)
-            {
+            catch (final Throwable t) {
                 // the runnable thrown an exception
                 IcyExceptionHandler.handleException(t, true);
             }
         }
-        else
-        {
-            try
-            {
+        else {
+            try {
                 EventQueue.invokeAndWait(runnable);
             }
-            catch (InvocationTargetException e)
-            {
+            catch (final InvocationTargetException e) {
                 // the runnable thrown an exception
                 IcyExceptionHandler.handleException(e.getTargetException(), true);
             }
-            catch (InterruptedException e)
-            {
+            catch (final InterruptedException e) {
                 // interrupt exception
-                System.err.println("ThreadUtil.invokeNow(...) error :");
-                IcyExceptionHandler.showErrorMessage(e, true);
+                IcyLogger.error(ThreadUtil.class, e, "ThreadUtil.invokeNow(...) error.");
             }
         }
     }
@@ -238,12 +198,11 @@ public class ThreadUtil
      * Invoke the specified <code>Runnable</code> on the AWT event dispatching thread.<br>
      * If we already are on the EDT the <code>Runnable</code> is executed immediately else it will
      * be executed later.
-     * 
+     *
      * @see #invokeLater(Runnable, boolean)
      * @param runnable running task
      */
-    public static void invokeLater(Runnable runnable)
-    {
+    public static void invokeLater(final Runnable runnable) {
         invokeLater(runnable, false);
     }
 
@@ -256,8 +215,7 @@ public class ThreadUtil
      *        If <code>true</code> the <code>Runnable</code> is forced to execute later even if we
      *        are on the Swing EDT.
      */
-    public static void invokeLater(Runnable runnable, boolean forceLater)
-    {
+    public static void invokeLater(final Runnable runnable, final boolean forceLater) {
         final Runnable r = new CaughtRunnable(runnable);
 
         if ((!forceLater) && isEventDispatchThread())
@@ -271,7 +229,7 @@ public class ThreadUtil
      * the result.<br>
      * The returned result can be <code>null</code> when a {@link Throwable} exception happen.<br>
      * Use this method carefully as it may lead to dead lock.
-     * 
+     *
      * @throws InterruptedException
      *         if the current thread was interrupted while waiting
      * @throws Exception
@@ -279,31 +237,26 @@ public class ThreadUtil
      * @param callable called threas
      * @param <T> generic Object
      */
-    public static <T> T invokeNow(Callable<T> callable) throws Exception
-    {
+    public static <T> T invokeNow(final Callable<T> callable) throws Exception {
         if (SwingUtilities.isEventDispatchThread())
             return callable.call();
 
-        final FutureTask<T> task = new FutureTask<T>(callable);
+        final FutureTask<T> task = new FutureTask<>(callable);
 
-        try
-        {
+        try {
             EventQueue.invokeAndWait(task);
         }
-        catch (InvocationTargetException e)
-        {
+        catch (final InvocationTargetException e) {
             if (e.getTargetException() instanceof Exception)
                 throw (Exception) e.getTargetException();
 
             throw new Exception(e.getTargetException());
         }
 
-        try
-        {
+        try {
             return task.get();
         }
-        catch (ExecutionException e)
-        {
+        catch (final ExecutionException e) {
             if (e.getCause() instanceof Exception)
                 throw (Exception) e.getCause();
 
@@ -321,9 +274,8 @@ public class ThreadUtil
      *        are on the EDT.
      * @param <T> generic Object
      */
-    public static <T> Future<T> invokeLater(Callable<T> callable, boolean forceLater)
-    {
-        final FutureTask<T> task = new FutureTask<T>(callable);
+    public static <T> Future<T> invokeLater(final Callable<T> callable, final boolean forceLater) {
+        final FutureTask<T> task = new FutureTask<>(callable);
         invokeLater(task, forceLater);
         return task;
     }
@@ -331,8 +283,7 @@ public class ThreadUtil
     /**
      * Retrieve the instance processor (normal priority) to use for specified runnable.
      */
-    private static InstanceProcessor getInstanceProcessor(Runnable runnable)
-    {
+    private static InstanceProcessor getInstanceProcessor(final Runnable runnable) {
         // get processor index from the hash code
         return instanceProcessors[runnable.hashCode() % instanceProcessors.length];
     }
@@ -340,8 +291,7 @@ public class ThreadUtil
     /**
      * Retrieve the instance processor (normal priority) to use for specified callable.
      */
-    private static InstanceProcessor getInstanceProcessor(Callable<?> callable)
-    {
+    private static InstanceProcessor getInstanceProcessor(final Callable<?> callable) {
         // get processor index from the hash code
         return instanceProcessors[callable.hashCode() % instanceProcessors.length];
     }
@@ -349,8 +299,7 @@ public class ThreadUtil
     /**
      * Retrieve the instance processor (low priority) to use for specified runnable.
      */
-    private static InstanceProcessor getBgInstanceProcessor(Runnable runnable)
-    {
+    private static InstanceProcessor getBgInstanceProcessor(final Runnable runnable) {
         // get processor index from the hash code
         return bgInstanceProcessors[runnable.hashCode() % bgInstanceProcessors.length];
     }
@@ -358,8 +307,7 @@ public class ThreadUtil
     /**
      * Retrieve the instance processor (low priority) to use for specified callable.
      */
-    private static InstanceProcessor getBgInstanceProcessor(Callable<?> callable)
-    {
+    private static InstanceProcessor getBgInstanceProcessor(final Callable<?> callable) {
         // get processor index from the hash code
         return bgInstanceProcessors[callable.hashCode() % bgInstanceProcessors.length];
     }
@@ -372,8 +320,7 @@ public class ThreadUtil
      * @return true if submitted process is not null
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean bgRun(Runnable runnable, boolean onEDT)
-    {
+    public static boolean bgRun(final Runnable runnable, final boolean onEDT) {
         return (bgProcessor.submit(runnable, onEDT) != null);
     }
 
@@ -382,8 +329,7 @@ public class ThreadUtil
      * @param runnable thread
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static void bgRunWait(Runnable runnable)
-    {
+    public static void bgRunWait(final Runnable runnable) {
         while (!bgRun(runnable))
             ThreadUtil.sleep(1);
     }
@@ -396,8 +342,7 @@ public class ThreadUtil
      * @param runnable task
      * @return true if submitted task is not null
      */
-    public static boolean bgRun(Runnable runnable)
-    {
+    public static boolean bgRun(final Runnable runnable) {
         return (bgProcessor.submit(true, runnable) != null);
     }
 
@@ -410,8 +355,7 @@ public class ThreadUtil
      * @return Object
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static <T> Future<T> bgRun(Callable<T> callable, boolean onEDT)
-    {
+    public static <T> Future<T> bgRun(final Callable<T> callable, final boolean onEDT) {
         return bgProcessor.submit(callable, onEDT);
     }
 
@@ -425,8 +369,7 @@ public class ThreadUtil
      * @param <T> generic Object
      * @return running process in background
      */
-    public static <T> Future<T> bgRun(Callable<T> callable)
-    {
+    public static <T> Future<T> bgRun(final Callable<T> callable) {
         return bgProcessor.submit(callable);
     }
 
@@ -438,8 +381,7 @@ public class ThreadUtil
      * @return true if submitted process is not null
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static boolean bgRunSingle(Runnable runnable, boolean onEDT)
-    {
+    public static boolean bgRunSingle(final Runnable runnable, final boolean onEDT) {
         final InstanceProcessor processor = getInstanceProcessor(runnable);
         return (processor.submit(runnable, onEDT) != null);
     }
@@ -454,8 +396,7 @@ public class ThreadUtil
      * @return running thread
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public static <T> Future<T> bgRunSingle(Callable<T> callable, boolean onEDT)
-    {
+    public static <T> Future<T> bgRunSingle(final Callable<T> callable, final boolean onEDT) {
         final InstanceProcessor processor = getInstanceProcessor(callable);
         return processor.submit(callable, onEDT);
     }
@@ -469,8 +410,7 @@ public class ThreadUtil
      * limited and others processes may be executed too late.
      * @param runnable running thread
      */
-    public static boolean bgRunSingle(Runnable runnable)
-    {
+    public static boolean bgRunSingle(final Runnable runnable) {
         final InstanceProcessor processor = getBgInstanceProcessor(runnable);
         return (processor.submit(true, runnable) != null);
     }
@@ -486,8 +426,7 @@ public class ThreadUtil
      * @param <T> generic Object
      * @param callable thread
      */
-    public static <T> Future<T> bgRunSingle(Callable<T> callable)
-    {
+    public static <T> Future<T> bgRunSingle(final Callable<T> callable) {
         final InstanceProcessor processor = getBgInstanceProcessor(callable);
         return processor.submit(callable);
     }
@@ -501,8 +440,7 @@ public class ThreadUtil
      * limited and others processes may be executed too late.
      * @param runnable running thread
      */
-    public static boolean runSingle(Runnable runnable)
-    {
+    public static boolean runSingle(final Runnable runnable) {
         final InstanceProcessor processor = getInstanceProcessor(runnable);
         return (processor.submit(true, runnable) != null);
     }
@@ -518,8 +456,7 @@ public class ThreadUtil
      * @param callable thread
      * @param <T> generic Object
      */
-    public static <T> Future<T> runSingle(Callable<T> callable)
-    {
+    public static <T> Future<T> runSingle(final Callable<T> callable) {
         final InstanceProcessor processor = getInstanceProcessor(callable);
         return processor.submit(callable);
     }
@@ -528,8 +465,7 @@ public class ThreadUtil
      * @param runnable running thread
      * @return Return true if the specified runnable is waiting to be processed in background processing.
      */
-    public static boolean hasWaitingBgTask(Runnable runnable)
-    {
+    public static boolean hasWaitingBgTask(final Runnable runnable) {
         return bgProcessor.getWaitingTasksCount(runnable) > 0;
     }
 
@@ -537,8 +473,7 @@ public class ThreadUtil
      * @param callable thread
      * @return Return true if the specified callable is waiting to be processed in background processing.
      */
-    public static boolean hasWaitingBgTask(Callable<?> callable)
-    {
+    public static boolean hasWaitingBgTask(final Callable<?> callable) {
         return bgProcessor.getWaitingTasksCount(callable) > 0;
     }
 
@@ -547,8 +482,7 @@ public class ThreadUtil
      * @return Return true if the specified runnable is waiting to be processed<br>
      * in single scheme background processing (low priority).
      */
-    public static boolean hasWaitingBgSingleTask(Runnable runnable)
-    {
+    public static boolean hasWaitingBgSingleTask(final Runnable runnable) {
         final InstanceProcessor processor = getBgInstanceProcessor(runnable);
         return processor.hasWaitingTasks(runnable);
     }
@@ -558,8 +492,7 @@ public class ThreadUtil
      * @return Return true if the specified callable is waiting to be processed<br>
      * in single scheme background processing (low priority).
      */
-    public static boolean hasWaitingBgSingleTask(Callable<?> callable)
-    {
+    public static boolean hasWaitingBgSingleTask(final Callable<?> callable) {
         final InstanceProcessor processor = getBgInstanceProcessor(callable);
         return processor.hasWaitingTasks(callable);
     }
@@ -569,8 +502,7 @@ public class ThreadUtil
      * @return Return true if the specified runnable is waiting to be processed<br>
      * in single scheme background processing (normal priority).
      */
-    public static boolean hasWaitingSingleTask(Runnable runnable)
-    {
+    public static boolean hasWaitingSingleTask(final Runnable runnable) {
         final InstanceProcessor processor = getInstanceProcessor(runnable);
         return processor.hasWaitingTasks(runnable);
     }
@@ -580,8 +512,7 @@ public class ThreadUtil
      * @return Return true if the specified callable is waiting to be processed<br>
      * in single scheme background processing (normal priority).
      */
-    public static boolean hasWaitingSingleTask(Callable<?> callable)
-    {
+    public static boolean hasWaitingSingleTask(final Callable<?> callable) {
         final InstanceProcessor processor = getInstanceProcessor(callable);
         return processor.hasWaitingTasks(callable);
     }
@@ -589,8 +520,7 @@ public class ThreadUtil
     /**
      * @return Return the number of active background tasks.
      */
-    public static int getActiveBgTaskCount()
-    {
+    public static int getActiveBgTaskCount() {
         return bgProcessor.getActiveCount();
     }
 
@@ -599,11 +529,10 @@ public class ThreadUtil
      * The number of processing thread is automatically calculated given the number of core of the
      * system.
      * @param name thread's name
-     * 
+     *
      * @see Processor#Processor(int, int, int)
      */
-    public static ExecutorService createThreadPool(String name)
-    {
+    public static ExecutorService createThreadPool(final String name) {
         final Processor result = new Processor(SystemUtil.getNumberOfCPUs());
 
         result.setThreadName(name);
@@ -615,14 +544,11 @@ public class ThreadUtil
      * Same as {@link Thread#sleep(long)} except Exception is caught and ignored.
      * @param milli time of sleeping process in ms
      */
-    public static void sleep(long milli)
-    {
-        try
-        {
+    public static void sleep(final long milli) {
+        try {
             Thread.sleep(milli);
         }
-        catch (InterruptedException e)
-        {
+        catch (final InterruptedException e) {
             // have to interrupt the thread
             Thread.currentThread().interrupt();
         }
@@ -632,14 +558,11 @@ public class ThreadUtil
      * Same as {@link Thread#sleep(long)} except Exception is caught and ignored.
      * @param milli time of sleeping process in ms
      */
-    public static void sleep(int milli)
-    {
-        try
-        {
+    public static void sleep(final int milli) {
+        try {
             Thread.sleep(milli);
         }
-        catch (InterruptedException e)
-        {
+        catch (final InterruptedException e) {
             // have to interrupt the thread
             Thread.currentThread().interrupt();
         }
