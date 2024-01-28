@@ -160,6 +160,13 @@ public class Icy {
     public static void main(@NotNull final String[] args) {
         boolean headless = false;
 
+        // Clear log file
+        final File logFile = new File("./icy.log");
+        if (logFile.isFile()) {
+            FileUtil.delete(logFile, false);
+            FileUtil.createFile(logFile);
+        }
+
         System.setProperty("log4j.skipJansi", "false");
 
         IcyLogger.setConsoleLevel(IcyLogger.TRACE);
