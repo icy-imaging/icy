@@ -38,7 +38,6 @@ public final class ImageCache {
         if (cache == null && !Icy.isCacheDisabled()) {
             try {
                 final String cacheName = "/icy3_cache";
-                //cache = new EHCache2(cacheSizeMB, path + "/icy_cache");
                 cache = new EHCache3(cacheSizeMB, path + cacheName);
 
                 IcyLogger.info(ImageCache.class, String.format(
