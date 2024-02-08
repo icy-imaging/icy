@@ -478,6 +478,7 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
         public void updateButtonsState()
         {
             boolean singleOp = false;
+            boolean subOp = false;
             boolean boolOp = false;
             final Sequence seq = Icy.getMainInterface().getActiveSequence();
 
@@ -487,14 +488,16 @@ public class ROITask extends RibbonTask implements PluginLoaderListener
 
                 singleOp = !selectedRois.isEmpty();
                 boolOp = selectedRois.size() > 1;
+                subOp = selectedRois.size() == 2;
             }
 
             booleanUnionButton.setEnabled(boolOp);
             booleanIntersectionButton.setEnabled(boolOp);
             booleanInversionButton.setEnabled(singleOp);
             booleanExclusiveUnionButton.setEnabled(boolOp);
-            booleanSubtractionButton.setEnabled(boolOp);
+            booleanSubtractionButton.setEnabled(subOp);
             booleanOthersButton.setEnabled(singleOp || boolOp);
+
         }
     }
 

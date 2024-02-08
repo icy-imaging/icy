@@ -1,4 +1,11 @@
-Icy 2.5.1.0 - 12/12/2024
+Icy 2.5.2.0 - 08/02/2024
+------------------------
+
+**Application**
+* fixed a regression with ROI merge.
+* small fix on ROI boolean operation button in ribbon.
+
+Icy 2.5.1.0 - 12/12/2023
 ------------------------
 
 **Application**
