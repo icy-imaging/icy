@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -25,7 +25,8 @@ import icy.gui.util.ComponentUtil;
 import icy.image.IcyBufferedImage;
 import icy.image.IcyBufferedImageUtil;
 import icy.main.Icy;
-import icy.resource.ResourceUtil;
+import icy.resource.icon.IcySVGImageIcon;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.MetaDataUtil;
 import icy.sequence.SequenceIdImporter;
 import icy.util.OMEUtil;
@@ -46,7 +47,7 @@ import java.util.TimerTask;
 /**
  * Dialog used to select which serie to open for multi serie image.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class SeriesSelectionDialog extends ActionDialog implements Runnable {
@@ -415,11 +416,8 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable {
                 final int sizeC = MetaDataUtil.getSizeC(metadata, i);
 
                 serieComponents[i].setTitle(metadata.getImageName(i));
-                serieComponents[i].setInfos(MetaDataUtil.getSizeX(metadata, i) + " x "
-                        + MetaDataUtil.getSizeY(metadata, i) + " - " + MetaDataUtil.getSizeZ(metadata, i) + "Z x "
-                        + MetaDataUtil.getSizeT(metadata, i) + "T");
-                serieComponents[i].setInfos2(sizeC + ((sizeC > 1) ? " channels (" : " channel (")
-                        + MetaDataUtil.getDataType(metadata, i) + ")");
+                serieComponents[i].setInfos(MetaDataUtil.getSizeX(metadata, i) + " x " + MetaDataUtil.getSizeY(metadata, i) + " - " + MetaDataUtil.getSizeZ(metadata, i) + "Z x " + MetaDataUtil.getSizeT(metadata, i) + "T");
+                serieComponents[i].setInfos2(sizeC + ((sizeC > 1) ? " channels (" : " channel (") + MetaDataUtil.getDataType(metadata, i) + ")");
             }
             catch (final Exception e) {
                 serieComponents[i].setTitle("Cannot read file");
@@ -429,7 +427,7 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable {
 
             try {
                 // why does this sometime fails ???
-                serieComponents[i].setImage(ResourceUtil.ICON_PICTURE);
+                serieComponents[i].setImage(new IcySVGImageIcon(SVGIcon.IMAGE, serieComponents[i].getForeground(), 512).getImage());
             }
             catch (final Exception e) {
                 // ignore
@@ -446,19 +444,18 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable {
                 if (importer.open(id, 0)) {
                     try {
                         final IcyBufferedImage img = importer.getThumbnail(i);
-                        serieComponents[i]
-                                .setImage(IcyBufferedImageUtil.toBufferedImage(img, BufferedImage.TYPE_INT_ARGB));
+                        serieComponents[i].setImage(IcyBufferedImageUtil.toBufferedImage(img, BufferedImage.TYPE_INT_ARGB));
                     }
                     finally {
                         importer.close();
                     }
                 }
                 else
-                    serieComponents[i].setImage(ResourceUtil.ICON_DELETE);
+                    serieComponents[i].setImage(new IcySVGImageIcon(SVGIcon.CLOSE, serieComponents[i].getForeground(), 512).getImage());
             }
             catch (final OutOfMemoryError | Exception e) {
                 // error image, we just totally ignore error here...
-                serieComponents[i].setImage(ResourceUtil.ICON_DELETE);
+                serieComponents[i].setImage(new IcySVGImageIcon(SVGIcon.CLOSE, serieComponents[i].getForeground(), 512).getImage());
             }
         }
     }

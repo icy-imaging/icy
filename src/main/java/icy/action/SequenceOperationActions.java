@@ -21,21 +21,20 @@ package icy.action;
 import icy.gui.dialog.IdConfirmDialog;
 import icy.gui.dialog.MessageDialog;
 import icy.gui.frame.progress.FailedAnnounceFrame;
-import icy.gui.main.MainFrame;
 import icy.gui.sequence.tools.*;
 import icy.gui.viewer.Viewer;
 import icy.main.Icy;
 import icy.roi.ROI;
 import icy.sequence.DimensionId;
 import icy.sequence.Sequence;
-import icy.sequence.SequenceDataIterator;
 import icy.sequence.SequenceUtil;
 import icy.system.SystemUtil;
 import icy.system.thread.ThreadUtil;
-import icy.type.DataIteratorUtil;
 import icy.type.DataType;
 import icy.undo.IcyUndoManager;
 import icy.util.ClassUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -49,7 +48,7 @@ import java.util.List;
 /**
  * Actions for "Sequence Operation" tab.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public final class SequenceOperationActions {
@@ -57,10 +56,9 @@ public final class SequenceOperationActions {
         final DataType dataType;
         final boolean scaled;
 
-        public SequenceConvertAction(final DataType dataType, final boolean scaled) {
+        public SequenceConvertAction(final @NotNull DataType dataType, final boolean scaled) {
             super(
                     dataType.toString(true),
-                    //new IcyIcon(ResourceUtil.ICON_BAND_RIGHT),
                     "Convert to " + dataType.toString(true),
                     "Convert sequence data type to " + dataType.toString(true),
                     true,
@@ -80,8 +78,7 @@ public final class SequenceOperationActions {
 
                 if (sequence != null) {
                     try {
-                        final Sequence out = SequenceUtil.convertToType(Icy.getMainInterface().getActiveSequence(),
-                                dataType, scaled);
+                        final Sequence out = SequenceUtil.convertToType(Icy.getMainInterface().getActiveSequence(), dataType, scaled);
 
                         ThreadUtil.invokeLater(() -> {
                             // get output viewer
@@ -103,7 +100,22 @@ public final class SequenceOperationActions {
 
         @Override
         public boolean isEnabled() {
-            return super.isEnabled() && (Icy.getMainInterface().getActiveSequence() != null);
+            final Sequence seq = Icy.getMainInterface().getActiveSequence();
+
+            return super.isEnabled() && (seq != null);
+        }
+
+        /**
+         * Returns the selected state (for toggle button type).
+         */
+        @Override
+        public boolean isSelected() {
+            final Sequence seq = Icy.getMainInterface().getActiveSequence();
+
+            if (seq == null)
+                return super.isSelected();
+
+            return (seq.getDataType().equals(dataType));
         }
     }
 
@@ -201,8 +213,7 @@ public final class SequenceOperationActions {
 
         public ExtractChannelAction(final int channel) {
             super(
-                    (channel == -1) ? "all channels" : "channel " + channel,
-                    //new IcyIcon(ResourceUtil.ICON_INDENT_DECREASE),
+                    (channel == -1) ? "All Channels" : "Channel " + channel,
                     (channel == -1) ? "Extract all channels" : "Extract channel " + channel,
                     (channel == -1) ? "Separate all channels of active sequence" : "Create a new single channel sequence from channel " + channel + " of active sequence",
                     true,
@@ -249,7 +260,6 @@ public final class SequenceOperationActions {
         public RemoveChannelAction(final int channel) {
             super(
                     "channel " + channel,
-                    //new IcyIcon(ResourceUtil.ICON_INDENT_REMOVE),
                     "Remove channel " + channel,
                     "Remove channel " + channel + " from active sequence",
                     true,
@@ -304,9 +314,9 @@ public final class SequenceOperationActions {
     public static final class MergeDimensionAction extends IcyAbstractAction {
         private static final String[] titles = {
                 null, null, null,
-                "Merge channels",
-                "Merge Z slices",
-                "Merge T frames"
+                "Merge Channels...",
+                "Merge Z Slices...",
+                "Merge T Frames..."
         };
         private static final String[] tooltips = {
                 null, null, null,
@@ -317,10 +327,9 @@ public final class SequenceOperationActions {
 
         final DimensionId dim;
 
-        public MergeDimensionAction(final DimensionId dim) {
+        public MergeDimensionAction(final @NotNull DimensionId dim) {
             super(
-                    "Merge...",
-                    //new IcyIcon(ResourceUtil.ICON_INDENT_INCREASE),
+                    titles[dim.ordinal()],
                     titles[dim.ordinal()],
                     tooltips[dim.ordinal()]
             );
@@ -332,6 +341,13 @@ public final class SequenceOperationActions {
         public boolean doAction(final ActionEvent e) {
             new SequenceDimensionMergeFrame(dim);
             return true;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            final Sequence seq = Icy.getMainInterface().getActiveSequence();
+
+            return super.isEnabled() && (seq != null) && (seq.getSize(dim) > 1);
         }
     }
 
@@ -419,15 +435,13 @@ public final class SequenceOperationActions {
         }
     }
 
-    public static final IcyAbstractAction cloneSequenceAction = new IcyAbstractAction(
-            "Duplicate",
-            //new IcyIcon(ResourceUtil.ICON_COPY),
+    public static final @NotNull IcyAbstractAction cloneSequenceAction = new IcyAbstractAction(
+            "Duplicate Sequence",
             "Duplicate sequence",
             "Create a fresh copy of the sequence",
             true,
             "Duplicating sequence..."
     ) {
-
         @Override
         public boolean doAction(final ActionEvent e) {
             final Viewer viewer = Icy.getMainInterface().getActiveViewer();
@@ -462,32 +476,31 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction convertUByteScaledSequenceAction = new SequenceConvertAction(DataType.UBYTE, true);
-    public static final IcyAbstractAction convertUByteSequenceAction = new SequenceConvertAction(DataType.UBYTE, false);
-    public static final IcyAbstractAction convertByteScaledSequenceAction = new SequenceConvertAction(DataType.BYTE, true);
-    public static final IcyAbstractAction convertByteSequenceAction = new SequenceConvertAction(DataType.BYTE, false);
-    public static final IcyAbstractAction convertUShortScaledSequenceAction = new SequenceConvertAction(DataType.USHORT, true);
-    public static final IcyAbstractAction convertUShortSequenceAction = new SequenceConvertAction(DataType.USHORT, false);
-    public static final IcyAbstractAction convertShortScaledSequenceAction = new SequenceConvertAction(DataType.SHORT, true);
-    public static final IcyAbstractAction convertShortSequenceAction = new SequenceConvertAction(DataType.SHORT, false);
-    public static final IcyAbstractAction convertUIntScaledSequenceAction = new SequenceConvertAction(DataType.UINT, true);
-    public static final IcyAbstractAction convertUIntSequenceAction = new SequenceConvertAction(DataType.UINT, false);
-    public static final IcyAbstractAction convertIntScaledSequenceAction = new SequenceConvertAction(DataType.INT, true);
-    public static final IcyAbstractAction convertIntSequenceAction = new SequenceConvertAction(DataType.INT, false);
-    public static final IcyAbstractAction convertFloatScaledSequenceAction = new SequenceConvertAction(DataType.FLOAT, true);
-    public static final IcyAbstractAction convertFloatSequenceAction = new SequenceConvertAction(DataType.FLOAT, false);
-    public static final IcyAbstractAction convertDoubleScaledSequenceAction = new SequenceConvertAction(DataType.DOUBLE, true);
-    public static final IcyAbstractAction convertDoubleSequenceAction = new SequenceConvertAction(DataType.DOUBLE, false);
+    public static final @NotNull IcyAbstractAction convertUByteScaledSequenceAction = new SequenceConvertAction(DataType.UBYTE, true);
+    public static final @NotNull IcyAbstractAction convertUByteSequenceAction = new SequenceConvertAction(DataType.UBYTE, false);
+    public static final @NotNull IcyAbstractAction convertByteScaledSequenceAction = new SequenceConvertAction(DataType.BYTE, true);
+    public static final @NotNull IcyAbstractAction convertByteSequenceAction = new SequenceConvertAction(DataType.BYTE, false);
+    public static final @NotNull IcyAbstractAction convertUShortScaledSequenceAction = new SequenceConvertAction(DataType.USHORT, true);
+    public static final @NotNull IcyAbstractAction convertUShortSequenceAction = new SequenceConvertAction(DataType.USHORT, false);
+    public static final @NotNull IcyAbstractAction convertShortScaledSequenceAction = new SequenceConvertAction(DataType.SHORT, true);
+    public static final @NotNull IcyAbstractAction convertShortSequenceAction = new SequenceConvertAction(DataType.SHORT, false);
+    public static final @NotNull IcyAbstractAction convertUIntScaledSequenceAction = new SequenceConvertAction(DataType.UINT, true);
+    public static final @NotNull IcyAbstractAction convertUIntSequenceAction = new SequenceConvertAction(DataType.UINT, false);
+    public static final @NotNull IcyAbstractAction convertIntScaledSequenceAction = new SequenceConvertAction(DataType.INT, true);
+    public static final @NotNull IcyAbstractAction convertIntSequenceAction = new SequenceConvertAction(DataType.INT, false);
+    public static final @NotNull IcyAbstractAction convertFloatScaledSequenceAction = new SequenceConvertAction(DataType.FLOAT, true);
+    public static final @NotNull IcyAbstractAction convertFloatSequenceAction = new SequenceConvertAction(DataType.FLOAT, false);
+    public static final @NotNull IcyAbstractAction convertDoubleScaledSequenceAction = new SequenceConvertAction(DataType.DOUBLE, true);
+    public static final @NotNull IcyAbstractAction convertDoubleSequenceAction = new SequenceConvertAction(DataType.DOUBLE, false);
 
     // color operations
-    public static final IcyAbstractAction argbSequenceAction = new SequenceColorAction(BufferedImage.TYPE_INT_ARGB);
-    public static final IcyAbstractAction rgbSequenceAction = new SequenceColorAction(BufferedImage.TYPE_INT_RGB);
-    public static final IcyAbstractAction graySequenceAction = new SequenceColorAction(BufferedImage.TYPE_BYTE_GRAY);
+    public static final @NotNull IcyAbstractAction argbSequenceAction = new SequenceColorAction(BufferedImage.TYPE_INT_ARGB);
+    public static final @NotNull IcyAbstractAction rgbSequenceAction = new SequenceColorAction(BufferedImage.TYPE_INT_RGB);
+    public static final @NotNull IcyAbstractAction graySequenceAction = new SequenceColorAction(BufferedImage.TYPE_BYTE_GRAY);
 
     // XY plan operations
-    public static final IcyAbstractAction cropSequenceAction = new IcyAbstractAction(
-            "Fast crop",
-            //new IcyIcon(ResourceUtil.ICON_CUT),
+    public static final @NotNull IcyAbstractAction cropSequenceAction = new IcyAbstractAction(
+            "Fast Crop ROI",
             "Fast crop image",
             "Crop an image from a ROI",
             true,
@@ -507,9 +520,7 @@ public final class SequenceOperationActions {
             int size = rois.size();
 
             if (size == 0) {
-                MessageDialog.showDialog(
-                        "There is no ROI in the current sequence.\nYou need a ROI to define the region to crop.",
-                        MessageDialog.INFORMATION_MESSAGE);
+                MessageDialog.showDialog("There is no ROI in the current sequence.\nYou need a ROI to define the region to crop.", MessageDialog.INFORMATION_MESSAGE);
                 return false;
             }
             else if (size > 1) {
@@ -517,13 +528,11 @@ public final class SequenceOperationActions {
                 size = rois.size();
 
                 if (size == 0) {
-                    MessageDialog.showDialog("You need to select a ROI to do this operation.",
-                            MessageDialog.INFORMATION_MESSAGE);
+                    MessageDialog.showDialog("You need to select a ROI to do this operation.", MessageDialog.INFORMATION_MESSAGE);
                     return false;
                 }
                 else if (size > 1) {
-                    MessageDialog.showDialog("You must have only one selected ROI to do this operation.",
-                            MessageDialog.INFORMATION_MESSAGE);
+                    MessageDialog.showDialog("You must have only one selected ROI to do this operation.", MessageDialog.INFORMATION_MESSAGE);
                     return false;
                 }
             }
@@ -548,13 +557,14 @@ public final class SequenceOperationActions {
 
         @Override
         public boolean isEnabled() {
-            return super.isEnabled() && (Icy.getMainInterface().getActiveSequence() != null);
+            final Sequence seq = Icy.getMainInterface().getActiveSequence();
+
+            return super.isEnabled() && (seq != null) && (!seq.getROIs().isEmpty());
         }
     };
 
-    public static final IcyAbstractAction canvasResizeAction = new IcyAbstractAction(
-            "Canvas size...",
-            //new IcyIcon(ResourceUtil.ICON_CROP),
+    public static final @NotNull IcyAbstractAction canvasResizeAction = new IcyAbstractAction(
+            "Resize Canvas...",
             "Canvas resize",
             "Resize the canvas without changing image size."
     ) {
@@ -576,9 +586,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction imageResizeAction = new IcyAbstractAction(
-            "Image size...",
-            //new IcyIcon(ResourceUtil.ICON_FIT_CANVAS),
+    public static final @NotNull IcyAbstractAction imageResizeAction = new IcyAbstractAction(
+            "Resize Image...",
             "Image resize",
             "Resize the image."
     ) {
@@ -601,8 +610,8 @@ public final class SequenceOperationActions {
     };
 
     // channel operations
-    public static final IcyAbstractAction extractAllChannelAction = new ExtractChannelAction(-1);
-    public static final IcyAbstractAction[] extractChannelActions = {
+    public static final @NotNull IcyAbstractAction extractAllChannelAction = new ExtractChannelAction(-1);
+    public static final @NotNull IcyAbstractAction[] extractChannelActions = {
             new ExtractChannelAction(0),
             new ExtractChannelAction(1),
             new ExtractChannelAction(2),
@@ -610,7 +619,7 @@ public final class SequenceOperationActions {
             new ExtractChannelAction(4),
             new ExtractChannelAction(5)
     };
-    public static final IcyAbstractAction[] removeChannelActions = {
+    public static final @NotNull IcyAbstractAction[] removeChannelActions = {
             new RemoveChannelAction(0),
             new RemoveChannelAction(1),
             new RemoveChannelAction(2),
@@ -618,12 +627,11 @@ public final class SequenceOperationActions {
             new RemoveChannelAction(4),
             new RemoveChannelAction(5)
     };
-    public static final IcyAbstractAction mergeChannelsAction = new MergeDimensionAction(DimensionId.C);
+    public static final @NotNull IcyAbstractAction mergeChannelsAction = new MergeDimensionAction(DimensionId.C);
 
     // Z operations
-    public static final IcyAbstractAction reverseSlicesAction = new IcyAbstractAction(
-            "Reverse order",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_REVERSE_V),
+    public static final @NotNull IcyAbstractAction reverseSlicesAction = new IcyAbstractAction(
+            "Reverse Z Slices",
             "Reverse Z slices",
             "Reverse Z slices order",
             true,
@@ -640,11 +648,17 @@ public final class SequenceOperationActions {
 
             return false;
         }
+
+        @Override
+        public boolean isEnabled() {
+            final Sequence seq = Icy.getMainInterface().getActiveSequence();
+
+            return super.isEnabled() && (seq != null) && (seq.getSizeZ() > 0);
+        }
     };
 
-    public static final IcyAbstractAction extractSliceAction = new IcyAbstractAction(
-            "Extract slice",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_EXTRACT_V),
+    public static final @NotNull IcyAbstractAction extractSliceAction = new IcyAbstractAction(
+            "Extract Selected Z Slice",
             "Extract current Z slice",
             "Create a new sequence by extracting current Z slice of active sequence.",
             false,
@@ -687,9 +701,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction removeSliceAction = new IcyAbstractAction(
-            "Remove slice",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_V),
+    public static final @NotNull IcyAbstractAction removeSliceAction = new IcyAbstractAction(
+            "Remove Selected Z Slice",
             "Remove current Z slice",
             "Remove the current Z slice of active sequence.",
             false,
@@ -717,9 +730,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction addSlicesAction = new IcyAbstractAction(
-            "Add...",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_ADD_V),
+    public static final @NotNull IcyAbstractAction addSlicesAction = new IcyAbstractAction(
+            "Add Z Slices...",
             "Add slice(s)",
             "Extends Z dimension by adding empty or duplicating slices."
     ) {
@@ -743,11 +755,10 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction mergeSlicesAction = new MergeDimensionAction(DimensionId.Z);
+    public static final @NotNull IcyAbstractAction mergeSlicesAction = new MergeDimensionAction(DimensionId.Z);
 
-    public static final IcyAbstractAction removeSlicesAction = new IcyAbstractAction(
-            "Remove...",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_ADV_V),
+    public static final @NotNull IcyAbstractAction removeSlicesAction = new IcyAbstractAction(
+            "Remove Multiple Z Slices...",
             "Advanced slice remove",
             "Advanced Z slice remove operation."
     ) {
@@ -770,9 +781,8 @@ public final class SequenceOperationActions {
     };
 
     // T operations
-    public static final IcyAbstractAction reverseFramesAction = new IcyAbstractAction(
-            "Reverse order",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_REVERSE_H),
+    public static final @NotNull IcyAbstractAction reverseFramesAction = new IcyAbstractAction(
+            "Reverse T Frames",
             "Reverse T frames",
             "Reverse T frames order",
             true,
@@ -796,9 +806,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction extractFrameAction = new IcyAbstractAction(
-            "Extract frame",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_EXTRACT_H),
+    public static final @NotNull IcyAbstractAction extractFrameAction = new IcyAbstractAction(
+            "Extract Selected T Frame",
             "Extract current T frame",
             "Create a new sequence by extracting current T frame of active sequence.",
             false,
@@ -841,9 +850,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction removeFrameAction = new IcyAbstractAction(
-            "Remove frame",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_H),
+    public static final @NotNull IcyAbstractAction removeFrameAction = new IcyAbstractAction(
+            "Remove Selected T Frame",
             "Remove current T frame",
             "Remove the current T frame of active sequence.",
             false,
@@ -871,9 +879,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction addFramesAction = new IcyAbstractAction(
-            "Add...",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_ADD_H),
+    public static final @NotNull IcyAbstractAction addFramesAction = new IcyAbstractAction(
+            "Add T Frames...",
             "Add frame(s)",
             "Extends T dimension by adding empty or duplicating frames."
     ) {
@@ -897,11 +904,10 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction mergeFramesAction = new MergeDimensionAction(DimensionId.T);
+    public static final @NotNull IcyAbstractAction mergeFramesAction = new MergeDimensionAction(DimensionId.T);
 
-    public static final IcyAbstractAction removeFramesAction = new IcyAbstractAction(
-            "Remove...",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_REMOVE_ADV_H),
+    public static final @NotNull IcyAbstractAction removeFramesAction = new IcyAbstractAction(
+            "Remove Multiple T Frames...",
             "Advanced frame remove",
             "Advanced T frame remove operation."
     ) {
@@ -924,9 +930,8 @@ public final class SequenceOperationActions {
     };
 
     // ZT conversion
-    public static final IcyAbstractAction convertToSlicesAction = new IcyAbstractAction(
-            "Convert to stack",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_V1),
+    public static final @NotNull IcyAbstractAction convertToSlicesAction = new IcyAbstractAction(
+            "Convert T Frames to Z Slices",
             "Convert to stack",
             "Set all images in Z dimension.",
             true,
@@ -956,9 +961,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction convertToFramesAction = new IcyAbstractAction(
-            "Convert to time",
-            //new IcyIcon(ResourceUtil.ICON_LAYER_H1),
+    public static final @NotNull IcyAbstractAction convertToFramesAction = new IcyAbstractAction(
+            "Convert Z Slices to T Frames",
             "Convert to time sequence",
             "Set all images in T dimension.",
             true,
@@ -988,9 +992,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction advancedZTConvertAction = new IcyAbstractAction(
-            "Advanced...",
-            //new IcyIcon(ResourceUtil.ICON_COG),
+    public static final @NotNull IcyAbstractAction advancedZTConvertAction = new IcyAbstractAction(
+            "Advanced Z-T Convertion...",
             "Advanced dimension conversion",
             "Advanced dimension conversion operation."
     ) {
@@ -1014,55 +1017,7 @@ public final class SequenceOperationActions {
         }
     };
 
-    /**
-     * @deprecated Use {@link RoiActions#fillInteriorAction} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final IcyAbstractAction fillSequenceAction = new IcyAbstractAction(
-            "Fill",
-            //new IcyIcon(ResourceUtil.ICON_BRUSH),
-            "Fill ROI content",
-            "Fill content of the selected ROI with specified value",
-            true,
-            "Fill ROI content"
-    ) {
-        @Override
-        public boolean doAction(final ActionEvent e) {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            if (sequence != null) {
-                final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
-
-                if (mainFrame != null) {
-                    final double value = 1d;
-
-                    try {
-                        for (final ROI roi : sequence.getSelectedROIs())
-                            DataIteratorUtil.set(new SequenceDataIterator(sequence, roi, true), value);
-                    }
-                    catch (final InterruptedException e1) {
-                        MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(),
-                                MessageDialog.ERROR_MESSAGE);
-                    }
-
-                    sequence.dataChanged();
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled() {
-            final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-
-            return super.isEnabled() && (sequence != null) && !sequence.isEmpty();
-        }
-    };
-
-    public static IcyAbstractAction getConvertSequenceAction(final DataType dataType, final boolean scaled) {
+    public static @Nullable IcyAbstractAction getConvertSequenceAction(final @NotNull DataType dataType, final boolean scaled) {
         return switch (dataType) {
             case UBYTE -> {
                 if (scaled)
@@ -1110,9 +1065,8 @@ public final class SequenceOperationActions {
         };
     }
 
-    public static final IcyAbstractAction undoAction = new IcyAbstractAction(
+    public static final @NotNull IcyAbstractAction undoAction = new IcyAbstractAction(
             "Undo",
-            //new IcyIcon(ResourceUtil.ICON_UNDO),
             "Undo last operation (Ctrl+Z)",
             KeyEvent.VK_Z,
             SystemUtil.getMenuCtrlMaskEx()
@@ -1133,9 +1087,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction redoAction = new IcyAbstractAction(
+    public static final @NotNull IcyAbstractAction redoAction = new IcyAbstractAction(
             "Redo",
-            //new IcyIcon(ResourceUtil.ICON_REDO),
             "Redo last operation (Ctrl+Y)",
             KeyEvent.VK_Y,
             SystemUtil.getMenuCtrlMaskEx()
@@ -1156,9 +1109,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction undoClearAction = new IcyAbstractAction(
+    public static final @NotNull IcyAbstractAction undoClearAction = new IcyAbstractAction(
             "Clear history",
-            //new IcyIcon(ResourceUtil.ICON_TRASH),
             "Clear all history (will release some memory)"
     ) {
         @Override
@@ -1184,9 +1136,8 @@ public final class SequenceOperationActions {
         }
     };
 
-    public static final IcyAbstractAction undoClearAllButLastAction = new IcyAbstractAction(
+    public static final @NotNull IcyAbstractAction undoClearAllButLastAction = new IcyAbstractAction(
             "Clear all but last",
-            //new IcyIcon(ResourceUtil.ICON_CLEAR_BEFORE),
             "Clear all history but the last operation (can release some memory)"
     ) {
         @Override
@@ -1216,7 +1167,8 @@ public final class SequenceOperationActions {
     /**
      * Return all actions of this class
      */
-    public static List<IcyAbstractAction> getAllActions() {
+    @Deprecated(forRemoval = true)
+    public static @NotNull List<IcyAbstractAction> getAllActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
         for (final Field field : SequenceOperationActions.class.getFields()) {
@@ -1232,6 +1184,74 @@ public final class SequenceOperationActions {
                 // ignore
             }
         }
+
+        return result;
+    }
+
+    public static @NotNull List<IcyAbstractAction> getAllActiveSequenceActions() {
+        final List<IcyAbstractAction> result = new ArrayList<>();
+
+        result.add(cloneSequenceAction);
+
+        result.add(convertUByteScaledSequenceAction);
+        result.add(convertUByteSequenceAction);
+        result.add(convertByteScaledSequenceAction);
+        result.add(convertByteSequenceAction);
+        result.add(convertUShortScaledSequenceAction);
+        result.add(convertUShortSequenceAction);
+        result.add(convertShortScaledSequenceAction);
+        result.add(convertShortSequenceAction);
+        result.add(convertUIntScaledSequenceAction);
+        result.add(convertUIntSequenceAction);
+        result.add(convertIntScaledSequenceAction);
+        result.add(convertIntSequenceAction);
+        result.add(convertFloatScaledSequenceAction);
+        result.add(convertFloatSequenceAction);
+        result.add(convertDoubleScaledSequenceAction);
+        result.add(convertDoubleSequenceAction);
+
+        result.add(argbSequenceAction);
+        result.add(rgbSequenceAction);
+        result.add(graySequenceAction);
+
+        result.add(cropSequenceAction);
+        result.add(canvasResizeAction);
+        result.add(imageResizeAction);
+
+        result.add(extractAllChannelAction);
+        for (int c = 0; c <= 5; c++) {
+            result.add(extractChannelActions[c]);
+            result.add(removeChannelActions[c]);
+        }
+
+        result.add(mergeChannelsAction);
+        result.add(reverseSlicesAction);
+        result.add(addSlicesAction);
+        result.add(mergeSlicesAction);
+        result.add(removeSlicesAction);
+        result.add(reverseFramesAction);
+        result.add(addFramesAction);
+        result.add(mergeFramesAction);
+        result.add(removeFramesAction);
+        result.add(convertToSlicesAction);
+        result.add(convertToFramesAction);
+        result.add(advancedZTConvertAction);
+
+        result.add(undoAction);
+        result.add(redoAction);
+        result.add(undoClearAction);
+        result.add(undoClearAllButLastAction);
+
+        return result;
+    }
+
+    public static @NotNull List<IcyAbstractAction> getAllGlobalViewerActions() {
+        final List<IcyAbstractAction> result = new ArrayList<>();
+
+        result.add(extractSliceAction);
+        result.add(removeSliceAction);
+        result.add(extractFrameAction);
+        result.add(removeFrameAction);
 
         return result;
     }

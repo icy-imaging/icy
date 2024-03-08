@@ -56,9 +56,8 @@ import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.type.collection.CollectionUtil;
 import icy.update.IcyUpdater;
+import icy.update.Updater;
 import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.swing.IconFontSwing;
 import org.apache.poi.hssf.usermodel.HSSFWorkbookFactory;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbookFactory;
@@ -72,6 +71,7 @@ import java.awt.*;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.nio.channels.FileLock;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 
@@ -260,8 +260,6 @@ public class Icy {
             // do it on AWT thread NOW as this is what we want first
             ThreadUtil.invokeNow(() -> {
                 try {
-                    // init IconFontSwing with GoogleMaterialIcons
-                    IconFontSwing.register(GoogleMaterialDesignIcons.getIconFont());
                     // init Look And Feel (need mainInterface instance)
                     LookAndFeelUtil.init();
                     // init need "mainInterface" variable to be initialized
@@ -294,24 +292,18 @@ public class Icy {
         IcyLogger.info(Icy.class, String.format("System total memory: %s", UnitUtil.getBytesString(SystemUtil.getTotalMemory())));
         IcyLogger.info(Icy.class, String.format("System available memory: %s", UnitUtil.getBytesString(SystemUtil.getFreeMemory())));
         IcyLogger.info(Icy.class, String.format("Max Java memory: %s", UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())));
+        IcyLogger.info(Icy.class, String.format("Application localisation: %s", Paths.get("").toAbsolutePath()));
 
         // image cache disabled from command line ?
-        // TODO: 16/10/2023 Replace this with new Inspector mode
-        if (isCacheDisabled()) {
+        if (isCacheDisabled())
             IcyLogger.info(Icy.class, "Image cache is disabled.");
 
-            // disable virtual mode button from inspector
-            /*final InspectorPanel inspector = getMainInterface().getInspector();
-            if (inspector != null)
-                inspector.imageCacheDisabled();*/
-        }
         // virtual mode enabled ? --> initialize image cache
         else if (GeneralPreferences.getVirtualMode())
             ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
 
-        if (headless) {
+        if (headless)
             IcyLogger.info(Icy.class, "Headless mode.");
-        }
 
         // initialize OSX specific GUI stuff
         if (!headless && SystemUtil.isMac())
@@ -437,7 +429,9 @@ public class Icy {
                 // execute plugin
             else if (arg.equalsIgnoreCase("--execute") || arg.equalsIgnoreCase("-x"))
                 execute = true;
-                // assume image name ?
+            else if (arg.trim().equalsIgnoreCase(Updater.ARG_UPDATE) || arg.trim().equalsIgnoreCase(Updater.ARG_NOSTART))
+                IcyLogger.error(Icy.class, "Wrong parameter: " + arg);
+            // assume image name ?
             else if (!arg.trim().isBlank())
                 startupImage = arg;
         }

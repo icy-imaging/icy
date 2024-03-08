@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,23 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component;
 
 import icy.gui.component.button.IcyButton;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import icy.resource.icon.SVGIcon;
 
-import java.awt.Color;
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.util.EventListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.Icon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.SwingConstants;
 
 /**
  * @deprecated Use {@link CloseableTabbedPane} instead
@@ -60,7 +51,7 @@ public class CloseTabbedPane extends JTabbedPane {
 
             sep = Box.createHorizontalStrut(6);
 
-            closeButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
+            closeButton = new IcyButton(SVGIcon.DELETE);
             closeButton.setFlat(true);
             // closeButton.setContentAreaFilled(false);
             closeButton.setToolTipText("close");

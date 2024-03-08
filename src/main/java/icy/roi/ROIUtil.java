@@ -1230,8 +1230,14 @@ public class ROIUtil {
         }
 
         ROI result;
-        if (!roi2dShapes.isEmpty())
-            result = roi2dShapes.get(0).getCopy();
+        if (!roi2dShapes.isEmpty()) {
+            final ROI2DShape roi = roi2dShapes.get(0);
+            result = new ROI2DPath(roi);
+            copyROIProperties(roi, result, true);
+            ((ROI2DPath) result).setZ(roi.getZ());
+            ((ROI2DPath) result).setT(roi.getT());
+            ((ROI2DPath) result).setC(roi.getC());
+        }
         else
             result = rois.get(0).getCopy();
 
@@ -1249,10 +1255,9 @@ public class ROIUtil {
                         // interrupt task
                         if (Thread.currentThread().isInterrupted())
                             throw new InterruptedException("ROI AND merging process interrupted.");
-                        result = result.intersect(rois.get(i), true);
+                        result = result.intersect(roiOthers.get(i), true);
                     }
                     break;
-
                 case OR:
                     // ROI2DShape optimization
                     if (!roi2dShapes.isEmpty()) {
@@ -1264,11 +1269,12 @@ public class ROIUtil {
                         // interrupt task
                         if (Thread.currentThread().isInterrupted())
                             throw new InterruptedException("ROI OR merging process interrupted.");
-                        result = result.add(rois.get(i), true);
+                        result = result.add(roiOthers.get(i), true);
                     }
                     break;
 
                 case XOR:
+                    // FIXME Strange behavior when more than 2 ROIs (possibly fastXOR)
                     // ROI2DShape optimization
                     if (!roi2dShapes.isEmpty()) {
                         roiOthers.addAll(((ROI2DPath) result).exclusiveAddFast(roi2dShapes));
@@ -1279,14 +1285,13 @@ public class ROIUtil {
                         // interrupt task
                         if (Thread.currentThread().isInterrupted())
                             throw new InterruptedException("ROI XOR merging process interrupted.");
-                        result = result.exclusiveAdd(rois.get(i), true);
+                        result = result.exclusiveAdd(roiOthers.get(i), true);
                     }
                     break;
             }
         }
 
         return result;
-
     }
 
     /**

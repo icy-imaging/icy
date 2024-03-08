@@ -21,7 +21,7 @@ package icy.gui.toolbar.button;
 import icy.gui.component.button.IcyToggleButton;
 import icy.gui.toolbar.container.InspectorPanel;
 import icy.gui.toolbar.panel.SequencePanel;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import icy.resource.icon.SVGIcon;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,7 +31,7 @@ import java.awt.event.ActionListener;
  */
 public final class SequenceButton extends IcyToggleButton implements ActionListener {
     public SequenceButton() {
-        super(GoogleMaterialDesignIcons.IMAGE);
+        super(SVGIcon.IMAGE);
         setFocusable(false);
         addActionListener(this);
     }

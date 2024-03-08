@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,26 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component;
 
 import icy.gui.component.button.IcyButton;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.util.ArrayList;
+import icy.resource.icon.SVGIcon;
 
 import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
 
 /**
  * Basically a JTabbedPane which can handle ExternalizablePanel.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
 public class ExtTabbedPanel extends JTabbedPane {
-    private static class TabComponent extends JPanel {
+    public static class TabComponent extends JPanel {
         final ExternalizablePanel extPanel;
         final private IcyButton externButton;
         final JLabel label;
@@ -46,7 +44,7 @@ public class ExtTabbedPanel extends JTabbedPane {
         final int index;
         final String tip;
 
-        public TabComponent(String title, Icon icon, ExternalizablePanel panel, String tip, int index) {
+        public TabComponent(final String title, final Icon icon, final ExternalizablePanel panel, final String tip, final int index) {
             super();
 
             setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
@@ -60,7 +58,7 @@ public class ExtTabbedPanel extends JTabbedPane {
             label = new JLabel(title + " ", icon, SwingConstants.CENTER);
             label.setOpaque(false);
 
-            externButton = new IcyButton(GoogleMaterialDesignIcons.OPEN_IN_NEW);
+            externButton = new IcyButton(SVGIcon.OPEN_IN_NEW);
             externButton.setOpaque(false);
             externButton.setContentAreaFilled(false);
             externButton.setToolTipText("Externalize panel");
@@ -83,24 +81,24 @@ public class ExtTabbedPanel extends JTabbedPane {
             return label.getIcon();
         }
 
-        public void setTitle(String title) {
+        public void setTitle(final String title) {
             label.setText(title + " ");
         }
 
-        public void setIcon(Icon icon) {
+        public void setIcon(final Icon icon) {
             label.setIcon(icon);
         }
 
-        public void setDisabledIcon(Icon disabledIcon) {
+        public void setDisabledIcon(final Icon disabledIcon) {
             label.setDisabledIcon(disabledIcon);
         }
 
-        public void setBackgroundAll(Color background) {
+        public void setBackgroundAll(final Color background) {
             externButton.setBackground(background);
             label.setBackground(background);
         }
 
-        public void setForegroundAll(Color foreground) {
+        public void setForegroundAll(final Color foreground) {
             externButton.setForeground(foreground);
             label.setForeground(foreground);
         }
@@ -112,11 +110,11 @@ public class ExtTabbedPanel extends JTabbedPane {
         this(TOP, WRAP_TAB_LAYOUT);
     }
 
-    public ExtTabbedPanel(int tabPlacement) {
+    public ExtTabbedPanel(final int tabPlacement) {
         this(tabPlacement, WRAP_TAB_LAYOUT);
     }
 
-    public ExtTabbedPanel(int tabPlacement, int tabLayoutPolicy) {
+    public ExtTabbedPanel(final int tabPlacement, final int tabLayoutPolicy) {
         super(tabPlacement, tabLayoutPolicy);
 
         tabComponents = new ArrayList<>();
@@ -125,8 +123,8 @@ public class ExtTabbedPanel extends JTabbedPane {
     /**
      * Find the ExtTabComponent attached to the specified ExternalizablePanel.
      */
-    protected TabComponent getTabComponent(ExternalizablePanel panel) {
-        for (TabComponent extTabComp : tabComponents)
+    protected TabComponent getTabComponent(final ExternalizablePanel panel) {
+        for (final TabComponent extTabComp : tabComponents)
             if (extTabComp.extPanel == panel)
                 return extTabComp;
 
@@ -134,7 +132,7 @@ public class ExtTabbedPanel extends JTabbedPane {
     }
 
     @Override
-    public Component add(Component component) {
+    public Component add(final Component component) {
         // special case of externalizable panel
         if (component instanceof ExternalizablePanel) {
             final TabComponent tabComp = getTabComponent((ExternalizablePanel) component);
@@ -152,7 +150,7 @@ public class ExtTabbedPanel extends JTabbedPane {
     }
 
     @Override
-    public void setIconAt(int index, Icon icon) {
+    public void setIconAt(final int index, final Icon icon) {
         super.setIconAt(index, icon);
 
         final Component comp = getTabComponentAt(index);
@@ -161,7 +159,7 @@ public class ExtTabbedPanel extends JTabbedPane {
     }
 
     @Override
-    public void setDisabledIconAt(int index, Icon disabledIcon) {
+    public void setDisabledIconAt(final int index, final Icon disabledIcon) {
         super.setDisabledIconAt(index, disabledIcon);
 
         final Component comp = getTabComponentAt(index);
@@ -170,7 +168,7 @@ public class ExtTabbedPanel extends JTabbedPane {
     }
 
     @Override
-    public void setBackgroundAt(int index, Color background) {
+    public void setBackgroundAt(final int index, final Color background) {
         super.setBackgroundAt(index, background);
 
         final Component comp = getTabComponentAt(index);
@@ -179,7 +177,7 @@ public class ExtTabbedPanel extends JTabbedPane {
     }
 
     @Override
-    public void setForegroundAt(int index, Color foreground) {
+    public void setForegroundAt(final int index, final Color foreground) {
         super.setForegroundAt(index, foreground);
 
         final Component comp = getTabComponentAt(index);
@@ -188,7 +186,7 @@ public class ExtTabbedPanel extends JTabbedPane {
     }
 
     @Override
-    public void setTitleAt(int index, String title) {
+    public void setTitleAt(final int index, final String title) {
         super.setTitleAt(index, title);
 
         final Component comp = getTabComponentAt(index);
@@ -197,11 +195,10 @@ public class ExtTabbedPanel extends JTabbedPane {
     }
 
     @Override
-    public void insertTab(String title, Icon icon, Component component, String tip, int index) {
+    public void insertTab(final String title, final Icon icon, final Component component, final String tip, final int index) {
         TabComponent tabComp;
 
-        if (component instanceof ExternalizablePanel) {
-            final ExternalizablePanel panel = (ExternalizablePanel) component;
+        if (component instanceof final ExternalizablePanel panel) {
             tabComp = getTabComponent(panel);
 
             // not existing ?

@@ -1,21 +1,21 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Icy is free software: you can redistribute it and/or modify it under the terms of the GNU General
- * Public License as
- * published by the Free Software Foundation, either version 3 of the License, or (at your option)
- * any later version.
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- * Icy is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
- * implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License along with Icy. If not, see
- * <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.lut;
 
 import icy.gui.component.CheckTabbedPane;
@@ -34,29 +34,24 @@ import icy.image.lut.LUT.LUTChannel;
 import icy.math.Scaler;
 import icy.preferences.ApplicationPreferences;
 import icy.preferences.XMLPreferences;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.sequence.SequenceListener;
 import icy.system.thread.ThreadUtil;
 import icy.type.DataType;
 import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
-import java.awt.BorderLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
-import javax.swing.JRadioButton;
-import javax.swing.JTabbedPane;
-import javax.swing.SwingConstants;
-
 /**
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
-@SuppressWarnings("deprecation") // TODO: 13/02/2023 Check deprecated extension
+// TODO: 13/02/2023 Check deprecated extension
 public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, SequenceListener {
     /**
      * pref id
@@ -67,7 +62,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     private static final String ID_AUTO_BOUNDS = "autoBounds";
     private static final String ID_LOG_VIEW = "logView";
 
-    /**
+    /*
      * gui
      */
     final CheckTabbedPane bottomPane;
@@ -79,12 +74,12 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     final JRadioButton linearButton;
     final IcyButton exportXLSButton;
 
-    /**
+    /*
      * data
      */
     final List<LUTChannelViewer> lutChannelViewers;
 
-    /**
+    /*
      * preferences
      */
     final XMLPreferences pref;
@@ -103,12 +98,12 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
             final Sequence sequence = getSequence();
 
             if (sequence != null) {
-                double[][] typeBounds = sequence.getChannelsTypeBounds();
-                double[][] bounds = sequence.getChannelsBounds();
+                final double[][] typeBounds = sequence.getChannelsTypeBounds();
+                final double[][] bounds = sequence.getChannelsBounds();
 
                 for (int i = 0; i < Math.min(getLut().getNumChannel(), typeBounds.length); i++) {
-                    double[] tb = typeBounds[i];
-                    double[] b = bounds[i];
+                    final double[] tb = typeBounds[i];
+                    final double[] b = bounds[i];
 
                     final Scaler scaler = getLut().getLutChannel(i).getScaler();
 
@@ -174,8 +169,8 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
 
         bottomPane.addChangeListener(e -> {
             final int size = lutChannelViewers.size();
-            boolean[] changedState = new boolean[size];
-            boolean[] enabledState = new boolean[size];
+            final boolean[] changedState = new boolean[size];
+            final boolean[] enabledState = new boolean[size];
 
             for (int i = 0; i < size; i++) {
                 try {
@@ -183,7 +178,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
                     enabledState[i] = bottomPane.isTabChecked(i);
                     changedState[i] = lutChannelViewers.get(i).getLutChannel().isEnabled() != enabledState[i];
                 }
-                catch (Exception exc) {
+                catch (final Exception exc) {
                     enabledState[i] = true;
                     changedState[i] = false;
                 }
@@ -252,7 +247,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
         // force apply selected mode (no event dispatched on setSelected)
         scaleTypeChanged(logButton.isSelected());
 
-        exportXLSButton = new IcyButton(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
+        exportXLSButton = new IcyButton(SVGIcon.FILE_SAVE);
         exportXLSButton.setToolTipText("Export histogram data into an excel file");
         exportXLSButton.addActionListener(e -> {
             try {
@@ -260,7 +255,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
                 lutChannelViewers.get(bottomPane.getSelectedIndex()).getScalerPanel().getScalerViewer()
                         .getHistogram().getHistogram().doXLSExport();
             }
-            catch (Exception e1) {
+            catch (final Exception e1) {
                 MessageDialog.showDialog("Error", e1.getMessage(), MessageDialog.ERROR_MESSAGE);
             }
         });
@@ -298,7 +293,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     }
 
     private boolean getPreferredAutoBounds() {
-        boolean result = pref.getBoolean(ID_AUTO_BOUNDS, true);
+        final boolean result = pref.getBoolean(ID_AUTO_BOUNDS, true);
 
         if (!result)
             return false;
@@ -307,7 +302,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
 
         if (sequence != null) {
             // byte data type ?
-            if (sequence.getDataType_() == DataType.UBYTE) {
+            if (sequence.getDataType() == DataType.UBYTE) {
                 final int numChannel = getLut().getNumChannel();
 
                 // custom colormaps --> cannot use auto bounds
@@ -374,14 +369,14 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     }
 
     void refreshAllHistogram() {
-        for (LUTChannelViewer lutChannelViewer : lutChannelViewers)
+        for (final LUTChannelViewer lutChannelViewer : lutChannelViewers)
             lutChannelViewer.getScalerPanel().refreshHistogram();
     }
 
     void scaleTypeChanged(final boolean log) {
         pref.putBoolean(ID_LOG_VIEW, log);
         // change histogram scale type
-        for (LUTChannelViewer lutChannelViewer : lutChannelViewers)
+        for (final LUTChannelViewer lutChannelViewer : lutChannelViewers)
             lutChannelViewer.getScalerPanel().getScalerViewer().scaleTypeChanged(log);
     }
 
@@ -404,7 +399,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     public void dispose() {
         removeAll();
 
-        Sequence seq = getSequence();
+        final Sequence seq = getSequence();
         if (seq != null)
             seq.removeListener(this);
     }
@@ -424,7 +419,7 @@ public class LUTViewer extends IcyLutViewer implements IcyColorMapListener, Sequ
     }
 
     @Override
-    public void sequenceClosed(Sequence sequence) {
+    public void sequenceClosed(final Sequence sequence) {
 
     }
 }

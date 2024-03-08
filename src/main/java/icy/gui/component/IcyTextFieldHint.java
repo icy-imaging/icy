@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,8 +19,9 @@
 package icy.gui.component;
 
 import icy.gui.util.LookAndFeelUtil;
-import icy.resource.icon.IcyIconFont;
-import jiconfont.IconCode;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -32,13 +33,13 @@ import java.awt.event.FocusListener;
  * @author Thomas Musset
  */
 public class IcyTextFieldHint extends JTextField implements FocusListener {
-    private final IcyIconFont icon;
+    private final IcySVGIcon icon;
     private final String hint;
     private final Insets insets;
 
-    public IcyTextFieldHint(final IconCode code, final String hint) {
+    public IcyTextFieldHint(final @NotNull SVGIcon icon, final @NotNull String hint) {
         super();
-        this.icon = new IcyIconFont(code, LookAndFeelUtil.getDefaultIconSizeAsFloat(), LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
+        this.icon = new IcySVGIcon(icon, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
         this.hint = hint;
 
         final Border border = UIManager.getBorder("TextField.border");
@@ -47,21 +48,15 @@ public class IcyTextFieldHint extends JTextField implements FocusListener {
         addFocusListener(this);
     }
 
-    public void updateIconFont() {
-        final IcyIconFont i = getIcon();
-        if (i != null)
-            i.updateIcon();
-    }
+    public IcyTextFieldHint(final @NotNull SVGIcon icon) {
+        super();
+        this.icon = new IcySVGIcon(icon, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
+        this.hint = "";
 
-    public IcyIconFont getIcon() {
-        return icon;
-    }
+        final Border border = UIManager.getBorder("TextField.border");
+        insets = border.getBorderInsets(this);
 
-    @Override
-    public void updateUI() {
-        super.updateUI();
-        updateIconFont();
-        repaint();
+        addFocusListener(this);
     }
 
     @Override
@@ -70,11 +65,11 @@ public class IcyTextFieldHint extends JTextField implements FocusListener {
 
         int textX = 2;
 
-        if(icon!=null) {
+        if (icon != null) {
             final int iconWidth = icon.getIconWidth();
             final int iconHeight = icon.getIconHeight();
             final int x = insets.left;
-            textX = x+iconWidth+2;
+            textX = x + iconWidth + 2;
             final int y = (this.getHeight() - iconHeight) / 2;
             icon.paintIcon(this, g, x, y);
         }

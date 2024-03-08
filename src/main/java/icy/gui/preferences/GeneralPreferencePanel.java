@@ -124,7 +124,7 @@ public class GeneralPreferencePanel extends PreferencePanel {
         gbc_updateRepository.gridwidth = 4;
         gbc_updateRepository.gridx = 1;
         gbc_updateRepository.gridy = 1;
-        mainPanel.add(updateRepository, gbc_updateRepository);
+        //mainPanel.add(updateRepository, gbc_updateRepository);
         updateRepository.setToolTipText("Choose the update channel");
 
         sequencePersistence = new JCheckBox("Enable sequence persistence");

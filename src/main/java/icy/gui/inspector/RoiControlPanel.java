@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,34 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.inspector;
-
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Semaphore;
-
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import icy.clipboard.Clipboard;
 import icy.clipboard.Clipboard.ClipboardListener;
@@ -57,22 +30,32 @@ import icy.gui.component.button.IcyToggleButton;
 import icy.gui.component.model.SpecialValueSpinnerModel;
 import icy.main.Icy;
 import icy.math.MathUtil;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import icy.roi.ROI;
 import icy.roi.ROIEvent;
-import icy.roi.edit.BoundsROIEdit;
-import icy.roi.edit.BoundsROIsEdit;
-import icy.roi.edit.PositionROIEdit;
-import icy.roi.edit.PositionROIsEdit;
-import icy.roi.edit.PropertyROIsEdit;
+import icy.roi.edit.*;
 import icy.sequence.Sequence;
 import icy.system.thread.ThreadUtil;
 import icy.type.point.Point5D;
 import icy.type.rectangle.Rectangle5D;
 import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Semaphore;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class RoiControlPanel extends JPanel implements ColorChangeListener, TextChangeListener, ClipboardListener, ChangeListener, ActionListener {
@@ -110,7 +93,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     final Runnable roiActionsRefresher;
     final Runnable roiPropertiesRefresher;
 
-    public RoiControlPanel(AbstractRoisPanel roisPanel) {
+    public RoiControlPanel(final AbstractRoisPanel roisPanel) {
         super();
 
         this.roisPanel = roisPanel;
@@ -154,7 +137,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     private void initialize() {
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
-        JPanel actionPanel = new JPanel();
+        final JPanel actionPanel = new JPanel();
         actionPanel.setBorder(
                 new TitledBorder(
                         null,
@@ -165,7 +148,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                 )
         );
         add(actionPanel);
-        GridBagLayout gbl_actionPanel = new GridBagLayout();
+        final GridBagLayout gbl_actionPanel = new GridBagLayout();
         gbl_actionPanel.columnWidths = new int[]{0, 0, 0, 60, 0, 0, 0};
         gbl_actionPanel.rowHeights = new int[]{0, 0, 0};
         gbl_actionPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
@@ -173,7 +156,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         actionPanel.setLayout(gbl_actionPanel);
 
         final JLabel lblColor = new JLabel("Color");
-        GridBagConstraints gbc_lblColor = new GridBagConstraints();
+        final GridBagConstraints gbc_lblColor = new GridBagConstraints();
         gbc_lblColor.anchor = GridBagConstraints.WEST;
         gbc_lblColor.insets = new Insets(0, 0, 5, 5);
         gbc_lblColor.gridx = 0;
@@ -181,7 +164,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         actionPanel.add(lblColor, gbc_lblColor);
 
         colorButton = new ColorChooserButton();
-        GridBagConstraints gbc_colorButton = new GridBagConstraints();
+        final GridBagConstraints gbc_colorButton = new GridBagConstraints();
         gbc_colorButton.fill = GridBagConstraints.HORIZONTAL;
         gbc_colorButton.insets = new Insets(0, 0, 5, 5);
         gbc_colorButton.gridx = 1;
@@ -189,8 +172,8 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         actionPanel.add(colorButton, gbc_colorButton);
         colorButton.setToolTipText("ROI color");
 
-        JLabel lblContentOpacity = new JLabel("Opacity");
-        GridBagConstraints gbc_lblContentOpacity = new GridBagConstraints();
+        final JLabel lblContentOpacity = new JLabel("Opacity");
+        final GridBagConstraints gbc_lblContentOpacity = new GridBagConstraints();
         gbc_lblContentOpacity.insets = new Insets(0, 0, 5, 5);
         gbc_lblContentOpacity.gridx = 2;
         gbc_lblContentOpacity.gridy = 0;
@@ -198,7 +181,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
 
         alphaSlider = new JSlider();
         alphaSlider.setFocusable(false);
-        GridBagConstraints gbc_alphaSlider = new GridBagConstraints();
+        final GridBagConstraints gbc_alphaSlider = new GridBagConstraints();
         gbc_alphaSlider.gridwidth = 2;
         gbc_alphaSlider.fill = GridBagConstraints.HORIZONTAL;
         gbc_alphaSlider.insets = new Insets(0, 0, 5, 5);
@@ -210,7 +193,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         alphaSlider.setMinimumSize(new Dimension(36, 20));
         alphaSlider.setToolTipText("ROI content opacity");
 
-        readOnlyToggle = new IcyToggleButton(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
+        readOnlyToggle = new IcyToggleButton(new SVGIconPack(SVGIcon.LOCK_OPEN, SVGIcon.LOCK));
         readOnlyToggle.setSelected(true);
         readOnlyToggle.setBorderPainted(false);
         readOnlyToggle.setFocusPainted(false);
@@ -219,15 +202,15 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         readOnlyToggle.setMinimumSize(new Dimension(29, 29));
         readOnlyToggle.setPreferredSize(new Dimension(29, 29));
         readOnlyToggle.setToolTipText("Enable/Disable ROI edition");
-        GridBagConstraints gbc_readOnlyToggle = new GridBagConstraints();
+        final GridBagConstraints gbc_readOnlyToggle = new GridBagConstraints();
         gbc_readOnlyToggle.insets = new Insets(0, 0, 5, 0);
         gbc_readOnlyToggle.gridwidth = 1;
         gbc_readOnlyToggle.gridx = 5;
         gbc_readOnlyToggle.gridy = 0;
         actionPanel.add(readOnlyToggle, gbc_readOnlyToggle);
 
-        JLabel lblNewLabel = new JLabel("Stroke");
-        GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+        final JLabel lblNewLabel = new JLabel("Stroke");
+        final GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
         gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
         gbc_lblNewLabel.insets = new Insets(0, 0, 0, 5);
         gbc_lblNewLabel.gridx = 0;
@@ -237,7 +220,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         strokeSpinner = new JSpinner();
         strokeSpinner.setToolTipText("ROI stroke size (for visualization only)");
         strokeSpinner.setModel(new SpinnerNumberModel(1.0, 1.0, 9.0, 1.0));
-        GridBagConstraints gbc_strokeSpinner = new GridBagConstraints();
+        final GridBagConstraints gbc_strokeSpinner = new GridBagConstraints();
         gbc_strokeSpinner.fill = GridBagConstraints.HORIZONTAL;
         gbc_strokeSpinner.insets = new Insets(0, 0, 0, 5);
         gbc_strokeSpinner.gridx = 1;
@@ -249,7 +232,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         displayNameCheckBox.setMargin(new Insets(2, 0, 2, 2));
         displayNameCheckBox.setIconTextGap(10);
         displayNameCheckBox.setHorizontalTextPosition(SwingConstants.LEADING);
-        GridBagConstraints gbc_displayNameCheckBox = new GridBagConstraints();
+        final GridBagConstraints gbc_displayNameCheckBox = new GridBagConstraints();
         gbc_displayNameCheckBox.anchor = GridBagConstraints.WEST;
         gbc_displayNameCheckBox.insets = new Insets(0, 0, 0, 5);
         gbc_displayNameCheckBox.gridwidth = 2;
@@ -262,7 +245,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         setAsDefaultBtn.setMargin(new Insets(2, 2, 2, 2));
         setAsDefaultBtn.setIconTextGap(0);
         setAsDefaultBtn.setToolTipText("Set the current color, opacity, stroke and show name values as the default settings");
-        GridBagConstraints gbc_setAsDefaultBtn = new GridBagConstraints();
+        final GridBagConstraints gbc_setAsDefaultBtn = new GridBagConstraints();
         gbc_setAsDefaultBtn.fill = GridBagConstraints.HORIZONTAL;
         gbc_setAsDefaultBtn.gridwidth = 2;
         gbc_setAsDefaultBtn.insets = new Insets(0, 0, 0, 5);
@@ -270,16 +253,16 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         gbc_setAsDefaultBtn.gridy = 1;
         actionPanel.add(setAsDefaultBtn, gbc_setAsDefaultBtn);
 
-        JPanel positionAndSizePanel = new JPanel();
+        final JPanel positionAndSizePanel = new JPanel();
         add(positionAndSizePanel);
-        GridBagLayout gbl_positionAndSizePanel = new GridBagLayout();
+        final GridBagLayout gbl_positionAndSizePanel = new GridBagLayout();
         gbl_positionAndSizePanel.columnWidths = new int[]{0, 0, 0};
         gbl_positionAndSizePanel.rowHeights = new int[]{0, 0};
         gbl_positionAndSizePanel.columnWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
         gbl_positionAndSizePanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
         positionAndSizePanel.setLayout(gbl_positionAndSizePanel);
 
-        JPanel positionPanel = new JPanel();
+        final JPanel positionPanel = new JPanel();
         positionPanel.setBorder(
                 new TitledBorder(
                         null,
@@ -289,14 +272,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                         null
                 )
         );
-        GridBagConstraints gbc_positionPanel = new GridBagConstraints();
+        final GridBagConstraints gbc_positionPanel = new GridBagConstraints();
         gbc_positionPanel.anchor = GridBagConstraints.NORTH;
         gbc_positionPanel.insets = new Insets(0, 0, 0, 5);
         gbc_positionPanel.fill = GridBagConstraints.HORIZONTAL;
         gbc_positionPanel.gridx = 0;
         gbc_positionPanel.gridy = 0;
         positionAndSizePanel.add(positionPanel, gbc_positionPanel);
-        GridBagLayout gbl_positionPanel = new GridBagLayout();
+        final GridBagLayout gbl_positionPanel = new GridBagLayout();
         gbl_positionPanel.columnWidths = new int[]{20, 0, 0};
         gbl_positionPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
         gbl_positionPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
@@ -304,14 +287,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         positionPanel.setLayout(gbl_positionPanel);
 
         final JLabel lblX = new JLabel("X");
-        GridBagConstraints gbc_lblX = new GridBagConstraints();
+        final GridBagConstraints gbc_lblX = new GridBagConstraints();
         gbc_lblX.insets = new Insets(0, 0, 5, 5);
         gbc_lblX.gridx = 0;
         gbc_lblX.gridy = 0;
         positionPanel.add(lblX, gbc_lblX);
 
         posXField = new IcyTextField();
-        GridBagConstraints gbc_posXField = new GridBagConstraints();
+        final GridBagConstraints gbc_posXField = new GridBagConstraints();
         gbc_posXField.insets = new Insets(0, 0, 5, 0);
         gbc_posXField.fill = GridBagConstraints.HORIZONTAL;
         gbc_posXField.gridx = 1;
@@ -321,14 +304,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         posXField.setColumns(8);
 
         final JLabel lblY = new JLabel("Y");
-        GridBagConstraints gbc_lblY = new GridBagConstraints();
+        final GridBagConstraints gbc_lblY = new GridBagConstraints();
         gbc_lblY.insets = new Insets(0, 0, 5, 5);
         gbc_lblY.gridx = 0;
         gbc_lblY.gridy = 1;
         positionPanel.add(lblY, gbc_lblY);
 
         posYField = new IcyTextField();
-        GridBagConstraints gbc_posYField = new GridBagConstraints();
+        final GridBagConstraints gbc_posYField = new GridBagConstraints();
         gbc_posYField.fill = GridBagConstraints.HORIZONTAL;
         gbc_posYField.insets = new Insets(0, 0, 5, 0);
         gbc_posYField.gridx = 1;
@@ -338,14 +321,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         posYField.setColumns(8);
 
         posZFieldLabel = new JLabel("Z");
-        GridBagConstraints gbc_posZFieldLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_posZFieldLabel = new GridBagConstraints();
         gbc_posZFieldLabel.insets = new Insets(0, 0, 5, 5);
         gbc_posZFieldLabel.gridx = 0;
         gbc_posZFieldLabel.gridy = 2;
         positionPanel.add(posZFieldLabel, gbc_posZFieldLabel);
 
         posZField = new IcyTextField();
-        GridBagConstraints gbc_posZField = new GridBagConstraints();
+        final GridBagConstraints gbc_posZField = new GridBagConstraints();
         gbc_posZField.fill = GridBagConstraints.HORIZONTAL;
         gbc_posZField.insets = new Insets(0, 0, 5, 0);
         gbc_posZField.gridx = 1;
@@ -356,14 +339,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         posZField.setColumns(8);
 
         posZSpinnerLabel = new JLabel("Z");
-        GridBagConstraints gbc_posZSpinnerLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_posZSpinnerLabel = new GridBagConstraints();
         gbc_posZSpinnerLabel.insets = new Insets(0, 0, 5, 5);
         gbc_posZSpinnerLabel.gridx = 0;
         gbc_posZSpinnerLabel.gridy = 3;
         positionPanel.add(posZSpinnerLabel, gbc_posZSpinnerLabel);
 
         posZSpinner = new SpecialValueSpinner(new SpecialValueSpinnerModel(-1, -1, 0, 1, -1, "ALL"));
-        GridBagConstraints gbc_posZSpinner = new GridBagConstraints();
+        final GridBagConstraints gbc_posZSpinner = new GridBagConstraints();
         gbc_posZSpinner.fill = GridBagConstraints.HORIZONTAL;
         gbc_posZSpinner.insets = new Insets(0, 0, 5, 0);
         gbc_posZSpinner.gridx = 1;
@@ -372,14 +355,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         posZSpinner.setToolTipText("Attach the ROI to a specific Z slice (set to -1 for ALL)");
 
         posTFieldLabel = new JLabel("T");
-        GridBagConstraints gbc_posTFieldLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_posTFieldLabel = new GridBagConstraints();
         gbc_posTFieldLabel.insets = new Insets(0, 0, 5, 5);
         gbc_posTFieldLabel.gridx = 0;
         gbc_posTFieldLabel.gridy = 4;
         positionPanel.add(posTFieldLabel, gbc_posTFieldLabel);
 
         posTField = new IcyTextField();
-        GridBagConstraints gbc_posTField = new GridBagConstraints();
+        final GridBagConstraints gbc_posTField = new GridBagConstraints();
         gbc_posTField.fill = GridBagConstraints.HORIZONTAL;
         gbc_posTField.insets = new Insets(0, 0, 5, 0);
         gbc_posTField.gridx = 1;
@@ -390,14 +373,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         posTField.setColumns(8);
 
         posTSpinnerLabel = new JLabel("T");
-        GridBagConstraints gbc_posTSpinnerLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_posTSpinnerLabel = new GridBagConstraints();
         gbc_posTSpinnerLabel.insets = new Insets(0, 0, 5, 5);
         gbc_posTSpinnerLabel.gridx = 0;
         gbc_posTSpinnerLabel.gridy = 5;
         positionPanel.add(posTSpinnerLabel, gbc_posTSpinnerLabel);
 
         posTSpinner = new SpecialValueSpinner(new SpecialValueSpinnerModel(-1, -1, 0, 1, -1, "ALL"));
-        GridBagConstraints gbc_posTSpinner = new GridBagConstraints();
+        final GridBagConstraints gbc_posTSpinner = new GridBagConstraints();
         gbc_posTSpinner.fill = GridBagConstraints.HORIZONTAL;
         gbc_posTSpinner.insets = new Insets(0, 0, 5, 0);
         gbc_posTSpinner.gridx = 1;
@@ -406,14 +389,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         posTSpinner.setToolTipText("Attach the ROI to a specific T frame (set to -1 for ALL)");
 
         posCFieldLabel = new JLabel("C");
-        GridBagConstraints gbc_posCFieldLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_posCFieldLabel = new GridBagConstraints();
         gbc_posCFieldLabel.insets = new Insets(0, 0, 5, 5);
         gbc_posCFieldLabel.gridx = 0;
         gbc_posCFieldLabel.gridy = 6;
         positionPanel.add(posCFieldLabel, gbc_posCFieldLabel);
 
         posCField = new IcyTextField();
-        GridBagConstraints gbc_posCField = new GridBagConstraints();
+        final GridBagConstraints gbc_posCField = new GridBagConstraints();
         gbc_posCField.fill = GridBagConstraints.HORIZONTAL;
         gbc_posCField.insets = new Insets(0, 0, 5, 0);
         gbc_posCField.gridx = 1;
@@ -424,21 +407,21 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         posCField.setColumns(8);
 
         posCSpinnerLabel = new JLabel("C");
-        GridBagConstraints gbc_posCSpinnerLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_posCSpinnerLabel = new GridBagConstraints();
         gbc_posCSpinnerLabel.insets = new Insets(0, 0, 0, 5);
         gbc_posCSpinnerLabel.gridx = 0;
         gbc_posCSpinnerLabel.gridy = 7;
         positionPanel.add(posCSpinnerLabel, gbc_posCSpinnerLabel);
 
         posCSpinner = new SpecialValueSpinner(new SpecialValueSpinnerModel(-1, -1, 0, 1, -1, "ALL"));
-        GridBagConstraints gbc_posCSpinner = new GridBagConstraints();
+        final GridBagConstraints gbc_posCSpinner = new GridBagConstraints();
         gbc_posCSpinner.fill = GridBagConstraints.HORIZONTAL;
         gbc_posCSpinner.gridx = 1;
         gbc_posCSpinner.gridy = 7;
         positionPanel.add(posCSpinner, gbc_posCSpinner);
         posCSpinner.setToolTipText("Attach the ROI to a specific C channel (set to -1 for ALL)");
 
-        JPanel sizePanel = new JPanel();
+        final JPanel sizePanel = new JPanel();
         sizePanel.setBorder(
                 new TitledBorder(
                         null,
@@ -448,14 +431,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                         null
                 )
         );
-        GridBagConstraints gbc_sizePanel = new GridBagConstraints();
+        final GridBagConstraints gbc_sizePanel = new GridBagConstraints();
         gbc_sizePanel.anchor = GridBagConstraints.NORTH;
         gbc_sizePanel.fill = GridBagConstraints.HORIZONTAL;
         gbc_sizePanel.gridx = 1;
         gbc_sizePanel.gridy = 0;
         positionAndSizePanel.add(sizePanel, gbc_sizePanel);
 
-        GridBagLayout gbl_sizePanel = new GridBagLayout();
+        final GridBagLayout gbl_sizePanel = new GridBagLayout();
         gbl_sizePanel.columnWidths = new int[]{20, 0, 0};
         gbl_sizePanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
         gbl_sizePanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
@@ -463,14 +446,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         sizePanel.setLayout(gbl_sizePanel);
 
         final JLabel lblNewLabel_2 = new JLabel("X");
-        GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+        final GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
         gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
         gbc_lblNewLabel_2.gridx = 0;
         gbc_lblNewLabel_2.gridy = 0;
         sizePanel.add(lblNewLabel_2, gbc_lblNewLabel_2);
 
         sizeXField = new IcyTextField();
-        GridBagConstraints gbc_sizeXField = new GridBagConstraints();
+        final GridBagConstraints gbc_sizeXField = new GridBagConstraints();
         gbc_sizeXField.insets = new Insets(0, 0, 5, 0);
         gbc_sizeXField.fill = GridBagConstraints.HORIZONTAL;
         gbc_sizeXField.gridx = 1;
@@ -480,14 +463,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         sizeXField.setColumns(8);
 
         final JLabel lblY_1 = new JLabel("Y");
-        GridBagConstraints gbc_lblY_1 = new GridBagConstraints();
+        final GridBagConstraints gbc_lblY_1 = new GridBagConstraints();
         gbc_lblY_1.insets = new Insets(0, 0, 5, 5);
         gbc_lblY_1.gridx = 0;
         gbc_lblY_1.gridy = 1;
         sizePanel.add(lblY_1, gbc_lblY_1);
 
         sizeYField = new IcyTextField();
-        GridBagConstraints gbc_sizeYField = new GridBagConstraints();
+        final GridBagConstraints gbc_sizeYField = new GridBagConstraints();
         gbc_sizeYField.fill = GridBagConstraints.HORIZONTAL;
         gbc_sizeYField.insets = new Insets(0, 0, 5, 0);
         gbc_sizeYField.gridx = 1;
@@ -496,15 +479,15 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         sizeYField.setToolTipText("Size of dimension Y for the ROI");
         sizeYField.setColumns(8);
 
-        JLabel sizeZFieldLabel = new JLabel("Z");
-        GridBagConstraints gbc_sizeZFieldLabel = new GridBagConstraints();
+        final JLabel sizeZFieldLabel = new JLabel("Z");
+        final GridBagConstraints gbc_sizeZFieldLabel = new GridBagConstraints();
         gbc_sizeZFieldLabel.insets = new Insets(0, 0, 5, 5);
         gbc_sizeZFieldLabel.gridx = 0;
         gbc_sizeZFieldLabel.gridy = 2;
         sizePanel.add(sizeZFieldLabel, gbc_sizeZFieldLabel);
 
         sizeZField = new IcyTextField();
-        GridBagConstraints gbc_sizeZField = new GridBagConstraints();
+        final GridBagConstraints gbc_sizeZField = new GridBagConstraints();
         gbc_sizeZField.fill = GridBagConstraints.HORIZONTAL;
         gbc_sizeZField.insets = new Insets(0, 0, 5, 0);
         gbc_sizeZField.gridx = 1;
@@ -513,15 +496,15 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         sizeZField.setToolTipText("Size of dimension Z for the ROI");
         sizeZField.setColumns(8);
 
-        JLabel sizeTFieldLabel = new JLabel("T");
-        GridBagConstraints gbc_sizeTFieldLabel = new GridBagConstraints();
+        final JLabel sizeTFieldLabel = new JLabel("T");
+        final GridBagConstraints gbc_sizeTFieldLabel = new GridBagConstraints();
         gbc_sizeTFieldLabel.insets = new Insets(0, 0, 5, 5);
         gbc_sizeTFieldLabel.gridx = 0;
         gbc_sizeTFieldLabel.gridy = 3;
         sizePanel.add(sizeTFieldLabel, gbc_sizeTFieldLabel);
 
         sizeTField = new IcyTextField();
-        GridBagConstraints gbc_sizeTField = new GridBagConstraints();
+        final GridBagConstraints gbc_sizeTField = new GridBagConstraints();
         gbc_sizeTField.fill = GridBagConstraints.HORIZONTAL;
         gbc_sizeTField.insets = new Insets(0, 0, 5, 0);
         gbc_sizeTField.gridx = 1;
@@ -530,15 +513,15 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         sizeTField.setToolTipText("Size of dimension T for the ROI");
         sizeTField.setColumns(8);
 
-        JLabel sizeCFieldLabel = new JLabel("C");
-        GridBagConstraints gbc_sizeCFieldLabel = new GridBagConstraints();
+        final JLabel sizeCFieldLabel = new JLabel("C");
+        final GridBagConstraints gbc_sizeCFieldLabel = new GridBagConstraints();
         gbc_sizeCFieldLabel.insets = new Insets(0, 0, 0, 5);
         gbc_sizeCFieldLabel.gridx = 0;
         gbc_sizeCFieldLabel.gridy = 4;
         sizePanel.add(sizeCFieldLabel, gbc_sizeCFieldLabel);
 
         sizeCField = new IcyTextField();
-        GridBagConstraints gbc_sizeCField = new GridBagConstraints();
+        final GridBagConstraints gbc_sizeCField = new GridBagConstraints();
         gbc_sizeCField.fill = GridBagConstraints.HORIZONTAL;
         gbc_sizeCField.gridx = 1;
         gbc_sizeCField.gridy = 4;
@@ -570,8 +553,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
      *
      * @param wantReadOnly If <code>true</code> the returned list will also contains ROI in Read-Only state
      */
-    // TODO: 25/01/2023 wantReadOnly always true
-    List<ROI> getSelectedRois(boolean wantReadOnly) {
+    List<ROI> getSelectedRois(final boolean wantReadOnly) {
         final List<ROI> selected = roisPanel.getSelectedRois();
 
         if (wantReadOnly)
@@ -579,14 +561,14 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
 
         final List<ROI> result = new ArrayList<>(selected.size());
 
-        for (ROI roi : selected)
+        for (final ROI roi : selected)
             if (!roi.isReadOnly())
                 result.add(roi);
 
         return result;
     }
 
-    static double formatPosition(double pos, double size) {
+    static double formatPosition(final double pos, final double size) {
         // special case of infinite dimension
         if (size == Double.POSITIVE_INFINITY)
             return -1d;
@@ -594,7 +576,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         return MathUtil.roundSignificant(pos, 5, true);
     }
 
-    static String getPositionAsString(double pos, double size) {
+    static String getPositionAsString(final double pos, final double size) {
         // special case of infinite dimension
         if (size == Double.POSITIVE_INFINITY)
             return "all";
@@ -602,11 +584,11 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         return StringUtil.toString(MathUtil.roundSignificant(pos, 5, true));
     }
 
-    static double formatSize(double value) {
+    static double formatSize(final double value) {
         return MathUtil.roundSignificant(value, 5, true);
     }
 
-    static String getSizeAsString(double value) {
+    static String getSizeAsString(final double value) {
         // special case of infinite dimension
         if (value == Double.POSITIVE_INFINITY)
             return MathUtil.INFINITE_STRING;
@@ -633,7 +615,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         boolean canSetBnd = false;
         boolean readOnly = true;
         // set read only flag
-        for (ROI r : selectedRois) {
+        for (final ROI r : selectedRois) {
             readOnly &= r.isReadOnly();
             canSetPos |= r.canSetPosition();
             canSetBnd |= r.canSetBounds();
@@ -653,12 +635,9 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
             if (modifyingRoi.tryAcquire()) {
                 try {
                     if (sequence != null) {
-                        ((SpecialValueSpinnerModel) posZSpinner.getModel())
-                                .setMaximum(Integer.valueOf(sequence.getSizeZ() - 1));
-                        ((SpecialValueSpinnerModel) posTSpinner.getModel())
-                                .setMaximum(Integer.valueOf(sequence.getSizeT() - 1));
-                        ((SpecialValueSpinnerModel) posCSpinner.getModel())
-                                .setMaximum(Integer.valueOf(sequence.getSizeC() - 1));
+                        ((SpecialValueSpinnerModel) posZSpinner.getModel()).setMaximum(Integer.valueOf(sequence.getSizeZ() - 1));
+                        ((SpecialValueSpinnerModel) posTSpinner.getModel()).setMaximum(Integer.valueOf(sequence.getSizeT() - 1));
+                        ((SpecialValueSpinnerModel) posCSpinner.getModel()).setMaximum(Integer.valueOf(sequence.getSizeC() - 1));
                     }
                     else {
                         ((SpecialValueSpinnerModel) posZSpinner.getModel()).setMaximum(Integer.valueOf(0));
@@ -821,7 +800,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     }
 
     @Override
-    public void textChanged(IcyTextField source, boolean validate) {
+    public void textChanged(final IcyTextField source, final boolean validate) {
         // source not anymore enable --> cancel validation
         if (!source.isEnabled())
             return;
@@ -830,7 +809,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         if (!validate) {
             modifiedRois.clear();
             // better to use weak reference here to not retain ROI
-            for (ROI roi : getSelectedRois())
+            for (final ROI roi : getSelectedRois())
                 modifiedRois.add(new WeakReference<>(roi));
 
             return;
@@ -838,7 +817,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
 
         // at this point the text is validated so we can recover modified ROIs...
         final List<ROI> rois = new ArrayList<>();
-        for (Reference<ROI> ref : modifiedRois) {
+        for (final Reference<ROI> ref : modifiedRois) {
             final ROI roi = ref.get();
             if (roi != null)
                 rois.add(roi);
@@ -862,7 +841,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                     final List<ROI> roiToModify = new ArrayList<>();
 
                     // get the ROI we were modifying
-                    for (ROI roi : rois) {
+                    for (final ROI roi : rois) {
                         // can't edit read only ROI (should not arrive)
                         if (roi.isReadOnly())
                             continue;
@@ -901,18 +880,17 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                             positionSet = roi.getPosition5D();
 
                             // add position change to undo manager
-                            Icy.getMainInterface().getUndoManager()
-                                    .addEdit(new PositionROIEdit(roi, savePosition, false));
+                            Icy.getMainInterface().getUndoManager().addEdit(new PositionROIEdit(roi, savePosition, false));
                         }
                         else {
                             final List<Point5D> savePositions = new ArrayList<>();
                             final List<Point5D> newPositions = new ArrayList<>();
 
                             // save previous positions
-                            for (ROI roi : roiToModify)
+                            for (final ROI roi : roiToModify)
                                 savePositions.add(roi.getPosition5D());
 
-                            for (ROI roi : roiToModify) {
+                            for (final ROI roi : roiToModify) {
                                 // get current ROI position
                                 final Point5D position = roi.getPosition5D();
 
@@ -938,8 +916,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                             }
 
                             // add position change to undo manager
-                            Icy.getMainInterface().getUndoManager().addEdit(
-                                    new PositionROIsEdit(roiToModify, savePositions, newPositions, false)
+                            Icy.getMainInterface().getUndoManager().addEdit(new PositionROIsEdit(roiToModify, savePositions, newPositions, false)
                             );
                         }
 
@@ -976,7 +953,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                     final List<ROI> roiToModify = new ArrayList<>();
 
                     // get the ROI we were modifying
-                    for (ROI roi : rois) {
+                    for (final ROI roi : rois) {
                         // can't edit read only ROI (should not arrive)
                         if (roi.isReadOnly())
                             continue;
@@ -1020,12 +997,12 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                             final List<Rectangle5D> newBoundsList = new ArrayList<>();
 
                             // save previous size
-                            for (ROI roi : roiToModify)
+                            for (final ROI roi : roiToModify)
                                 saveBoundsList.add(roi.getBounds5D());
 
-                            for (ROI roi : roiToModify) {
+                            for (final ROI roi : roiToModify) {
                                 // get current ROI size
-                                Rectangle5D bounds = roi.getBounds5D();
+                                final Rectangle5D bounds = roi.getBounds5D();
 
                                 if (source == sizeXField)
                                     bounds.setSizeX(value);
@@ -1048,8 +1025,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                             }
 
                             // add position change to undo manager
-                            Icy.getMainInterface().getUndoManager().addEdit(
-                                    new BoundsROIsEdit(roiToModify, saveBoundsList, newBoundsList, false)
+                            Icy.getMainInterface().getUndoManager().addEdit(new BoundsROIsEdit(roiToModify, saveBoundsList, newBoundsList, false)
                             );
                         }
 
@@ -1080,7 +1056,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     }
 
     @Override
-    public void colorChanged(ColorChooserButton source) {
+    public void colorChanged(final ColorChooserButton source) {
         // source not anymore enable --> cancel change
         if (!source.isEnabled())
             return;
@@ -1099,7 +1075,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         sequence.beginUpdate();
         try {
             // set new color
-            for (ROI roi : rois) {
+            for (final ROI roi : rois) {
                 // save previous color
                 oldValues.add(roi.getColor());
                 roi.setColor(color);
@@ -1115,11 +1091,9 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     }
 
     @Override
-    public void stateChanged(ChangeEvent e) {
-        if (!(e.getSource() instanceof JComponent))
+    public void stateChanged(final ChangeEvent e) {
+        if (!(e.getSource() instanceof final JComponent source))
             return;
-
-        final JComponent source = (JComponent) e.getSource();
 
         // source not anymore enable --> cancel change
         if (!source.isEnabled())
@@ -1140,7 +1114,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
 
                 sequence.beginUpdate();
                 try {
-                    for (ROI roi : rois) {
+                    for (final ROI roi : rois) {
                         // save previous stroke
                         oldValues.add(Double.valueOf(roi.getStroke()));
                         roi.setStroke(stroke);
@@ -1151,9 +1125,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                 }
 
                 // add stroke change to undo manager
-                sequence.addUndoableEdit(
-                        new PropertyROIsEdit(rois, ROI.PROPERTY_STROKE, oldValues, Double.valueOf(stroke))
-                );
+                sequence.addUndoableEdit(new PropertyROIsEdit(rois, ROI.PROPERTY_STROKE, oldValues, Double.valueOf(stroke)));
             }
             else if (source == alphaSlider) {
                 final List<ROI> rois = getSelectedRois();
@@ -1162,7 +1134,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
 
                 sequence.beginUpdate();
                 try {
-                    for (ROI roi : rois) {
+                    for (final ROI roi : rois) {
                         // save previous opacity
                         oldValues.add(Float.valueOf(roi.getOpacity()));
                         roi.setOpacity(opacity);
@@ -1173,9 +1145,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                 }
 
                 // add opacity change to undo manager
-                sequence.addUndoableEdit(
-                        new PropertyROIsEdit(rois, ROI.PROPERTY_OPACITY, oldValues, Float.valueOf(opacity))
-                );
+                sequence.addUndoableEdit(new PropertyROIsEdit(rois, ROI.PROPERTY_OPACITY, oldValues, Float.valueOf(opacity)));
             }
             else if ((source == posZSpinner) || (source == posTSpinner) || (source == posCSpinner)) {
                 final List<ROI> rois = getSelectedRois();
@@ -1192,7 +1162,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                     final List<ROI> roiToModify = new ArrayList<>();
 
                     // get the ROI we were modifying
-                    for (ROI roi : rois) {
+                    for (final ROI roi : rois) {
                         // can't edit read only ROI (should not arrive)
                         if (roi.isReadOnly())
                             continue;
@@ -1227,19 +1197,17 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                             positionSet = roi.getPosition5D();
 
                             // add position change to undo manager
-                            Icy.getMainInterface().getUndoManager().addEdit(
-                                    new PositionROIEdit(roi, savePosition, false)
-                            );
+                            Icy.getMainInterface().getUndoManager().addEdit(new PositionROIEdit(roi, savePosition, false));
                         }
                         else {
                             final List<Point5D> savePositions = new ArrayList<>();
                             final List<Point5D> newPositions = new ArrayList<>();
 
                             // save previous positions
-                            for (ROI roi : roiToModify)
+                            for (final ROI roi : roiToModify)
                                 savePositions.add(roi.getPosition5D());
 
-                            for (ROI roi : roiToModify) {
+                            for (final ROI roi : roiToModify) {
                                 // get current ROI position
                                 final Point5D position = roi.getPosition5D();
 
@@ -1261,9 +1229,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                             }
 
                             // add position change to undo manager
-                            Icy.getMainInterface().getUndoManager().addEdit(
-                                    new PositionROIsEdit(roiToModify, savePositions, newPositions, false)
-                            );
+                            Icy.getMainInterface().getUndoManager().addEdit(new PositionROIsEdit(roiToModify, savePositions, newPositions, false));
                         }
 
                         if (positionSet != null) {
@@ -1293,11 +1259,9 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        if (!(e.getSource() instanceof JComponent))
+    public void actionPerformed(final ActionEvent e) {
+        if (!(e.getSource() instanceof final JComponent source))
             return;
-
-        final JComponent source = (JComponent) e.getSource();
 
         // source not anymore enable --> cancel change
         if (!source.isEnabled())
@@ -1312,7 +1276,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
 
         try {
             if (source == readOnlyToggle) {
-                for (ROI roi : getSelectedRois()) {
+                for (final ROI roi : getSelectedRois()) {
                     roi.setReadOnly(readOnlyToggle.isSelected());
                     roi.setSelected(true);
                 }
@@ -1322,7 +1286,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
                 try {
                     final boolean display = displayNameCheckBox.isSelected();
 
-                    for (ROI roi : getSelectedRois())
+                    for (final ROI roi : getSelectedRois())
                         roi.setShowName(display);
                 }
                 finally {
@@ -1353,7 +1317,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     }
 
     // one of the selected ROI changed
-    public void roiChanged(ROIEvent event) {
+    public void roiChanged(final ROIEvent event) {
         switch (event.getType()) {
             case ROI_CHANGED:
                 // refresh the properties

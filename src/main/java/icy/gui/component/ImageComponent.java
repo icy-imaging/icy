@@ -1,43 +1,35 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component;
 
 import icy.image.ImageUtil;
-import icy.resource.ResourceUtil;
+import icy.resource.icon.IcySVGImageIcon;
+import icy.resource.icon.SVGIcon;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import javax.swing.JPanel;
-
 /**
- * @author stephane
+ * @author Stephane Dallongeville
  */
-public class ImageComponent extends JPanel
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1448746815524070306L;
-
+public class ImageComponent extends JPanel {
     private Image image;
     private BufferedImage cachedImage;
     protected boolean forceUpdateCache;
@@ -46,8 +38,7 @@ public class ImageComponent extends JPanel
      * @deprecated Use {@link #ImageComponent(Image)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public ImageComponent(Image image, Dimension d)
-    {
+    public ImageComponent(final Image image, final Dimension d) {
         this(image);
     }
 
@@ -55,22 +46,16 @@ public class ImageComponent extends JPanel
      * @deprecated Use {@link #ImageComponent(Image)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public ImageComponent(Image image, int width, int height)
-    {
+    public ImageComponent(final Image image, final int width, final int height) {
         this(image);
     }
 
-    /**
-     * @param image
-     */
-    public ImageComponent(Image image)
-    {
+    public ImageComponent(final Image image) {
         super(true);
 
         this.image = image;
 
-        if (image != null)
-        {
+        if (image != null) {
             // be sure image data are ready
             ImageUtil.waitImageReady(image);
             setPreferredSize(new Dimension(image.getWidth(null), image.getHeight(null)));
@@ -79,16 +64,14 @@ public class ImageComponent extends JPanel
         forceUpdateCache = true;
     }
 
-    public ImageComponent()
-    {
+    public ImageComponent() {
         this(null);
     }
 
     /**
      * @return the image
      */
-    public Image getImage()
-    {
+    public Image getImage() {
         return image;
     }
 
@@ -96,18 +79,15 @@ public class ImageComponent extends JPanel
      * @param image
      *        the image to set
      */
-    public void setImage(Image image)
-    {
-        if (this.image != image)
-        {
+    public void setImage(final Image image) {
+        if (this.image != image) {
             this.image = image;
             forceUpdateCache = true;
             repaint();
         }
     }
 
-    protected void updateCache()
-    {
+    protected void updateCache() {
         cachedImage = null;
 
         if (image == null)
@@ -120,9 +100,8 @@ public class ImageComponent extends JPanel
         float iy = image.getHeight(null);
 
         // something wrong here --> use 'fault' image
-        if ((ix <= 0f) || (iy <= 0f))
-        {
-            image = ResourceUtil.ICON_DELETE;
+        if ((ix <= 0f) || (iy <= 0f)) {
+            image = new IcySVGImageIcon(SVGIcon.CLOSE, this.getForeground()).getImage();
             ix = image.getWidth(null);
             iy = image.getHeight(null);
         }
@@ -131,20 +110,16 @@ public class ImageComponent extends JPanel
         final float w = Math.max(getWidth(), 100);
         final float h = Math.max(getHeight(), 100);
 
-        if ((w > 0f) && (h > 0f))
-        {
+        if ((w > 0f) && (h > 0f)) {
             final float sx = w / ix;
             final float sy = h / iy;
             final float s = Math.min(sx, sy);
             final int nix = (int) (ix * s);
             final int niy = (int) (iy * s);
 
-            if ((nix > 0) && (niy > 0))
-            {
+            if ((nix > 0) && (niy > 0)) {
                 // need to rebuild cached image ?
-                if (forceUpdateCache || (cachedImage == null) || (nix != cachedImage.getWidth())
-                        || (niy != cachedImage.getHeight()))
-                {
+                if (forceUpdateCache || (cachedImage == null) || (nix != cachedImage.getWidth()) || (niy != cachedImage.getHeight())) {
                     cachedImage = ImageUtil.scaleQuality(image, nix, niy);
                     forceUpdateCache = false;
                 }
@@ -153,8 +128,7 @@ public class ImageComponent extends JPanel
     }
 
     @Override
-    protected void paintComponent(Graphics g)
-    {
+    protected void paintComponent(final Graphics g) {
         super.paintComponent(g);
 
         updateCache();

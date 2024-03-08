@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,22 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component.button;
 
-import java.awt.Color;
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EventListener;
 
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JColorChooser;
-
 /**
  * Color button used to select a specific color.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class ColorChooserButton extends JButton implements ActionListener {
@@ -48,7 +44,7 @@ public class ColorChooserButton extends JButton implements ActionListener {
     /**
      * @param color default color
      */
-    public ColorChooserButton(Color color) {
+    public ColorChooserButton(final Color color) {
         super();
 
         // setBorderPainted(false);
@@ -74,7 +70,7 @@ public class ColorChooserButton extends JButton implements ActionListener {
     /**
      * @param color the color to set
      */
-    public void setColor(Color color) {
+    public void setColor(final Color color) {
         if (getColor() != color) {
             setBackground(color);
             // notify about color change
@@ -92,12 +88,12 @@ public class ColorChooserButton extends JButton implements ActionListener {
     /**
      * @param colorChooseText the colorChooseText to set
      */
-    public void setColorChooseText(String colorChooseText) {
+    public void setColorChooseText(final String colorChooseText) {
         this.colorChooseText = colorChooseText;
     }
 
     protected void fireColorChanged() {
-        for (ColorChangeListener listener : listenerList.getListeners(ColorChangeListener.class))
+        for (final ColorChangeListener listener : listenerList.getListeners(ColorChangeListener.class))
             listener.colorChanged(this);
     }
 
@@ -106,7 +102,7 @@ public class ColorChooserButton extends JButton implements ActionListener {
      *
      * @param l the listener to be added
      */
-    public void addColorChangeListener(ColorChangeListener l) {
+    public void addColorChangeListener(final ColorChangeListener l) {
         listenerList.add(ColorChangeListener.class, l);
     }
 
@@ -115,21 +111,12 @@ public class ColorChooserButton extends JButton implements ActionListener {
      *
      * @param l the listener to be removed
      */
-    public void removeColorChangeListener(ColorChangeListener l) {
+    public void removeColorChangeListener(final ColorChangeListener l) {
         listenerList.remove(ColorChangeListener.class, l);
     }
 
-    // @Override
-    // protected void paintComponent(Graphics g)
-    // {
-    // super.paintComponent(g);
-    //
-    // g.setColor(color);
-    // g.fillRect(1, 1, getWidth() - 2, getHeight() - 2);
-    // }
-
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
         final Color c = JColorChooser.showDialog(this, colorChooseText, getColor());
 
         if (c != null)

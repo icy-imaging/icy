@@ -18,9 +18,9 @@
 
 package icy.file.xls;
 
-import icy.system.IcyExceptionHandler;
 import icy.system.logging.IcyLogger;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,6 +84,8 @@ public final class XLSXUtil {
      * Create the file if does not exists.
      */
     public static void saveAndClose(final @NotNull Workbook workbook, final @NotNull File file) throws IOException {
+        if (!file.getName().endsWith(FILE_DOT_EXTENSION))
+            IcyLogger.warn(XLSXUtil.class, "Saving workbook in non-xlsx file.");
         final FileOutputStream os = new FileOutputStream(file);
         workbook.write(os);
         os.close();
@@ -172,6 +174,27 @@ public final class XLSXUtil {
     }
 
     /**
+     * Change the width of the given column.
+     */
+    public static void setColumnWidth(final @NotNull Sheet sheet, final int col, final int width) {
+        sheet.setColumnWidth(col, width);
+    }
+
+    /**
+     * Make the width automatic of the given column.
+     */
+    public static void setColumnAutoWidth(final @NotNull Sheet sheet, final int col) {
+        sheet.autoSizeColumn(col);
+    }
+
+    /**
+     * Merge the given cells coordinates (y1, y2, x1, x2).
+     */
+    public static void mergeCells(final @NotNull Sheet sheet, final int firstRow, final int lastRow, final int firstCol, final int lastCol) {
+        sheet.addMergedRegion(new CellRangeAddress(firstRow, lastRow, firstCol, lastCol));
+    }
+
+    /**
      * Change the background color for the given cell.
      *
      * @param background Apply default style if set to null.
@@ -210,6 +233,75 @@ public final class XLSXUtil {
     }
 
     /**
+     * Sets cell content in long format of specified Sheet.<br>
+     * Returns <code>false</code> if the operation failed.
+     */
+    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Long value, final @Nullable Color background) {
+        final Cell cell = getOrCreateCell(sheet, x, y);
+        if (cell != null) {
+            cell.setCellValue(value);
+            applyBackground(cell, background);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Sets cell content in long format of specified Sheet.<br>
+     * Returns <code>false</code> if the operation failed.
+     */
+    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Long value) {
+        return setCellNumber(sheet, x, y, value, null);
+    }
+
+    /**
+     * Sets cell content in integer format of specified Sheet.<br>
+     * Returns <code>false</code> if the operation failed.
+     */
+    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Integer value, final @Nullable Color background) {
+        final Cell cell = getOrCreateCell(sheet, x, y);
+        if (cell != null) {
+            cell.setCellValue(value);
+            applyBackground(cell, background);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Sets cell content in integer format of specified Sheet.<br>
+     * Returns <code>false</code> if the operation failed.
+     */
+    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Integer value) {
+        return setCellNumber(sheet, x, y, value, null);
+    }
+
+    /**
+     * Sets cell content in short format of specified Sheet.<br>
+     * Returns <code>false</code> if the operation failed.
+     */
+    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Short value, final @Nullable Color background) {
+        final Cell cell = getOrCreateCell(sheet, x, y);
+        if (cell != null) {
+            cell.setCellValue(value);
+            applyBackground(cell, background);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Sets cell content in short format of specified Sheet.<br>
+     * Returns <code>false</code> if the operation failed.
+     */
+    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Short value) {
+        return setCellNumber(sheet, x, y, value, null);
+    }
+
+    /**
      * Sets cell content in double format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
@@ -233,7 +325,30 @@ public final class XLSXUtil {
     }
 
     /**
-     * Sets cell content in double format of specified Sheet.<br>
+     * Sets cell content in float format of specified Sheet.<br>
+     * Returns <code>false</code> if the operation failed.
+     */
+    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Float value, final @Nullable Color background) {
+        final Cell cell = getOrCreateCell(sheet, x, y);
+        if (cell != null) {
+            cell.setCellValue(value);
+            applyBackground(cell, background);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Sets cell content in float format of specified Sheet.<br>
+     * Returns <code>false</code> if the operation failed.
+     */
+    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Float value) {
+        return setCellNumber(sheet, x, y, value, null);
+    }
+
+    /**
+     * Sets cell content in date format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
     public static boolean setCellDate(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Date value, final @Nullable Color background) {
@@ -248,11 +363,34 @@ public final class XLSXUtil {
     }
 
     /**
-     * Sets cell content in double format of specified Sheet.<br>
+     * Sets cell content in date format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
     public static boolean setCellDate(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Date value) {
         return setCellDate(sheet, x, y, value, null);
+    }
+
+    /**
+     * Sets cell content in date format of specified Sheet.<br>
+     * Returns <code>false</code> if the operation failed.
+     */
+    public static boolean setCellFormula(final @NotNull Sheet sheet, final int x, final int y, final @NotNull String value, final @Nullable Color background) {
+        final Cell cell = getOrCreateCell(sheet, x, y);
+        if (cell != null) {
+            cell.setCellFormula(value);
+            applyBackground(cell, background);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Sets cell content in date format of specified Sheet.<br>
+     * Returns <code>false</code> if the operation failed.
+     */
+    public static boolean setCellFormula(final @NotNull Sheet sheet, final int x, final int y, final @NotNull String value) {
+        return setCellFormula(sheet, x, y, value, null);
     }
 
     /**
@@ -283,7 +421,7 @@ public final class XLSXUtil {
             return true;
         }
         catch (final IOException e) {
-            IcyExceptionHandler.showErrorMessage(e, false, true);
+            IcyLogger.error(XLSXUtil.class, e, e.getLocalizedMessage());
             return false;
         }
     }
@@ -325,7 +463,7 @@ public final class XLSXUtil {
             return readCSVLines(sheet, reader, separator);
         }
         catch (final IOException e) {
-            IcyExceptionHandler.showErrorMessage(e, false, true);
+            IcyLogger.error(XLSXUtil.class, e, e.getLocalizedMessage());
             return false;
         }
     }

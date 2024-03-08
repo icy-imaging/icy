@@ -26,10 +26,11 @@ import icy.file.SequenceFileSticher.SequenceFileGroup;
 import icy.gui.component.*;
 import icy.gui.component.model.SpecialValueSpinnerModel;
 import icy.image.IcyBufferedImage;
-import icy.resource.ResourceUtil;
+import icy.resource.icon.IcySVGImageIcon;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.MetaDataUtil;
 import icy.sequence.SequenceIdImporter;
-import icy.system.IcyExceptionHandler;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.type.collection.CollectionUtil;
 import icy.util.OMEUtil;
@@ -326,7 +327,7 @@ public class LoaderOptionPanel extends JPanel {
 
                     // no more update ? --> show that an error happened
                     if (!previewUpdater.getNeedUpdate())
-                        preview.setImage(ResourceUtil.ICON_DELETE);
+                        preview.setImage(new IcySVGImageIcon(SVGIcon.CLOSE, preview.getForeground(), 512).getImage());
                 }
 
                 // image updated
@@ -355,7 +356,7 @@ public class LoaderOptionPanel extends JPanel {
                 }
 
                 // loading...
-                preview.setImage(ResourceUtil.ICON_WAIT);
+                preview.setImage(new IcySVGImageIcon(SVGIcon.HOURGLASS, preview.getForeground(), 512).getImage());
                 preview.setInfos("loading...");
 
                 // use Callable as we can get interrupted here...
@@ -429,7 +430,7 @@ public class LoaderOptionPanel extends JPanel {
                 // no more update ? --> show that an error happened
                 if (!previewUpdater.getNeedUpdate()) {
                     // fatal error --> failed image
-                    preview.setImage(ResourceUtil.ICON_DELETE);
+                    preview.setImage(new IcySVGImageIcon(SVGIcon.CLOSE, preview.getForeground(), 512).getImage());
 
                     // cannot even read metadata
                     if (!metadataFieldsOk) {
@@ -700,7 +701,7 @@ public class LoaderOptionPanel extends JPanel {
                 // no need to do more here...
             }
             catch (final Throwable t) {
-                IcyExceptionHandler.showErrorMessage(t, false);
+                IcyLogger.error(LoaderOptionPanel.class, t, t.getLocalizedMessage());
             }
         }
     }

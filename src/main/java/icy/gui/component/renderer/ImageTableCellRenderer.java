@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,26 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component.renderer;
 
 import icy.gui.component.ColorIcon;
 import icy.gui.util.LookAndFeelUtil;
-import icy.resource.ResourceUtil;
+import icy.image.ImageUtil;
 
-import java.awt.Color;
-import java.awt.Image;
-
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.*;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class ImageTableCellRenderer extends DefaultTableCellRenderer {
     final int size;
 
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public ImageTableCellRenderer(int size) {
+    public ImageTableCellRenderer(final int size) {
         super();
 
         this.size = size;
@@ -45,14 +44,14 @@ public class ImageTableCellRenderer extends DefaultTableCellRenderer {
     public ImageTableCellRenderer() {
         super();
 
-        this.size = LookAndFeelUtil.getDefaultIconSizeAsInt();
+        this.size = LookAndFeelUtil.getDefaultIconSize();
         setIconTextGap(0);
     }
 
     @Override
-    public void setValue(Object value) {
+    public void setValue(final Object value) {
         if (value instanceof Image)
-            setIcon(ResourceUtil.getImageIcon((Image) value, size));
+            setIcon(new ImageIcon(ImageUtil.scale((Image) value, size, size)));
         else if (value instanceof Color)
             setIcon(new ColorIcon((Color) value, size, size));
         else

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,9 +18,10 @@
 
 package icy.gui.component.menu;
 
-import icy.gui.util.LookAndFeelUtil;
 import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginLauncher;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import icy.system.thread.ThreadUtil;
 
 import javax.swing.*;
@@ -35,18 +36,20 @@ import java.awt.event.ActionListener;
  */
 public class IcyPluginMenuItem extends IcyMenuItem implements ActionListener {
     private final PluginDescriptor descriptor;
+    private static final int SIZE = 32;
 
     public IcyPluginMenuItem(final PluginDescriptor descriptor, final String text) {
-        super(text);
+        super(text, new SVGIconPack(SVGIcon.INDETERMINATE_QUESTION), SIZE);
         this.descriptor = descriptor;
 
-        final int size = LookAndFeelUtil.getDefaultIconSizeAsInt();
 
         // do it in background as loading icon can take sometime
         ThreadUtil.bgRun(() -> {
             final ImageIcon imgIcon = descriptor.getIcon();
-            if (imgIcon != null)
-                setIcon(new ImageIcon(imgIcon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH)));
+            if (imgIcon != null) {
+                final ImageIcon icon = new ImageIcon(imgIcon.getImage().getScaledInstance(SIZE, SIZE, Image.SCALE_SMOOTH));
+                setIcons(icon);
+            }
         });
 
         addActionListener(this);
@@ -56,12 +59,8 @@ public class IcyPluginMenuItem extends IcyMenuItem implements ActionListener {
         this(descriptor, descriptor.getName());
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param e {@inheritDoc}
-     */
     @Override
+    @SuppressWarnings("resource")
     public void actionPerformed(final ActionEvent e) {
         PluginLauncher.start(descriptor);
     }

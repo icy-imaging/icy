@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,21 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component;
 
-import icy.gui.util.LookAndFeelUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.swing.IconFontSwing;
-
-import java.awt.Color;
-import java.awt.Component;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * Basically a JTabbedPane with checkbox in tab.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class CheckTabbedPane extends JTabbedPane {
@@ -38,7 +35,7 @@ public class CheckTabbedPane extends JTabbedPane {
         final private JCheckBox checkBox;
         final private JLabel label;
 
-        public CheckTabComponent(String title, Icon icon) {
+        public CheckTabComponent(final String title, final Icon icon) {
             super();
 
             setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
@@ -60,11 +57,7 @@ public class CheckTabbedPane extends JTabbedPane {
             add(checkBox);
             add(Box.createHorizontalStrut(10));
             add(label);
-            final Icon disabledIcon = IconFontSwing.buildIcon(
-                    GoogleMaterialDesignIcons.BRIGHTNESS_1,
-                    LookAndFeelUtil.getDefaultIconSizeAsFloat(),
-                    Color.GRAY
-            );
+            final Icon disabledIcon = new IcySVGIcon(SVGIcon.CIRCLE_FILL, Color.GRAY);
             setIcon(disabledIcon);
             setDisabledIcon(disabledIcon);
 
@@ -75,29 +68,29 @@ public class CheckTabbedPane extends JTabbedPane {
             return checkBox.isSelected();
         }
 
-        public void setSelected(boolean value) {
+        public void setSelected(final boolean value) {
             checkBox.setSelected(value);
         }
 
-        public void setTitle(String title) {
+        public void setTitle(final String title) {
             label.setText(" " + title);
         }
 
-        public void setIcon(Icon icon) {
+        public void setIcon(final Icon icon) {
             label.setIcon(icon);
         }
 
-        public void setDisabledIcon(Icon disabledIcon) {
+        public void setDisabledIcon(final Icon disabledIcon) {
             label.setDisabledIcon(disabledIcon);
         }
 
-        public void setBackgroundAll(Color background) {
+        public void setBackgroundAll(final Color background) {
             //checkBox.setBackground(background);
             //label.setBackground(background);
-            setIcon(IconFontSwing.buildIcon(GoogleMaterialDesignIcons.BRIGHTNESS_1, LookAndFeelUtil.getDefaultIconSizeAsFloat(), background));
+            setIcon(new IcySVGIcon(SVGIcon.CIRCLE_FILL, background));
         }
 
-        public void setForegroundAll(Color foreground) {
+        public void setForegroundAll(final Color foreground) {
             checkBox.setForeground(foreground);
             label.setForeground(foreground);
         }
@@ -114,7 +107,7 @@ public class CheckTabbedPane extends JTabbedPane {
      * @param defaultSelected by default checkbox is selected
      * @see JTabbedPane
      */
-    public CheckTabbedPane(int tabPlacement, boolean defaultSelected) {
+    public CheckTabbedPane(final int tabPlacement, final boolean defaultSelected) {
         super(tabPlacement);
 
         this.defaultSelected = defaultSelected;
@@ -124,7 +117,7 @@ public class CheckTabbedPane extends JTabbedPane {
         return defaultSelected;
     }
 
-    public void setDefaultSelected(boolean defaultSelected) {
+    public void setDefaultSelected(final boolean defaultSelected) {
         this.defaultSelected = defaultSelected;
     }
 
@@ -143,7 +136,7 @@ public class CheckTabbedPane extends JTabbedPane {
      * @throws IndexOutOfBoundsException if index is out of range (index &lt; 0 || index &gt;= tab count)
      * @see #setTabChecked(int, boolean)
      */
-    public boolean isTabChecked(int index) {
+    public boolean isTabChecked(final int index) {
         return ((CheckTabComponent) getTabComponentAt(index)).isSelected();
     }
 
@@ -155,47 +148,47 @@ public class CheckTabbedPane extends JTabbedPane {
      * @throws IndexOutOfBoundsException if index is out of range (index &lt; 0 || index &gt;= tab count)
      * @see #isTabChecked(int)
      */
-    public void setTabChecked(int index, boolean value) {
+    public void setTabChecked(final int index, final boolean value) {
         ((CheckTabComponent) getTabComponentAt(index)).setSelected(value);
     }
 
     @Override
-    public void setIconAt(int index, Icon icon) {
+    public void setIconAt(final int index, final Icon icon) {
         super.setIconAt(index, icon);
 
         ((CheckTabComponent) getTabComponentAt(index)).setIcon(icon);
     }
 
     @Override
-    public void setDisabledIconAt(int index, Icon disabledIcon) {
+    public void setDisabledIconAt(final int index, final Icon disabledIcon) {
         super.setDisabledIconAt(index, disabledIcon);
 
         ((CheckTabComponent) getTabComponentAt(index)).setDisabledIcon(disabledIcon);
     }
 
     @Override
-    public void setBackgroundAt(int index, Color background) {
+    public void setBackgroundAt(final int index, final Color background) {
         //super.setBackgroundAt(index, background);
 
         ((CheckTabComponent) getTabComponentAt(index)).setBackgroundAll(background);
     }
 
     @Override
-    public void setForegroundAt(int index, Color foreground) {
+    public void setForegroundAt(final int index, final Color foreground) {
         super.setForegroundAt(index, foreground);
 
         ((CheckTabComponent) getTabComponentAt(index)).setForegroundAll(foreground);
     }
 
     @Override
-    public void setTitleAt(int index, String title) {
+    public void setTitleAt(final int index, final String title) {
         super.setTitleAt(index, title);
 
         ((CheckTabComponent) getTabComponentAt(index)).setTitle(title);
     }
 
     @Override
-    public void insertTab(String title, Icon icon, Component component, String tip, int index) {
+    public void insertTab(final String title, final Icon icon, final Component component, final String tip, final int index) {
         super.insertTab(title, icon, component, tip, index);
 
         setTabComponentAt(index, new CheckTabComponent(title, icon));

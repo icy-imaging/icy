@@ -21,13 +21,12 @@ package icy.gui.toolbar.button;
 import icy.action.PreferencesActions;
 import icy.gui.component.button.IcyButton;
 import icy.gui.component.menu.IcyMenuItem;
-import icy.gui.util.LookAndFeelUtil;
 import icy.math.UnitUtil;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
 import icy.system.SystemUtil;
 import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.swing.IconFontSwing;
 import vtk.vtkObjectBase;
 
 import javax.swing.*;
@@ -41,15 +40,14 @@ import java.util.TimerTask;
  * @author Thomas Musset
  */
 public final class MemoryMonitorButton extends IcyButton implements MouseListener {
-
-    private final Icon OK = IconFontSwing.buildIcon(GoogleMaterialDesignIcons.CHECK_CIRCLE, LookAndFeelUtil.getDefaultIconSizeAsFloat(), Color.GREEN.darker());
-    private final Icon WARN = IconFontSwing.buildIcon(GoogleMaterialDesignIcons.WARNING, LookAndFeelUtil.getDefaultIconSizeAsFloat(), Color.YELLOW.darker());
-    private final Icon ERROR = IconFontSwing.buildIcon(GoogleMaterialDesignIcons.ERROR, LookAndFeelUtil.getDefaultIconSizeAsFloat(), Color.RED.darker());
+    private final IcySVGIcon OK = new IcySVGIcon(SVGIcon.CHECK_CIRCLE, Color.GREEN.darker());
+    private final IcySVGIcon WARN = new IcySVGIcon(SVGIcon.WARNING, Color.YELLOW.darker());
+    private final IcySVGIcon ERROR = new IcySVGIcon(SVGIcon.ERROR, Color.RED.darker());
 
     private final JPopupMenu popup;
 
     public MemoryMonitorButton() {
-        super("CPU: 0% | RAM: 0%");
+        super("CPU: 0% | RAM: 0%", SVGIcon.CHECK_CIRCLE);
         setFlat(true);
         setHorizontalAlignment(JButton.LEFT);
         setIcon(OK);
@@ -58,11 +56,11 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
         addMouseListener(this);
 
         popup = new JPopupMenu();
-        final IcyMenuItem settings = new IcyMenuItem("Open Settings...", GoogleMaterialDesignIcons.SETTINGS);
+        final IcyMenuItem settings = new IcyMenuItem("Open Settings...", SVGIcon.SETTINGS);
         settings.addActionListener(PreferencesActions.generalPreferencesAction);
-        final IcyMenuItem GB = new IcyMenuItem("Free Java Memory", GoogleMaterialDesignIcons.DELETE_SWEEP);
+        final IcyMenuItem GB = new IcyMenuItem("Free Java Memory", SVGIcon.DELETE_SWEEP);
         GB.addActionListener(e -> forceGC());
-        final IcyMenuItem VTKGB = new IcyMenuItem("Free VTK Memory", GoogleMaterialDesignIcons.DELETE_SWEEP);
+        final IcyMenuItem VTKGB = new IcyMenuItem("Free VTK Memory", SVGIcon.DELETE_SWEEP);
         VTKGB.addActionListener(e -> forceVTKGC());
         popup.add(settings);
         popup.addSeparator();
@@ -115,7 +113,7 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
             final double usedMemory = SystemUtil.getJavaUsedMemory();
 
             IcyLogger.info(MemoryMonitorButton.class, String.format(
-                    "Max / Used memory: %s / %s (released by GC: %s)",
+                    "Max | Used memory: %s | %s (released by GC: %s)",
                     UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory()),
                     UnitUtil.getBytesString((usedMemory > 0) ? usedMemory : 0),
                     UnitUtil.getBytesString((released > 0) ? released : 0)

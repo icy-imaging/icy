@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,24 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.frame;
 
 import icy.action.IcyAbstractAction;
 import icy.common.MenuCallback;
 import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
-import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 
+import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
-
-import javax.swing.JInternalFrame;
-import javax.swing.JMenu;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 
 /**
  * @author Stephane
@@ -41,20 +38,17 @@ import javax.swing.event.InternalFrameEvent;
  */
 public class IcyInternalFrame extends JInternalFrame {
     private class CloseAction extends IcyAbstractAction {
-
         public CloseAction() {
             super(
                     "Close",
-                    //new IcyIcon(ResourceUtil.ICON_CLOSE, 20),
-                    (IcyIcon) null,
                     "Close window",
                     KeyEvent.VK_F4,
-                    SystemUtil.getMenuCtrlMask()
+                    SystemUtil.getMenuCtrlMaskEx()
             );
         }
 
         @Override
-        public boolean doAction(ActionEvent e) {
+        public boolean doAction(final ActionEvent e) {
             close(false);
             return true;
         }
@@ -70,14 +64,7 @@ public class IcyInternalFrame extends JInternalFrame {
     private boolean closeItemVisible;
     private final boolean initialized;
 
-    /**
-     * @param title
-     * @param resizable
-     * @param closable
-     * @param maximizable
-     * @param iconifiable
-     */
-    public IcyInternalFrame(String title, boolean resizable, boolean closable, boolean maximizable, boolean iconifiable) {
+    public IcyInternalFrame(final String title, final boolean resizable, final boolean closable, final boolean maximizable, final boolean iconifiable) {
         super(title, resizable, closable, maximizable, iconifiable);
 
         addPropertyChangeListener("titlePane", evt -> {
@@ -87,7 +74,7 @@ public class IcyInternalFrame extends JInternalFrame {
 
         addInternalFrameListener(new InternalFrameAdapter() {
             @Override
-            public void internalFrameClosed(InternalFrameEvent e) {
+            public void internalFrameClosed(final InternalFrameEvent e) {
                 // release the system menu callback as it can lead to some memory leak
                 // (cycling reference)
                 systemMenuCallback = null;
@@ -162,7 +149,7 @@ public class IcyInternalFrame extends JInternalFrame {
      *
      * @param force if <code>true</code> the frame is close even if {@link #isClosable()} return <code>false</code>
      */
-    public void close(boolean force) {
+    public void close(final boolean force) {
         if (force || isClosable())
             doDefaultCloseAction();
     }
@@ -190,8 +177,8 @@ public class IcyInternalFrame extends JInternalFrame {
             try {
                 setIcon(value);
             }
-            catch (PropertyVetoException e) {
-                IcyExceptionHandler.showErrorMessage(e, true);
+            catch (final PropertyVetoException e) {
+                IcyLogger.error(IcyInternalFrame.class, e, e.getLocalizedMessage());
             }
         }
     }
@@ -210,8 +197,8 @@ public class IcyInternalFrame extends JInternalFrame {
                 // have to check for parent non null
                 setMaximum(value);
             }
-            catch (PropertyVetoException e) {
-                IcyExceptionHandler.showErrorMessage(e, true);
+            catch (final PropertyVetoException e) {
+                IcyLogger.error(IcyInternalFrame.class, e, e.getLocalizedMessage());
             }
         }
     }
@@ -233,7 +220,7 @@ public class IcyInternalFrame extends JInternalFrame {
     /**
      * @param value the closeItemVisible to set
      */
-    public void setCloseItemVisible(boolean value) {
+    public void setCloseItemVisible(final boolean value) {
         if (closeItemVisible != value) {
             closeItemVisible = value;
 
@@ -242,7 +229,7 @@ public class IcyInternalFrame extends JInternalFrame {
     }
 
     @Override
-    public void setClosable(boolean b) {
+    public void setClosable(final boolean b) {
         super.setClosable(b);
 
         if (!b)
@@ -252,7 +239,7 @@ public class IcyInternalFrame extends JInternalFrame {
     /**
      * @param value the titleBarVisible to set
      */
-    public void setTitleBarVisible(boolean value) {
+    public void setTitleBarVisible(final boolean value) {
         /*if (value)
             LookAndFeelUtil.setTitlePane(this, titlePane);
         else
@@ -285,7 +272,7 @@ public class IcyInternalFrame extends JInternalFrame {
     /**
      * @param value the systemMenuCallback to set
      */
-    public void setSystemMenuCallback(MenuCallback value) {
+    public void setSystemMenuCallback(final MenuCallback value) {
         if (systemMenuCallback != value) {
             systemMenuCallback = value;
 

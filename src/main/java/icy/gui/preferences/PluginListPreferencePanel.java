@@ -1,21 +1,21 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.preferences;
 
 import icy.gui.component.IcyTable;
@@ -23,17 +23,24 @@ import icy.gui.component.IcyTextField;
 import icy.gui.component.IcyTextField.TextChangeListener;
 import icy.gui.plugin.PluginDetailPanel;
 import icy.gui.util.ComponentUtil;
+import icy.image.ImageUtil;
 import icy.network.NetworkUtil;
 import icy.plugin.PluginDescriptor;
 import icy.preferences.RepositoryPreferences;
 import icy.preferences.RepositoryPreferences.RepositoryInfo;
-import icy.resource.ResourceUtil;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.IcySVGImageIcon;
+import icy.resource.icon.SVGIcon;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -41,34 +48,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public abstract class PluginListPreferencePanel extends PreferencePanel
-        implements TextChangeListener, ListSelectionListener
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -2718763355377652489L;
-
+public abstract class PluginListPreferencePanel extends PreferencePanel implements TextChangeListener, ListSelectionListener {
     static final String[] columnNames = {"", "Name", "Version", "State", "Enabled"};
     static final String[] columnIds = {"Icon", "Name", "Version", "State", "Enabled"};
 
@@ -80,7 +64,7 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
     final AbstractTableModel tableModel;
     final JTable table;
 
-    final JComboBox repository;
+    final JComboBox<RepositoryInfo> repository;
     final JPanel repositoryPanel;
     final IcyTextField filter;
     final JButton refreshButton;
@@ -96,78 +80,27 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
 
     final ActionListener repositoryActionListener;
 
-    PluginListPreferencePanel(PreferenceFrame parent, String nodeName, String parentName)
-    {
+    PluginListPreferencePanel(final PreferenceFrame parent, final String nodeName, final String parentName) {
         super(parent, nodeName, parentName);
 
-        plugins = new ArrayList<PluginDescriptor>();
+        plugins = new ArrayList<>();
 
-        buttonsStateUpdater = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // need to be done on EDT
-                ThreadUtil.invokeNow(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        updateButtonsStateInternal();
-                    }
-                });
-            }
+        buttonsStateUpdater = () -> {
+            // need to be done on EDT
+            ThreadUtil.invokeNow(this::updateButtonsStateInternal);
         };
-        tableDataRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // need to be done on EDT
-                ThreadUtil.invokeNow(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        refreshTableDataInternal();
-                    }
-                });
-            }
+        tableDataRefresher = () -> {
+            // need to be done on EDT
+            ThreadUtil.invokeNow(this::refreshTableDataInternal);
         };
-        pluginsListRefresher = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshPluginsInternal();
-            }
+        pluginsListRefresher = this::refreshPluginsInternal;
+        repositoriesUpdater = () -> {
+            // need to be done on EDT
+            ThreadUtil.invokeNow(this::updateRepositoriesInternal);
         };
-        repositoriesUpdater = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // need to be done on EDT
-                ThreadUtil.invokeNow(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        updateRepositoriesInternal();
-                    }
-                });
-            }
-        };
-        repositoryActionListener = new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                repositoryChanged();
-            }
-        };
+        repositoryActionListener = e -> repositoryChanged();
 
-        repository = new JComboBox();
+        repository = new JComboBox<>();
         repository.setToolTipText("Select a repository");
         repository.addActionListener(repositoryActionListener);
 
@@ -194,68 +127,37 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
         final Dimension buttonsDim = new Dimension(100, 24);
 
         refreshButton = new JButton("Reload list");
-        refreshButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                reloadPlugins();
-            }
-        });
+        refreshButton.addActionListener(e -> reloadPlugins());
         ComponentUtil.setFixedSize(refreshButton, buttonsDim);
 
         documentationButton = new JButton("Online doc");
         documentationButton.setToolTipText("Open the online documentation");
-        documentationButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                final List<PluginDescriptor> selectedPlugins = getSelectedPlugins();
+        documentationButton.addActionListener(e -> {
+            final List<PluginDescriptor> selectedPlugins = getSelectedPlugins();
 
-                // open plugin web page
-                if (selectedPlugins.size() == 1)
-                    NetworkUtil.openBrowser(selectedPlugins.get(0).getWeb());
-            }
+            // open plugin web page
+            if (selectedPlugins.size() == 1)
+                NetworkUtil.openBrowser(selectedPlugins.get(0).getWeb());
         });
         ComponentUtil.setFixedSize(documentationButton, buttonsDim);
 
         detailButton = new JButton("Show detail");
-        detailButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                final List<PluginDescriptor> selectedPlugins = getSelectedPlugins();
+        detailButton.addActionListener(e -> {
+            final List<PluginDescriptor> selectedPlugins = getSelectedPlugins();
 
-                // open the detail
-                if (selectedPlugins.size() == 1)
-                    new PluginDetailPanel(selectedPlugins.get(0));
-            }
+            // open the detail
+            if (selectedPlugins.size() == 1)
+                new PluginDetailPanel(selectedPlugins.get(0));
         });
         ComponentUtil.setFixedSize(detailButton, buttonsDim);
 
         action1Button = new JButton("null");
-        action1Button.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                doAction1();
-            }
-        });
+        action1Button.addActionListener(e -> doAction1());
         action1Button.setVisible(false);
         ComponentUtil.setFixedSize(action1Button, buttonsDim);
 
         action2Button = new JButton("null");
-        action2Button.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                doAction2();
-            }
-        });
+        action2Button.addActionListener(e -> doAction2());
         action2Button.setVisible(false);
         ComponentUtil.setFixedSize(action2Button, buttonsDim);
 
@@ -276,46 +178,34 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
         buttonsPanel.add(Box.createVerticalGlue());
 
         // build table
-        tableModel = new AbstractTableModel()
-        {
-            /**
-             * 
-             */
-            private static final long serialVersionUID = -8573364273165723214L;
-
+        tableModel = new AbstractTableModel() {
             @Override
-            public int getColumnCount()
-            {
+            public int getColumnCount() {
                 return columnNames.length;
             }
 
             @Override
-            public String getColumnName(int column)
-            {
+            public String getColumnName(final int column) {
                 return columnNames[column];
             }
 
             @Override
-            public int getRowCount()
-            {
+            public int getRowCount() {
                 return plugins.size();
             }
 
             @Override
-            public Object getValueAt(int row, int column)
-            {
-                if (row < plugins.size())
-                {
+            public Object getValueAt(final int row, final int column) {
+                if (row < plugins.size()) {
                     final PluginDescriptor plugin = plugins.get(row);
 
-                    switch (column)
-                    {
+                    switch (column) {
                         case 0:
-                            if (plugin.isIconLoaded())
-                                return ResourceUtil.scaleIcon(plugin.getIcon(), 32);
+                            if (plugin.isIconLoaded() && plugin.getIcon() != null)
+                                return new ImageIcon(ImageUtil.scale(plugin.getIcon().getImage(), 32, 32));
 
                             loadIconAsync(plugin);
-                            return ResourceUtil.scaleIcon(PluginDescriptor.DEFAULT_ICON, 32);
+                            return new IcySVGImageIcon(SVGIcon.INDETERMINATE_QUESTION, getForeground(), 32);
 
                         case 1:
                             return plugin.getName();
@@ -335,14 +225,11 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
             }
 
             @Override
-            public void setValueAt(Object aValue, int rowIndex, int columnIndex)
-            {
-                if (rowIndex < plugins.size())
-                {
+            public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
+                if (rowIndex < plugins.size()) {
                     final PluginDescriptor plugin = plugins.get(rowIndex);
 
-                    if (columnIndex == 4)
-                    {
+                    if (columnIndex == 4) {
                         if (aValue instanceof Boolean)
                             setActive(plugin, ((Boolean) aValue).booleanValue());
                     }
@@ -350,23 +237,17 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
             }
 
             @Override
-            public boolean isCellEditable(int row, int column)
-            {
+            public boolean isCellEditable(final int row, final int column) {
                 return (column == 4);
             }
 
             @Override
-            public Class<?> getColumnClass(int columnIndex)
-            {
-                switch (columnIndex)
-                {
-                    case 0:
-                        return ImageIcon.class;
-                    case 4:
-                        return Boolean.class;
-                    default:
-                        return String.class;
-                }
+            public Class<?> getColumnClass(final int columnIndex) {
+                return switch (columnIndex) {
+                    case 0 -> ImageIcon.class;
+                    case 4 -> Boolean.class;
+                    default -> String.class;
+                };
             }
         };
 
@@ -416,15 +297,11 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
         // sort on name by default
         table.getRowSorter().toggleSortOrder(1);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        table.addMouseListener(new MouseAdapter()
-        {
+        table.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent me)
-            {
-                if (!me.isConsumed())
-                {
-                    if (me.getClickCount() == 2)
-                    {
+            public void mouseClicked(final MouseEvent me) {
+                if (!me.isConsumed()) {
+                    if (me.getClickCount() == 2) {
                         // show detail
                         detailButton.doClick();
                         me.consume();
@@ -458,32 +335,24 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
         mainPanel.validate();
     }
 
-    protected void loadIconAsync(final PluginDescriptor plugin)
-    {
-        ThreadUtil.bgRun(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // icon correctly loaded ?
-                if (plugin.loadIcon())
-                    refreshTableData();
-            }
+    protected void loadIconAsync(final PluginDescriptor plugin) {
+        ThreadUtil.bgRun(() -> {
+            // icon correctly loaded ?
+            if (plugin.loadIcon())
+                refreshTableData();
         });
     }
 
     @Override
-    protected void closed()
-    {
+    protected void closed() {
         super.closed();
 
         // do not retains plugins when frame is closed
         plugins.clear();
     }
 
-    private List<PluginDescriptor> filterList(List<PluginDescriptor> list, String filter)
-    {
-        final List<PluginDescriptor> result = new ArrayList<PluginDescriptor>();
+    private List<PluginDescriptor> filterList(final List<PluginDescriptor> list, final String filter) {
+        final List<PluginDescriptor> result = new ArrayList<>();
         final boolean empty = StringUtil.isEmpty(filter, true);
         final String filterUp;
 
@@ -492,28 +361,24 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
         else
             filterUp = "";
 
-        for (PluginDescriptor plugin : list)
-        {
+        for (final PluginDescriptor plugin : list) {
             final String classname = plugin.getClassName().toUpperCase();
             final String name = plugin.getName().toUpperCase();
             final String desc = plugin.getDescription().toUpperCase();
 
             // search in name and description
-            if (empty || (classname.indexOf(filterUp) != -1) || (name.indexOf(filterUp) != -1)
-                    || (desc.indexOf(filterUp) != -1))
+            if (empty || (classname.contains(filterUp)) || (name.contains(filterUp)) || (desc.contains(filterUp)))
                 result.add(plugin);
         }
 
         return result;
     }
 
-    protected boolean isActive(PluginDescriptor plugin)
-    {
+    protected boolean isActive(final PluginDescriptor plugin) {
         return false;
     }
 
-    protected void setActive(PluginDescriptor plugin, boolean value)
-    {
+    protected void setActive(final PluginDescriptor plugin, final boolean value) {
     }
 
     protected abstract void doAction1();
@@ -528,41 +393,33 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
 
     protected abstract List<PluginDescriptor> getPlugins();
 
-    protected int getPluginTableIndex(int rowIndex)
-    {
+    protected int getPluginTableIndex(final int rowIndex) {
         if (rowIndex == -1)
             return rowIndex;
 
-        try
-        {
+        try {
 
             return table.convertRowIndexToView(rowIndex);
         }
-        catch (IndexOutOfBoundsException e)
-        {
+        catch (final IndexOutOfBoundsException e) {
             return -1;
         }
     }
 
-    protected int getPluginIndex(PluginDescriptor plugin)
-    {
+    protected int getPluginIndex(final PluginDescriptor plugin) {
         return plugins.indexOf(plugin);
     }
 
-    protected int getPluginModelIndex(PluginDescriptor plugin)
-    {
+    protected int getPluginModelIndex(final PluginDescriptor plugin) {
         return getPluginIndex(plugin);
     }
 
-    protected int getPluginTableIndex(PluginDescriptor plugin)
-    {
+    protected int getPluginTableIndex(final PluginDescriptor plugin) {
         return getPluginTableIndex(getPluginModelIndex(plugin));
     }
 
-    protected int getPluginIndex(String pluginClassName)
-    {
-        for (int i = 0; i < plugins.size(); i++)
-        {
+    protected int getPluginIndex(final String pluginClassName) {
+        for (int i = 0; i < plugins.size(); i++) {
             final PluginDescriptor plugin = plugins.get(i);
 
             if (plugin.getClassName().equals(pluginClassName))
@@ -572,19 +429,16 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
         return -1;
     }
 
-    protected int getPluginModelIndex(String pluginClassName)
-    {
+    protected int getPluginModelIndex(final String pluginClassName) {
         return getPluginIndex(pluginClassName);
     }
 
-    protected int getPluginTableIndex(String pluginClassName)
-    {
+    protected int getPluginTableIndex(final String pluginClassName) {
         return getPluginTableIndex(getPluginModelIndex(pluginClassName));
     }
 
-    List<PluginDescriptor> getSelectedPlugins()
-    {
-        final List<PluginDescriptor> result = new ArrayList<PluginDescriptor>();
+    List<PluginDescriptor> getSelectedPlugins() {
+        final List<PluginDescriptor> result = new ArrayList<>();
 
         final int[] rows = table.getSelectedRows();
         if (rows.length == 0)
@@ -592,16 +446,13 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
 
         final List<PluginDescriptor> cachedPlugins = plugins;
 
-        for (int i = 0; i < rows.length; i++)
-        {
-            try
-            {
-                final int index = table.convertRowIndexToModel(rows[i]);
+        for (final int row : rows) {
+            try {
+                final int index = table.convertRowIndexToModel(row);
                 if (index < cachedPlugins.size())
                     result.add(cachedPlugins.get(index));
             }
-            catch (IndexOutOfBoundsException e)
-            {
+            catch (final IndexOutOfBoundsException e) {
                 // ignore as async process can cause it
             }
         }
@@ -612,60 +463,50 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
     /**
      * Select the specified list of ROI in the ROI Table
      */
-    void setSelectedPlugins(HashSet<PluginDescriptor> newSelected)
-    {
+    void setSelectedPlugins(final HashSet<PluginDescriptor> newSelected) {
         final List<PluginDescriptor> modelPlugins = plugins;
         final ListSelectionModel selectionModel = table.getSelectionModel();
 
         // start selection change
         selectionModel.setValueIsAdjusting(true);
-        try
-        {
+        try {
             // start by clearing selection
             selectionModel.clearSelection();
 
-            for (int i = 0; i < modelPlugins.size(); i++)
-            {
+            for (int i = 0; i < modelPlugins.size(); i++) {
                 final PluginDescriptor plugin = modelPlugins.get(i);
 
                 // HashSet provide fast "contains"
-                if (newSelected.contains(plugin))
-                {
-                    try
-                    {
+                if (newSelected.contains(plugin)) {
+                    try {
                         // convert model index to view index
                         final int ind = table.convertRowIndexToView(i);
                         if (ind != -1)
                             selectionModel.addSelectionInterval(ind, ind);
                     }
-                    catch (IndexOutOfBoundsException e)
-                    {
+                    catch (final IndexOutOfBoundsException e) {
                         // ignore
                     }
                 }
             }
         }
-        finally
-        {
+        finally {
             // end selection change
             selectionModel.setValueIsAdjusting(false);
         }
     }
 
-    protected void refreshPluginsInternal()
-    {
+    protected void refreshPluginsInternal() {
         plugins = filterList(getPlugins(), filter.getText());
         // refresh table data
         refreshTableData();
     }
 
-    protected final void refreshPlugins()
-    {
+    protected final void refreshPlugins() {
         ThreadUtil.runSingle(pluginsListRefresher);
     }
 
-    protected void updateButtonsStateInternal()
-    {
+    protected void updateButtonsStateInternal() {
         final List<PluginDescriptor> selectedPlugins = getSelectedPlugins();
         final boolean singleSelection = (selectedPlugins.size() == 1);
         final PluginDescriptor singlePlugin = singleSelection ? selectedPlugins.get(0) : null;
@@ -674,13 +515,11 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
         documentationButton.setEnabled(singleSelection && !StringUtil.isEmpty(singlePlugin.getWeb()));
     }
 
-    protected final void updateButtonsState()
-    {
+    protected final void updateButtonsState() {
         ThreadUtil.runSingle(buttonsStateUpdater);
     }
 
-    protected void updateRepositoriesInternal()
-    {
+    protected void updateRepositoriesInternal() {
         // final RepositoryPreferencePanel panel = (RepositoryPreferencePanel)
         // getPreferencePanel(RepositoryPreferencePanel.class);
         // // refresh repositories list (use list from GUI)
@@ -694,7 +533,7 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
         repository.removeActionListener(repositoryActionListener);
 
         repository.removeAllItems();
-        for (RepositoryInfo repos : repositeries)
+        for (final RepositoryInfo repos : repositeries)
             if (repos.isEnabled())
                 repository.addItem(repos);
 
@@ -703,16 +542,13 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
         boolean selected = false;
 
         // try to set back the old selected repository
-        if (savedRepository != null)
-        {
+        if (savedRepository != null) {
             final String repositoryName = savedRepository.getName();
 
-            for (int ind = 0; ind < repository.getItemCount(); ind++)
-            {
-                final RepositoryInfo repo = (RepositoryInfo) repository.getItemAt(ind);
+            for (int ind = 0; ind < repository.getItemCount(); ind++) {
+                final RepositoryInfo repo = repository.getItemAt(ind);
 
-                if ((repo != null) && (repo.getName().equals(repositoryName)))
-                {
+                if ((repo != null) && (repo.getName().equals(repositoryName))) {
                     repository.setSelectedIndex(ind);
                     selected = true;
                     break;
@@ -728,66 +564,55 @@ public abstract class PluginListPreferencePanel extends PreferencePanel
         repository.setMinimumSize(new Dimension(48, 18));
     }
 
-    protected final void updateRepositories()
-    {
+    protected final void updateRepositories() {
         ThreadUtil.runSingle(repositoriesUpdater);
     }
 
-    protected void refreshTableDataInternal()
-    {
+    protected void refreshTableDataInternal() {
         final List<PluginDescriptor> plugins = getSelectedPlugins();
 
-        try
-        {
+        try {
             tableModel.fireTableDataChanged();
         }
-        catch (Throwable t)
-        {
+        catch (final Throwable t) {
             // sometime sorting can throw exception, ignore them...
         }
 
         // restore previous selected plugins if possible
-        setSelectedPlugins(new HashSet<PluginDescriptor>(plugins));
+        setSelectedPlugins(new HashSet<>(plugins));
         // update button state
         buttonsStateUpdater.run();
     }
 
-    protected final void refreshTableData()
-    {
+    protected final void refreshTableData() {
         ThreadUtil.runSingle(tableDataRefresher);
     }
 
-    protected void pluginsChanged()
-    {
+    protected void pluginsChanged() {
         refreshPlugins();
     }
 
     @Override
-    protected void load()
-    {
+    protected void load() {
 
     }
 
     @Override
-    protected void save()
-    {
+    protected void save() {
         // reload repositories as some parameter as beta flag can have changed
         updateRepositories();
     }
 
     @Override
-    public void textChanged(IcyTextField source, boolean validate)
-    {
+    public void textChanged(final IcyTextField source, final boolean validate) {
         pluginsChanged();
     }
 
     @Override
-    public void valueChanged(ListSelectionEvent e)
-    {
+    public void valueChanged(final ListSelectionEvent e) {
         final int selected = table.getSelectedRow();
 
-        if (!e.getValueIsAdjusting() && (selected != -1))
-        {
+        if (!e.getValueIsAdjusting() && (selected != -1)) {
             final int fi = e.getFirstIndex();
             final int li = e.getLastIndex();
 

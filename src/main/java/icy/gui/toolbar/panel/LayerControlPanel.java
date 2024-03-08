@@ -24,8 +24,8 @@ import icy.canvas.Layer;
 import icy.gui.component.button.IcyButton;
 import icy.gui.viewer.Viewer;
 import icy.main.Icy;
+import icy.resource.icon.SVGIcon;
 import icy.system.thread.ThreadUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -98,7 +98,7 @@ public final class LayerControlPanel extends JPanel implements ChangeListener {
         gbc_opacitySlider.gridy = 1;
         actionPanel.add(opacitySlider, gbc_opacitySlider);
 
-        deleteButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
+        deleteButton = new IcyButton(SVGIcon.DELETE);
         deleteButton.addActionListener(CanvasActions.deleteLayersAction);
         final GridBagConstraints gbc_deleteButton = new GridBagConstraints();
         gbc_deleteButton.anchor = GridBagConstraints.EAST;

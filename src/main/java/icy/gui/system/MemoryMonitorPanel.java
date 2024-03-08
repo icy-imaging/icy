@@ -21,13 +21,13 @@ package icy.gui.system;
 import icy.image.cache.ImageCache;
 import icy.math.UnitUtil;
 import icy.network.NetworkUtil;
+import icy.resource.icon.IcySVGImageIcon;
+import icy.resource.icon.SVGIcon;
 import icy.system.SystemUtil;
 import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.ColorUtil;
 import icy.util.GraphicsUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.swing.IconFontSwing;
 import vtk.vtkObjectBase;
 
 import javax.swing.*;
@@ -71,9 +71,9 @@ public class MemoryMonitorPanel extends JPanel implements MouseListener {
     private final Font textFont = new Font("Arial", Font.BOLD, 9);
     //private BufferedImage background = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
     //private final Image networkImage = ImageUtil.getColorImageFromAlphaImage(ResourceUtil.ICON_NETWORK, Color.gray); //SIGNAL_WIFI_OFF
-    private final Image networkImage = IconFontSwing.buildImage(GoogleMaterialDesignIcons.SIGNAL_CELLULAR_4_BAR, 20f, Color.GRAY);
+    private final Image networkImage = new IcySVGImageIcon(SVGIcon.BROKEN_IMAGE, Color.GRAY, 20).getImage();
     //private final Image deleteImage = ImageUtil.getColorImageFromAlphaImage(ResourceUtil.ICON_DELETE, Color.red);
-    private final Image deleteImage = IconFontSwing.buildImage(GoogleMaterialDesignIcons.CLEAR, 16f, Color.RED.brighter());
+    private final Image deleteImage = new IcySVGImageIcon(SVGIcon.BROKEN_IMAGE, Color.RED.brighter(), 16).getImage();
 
     boolean displayHelpMessage = false;
     int lastCacheUpdate;

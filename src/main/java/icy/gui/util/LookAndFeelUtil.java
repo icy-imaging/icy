@@ -332,12 +332,13 @@ public final class LookAndFeelUtil {
         return fontSize;
     }
 
+    @Deprecated(forRemoval = true)
     public static float getDefaultIconSizeAsFloat() {
-        return (float) getDefaultIconSizeAsInt();
+        return (float) getDefaultIconSize();
     }
 
-    public static int getDefaultIconSizeAsInt() {
-        return 18;
+    public static int getDefaultIconSize() {
+        return 22;
     }
 
     /**

@@ -18,19 +18,14 @@
 
 package icy.resource;
 
-import icy.image.ImageUtil;
-import icy.system.logging.IcyLogger;
-import icy.system.thread.ThreadUtil;
-import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.swing.IconFontSwing;
+import icy.main.Icy;
+import icy.resource.icon.IcySVGImageIcon;
+import icy.resource.icon.SVGIcon;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Resources (images, icons...) utilities class.
@@ -40,272 +35,52 @@ import java.util.ArrayList;
  */
 public class ResourceUtil {
     // image and icon path
-    public static final String ICON_PATH = "icon/";
-    public static final String IMAGE_PATH = "image/";
+    public static final String ICON_PATH = "/icon/";
+    public static final String IMAGE_PATH = "/image/";
 
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final String ALPHA_ICON_PATH = "alpha/";
-    public static final String COLOR_ICON_PATH = "color/";
-
-    // default icon size
-    //public static final int DEFAULT_ICON_SIZE = IcyIcon.DEFAULT_SIZE;
+    public static final String SVG_ICON_PATH = ICON_PATH + "svg/";
 
     // application images
-    public static final Image IMAGE_ICY_16 = ResourceUtil.getIconAsImage("icy16.png");
-    public static final Image IMAGE_ICY_20 = ResourceUtil.getIconAsImage("icy20.png");
-    public static final Image IMAGE_ICY_24 = ResourceUtil.getIconAsImage("icy24.png");
-    public static final Image IMAGE_ICY_32 = ResourceUtil.getIconAsImage("icy32.png");
-    public static final Image IMAGE_ICY_64 = ResourceUtil.getIconAsImage("icy64.png");
-    public static final Image IMAGE_ICY_256 = ResourceUtil.getImage("logo.png");
+    public static final ImageIcon ICON_ICY_16 = new IcySVGImageIcon(SVGIcon.ICY_WHITE_BG, 16);
+    public static final ImageIcon ICON_ICY_20 = new IcySVGImageIcon(SVGIcon.ICY_WHITE_BG, 20);
+    public static final ImageIcon ICON_ICY_24 = new IcySVGImageIcon(SVGIcon.ICY_WHITE_BG, 24);
+    public static final ImageIcon ICON_ICY_32 = new IcySVGImageIcon(SVGIcon.ICY_WHITE_BG, 32);
+    public static final ImageIcon ICON_ICY_64 = new IcySVGImageIcon(SVGIcon.ICY_WHITE_BG, 64);
+    public static final ImageIcon ICON_ICY_256 = new IcySVGImageIcon(SVGIcon.ICY_WHITE_BG, 256);
 
-    //public static final Image IMAGE_PLUGIN_SMALL = ResourceUtil.getImage("app/plugin_small.png");
-    public static final Image IMAGE_PLUGIN_SMALL = IconFontSwing.buildImage(GoogleMaterialDesignIcons.EXTENSION, 32f);
-    public static final Image IMAGE_PLUGIN = ResourceUtil.getImage("app/plugin.png");
-    public static final Image IMAGE_ACCOLADE_LEFT = ResourceUtil.getImage("app/accol_left.png");
+    public static final Image IMAGE_ICY_16 = ICON_ICY_16.getImage();
+    public static final Image IMAGE_ICY_20 = ICON_ICY_20.getImage();
+    public static final Image IMAGE_ICY_24 = ICON_ICY_24.getImage();
+    public static final Image IMAGE_ICY_32 = ICON_ICY_32.getImage();
+    public static final Image IMAGE_ICY_64 = ICON_ICY_64.getImage();
+    public static final Image IMAGE_ICY_256 = ICON_ICY_256.getImage();
 
     // alpha mask icons
-    public static final ImageIcon ICON_ICY_16 = ResourceUtil.getImageIcon(IMAGE_ICY_16);
-    public static final ImageIcon ICON_ICY_20 = ResourceUtil.getImageIcon(IMAGE_ICY_20);
-    public static final ImageIcon ICON_ICY_24 = ResourceUtil.getImageIcon(IMAGE_ICY_24);
-    public static final ImageIcon ICON_ICY_32 = ResourceUtil.getImageIcon(IMAGE_ICY_32);
-    public static final ImageIcon ICON_ICY_64 = ResourceUtil.getImageIcon(IMAGE_ICY_64);
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi.png"))).getImage();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI_POINT = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi_point.png"))).getImage();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI_LINE = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi_line.png"))).getImage();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI_OVAL = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi_oval.png"))).getImage();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI_POLYLINE = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi_polyline.png"))).getImage();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI_POLYGON = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi_polygon.png"))).getImage();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI_RECTANGLE = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi_rectangle.png"))).getImage();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI_AREA = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi_area.png"))).getImage();
 
-    public static final Image ICON_NULL = ResourceUtil.getAlphaIconAsImage("null.png");
-
-    public static final Image ICON_WINDOW_EXPAND = ResourceUtil.getAlphaIconAsImage("top_right_expand.png");
-    public static final Image ICON_WINDOW_COLLAPSE = ResourceUtil.getAlphaIconAsImage("top_right_collapse.png");
-    public static final Image ICON_PICTURE = ResourceUtil.getAlphaIconAsImage("picture.png");
-    public static final Image ICON_PICTURE_COPY = ResourceUtil.getAlphaIconAsImage("picture_copy.png");
-    public static final Image ICON_PICTURE_PASTE = ResourceUtil.getAlphaIconAsImage("picture_paste.png");
-    public static final Image ICON_WINDOW = ResourceUtil.getAlphaIconAsImage("app_window.png");
-    public static final Image ICON_DETACHED_WINDOW = ResourceUtil.getAlphaIconAsImage("app_detached.png");
-    public static final Image ICON_DOC = ResourceUtil.getAlphaIconAsImage("document.png");
-    public static final Image ICON_DOC_NEW = ResourceUtil.getAlphaIconAsImage("doc_new.png");
-    public static final Image ICON_DOC_COPY = ResourceUtil.getAlphaIconAsImage("doc_copy.png");
-    public static final Image ICON_DOC_IMPORT = ResourceUtil.getAlphaIconAsImage("doc_import.png");
-    public static final Image ICON_DOC_EXPORT = ResourceUtil.getAlphaIconAsImage("doc_export.png");
-    public static final Image ICON_XLS_EXPORT = ResourceUtil.getAlphaIconAsImage("xls_export.png");
-    public static final Image ICON_DOCEDIT = ResourceUtil.getAlphaIconAsImage("doc_edit.png");
-    public static final Image ICON_DOCTEXT1 = ResourceUtil.getAlphaIconAsImage("doc_lines.png");
-    public static final Image ICON_DOCTEXT2 = ResourceUtil.getAlphaIconAsImage("doc_lines_stright.png");
-    public static final Image ICON_DUPLICATE = ResourceUtil.getAlphaIconAsImage("duplicate.png");
-    public static final Image ICON_FOLDER = ResourceUtil.getAlphaIconAsImage("folder.png");
-    public static final Image ICON_OPEN = ResourceUtil.getAlphaIconAsImage("folder_open.png");
-    public static final Image ICON_LOAD = ICON_OPEN;
-    public static final Image ICON_SAVE = ResourceUtil.getAlphaIconAsImage("save.png");
-    public static final Image ICON_CLOSE = ResourceUtil.getAlphaIconAsImage("round_delete.png");
-    public static final Image ICON_CLIPBOARD_CLEAR = ResourceUtil.getAlphaIconAsImage("clipboard_clear.png");
-    public static final Image ICON_COPY = ResourceUtil.getAlphaIconAsImage("clipboard_copy.png");
-    public static final Image ICON_CUT = ResourceUtil.getAlphaIconAsImage("clipboard_cut.png");
-    public static final Image ICON_LINK_COPY = ResourceUtil.getAlphaIconAsImage("clipboard_link_copy.png");
-    public static final Image ICON_PASTE = ResourceUtil.getAlphaIconAsImage("clipboard_past.png");
-    public static final Image ICON_LINK_PASTE = ResourceUtil.getAlphaIconAsImage("clipboard_link_past.png");
-
-    public static final Image ICON_HELP = ResourceUtil.getAlphaIconAsImage("help.png");
-    public static final Image ICON_INFO = ResourceUtil.getAlphaIconAsImage("info.png");
-
-    public static final Image ICON_ON_OFF = ResourceUtil.getAlphaIconAsImage("on-off.png");
-    public static final Image ICON_TRASH = ResourceUtil.getAlphaIconAsImage("trash.png");
-    public static final Image ICON_DELETE = ResourceUtil.getAlphaIconAsImage("delete.png");
-    public static final Image ICON_COG = ResourceUtil.getAlphaIconAsImage("cog.png");
-    public static final Image ICON_UNCHECKED = ResourceUtil.getAlphaIconAsImage("checkbox_unchecked.png");
-    public static final Image ICON_CHECKED = ResourceUtil.getAlphaIconAsImage("checkbox_checked.png");
-    public static final Image ICON_LOCK_OPEN = ResourceUtil.getAlphaIconAsImage("unlocked.png");
-    public static final Image ICON_LOCK_CLOSE = ResourceUtil.getAlphaIconAsImage("locked.png");
-    public static final Image ICON_DOWNLOAD = ResourceUtil.getAlphaIconAsImage("download.png");
-    public static final Image ICON_PROPERTIES = ICON_DOCTEXT1;
-    public static final Image ICON_TAG = ResourceUtil.getAlphaIconAsImage("tag.png");
-    public static final Image ICON_TOOLS = ResourceUtil.getAlphaIconAsImage("wrench_plus_2.png");
-    public static final Image ICON_LIGHTING = ResourceUtil.getAlphaIconAsImage("lighting.png");
-    public static final Image ICON_SEARCH = ResourceUtil.getAlphaIconAsImage("zoom.png");
-    public static final Image ICON_WAIT = ResourceUtil.getAlphaIconAsImage("sand.png");
-    public static final Image ICON_VISIBLE = ResourceUtil.getAlphaIconAsImage("eye_open.png");
-    public static final Image ICON_NOT_VISIBLE = ResourceUtil.getAlphaIconAsImage("eye_close.png");
-    public static final Image ICON_EYE_INV = ResourceUtil.getAlphaIconAsImage("eye_inv.png");
-    public static final Image ICON_UNDO = ResourceUtil.getAlphaIconAsImage("undo.png");
-    public static final Image ICON_REDO = ResourceUtil.getAlphaIconAsImage("redo.png");
-
-    public static final Image ICON_CENTER_IMAGE = ResourceUtil.getAlphaIconAsImage("center.png");
-    public static final Image ICON_CROP = ResourceUtil.getAlphaIconAsImage("crop.png");
-    public static final Image ICON_FIT_IMAGE = ResourceUtil.getAlphaIconAsImage("fit_in2.png");
-    public static final Image ICON_FIT_CANVAS = ResourceUtil.getAlphaIconAsImage("fit_out.png");
-
-    public static final Image ICON_TARGET = ResourceUtil.getAlphaIconAsImage("simple_target.png");
-    public static final Image ICON_PENCIL = ResourceUtil.getAlphaIconAsImage("pencil.png");
-    public static final Image ICON_BRUSH = ResourceUtil.getAlphaIconAsImage("brush.png");
-    public static final Image ICON_LINK = ResourceUtil.getAlphaIconAsImage("link.png");
-
-    public static final Image ICON_LAYER_H1 = ResourceUtil.getAlphaIconAsImage("layers_h1.png");
-    public static final Image ICON_LAYER_H2 = ResourceUtil.getAlphaIconAsImage("layers_h2.png");
-    public static final Image ICON_LAYER_REVERSE_H = ResourceUtil.getAlphaIconAsImage("layers_reverse_h.png");
-    public static final Image ICON_LAYER_EXTRACT_H = ResourceUtil.getAlphaIconAsImage("layers_extract_h.png");
-    public static final Image ICON_LAYER_ADD_H = ResourceUtil.getAlphaIconAsImage("layers_add_h.png");
-    public static final Image ICON_LAYER_INSERT_H = ResourceUtil.getAlphaIconAsImage("layers_insert_h.png");
-    public static final Image ICON_LAYER_REMOVE_H = ResourceUtil.getAlphaIconAsImage("layers_remove_h.png");
-    public static final Image ICON_LAYER_REMOVE_ADV_H = ResourceUtil.getAlphaIconAsImage("layers_remove_adv_h.png");
-    public static final Image ICON_LAYER_V1 = ResourceUtil.getAlphaIconAsImage("layers_v1.png");
-    public static final Image ICON_LAYER_V2 = ResourceUtil.getAlphaIconAsImage("layers_v2.png");
-    public static final Image ICON_LAYER_REVERSE_V = ResourceUtil.getAlphaIconAsImage("layers_reverse_v.png");
-    public static final Image ICON_LAYER_EXTRACT_V = ResourceUtil.getAlphaIconAsImage("layers_extract_v.png");
-    public static final Image ICON_LAYER_ADD_V = ResourceUtil.getAlphaIconAsImage("layers_add_v.png");
-    public static final Image ICON_LAYER_INSERT_V = ResourceUtil.getAlphaIconAsImage("layers_insert_v.png");
-    public static final Image ICON_LAYER_REMOVE_V = ResourceUtil.getAlphaIconAsImage("layers_remove_v.png");
-    public static final Image ICON_LAYER_REMOVE_V2 = ResourceUtil.getAlphaIconAsImage("layers_remove_v2.png");
-    public static final Image ICON_LAYER_REMOVE_ADV_V = ResourceUtil.getAlphaIconAsImage("layers_remove_adv_v.png");
-    public static final Image ICON_LAYER_ADJUST_HV = ResourceUtil.getAlphaIconAsImage("layers_adjust_hv.png");
-
-    public static final Image ICON_ROI = ResourceUtil.getAlphaIconAsImage("roi.png");
-    public static final Image ICON_ROI_POINT = ResourceUtil.getAlphaIconAsImage("roi_point.png");
-    public static final Image ICON_ROI_LINE = ResourceUtil.getAlphaIconAsImage("roi_line.png");
-    public static final Image ICON_ROI_OVAL = ResourceUtil.getAlphaIconAsImage("roi_oval.png");
-    public static final Image ICON_ROI_POLYLINE = ResourceUtil.getAlphaIconAsImage("roi_polyline.png");
-    public static final Image ICON_ROI_POLYGON = ResourceUtil.getAlphaIconAsImage("roi_polygon.png");
-    public static final Image ICON_ROI_RECTANGLE = ResourceUtil.getAlphaIconAsImage("roi_rectangle.png");
-    public static final Image ICON_ROI_AREA = ResourceUtil.getAlphaIconAsImage("roi_area.png");
-
-    public static final Image ICON_ROI_CYLINDER = ResourceUtil.getAlphaIconAsImage("roi_cylinder.png");
-    public static final Image ICON_ROI_BOX = ResourceUtil.getAlphaIconAsImage("roi_box.png");
-    public static final Image ICON_ROI_FLATPOLYGON3D = ResourceUtil.getAlphaIconAsImage("roi_flat_polygon3D.png");
-
-    public static final Image ICON_ROI_NOT = ResourceUtil.getAlphaIconAsImage("roi_not.png");
-    public static final Image ICON_ROI_OR = ResourceUtil.getAlphaIconAsImage("roi_or.png");
-    public static final Image ICON_ROI_AND = ResourceUtil.getAlphaIconAsImage("roi_and.png");
-    public static final Image ICON_ROI_XOR = ResourceUtil.getAlphaIconAsImage("roi_xor.png");
-    public static final Image ICON_ROI_SUB = ResourceUtil.getAlphaIconAsImage("roi_sub.png");
-
-    public static final Image ICON_ROI_INTERIOR = ResourceUtil.getAlphaIconAsImage("roi_interior.png");
-    public static final Image ICON_ROI_UPSCALE = ResourceUtil.getAlphaIconAsImage("roi_upscale.png");
-    public static final Image ICON_ROI_DOWNSCALE = ResourceUtil.getAlphaIconAsImage("roi_downscale.png");
-
-    public static final Image ICON_ROI_COMP = ResourceUtil.getAlphaIconAsImage("separate_obj.png");
-    public static final Image ICON_ROI_DISTANCE_MAP = ResourceUtil.getAlphaIconAsImage("roi_distance_map.png");
-    public static final Image ICON_ROI_DILATE = ResourceUtil.getAlphaIconAsImage("roi_dilate.png");
-    public static final Image ICON_ROI_ERODE = ResourceUtil.getAlphaIconAsImage("roi_erode.png");
-    public static final Image ICON_ROI_SEPARATE = ResourceUtil.getAlphaIconAsImage("split_roi.png");
-
-    public static final Image ICON_BOOL_MASK = ResourceUtil.getAlphaIconAsImage("boolean_mask.png");
-
-    public static final Image ICON_INDENT_DECREASE = ResourceUtil.getAlphaIconAsImage("indent_decrease.png");
-    public static final Image ICON_INDENT_INCREASE = ResourceUtil.getAlphaIconAsImage("indent_increase.png");
-    public static final Image ICON_INDENT_REMOVE = ResourceUtil.getAlphaIconAsImage("indent_remove.png");
-
-    public static final Image ICON_TOIJ = ResourceUtil.getAlphaIconAsImage("to_ij.png");
-    public static final Image ICON_TOICY = ResourceUtil.getAlphaIconAsImage("to_icy.png");
-
-    public static final Image ICON_PLAY = ResourceUtil.getAlphaIconAsImage("playback_play.png");
-    public static final Image ICON_STOP = ResourceUtil.getAlphaIconAsImage("playback_stop.png");
-    public static final Image ICON_PAUSE = ResourceUtil.getAlphaIconAsImage("playback_pause.png");
-    public static final Image ICON_PLAY_NEXT = ResourceUtil.getAlphaIconAsImage("playback_next.png");
-    public static final Image ICON_PLAY_PREV = ResourceUtil.getAlphaIconAsImage("playback_prev.png");
-    public static final Image ICON_RELOAD = ResourceUtil.getAlphaIconAsImage("playback_reload.png");
-
-    public static final Image ICON_PLUS = ResourceUtil.getAlphaIconAsImage("plus.png");
-    public static final Image ICON_MINUS = ResourceUtil.getAlphaIconAsImage("minus.png");
-
-    public static final Image ICON_ROUND_PLUS = ResourceUtil.getAlphaIconAsImage("round_plus.png");
-    public static final Image ICON_ROUND_MINUS = ResourceUtil.getAlphaIconAsImage("round_minus.png");
-
-    public static final Image ICON_ROTATE_UNCLOCK = ResourceUtil.getAlphaIconAsImage("rot_unclock.png");
-    public static final Image ICON_ROTATE_CLOCK = ICON_RELOAD;
-
-    public static final Image ICON_ARROW_UP = ResourceUtil.getAlphaIconAsImage("arrow_top.png");
-    public static final Image ICON_ARROW_LEFT = ResourceUtil.getAlphaIconAsImage("arrow_left.png");
-    public static final Image ICON_ARROW_RIGHT = ResourceUtil.getAlphaIconAsImage("arrow_right.png");
-    public static final Image ICON_ARROW_DOWN = ResourceUtil.getAlphaIconAsImage("arrow_bottom.png");
-    public static final Image ICON_ARROW_TOP_RIGHT = ResourceUtil.getAlphaIconAsImage("arrow_top_right.png");
-
-    public static final Image ICON_ROUND_ARROW_UP = ResourceUtil.getAlphaIconAsImage("round_arrow_up.png");
-    public static final Image ICON_ROUND_ARROW_LEFT = ResourceUtil.getAlphaIconAsImage("round_arrow_left.png");
-    public static final Image ICON_ROUND_ARROW_RIGHT = ResourceUtil.getAlphaIconAsImage("round_arrow_right.png");
-    public static final Image ICON_ROUND_ARROW_DOWN = ResourceUtil.getAlphaIconAsImage("round_arrow_down.png");
-
-    public static final Image ICON_SQUARE_DOWN = ResourceUtil.getAlphaIconAsImage("sq_down.png");
-    public static final Image ICON_SQUARE_UP = ResourceUtil.getAlphaIconAsImage("sq_up.png");
-    public static final Image ICON_SQUARE_PREV = ResourceUtil.getAlphaIconAsImage("sq_prev.png");
-    public static final Image ICON_SQUARE_NEXT = ResourceUtil.getAlphaIconAsImage("sq_next.png");
-
-    public static final Image ICON_CLEAR_BEFORE = ResourceUtil.getAlphaIconAsImage("clear_top.png");
-    public static final Image ICON_CLEAR_AFTER = ResourceUtil.getAlphaIconAsImage("clear_bottom.png");
-
-    public static final Image ICON_PANEL_EXPAND = ResourceUtil.getAlphaIconAsImage("br_next.png");
-    public static final Image ICON_PANEL_COLLAPSE = ResourceUtil.getAlphaIconAsImage("br_down.png");
-    public static final Image ICON_PIN = ResourceUtil.getAlphaIconAsImage("pin.png");
-
-    public static final Image ICON_NODE_EXPANDED = ResourceUtil.getAlphaIconAsImage("node_expanded.png");
-    public static final Image ICON_NODE_COLLAPSED = ResourceUtil.getAlphaIconAsImage("node_collapsed.png");
-
-    public static final Image ICON_BAND_RIGHT = ResourceUtil.getAlphaIconAsImage("arrow_r.png");
-    public static final Image ICON_BAND_LEFT = ResourceUtil.getAlphaIconAsImage("arrow_l.png");
-
-    public static final Image ICON_RESIZE = ResourceUtil.getAlphaIconAsImage("cursor_drag_arrow.png");
-    public static final Image ICON_RESIZE_2 = ResourceUtil.getAlphaIconAsImage("cursor_drag_arrow_2.png");
-
-    public static final Image ICON_TEXT = ResourceUtil.getAlphaIconAsImage("text_letter_t.png");
-
-    public static final Image ICON_SMILEY_HAPPY = ResourceUtil.getAlphaIconAsImage("emotion_smile.png");
-    public static final Image ICON_SMILEY_SAD = ResourceUtil.getAlphaIconAsImage("emotion_sad.png");
-
-    public static final Image ICON_CUBE_3D = ResourceUtil.getAlphaIconAsImage("cube.png");
-
-    public static final Image ICON_PLUGIN = ResourceUtil.getAlphaIconAsImage("plugin.png");
-    public static final Image ICON_BOX = ResourceUtil.getAlphaIconAsImage("box.png");
-    public static final Image ICON_DATABASE = ResourceUtil.getAlphaIconAsImage("db.png");
-    public static final Image ICON_HDD = ICON_DATABASE;
-    public static final Image ICON_HDD_STREAM = ResourceUtil.getAlphaIconAsImage("hdd_stream.png");
-    public static final Image ICON_STAR = ResourceUtil.getAlphaIconAsImage("star_fav.png");
-    public static final Image ICON_NETWORK = ResourceUtil.getAlphaIconAsImage("network.png");
-    public static final Image ICON_BROWSER = ResourceUtil.getAlphaIconAsImage("browser.png");
-    public static final Image ICON_CHAT = ResourceUtil.getAlphaIconAsImage("spechbubble.png");
-    public static final Image ICON_PHOTO = ResourceUtil.getAlphaIconAsImage("photo.png");
-    public static final Image ICON_PHOTO_SMALL = ResourceUtil.getAlphaIconAsImage("photo_small.png");
-
-    /**
-     * @deprecated Use {@link #ICON_DOC_NEW} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final Image ICON_NEWDOC = ICON_DOC_NEW;
-    /**
-     * @deprecated Use {@link #ICON_DOC_COPY} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final Image ICON_DOCCOPY = ICON_DOC_COPY;
-    /**
-     * @deprecated Use {@link #ICON_DOC_IMPORT} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final Image ICON_DOCIMPORT = ICON_DOC_IMPORT;
-    /**
-     * @deprecated Use {@link #ICON_DOC_EXPORT} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final Image ICON_DOCEXPORT = ICON_DOC_EXPORT;
-    /**
-     * @deprecated Use {@link #ICON_ARROW_DOWN} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final Image ICON_ARROW_BOTTOM = ICON_ARROW_DOWN;
-    /**
-     * @deprecated Use {@link #ICON_ARROW_UP} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final Image ICON_ARROW_TOP = ICON_ARROW_UP;
-    /**
-     * @deprecated Use {@link #ICON_WINDOW_EXPAND} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final Image ICON_EXPAND = ICON_WINDOW_EXPAND;
-    /**
-     * @deprecated Use {@link #ICON_WINDOW_COLLAPSE} instead.
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static final Image ICON_COLLAPSE = ICON_WINDOW_COLLAPSE;
-
-    // color icons
-    public static final Image ICON_ALPHA_COLOR = ResourceUtil.getColorIconAsImage("alpha.png");
-    public static final Image ICON_ARGB_COLOR = ResourceUtil.getColorIconAsImage("argb.png");
-    public static final Image ICON_RGB_COLOR = ResourceUtil.getColorIconAsImage("rgb.png");
-    public static final Image ICON_GRAY_COLOR = ResourceUtil.getColorIconAsImage("gray.png");
-
-    public static final Image ICON_PLUGIN_COLOR = ResourceUtil.getColorIconAsImage("plugin.png");
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI_CYLINDER = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi_cylinder.png"))).getImage();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI_BOX = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi_box.png"))).getImage();
+    @Deprecated(since = "3.0.0", forRemoval = true)
+    public static final Image ICON_ROI_FLATPOLYGON3D = new ImageIcon(Objects.requireNonNull(Icy.class.getResource("/icon/alpha/roi_flat_polygon3D.png"))).getImage();
 
     public static ArrayList<Image> getIcyIconImages() {
         final ArrayList<Image> result = new ArrayList<>();
@@ -316,310 +91,5 @@ public class ResourceUtil {
         result.add(ResourceUtil.IMAGE_ICY_16);
 
         return result;
-    }
-
-    private static Image scaleImage(final Image image, final int size) {
-        // resize if needed
-        if ((image != null) && (size != -1)) {
-            // be sure image data are ready
-            ImageUtil.waitImageReady(image);
-            // resize only if image has different size
-            if ((image.getWidth(null) != size) || (image.getWidth(null) != size))
-                return ImageUtil.scale(image, size, size);
-        }
-
-        return image;
-    }
-
-    /**
-     * Return an image with wanted size located in resources/image<br>
-     * For any other location use the ImageUtil.loadImage() method
-     */
-    public static Image getImage(final String name) {
-        final URL url = ResourceUtil.class.getResource("/" + IMAGE_PATH + name);
-
-        Image result;
-
-        if (url != null)
-            result = ImageUtil.load(url, false);
-        else
-            result = ImageUtil.load(new File(IMAGE_PATH + name), false);
-
-        // FIXME: we do that as in very rare occasion ImageIO.read(..) throw a NPE (inflater has been closed) 
-        // I admit this is an ugly fix but it works eventually.. 
-        int retry = 3;
-        while ((result == null) && (retry-- > 0)) {
-            ThreadUtil.sleep(1);
-
-            if (url != null)
-                result = ImageUtil.load(url, false);
-            else
-                result = ImageUtil.load(new File(IMAGE_PATH + name), false);
-        }
-
-        if (result == null) {
-            IcyLogger.warn(ResourceUtil.class, "Resource name can't be found: " + name);
-            return null;
-        }
-
-        return result;
-    }
-
-    /**
-     * Return lock image with specified number.
-     */
-    public static BufferedImage getLockedImage(final int number) {
-        final BufferedImage result = ImageUtil.getCopy(ICON_LOCK_CLOSE);
-
-        // nice for 48 pixels image
-        ImageUtil.drawTextTopRight(result, StringUtil.toString(number), 26, true, Color.black);
-
-        return result;
-    }
-
-    /**
-     * Return lock image with specified letter.
-     */
-    public static BufferedImage getLockedImage(final char letter) {
-        final BufferedImage result = ImageUtil.getCopy(ICON_LOCK_CLOSE);
-
-        // nice for 48 pixels image
-        ImageUtil.drawTextTopRight(result, String.valueOf(letter), 26, true, Color.black);
-
-        return result;
-    }
-
-    /**
-     * Return an image with wanted size located in resources/icon from its name<br>
-     * For any other location use the ImageUtil.loadImage() method
-     */
-    public static Image getIconAsImage(final String name, final int size) {
-        final URL url = ResourceUtil.class.getResource("/" + ICON_PATH + name);
-
-        Image result;
-
-        if (url != null)
-            result = ImageUtil.load(url, false);
-        else
-            result = ImageUtil.load(new File(ICON_PATH + name), false);
-
-        // FIXME: we do that as in very rare occasion ImageIO.read(..) throw a NPE (inflater has been closed) 
-        // I admit this is an ugly fix but it works eventually.. 
-        int retry = 3;
-        while ((result == null) && (retry-- > 0)) {
-            ThreadUtil.sleep(1);
-
-            if (url != null)
-                result = ImageUtil.load(url, false);
-            else
-                result = ImageUtil.load(new File(ICON_PATH + name), false);
-        }
-
-        if (result == null) {
-            IcyLogger.warn(ResourceUtil.class, "Resource name can't be found: " + name);
-            return null;
-        }
-
-        return scaleImage(result, size);
-    }
-
-    /**
-     * Return an image located in resources/icon from its name<br>
-     * For any other location use the ImageUtil.loadImage() method
-     */
-    public static Image getIconAsImage(final String name) {
-        return getIconAsImage(name, -1);
-    }
-
-    /**
-     * Create an ImageIcon with specified size from the specified image<br>
-     */
-    public static ImageIcon getImageIcon(final Image image, final int size) {
-        if (image != null)
-            return new ImageIcon(scaleImage(image, size));
-
-        return null;
-    }
-
-    /**
-     * Create an ImageIcon from the specified image (default image size is used as icon size)<br>
-     */
-    public static ImageIcon getImageIcon(final Image image) {
-        if (image != null)
-            return new ImageIcon(image);
-
-        return null;
-    }
-
-    /**
-     * Return an image located in resources/icon with specified square size from its name<br>
-     */
-    public static ImageIcon getImageIcon(final String resourceName, final int size) {
-        return getImageIcon(getIconAsImage(resourceName, size));
-    }
-
-    /**
-     * Return an image located in resources/icon from its name<br>
-     */
-    public static ImageIcon getImageIcon(final String resourceName) {
-        return getImageIcon(getIconAsImage(resourceName));
-    }
-
-    /**
-     * Return an image located in resources/icon/alpha with specified square size from its name<br>
-     */
-    public static Image getAlphaIconAsImage(final String resourceName, final int size) {
-        final String finalName;
-
-        if (resourceName.toLowerCase().endsWith(".png"))
-            finalName = resourceName;
-        else
-            finalName = resourceName + ".png";
-
-        return getIconAsImage(ALPHA_ICON_PATH + finalName, size);
-    }
-
-    /**
-     * Return an image located in resources/icon/alpha from its name<br>
-     */
-    public static Image getAlphaIconAsImage(final String resourceName) {
-        return getAlphaIconAsImage(resourceName, -1);
-    }
-
-    /**
-     * Return an ImageIcon located in resources/icon/alpha with specified square size<br>
-     */
-    public static ImageIcon getAlphaIcon(final String resourceName, final int size) {
-        final String finalName;
-
-        if (resourceName.toLowerCase().endsWith(".png"))
-            finalName = resourceName;
-        else
-            finalName = resourceName + ".png";
-
-        return getImageIcon(getIconAsImage(ALPHA_ICON_PATH + finalName, size));
-    }
-
-    /**
-     * Return an ImageIcon located in resources/icon/alpha<br>
-     */
-    public static ImageIcon getAlphaIcon(final String resourceName) {
-        return getAlphaIcon(resourceName, -1);
-    }
-
-    /**
-     * Return an image located in resources/icon/color with specified square size from its name<br>
-     */
-    public static Image getColorIconAsImage(final String resourceName, final int size) {
-        final String finalName;
-
-        if (resourceName.toLowerCase().endsWith(".png"))
-            finalName = resourceName;
-        else
-            finalName = resourceName + ".png";
-
-        return getIconAsImage(COLOR_ICON_PATH + finalName, size);
-    }
-
-    /**
-     * Return an image located in resources/icon/color from its name<br>
-     */
-    public static Image getColorIconAsImage(final String resourceName) {
-        return getColorIconAsImage(resourceName, -1);
-    }
-
-    /**
-     * Return an ImageIcon located in resources/icon/color with specified square size<br>
-     */
-    public static ImageIcon getColorIcon(final String resourceName, final int size) {
-        final String finalName;
-
-        if (resourceName.toLowerCase().endsWith(".png"))
-            finalName = resourceName;
-        else
-            finalName = resourceName + ".png";
-
-        return getImageIcon(getIconAsImage(COLOR_ICON_PATH + finalName, size));
-    }
-
-    /**
-     * Return an ImageIcon located in resources/icon/color<br>
-     */
-    public static ImageIcon getColorIcon(final String resourceName) {
-        return getColorIcon(resourceName, -1);
-    }
-
-    /**
-     * @deprecated use {@link #getAlphaIconAsImage(String, int)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Image getBlackIconAsImage(final String resourceName, final int size) {
-        return getAlphaIconAsImage(resourceName, size);
-    }
-
-    /**
-     * @deprecated use {@link #getAlphaIconAsImage(String)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static Image getBlackIconAsImage(final String resourceName) {
-        return getAlphaIconAsImage(resourceName);
-    }
-
-    /**
-     * @deprecated use {@link #getAlphaIcon(String, int)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ImageIcon getBlackIcon(final String resourceName, final int size) {
-        return getAlphaIcon(resourceName, size);
-    }
-
-    /**
-     * @deprecated use {@link #getAlphaIcon(String)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ImageIcon getBlackIcon(final String resourceName) {
-        return getAlphaIcon(resourceName);
-    }
-
-    /**
-     * @deprecated use {@link #getAlphaIcon(String, int)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ImageIcon getWhiteIcon(final String resourceName, final int size) {
-        return getAlphaIcon(resourceName, size);
-    }
-
-    /**
-     * @deprecated use {@link #getAlphaIcon(String)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ImageIcon getWhiteIcon(final String resourceName) {
-        return getAlphaIcon(resourceName);
-    }
-
-    /**
-     * @deprecated use {@link #getAlphaIcon(String, int)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ImageIcon getIcyIcon(final String resourceName, final int size) {
-        return getAlphaIcon(resourceName, size);
-    }
-
-    /**
-     * @deprecated use {@link #getAlphaIcon(String)} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public static ImageIcon getIcyIcon(final String resourceName) {
-        return getAlphaIcon(resourceName);
-    }
-
-    /**
-     * Return a new ImageIcon scaled with specified size
-     */
-    public static ImageIcon scaleIcon(final ImageIcon icon, final int size) {
-        if (icon != null)
-            return getImageIcon(icon.getImage(), size);
-
-        return null;
     }
 }

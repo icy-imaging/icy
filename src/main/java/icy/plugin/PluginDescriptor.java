@@ -31,6 +31,8 @@ import icy.plugin.interface_.IcyPlugin;
 import icy.plugin.interface_.PluginBundled;
 import icy.preferences.RepositoryPreferences.RepositoryInfo;
 import icy.resource.ResourceUtil;
+import icy.resource.icon.IcySVGImageIcon;
+import icy.resource.icon.SVGIcon;
 import icy.system.logging.IcyLogger;
 import icy.util.ClassUtil;
 import icy.util.JarUtil;
@@ -45,17 +47,15 @@ import org.w3c.dom.Node;
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 
 /**
  * <br>
  * The plugin descriptor contains all the data needed to launch a plugin. <br>
  *
  * @author Fabrice de Chaumont
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  * @see PluginLauncher
  */
@@ -63,8 +63,8 @@ public class PluginDescriptor implements XMLPersistent {
     public static final int ICON_SIZE = 32;
     public static final int IMAGE_SIZE = 256;
 
-    public static final ImageIcon DEFAULT_ICON = ResourceUtil.getImageIcon(ResourceUtil.IMAGE_PLUGIN_SMALL);
-    public static final Image DEFAULT_IMAGE = ResourceUtil.IMAGE_PLUGIN;
+    public static final ImageIcon DEFAULT_ICON = new IcySVGImageIcon(SVGIcon.INDETERMINATE_QUESTION);
+    public static final Image DEFAULT_IMAGE = new IcySVGImageIcon(SVGIcon.INDETERMINATE_QUESTION).getImage();
 
     public static final String ID_URL = "url";
     public static final String ID_NAME = "name";
@@ -573,81 +573,26 @@ public class PluginDescriptor implements XMLPersistent {
         return getClassName().startsWith(PluginLoader.PLUGIN_KERNEL_PACKAGE + ".");
     }
 
-    boolean loadIcon(final URL url) {
+    boolean loadIcon(final @Nullable URL url) {
         if (url == null) {
-            icon = DEFAULT_ICON;
+            icon = null; //DEFAULT_ICON;
             return false;
         }
 
         // load icon
-        /*if (isInstanceOf(PluginDaemon.class)) {
-            BufferedImage img = ImageUtil.load(NetworkUtil.getInputStream(url, (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false);
-            if (img != null) {
-                BufferedImage overlay = ImageUtil.convert(ResourceUtil.getColorIconAsImage("overlay_daemon.png", 16), new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB));
-
-                // create the new image, canvas size is the max. of both image sizes
-                int w = Math.max(img.getWidth(), overlay.getWidth());
-                int h = Math.max(img.getHeight(), overlay.getHeight());
-                BufferedImage combined = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-
-                // paint both images, preserving the alpha channels
-                Graphics g = combined.getGraphics();
-                g.drawImage(img, 0, 0, null);
-                g.drawImage(overlay, 16, 16, null);
-
-                g.dispose();
-
-                icon = ResourceUtil.getImageIcon(combined, ICON_SIZE);
-            }
+        if (url.toString().toLowerCase(Locale.ROOT).endsWith(".svg"))
+            icon = new IcySVGImageIcon(new SVGIcon(url, true));
+        else {
+            final Image img = ImageUtil.scale(ImageUtil.load(NetworkUtil.getInputStream(url, (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false), ICON_SIZE, ICON_SIZE);
+            if (img != null)
+                icon = new ImageIcon(img);
+            else
+                icon = null;
         }
-        else if (isActionable()) {
-            BufferedImage img = ImageUtil.load(NetworkUtil.getInputStream(url, (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false);
-            if (img != null) {
-                BufferedImage overlay = ImageUtil.convert(ResourceUtil.getColorIconAsImage("overlay_actionable.png", 16), new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB));
-
-                // create the new image, canvas size is the max. of both image sizes
-                int w = Math.max(img.getWidth(), overlay.getWidth());
-                int h = Math.max(img.getHeight(), overlay.getHeight());
-                BufferedImage combined = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-
-                // paint both images, preserving the alpha channels
-                Graphics g = combined.getGraphics();
-                g.drawImage(img, 0, 0, null);
-                g.drawImage(overlay, 16, 16, null);
-
-                g.dispose();
-
-                icon = ResourceUtil.getImageIcon(combined, ICON_SIZE);
-            }
-        }
-        else if (isInstanceOf(PluginLibrary.class)) {
-            BufferedImage img = ImageUtil.load(NetworkUtil.getInputStream(url, (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false);
-            if (img != null) {
-                BufferedImage overlay = ImageUtil.convert(ResourceUtil.getColorIconAsImage("overlay_core.png", 16), new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB));
-
-                // create the new image, canvas size is the max. of both image sizes
-                int w = Math.max(img.getWidth(), overlay.getWidth());
-                int h = Math.max(img.getHeight(), overlay.getHeight());
-                BufferedImage combined = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-
-                // paint both images, preserving the alpha channels
-                Graphics g = combined.getGraphics();
-                g.drawImage(img, 0, 0, null);
-                g.drawImage(overlay, 16, 16, null);
-
-                g.dispose();
-
-                icon = ResourceUtil.getImageIcon(combined, ICON_SIZE);
-            }
-        }
-        else {*/
-        icon = ResourceUtil.getImageIcon(ImageUtil.load(NetworkUtil.getInputStream(url,
-                (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false), ICON_SIZE);
-        //}
 
         // get default icon
         if (icon == null) {
-            icon = DEFAULT_ICON;
+            icon = null; //DEFAULT_ICON;
             return false;
         }
 

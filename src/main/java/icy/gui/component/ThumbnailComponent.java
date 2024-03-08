@@ -1,46 +1,32 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component;
 
 import icy.gui.util.ComponentUtil;
 import icy.image.ImageUtil;
-import icy.resource.ResourceUtil;
+import icy.resource.icon.IcySVGImageIcon;
+import icy.resource.icon.SVGIcon;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Image;
-import java.awt.Insets;
+import javax.swing.*;
+import java.awt.*;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.SwingConstants;
-
-public class ThumbnailComponent extends JToggleButton
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 6742578649112198581L;
-
+public class ThumbnailComponent extends JToggleButton {
     // GUI
     private ImageComponent imageComp;
     private JLabel titleLabel;
@@ -50,12 +36,11 @@ public class ThumbnailComponent extends JToggleButton
 
     /**
      * Create the thumbnail.
-     * 
+     *
      * @param selectable
      *        If true then the thumbnail component can be selected as a toggle button.
      */
-    public ThumbnailComponent(boolean selectable)
-    {
+    public ThumbnailComponent(final boolean selectable) {
         super();
 
         shortDisplay = false;
@@ -68,8 +53,7 @@ public class ThumbnailComponent extends JToggleButton
         setEnabled(selectable);
     }
 
-    private void initialize()
-    {
+    private void initialize() {
         setMargin(new Insets(2, 2, 2, 2));
         setLayout(new BorderLayout());
 
@@ -78,15 +62,15 @@ public class ThumbnailComponent extends JToggleButton
 
         final JPanel southPanel = new JPanel();
         southPanel.setOpaque(false);
-        GridBagLayout gbl_southPanel = new GridBagLayout();
-        gbl_southPanel.columnWidths = new int[] {0, 0};
-        gbl_southPanel.rowHeights = new int[] {0, 0, 0, 0};
-        gbl_southPanel.columnWeights = new double[] {1.0, Double.MIN_VALUE};
-        gbl_southPanel.rowWeights = new double[] {0.0, 0.0, 0.0, Double.MIN_VALUE};
+        final GridBagLayout gbl_southPanel = new GridBagLayout();
+        gbl_southPanel.columnWidths = new int[]{0, 0};
+        gbl_southPanel.rowHeights = new int[]{0, 0, 0, 0};
+        gbl_southPanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+        gbl_southPanel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
         southPanel.setLayout(gbl_southPanel);
 
         titleLabel = new JLabel();
-        GridBagConstraints gbc_titleLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_titleLabel = new GridBagConstraints();
         gbc_titleLabel.fill = GridBagConstraints.HORIZONTAL;
         gbc_titleLabel.insets = new Insets(0, 0, 0, 0);
         gbc_titleLabel.gridx = 0;
@@ -97,7 +81,7 @@ public class ThumbnailComponent extends JToggleButton
         titleLabel.setHorizontalTextPosition(SwingConstants.LEADING);
         ComponentUtil.setFontBold(titleLabel);
         infosLabel = new JLabel();
-        GridBagConstraints gbc_infosLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_infosLabel = new GridBagConstraints();
         gbc_infosLabel.fill = GridBagConstraints.HORIZONTAL;
         gbc_infosLabel.insets = new Insets(0, 0, 0, 0);
         gbc_infosLabel.gridx = 0;
@@ -108,7 +92,7 @@ public class ThumbnailComponent extends JToggleButton
         infosLabel.setHorizontalTextPosition(SwingConstants.LEADING);
         ComponentUtil.setFontSize(infosLabel, 11);
         infos2Label = new JLabel();
-        GridBagConstraints gbc_infos2Label = new GridBagConstraints();
+        final GridBagConstraints gbc_infos2Label = new GridBagConstraints();
         gbc_infos2Label.fill = GridBagConstraints.HORIZONTAL;
         gbc_infos2Label.gridx = 0;
         gbc_infos2Label.gridy = 2;
@@ -121,10 +105,8 @@ public class ThumbnailComponent extends JToggleButton
         add(southPanel, BorderLayout.SOUTH);
     }
 
-    public void setImage(Image img)
-    {
-        if (img == null)
-        {
+    public void setImage(final Image img) {
+        if (img == null) {
             imageComp.setImage(null);
             return;
         }
@@ -137,15 +119,13 @@ public class ThumbnailComponent extends JToggleButton
         float ix = image.getWidth(null);
         float iy = image.getHeight(null);
 
-        if ((ix <= 0f) || (iy <= 0f))
-        {
-            image = ResourceUtil.ICON_DELETE;
+        if ((ix <= 0f) || (iy <= 0f)) {
+            image = new IcySVGImageIcon(SVGIcon.CLOSE, this.getForeground()).getImage();
             ix = image.getWidth(null);
             iy = image.getHeight(null);
         }
 
-        if ((imageComp.getWidth() != 0) && (imageComp.getHeight() != 0))
-        {
+        if ((imageComp.getWidth() != 0) && (imageComp.getHeight() != 0)) {
             final float sx = imageComp.getWidth() / ix;
             final float sy = imageComp.getHeight() / iy;
             final float s = Math.min(sx, sy);
@@ -163,18 +143,15 @@ public class ThumbnailComponent extends JToggleButton
      * @return the shortDisplay property
      * @see #setShortDisplay(boolean)
      */
-    public boolean getShortDisplay()
-    {
+    public boolean getShortDisplay() {
         return shortDisplay;
     }
 
     /**
      * When set to true, only 'infos' is visible otherwise title, infos and infos2 are all visible
      */
-    public void setShortDisplay(boolean value)
-    {
-        if (shortDisplay != value)
-        {
+    public void setShortDisplay(final boolean value) {
+        if (shortDisplay != value) {
             shortDisplay = value;
 
             titleLabel.setVisible(!value);
@@ -182,33 +159,27 @@ public class ThumbnailComponent extends JToggleButton
         }
     }
 
-    public String getTitle()
-    {
+    public String getTitle() {
         return titleLabel.getText();
     }
 
-    public String getInfos()
-    {
+    public String getInfos() {
         return infosLabel.getText();
     }
 
-    public String getInfos2()
-    {
+    public String getInfos2() {
         return infos2Label.getText();
     }
 
-    public void setTitle(String value)
-    {
+    public void setTitle(final String value) {
         titleLabel.setText(value);
     }
 
-    public void setInfos(String value)
-    {
+    public void setInfos(final String value) {
         infosLabel.setText(value);
     }
 
-    public void setInfos2(String value)
-    {
+    public void setInfos2(final String value) {
         infos2Label.setText(value);
     }
 }

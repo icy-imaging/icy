@@ -33,11 +33,12 @@ import icy.image.cache.ImageCache;
 import icy.main.Icy;
 import icy.preferences.ApplicationPreferences;
 import icy.preferences.GeneralPreferences;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import javax.swing.*;
 import java.awt.*;
@@ -84,11 +85,7 @@ public class InspectorPanel extends ExternalizablePanel implements ActiveViewerL
         // chatPanel = new ChatPanel();
 
         // virtual mode button (set the same size as memory monitor)
-        virtualModeBtn = new IcyToggleButton(
-                GoogleMaterialDesignIcons.FLASH_OFF,
-                GoogleMaterialDesignIcons.FLASH_ON,
-                48f
-        );
+        virtualModeBtn = new IcyToggleButton(new SVGIconPack(SVGIcon.FLASH_OFF, SVGIcon.FLASH_ON), 48);
         virtualModeBtn.setToolTipText("Enable / disable the virtual mode (all images are created in virtual mode)");
         virtualModeBtn.setHideActionText(true);
         virtualModeBtn.setFocusable(false);

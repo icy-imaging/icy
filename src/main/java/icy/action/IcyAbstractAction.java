@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,26 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.action;
-
-import java.awt.event.ActionEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.KeyStroke;
 
 import icy.gui.frame.progress.CancelableProgressFrame;
 import icy.main.Icy;
-import icy.resource.icon.IcyIcon;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
 
 /**
  * Icy basic AbstractAction class.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public abstract class IcyAbstractAction extends AbstractAction {
@@ -69,12 +63,12 @@ public abstract class IcyAbstractAction extends AbstractAction {
     protected boolean processing;
     protected String processMessage;
     protected CancelableProgressFrame progressFrame;
-    
+
     public IcyAbstractAction(
-            final String name, 
-            final String description, 
-            final String longDescription, 
-            final int keyCode, 
+            final String name,
+            final String description,
+            final String longDescription,
+            final int keyCode,
             final int modifiers,
             final boolean bgProcess,
             final String processMessage
@@ -103,7 +97,7 @@ public abstract class IcyAbstractAction extends AbstractAction {
     public IcyAbstractAction(final String name, final String description, final String longDescription, final boolean bgProcess, final String processMessage) {
         this(name, description, longDescription, 0, 0, bgProcess, processMessage);
     }
-    
+
     public IcyAbstractAction(final String name, final String description, final boolean bgProcess, final String processMessage) {
         this(name, description, null, 0, 0, bgProcess, processMessage);
     }
@@ -119,81 +113,13 @@ public abstract class IcyAbstractAction extends AbstractAction {
     public IcyAbstractAction(final String name, final String description, final String longDescription) {
         this(name, description, longDescription, 0, 0, false, null);
     }
-    
+
     public IcyAbstractAction(final String name, final String description) {
         this(name, description, null, 0, 0, false, null);
     }
-    
+
     public IcyAbstractAction(final String name) {
         this(name, null, null, 0, 0, false, null);
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public IcyAbstractAction(
-            final String name,
-            final IcyIcon icon,
-            final String description,
-            final String longDescription,
-            final int keyCode,
-            final int modifiers,
-            final boolean bgProcess,
-            final String processMessage
-    ) {
-        super(name, icon);
-
-        // by default we use the name as Action Command
-        putValue(ACTION_COMMAND_KEY, name);
-        if (keyCode != 0)
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(keyCode, modifiers));
-        if (!StringUtil.isEmpty(description))
-            putValue(SHORT_DESCRIPTION, description);
-        if (!StringUtil.isEmpty(longDescription))
-            putValue(LONG_DESCRIPTION, longDescription);
-
-        this.bgProcess = bgProcess;
-        this.processMessage = processMessage;
-        progressFrame = null;
-        processing = false;
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final String longDescription, final int keyCode, final int modifiers) {
-        this(name, icon, description, longDescription, keyCode, modifiers, false, null);
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final String longDescription, final boolean bgProcess, final String processMessage) {
-        this(name, icon, description, longDescription, 0, 0, bgProcess, processMessage);
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final boolean bgProcess, final String processMessage) {
-        this(name, icon, description, null, 0, 0, bgProcess, processMessage);
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final int keyCode, final int modifiers) {
-        this(name, icon, description, null, keyCode, modifiers, false, null);
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final int keyCode) {
-        this(name, icon, description, null, keyCode, 0, false, null);
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public IcyAbstractAction(final String name, final IcyIcon icon, final String description, final String longDescription) {
-        this(name, icon, description, longDescription, 0, 0, false, null);
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public IcyAbstractAction(final String name, final IcyIcon icon, final String description) {
-        this(name, icon, description, null, 0, 0, false, null);
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public IcyAbstractAction(final String name, final IcyIcon icon) {
-        this(name, icon, null, null, 0, 0, false, null);
     }
 
     /**
@@ -222,32 +148,6 @@ public abstract class IcyAbstractAction extends AbstractAction {
         return processMessage;
     }
 
-    // TODO: 17/02/2023 Remove this once Substance removed 
-    //private static final int DEFAULT_ICON_SIZE = 20;
-    /*public RichTooltip getRichToolTip() {
-        final String desc = getDescription();
-        final String longDesc = getLongDescription();
-        final IcyIcon icon = getIcon();
-
-        if (StringUtil.isEmpty(desc) && StringUtil.isEmpty(longDesc))
-            return null;
-
-        final RichTooltip result = new RichTooltip();
-
-        if (!StringUtil.isEmpty(desc))
-            result.setTitle(desc);
-
-        if (!StringUtil.isEmpty(longDesc)) {
-            for (String ld : longDesc.split("\n"))
-                result.addDescriptionSection(ld);
-        }
-
-        if (icon != null)
-            result.setMainImage(icon.getImage());
-
-        return result;
-    }*/
-
     /**
      * Set the process message to display for background action process.<br>
      * If set to null then no message is displayed (default).
@@ -264,16 +164,6 @@ public abstract class IcyAbstractAction extends AbstractAction {
 
     public String getName() {
         return (String) getValue(Action.NAME);
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public void setIcon(final IcyIcon value) {
-        putValue(Action.SMALL_ICON, value);
-    }
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public IcyIcon getIcon() {
-        return (IcyIcon) getValue(Action.SMALL_ICON);
     }
 
     public void setDescription(final String value) {
@@ -383,11 +273,12 @@ public abstract class IcyAbstractAction extends AbstractAction {
     /**
      * Returns a {@link JLabel} component representing the action.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public JLabel getLabelComponent(final boolean wantIcon, final boolean wantText) {
         final JLabel result = new JLabel();
 
-        if (wantIcon)
-            result.setIcon(getIcon());
+        /*if (wantIcon)
+            result.setIcon(getIcon());*/
         if (wantText)
             result.setText(getName());
 
@@ -404,6 +295,7 @@ public abstract class IcyAbstractAction extends AbstractAction {
     /**
      * Returns a {@link JLabel} component representing the action.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public JLabel getLabelComponent() {
         return getLabelComponent(true, true);
     }
@@ -472,14 +364,6 @@ public abstract class IcyAbstractAction extends AbstractAction {
      */
     public void execute() {
         actionPerformed(new ActionEvent(this, 0, ""));
-    }
-
-    /**
-     * @deprecated Use {@link #executeNow()} instead
-     */
-    @Deprecated(since = "2.4.3", forRemoval = true)
-    public boolean doAction() {
-        return doAction(new ActionEvent(this, 0, ""));
     }
 
     /**

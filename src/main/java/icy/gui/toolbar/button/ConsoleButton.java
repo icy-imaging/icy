@@ -21,7 +21,7 @@ package icy.gui.toolbar.button;
 import icy.gui.component.button.IcyToggleButton;
 import icy.gui.toolbar.container.StatusPanel;
 import icy.gui.toolbar.panel.OutputConsolePanel;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import icy.resource.icon.SVGIcon;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,7 +31,7 @@ import java.awt.event.ActionListener;
  */
 public final class ConsoleButton extends IcyToggleButton implements ActionListener {
     public ConsoleButton() {
-        super(GoogleMaterialDesignIcons.BUG_REPORT);
+        super(SVGIcon.BUG_REPORT);
         setFocusable(false);
         addActionListener(this);
     }

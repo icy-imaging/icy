@@ -154,7 +154,7 @@ public class Updater {
         for (final ElementDescriptor onlineElement : onlineElements) {
             final ElementDescriptor localElement = findElement(onlineElement.getName(), localElements);
             // get update element (differences between online and local element)
-            final ElementDescriptor updateElement = ElementDescriptor.getUpdateElement(localElement, onlineElement);
+            final ElementDescriptor updateElement = ElementDescriptor.getUpdateElement(localElement, onlineElement, true);
 
             if (updateElement != null)
                 // add the element to update list

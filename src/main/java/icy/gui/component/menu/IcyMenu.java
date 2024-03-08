@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,11 +18,10 @@
 
 package icy.gui.component.menu;
 
-import icy.action.IcyAbstractAction;
 import icy.gui.util.LookAndFeelUtil;
-import icy.resource.icon.IcyIconFont;
-import icy.system.SystemUtil;
-import jiconfont.IconCode;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,84 +31,130 @@ import javax.swing.*;
  * @author Thomas Musset
  */
 public class IcyMenu extends JMenu {
-    public IcyMenu(@Nullable final String text, @NotNull final IconCode defaultIcon, @NotNull final IconCode disabledIcon, @NotNull final IconCode selectedIcon, final float size) {
+    private @Nullable SVGIconPack iconPack;
+    private @Nullable Icon iconDefault = null, iconDisabled = null, iconSelected = null, iconDisabledSelected = null;
+    private final int iconSize;
+
+    /**
+     * Create a {@link JMenu} with specified text, SVG icons for each state (default, disabled and selected) and custom size.
+     */
+    public IcyMenu(final @NotNull String text, final @NotNull SVGIconPack pack, final int size) {
         super(text);
-
-        if (!SystemUtil.isMac() || (SystemUtil.isMac() && !System.getProperty("apple.laf.useScreenMenuBar").equals("true"))) {
-            setIcon(new IcyIconFont(defaultIcon, size, LookAndFeelUtil.ColorType.UI_MENU_DEFAULT));
-            setDisabledIcon(new IcyIconFont(disabledIcon, size, LookAndFeelUtil.ColorType.UI_MENU_DISABLED));
-            setSelectedIcon(new IcyIconFont(selectedIcon, size, LookAndFeelUtil.ColorType.UI_MENU_SELECTED));
-        }
-    }
-
-    public IcyMenu(@Nullable final String text, @NotNull final IconCode defaultIcon, @NotNull final IconCode disabledIcon, @NotNull final IconCode selectedIcon) {
-        this(text, defaultIcon, disabledIcon, selectedIcon, LookAndFeelUtil.getDefaultIconSizeAsFloat());
-    }
-
-    public IcyMenu(@NotNull final IconCode defaultIcon, @NotNull final IconCode disabledIcon, @NotNull final IconCode selectedIcon) {
-        this(null, defaultIcon, disabledIcon, selectedIcon);
-    }
-
-    public IcyMenu(@NotNull final IconCode defaultIcon, @NotNull final IconCode disabledIcon, @NotNull final IconCode selectedIcon, final float size) {
-        this(null, defaultIcon, disabledIcon, selectedIcon, size);
+        iconPack = pack;
+        iconSize = size;
+        setSVGIcons();
     }
 
     /**
-     * Create a button with specified text and icon
+     * Create a {@link JMenu} with specified text, SVG icons for each state (default, disabled and selected) and default size.
      */
-    public IcyMenu(@NotNull final String text, @NotNull final IconCode defaultIcon) {
-        this(text, defaultIcon, defaultIcon, defaultIcon);
+    public IcyMenu(final @NotNull String text, final @NotNull SVGIconPack pack) {
+        this(text, pack, LookAndFeelUtil.getDefaultIconSize());
     }
 
     /**
-     * Create a button with specified icon.
+     * Create a {@link JMenu} with specified text, same SVG icon for each state (default, disabled and selected) and custom size.
      */
-    public IcyMenu(@NotNull final IconCode defaultIcon) {
-        this(null, defaultIcon, defaultIcon, defaultIcon);
+    public IcyMenu(final @NotNull String text, final @NotNull SVGIcon icon, final int size) {
+        this(text, new SVGIconPack(icon), size);
     }
 
     /**
-     * Create a button with specified text and classic icon
+     * Create a {@link JMenu} with specified text, same SVG icon for each state (default, disabled and selected) and default size.
      */
-    public IcyMenu(@NotNull final String text, @NotNull final Icon icon) {
-        super(text);
-        setIcon(icon);
+    public IcyMenu(final @NotNull String text, final @NotNull SVGIcon icon) {
+        this(text, new SVGIconPack(icon), LookAndFeelUtil.getDefaultIconSize());
     }
 
     /**
-     * Create a menu with specified text.
+     * Create a {@link JMenu} with specified SVG icons for each state (default, disabled and selected) and custom size, but without text.
      */
-    public IcyMenu(@NotNull final String text) {
-        super(text);
+    public IcyMenu(final @NotNull SVGIconPack pack, final int size) {
+        super();
+        iconPack = pack;
+        iconSize = size;
+        setSVGIcons();
     }
 
-    @Override
-    public void setAction(@Nullable final Action a) {
-        super.setAction(a);
-
-        // override tooltip set from action
-        IcyAbstractAction.setToolTipTextFromAction(this, a);
+    /**
+     * Create a {@link JMenu} with specified SVG icons for each state (default, disabled and selected) and default size, but without text.
+     */
+    public IcyMenu(final @NotNull SVGIconPack pack) {
+        this(pack, LookAndFeelUtil.getDefaultIconSize());
     }
 
-    public void updateIconFont() {
-        IcyIconFont.updateIcon(getIcon());
-        IcyIconFont.updateIcon(getDisabledIcon());
-        IcyIconFont.updateIcon(getSelectedIcon());
-
-        /*final Icon i = getIcon();
-        if (i instanceof IcyIconFont)
-            ((IcyIconFont) i).updateIcon();
-        final Icon di = getDisabledIcon();
-        if (di instanceof IcyIconFont)
-            ((IcyIconFont) di).updateIcon();
-        final Icon si = getSelectedIcon();
-        if (si instanceof IcyIconFont)
-            ((IcyIconFont) si).updateIcon();*/
+    /**
+     * Create a {@link JMenu} with same SVG icon for each state (default, disabled and selected) and custom size, but without text.
+     */
+    public IcyMenu(final @NotNull SVGIcon icon, final int size) {
+        this(new SVGIconPack(icon), size);
     }
 
-    @Override
-    public void updateUI() {
-        super.updateUI();
-        updateIconFont();
+    /**
+     * Create a {@link JMenu} with same SVG icon for each state (default, disabled and selected) and default size, but without text.
+     */
+    public IcyMenu(final @NotNull SVGIcon icon) {
+        this(new SVGIconPack(icon), LookAndFeelUtil.getDefaultIconSize());
+    }
+
+    protected final void setSVGIconPack(final @NotNull SVGIconPack pack) {
+        this.iconPack = pack;
+        setSVGIcons();
+    }
+
+    /**
+     * Set icon for each state (default, disabled, selected and disabled-selected).<br>
+     * Internal use only.
+     */
+    protected final void setIcons(final @NotNull Icon icon, final @NotNull Icon disabled, final @NotNull Icon selected, final @NotNull Icon disabledSelected) {
+        iconDefault = icon;
+        iconDisabled = disabled;
+        iconSelected = selected;
+        iconDisabledSelected = disabledSelected;
+
+        resetIcons();
+    }
+
+    /**
+     * Set icon for each state (default, disabled, selected and disabled-selected).<br>
+     * Internal use only.
+     */
+    protected final void setIcons(final @NotNull Icon icon, final @NotNull Icon selected) {
+        setIcons(icon, icon, selected, selected);
+    }
+
+    /**
+     * Set icon for each state (default, disabled, selected and disabled-selected).<br>
+     * Internal use only.
+     */
+    protected final void setIcons(final @NotNull Icon icon) {
+        setIcons(icon, icon, icon, icon);
+    }
+
+    /**
+     * Set SVG icon for each state (default, disabled, selected and disabled-selected).<br>
+     * Internal use only.
+     */
+    protected final void setSVGIcons() {
+        if (iconPack == null)
+            return;
+
+        iconDefault = new IcySVGIcon(iconPack.getDefaultIcon(), LookAndFeelUtil.ColorType.UI_MENUITEM_DEFAULT, iconSize);
+        iconDisabled = new IcySVGIcon(iconPack.getDisabledIcon(), LookAndFeelUtil.ColorType.UI_MENUITEM_DISABLED, iconSize);
+        iconSelected = new IcySVGIcon(iconPack.getSelectedtIcon(), LookAndFeelUtil.ColorType.UI_MENUITEM_SELECTED, iconSize);
+        iconDisabledSelected = new IcySVGIcon(iconPack.getDisabledSelectedIcon(), LookAndFeelUtil.ColorType.UI_MENUITEM_DISABLED, iconSize);
+
+        resetIcons();
+    }
+
+    /**
+     * Reset all icons (useful when Action overrides icons).<br>
+     * Internal use only.
+     */
+    protected final void resetIcons() {
+        setIcon(iconDefault);
+        setDisabledIcon(iconDisabled);
+        setSelectedIcon(iconSelected);
+        setDisabledSelectedIcon(iconDisabledSelected);
     }
 }

@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.inspector;
 
 import icy.gui.component.ImageComponent;
@@ -25,23 +25,15 @@ import icy.gui.util.ComponentUtil;
 import icy.main.Icy;
 import icy.plugin.PluginDescriptor;
 import icy.plugin.abstract_.Plugin;
+import icy.resource.icon.SVGIcon;
 import icy.system.thread.ThreadUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 import java.lang.ref.WeakReference;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
@@ -81,7 +73,7 @@ public class PluginsPanel extends JPanel implements GlobalPluginListener, Runnab
             final JLabel label = new JLabel(descriptor.getName());
             label.setToolTipText(descriptor.getName() + " " + descriptor.getVersion());
 
-            final IcyButton killButton = new IcyButton(GoogleMaterialDesignIcons.CLOSE);
+            final IcyButton killButton = new IcyButton(SVGIcon.CLOSE);
             killButton.setFlat(true);
             killButton.setEnabled(false);
             killButton.setToolTipText("kill plugin");

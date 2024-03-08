@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.inspector;
 
 import icy.gui.component.IcyTextField;
 import icy.gui.component.IcyTextField.TextChangeListener;
+import icy.image.ImageUtil;
 import icy.main.Icy;
-import icy.resource.ResourceUtil;
 import icy.swimmingPool.SwimmingObject;
 import icy.swimmingPool.SwimmingPool;
 import icy.swimmingPool.SwimmingPoolEvent;
@@ -29,28 +29,16 @@ import icy.swimmingPool.SwimmingPoolListener;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
 
-import java.util.ArrayList;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import java.util.ArrayList;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class SwimmingPoolPanel extends JPanel implements TextChangeListener, ListSelectionListener, SwimmingPoolListener {
@@ -69,7 +57,7 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
     final JButton deleteAllButton;
     final JButton deleteButton;
 
-    public SwimmingPoolPanel(boolean showTypeFilter, boolean showNameFilter, boolean showButtons) {
+    public SwimmingPoolPanel(final boolean showTypeFilter, final boolean showNameFilter, final boolean showButtons) {
         super();
 
         swimmingPool = Icy.getMainInterface().getSwimmingPool();
@@ -129,7 +117,7 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
         deleteButton.addActionListener(e -> {
             // delete selected objects
             if (swimmingPool != null)
-                for (SwimmingObject so : getSelectedObjects())
+                for (final SwimmingObject so : getSelectedObjects())
                     swimmingPool.remove(so);
         });
 
@@ -153,7 +141,7 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
             }
 
             @Override
-            public String getColumnName(int column) {
+            public String getColumnName(final int column) {
                 return columnNames[column];
             }
 
@@ -163,30 +151,29 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
             }
 
             @Override
-            public Object getValueAt(int row, int column) {
+            public Object getValueAt(final int row, final int column) {
                 final SwimmingObject so = objects.get(row);
 
-                switch (column) {
-                    case 0:
-                        return ResourceUtil.scaleIcon(so.getIcon(), 24);
-
-                    case 1:
-                        return so.getName();
-
-                    case 2:
-                        return so.getObjectSimpleClassName();
-                }
-
-                return "";
+                return switch (column) {
+                    case 0 ->  {
+                        if (so.getIcon() != null)
+                            yield new ImageIcon(ImageUtil.scale(so.getIcon().getImage(), 24, 24));
+                        else
+                            yield null;
+                    }
+                    case 1 -> so.getName();
+                    case 2 -> so.getObjectSimpleClassName();
+                    default -> "";
+                };
             }
 
             @Override
-            public boolean isCellEditable(int row, int column) {
+            public boolean isCellEditable(final int row, final int column) {
                 return false;
             }
 
             @Override
-            public Class<?> getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(final int columnIndex) {
                 if (columnIndex == 0)
                     return ImageIcon.class;
 
@@ -242,11 +229,11 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
         refreshObjects();
     }
 
-    public void setTypeFilter(String type) {
+    public void setTypeFilter(final String type) {
         objectType.setSelectedItem(type);
     }
 
-    public void setNameFilter(String name) {
+    public void setNameFilter(final String name) {
         nameFilter.setText(name);
     }
 
@@ -257,15 +244,15 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
             objects.clear();
     }
 
-    protected int getObjectIndex(SwimmingObject object) {
+    protected int getObjectIndex(final SwimmingObject object) {
         return objects.indexOf(object);
     }
 
-    protected int getObjectModelIndex(SwimmingObject object) {
+    protected int getObjectModelIndex(final SwimmingObject object) {
         return getObjectIndex(object);
     }
 
-    protected int getObjectTableIndex(SwimmingObject object) {
+    protected int getObjectTableIndex(final SwimmingObject object) {
         final int ind = getObjectModelIndex(object);
 
         if (ind == -1)
@@ -274,7 +261,7 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
         try {
             return table.convertRowIndexToView(ind);
         }
-        catch (IndexOutOfBoundsException e) {
+        catch (final IndexOutOfBoundsException e) {
             return -1;
         }
     }
@@ -282,14 +269,14 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
     public ArrayList<SwimmingObject> getSelectedObjects() {
         final ArrayList<SwimmingObject> result = new ArrayList<>();
 
-        for (int rowIndex : table.getSelectedRows()) {
+        for (final int rowIndex : table.getSelectedRows()) {
             int index = -1;
 
             if (rowIndex != -1) {
                 try {
                     index = table.convertRowIndexToModel(rowIndex);
                 }
-                catch (IndexOutOfBoundsException e) {
+                catch (final IndexOutOfBoundsException e) {
                     // ignore
                 }
             }
@@ -301,10 +288,10 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
         return result;
     }
 
-    public void setSelectedObjects(ArrayList<SwimmingObject> sos) {
+    public void setSelectedObjects(final ArrayList<SwimmingObject> sos) {
         table.clearSelection();
 
-        for (SwimmingObject so : sos) {
+        for (final SwimmingObject so : sos) {
             final int index = getObjectTableIndex(so);
 
             if (index > -1)
@@ -320,7 +307,7 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
         model.addElement("ALL");
 
         if (swimmingPool != null) {
-            for (String type : SwimmingObject.getObjectTypes(swimmingPool.getObjects()))
+            for (final String type : SwimmingObject.getObjectTypes(swimmingPool.getObjects()))
                 model.addElement(type);
         }
 
@@ -330,7 +317,7 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
             objectType.setSelectedIndex(0);
     }
 
-    private ArrayList<SwimmingObject> filterList(ArrayList<SwimmingObject> list, String nameFilterText) {
+    private ArrayList<SwimmingObject> filterList(final ArrayList<SwimmingObject> list, final String nameFilterText) {
         final ArrayList<SwimmingObject> result = new ArrayList<>();
 
         final boolean typeEmpty = objectType.getSelectedIndex() == 0;
@@ -347,7 +334,7 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
         else
             nameFilterUp = "";
 
-        for (SwimmingObject so : list) {
+        for (final SwimmingObject so : list) {
             // search in name and type
             if ((typeEmpty || so.getObjectSimpleClassName().equals(typeFilter)) && (nameEmpty || (so.getName().contains(nameFilterUp))))
                 result.add(so);
@@ -379,19 +366,19 @@ public class SwimmingPoolPanel extends JPanel implements TextChangeListener, Lis
     }
 
     @Override
-    public void textChanged(IcyTextField source, boolean validate) {
+    public void textChanged(final IcyTextField source, final boolean validate) {
         pluginsChanged();
     }
 
     @Override
-    public void valueChanged(ListSelectionEvent e) {
+    public void valueChanged(final ListSelectionEvent e) {
         refreshButtonsPanel();
 
         // TODO : send event to notify selection change
     }
 
     @Override
-    public void swimmingPoolChangeEvent(SwimmingPoolEvent swimmingPoolEvent) {
+    public void swimmingPoolChangeEvent(final SwimmingPoolEvent swimmingPoolEvent) {
         refreshObjectTypeList();
         refreshObjects();
     }

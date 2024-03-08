@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.system;
 
 import icy.file.FileUtil;
@@ -25,14 +25,16 @@ import icy.gui.component.button.IcyToggleButton;
 import icy.gui.frame.progress.ProgressFrame;
 import icy.gui.util.GuiUtil;
 import icy.preferences.GeneralPreferences;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import icy.system.IcyExceptionHandler;
 import icy.system.thread.ThreadUtil;
 import icy.util.EventUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import org.jetbrains.annotations.NotNull;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
+import javax.swing.*;
+import javax.swing.text.*;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
@@ -47,15 +49,8 @@ import java.io.PrintStream;
 import java.io.Writer;
 import java.util.EventListener;
 
-import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Element;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
-
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  * @deprecated Use {@link icy.gui.toolbar.panel.OutputConsolePanel} instead.
  */
@@ -68,14 +63,14 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
     private class WindowsOutPrintStream extends PrintStream {
         boolean isStdErr;
 
-        public WindowsOutPrintStream(PrintStream out, boolean isStdErr) {
+        public WindowsOutPrintStream(final PrintStream out, final boolean isStdErr) {
             super(out);
 
             this.isStdErr = isStdErr;
         }
 
         @Override
-        public void write(byte[] buf, int off, int len) {
+        public void write(final byte @NotNull [] buf, final int off, final int len) {
             try {
                 super.write(buf, off, len);
 
@@ -88,7 +83,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
                     logWriter.flush();
                 }
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
                 addText(t.getMessage(), isStdErr);
             }
         }
@@ -111,6 +106,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
     int nbUpdate;
     Writer logWriter;
 
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     public OutputConsolePanel() {
         super("Output", "outputConsole");
 
@@ -133,11 +129,11 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
 
         logMaxLineField = new JSpinner(new SpinnerNumberModel(GeneralPreferences.getOutputLogSize(), 100, 1000000, 100));
         logMaxLineTextField = ((JSpinner.DefaultEditor) logMaxLineField.getEditor()).getTextField();
-        clearLogButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
-        copyLogButton = new IcyButton(GoogleMaterialDesignIcons.CONTENT_COPY);
-        reportLogButton = new IcyButton(GoogleMaterialDesignIcons.BUG_REPORT);
-        scrollLockButton = new IcyToggleButton(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
-        fileLogButton = new IcyToggleButton(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
+        clearLogButton = new IcyButton(SVGIcon.DELETE);
+        copyLogButton = new IcyButton(SVGIcon.CONTENT_COPY);
+        reportLogButton = new IcyButton(SVGIcon.BUG_REPORT);
+        scrollLockButton = new IcyToggleButton(new SVGIconPack(SVGIcon.LOCK_OPEN, SVGIcon.LOCK));
+        fileLogButton = new IcyToggleButton(SVGIcon.FILE_SAVE);
         fileLogButton.setSelected(GeneralPreferences.getOutputLogToFile());
 
         // ComponentUtil.setFontSize(textPane, 10);
@@ -155,7 +151,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
         logMaxLineTextField.setFocusable(false);
         logMaxLineTextField.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(final MouseEvent e) {
                 // get focus on double click to enable manual edition
                 if (EventUtil.isLeftMouseButton(e)) {
                     logMaxLineField.setFocusable(true);
@@ -166,7 +162,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
         });
         logMaxLineTextField.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
+            public void keyPressed(final KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     // cancel manual edition ? --> remove focus
                     if (logMaxLineTextField.isFocusable()) {
@@ -188,7 +184,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
             try {
                 limitLog();
             }
-            catch (Exception ex) {
+            catch (final Exception ex) {
                 // ignore
             }
         });
@@ -216,12 +212,25 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
         });
         fileLogButton.addActionListener(e -> GeneralPreferences.setOutputLogFile(fileLogButton.isSelected()));
 
-        bottomPanel = GuiUtil.createPageBoxPanel(Box.createVerticalStrut(4),
-                GuiUtil.createLineBoxPanel(clearLogButton, Box.createHorizontalStrut(4), copyLogButton,
-                        Box.createHorizontalStrut(4), reportLogButton, Box.createHorizontalGlue(),
-                        Box.createHorizontalStrut(4), new JLabel("Limit"), Box.createHorizontalStrut(4),
-                        logMaxLineField, Box.createHorizontalStrut(4), scrollLockButton, Box.createHorizontalStrut(4),
-                        fileLogButton));
+        bottomPanel = GuiUtil.createPageBoxPanel(
+                Box.createVerticalStrut(4),
+                GuiUtil.createLineBoxPanel(
+                        clearLogButton,
+                        Box.createHorizontalStrut(4),
+                        copyLogButton,
+                        Box.createHorizontalStrut(4),
+                        reportLogButton,
+                        Box.createHorizontalGlue(),
+                        Box.createHorizontalStrut(4),
+                        new JLabel("Limit"),
+                        Box.createHorizontalStrut(4),
+                        logMaxLineField,
+                        Box.createHorizontalStrut(4),
+                        scrollLockButton,
+                        Box.createHorizontalStrut(4),
+                        fileLogButton
+                )
+        );
 
         final JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
@@ -244,7 +253,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
             // define log file writer (always clear log.txt file if present)
             logWriter = new FileWriter(FileUtil.getApplicationDirectory() + "/icy.log", false);
         }
-        catch (IOException e1) {
+        catch (final IOException e1) {
             logWriter = null;
         }
     }
@@ -270,7 +279,7 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
                         textPane.setCaretPosition(doc.getLength());
                 }
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 // ignore
             }
 
@@ -287,15 +296,13 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
                 return doc.getText(0, doc.getLength());
             }
         }
-        catch (BadLocationException e) {
+        catch (final BadLocationException e) {
             return "";
         }
     }
 
     /**
      * Apply maximum line limitation to the log output
-     *
-     * @throws BadLocationException
      */
     public void limitLog() throws BadLocationException {
         final Element root = doc.getDefaultRootElement();
@@ -320,29 +327,29 @@ public class OutputConsolePanel extends ExternalizablePanel implements Clipboard
     /**
      * Sets maximum log line number
      */
-    public void setLogMaxLine(int value) {
+    public void setLogMaxLine(final int value) {
         logMaxLineField.setValue(Integer.valueOf(value));
     }
 
-    private void changed(boolean isError) {
+    private void changed(final boolean isError) {
         fireChangedEvent(isError);
     }
 
-    public void fireChangedEvent(boolean isError) {
-        for (OutputConsoleChangeListener listener : listenerList.getListeners(OutputConsoleChangeListener.class))
+    public void fireChangedEvent(final boolean isError) {
+        for (final OutputConsoleChangeListener listener : listenerList.getListeners(OutputConsoleChangeListener.class))
             listener.outputConsoleChanged(this, isError);
     }
 
-    public void addOutputConsoleChangeListener(OutputConsoleChangeListener listener) {
+    public void addOutputConsoleChangeListener(final OutputConsoleChangeListener listener) {
         listenerList.add(OutputConsoleChangeListener.class, listener);
     }
 
-    public void removeOutputConsoleChangeListener(OutputConsoleChangeListener listener) {
+    public void removeOutputConsoleChangeListener(final OutputConsoleChangeListener listener) {
         listenerList.remove(OutputConsoleChangeListener.class, listener);
     }
 
     @Override
-    public void lostOwnership(Clipboard clipboard, Transferable contents) {
+    public void lostOwnership(final Clipboard clipboard, final Transferable contents) {
         // ignore
     }
 }

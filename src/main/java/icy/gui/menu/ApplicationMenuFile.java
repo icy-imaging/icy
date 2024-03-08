@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,223 +24,170 @@ import icy.action.PreferencesActions;
 import icy.file.Loader;
 import icy.gui.component.menu.IcyMenu;
 import icy.gui.component.menu.IcyMenuItem;
-import icy.main.Icy;
-import icy.plugin.PluginDescriptor;
-import icy.plugin.PluginLoader;
-import icy.plugin.abstract_.PluginSequenceImporter;
 import icy.preferences.IcyPreferences;
-import icy.resource.icon.IcyIcon;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.Sequence;
 import icy.system.SystemUtil;
 import icy.system.thread.ThreadUtil;
 import icy.type.collection.CollectionUtil;
 import icy.type.collection.list.RecentFileList;
 import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Thomas Musset
  */
 public final class ApplicationMenuFile extends AbstractApplicationMenu {
-    @NotNull
-    private static final ApplicationMenuFile instance = new ApplicationMenuFile();
+    private static final @NotNull ApplicationMenuFile instance = new ApplicationMenuFile();
 
-    @NotNull
-    public static synchronized ApplicationMenuFile getInstance() {
+    public static synchronized @NotNull ApplicationMenuFile getInstance() {
         return instance;
     }
 
-    @NotNull
-    private final IcyMenu menuImport;
-    @NotNull
-    private final IcyMenuItem itemCloseSequence;
-    @NotNull
-    private final IcyMenuItem itemCloseOther;
-    @NotNull
-    private final IcyMenuItem itemCloseAll;
-    @NotNull
-    private final IcyMenuItem itemSaveSequence;
-    @NotNull
-    private final IcyMenuItem itemSaveSequenceAs;
-    @NotNull
-    private final IcyMenuItem itemSaveMetadata;
+    private final @NotNull IcyMenu menuOpenRecent;
+    private final @NotNull IcyMenuItem itemRemoveRecentFiles;
+
+    private final RecentFileList recentFileList;
 
     private ApplicationMenuFile() {
         super("File");
 
-        final IcyMenu menuCreate = new IcyMenu("New", GoogleMaterialDesignIcons.NOTE_ADD);
+        recentFileList = new RecentFileList(IcyPreferences.applicationRoot().node("loader"));
+
+        final IcyMenu menuCreate = new IcyMenu("New", SVGIcon.ADD_PHOTO_ALTERNATE);
         add(menuCreate);
 
-        final IcyMenuItem itemCreateSequence = new IcyMenuItem("Sequence", GoogleMaterialDesignIcons.IMAGE);
-        itemCreateSequence.addActionListener(FileActions.newSequenceAction);
+        final IcyMenuItem itemCreateSequence = new IcyMenuItem(FileActions.newSequenceAction, SVGIcon.IMAGE);
         menuCreate.add(itemCreateSequence);
 
-        final IcyMenuItem itemCreateGraySequence = new IcyMenuItem("Grayscale sequence", new IcyIcon("gray", 18, false));
-        itemCreateGraySequence.addActionListener(FileActions.newGraySequenceAction);
+        final IcyMenuItem itemCreateGraySequence = new IcyMenuItem(FileActions.newGraySequenceAction, SVGIcon.GRAYSCALE_IMAGE);
         menuCreate.add(itemCreateGraySequence);
 
-        final IcyMenuItem itemCreateRGBSequence = new IcyMenuItem("RGB sequence", new IcyIcon("rgb", 18, false));
-        itemCreateRGBSequence.addActionListener(FileActions.newRGBSequenceAction);
+        final IcyMenuItem itemCreateRGBSequence = new IcyMenuItem(FileActions.newRGBSequenceAction, SVGIcon.RGB_IMAGE);
         menuCreate.add(itemCreateRGBSequence);
 
-        final IcyMenuItem itemCreateRGBASequence = new IcyMenuItem("RGBA sequence", new IcyIcon("argb", 18, false));
-        itemCreateRGBASequence.addActionListener(FileActions.newARGBSequenceAction);
+        // TODO rework svg icon for ARGB sequence
+        final IcyMenuItem itemCreateRGBASequence = new IcyMenuItem(FileActions.newARGBSequenceAction, SVGIcon.ARGB_IMAGE);
         menuCreate.add(itemCreateRGBASequence);
 
-        final IcyMenuItem itemOpen = new IcyMenuItem("Open...", GoogleMaterialDesignIcons.FOLDER_OPEN);
-        itemOpen.addActionListener(FileActions.openSequenceAction);
+        final IcyMenuItem itemOpen = new IcyMenuItem(FileActions.openSequenceAction, SVGIcon.FOLDER_OPEN);
         add(itemOpen);
 
         // TODO Make recent files menu
-        final IcyMenu menuOpenRecent = new IcyMenu("Open Recent", GoogleMaterialDesignIcons.FOLDER);
-        menuOpenRecent.setEnabled(false);
+        menuOpenRecent = new IcyMenu("Open Recent", SVGIcon.FOLDER);
         add(menuOpenRecent);
 
-        final RecentFileList recentFileList = new RecentFileList(IcyPreferences.applicationRoot().node("loader"));
-        // remove obsolete entries
-        recentFileList.clean();
-        final int nbRecentFiles = recentFileList.getSize();
-        for (int i = 0; i < nbRecentFiles; i ++) {
-            final String entry = recentFileList.getEntryAsName(i, 100, true);
-            if (!StringUtil.isEmpty(entry)) {
-                final IcyMenuItem itemFile = new IcyMenuItem(entry);
-                final String[] paths = recentFileList.getEntry(i);
-                itemFile.addActionListener(e -> Loader.load(CollectionUtil.asList(paths), false, true, true));
-                menuOpenRecent.add(itemFile);
-                if (!menuOpenRecent.isEnabled())
-                    menuOpenRecent.setEnabled(true);
-            }
-        }
+        itemRemoveRecentFiles = new IcyMenuItem(FileActions.clearRecentFilesAction, SVGIcon.DELETE);
+        itemRemoveRecentFiles.addActionListener(e -> menuOpenRecent.setEnabled(false));
 
-        itemCloseSequence = new IcyMenuItem("Close Sequence", GoogleMaterialDesignIcons.CLEAR);
-        itemCloseSequence.addActionListener(FileActions.closeCurrentSequenceAction);
+        final IcyMenuItem itemOpenRegion = new IcyMenuItem(FileActions.openSequenceRegionAction, SVGIcon.PICTURE_IN_PICTURE);
+        add(itemOpenRegion);
+
+        final IcyMenuItem itemCloseSequence = new IcyMenuItem(FileActions.closeCurrentSequenceAction, SVGIcon.CLOSE);
         add(itemCloseSequence);
 
-        itemCloseOther = new IcyMenuItem("Close Other Sequences", GoogleMaterialDesignIcons.CLEAR_ALL);
-        itemCloseOther.addActionListener(FileActions.closeOthersSequencesAction);
+        final IcyMenuItem itemCloseOther = new IcyMenuItem(FileActions.closeOthersSequencesAction, SVGIcon.CLEAR_ALL);
         add(itemCloseOther);
 
-        itemCloseAll = new IcyMenuItem("Close All Sequences", GoogleMaterialDesignIcons.CLEAR_ALL);
-        itemCloseAll.addActionListener(FileActions.closeAllSequencesAction);
+        final IcyMenuItem itemCloseAll = new IcyMenuItem(FileActions.closeAllSequencesAction, SVGIcon.CLEAR_ALL);
         add(itemCloseAll);
 
         addSeparator();
 
-        itemSaveSequence = new IcyMenuItem("Save Sequence", GoogleMaterialDesignIcons.SAVE);
-        itemSaveSequence.addActionListener(FileActions.saveSequenceAction);
+        final IcyMenuItem itemSaveSequence = new IcyMenuItem(FileActions.saveSequenceAction, SVGIcon.SAVE);
         add(itemSaveSequence);
 
-        itemSaveSequenceAs = new IcyMenuItem("Save Sequence As...", GoogleMaterialDesignIcons.SAVE);
-        itemSaveSequenceAs.addActionListener(FileActions.saveAsSequenceAction);
+        final IcyMenuItem itemSaveSequenceAs = new IcyMenuItem(FileActions.saveAsSequenceAction, SVGIcon.SAVE_AS);
         add(itemSaveSequenceAs);
 
-        itemSaveMetadata = new IcyMenuItem("Save Metadata", GoogleMaterialDesignIcons.ART_TRACK);
-        itemSaveMetadata.addActionListener(FileActions.saveMetaDataAction);
+        final IcyMenuItem itemSaveMetadata = new IcyMenuItem(FileActions.saveMetaDataAction, SVGIcon.ART_TRACK);
         add(itemSaveMetadata);
-
-        addSeparator();
-
-        // TODO Make import actions
-        menuImport = new IcyMenu("Import");
-        add(menuImport);
 
         if (!SystemUtil.isMac()) {
             addSeparator();
 
-            final IcyMenuItem itemPreferences = new IcyMenuItem("Preferences...", GoogleMaterialDesignIcons.SETTINGS);
-            itemPreferences.addActionListener(PreferencesActions.preferencesAction);
+            final IcyMenuItem itemPreferences = new IcyMenuItem(PreferencesActions.preferencesAction, SVGIcon.SETTINGS);
             add(itemPreferences);
 
             addSeparator();
 
-            final IcyMenuItem itemQuit = new IcyMenuItem("Quit Icy", GoogleMaterialDesignIcons.POWER_SETTINGS_NEW);
-            itemQuit.addActionListener(GeneralActions.exitApplicationAction);
+            final IcyMenuItem itemQuit = new IcyMenuItem(GeneralActions.exitApplicationAction, SVGIcon.POWER_SETTINGS_NEW);
             add(itemQuit);
         }
 
-        reloadFileMenu();
-        enableImport(false); // TODO: 19/01/2023 Remove this when reload import finished
-
-        addGlobalSequenceListener();
+        reloadRecentFiles();
     }
 
-    private void enableFileMenu(final boolean b) {
-        itemCloseSequence.setEnabled(b);
-        itemCloseAll.setEnabled(b);
-        itemSaveSequence.setEnabled(b);
-        itemSaveSequenceAs.setEnabled(b);
-        itemSaveMetadata.setEnabled(b);
-    }
-
-    private void enableCloseOther(final boolean b) {
-        itemCloseOther.setEnabled(b);
-    }
-
-    private void enableImport(final boolean b) {
-        menuImport.setEnabled(b);
-    }
-
-    private void reloadFileMenu() {
-        final List<Sequence> sequences = Icy.getMainInterface().getSequences();
-        final int size = sequences.size();
-        if (size == 0) {
-            // No sequence -> disable all
-            enableFileMenu(false);
-            enableCloseOther(false);
-        }
-        else {
-            enableFileMenu(true);
-            // Two or more sequences -> enable Close Other
-            enableCloseOther(size > 1);
-        }
-    }
-
-    private void reloadImportMenu() {
+    private void reloadRecentFiles() {
         ThreadUtil.invokeLater(() -> {
-            final List<PluginDescriptor> plugins = PluginLoader.getPlugins(PluginSequenceImporter.class);
-            for (final PluginDescriptor descriptor : plugins) {
-                // TODO add plugin importer menu
+            menuOpenRecent.removeAll();
+            menuOpenRecent.add(itemRemoveRecentFiles);
+            menuOpenRecent.addSeparator();
+
+            // remove obsolete entries
+            recentFileList.clean();
+            final int nbRecentFiles = recentFileList.getSize();
+            if (nbRecentFiles > 0) {
+                int valid = 0;
+                for (int i = 0; i < nbRecentFiles; i++) {
+                    final String entry = recentFileList.getEntryAsName(i, 100, true);
+                    if (!StringUtil.isEmpty(entry)) {
+                        final IcyMenuItem itemFile = new IcyMenuItem(entry, SVGIcon.IMAGE);
+                        final String[] paths = recentFileList.getEntry(i);
+                        itemFile.addActionListener(e -> Loader.load(CollectionUtil.asList(paths), false, true, true));
+                        menuOpenRecent.add(itemFile);
+                        valid++;
+                    }
+                }
+
+                menuOpenRecent.setEnabled(valid > 0);
             }
+            else
+                menuOpenRecent.setEnabled(false);
         });
     }
 
-    // TODO change this action
-    public void addRecentFile(final String filename) {
-
+    public RecentFileList getRecentFileList() {
+        return recentFileList;
     }
 
-    // TODO change this action
-    public void addRecentFile(final List<String> filenames) {
-
+    public void addRecentLoadedFile(final List<File> files) {
+        addRecentLoadedFile(files.toArray(new File[0]));
     }
 
-    // TODO change this action
+    public void addRecentLoadedFile(final File[] files) {
+        recentFileList.addEntry(files);
+    }
+
     public void addRecentLoadedFile(final File file) {
-
+        addRecentLoadedFile(new File[]{file});
     }
 
-    // TODO change this action
-    public List<File> getRecentFileList() {
-        return new ArrayList<>();
+    /**
+     * Add a list of recently opened files (String format)
+     */
+    public void addRecentFile(final List<String> paths) {
+        addRecentFile(paths.toArray(new String[0]));
+    }
+
+    public void addRecentFile(final String[] paths) {
+        recentFileList.addEntry(paths);
+    }
+
+    public void addRecentFile(final String path) {
+        addRecentFile(new String[]{path});
     }
 
     @Override
     public void sequenceOpened(final Sequence sequence) {
-        reloadFileMenu();
+        reloadRecentFiles();
     }
 
     @Override
     public void sequenceClosed(final Sequence sequence) {
-        reloadFileMenu();
-    }
-
-    @Override
-    public void pluginLoaderChanged(final PluginLoader.PluginLoaderEvent e) {
-        //reloadImportMenu();
+        reloadRecentFiles();
     }
 }

@@ -18,17 +18,17 @@
 
 package icy.gui.toolbar.panel;
 
-import icy.file.FileUtil;
 import icy.gui.component.button.IcyButton;
 import icy.gui.component.button.IcyToggleButton;
 import icy.gui.frame.progress.ProgressFrame;
 import icy.gui.util.GuiUtil;
 import icy.preferences.GeneralPreferences;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import icy.system.IcyExceptionHandler;
 import icy.util.EventUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
@@ -40,10 +40,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Writer;
 
 /**
  * @author Stephane Dallongeville
@@ -69,7 +66,7 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
         }
 
         @Override
-        public void write(@Nonnull final byte[] buf, final int off, final int len) {
+        public void write(final byte @NotNull [] buf, final int off, final int len) {
             try {
                 super.write(buf, off, len);
 
@@ -217,6 +214,7 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
 
     //private Writer logWriter;
 
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     public OutputConsolePanel() {
         super(new Dimension(300, 200));
 
@@ -225,11 +223,11 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
 
         logMaxLineField = new JSpinner(new SpinnerNumberModel(GeneralPreferences.getOutputLogSize(), 100, 1000000, 100));
         logMaxLineTextField = ((JSpinner.DefaultEditor) logMaxLineField.getEditor()).getTextField();
-        final IcyButton clearLogButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
-        final IcyButton copyLogButton = new IcyButton(GoogleMaterialDesignIcons.CONTENT_COPY);
-        final IcyButton reportLogButton = new IcyButton(GoogleMaterialDesignIcons.BUG_REPORT);
-        final IcyToggleButton scrollLockButton = new IcyToggleButton(GoogleMaterialDesignIcons.LOCK_OPEN, GoogleMaterialDesignIcons.LOCK);
-        fileLogButton = new IcyToggleButton(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
+        final IcyButton clearLogButton = new IcyButton(SVGIcon.DELETE);
+        final IcyButton copyLogButton = new IcyButton(SVGIcon.CONTENT_COPY);
+        final IcyButton reportLogButton = new IcyButton(SVGIcon.BUG_REPORT);
+        final IcyToggleButton scrollLockButton = new IcyToggleButton(new SVGIconPack(SVGIcon.LOCK_OPEN, SVGIcon.LOCK));
+        fileLogButton = new IcyToggleButton(SVGIcon.FILE_SAVE);
         fileLogButton.setSelected(GeneralPreferences.getOutputLogToFile());
 
         textPane.setEditable(false);

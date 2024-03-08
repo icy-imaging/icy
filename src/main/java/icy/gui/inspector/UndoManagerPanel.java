@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.inspector;
 
 import icy.action.SequenceOperationActions;
@@ -23,15 +23,13 @@ import icy.gui.component.button.IcyButton;
 import icy.gui.main.ActiveSequenceListener;
 import icy.main.Icy;
 import icy.preferences.GeneralPreferences;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.system.thread.ThreadUtil;
 import icy.undo.AbstractIcyUndoableEdit;
 import icy.undo.IcyUndoManager;
 import icy.undo.IcyUndoManagerListener;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-
-import java.awt.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -42,9 +40,10 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import java.awt.*;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
@@ -94,7 +93,7 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
             }
 
             @Override
-            public String getColumnName(int column) {
+            public String getColumnName(final int column) {
                 return columnNames[column];
             }
 
@@ -107,7 +106,7 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
             }
 
             @Override
-            public Object getValueAt(int row, int column) {
+            public Object getValueAt(final int row, final int column) {
                 if (row == 0) {
                     if (column == 0)
                         return null;
@@ -134,12 +133,12 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
             }
 
             @Override
-            public boolean isCellEditable(int row, int column) {
+            public boolean isCellEditable(final int row, final int column) {
                 return false;
             }
 
             @Override
-            public Class<?> getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(final int columnIndex) {
                 if (columnIndex == 0)
                     return Icon.class;
 
@@ -186,24 +185,24 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
         bottomPanel.setBorder(new EmptyBorder(2, 0, 0, 0));
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
 
-        undoButton = new IcyButton(GoogleMaterialDesignIcons.UNDO);
+        undoButton = new IcyButton(SVGIcon.UNDO);
         undoButton.addActionListener(SequenceOperationActions.undoAction);
         undoButton.setHideActionText(true);
         bottomPanel.add(undoButton);
 
-        redoButton = new IcyButton(GoogleMaterialDesignIcons.REDO);
+        redoButton = new IcyButton(SVGIcon.REDO);
         redoButton.addActionListener(SequenceOperationActions.redoAction);
         redoButton.setHideActionText(true);
         bottomPanel.add(redoButton);
 
-        Component horizontalGlue = Box.createHorizontalGlue();
+        final Component horizontalGlue = Box.createHorizontalGlue();
         bottomPanel.add(horizontalGlue);
 
-        JLabel lblNewLabel = new JLabel("History size");
+        final JLabel lblNewLabel = new JLabel("History size");
         lblNewLabel.setToolTipText("");
         bottomPanel.add(lblNewLabel);
 
-        Component horizontalStrut = Box.createHorizontalStrut(8);
+        final Component horizontalStrut = Box.createHorizontalStrut(8);
         bottomPanel.add(horizontalStrut);
 
         historySizeField = new JSpinner();
@@ -211,15 +210,15 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
         historySizeField.setToolTipText("Maximum size of the history (lower value will reduce memory usage)");
         bottomPanel.add(historySizeField);
 
-        Component horizontalStrut_2 = Box.createHorizontalStrut(8);
+        final Component horizontalStrut_2 = Box.createHorizontalStrut(8);
         bottomPanel.add(horizontalStrut_2);
 
-        clearAllButLastButton = new IcyButton(GoogleMaterialDesignIcons.DELETE_SWEEP);
+        clearAllButLastButton = new IcyButton(SVGIcon.DELETE_SWEEP);
         clearAllButLastButton.addActionListener(SequenceOperationActions.undoClearAllButLastAction);
         clearAllButLastButton.setHideActionText(true);
         bottomPanel.add(clearAllButLastButton);
 
-        clearAllButton = new IcyButton(GoogleMaterialDesignIcons.DELETE);
+        clearAllButton = new IcyButton(SVGIcon.DELETE);
         clearAllButton.addActionListener(SequenceOperationActions.undoClearAction);
         clearAllButton.setHideActionText(true);
         bottomPanel.add(clearAllButton);
@@ -230,7 +229,7 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    public void setUndoManager(IcyUndoManager value) {
+    public void setUndoManager(final IcyUndoManager value) {
         if (undoManager != value) {
             if (undoManager != null)
                 undoManager.removeListener(this);
@@ -303,7 +302,7 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
     }
 
     @Override
-    public void valueChanged(ListSelectionEvent e) {
+    public void valueChanged(final ListSelectionEvent e) {
         if (e.getValueIsAdjusting() || isSelectionAdjusting)
             return;
 
@@ -314,11 +313,11 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
     }
 
     @Override
-    public void stateChanged(ChangeEvent e) {
+    public void stateChanged(final ChangeEvent e) {
         final int value = ((Integer) historySizeField.getValue()).intValue();
 
         // change size of all current active undo manager
-        for (Sequence sequence : Icy.getMainInterface().getSequences()) {
+        for (final Sequence sequence : Icy.getMainInterface().getSequences()) {
             final IcyUndoManager um = sequence.getUndoManager();
 
             if (um != null)
@@ -331,12 +330,12 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
     }
 
     @Override
-    public void undoManagerChanged(IcyUndoManager source) {
+    public void undoManagerChanged(final IcyUndoManager source) {
         ThreadUtil.bgRunSingle(refresher);
     }
 
     @Override
-    public void sequenceActivated(Sequence sequence) {
+    public void sequenceActivated(final Sequence sequence) {
         if (sequence == null)
             setUndoManager(null);
         else
@@ -344,12 +343,12 @@ public class UndoManagerPanel extends JPanel implements ActiveSequenceListener, 
     }
 
     @Override
-    public void sequenceDeactivated(Sequence sequence) {
+    public void sequenceDeactivated(final Sequence sequence) {
         // nothing here
     }
 
     @Override
-    public void activeSequenceChanged(SequenceEvent event) {
+    public void activeSequenceChanged(final SequenceEvent event) {
         // nothing here
     }
 }

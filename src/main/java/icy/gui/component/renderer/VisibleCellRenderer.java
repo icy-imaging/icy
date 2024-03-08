@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,23 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component.renderer;
 
 import icy.gui.util.LookAndFeelUtil;
-import icy.resource.icon.IcyIconFont;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
 
-import java.awt.Component;
-import java.awt.Rectangle;
-
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
+import java.awt.*;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class VisibleCellRenderer extends JLabel implements TableCellRenderer, TreeCellRenderer {
@@ -40,17 +36,17 @@ public class VisibleCellRenderer extends JLabel implements TableCellRenderer, Tr
     float iconSize = LookAndFeelUtil.getDefaultIconSizeAsFloat();
 
     // TODO: 02/02/2023 Move icon creation
-    public static final IcyIconFont VISIBILITY = new IcyIconFont(GoogleMaterialDesignIcons.VISIBILITY, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
-    public static final IcyIconFont VISIBILITY_OFF = new IcyIconFont(GoogleMaterialDesignIcons.VISIBILITY_OFF, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
+    public static final Icon VISIBILITY = new IcySVGIcon(SVGIcon.VISIBILITY, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
+    public static final Icon VISIBILITY_OFF = new IcySVGIcon(SVGIcon.VISIBILITY_OFF, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
 
     @Deprecated(since = "3.0.0", forRemoval = true)
-    public VisibleCellRenderer(int iconSize) {
+    public VisibleCellRenderer(final int iconSize) {
         this();
 
         this.iconSize = (float) iconSize;
 
-        VISIBILITY.updateIcon(iconSize);
-        VISIBILITY_OFF.updateIcon(iconSize);
+        //VISIBILITY.updateIcon(iconSize);
+        //VISIBILITY_OFF.updateIcon(iconSize);
     }
 
     public VisibleCellRenderer() {
@@ -58,7 +54,7 @@ public class VisibleCellRenderer extends JLabel implements TableCellRenderer, Tr
     }
 
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
         if (value instanceof Boolean) {
             final boolean b = ((Boolean) value).booleanValue();
 
@@ -72,7 +68,7 @@ public class VisibleCellRenderer extends JLabel implements TableCellRenderer, Tr
     }
 
     @Override
-    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+    public Component getTreeCellRendererComponent(final JTree tree, final Object value, final boolean selected, final boolean expanded, final boolean leaf, final int row, final boolean hasFocus) {
         if (value instanceof Boolean) {
             final boolean b = ((Boolean) value).booleanValue();
 
@@ -90,8 +86,8 @@ public class VisibleCellRenderer extends JLabel implements TableCellRenderer, Tr
      */
     @Override
     public void invalidate() {
-        VISIBILITY.updateIcon();
-        VISIBILITY_OFF.updateIcon();
+        //VISIBILITY.updateIcon();
+        //VISIBILITY_OFF.updateIcon();
     }
 
     /**
@@ -112,14 +108,14 @@ public class VisibleCellRenderer extends JLabel implements TableCellRenderer, Tr
      * Overridden for performance reasons.
      */
     @Override
-    public void repaint(long tm, int x, int y, int width, int height) {
+    public void repaint(final long tm, final int x, final int y, final int width, final int height) {
     }
 
     /**
      * Overridden for performance reasons.
      */
     @Override
-    public void repaint(Rectangle r) {
+    public void repaint(final Rectangle r) {
     }
 
     /**

@@ -1,69 +1,46 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.menu.search;
 
-import java.awt.AWTEvent;
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.event.AWTEventListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
-
-import org.jdesktop.swingx.painter.BusyPainter;
-
 import icy.gui.component.IcyTextField;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
 import icy.search.SearchEngine;
 import icy.search.SearchEngine.SearchEngineListener;
 import icy.search.SearchResult;
 import icy.util.StringUtil;
+import org.jdesktop.swingx.painter.BusyPainter;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.Rectangle2D;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
- * @author Thomas Provoost &amp; Stephane.
+ * @author Thomas Provoost
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class SearchBar extends IcyTextField implements SearchEngineListener
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -931313822004038942L;
-
+public class SearchBar extends IcyTextField implements SearchEngineListener {
     private static final int DELAY = 20;
 
     private static final int BUSY_PAINTER_SIZE = 15;
@@ -77,7 +54,7 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
      * GUI
      */
     final SearchResultPanel resultsPanel;
-    private final IcyIcon searchIcon;
+    private final Icon searchIcon;
 
     /**
      * Internals
@@ -88,8 +65,7 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
     boolean lastSearchingState;
     boolean initialized;
 
-    public SearchBar()
-    {
+    public SearchBar() {
         super();
 
         initialized = false;
@@ -98,7 +74,7 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
         searchEngine.addListener(this);
 
         resultsPanel = new SearchResultPanel(this);
-        searchIcon = new IcyIcon(ResourceUtil.ICON_SEARCH, 16);
+        searchIcon = new IcySVGIcon(SVGIcon.SEARCH, 16);
 
         // modify margin so we have space for icon
         final Insets margin = getMargin();
@@ -119,34 +95,22 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
         busyPainterTimer = new Timer("Search animation timer");
 
         // ADD LISTENERS
-        addTextChangeListener(new TextChangeListener()
-        {
+        addTextChangeListener((source, validate) -> searchInternal(getText()));
+        addMouseListener(new MouseAdapter() {
             @Override
-            public void textChanged(IcyTextField source, boolean validate)
-            {
-                searchInternal(getText());
-            }
-        });
-        addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(final MouseEvent e) {
                 setFocus();
             }
         });
 
-        addFocusListener(new FocusListener()
-        {
+        addFocusListener(new FocusListener() {
             @Override
-            public void focusLost(FocusEvent e)
-            {
+            public void focusLost(final FocusEvent e) {
                 removeFocus();
             }
 
             @Override
-            public void focusGained(FocusEvent e)
-            {
+            public void focusGained(final FocusEvent e) {
                 searchInternal(getText());
             }
         });
@@ -180,26 +144,17 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
         // }, AWTEvent.KEY_EVENT_MASK);
 
         // global mouse listener to simulate focus lost (not elegant)
-        getToolkit().addAWTEventListener(new AWTEventListener()
-        {
-            @Override
-            public void eventDispatched(AWTEvent event)
-            {
-                if (!initialized || !hasFocus())
-                    return;
+        getToolkit().addAWTEventListener(event -> {
+            if (!initialized || !hasFocus())
+                return;
 
-                if (event instanceof MouseEvent)
-                {
-                    final MouseEvent evt = (MouseEvent) event;
+            if (event instanceof final MouseEvent evt) {
+                if (evt.getID() == MouseEvent.MOUSE_PRESSED) {
+                    final Point pt = evt.getLocationOnScreen();
 
-                    if (evt.getID() == MouseEvent.MOUSE_PRESSED)
-                    {
-                        final Point pt = evt.getLocationOnScreen();
-
-                        // user clicked outside search panel --> close it
-                        if (!isInsideSearchComponents(pt))
-                            removeFocus();
-                    }
+                    // user clicked outside search panel --> close it
+                    if (!isInsideSearchComponents(pt))
+                        removeFocus();
                 }
             }
         }, AWTEvent.MOUSE_EVENT_MASK);
@@ -209,8 +164,7 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
         initialized = true;
     }
 
-    void buildActionMap()
-    {
+    void buildActionMap() {
         final InputMap imap = getInputMap(JComponent.WHEN_FOCUSED);
         final ActionMap amap = getActionMap();
 
@@ -219,71 +173,41 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
         imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "MoveUp");
         imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "Execute");
 
-        amap.put("Cancel", new AbstractAction()
-        {
-            /**
-             * 
-             */
-            private static final long serialVersionUID = 6690317671269902666L;
-
+        amap.put("Cancel", new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(final ActionEvent e) {
                 if (initialized)
                     cancelSearch();
             }
         });
-        getActionMap().put("MoveDown", new AbstractAction()
-        {
-            /**
-             * 
-             */
-            private static final long serialVersionUID = 8864361043092897904L;
-
+        getActionMap().put("MoveDown", new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(final ActionEvent e) {
                 if (initialized)
                     moveDown();
             }
         });
-        getActionMap().put("MoveUp", new AbstractAction()
-        {
-            /**
-             * 
-             */
-            private static final long serialVersionUID = 6258168037713535447L;
-
+        getActionMap().put("MoveUp", new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(final ActionEvent e) {
                 if (initialized)
                     moveUp();
             }
         });
-        getActionMap().put("Execute", new AbstractAction()
-        {
-            /**
-             * 
-             */
-            private static final long serialVersionUID = 5363650211730888168L;
-
+        getActionMap().put("Execute", new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(final ActionEvent e) {
                 if (initialized)
                     execute();
             }
         });
     }
 
-    public SearchEngine getSearchEngine()
-    {
+    public SearchEngine getSearchEngine() {
         return searchEngine;
     }
 
-    protected boolean isInsideSearchComponents(Point pt)
-    {
+    protected boolean isInsideSearchComponents(final Point pt) {
         final Rectangle bounds = new Rectangle();
 
         bounds.setLocation(getLocationOnScreen());
@@ -292,10 +216,8 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
         if (bounds.contains(pt))
             return true;
 
-        if (initialized)
-        {
-            if (resultsPanel.isVisible())
-            {
+        if (initialized) {
+            if (resultsPanel.isVisible()) {
                 bounds.setLocation(resultsPanel.getLocationOnScreen());
                 bounds.setSize(resultsPanel.getSize());
 
@@ -306,26 +228,21 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
         return false;
     }
 
-    public void setFocus()
-    {
-        if (!hasFocus())
-        {
+    public void setFocus() {
+        if (!hasFocus()) {
             setFocusable(true);
             requestFocus();
         }
     }
 
-    public void removeFocus()
-    {
-        if (initialized)
-        {
+    public void removeFocus() {
+        if (initialized) {
             resultsPanel.close(true);
             setFocusable(false);
         }
     }
 
-    public void cancelSearch()
-    {
+    public void cancelSearch() {
         setText("");
     }
 
@@ -339,19 +256,18 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
     // searchEngine.search(filter);
     // }
     //
+
     /**
      * Request search for the specified text.
      * @param text string
-     * 
+     *
      * @see SearchEngine#search(String)
      */
-    public void search(String text)
-    {
+    public void search(final String text) {
         setText(text);
     }
 
-    protected void searchInternal(String text)
-    {
+    protected void searchInternal(final @NotNull String text) {
         final String filter = text.trim();
 
         if (StringUtil.isEmpty(filter))
@@ -360,8 +276,7 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
             searchEngine.search(filter);
     }
 
-    protected void execute()
-    {
+    protected void execute() {
         // result displayed --> launch selected result
         if (resultsPanel.isShowing())
             resultsPanel.executeSelected();
@@ -369,47 +284,41 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
             searchInternal(getText());
     }
 
-    protected void moveDown()
-    {
+    protected void moveDown() {
         resultsPanel.moveSelection(1);
     }
 
-    protected void moveUp()
-    {
+    protected void moveUp() {
         resultsPanel.moveSelection(-1);
     }
 
     @Override
-    protected void paintComponent(Graphics g)
-    {
+    protected void paintComponent(final Graphics g) {
         super.paintComponent(g);
 
-        Graphics2D g2 = (Graphics2D) g.create();
-        int w = getWidth();
-        int h = getHeight();
+        final Graphics2D g2 = (Graphics2D) g.create();
+        final int w = getWidth();
+        final int h = getHeight();
 
         // set rendering presets
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
-        if (StringUtil.isEmpty(getText()) && !hasFocus())
-        {
+        if (StringUtil.isEmpty(getText()) && !hasFocus()) {
             // draw "Search" if no focus
-            Insets insets = getMargin();
-            Color fg = getForeground();
+            final Insets insets = getMargin();
+            final Color fg = getForeground();
 
             g2.setColor(new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), 100));
             g2.drawString("Search", insets.left + 2, h - g2.getFontMetrics().getHeight() / 2 + 2);
         }
 
-        if (searchEngine.isSearching())
-        {
+        if (searchEngine.isSearching()) {
             // draw loading icon
             g2.translate(w - (BUSY_PAINTER_SIZE + 5), 3);
             busyPainter.paint(g2, this, BUSY_PAINTER_SIZE, BUSY_PAINTER_SIZE);
         }
-        else
-        {
+        else {
             // draw search icon
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
             searchIcon.paintIcon(this, g2, w - h, 2);
@@ -419,22 +328,19 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
     }
 
     @Override
-    public void resultChanged(SearchEngine source, SearchResult result)
-    {
+    public void resultChanged(final SearchEngine source, final SearchResult result) {
         if (initialized)
             resultsPanel.resultChanged(result);
     }
 
     @Override
-    public void resultsChanged(SearchEngine source)
-    {
+    public void resultsChanged(final SearchEngine source) {
         if (initialized)
             resultsPanel.resultsChanged();
     }
 
     @Override
-    public void searchStarted(SearchEngine source)
-    {
+    public void searchStarted(final SearchEngine source) {
         if (!initialized)
             return;
 
@@ -443,11 +349,9 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
 
         // ... and restart it
         final Timer newTimer = new Timer("Search animation timer");
-        newTimer.scheduleAtFixedRate(new TimerTask()
-        {
+        newTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
-            public void run()
-            {
+            public void run() {
                 frame = (frame + 1) % BUSY_PAINTER_POINTS;
                 busyPainter.setFrame(frame);
 
@@ -468,8 +372,7 @@ public class SearchBar extends IcyTextField implements SearchEngineListener
     }
 
     @Override
-    public void searchCompleted(SearchEngine source)
-    {
+    public void searchCompleted(final SearchEngine source) {
         // stop the animation timer for the rotating busy icon
         busyPainterTimer.cancel();
 

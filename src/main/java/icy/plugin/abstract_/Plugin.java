@@ -51,6 +51,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Base class for Plugin, provide some helper methods.<br>
@@ -299,7 +300,7 @@ public abstract class Plugin implements AutoCloseable {
      */
     @Nullable
     public ImageIcon getIconResource(@NotNull final String resourceName) {
-        return ResourceUtil.getImageIcon(getImageResource(resourceName));
+        return new ImageIcon(Objects.requireNonNull(getImageResource(resourceName)));
     }
 
     /**

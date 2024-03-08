@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,23 +18,24 @@
 
 package icy.gui.menu;
 
+import icy.action.IcyAbstractAction;
 import icy.action.SequenceOperationActions;
 import icy.gui.component.menu.IcyMenu;
 import icy.gui.component.menu.IcyMenuItem;
+import icy.gui.component.menu.IcyRadioButtonMenuItem;
 import icy.main.Icy;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.system.thread.ThreadUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import icy.type.DataType;
 
-import javax.swing.*;
-import java.awt.*;
+import java.util.Objects;
 
 /**
  * @author Thomas Musset
  */
 public final class ApplicationMenuSequence extends AbstractApplicationMenu {
-
     private static ApplicationMenuSequence instance = null;
 
     public static synchronized ApplicationMenuSequence getInstance() {
@@ -49,221 +50,125 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
     private final IcyMenu menuExtractChannel;
     private final IcyMenu menuRemoveChannel;
 
-    private final JRadioButtonMenuItem itemConversionUnsigned8bits;
-    private final JRadioButtonMenuItem itemConversionSigned8bits;
-    private final JRadioButtonMenuItem itemConversionUnsigned16bits;
-    private final JRadioButtonMenuItem itemConversionSigned16bits;
-    private final JRadioButtonMenuItem itemConversionUnsigned32bits;
-    private final JRadioButtonMenuItem itemConversionSigned32bits;
-    private final JRadioButtonMenuItem itemConversionFloat32bits;
-    private final JRadioButtonMenuItem itemConversionDouble64bits;
-    private final JRadioButtonMenuItem itemRawConversionUnsigned8bits;
-    private final JRadioButtonMenuItem itemRawConversionSigned8bits;
-    private final JRadioButtonMenuItem itemRawConversionUnsigned16bits;
-    private final JRadioButtonMenuItem itemRawConversionSigned16bits;
-    private final JRadioButtonMenuItem itemRawConversionUnsigned32bits;
-    private final JRadioButtonMenuItem itemRawConversionSigned32bits;
-    private final JRadioButtonMenuItem itemRawConversionFloat32bits;
-    private final JRadioButtonMenuItem itemRawConversionDouble64bits;
     private final IcyMenuItem itemExtractAllChannels;
-    private final IcyMenuItem itemMergeChannels;
-    private final IcyMenuItem itemReverseSlices;
-    private final IcyMenuItem itemExtractSlice;
-    private final IcyMenuItem itemRemoveSlice;
-    private final IcyMenuItem itemMergeSlices;
-    private final IcyMenuItem itemRemoveSlices;
-    private final IcyMenuItem itemReverseFrames;
-    private final IcyMenuItem itemExtractFrame;
-    private final IcyMenuItem itemRemoveFrame;
-    private final IcyMenuItem itemMergeFrames;
-    private final IcyMenuItem itemRemoveFrames;
-    private final IcyMenuItem itemConvertToSlices;
-    private final IcyMenuItem itemConvertToFrames;
 
     private ApplicationMenuSequence() {
         super("Sequence");
 
-        final IcyMenuItem itemDuplicate = new IcyMenuItem("Duplicate Sequence", GoogleMaterialDesignIcons.PHOTO_LIBRARY);
-        itemDuplicate.addActionListener(SequenceOperationActions.cloneSequenceAction);
-        add(itemDuplicate);
+        final IcyMenuItem itemUndo = new IcyMenuItem(SequenceOperationActions.undoAction, SVGIcon.UNDO);
+        add(itemUndo);
 
-        // TODO: 19/01/2023 Refactor conversion and raw conversion submenu
-        /* submenu conversion */
-        menuConversion = new IcyMenu("Convert to", GoogleMaterialDesignIcons.LABEL);
-        add(menuConversion);
-
-        final ButtonGroup groupConversion = new ButtonGroup();
-
-        itemConversionUnsigned8bits = new JRadioButtonMenuItem("Unsigned Byte (8 bits)");
-        itemConversionUnsigned8bits.addActionListener(SequenceOperationActions.convertUByteScaledSequenceAction);
-        groupConversion.add(itemConversionUnsigned8bits);
-        menuConversion.add(itemConversionUnsigned8bits);
-        itemConversionSigned8bits = new JRadioButtonMenuItem("Signed Byte (8 bits)");
-        itemConversionSigned8bits.addActionListener(SequenceOperationActions.convertByteScaledSequenceAction);
-        groupConversion.add(itemConversionSigned8bits);
-        menuConversion.add(itemConversionSigned8bits);
-        itemConversionUnsigned16bits = new JRadioButtonMenuItem("Unsigned Short (16 bits)");
-        itemConversionUnsigned16bits.addActionListener(SequenceOperationActions.convertUShortScaledSequenceAction);
-        groupConversion.add(itemConversionUnsigned16bits);
-        menuConversion.add(itemConversionUnsigned16bits);
-        itemConversionSigned16bits = new JRadioButtonMenuItem("Signed Short (16 bits)");
-        itemConversionSigned16bits.addActionListener(SequenceOperationActions.convertShortScaledSequenceAction);
-        groupConversion.add(itemConversionSigned16bits);
-        menuConversion.add(itemConversionSigned16bits);
-        itemConversionUnsigned32bits = new JRadioButtonMenuItem("Unsigned Int (32 bits)");
-        itemConversionUnsigned32bits.addActionListener(SequenceOperationActions.convertUIntScaledSequenceAction);
-        groupConversion.add(itemConversionUnsigned32bits);
-        menuConversion.add(itemConversionUnsigned32bits);
-        itemConversionSigned32bits = new JRadioButtonMenuItem("Signed Int (32 bits)");
-        itemConversionSigned32bits.addActionListener(SequenceOperationActions.convertIntScaledSequenceAction);
-        groupConversion.add(itemConversionSigned32bits);
-        menuConversion.add(itemConversionSigned32bits);
-        itemConversionFloat32bits = new JRadioButtonMenuItem("Float (32 bits)");
-        itemConversionFloat32bits.addActionListener(SequenceOperationActions.convertFloatScaledSequenceAction);
-        groupConversion.add(itemConversionFloat32bits);
-        menuConversion.add(itemConversionFloat32bits);
-        itemConversionDouble64bits = new JRadioButtonMenuItem("Double (64 bits)");
-        itemConversionDouble64bits.addActionListener(SequenceOperationActions.convertDoubleScaledSequenceAction);
-        groupConversion.add(itemConversionDouble64bits);
-        menuConversion.add(itemConversionDouble64bits);
-
-        /* submenu raw conversion */
-        menuRawConversion = new IcyMenu("Convert to Raw", GoogleMaterialDesignIcons.LABEL_OUTLINE);
-        add(menuRawConversion);
-
-        final ButtonGroup groupRawConversion = new ButtonGroup();
-
-        itemRawConversionUnsigned8bits = new JRadioButtonMenuItem("Unsigned Byte (8 bits)");
-        itemRawConversionUnsigned8bits.addActionListener(SequenceOperationActions.convertUByteSequenceAction);
-        groupRawConversion.add(itemRawConversionUnsigned8bits);
-        menuRawConversion.add(itemRawConversionUnsigned8bits);
-        itemRawConversionSigned8bits = new JRadioButtonMenuItem("Signed Byte (8 bits)");
-        itemRawConversionSigned8bits.addActionListener(SequenceOperationActions.convertByteSequenceAction);
-        groupRawConversion.add(itemRawConversionSigned8bits);
-        menuRawConversion.add(itemRawConversionSigned8bits);
-        itemRawConversionUnsigned16bits = new JRadioButtonMenuItem("Unsigned Short (16 bits)");
-        itemRawConversionUnsigned16bits.addActionListener(SequenceOperationActions.convertUShortSequenceAction);
-        groupRawConversion.add(itemRawConversionUnsigned16bits);
-        menuRawConversion.add(itemRawConversionUnsigned16bits);
-        itemRawConversionSigned16bits = new JRadioButtonMenuItem("Signed Short (16 bits)");
-        itemRawConversionSigned16bits.addActionListener(SequenceOperationActions.convertUShortSequenceAction);
-        groupRawConversion.add(itemRawConversionSigned16bits);
-        menuRawConversion.add(itemRawConversionSigned16bits);
-        itemRawConversionUnsigned32bits = new JRadioButtonMenuItem("Unsigned Int (32 bits)");
-        itemRawConversionUnsigned32bits.addActionListener(SequenceOperationActions.convertUIntSequenceAction);
-        groupRawConversion.add(itemRawConversionUnsigned32bits);
-        menuRawConversion.add(itemRawConversionUnsigned32bits);
-        itemRawConversionSigned32bits = new JRadioButtonMenuItem("Signed Int (32 bits)");
-        itemRawConversionSigned32bits.addActionListener(SequenceOperationActions.convertIntSequenceAction);
-        groupRawConversion.add(itemRawConversionSigned32bits);
-        menuRawConversion.add(itemRawConversionSigned32bits);
-        itemRawConversionFloat32bits = new JRadioButtonMenuItem("Float (32 bits)");
-        itemRawConversionFloat32bits.addActionListener(SequenceOperationActions.convertFloatSequenceAction);
-        groupRawConversion.add(itemRawConversionFloat32bits);
-        menuRawConversion.add(itemRawConversionFloat32bits);
-        itemRawConversionDouble64bits = new JRadioButtonMenuItem("Double (64 bits)");
-        itemRawConversionDouble64bits.addActionListener(SequenceOperationActions.convertDoubleSequenceAction);
-        groupRawConversion.add(itemRawConversionDouble64bits);
-        menuRawConversion.add(itemRawConversionDouble64bits);
+        final IcyMenuItem itemRedo = new IcyMenuItem(SequenceOperationActions.redoAction, SVGIcon.REDO);
+        add(itemRedo);
 
         addSeparator();
 
-        // TODO: 19/01/2023 Check if there is ROI inside active sequence
-        final IcyMenuItem itemFastCrop = new IcyMenuItem("Fast Crop ROI", GoogleMaterialDesignIcons.CROP);
-        itemFastCrop.addActionListener(SequenceOperationActions.cropSequenceAction);
+        final IcyMenuItem itemDuplicate = new IcyMenuItem(SequenceOperationActions.cloneSequenceAction, SVGIcon.PHOTO_LIBRARY);
+        add(itemDuplicate);
+
+        /* submenu conversion */
+        menuConversion = new IcyMenu("Convert to", SVGIcon.SWITCH_ACCESS_2);
+        add(menuConversion);
+
+        /* submenu raw conversion */
+        menuRawConversion = new IcyMenu("Convert to Raw", SVGIcon.SWITCH_ACCESS_2);
+        add(menuRawConversion);
+
+        final DataType[] dataTypes = {
+                DataType.UBYTE,
+                DataType.BYTE,
+                DataType.USHORT,
+                DataType.SHORT,
+                DataType.UINT,
+                DataType.INT,
+                DataType.FLOAT,
+                DataType.DOUBLE
+        };
+
+        for (final DataType dataType : dataTypes) {
+            final IcyAbstractAction scaled = Objects.requireNonNull(SequenceOperationActions.getConvertSequenceAction(dataType, true));
+            menuConversion.add(new IcyRadioButtonMenuItem(scaled));
+
+            final IcyAbstractAction raw = Objects.requireNonNull(SequenceOperationActions.getConvertSequenceAction(dataType, false));
+            menuRawConversion.add(new IcyRadioButtonMenuItem(raw));
+        }
+
+        addSeparator();
+
+        final IcyMenuItem itemFastCrop = new IcyMenuItem(SequenceOperationActions.cropSequenceAction, SVGIcon.CROP);
         add(itemFastCrop);
 
-        final IcyMenuItem itemResizeCanvas = new IcyMenuItem("Resize Canvas...", GoogleMaterialDesignIcons.IMAGE_ASPECT_RATIO);
-        itemResizeCanvas.addActionListener(SequenceOperationActions.canvasResizeAction);
+        final IcyMenuItem itemResizeCanvas = new IcyMenuItem(SequenceOperationActions.canvasResizeAction, SVGIcon.IMAGE_ASPECT_RATIO);
         add(itemResizeCanvas);
 
-        final IcyMenuItem itemResizeImage = new IcyMenuItem("Resize Image...", GoogleMaterialDesignIcons.ASPECT_RATIO);
-        itemResizeImage.addActionListener(SequenceOperationActions.imageResizeAction);
+        final IcyMenuItem itemResizeImage = new IcyMenuItem(SequenceOperationActions.imageResizeAction, SVGIcon.ASPECT_RATIO);
         add(itemResizeImage);
 
         addSeparator();
 
-        // TODO: 19/01/2023 Make extract and remove channel actions auto reload
-        menuExtractChannel = new IcyMenu("Extract Channel...");
+        menuExtractChannel = new IcyMenu("Extract Channel...", SVGIcon.BROKEN_IMAGE);
         add(menuExtractChannel);
 
-        itemExtractAllChannels = new IcyMenuItem("All");
-        itemExtractAllChannels.addActionListener(SequenceOperationActions.extractAllChannelAction);
+        itemExtractAllChannels = new IcyMenuItem(SequenceOperationActions.extractAllChannelAction);
         menuExtractChannel.add(itemExtractAllChannels);
 
         menuExtractChannel.addSeparator();
 
-        menuRemoveChannel = new IcyMenu("Remove Channel");
+        menuRemoveChannel = new IcyMenu("Remove Channel", SVGIcon.BROKEN_IMAGE);
         add(menuRemoveChannel);
 
-        itemMergeChannels = new IcyMenuItem("Merge Channels...");
-        itemMergeChannels.addActionListener(SequenceOperationActions.mergeChannelsAction);
+        final IcyMenuItem itemMergeChannels = new IcyMenuItem(SequenceOperationActions.mergeChannelsAction, SVGIcon.BROKEN_IMAGE);
         add(itemMergeChannels);
 
         addSeparator();
 
-        itemReverseSlices = new IcyMenuItem("Reverse Z Slices");
-        itemReverseSlices.addActionListener(SequenceOperationActions.reverseSlicesAction);
+        final IcyMenuItem itemReverseSlices = new IcyMenuItem(SequenceOperationActions.reverseSlicesAction, SVGIcon.BROKEN_IMAGE);
         add(itemReverseSlices);
 
-        itemExtractSlice = new IcyMenuItem("Extract Selected Z Slice");
-        itemExtractSlice.addActionListener(SequenceOperationActions.extractSliceAction);
+        final IcyMenuItem itemExtractSlice = new IcyMenuItem(SequenceOperationActions.extractSliceAction, SVGIcon.BROKEN_IMAGE);
         add(itemExtractSlice);
 
-        itemRemoveSlice = new IcyMenuItem("Remove Selected Z Slice");
-        itemRemoveSlice.addActionListener(SequenceOperationActions.removeSliceAction);
+        final IcyMenuItem itemRemoveSlice = new IcyMenuItem(SequenceOperationActions.removeSliceAction, SVGIcon.BROKEN_IMAGE);
         add(itemRemoveSlice);
 
-        final IcyMenuItem itemAddSlices = new IcyMenuItem("Add Z Slices...");
-        itemAddSlices.addActionListener(SequenceOperationActions.addSlicesAction);
+        final IcyMenuItem itemAddSlices = new IcyMenuItem(SequenceOperationActions.addSlicesAction, SVGIcon.BROKEN_IMAGE);
         add(itemAddSlices);
 
-        itemMergeSlices = new IcyMenuItem("Merge Z Slices...");
-        itemMergeSlices.addActionListener(SequenceOperationActions.mergeSlicesAction);
+        final IcyMenuItem itemMergeSlices = new IcyMenuItem(SequenceOperationActions.mergeSlicesAction, SVGIcon.BROKEN_IMAGE);
         add(itemMergeSlices);
 
-        itemRemoveSlices = new IcyMenuItem("Remove Multiple Z Slices...");
-        itemRemoveSlices.addActionListener(SequenceOperationActions.removeSlicesAction);
+        final IcyMenuItem itemRemoveSlices = new IcyMenuItem(SequenceOperationActions.removeSlicesAction, SVGIcon.BROKEN_IMAGE);
         add(itemRemoveSlices);
 
         addSeparator();
 
-        itemReverseFrames = new IcyMenuItem("Reverse T Frames");
-        itemReverseFrames.addActionListener(SequenceOperationActions.reverseFramesAction);
+        final IcyMenuItem itemReverseFrames = new IcyMenuItem(SequenceOperationActions.reverseFramesAction, SVGIcon.BROKEN_IMAGE);
         add(itemReverseFrames);
 
-        itemExtractFrame = new IcyMenuItem("Extract Selected T Frame");
-        itemExtractFrame.addActionListener(SequenceOperationActions.extractFrameAction);
+        final IcyMenuItem itemExtractFrame = new IcyMenuItem(SequenceOperationActions.extractFrameAction, SVGIcon.BROKEN_IMAGE);
         add(itemExtractFrame);
 
-        itemRemoveFrame = new IcyMenuItem("Remove Selected T Frame");
-        itemRemoveFrame.addActionListener(SequenceOperationActions.removeFrameAction);
+        final IcyMenuItem itemRemoveFrame = new IcyMenuItem(SequenceOperationActions.removeFrameAction, SVGIcon.BROKEN_IMAGE);
         add(itemRemoveFrame);
 
-        final IcyMenuItem itemAddFrames = new IcyMenuItem("Add T Frames...");
-        itemAddFrames.addActionListener(SequenceOperationActions.addFramesAction);
+        final IcyMenuItem itemAddFrames = new IcyMenuItem(SequenceOperationActions.addFramesAction, SVGIcon.BROKEN_IMAGE);
         add(itemAddFrames);
 
-        itemMergeFrames = new IcyMenuItem("Merge T Frames...");
-        itemMergeFrames.addActionListener(SequenceOperationActions.mergeFramesAction);
+        final IcyMenuItem itemMergeFrames = new IcyMenuItem(SequenceOperationActions.mergeFramesAction, SVGIcon.BROKEN_IMAGE);
         add(itemMergeFrames);
 
-        itemRemoveFrames = new IcyMenuItem("Remove Multiple T Frames...");
-        itemRemoveFrames.addActionListener(SequenceOperationActions.removeFramesAction);
+        final IcyMenuItem itemRemoveFrames = new IcyMenuItem(SequenceOperationActions.removeFramesAction, SVGIcon.BROKEN_IMAGE);
         add(itemRemoveFrames);
 
         addSeparator();
 
-        itemConvertToSlices = new IcyMenuItem("Convert T to Z");
-        itemConvertToSlices.addActionListener(SequenceOperationActions.convertToSlicesAction);
+        final IcyMenuItem itemConvertToSlices = new IcyMenuItem(SequenceOperationActions.convertToSlicesAction, SVGIcon.BROKEN_IMAGE);
         add(itemConvertToSlices);
 
-        itemConvertToFrames = new IcyMenuItem("Convert Z to T");
-        itemConvertToFrames.addActionListener(SequenceOperationActions.convertToFramesAction);
+        final IcyMenuItem itemConvertToFrames = new IcyMenuItem(SequenceOperationActions.convertToFramesAction, SVGIcon.BROKEN_IMAGE);
         add(itemConvertToFrames);
 
-        final IcyMenuItem itemConvertAdvancedZT = new IcyMenuItem("Advanced Z-T Convertion...");
-        itemConvertAdvancedZT.addActionListener(SequenceOperationActions.advancedZTConvertAction);
+        final IcyMenuItem itemConvertAdvancedZT = new IcyMenuItem(SequenceOperationActions.advancedZTConvertAction, SVGIcon.BROKEN_IMAGE);
         add(itemConvertAdvancedZT);
 
         reloadSequenceMenu();
@@ -274,65 +179,8 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
     private void reloadSequenceMenu() {
         ThreadUtil.invokeLater(() -> {
             final Sequence active = Icy.getMainInterface().getActiveSequence();
-            for (Component c : getMenuComponents())
-                c.setEnabled(active != null);
 
             if (active != null) {
-                // Unselect scaled datatype
-                for (final Component c : menuConversion.getMenuComponents())
-                    if (c instanceof JRadioButtonMenuItem)
-                        ((JRadioButtonMenuItem) c).setSelected(false);
-
-                // Unselect raw datatype
-                for (final Component c : menuRawConversion.getMenuComponents()) {
-                    if (c instanceof JRadioButtonMenuItem)
-                        ((JRadioButtonMenuItem) c).setSelected(false);
-                }
-
-                final int bitSize = active.getDataType_().getBitSize();
-                final boolean isFloat = active.getDataType_().isFloat();
-                final boolean isSigned = active.getDataType_().isSigned();
-
-                // Select correct datatype in menu
-                switch (bitSize) {
-                    case 8:
-                        if (isSigned) {
-                            itemConversionSigned8bits.setSelected(true);
-                            itemRawConversionSigned8bits.setSelected(true);
-                        } else {
-                            itemConversionUnsigned8bits.setSelected(true);
-                            itemRawConversionUnsigned8bits.setSelected(true);
-                        }
-                        break;
-                    case 16:
-                        if (isSigned) {
-                            itemConversionSigned16bits.setSelected(true);
-                            itemRawConversionSigned16bits.setSelected(true);
-                        } else {
-                            itemConversionUnsigned16bits.setSelected(true);
-                            itemRawConversionUnsigned16bits.setSelected(true);
-                        }
-                        break;
-                    case 32:
-                        if (isFloat) {
-                            itemConversionFloat32bits.setSelected(true);
-                            itemRawConversionFloat32bits.setSelected(true);
-                            break;
-                        }
-                        if (isSigned) {
-                            itemConversionSigned32bits.setSelected(true);
-                            itemRawConversionSigned32bits.setSelected(true);
-                        } else {
-                            itemConversionUnsigned32bits.setSelected(true);
-                            itemRawConversionUnsigned32bits.setSelected(true);
-                        }
-                        break;
-                    case 64:
-                        itemConversionDouble64bits.setSelected(true);
-                        itemRawConversionDouble64bits.setSelected(true);
-                        break;
-                }
-
                 // Channels (C) menu
                 final int sizeC = active.getSizeC();
                 menuExtractChannel.removeAll();
@@ -342,51 +190,25 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
                     menuExtractChannel.add(itemExtractAllChannels);
                     menuExtractChannel.addSeparator();
 
-                    for (int c = 0; c < sizeC; c ++) {
-                        final IcyMenuItem itemExtractChannel = new IcyMenuItem(active.getChannelName(c));
-                        itemExtractChannel.addActionListener(SequenceOperationActions.extractChannelActions[c]);
+                    for (int c = 0; c < sizeC; c++) {
+                        final IcyMenuItem itemExtractChannel = new IcyMenuItem(SequenceOperationActions.extractChannelActions[c]);
                         menuExtractChannel.add(itemExtractChannel);
 
-                        final IcyMenuItem itemRemoveChannel = new IcyMenuItem(active.getChannelName(c));
-                        itemRemoveChannel.addActionListener(SequenceOperationActions.removeChannelActions[c]);
+                        final IcyMenuItem itemRemoveChannel = new IcyMenuItem(SequenceOperationActions.removeChannelActions[c]);
                         menuRemoveChannel.add(itemRemoveChannel);
                     }
 
+                    menuExtractChannel.setEnabled(true);
                     menuRemoveChannel.setEnabled(sizeC > 1);
-                    itemMergeChannels.setEnabled(sizeC > 1);
                 }
                 else {
                     menuExtractChannel.setEnabled(false);
                     menuRemoveChannel.setEnabled(false);
                 }
-
-                // Slices (Z) menu
-                final int sizeZ = active.getSizeZ();
-
-                if (sizeZ < 2) {
-                    itemReverseSlices.setEnabled(false);
-                    itemExtractSlice.setEnabled(false);
-                    itemRemoveSlice.setEnabled(false);
-                    itemMergeSlices.setEnabled(false);
-                    itemRemoveSlices.setEnabled(false);
-                }
-
-                // Frames (T) menu
-                final int sizeT = active.getSizeT();
-
-                if (sizeT < 2) {
-                    itemReverseFrames.setEnabled(false);
-                    itemExtractFrame.setEnabled(false);
-                    itemRemoveFrame.setEnabled(false);
-                    itemMergeFrames.setEnabled(false);
-                    itemRemoveFrames.setEnabled(false);
-                }
-
-                if (sizeT < 2)
-                    itemConvertToSlices.setEnabled(false);
-                if (sizeZ < 2)
-                    itemConvertToFrames.setEnabled(false);
             }
+
+            menuConversion.setEnabled(active != null);
+            menuRawConversion.setEnabled(active != null);
         });
     }
 

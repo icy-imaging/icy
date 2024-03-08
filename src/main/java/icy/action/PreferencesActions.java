@@ -20,6 +20,7 @@ package icy.action;
 
 import icy.gui.preferences.*;
 import icy.util.ClassUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.event.ActionEvent;
 import java.lang.reflect.Field;
@@ -28,15 +29,14 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Preference actions.
+ * Preferences actions.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public final class PreferencesActions {
-    public static final IcyAbstractAction preferencesAction = new IcyAbstractAction(
-            "Preferences  ",
-            //new IcyIcon(ResourceUtil.ICON_TOOLS),
+    public static final @NotNull IcyAbstractAction preferencesAction = new IcyAbstractAction(
+            "Preferences...",
             "Show the preferences window",
             "Setup Icy preferences"
     ) {
@@ -47,9 +47,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final IcyAbstractAction generalPreferencesAction = new IcyAbstractAction(
-            "Preferences",
-            //new IcyIcon(ResourceUtil.ICON_TOOLS),
+    public static final @NotNull IcyAbstractAction generalPreferencesAction = new IcyAbstractAction(
+            "General Preferences...",
             "Show the general preferences window",
             "Setup general setting as font size, automatic update, maximum memory..."
     ) {
@@ -60,9 +59,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final IcyAbstractAction canvasPreferencesAction = new IcyAbstractAction(
-            "Canvas preferences",
-            //new IcyIcon(ResourceUtil.ICON_PICTURE),
+    public static final @NotNull IcyAbstractAction canvasPreferencesAction = new IcyAbstractAction(
+            "Canvas Preferences...",
             "Show the canvas preferences window",
             "Setup canvas setting as filtering, mouse wheel sensivity and reverse mouse axis..."
     ) {
@@ -73,9 +71,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final IcyAbstractAction magicWandPreferencesAction = new IcyAbstractAction(
-            "Magic Wand preferences",
-            //new IcyIcon("magic_wand", true),
+    public static final @NotNull IcyAbstractAction magicWandPreferencesAction = new IcyAbstractAction(
+            "Magic Wand Preferences...",
             "Show the Magic Wand preferences window",
             "Setup Magic Wand advanced setting as connectivity, gradient tolerance..."
     ) {
@@ -86,9 +83,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final IcyAbstractAction networkPreferencesAction = new IcyAbstractAction(
-            "Network preferences",
-            //new IcyIcon(ResourceUtil.ICON_NETWORK),
+    public static final @NotNull IcyAbstractAction networkPreferencesAction = new IcyAbstractAction(
+            "Network Preferences...",
             "Show the network preferences window",
             "Setup network setting as proxy server."
     ) {
@@ -99,9 +95,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final IcyAbstractAction pluginPreferencesAction = new IcyAbstractAction(
-            "Plugin preferences",
-            //new IcyIcon(ResourceUtil.ICON_PLUGIN),
+    public static final @NotNull IcyAbstractAction pluginPreferencesAction = new IcyAbstractAction(
+            "Plugin Preferences...",
             "Show the plugin preferences window",
             "Setup plugin setting as automatic update and enable beta version."
     ) {
@@ -112,9 +107,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final IcyAbstractAction localPluginPreferencesAction = new IcyAbstractAction(
-            "Local plugin",
-            //new IcyIcon(ResourceUtil.ICON_PLUGIN),
+    public static final @NotNull IcyAbstractAction localPluginPreferencesAction = new IcyAbstractAction(
+            "Local Plugin Preferences...",
             "Show the local plugin window",
             "Browse, remove, update and show informations about installed plugin."
     ) {
@@ -125,9 +119,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final IcyAbstractAction onlinePluginPreferencesAction = new IcyAbstractAction(
-            "Online plugin",
-            //new IcyIcon(ResourceUtil.ICON_PLUGIN),
+    public static final @NotNull IcyAbstractAction onlinePluginPreferencesAction = new IcyAbstractAction(
+            "Online Plugin Preferences...",
             "Show the online plugin window",
             "Browse online plugins and install them."
     ) {
@@ -138,9 +131,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final IcyAbstractAction startupPluginPreferencesAction = new IcyAbstractAction(
-            "Startup plugin",
-            //new IcyIcon(ResourceUtil.ICON_PLUGIN),
+    public static final @NotNull IcyAbstractAction startupPluginPreferencesAction = new IcyAbstractAction(
+            "Startup Plugin Preferences...",
             "Show the startup plugin window",
             "Enable / disable startup plugins."
     ) {
@@ -151,9 +143,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final IcyAbstractAction repositoryPreferencesAction = new IcyAbstractAction(
-            "Repository preferences",
-            //new IcyIcon(ResourceUtil.ICON_TOOLS),
+    public static final @NotNull IcyAbstractAction repositoryPreferencesAction = new IcyAbstractAction(
+            "Repository Preferences...",
             "Show the repository preferences window",
             "Add, edit or remove repository address."
     ) {
@@ -167,7 +158,8 @@ public final class PreferencesActions {
     /**
      * Return all actions of this class
      */
-    public static List<IcyAbstractAction> getAllActions() {
+    @Deprecated(forRemoval = true)
+    public static @NotNull List<IcyAbstractAction> getAllActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
         for (final Field field : PreferencesActions.class.getFields()) {

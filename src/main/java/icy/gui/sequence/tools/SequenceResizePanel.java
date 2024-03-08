@@ -1,67 +1,59 @@
-/**
- * 
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.sequence.tools;
 
 import icy.image.IcyBufferedImageUtil.FilterType;
 import icy.sequence.Sequence;
 
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
+import java.awt.*;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  */
-public class SequenceResizePanel extends SequenceBaseResizePanel
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 5366610917009978874L;
+public class SequenceResizePanel extends SequenceBaseResizePanel {
+    private JComboBox<String> filterComboBox;
 
-    private JComboBox filterComboBox;
-    private JLabel lblFilterType;
-
-    public SequenceResizePanel(Sequence sequence)
-    {
+    public SequenceResizePanel(final Sequence sequence) {
         super(sequence);
 
         keepRatioCheckBox.setSelected(true);
 
-        filterComboBox.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                updatePreview();
-            }
-        });
+        filterComboBox.addActionListener(e -> updatePreview());
     }
 
     @Override
-    protected void initialize()
-    {
+    protected void initialize() {
         super.initialize();
 
-        lblFilterType = new JLabel("Filter type");
-        GridBagConstraints gbc_lblFilterType = new GridBagConstraints();
+        final JLabel lblFilterType = new JLabel("Filter type");
+        final GridBagConstraints gbc_lblFilterType = new GridBagConstraints();
         gbc_lblFilterType.fill = GridBagConstraints.BOTH;
         gbc_lblFilterType.insets = new Insets(0, 0, 5, 5);
         gbc_lblFilterType.gridx = 5;
         gbc_lblFilterType.gridy = 0;
         settingPanel.add(lblFilterType, gbc_lblFilterType);
 
-        filterComboBox = new JComboBox();
-        filterComboBox.setModel(new DefaultComboBoxModel(new String[] {"Nearest", "Bilinear", "Bicubic"}));
+        filterComboBox = new JComboBox<>();
+        filterComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"Nearest", "Bilinear", "Bicubic"}));
         filterComboBox.setSelectedIndex(1);
-        GridBagConstraints gbc_filterComboBox = new GridBagConstraints();
+        final GridBagConstraints gbc_filterComboBox = new GridBagConstraints();
         gbc_filterComboBox.insets = new Insets(0, 0, 5, 5);
         gbc_filterComboBox.fill = GridBagConstraints.HORIZONTAL;
         gbc_filterComboBox.gridx = 5;
@@ -70,35 +62,26 @@ public class SequenceResizePanel extends SequenceBaseResizePanel
     }
 
     @Override
-    public FilterType getFilterType()
-    {
-        switch (filterComboBox.getSelectedIndex())
-        {
-            default:
-            case 0:
-                return FilterType.NEAREST;
-            case 1:
-                return FilterType.BILINEAR;
-            case 2:
-                return FilterType.BICUBIC;
-        }
+    public FilterType getFilterType() {
+        return switch (filterComboBox.getSelectedIndex()) {
+            default -> FilterType.NEAREST;
+            case 1 -> FilterType.BILINEAR;
+            case 2 -> FilterType.BICUBIC;
+        };
     }
 
     @Override
-    public boolean getResizeContent()
-    {
+    public boolean getResizeContent() {
         return true;
     }
 
     @Override
-    public int getXAlign()
-    {
+    public int getXAlign() {
         return SwingConstants.CENTER;
     }
 
     @Override
-    public int getYAlign()
-    {
+    public int getYAlign() {
         return SwingConstants.CENTER;
     }
 }

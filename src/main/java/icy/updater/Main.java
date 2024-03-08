@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.*;
 
 /**
- * @author stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class Main {
@@ -88,7 +88,9 @@ public class Main {
      */
     public static final Version VERSION = new Version(3, 0, 0, Version.Snapshot.ALPHA);
 
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     static final OutPrintStream stdStream = new OutPrintStream(System.out, false);
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     static final OutPrintStream errStream = new OutPrintStream(System.err, true);
 
     static UpdateFrame frame = null;
@@ -109,15 +111,15 @@ public class Main {
         NetworkUtil.updateNetworkSetting();
 
         for (final String arg : args) {
-            if (arg.equals(Updater.ARG_UPDATE))
+            if (arg.trim().equalsIgnoreCase(Updater.ARG_UPDATE))
                 update = true;
-            else if (arg.equals(Updater.ARG_NOSTART))
+            else if (arg.trim().equalsIgnoreCase(Updater.ARG_NOSTART))
                 start = false;
         }
 
         // keep trace of others arguments
         for (final String arg : args) {
-            if (!(arg.equals(Updater.ARG_UPDATE) || arg.equals(Updater.ARG_NOSTART)))
+            if (!(arg.trim().equalsIgnoreCase(Updater.ARG_UPDATE) || arg.trim().equalsIgnoreCase(Updater.ARG_NOSTART)))
                 extraArgs = extraArgs.concat(" ").concat(arg);
         }
 

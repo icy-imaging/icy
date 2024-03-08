@@ -26,8 +26,9 @@ import icy.image.cache.ImageCache;
 import icy.main.Icy;
 import icy.preferences.ApplicationPreferences;
 import icy.preferences.GeneralPreferences;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import icy.system.logging.IcyLogger;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,7 +38,7 @@ import java.awt.event.ActionListener;
  */
 public final class EHCacheButton extends IcyToggleButton implements ActionListener {
     public EHCacheButton() {
-        super(GoogleMaterialDesignIcons.FLASH_OFF, GoogleMaterialDesignIcons.FLASH_ON);
+        super(new SVGIconPack(SVGIcon.FLASH_OFF, SVGIcon.FLASH_ON));
         setFocusable(false);
         if (Icy.isCacheDisabled()) {
             super.setEnabled(false);

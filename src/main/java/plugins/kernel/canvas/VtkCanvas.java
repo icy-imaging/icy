@@ -34,12 +34,12 @@ import icy.painter.VtkPainter;
 import icy.preferences.CanvasPreferences;
 import icy.preferences.XMLPreferences;
 import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import icy.roi.ROI;
 import icy.sequence.DimensionId;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent.SequenceEventType;
-import icy.system.IcyExceptionHandler;
 import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.type.collection.array.Array1DUtil;
@@ -72,17 +72,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Thomas Musset
  */
 public class VtkCanvas extends Canvas3D implements ActionListener, SettingChangeListener {
-    /**
-     * icons
-     */
-    public static final Image ICON_AXES3D = ResourceUtil.getAlphaIconAsImage("axes3d.png");
-    public static final Image ICON_BOUNDINGBOX = ResourceUtil.getAlphaIconAsImage("bbox.png");
-    public static final Image ICON_GRID = ResourceUtil.getAlphaIconAsImage("3x3_grid.png");
-    public static final Image ICON_RULER = ResourceUtil.getAlphaIconAsImage("ruler.png");
-    public static final Image ICON_RULERLABEL = ResourceUtil.getAlphaIconAsImage("ruler_label.png");
-    public static final Image ICON_TARGET = ResourceUtil.getAlphaIconAsImage("target.png");
-    public static final Image ICON_SLICER = ResourceUtil.getAlphaIconAsImage("plane_slicer.png");
-
     /**
      * properties
      */
@@ -158,12 +147,12 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
      */
     protected VtkSettingPanel settingPanel;
     protected CustomVtkPanel panel3D;
-    protected IcyToggleButton axesButton;
-    protected IcyToggleButton boundingBoxButton;
-    protected IcyToggleButton gridButton;
-    protected IcyToggleButton rulerButton;
-    protected IcyToggleButton rulerLabelButton;
-    protected IcyToggleButton volumeSlicerButton;
+    protected JToggleButton axesButton;
+    protected JToggleButton boundingBoxButton;
+    protected JToggleButton gridButton;
+    protected JToggleButton rulerButton;
+    protected JToggleButton rulerLabelButton;
+    protected JToggleButton volumeSlicerButton;
     // protected IcyToggleButton pickOnMouseMoveButton;
 
     /**
@@ -211,22 +200,22 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
         updateTNav();
 
         // create toolbar buttons
-        axesButton = new IcyToggleButton(new IcyIcon(ICON_AXES3D)); // TODO: 17/02/2023 Change this icon
+        axesButton = new IcyToggleButton(SVGIcon.AXIS_3D);
         axesButton.setFocusable(false);
         axesButton.setToolTipText("Display 3D axis");
-        boundingBoxButton = new IcyToggleButton(new IcyIcon(ICON_BOUNDINGBOX)); // TODO: 17/02/2023 Change this icon
+        boundingBoxButton = new IcyToggleButton(SVGIcon.BOX_BOUNDS);
         boundingBoxButton.setFocusable(false);
         boundingBoxButton.setToolTipText("Display bounding box");
-        gridButton = new IcyToggleButton(new IcyIcon(ICON_GRID)); // TODO: 17/02/2023 Change this icon
+        gridButton = new IcyToggleButton(new SVGIconPack(SVGIcon.GRID_ON, SVGIcon.GRID_OFF));
         gridButton.setFocusable(false);
         gridButton.setToolTipText("Display grid");
-        rulerButton = new IcyToggleButton(new IcyIcon(ICON_RULER)); // TODO: 17/02/2023 Change this icon
+        rulerButton = new IcyToggleButton(SVGIcon.RULER);
         rulerButton.setFocusable(false);
         rulerButton.setToolTipText("Display rulers");
-        rulerLabelButton = new IcyToggleButton(new IcyIcon(ICON_RULERLABEL)); // TODO: 17/02/2023 Change this icon
+        rulerLabelButton = new IcyToggleButton(SVGIcon.MEASURE_CENTIMETER);
         rulerLabelButton.setFocusable(false);
         rulerLabelButton.setToolTipText("Display rulers label");
-        volumeSlicerButton = new IcyToggleButton(new IcyIcon(ICON_SLICER)); // TODO: 17/02/2023 Change this icon
+        volumeSlicerButton = new IcyToggleButton(SVGIcon.CUBE_SLICE);
         volumeSlicerButton.setFocusable(false);
         volumeSlicerButton.setToolTipText("Enable volume slicer");
 
@@ -1533,7 +1522,7 @@ public class VtkCanvas extends Canvas3D implements ActionListener, SettingChange
                 return robot.createScreenCapture(bounds);
             }
             catch (final AWTException e) {
-                IcyExceptionHandler.showErrorMessage(e, true);
+                IcyLogger.error(VtkCanvas.class, e, e.getLocalizedMessage());
                 return null;
             }
 

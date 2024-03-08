@@ -1,51 +1,46 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package plugins.kernel.searchprovider;
 
-import java.awt.Image;
-import java.util.ArrayList;
-import java.util.List;
+package plugins.kernel.searchprovider;
 
 import icy.action.ActionManager;
 import icy.action.IcyAbstractAction;
-import icy.resource.icon.IcyIcon;
 import icy.search.SearchResult;
 import icy.search.SearchResultConsumer;
 import icy.search.SearchResultProducer;
 import icy.util.StringUtil;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class is used to provide kernel command elements to the search engine.
- * 
+ *
  * @author Stephane
  */
-public class KernelSearchResultProducer extends SearchResultProducer
-{
-    public static class KernelSearchResult extends SearchResult
-    {
+public class KernelSearchResultProducer extends SearchResultProducer {
+    public static class KernelSearchResult extends SearchResult {
         private final IcyAbstractAction action;
         private final int priority;
         private String description;
 
-        public KernelSearchResult(SearchResultProducer provider, IcyAbstractAction action, List<SearchWord> searchWords,
-                int priority, boolean startWithOnly)
-        {
+        public KernelSearchResult(final SearchResultProducer provider, final IcyAbstractAction action, final List<SearchWord> searchWords, final int priority, final boolean startWithOnly) {
             super(provider);
 
             this.action = action;
@@ -53,8 +48,7 @@ public class KernelSearchResultProducer extends SearchResultProducer
 
             final String longDesc = action.getLongDescription();
 
-            if (!StringUtil.isEmpty(longDesc))
-            {
+            if (!StringUtil.isEmpty(longDesc)) {
                 final String[] lds = longDesc.split("\n");
 
                 if (lds.length > 0)
@@ -62,10 +56,9 @@ public class KernelSearchResultProducer extends SearchResultProducer
                     description = StringUtil.limit(lds[0], 80, true);
 
                 // highlight search keywords (only for more than 2 characters search)
-                if (!startWithOnly)
-                {
+                if (!startWithOnly) {
                     // highlight search keywords in description
-                    for (SearchWord sw : searchWords)
+                    for (final SearchWord sw : searchWords)
                         description = StringUtil.htmlBoldSubstring(description, sw.word, true);
                 }
             }
@@ -73,25 +66,23 @@ public class KernelSearchResultProducer extends SearchResultProducer
                 description = "";
         }
 
-        public IcyAbstractAction getAction()
-        {
+        public IcyAbstractAction getAction() {
             return action;
         }
 
         @Override
-        public Image getImage()
-        {
-            final IcyIcon icon = action.getIcon();
+        public Image getImage() {
+            // TODO Remove this
+            /*final IcyIcon icon = action.getIcon();
 
             if (icon != null)
-                return icon.getImage();
+                return icon.getImage();*/
 
             return null;
         }
 
         @Override
-        public String getTitle()
-        {
+        public String getTitle() {
             final String desc = action.getDescription();
 
             if (!StringUtil.isEmpty(desc))
@@ -101,14 +92,12 @@ public class KernelSearchResultProducer extends SearchResultProducer
         }
 
         @Override
-        public String getDescription()
-        {
+        public String getDescription() {
             return description;
         }
 
         @Override
-        public String getTooltip()
-        {
+        public String getTooltip() {
             if (isEnabled())
                 return "Click to execute the action";
 
@@ -117,26 +106,22 @@ public class KernelSearchResultProducer extends SearchResultProducer
         }
 
         @Override
-        public boolean isEnabled()
-        {
+        public boolean isEnabled() {
             return action.isEnabled();
         }
 
         @Override
-        public void execute()
-        {
+        public void execute() {
             action.execute();
         }
 
         @Override
-        public void executeAlternate()
-        {
+        public void executeAlternate() {
             // nothing to do here...
         }
 
         @Override
-        public int compareTo(SearchResult o)
-        {
+        public int compareTo(final SearchResult o) {
             if (o instanceof KernelSearchResult)
                 return ((KernelSearchResult) o).priority - priority;
 
@@ -145,37 +130,32 @@ public class KernelSearchResultProducer extends SearchResultProducer
     }
 
     @Override
-    public int getOrder()
-    {
+    public int getOrder() {
         // should be first
         return 0;
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return "Command";
     }
 
     @Override
-    public String getTooltipText()
-    {
+    public String getTooltipText() {
         return "Result(s) from the internal commands and actions";
     }
 
     @Override
-    public void doSearch(String text, SearchResultConsumer consumer)
-    {
+    public void doSearch(final String text, final SearchResultConsumer consumer) {
         final List<SearchWord> words = getSearchWords(text);
 
         if (words.isEmpty())
             return;
 
-        final List<SearchResult> tmpResults = new ArrayList<SearchResult>();
+        final List<SearchResult> tmpResults = new ArrayList<>();
         final boolean startWithOnly = getShortSearch(words);
 
-        for (IcyAbstractAction action : ActionManager.actions)
-        {
+        for (final IcyAbstractAction action : ActionManager.activeSequenceActions) {
             if (hasWaitingSearch())
                 return;
 
@@ -190,13 +170,11 @@ public class KernelSearchResultProducer extends SearchResultProducer
         consumer.resultsChanged(this);
     }
 
-    public static int searchInAction(IcyAbstractAction action, List<SearchWord> words, boolean startWithOnly)
-    {
+    public static int searchInAction(final IcyAbstractAction action, final List<SearchWord> words, final boolean startWithOnly) {
         int result = 0;
 
         // we accept action which contains all words only
-        for (SearchWord sw : words)
-        {
+        for (final SearchWord sw : words) {
             final int r = searchInAction(action, sw.word, startWithOnly);
 
             // mandatory word not found ? --> reject
@@ -213,8 +191,7 @@ public class KernelSearchResultProducer extends SearchResultProducer
         return result / words.size();
     }
 
-    public static int searchInAction(IcyAbstractAction action, String word, boolean startWithOnly)
-    {
+    public static int searchInAction(final IcyAbstractAction action, final String word, final boolean startWithOnly) {
         final String wordlc = word.trim().toLowerCase();
         String text;
 
@@ -228,8 +205,7 @@ public class KernelSearchResultProducer extends SearchResultProducer
         if (!StringUtil.isEmpty(text) && text.toLowerCase().startsWith(wordlc))
             return 5;
 
-        if (!startWithOnly)
-        {
+        if (!startWithOnly) {
             // text = action.getName();
             // if (!StringUtil.isEmpty(text) && text.toLowerCase().contains(wordlc))
             // return 9;

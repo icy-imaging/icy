@@ -32,6 +32,7 @@ import icy.system.SystemUtil;
 import icy.system.logging.IcyLogger;
 import icy.update.IcyUpdater;
 import icy.util.ClassUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -52,7 +53,6 @@ import java.util.List;
 public final class GeneralActions {
     public static final IcyAbstractAction searchAction = new IcyAbstractAction(
             "Search",
-            //new IcyIcon(ResourceUtil.ICON_SEARCH),
             "Application search tool", KeyEvent.VK_F,
             SystemUtil.getMenuCtrlMaskEx()
     ) {
@@ -73,10 +73,7 @@ public final class GeneralActions {
         }
     };
 
-    public static final IcyAbstractAction exitApplicationAction = new IcyAbstractAction(
-            "Exit"
-            //new IcyIcon(ResourceUtil.ICON_ON_OFF)
-    ) {
+    public static final IcyAbstractAction exitApplicationAction = new IcyAbstractAction("Quit Icy") {
         @Override
         public boolean doAction(final ActionEvent e) {
             Icy.exit(false);
@@ -87,7 +84,6 @@ public final class GeneralActions {
     @Deprecated(since = "3.0.0", forRemoval = true)
     public static final IcyAbstractAction detachedModeAction = new IcyAbstractAction(
             "Detached Mode",
-            //new IcyIcon(ResourceUtil.ICON_DETACHED_WINDOW),
             "Detached mode ON/OFF",
             "Switch application to detached / attached mode"
     ) {
@@ -102,11 +98,15 @@ public final class GeneralActions {
 
             return true;
         }
+
+        @Override
+        public boolean isEnabled() {
+            return false; // TODO disable for now...
+        }
     };
 
     public static final IcyAbstractAction copyImageAction = new IcyAbstractAction(
             "Copy image",
-            //new IcyIcon(ResourceUtil.ICON_PICTURE_COPY),
             "Copy image to clipboard",
             "Copy the active image to the system clipboard.",
             KeyEvent.VK_C,
@@ -123,8 +123,7 @@ public final class GeneralActions {
 
                 if (seq != null) {
                     try {
-                        final BufferedImage img = viewer.getRenderedImage(viewer.getPositionT(), viewer.getPositionZ(),
-                                viewer.getPositionC(), false);
+                        final BufferedImage img = viewer.getRenderedImage(viewer.getPositionT(), viewer.getPositionZ(), viewer.getPositionC(), false);
 
                         // put image in system clipboard
                         Clipboard.putSystem(new TransferableImage(img), null);
@@ -150,7 +149,6 @@ public final class GeneralActions {
 
     public static final IcyAbstractAction pasteImageAction = new IcyAbstractAction(
             "Paste image",
-            //new IcyIcon(ResourceUtil.ICON_PICTURE_PASTE),
             "Paste image from clipboard",
             "Paste image from the system clipboard in a new sequence.",
             KeyEvent.VK_V,
@@ -185,49 +183,8 @@ public final class GeneralActions {
         }
     };
 
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public static final IcyAbstractAction toIJAction = new IcyAbstractAction(
-            "Convert to IJ",
-            //new IcyIcon(ResourceUtil.ICON_TOIJ),
-            "Convert to ImageJ",
-            "Convert the selected Icy sequence to ImageJ image.",
-            true,
-            "Converting to ImageJ image..."
-    ) {
-        @Override
-        public boolean doAction(final ActionEvent e) {
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return super.isEnabled() && (Icy.getMainInterface().getActiveSequence() != null);
-        }
-    };
-
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public static final IcyAbstractAction toIcyAction = new IcyAbstractAction(
-            "Convert to Icy",
-            //new IcyIcon(ResourceUtil.ICON_TOICY),
-            "Convert to Icy",
-            "Convert the selected ImageJ image to Icy sequence.",
-            true,
-            "Converting to Icy image..."
-    ) {
-        @Override
-        public boolean doAction(final ActionEvent e) {
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return super.isEnabled();
-        }
-    };
-
     public static final IcyAbstractAction onlineHelpAction = new IcyAbstractAction(
-            "Online help (F1)",
-            //new IcyIcon(ResourceUtil.ICON_HELP),
+            "Get Help",
             "Open a browser and display support forum",
             KeyEvent.VK_F1
     ) {
@@ -239,10 +196,7 @@ public final class GeneralActions {
         }
     };
 
-    public static final IcyAbstractAction websiteAction = new IcyAbstractAction(
-            "Website"
-            //new IcyIcon(ResourceUtil.ICON_BROWSER)
-    ) {
+    public static final IcyAbstractAction websiteAction = new IcyAbstractAction("Go to Website") {
         @Override
         public boolean doAction(final ActionEvent e) {
             // open browser on help page
@@ -295,8 +249,7 @@ public final class GeneralActions {
     // };
 
     public static final IcyAbstractAction checkUpdateAction = new IcyAbstractAction(
-            "Check for update",
-            //new IcyIcon(ResourceUtil.ICON_DOWNLOAD),
+            "Check for Updates",
             "Check for updates",
             "Search updates for application and plugins in all referenced repositories."
     ) {
@@ -306,8 +259,8 @@ public final class GeneralActions {
             if (!IcyUpdater.isCheckingForUpdate())
                 IcyUpdater.checkUpdate(false);
             // check plugin update
-            if (!PluginUpdater.isCheckingForUpdate())
-                PluginUpdater.checkUpdate(false);
+            /*if (!PluginUpdater.isCheckingForUpdate()) // TODO uncomment this
+                PluginUpdater.checkUpdate(false);*/
 
             return true;
         }
@@ -320,8 +273,7 @@ public final class GeneralActions {
     };
 
     public static final IcyAbstractAction aboutAction = new IcyAbstractAction(
-            "About",
-            //new IcyIcon(ResourceUtil.ICON_INFO),
+            "About Icy",
             "About Icy",
             "Information about ICY's authors, license and copyrights."
     ) {
@@ -333,9 +285,8 @@ public final class GeneralActions {
     };
 
     public static final IcyAbstractAction changeLogAction = new IcyAbstractAction(
-            "ChangeLog",
-            //new IcyIcon("notepad_2.png"),
-            "ChangeLog",
+            "See Changelog",
+            "See changelog",
             "See the changelog informations."
     ) {
         @Override
@@ -348,7 +299,8 @@ public final class GeneralActions {
     /**
      * Return all actions of this class
      */
-    public static List<IcyAbstractAction> getAllActions() {
+    @Deprecated(forRemoval = true)
+    public static @NotNull List<IcyAbstractAction> getAllActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
         for (final Field field : GeneralActions.class.getFields()) {

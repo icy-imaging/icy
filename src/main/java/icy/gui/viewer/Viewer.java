@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.viewer;
 
 import icy.action.CanvasActions;
@@ -43,7 +43,6 @@ import icy.gui.frame.progress.ToolTipFrame;
 import icy.gui.lut.LUTViewer;
 import icy.gui.lut.abstract_.IcyLutViewer;
 import icy.gui.plugin.PluginComboBoxRenderer;
-import icy.gui.util.LookAndFeelUtil;
 import icy.gui.viewer.ViewerEvent.ViewerEventType;
 import icy.image.IcyBufferedImage;
 import icy.image.lut.LUT;
@@ -53,6 +52,9 @@ import icy.plugin.PluginLoader.PluginLoaderEvent;
 import icy.plugin.PluginLoader.PluginLoaderListener;
 import icy.plugin.interface_.PluginCanvas;
 import icy.preferences.GeneralPreferences;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import icy.sequence.DimensionId;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
@@ -63,8 +65,6 @@ import icy.system.thread.ThreadUtil;
 import icy.util.GraphicsUtil;
 import icy.util.Random;
 import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.swing.IconFontSwing;
 import plugins.kernel.canvas.VtkCanvas;
 import plugins.kernel.canvas.VtkCanvasPlugin;
 
@@ -83,7 +83,8 @@ import java.util.Vector;
 /**
  * Viewer send an event if the IcyCanvas change.
  *
- * @author Fabrice de Chaumont &amp; Stephane
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class Viewer extends IcyFrame implements KeyListener, SequenceListener, IcyCanvasListener, PluginLoaderListener {
@@ -92,7 +93,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
             super();
         }
 
-        public void drawTextCenter(Graphics2D g, String text, float alpha) {
+        public void drawTextCenter(final Graphics2D g, final String text, final float alpha) {
             final Rectangle2D rect = GraphicsUtil.getStringBounds(g, text);
             final int w = (int) rect.getWidth();
             final int h = (int) rect.getHeight();
@@ -108,7 +109,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         }
 
         @Override
-        public void paint(Graphics g) {
+        public void paint(final Graphics g) {
             // currently modifying canvas ?
             super.paint(g);
 
@@ -168,7 +169,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     private final Runnable lutUpdater;
     boolean settingCanvas;
 
-    public Viewer(Sequence sequence, boolean visible) {
+    public Viewer(final Sequence sequence, final boolean visible) {
         super("Viewer", true, true, true, true);
 
         if (sequence == null)
@@ -247,7 +248,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
 
         addFrameListener(new IcyFrameAdapter() {
             @Override
-            public void icyFrameOpened(IcyFrameEvent e) {
+            public void icyFrameOpened(final IcyFrameEvent e) {
                 if (!initialized) {
                     if ((Viewer.this.sequence != null) && !Viewer.this.sequence.isEmpty()) {
                         adjustViewerToImageSize();
@@ -257,22 +258,22 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
             }
 
             @Override
-            public void icyFrameActivated(IcyFrameEvent e) {
+            public void icyFrameActivated(final IcyFrameEvent e) {
                 Icy.getMainInterface().setActiveViewer(Viewer.this);
             }
 
             @Override
-            public void icyFrameExternalized(IcyFrameEvent e) {
+            public void icyFrameExternalized(final IcyFrameEvent e) {
                 refreshToolBar();
             }
 
             @Override
-            public void icyFrameInternalized(IcyFrameEvent e) {
+            public void icyFrameInternalized(final IcyFrameEvent e) {
                 refreshToolBar();
             }
 
             @Override
-            public void icyFrameClosing(IcyFrameEvent e) {
+            public void icyFrameClosing(final IcyFrameEvent e) {
                 onClosing();
             }
         });
@@ -298,7 +299,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         buildActionMap();
     }
 
-    public Viewer(Sequence sequence) {
+    public Viewer(final Sequence sequence) {
         this(sequence, true);
     }
 
@@ -307,7 +308,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         buildActionMap(getInputMap(JComponent.WHEN_FOCUSED), getActionMap());
     }
 
-    protected void buildActionMap(InputMap imap, ActionMap amap) {
+    protected void buildActionMap(final InputMap imap, final ActionMap amap) {
         imap.put(WindowActions.gridTileAction.getKeyStroke(), WindowActions.gridTileAction.getName());
         imap.put(WindowActions.horizontalTileAction.getKeyStroke(), WindowActions.horizontalTileAction.getName());
         imap.put(WindowActions.verticalTileAction.getKeyStroke(), WindowActions.verticalTileAction.getName());
@@ -393,8 +394,8 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
             toolBar.removeAll();
 
         // remove all listeners for this viewer
-        ViewerListener[] vls = listeners.getListeners(ViewerListener.class);
-        for (ViewerListener vl : vls)
+        final ViewerListener[] vls = listeners.getListeners(ViewerListener.class);
+        for (final ViewerListener vl : vls)
             listeners.remove(ViewerListener.class, vl);
 
         lutViewer = null;
@@ -417,9 +418,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     }
 
     void adjustViewerToImageSize() {
-        if (canvas instanceof IcyCanvas2D) {
-            final IcyCanvas2D cnv = (IcyCanvas2D) canvas;
-
+        if (canvas instanceof final IcyCanvas2D cnv) {
             final int ix = cnv.getImageSizeX();
             final int iy = cnv.getImageSizeY();
 
@@ -473,11 +472,11 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         final ArrayList<JLabel> labels = new ArrayList<>();
 
         // get sync action labels
-        labels.add(new JLabel("Sync OFF", IconFontSwing.buildIcon(GoogleMaterialDesignIcons.FILTER_NONE, LookAndFeelUtil.getDefaultIconSizeAsFloat(), Color.DARK_GRAY), JLabel.LEFT));
-        labels.add(new JLabel("Sync 1", IconFontSwing.buildIcon(GoogleMaterialDesignIcons.FILTER_1, LookAndFeelUtil.getDefaultIconSizeAsFloat(), Color.GREEN.darker()), JLabel.LEFT));
-        labels.add(new JLabel("Sync 2", IconFontSwing.buildIcon(GoogleMaterialDesignIcons.FILTER_2, LookAndFeelUtil.getDefaultIconSizeAsFloat(), Color.ORANGE.darker()), JLabel.LEFT));
-        labels.add(new JLabel("Sync 3", IconFontSwing.buildIcon(GoogleMaterialDesignIcons.FILTER_3, LookAndFeelUtil.getDefaultIconSizeAsFloat(), Color.BLUE.darker()), JLabel.LEFT));
-        labels.add(new JLabel("Sync 4", IconFontSwing.buildIcon(GoogleMaterialDesignIcons.FILTER_4, LookAndFeelUtil.getDefaultIconSizeAsFloat(), Color.RED.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync OFF", new IcySVGIcon(SVGIcon.FILTER_NONE, Color.DARK_GRAY), JLabel.LEFT));
+        labels.add(new JLabel("Sync 1", new IcySVGIcon(SVGIcon.FILTER_1, Color.GREEN.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync 2", new IcySVGIcon(SVGIcon.FILTER_2, Color.ORANGE.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync 3", new IcySVGIcon(SVGIcon.FILTER_3, Color.BLUE.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync 4", new IcySVGIcon(SVGIcon.FILTER_4, Color.RED.darker()), JLabel.LEFT));
 
         // build comboBox with lock id
         lockComboBox = new JComboBox<>(new Vector<>(labels));
@@ -531,35 +530,35 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         buildCanvasCombo();
 
         // build buttons
-        layersEnabledButton = new IcyToggleButton(GoogleMaterialDesignIcons.LAYERS_CLEAR, GoogleMaterialDesignIcons.LAYERS);
+        layersEnabledButton = new IcyToggleButton(new SVGIconPack(SVGIcon.LAYERS_CLEAR, SVGIcon.LAYERS));
         layersEnabledButton.addActionListener(new ToggleLayersAction(true));
         layersEnabledButton.setHideActionText(true);
         layersEnabledButton.setFocusable(false);
         layersEnabledButton.setSelected(true);
 
-        screenShotButton = new IcyButton(GoogleMaterialDesignIcons.CAMERA_ALT);
+        screenShotButton = new IcyButton(SVGIcon.PHOTO_CAMERA);
         screenShotButton.addActionListener(CanvasActions.screenShotAction);
         screenShotButton.setFocusable(false);
         screenShotButton.setHideActionText(true);
 
-        screenShotAlternateButton = new IcyButton(GoogleMaterialDesignIcons.ASPECT_RATIO);
+        screenShotAlternateButton = new IcyButton(SVGIcon.ASPECT_RATIO);
         screenShotAlternateButton.addActionListener(CanvasActions.screenShotAlternateAction);
         screenShotAlternateButton.setFocusable(false);
         screenShotAlternateButton.setHideActionText(true);
 
-        duplicateButton = new IcyButton(GoogleMaterialDesignIcons.CONTENT_COPY);
+        duplicateButton = new IcyButton(SVGIcon.CONTENT_COPY);
         duplicateButton.addActionListener(ViewerActions.duplicateAction);
         duplicateButton.setFocusable(false);
         duplicateButton.setHideActionText(true);
         // duplicateButton.setToolTipText("Duplicate view (no data duplication)");
 
-        switchStateButton = new IcyToggleButton(GoogleMaterialDesignIcons.OPEN_IN_NEW);
+        switchStateButton = new IcyToggleButton(SVGIcon.OPEN_IN_NEW);
         switchStateButton.addActionListener(getSwitchStateAction());
         switchStateButton.setSelected(isExternalized());
         switchStateButton.setFocusable(false);
         switchStateButton.setHideActionText(true);
 
-        virtualButton = new IcyToggleButton(GoogleMaterialDesignIcons.FLASH_OFF, GoogleMaterialDesignIcons.FLASH_ON);
+        virtualButton = new IcyToggleButton(new SVGIconPack(SVGIcon.FLASH_OFF, SVGIcon.FLASH_ON));
         virtualButton.addActionListener(new ToggleVirtualSequenceAction(false));
         virtualButton.setFocusable(false);
         virtualButton.setHideActionText(true);
@@ -718,10 +717,8 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * Set the specified LUT for the viewer.
      */
-    public void setLut(LUT value)
-    {
-        if ((lut != value) && (sequence != null) && sequence.isLutCompatible(value))
-        {
+    public void setLut(final LUT value) {
+        if ((lut != value) && (sequence != null) && sequence.isLutCompatible(value)) {
             // set new lut & notify change
             lut = value;
             lutChanged();
@@ -758,10 +755,9 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
      *
      * @see IcyCanvas#getCanvasPluginNames()
      */
-    public void setCanvas(String pluginClassName) {
+    public void setCanvas(final String pluginClassName) {
         // not the same canvas ?
-        if ((canvas == null)
-                || !StringUtil.equals(canvas.getClass().getName(), IcyCanvas.getCanvasClassName(pluginClassName))) {
+        if ((canvas == null) || !StringUtil.equals(canvas.getClass().getName(), IcyCanvas.getCanvasClassName(pluginClassName))) {
             try {
                 IcyCanvas newCanvas;
                 String className = pluginClassName;
@@ -769,7 +765,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                 // VTK Canvas ?
                 if (StringUtil.equals(className, VtkCanvasPlugin.class.getName())) {
                     // VTK canvas doesn't support duplicated view
-                    for (Viewer v : Icy.getMainInterface().getViewers()) {
+                    for (final Viewer v : Icy.getMainInterface().getViewers()) {
                         // we have another viewer with duplicated VTK view ? --> show warning at least
                         if ((v != this) && (v.getSequence() == getSequence()) && (v.getCanvas() instanceof VtkCanvas)) {
                             if (!ConfirmDialog.confirm("Caution",
@@ -790,21 +786,15 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                     // try to create the new canvas
                     newCanvas = IcyCanvas.create(className, this);
                 }
-                catch (Throwable e) {
-                    if (e instanceof IcyHandledException) {
-                        // just ignore
+                catch (final Throwable e) {
+                    switch (e) {
+                        case final IcyHandledException ignored -> {
+                            // just ignore
+                        }
+                        case final UnsupportedOperationException ignored -> MessageDialog.showDialog(e.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                        case final Exception ignored -> IcyExceptionHandler.handleException(new ClassNotFoundException("Cannot find '" + className + "' class --> cannot create the canvas.", e), true);
+                        default -> IcyExceptionHandler.handleException(e, true);
                     }
-                    else if (e instanceof UnsupportedOperationException) {
-                        MessageDialog.showDialog(e.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
-                    }
-                    else if (e instanceof Exception) {
-                        IcyExceptionHandler.handleException(
-                                new ClassNotFoundException(
-                                        "Cannot find '" + className + "' class --> cannot create the canvas.", e),
-                                true);
-                    }
-                    else
-                        IcyExceptionHandler.handleException(e, true);
 
                     // create a new instance of current canvas
                     newCanvas = IcyCanvas.create(canvas.getClass().getName(), this);
@@ -859,7 +849,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                 // canvas set :)
                 canvas = newCanvas;
             }
-            catch (Throwable e) {
+            catch (final Throwable e) {
                 IcyExceptionHandler.handleException(e, true);
             }
 
@@ -882,7 +872,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
      * @deprecated Use {@link #setCanvas(String)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setCanvas(IcyCanvas value) {
+    public void setCanvas(final IcyCanvas value) {
         if (canvas == value)
             return;
 
@@ -979,7 +969,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * Set the {@link LUTViewer} for this viewer.
      */
-    public void setLutViewer(LUTViewer value) {
+    public void setLutViewer(final LUTViewer value) {
         if (lutViewer != value) {
             if (lutViewer != null)
                 lutViewer.dispose();
@@ -999,7 +989,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
      * @deprecated Use {@link #setLutViewer(LUTViewer)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setLutPanel(IcyLutViewer lutViewer) {
+    public void setLutPanel(final IcyLutViewer lutViewer) {
         setLutViewer((LUTViewer) lutViewer);
     }
 
@@ -1023,7 +1013,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * Set the current T position (for multi frame sequence).
      */
-    public void setPositionT(int t) {
+    public void setPositionT(final int t) {
         if (canvas != null)
             canvas.setPositionT(t);
     }
@@ -1041,7 +1031,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * Set the current Z position (for stack sequence).
      */
-    public void setPositionZ(int z) {
+    public void setPositionZ(final int z) {
         if (canvas != null)
             canvas.setPositionZ(z);
     }
@@ -1059,7 +1049,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * Set the current C (channel) position (multi channel sequence)
      */
-    public void setPositionC(int c) {
+    public void setPositionC(final int c) {
         if (canvas != null)
             canvas.setPositionC(c);
     }
@@ -1076,7 +1066,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
      * @deprecated Use {@link #setPositionT(int)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setT(int t) {
+    public void setT(final int t) {
         setPositionT(t);
     }
 
@@ -1092,7 +1082,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
      * @deprecated Use {@link #setPositionZ(int)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setZ(int z) {
+    public void setZ(final int z) {
         setPositionZ(z);
     }
 
@@ -1108,7 +1098,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
      * @deprecated Use {@link #setPositionZ(int)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setC(int c) {
+    public void setC(final int c) {
         setPositionC(c);
     }
 
@@ -1168,7 +1158,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
      * @param id the view synchronization id to set
      * @see IcyCanvas#setSyncId(int)
      */
-    public boolean setViewSyncId(int id) {
+    public boolean setViewSyncId(final int id) {
         if (canvas != null)
             return canvas.setSyncId(id);
 
@@ -1188,7 +1178,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * Delegation for {@link IcyCanvas#getImage(int, int, int)}
      */
-    public IcyBufferedImage getImage(int t, int z, int c) {
+    public IcyBufferedImage getImage(final int t, final int z, final int c) {
         if (canvas != null)
             return canvas.getImage(t, z, c);
 
@@ -1199,7 +1189,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
      * @deprecated Use {@link #getImage(int, int, int)} with C = -1 instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public IcyBufferedImage getImage(int t, int z) {
+    public IcyBufferedImage getImage(final int t, final int z) {
         return getImage(t, z, -1);
     }
 
@@ -1226,10 +1216,9 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     }
 
     /**
-     * @throws InterruptedException
      * @see icy.canvas.IcyCanvas#getRenderedImage(int, int, int, boolean)
      */
-    public BufferedImage getRenderedImage(int t, int z, int c, boolean canvasView) throws InterruptedException {
+    public BufferedImage getRenderedImage(final int t, final int z, final int c, final boolean canvasView) throws InterruptedException {
         if (canvas == null)
             return null;
 
@@ -1237,11 +1226,9 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     }
 
     /**
-     * @throws InterruptedException
      * @see icy.canvas.IcyCanvas#getRenderedSequence(boolean, icy.common.listener.ProgressListener)
      */
-    public Sequence getRenderedSequence(boolean canvasView, ProgressListener progressListener)
-            throws InterruptedException {
+    public Sequence getRenderedSequence(final boolean canvasView, final ProgressListener progressListener) throws InterruptedException {
         if (canvas == null)
             return null;
 
@@ -1273,7 +1260,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * Sets the frame rate (given in frame per second) for play command.
      */
-    public void setFrameRate(int fps) {
+    public void setFrameRate(final int fps) {
         final TNavigationPanel tNav = getTNavigationPanel();
 
         if (tNav != null)
@@ -1295,7 +1282,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     /**
      * Set <code>repeat</code> mode for play command.
      */
-    public void setRepeat(boolean value) {
+    public void setRepeat(final boolean value) {
         final TNavigationPanel tNav = getTNavigationPanel();
 
         if (tNav != null)
@@ -1351,7 +1338,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         ThreadUtil.bgRunSingle(lutUpdater);
     }
 
-    protected void positionChanged(DimensionId dim) {
+    protected void positionChanged(final DimensionId dim) {
         fireViewerChanged(ViewerEventType.POSITION_CHANGED, dim);
 
         refreshViewerTitle();
@@ -1359,54 +1346,50 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
 
     /**
      * Add a listener
-     *
-     * @param listener
      */
-    public void addListener(ViewerListener listener) {
+    public void addListener(final ViewerListener listener) {
         listeners.add(ViewerListener.class, listener);
     }
 
     /**
      * Remove a listener
-     *
-     * @param listener
      */
-    public void removeListener(ViewerListener listener) {
+    public void removeListener(final ViewerListener listener) {
         listeners.remove(ViewerListener.class, listener);
     }
 
-    void fireViewerChanged(ViewerEventType eventType, DimensionId dim) {
+    void fireViewerChanged(final ViewerEventType eventType, final DimensionId dim) {
         final ViewerEvent event = new ViewerEvent(this, eventType, dim);
 
-        for (ViewerListener viewerListener : listeners.getListeners(ViewerListener.class))
+        for (final ViewerListener viewerListener : listeners.getListeners(ViewerListener.class))
             viewerListener.viewerChanged(event);
     }
 
-    void fireViewerChanged(ViewerEventType event) {
+    void fireViewerChanged(final ViewerEventType event) {
         fireViewerChanged(event, DimensionId.NULL);
     }
 
     protected void fireViewerClosed() {
-        for (ViewerListener viewerListener : listeners.getListeners(ViewerListener.class))
+        for (final ViewerListener viewerListener : listeners.getListeners(ViewerListener.class))
             viewerListener.viewerClosed(this);
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {
+    public void keyPressed(final KeyEvent e) {
         // forward to canvas
         if ((canvas != null) && (!e.isConsumed()))
             canvas.keyPressed(e);
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {
+    public void keyReleased(final KeyEvent e) {
         // forward to canvas
         if ((canvas != null) && (!e.isConsumed()))
             canvas.keyReleased(e);
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
+    public void keyTyped(final KeyEvent e) {
         // forward to canvas
         if ((canvas != null) && (!e.isConsumed()))
             canvas.keyTyped(e);
@@ -1441,7 +1424,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     }
 
     @Override
-    public void sequenceChanged(SequenceEvent event) {
+    public void sequenceChanged(final SequenceEvent event) {
         switch (event.getSourceType()) {
             case SEQUENCE_META:
                 final String meta = (String) event.getSource();
@@ -1483,12 +1466,11 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     }
 
     @Override
-    public void sequenceClosed(Sequence sequence) {
-
+    public void sequenceClosed(final Sequence sequence) {
     }
 
     @Override
-    public void canvasChanged(IcyCanvasEvent event) {
+    public void canvasChanged(final IcyCanvasEvent event) {
         switch (event.getType()) {
             case POSITION_CHANGED:
                 // common process on position change
@@ -1502,7 +1484,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
+    public void propertyChange(final PropertyChangeEvent evt) {
         super.propertyChange(evt);
 
         // Canvas property "layer visible" changed ?
@@ -1513,7 +1495,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     }
 
     @Override
-    public void pluginLoaderChanged(PluginLoaderEvent e) {
+    public void pluginLoaderChanged(final PluginLoaderEvent e) {
         ThreadUtil.invokeLater(() -> {
             // refresh available canvas
             buildCanvasCombo();

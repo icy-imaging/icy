@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,10 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.viewer;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import icy.gui.component.IcySlider;
+import icy.gui.component.button.IcyToggleButton;
+import icy.gui.util.ComponentUtil;
+import icy.gui.util.GuiUtil;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
+import icy.system.thread.ThreadUtil;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -27,31 +37,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
-import javax.swing.Timer;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import icy.gui.component.IcySlider;
-import icy.gui.component.button.IcyToggleButton;
-import icy.gui.util.ComponentUtil;
-import icy.gui.util.GuiUtil;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
-import icy.system.thread.ThreadUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class TNavigationPanel extends JPanel {
@@ -77,7 +64,7 @@ public class TNavigationPanel extends JPanel {
         slider.setToolTipText("Move cursor or use left/right key to navigate in T dimension");
         slider.addChangeListener(new ChangeListener() {
             @Override
-            public void stateChanged(ChangeEvent e) {
+            public void stateChanged(final ChangeEvent e) {
                 rightLabel.setText(Integer.toString(slider.getMaximum()));
                 leftLabel.setText(Integer.toString(slider.getValue()));
                 validate();
@@ -108,7 +95,7 @@ public class TNavigationPanel extends JPanel {
             }
         });
 
-        play = new IcyToggleButton(GoogleMaterialDesignIcons.PLAY_CIRCLE_OUTLINE, GoogleMaterialDesignIcons.STOP);
+        play = new IcyToggleButton(new SVGIconPack(SVGIcon.PLAY_CIRCLE, SVGIcon.STOP_CIRCLE));
         //play.setFlat(true);
         play.setToolTipText("play");
         play.addActionListener(e -> {
@@ -118,7 +105,7 @@ public class TNavigationPanel extends JPanel {
                 startPlay();
         });
 
-        loop = new IcyToggleButton(GoogleMaterialDesignIcons.REPEAT);
+        loop = new IcyToggleButton(SVGIcon.REPEAT);
         //loop.setFlat(true);
         loop.setToolTipText("Enable loop playback");
         loop.addActionListener(e -> setRepeat(!isRepeat()));
@@ -149,7 +136,7 @@ public class TNavigationPanel extends JPanel {
 
         rightLabel.addComponentListener(new ComponentAdapter() {
             @Override
-            public void componentResized(ComponentEvent e) {
+            public void componentResized(final ComponentEvent e) {
                 // so left label is adjusted to right label size
                 ComponentUtil.setFixedWidth(leftLabel, rightLabel.getWidth());
                 leftPanel.revalidate();
@@ -191,7 +178,7 @@ public class TNavigationPanel extends JPanel {
         setTPosition(Math.max(0, getTPosition() - 1));
     }
 
-    protected void setTimerDelay(int delay) {
+    protected void setTimerDelay(final int delay) {
         timer.setDelay(delay);
     }
 
@@ -214,7 +201,7 @@ public class TNavigationPanel extends JPanel {
     /**
      * Sets the frame rate (given in frame per second) for play command.
      */
-    public void setFrameRate(int fps) {
+    public void setFrameRate(final int fps) {
         frameRate.setValue(Integer.valueOf(fps));
     }
 
@@ -228,7 +215,7 @@ public class TNavigationPanel extends JPanel {
     /**
      * Set <code>repeat</code> mode for play command.
      */
-    public void setRepeat(boolean value) {
+    public void setRepeat(final boolean value) {
         if (value) {
             //loop.setIcon(new IcyIcon(ResourceUtil.ICON_RELOAD, 16));
             loop.setSelected(true);
@@ -244,16 +231,16 @@ public class TNavigationPanel extends JPanel {
 
     private final List<ActionListener> loopingStateChangeListeners = Collections.synchronizedList(new ArrayList<>());
 
-    public void addLoopingStateChangeListener(ActionListener actionListener) {
+    public void addLoopingStateChangeListener(final ActionListener actionListener) {
         loopingStateChangeListeners.add(actionListener);
     }
 
-    public void removeLoopingStateChangeListener(ActionListener actionListener) {
+    public void removeLoopingStateChangeListener(final ActionListener actionListener) {
         loopingStateChangeListeners.remove(actionListener);
     }
 
     protected void fireLoopingStateChange() {
-        for (ActionListener l : loopingStateChangeListeners) {
+        for (final ActionListener l : loopingStateChangeListeners) {
             l.actionPerformed(null);
         }
     }
@@ -273,7 +260,7 @@ public class TNavigationPanel extends JPanel {
      */
     public void startPlay() {
         timer.start();
-        play.setIcon(new IcyIcon(ResourceUtil.ICON_PAUSE));
+        //play.setIcon(new IcyIcon(ResourceUtil.ICON_PAUSE));
         play.setSelected(true);
         play.setToolTipText("pause");
     }
@@ -285,7 +272,7 @@ public class TNavigationPanel extends JPanel {
      */
     public void stopPlay() {
         timer.stop();
-        play.setIcon(new IcyIcon(ResourceUtil.ICON_PLAY));
+        //play.setIcon(new IcyIcon(ResourceUtil.ICON_PLAY));
         play.setSelected(false);
         play.setToolTipText("play");
     }
@@ -293,28 +280,28 @@ public class TNavigationPanel extends JPanel {
     /**
      * @see icy.gui.component.IcySlider#setPaintLabels(boolean)
      */
-    public void setPaintLabels(boolean b) {
+    public void setPaintLabels(final boolean b) {
         slider.setPaintLabels(b);
     }
 
     /**
      * @see icy.gui.component.IcySlider#setPaintTicks(boolean)
      */
-    public void setPaintTicks(boolean b) {
+    public void setPaintTicks(final boolean b) {
         slider.setPaintTicks(b);
     }
 
     /**
      * @see JSlider#addChangeListener(ChangeListener)
      */
-    public void addChangeListener(ChangeListener l) {
+    public void addChangeListener(final ChangeListener l) {
         slider.addChangeListener(l);
     }
 
     /**
      * @see JSlider#removeChangeListener(ChangeListener)
      */
-    public void removeChangeListener(ChangeListener l) {
+    public void removeChangeListener(final ChangeListener l) {
         slider.removeChangeListener(l);
     }
 
@@ -322,7 +309,7 @@ public class TNavigationPanel extends JPanel {
      * Remove all change listener
      */
     public void removeAllChangeListener() {
-        for (ChangeListener l : slider.getListeners(ChangeListener.class))
+        for (final ChangeListener l : slider.getListeners(ChangeListener.class))
             slider.removeChangeListener(l);
     }
 
@@ -334,10 +321,9 @@ public class TNavigationPanel extends JPanel {
     }
 
     /**
-     * @param n
      * @see JSlider#setValue(int)
      */
-    public void setValue(int n) {
+    public void setValue(final int n) {
         slider.setValue(n);
     }
 
@@ -351,7 +337,7 @@ public class TNavigationPanel extends JPanel {
     /**
      * @see JSlider#setMinimum(int)
      */
-    public void setMinimum(int minimum) {
+    public void setMinimum(final int minimum) {
         slider.setMinimum(minimum);
     }
 
@@ -365,7 +351,7 @@ public class TNavigationPanel extends JPanel {
     /**
      * @see JSlider#setMaximum(int)
      */
-    public void setMaximum(int maximum) {
+    public void setMaximum(final int maximum) {
         slider.setMaximum(maximum);
     }
 
@@ -386,7 +372,7 @@ public class TNavigationPanel extends JPanel {
     /**
      * @see JSlider#setPaintTrack(boolean)
      */
-    public void setPaintTrack(boolean b) {
+    public void setPaintTrack(final boolean b) {
         slider.setPaintTrack(b);
     }
 

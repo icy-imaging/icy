@@ -47,7 +47,7 @@ public class ColormapComboBoxRenderer extends CustomComboBoxRenderer {
         if (value instanceof IcyColorMap) {
             final IcyColorMap colormap = (IcyColorMap) value;
 
-            final int size = LookAndFeelUtil.getDefaultIconSizeAsInt();
+            final int size = LookAndFeelUtil.getDefaultIconSize();
 
             setIcon(new ColormapIcon(colormap, size * 3, size));
             setText("");

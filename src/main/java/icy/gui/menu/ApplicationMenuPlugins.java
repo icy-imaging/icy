@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -21,11 +21,11 @@ package icy.gui.menu;
 import icy.action.PreferencesActions;
 import icy.gui.component.menu.IcyMenu;
 import icy.gui.component.menu.IcyMenuItem;
+import icy.gui.component.menu.IcyPluginMenuItem;
 import icy.plugin.PluginDescriptor;
-import icy.plugin.PluginLauncher;
 import icy.plugin.PluginLoader;
+import icy.resource.icon.SVGIcon;
 import icy.system.thread.ThreadUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -53,8 +53,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
     private ApplicationMenuPlugins() {
         super("Plugins");
 
-        itemPluginsSettings = new IcyMenuItem("Plugins Settings...", GoogleMaterialDesignIcons.EXTENSION);
-        itemPluginsSettings.addActionListener(PreferencesActions.onlinePluginPreferencesAction);
+        itemPluginsSettings = new IcyMenuItem(PreferencesActions.pluginPreferencesAction, SVGIcon.SETTINGS);
 
         //itemPluginSearch = new IcyTextFieldHint(GoogleMaterialDesignIcons.SEARCH, "Search Plugin...");
         //itemPluginSearch.setEnabled(false);
@@ -65,7 +64,6 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
         addPluginLoaderListener();
     }
 
-    @SuppressWarnings("resource")
     private void reloadPluginsMenu() {
         removeAll();
 
@@ -76,7 +74,6 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
 
         ThreadUtil.invokeLater(() -> {
             final List<PluginDescriptor> plugins = PluginLoader.getActionablePlugins();
-            //final List<PluginDescriptor> plugins = PluginLoader.getPlugins();
 
             final Map<Character, List<PluginDescriptor>> characterListMap = new TreeMap<>();
             for (final PluginDescriptor descriptor : plugins) {
@@ -97,17 +94,14 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
             }
 
             for (final Map.Entry<Character, List<PluginDescriptor>> characterListEntry : characterListMap.entrySet()) {
-                final IcyMenu menuAuthor = new IcyMenu(characterListEntry.getKey().toString());
+                final IcyMenu menuFirstChar = new IcyMenu(characterListEntry.getKey().toString(), SVGIcon.FOLDER);
                 for (final PluginDescriptor plugin : characterListEntry.getValue()) {
-                    final IcyMenuItem itemPlugin = new IcyMenuItem(plugin.getName());
-                    itemPlugin.setIcon(plugin.getIcon());
-                    if (plugin.isActionable())
-                        itemPlugin.addActionListener(e -> PluginLauncher.start(plugin));
+                    final IcyPluginMenuItem itemPlugin = new IcyPluginMenuItem(plugin);
                     if (!plugin.getShortDescription().isBlank())
                         itemPlugin.setToolTipText("<html>" + plugin.getShortDescription() + "</html>");
-                    menuAuthor.add(itemPlugin);
+                    menuFirstChar.add(itemPlugin);
                 }
-                add(menuAuthor);
+                add(menuFirstChar);
             }
 
             setEnabled(true);

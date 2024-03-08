@@ -20,13 +20,15 @@ package icy.plugin.interface_;
 
 import icy.roi.ROI;
 import icy.type.point.Point5D;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Plugin ROI interface.<br>
  * Used to define a plugin representing a specific ROI.<br>
  * The plugin will appears in the ROI list.<br>
  *
- * @author Fab &amp; Stephane
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public interface PluginROI extends PluginNoEDTConstructor {
@@ -35,7 +37,7 @@ public interface PluginROI extends PluginNoEDTConstructor {
      *
      * @return ROI's class name
      */
-    String getROIClassName();
+    @NotNull String getROIClassName();
 
     /**
      * Create and return a new ROI for <i>interactive</i> mode.<br>

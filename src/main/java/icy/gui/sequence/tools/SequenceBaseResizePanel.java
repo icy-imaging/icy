@@ -1,21 +1,21 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.sequence.tools;
 
 import icy.gui.component.IcyTextField;
@@ -24,157 +24,111 @@ import icy.image.IcyBufferedImage;
 import icy.image.IcyBufferedImageUtil;
 import icy.image.IcyBufferedImageUtil.FilterType;
 import icy.math.UnitUtil;
-import icy.resource.ResourceUtil;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.AbstractSequenceModel;
 import icy.sequence.Sequence;
+import org.jetbrains.annotations.NotNull;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.*;
+import javax.swing.JSpinner.DefaultEditor;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JSpinner.DefaultEditor;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public abstract class SequenceBaseResizePanel extends JPanel
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -9220345511598410844L;
-
-    protected enum SizeUnit
-    {
+public abstract class SequenceBaseResizePanel extends JPanel {
+    public enum SizeUnit {
         PIXEL, PERCENT, MICRON
     }
 
-    // pixel / micron
-
-    protected class OriginalModel extends AbstractSequenceModel
-    {
-        public OriginalModel()
-        {
+    protected class OriginalModel extends AbstractSequenceModel {
+        public OriginalModel() {
             super();
         }
 
         @Override
-        public int getSizeX()
-        {
+        public int getSizeX() {
             return getMaxSizeX();
         }
 
         @Override
-        public int getSizeY()
-        {
+        public int getSizeY() {
             return getMaxSizeY();
         }
 
         @Override
-        public int getSizeZ()
-        {
+        public int getSizeZ() {
             return sequence.getSizeZ();
         }
 
         @Override
-        public int getSizeT()
-        {
+        public int getSizeT() {
             return sequence.getSizeT();
         }
 
         @Override
-        public int getSizeC()
-        {
+        public int getSizeC() {
             return sequence.getSizeC();
         }
 
         @Override
-        public BufferedImage getImage(int t, int z)
-        {
+        public BufferedImage getImage(final int t, final int z) {
             return sequence.getImage(t, z);
         }
 
         @Override
-        public BufferedImage getImage(int t, int z, int c)
-        {
+        public BufferedImage getImage(final int t, final int z, final int c) {
             return sequence.getImage(t, z, c);
         }
     }
 
-    protected class ResultModel extends AbstractSequenceModel
-    {
-        public ResultModel()
-        {
+    protected class ResultModel extends AbstractSequenceModel {
+        public ResultModel() {
             super();
         }
 
         @Override
-        public int getSizeX()
-        {
+        public int getSizeX() {
             return getMaxSizeX();
         }
 
         @Override
-        public int getSizeY()
-        {
+        public int getSizeY() {
             return getMaxSizeY();
         }
 
         @Override
-        public int getSizeZ()
-        {
+        public int getSizeZ() {
             return sequence.getSizeZ();
         }
 
         @Override
-        public int getSizeT()
-        {
+        public int getSizeT() {
             return sequence.getSizeT();
         }
 
         @Override
-        public int getSizeC()
-        {
+        public int getSizeC() {
             return sequence.getSizeC();
         }
 
         @Override
-        public BufferedImage getImage(int t, int z)
-        {
-            try
-            {
-                return IcyBufferedImageUtil.scale(sequence.getImage(t, z), getNewWidth(), getNewHeight(),
-                        getResizeContent(), getXAlign(), getYAlign(), getFilterType());
+        public BufferedImage getImage(final int t, final int z) {
+            try {
+                return IcyBufferedImageUtil.scale(sequence.getImage(t, z), getNewWidth(), getNewHeight(), getResizeContent(), getXAlign(), getYAlign(), getFilterType());
             }
-            catch (OutOfMemoryError e)
-            {
+            catch (final OutOfMemoryError e) {
                 return null;
             }
         }
 
         @Override
-        public BufferedImage getImage(int t, int z, int c)
-        {
+        public BufferedImage getImage(final int t, final int z, final int c) {
             return ((IcyBufferedImage) getImage(t, z)).getImage(c);
         }
     }
@@ -191,7 +145,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
     protected IcyTextField widthField;
     protected IcyTextField heightField;
     protected IcyTextField sizeField;
-    protected JComboBox sizeUnitComboBox;
+    protected JComboBox<String> sizeUnitComboBox;
     protected JLabel accolLeftLabel;
     protected JPanel panel;
     protected Component horizontalGlue;
@@ -201,8 +155,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
     /**
      * Create the panel.
      */
-    public SequenceBaseResizePanel(Sequence sequence)
-    {
+    public SequenceBaseResizePanel(final @NotNull Sequence sequence) {
         super();
 
         this.sequence = sequence;
@@ -212,7 +165,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
         setNewWidth(sequence.getSizeX());
         setNewHeight(sequence.getSizeY());
 
-        accolLeftLabel.setIcon(ResourceUtil.getImageIcon(ResourceUtil.IMAGE_ACCOLADE_LEFT));
+        accolLeftLabel.setIcon(new IcySVGIcon(SVGIcon.BRACKET_RIGHT, 40));
         accolLeftLabel.setText(null);
 
         originalPreview.setFitToView(false);
@@ -222,53 +175,39 @@ public abstract class SequenceBaseResizePanel extends JPanel
 
         updatePreview();
 
-        final ChangeListener spinnerChangeListener = new ChangeListener()
-        {
-            @Override
-            public void stateChanged(ChangeEvent e)
-            {
-                // maintain ratio
-                if (keepRatioCheckBox.isSelected())
-                {
-                    final Sequence seq = SequenceBaseResizePanel.this.sequence;
+        final ChangeListener spinnerChangeListener = e -> {
+            // maintain ratio
+            if (keepRatioCheckBox.isSelected()) {
+                final Sequence seq = SequenceBaseResizePanel.this.sequence;
 
-                    if (e.getSource() == widthSpinner)
-                    {
-                        // adjust height
-                        final double ratio = (double) getNewWidth() / (double) seq.getWidth();
-                        setNewHeight((int) Math.round(seq.getHeight() * ratio));
-                    }
-                    else
-                    {
-                        // adjust width
-                        final double ratio = (double) getNewHeight() / (double) seq.getHeight();
-                        setNewWidth((int) Math.round(seq.getWidth() * ratio));
-                    }
+                if (e.getSource() == widthSpinner) {
+                    // adjust height
+                    final double ratio = (double) getNewWidth() / (double) seq.getWidth();
+                    setNewHeight((int) Math.round(seq.getHeight() * ratio));
                 }
-
-                updatePreview();
+                else {
+                    // adjust width
+                    final double ratio = (double) getNewHeight() / (double) seq.getHeight();
+                    setNewWidth((int) Math.round(seq.getWidth() * ratio));
+                }
             }
+
+            updatePreview();
         };
         heightSpinner.addChangeListener(spinnerChangeListener);
         widthSpinner.addChangeListener(spinnerChangeListener);
 
-        sizeUnitComboBox.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                // convert width and height in new unit
-                final int w = Integer.parseInt(widthField.getText());
-                final int h = Integer.parseInt(heightField.getText());
+        sizeUnitComboBox.addActionListener(e -> {
+            // convert width and height in new unit
+            final int w = Integer.parseInt(widthField.getText());
+            final int h = Integer.parseInt(heightField.getText());
 
-                setNewWidth(w);
-                setNewHeight(h);
-            }
+            setNewWidth(w);
+            setNewHeight(h);
         });
     }
 
-    protected void initialize()
-    {
+    protected void initialize() {
         setLayout(new BorderLayout(0, 0));
 
         panel = new JPanel();
@@ -277,17 +216,16 @@ public abstract class SequenceBaseResizePanel extends JPanel
 
         infoPanel = new JPanel();
         panel.add(infoPanel);
-        infoPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Size in pixel",
-                TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        GridBagLayout gbl_infoPanel = new GridBagLayout();
-        gbl_infoPanel.columnWidths = new int[] {20, 100, 20, 100, 20, 100, 20, 0};
-        gbl_infoPanel.rowHeights = new int[] {0, 0, 0};
-        gbl_infoPanel.columnWeights = new double[] {1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
-        gbl_infoPanel.rowWeights = new double[] {0.0, 0.0, Double.MIN_VALUE};
+        infoPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Size in pixel", TitledBorder.LEADING, TitledBorder.TOP));
+        final GridBagLayout gbl_infoPanel = new GridBagLayout();
+        gbl_infoPanel.columnWidths = new int[]{20, 100, 20, 100, 20, 100, 20, 0};
+        gbl_infoPanel.rowHeights = new int[]{0, 0, 0};
+        gbl_infoPanel.columnWeights = new double[]{1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
+        gbl_infoPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
         infoPanel.setLayout(gbl_infoPanel);
 
         final JLabel lblOriginalWidth = new JLabel("Width");
-        GridBagConstraints gbc_lblOriginalWidth = new GridBagConstraints();
+        final GridBagConstraints gbc_lblOriginalWidth = new GridBagConstraints();
         gbc_lblOriginalWidth.fill = GridBagConstraints.BOTH;
         gbc_lblOriginalWidth.insets = new Insets(0, 0, 5, 5);
         gbc_lblOriginalWidth.gridx = 1;
@@ -296,7 +234,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
         lblOriginalWidth.setToolTipText("");
 
         final JLabel lblNewLabel_3 = new JLabel("Height");
-        GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
+        final GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
         gbc_lblNewLabel_3.fill = GridBagConstraints.BOTH;
         gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
         gbc_lblNewLabel_3.gridx = 3;
@@ -305,7 +243,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
         lblNewLabel_3.setToolTipText("");
 
         final JLabel lblNewLabel_2 = new JLabel("Memory size");
-        GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+        final GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
         gbc_lblNewLabel_2.fill = GridBagConstraints.BOTH;
         gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
         gbc_lblNewLabel_2.gridx = 5;
@@ -317,7 +255,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
         widthField.setToolTipText("Width in pixel");
         widthField.setText("0000");
         widthField.setEditable(false);
-        GridBagConstraints gbc_widthField = new GridBagConstraints();
+        final GridBagConstraints gbc_widthField = new GridBagConstraints();
         gbc_widthField.fill = GridBagConstraints.BOTH;
         gbc_widthField.insets = new Insets(0, 0, 0, 5);
         gbc_widthField.gridx = 1;
@@ -329,7 +267,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
         heightField.setToolTipText("Height in pixel");
         heightField.setText("0");
         heightField.setEditable(false);
-        GridBagConstraints gbc_heightField = new GridBagConstraints();
+        final GridBagConstraints gbc_heightField = new GridBagConstraints();
         gbc_heightField.fill = GridBagConstraints.BOTH;
         gbc_heightField.insets = new Insets(0, 0, 0, 5);
         gbc_heightField.gridx = 3;
@@ -341,7 +279,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
         sizeField.setToolTipText("Memory size");
         sizeField.setText("0.0B");
         sizeField.setEditable(false);
-        GridBagConstraints gbc_sizeField = new GridBagConstraints();
+        final GridBagConstraints gbc_sizeField = new GridBagConstraints();
         gbc_sizeField.insets = new Insets(0, 0, 0, 5);
         gbc_sizeField.fill = GridBagConstraints.BOTH;
         gbc_sizeField.gridx = 5;
@@ -351,17 +289,16 @@ public abstract class SequenceBaseResizePanel extends JPanel
 
         settingPanel = new JPanel();
         panel.add(settingPanel);
-        settingPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Setting",
-                TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        GridBagLayout gbl_settingPanel = new GridBagLayout();
-        gbl_settingPanel.columnWidths = new int[] {20, 100, 20, 100, 20, 100, 20, 0};
-        gbl_settingPanel.rowHeights = new int[] {0, 0, 0, 0, 10, 0, 0, 0};
-        gbl_settingPanel.columnWeights = new double[] {1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
-        gbl_settingPanel.rowWeights = new double[] {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+        settingPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Setting", TitledBorder.LEADING, TitledBorder.TOP));
+        final GridBagLayout gbl_settingPanel = new GridBagLayout();
+        gbl_settingPanel.columnWidths = new int[]{20, 100, 20, 100, 20, 100, 20, 0};
+        gbl_settingPanel.rowHeights = new int[]{0, 0, 0, 0, 10, 0, 0, 0};
+        gbl_settingPanel.columnWeights = new double[]{1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
+        gbl_settingPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         settingPanel.setLayout(gbl_settingPanel);
 
         final JLabel lblWidth = new JLabel("Width");
-        GridBagConstraints gbc_lblWidth = new GridBagConstraints();
+        final GridBagConstraints gbc_lblWidth = new GridBagConstraints();
         gbc_lblWidth.fill = GridBagConstraints.BOTH;
         gbc_lblWidth.insets = new Insets(0, 0, 5, 5);
         gbc_lblWidth.gridx = 1;
@@ -369,9 +306,9 @@ public abstract class SequenceBaseResizePanel extends JPanel
         settingPanel.add(lblWidth, gbc_lblWidth);
 
         widthSpinner = new JSpinner();
-        widthSpinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
+        widthSpinner.setModel(new SpinnerNumberModel(1L, 1L, Long.MAX_VALUE, 1L));
         widthSpinner.setToolTipText("New width to set");
-        GridBagConstraints gbc_widthSpinner = new GridBagConstraints();
+        final GridBagConstraints gbc_widthSpinner = new GridBagConstraints();
         gbc_widthSpinner.fill = GridBagConstraints.BOTH;
         gbc_widthSpinner.insets = new Insets(0, 0, 5, 5);
         gbc_widthSpinner.gridx = 1;
@@ -379,7 +316,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
         settingPanel.add(widthSpinner, gbc_widthSpinner);
 
         final JLabel lblNewLabel = new JLabel("Height");
-        GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
         gbc_lblNewLabel.fill = GridBagConstraints.BOTH;
         gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
         gbc_lblNewLabel.gridx = 1;
@@ -388,7 +325,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
 
         accolLeftLabel = new JLabel("");
         accolLeftLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        GridBagConstraints gbc_accolLeftLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_accolLeftLabel = new GridBagConstraints();
         gbc_accolLeftLabel.fill = GridBagConstraints.BOTH;
         gbc_accolLeftLabel.gridheight = 3;
         gbc_accolLeftLabel.insets = new Insets(0, 0, 5, 5);
@@ -397,12 +334,12 @@ public abstract class SequenceBaseResizePanel extends JPanel
         settingPanel.add(accolLeftLabel, gbc_accolLeftLabel);
         lblNewLabel.setLabelFor(heightSpinner);
 
-        sizeUnitComboBox = new JComboBox();
+        sizeUnitComboBox = new JComboBox<>();
         sizeUnitComboBox.setMaximumRowCount(3);
         sizeUnitComboBox.setToolTipText("Width / Height unit");
-        sizeUnitComboBox.setModel(new DefaultComboBoxModel(new String[] {"pixel", "%", UnitUtil.MICRO_STRING + "m"}));
+        sizeUnitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"pixel", "%", UnitUtil.MICRO_STRING + "m"}));
         sizeUnitComboBox.setSelectedIndex(0);
-        GridBagConstraints gbc_sizeUnitComboBox = new GridBagConstraints();
+        final GridBagConstraints gbc_sizeUnitComboBox = new GridBagConstraints();
         gbc_sizeUnitComboBox.fill = GridBagConstraints.HORIZONTAL;
         gbc_sizeUnitComboBox.gridheight = 3;
         gbc_sizeUnitComboBox.insets = new Insets(0, 0, 5, 5);
@@ -411,9 +348,9 @@ public abstract class SequenceBaseResizePanel extends JPanel
         settingPanel.add(sizeUnitComboBox, gbc_sizeUnitComboBox);
 
         heightSpinner = new JSpinner();
-        heightSpinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
+        heightSpinner.setModel(new SpinnerNumberModel(1L, 1L, Long.MAX_VALUE, 1L));
         heightSpinner.setToolTipText("New height to set");
-        GridBagConstraints gbc_heightSpinner = new GridBagConstraints();
+        final GridBagConstraints gbc_heightSpinner = new GridBagConstraints();
         gbc_heightSpinner.fill = GridBagConstraints.BOTH;
         gbc_heightSpinner.insets = new Insets(0, 0, 5, 5);
         gbc_heightSpinner.gridx = 1;
@@ -424,7 +361,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
         keepRatioCheckBox.setVerticalAlignment(SwingConstants.TOP);
         keepRatioCheckBox.setToolTipText("Keep original aspect ratio");
         keepRatioCheckBox.setSelected(true);
-        GridBagConstraints gbc_keepRatioCheckBox = new GridBagConstraints();
+        final GridBagConstraints gbc_keepRatioCheckBox = new GridBagConstraints();
         gbc_keepRatioCheckBox.gridwidth = 3;
         gbc_keepRatioCheckBox.fill = GridBagConstraints.BOTH;
         gbc_keepRatioCheckBox.insets = new Insets(0, 0, 5, 5);
@@ -433,7 +370,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
         settingPanel.add(keepRatioCheckBox, gbc_keepRatioCheckBox);
 
         horizontalGlue = Box.createHorizontalGlue();
-        GridBagConstraints gbc_horizontalGlue = new GridBagConstraints();
+        final GridBagConstraints gbc_horizontalGlue = new GridBagConstraints();
         gbc_horizontalGlue.fill = GridBagConstraints.HORIZONTAL;
         gbc_horizontalGlue.insets = new Insets(0, 0, 0, 5);
         gbc_horizontalGlue.gridx = 5;
@@ -441,7 +378,7 @@ public abstract class SequenceBaseResizePanel extends JPanel
         settingPanel.add(horizontalGlue, gbc_horizontalGlue);
 
         horizontalGlue_1 = Box.createHorizontalGlue();
-        GridBagConstraints gbc_horizontalGlue_1 = new GridBagConstraints();
+        final GridBagConstraints gbc_horizontalGlue_1 = new GridBagConstraints();
         gbc_horizontalGlue_1.fill = GridBagConstraints.HORIZONTAL;
         gbc_horizontalGlue_1.gridx = 6;
         gbc_horizontalGlue_1.gridy = 6;
@@ -459,30 +396,26 @@ public abstract class SequenceBaseResizePanel extends JPanel
         previewPanel.add(resultPreview);
     }
 
-    void updatePreview()
-    {
+    void updatePreview() {
         final int w = getNewWidth();
         final int h = getNewHeight();
 
         widthField.setText(Integer.toString(w));
         heightField.setText(Integer.toString(h));
-        sizeField.setText(UnitUtil.getBytesString(w * h * sequence.getSizeC() * sequence.getSizeZ()
-                * sequence.getSizeT() * sequence.getDataType_().getSize()));
+        sizeField.setText(UnitUtil.getBytesString(w * h * sequence.getSizeC() * sequence.getSizeZ() * sequence.getSizeT() * sequence.getDataType().getSize()));
 
         originalPreview.imageChanged();
         resultPreview.imageChanged();
     }
 
-    public Sequence getSequence()
-    {
+    public Sequence getSequence() {
         return sequence;
     }
 
     /**
      * pixel resolution X (micron / pixel)
      */
-    public double getPixelSizeX()
-    {
+    public double getPixelSizeX() {
         if (sequence != null)
             return sequence.getPixelSizeX();
 
@@ -492,108 +425,74 @@ public abstract class SequenceBaseResizePanel extends JPanel
     /**
      * pixel resolution X (micron / pixel)
      */
-    public double getPixelSizeY()
-    {
+    public double getPixelSizeY() {
         if (sequence != null)
             return sequence.getPixelSizeY();
 
         return 1d;
     }
 
-    public SizeUnit getSizeUnit()
-    {
-        switch (sizeUnitComboBox.getSelectedIndex())
-        {
-            default:
-            case 0:
-                return SizeUnit.PIXEL;
-            case 1:
-                return SizeUnit.PERCENT;
-            case 2:
-                return SizeUnit.MICRON;
-        }
+    public SizeUnit getSizeUnit() {
+        return switch (sizeUnitComboBox.getSelectedIndex()) {
+            default -> SizeUnit.PIXEL;
+            case 1 -> SizeUnit.PERCENT;
+            case 2 -> SizeUnit.MICRON;
+        };
     }
 
-    public int unitToPixel(double value, int originPixel, SizeUnit unit, double micronPerPixel)
-    {
-        switch (unit)
-        {
-            default:
-            case PIXEL:
-                return (int) Math.round(value);
-            case PERCENT:
-                return (int) Math.round((originPixel * value) / 100d);
-            case MICRON:
-                return (int) Math.round(value / micronPerPixel);
-        }
+    public int unitToPixel(final double value, final int originPixel, final SizeUnit unit, final double micronPerPixel) {
+        return switch (unit) {
+            default -> (int) Math.round(value);
+            case PERCENT -> (int) Math.round((originPixel * value) / 100d);
+            case MICRON -> (int) Math.round(value / micronPerPixel);
+        };
     }
 
-    public int unitToPixelX(double value, int originPixel, SizeUnit unit)
-    {
+    public int unitToPixelX(final double value, final int originPixel, final SizeUnit unit) {
         return unitToPixel(value, originPixel, unit, getPixelSizeX());
     }
 
-    public int unitToPixelY(double value, int originPixel, SizeUnit unit)
-    {
+    public int unitToPixelY(final double value, final int originPixel, final SizeUnit unit) {
         return unitToPixel(value, originPixel, unit, getPixelSizeY());
     }
 
-    public double pixelToUnit(int value, int originPixel, SizeUnit unit, double micronPerPixel)
-    {
-        switch (unit)
-        {
-            default:
-            case PIXEL:
-                return value;
-            case PERCENT:
-                return (int) Math.round((value * 100d) / originPixel);
-            case MICRON:
-                return (int) (value * micronPerPixel);
-        }
+    public double pixelToUnit(final int value, final int originPixel, final SizeUnit unit, final double micronPerPixel) {
+        return switch (unit) {
+            default -> value;
+            case PERCENT -> (int) Math.round((value * 100d) / originPixel);
+            case MICRON -> (int) (value * micronPerPixel);
+        };
     }
 
-    public double pixelXToUnit(int value, int originPixel, SizeUnit unit)
-    {
+    public double pixelXToUnit(final int value, final int originPixel, final SizeUnit unit) {
         return pixelToUnit(value, originPixel, unit, getPixelSizeX());
     }
 
-    public double pixelYToUnit(int value, int originPixel, SizeUnit unit)
-    {
+    public double pixelYToUnit(final int value, final int originPixel, final SizeUnit unit) {
         return pixelToUnit(value, originPixel, unit, getPixelSizeY());
     }
 
-    public double getSpinnerSizeValue(JSpinner spinner)
-    {
-        switch (getSizeUnit())
-        {
-            default:
-            case PIXEL:
-                return ((Integer) spinner.getValue()).intValue();
-
-            case PERCENT:
-            case MICRON:
-                return ((Double) spinner.getValue()).doubleValue();
-        }
+    public double getSpinnerSizeValue(final JSpinner spinner) {
+        return switch (getSizeUnit()) {
+            default -> ((Integer) spinner.getValue()).intValue();
+            case PERCENT, MICRON -> ((Double) spinner.getValue()).doubleValue();
+        };
     }
 
-    public int getNewWidth()
-    {
+    public int getNewWidth() {
         final int result = unitToPixelX(getSpinnerSizeValue(widthSpinner), sequence.getSizeX(), getSizeUnit());
 
         return Math.min(65535, Math.max(1, result));
     }
 
-    public int getNewHeight()
-    {
+    public int getNewHeight() {
         final int result = unitToPixelY(getSpinnerSizeValue(heightSpinner), sequence.getSizeY(), getSizeUnit());
 
         return Math.min(Math.max(1, result), 65535);
     }
 
-    void setSpinnerSizeValue(JSpinner spinner, double value)
-    {
-        switch (getSizeUnit())
-        {
+    void setSpinnerSizeValue(final JSpinner spinner, final double value) {
+        switch (getSizeUnit()) {
             default:
             case PIXEL:
                 spinner.setModel(new SpinnerNumberModel((int) value, 0, 65535, 1));
@@ -615,23 +514,19 @@ public abstract class SequenceBaseResizePanel extends JPanel
         }
     }
 
-    void setNewWidth(int value)
-    {
+    void setNewWidth(final int value) {
         setSpinnerSizeValue(widthSpinner, pixelXToUnit(value, sequence.getSizeX(), getSizeUnit()));
     }
 
-    void setNewHeight(int value)
-    {
+    void setNewHeight(final int value) {
         setSpinnerSizeValue(heightSpinner, pixelYToUnit(value, sequence.getSizeY(), getSizeUnit()));
     }
 
-    public int getMaxSizeX()
-    {
+    public int getMaxSizeX() {
         return Math.max(getNewWidth(), sequence.getSizeX());
     }
 
-    public int getMaxSizeY()
-    {
+    public int getMaxSizeY() {
         return Math.max(getNewHeight(), sequence.getSizeY());
     }
 

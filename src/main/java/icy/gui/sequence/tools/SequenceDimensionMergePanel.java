@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,60 +15,44 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.sequence.tools;
 
 import icy.gui.component.button.IcyButton;
 import icy.gui.component.sequence.SequenceChooser;
 import icy.gui.component.sequence.SequencePreviewPanel;
 import icy.gui.dialog.MessageDialog;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.DimensionId;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceModel;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-
-import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.*;
 
 /**
  * Frame for dimension merge operation.
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class SequenceDimensionMergePanel extends JPanel {
-    static class SequenceChannelEntry {
+    public static class SequenceChannelEntry {
         final Sequence sequence;
         final int c;
 
-        /**
-         * @param sequence
-         * @param c
-         */
-        public SequenceChannelEntry(Sequence sequence, int c) {
+        public SequenceChannelEntry(final Sequence sequence, final int c) {
             super();
 
             this.sequence = sequence;
             this.c = c;
         }
 
-        public SequenceChannelEntry(Sequence sequence) {
+        public SequenceChannelEntry(final Sequence sequence) {
             this(sequence, -1);
         }
 
@@ -104,7 +87,7 @@ public class SequenceDimensionMergePanel extends JPanel {
     /**
      * Create the panel.
      */
-    public SequenceDimensionMergePanel(DimensionId dim) {
+    public SequenceDimensionMergePanel(final DimensionId dim) {
         super();
 
         this.dim = dim;
@@ -187,8 +170,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         });
 
         dimLabel.setText(dim.toString());
-        IcyIcon icon = new IcyIcon(ResourceUtil.ICON_ARROW_DOWN);
-        icon.setDimension(new Dimension(20, 60));
+        final Icon icon = new IcySVGIcon(SVGIcon.SOUTH, 20, 60);
         bottomArrowLabel.setIcon(icon);
 
         // interlace not available for channel merge operation
@@ -199,15 +181,15 @@ public class SequenceDimensionMergePanel extends JPanel {
     }
 
     private void initialize() {
-        GridBagLayout gridBagLayout = new GridBagLayout();
+        final GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[]{24, 80, 140, 100, 0, 0};
         gridBagLayout.rowHeights = new int[]{0, 26, 0, 0, 0, 0, 0, 174, 0};
         gridBagLayout.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
         gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
         setLayout(gridBagLayout);
 
-        JLabel lblSelectSequenceTo = new JLabel("Add sequence to merge in the list :");
-        GridBagConstraints gbc_lblSelectSequenceTo = new GridBagConstraints();
+        final JLabel lblSelectSequenceTo = new JLabel("Add sequence to merge in the list :");
+        final GridBagConstraints gbc_lblSelectSequenceTo = new GridBagConstraints();
         gbc_lblSelectSequenceTo.fill = GridBagConstraints.BOTH;
         gbc_lblSelectSequenceTo.gridwidth = 4;
         gbc_lblSelectSequenceTo.insets = new Insets(0, 0, 5, 5);
@@ -216,7 +198,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         add(lblSelectSequenceTo, gbc_lblSelectSequenceTo);
 
         sequenceChooser = new SequenceChooser();
-        GridBagConstraints gbc_sequenceChooser = new GridBagConstraints();
+        final GridBagConstraints gbc_sequenceChooser = new GridBagConstraints();
         gbc_sequenceChooser.gridwidth = 4;
         gbc_sequenceChooser.insets = new Insets(0, 0, 5, 5);
         gbc_sequenceChooser.fill = GridBagConstraints.BOTH;
@@ -224,10 +206,9 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_sequenceChooser.gridy = 1;
         add(sequenceChooser, gbc_sequenceChooser);
 
-        addButton = new IcyButton(new IcyIcon(ResourceUtil.ICON_ROUND_PLUS)); // FIXME: 15/02/2023
+        addButton = new IcyButton(SVGIcon.ADD, true);
         addButton.setToolTipText("Add selected sequence to the list.");
-        addButton.setFlat(true);
-        GridBagConstraints gbc_addButton = new GridBagConstraints();
+        final GridBagConstraints gbc_addButton = new GridBagConstraints();
         gbc_addButton.fill = GridBagConstraints.BOTH;
         gbc_addButton.insets = new Insets(0, 0, 5, 0);
         gbc_addButton.gridx = 4;
@@ -237,7 +218,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         dimLabel = new JLabel("Z");
         dimLabel.setHorizontalAlignment(SwingConstants.CENTER);
         dimLabel.setFont(new Font("Tahoma", Font.BOLD, 14));
-        GridBagConstraints gbc_dimLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_dimLabel = new GridBagConstraints();
         gbc_dimLabel.fill = GridBagConstraints.HORIZONTAL;
         gbc_dimLabel.anchor = GridBagConstraints.BASELINE;
         gbc_dimLabel.insets = new Insets(0, 0, 5, 5);
@@ -245,8 +226,8 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_dimLabel.gridy = 2;
         add(dimLabel, gbc_dimLabel);
 
-        JScrollPane scrollPane = new JScrollPane();
-        GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+        final JScrollPane scrollPane = new JScrollPane();
+        final GridBagConstraints gbc_scrollPane = new GridBagConstraints();
         gbc_scrollPane.gridwidth = 3;
         gbc_scrollPane.fill = GridBagConstraints.BOTH;
         gbc_scrollPane.gridheight = 4;
@@ -259,10 +240,9 @@ public class SequenceDimensionMergePanel extends JPanel {
         scrollPane.setViewportView(sequenceList);
         sequenceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        removeButton = new IcyButton(new IcyIcon(ResourceUtil.ICON_ROUND_MINUS)); // FIXME: 15/02/2023
+        removeButton = new IcyButton(SVGIcon.REMOVE, true);
         removeButton.setToolTipText("Remove selected sequence from the list.");
-        removeButton.setFlat(true);
-        GridBagConstraints gbc_removeButton = new GridBagConstraints();
+        final GridBagConstraints gbc_removeButton = new GridBagConstraints();
         gbc_removeButton.fill = GridBagConstraints.BOTH;
         gbc_removeButton.insets = new Insets(0, 0, 5, 0);
         gbc_removeButton.gridx = 4;
@@ -271,27 +251,27 @@ public class SequenceDimensionMergePanel extends JPanel {
 
         bottomArrowLabel = new JLabel("");
         bottomArrowLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        GridBagConstraints gbc_bottomArrowLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_bottomArrowLabel = new GridBagConstraints();
         gbc_bottomArrowLabel.gridheight = 3;
         gbc_bottomArrowLabel.insets = new Insets(0, 0, 5, 5);
         gbc_bottomArrowLabel.gridx = 0;
         gbc_bottomArrowLabel.gridy = 3;
         add(bottomArrowLabel, gbc_bottomArrowLabel);
 
-        upButton = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_UP);
+        upButton = new IcyButton(SVGIcon.KEYBOARD_ARROW_UP);
         upButton.setToolTipText("Move up selected sequence.");
         upButton.setFlat(true);
-        GridBagConstraints gbc_upButton = new GridBagConstraints();
+        final GridBagConstraints gbc_upButton = new GridBagConstraints();
         gbc_upButton.fill = GridBagConstraints.BOTH;
         gbc_upButton.insets = new Insets(0, 0, 5, 0);
         gbc_upButton.gridx = 4;
         gbc_upButton.gridy = 3;
         add(upButton, gbc_upButton);
 
-        downButton = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_DOWN);
+        downButton = new IcyButton(SVGIcon.KEYBOARD_ARROW_DOWN);
         downButton.setToolTipText("Move down selected sequence.");
         downButton.setFlat(true);
-        GridBagConstraints gbc_downButton = new GridBagConstraints();
+        final GridBagConstraints gbc_downButton = new GridBagConstraints();
         gbc_downButton.fill = GridBagConstraints.BOTH;
         gbc_downButton.insets = new Insets(0, 0, 5, 0);
         gbc_downButton.gridx = 4;
@@ -300,7 +280,7 @@ public class SequenceDimensionMergePanel extends JPanel {
 
         fitCheckbox = new JCheckBox("Scale image");
         fitCheckbox.setToolTipText("Scale all image to the largest one");
-        GridBagConstraints gbc_fitCheckbox = new GridBagConstraints();
+        final GridBagConstraints gbc_fitCheckbox = new GridBagConstraints();
         gbc_fitCheckbox.anchor = GridBagConstraints.WEST;
         gbc_fitCheckbox.gridwidth = 2;
         gbc_fitCheckbox.insets = new Insets(0, 0, 5, 5);
@@ -310,7 +290,7 @@ public class SequenceDimensionMergePanel extends JPanel {
 
         fillEmptyImageCheckBox = new JCheckBox("Fill empty image");
         fillEmptyImageCheckBox.setToolTipText("Replace empty image by the previous non empty one");
-        GridBagConstraints gbc_noEmptyImageCheckBox = new GridBagConstraints();
+        final GridBagConstraints gbc_noEmptyImageCheckBox = new GridBagConstraints();
         gbc_noEmptyImageCheckBox.fill = GridBagConstraints.VERTICAL;
         gbc_noEmptyImageCheckBox.insets = new Insets(0, 0, 5, 5);
         gbc_noEmptyImageCheckBox.gridx = 2;
@@ -319,7 +299,7 @@ public class SequenceDimensionMergePanel extends JPanel {
 
         interlaceCheckBox = new JCheckBox("Interlace image");
         interlaceCheckBox.setToolTipText("Interlace sequence image");
-        GridBagConstraints gbc_interlaceCheckBox = new GridBagConstraints();
+        final GridBagConstraints gbc_interlaceCheckBox = new GridBagConstraints();
         gbc_interlaceCheckBox.anchor = GridBagConstraints.EAST;
         gbc_interlaceCheckBox.gridwidth = 2;
         gbc_interlaceCheckBox.fill = GridBagConstraints.VERTICAL;
@@ -329,9 +309,8 @@ public class SequenceDimensionMergePanel extends JPanel {
         add(interlaceCheckBox, gbc_interlaceCheckBox);
 
         sequencePreview = new SequencePreviewPanel();
-        sequencePreview
-                .setBorder(new TitledBorder(null, "Preview", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        GridBagConstraints gbc_sequencePreview = new GridBagConstraints();
+        sequencePreview.setBorder(new TitledBorder(null, "Preview", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        final GridBagConstraints gbc_sequencePreview = new GridBagConstraints();
         gbc_sequencePreview.gridwidth = 5;
         gbc_sequencePreview.fill = GridBagConstraints.BOTH;
         gbc_sequencePreview.gridx = 0;
@@ -371,12 +350,12 @@ public class SequenceDimensionMergePanel extends JPanel {
         return result;
     }
 
-    boolean checkSequenceIsCompatible(Sequence seq, boolean showMessage, boolean showWarning) {
+    boolean checkSequenceIsCompatible(final Sequence seq, final boolean showMessage, final boolean showWarning) {
         boolean warningXYDone = false;
 
-        for (Sequence sequence : getSequences()) {
+        for (final Sequence sequence : getSequences()) {
             // first check for data type
-            if (!seq.getDataType_().equals(sequence.getDataType_())) {
+            if (!seq.getDataType().equals(sequence.getDataType())) {
                 if (showMessage)
                     MessageDialog.showDialog("You cannot merge sequences with different data type.");
 
@@ -447,10 +426,13 @@ public class SequenceDimensionMergePanel extends JPanel {
             if (!isFitImagesEnabled()) {
                 if ((seq.getSizeX() != sequence.getSizeX()) || (seq.getSizeY() != sequence.getSizeY())) {
                     if (showWarning && !warningXYDone) {
-                        MessageDialog
-                                .showDialog(
-                                        "Sequences have different XY size !\nYou can enable the \"Scale image\" option to resize images if needed.",
-                                        MessageDialog.WARNING_MESSAGE);
+                        MessageDialog.showDialog(
+                                "Sequences have different XY size !\n" +
+                                        "You can enable the \"" +
+                                        "Scale image\" " +
+                                        "option to resize images if needed.",
+                                MessageDialog.WARNING_MESSAGE
+                        );
                         warningXYDone = true;
                     }
                 }
@@ -467,7 +449,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         return sequencePreview.getModel();
     }
 
-    public void setModel(SequenceModel model) {
+    public void setModel(final SequenceModel model) {
         sequencePreview.setModel(model);
     }
 
@@ -495,7 +477,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         return interlaceCheckBox.isVisible();
     }
 
-    public void setInterlaceVisible(boolean value) {
+    public void setInterlaceVisible(final boolean value) {
         interlaceCheckBox.setVisible(value);
     }
 
@@ -503,22 +485,22 @@ public class SequenceDimensionMergePanel extends JPanel {
         return fillEmptyImageCheckBox.isVisible();
     }
 
-    public void setFillEmptyImageVisible(boolean value) {
+    public void setFillEmptyImageVisible(final boolean value) {
         fillEmptyImageCheckBox.setVisible(value);
     }
 
     protected void fireChangedEvent() {
         final ChangeEvent event = new ChangeEvent(SequenceDimensionMergePanel.this);
 
-        for (ChangeListener listener : getListeners(ChangeListener.class))
+        for (final ChangeListener listener : getListeners(ChangeListener.class))
             listener.stateChanged(event);
     }
 
-    public void addChangeListener(ChangeListener listener) {
+    public void addChangeListener(final ChangeListener listener) {
         listenerList.add(ChangeListener.class, listener);
     }
 
-    public void removeChangeListener(ChangeListener listener) {
+    public void removeChangeListener(final ChangeListener listener) {
         listenerList.remove(ChangeListener.class, listener);
     }
 }

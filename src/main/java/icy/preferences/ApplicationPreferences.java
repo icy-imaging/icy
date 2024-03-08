@@ -1,21 +1,21 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.preferences;
 
 import icy.common.Version;
@@ -25,10 +25,10 @@ import icy.network.NetworkUtil;
 import icy.system.SystemUtil;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class ApplicationPreferences
-{
+public class ApplicationPreferences {
     /**
      * id
      */
@@ -59,8 +59,7 @@ public class ApplicationPreferences
      */
     private static XMLPreferences preferences;
 
-    public static void load()
-    {
+    public static void load() {
         // load preference
         preferences = IcyPreferences.root().node(PREF_ID);
 
@@ -71,62 +70,53 @@ public class ApplicationPreferences
     /**
      * @return the preferences
      */
-    public static XMLPreferences getPreferences()
-    {
+    public static XMLPreferences getPreferences() {
         return preferences;
     }
 
-    public static String getOs()
-    {
+    public static String getOs() {
         return preferences.get(ID_OS, "");
     }
 
-    public static void setOs(String value)
-    {
+    public static void setOs(final String value) {
         preferences.put(ID_OS, value);
     }
 
     /**
      * @return Return Icy unique Id (-1 if not yet set)
      */
-    public static int getId()
-    {
+    public static int getId() {
         return preferences.getInt(ID_ICY_ID, -1);
     }
 
-    public static void setId(int value)
-    {
+    public static void setId(final int value) {
         preferences.putInt(ID_ICY_ID, value);
     }
 
-    public static String getUpdateRepositoryBase()
-    {
-        return preferences.get(ID_UPDATE_REPOSITORY_BASE, DEFAULT_UPDATE_REPOSITORY_BASE);
+    // TODO Enable get from preference when Icy 3 is ready
+    public static String getUpdateRepositoryBase() {
+        //return preferences.get(ID_UPDATE_REPOSITORY_BASE, DEFAULT_UPDATE_REPOSITORY_BASE);
+        return "https://icy.bioimageanalysis.org/update_test_icy3/";
     }
 
-    public static void setUpdateRepositoryBase(String value)
-    {
+    public static void setUpdateRepositoryBase(final String value) {
         preferences.put(ID_UPDATE_REPOSITORY_BASE, value);
     }
 
-    public static String getUpdateRepositoryFile()
-    {
+    public static String getUpdateRepositoryFile() {
         return preferences.get(ID_UPDATE_REPOSITORY_FILE, DEFAULT_UPDATE_REPOSITORY_FILE);
     }
 
-    public static void setUpdateRepositoryFile(String value)
-    {
+    public static void setUpdateRepositoryFile(final String value) {
         preferences.put(ID_UPDATE_REPOSITORY_FILE, value);
     }
 
-    static int memoryAlign(int memMB)
-    {
+    static int memoryAlign(final int memMB) {
         // arrange to get multiple of 32 MB
         return (int) MathUtil.prevMultiple(memMB, 32);
     }
 
-    static int checkMem(int memMB)
-    {
+    static int checkMem(final int memMB) {
         // check we can allocate that much
         return Math.min(getMaxMemoryMBLimit(), memoryAlign(memMB));
     }
@@ -134,8 +124,7 @@ public class ApplicationPreferences
     /**
      * @return Get max memory (in MB)
      */
-    public static int getMaxMemoryMB()
-    {
+    public static int getMaxMemoryMB() {
         int result = preferences.getInt(ID_MAX_MEMORY, -1);
 
         // no value ?
@@ -146,8 +135,7 @@ public class ApplicationPreferences
         return checkMem(result);
     }
 
-    public static int getDefaultMemoryMB()
-    {
+    public static int getDefaultMemoryMB() {
         final long freeMemory = SystemUtil.getFreeMemory();
 
         // take system total memory / 2
@@ -161,13 +149,8 @@ public class ApplicationPreferences
         return checkMem((int) (calculatedMaxMem / (1024 * 1000)));
     }
 
-    public static int getMaxMemoryMBLimit()
-    {
-        int result = (int) (SystemUtil.getTotalMemory() / (1024 * 1000));
-
-        // limit maximum memory to 1024 MB for 32 bits system
-        if (SystemUtil.is32bits() && (result > 1024))
-            result = 1024;
+    public static int getMaxMemoryMBLimit() {
+        final int result = (int) (SystemUtil.getTotalMemory() / (1024 * 1000));
 
         return memoryAlign(result);
     }
@@ -175,8 +158,7 @@ public class ApplicationPreferences
     /**
      * @return Get stack size (in KB)
      */
-    public static int getStackSizeKB()
-    {
+    public static int getStackSizeKB() {
         // 2MB by default for VTK
         return preferences.getInt(ID_STACK_SIZE, 2048);
     }
@@ -184,24 +166,21 @@ public class ApplicationPreferences
     /**
      * @return Get cache reserved memory (in % of max memory)
      */
-    public static int getCacheMemoryPercent()
-    {
+    public static int getCacheMemoryPercent() {
         return preferences.getInt(ID_CACHE_MEMORY_PERCENT, 40);
     }
 
     /**
      * @return Get cache reserved memory (in MB)
      */
-    public static int getCacheMemoryMB()
-    {
+    public static int getCacheMemoryMB() {
         return (int) (((SystemUtil.getJavaMaxMemory() / (1024 * 1024)) * getCacheMemoryPercent()) / 100L);
     }
 
     /**
      * @return Get cache path (folder where to create cache data, better to use fast storage)
      */
-    public static String getCachePath()
-    {
+    public static String getCachePath() {
         final String result = preferences.get(ID_CACHE_PATH, SystemUtil.getTempDirectory());
         // doesn't exist ? --> use default folder as config may have changed
         if (!FileUtil.exists(result))
@@ -213,8 +192,7 @@ public class ApplicationPreferences
     /**
      * @return Get extra JVM parameters string
      */
-    public static String getExtraVMParams()
-    {
+    public static String getExtraVMParams() {
 //        return preferences.get(ID_EXTRA_VMPARAMS, "-XX:+UseG1GC -XX:MaxGCPauseMillis=100");
         return preferences.get(ID_EXTRA_VMPARAMS, "");
     }
@@ -222,8 +200,7 @@ public class ApplicationPreferences
     /**
      * @return Get OS specific extra JVM parameters string
      */
-    public static String getOSExtraVMParams()
-    {
+    public static String getOSExtraVMParams() {
         final String os = SystemUtil.getOSNameId();
 
         // we have different default extra VM parameters depending OS
@@ -240,33 +217,29 @@ public class ApplicationPreferences
     /**
      * @return Get Icy application folder
      */
-    public static String getAppFolder()
-    {
+    public static String getAppFolder() {
         return preferences.get(ID_APP_FOLDER, "");
     }
 
     /**
      * @return Get Icy application parameters string
      */
-    public static String getAppParams()
-    {
+    public static String getAppParams() {
         return preferences.get(ID_APP_PARAMS, "");
     }
 
     /**
      * @return Get the stored version number (used to detect new installed version).
      */
-    public static Version getVersion()
-    {
-        return new Version(preferences.get(ID_VERSION, "1.0.0.0"));
+    public static Version getVersion() {
+        return Version.fromString(preferences.get(ID_VERSION, "1.0.0"));
     }
 
     /**
      * @param value
      *        Set max memory (in MB)
      */
-    public static void setMaxMemoryMB(int value)
-    {
+    public static void setMaxMemoryMB(final int value) {
         preferences.putInt(ID_MAX_MEMORY, Math.min(getMaxMemoryMBLimit(), value));
     }
 
@@ -274,8 +247,7 @@ public class ApplicationPreferences
      * @param value
      *        Set stack size (in KB)
      */
-    public static void setStackSizeKB(int value)
-    {
+    public static void setStackSizeKB(final int value) {
         preferences.putInt(ID_STACK_SIZE, value);
     }
 
@@ -283,8 +255,7 @@ public class ApplicationPreferences
      * @param value
      *        Set cache reserved memory (in % of max memory)
      */
-    public static void setCacheMemoryPercent(int value)
-    {
+    public static void setCacheMemoryPercent(final int value) {
         // 10 <= value <= 80
         preferences.putInt(ID_CACHE_MEMORY_PERCENT, Math.min(80, Math.max(10, value)));
     }
@@ -293,8 +264,7 @@ public class ApplicationPreferences
      * @param value
      *        Set cache path (folder where to create cache data, better to use fast storage)
      */
-    public static void setCachePath(String value)
-    {
+    public static void setCachePath(final String value) {
         preferences.put(ID_CACHE_PATH, value);
     }
 
@@ -302,8 +272,7 @@ public class ApplicationPreferences
      * @param value
      *        Set extra JVM parameters string
      */
-    public static void setExtraVMParams(String value)
-    {
+    public static void setExtraVMParams(final String value) {
         preferences.put(ID_EXTRA_VMPARAMS, value);
     }
 
@@ -311,8 +280,7 @@ public class ApplicationPreferences
      * @param value
      *        Set OS specific extra JVM parameters string
      */
-    public static void setOSExtraVMParams(String value)
-    {
+    public static void setOSExtraVMParams(final String value) {
         preferences.put(ID_OS_EXTRA_VMPARAMS + SystemUtil.getOSNameId(), value);
     }
 
@@ -320,8 +288,7 @@ public class ApplicationPreferences
      * @param value
      *        Set Icy application folder
      */
-    public static void setAppFolder(String value)
-    {
+    public static void setAppFolder(final String value) {
         preferences.put(ID_APP_FOLDER, value);
     }
 
@@ -329,8 +296,7 @@ public class ApplicationPreferences
      * @param value
      *        Set ICY application parameters string
      */
-    public static void setAppParams(String value)
-    {
+    public static void setAppParams(final String value) {
         preferences.put(ID_APP_PARAMS, value);
     }
 
@@ -338,8 +304,7 @@ public class ApplicationPreferences
      * @param value
      *        Set the stored version number (used to detect new installed version)
      */
-    public static void setVersion(Version value)
-    {
+    public static void setVersion(final Version value) {
         preferences.put(ID_VERSION, value.toString());
     }
 

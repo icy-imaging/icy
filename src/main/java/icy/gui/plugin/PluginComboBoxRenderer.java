@@ -22,7 +22,8 @@ import icy.gui.component.renderer.CustomComboBoxRenderer;
 import icy.gui.util.LookAndFeelUtil;
 import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginLoader;
-import icy.resource.ResourceUtil;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,8 +48,12 @@ public class PluginComboBoxRenderer extends CustomComboBoxRenderer {
 
             if (plugin != null) {
                 //setIcon(ResourceUtil.scaleIcon(plugin.getIcon(), 16));
-                final int size = LookAndFeelUtil.getDefaultIconSizeAsInt();
-                setIcon(new ImageIcon(plugin.getIcon().getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH))); // TODO: 10/02/2023 Set smooth mode for ResourceUtil.scaleIcon
+                final int size = LookAndFeelUtil.getDefaultIconSize();
+                final ImageIcon imgIcon = plugin.getIcon();
+                if (imgIcon != null)
+                    setIcon(new ImageIcon(imgIcon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH))); // TODO: 10/02/2023 Set smooth mode for ResourceUtil.scaleIcon
+                else
+                    setIcon(new IcySVGIcon(SVGIcon.BROKEN_IMAGE));
                 if (showLabel)
                     setText(plugin.getName());
                 else

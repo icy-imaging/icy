@@ -66,19 +66,10 @@
         </element>
         <element>
             <name>Bio Formats</name>
-            <version>6.11.0</version>
+            <version>7.1.0</version>
             <files>
                 <file>
                     <localpath>lib/icy-bioformats.jar</localpath>
-                </file>
-            </files>
-        </element>
-        <element>
-            <name>EHCache</name>
-            <version>2.10.6</version>
-            <files>
-                <file>
-                    <localpath>lib/ehcache2.jar</localpath>
                 </file>
             </files>
         </element>
@@ -155,12 +146,6 @@
                 <file>
                     <localpath>lib/flatlaf.jar</localpath>
                 </file>
-            </files>
-        </element>
-        <element>
-            <name>Flatlaf-IntelliJ</name>
-            <version>3.2.5</version>
-            <files>
                 <file>
                     <localpath>lib/flatlaf-intellij-themes.jar</localpath>
                 </file>
@@ -184,6 +169,30 @@
                 </file>
                 <file>
                     <localpath>lib/unix64/vtk</localpath>
+                </file>
+            </files>
+        </element>
+        <element>
+            <name>Log4j</name>
+            <version>2.22.1</version>
+            <files>
+                <file>
+                    <localpath>lib/log4j-api.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/log4j-core.jar</localpath>
+                </file>
+                <file>
+                    <localpath>lib/jansi.jar</localpath>
+                </file>
+            </files>
+        </element>
+        <element>
+            <name>Batik</name>
+            <version>1.17</version>
+            <files>
+                <file>
+                    <localpath>lib/icy-batik.jar</localpath>
                 </file>
             </files>
         </element>

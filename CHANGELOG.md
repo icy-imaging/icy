@@ -1,3 +1,23 @@
+Icy 3.0.0.0
+------------------------
+
+**TODO**
+
+Icy 2.5.2.0 - 08/02/2024
+------------------------
+
+**Application**
+* fixed a regression with ROI merge.
+* small fix on ROI boolean operation button in ribbon.
+
+Icy 2.5.1.0 - 12/12/2023
+------------------------
+
+**Application**
+* fixed VTK library binaries for MacOS (was not working on older MacOS).
+* fixed a regression with ROI boolean operations.
+* small fix on application updater
+
 Icy 2.5.0.0 - 01/12/2023
 ------------------------
 

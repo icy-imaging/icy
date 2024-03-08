@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.main;
 
 import icy.gui.frame.IcyInternalFrame;
@@ -23,7 +23,9 @@ import icy.gui.util.ComponentUtil;
 import icy.gui.viewer.Viewer;
 import icy.main.Icy;
 import icy.math.HungarianAlgorithm;
-import icy.resource.ResourceUtil;
+import icy.resource.icon.IcySVGImageIcon;
+import icy.resource.icon.SVGIcon;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,7 +42,8 @@ import java.util.List;
  * background. First added overlays is painted first, so take care of that. Call
  * the IcyDesktopPane.repaint() method to update overlays.
  *
- * @author Fabrice &amp; Stephane
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class IcyDesktopPane extends JDesktopPane implements ContainerListener, MouseListener, MouseMotionListener, MouseWheelListener {
@@ -50,7 +53,7 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
 
     public static class AbstractDesktopOverlay extends MouseAdapter implements DesktopOverlay {
         @Override
-        public void paint(Graphics g, int width, int height) {
+        public void paint(final Graphics g, final int width, final int height) {
             // nothing by default
         }
     }
@@ -59,36 +62,26 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
      * Background overlay.
      */
     public class BackgroundDesktopOverlay extends AbstractDesktopOverlay implements ImageObserver {
-        private final static String BACKGROUND_PATH = "background/";
-
         private final Image backGround;
-        //private final Image icyLogo;
-        //private final Color textColor;
-        //private final Color bgTextColor;
 
         public BackgroundDesktopOverlay() {
             super();
 
-            // load random background (nor really random as we have only one right now)
-            //backGround = ResourceUtil.getImage(BACKGROUND_PATH + Integer.toString(Random.nextInt(1)) + ".jpg");
-            backGround = ResourceUtil.getImage(BACKGROUND_PATH + "4.png");
-            // load Icy logo
-            //icyLogo = ResourceUtil.getImage("logoICY.png");
-
-            // default text colors
-            //textColor = new Color(0, 0, 0, 0.5f);
-            //bgTextColor = new Color(1, 1, 1, 0.5f);
+            backGround = new IcySVGImageIcon(SVGIcon.ICY_TRANSPARENT, Color.GRAY, 512).getImage();
         }
 
         @Override
-        public void paint(Graphics g, int width, int height) {
+        public void paint(final Graphics g, final int width, final int height) {
             final IcyDesktopPane desktop = Icy.getMainInterface().getDesktopPane();
-            final Color bgColor;
+            if (desktop == null)
+                return;
 
-            if (desktop != null)
+            final Color bgColor = desktop.getBackground();
+
+            /*if (desktop != null)
                 bgColor = desktop.getBackground();
             else
-                bgColor = Color.lightGray;
+                bgColor = Color.lightGray;*/
 
             final int bgImgWidth = backGround.getWidth(this);
             final int bgImgHeight = backGround.getHeight(this);
@@ -109,25 +102,13 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             //g2.drawImage(backGround, 0, 0, (int) (scale * bgImgWidth), (int) (scale * bgImgHeight), bgColor, this);
             //g2.drawImage(backGround, (desktop.getWidth()/2)-(imgWidth/2), (desktop.getHeight()/2)-(imgWidth/2), imgWidth, imgHeight, bgColor, this);
-            g2.drawImage(backGround, (desktop.getWidth()/2)-(bgImgWidth/2), (desktop.getHeight()/2)-(bgImgHeight/2), bgImgWidth, bgImgHeight, null, this);
-
-            //final String text = "Version " + Icy.version;
-            //final int textWidth = (int) GraphicsUtil.getStringBounds(g, text).getWidth();
-
-            // draw version text
-            //g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.7f));
-            //g2.setColor(bgTextColor);
-            //g2.drawString(text, width - (textWidth + 31), height - 8);
-            //g2.setColor(textColor);
-            //g2.drawString(text, width - (textWidth + 30), height - 9);
-            // and draw Icy text logo
-            //g2.drawImage(icyLogo, width - 220, height - 130, this);
+            g2.drawImage(backGround, (desktop.getWidth() / 2) - (bgImgWidth / 2), (desktop.getHeight() / 2) - (bgImgHeight / 2), bgImgWidth, bgImgHeight, null, this);
 
             g2.dispose();
         }
 
         @Override
-        public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+        public boolean imageUpdate(final Image img, final int infoflags, final int x, final int y, final int width, final int height) {
             if ((infoflags & ImageObserver.ALLBITS) != 0) {
                 repaint();
                 return false;
@@ -151,12 +132,12 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
 
         componentAdapter = new ComponentAdapter() {
             @Override
-            public void componentResized(ComponentEvent e) {
+            public void componentResized(final ComponentEvent e) {
                 checkPosition((JInternalFrame) e.getSource());
             }
 
             @Override
-            public void componentMoved(ComponentEvent e) {
+            public void componentMoved(final ComponentEvent e) {
                 checkPosition((JInternalFrame) e.getSource());
             }
         };
@@ -173,33 +154,33 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
     // int i = 0;
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(final Graphics g) {
         super.paintComponent(g);
 
         final int w = getWidth();
         final int h = getHeight();
 
         // paint overlays
-        for (DesktopOverlay overlay : overlays)
+        for (final DesktopOverlay overlay : overlays)
             overlay.paint(g, w, h);
     }
 
-    private void registerFrame(JInternalFrame frame) {
+    private void registerFrame(final @NotNull JInternalFrame frame) {
         frame.addComponentListener(componentAdapter);
     }
 
-    void unregisterFrame(JInternalFrame frame) {
+    void unregisterFrame(final @NotNull JInternalFrame frame) {
         frame.removeComponentListener(componentAdapter);
     }
 
-    void checkPosition(JInternalFrame frame) {
+    void checkPosition(final @NotNull JInternalFrame frame) {
         final Rectangle rect = frame.getBounds();
 
         if (fixPosition(rect))
             frame.setBounds(rect);
     }
 
-    boolean fixPosition(Rectangle rect) {
+    boolean fixPosition(final @NotNull Rectangle rect) {
         final int limit = getY();
         if (rect.y < limit) {
             rect.y = limit;
@@ -215,10 +196,10 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
      * @param wantNotVisible Also return not visible viewers
      * @param wantIconized   Also return iconized viewers
      */
-    public static Viewer[] getInternalViewers(boolean wantNotVisible, boolean wantIconized) {
+    public static Viewer[] getInternalViewers(final boolean wantNotVisible, final boolean wantIconized) {
         final List<Viewer> result = new ArrayList<>();
 
-        for (Viewer viewer : Icy.getMainInterface().getViewers()) {
+        for (final Viewer viewer : Icy.getMainInterface().getViewers()) {
             if (viewer.isInternalized()) {
                 final IcyInternalFrame internalFrame = viewer.getIcyInternalFrame();
 
@@ -227,7 +208,7 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
             }
         }
 
-        return result.toArray(new Viewer[result.size()]);
+        return result.toArray(new Viewer[0]);
     }
 
     /**
@@ -244,13 +225,13 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
         final int fw = (int) (w * 0.6f);
         final int fh = (int) (h * 0.6f);
 
-        final int xMax = w - 0;
-        final int yMax = h - 0;
+        final int xMax = w; // w - 0;
+        final int yMax = h; // h - 0;
 
-        int x = 0 + 32;
-        int y = 0 + 32;
+        int x = 32; // 0 + 32;
+        int y = 32; // 0 + 32;
 
-        for (Viewer v : viewers) {
+        for (final Viewer v : viewers) {
             final IcyInternalFrame internalFrame = v.getIcyInternalFrame();
 
             if (internalFrame.isMaximized())
@@ -274,7 +255,7 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
      *             MainFrame.TILE_HORIZONTAL, MainFrame.TILE_VERTICAL or
      *             MainFrame.TILE_GRID
      */
-    public void organizeTile(int type) {
+    public void organizeTile(final int type) {
         // get internal viewers
         final Viewer[] viewers = getInternalViewers(false, false);
 
@@ -361,7 +342,7 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
     /**
      * Add the specified overlay to the desktop.
      */
-    public void addOverlay(DesktopOverlay overlay) {
+    public void addOverlay(final DesktopOverlay overlay) {
         if (!overlays.contains(overlay))
             overlays.add(overlay);
     }
@@ -369,12 +350,12 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
     /**
      * remove the specified overlay from the desktop.
      */
-    public boolean removeOverlay(DesktopOverlay overlay) {
+    public boolean removeOverlay(final DesktopOverlay overlay) {
         return overlays.remove(overlay);
     }
 
     @Override
-    public void componentAdded(ContainerEvent e) {
+    public void componentAdded(final @NotNull ContainerEvent e) {
         final Component comp = e.getChild();
 
         if (comp instanceof JInternalFrame)
@@ -382,7 +363,7 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
     }
 
     @Override
-    public void componentRemoved(ContainerEvent e) {
+    public void componentRemoved(final @NotNull ContainerEvent e) {
         final Component comp = e.getChild();
 
         if (comp instanceof JInternalFrame)
@@ -390,58 +371,58 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
     }
 
     @Override
-    public void mouseWheelMoved(MouseWheelEvent e) {
+    public void mouseWheelMoved(final MouseWheelEvent e) {
         // send to overlays
-        for (DesktopOverlay overlay : overlays)
+        for (final DesktopOverlay overlay : overlays)
             overlay.mouseWheelMoved(e);
     }
 
     @Override
-    public void mouseDragged(MouseEvent e) {
+    public void mouseDragged(final MouseEvent e) {
         // send to overlays
-        for (DesktopOverlay overlay : overlays)
+        for (final DesktopOverlay overlay : overlays)
             overlay.mouseDragged(e);
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) {
+    public void mouseMoved(final MouseEvent e) {
         // send to overlays
-        for (DesktopOverlay overlay : overlays)
+        for (final DesktopOverlay overlay : overlays)
             overlay.mouseMoved(e);
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(final MouseEvent e) {
         // send to overlays
-        for (DesktopOverlay overlay : overlays)
+        for (final DesktopOverlay overlay : overlays)
             overlay.mouseClicked(e);
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(final MouseEvent e) {
         // send to overlays
-        for (DesktopOverlay overlay : overlays)
+        for (final DesktopOverlay overlay : overlays)
             overlay.mousePressed(e);
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(final MouseEvent e) {
         // send to overlays
-        for (DesktopOverlay overlay : overlays)
+        for (final DesktopOverlay overlay : overlays)
             overlay.mouseReleased(e);
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
+    public void mouseEntered(final MouseEvent e) {
         // send to overlays
-        for (DesktopOverlay overlay : overlays)
+        for (final DesktopOverlay overlay : overlays)
             overlay.mouseEntered(e);
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(final MouseEvent e) {
         // send to overlays
-        for (DesktopOverlay overlay : overlays)
+        for (final DesktopOverlay overlay : overlays)
             overlay.mouseExited(e);
     }
 }

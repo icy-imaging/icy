@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.menu.search;
 
 import icy.image.ImageUtil;
@@ -23,18 +23,15 @@ import icy.search.SearchResult;
 import icy.util.GraphicsUtil;
 import icy.util.StringUtil;
 
-import java.awt.Component;
-import java.awt.Image;
-
-import javax.swing.ImageIcon;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.*;
 
 /**
  * This class is a renderer to display the filtered data.
  *
- * @author Thomas Provoost &amp; Stephane
+ * @author Thomas Provoost
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class SearchResultTableCellRenderer extends DefaultTableCellRenderer {
@@ -42,9 +39,7 @@ public class SearchResultTableCellRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        if (value instanceof SearchResult) {
-            final SearchResult result = (SearchResult) value;
-
+        if (value instanceof final SearchResult result) {
             final String title = result.getTitle();
             final String description = result.getDescription();
             final Image img = result.getImage();

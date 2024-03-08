@@ -19,9 +19,15 @@
 package icy.action;
 
 import icy.gui.main.ActiveSequenceListener;
+import icy.gui.main.GlobalROIListener;
+import icy.gui.main.GlobalSequenceListener;
+import icy.gui.main.GlobalViewerListener;
+import icy.gui.viewer.Viewer;
 import icy.main.Icy;
+import icy.roi.ROI;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
+import icy.system.logging.IcyLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,44 +40,132 @@ public final class ActionManager {
     /**
      * All registered action
      */
-    public static List<IcyAbstractAction> actions = null;
+    public static List<IcyAbstractAction> activeSequenceActions = null;
+    public static List<IcyAbstractAction> globalROIActions = null;
+    public static List<IcyAbstractAction> globalSequenceActions = null;
+    public static List<IcyAbstractAction> globalViewerActions = null;
 
     public static synchronized void init() {
         // init actions
-        if (actions == null) {
-            actions = new ArrayList<>();
+        if (activeSequenceActions == null) {
+            activeSequenceActions = new ArrayList<>();
 
             // add all kernels actions
-            actions.addAll(FileActions.getAllActions());
-            actions.addAll(GeneralActions.getAllActions());
-            actions.addAll(PreferencesActions.getAllActions());
-            actions.addAll(SequenceOperationActions.getAllActions());
-            actions.addAll(RoiActions.getAllActions());
-            actions.addAll(CanvasActions.getAllActions());
-            actions.addAll(ViewerActions.getAllActions());
-            actions.addAll(WindowActions.getAllActions());
+            activeSequenceActions.addAll(FileActions.getAllActiveSequenceActions());
+            activeSequenceActions.addAll(SequenceOperationActions.getAllActiveSequenceActions());
+            activeSequenceActions.addAll(RoiActions.getAllActiveSequenceActions());
+
+            activeSequenceActions.addAll(CanvasActions.getAllActions());
+            activeSequenceActions.addAll(ViewerActions.getAllActions());
+            activeSequenceActions.addAll(WindowActions.getAllActions());
 
             final ActiveSequenceListener activeSequenceListener = new ActiveSequenceListener() {
                 @Override
-                public void sequenceDeactivated(Sequence sequence) {
+                public void sequenceDeactivated(final Sequence sequence) {
                     // nothing here
                 }
 
                 @Override
-                public void sequenceActivated(Sequence sequence) {
+                public void sequenceActivated(final Sequence sequence) {
                     // force action components refresh
-                    for (IcyAbstractAction action : actions)
+                    for (final IcyAbstractAction action : activeSequenceActions) {
                         action.enabledChanged();
+                        action.setSelected(action.isSelected());
+                    }
                 }
 
                 @Override
-                public void activeSequenceChanged(SequenceEvent event) {
+                public void activeSequenceChanged(final SequenceEvent event) {
                     // nothing here
                 }
             };
 
             // listen these event
             Icy.getMainInterface().addActiveSequenceListener(activeSequenceListener);
+        }
+
+        if (globalROIActions == null) {
+            globalROIActions = new ArrayList<>();
+
+            final GlobalROIListener globalROIListener = new GlobalROIListener() {
+                @Override
+                public void roiAdded(final ROI roi) {
+                    // force action components refresh
+                    for (final IcyAbstractAction action : globalROIActions) {
+                        action.enabledChanged();
+                        action.setSelected(action.isSelected());
+                    }
+                }
+
+                @Override
+                public void roiRemoved(final ROI roi) {
+                    // force action components refresh
+                    for (final IcyAbstractAction action : globalROIActions) {
+                        action.enabledChanged();
+                        action.setSelected(action.isSelected());
+                    }
+                }
+            };
+
+            // listen these event
+            Icy.getMainInterface().addGlobalROIListener(globalROIListener);
+        }
+
+        if (globalSequenceActions == null) {
+            globalSequenceActions = new ArrayList<>();
+
+            final GlobalSequenceListener globalSequenceListener = new GlobalSequenceListener() {
+                @Override
+                public void sequenceOpened(final Sequence sequence) {
+                    // force action components refresh
+                    for (final IcyAbstractAction action : globalSequenceActions) {
+                        action.enabledChanged();
+                        action.setSelected(action.isSelected());
+                    }
+                }
+
+                @Override
+                public void sequenceClosed(final Sequence sequence) {
+                    // force action components refresh
+                    for (final IcyAbstractAction action : globalSequenceActions) {
+                        action.enabledChanged();
+                        action.setSelected(action.isSelected());
+                    }
+                }
+            };
+
+            // listen these event
+            Icy.getMainInterface().addGlobalSequenceListener(globalSequenceListener);
+        }
+
+        if (globalViewerActions == null) {
+            globalViewerActions = new ArrayList<>();
+
+            globalViewerActions.addAll(FileActions.getAllGlobalViewerActions());
+            globalViewerActions.addAll(SequenceOperationActions.getAllGlobalViewerActions());
+
+            final GlobalViewerListener globalViewerListener = new GlobalViewerListener() {
+                @Override
+                public void viewerOpened(final Viewer viewer) {
+                    // force action components refresh
+                    for (final IcyAbstractAction action : globalViewerActions) {
+                        action.enabledChanged();
+                        action.setSelected(action.isSelected());
+                    }
+                }
+
+                @Override
+                public void viewerClosed(final Viewer viewer) {
+                    // force action components refresh
+                    for (final IcyAbstractAction action : globalViewerActions) {
+                        action.enabledChanged();
+                        action.setSelected(action.isSelected());
+                    }
+                }
+            };
+
+            // listen these event
+            Icy.getMainInterface().addGlobalViewerListener(globalViewerListener);
         }
     }
 }

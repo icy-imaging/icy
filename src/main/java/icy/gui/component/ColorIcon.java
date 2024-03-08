@@ -45,7 +45,7 @@ public final class ColorIcon implements Icon {
 
     public ColorIcon(final Color color) {
         //this(color, 32, 20);
-        this(color, LookAndFeelUtil.getDefaultIconSizeAsInt(), LookAndFeelUtil.getDefaultIconSizeAsInt());
+        this(color, LookAndFeelUtil.getDefaultIconSize(), LookAndFeelUtil.getDefaultIconSize());
     }
 
     public Color getColor() {

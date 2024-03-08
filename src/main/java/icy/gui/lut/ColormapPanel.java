@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,17 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.lut;
-
-import java.awt.BorderLayout;
-import java.util.List;
-import java.util.Vector;
-
-import javax.swing.*;
 
 import icy.canvas.IcyCanvas3D;
 import icy.file.xml.XMLPersistentHelper;
 import icy.gui.component.button.IcyButton;
+import icy.gui.component.button.IcyToggleButton;
 import icy.gui.component.renderer.ColormapComboBoxRenderer;
 import icy.gui.dialog.OpenDialog;
 import icy.gui.dialog.SaveDialog;
@@ -38,26 +33,29 @@ import icy.image.colormap.IcyColorMapEvent;
 import icy.image.colormap.IcyColorMapListener;
 import icy.image.lut.LUT;
 import icy.image.lut.LUT.LUTChannel;
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.Sequence;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+import java.util.Vector;
 
 /**
- * @author stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class ColormapPanel extends JPanel implements IcyColorMapListener {
     private static final String DEFAULT_COLORMAP_DIR = IcyColorMap.DEFAULT_COLORMAP_DIR;
     private static final String DEFAULT_COLORMAP_NAME = "colormap.xml";
 
-    /**
+    /*
      * gui
      */
     private final ColormapViewer colormapViewer;
-    final JToggleButton rgbBtn;
-    final JToggleButton grayBtn;
-    final JToggleButton alphaBtn;
+    final IcyToggleButton rgbBtn;
+    final IcyToggleButton grayBtn;
+    final IcyToggleButton alphaBtn;
     final ButtonGroup colormapTypeBtnGrp;
     final JComboBox<IcyColorMap> colormapComboBox;
 
@@ -87,15 +85,15 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         colormapViewer = new ColormapViewer(lutChannel);
 
         // colormap type
-        rgbBtn = new JToggleButton(new IcyIcon(ResourceUtil.ICON_RGB_COLOR, 20, false));
+        rgbBtn = new IcyToggleButton(SVGIcon.RGB_IMAGE);
         rgbBtn.setToolTipText("Set colormap type to Color");
         rgbBtn.setFocusPainted(false);
         //ComponentUtil.setFixedWidth(rgbBtn, 26);
-        grayBtn = new JToggleButton(new IcyIcon(ResourceUtil.ICON_GRAY_COLOR, 20, false));
+        grayBtn = new IcyToggleButton(SVGIcon.GRAYSCALE_IMAGE);
         grayBtn.setToolTipText("Set colormap type to Gray");
         grayBtn.setFocusPainted(false);
         //ComponentUtil.setFixedWidth(grayBtn, 26);
-        alphaBtn = new JToggleButton(new IcyIcon(ResourceUtil.ICON_ALPHA_COLOR, 20, false));
+        alphaBtn = new IcyToggleButton(SVGIcon.ARGB_IMAGE);
         alphaBtn.setToolTipText("Set colormap type to Alpha (transparency)");
         alphaBtn.setFocusPainted(false);
         //ComponentUtil.setFixedWidth(alphaBtn, 26);
@@ -171,7 +169,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         colormapComboBox.addActionListener(e -> setColorMap((IcyColorMap) colormapComboBox.getSelectedItem()));
 
         // load button
-        final IcyButton loadButton = new IcyButton(GoogleMaterialDesignIcons.FOLDER_OPEN);
+        final IcyButton loadButton = new IcyButton(SVGIcon.FOLDER_OPEN);
         loadButton.setToolTipText("Load colormap from file");
 
         // action to load colormap
@@ -187,7 +185,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         });
 
         // save button
-        final IcyButton saveButton = new IcyButton(GoogleMaterialDesignIcons.SAVE);
+        final IcyButton saveButton = new IcyButton(SVGIcon.SAVE);
         saveButton.setToolTipText("Save colormap to file");
 
         // action to save colormap
@@ -258,7 +256,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         return colormapViewer;
     }
 
-    private void updateColormapType(IcyColorMapType type) {
+    private void updateColormapType(final IcyColorMapType type) {
         switch (type) {
             case RGB:
                 colormapTypeBtnGrp.setSelected(rgbBtn.getModel(), true);
@@ -275,7 +273,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
     /**
      * Set the colormap.
      */
-    public void setColorMap(IcyColorMap src) {
+    public void setColorMap(final IcyColorMap src) {
         if (colormap == src)
             return;
 
@@ -321,12 +319,12 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
      * @deprecated Use {@link #setColorMap(IcyColorMap)} instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void copyColorMap(IcyColorMap src) {
+    public void copyColorMap(final IcyColorMap src) {
         setColorMap(src);
     }
 
     @Override
-    public void colorMapChanged(IcyColorMapEvent e) {
+    public void colorMapChanged(final IcyColorMapEvent e) {
         switch (e.getType()) {
             case TYPE_CHANGED:
                 // colormap type has changed ? --> update combo state

@@ -37,6 +37,7 @@ import icy.plugin.PluginLoader.PluginLoaderEvent;
 import icy.plugin.PluginLoader.PluginLoaderListener;
 import icy.plugin.interface_.PluginROIDescriptor;
 import icy.preferences.XMLPreferences;
+import icy.resource.icon.SVGIcon;
 import icy.roi.*;
 import icy.roi.ROIEvent.ROIEventType;
 import icy.sequence.Sequence;
@@ -49,7 +50,6 @@ import icy.system.thread.ThreadUtil;
 import icy.type.rectangle.Rectangle5D;
 import icy.util.ClassUtil;
 import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.sort.DefaultSortController;
 import org.jdesktop.swingx.table.DefaultTableColumnModelExt;
@@ -300,11 +300,11 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         middlePanel.add(roiTable.getTableHeader(), BorderLayout.NORTH);
         middlePanel.add(new JScrollPane(roiTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
-        final IcyButton settingButton = new IcyButton(GoogleMaterialDesignIcons.SETTINGS);
+        final IcyButton settingButton = new IcyButton(SVGIcon.SETTINGS);
         settingButton.addActionListener(RoiActions.settingAction);
         settingButton.setHideActionText(true);
 
-        final IcyButton xlsExportButton = new IcyButton(GoogleMaterialDesignIcons.FILE_DOWNLOAD);
+        final IcyButton xlsExportButton = new IcyButton(SVGIcon.FILE_SAVE);
         xlsExportButton.addActionListener(RoiActions.xlsExportAction);
         xlsExportButton.setHideActionText(true);
 

@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,36 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.inspector;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import icy.gui.component.AbstractRoisPanel.BaseColumnInfo;
+import icy.gui.component.button.IcyButton;
+import icy.preferences.XMLPreferences;
+import icy.resource.icon.SVGIcon;
+import icy.roi.ROIDescriptor;
+import icy.roi.ROIUtil;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-
-import icy.gui.component.AbstractRoisPanel.BaseColumnInfo;
-import icy.gui.component.button.IcyButton;
-import icy.preferences.XMLPreferences;
-import icy.roi.ROIDescriptor;
-import icy.roi.ROIUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.List;
+import java.util.*;
 
 /**
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class RoiSettingPanel extends JPanel implements ActionListener, ItemListener {
@@ -76,10 +69,8 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
 
     /**
      * Create the panel.
-     *
-     * @param exportPreferences
      */
-    public RoiSettingPanel(XMLPreferences viewPreferences, XMLPreferences exportPreferences) {
+    public RoiSettingPanel(final XMLPreferences viewPreferences, final XMLPreferences exportPreferences) {
         super();
 
         prefView = viewPreferences;
@@ -91,7 +82,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         idsExport = new ArrayList<>();
 
         // build view and export lists
-        for (ROIDescriptor descriptor : descriptors) {
+        for (final ROIDescriptor descriptor : descriptors) {
             idsView.add(new BaseColumnInfo(descriptor, prefView, false));
             idsExport.add(new BaseColumnInfo(descriptor, prefExport, true));
         }
@@ -107,7 +98,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
             }
 
             @Override
-            public Class<?> getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(final int columnIndex) {
                 switch (columnIndex) {
                     case 0:
                         // name
@@ -122,7 +113,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
             }
 
             @Override
-            public String getColumnName(int column) {
+            public String getColumnName(final int column) {
                 switch (column) {
                     case 0:
                         return "Column name";
@@ -140,7 +131,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
             }
 
             @Override
-            public Object getValueAt(int rowIndex, int columnIndex) {
+            public Object getValueAt(final int rowIndex, final int columnIndex) {
                 switch (columnIndex) {
                     case 0:
                         // name
@@ -155,12 +146,12 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
             }
 
             @Override
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
+            public boolean isCellEditable(final int rowIndex, final int columnIndex) {
                 return (columnIndex == 1);
             }
 
             @Override
-            public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
                 // visibility
                 if (columnIndex == 1)
                     idsView.get(rowIndex).visible = ((Boolean) aValue).booleanValue();
@@ -174,7 +165,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
             }
 
             @Override
-            public Class<?> getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(final int columnIndex) {
                 switch (columnIndex) {
                     case 0:
                         // name
@@ -189,7 +180,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
             }
 
             @Override
-            public String getColumnName(int column) {
+            public String getColumnName(final int column) {
                 switch (column) {
                     case 0:
                         return "Column name";
@@ -207,7 +198,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
             }
 
             @Override
-            public Object getValueAt(int rowIndex, int columnIndex) {
+            public Object getValueAt(final int rowIndex, final int columnIndex) {
                 switch (columnIndex) {
                     case 0:
                         // name
@@ -222,12 +213,12 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
             }
 
             @Override
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
+            public boolean isCellEditable(final int rowIndex, final int columnIndex) {
                 return (columnIndex == 1);
             }
 
             @Override
-            public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
                 // visibility
                 if (columnIndex == 1)
                     idsExport.get(rowIndex).visible = ((Boolean) aValue).booleanValue();
@@ -276,11 +267,11 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
     private void initialize() {
         setLayout(new BorderLayout(0, 0));
 
-        JSplitPane splitPane = new JSplitPane();
+        final JSplitPane splitPane = new JSplitPane();
         splitPane.setResizeWeight(0.5);
         add(splitPane, BorderLayout.CENTER);
 
-        JPanel panelView = new JPanel();
+        final JPanel panelView = new JPanel();
         splitPane.setLeftComponent(panelView);
         panelView.setLayout(new BorderLayout(0, 0));
 
@@ -292,9 +283,9 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         tableView.setRowSelectionAllowed(true);
         scrollPaneView.setViewportView(tableView);
 
-        JPanel panelViewTop = new JPanel();
+        final JPanel panelViewTop = new JPanel();
         panelView.add(panelViewTop, BorderLayout.NORTH);
-        GridBagLayout gbl_panelViewTop = new GridBagLayout();
+        final GridBagLayout gbl_panelViewTop = new GridBagLayout();
         gbl_panelViewTop.columnWidths = new int[]{0, 0, 0, 0, 0};
         gbl_panelViewTop.rowHeights = new int[]{14, 0};
         gbl_panelViewTop.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
@@ -303,7 +294,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
 
         chkHeaderSelectAllToDisplay = new JCheckBox();
         chkHeaderSelectAllToDisplay.setToolTipText("Click to select/deselect all descriptors in this list");
-        GridBagConstraints gbc_chkHeaderSelectAllToDisplay = new GridBagConstraints();
+        final GridBagConstraints gbc_chkHeaderSelectAllToDisplay = new GridBagConstraints();
         gbc_chkHeaderSelectAllToDisplay.insets = new Insets(0, 0, 0, 0);
         gbc_chkHeaderSelectAllToDisplay.gridx = 0;
         gbc_chkHeaderSelectAllToDisplay.gridy = 0;
@@ -311,28 +302,28 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
 
         btnHeaderColumnsToDisplay = new JToggleButton("Columns to display");
         btnHeaderColumnsToDisplay.setToolTipText("Click to alphabetically reorder descriptors in this list");
-        GridBagConstraints gbc_btnHeaderColumnsToDisplay = new GridBagConstraints();
+        final GridBagConstraints gbc_btnHeaderColumnsToDisplay = new GridBagConstraints();
         gbc_btnHeaderColumnsToDisplay.insets = new Insets(0, 0, 0, 0);
         gbc_btnHeaderColumnsToDisplay.gridx = 1;
         gbc_btnHeaderColumnsToDisplay.gridy = 0;
         panelViewTop.add(btnHeaderColumnsToDisplay, gbc_btnHeaderColumnsToDisplay);
 
-        btnUpView = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_UP);
+        btnUpView = new IcyButton(SVGIcon.KEYBOARD_ARROW_UP);
         btnUpView.setToolTipText("Change order of selected column(s)");
-        GridBagConstraints gbc_btnUpView = new GridBagConstraints();
+        final GridBagConstraints gbc_btnUpView = new GridBagConstraints();
         gbc_btnUpView.insets = new Insets(0, 0, 0, 5);
         gbc_btnUpView.gridx = 2;
         gbc_btnUpView.gridy = 0;
         panelViewTop.add(btnUpView, gbc_btnUpView);
 
-        btnDownView = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_DOWN);
+        btnDownView = new IcyButton(SVGIcon.KEYBOARD_ARROW_DOWN);
         btnDownView.setToolTipText("Change order of selected column(s)");
-        GridBagConstraints gbc_btnDownView = new GridBagConstraints();
+        final GridBagConstraints gbc_btnDownView = new GridBagConstraints();
         gbc_btnDownView.gridx = 3;
         gbc_btnDownView.gridy = 0;
         panelViewTop.add(btnDownView, gbc_btnDownView);
 
-        JPanel panelExport = new JPanel();
+        final JPanel panelExport = new JPanel();
         splitPane.setRightComponent(panelExport);
         panelExport.setLayout(new BorderLayout(0, 0));
 
@@ -346,7 +337,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
 
         panelExportTop = new JPanel();
         panelExport.add(panelExportTop, BorderLayout.NORTH);
-        GridBagLayout gbl_panelExportTop = new GridBagLayout();
+        final GridBagLayout gbl_panelExportTop = new GridBagLayout();
         gbl_panelExportTop.columnWidths = new int[]{0, 0, 0, 0, 0};
         gbl_panelExportTop.rowHeights = new int[]{14, 0};
         gbl_panelExportTop.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
@@ -355,7 +346,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
 
         chkHeaderSelectAllToExport = new JCheckBox();
         chkHeaderSelectAllToExport.setToolTipText("Click to select/deselect all descriptors in this list");
-        GridBagConstraints gbc_chkHeaderSelectAllToExport = new GridBagConstraints();
+        final GridBagConstraints gbc_chkHeaderSelectAllToExport = new GridBagConstraints();
         gbc_chkHeaderSelectAllToExport.insets = new Insets(0, 0, 0, 0);
         gbc_chkHeaderSelectAllToExport.gridx = 0;
         gbc_chkHeaderSelectAllToExport.gridy = 0;
@@ -363,23 +354,23 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
 
         btnHeaderColumnsToExport = new JToggleButton("Columns to export (XLS or CSV)");
         btnHeaderColumnsToExport.setToolTipText("Click to alphabetically reorder descriptors in this list");
-        GridBagConstraints gbc_btnHeaderColumnsToExport = new GridBagConstraints();
+        final GridBagConstraints gbc_btnHeaderColumnsToExport = new GridBagConstraints();
         gbc_btnHeaderColumnsToExport.insets = new Insets(0, 0, 0, 0);
         gbc_btnHeaderColumnsToExport.gridx = 1;
         gbc_btnHeaderColumnsToExport.gridy = 0;
         panelExportTop.add(btnHeaderColumnsToExport, gbc_btnHeaderColumnsToExport);
 
-        btnUpExport = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_UP);
+        btnUpExport = new IcyButton(SVGIcon.KEYBOARD_ARROW_UP);
         btnUpExport.setToolTipText("Change order of selected column(s)");
-        GridBagConstraints gbc_btnUpExport = new GridBagConstraints();
+        final GridBagConstraints gbc_btnUpExport = new GridBagConstraints();
         gbc_btnUpExport.insets = new Insets(0, 0, 0, 5);
         gbc_btnUpExport.gridx = 2;
         gbc_btnUpExport.gridy = 0;
         panelExportTop.add(btnUpExport, gbc_btnUpExport);
 
-        btnDownExport = new IcyButton(GoogleMaterialDesignIcons.KEYBOARD_ARROW_DOWN);
+        btnDownExport = new IcyButton(SVGIcon.KEYBOARD_ARROW_DOWN);
         btnDownExport.setToolTipText("Change order of selected column(s)");
-        GridBagConstraints gbc_btnDownExport = new GridBagConstraints();
+        final GridBagConstraints gbc_btnDownExport = new GridBagConstraints();
         gbc_btnDownExport.gridx = 3;
         gbc_btnDownExport.gridy = 0;
         panelExportTop.add(btnDownExport, gbc_btnDownExport);
@@ -389,10 +380,10 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         int order;
 
         order = 0;
-        for (BaseColumnInfo columnInfo : idsView)
+        for (final BaseColumnInfo columnInfo : idsView)
             columnInfo.order = order++;
         order = 0;
-        for (BaseColumnInfo columnInfo : idsExport)
+        for (final BaseColumnInfo columnInfo : idsExport)
             columnInfo.order = order++;
     }
 
@@ -413,41 +404,42 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
     public void save() {
         sortLists();
 
-        for (BaseColumnInfo columnInfo : idsView)
+        for (final BaseColumnInfo columnInfo : idsView)
             columnInfo.save(prefView);
-        for (BaseColumnInfo columnInfo : idsExport)
+        for (final BaseColumnInfo columnInfo : idsExport)
             columnInfo.save(prefExport);
     }
 
-    List<BaseColumnInfo> getSelected(JTable table, List<BaseColumnInfo> columnInfos) {
+    List<BaseColumnInfo> getSelected(final JTable table, final List<BaseColumnInfo> columnInfos) {
         final List<BaseColumnInfo> result = new ArrayList<>();
         final int[] selected = table.getSelectedRows();
 
-        for (int index : selected)
+        for (final int index : selected)
             result.add(columnInfos.get(index));
 
         return result;
     }
 
-    void restoreSelected(JTable table, List<BaseColumnInfo> columnInfos, List<BaseColumnInfo> selected) {
+    void restoreSelected(final JTable table, final List<BaseColumnInfo> columnInfos, final List<BaseColumnInfo> selected) {
         final ListSelectionModel selectionModel = table.getSelectionModel();
 
         selectionModel.setValueIsAdjusting(true);
         try {
             selectionModel.clearSelection();
 
-            for (BaseColumnInfo bci : selected) {
+            for (final BaseColumnInfo bci : selected) {
                 final int index = columnInfos.indexOf(bci);
                 if (index >= 0)
                     selectionModel.addSelectionInterval(index, index);
             }
-        } finally {
+        }
+        finally {
             selectionModel.setValueIsAdjusting(false);
         }
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
         final Object source = e.getSource();
 
         if (source == btnUpView || source == btnDownView || source == btnUpExport || source == btnDownExport) {
@@ -455,7 +447,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         }
     }
 
-    private void moveTableItem(ActionEvent e) {
+    private void moveTableItem(final ActionEvent e) {
         final Object source = e.getSource();
         final JTable table;
         final List<BaseColumnInfo> columnInfos;
@@ -485,7 +477,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
             final List<BaseColumnInfo> selected = getSelected(table, columnInfos);
 
             // update order of selected area
-            for (BaseColumnInfo bci : selected)
+            for (final BaseColumnInfo bci : selected)
                 bci.order = bci.order + v;
 
             if (v == -1) {
@@ -515,8 +507,8 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
     }
 
     @Override
-    public void itemStateChanged(ItemEvent e) {
-        Object source = e.getSource();
+    public void itemStateChanged(final ItemEvent e) {
+        final Object source = e.getSource();
         if (source == chkHeaderSelectAllToDisplay || source == chkHeaderSelectAllToExport) {
             toggleSelectAll(e);
         }
@@ -525,7 +517,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         }
     }
 
-    private void toggleSelectAll(ItemEvent e) {
+    private void toggleSelectAll(final ItemEvent e) {
         final Object source = e.getSource();
         final JTable table;
         final List<BaseColumnInfo> columnInfos;
@@ -560,7 +552,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         }
     }
 
-    private void sortTableElements(ItemEvent e) {
+    private void sortTableElements(final ItemEvent e) {
         final Object source = e.getSource();
         final JTable table;
         final List<BaseColumnInfo> columnInfos;
@@ -612,18 +604,18 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         }
     }
 
-    private List<BaseColumnInfo> getIncluded(JTable table, List<BaseColumnInfo> columnInfos) {
+    private List<BaseColumnInfo> getIncluded(final JTable table, final List<BaseColumnInfo> columnInfos) {
         final List<BaseColumnInfo> result = new ArrayList<>();
         final int[] included = getIncludedIndices(table);
 
-        for (int index : included)
+        for (final int index : included)
             result.add(columnInfos.get(index));
 
         return result;
     }
 
-    private int[] getIncludedIndices(JTable table) {
-        int[] included = new int[table.getRowCount()];
+    private int[] getIncludedIndices(final JTable table) {
+        final int[] included = new int[table.getRowCount()];
         int pos = 0;
         for (int j = 0; j < table.getRowCount(); j++) {
             if ((Boolean) table.getValueAt(j, 1)) {
@@ -633,18 +625,18 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         return Arrays.copyOf(included, pos);
     }
 
-    private List<BaseColumnInfo> getNotIncluded(JTable table, List<BaseColumnInfo> columnInfos) {
+    private List<BaseColumnInfo> getNotIncluded(final JTable table, final List<BaseColumnInfo> columnInfos) {
         final List<BaseColumnInfo> result = new ArrayList<>();
         final int[] notIncluded = getNotIncludedIndices(table);
 
-        for (int index : notIncluded)
+        for (final int index : notIncluded)
             result.add(columnInfos.get(index));
 
         return result;
     }
 
-    private int[] getNotIncludedIndices(JTable table) {
-        int[] notIncluded = new int[table.getRowCount()];
+    private int[] getNotIncludedIndices(final JTable table) {
+        final int[] notIncluded = new int[table.getRowCount()];
         int pos = 0;
         for (int j = 0; j < table.getRowCount(); j++) {
             if (!(Boolean) table.getValueAt(j, 1)) {

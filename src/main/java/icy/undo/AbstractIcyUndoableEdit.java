@@ -1,42 +1,42 @@
 /*
- * Copyright 2010-2015 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.undo;
 
-import icy.resource.ResourceUtil;
-import icy.resource.icon.IcyIcon;
+import icy.gui.util.LookAndFeelUtil;
+import icy.resource.icon.IcySVGIcon;
+import icy.resource.icon.SVGIcon;
 import icy.util.StringUtil;
 
-import java.awt.Image;
-
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
+import java.awt.*;
 
 /**
  * Abstract Icy {@link UndoableEdit} class.
- * 
- * @author Stephane
+ *
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
-{
-    protected static final IcyIcon DEFAULT_ICON = new IcyIcon(ResourceUtil.ICON_LIGHTING, 16);
+public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
+    protected static final Icon DEFAULT_ICON = new IcySVGIcon(SVGIcon.FLASH_ON);
 
     /**
      * Source of the UndoableEdit
@@ -58,7 +58,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
     /**
      * Used to recognize the edit in the undo manager panel
      */
-    protected IcyIcon icon;
+    protected Icon icon;
 
     /**
      * Representation name in the history panel
@@ -74,8 +74,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * Creates an <code>UndoableAction</code> which defaults <code>hasBeenDone</code> and
      * <code>alive</code> to <code>true</code>.
      */
-    public AbstractIcyUndoableEdit(Object source, String name, Image icon)
-    {
+    public AbstractIcyUndoableEdit(final Object source, final String name, final Image icon) {
         super();
 
         // this.source = new WeakReference<Object>(source);
@@ -83,8 +82,10 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
         hasBeenDone = true;
         alive = true;
 
+        final int size = LookAndFeelUtil.getDefaultIconSize();
+
         if (icon != null)
-            this.icon = new IcyIcon(icon, 16);
+            this.icon = new ImageIcon(icon.getScaledInstance(size, size, Image.SCALE_SMOOTH));
         else
             this.icon = DEFAULT_ICON;
         presentationName = name;
@@ -96,8 +97,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * Creates an <code>UndoableAction</code> which defaults <code>hasBeenDone</code> and
      * <code>alive</code> to <code>true</code>.
      */
-    public AbstractIcyUndoableEdit(Object source, String name)
-    {
+    public AbstractIcyUndoableEdit(final Object source, final String name) {
         this(source, name, null);
     }
 
@@ -105,8 +105,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * Creates an <code>UndoableAction</code> which defaults <code>hasBeenDone</code> and
      * <code>alive</code> to <code>true</code>.
      */
-    public AbstractIcyUndoableEdit(Object source, Image icon)
-    {
+    public AbstractIcyUndoableEdit(final Object source, final Image icon) {
         this(source, "", icon);
     }
 
@@ -114,20 +113,17 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * Creates an <code>UndoableAction</code> which defaults <code>hasBeenDone</code> and
      * <code>alive</code> to <code>true</code>.
      */
-    public AbstractIcyUndoableEdit(Object source)
-    {
+    public AbstractIcyUndoableEdit(final Object source) {
         this(source, "", null);
     }
 
     @Override
-    public Object getSource()
-    {
+    public Object getSource() {
         return source;
     }
 
     @Override
-    public IcyIcon getIcon()
-    {
+    public Icon getIcon() {
         return icon;
     }
 
@@ -141,8 +137,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * <code>replaceEdit</code> method, or when it is dequeued from an <code>UndoManager</code>.
      */
     @Override
-    public void die()
-    {
+    public void die() {
         alive = false;
 
         // remove source reference
@@ -154,14 +149,13 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * Sets <code>hasBeenDone</code> to <code>false</code>. Subclasses should override to undo the
      * operation represented by this edit. Override should begin with
      * a call to super.
-     * 
+     *
      * @exception CannotUndoException
      *            if <code>canUndo</code> returns <code>false</code>
      * @see #canUndo
      */
     @Override
-    public void undo() throws CannotUndoException
-    {
+    public void undo() throws CannotUndoException {
         if (!canUndo())
             throw new CannotUndoException();
 
@@ -169,8 +163,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
     }
 
     @Override
-    public boolean canUndo()
-    {
+    public boolean canUndo() {
         return alive && hasBeenDone;
     }
 
@@ -179,14 +172,13 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * <code>hasBeenDone</code> to <code>true</code>.
      * Subclasses should override to redo the operation represented by
      * this edit. Override should begin with a call to super.
-     * 
+     *
      * @exception CannotRedoException
      *            if <code>canRedo</code> returns <code>false</code>
      * @see #canRedo
      */
     @Override
-    public void redo() throws CannotRedoException
-    {
+    public void redo() throws CannotRedoException {
         if (!canRedo())
             throw new CannotRedoException();
 
@@ -194,8 +186,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
     }
 
     @Override
-    public boolean canRedo()
-    {
+    public boolean canRedo() {
         return alive && !hasBeenDone;
     }
 
@@ -203,8 +194,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * This default implementation returns false.
      */
     @Override
-    public boolean addEdit(UndoableEdit anEdit)
-    {
+    public boolean addEdit(final UndoableEdit anEdit) {
         return false;
     }
 
@@ -212,8 +202,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * This default implementation returns false.
      */
     @Override
-    public boolean replaceEdit(UndoableEdit anEdit)
-    {
+    public boolean replaceEdit(final UndoableEdit anEdit) {
         return false;
     }
 
@@ -221,20 +210,17 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * This default implementation returns true.
      */
     @Override
-    final public boolean isSignificant()
-    {
+    final public boolean isSignificant() {
         // should always returns true for easier UndoManager manipulation
         return true;
     }
 
     @Override
-    public boolean isMergeable()
-    {
+    public boolean isMergeable() {
         return mergeable;
     }
 
-    public void setMergeable(boolean value)
-    {
+    public void setMergeable(final boolean value) {
         mergeable = value;
     }
 
@@ -244,14 +230,13 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * construct the strings they return. Subclasses should override to
      * return an appropriate description of the operation this edit
      * represents.
-     * 
+     *
      * @return the empty string ""
      * @see #getUndoPresentationName
      * @see #getRedoPresentationName
      */
     @Override
-    public String getPresentationName()
-    {
+    public String getPresentationName() {
         return presentationName;
     }
 
@@ -261,7 +246,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * that value followed by a space, followed by <code>getPresentationName</code>.
      * If <code>getPresentationName</code> returns "",
      * then the defaults value is returned alone.
-     * 
+     *
      * @return the value from the defaults table with key <code>AbstractUndoableEdit.undoText</code>
      *         , followed
      *         by a space, followed by <code>getPresentationName</code> unless
@@ -270,8 +255,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * @see #getPresentationName
      */
     @Override
-    public String getUndoPresentationName()
-    {
+    public String getUndoPresentationName() {
         String name = getPresentationName();
 
         if (!StringUtil.isEmpty(name))
@@ -288,7 +272,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * that value followed by a space, followed by <code>getPresentationName</code>.
      * If <code>getPresentationName</code> returns "",
      * then the defaults value is returned alone.
-     * 
+     *
      * @return the value from the defaults table with key <code>AbstractUndoableEdit.redoText</code>
      *         , followed
      *         by a space, followed by <code>getPresentationName</code> unless
@@ -297,8 +281,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
      * @see #getPresentationName
      */
     @Override
-    public String getRedoPresentationName()
-    {
+    public String getRedoPresentationName() {
         String name = getPresentationName();
 
         if (!StringUtil.isEmpty(name))
@@ -312,12 +295,11 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit
     /**
      * Returns a string that displays and identifies this
      * object's properties.
-     * 
+     *
      * @return a String representation of this object
      */
     @Override
-    public String toString()
-    {
+    public String toString() {
         return super.toString() + " hasBeenDone: " + hasBeenDone + " alive: " + alive;
     }
 

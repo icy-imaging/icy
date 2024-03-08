@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,34 +15,45 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.sequence.tools;
 
 import icy.gui.component.button.IcyToggleButton;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import icy.resource.icon.SVGIcon;
+import org.jetbrains.annotations.NotNull;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import javax.swing.*;
+import javax.swing.event.EventListenerList;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.event.EventListenerList;
-
 /**
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class PositionAlignmentPanel extends JPanel {
-    public static class PositionBox extends IcyToggleButton {
-        public PositionBox() {
-            super(GoogleMaterialDesignIcons.RADIO_BUTTON_UNCHECKED, GoogleMaterialDesignIcons.RADIO_BUTTON_CHECKED);
+    static class PositionBox extends IcyToggleButton {
+        enum Position {
+            CENTER(SVGIcon.RECENTER),
+            TOP(SVGIcon.NORTH), BOTTOM(SVGIcon.SOUTH),
+            LEFT(SVGIcon.WEST), RIGHT(SVGIcon.EAST),
+            TOP_LEFT(SVGIcon.NORTH_WEST), TOP_RIGHT(SVGIcon.NORTH_EAST),
+            BOTTOM_LEFT(SVGIcon.SOUTH_WEST), BOTTOM_RIGHT(SVGIcon.SOUTH_EAST);
 
-            // TODO: 17/02/2023 Why paint a black border ?
-            //setBorder(BorderFactory.createLineBorder(Color.black));
-            setFocusPainted(false);
+            private final @NotNull SVGIcon icon;
+
+            Position(final @NotNull SVGIcon icon) {
+                this.icon = icon;
+            }
+
+            @NotNull SVGIcon getIcon() {
+                return icon;
+            }
+        }
+
+        PositionBox(final @NotNull Position position) {
+            super(position.getIcon());
         }
     }
 
@@ -96,7 +106,7 @@ public class PositionAlignmentPanel extends JPanel {
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         super.setEnabled(enabled);
 
         topLeftBox.setEnabled(enabled);
@@ -148,10 +158,15 @@ public class PositionAlignmentPanel extends JPanel {
      * @param event the <code>ActionEvent</code> object
      * @see EventListenerList
      */
-    protected void fireActionPerformed(ActionEvent event) {
-        for (ActionListener listener : getActionListeners())
-            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, event.getActionCommand(),
-                    event.getWhen(), event.getModifiers()));
+    protected void fireActionPerformed(final ActionEvent event) {
+        for (final ActionListener listener : getActionListeners())
+            listener.actionPerformed(new ActionEvent(
+                    this,
+                    ActionEvent.ACTION_PERFORMED,
+                    event.getActionCommand(),
+                    event.getWhen(),
+                    event.getModifiers()
+            ));
     }
 
     /**
@@ -159,7 +174,7 @@ public class PositionAlignmentPanel extends JPanel {
      *
      * @param l the <code>ActionListener</code> to be added
      */
-    public void addActionListener(ActionListener l) {
+    public void addActionListener(final ActionListener l) {
         listenerList.add(ActionListener.class, l);
     }
 
@@ -170,7 +185,7 @@ public class PositionAlignmentPanel extends JPanel {
      *
      * @param l the listener to be removed
      */
-    public void removeActionListener(ActionListener l) {
+    public void removeActionListener(final ActionListener l) {
         listenerList.remove(ActionListener.class, l);
     }
 
@@ -187,80 +202,80 @@ public class PositionAlignmentPanel extends JPanel {
     }
 
     private void initialize() {
-        GridBagLayout gridBagLayout = new GridBagLayout();
+        final GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[]{0, 0, 0, 0};
         gridBagLayout.rowHeights = new int[]{0, 0, 0, 0};
         gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
         gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
         setLayout(gridBagLayout);
 
-        topLeftBox = new PositionBox();
+        topLeftBox = new PositionBox(PositionBox.Position.TOP_LEFT);
         topLeftBox.setToolTipText("Align content to top left");
-        GridBagConstraints gbc_topLeftBox = new GridBagConstraints();
+        final GridBagConstraints gbc_topLeftBox = new GridBagConstraints();
         gbc_topLeftBox.insets = new Insets(0, 0, 5, 5);
         gbc_topLeftBox.gridx = 0;
         gbc_topLeftBox.gridy = 0;
         add(topLeftBox, gbc_topLeftBox);
 
-        topBox = new PositionBox();
+        topBox = new PositionBox(PositionBox.Position.TOP);
         topBox.setToolTipText("Align content to top");
-        GridBagConstraints gbc_topBox = new GridBagConstraints();
+        final GridBagConstraints gbc_topBox = new GridBagConstraints();
         gbc_topBox.insets = new Insets(0, 0, 5, 5);
         gbc_topBox.gridx = 1;
         gbc_topBox.gridy = 0;
         add(topBox, gbc_topBox);
 
-        topRightBox = new PositionBox();
+        topRightBox = new PositionBox(PositionBox.Position.TOP_RIGHT);
         topRightBox.setToolTipText("Align content to top right");
-        GridBagConstraints gbc_topRightBox = new GridBagConstraints();
+        final GridBagConstraints gbc_topRightBox = new GridBagConstraints();
         gbc_topRightBox.insets = new Insets(0, 0, 5, 0);
         gbc_topRightBox.gridx = 2;
         gbc_topRightBox.gridy = 0;
         add(topRightBox, gbc_topRightBox);
 
-        leftBox = new PositionBox();
+        leftBox = new PositionBox(PositionBox.Position.LEFT);
         leftBox.setToolTipText("Align content to left");
-        GridBagConstraints gbc_leftBox = new GridBagConstraints();
+        final GridBagConstraints gbc_leftBox = new GridBagConstraints();
         gbc_leftBox.insets = new Insets(0, 0, 5, 5);
         gbc_leftBox.gridx = 0;
         gbc_leftBox.gridy = 1;
         add(leftBox, gbc_leftBox);
 
-        centerBox = new PositionBox();
+        centerBox = new PositionBox(PositionBox.Position.CENTER);
         centerBox.setToolTipText("Align content to center");
-        GridBagConstraints gbc_centerBox = new GridBagConstraints();
+        final GridBagConstraints gbc_centerBox = new GridBagConstraints();
         gbc_centerBox.insets = new Insets(0, 0, 5, 5);
         gbc_centerBox.gridx = 1;
         gbc_centerBox.gridy = 1;
         add(centerBox, gbc_centerBox);
 
-        rightBox = new PositionBox();
+        rightBox = new PositionBox(PositionBox.Position.RIGHT);
         rightBox.setToolTipText("Align content to right");
-        GridBagConstraints gbc_rightBox = new GridBagConstraints();
+        final GridBagConstraints gbc_rightBox = new GridBagConstraints();
         gbc_rightBox.insets = new Insets(0, 0, 5, 0);
         gbc_rightBox.gridx = 2;
         gbc_rightBox.gridy = 1;
         add(rightBox, gbc_rightBox);
 
-        bottomLeftBox = new PositionBox();
+        bottomLeftBox = new PositionBox(PositionBox.Position.BOTTOM_LEFT);
         bottomLeftBox.setToolTipText("Align content to bottom left");
-        GridBagConstraints gbc_bottomLeftBox = new GridBagConstraints();
+        final GridBagConstraints gbc_bottomLeftBox = new GridBagConstraints();
         gbc_bottomLeftBox.insets = new Insets(0, 0, 0, 5);
         gbc_bottomLeftBox.gridx = 0;
         gbc_bottomLeftBox.gridy = 2;
         add(bottomLeftBox, gbc_bottomLeftBox);
 
-        bottomBox = new PositionBox();
+        bottomBox = new PositionBox(PositionBox.Position.BOTTOM);
         bottomBox.setToolTipText("Align content to bottom");
-        GridBagConstraints gbc_bottomBox = new GridBagConstraints();
+        final GridBagConstraints gbc_bottomBox = new GridBagConstraints();
         gbc_bottomBox.insets = new Insets(0, 0, 0, 5);
         gbc_bottomBox.gridx = 1;
         gbc_bottomBox.gridy = 2;
         add(bottomBox, gbc_bottomBox);
 
-        bottomRightBox = new PositionBox();
+        bottomRightBox = new PositionBox(PositionBox.Position.BOTTOM_RIGHT);
         bottomRightBox.setToolTipText("Align content to bottom right");
-        GridBagConstraints gbc_bottomRightBox = new GridBagConstraints();
+        final GridBagConstraints gbc_bottomRightBox = new GridBagConstraints();
         gbc_bottomRightBox.gridx = 2;
         gbc_bottomRightBox.gridy = 2;
         add(bottomRightBox, gbc_bottomRightBox);

@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.canvas;
 
 import icy.common.listener.ROIToolChangeListener;
@@ -35,8 +35,11 @@ import icy.math.MultiSmoothMover;
 import icy.math.SmoothMover;
 import icy.painter.ImageOverlay;
 import icy.painter.Overlay;
+import icy.plugin.interface_.PluginROI;
 import icy.preferences.CanvasPreferences;
 import icy.preferences.XMLPreferences;
+import icy.resource.icon.IcySVGImageIcon;
+import icy.resource.icon.SVGIcon;
 import icy.roi.ROI;
 import icy.roi.ROI2D;
 import icy.roi.ROI3D;
@@ -46,9 +49,11 @@ import icy.sequence.SequenceEvent;
 import icy.system.thread.SingleProcessor;
 import icy.type.rectangle.Rectangle2DUtil;
 import icy.type.rectangle.Rectangle5D;
-import icy.util.*;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.swing.IconFontSwing;
+import icy.util.EventUtil;
+import icy.util.GraphicsUtil;
+import icy.util.ShapeUtil;
+import icy.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
 import plugins.kernel.roi.tool.ROILineCutter;
 import plugins.kernel.roi.tool.ROIMagicWand;
 
@@ -64,16 +69,21 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 // TODO: 23/01/2023 Should be in gui package (extends JPanel)
-public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
-    static final int ICON_TARGET_SIZE = LookAndFeelUtil.getDefaultIconSizeAsInt();
 
-    static final Image ICON_TARGET_BLACK = IconFontSwing.buildImage(GoogleMaterialDesignIcons.ADJUST, ICON_TARGET_SIZE, Color.BLACK);
-    static final Image ICON_TARGET_LIGHT = IconFontSwing.buildImage(GoogleMaterialDesignIcons.ADJUST, ICON_TARGET_SIZE, Color.LIGHT_GRAY);
+/**
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
+ */
+public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
+    static final int ICON_TARGET_SIZE = LookAndFeelUtil.getDefaultIconSize();
+
+    static final Image ICON_TARGET_BLACK = new IcySVGImageIcon(SVGIcon.POINT_SCAN, Color.BLACK).getImage();
+    static final Image ICON_TARGET_LIGHT = new IcySVGImageIcon(SVGIcon.POINT_SCAN, Color.WHITE).getImage();
 
     /**
      * Possible rounded zoom factor : 0.01 --> 100
      */
-    final static double[] zoomRoundedFactors = new double[] {
+    final static double[] zoomRoundedFactors = new double[]{
             0.01d, 0.02d, 0.0333d, 0.05d, 0.075d, 0.1d, 0.15d, 0.2d, 0.25d, 0.333d, 0.5d, 0.66d, 0.75d, 1d,
             1.25d, 1.5d, 1.75d, 2d, 2.5d, 3d, 4d, 5d, 6.6d, 7.5d, 10d, 15d, 20d, 30d, 50d, 66d, 75d, 100d
     };
@@ -130,7 +140,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
     String ROITool;
 
-    public Canvas2D(Viewer viewer) {
+    public Canvas2D(final Viewer viewer) {
         super(viewer);
 
         // all channel visible at once
@@ -147,7 +157,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         // init transform (5 values, log transition type)
         smoothTransform = new Canvas2DSmoothMover(5, SmoothMover.SmoothMoveType.LOG);
         // initials transform values
-        smoothTransform.setValues(new double[] {0d, 0d, 1d, 1d, 0d});
+        smoothTransform.setValues(new double[]{0d, 0d, 1d, 1d, 0d});
         textInfos = null;
         modifyingZoom = false;
         modifyingRotation = false;
@@ -155,7 +165,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
         smoothTransform.addListener(new MultiSmoothMover.MultiSmoothMoverAdapter() {
             @Override
-            public void valueChanged(MultiSmoothMover source, int index, double newValue, int pourcent) {
+            public void valueChanged(final MultiSmoothMover source, final int index, final double newValue, final int pourcent) {
                 // notify canvas transformation has changed
                 switch (index) {
                     case TRANS_X:
@@ -181,7 +191,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             }
 
             @Override
-            public void moveEnded(MultiSmoothMover source, int index, double value) {
+            public void moveEnded(final MultiSmoothMover source, final int index, final double value) {
                 // just to allow correct set mouse position update
                 valueChanged(source, index, value, 100);
 
@@ -257,7 +267,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         panel.add(canvasMap, BorderLayout.CENTER);
 
         // fit canvas toggle
-        zoomFitCanvasButton = new IcyButton(GoogleMaterialDesignIcons.ZOOM_OUT_MAP);
+        zoomFitCanvasButton = new IcyButton(SVGIcon.ZOOM_OUT_MAP);
         //zoomFitCanvasButton.setSelected(preferences.getBoolean(ID_FIT_CANVAS, false));
         zoomFitCanvasButton.setFocusable(false);
         //zoomFitCanvasButton.setToolTipText("Keep image fitting to window size");
@@ -294,7 +304,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    public void customizeToolbar(JToolBar toolBar) {
+    public void customizeToolbar(final JToolBar toolBar) {
         toolBar.addSeparator();
         toolBar.add(zoomFitCanvasButton);
         // toolBar.addSeparator();
@@ -310,7 +320,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     /**
      * Change zoom so image fit in canvas view dimension
      */
-    public void fitImageToCanvas(boolean smooth) {
+    public void fitImageToCanvas(final boolean smooth) {
         // search best ratio
         final Point2D.Double s = getFitImageToCanvasScale();
 
@@ -333,7 +343,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    public void centerOnImage(double x, double y) {
+    public void centerOnImage(final double x, final double y) {
         // get point on canvas
         final Point pt = imageToCanvas(x, y);
         final int canvasCenterX = getCanvasSizeX() / 2;
@@ -359,22 +369,22 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    public void centerOn(Rectangle region) {
+    public void centerOn(final Rectangle region) {
         final Rectangle2D imageRectMax = Rectangle2DUtil.getScaledRectangle(new Rectangle(getImageSizeX(), getImageSizeY()), 1.5d, true);
 
-        Rectangle2D adjusted = Rectangle2DUtil.getScaledRectangle(region, 2d, true);
+        final Rectangle2D adjusted = Rectangle2DUtil.getScaledRectangle(region, 2d, true);
 
         // get undersize
-        double wu = Math.max(0, 100d - adjusted.getWidth());
-        double hu = Math.max(0, 100d - adjusted.getHeight());
+        final double wu = Math.max(0, 100d - adjusted.getWidth());
+        final double hu = Math.max(0, 100d - adjusted.getHeight());
 
         // enlarge a bit to have at least a 100x100 rectangle
         if ((wu > 0) || (hu > 0))
             ShapeUtil.enlarge(adjusted, wu, hu, true);
 
         // get overflow on original image size
-        double wo = Math.max(0, adjusted.getWidth() - imageRectMax.getWidth());
-        double ho = Math.max(0, adjusted.getHeight() - imageRectMax.getHeight());
+        final double wo = Math.max(0, adjusted.getWidth() - imageRectMax.getWidth());
+        final double ho = Math.max(0, adjusted.getHeight() - imageRectMax.getHeight());
 
         // reduce a bit to clip on max image size
         if ((wo > 0) || (ho > 0))
@@ -411,8 +421,8 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     /**
      * Set transform
      */
-    protected void setTransform(int tx, int ty, double sx, double sy, double rot, boolean smooth) {
-        final double[] values = new double[] {tx, ty, sx, sy, rot};
+    protected void setTransform(final int tx, final int ty, final double sx, final double sy, final double rot, final boolean smooth) {
+        final double[] values = new double[]{tx, ty, sx, sy, rot};
 
         // modify all at once for synchronized change events
         if (smooth)
@@ -427,7 +437,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * @param smooth
      *        use smooth transition
      */
-    public void setOffset(int x, int y, boolean smooth) {
+    public void setOffset(final int x, final int y, final boolean smooth) {
         final int adjX = Math.min(getMaxOffsetX(), Math.max(getMinOffsetX(), x));
         final int adjY = Math.min(getMaxOffsetY(), Math.max(getMinOffsetY(), y));
 
@@ -443,7 +453,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * @param smooth
      *        use smooth transition
      */
-    public void setScale(double factor, boolean center, boolean smooth) {
+    public void setScale(final double factor, final boolean center, final boolean smooth) {
         // first we center mouse position if requested
         if (center)
             centerMouseOnImage();
@@ -462,7 +472,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * @param smooth
      *        use smooth transition
      */
-    public void setScale(double x, double y, boolean mouseCentered, boolean smooth) {
+    public void setScale(final double x, final double y, final boolean mouseCentered, final boolean smooth) {
         final Sequence seq = getSequence();
         // there is no way of changing scale if no sequence
         if (seq == null)
@@ -509,7 +519,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * @param smooth
      *        use smooth transition
      */
-    public void setScale(double x, double y, boolean smooth) {
+    public void setScale(final double x, final double y, final boolean smooth) {
         setTransform((int) smoothTransform.getDestValue(TRANS_X), (int) smoothTransform.getDestValue(TRANS_Y), x, y, smoothTransform.getDestValue(ROT), smooth);
     }
 
@@ -521,7 +531,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * @deprecated use setScale(...) instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public void setZoom(float zoom) {
+    public void setZoom(final float zoom) {
         // set mouse position on image center
         centerMouseOnImage();
         // then apply zoom
@@ -566,7 +576,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     /**
      * Sets the background color enabled state
      */
-    public void setBackgroundColorEnabled(boolean value) {
+    public void setBackgroundColorEnabled(final boolean value) {
         getCanvasSettingPanel().setBackgroundColorEnabled(value);
     }
 
@@ -580,7 +590,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     /**
      * Sets the background color
      */
-    public void setBackgroundColor(Color color) {
+    public void setBackgroundColor(final Color color) {
         getCanvasSettingPanel().setBackgroundColor(color);
     }
 
@@ -597,7 +607,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     /**
      * Sets the automatic 'fit to canvas' state
      */
-    public void setFitToCanvas(boolean value) {
+    public void setFitToCanvas(final boolean value) {
         if (zoomFitCanvasButton != null)
             zoomFitCanvasButton.setSelected(value);
     }
@@ -686,38 +696,38 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    protected void setPositionCInternal(int c) {
+    protected void setPositionCInternal(final int c) {
         // not supported in this canvas, C should stay at -1
     }
 
     @Override
-    protected void setOffsetXInternal(int value) {
+    protected void setOffsetXInternal(final int value) {
         // this will automatically call the offsetChanged() event
         smoothTransform.setValue(TRANS_X, Math.min(getMaxOffsetX(), Math.max(getMinOffsetX(), value)));
     }
 
     @Override
-    protected void setOffsetYInternal(int value) {
+    protected void setOffsetYInternal(final int value) {
         // this will automatically call the offsetChanged() event
         smoothTransform.setValue(TRANS_Y, Math.min(getMaxOffsetY(), Math.max(getMinOffsetY(), value)));
     }
 
     @Override
-    protected void setScaleXInternal(double value) {
+    protected void setScaleXInternal(final double value) {
         // this will automatically call the scaledChanged() event
         smoothTransform.setValue(SCALE_X, value);
         canvasView.curScaleX = value;
     }
 
     @Override
-    protected void setScaleYInternal(double value) {
+    protected void setScaleYInternal(final double value) {
         // this will automatically call the scaledChanged() event
         smoothTransform.setValue(SCALE_Y, value);
         canvasView.curScaleY = value;
     }
 
     @Override
-    protected void setRotationZInternal(double value) {
+    protected void setRotationZInternal(final double value) {
         // this will automatically call the rotationChanged() event
         smoothTransform.setValue(ROT, value);
     }
@@ -728,12 +738,12 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * @param smooth
      *        use smooth transition
      */
-    public void setRotation(double value, boolean smooth) {
+    public void setRotation(final double value, final boolean smooth) {
         setTransform((int) smoothTransform.getDestValue(TRANS_X), (int) smoothTransform.getDestValue(TRANS_Y), smoothTransform.getDestValue(SCALE_X), smoothTransform.getDestValue(SCALE_Y), value, smooth);
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {
+    public void keyPressed(final KeyEvent e) {
         // send to overlays
         super.keyPressed(e);
 
@@ -755,7 +765,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                     break;
 
                 case KeyEvent.VK_LEFT:
-                    int amount = EventUtil.isMenuControlDown(e, true) ? 5 : 1;
+                    final int amount = EventUtil.isMenuControlDown(e, true) ? 5 : 1;
                     if (isLoopingInT()) {
                         setPositionT((getPositionT() - amount + getImageSizeT()) % getImageSizeT());
                     }
@@ -766,7 +776,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                     break;
 
                 case KeyEvent.VK_RIGHT:
-                    int amount1 = EventUtil.isMenuControlDown(e, true) ? 5 : 1;
+                    final int amount1 = EventUtil.isMenuControlDown(e, true) ? 5 : 1;
                     if (isLoopingInT()) {
                         setPositionT((getPositionT() + amount1) % getImageSizeT());
                     }
@@ -853,7 +863,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {
+    public void keyReleased(final KeyEvent e) {
         // send to overlays
         super.keyReleased(e);
 
@@ -873,10 +883,8 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     /**
      * Return an ARGB BufferedImage form of the image located at position [T, Z, C].<br>
      * If the 'out' image is not compatible with wanted image, a new image is returned.
-     *
-     * @throws InterruptedException
      */
-    public BufferedImage getARGBImage(int t, int z, int c, BufferedImage out) throws InterruptedException {
+    public BufferedImage getARGBImage(final int t, final int z, final int c, final BufferedImage out) throws InterruptedException {
         final IcyBufferedImage img = getImage(t, z, c);
 
         if (img != null) {
@@ -894,7 +902,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    public BufferedImage getRenderedImage(int t, int z, int c, boolean cv) throws InterruptedException {
+    public BufferedImage getRenderedImage(final int t, final int z, final int c, final boolean cv) throws InterruptedException {
         final Sequence seq = getSequence();
         if (seq == null)
             return null;
@@ -979,20 +987,18 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use <code>getRenderedImage(t, z, -1, true)</code> instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage getRenderedImage(int t, int z) throws InterruptedException {
+    public BufferedImage getRenderedImage(final int t, final int z) throws InterruptedException {
         return getRenderedImage(t, z, -1, true);
     }
 
     /**
-     * @throws InterruptedException
      * @deprecated Use <code>getRenderedImage(t, z, -1, canvasView)</code> instead.
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public BufferedImage getRenderedImage(int t, int z, boolean canvasView) throws InterruptedException {
+    public BufferedImage getRenderedImage(final int t, final int z, final boolean canvasView) throws InterruptedException {
         return getRenderedImage(t, z, -1, canvasView);
     }
 
@@ -1000,7 +1006,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * Synchronize views of specified list of canvas
      */
     @Override
-    protected void synchronizeCanvas(List<IcyCanvas> canvasList, IcyCanvasEvent event, boolean processAll) {
+    protected void synchronizeCanvas(final List<IcyCanvas> canvasList, final IcyCanvasEvent event, final boolean processAll) {
         final IcyCanvasEvent.IcyCanvasEventType type = event.getType();
         final DimensionId dim = event.getDim();
 
@@ -1013,7 +1019,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                     final int z = getPositionZ();
                     final int t = getPositionT();
 
-                    for (IcyCanvas cnv : canvasList) {
+                    for (final IcyCanvas cnv : canvasList) {
                         if (z != -1)
                             cnv.setPositionZ(z);
                         if (t != -1)
@@ -1021,7 +1027,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                     }
                 }
                 else {
-                    for (IcyCanvas cnv : canvasList) {
+                    for (final IcyCanvas cnv : canvasList) {
                         final int pos = getPosition(dim);
                         if (pos != -1)
                             cnv.setPosition(dim, pos);
@@ -1038,11 +1044,11 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                     final double sX = getScaleX();
                     final double sY = getScaleY();
 
-                    for (IcyCanvas cnv : canvasList)
+                    for (final IcyCanvas cnv : canvasList)
                         ((Canvas2D) cnv).setScale(sX, sY, false);
                 }
                 else {
-                    for (IcyCanvas cnv : canvasList)
+                    for (final IcyCanvas cnv : canvasList)
                         cnv.setScale(dim, getScale(dim));
                 }
             }
@@ -1052,11 +1058,11 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                 if (processAll || (dim == DimensionId.NULL)) {
                     final double rot = getRotationZ();
 
-                    for (IcyCanvas cnv : canvasList)
+                    for (final IcyCanvas cnv : canvasList)
                         ((Canvas2D) cnv).setRotation(rot, false);
                 }
                 else {
-                    for (IcyCanvas cnv : canvasList)
+                    for (final IcyCanvas cnv : canvasList)
                         cnv.setRotation(dim, getRotation(dim));
                 }
             }
@@ -1068,11 +1074,11 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                     final int offX = getOffsetX();
                     final int offY = getOffsetY();
 
-                    for (IcyCanvas cnv : canvasList)
+                    for (final IcyCanvas cnv : canvasList)
                         ((Canvas2D) cnv).setOffset(offX, offY, false);
                 }
                 else {
-                    for (IcyCanvas cnv : canvasList)
+                    for (final IcyCanvas cnv : canvasList)
                         cnv.setOffset(dim, getOffset(dim));
                 }
             }
@@ -1088,11 +1094,11 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                     final double mouseImagePosX = getMouseImagePosX();
                     final double mouseImagePosY = getMouseImagePosY();
 
-                    for (IcyCanvas cnv : canvasList)
+                    for (final IcyCanvas cnv : canvasList)
                         ((Canvas2D) cnv).setMouseImagePos(mouseImagePosX, mouseImagePosY);
                 }
                 else {
-                    for (IcyCanvas cnv : canvasList)
+                    for (final IcyCanvas cnv : canvasList)
                         cnv.setMouseImagePos(dim, getMouseImagePos(dim));
                 }
             }
@@ -1100,7 +1106,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    public void changed(IcyCanvasEvent event) {
+    public void changed(final IcyCanvasEvent event) {
         super.changed(event);
 
         // not yet initialized
@@ -1165,7 +1171,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    protected void lutChanged(int component) {
+    protected void lutChanged(final int component) {
         super.lutChanged(component);
 
         // refresh image
@@ -1176,7 +1182,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    protected void layerChanged(CanvasLayerEvent event) {
+    protected void layerChanged(final CanvasLayerEvent event) {
         super.layerChanged(event);
 
         // layer visibility property modified ?
@@ -1190,7 +1196,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    protected void sequenceOverlayChanged(Overlay overlay, SequenceEvent.SequenceEventType type) {
+    protected void sequenceOverlayChanged(final Overlay overlay, final SequenceEvent.SequenceEventType type) {
         super.sequenceOverlayChanged(overlay, type);
 
         // layer refresh
@@ -1201,7 +1207,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    protected void sequenceDataChanged(IcyBufferedImage image, SequenceEvent.SequenceEventType type) {
+    protected void sequenceDataChanged(final IcyBufferedImage image, final SequenceEvent.SequenceEventType type) {
         super.sequenceDataChanged(image, type);
 
         // refresh image
@@ -1228,11 +1234,11 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    public void toolChanged(String tool) {
+    public void toolChanged(final @NotNull PluginROI plugin) {
+        final String tool = plugin.getROIClassName();
         final Sequence seq = getSequence();
 
-
-        if (tool != null && !tool.isEmpty()) {
+        if (!tool.isBlank()) {
             ROITool = tool;
             setLayersVisible(true);
         }
@@ -1247,14 +1253,14 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      */
     protected class Canvas2DImageOverlay extends IcyCanvasImageOverlay {
         @Override
-        public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas) {
+        public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
             if (g == null)
                 return;
 
             final List<Canvas2D.CanvasView.ImageCache.ImageCacheTile> tiles = canvasView.imageCache.getImageAsTiles();
 
             // draw image
-            for (Canvas2D.CanvasView.ImageCache.ImageCacheTile tile : tiles)
+            for (final Canvas2D.CanvasView.ImageCache.ImageCacheTile tile : tiles)
                 g.drawImage(tile.image, tile.rect.x, tile.rect.y, null);
 
             if (tiles.isEmpty()) {
@@ -1352,7 +1358,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         /**
          * Transform a CanvasMap point in CanvasView point
          */
-        public Point getCanvasPosition(Point p) {
+        public Point getCanvasPosition(final Point p) {
             // transform map coordinate to canvas coordinate
             return imageToCanvas(getImagePosition(p));
         }
@@ -1360,7 +1366,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         /**
          * Transforms a Image point in CanvasView point.
          */
-        public Point getCanvasPosition(Point2D.Double p) {
+        public Point getCanvasPosition(final Point2D.Double p) {
             // transform image coordinate to canvas coordinate
             return imageToCanvas(p);
         }
@@ -1368,14 +1374,14 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         /**
          * Transforms a CanvasMap point in Image point.
          */
-        public Point2D.Double getImagePosition(Point p) {
+        public Point2D.Double getImagePosition(final Point p) {
             final AffineTransform trans = getImageTransform();
 
             try {
                 // get image coordinates
                 return (Point2D.Double) trans.inverseTransform(p, new Point2D.Double());
             }
-            catch (Exception ecx) {
+            catch (final Exception ecx) {
                 return new Point2D.Double(0, 0);
             }
         }
@@ -1384,7 +1390,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             return mapStartDragPos != null;
         }
 
-        protected void updateDrag(InputEvent e) {
+        protected void updateDrag(final InputEvent e) {
             // not moving --> exit
             if (!mapMoving)
                 return;
@@ -1407,7 +1413,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             // no need to update mouse canvas position here as it stays at center
         }
 
-        protected void updateRot(InputEvent e) {
+        protected void updateRot(final InputEvent e) {
             // not rotating --> exit
             if (!mapRotating)
                 return;
@@ -1429,8 +1435,8 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
             // get angle in radian between last and current mouse position
             // relative to image center
-            double newAngle = Math.atan2(newMouseDeltaPosY, newMouseDeltaPosX);
-            double lastAngle = Math.atan2(lastMouseDeltaPosY, lastMouseDeltaPosX);
+            final double newAngle = Math.atan2(newMouseDeltaPosY, newMouseDeltaPosX);
+            final double lastAngle = Math.atan2(lastMouseDeltaPosY, lastMouseDeltaPosX);
 
             // inverse rotation
             double angle = lastAngle - newAngle;
@@ -1452,7 +1458,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseDragged(MouseEvent e) {
+        public void mouseDragged(final MouseEvent e) {
             canvasView.handlingMouseMoveEvent = true;
             try {
                 mouseMapPos = new Point(e.getPoint());
@@ -1492,7 +1498,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseMoved(MouseEvent e) {
+        public void mouseMoved(final MouseEvent e) {
             mouseMapPos = new Point(e.getPoint());
 
             // send to canvas view with converted canvas position
@@ -1500,12 +1506,12 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseClicked(MouseEvent e) {
+        public void mouseClicked(final MouseEvent e) {
             // nothing here
         }
 
         @Override
-        public void mousePressed(MouseEvent e) {
+        public void mousePressed(final MouseEvent e) {
             // start drag mouse position
             mapStartDragPos = (Point) e.getPoint().clone();
             // store canvas parameters
@@ -1526,7 +1532,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                         // consume event
                         e.consume();
                     }
-                    catch (Exception ecx) {
+                    catch (final Exception ecx) {
                         // ignore
                     }
                 }
@@ -1534,7 +1540,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseReleased(MouseEvent e) {
+        public void mouseReleased(final MouseEvent e) {
             // assume end dragging
             mapStartDragPos = null;
             mapRotating = false;
@@ -1544,17 +1550,17 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseEntered(MouseEvent e) {
+        public void mouseEntered(final MouseEvent e) {
             // nothing here
         }
 
         @Override
-        public void mouseExited(MouseEvent e) {
+        public void mouseExited(final MouseEvent e) {
             // nothing here
         }
 
         @Override
-        public void mouseWheelMoved(MouseWheelEvent e) {
+        public void mouseWheelMoved(final MouseWheelEvent e) {
             // we first center image to mouse position
             final AffineTransform trans = getImageTransform();
 
@@ -1567,7 +1573,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                     // update new canvas position
                     setMousePos(imageToCanvas(imagePoint.getX(), imagePoint.getY()));
                 }
-                catch (Exception ecx) {
+                catch (final Exception ecx) {
                     // ignore
                 }
             }
@@ -1577,20 +1583,20 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                 e.consume();
         }
 
-        public void keyPressed(KeyEvent e) {
+        public void keyPressed(final KeyEvent e) {
             // just for the shift key state change
             updateDrag(e);
             updateRot(e);
         }
 
-        public void keyReleased(KeyEvent e) {
+        public void keyReleased(final KeyEvent e) {
             // just for the shift key state change
             updateDrag(e);
             updateRot(e);
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
+        protected void paintComponent(final Graphics g) {
             super.paintComponent(g);
 
             final AffineTransform trans = getImageTransform();
@@ -1601,7 +1607,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                 // final BufferedImage img = canvasView.imageCache.getImage();
 
                 // draw image
-                for (CanvasView.ImageCache.ImageCacheTile tile : tiles) {
+                for (final CanvasView.ImageCache.ImageCacheTile tile : tiles) {
                     trans.translate(tile.rect.getX(), tile.rect.getY());
                     g2.drawImage(tile.image, trans, null);
                     trans.translate(-tile.rect.getX(), -tile.rect.getY());
@@ -1663,20 +1669,20 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
     public class CanvasView extends JPanel implements ActionListener, MouseWheelListener, MouseListener, MouseMotionListener {
         public class ImageCache implements Runnable {
-            public class ImageCacheTile {
+            public static class ImageCacheTile {
                 final static int TILE_SIZE = 2048;
 
                 public Rectangle rect;
                 public BufferedImage image;
 
-                public ImageCacheTile(Rectangle r, BufferedImage img) {
+                public ImageCacheTile(final Rectangle r, final BufferedImage img) {
                     super();
 
                     rect = new Rectangle(r);
                     image = img;
                 }
 
-                public ImageCacheTile(Rectangle r) {
+                public ImageCacheTile(final Rectangle r) {
                     this(r, new BufferedImage(r.width, r.height, BufferedImage.TYPE_INT_ARGB));
                 }
             }
@@ -1733,7 +1739,6 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             }
 
             /**
-             * @throws InterruptedException
              * @deprecated Caching is done as tiles now so it's better to use {@link #getImageAsTiles()}
              */
             @Deprecated(since = "2.4.3", forRemoval = true)
@@ -1776,7 +1781,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
                             int indNewTiles = 0;
                             // compare with previous tile list
-                            for (ImageCacheTile tile : tiles) {
+                            for (final ImageCacheTile tile : tiles) {
                                 if (indNewTiles < len) {
                                     final Rectangle oldRect = tile.rect;
                                     final Rectangle newRect = newTiles.get(indNewTiles).intersection(imgRect);
@@ -1800,7 +1805,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
                             // rebuild images
                             final LUT l = getLut();
-                            for (ImageCacheTile tile : tiles) {
+                            for (final ImageCacheTile tile : tiles) {
                                 final IcyBufferedImage icyTile = IcyBufferedImageUtil.getSubImage(icyImage, tile.rect);
 
                                 if (icyTile != null) {
@@ -1810,7 +1815,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                                         // convert to buffered image
                                         tile.image = IcyBufferedImageUtil.toBufferedImage(icyTile, tile.image, l);
                                     }
-                                    catch (InterruptedException e) {
+                                    catch (final InterruptedException e) {
                                         // shouldn't happen here
                                     }
                                 }
@@ -1819,7 +1824,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
                         notEnoughMemory = false;
                     }
-                    catch (OutOfMemoryError e) {
+                    catch (final OutOfMemoryError e) {
                         notEnoughMemory = true;
                     }
                 }
@@ -1884,7 +1889,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             zoomInfoAlphaMover.setUpdateDelay(20);
             zoomInfoAlphaMover.addListener(new SmoothMover.SmoothMoverAdapter() {
                 @Override
-                public void valueChanged(SmoothMover source, double newValue, int pourcent) {
+                public void valueChanged(final SmoothMover source, final double newValue, final int pourcent) {
                     // just repaint
                     repaint();
                 }
@@ -1894,7 +1899,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             rotationInfoAlphaMover.setUpdateDelay(20);
             rotationInfoAlphaMover.addListener(new SmoothMover.SmoothMoverAdapter() {
                 @Override
-                public void valueChanged(SmoothMover source, double newValue, int pourcent) {
+                public void valueChanged(final SmoothMover source, final double newValue, final int pourcent) {
                     // just repaint
                     repaint();
                 }
@@ -1910,7 +1915,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
             addComponentListener(new ComponentAdapter() {
                 @Override
-                public void componentResized(ComponentEvent e) {
+                public void componentResized(final ComponentEvent e) {
                     final Dimension newSize = getSize();
                     int extX = 0;
                     int extY = 0;
@@ -1970,12 +1975,11 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         /**
          * Returns the internal {@link ImageCache} object.
          */
-        public ImageCache getImageCache()
-        {
+        public ImageCache getImageCache() {
             return imageCache;
         }
 
-        protected void updateDrag(boolean control, boolean shift) {
+        protected void updateDrag(final boolean control, final boolean shift) {
             if (!moving)
                 return;
 
@@ -1995,7 +1999,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             translate(startOffset, delta, control);
         }
 
-        protected void translate(Point startPos, Point delta, boolean control) {
+        protected void translate(final Point startPos, final Point delta, final boolean control) {
             final Point2D.Double deltaD;
 
             // control button down
@@ -2012,7 +2016,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             setOffset((int) Math.round(startPos.x + deltaD.x), (int) Math.round(startPos.y + deltaD.y), true);
         }
 
-        protected void updateRot(boolean control, boolean shift) {
+        protected void updateRot(final boolean control, final boolean shift) {
             if (!rotating)
                 return;
 
@@ -2030,8 +2034,8 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
             // get angle in radian between last and current mouse position
             // relative to image center
-            double newAngle = Math.atan2(newMouseDeltaPosY, newMouseDeltaPosX);
-            double lastAngle = Math.atan2(lastMouseDeltaPosY, lastMouseDeltaPosX);
+            final double newAngle = Math.atan2(newMouseDeltaPosY, newMouseDeltaPosX);
+            final double lastAngle = Math.atan2(lastMouseDeltaPosY, lastMouseDeltaPosX);
 
             double angle = newAngle - lastAngle;
 
@@ -2056,7 +2060,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
          * Return true if event should be consumed.
          */
         // TODO: 23/01/2023 Always returns false
-        boolean onMouseClicked(boolean consumed, int clickCount, boolean left, boolean right, boolean control) {
+        boolean onMouseClicked(final boolean consumed, final int clickCount, final boolean left, final boolean right, final boolean control) {
             if (!consumed) {
                 // nothing yet
             }
@@ -2068,7 +2072,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
          * Internal canvas process on mousePressed event.<br>
          * Return true if event should be consumed.
          */
-        boolean onMousePressed(boolean consumed, boolean left, boolean right, boolean control, boolean shift) {
+        boolean onMousePressed(final boolean consumed, final boolean left, final boolean right, final boolean control, final boolean shift) {
             // not yet consumed
             if (!consumed) {
                 final Sequence seq = getSequence();
@@ -2154,7 +2158,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
          * Internal canvas process on mouseReleased event.<br>
          * Return true if event should be consumed.
          */
-        boolean onMouseReleased(boolean consumed, boolean left, boolean right, boolean control) {
+        boolean onMouseReleased(final boolean consumed, final boolean left, final boolean right, final boolean control) {
             // area selection ?
             if (areaSelection) {
                 final Sequence seq = getSequence();
@@ -2171,7 +2175,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
                         seq.beginUpdate();
                         try {
-                            for (ROI roi : rois)
+                            for (final ROI roi : rois)
                                 roi.setSelected(roi.intersects(area5d));
                         }
                         finally {
@@ -2202,7 +2206,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
          * Internal canvas process on mouseMove event.<br>
          * Always processed, no consume here.
          */
-        void onMousePositionChanged(Point pos) {
+        void onMousePositionChanged(final Point pos) {
             handlingMouseMoveEvent = true;
             try {
                 // update mouse position
@@ -2217,7 +2221,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
          * Internal canvas process on mouseDragged event.<br>
          * Return true if event should be consumed.
          */
-        boolean onMouseDragged(boolean consumed, Point pos, boolean left, boolean right, boolean control, boolean shift) {
+        boolean onMouseDragged(final boolean consumed, final Point pos, final boolean left, final boolean right, final boolean control, final boolean shift) {
             if (!consumed) {
                 // canvas get the drag event ?
                 if (isDragging()) {
@@ -2262,7 +2266,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
          * Internal canvas process on mouseWheelMoved event.<br>
          * Return true if event should be consumed.
          */
-        boolean onMouseWheelMoved(boolean consumed, int wheelRotation, boolean left, boolean right, boolean control, boolean shift) {
+        boolean onMouseWheelMoved(final boolean consumed, final int wheelRotation, final boolean left, final boolean right, final boolean control, final boolean shift) {
             if (!consumed) {
                 if (!isDragging()) {
                     // as soon we manipulate the image with mouse, we want to be focused
@@ -2326,7 +2330,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseClicked(MouseEvent e) {
+        public void mouseClicked(final MouseEvent e) {
             // send mouse event to overlays first
             Canvas2D.this.mouseClick(e);
 
@@ -2336,7 +2340,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mousePressed(MouseEvent e) {
+        public void mousePressed(final MouseEvent e) {
             // send mouse event to overlays first
             Canvas2D.this.mousePressed(e);
 
@@ -2346,7 +2350,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseReleased(MouseEvent e) {
+        public void mouseReleased(final MouseEvent e) {
             // send mouse event to overlays first
             Canvas2D.this.mouseReleased(e);
 
@@ -2356,7 +2360,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseEntered(MouseEvent e) {
+        public void mouseEntered(final MouseEvent e) {
             hasMouseFocus = true;
 
             // send mouse event to overlays
@@ -2366,7 +2370,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseExited(MouseEvent e) {
+        public void mouseExited(final MouseEvent e) {
             hasMouseFocus = false;
 
             // send mouse event to overlays
@@ -2376,7 +2380,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseMoved(MouseEvent e) {
+        public void mouseMoved(final MouseEvent e) {
             // process first without consume (update mouse canvas position)
             onMousePositionChanged(e.getPoint());
 
@@ -2385,7 +2389,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseDragged(MouseEvent e) {
+        public void mouseDragged(final MouseEvent e) {
             // process first without consume (update mouse canvas position)
             onMousePositionChanged(e.getPoint());
 
@@ -2398,7 +2402,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void mouseWheelMoved(MouseWheelEvent e) {
+        public void mouseWheelMoved(final MouseWheelEvent e) {
             // send mouse event to overlays
             Canvas2D.this.mouseWheelMoved(e);
 
@@ -2407,7 +2411,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                 e.consume();
         }
 
-        public void keyPressed(KeyEvent e) {
+        public void keyPressed(final KeyEvent e) {
             final boolean control = EventUtil.isControlDown(e);
             final boolean shift = EventUtil.isShiftDown(e);
 
@@ -2416,7 +2420,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             updateRot(control, shift);
         }
 
-        public void keyReleased(KeyEvent e) {
+        public void keyReleased(final KeyEvent e) {
             final boolean control = EventUtil.isControlDown(e);
             final boolean shift = EventUtil.isShiftDown(e);
 
@@ -2428,7 +2432,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         /**
          * Draw specified image layer and others layers on specified {@link Graphics2D} object.
          */
-        void drawLayer(Graphics2D g, Sequence seq, Layer layer) {
+        void drawLayer(final Graphics2D g, final Sequence seq, final Layer layer) {
             if (layer.isVisible()) {
                 final float opacity = layer.getOpacity();
 
@@ -2444,18 +2448,16 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         /**
          * Draw specified image layer and others layers on specified {@link Graphics2D} object.
          */
-        void drawImageAndLayers(Graphics2D g, Layer imageLayer) {
+        void drawImageAndLayers(final Graphics2D g, final Layer imageLayer) {
             final Sequence seq = getSequence();
             final Layer defaultImageLayer = getImageLayer();
 
             // global layer visible switch for canvas
-            if (isLayersVisible())
-            {
+            if (isLayersVisible()) {
                 final List<Layer> layers = getLayers(true);
 
                 // draw them in inverse order to have first painter event at top
-                for (int i = layers.size() - 1; i >= 0; i--)
-                {
+                for (int i = layers.size() - 1; i >= 0; i--) {
                     final Layer layer = layers.get(i);
 
                     // replace the default image layer by the specified one
@@ -2471,7 +2473,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
+        protected void paintComponent(final Graphics g) {
             super.paintComponent(g);
 
             final int w = getCanvasSizeX();
@@ -2591,7 +2593,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             canvasMap.repaint();
         }
 
-        public void drawTextBottomRight(Graphics2D g, String text, float alpha) {
+        public void drawTextBottomRight(final Graphics2D g, final String text, final float alpha) {
             final Rectangle2D rect = GraphicsUtil.getStringBounds(g, text);
             final int w = (int) rect.getWidth();
             final int h = (int) rect.getHeight();
@@ -2606,7 +2608,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             g.drawString(text, x + 4, y + 2 + h);
         }
 
-        public void drawTextTopRight(Graphics2D g, String text, float alpha) {
+        public void drawTextTopRight(final Graphics2D g, final String text, final float alpha) {
             final Rectangle2D rect = GraphicsUtil.getStringBounds(g, text);
             final int w = (int) rect.getWidth();
             final int h = (int) rect.getHeight();
@@ -2621,7 +2623,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             g.drawString(text, x + 4, y + 2 + h);
         }
 
-        public void drawTextCenter(Graphics2D g, String text, float alpha) {
+        public void drawTextCenter(final Graphics2D g, final String text, final float alpha) {
             final Rectangle2D rect = GraphicsUtil.getStringBounds(g, text);
             final int w = (int) rect.getWidth();
             final int h = (int) rect.getHeight();
@@ -2676,7 +2678,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                     final List<ROI> selectedRois = seq.getSelectedROIs();
 
                     // search if we are overriding ROI control points
-                    for (ROI selectedRoi : selectedRois) {
+                    for (final ROI selectedRoi : selectedRois) {
                         final Layer layer = getLayer(selectedRoi);
 
                         if ((layer != null) && layer.isVisible() && selectedRoi.hasSelectedPoint()) {
@@ -2698,7 +2700,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         /**
          * Refresh in sometime
          */
-        public void refreshLater(int milli) {
+        public void refreshLater(final int milli) {
             refreshTimer.setInitialDelay(milli);
             refreshTimer.start();
         }
@@ -2706,7 +2708,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         /**
          * Display zoom message for the specified amount of time (in ms)
          */
-        public void setZoomMessage(String value, int delay) {
+        public void setZoomMessage(final String value, final int delay) {
             zoomMessage = value;
 
             if (StringUtil.isEmpty(value)) {
@@ -2723,7 +2725,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         /**
          * Display rotation message for the specified amount of time (in ms)
          */
-        public void setRotationMessage(String value, int delay) {
+        public void setRotationMessage(final String value, final int delay) {
             rotationMessage = value;
 
             if (StringUtil.isEmpty(value)) {
@@ -2786,7 +2788,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
             final Object source = e.getSource();
 
             if (source == refreshTimer)
@@ -2806,12 +2808,12 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * @author Stephane
      */
     static class Canvas2DSmoothMover extends MultiSmoothMover {
-        public Canvas2DSmoothMover(int size, SmoothMover.SmoothMoveType type) {
+        public Canvas2DSmoothMover(final int size, final SmoothMover.SmoothMoveType type) {
             super(size, type);
         }
 
         @Override
-        public void moveTo(int index, double value) {
+        public void moveTo(final int index, final double value) {
             final double v;
 
             // format value for radian 0..2PI range
@@ -2828,7 +2830,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void moveTo(double[] values) {
+        public void moveTo(final double[] values) {
             final int maxInd = Math.min(values.length, destValues.length);
 
             // first we check we have at least one value which had changed
@@ -2870,7 +2872,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void setValue(int index, double value) {
+        public void setValue(final int index, final double value) {
             final double v;
 
             // format value for radian 0..2PI range
@@ -2887,7 +2889,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        public void setValues(double[] values) {
+        public void setValues(final double[] values) {
             final int maxInd = Math.min(values.length, destValues.length);
 
             for (int index = 0; index < maxInd; index++) {
@@ -2908,7 +2910,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        protected void setCurrentValue(int index, double value, int pourcent) {
+        protected void setCurrentValue(final int index, final double value, final int pourcent) {
             final double v;
 
             // format value for radian 0..2PI range
@@ -2925,16 +2927,15 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
 
         @Override
-        protected void start(int index, long time) {
+        protected void start(final int index, final long time) {
             final double current = currentValues[index];
             final double dest;
 
             if (index == ROT) {
-                double d = destValues[index];
+                final double d = destValues[index];
 
                 // choose shorter path
-                if (Math.abs(d - current) > Math.PI)
-                {
+                if (Math.abs(d - current) > Math.PI) {
                     if (d > Math.PI)
                         dest = d - (Math.PI * 2);
                     else

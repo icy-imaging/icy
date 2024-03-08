@@ -33,9 +33,10 @@ import icy.gui.viewer.Viewer;
 import icy.gui.viewer.ViewerEvent;
 import icy.gui.viewer.ViewerEvent.ViewerEventType;
 import icy.main.Icy;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import icy.system.thread.ThreadUtil;
 import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.ColumnControlButton;
 import org.jdesktop.swingx.table.TableColumnExt;
@@ -144,7 +145,7 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
         gbc_nameFilter.gridy = 0;
         panelNorth.add(nameFilter, gbc_nameFilter);
 
-        tglbtnLayerVisibility = new IcyToggleButton(GoogleMaterialDesignIcons.VISIBILITY_OFF, GoogleMaterialDesignIcons.VISIBILITY);
+        tglbtnLayerVisibility = new IcyToggleButton(new SVGIconPack(SVGIcon.VISIBILITY_OFF, SVGIcon.VISIBILITY));
         tglbtnLayerVisibility.setFocusable(false);
         tglbtnLayerVisibility.setToolTipText("Change visibility for selected layer(s)");
         final GridBagConstraints gbc_tglbtnLayerVisibility = new GridBagConstraints();

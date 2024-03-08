@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -27,8 +27,8 @@ import icy.gui.component.menu.IcyMenuItem;
 import icy.gui.component.menu.IcyRadioButtonMenuItem;
 import icy.gui.util.LookAndFeelUtil;
 import icy.main.Icy;
-import jiconfont.IconCode;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import icy.resource.icon.SVGIcon;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.util.List;
@@ -37,28 +37,24 @@ import java.util.List;
  * @author Thomas Musset
  */
 public final class ApplicationMenuView extends AbstractApplicationMenu {
+    private static final @NotNull ApplicationMenuView instance = new ApplicationMenuView();
 
-    private static ApplicationMenuView instance = null;
-
-    public static synchronized ApplicationMenuView getInstance() {
-        if (instance == null)
-            instance = new ApplicationMenuView();
-
+    public static synchronized @NotNull ApplicationMenuView getInstance() {
         return instance;
     }
 
     private ApplicationMenuView() {
         super("View");
 
-        final IcyMenu menuAppearance = new IcyMenu("Appearance", GoogleMaterialDesignIcons.BRIGHTNESS_MEDIUM);
+        final IcyMenu menuAppearance = new IcyMenu("Appearance", SVGIcon.BRIGHTNESS_MEDIUM);
         add(menuAppearance);
 
         final List<FlatLaf> skins = LookAndFeelUtil.getSkins();
         final String skinName = LookAndFeelUtil.getCurrentSkinName();
         final ButtonGroup groupSkin = new ButtonGroup();
         for (final FlatLaf skin : skins) {
-            final IconCode iconCode = (skin.isDark()) ? GoogleMaterialDesignIcons.BRIGHTNESS_2 : GoogleMaterialDesignIcons.WB_SUNNY;
-            final IcyRadioButtonMenuItem itemLaf = new IcyRadioButtonMenuItem(skin.getName(), iconCode);
+            final SVGIcon svg = (skin.isDark()) ? SVGIcon.DARK_MODE : SVGIcon.LIGHT_MODE;
+            final IcyRadioButtonMenuItem itemLaf = new IcyRadioButtonMenuItem(skin.getName(), svg);
             if (skinName.equals(skin.getName()))
                 itemLaf.setSelected(true);
             itemLaf.addActionListener(e -> LookAndFeelUtil.setSkin(skin));
@@ -68,43 +64,44 @@ public final class ApplicationMenuView extends AbstractApplicationMenu {
 
         addSeparator();
 
-        final IcyCheckBoxMenuItem checkboxitemDetachedMode = new IcyCheckBoxMenuItem("Detached Mode", GoogleMaterialDesignIcons.DASHBOARD);
+        // TODO rework detached mode
+        final IcyCheckBoxMenuItem checkboxitemDetachedMode = new IcyCheckBoxMenuItem("Detached Mode", SVGIcon.DASHBOARD);
         checkboxitemDetachedMode.setSelected(Icy.getMainInterface().isDetachedMode());
         checkboxitemDetachedMode.addActionListener(GeneralActions.detachedModeAction);
         add(checkboxitemDetachedMode);
 
-        final IcyCheckBoxMenuItem checkboxitemStayOnTop = new IcyCheckBoxMenuItem("Stay on Top", GoogleMaterialDesignIcons.VERTICAL_ALIGN_TOP);
+        final IcyCheckBoxMenuItem checkboxitemStayOnTop = new IcyCheckBoxMenuItem("Stay on Top", SVGIcon.VERTICAL_ALIGN_TOP);
         checkboxitemStayOnTop.setSelected(Icy.getMainInterface().isAlwaysOnTop());
         checkboxitemStayOnTop.addActionListener(WindowActions.stayOnTopAction);
         add(checkboxitemStayOnTop);
 
         addSeparator();
 
-        final IcyMenuItem itemSwimmingPoolViewer = new IcyMenuItem("Swimming Pool Viewer...", GoogleMaterialDesignIcons.GROUP_WORK);
+        final IcyMenuItem itemSwimmingPoolViewer = new IcyMenuItem("Swimming Pool Viewer...", SVGIcon.GROUP_WORK);
         itemSwimmingPoolViewer.addActionListener(WindowActions.swimmingPoolAction);
         add(itemSwimmingPoolViewer);
 
         addSeparator();
 
-        final IcyMenu menuOrganizeWindows = new IcyMenu("Organize Windows", GoogleMaterialDesignIcons.WEB);
+        final IcyMenu menuOrganizeWindows = new IcyMenu("Organize Windows", SVGIcon.TV_OPTIONS_INPUT_SETTINGS);
         add(menuOrganizeWindows);
 
-        final IcyMenuItem itemOrganizeGrid = new IcyMenuItem("Grid View", GoogleMaterialDesignIcons.VIEW_MODULE);
+        final IcyMenuItem itemOrganizeGrid = new IcyMenuItem("Grid View", SVGIcon.VIEW_MODULE);
         itemOrganizeGrid.setAccelerator(KeyStroke.getKeyStroke("shift G"));
         itemOrganizeGrid.addActionListener(WindowActions.gridTileAction);
         menuOrganizeWindows.add(itemOrganizeGrid);
 
-        final IcyMenuItem itemOrganizeHorizontal = new IcyMenuItem("Horizontal View", GoogleMaterialDesignIcons.VIEW_AGENDA);
+        final IcyMenuItem itemOrganizeHorizontal = new IcyMenuItem("Horizontal View", SVGIcon.VIEW_STREAM);
         itemOrganizeHorizontal.setAccelerator(KeyStroke.getKeyStroke("shift H"));
         itemOrganizeHorizontal.addActionListener(WindowActions.horizontalTileAction);
         menuOrganizeWindows.add(itemOrganizeHorizontal);
 
-        final IcyMenuItem itemOrganizeVertical = new IcyMenuItem("Vertical View", GoogleMaterialDesignIcons.VIEW_COLUMN);
+        final IcyMenuItem itemOrganizeVertical = new IcyMenuItem("Vertical View", SVGIcon.VIEW_COLUMN);
         itemOrganizeVertical.setAccelerator(KeyStroke.getKeyStroke("shift V"));
         itemOrganizeVertical.addActionListener(WindowActions.verticalTileAction);
         menuOrganizeWindows.add(itemOrganizeVertical);
 
-        final IcyMenuItem itemOrganizeCascade = new IcyMenuItem("Cascade View", GoogleMaterialDesignIcons.VIEW_QUILT);
+        final IcyMenuItem itemOrganizeCascade = new IcyMenuItem("Cascade View", SVGIcon.VIEW_QUILT);
         itemOrganizeCascade.addActionListener(WindowActions.cascadeAction);
         add(itemOrganizeCascade);
     }

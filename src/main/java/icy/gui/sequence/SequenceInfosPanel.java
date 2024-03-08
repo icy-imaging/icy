@@ -1,33 +1,22 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
- * 
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
  * This file is part of Icy.
- * 
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.sequence;
-
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.util.Date;
-
-import javax.swing.*;
 
 import icy.file.FileUtil;
 import icy.gui.component.button.IcyButton;
@@ -36,20 +25,25 @@ import icy.gui.main.ActiveSequenceListener;
 import icy.main.Icy;
 import icy.math.UnitUtil;
 import icy.math.UnitUtil.UnitPrefix;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
-import icy.system.IcyExceptionHandler;
 import icy.system.SystemUtil;
+import icy.system.logging.IcyLogger;
 import icy.system.thread.ThreadUtil;
 import icy.util.DateUtil;
 import icy.util.EventUtil;
 import icy.util.StringUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 
-import java.awt.Font;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.util.Date;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener {
@@ -96,8 +90,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
             final Sequence seq = Icy.getMainInterface().getActiveSequence();
 
             if (seq != null) {
-                final GenericFrame g = new GenericFrame(seq.getName() + " - Metadata",
-                        new SequenceMetadataPanel(seq));
+                final GenericFrame g = new GenericFrame(seq.getName() + " - Metadata", new SequenceMetadataPanel(seq));
 
                 g.addToDesktopPane();
                 g.center();
@@ -111,17 +104,17 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
     }
 
     public void initialize() {
-        GridBagLayout gridBagLayout = new GridBagLayout();
-        gridBagLayout.columnWidths = new int[] {70, 40, 90, 40};
-        gridBagLayout.rowHeights = new int[] {18, 0, 18, 18, 18, 0, 18, 18, 0};
-        gridBagLayout.columnWeights = new double[] {0.0, 1.0, 0.0, 1.0};
-        gridBagLayout.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+        final GridBagLayout gridBagLayout = new GridBagLayout();
+        gridBagLayout.columnWidths = new int[]{70, 40, 90, 40};
+        gridBagLayout.rowHeights = new int[]{18, 0, 18, 18, 18, 0, 18, 18, 0};
+        gridBagLayout.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0};
+        gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         setLayout(gridBagLayout);
 
-        JLabel lbl_name = new JLabel("Name");
+        final JLabel lbl_name = new JLabel("Name");
         lbl_name.setFont(new Font("Tahoma", Font.BOLD, 11));
         lbl_name.setToolTipText("Sequence name");
-        GridBagConstraints gbc_lbl_name = new GridBagConstraints();
+        final GridBagConstraints gbc_lbl_name = new GridBagConstraints();
         gbc_lbl_name.anchor = GridBagConstraints.WEST;
         gbc_lbl_name.fill = GridBagConstraints.VERTICAL;
         gbc_lbl_name.insets = new Insets(0, 0, 5, 5);
@@ -142,7 +135,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         nameField.setBorder(null);
         nameField.setEditable(false);
 
-        GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+        final GridBagConstraints gbc_scrollPane = new GridBagConstraints();
         gbc_scrollPane.fill = GridBagConstraints.BOTH;
         gbc_scrollPane.gridwidth = 3;
         gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
@@ -153,7 +146,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         pathLabel = new JLabel("Path");
         pathLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
         pathLabel.setToolTipText("Sequence file path");
-        GridBagConstraints gbc_pathLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_pathLabel = new GridBagConstraints();
         gbc_pathLabel.fill = GridBagConstraints.VERTICAL;
         gbc_pathLabel.anchor = GridBagConstraints.WEST;
         gbc_pathLabel.insets = new Insets(0, 0, 5, 5);
@@ -175,7 +168,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         pathField.setEditable(false);
         pathField.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(final MouseEvent e) {
                 if (e.isConsumed())
                     return;
 
@@ -183,8 +176,8 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
                     try {
                         SystemUtil.openFolder(FileUtil.getDirectory(pathField.getText()));
                     }
-                    catch (IOException e1) {
-                        IcyExceptionHandler.showErrorMessage(e1, false, false);
+                    catch (final IOException e1) {
+                        IcyLogger.error(SequenceInfosPanel.class, e1, "Unable to open folder: " + pathField.getText());
                     }
 
                     e.consume();
@@ -192,7 +185,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
             }
         });
 
-        GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
+        final GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
         gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
         gbc_scrollPane_1.gridwidth = 3;
         gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
@@ -200,10 +193,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_scrollPane_1.gridy = 1;
         add(pathField, gbc_scrollPane_1);
 
-        JLabel lbl_dim = new JLabel("Dimension");
+        final JLabel lbl_dim = new JLabel("Dimension");
         lbl_dim.setFont(new Font("Tahoma", Font.BOLD, 11));
         lbl_dim.setToolTipText("Size of X, Y, Z and T dimension");
-        GridBagConstraints gbc_lbl_dim = new GridBagConstraints();
+        final GridBagConstraints gbc_lbl_dim = new GridBagConstraints();
         gbc_lbl_dim.anchor = GridBagConstraints.WEST;
         gbc_lbl_dim.fill = GridBagConstraints.VERTICAL;
         gbc_lbl_dim.insets = new Insets(0, 0, 5, 5);
@@ -213,7 +206,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
         dimensionLabel = new JLabel();
         dimensionLabel.setText("---");
-        GridBagConstraints gbc_dimensionLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_dimensionLabel = new GridBagConstraints();
         gbc_dimensionLabel.anchor = GridBagConstraints.WEST;
         gbc_dimensionLabel.gridwidth = 3;
         gbc_dimensionLabel.fill = GridBagConstraints.VERTICAL;
@@ -222,10 +215,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_dimensionLabel.gridy = 2;
         add(dimensionLabel, gbc_dimensionLabel);
 
-        JLabel lbl_channel = new JLabel("Channel");
+        final JLabel lbl_channel = new JLabel("Channel");
         lbl_channel.setFont(new Font("Tahoma", Font.BOLD, 11));
         lbl_channel.setToolTipText("Number of channel");
-        GridBagConstraints gbc_lbl_channel = new GridBagConstraints();
+        final GridBagConstraints gbc_lbl_channel = new GridBagConstraints();
         gbc_lbl_channel.anchor = GridBagConstraints.WEST;
         gbc_lbl_channel.fill = GridBagConstraints.VERTICAL;
         gbc_lbl_channel.insets = new Insets(0, 0, 5, 5);
@@ -235,7 +228,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
         channelLabel = new JLabel();
         channelLabel.setText("---");
-        GridBagConstraints gbc_channelLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_channelLabel = new GridBagConstraints();
         gbc_channelLabel.anchor = GridBagConstraints.WEST;
         gbc_channelLabel.fill = GridBagConstraints.VERTICAL;
         gbc_channelLabel.insets = new Insets(0, 0, 5, 5);
@@ -243,10 +236,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_channelLabel.gridy = 3;
         add(channelLabel, gbc_channelLabel);
 
-        JLabel lblNewLabel = new JLabel("Data type");
+        final JLabel lblNewLabel = new JLabel("Data type");
         lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
         lblNewLabel.setToolTipText("Data type");
-        GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
         gbc_lblNewLabel.fill = GridBagConstraints.VERTICAL;
         gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
         gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
@@ -255,7 +248,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         add(lblNewLabel, gbc_lblNewLabel);
 
         dataTypeLabel = new JLabel("---");
-        GridBagConstraints gbc_dataTypeLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_dataTypeLabel = new GridBagConstraints();
         gbc_dataTypeLabel.fill = GridBagConstraints.VERTICAL;
         gbc_dataTypeLabel.anchor = GridBagConstraints.WEST;
         gbc_dataTypeLabel.insets = new Insets(0, 0, 5, 0);
@@ -263,10 +256,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_dataTypeLabel.gridy = 3;
         add(dataTypeLabel, gbc_dataTypeLabel);
 
-        JLabel lbl_size = new JLabel("Size");
+        final JLabel lbl_size = new JLabel("Size");
         lbl_size.setFont(new Font("Tahoma", Font.BOLD, 11));
         lbl_size.setToolTipText("Size");
-        GridBagConstraints gbc_lbl_size = new GridBagConstraints();
+        final GridBagConstraints gbc_lbl_size = new GridBagConstraints();
         gbc_lbl_size.anchor = GridBagConstraints.WEST;
         gbc_lbl_size.fill = GridBagConstraints.VERTICAL;
         gbc_lbl_size.insets = new Insets(0, 0, 5, 5);
@@ -276,7 +269,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
         sizeLabel = new JLabel();
         sizeLabel.setText("---");
-        GridBagConstraints gbc_sizeLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_sizeLabel = new GridBagConstraints();
         gbc_sizeLabel.anchor = GridBagConstraints.WEST;
         gbc_sizeLabel.fill = GridBagConstraints.VERTICAL;
         gbc_sizeLabel.insets = new Insets(0, 0, 5, 5);
@@ -284,10 +277,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_sizeLabel.gridy = 4;
         add(sizeLabel, gbc_sizeLabel);
 
-        JLabel lblNewLabel_2 = new JLabel("Owner(s)");
+        final JLabel lblNewLabel_2 = new JLabel("Owner(s)");
         lblNewLabel_2.setFont(new Font("Tahoma", Font.BOLD, 11));
         lblNewLabel_2.setToolTipText("Owner(s) user name (person who created, generated or modified the dataset)");
-        GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+        final GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
         gbc_lblNewLabel_2.fill = GridBagConstraints.VERTICAL;
         gbc_lblNewLabel_2.anchor = GridBagConstraints.WEST;
         gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
@@ -296,7 +289,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         add(lblNewLabel_2, gbc_lblNewLabel_2);
 
         userNameLabel = new JLabel("---");
-        GridBagConstraints gbc_userNameLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_userNameLabel = new GridBagConstraints();
         gbc_userNameLabel.anchor = GridBagConstraints.WEST;
         gbc_userNameLabel.fill = GridBagConstraints.VERTICAL;
         gbc_userNameLabel.insets = new Insets(0, 0, 5, 0);
@@ -304,10 +297,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_userNameLabel.gridy = 4;
         add(userNameLabel, gbc_userNameLabel);
 
-        JLabel lblNewLabel_1 = new JLabel("Date");
+        final JLabel lblNewLabel_1 = new JLabel("Date");
         lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 11));
         lblNewLabel_1.setToolTipText("Creation / acquisition date");
-        GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+        final GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
         gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
         gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
         gbc_lblNewLabel_1.gridx = 0;
@@ -315,7 +308,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         add(lblNewLabel_1, gbc_lblNewLabel_1);
 
         creationDateLabel = new JLabel("---");
-        GridBagConstraints gbc_creationDateLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_creationDateLabel = new GridBagConstraints();
         gbc_creationDateLabel.fill = GridBagConstraints.VERTICAL;
         gbc_creationDateLabel.anchor = GridBagConstraints.WEST;
         gbc_creationDateLabel.insets = new Insets(0, 0, 5, 5);
@@ -323,10 +316,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_creationDateLabel.gridy = 5;
         add(creationDateLabel, gbc_creationDateLabel);
 
-        JLabel lbl_time = new JLabel("Time interval");
+        final JLabel lbl_time = new JLabel("Time interval");
         lbl_time.setFont(new Font("Tahoma", Font.BOLD, 11));
         lbl_time.setToolTipText("Time Interval");
-        GridBagConstraints gbc_lbl_time = new GridBagConstraints();
+        final GridBagConstraints gbc_lbl_time = new GridBagConstraints();
         gbc_lbl_time.anchor = GridBagConstraints.WEST;
         gbc_lbl_time.fill = GridBagConstraints.VERTICAL;
         gbc_lbl_time.insets = new Insets(0, 0, 5, 5);
@@ -336,7 +329,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
         resTLabel = new JLabel();
         resTLabel.setText("---");
-        GridBagConstraints gbc_resTLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_resTLabel = new GridBagConstraints();
         gbc_resTLabel.anchor = GridBagConstraints.WEST;
         gbc_resTLabel.fill = GridBagConstraints.VERTICAL;
         gbc_resTLabel.insets = new Insets(0, 0, 5, 0);
@@ -344,10 +337,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_resTLabel.gridy = 5;
         add(resTLabel, gbc_resTLabel);
 
-        JLabel lbl_psx = new JLabel("Pixel size");
+        final JLabel lbl_psx = new JLabel("Pixel size");
         lbl_psx.setFont(new Font("Tahoma", Font.BOLD, 11));
         lbl_psx.setToolTipText("Pixel size for X, Y, Z dimension");
-        GridBagConstraints gbc_lbl_psx = new GridBagConstraints();
+        final GridBagConstraints gbc_lbl_psx = new GridBagConstraints();
         gbc_lbl_psx.anchor = GridBagConstraints.WEST;
         gbc_lbl_psx.fill = GridBagConstraints.VERTICAL;
         gbc_lbl_psx.insets = new Insets(0, 0, 5, 5);
@@ -357,7 +350,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
         resXLabel = new JLabel();
         resXLabel.setText("---");
-        GridBagConstraints gbc_resXLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_resXLabel = new GridBagConstraints();
         gbc_resXLabel.anchor = GridBagConstraints.WEST;
         gbc_resXLabel.fill = GridBagConstraints.VERTICAL;
         gbc_resXLabel.insets = new Insets(0, 0, 5, 5);
@@ -367,7 +360,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
         resYLabel = new JLabel();
         resYLabel.setText("---");
-        GridBagConstraints gbc_resYLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_resYLabel = new GridBagConstraints();
         gbc_resYLabel.anchor = GridBagConstraints.WEST;
         gbc_resYLabel.fill = GridBagConstraints.VERTICAL;
         gbc_resYLabel.insets = new Insets(0, 0, 5, 5);
@@ -377,7 +370,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
         resZLabel = new JLabel();
         resZLabel.setText("---");
-        GridBagConstraints gbc_resZLabel = new GridBagConstraints();
+        final GridBagConstraints gbc_resZLabel = new GridBagConstraints();
         gbc_resZLabel.anchor = GridBagConstraints.WEST;
         gbc_resZLabel.fill = GridBagConstraints.VERTICAL;
         gbc_resZLabel.insets = new Insets(0, 0, 5, 0);
@@ -385,10 +378,10 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_resZLabel.gridy = 6;
         add(resZLabel, gbc_resZLabel);
 
-        editBtn = new IcyButton("Edit", GoogleMaterialDesignIcons.EDIT);
+        editBtn = new IcyButton("Edit", SVGIcon.EDIT);
         editBtn.setToolTipText("Edit sequence properties");
 
-        GridBagConstraints gbc_editBtn = new GridBagConstraints();
+        final GridBagConstraints gbc_editBtn = new GridBagConstraints();
         gbc_editBtn.gridwidth = 2;
         gbc_editBtn.fill = GridBagConstraints.BOTH;
         gbc_editBtn.insets = new Insets(0, 0, 0, 5);
@@ -396,11 +389,11 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_editBtn.gridy = 7;
         add(editBtn, gbc_editBtn);
 
-        detailBtn = new IcyButton("Show metadata", GoogleMaterialDesignIcons.DESCRIPTION);
+        detailBtn = new IcyButton("Show metadata", SVGIcon.DESCRIPTION);
         detailBtn.setText("Metadata");
         detailBtn.setToolTipText("Show all associated metadata informations");
 
-        GridBagConstraints gbc_detailBtn = new GridBagConstraints();
+        final GridBagConstraints gbc_detailBtn = new GridBagConstraints();
         gbc_detailBtn.gridwidth = 2;
         gbc_detailBtn.fill = GridBagConstraints.BOTH;
         gbc_detailBtn.gridx = 2;
@@ -412,7 +405,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         ThreadUtil.runSingle(infosRefresher);
     }
 
-    public void updateInfosInternal(Sequence sequence) {
+    public void updateInfosInternal(final Sequence sequence) {
         if (sequence != null) {
             final int sizeX = sequence.getSizeX();
             final int sizeY = sequence.getSizeY();
@@ -439,9 +432,8 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
             }
             dimensionLabel.setText(sizeX + " x " + sizeY + " x " + sizeZ + " x " + sizeT);
             channelLabel.setText(StringUtil.toString(sizeC));
-            dataTypeLabel.setText(sequence.getDataType_().toString());
-            sizeLabel.setText(UnitUtil.getBytesString(
-                    (double) sizeX * (double) sizeY * sizeZ * sizeT * sizeC * sequence.getDataType_().getSize()));
+            dataTypeLabel.setText(sequence.getDataType().toString());
+            sizeLabel.setText(UnitUtil.getBytesString((double) sizeX * (double) sizeY * sizeZ * sizeT * sizeC * sequence.getDataType().getSize()));
 
             resXLabel.setText(UnitUtil.getBestUnitInMeters(pxSizeX, 2, UnitPrefix.MICRO));
             resYLabel.setText(UnitUtil.getBestUnitInMeters(pxSizeY, 2, UnitPrefix.MICRO));
@@ -456,7 +448,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
 
             // owner user name
             String userNames = "";
-            for (String s : sequence.getUserNames()) {
+            for (final String s : sequence.getUserNames()) {
                 if (StringUtil.isEmpty(userNames))
                     userNames = s;
                 else
@@ -472,7 +464,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
                 channelLabel.setToolTipText(sizeC + " channels");
             else
                 channelLabel.setToolTipText(sizeC + " channel");
-            dataTypeLabel.setToolTipText(sequence.getDataType_().toLongString());
+            dataTypeLabel.setToolTipText(sequence.getDataType().toLongString());
             sizeLabel.setToolTipText(sizeLabel.getText());
 
             resXLabel.setToolTipText("X pixel resolution: " + resXLabel.getText());
@@ -524,17 +516,17 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
     }
 
     @Override
-    public void sequenceActivated(Sequence sequence) {
+    public void sequenceActivated(final Sequence sequence) {
         updateInfos();
     }
 
     @Override
-    public void sequenceDeactivated(Sequence sequence) {
+    public void sequenceDeactivated(final Sequence sequence) {
         // nothing to do here
     }
 
     @Override
-    public void activeSequenceChanged(SequenceEvent event) {
+    public void activeSequenceChanged(final SequenceEvent event) {
         switch (event.getSourceType()) {
             case SEQUENCE_DATA:
             case SEQUENCE_TYPE:

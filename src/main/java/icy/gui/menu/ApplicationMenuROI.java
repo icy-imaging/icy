@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,35 +24,26 @@ import icy.gui.component.menu.IcyMenu;
 import icy.gui.component.menu.IcyMenuItem;
 import icy.main.Icy;
 import icy.plugin.interface_.PluginROI;
-import icy.roi.ROI;
+import icy.resource.icon.SVGIcon;
 import icy.sequence.Sequence;
 import icy.sequence.SequenceEvent;
 import icy.system.thread.ThreadUtil;
-import plugins.kernel.roi.roi2d.plugin.ROI2DAreaPlugin;
-import plugins.kernel.roi.roi2d.plugin.ROI2DPointPlugin;
-import plugins.kernel.roi.roi2d.plugin.ROI2DLinePlugin;
-import plugins.kernel.roi.roi2d.plugin.ROI2DPolyLinePlugin;
-import plugins.kernel.roi.roi2d.plugin.ROI2DRectanglePlugin;
-import plugins.kernel.roi.roi2d.plugin.ROI2DEllipsePlugin;
-import plugins.kernel.roi.roi2d.plugin.ROI2DPolygonPlugin;
+import org.jetbrains.annotations.NotNull;
+import plugins.kernel.roi.roi2d.plugin.*;
 import plugins.kernel.roi.roi3d.plugin.ROI3DLinePlugin;
 import plugins.kernel.roi.roi3d.plugin.ROI3DPointPlugin;
 import plugins.kernel.roi.roi3d.plugin.ROI3DPolyLinePlugin;
 import plugins.kernel.roi.tool.plugin.ROILineCutterPlugin;
 import plugins.kernel.roi.tool.plugin.ROIMagicWandPlugin;
 
-import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
  * @author Thomas Musset
  */
 public final class ApplicationMenuROI extends AbstractApplicationMenu {
-
     private static ApplicationMenuROI instance = null;
 
     public static synchronized ApplicationMenuROI getInstance() {
@@ -64,312 +55,199 @@ public final class ApplicationMenuROI extends AbstractApplicationMenu {
 
     private static final Set<ROIToolChangeListener> listeners = new HashSet<>();
 
-    private final IcyMenuItem item2DTo3D;
-    private final IcyMenuItem item3DTo2D;
-    private final IcyMenuItem itemToEllipse;
-    private final IcyMenuItem itemToShape;
-    private final IcyMenuItem itemToMask;
-    private final IcyMenuItem itemSeparateComponent;
-    private final IcyMenuItem itemSeparateWatershed;
-    private final IcyMenuItem itemROICutter;
-    private final IcyMenuItem itemDilate;
-    private final IcyMenuItem itemErode;
-    private final IcyMenuItem itemDistanceMap;
-    private final IcyMenuItem itemOperationUnion;
-    private final IcyMenuItem itemOperationIntersection;
-    private final IcyMenuItem itemOperationInversion;
-    private final IcyMenuItem itemOperationExclusiveUnion;
-    private final IcyMenuItem itemOperationSubstraction;
+    private final IcyMenu menuDraw2D;
+    private final IcyMenu menuDraw3D;
 
-    private final List<ROI> lastROISelection = new ArrayList<>();
+    private final IcyMenuItem itemMagicWand;
+    private final IcyMenuItem itemROICutter;
 
     private ApplicationMenuROI() {
         super("Region of Interest");
 
-        final IcyMenuItem itemLoadROI = new IcyMenuItem("Load ROI...");
-        itemLoadROI.addActionListener(RoiActions.loadAction);
+        final IcyMenuItem itemLoadROI = new IcyMenuItem(RoiActions.loadAction, SVGIcon.FILE_OPEN);
         add(itemLoadROI);
 
-        final IcyMenuItem itemSaveROI = new IcyMenuItem("Save ROI As...");
-        itemSaveROI.addActionListener(RoiActions.saveAction);
+        final IcyMenuItem itemSaveROI = new IcyMenuItem(RoiActions.saveAction, SVGIcon.SAVE_AS);
         add(itemSaveROI);
 
-        final IcyMenuItem itemExportExcelROI = new IcyMenuItem("Export ROI As Excel...");
-        itemExportExcelROI.addActionListener(RoiActions.xlsExportAction);
+        final IcyMenuItem itemExportExcelROI = new IcyMenuItem(RoiActions.xlsExportAction, SVGIcon.EXPORT_NOTES);
         add(itemExportExcelROI);
 
         addSeparator();
 
-        final IcyMenu menuDraw2D = new IcyMenu("Draw 2D");
+        menuDraw2D = new IcyMenu("Draw 2D", SVGIcon.DRAW_ABSTRACT);
         add(menuDraw2D);
 
-        final IcyMenuItem itemDraw2DPoint = new IcyMenuItem("Point");
+        // FIXME Replace all broken SVG icons
+        final IcyMenuItem itemDraw2DPoint = new IcyMenuItem("Point", SVGIcon.BROKEN_IMAGE);
         addPluginAction(itemDraw2DPoint, new ROI2DPointPlugin());
         menuDraw2D.add(itemDraw2DPoint);
 
-        final IcyMenuItem itemDraw2DLine = new IcyMenuItem("Line");
+        final IcyMenuItem itemDraw2DLine = new IcyMenuItem("Line", SVGIcon.BROKEN_IMAGE);
         addPluginAction(itemDraw2DLine, new ROI2DLinePlugin());
         menuDraw2D.add(itemDraw2DLine);
 
-        final IcyMenuItem itemDraw2DPolyline = new IcyMenuItem("Polyline");
+        final IcyMenuItem itemDraw2DPolyline = new IcyMenuItem("Polyline", SVGIcon.TIMELINE);
         addPluginAction(itemDraw2DPolyline, new ROI2DPolyLinePlugin());
         menuDraw2D.add(itemDraw2DPolyline);
 
         menuDraw2D.addSeparator();
 
-        final IcyMenuItem itemDraw2DRectangle = new IcyMenuItem("Rectangle");
+        final IcyMenuItem itemDraw2DRectangle = new IcyMenuItem("Rectangle", SVGIcon.RECTANGLE);
         addPluginAction(itemDraw2DRectangle, new ROI2DRectanglePlugin());
         menuDraw2D.add(itemDraw2DRectangle);
 
-        final IcyMenuItem itemDraw2DEllipse = new IcyMenuItem("Ellipse");
+        final IcyMenuItem itemDraw2DEllipse = new IcyMenuItem("Ellipse", SVGIcon.CIRCLE);
         addPluginAction(itemDraw2DEllipse, new ROI2DEllipsePlugin());
         menuDraw2D.add(itemDraw2DEllipse);
 
-        final IcyMenuItem itemDraw2DPolygon = new IcyMenuItem("Polygon");
+        final IcyMenuItem itemDraw2DPolygon = new IcyMenuItem("Polygon", SVGIcon.PENTAGON);
         addPluginAction(itemDraw2DPolygon, new ROI2DPolygonPlugin());
         menuDraw2D.add(itemDraw2DPolygon);
 
         menuDraw2D.addSeparator();
 
-        final IcyMenuItem itemDraw2DArea = new IcyMenuItem("Area");
+        final IcyMenuItem itemDraw2DArea = new IcyMenuItem("Area", SVGIcon.STROKE_FULL);
         addPluginAction(itemDraw2DArea, new ROI2DAreaPlugin());
         menuDraw2D.add(itemDraw2DArea);
 
-        final IcyMenu menuDraw3D = new IcyMenu("Draw 3D");
+        menuDraw3D = new IcyMenu("Draw 3D", SVGIcon.DEPLOYED_CODE);
         add(menuDraw3D);
 
-        final IcyMenuItem itemDraw3DPoint = new IcyMenuItem("Dot");
+        final IcyMenuItem itemDraw3DPoint = new IcyMenuItem("Dot", SVGIcon.BROKEN_IMAGE);
         addPluginAction(itemDraw3DPoint, new ROI3DPointPlugin());
         menuDraw3D.add(itemDraw3DPoint);
 
-        final IcyMenuItem itemDraw3DLine = new IcyMenuItem("Line");
+        final IcyMenuItem itemDraw3DLine = new IcyMenuItem("Line", SVGIcon.BROKEN_IMAGE);
         addPluginAction(itemDraw3DLine, new ROI3DLinePlugin());
         menuDraw3D.add(itemDraw3DLine);
 
-        final IcyMenuItem itemDraw3DPolyline = new IcyMenuItem("Polyline");
+        final IcyMenuItem itemDraw3DPolyline = new IcyMenuItem("Polyline", SVGIcon.TIMELINE);
         addPluginAction(itemDraw3DPolyline, new ROI3DPolyLinePlugin());
         menuDraw3D.add(itemDraw3DPolyline);
 
         addSeparator();
 
-        final IcyMenuItem itemMagicWand = new IcyMenuItem("Magic Wand");
+        itemMagicWand = new IcyMenuItem("Magic Wand", SVGIcon.GESTURE_SELECT);
         addPluginAction(itemMagicWand, new ROIMagicWandPlugin());
         add(itemMagicWand);
 
         addSeparator();
 
-        item2DTo3D = new IcyMenuItem("2D to 3D");
-        item2DTo3D.addActionListener(RoiActions.convertTo3DAction);
+        final IcyMenuItem item2DTo3D = new IcyMenuItem(RoiActions.convertTo3DAction, SVGIcon.DEPLOYED_CODE);
         add(item2DTo3D);
 
-        item3DTo2D = new IcyMenuItem("3D to 2D");
-        item3DTo2D.addActionListener(RoiActions.convertTo2DAction);
+        final IcyMenuItem item3DTo2D = new IcyMenuItem(RoiActions.convertTo2DAction, SVGIcon.RECTANGLE);
         add(item3DTo2D);
 
-        itemToEllipse = new IcyMenuItem("Convert to Ellipse");
-        itemToEllipse.addActionListener(RoiActions.convertToEllipseAction);
+        final IcyMenuItem itemToEllipse = new IcyMenuItem(RoiActions.convertToEllipseAction, SVGIcon.CIRCLE);
         add(itemToEllipse);
 
-        itemToShape = new IcyMenuItem("Convert to Shape");
-        itemToShape.addActionListener(RoiActions.convertToShapeAction);
+        final IcyMenuItem itemToShape = new IcyMenuItem(RoiActions.convertToShapeAction, SVGIcon.PENTAGON);
         add(itemToShape);
 
-        itemToMask = new IcyMenuItem("Convert to Mask");
-        itemToMask.addActionListener(RoiActions.convertToMaskAction);
+        final IcyMenuItem itemToMask = new IcyMenuItem(RoiActions.convertToMaskAction, SVGIcon.GRAIN);
         add(itemToMask);
 
         addSeparator();
 
-        itemSeparateComponent = new IcyMenuItem("Separate Component");
-        itemSeparateComponent.addActionListener(RoiActions.separateObjectsAction);
+        final IcyMenuItem itemSeparateComponent = new IcyMenuItem(RoiActions.separateObjectsAction, SVGIcon.BROKEN_IMAGE);
         add(itemSeparateComponent);
 
-        itemSeparateWatershed = new IcyMenuItem("Separate by Watershed");
-        itemSeparateWatershed.addActionListener(RoiActions.computeWatershedSeparation);
+        final IcyMenuItem itemSeparateWatershed = new IcyMenuItem(RoiActions.computeWatershedSeparation, SVGIcon.BROKEN_IMAGE);
         add(itemSeparateWatershed);
 
-        itemROICutter = new IcyMenuItem("ROI Cutter");
+        itemROICutter = new IcyMenuItem("ROI Cutter", SVGIcon.CUT);
         addPluginAction(itemROICutter, new ROILineCutterPlugin());
         add(itemROICutter);
 
         addSeparator();
 
-        itemDilate = new IcyMenuItem("Dilate");
-        itemDilate.addActionListener(RoiActions.dilateObjectsAction);
+        final IcyMenuItem itemDilate = new IcyMenuItem(RoiActions.dilateObjectsAction, SVGIcon.BROKEN_IMAGE);
         add(itemDilate);
 
-        itemErode = new IcyMenuItem("Erode");
-        itemErode.addActionListener(RoiActions.erodeObjectsAction);
+        final IcyMenuItem itemErode = new IcyMenuItem(RoiActions.erodeObjectsAction, SVGIcon.BROKEN_IMAGE);
         add(itemErode);
 
-        itemDistanceMap = new IcyMenuItem("Distance Map");
-        itemDistanceMap.addActionListener(RoiActions.computeDistanceMapAction);
+        final IcyMenuItem itemDistanceMap = new IcyMenuItem(RoiActions.computeDistanceMapAction, SVGIcon.BROKEN_IMAGE);
         add(itemDistanceMap);
 
         addSeparator();
 
-        itemOperationUnion = new IcyMenuItem("Union");
-        itemOperationUnion.addActionListener(RoiActions.boolOrAction);
+        final IcyMenuItem itemOperationUnion = new IcyMenuItem(RoiActions.boolOrAction, SVGIcon.BROKEN_IMAGE);
         add(itemOperationUnion);
 
-        itemOperationIntersection = new IcyMenuItem("Intersection");
-        itemOperationIntersection.addActionListener(RoiActions.boolAndAction);
+        final IcyMenuItem itemOperationIntersection = new IcyMenuItem(RoiActions.boolAndAction, SVGIcon.BROKEN_IMAGE);
         add(itemOperationIntersection);
 
-        itemOperationInversion = new IcyMenuItem("Inversion");
-        itemOperationInversion.addActionListener(RoiActions.boolNotAction);
+        final IcyMenuItem itemOperationInversion = new IcyMenuItem(RoiActions.boolNotAction, SVGIcon.BROKEN_IMAGE);
         add(itemOperationInversion);
 
-        itemOperationExclusiveUnion = new IcyMenuItem("Exclusive Union");
-        itemOperationExclusiveUnion.addActionListener(RoiActions.boolXorAction);
+        final IcyMenuItem itemOperationExclusiveUnion = new IcyMenuItem(RoiActions.boolXorAction, SVGIcon.BROKEN_IMAGE);
         add(itemOperationExclusiveUnion);
 
-        itemOperationSubstraction = new IcyMenuItem("Substraction");
-        itemOperationSubstraction.addActionListener(RoiActions.boolSubtractAction);
+        final IcyMenuItem itemOperationSubstraction = new IcyMenuItem(RoiActions.boolSubtractAction, SVGIcon.BROKEN_IMAGE);
         add(itemOperationSubstraction);
 
         addSeparator();
 
         // FIXME: 17/01/2023 change fill value
-        final IcyMenuItem itemFillInterior = new IcyMenuItem("Fill Interior");
-        itemFillInterior.addActionListener(RoiActions.fillInteriorAction);
+        final IcyMenuItem itemFillInterior = new IcyMenuItem(RoiActions.fillInteriorAction, SVGIcon.BROKEN_IMAGE);
         add(itemFillInterior);
 
-        final  IcyMenuItem itemFillExterior = new IcyMenuItem("Fill Exterior");
-        itemFillExterior.addActionListener(RoiActions.fillExteriorAction);
+        final IcyMenuItem itemFillExterior = new IcyMenuItem(RoiActions.fillExteriorAction, SVGIcon.BROKEN_IMAGE);
         add(itemFillExterior);
 
         reloadROIMenu();
 
         addActiveSequenceListener();
-        addGlobalROIListener();
     }
 
     private void reloadROIMenu() {
         ThreadUtil.invokeLater(() -> {
             final Sequence active = Icy.getMainInterface().getActiveSequence();
 
-            if (active != null) {
-                final List<ROI> rois = active.getSelectedROIs();
-
-                // Do nothing if last selected ROIs are the same than actual selected ROIs (prevent useless processes)
-                if (!lastROISelection.isEmpty() && lastROISelection.equals(rois))
-                    return;
-
-                for (final Component c : getMenuComponents())
-                    c.setEnabled(true);
-
-                // First of all, clear last saved ROIs list
-                lastROISelection.clear();
-
-                if (rois.isEmpty()) {
-                    item2DTo3D.setEnabled(false);
-                    item3DTo2D.setEnabled(false);
-                    itemToEllipse.setEnabled(false);
-                    itemToShape.setEnabled(false);
-                    itemToMask.setEnabled(false);
-                    itemSeparateComponent.setEnabled(false);
-                    itemSeparateWatershed.setEnabled(false);
-                    itemROICutter.setEnabled(false);
-                    itemDilate.setEnabled(false);
-                    itemErode.setEnabled(false);
-                    itemDistanceMap.setEnabled(false);
-                    itemOperationUnion.setEnabled(false);
-                    itemOperationIntersection.setEnabled(false);
-                    itemOperationInversion.setEnabled(false);
-                    itemOperationExclusiveUnion.setEnabled(false);
-                    itemOperationSubstraction.setEnabled(false);
-
-                    return;
-                }
-
-                // Set last selected ROIs list to actual list
-                lastROISelection.addAll(rois);
-
-                boolean contains2D = false;
-                boolean contains3D = false;
-                boolean containsEllipse = false;
-                boolean containsShape = false;
-
-                for (ROI roi : rois) {
-                    if (roi.getDimension() == 2)
-                        contains2D = true;
-                    if (roi.getDimension() == 3)
-                        contains3D = true;
-
-                    // TODO: 23/01/2023 Check if can be converted to shape / ellipse / mask
-                }
-
-                item2DTo3D.setEnabled(contains2D);
-                item3DTo2D.setEnabled(contains3D);
-                itemToEllipse.setEnabled(containsShape);
-                itemToShape.setEnabled(containsEllipse);
-
-
-
-                // TODO: 23/01/2023 Continue reload function
-            }
-            else {
-                // Clear last saved ROIs list
-                lastROISelection.clear();
-
-                // Disable all items
-                for (final Component c : getMenuComponents())
-                    c.setEnabled(false);
-            }
+            menuDraw2D.setEnabled((active != null));
+            menuDraw3D.setEnabled((active != null));
+            itemMagicWand.setEnabled((active != null));
+            itemROICutter.setEnabled((active != null));
         });
     }
 
-    private void addPluginAction(final IcyMenuItem item, final PluginROI plugin) {
-        if (item == null || plugin == null)
-            return;
+    private void addPluginAction(final @NotNull IcyMenuItem item, final @NotNull PluginROI plugin) {
         addAction(item, e -> changeTool(plugin));
     }
 
-    private void addAction(final IcyMenuItem item, final ActionListener listener) {
-        if (item == null)
-            return;
-        for (ActionListener al : item.getActionListeners())
+    private void addAction(final @NotNull IcyMenuItem item, final @NotNull ActionListener listener) {
+        for (final ActionListener al : item.getActionListeners())
             item.removeActionListener(al);
-        if (listener != null)
-            item.addActionListener(listener);
+
+        item.addActionListener(listener);
     }
 
     // TODO: 23/01/2023 Should be global
-    private void changeTool(PluginROI plugin) {
-        if (plugin == null)
-            return;
-        for (ROIToolChangeListener listener : listeners)
-            listener.toolChanged(plugin.getROIClassName());
+    public void changeTool(final @NotNull PluginROI plugin) {
+        for (final ROIToolChangeListener listener : listeners)
+            listener.toolChanged(plugin);
     }
 
     // TODO: 23/01/2023 Should be global listener
-    public static void addListener(ROIToolChangeListener listener) {
+    public static void addListener(final ROIToolChangeListener listener) {
         listeners.add(listener);
     }
 
     // TODO: 23/01/2023 Should be global listener
-    public static void removeListener(ROIToolChangeListener listener) {
+    public static void removeListener(final ROIToolChangeListener listener) {
         listeners.remove(listener);
     }
 
     @Override
-    public void sequenceActivated(Sequence sequence) {
+    public void sequenceActivated(final Sequence sequence) {
         reloadROIMenu();
     }
 
     @Override
-    public void activeSequenceChanged(SequenceEvent event) {
-        reloadROIMenu();
-    }
-
-    @Override
-    public void roiAdded(ROI roi) {
-        reloadROIMenu();
-    }
-
-    @Override
-    public void roiRemoved(ROI roi) {
+    public void activeSequenceChanged(final SequenceEvent event) {
         reloadROIMenu();
     }
 }

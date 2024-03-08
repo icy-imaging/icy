@@ -1,8 +1,7 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
- *
  * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,44 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package icy.gui.component;
 
 import icy.gui.component.button.IcyToggleButton;
 import icy.gui.util.ComponentUtil;
-import icy.gui.util.LookAndFeelUtil;
-import icy.resource.icon.IcyIcon;
+import icy.resource.icon.SVGIcon;
+import icy.resource.icon.SVGIconPack;
 import icy.util.GraphicsUtil;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.geom.Rectangle2D;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class PopupPanel extends JPanel {
-    private class PopupTitlePanel extends IcyToggleButton {
-        @Deprecated(since = "3.0.0", forRemoval = true)
-        public PopupTitlePanel(String text, Image image) {
-            super(text, new IcyIcon(image, LookAndFeelUtil.getDefaultIconSizeAsInt()));
-            setHorizontalAlignment(SwingConstants.LEADING);
-            setFocusPainted(false);
-
-            if (subPopupPanel)
-                ComponentUtil.setFixedHeight(this, getTextSize().height);
-            else
-                ComponentUtil.setFontBold(this);
-
-            addActionListener(e -> refresh());
-        }
-
+    public final class PopupTitlePanel extends IcyToggleButton {
         public PopupTitlePanel(final String text) {
-            super(text, GoogleMaterialDesignIcons.ARROW_DROP_DOWN, GoogleMaterialDesignIcons.ARROW_DROP_UP);
+            super(text, new SVGIconPack(SVGIcon.ARROW_DROP_DOWN, SVGIcon.ARROW_DROP_UP));
 
             setHorizontalAlignment(SwingConstants.LEADING);
             setFocusPainted(false);
@@ -67,21 +49,21 @@ public class PopupPanel extends JPanel {
         }
 
         @Override
-        public void setText(String text) {
+        public void setText(final String text) {
             super.setText(text);
 
             updateIconTextGap();
         }
 
         @Override
-        public void setIcon(Icon defaultIcon) {
+        public void setIcon(final Icon defaultIcon) {
             super.setIcon(defaultIcon);
 
             updateIconTextGap();
         }
 
         @Override
-        public void setBounds(int x, int y, int width, int height) {
+        public void setBounds(final int x, final int y, final int width, final int height) {
             super.setBounds(x, y, width, height);
 
             updateIconTextGap();
@@ -120,7 +102,7 @@ public class PopupPanel extends JPanel {
      * @deprecated Use {@link #PopupPanel(String, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public PopupPanel(String title, int panelHeight, boolean subPopupPanel) {
+    public PopupPanel(final String title, final int panelHeight, final boolean subPopupPanel) {
         this(title, subPopupPanel);
     }
 
@@ -128,7 +110,7 @@ public class PopupPanel extends JPanel {
      * @deprecated Use {@link #PopupPanel(String, boolean)} instead
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
-    public PopupPanel(String title, int panelHeight) {
+    public PopupPanel(final String title, final int panelHeight) {
         this(title, false);
     }
 
@@ -139,7 +121,7 @@ public class PopupPanel extends JPanel {
      * @param panel    internal panel
      * @param subPanel Determine if this is an embedded popup panel or a normal one.
      */
-    public PopupPanel(String title, JPanel panel, boolean subPanel) {
+    public PopupPanel(final String title, final JPanel panel, final boolean subPanel) {
         super();
 
         //topPanel = new PopupTitlePanel(title, ResourceUtil.ICON_PANEL_COLLAPSE);
@@ -165,7 +147,7 @@ public class PopupPanel extends JPanel {
      * @param title Panel title
      * @param panel internal panel
      */
-    public PopupPanel(String title, JPanel panel) {
+    public PopupPanel(final String title, final JPanel panel) {
         this(title, panel, false);
     }
 
@@ -175,14 +157,14 @@ public class PopupPanel extends JPanel {
      * @param title    Panel title
      * @param subPanel Determine if this is an embedded popup panel or a normal one.
      */
-    public PopupPanel(String title, boolean subPanel) {
+    public PopupPanel(final String title, final boolean subPanel) {
         this(title, new JPanel(), subPanel);
     }
 
     /**
      * Create a new popup panel with specified title.
      */
-    public PopupPanel(String title) {
+    public PopupPanel(final String title) {
         this(title, false);
     }
 
@@ -198,7 +180,7 @@ public class PopupPanel extends JPanel {
         return topPanel.getText();
     }
 
-    public void setTitle(String value) {
+    public void setTitle(final String value) {
         topPanel.setText(value);
     }
 
@@ -233,7 +215,7 @@ public class PopupPanel extends JPanel {
     /**
      * @param value the collapsed to set
      */
-    public void setExpanded(boolean value) {
+    public void setExpanded(final boolean value) {
         if (topPanel.isSelected() != value) {
             topPanel.setSelected(value);
             refresh();

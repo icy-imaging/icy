@@ -110,15 +110,16 @@ public class IcyUpdater {
             else
                 checkingFrame = null;
 
-            final String params = PARAM_ARCH + "=" + SystemUtil.getOSArchIdString() + "&" + PARAM_VERSION + "="
-                    + Icy.VERSION.toShortString();
+            final String params = PARAM_ARCH + "=" + SystemUtil.getOSArchIdString() + "&" + PARAM_VERSION + "=" + Icy.VERSION.toShortString();
 
             try {
                 // error (or cancel) while downloading XML ?
                 if (!downloadAndSaveForUpdate(
-                        ApplicationPreferences.getUpdateRepositoryBase()
-                                + ApplicationPreferences.getUpdateRepositoryFile() + "?" + params,
-                        Updater.UPDATE_NAME, checkingFrame, !silent)) {
+                        ApplicationPreferences.getUpdateRepositoryBase() + ApplicationPreferences.getUpdateRepositoryFile() + "?" + params,
+                        Updater.UPDATE_NAME,
+                        checkingFrame,
+                        !silent
+                )) {
                     // remove partially downloaded files
                     FileUtil.delete(Updater.UPDATE_DIRECTORY, true);
                     return;

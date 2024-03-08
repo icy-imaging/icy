@@ -23,7 +23,7 @@ import icy.common.CollapsibleEvent;
 import icy.common.UpdateEventHandler;
 import icy.common.listener.ChangeListener;
 import icy.file.xml.XMLPersistent;
-import icy.gui.inspector.RoisPanel;
+import icy.gui.toolbar.panel.RoisPanel;
 import icy.main.Icy;
 import icy.painter.Overlay;
 import icy.painter.VtkPainter;
@@ -1237,7 +1237,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent {
                         // focused ?
                         if (isFocused()) {
                             // show in ROI panel
-                            final RoisPanel roiPanel = Icy.getMainInterface().getRoisPanel();
+                            final RoisPanel roiPanel = RoisPanel.getInstance();
 
                             if (roiPanel != null) {
                                 roiPanel.scrollTo(ROI.this);
@@ -2914,7 +2914,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent {
      */
     public ROI getCopy() {
         // use XML persistence for cloning
-        final Node node = XMLUtil.createDocument(true).getDocumentElement();
+        final Node node = Objects.requireNonNull(XMLUtil.createDocument(true)).getDocumentElement();
         int retry;
 
         // XML methods sometime fails, better to offer retry (hacky)
@@ -3115,7 +3115,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent {
      */
     public boolean copyFrom(final ROI roi, final boolean copyId) {
         // use XML persistence for cloning
-        final Node node = XMLUtil.createDocument(true).getDocumentElement();
+        final Node node = Objects.requireNonNull(XMLUtil.createDocument(true)).getDocumentElement();
 
         // save operation can fails sometime...
         if (!roi.saveToXML(node))

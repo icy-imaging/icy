@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -21,12 +21,13 @@ package icy.gui.menu;
 import icy.action.GeneralActions;
 import icy.gui.component.menu.IcyMenuItem;
 import icy.network.NetworkUtil;
+import icy.resource.icon.SVGIcon;
 import icy.system.logging.IcyLogger;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 
@@ -45,21 +46,29 @@ public final class ApplicationMenuHelp extends AbstractApplicationMenu {
     private ApplicationMenuHelp() {
         super("Help");
 
-        final IcyMenuItem itemHelp = new IcyMenuItem("Get Help", GoogleMaterialDesignIcons.HELP_OUTLINE);
+        final IcyMenuItem itemHelp = new IcyMenuItem("Get Help", SVGIcon.HELP);
         itemHelp.addActionListener(e -> NetworkUtil.openBrowser(NetworkUtil.IMAGE_SC_ICY_URL));
-        itemHelp.setAccelerator(KeyStroke.getKeyStroke("F1"));
+        itemHelp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
         add(itemHelp);
 
-        final IcyMenuItem itemGettingStarted = new IcyMenuItem("Getting Started", GoogleMaterialDesignIcons.FLAG);
+        final IcyMenuItem itemGettingStarted = new IcyMenuItem("Getting Started", SVGIcon.FLAG);
         itemGettingStarted.addActionListener(e -> NetworkUtil.openBrowser(NetworkUtil.WEBSITE_URL + "trainings/"));
+        itemGettingStarted.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
         add(itemGettingStarted);
 
+        // TODO make shortcuts visible
+        final IcyMenuItem itemShortcuts = new IcyMenuItem("See Shortcuts", SVGIcon.KEYBOARD);
+        itemShortcuts.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
+        itemShortcuts.setEnabled(false);
+        add(itemShortcuts);
+
         // TODO change action to use Icy's internal bug report system ?
-        final IcyMenuItem itemSubmitBug = new IcyMenuItem("Submit a Bug Report", GoogleMaterialDesignIcons.BUG_REPORT);
+        final IcyMenuItem itemSubmitBug = new IcyMenuItem("Submit a Bug Report", SVGIcon.BUG_REPORT);
         itemSubmitBug.addActionListener(e -> NetworkUtil.openBrowser("https://gitlab.pasteur.fr/bia/icy/-/issues"));
+        itemSubmitBug.setEnabled(false);
         add(itemSubmitBug);
 
-        final IcyMenuItem itemShowLog = new IcyMenuItem("Show Log", GoogleMaterialDesignIcons.DESCRIPTION);
+        final IcyMenuItem itemShowLog = new IcyMenuItem("Show Log", SVGIcon.DESCRIPTION);
         itemShowLog.addActionListener(e -> {
             try {
                 final File log = new File("./icy.log");
@@ -74,7 +83,7 @@ public final class ApplicationMenuHelp extends AbstractApplicationMenu {
 
         addSeparator();
 
-        final IcyMenuItem itemUpdate = new IcyMenuItem("Check for Update", GoogleMaterialDesignIcons.FILE_DOWNLOAD);
+        final IcyMenuItem itemUpdate = new IcyMenuItem("Check for Update", SVGIcon.UPDATE);
         itemUpdate.addActionListener(GeneralActions.checkUpdateAction);
         add(itemUpdate);
     }
