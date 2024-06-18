@@ -104,7 +104,7 @@
                             <classpathLayoutType>custom</classpathLayoutType>
                             <!--suppress UnresolvedMavenProperty -->
                             <customClasspathLayout>$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
-                            <mainClass>icy.updater.Main</mainClass>
+                            <mainClass>org.bioimageanalysis.updater.Main</mainClass>
                         </manifest>
                         <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>

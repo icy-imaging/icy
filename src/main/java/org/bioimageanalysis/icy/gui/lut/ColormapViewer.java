@@ -1,0 +1,976 @@
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package org.bioimageanalysis.icy.gui.lut;
+
+import org.bioimageanalysis.icy.gui.action.IcyAbstractAction;
+import org.bioimageanalysis.icy.gui.component.panel.BorderedPanel;
+import org.bioimageanalysis.icy.model.colormap.IcyColorMap;
+import org.bioimageanalysis.icy.model.colormap.IcyColorMap.IcyColorMapType;
+import org.bioimageanalysis.icy.model.colormap.IcyColorMapComponent;
+import org.bioimageanalysis.icy.model.colormap.IcyColorMapComponent.ControlPoint;
+import org.bioimageanalysis.icy.model.lut.LUT.LUTChannel;
+import org.bioimageanalysis.icy.model.lut.LUT.LUTChannelEvent;
+import org.bioimageanalysis.icy.model.lut.LUT.LUTChannelEvent.LUTChannelEventType;
+import org.bioimageanalysis.icy.model.lut.LUT.LUTChannelListener;
+import org.bioimageanalysis.icy.common.color.ColorUtil;
+import org.bioimageanalysis.icy.gui.EventUtil;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import javax.swing.event.EventListenerList;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.EventListener;
+import java.util.List;
+
+/**
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
+ */
+public class ColormapViewer extends BorderedPanel implements MouseListener, MouseMotionListener, LUTChannelListener {
+    private enum ActionType {
+        NULL, MODIFY_CONTROLPOINT
+    }
+
+    public interface ColormapPositionListener extends EventListener {
+        void positionChanged(int index, int value);
+    }
+
+    private static final int POINT_SIZE = 10;
+    private static final int LINE_SIZE = 3;
+
+    private static final int MIN_INDEX = 0;
+    private static final int MAX_INDEX = IcyColorMap.MAX_INDEX;
+    private static final int MIN_VALUE = 0;
+    private static final int MAX_VALUE = IcyColorMap.MAX_LEVEL;
+
+    /**
+     * associated {@link LUTChannel}
+     */
+    private final LUTChannel lutChannel;
+
+    /**
+     * alpha enabled
+     */
+    private boolean alphaEnabled;
+
+    /**
+     * gui
+     */
+    private final JPopupMenu menu;
+
+    /**
+     * listeners
+     */
+    private final EventListenerList colorMapPositionListeners;
+    /**
+     * cached
+     */
+    final IcyColorMap colormap;
+    /**
+     * internals
+     */
+    private float pixToIndexRatio;
+    private float indexToPixRatio;
+    private float pixToValueRatio;
+    private float valueToPixRatio;
+    private ActionType action;
+    private IcyColorMapComponent currentComponent;
+    ControlPoint currentControlPoint;
+
+    public ColormapViewer(final @NotNull LUTChannel lutChannel) {
+        super();
+
+        // dimension (don't change or you will regret !)
+        setMinimumSize(new Dimension(100, 100));
+        setPreferredSize(new Dimension(240, 100));
+        setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+        // faster draw
+        setOpaque(true);
+        // set border
+        setBorder(null);
+        // for the input map
+        setFocusable(true);
+
+        this.lutChannel = lutChannel;
+        colormap = lutChannel.getColorMap();
+
+        colorMapPositionListeners = new EventListenerList();
+
+        // gui
+        menu = new JPopupMenu();
+
+        alphaEnabled = true;
+
+        action = ActionType.NULL;
+        currentComponent = null;
+        currentControlPoint = null;
+
+        // calculate ratios
+        updateRatios();
+
+        // we can't get key events without focus and having focus here is a problem
+        // as we can have externalized windows...
+        // addKeyListener(this);
+
+        // add listeners
+        addMouseListener(this);
+        addMouseMotionListener(this);
+
+        buildActionMap();
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+
+        // add listeners
+        lutChannel.addListener(this);
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+
+        // remove listeners
+        lutChannel.removeListener(this);
+    }
+
+    void buildActionMap() {
+        final InputMap imap = getInputMap(JComponent.WHEN_FOCUSED);
+        final ActionMap amap = getActionMap();
+
+        imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
+
+        amap.put(
+                "delete",
+                new IcyAbstractAction(
+                        "delete",
+                        "Delete control point",
+                        KeyEvent.VK_DELETE,
+                        0
+                ) {
+
+                    @Override
+                    protected boolean doAction(final ActionEvent e) {
+                        // remove current control point
+                        if (currentControlPoint != null) {
+                            currentControlPoint.remove();
+                            return true;
+                        }
+
+                        return false;
+                    }
+                });
+    }
+
+    /**
+     * @return the colormap
+     */
+    public IcyColorMap getColormap() {
+        return colormap;
+    }
+
+    /**
+     * Translate index to pixel
+     */
+    public int indexToPix(final int index) {
+        final int clientX = getClientX();
+        final int pix = (int) (index * indexToPixRatio) + clientX;
+        return Math.max(Math.min(pix, getClientWidth() + clientX), clientX);
+    }
+
+    /**
+     * Translate pixel to index
+     */
+    public int pixToIndex(final int pixel) {
+        final int ind = (int) ((pixel - getClientX()) * pixToIndexRatio);
+        return Math.max(Math.min(ind, MAX_INDEX), MIN_INDEX);
+    }
+
+    /**
+     * Translate value to pixel
+     *
+     * @return pixel for specified value
+     */
+    public int valueToPix(final int value) {
+        final int clientY = getClientY();
+        final int hl = (getClientHeight() - 1) + clientY;
+        final int pix = hl - (int) (value * valueToPixRatio);
+        return Math.max(Math.min(pix, hl), clientY);
+    }
+
+    /**
+     * Translate pixel to value
+     *
+     * @return value for specified pixel
+     */
+    public int pixToValue(final int pixel) {
+        final int hl = (getClientHeight() - 1) + getClientY();
+        final int value = (int) ((hl - pixel) * pixToValueRatio);
+        return Math.max(Math.min(value, MAX_VALUE), MIN_VALUE);
+    }
+
+    @Override
+    protected void paintComponent(final @NotNull Graphics g) {
+        super.paintComponent(g);
+
+        // we do it here as componentResized event occurs after paint (and it is not time consuming)
+        updateRatios();
+
+        final Graphics2D g2 = (Graphics2D) g.create();
+        final int w = getWidth();
+        final int h = getHeight();
+
+        // draw colored background mesh
+        for (int i = 0; i < w; i++) {
+            // get current color from pixel position
+            final Color curColor = getColorFromPixel(i);
+            final Color grayMixed = ColorUtil.mixOver(Color.gray, curColor);
+            final Color whiteMixed = ColorUtil.mixOver(Color.white, curColor);
+
+            for (int j = 0; j < h; j += 16) {
+                // set graphics color
+                if (((i ^ j) & 16) != 0)
+                    g2.setColor(grayMixed);
+                else
+                    g2.setColor(whiteMixed);
+
+                g2.drawLine(i, j, i, j + 15);
+            }
+        }
+
+        if (alphaEnabled)
+            drawColormapBand(g2, colormap.alpha);
+
+        switch (colormap.getType()) {
+            case RGB:
+                drawColormapBand(g2, colormap.blue);
+                drawColormapBand(g2, colormap.green);
+                drawColormapBand(g2, colormap.red);
+                break;
+
+            case GRAY:
+                drawColormapBand(g2, colormap.gray);
+                break;
+        }
+
+        g2.setColor(Color.black);
+        g2.drawRect(0, 0, w - 1, h - 1);
+
+        g2.dispose();
+    }
+
+    private void drawColormapBand(final Graphics2D g, final IcyColorMapComponent band) {
+        drawColormap(g, band);
+        drawControlPoints(g, band);
+    }
+
+    private void drawColormap(final @NotNull Graphics2D g, final @NotNull IcyColorMapComponent cmc) {
+        final Graphics2D g2 = (Graphics2D) g.create();
+
+        // enable anti alias for better rendering
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        GeneralPath polyline = null;
+
+        // the LUT is defined directly, without control points
+        if (cmc.isRawData()) {
+            final int x = getClientX();
+            final int w = getClientWidth();
+
+            polyline = new GeneralPath(Path2D.WIND_EVEN_ODD, w);
+
+            int intensity = valueToPix(cmc.map[pixToIndex(0)]);
+            polyline.moveTo(x, intensity);
+
+            for (int i = x; i < (w + x); i++) {
+                intensity = valueToPix(cmc.map[pixToIndex(i)]);
+                polyline.lineTo(i, intensity);
+            }
+        }
+        // the LUT is defined through control points, use them.
+        else if (cmc.getControlPointCount() > 0) {
+            polyline = new GeneralPath(Path2D.WIND_EVEN_ODD, cmc.getControlPointCount());
+
+            final ArrayList<ControlPoint> controlPoints = cmc.getControlPoints();
+            int x = getPixelPosX(controlPoints.get(0));
+            int y = getPixelPosY(controlPoints.get(0));
+            polyline.moveTo(x, y);
+
+            for (int i = 1; i < cmc.getControlPointCount(); i++) {
+                x = getPixelPosX(controlPoints.get(i));
+                y = getPixelPosY(controlPoints.get(i));
+                polyline.lineTo(x, y);
+            }
+        }
+
+        if (isFocused(cmc))
+            g2.setColor(Color.lightGray);
+        else
+            g2.setColor(Color.black);
+        g2.setStroke(new BasicStroke(LINE_SIZE + 1));
+        g2.draw(polyline);
+
+        g2.setColor(getColor(cmc));
+        g2.setStroke(new BasicStroke(LINE_SIZE));
+        g2.draw(polyline);
+
+        g2.dispose();
+    }
+
+    private void drawControlPoints(final @NotNull Graphics2D g, final @NotNull IcyColorMapComponent cmc) {
+        final Graphics2D g2 = (Graphics2D) g.create();
+
+        // enable anti alias for better rendering
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        final int offset_oval = POINT_SIZE / 2;
+
+        // define color
+        final Color color = getColor(cmc);
+        final List<ControlPoint> controlPoints;
+
+        synchronized (cmc.getControlPoints()) {
+            controlPoints = new ArrayList<>(cmc.getControlPoints());
+        }
+
+        for (final ControlPoint controlPoint : controlPoints) {
+            final int x = getPixelPosX(controlPoint);
+            final int y = getPixelPosY(controlPoint);
+
+            if (controlPoint.isFixed()) {
+                // draw square control point
+                g2.setColor(color);
+                g2.fillRect(x - (offset_oval - 1), y - (offset_oval - 1), POINT_SIZE - 2, POINT_SIZE - 2);
+                g2.setColor(Color.darkGray);
+                g2.drawRect(x - (offset_oval - 1), y - (offset_oval - 1), POINT_SIZE - 2, POINT_SIZE - 2);
+                if (isFocused(controlPoint))
+                    g2.setColor(Color.white);
+                else
+                    g2.setColor(Color.black);
+                //g2.drawRect(x - (offset_oval - 0), y - (offset_oval - 0), POINT_SIZE - 0, POINT_SIZE - 0);
+                g2.drawRect(x - (offset_oval), y - (offset_oval), POINT_SIZE, POINT_SIZE);
+            }
+            else {
+                // draw round control point
+                g2.setColor(color);
+                g2.fillOval(x - (offset_oval - 1), y - (offset_oval - 1), POINT_SIZE - 2, POINT_SIZE - 2);
+                g2.setColor(Color.darkGray);
+                g2.drawOval(x - (offset_oval - 1), y - (offset_oval - 1), POINT_SIZE - 2, POINT_SIZE - 2);
+                if (isFocused(controlPoint))
+                    g2.setColor(Color.white);
+                else
+                    g2.setColor(Color.black);
+                //g2.drawOval(x - (offset_oval - 0), y - (offset_oval - 0), POINT_SIZE - 0, POINT_SIZE - 0);
+                g2.drawOval(x - (offset_oval), y - (offset_oval), POINT_SIZE, POINT_SIZE);
+            }
+        }
+
+        g2.dispose();
+    }
+
+    public boolean isAlphaEnabled() {
+        return alphaEnabled;
+    }
+
+    public void setAlphaEnabled(final boolean value) {
+        if (alphaEnabled != value) {
+            alphaEnabled = value;
+
+            if (!value)
+                colormap.alpha.removeAllControlPoint();
+
+            repaint();
+        }
+    }
+
+    /**
+     * set current controller or control point
+     */
+    public void setCurrentElements(final IcyColorMapComponent cmc, final ControlPoint cp) {
+        if (currentControlPoint != cp) {
+            currentControlPoint = cp;
+            repaint();
+        }
+
+        if (currentComponent != cmc) {
+            currentComponent = cmc;
+            repaint();
+        }
+
+        final int cursor;
+
+        if ((cmc != null) || (cp != null))
+            cursor = Cursor.HAND_CURSOR;
+        else
+            cursor = Cursor.DEFAULT_CURSOR;
+
+        // set cursor only only if different
+        if (getCursor().getType() != cursor)
+            setCursor(new Cursor(cursor));
+    }
+
+    private boolean isFocused(final IcyColorMapComponent cmc) {
+        return (cmc != null) && (currentComponent == cmc);
+    }
+
+    private boolean isFocused(final ControlPoint cp) {
+        return (cp != null) && (currentControlPoint == cp);
+    }
+
+    /**
+     * return the final color for specified index
+     */
+    public Color getColor(final int index) {
+        return colormap.getColor(index);
+    }
+
+    /**
+     * get color of specified band
+     */
+    public Color getColor(final IcyColorMapComponent cmc) {
+        if (cmc == colormap.red)
+            return Color.red;
+        if (cmc == colormap.green)
+            return Color.green;
+        if (cmc == colormap.blue)
+            return Color.blue;
+        if (cmc == colormap.gray)
+            return Color.gray;
+        if (cmc == colormap.alpha)
+            return Color.white;
+
+        return Color.black;
+    }
+
+    /**
+     * return the final color for specified pixel position
+     */
+    public Color getColorFromPixel(final int pixel) {
+        return getColor(pixToIndex(pixel));
+    }
+
+    /**
+     * update ratios for data <--> pix conversion
+     */
+    private void updateRatios() {
+        final int w = getClientWidth();
+        final int h = getClientHeight();
+
+        if (w <= 0) {
+            indexToPixRatio = 0f;
+            pixToIndexRatio = 0f;
+        }
+        else {
+            indexToPixRatio = (float) (w - 1) / (float) (IcyColorMap.SIZE - 1);
+            if (indexToPixRatio != 0f)
+                pixToIndexRatio = 1f / indexToPixRatio;
+            else
+                pixToIndexRatio = 0f;
+        }
+
+        if (h <= 0) {
+            valueToPixRatio = 0f;
+            pixToValueRatio = 0f;
+        }
+        else {
+            valueToPixRatio = (float) (h - 1) / (float) (IcyColorMap.MAX_LEVEL);
+            if (valueToPixRatio != 0f)
+                pixToValueRatio = 1f / valueToPixRatio;
+            else
+                pixToValueRatio = 0f;
+        }
+    }
+
+    // /**
+    // * Check if point is over any control point
+    // *
+    // * @param pos
+    // * point
+    // * @return boolean
+    // */
+    // private boolean isOverControlPoint(Point pos)
+    // {
+    // boolean result = false;
+    // final IcyColorMapType type = colormap.getType();
+    //
+    // // check only if alpha enabled
+    // if (alphaEnabled)
+    // result = result || isOverControlPoint(colormap.alpha, pos);
+    //
+    // // test according to display order (ARGB)
+    // if (type == IcyColorMapType.RGB)
+    // result = result || isOverControlPoint(colormap.red, pos) ||
+    // isOverControlPoint(colormap.green, pos)
+    // || isOverControlPoint(colormap.blue, pos);
+    // if (type == IcyColorMapType.GRAY)
+    // result = result || isOverControlPoint(colormap.gray, pos);
+    //
+    // return result;
+    // }
+
+    // /**
+    // * Check if point is over any control point from this band
+    // *
+    // * @param pos
+    // * point
+    // * @return boolean
+    // */
+    // private boolean isOverControlPoint(IcyColorMapComponent cmc, Point pos)
+    // {
+    // for (ControlPoint cp : cmc.getControlPoints())
+    // if (isOverlapped(cp, pos))
+    // return true;
+    //
+    // return false;
+    // }
+
+    /**
+     * Check if point is over any point in colormap
+     *
+     * @param pos point
+     * @return boolean
+     */
+    public boolean isOverlapped(final @NotNull IcyColorMapComponent cmc, final @NotNull Point pos) {
+        final int index_min = Math.max(0, pixToIndex(pos.x - LINE_SIZE));
+        final int index_max = Math.min(IcyColorMap.MAX_INDEX, pixToIndex(pos.x + LINE_SIZE));
+
+        for (int ind = index_min; ind < index_max; ind++)
+            if (Point2D.distance(pos.x, pos.y, indexToPix(ind), valueToPix(cmc.map[ind])) <= (LINE_SIZE + 1))
+                return true;
+
+        return false;
+    }
+
+    /**
+     * Return true if pixel (x, y) is over the control point
+     *
+     * @param p point
+     * @return boolean
+     */
+    public boolean isOverlapped(final ControlPoint cp, final Point p) {
+        return getDistance(cp, p) <= (POINT_SIZE / 2f);
+    }
+
+    /**
+     * Return distance between control point and the specified point
+     *
+     * @param p point
+     * @return boolean
+     */
+    public double getDistance(final @NotNull ControlPoint cp, final @NotNull Point p) {
+        return Point2D.distance(p.x, p.y, indexToPix(cp.getIndex()), valueToPix(cp.getValue()));
+    }
+
+    /**
+     * Set position from a pixel position
+     */
+    public void setPixelPosition(final @NotNull ControlPoint cp, final int x, final int y) {
+        cp.setPosition(pixToIndex(x), pixToValue(y));
+    }
+
+    /**
+     * Get X pixel position
+     *
+     * @return X pixel position
+     */
+    public int getPixelPosX(final @NotNull ControlPoint cp) {
+        return indexToPix(cp.getIndex());
+    }
+
+    /**
+     * Get Y pixel position
+     *
+     * @return Y pixel position
+     */
+    public int getPixelPosY(final @NotNull ControlPoint cp) {
+        return valueToPix(cp.getValue());
+    }
+
+    /**
+     * Find the overlapped colormap band by specified point
+     *
+     * @param pos point
+     * @return ColormapController
+     */
+    private IcyColorMapComponent getOverlappedColormapController(final Point pos) {
+        final IcyColorMapType type = colormap.getType();
+
+        // test according to display order (ARGB)
+        if (type == IcyColorMapType.RGB) {
+            if (isOverlapped(colormap.red, pos))
+                return colormap.red;
+            if (isOverlapped(colormap.green, pos))
+                return colormap.green;
+            if (isOverlapped(colormap.blue, pos))
+                return colormap.blue;
+        }
+        if (type == IcyColorMapType.GRAY)
+            if (isOverlapped(colormap.gray, pos))
+                return colormap.gray;
+
+        // check only if alpha enabled
+        if (alphaEnabled)
+            if (isOverlapped(colormap.alpha, pos))
+                return colormap.alpha;
+
+        return null;
+    }
+
+    /**
+     * Find the closest overlapped control point by specified point
+     *
+     * @param pos point
+     * @return ControlPoint
+     */
+    private ControlPoint getClosestOverlappedControlPoint(final Point pos) {
+        ControlPoint point;
+        final IcyColorMapType type = colormap.getType();
+
+        // test according to display order (RGBA)
+        if (type == IcyColorMapType.RGB) {
+            point = getClosestOverlappedControlPoint(colormap.red, pos);
+            if (point != null)
+                return point;
+            point = getClosestOverlappedControlPoint(colormap.green, pos);
+            if (point != null)
+                return point;
+            point = getClosestOverlappedControlPoint(colormap.blue, pos);
+            if (point != null)
+                return point;
+        }
+        if (type == IcyColorMapType.GRAY) {
+            point = getClosestOverlappedControlPoint(colormap.gray, pos);
+            if (point != null)
+                return point;
+        }
+
+        // check only if alpha enabled
+        if (alphaEnabled) {
+            point = getClosestOverlappedControlPoint(colormap.alpha, pos);
+            return point;
+        }
+
+        return null;
+    }
+
+    /**
+     * Find the closest overlapped control point by specified point
+     *
+     * @param pos point
+     * @return ControlPoint
+     */
+    private ControlPoint getClosestOverlappedControlPoint(final IcyColorMapComponent cmc, final Point pos) {
+        final List<ControlPoint> overlapped = new ArrayList<>();
+
+        // add all overlapped control points to the list
+        for (final ControlPoint point : cmc.getControlPoints())
+            if (isOverlapped(point, pos))
+                overlapped.add(point);
+
+        final int size = overlapped.size();
+
+        // we have at least one overlapped control point ?
+        if (size > 0) {
+            // find the closest from the specified position
+            ControlPoint closestPoint = overlapped.get(0);
+            double minDist = getDistance(closestPoint, pos);
+
+            for (int i = 1; i < size; i++) {
+                final ControlPoint currentPoint = overlapped.get(i);
+                final double curDist = getDistance(currentPoint, pos);
+
+                if (curDist < minDist) {
+                    closestPoint = currentPoint;
+                    minDist = curDist;
+                }
+            }
+
+            return closestPoint;
+        }
+
+        return null;
+    }
+
+    /**
+     * Set a control point to specified index and value
+     *
+     * @param pos position
+     */
+    ControlPoint setControlPoint(final @NotNull IcyColorMapComponent comp, final @NotNull Point pos) {
+        return comp.setControlPoint(pixToIndex(pos.x), pixToValue(pos.y));
+    }
+
+    /**
+     * show popup menu
+     */
+    private void showPopupMenu(final Point pos) {
+        // rebuild menu
+        menu.removeAll();
+
+        // keep a copy of current control point
+        final ControlPoint cp = currentControlPoint;
+
+        if (cp != null) {
+            // fixed control point --> no popup menu
+            if (cp.isFixed())
+                return;
+
+            final JMenuItem removeItem = new JMenuItem("remove (Shift + Click)");
+
+            removeItem.addActionListener(e -> {
+                // remove the control point
+                cp.remove();
+            });
+
+            menu.add(removeItem);
+        }
+        else {
+            final IcyColorMapType type = colormap.getType();
+
+            if (type == IcyColorMapType.GRAY) {
+                final JMenuItem addCPItem = new JMenuItem("add Gray point");
+
+                addCPItem.addActionListener(e -> {
+                    // add gray control point
+                    setControlPoint(colormap.gray, pos);
+                });
+
+                menu.add(addCPItem);
+            }
+            if (type == IcyColorMapType.RGB) {
+                final JMenuItem addCRPItem = new JMenuItem("add Red point");
+                final JMenuItem addCGPItem = new JMenuItem("add Green point");
+                final JMenuItem addCBPItem = new JMenuItem("add Blue point");
+
+                addCRPItem.addActionListener(e -> {
+                    // add red control point
+                    setControlPoint(colormap.red, pos);
+                });
+                addCGPItem.addActionListener(e -> {
+                    // add green control point
+                    setControlPoint(colormap.green, pos);
+                });
+                addCBPItem.addActionListener(e -> {
+                    // add blue control point
+                    setControlPoint(colormap.blue, pos);
+                });
+
+                menu.add(addCRPItem);
+                menu.add(addCGPItem);
+                menu.add(addCBPItem);
+            }
+
+            if (alphaEnabled) {
+                final JMenuItem addAlphaCPItem = new JMenuItem("add Alpha point");
+
+                addAlphaCPItem.addActionListener(e -> {
+                    // add alpha control point
+                    setControlPoint(colormap.alpha, pos);
+                });
+
+                menu.add(addAlphaCPItem);
+            }
+        }
+
+        menu.pack();
+        menu.validate();
+
+        // display menu
+        menu.show(this, pos.x, pos.y);
+    }
+
+    /**
+     * update current controller and control point from mouse position
+     */
+    private void updateCurrentElements(final Point pos) {
+        final IcyColorMapComponent cmc;
+        // by default we search for an overlapped control point
+        final ControlPoint cp = getClosestOverlappedControlPoint(pos);
+
+        // if no overlapped control point we search for overlapped controller
+        if (cp == null)
+            cmc = getOverlappedColormapController(pos);
+        else
+            cmc = null;
+
+        // define current elements
+        setCurrentElements(cmc, cp);
+    }
+
+    /**
+     * update colormap position info
+     */
+    private void updateColormapPositionInfo(final Point pos) {
+        final ControlPoint cp;
+        final int index;
+        final int value;
+
+        if (action != ActionType.NULL)
+            cp = currentControlPoint;
+        else
+            cp = getClosestOverlappedControlPoint(pos);
+
+        if (cp != null) {
+            index = cp.getIndex();
+            value = cp.getValue();
+        }
+        else {
+            index = pixToIndex(pos.x);
+            value = pixToValue(pos.y);
+        }
+
+        // setToolTipText("<html>" + "index : " + index + "<br>" + "value : " + value);
+
+        colormapPositionChanged(index, value);
+    }
+
+    /**
+     * process on colormap change
+     */
+    public void onColormapChanged() {
+        // repaint the colormap
+        repaint();
+    }
+
+    /**
+     * Add a listener
+     */
+    public void addColormapPositionListener(final ColormapPositionListener listener) {
+        colorMapPositionListeners.add(ColormapPositionListener.class, listener);
+    }
+
+    /**
+     * Remove a listener
+     */
+    public void removeColormapPositionListener(final ColormapPositionListener listener) {
+        colorMapPositionListeners.remove(ColormapPositionListener.class, listener);
+    }
+
+    /**
+     * mouse position on colormap info changed
+     */
+    public void colormapPositionChanged(final int index, final int value) {
+        for (final ColormapPositionListener listener : colorMapPositionListeners.getListeners(ColormapPositionListener.class))
+            listener.positionChanged(index, value);
+    }
+
+    @Override
+    public void lutChannelChanged(final @NotNull LUTChannelEvent e) {
+        if (e.getType() == LUTChannelEventType.COLORMAP_CHANGED)
+            onColormapChanged();
+    }
+
+    @Override
+    public void mouseClicked(final MouseEvent e) {
+        // nothing to do here
+    }
+
+    @Override
+    public void mouseEntered(final MouseEvent e) {
+        // // get the focus while mouse is on the component
+        // setFocusable(true);
+        // requestFocus();
+        //
+        // repaint();
+
+        // KeyboardFocusManager.getCurrentKeyboardFocusManager().downFocusCycle(this);
+    }
+
+    @Override
+    public void mouseExited(final MouseEvent e) {
+        // clear position info
+        colormapPositionChanged(-1, -1);
+        // unfocus if no action
+        if (action == ActionType.NULL)
+            setCurrentElements(null, null);
+
+        // KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent(this);
+
+        // // remove focus
+        // setFocusable(false);
+        //
+        // // set focus back to last active viewer
+        // final Viewer viewer = Icy.getMainInterface().getActiveViewer();
+        // if (viewer != null)
+        // viewer.requestFocus();
+        //
+        // repaint();
+    }
+
+    @Override
+    public void mousePressed(final @NotNull MouseEvent e) {
+        final Point pos = e.getPoint();
+
+        if (EventUtil.isLeftMouseButton(e)) {
+            // we have a selected control point ?
+            if (currentControlPoint != null) {
+                // Shift pressed --> remove control point
+                if (EventUtil.isShiftDown(e))
+                    currentControlPoint.remove();
+                    // else we start modification
+                else
+                    action = ActionType.MODIFY_CONTROLPOINT;
+            }
+            // we have a selected controller ?
+            else if (currentComponent != null) {
+                action = ActionType.MODIFY_CONTROLPOINT;
+                // add a new control point to the controller which become the active control point
+                setCurrentElements(null, setControlPoint(currentComponent, pos));
+            }
+        }
+        else if (EventUtil.isRightMouseButton(e)) {
+            showPopupMenu(pos);
+        }
+    }
+
+    @Override
+    public void mouseReleased(final MouseEvent e) {
+        if (EventUtil.isLeftMouseButton(e)) {
+            action = ActionType.NULL;
+            updateCurrentElements(e.getPoint());
+        }
+    }
+
+    @Override
+    public void mouseDragged(final @NotNull MouseEvent e) {
+        final Point pos = e.getPoint();
+
+        switch (action) {
+            case MODIFY_CONTROLPOINT:
+                setPixelPosition(currentControlPoint, pos.x, pos.y);
+                break;
+        }
+
+        updateColormapPositionInfo(pos);
+    }
+
+    @Override
+    public void mouseMoved(final @NotNull MouseEvent e) {
+        final Point pos = e.getPoint();
+
+        updateCurrentElements(pos);
+        updateColormapPositionInfo(pos);
+    }
+}

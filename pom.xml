@@ -137,7 +137,7 @@
                             </customClasspathLayout>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>icy.main.Icy</mainClass>
+                            <mainClass>org.bioimageanalysis.icy.Icy</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Class-Path>ij/ij.jar</Class-Path>
@@ -248,6 +248,11 @@
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-poi</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-snakeyaml</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>

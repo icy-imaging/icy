@@ -1,0 +1,1427 @@
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.bioimageanalysis.icy.model.colormap;
+
+import org.bioimageanalysis.icy.common.color.ColorUtil;
+import org.bioimageanalysis.icy.common.event.CollapsibleEvent;
+import org.bioimageanalysis.icy.common.event.UpdateEventHandler;
+import org.bioimageanalysis.icy.common.listener.ChangeListener;
+import org.bioimageanalysis.icy.io.FileUtil;
+import org.bioimageanalysis.icy.io.xml.XMLPersistent;
+import org.bioimageanalysis.icy.io.xml.XMLPersistentHelper;
+import org.bioimageanalysis.icy.io.xml.XMLUtil;
+import org.bioimageanalysis.icy.model.colormap.IcyColorMapEvent.IcyColorMapEventType;
+import org.w3c.dom.Node;
+
+import javax.swing.event.EventListenerList;
+import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
+ */
+public class IcyColorMap implements ChangeListener, XMLPersistent {
+    public enum IcyColorMapType {
+        RGB, GRAY, ALPHA
+    }
+
+    private static final String ID_TYPE = "type";
+    private static final String ID_NAME = "name";
+    private static final String ID_ENABLED = "enabled";
+    private static final String ID_RED = "red";
+    private static final String ID_GREEN = "green";
+    private static final String ID_BLUE = "blue";
+    private static final String ID_GRAY = "gray";
+    private static final String ID_ALPHA = "alpha";
+
+    /**
+     * define the wanted colormap bits resolution (never change it)
+     */
+    public static final int COLORMAP_BITS = 8;
+    public static final int MAX_LEVEL = (1 << COLORMAP_BITS) - 1;
+
+    /**
+     * define colormap size
+     */
+    public static final int SIZE = 256;
+    public static final int MAX_INDEX = SIZE - 1;
+
+    /**
+     * default colormap directory
+     */
+    public static final String DEFAULT_COLORMAP_DIR = "colormap";
+
+    /**
+     * Custom (user) colormap
+     */
+    private static List<IcyColorMap> customMaps = null;
+
+    /**
+     * @return Returns the list of default linear colormap:<br>
+     *         GRAY, [GRAY_INV,] RED, GREEN, BLUE, MAGENTA, YELLOW, CYAN, [ALPHA]
+     * @param wantGrayInverse
+     *        specify if we want the gray inverse colormap
+     * @param wantAlpha
+     *        specify if we want the alpha colormap
+     */
+    public static List<IcyColorMap> getLinearColorMaps(final boolean wantGrayInverse, final boolean wantAlpha) {
+        final List<IcyColorMap> result = new ArrayList<>();
+
+        result.add(LinearColorMap.gray_);
+        if (wantGrayInverse)
+            result.add(LinearColorMap.gray_inv_);
+        result.add(LinearColorMap.red_);
+        result.add(LinearColorMap.green_);
+        result.add(LinearColorMap.blue_);
+        result.add(LinearColorMap.magenta_);
+        result.add(LinearColorMap.yellow_);
+        result.add(LinearColorMap.cyan_);
+        if (wantAlpha)
+            result.add(LinearColorMap.alpha_);
+
+        return result;
+    }
+
+    /**
+     * @return Returns the list of special colormap:<br>
+     *         ICE, FIRE, HSV, JET, GLOW
+     */
+    public static List<IcyColorMap> getSpecialColorMaps() {
+        final List<IcyColorMap> result = new ArrayList<>();
+
+        result.add(new IceColorMap());
+        result.add(new FireColorMap());
+        result.add(new HSVColorMap());
+        result.add(new JETColorMap());
+        result.add(new GlowColorMap(true));
+
+        return result;
+    }
+
+    /**
+     * @return Returns the list of custom colormap available in the Icy "colormap" folder
+     */
+    public static synchronized List<IcyColorMap> getCustomColorMaps() {
+        if (customMaps == null) {
+            // load custom maps
+            customMaps = new ArrayList<>();
+
+            // add saved colormap
+            for (final File f : FileUtil.getFiles(new File(DEFAULT_COLORMAP_DIR), null, false, false, false)) {
+                final IcyColorMap map = new IcyColorMap();
+                if (XMLPersistentHelper.loadFromXML(map, f))
+                    customMaps.add(map);
+            }
+        }
+
+        return new ArrayList<>(customMaps);
+    }
+
+    /**
+     * @return Returns the list of all available colormaps.<br>
+     *         The order of returned colormap map is Linear, Special and Custom.
+     * @param wantGrayInverse
+     *        specify if we want the gray inverse colormap
+     * @param wantAlpha
+     *        specify if we want the alpha colormap
+     */
+    public static synchronized List<IcyColorMap> getAllColorMaps(final boolean wantGrayInverse, final boolean wantAlpha) {
+        final List<IcyColorMap> result = new ArrayList<>();
+
+        result.addAll(getLinearColorMaps(wantGrayInverse, wantAlpha));
+        result.addAll(getSpecialColorMaps());
+        result.addAll(getCustomColorMaps());
+
+        return result;
+    }
+
+    /**
+     * colormap name
+     */
+    private String name;
+
+    /**
+     * enabled flag
+     */
+    private boolean enabled;
+
+    /**
+     * RED band
+     */
+    public final IcyColorMapComponent red;
+    /**
+     * GREEN band
+     */
+    public final IcyColorMapComponent green;
+    /**
+     * BLUE band
+     */
+    public final IcyColorMapComponent blue;
+    /**
+     * GRAY band
+     */
+    public final IcyColorMapComponent gray;
+    /**
+     * ALPHA band
+     */
+    public final IcyColorMapComponent alpha;
+
+    /**
+     * colormap type
+     */
+    private IcyColorMapType type;
+
+    /**
+     * pre-multiplied RGB caches
+     */
+    private final int[][] premulRGB;
+    private final float[][] premulRGBNorm;
+
+    /**
+     * listeners
+     */
+    private final EventListenerList listeners;
+
+    /**
+     * internal updater
+     */
+    private final UpdateEventHandler updater;
+
+    public IcyColorMap(final String name, final IcyColorMapType type) {
+        this.name = name;
+        enabled = true;
+
+        listeners = new EventListenerList();
+        updater = new UpdateEventHandler(this, false);
+
+        // colormap band
+        red = createColorMapBand((short) 0);
+        green = createColorMapBand((short) 0);
+        blue = createColorMapBand((short) 0);
+        gray = createColorMapBand((short) 0);
+        alpha = createColorMapBand((short) 255);
+
+        this.type = type;
+
+        // allocating and init RGB cache
+        premulRGB = new int[IcyColorMap.SIZE][3];
+        premulRGBNorm = new float[IcyColorMap.SIZE][3];
+    }
+
+    public IcyColorMap(final String name) {
+        this(name, IcyColorMapType.RGB);
+    }
+
+    public IcyColorMap(final String name, final Object maps) {
+        this(name, IcyColorMapType.RGB);
+
+        if (maps instanceof byte[][])
+            copyFrom((byte[][]) maps);
+        else if (maps instanceof short[][])
+            copyFrom((short[][]) maps);
+
+        // try to define color map type from data
+        setTypeFromData(false);
+    }
+
+    /**
+     * Create a copy of specified colormap.
+     *
+     * @param colormap
+     *        color map
+     */
+    public IcyColorMap(final IcyColorMap colormap) {
+        this(colormap.name, colormap.type);
+
+        copyFrom(colormap);
+    }
+
+    public IcyColorMap() {
+        this("");
+    }
+
+    protected IcyColorMapComponent createColorMapBand(final short initValue) {
+        return new IcyColorMapComponent(IcyColorMap.this, initValue);
+    }
+
+    /**
+     * @return Return true if this color map is RGB type
+     */
+    public boolean isRGB() {
+        return type == IcyColorMapType.RGB;
+    }
+
+    /**
+     * @return Return true if this color map is GRAY type
+     */
+    public boolean isGray() {
+        return type == IcyColorMapType.GRAY;
+    }
+
+    /**
+     * @return Return true if this color map is ALPHA type
+     */
+    public boolean isAlpha() {
+        return type == IcyColorMapType.ALPHA;
+    }
+
+    /**
+     * @return the type
+     */
+    public IcyColorMapType getType() {
+        return type;
+    }
+
+    /**
+     * @param value
+     *        the type to set
+     */
+    public void setType(final IcyColorMapType value) {
+        if (type != value) {
+            type = value;
+
+            changed(IcyColorMapEventType.TYPE_CHANGED);
+        }
+    }
+
+    /**
+     * @see IcyColorMap#setTypeFromData()
+     * @param notifyChange
+     *        boolean
+     */
+    public void setTypeFromData(final boolean notifyChange) {
+        boolean grayColor = true;
+        boolean noColor = true;
+        boolean hasAlpha = false;
+        final IcyColorMapType cmType;
+
+        for (int i = 0; i < MAX_INDEX; i++) {
+            final short r = red.map[i];
+            final short g = green.map[i];
+            final short b = blue.map[i];
+            final short a = alpha.map[i];
+
+            grayColor &= (r == g) && (r == b);
+            noColor &= (r == 0) && (g == 0) && (b == 0);
+            hasAlpha |= (a != MAX_LEVEL);
+        }
+
+        if (noColor && hasAlpha)
+            cmType = IcyColorMapType.ALPHA;
+        else if (grayColor && !noColor) {
+            // set gray map
+            gray.copyFrom(red.map, 0);
+            cmType = IcyColorMapType.GRAY;
+        }
+        else
+            cmType = IcyColorMapType.RGB;
+
+        if (notifyChange)
+            setType(cmType);
+        else
+            type = cmType;
+    }
+
+    /**
+     * Define the type of color map depending its RGBA data.<br>
+     * If map contains only alpha information then type = <code>IcyColorMapType.ALPHA</code><br>
+     * If map contains only grey level then type = <code>IcyColorMapType.GRAY</code><br>
+     * else type = <code>IcyColorMapType.RGB</code>
+     */
+    public void setTypeFromData() {
+        setTypeFromData(true);
+    }
+
+    /**
+     * Set a red control point to specified index and value
+     *
+     * @param index
+     *        int
+     * @param value
+     *        int
+     */
+    public void setRedControlPoint(final int index, final int value) {
+        // set control point
+        red.setControlPoint(index, value);
+    }
+
+    /**
+     * Set a green control point to specified index and value
+     *
+     * @param index
+     *        int
+     * @param value
+     *        int
+     */
+    public void setGreenControlPoint(final int index, final int value) {
+        green.setControlPoint(index, value);
+    }
+
+    /**
+     * Set a blue control point to specified index and value
+     *
+     * @param index
+     *        int
+     * @param value
+     *        int
+     */
+    public void setBlueControlPoint(final int index, final int value) {
+        blue.setControlPoint(index, value);
+    }
+
+    /**
+     * Set a gray control point to specified index and value
+     *
+     * @param index
+     *        int
+     * @param value
+     *        int
+     */
+    public void setGrayControlPoint(final int index, final int value) {
+        gray.setControlPoint(index, value);
+    }
+
+    /**
+     * Set a alpha control point to specified index and value
+     *
+     * @param index
+     *        int
+     * @param value
+     *        index
+     */
+    public void setAlphaControlPoint(final int index, final int value) {
+        alpha.setControlPoint(index, value);
+    }
+
+    /**
+     * Set RGB control point values to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        int
+     */
+    public void setRGBControlPoint(final int index, final Color value) {
+        red.setControlPoint(index, (short) value.getRed());
+        green.setControlPoint(index, (short) value.getGreen());
+        blue.setControlPoint(index, (short) value.getBlue());
+        gray.setControlPoint(index, (short) ColorUtil.getGrayMix(value));
+    }
+
+    /**
+     * Set ARGB control point values to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        int
+     */
+    public void setARGBControlPoint(final int index, final Color value) {
+        alpha.setControlPoint(index, (short) value.getAlpha());
+        red.setControlPoint(index, (short) value.getRed());
+        green.setControlPoint(index, (short) value.getGreen());
+        blue.setControlPoint(index, (short) value.getBlue());
+        gray.setControlPoint(index, (short) ColorUtil.getGrayMix(value));
+    }
+
+    /**
+     * @return Returns the blue component map.<br>
+     *         If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
+     *         If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
+     */
+    public short[] getBlueMap() {
+        if (type == IcyColorMapType.RGB)
+            return blue.map;
+        if (type == IcyColorMapType.GRAY)
+            return gray.map;
+
+        return null;
+    }
+
+    /**
+     * @return Returns the green component map.<br>
+     *         If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
+     *         If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
+     */
+    public short[] getGreenMap() {
+        if (type == IcyColorMapType.RGB)
+            return green.map;
+        if (type == IcyColorMapType.GRAY)
+            return gray.map;
+
+        return null;
+    }
+
+    /**
+     * @return Returns the red component map.<br>
+     *         If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
+     *         If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
+     */
+    public short[] getRedMap() {
+        if (type == IcyColorMapType.RGB)
+            return red.map;
+        if (type == IcyColorMapType.GRAY)
+            return gray.map;
+
+        return null;
+    }
+
+    /**
+     * @return Returns the alpha component map.
+     */
+    public short[] getAlphaMap() {
+        return alpha.map;
+    }
+
+    /**
+     * @return Returns the normalized blue component map.<br>
+     *         If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
+     *         If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
+     */
+    public float[] getNormalizedBlueMap() {
+        if (type == IcyColorMapType.RGB)
+            return blue.mapf;
+        if (type == IcyColorMapType.GRAY)
+            return gray.mapf;
+
+        return null;
+    }
+
+    /**
+     * @return Returns the normalized green component map.<br>
+     *         If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
+     *         If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
+     */
+    public float[] getNormalizedGreenMap() {
+        if (type == IcyColorMapType.RGB)
+            return green.mapf;
+        if (type == IcyColorMapType.GRAY)
+            return gray.mapf;
+
+        return null;
+    }
+
+    /**
+     * @return Returns the normalized red component map.<br>
+     *         If the color map type is {@link IcyColorMapType#GRAY} then it returns the gray map instead.
+     *         If the color map type is {@link IcyColorMapType#ALPHA} then it returns <code>null</code>.
+     */
+    public float[] getNormalizedRedMap() {
+        if (type == IcyColorMapType.RGB)
+            return red.mapf;
+        if (type == IcyColorMapType.GRAY)
+            return gray.mapf;
+
+        return null;
+    }
+
+    /**
+     * @return Returns the normalized alpha component map.
+     */
+    public float[] getNormalizedAlphaMap() {
+        return alpha.mapf;
+    }
+
+    /**
+     * Get blue intensity from an input index
+     *
+     * @param index
+     *        int
+     * @return blue intensity ([0..255] range)
+     */
+    public short getBlue(final int index) {
+        if (type == IcyColorMapType.RGB)
+            return blue.map[index];
+        if (type == IcyColorMapType.GRAY)
+            return gray.map[index];
+
+        return 0;
+    }
+
+    /**
+     * Get green intensity from an input index
+     *
+     * @param index
+     *        int
+     * @return green intensity ([0..255] range)
+     */
+    public short getGreen(final int index) {
+        if (type == IcyColorMapType.RGB)
+            return green.map[index];
+        if (type == IcyColorMapType.GRAY)
+            return gray.map[index];
+
+        return 0;
+    }
+
+    /**
+     * Get red intensity from an input index
+     *
+     * @param index
+     *        int
+     * @return red intensity ([0..255] range)
+     */
+    public short getRed(final int index) {
+        if (type == IcyColorMapType.RGB)
+            return red.map[index];
+        if (type == IcyColorMapType.GRAY)
+            return gray.map[index];
+
+        return 0;
+    }
+
+    /**
+     * Get alpha intensity from an input index
+     *
+     * @param index
+     *        int
+     * @return alpha intensity ([0..255] range)
+     */
+    public short getAlpha(final int index) {
+        return alpha.map[index];
+    }
+
+    /**
+     * Get normalized blue intensity from an input index
+     *
+     * @param index
+     *        int
+     * @return normalized blue intensity
+     */
+    public float getNormalizedBlue(final int index) {
+        if (type == IcyColorMapType.RGB)
+            return blue.mapf[index];
+        if (type == IcyColorMapType.GRAY)
+            return gray.mapf[index];
+
+        return 0;
+    }
+
+    /**
+     * Get normalized green intensity from an input index
+     *
+     * @param index
+     *        int
+     * @return normalized green intensity
+     */
+    public float getNormalizedGreen(final int index) {
+        if (type == IcyColorMapType.RGB)
+            return green.mapf[index];
+        if (type == IcyColorMapType.GRAY)
+            return gray.mapf[index];
+
+        return 0;
+    }
+
+    /**
+     * Get normalized red intensity from an input index
+     *
+     * @param index
+     *        int
+     * @return normalized red intensity
+     */
+    public float getNormalizedRed(final int index) {
+        if (type == IcyColorMapType.RGB)
+            return red.mapf[index];
+        if (type == IcyColorMapType.GRAY)
+            return gray.mapf[index];
+
+        return 0;
+    }
+
+    /**
+     * Get alpha normalized intensity from an input index
+     *
+     * @param index
+     *        int
+     * @return normalized alpha intensity
+     */
+    public float getNormalizedAlpha(final int index) {
+        return alpha.mapf[index];
+    }
+
+    /**
+     * Get blue intensity from a normalized input index
+     *
+     * @param index
+     *        float
+     * @return blue intensity ([0..255] range)
+     */
+    public short getBlue(final float index) {
+        return getBlue((int) (index * MAX_INDEX));
+    }
+
+    /**
+     * Get green intensity from a normalized input index
+     *
+     * @param index
+     *        float
+     * @return green intensity ([0..255] range)
+     */
+    public short getGreen(final float index) {
+        return getGreen((int) (index * MAX_INDEX));
+    }
+
+    /**
+     * Get red intensity from a normalized input index
+     *
+     * @param index
+     *        float
+     * @return red intensity ([0..255] range)
+     */
+    public short getRed(final float index) {
+        return getRed((int) (index * MAX_INDEX));
+    }
+
+    /**
+     * Get alpha intensity from a normalized input index
+     *
+     * @param index
+     *        float
+     * @return alpha intensity ([0..255] range)
+     */
+    public short getAlpha(final float index) {
+        return getAlpha((int) (index * MAX_INDEX));
+    }
+
+    /**
+     * Get normalized blue intensity from a normalized input index
+     *
+     * @param index
+     *        float
+     * @return normalized blue intensity
+     */
+    public float getNormalizedBlue(final float index) {
+        return getNormalizedBlue((int) (index * MAX_INDEX));
+    }
+
+    /**
+     * Get normalized green intensity from a normalized input index
+     *
+     * @param index
+     *        float
+     * @return normalized green intensity
+     */
+    public float getNormalizedGreen(final float index) {
+        return getNormalizedGreen((int) (index * MAX_INDEX));
+    }
+
+    /**
+     * Get normalized red intensity from a normalized input index
+     *
+     * @param index
+     *        float
+     * @return normalized red intensity
+     */
+    public float getNormalizedRed(final float index) {
+        return getNormalizedRed((int) (index * MAX_INDEX));
+    }
+
+    /**
+     * Get normalized alpha intensity from a normalized input index
+     *
+     * @param index
+     *        int
+     * @return normalized alpha intensity
+     */
+    public float getNormalizedAlpha(final float index) {
+        return getNormalizedAlpha((int) (index * MAX_INDEX));
+    }
+
+    /**
+     * Set red intensity to specified index
+     *
+     * @param value
+     *        short
+     * @param index
+     *        int
+     */
+    public void setRed(final int index, final short value) {
+        red.setValue(index, value);
+    }
+
+    /**
+     * Set green intensity to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        short
+     */
+    public void setGreen(final int index, final short value) {
+        green.setValue(index, value);
+    }
+
+    /**
+     * Set blue intensity to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        short
+     */
+    public void setBlue(final int index, final short value) {
+        blue.setValue(index, value);
+    }
+
+    /**
+     * Set gray intensity to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        short
+     */
+    public void setGray(final int index, final short value) {
+        gray.setValue(index, value);
+    }
+
+    /**
+     * Set alpha intensity to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        short
+     */
+    public void setAlpha(final int index, final short value) {
+        alpha.setValue(index, value);
+    }
+
+    /**
+     * Set red intensity (normalized) to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        float
+     */
+    public void setNormalizedRed(final int index, final float value) {
+        red.setNormalizedValue(index, value);
+    }
+
+    /**
+     * Set green intensity (normalized) to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        float
+     */
+    public void setNormalizedGreen(final int index, final float value) {
+        green.setNormalizedValue(index, value);
+    }
+
+    /**
+     * Set blue intensity (normalized) to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        float
+     */
+    public void setNormalizedBlue(final int index, final float value) {
+        blue.setNormalizedValue(index, value);
+    }
+
+    /**
+     * Set gray intensity (normalized) to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        float
+     */
+    public void setNormalizedGray(final int index, final float value) {
+        gray.setNormalizedValue(index, value);
+    }
+
+    /**
+     * Set alpha intensity (normalized) to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        float
+     */
+    public void setNormalizedAlpha(final int index, final float value) {
+        alpha.setNormalizedValue(index, value);
+    }
+
+    /**
+     * Set RGB color to specified index
+     *
+     * @param index
+     *        int
+     * @param rgb
+     *        int
+     */
+    public void setRGB(final int index, final int rgb) {
+        alpha.setValue(index, MAX_LEVEL);
+        red.setValue(index, (rgb >> 16) & 0xFF);
+        green.setValue(index, (rgb >> 8) & 0xFF);
+        //blue.setValue(index, (rgb >> 0) & 0xFF);
+        blue.setValue(index, (rgb) & 0xFF);
+        gray.setValue(index, ColorUtil.getGrayMix(rgb));
+    }
+
+    /**
+     * Set RGB color to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        color
+     */
+    public void setRGB(final int index, final Color value) {
+        setRGB(index, value.getRGB());
+    }
+
+    /**
+     * Set ARGB color to specified index
+     *
+     * @param index
+     *        int
+     * @param argb
+     *        int
+     */
+    public void setARGB(final int index, final int argb) {
+        alpha.setValue(index, (argb >> 24) & 0xFF);
+        red.setValue(index, (argb >> 16) & 0xFF);
+        green.setValue(index, (argb >> 8) & 0xFF);
+        //blue.setValue(index, (argb >> 0) & 0xFF);
+        blue.setValue(index, (argb) & 0xFF);
+        gray.setValue(index, ColorUtil.getGrayMix(argb));
+    }
+
+    /**
+     * Set ARGB color to specified index
+     *
+     * @param index
+     *        int
+     * @param value
+     *        color
+     */
+    public void setARGB(final int index, final Color value) {
+        setARGB(index, value.getRGB());
+    }
+
+    /**
+     * Set the alpha channel to opaque
+     */
+    public void setAlphaToOpaque() {
+        alpha.beginUpdate();
+        try {
+            alpha.removeAllControlPoint();
+            alpha.setControlPoint(0, 1f);
+            alpha.setControlPoint(255, 1f);
+        }
+        finally {
+            alpha.endUpdate();
+        }
+    }
+
+    /**
+     * Set the alpha channel to linear opacity (0 to 1)
+     */
+    public void setAlphaToLinear() {
+        alpha.beginUpdate();
+        try {
+            alpha.removeAllControlPoint();
+            alpha.setControlPoint(0, 0f);
+            alpha.setControlPoint(255, 1f);
+        }
+        finally {
+            alpha.endUpdate();
+        }
+    }
+
+    /**
+     * Set the alpha channel to an optimized linear transparency for 3D volume display
+     */
+    public void setAlphaToLinear3D() {
+        alpha.beginUpdate();
+        try {
+            alpha.removeAllControlPoint();
+            alpha.setControlPoint(0, 0f);
+            alpha.setControlPoint(16, 0f);
+            alpha.setControlPoint(32, 0.1f);
+            alpha.setControlPoint(255, 0.75f);
+        }
+        finally {
+            alpha.endUpdate();
+        }
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name
+     *        the name to set
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return the enabled
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Set enabled flag.<br>
+     * This flag is used to test if the color map is enabled or not.<br>
+     * It is up to the developer to implement it or not.
+     *
+     * @param enabled
+     *        the enabled to set
+     */
+    public void setEnabled(final boolean enabled) {
+        if (this.enabled != enabled) {
+            this.enabled = enabled;
+            changed(IcyColorMapEventType.ENABLED_CHANGED);
+        }
+    }
+
+    /**
+     * Gets a Color object representing the color at the specified index
+     *
+     * @param index
+     *        the index of the color map to retrieve
+     * @return a Color object
+     */
+    public Color getColor(final int index) {
+        return switch (type) {
+            case RGB -> new Color(red.map[index], green.map[index], blue.map[index], alpha.map[index]);
+            case GRAY -> new Color(gray.map[index], gray.map[index], gray.map[index], alpha.map[index]);
+            case ALPHA -> new Color(0, 0, 0, alpha.map[index]);
+        };
+
+    }
+
+    /**
+     * @return Return the pre-multiplied RGB cache
+     */
+    public int[][] getPremulRGB() {
+        return premulRGB;
+    }
+
+    /**
+     * @return Return the pre-multiplied RGB cache (normalized)
+     */
+    public float[][] getPremulRGBNorm() {
+        return premulRGBNorm;
+    }
+
+    /**
+     * Copy data from specified source colormap.
+     *
+     * @param copyAlpha
+     *        Also copy the alpha information.
+     * @param srcColorMap
+     *        color map
+     */
+    public void copyFrom(final IcyColorMap srcColorMap, final boolean copyAlpha) {
+        // nothing to do
+        if ((srcColorMap == null) || (srcColorMap == this))
+            return;
+
+        beginUpdate();
+        try {
+            // copy colormap band
+            red.copyFrom(srcColorMap.red);
+            green.copyFrom(srcColorMap.green);
+            blue.copyFrom(srcColorMap.blue);
+            gray.copyFrom(srcColorMap.gray);
+            // copy alpha information for alpha type colormap
+            if (copyAlpha || isAlpha())
+                alpha.copyFrom(srcColorMap.alpha);
+            // copy type
+            setType(srcColorMap.type);
+            // copy name
+            setName(srcColorMap.getName());
+        }
+        finally {
+            endUpdate();
+        }
+    }
+
+    /**
+     * @param srcColorMap
+     *        Copy data from specified source colormap
+     */
+    public void copyFrom(final IcyColorMap srcColorMap) {
+        copyFrom(srcColorMap, true);
+    }
+
+    /**
+     * Copy data from specified 2D byte array.
+     *
+     * @param copyAlpha
+     *        Also copy the alpha information.
+     * @param maps
+     *        2D array
+     */
+    public void copyFrom(final byte[][] maps, final boolean copyAlpha) {
+        final int len = maps.length;
+
+        beginUpdate();
+        try {
+            // red component
+            if (len > 0)
+                red.copyFrom(maps[0]);
+            if (len > 1)
+                green.copyFrom(maps[1]);
+            if (len > 2)
+                blue.copyFrom(maps[2]);
+            if (copyAlpha && (len > 3))
+                alpha.copyFrom(maps[3]);
+        }
+        finally {
+            endUpdate();
+        }
+    }
+
+    /**
+     * @param maps
+     *        Copy data from specified 2D byte array
+     */
+    public void copyFrom(final byte[][] maps) {
+        copyFrom(maps, true);
+    }
+
+    /**
+     * Copy data from specified 2D short array.
+     *
+     * @param copyAlpha
+     *        Also copy the alpha information.
+     * @param maps
+     *        2D array
+     */
+    public void copyFrom(final short[][] maps, final boolean copyAlpha) {
+        final int len = maps.length;
+
+        beginUpdate();
+        try {
+            // red component
+            if (len > 0)
+                red.copyFrom(maps[0], 8);
+            if (len > 1)
+                green.copyFrom(maps[1], 8);
+            if (len > 2)
+                blue.copyFrom(maps[2], 8);
+            if (copyAlpha && (len > 3))
+                alpha.copyFrom(maps[3], 8);
+        }
+        finally {
+            endUpdate();
+        }
+    }
+
+    /**
+     * @param maps
+     *        Copy data from specified 2D short array.
+     */
+    public void copyFrom(final short[][] maps) {
+        copyFrom(maps, true);
+    }
+
+    /**
+     * @return Return true if this is a linear type colormap.<br>
+     *         Linear colormap are used to display plain gray or color image.<br>
+     *         A non linear colormap means you usually have an indexed color image or
+     *         you want to enhance contrast/color in display.
+     */
+    public boolean isLinear() {
+        return switch (type) {
+            default -> red.isLinear() && green.isLinear() && blue.isLinear();
+            case GRAY -> gray.isLinear();
+            case ALPHA -> alpha.isLinear();
+        };
+    }
+
+    /**
+     * @return Return true if this is a total black colormap.
+     */
+    public boolean isBlack() {
+        return switch (type) {
+            case RGB -> {
+                for (int i = 0; i < MAX_INDEX; i++)
+                    if ((red.map[i] | green.map[i] | blue.map[i]) != 0)
+                        yield false;
+                yield true;
+            }
+            case GRAY -> {
+                for (int i = 0; i < MAX_INDEX; i++)
+                    if (gray.map[i] != 0)
+                        yield false;
+                yield true;
+            }
+            default -> false;
+        };
+    }
+
+    /**
+     * @return Returns the dominant color of this colormap.<br>
+     *         Warning: this need sometime to compute.
+     */
+    public Color getDominantColor() {
+        final Color[] colors = new Color[SIZE];
+
+        for (int i = 0; i < colors.length; i++)
+            colors[i] = getColor(i);
+
+        return ColorUtil.getDominantColor(colors);
+    }
+
+    /**
+     * Update internal RGB cache
+     */
+    private void updateRGBCache() {
+        for (int i = 0; i < SIZE; i++) {
+            final float af = alpha.mapf[i];
+            final float[] rgbn = premulRGBNorm[i];
+
+            switch (type) {
+                case GRAY:
+                    final float grayValue = gray.mapf[i] * af;
+                    rgbn[0] = grayValue;
+                    rgbn[1] = grayValue;
+                    rgbn[2] = grayValue;
+                    break;
+
+                case RGB:
+                    rgbn[0] = blue.mapf[i] * af;
+                    rgbn[1] = green.mapf[i] * af;
+                    rgbn[2] = red.mapf[i] * af;
+                    break;
+
+                default:
+                    rgbn[0] = 0f;
+                    rgbn[1] = 0f;
+                    rgbn[2] = 0f;
+                    break;
+            }
+
+            final int[] rgb = premulRGB[i];
+
+            rgb[0] = (int) (rgbn[0] * MAX_LEVEL);
+            rgb[1] = (int) (rgbn[1] * MAX_LEVEL);
+            rgb[2] = (int) (rgbn[2] * MAX_LEVEL);
+        }
+    }
+
+    /**
+     * Add a listener
+     *
+     * @param listener
+     *        color map listener
+     */
+    public void addListener(final IcyColorMapListener listener) {
+        listeners.add(IcyColorMapListener.class, listener);
+    }
+
+    /**
+     * Remove a listener
+     *
+     * @param listener
+     *        color map listener
+     */
+    public void removeListener(final IcyColorMapListener listener) {
+        listeners.remove(IcyColorMapListener.class, listener);
+    }
+
+    /**
+     * @param e
+     *        fire event
+     */
+    public void fireEvent(final IcyColorMapEvent e) {
+        for (final IcyColorMapListener listener : listeners.getListeners(IcyColorMapListener.class))
+            listener.colorMapChanged(e);
+    }
+
+    /**
+     * called when colormap data changed
+     */
+    public void changed() {
+        changed(IcyColorMapEventType.MAP_CHANGED);
+    }
+
+    /**
+     * called when colormap changed
+     *
+     * @param type
+     *        color map type
+     */
+    private void changed(final IcyColorMapEventType type) {
+        // handle changed via updater object
+        updater.changed(new IcyColorMapEvent(this, type));
+    }
+
+    @Override
+    public void onChanged(final CollapsibleEvent e) {
+        final IcyColorMapEvent event = (IcyColorMapEvent) e;
+
+        switch (event.getType()) {
+            // refresh RGB cache
+            case MAP_CHANGED:
+            case TYPE_CHANGED:
+                updateRGBCache();
+                break;
+
+            default:
+                break;
+        }
+
+        // notify listener we have changed
+        fireEvent(event);
+    }
+
+    /**
+     * @see UpdateEventHandler#beginUpdate()
+     */
+    public void beginUpdate() {
+        updater.beginUpdate();
+
+        red.beginUpdate();
+        green.beginUpdate();
+        blue.beginUpdate();
+        gray.beginUpdate();
+        alpha.beginUpdate();
+    }
+
+    /**
+     * @see UpdateEventHandler#endUpdate()
+     */
+    public void endUpdate() {
+        alpha.endUpdate();
+        gray.endUpdate();
+        blue.endUpdate();
+        green.endUpdate();
+        red.endUpdate();
+
+        updater.endUpdate();
+    }
+
+    /**
+     * @see UpdateEventHandler#isUpdating()
+     */
+    public boolean isUpdating() {
+        return updater.isUpdating();
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    /**
+     * @param obj
+     *        object
+     * @return Return true if the colormap has the same type and same color intensities than specified one.
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == this)
+            return true;
+
+        if (obj instanceof final IcyColorMap colormap) {
+            if (colormap.getType() != type)
+                return false;
+
+            if (!red.equals(colormap.red))
+                return false;
+            if (!green.equals(colormap.green))
+                return false;
+            if (!blue.equals(colormap.blue))
+                return false;
+            if (!gray.equals(colormap.gray))
+                return false;
+            if (!alpha.equals(colormap.alpha))
+                return false;
+
+            return true;
+        }
+
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        //return red.map.hashCode() ^ green.map.hashCode() ^ blue.map.hashCode() ^ gray.map.hashCode() ^ alpha.map.hashCode() ^ type.ordinal();
+        return Arrays.hashCode(red.map) ^ Arrays.hashCode(green.map) ^ Arrays.hashCode(blue.map) ^ Arrays.hashCode(gray.map) ^ Arrays.hashCode(alpha.map) ^ type.ordinal();
+    }
+
+    @Override
+    public boolean loadFromXML(final Node node) {
+        if (node == null)
+            return false;
+
+        beginUpdate();
+        try {
+            setName(XMLUtil.getElementValue(node, ID_NAME, ""));
+            setEnabled(XMLUtil.getElementBooleanValue(node, ID_ENABLED, true));
+            setType(IcyColorMapType.valueOf(XMLUtil.getElementValue(node, ID_TYPE, IcyColorMapType.RGB.toString())));
+
+            boolean result = true;
+
+            result = result && red.loadFromXML(XMLUtil.getElement(node, ID_RED));
+            result = result && green.loadFromXML(XMLUtil.getElement(node, ID_GREEN));
+            result = result && blue.loadFromXML(XMLUtil.getElement(node, ID_BLUE));
+            result = result && gray.loadFromXML(XMLUtil.getElement(node, ID_GRAY));
+            result = result && alpha.loadFromXML(XMLUtil.getElement(node, ID_ALPHA));
+
+            return result;
+        }
+        finally {
+            endUpdate();
+        }
+    }
+
+    @Override
+    public boolean saveToXML(final Node node) {
+        if (node == null)
+            return false;
+
+        XMLUtil.setElementValue(node, ID_NAME, getName());
+        XMLUtil.setElementBooleanValue(node, ID_ENABLED, isEnabled());
+        XMLUtil.setElementValue(node, ID_TYPE, getType().toString());
+
+        boolean result = true;
+
+        result = result && red.saveToXML(XMLUtil.setElement(node, ID_RED));
+        result = result && green.saveToXML(XMLUtil.setElement(node, ID_GREEN));
+        result = result && blue.saveToXML(XMLUtil.setElement(node, ID_BLUE));
+        result = result && gray.saveToXML(XMLUtil.setElement(node, ID_GRAY));
+        result = result && alpha.saveToXML(XMLUtil.setElement(node, ID_ALPHA));
+
+        return result;
+    }
+
+}

@@ -1,0 +1,433 @@
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package org.bioimageanalysis.icy.gui.lut;
+
+import org.bioimageanalysis.icy.common.math.Scaler;
+import org.bioimageanalysis.icy.common.string.StringUtil;
+import org.bioimageanalysis.icy.common.type.DataType;
+import org.bioimageanalysis.icy.gui.GuiUtil;
+import org.bioimageanalysis.icy.gui.component.button.IcyButton;
+import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.tabbedpane.CheckTabbedPane;
+import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
+import org.bioimageanalysis.icy.gui.viewer.Viewer;
+import org.bioimageanalysis.icy.model.colormap.IcyColorMap;
+import org.bioimageanalysis.icy.model.colormap.IcyColorMap.IcyColorMapType;
+import org.bioimageanalysis.icy.model.colormap.IcyColorMapEvent;
+import org.bioimageanalysis.icy.model.colormap.IcyColorMapListener;
+import org.bioimageanalysis.icy.model.colormap.LinearColorMap;
+import org.bioimageanalysis.icy.model.lut.LUT;
+import org.bioimageanalysis.icy.model.lut.LUT.LUTChannel;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.model.sequence.SequenceEvent;
+import org.bioimageanalysis.icy.model.sequence.SequenceListener;
+import org.bioimageanalysis.icy.system.preferences.ApplicationPreferences;
+import org.bioimageanalysis.icy.system.preferences.XMLPreferences;
+import org.bioimageanalysis.icy.system.thread.ThreadUtil;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
+ */
+public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceListener {
+    /**
+     * pref id
+     */
+    private static final String PREF_ID_HISTO = "gui.histo";
+
+    private static final String ID_AUTO_REFRESH = "autoRefresh";
+    private static final String ID_AUTO_BOUNDS = "autoBounds";
+    private static final String ID_LOG_VIEW = "logView";
+
+    /*
+     * gui
+     */
+    /**
+     * associated Viewer &amp; LUT
+     */
+    private final Viewer viewer;
+    private final LUT lut;
+    final CheckTabbedPane bottomPane;
+
+    final JCheckBox autoRefreshHistoCheckBox;
+    final JCheckBox autoBoundsCheckBox;
+    final ButtonGroup scaleGroup;
+    final JRadioButton logButton;
+    final JRadioButton linearButton;
+    final IcyButton exportXLSButton;
+
+    /*
+     * data
+     */
+    final List<LUTChannelViewer> lutChannelViewers;
+
+    /*
+     * preferences
+     */
+    final XMLPreferences pref;
+
+    final Runnable boundsUpdater;
+    final Runnable channelNameUpdater;
+    final Runnable channelEnableUpdater;
+    final Runnable channelTabColorUpdater;
+
+    public LUTViewer(final Viewer viewer, final LUT lut) {
+        super();
+
+        this.viewer = viewer;
+        this.lut = lut;
+
+        pref = ApplicationPreferences.getPreferences().node(PREF_ID_HISTO);
+
+        boundsUpdater = () -> {
+            final Sequence sequence = getSequence();
+
+            if (sequence != null) {
+                final double[][] typeBounds = sequence.getChannelsTypeBounds();
+                final double[][] bounds = sequence.getChannelsBounds();
+
+                for (int i = 0; i < Math.min(getLut().getNumChannel(), typeBounds.length); i++) {
+                    final double[] tb = typeBounds[i];
+                    final double[] b = bounds[i];
+
+                    final Scaler scaler = getLut().getLutChannel(i).getScaler();
+
+                    scaler.setAbsLeftRightIn(tb[0], tb[1]);
+                    scaler.setLeftRightIn(b[0], b[1]);
+                }
+            }
+        };
+        channelEnableUpdater = new Runnable() {
+            @Override
+            public void run() {
+                for (int c = 0; c < Math.min(getLut().getNumChannel(), bottomPane.getTabCount()); c++)
+                    bottomPane.setTabChecked(c, getLut().getLutChannel(c).isEnabled());
+            }
+        };
+        channelTabColorUpdater = new Runnable() {
+            @Override
+            public void run() {
+                for (int c = 0; c < Math.min(getLut().getNumChannel(), bottomPane.getTabCount()); c++) {
+                    final IcyColorMap colormap = getLut().getLutChannel(c).getColorMap();
+                    bottomPane.setBackgroundAt(c, colormap.getDominantColor());
+                }
+            }
+        };
+        channelNameUpdater = new Runnable() {
+            @Override
+            public void run() {
+                final Sequence sequence = getSequence();
+
+                if (sequence != null) {
+                    // need to be done on EDT
+                    ThreadUtil.invokeNow(() -> {
+                        for (int c = 0; c < Math.min(sequence.getSizeC(), bottomPane.getTabCount()); c++) {
+                            final String channelName = sequence.getChannelName(c);
+
+                            bottomPane.setTitleAt(c, StringUtil.limit(channelName, 10));
+                            if (sequence.getDefaultChannelName(c).equals(channelName))
+                                bottomPane.setToolTipTextAt(c, "Channel " + c);
+                            else
+                                bottomPane.setToolTipTextAt(c, channelName + " (channel " + c + ")");
+                        }
+                    });
+                }
+            }
+        };
+
+        lutChannelViewers = new ArrayList<>();
+
+        // build GUI
+        bottomPane = new CheckTabbedPane(SwingConstants.BOTTOM, true);
+        bottomPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+
+        // add tab for each channel
+        for (int c = 0; c < lut.getNumChannel(); c++) {
+            final LUTChannel lutChannel = lut.getLutChannel(c);
+            final LUTChannelViewer lbv = new LUTChannelViewer(viewer, lutChannel);
+
+            lutChannel.getColorMap().addListener(this);
+
+            lutChannelViewers.add(lbv);
+            bottomPane.addTab("ch " + c, lbv);
+        }
+
+        bottomPane.addChangeListener(e -> {
+            final int size = lutChannelViewers.size();
+            final boolean[] changedState = new boolean[size];
+            final boolean[] enabledState = new boolean[size];
+
+            for (int i = 0; i < size; i++) {
+                try {
+                    // null pointer exception can sometime happen here, normal
+                    enabledState[i] = bottomPane.isTabChecked(i);
+                    changedState[i] = lutChannelViewers.get(i).getLutChannel().isEnabled() != enabledState[i];
+                }
+                catch (final Exception exc) {
+                    enabledState[i] = true;
+                    changedState[i] = false;
+                }
+            }
+
+            // we really want to only set state which changed here and not the one which has
+            // been set from a "setEnabled" event
+            for (int i = 0; i < size; i++) {
+                if (changedState[i]) {
+                    lutChannelViewers.get(i).getLutChannel().setEnabled(enabledState[i]);
+                }
+            }
+        });
+
+        autoRefreshHistoCheckBox = new JCheckBox("Refresh", pref.getBoolean(ID_AUTO_REFRESH, true));
+        autoRefreshHistoCheckBox.setToolTipText("Automatically refresh histogram when data is modified");
+        autoRefreshHistoCheckBox.addActionListener(e -> {
+            final boolean value = autoRefreshHistoCheckBox.isSelected();
+            if (value)
+                refreshAllHistogram();
+            pref.putBoolean(ID_AUTO_REFRESH, value);
+        });
+        if (autoRefreshHistoCheckBox.isSelected())
+            refreshAllHistogram();
+
+        autoBoundsCheckBox = new JCheckBox("Auto bounds", getPreferredAutoBounds());
+        autoBoundsCheckBox.setToolTipText("Automatically ajdust bounds when data is modified");
+        autoBoundsCheckBox.addActionListener(e -> {
+            final boolean value = autoBoundsCheckBox.isSelected();
+
+            if (value) {
+                ThreadUtil.runSingle(boundsUpdater);
+                refreshAllHistogram();
+                autoRefreshHistoCheckBox.setSelected(true);
+                autoRefreshHistoCheckBox.setEnabled(false);
+            }
+            else {
+                final boolean refreshValue = pref.getBoolean(ID_AUTO_REFRESH, true);
+                if (refreshValue)
+                    refreshAllHistogram();
+                autoRefreshHistoCheckBox.setSelected(refreshValue);
+                autoRefreshHistoCheckBox.setEnabled(true);
+            }
+
+            pref.putBoolean(ID_AUTO_BOUNDS, value);
+        });
+
+        final Sequence seq = getSequence();
+
+        scaleGroup = new ButtonGroup();
+        logButton = new JRadioButton("log");
+        logButton.setToolTipText("Display histogram in a logarithm form");
+        logButton.addActionListener(e -> scaleTypeChanged(true));
+        linearButton = new JRadioButton("linear");
+        linearButton.setToolTipText("Display histogram in a linear form");
+        linearButton.addActionListener(e -> scaleTypeChanged(false));
+
+        scaleGroup.add(logButton);
+        scaleGroup.add(linearButton);
+
+        // restore view mode
+        if (pref.getBoolean(ID_LOG_VIEW, true))
+            logButton.setSelected(true);
+        else
+            linearButton.setSelected(true);
+        // force apply selected mode (no event dispatched on setSelected)
+        scaleTypeChanged(logButton.isSelected());
+
+        exportXLSButton = new IcyButton(SVGIcon.FILE_SAVE);
+        exportXLSButton.setToolTipText("Export histogram data into an excel file");
+        exportXLSButton.addActionListener(e -> {
+            try {
+                // export current visible histogram
+                lutChannelViewers.get(bottomPane.getSelectedIndex()).getScalerPanel().getScalerViewer()
+                        .getHistogram().getHistogram().doXLSExport();
+            }
+            catch (final Exception e1) {
+                MessageDialog.showDialog("Error", e1.getMessage(), MessageDialog.ERROR_MESSAGE);
+            }
+        });
+
+        setLayout(new BorderLayout());
+
+        add(GuiUtil.createLineBoxPanel(autoRefreshHistoCheckBox, autoBoundsCheckBox, Box.createHorizontalGlue(),
+                        Box.createHorizontalStrut(4), logButton, linearButton, Box.createHorizontalStrut(4), exportXLSButton),
+                BorderLayout.NORTH);
+        add(bottomPane, BorderLayout.CENTER);
+
+        validate();
+
+        // update channel name and color
+        channelTabColorUpdater.run();
+        channelNameUpdater.run();
+
+        if (seq != null) {
+            if (!seq.hasUserLUT() && autoBoundsCheckBox.isSelected()) {
+                ThreadUtil.runSingle(boundsUpdater);
+                refreshAllHistogram();
+                autoRefreshHistoCheckBox.setSelected(true);
+                autoRefreshHistoCheckBox.setEnabled(false);
+            }
+
+            seq.addListener(this);
+        }
+    }
+
+    /**
+     * @return current active channel index (channel pane which has focus)
+     */
+    public int getActiveChannelIndex() {
+        return bottomPane.getSelectedIndex();
+    }
+
+    private boolean getPreferredAutoBounds() {
+        final boolean result = pref.getBoolean(ID_AUTO_BOUNDS, true);
+
+        if (!result)
+            return false;
+
+        final Sequence sequence = getSequence();
+
+        if (sequence != null) {
+            // byte data type ?
+            if (sequence.getDataType() == DataType.UBYTE) {
+                final int numChannel = getLut().getNumChannel();
+
+                // custom colormaps --> cannot use auto bounds
+                for (int c = 0; c < numChannel; c++)
+                    if (!getLut().getLutChannel(c).getColorMap().isLinear())
+                        return false;
+
+                if ((numChannel == 3) || (numChannel == 4)) {
+                    boolean rgb;
+
+                    // check if we have classic RGB
+                    rgb = getLut().getLutChannel(0).getColorMap().equals(LinearColorMap.red_)
+                            && getLut().getLutChannel(1).getColorMap().equals(LinearColorMap.green_)
+                            && getLut().getLutChannel(2).getColorMap().equals(LinearColorMap.blue_);
+
+                    // ARGB
+                    if (numChannel == 4)
+                        rgb &= (getLut().getLutChannel(3).getColorMap().getType() == IcyColorMapType.ALPHA);
+
+                    // do not use auto bounds for classic (A)RGB images
+                    return !rgb;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public Sequence getSequence() {
+        return viewer.getSequence();
+    }
+
+    public LUT getLut() {
+        return lut;
+    }
+
+    public Viewer getViewer() {
+        return viewer;
+    }
+
+    public boolean getAutoBounds() {
+        return autoBoundsCheckBox.isSelected();
+    }
+
+    public void setAutoBound(final boolean value) {
+        autoBoundsCheckBox.setSelected(value);
+    }
+
+    public boolean getAutoRefreshHistogram() {
+        return autoRefreshHistoCheckBox.isSelected();
+    }
+
+    public void setAutoRefreshHistogram(final boolean value) {
+        autoRefreshHistoCheckBox.setSelected(value);
+    }
+
+    public boolean getLogScale() {
+        return logButton.isSelected();
+    }
+
+    public void setLogScale(final boolean value) {
+        if (value)
+            logButton.setSelected(true);
+        else
+            linearButton.setSelected(true);
+    }
+
+    void refreshAllHistogram() {
+        for (final LUTChannelViewer lutChannelViewer : lutChannelViewers)
+            lutChannelViewer.getScalerPanel().refreshHistogram();
+    }
+
+    void scaleTypeChanged(final boolean log) {
+        pref.putBoolean(ID_LOG_VIEW, log);
+        // change histogram scale type
+        for (final LUTChannelViewer lutChannelViewer : lutChannelViewers)
+            lutChannelViewer.getScalerPanel().getScalerViewer().scaleTypeChanged(log);
+    }
+
+    @Override
+    public void colorMapChanged(final IcyColorMapEvent e) {
+        switch (e.getType()) {
+            case ENABLED_CHANGED:
+                ThreadUtil.runSingle(channelEnableUpdater);
+                break;
+
+            case MAP_CHANGED:
+                ThreadUtil.runSingle(channelTabColorUpdater);
+                break;
+
+            case TYPE_CHANGED:
+                break;
+        }
+    }
+
+    public void dispose() {
+        removeAll();
+
+        final Sequence seq = getSequence();
+        if (seq != null)
+            seq.removeListener(this);
+    }
+
+    @Override
+    public void sequenceChanged(final SequenceEvent sequenceEvent) {
+        switch (sequenceEvent.getSourceType()) {
+            case SEQUENCE_META:
+                ThreadUtil.runSingle(channelNameUpdater);
+                break;
+
+            case SEQUENCE_COMPONENTBOUNDS:
+                if (autoBoundsCheckBox.isSelected())
+                    ThreadUtil.runSingle(boundsUpdater);
+                break;
+        }
+    }
+
+    @Override
+    public void sequenceClosed(final Sequence sequence) {
+
+    }
+}
