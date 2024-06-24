@@ -7,11 +7,11 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>3.0.0</version>
+        <version>3.0.0-a.1</version>
     </parent>
 
     <artifactId>icy-kernel</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.0-a.1</version>
 
     <packaging>jar</packaging>
 
@@ -272,13 +272,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <!-- Link to third-party Maven repositories -->
-    <repositories>
-        <repository>
-            <id>icy</id>
-            <name>Icy's Nexus</name>
-            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
-        </repository>
-    </repositories>
 </project>
