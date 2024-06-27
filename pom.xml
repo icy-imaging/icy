@@ -292,4 +292,11 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>icy</id>
+            <url>https://nexus-icy.pasteur.cloud/repository/icy/</url>
+        </repository>
+    </repositories>
 </project>
