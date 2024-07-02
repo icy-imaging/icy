@@ -58,6 +58,9 @@ public class SVGIcon {
     public static final SVGIcon BRIGHTNESS_MEDIUM = new SVGIcon(MONO + "brightness_medium.svg", false);
     public static final SVGIcon BROKEN_IMAGE = new SVGIcon(MONO + "broken_image.svg", false);
     public static final SVGIcon BUG_REPORT = new SVGIcon(MONO + "bug_report.svg", false);
+    public static final SVGIcon CAMERA = new SVGIcon(MONO + "camera.svg", false);
+    public static final SVGIcon CAMERA_ROLL = new SVGIcon(MONO + "camera_roll.svg", false);
+    public static final SVGIcon CENTER_FOCUS_STRONG = new SVGIcon(MONO + "center_focus_strong.svg", false);
     public static final SVGIcon CHECK = new SVGIcon(MONO + "check.svg", false);
     public static final SVGIcon CHECK_CIRCLE = new SVGIcon(MONO + "check_circle.svg", false);
     public static final SVGIcon CIRCLE = new SVGIcon(MONO + "circle.svg", false);
@@ -71,6 +74,7 @@ public class SVGIcon {
     public static final SVGIcon CUT = new SVGIcon(MONO + "cut.svg", false);
     public static final SVGIcon DARK_MODE = new SVGIcon(MONO + "dark_mode.svg", false);
     public static final SVGIcon DASHBOARD = new SVGIcon(MONO + "dashboard.svg", false);
+    public static final SVGIcon DATABASE = new SVGIcon(MONO + "database.svg", false);
     public static final SVGIcon DELETE = new SVGIcon(MONO + "delete.svg", false);
     public static final SVGIcon DELETE_SWEEP = new SVGIcon(MONO + "delete_sweep.svg", false);
     public static final SVGIcon DEPLOYED_CODE = new SVGIcon(MONO + "deployed_code.svg", false);
@@ -113,6 +117,7 @@ public class SVGIcon {
     public static final SVGIcon IMAGE = new SVGIcon(MONO + "image.svg", false);
     public static final SVGIcon IMAGE_ASPECT_RATIO = new SVGIcon(MONO + "image_aspect_ratio.svg", false);
     public static final SVGIcon INDETERMINATE_QUESTION = new SVGIcon(MONO + "indeterminate_question.svg", false);
+    public static final SVGIcon INFO = new SVGIcon(MONO + "info.svg", false);
     public static final SVGIcon INVERT_COLORS = new SVGIcon(MONO + "invert_colors.svg", false);
     public static final SVGIcon KEYBOARD = new SVGIcon(MONO + "keyboard.svg", false);
     public static final SVGIcon KEYBOARD_ARROW_DOWN = new SVGIcon(MONO + "keyboard_arrow_down.svg", false);
@@ -153,6 +158,7 @@ public class SVGIcon {
     public static final SVGIcon REMOVE = new SVGIcon(MONO + "remove.svg", false);
     public static final SVGIcon REPEAT = new SVGIcon(MONO + "repeat.svg", false);
     public static final SVGIcon REPEAT_ON = new SVGIcon(MONO + "repeat_on.svg", false);
+    public static final SVGIcon REPLAY = new SVGIcon(MONO + "replay.svg", false);
     public static final SVGIcon ROI_DILATE = new SVGIcon(MONO + "roi_dilate.svg", false);
     public static final SVGIcon ROI_DISTANCE_MAP = new SVGIcon(MONO + "roi_distance_map.svg", false);
     public static final SVGIcon ROI_ERODE = new SVGIcon(MONO + "roi_erode.svg", false);
@@ -166,12 +172,15 @@ public class SVGIcon {
     public static final SVGIcon SAVE_AS = new SVGIcon(MONO + "save_as.svg", false);
     public static final SVGIcon SEARCH = new SVGIcon(MONO + "search.svg", false);
     public static final SVGIcon SETTINGS = new SVGIcon(MONO + "settings.svg", false);
+    public static final SVGIcon SETTINGS_PHOTO_CAMERA = new SVGIcon(MONO + "settings_photo_camera.svg", false);
+    public static final SVGIcon SETTINGS_VIDEO_CAMERA = new SVGIcon(MONO + "settings_video_camera.svg", false);
     public static final SVGIcon SHADING = new SVGIcon(MONO + "shading.svg", false);
     public static final SVGIcon SKIP_NEXT = new SVGIcon(MONO + "skip_next.svg", false);
     public static final SVGIcon SKIP_PREVIOUS = new SVGIcon(MONO + "skip_previous.svg", false);
     public static final SVGIcon SOUTH = new SVGIcon(MONO + "south.svg", false);
     public static final SVGIcon SOUTH_EAST = new SVGIcon(MONO + "south_east.svg", false);
     public static final SVGIcon SOUTH_WEST = new SVGIcon(MONO + "south_west.svg", false);
+    public static final SVGIcon STAR = new SVGIcon(MONO + "star.svg", false);
     public static final SVGIcon STOP_CIRCLE = new SVGIcon(MONO + "stop_circle.svg", false);
     public static final SVGIcon STROKE_FULL = new SVGIcon(MONO + "stroke_full.svg", false);
     public static final SVGIcon SWITCH_ACCESS_2 = new SVGIcon(MONO + "switch_access_2.svg", false);
@@ -184,6 +193,7 @@ public class SVGIcon {
     public static final SVGIcon UPDATE = new SVGIcon(MONO + "update.svg", false);
     public static final SVGIcon UPDATE_DISABLED = new SVGIcon(MONO + "update_disabled.svg", false);
     public static final SVGIcon VERTICAL_ALIGN_TOP = new SVGIcon(MONO + "vertical_align_top.svg", false);
+    public static final SVGIcon VIDEOCAM = new SVGIcon(MONO + "videocam.svg", false);
     public static final SVGIcon VIEW_COLUMN = new SVGIcon(MONO + "view_column.svg", false);
     public static final SVGIcon VIEW_MODULE = new SVGIcon(MONO + "view_module.svg", false);
     public static final SVGIcon VIEW_QUILT = new SVGIcon(MONO + "view_quilt.svg", false);
