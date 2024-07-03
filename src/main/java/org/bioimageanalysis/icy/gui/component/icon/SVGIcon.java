@@ -105,6 +105,10 @@ public class SVGIcon {
     public static final SVGIcon FLASH_ON = new SVGIcon(MONO + "flash_on.svg", false);
     public static final SVGIcon FOLDER = new SVGIcon(MONO + "folder.svg", false);
     public static final SVGIcon FOLDER_OPEN = new SVGIcon(MONO + "folder_open.svg", false);
+    public static final SVGIcon FORMAT_ALIGN_CENTER = new SVGIcon(MONO + "format_align_center.svg", false);
+    public static final SVGIcon FORMAT_ALIGN_JUSTIFY = new SVGIcon(MONO + "format_align_justify.svg", false);
+    public static final SVGIcon FORMAT_ALIGN_LEFT = new SVGIcon(MONO + "format_align_left.svg", false);
+    public static final SVGIcon FORMAT_ALIGN_RIGHT = new SVGIcon(MONO + "format_align_right.svg", false);
     public static final SVGIcon GESTURE_SELECT = new SVGIcon(MONO + "gesture_select.svg", false);
     public static final SVGIcon GRAIN = new SVGIcon(MONO + "grain.svg", false);
     public static final SVGIcon GRID_OFF = new SVGIcon(MONO + "grid_off.svg", false);
