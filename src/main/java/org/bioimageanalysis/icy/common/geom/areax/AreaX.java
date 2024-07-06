@@ -16,32 +16,28 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
+/*
  * This software is released as part of the Pumpernickel project.
- * 
+ *
  * All com.pump resources in the Pumpernickel project are distributed under the
  * MIT License:
  * https://github.com/mickleness/pumpernickel/raw/master/License.txt
- * 
+ *
  * More information about the Pumpernickel project is available here:
  * https://mickleness.github.io/pumpernickel/
  */
 package org.bioimageanalysis.icy.common.geom.areax;
 
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.FlatteningPathIterator;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.*;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.UIManager;
 
 /**
  * This class is a direct branch from the <code>java.awt.geom.Area</code>.
@@ -92,7 +88,7 @@ import javax.swing.UIManager;
  * that the <code>AreaX</code> class must perform on the path may not reflect
  * the same concepts of "simple and obvious" as a human being perceives.
  * </ul>
- * 
+ *
  * <p>
  * What is stated above is directly copied from the
  * <code>java.awt.geom.Area</code> javadocs. Below are notes specifically
@@ -113,838 +109,805 @@ import javax.swing.UIManager;
  * calling: <code>UIManager.put("AreaX.rules", myRules)</code>.
  */
 public class AreaX implements Shape, Cloneable {
-	public static final int RELATIONSHIP_LHS_CONTAINS = 0;
-	public static final int RELATIONSHIP_RHS_CONTAINS = 1;
-	public static final int RELATIONSHIP_COMPLEX = 2;
-	public static final int RELATIONSHIP_NONE = 3;
+    public static final int RELATIONSHIP_LHS_CONTAINS = 0;
+    public static final int RELATIONSHIP_RHS_CONTAINS = 1;
+    public static final int RELATIONSHIP_COMPLEX = 2;
+    public static final int RELATIONSHIP_NONE = 3;
 
-	private static AreaXBody emptyBody = new AreaXBody(null, 0);
-	private static AreaXRules minimalRules = new AreaXRules();
-	private static Map<String, AreaXRules> rulesTable = new HashMap<String, AreaXRules>();
+    private static final AreaXBody emptyBody = new AreaXBody(null, 0);
+    private static final AreaXRules minimalRules = new AreaXRules();
+    private static final Map<String, AreaXRules> rulesTable = new HashMap<>();
 
-	private static AreaXRules getDefaultRules() {
-		Object rulesObject = UIManager.get("AreaX.rules");
-		if (rulesObject instanceof AreaXRules)
-			return (AreaXRules) rulesObject;
-		String className = (String) rulesObject;
-		if (className == null)
-			className = "icy.type.geom.areax.BoundsRules";
-		AreaXRules rules = rulesTable.get(className);
-		try {
-			if (rules == null) {
-				Class<?> theClass = Class.forName(className);
-				Constructor<?> constructor = theClass
-						.getConstructor(new Class[] {});
-				rules = (AreaXRules) constructor.newInstance(new Object[] {});
-			}
-			return rules;
-		} catch (Throwable t) {
-			t.printStackTrace();
-			return minimalRules;
-		}
-	}
+    private static AreaXRules getDefaultRules() {
+        final Object rulesObject = UIManager.get("AreaX.rules");
+        if (rulesObject instanceof AreaXRules)
+            return (AreaXRules) rulesObject;
+        String className = (String) rulesObject;
+        if (className == null)
+            className = BoundsRules.class.getName();
+        AreaXRules rules = rulesTable.get(className);
+        try {
+            if (rules == null) {
+                final Class<?> theClass = Class.forName(className);
+                final Constructor<?> constructor = theClass.getConstructor();
+                rules = (AreaXRules) constructor.newInstance(new Object[]{});
+            }
+            return rules;
+        }
+        catch (final Throwable t) {
+            t.printStackTrace();
+            return minimalRules;
+        }
+    }
 
-	private AreaXBody body;
-	private List<AreaXOperation> queue = new LinkedList<AreaXOperation>();
-	private AreaXRules rules = getDefaultRules();
+    private AreaXBody body;
+    private final List<AreaXOperation> queue = new LinkedList<>();
+    private AreaXRules rules = getDefaultRules();
 
-	/**
-	 * Default constructor which creates an empty area.
-	 */
-	public AreaX() {
-		body = emptyBody;
-	}
+    /**
+     * Default constructor which creates an empty area.
+     */
+    public AreaX() {
+        body = emptyBody;
+    }
 
-	/**
-	 * Create a new <code>AreaX</code> pointing to a <code>AreaXBody</code>.
-	 */
-	public AreaX(AreaXBody body) {
-		this.body = body;
-	}
+    /**
+     * Create a new <code>AreaX</code> pointing to a <code>AreaXBody</code>.
+     */
+    public AreaX(final AreaXBody body) {
+        this.body = body;
+    }
 
-	/**
-	 * The <code>AreaX</code> class creates an area geometry from the specified
-	 * {@link Shape} object. The geometry is explicitly closed, if the
-	 * <code>Shape</code> is not already closed. The fill rule (even-odd or
-	 * winding) specified by the geometry of the <code>Shape</code> is used to
-	 * determine the resulting enclosed area.
-	 * 
-	 * @param s
-	 *            the <code>Shape</code> from which the area is constructed.
-	 *            <p>
-	 *            If this is an <code>AreaX</code>, then this constructor forces
-	 *            any pending operations to be performed.
-	 * @throws NullPointerException
-	 *             if <code>s</code> is null
-	 */
-	public AreaX(Shape s) {
-		if (s instanceof AreaX) {
-			AreaX area = (AreaX) s;
-			area.processQueue();
-			body = area.body;
-		} else {
-			body = AreaXBody.create(s.getPathIterator(null), true);
-		}
-	}
+    /**
+     * The <code>AreaX</code> class creates an area geometry from the specified
+     * {@link Shape} object. The geometry is explicitly closed, if the
+     * <code>Shape</code> is not already closed. The fill rule (even-odd or
+     * winding) specified by the geometry of the <code>Shape</code> is used to
+     * determine the resulting enclosed area.
+     *
+     * @param s the <code>Shape</code> from which the area is constructed.
+     *          <p>
+     *          If this is an <code>AreaX</code>, then this constructor forces
+     *          any pending operations to be performed.
+     * @throws NullPointerException if <code>s</code> is null
+     */
+    public AreaX(final Shape s) {
+        if (s instanceof final AreaX area) {
+            area.processQueue();
+            body = area.body;
+        }
+        else {
+            body = AreaXBody.create(s.getPathIterator(null), true);
+        }
+    }
 
-	public synchronized void setRules(AreaXRules rules) {
-		if (rules == null)
-			rules = minimalRules;
-		this.rules = rules;
-	}
+    public synchronized void setRules(AreaXRules rules) {
+        if (rules == null)
+            rules = minimalRules;
+        this.rules = rules;
+    }
 
-	public synchronized AreaXRules getRules() {
-		return rules;
-	}
+    public synchronized AreaXRules getRules() {
+        return rules;
+    }
 
-	/**
-	 * This immediately executes all pending operations on this
-	 * <code>AreaX</code>. It should not be necessary for other objects to need
-	 * to call this method, except to manager the time/cost of execution.
-	 */
-	public synchronized void processQueue() {
-		int queueSize = queue.size();
-		if (queueSize == 0)
-			return;
+    /**
+     * This immediately executes all pending operations on this
+     * <code>AreaX</code>. It should not be necessary for other objects to need
+     * to call this method, except to manager the time/cost of execution.
+     */
+    public synchronized void processQueue() {
+        final int queueSize = queue.size();
+        if (queueSize == 0)
+            return;
 
-		AreaXOperation[] ops = queue.toArray(new AreaXOperation[queueSize]);
-		queue.clear();
-		body = rules.execute(body, ops);
-	}
+        final AreaXOperation[] ops = queue.toArray(new AreaXOperation[queueSize]);
+        queue.clear();
+        body = rules.execute(body, ops);
+    }
 
-	/**
-	 * This returns the <code>AreaXBody</code> that currently expressed the data
-	 * in this <code>AreaX</code>. This object will constantly be replaced as
-	 * new operations are performed.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 */
-	public synchronized AreaXBody getBody() {
-		processQueue();
-		return body;
-	}
+    /**
+     * This returns the <code>AreaXBody</code> that currently expressed the data
+     * in this <code>AreaX</code>. This object will constantly be replaced as
+     * new operations are performed.
+     * <p>
+     * This forces any pending operations to be performed.
+     */
+    public synchronized AreaXBody getBody() {
+        processQueue();
+        return body;
+    }
 
-	/**
-	 * Adds the shape of the specified <code>Shape</code> to the shape of this
-	 * <code>AreaX</code>. The resulting shape of this <code>AreaX</code> will
-	 * include the union of both shapes, or all areas that were contained in
-	 * either this or the specified <code>AreaX</code>.
-	 * 
-	 * <pre>
-	 *     // Example:
-	 *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
-	 *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
-	 *     a1.add(a2);
-	 * 
-	 *        a1(before)     +         a2         =     a1(after)
-	 * 
-	 *     ################     ################     ################
-	 *     ##############         ##############     ################
-	 *     ############             ############     ################
-	 *     ##########                 ##########     ################
-	 *     ########                     ########     ################
-	 *     ######                         ######     ######    ######
-	 *     ####                             ####     ####        ####
-	 *     ##                                 ##     ##            ##
-	 * </pre>
-	 * <p>
-	 * This call does not immediately execute. It adds this operation to a queue
-	 * of operations that are processed as required.
-	 * 
-	 * @param rhs
-	 *            the <code>Shape</code> to be added to the current shape
-	 * @throws NullPointerException
-	 *             if <code>rhs</code> is null
-	 */
-	public synchronized void add(Shape rhs) {
-		queue.add(new AreaXOperation(rhs, AreaXOperation.ADD));
-	}
+    /**
+     * Adds the shape of the specified <code>Shape</code> to the shape of this
+     * <code>AreaX</code>. The resulting shape of this <code>AreaX</code> will
+     * include the union of both shapes, or all areas that were contained in
+     * either this or the specified <code>AreaX</code>.
+     *
+     * <pre>
+     *     // Example:
+     *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
+     *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
+     *     a1.add(a2);
+     *
+     *        a1(before)     +         a2         =     a1(after)
+     *
+     *     ################     ################     ################
+     *     ##############         ##############     ################
+     *     ############             ############     ################
+     *     ##########                 ##########     ################
+     *     ########                     ########     ################
+     *     ######                         ######     ######    ######
+     *     ####                             ####     ####        ####
+     *     ##                                 ##     ##            ##
+     * </pre>
+     * <p>
+     * This call does not immediately execute. It adds this operation to a queue
+     * of operations that are processed as required.
+     *
+     * @param rhs the <code>Shape</code> to be added to the current shape
+     * @throws NullPointerException if <code>rhs</code> is null
+     */
+    public synchronized void add(final Shape rhs) {
+        queue.add(new AreaXOperation(rhs, AreaXOperation.ADD));
+    }
 
-	/**
-	 * This uses <code>getRelationship()</code> to determine if the argument is
-	 * inside this shape.
-	 * 
-	 * @param shape
-	 * @return true whether the argument is completely contained inside this
-	 *         shape.
-	 */
-	public synchronized boolean contains(Shape shape) {
-		return getRelationship(null, shape, null) == RELATIONSHIP_LHS_CONTAINS;
-	}
+    /**
+     * This uses <code>getRelationship()</code> to determine if the argument is
+     * inside this shape.
+     *
+     * @param shape
+     * @return true whether the argument is completely contained inside this
+     * shape.
+     */
+    public synchronized boolean contains(final Shape shape) {
+        return getRelationship(null, shape, null) == RELATIONSHIP_LHS_CONTAINS;
+    }
 
-	/**
-	 * This uses <code>getRelationship()</code> to determine if the argument is
-	 * inside this shape.
-	 * 
-	 * @param shape
-	 * @param transform
-	 *            a transform to apply to the argument shape.
-	 * @return true whether the argument (when transformed) is completely
-	 *         contained inside this shape.
-	 */
-	public synchronized boolean contains(Shape shape, AffineTransform transform) {
-		return getRelationship(null, shape, transform) == RELATIONSHIP_LHS_CONTAINS;
-	}
+    /**
+     * This uses <code>getRelationship()</code> to determine if the argument is
+     * inside this shape.
+     *
+     * @param shape
+     * @param transform a transform to apply to the argument shape.
+     * @return true whether the argument (when transformed) is completely
+     * contained inside this shape.
+     */
+    public synchronized boolean contains(final Shape shape, final AffineTransform transform) {
+        return getRelationship(null, shape, transform) == RELATIONSHIP_LHS_CONTAINS;
+    }
 
-	/**
-	 * This uses <code>getRelationship()</code> to determine if the argument is
-	 * inside this shape.
-	 * 
-	 * @param lhsTransform
-	 *            the optional transform to apply to this operand.
-	 * @param shape
-	 * @param transform
-	 *            an optional transform to apply to the argument shape.
-	 * @return true whether the argument (when transformed) is completely
-	 *         contained inside this shape.
-	 */
-	public synchronized boolean contains(AffineTransform lhsTransform,
-			Shape shape, AffineTransform transform) {
-		return getRelationship(lhsTransform, shape, transform) == RELATIONSHIP_LHS_CONTAINS;
-	}
+    /**
+     * This uses <code>getRelationship()</code> to determine if the argument is
+     * inside this shape.
+     *
+     * @param lhsTransform the optional transform to apply to this operand.
+     * @param shape
+     * @param transform    an optional transform to apply to the argument shape.
+     * @return true whether the argument (when transformed) is completely
+     * contained inside this shape.
+     */
+    public synchronized boolean contains(final AffineTransform lhsTransform, final Shape shape, final AffineTransform transform) {
+        return getRelationship(lhsTransform, shape, transform) == RELATIONSHIP_LHS_CONTAINS;
+    }
 
-	/**
-	 * This uses <code>getRelationship()</code> to determine if the argument
-	 * intersects this shape.
-	 * 
-	 * @param shape
-	 * @return true whether the argument (when transformed) intersects this
-	 *         shape.
-	 */
-	public synchronized boolean intersects(Shape shape) {
-		int r = getRelationship(null, shape, null);
-		return r != RELATIONSHIP_NONE;
-	}
+    /**
+     * This uses <code>getRelationship()</code> to determine if the argument
+     * intersects this shape.
+     *
+     * @param shape
+     * @return true whether the argument (when transformed) intersects this
+     * shape.
+     */
+    public synchronized boolean intersects(final Shape shape) {
+        final int r = getRelationship(null, shape, null);
+        return r != RELATIONSHIP_NONE;
+    }
 
-	/**
-	 * This uses <code>getRelationship()</code> to determine if the argument
-	 * intersects this shape.
-	 * 
-	 * @param shape
-	 * @param transform
-	 *            a transform to apply to the argument shape.
-	 * @return true whether the argument (when transformed) intersects this
-	 *         shape.
-	 */
-	public synchronized boolean intersects(Shape shape,
-			AffineTransform transform) {
-		int r = getRelationship(null, shape, transform);
-		return r != RELATIONSHIP_NONE;
-	}
+    /**
+     * This uses <code>getRelationship()</code> to determine if the argument
+     * intersects this shape.
+     *
+     * @param shape
+     * @param transform a transform to apply to the argument shape.
+     * @return true whether the argument (when transformed) intersects this
+     * shape.
+     */
+    public synchronized boolean intersects(final Shape shape, final AffineTransform transform) {
+        final int r = getRelationship(null, shape, transform);
+        return r != RELATIONSHIP_NONE;
+    }
 
-	/**
-	 * This uses <code>getRelationship()</code> to determine if the argument
-	 * intersects this shape.
-	 * 
-	 * @param lhsTransform
-	 *            the optional transform to apply to this operand.
-	 * @param shape
-	 * @param transform
-	 *            an optional transform to apply to the argument shape.
-	 * @return true whether the argument (when transformed) intersects this
-	 *         shape.
-	 */
-	public synchronized boolean intersects(AffineTransform lhsTransform,
-			Shape shape, AffineTransform transform) {
-		int r = getRelationship(lhsTransform, shape, transform);
-		return r != RELATIONSHIP_NONE;
-	}
+    /**
+     * This uses <code>getRelationship()</code> to determine if the argument
+     * intersects this shape.
+     *
+     * @param lhsTransform the optional transform to apply to this operand.
+     * @param shape
+     * @param transform    an optional transform to apply to the argument shape.
+     * @return true whether the argument (when transformed) intersects this
+     * shape.
+     */
+    public synchronized boolean intersects(final AffineTransform lhsTransform, final Shape shape, final AffineTransform transform) {
+        final int r = getRelationship(lhsTransform, shape, transform);
+        return r != RELATIONSHIP_NONE;
+    }
 
-	/**
-	 * Returns one of the relationship constants to indicate the relationship
-	 * between this shape and the argument (with the optional transform).
-	 * 
-	 * @param lhsTransform
-	 *            the optional transform to apply to this operand.
-	 * @param shape
-	 * @param transform
-	 *            an optional transform to apply to the argument.
-	 * @return one of the 4 relationship constants: RELATIONSHIP_LHS_CONTAINS,
-	 *         RELATIONSHIP_RHS_CONTAINS, RELATIONSHIP_NONE, or
-	 *         RELATIONSHIP_COMPLEX.
-	 */
-	public synchronized int getRelationship(AffineTransform lhsTransform,
-			Shape shape, AffineTransform transform) {
-		return getBody().getRelationship(lhsTransform, shape, transform);
-	}
+    /**
+     * Returns one of the relationship constants to indicate the relationship
+     * between this shape and the argument (with the optional transform).
+     *
+     * @param lhsTransform the optional transform to apply to this operand.
+     * @param shape
+     * @param transform    an optional transform to apply to the argument.
+     * @return one of the 4 relationship constants: RELATIONSHIP_LHS_CONTAINS,
+     * RELATIONSHIP_RHS_CONTAINS, RELATIONSHIP_NONE, or
+     * RELATIONSHIP_COMPLEX.
+     */
+    public synchronized int getRelationship(final AffineTransform lhsTransform, final Shape shape, final AffineTransform transform) {
+        return getBody().getRelationship(lhsTransform, shape, transform);
+    }
 
-	/**
-	 * Adds the shape of the specified <code>AreaX</code> to the shape of this
-	 * <code>AreaX</code>. The resulting shape of this <code>AreaX</code> will
-	 * include the union of both shapes, or all areas that were contained in
-	 * either this or the specified <code>AreaX</code>.
-	 * 
-	 * <pre>
-	 *     // Example:
-	 *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
-	 *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
-	 *     a1.add(a2);
-	 * 
-	 *        a1(before)     +         a2         =     a1(after)
-	 * 
-	 *     ################     ################     ################
-	 *     ##############         ##############     ################
-	 *     ############             ############     ################
-	 *     ##########                 ##########     ################
-	 *     ########                     ########     ################
-	 *     ######                         ######     ######    ######
-	 *     ####                             ####     ####        ####
-	 *     ##                                 ##     ##            ##
-	 * </pre>
-	 * <p>
-	 * This call immediately executes. It executes any pending operations first,
-	 * and then executes this add.
-	 * 
-	 * @param rhs
-	 *            the <code>AreaX</code> to be added to the current shape
-	 * @throws NullPointerException
-	 *             if <code>rhs</code> is null
-	 */
-	public synchronized void executeAdd(AreaX rhs) {
-		body = getBody().add(rhs.getBody());
-	}
+    /**
+     * Adds the shape of the specified <code>AreaX</code> to the shape of this
+     * <code>AreaX</code>. The resulting shape of this <code>AreaX</code> will
+     * include the union of both shapes, or all areas that were contained in
+     * either this or the specified <code>AreaX</code>.
+     *
+     * <pre>
+     *     // Example:
+     *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
+     *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
+     *     a1.add(a2);
+     *
+     *        a1(before)     +         a2         =     a1(after)
+     *
+     *     ################     ################     ################
+     *     ##############         ##############     ################
+     *     ############             ############     ################
+     *     ##########                 ##########     ################
+     *     ########                     ########     ################
+     *     ######                         ######     ######    ######
+     *     ####                             ####     ####        ####
+     *     ##                                 ##     ##            ##
+     * </pre>
+     * <p>
+     * This call immediately executes. It executes any pending operations first,
+     * and then executes this add.
+     *
+     * @param rhs the <code>AreaX</code> to be added to the current shape
+     * @throws NullPointerException if <code>rhs</code> is null
+     */
+    public synchronized void executeAdd(@NotNull final AreaX rhs) {
+        body = getBody().add(rhs.getBody());
+    }
 
-	/**
-	 * Subtracts the shape of the specified <code>Shape</code> from the shape of
-	 * this <code>AreaX</code>. The resulting shape of this <code>AreaX</code>
-	 * will include areas that were contained only in this <code>AreaX</code>
-	 * and not in the specified <code>AreaX</code>.
-	 * 
-	 * <pre>
-	 *     // Example:
-	 *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
-	 *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
-	 *     a1.subtract(a2);
-	 * 
-	 *        a1(before)     -         a2         =     a1(after)
-	 * 
-	 *     ################     ################
-	 *     ##############         ##############     ##
-	 *     ############             ############     ####
-	 *     ##########                 ##########     ######
-	 *     ########                     ########     ########
-	 *     ######                         ######     ######
-	 *     ####                             ####     ####
-	 *     ##                                 ##     ##
-	 * </pre>
-	 * <p>
-	 * This call does not immediately execute. It adds this operation to a queue
-	 * of operations that are processed as required.
-	 * 
-	 * @param rhs
-	 *            the <code>AreaX</code> to be subtracted from the current shape
-	 * @throws NullPointerException
-	 *             if <code>rhs</code> is null
-	 */
-	public synchronized void subtract(Shape rhs) {
-		queue.add(new AreaXOperation(rhs, AreaXOperation.SUBTRACT));
-	}
+    /**
+     * Subtracts the shape of the specified <code>Shape</code> from the shape of
+     * this <code>AreaX</code>. The resulting shape of this <code>AreaX</code>
+     * will include areas that were contained only in this <code>AreaX</code>
+     * and not in the specified <code>AreaX</code>.
+     *
+     * <pre>
+     *     // Example:
+     *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
+     *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
+     *     a1.subtract(a2);
+     *
+     *        a1(before)     -         a2         =     a1(after)
+     *
+     *     ################     ################
+     *     ##############         ##############     ##
+     *     ############             ############     ####
+     *     ##########                 ##########     ######
+     *     ########                     ########     ########
+     *     ######                         ######     ######
+     *     ####                             ####     ####
+     *     ##                                 ##     ##
+     * </pre>
+     * <p>
+     * This call does not immediately execute. It adds this operation to a queue
+     * of operations that are processed as required.
+     *
+     * @param rhs the <code>AreaX</code> to be subtracted from the current shape
+     * @throws NullPointerException if <code>rhs</code> is null
+     */
+    public synchronized void subtract(final Shape rhs) {
+        queue.add(new AreaXOperation(rhs, AreaXOperation.SUBTRACT));
+    }
 
-	/**
-	 * Subtracts the shape of the specified <code>AreaX</code> from the shape of
-	 * this <code>AreaX</code>. The resulting shape of this <code>AreaX</code>
-	 * will include areas that were contained only in this <code>AreaX</code>
-	 * and not in the specified <code>AreaX</code>.
-	 * 
-	 * <pre>
-	 *     // Example:
-	 *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
-	 *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
-	 *     a1.subtract(a2);
-	 * 
-	 *        a1(before)     -         a2         =     a1(after)
-	 * 
-	 *     ################     ################
-	 *     ##############         ##############     ##
-	 *     ############             ############     ####
-	 *     ##########                 ##########     ######
-	 *     ########                     ########     ########
-	 *     ######                         ######     ######
-	 *     ####                             ####     ####
-	 *     ##                                 ##     ##
-	 * </pre>
-	 * <p>
-	 * This call immediately executes. It executes any pending operations first,
-	 * and then executes this add.
-	 * 
-	 * @param rhs
-	 *            the <code>AreaX</code> to be subtracted from the current shape
-	 * @throws NullPointerException
-	 *             if <code>rhs</code> is null
-	 */
-	public synchronized void executeSubtract(AreaX rhs) {
-		body = getBody().subtract(rhs.getBody());
-	}
+    /**
+     * Subtracts the shape of the specified <code>AreaX</code> from the shape of
+     * this <code>AreaX</code>. The resulting shape of this <code>AreaX</code>
+     * will include areas that were contained only in this <code>AreaX</code>
+     * and not in the specified <code>AreaX</code>.
+     *
+     * <pre>
+     *     // Example:
+     *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
+     *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
+     *     a1.subtract(a2);
+     *
+     *        a1(before)     -         a2         =     a1(after)
+     *
+     *     ################     ################
+     *     ##############         ##############     ##
+     *     ############             ############     ####
+     *     ##########                 ##########     ######
+     *     ########                     ########     ########
+     *     ######                         ######     ######
+     *     ####                             ####     ####
+     *     ##                                 ##     ##
+     * </pre>
+     * <p>
+     * This call immediately executes. It executes any pending operations first,
+     * and then executes this add.
+     *
+     * @param rhs the <code>AreaX</code> to be subtracted from the current shape
+     * @throws NullPointerException if <code>rhs</code> is null
+     */
+    public synchronized void executeSubtract(@NotNull final AreaX rhs) {
+        body = getBody().subtract(rhs.getBody());
+    }
 
-	/**
-	 * Sets the shape of this <code>AreaX</code> to the intersection of its
-	 * current shape and the shape of the specified <code>Shape</code>. The
-	 * resulting shape of this <code>AreaX</code> will include only areas that
-	 * were contained in both this <code>AreaX</code> and also in the specified
-	 * <code>AreaX</code>.
-	 * 
-	 * <pre>
-	 *     // Example:
-	 *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
-	 *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
-	 *     a1.intersect(a2);
-	 * 
-	 *      a1(before)   intersect     a2         =     a1(after)
-	 * 
-	 *     ################     ################     ################
-	 *     ##############         ##############       ############
-	 *     ############             ############         ########
-	 *     ##########                 ##########           ####
-	 *     ########                     ########
-	 *     ######                         ######
-	 *     ####                             ####
-	 *     ##                                 ##
-	 * </pre>
-	 * <p>
-	 * This call does not immediately execute. It adds this operation to a queue
-	 * of operations that are processed as required.
-	 * 
-	 * @param rhs
-	 *            the <code>AreaX</code> to be intersected with this
-	 *            <code>AreaX</code>
-	 * @throws NullPointerException
-	 *             if <code>rhs</code> is null
-	 */
-	public synchronized void intersect(Shape rhs) {
-		queue.add(new AreaXOperation(rhs, AreaXOperation.INTERSECT));
-	}
+    /**
+     * Sets the shape of this <code>AreaX</code> to the intersection of its
+     * current shape and the shape of the specified <code>Shape</code>. The
+     * resulting shape of this <code>AreaX</code> will include only areas that
+     * were contained in both this <code>AreaX</code> and also in the specified
+     * <code>AreaX</code>.
+     *
+     * <pre>
+     *     // Example:
+     *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
+     *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
+     *     a1.intersect(a2);
+     *
+     *      a1(before)   intersect     a2         =     a1(after)
+     *
+     *     ################     ################     ################
+     *     ##############         ##############       ############
+     *     ############             ############         ########
+     *     ##########                 ##########           ####
+     *     ########                     ########
+     *     ######                         ######
+     *     ####                             ####
+     *     ##                                 ##
+     * </pre>
+     * <p>
+     * This call does not immediately execute. It adds this operation to a queue
+     * of operations that are processed as required.
+     *
+     * @param rhs the <code>AreaX</code> to be intersected with this
+     *            <code>AreaX</code>
+     * @throws NullPointerException if <code>rhs</code> is null
+     */
+    public synchronized void intersect(final Shape rhs) {
+        queue.add(new AreaXOperation(rhs, AreaXOperation.INTERSECT));
+    }
 
-	/**
-	 * Sets the shape of this <code>AreaX</code> to the intersection of its
-	 * current shape and the shape of the specified <code>AreaX</code>. The
-	 * resulting shape of this <code>AreaX</code> will include only areas that
-	 * were contained in both this <code>AreaX</code> and also in the specified
-	 * <code>AreaX</code>.
-	 * 
-	 * <pre>
-	 *     // Example:
-	 *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
-	 *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
-	 *     a1.intersect(a2);
-	 * 
-	 *      a1(before)   intersect     a2         =     a1(after)
-	 * 
-	 *     ################     ################     ################
-	 *     ##############         ##############       ############
-	 *     ############             ############         ########
-	 *     ##########                 ##########           ####
-	 *     ########                     ########
-	 *     ######                         ######
-	 *     ####                             ####
-	 *     ##                                 ##
-	 * </pre>
-	 * <p>
-	 * This call immediately executes. It executes any pending operations first,
-	 * and then executes this add.
-	 * 
-	 * @param rhs
-	 *            the <code>AreaX</code> to be intersected with this
-	 *            <code>AreaX</code>
-	 * @throws NullPointerException
-	 *             if <code>rhs</code> is null
-	 */
-	public synchronized void executeIntersect(AreaX rhs) {
-		body = getBody().intersect(rhs.getBody());
-	}
+    /**
+     * Sets the shape of this <code>AreaX</code> to the intersection of its
+     * current shape and the shape of the specified <code>AreaX</code>. The
+     * resulting shape of this <code>AreaX</code> will include only areas that
+     * were contained in both this <code>AreaX</code> and also in the specified
+     * <code>AreaX</code>.
+     *
+     * <pre>
+     *     // Example:
+     *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
+     *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
+     *     a1.intersect(a2);
+     *
+     *      a1(before)   intersect     a2         =     a1(after)
+     *
+     *     ################     ################     ################
+     *     ##############         ##############       ############
+     *     ############             ############         ########
+     *     ##########                 ##########           ####
+     *     ########                     ########
+     *     ######                         ######
+     *     ####                             ####
+     *     ##                                 ##
+     * </pre>
+     * <p>
+     * This call immediately executes. It executes any pending operations first,
+     * and then executes this add.
+     *
+     * @param rhs the <code>AreaX</code> to be intersected with this
+     *            <code>AreaX</code>
+     * @throws NullPointerException if <code>rhs</code> is null
+     */
+    public synchronized void executeIntersect(@NotNull final AreaX rhs) {
+        body = getBody().intersect(rhs.getBody());
+    }
 
-	/**
-	 * Sets the shape of this <code>AreaX</code> to be the combined area of its
-	 * current shape and the shape of the specified <code>Shape</code>, minus
-	 * their intersection. The resulting shape of this <code>AreaX</code> will
-	 * include only areas that were contained in either this <code>AreaX</code>
-	 * or in the specified <code>AreaX</code>, but not in both.
-	 * 
-	 * <pre>
-	 *     // Example:
-	 *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
-	 *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
-	 *     a1.exclusiveOr(a2);
-	 * 
-	 *        a1(before)    xor        a2         =     a1(after)
-	 * 
-	 *     ################     ################
-	 *     ##############         ##############     ##            ##
-	 *     ############             ############     ####        ####
-	 *     ##########                 ##########     ######    ######
-	 *     ########                     ########     ################
-	 *     ######                         ######     ######    ######
-	 *     ####                             ####     ####        ####
-	 *     ##                                 ##     ##            ##
-	 * </pre>
-	 * <p>
-	 * This call does not immediately execute. It adds this operation to a queue
-	 * of operations that are processed as required.
-	 * 
-	 * @param rhs
-	 *            the <code>AreaX</code> to be exclusive ORed with this
-	 *            <code>AreaX</code>.
-	 * @throws NullPointerException
-	 *             if <code>rhs</code> is null
-	 */
-	public synchronized void exclusiveOr(Shape rhs) {
-		queue.add(new AreaXOperation(rhs, AreaXOperation.XOR));
-	}
+    /**
+     * Sets the shape of this <code>AreaX</code> to be the combined area of its
+     * current shape and the shape of the specified <code>Shape</code>, minus
+     * their intersection. The resulting shape of this <code>AreaX</code> will
+     * include only areas that were contained in either this <code>AreaX</code>
+     * or in the specified <code>AreaX</code>, but not in both.
+     *
+     * <pre>
+     *     // Example:
+     *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
+     *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
+     *     a1.exclusiveOr(a2);
+     *
+     *        a1(before)    xor        a2         =     a1(after)
+     *
+     *     ################     ################
+     *     ##############         ##############     ##            ##
+     *     ############             ############     ####        ####
+     *     ##########                 ##########     ######    ######
+     *     ########                     ########     ################
+     *     ######                         ######     ######    ######
+     *     ####                             ####     ####        ####
+     *     ##                                 ##     ##            ##
+     * </pre>
+     * <p>
+     * This call does not immediately execute. It adds this operation to a queue
+     * of operations that are processed as required.
+     *
+     * @param rhs the <code>AreaX</code> to be exclusive ORed with this
+     *            <code>AreaX</code>.
+     * @throws NullPointerException if <code>rhs</code> is null
+     */
+    public synchronized void exclusiveOr(final Shape rhs) {
+        queue.add(new AreaXOperation(rhs, AreaXOperation.XOR));
+    }
 
-	/**
-	 * Sets the shape of this <code>AreaX</code> to be the combined area of its
-	 * current shape and the shape of the specified <code>AreaX</code>, minus
-	 * their intersection. The resulting shape of this <code>AreaX</code> will
-	 * include only areas that were contained in either this <code>AreaX</code>
-	 * or in the specified <code>AreaX</code>, but not in both.
-	 * 
-	 * <pre>
-	 *     // Example:
-	 *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
-	 *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
-	 *     a1.exclusiveOr(a2);
-	 * 
-	 *        a1(before)    xor        a2         =     a1(after)
-	 * 
-	 *     ################     ################
-	 *     ##############         ##############     ##            ##
-	 *     ############             ############     ####        ####
-	 *     ##########                 ##########     ######    ######
-	 *     ########                     ########     ################
-	 *     ######                         ######     ######    ######
-	 *     ####                             ####     ####        ####
-	 *     ##                                 ##     ##            ##
-	 * </pre>
-	 * <p>
-	 * This call immediately executes. It executes any pending operations first,
-	 * and then executes this add.
-	 * 
-	 * @param rhs
-	 *            the <code>AreaX</code> to be exclusive ORed with this
-	 *            <code>AreaX</code>.
-	 * @throws NullPointerException
-	 *             if <code>rhs</code> is null
-	 */
-	public synchronized void executeExclusiveOr(AreaX rhs) {
-		body = getBody().xor(rhs.getBody());
-	}
+    /**
+     * Sets the shape of this <code>AreaX</code> to be the combined area of its
+     * current shape and the shape of the specified <code>AreaX</code>, minus
+     * their intersection. The resulting shape of this <code>AreaX</code> will
+     * include only areas that were contained in either this <code>AreaX</code>
+     * or in the specified <code>AreaX</code>, but not in both.
+     *
+     * <pre>
+     *     // Example:
+     *     Area a1 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 0,8]);
+     *     Area a2 = new Area([triangle 0,0 =&gt; 8,0 =&gt; 8,8]);
+     *     a1.exclusiveOr(a2);
+     *
+     *        a1(before)    xor        a2         =     a1(after)
+     *
+     *     ################     ################
+     *     ##############         ##############     ##            ##
+     *     ############             ############     ####        ####
+     *     ##########                 ##########     ######    ######
+     *     ########                     ########     ################
+     *     ######                         ######     ######    ######
+     *     ####                             ####     ####        ####
+     *     ##                                 ##     ##            ##
+     * </pre>
+     * <p>
+     * This call immediately executes. It executes any pending operations first,
+     * and then executes this add.
+     *
+     * @param rhs the <code>AreaX</code> to be exclusive ORed with this
+     *            <code>AreaX</code>.
+     * @throws NullPointerException if <code>rhs</code> is null
+     */
+    public synchronized void executeExclusiveOr(@NotNull final AreaX rhs) {
+        body = getBody().xor(rhs.getBody());
+    }
 
-	/**
-	 * Removes all of the geometry from this <code>AreaX</code> and restores it
-	 * to an empty area.
-	 */
-	public synchronized void reset() {
-		queue.clear();
-		body = emptyBody;
-	}
+    /**
+     * Removes all of the geometry from this <code>AreaX</code> and restores it
+     * to an empty area.
+     */
+    public synchronized void reset() {
+        queue.clear();
+        body = emptyBody;
+    }
 
-	/**
-	 * Tests whether this <code>AreaX</code> object encloses any area.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @return <code>true</code> if this <code>AreaX</code> object represents an
-	 *         empty area; <code>false</code> otherwise.
-	 */
-	public synchronized boolean isEmpty() {
-		processQueue();
-		return (body.size() == 0);
-	}
+    /**
+     * Tests whether this <code>AreaX</code> object encloses any area.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @return <code>true</code> if this <code>AreaX</code> object represents an
+     * empty area; <code>false</code> otherwise.
+     */
+    public synchronized boolean isEmpty() {
+        processQueue();
+        return (body.size() == 0);
+    }
 
-	/**
-	 * Tests whether this <code>AreaX</code> consists entirely of straight edged
-	 * polygonal geometry.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @return <code>true</code> if the geometry of this <code>AreaX</code>
-	 *         consists entirely of line segments; <code>false</code> otherwise.
-	 */
-	public synchronized boolean isPolygonal() {
-		processQueue();
-		for (int a = 0; a < body.size(); a++) {
-			if (body.get(a).getOrder() > 1) {
-				return false;
-			}
-		}
-		return true;
-	}
+    /**
+     * Tests whether this <code>AreaX</code> consists entirely of straight edged
+     * polygonal geometry.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @return <code>true</code> if the geometry of this <code>AreaX</code>
+     * consists entirely of line segments; <code>false</code> otherwise.
+     */
+    public synchronized boolean isPolygonal() {
+        processQueue();
+        for (int a = 0; a < body.size(); a++) {
+            if (body.get(a).getOrder() > 1) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	/**
-	 * Tests whether this <code>AreaX</code> is rectangular in shape.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @return <code>true</code> if the geometry of this <code>AreaX</code> is
-	 *         rectangular in shape; <code>false</code> otherwise.
-	 */
-	public synchronized boolean isRectangular() {
-		processQueue();
-		int size = body.size();
-		if (size == 0) {
-			return true;
-		}
-		if (size > 3) {
-			return false;
-		}
-		CurveX c1 = body.get(1);
-		CurveX c2 = body.get(2);
-		if (c1.getOrder() != 1 || c2.getOrder() != 1) {
-			return false;
-		}
-		if (c1.getXTop() != c1.getXBot() || c2.getXTop() != c2.getXBot()) {
-			return false;
-		}
-		if (c1.getYTop() != c2.getYTop() || c1.getYBot() != c2.getYBot()) {
-			// One might be able to prove that this is impossible...
-			return false;
-		}
-		return true;
-	}
+    /**
+     * Tests whether this <code>AreaX</code> is rectangular in shape.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @return <code>true</code> if the geometry of this <code>AreaX</code> is
+     * rectangular in shape; <code>false</code> otherwise.
+     */
+    public synchronized boolean isRectangular() {
+        processQueue();
+        final int size = body.size();
+        if (size == 0) {
+            return true;
+        }
+        if (size > 3) {
+            return false;
+        }
+        final CurveX c1 = body.get(1);
+        final CurveX c2 = body.get(2);
+        if (c1.getOrder() != 1 || c2.getOrder() != 1) {
+            return false;
+        }
+        if (c1.getXTop() != c1.getXBot() || c2.getXTop() != c2.getXBot()) {
+            return false;
+        }
+        // One might be able to prove that this is impossible...
+        return (c1.getYTop() == c2.getYTop()) && (c1.getYBot() == c2.getYBot());
+    }
 
-	/**
-	 * Tests whether this <code>AreaX</code> is comprised of a single closed
-	 * subpath. This method returns <code>true</code> if the path contains 0 or
-	 * 1 subpaths, or <code>false</code> if the path contains more than 1
-	 * subpath. The subpaths are counted by the number of
-	 * {@link PathIterator#SEG_MOVETO SEG_MOVETO} segments that appear in the
-	 * path.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @return <code>true</code> if the <code>AreaX</code> is comprised of a
-	 *         single basic geometry; <code>false</code> otherwise.
-	 */
-	public synchronized boolean isSingular() {
-		processQueue();
-		if (body.size() < 3) {
-			return true;
-		}
-		for (int a = 1; a < body.size(); a++) {
-			if (body.get(a).getOrder() == 0) {
-				return false;
-			}
-		}
-		return true;
-	}
+    /**
+     * Tests whether this <code>AreaX</code> is comprised of a single closed
+     * subpath. This method returns <code>true</code> if the path contains 0 or
+     * 1 subpaths, or <code>false</code> if the path contains more than 1
+     * subpath. The subpaths are counted by the number of
+     * {@link PathIterator#SEG_MOVETO SEG_MOVETO} segments that appear in the
+     * path.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @return <code>true</code> if the <code>AreaX</code> is comprised of a
+     * single basic geometry; <code>false</code> otherwise.
+     */
+    public synchronized boolean isSingular() {
+        processQueue();
+        if (body.size() < 3) {
+            return true;
+        }
+        for (int a = 1; a < body.size(); a++) {
+            if (body.get(a).getOrder() == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	/**
-	 * Returns a high precision bounding {@link Rectangle2D} that completely
-	 * encloses this <code>AreaX</code>.
-	 * <p>
-	 * The Area class will attempt to return the tightest bounding box possible
-	 * for the Shape. The bounding box will not be padded to include the control
-	 * points of curves in the outline of the Shape, but should tightly fit the
-	 * actual geometry of the outline itself.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @return the bounding <code>Rectangle2D</code> for the <code>AreaX</code>.
-	 */
-	public synchronized Rectangle2D getBounds2D() {
-		processQueue();
-		return body.getBounds2D(null);
-	}
+    /**
+     * Returns a high precision bounding {@link Rectangle2D} that completely
+     * encloses this <code>AreaX</code>.
+     * <p>
+     * The Area class will attempt to return the tightest bounding box possible
+     * for the Shape. The bounding box will not be padded to include the control
+     * points of curves in the outline of the Shape, but should tightly fit the
+     * actual geometry of the outline itself.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @return the bounding <code>Rectangle2D</code> for the <code>AreaX</code>.
+     */
+    @Override
+    public synchronized Rectangle2D getBounds2D() {
+        processQueue();
+        return body.getBounds2D(null);
+    }
 
-	/**
-	 * Returns a bounding {@link Rectangle} that completely encloses this
-	 * <code>AreaX</code>.
-	 * <p>
-	 * The Area class will attempt to return the tightest bounding box possible
-	 * for the Shape. The bounding box will not be padded to include the control
-	 * points of curves in the outline of the Shape, but should tightly fit the
-	 * actual geometry of the outline itself. Since the returned object
-	 * represents the bounding box with integers, the bounding box can only be
-	 * as tight as the nearest integer coordinates that encompass the geometry
-	 * of the Shape.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @return the bounding <code>Rectangle</code> for the <code>AreaX</code>.
-	 */
-	public synchronized Rectangle getBounds() {
-		processQueue();
-		return body.getBounds(null);
-	}
+    /**
+     * Returns a bounding {@link Rectangle} that completely encloses this
+     * <code>AreaX</code>.
+     * <p>
+     * The Area class will attempt to return the tightest bounding box possible
+     * for the Shape. The bounding box will not be padded to include the control
+     * points of curves in the outline of the Shape, but should tightly fit the
+     * actual geometry of the outline itself. Since the returned object
+     * represents the bounding box with integers, the bounding box can only be
+     * as tight as the nearest integer coordinates that encompass the geometry
+     * of the Shape.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @return the bounding <code>Rectangle</code> for the <code>AreaX</code>.
+     */
+    @Override
+    public synchronized Rectangle getBounds() {
+        processQueue();
+        return body.getBounds(null);
+    }
 
-	/**
-	 * Returns an exact copy of this <code>AreaX</code> object.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @return Created clone object
-	 */
-	@Override
-	public synchronized AreaX clone() {
-		processQueue();
-		return new AreaX(this);
-	}
+    /**
+     * Returns an exact copy of this <code>AreaX</code> object.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @return Created clone object
+     */
+    @Override
+    public synchronized AreaX clone() {
+        processQueue();
+        return new AreaX(this);
+    }
 
-	/**
-	 * Tests whether the geometries of the two <code>AreaX</code> objects are
-	 * equal. This method will return false if the argument is null.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @param other
-	 *            the <code>AreaX</code> to be compared to this
-	 *            <code>AreaX</code>
-	 * @return <code>true</code> if the two geometries are equal;
-	 *         <code>false</code> otherwise.
-	 */
-	public synchronized boolean equals(AreaX other) {
-		return getBody().equals(other.getBody());
-	}
+    /**
+     * Tests whether the geometries of the two <code>AreaX</code> objects are
+     * equal. This method will return false if the argument is null.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @param other the <code>AreaX</code> to be compared to this
+     *              <code>AreaX</code>
+     * @return <code>true</code> if the two geometries are equal;
+     * <code>false</code> otherwise.
+     */
+    public synchronized boolean equals(@NotNull final AreaX other) {
+        return getBody().equals(other.getBody());
+    }
 
-	/**
-	 * Transforms the geometry of this <code>AreaX</code> using the specified
-	 * {@link AffineTransform}. The geometry is transformed in place, which
-	 * permanently changes the enclosed area defined by this object.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @param t
-	 *            the transformation used to transform the area
-	 * @throws NullPointerException
-	 *             if <code>t</code> is null
-	 */
-	public synchronized void transform(AffineTransform t) {
-		if (t == null) {
-			throw new NullPointerException("transform must not be null");
-		}
+    /**
+     * Transforms the geometry of this <code>AreaX</code> using the specified
+     * {@link AffineTransform}. The geometry is transformed in place, which
+     * permanently changes the enclosed area defined by this object.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @param t the transformation used to transform the area
+     * @throws NullPointerException if <code>t</code> is null
+     */
+    public synchronized void transform(final AffineTransform t) {
+        if (t == null) {
+            throw new NullPointerException("transform must not be null");
+        }
 
-		body = getBody().transform(t);
-	}
+        body = getBody().transform(t);
+    }
 
-	/**
-	 * Creates a new <code>AreaX</code> object that contains the same geometry
-	 * as this <code>AreaX</code> transformed by the specified
-	 * <code>AffineTransform</code>. This <code>AreaX</code> object is
-	 * unchanged.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @param t
-	 *            the specified <code>AffineTransform</code> used to transform
-	 *            the new <code>AreaX</code>
-	 * @throws NullPointerException
-	 *             if <code>t</code> is null
-	 * @return a new <code>AreaX</code> object representing the transformed
-	 *         geometry.
-	 */
-	public synchronized AreaX createTransformedArea(AffineTransform t) {
-		AreaX a = new AreaX(this);
-		a.transform(t);
-		return a;
-	}
+    /**
+     * Creates a new <code>AreaX</code> object that contains the same geometry
+     * as this <code>AreaX</code> transformed by the specified
+     * <code>AffineTransform</code>. This <code>AreaX</code> object is
+     * unchanged.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @param t the specified <code>AffineTransform</code> used to transform
+     *          the new <code>AreaX</code>
+     * @return a new <code>AreaX</code> object representing the transformed
+     * geometry.
+     * @throws NullPointerException if <code>t</code> is null
+     */
+    public synchronized AreaX createTransformedArea(final AffineTransform t) {
+        final AreaX a = new AreaX(this);
+        a.transform(t);
+        return a;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 */
-	public synchronized boolean contains(double x, double y) {
-		return getBody().contains(x, y);
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This forces any pending operations to be performed.
+     */
+    @Override
+    public synchronized boolean contains(final double x, final double y) {
+        return getBody().contains(x, y);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 */
-	public synchronized boolean contains(Point2D p) {
-		return contains(p.getX(), p.getY());
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This forces any pending operations to be performed.
+     */
+    @Override
+    public synchronized boolean contains(final Point2D p) {
+        return contains(p.getX(), p.getY());
+    }
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 */
-	public synchronized boolean contains(double x, double y, double w, double h) {
-		if (w < 0 || h < 0) {
-			return false;
-		}
-		processQueue();
-		if (!body.boundsContains(x, y, w, h)) {
-			return false;
-		}
-		CrossingsX c = CrossingsX.findCrossings(body, x, y, x + w, y + h);
-		return (c != null && c.covers(y, y + h));
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This forces any pending operations to be performed.
+     */
+    @Override
+    public synchronized boolean contains(final double x, final double y, final double w, final double h) {
+        if (w < 0 || h < 0) {
+            return false;
+        }
+        processQueue();
+        if (!body.boundsContains(x, y, w, h)) {
+            return false;
+        }
+        final CrossingsX c = CrossingsX.findCrossings(body, x, y, x + w, y + h);
+        return (c != null && c.covers(y, y + h));
+    }
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 */
-	public synchronized boolean contains(Rectangle2D r) {
-		return contains(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This forces any pending operations to be performed.
+     */
+    @Override
+    public synchronized boolean contains(@NotNull final Rectangle2D r) {
+        return contains(r.getX(), r.getY(), r.getWidth(), r.getHeight());
+    }
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 */
-	public synchronized boolean intersects(double x, double y, double w,
-			double h) {
-		if (w < 0 || h < 0) {
-			return false;
-		}
-		processQueue();
-		if (!body.boundsIntersects(x, y, w, h)) {
-			return false;
-		}
-		CrossingsX c = CrossingsX.findCrossings(body, x, y, x + w, y + h);
-		return (c == null || !c.isEmpty());
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This forces any pending operations to be performed.
+     */
+    @Override
+    public synchronized boolean intersects(final double x, final double y, final double w, final double h) {
+        if (w < 0 || h < 0) {
+            return false;
+        }
+        processQueue();
+        if (!body.boundsIntersects(x, y, w, h)) {
+            return false;
+        }
+        final CrossingsX c = CrossingsX.findCrossings(body, x, y, x + w, y + h);
+        return (c == null || !c.isEmpty());
+    }
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 */
-	public synchronized boolean intersects(Rectangle2D r) {
-		return intersects(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This forces any pending operations to be performed.
+     */
+    @Override
+    public synchronized boolean intersects(@NotNull final Rectangle2D r) {
+        return intersects(r.getX(), r.getY(), r.getWidth(), r.getHeight());
+    }
 
-	/**
-	 * Creates a {@link PathIterator} for the outline of this <code>AreaX</code>
-	 * object. This <code>AreaX</code> object is unchanged.
-	 * <p>
-	 * This forces any pending operations to be performed.
-	 * 
-	 * @param at
-	 *            an optional <code>AffineTransform</code> to be applied to the
-	 *            coordinates as they are returned in the iteration, or
-	 *            <code>null</code> if untransformed coordinates are desired
-	 * @return the <code>PathIterator</code> object that returns the geometry of
-	 *         the outline of this <code>AreaX</code>, one segment at a time.
-	 */
-	public synchronized PathIterator getPathIterator(AffineTransform at) {
-		processQueue();
-		return body.getPathIterator(at);
-	}
+    /**
+     * Creates a {@link PathIterator} for the outline of this <code>AreaX</code>
+     * object. This <code>AreaX</code> object is unchanged.
+     * <p>
+     * This forces any pending operations to be performed.
+     *
+     * @param at an optional <code>AffineTransform</code> to be applied to the
+     *           coordinates as they are returned in the iteration, or
+     *           <code>null</code> if untransformed coordinates are desired
+     * @return the <code>PathIterator</code> object that returns the geometry of
+     * the outline of this <code>AreaX</code>, one segment at a time.
+     */
+    @Override
+    public synchronized PathIterator getPathIterator(final AffineTransform at) {
+        processQueue();
+        return body.getPathIterator(at);
+    }
 
-	/**
-	 * Creates a <code>PathIterator</code> for the flattened outline of this
-	 * <code>AreaX</code> object. Only uncurved path segments represented by the
-	 * SEG_MOVETO, SEG_LINETO, and SEG_CLOSE point types are returned by the
-	 * iterator. This <code>AreaX</code> object is unchanged.
-	 * 
-	 * @param at
-	 *            an optional <code>AffineTransform</code> to be applied to the
-	 *            coordinates as they are returned in the iteration, or
-	 *            <code>null</code> if untransformed coordinates are desired
-	 * @param flatness
-	 *            the maximum amount that the control points for a given curve
-	 *            can vary from colinear before a subdivided curve is replaced
-	 *            by a straight line connecting the end points
-	 * @return the <code>PathIterator</code> object that returns the geometry of
-	 *         the outline of this <code>AreaX</code>, one segment at a time.
-	 */
-	public synchronized PathIterator getPathIterator(AffineTransform at,
-			double flatness) {
-		return new FlatteningPathIterator(getPathIterator(at), flatness);
-	}
+    /**
+     * Creates a <code>PathIterator</code> for the flattened outline of this
+     * <code>AreaX</code> object. Only uncurved path segments represented by the
+     * SEG_MOVETO, SEG_LINETO, and SEG_CLOSE point types are returned by the
+     * iterator. This <code>AreaX</code> object is unchanged.
+     *
+     * @param at       an optional <code>AffineTransform</code> to be applied to the
+     *                 coordinates as they are returned in the iteration, or
+     *                 <code>null</code> if untransformed coordinates are desired
+     * @param flatness the maximum amount that the control points for a given curve
+     *                 can vary from colinear before a subdivided curve is replaced
+     *                 by a straight line connecting the end points
+     * @return the <code>PathIterator</code> object that returns the geometry of
+     * the outline of this <code>AreaX</code>, one segment at a time.
+     */
+    @Override
+    public synchronized PathIterator getPathIterator(final AffineTransform at, final double flatness) {
+        return new FlatteningPathIterator(getPathIterator(at), flatness);
+    }
 }
