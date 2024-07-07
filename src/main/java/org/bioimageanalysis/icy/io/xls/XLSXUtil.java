@@ -65,7 +65,7 @@ public final class XLSXUtil {
      * @throws FileNotFoundException if the file does not exist.
      */
     public static @NotNull Workbook loadWorkbookForWrite(final @NotNull File file) throws IOException {
-        return WorkbookFactory.create(file, null, false);
+        return WorkbookFactory.create(new FileInputStream(file), null);
     }
 
     /**
