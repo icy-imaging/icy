@@ -88,7 +88,7 @@ public final class Icy {
     /**
      * Icy Version
      */
-    public static final Version VERSION = new Version(3, 0, 0, Version.DevelopmentStage.ALPHA, 0);
+    public static final Version VERSION = new Version(3, 0, 0, Version.DevelopmentStage.ALPHA, 1);
 
     /**
      * Main interface

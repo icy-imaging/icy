@@ -115,7 +115,11 @@ public class GeneralPreferencePanel extends PreferencePanel {
         gbc_autoUpdateCheckBox.gridx = 0;
         gbc_autoUpdateCheckBox.gridy = 1;
         mainPanel.add(autoUpdateCheckBox, gbc_autoUpdateCheckBox);
-        autoUpdateCheckBox.setToolTipText("Enable automatic update for application as soon a new version is available");
+        //autoUpdateCheckBox.setToolTipText("Enable automatic update for application as soon a new version is available");
+        autoUpdateCheckBox.setToolTipText("<html><b>Not available during alpha.<br>Please update manually via Help menu.</b></html>");
+        autoUpdateCheckBox.setSelected(false);
+        autoUpdateCheckBox.setEnabled(false);
+        // TODO change this after alpha
 
         updateRepository = new JComboBox<>(new String[]{DEFAULT_UPDATE_REPOSITORY, BETA_UPDATE_REPOSITORY});
         final GridBagConstraints gbc_updateRepository = new GridBagConstraints();

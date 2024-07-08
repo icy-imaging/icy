@@ -40,11 +40,10 @@ public class PluginPreferencePanel extends PreferencePanel
         super(parent, NODE_NAME, PreferenceFrame.NODE_NAME);
 
         autoUpdateCheckBox = new JCheckBox("Enable automatic update");
-        autoUpdateCheckBox
-                .setToolTipText("Enable (silent) automatic update for plugins as soon a new version is available");
+        //autoUpdateCheckBox.setToolTipText("Enable (silent) automatic update for plugins as soon a new version is available");
+        autoUpdateCheckBox.setToolTipText("<html><b>Not available during alpha. Please update plugins manually.</b></html>");
         allowBetaCheckBox = new JCheckBox("Allow beta version");
-        allowBetaCheckBox
-                .setToolTipText("Show beta version in online plugins, also beta version can be used for update");
+        allowBetaCheckBox.setToolTipText("Show beta version in online plugins, also beta version can be used for update");
 
         load();
 
@@ -60,7 +59,9 @@ public class PluginPreferencePanel extends PreferencePanel
     @Override
     protected void load()
     {
-        autoUpdateCheckBox.setSelected(PluginPreferences.getAutomaticUpdate());
+        //autoUpdateCheckBox.setSelected(PluginPreferences.getAutomaticUpdate());
+        autoUpdateCheckBox.setSelected(false);
+        autoUpdateCheckBox.setEnabled(false); // TODO change this after alpha
         allowBetaCheckBox.setSelected(PluginPreferences.getAllowBeta());
     }
 
