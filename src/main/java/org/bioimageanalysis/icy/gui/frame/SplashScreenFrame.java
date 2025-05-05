@@ -36,7 +36,9 @@ import java.net.URL;
  * @author Fabrice de Chaumont
  * @author Stephane Dallongeville
  * @author Thomas Musset
+ * @deprecated Does not work anymore with FlatLaf
  */
+@Deprecated(since = "3.0.0", forRemoval = true)
 public class SplashScreenFrame extends JFrame {
     public static class SplashPanel extends JPanel {
         private static final String SPLASH_FOLDER = ResourceUtil.IMAGE_PATH + "splash";
@@ -62,7 +64,7 @@ public class SplashScreenFrame extends JFrame {
                     }
                 }
                 catch (final Exception e) {
-                    IcyLogger.warn(SplashScreenFrame.class, e, "Cannot load splashscreen image.");
+                    IcyLogger.warn(this.getClass(), e, "Cannot load splashscreen image.");
                 }
             }
 

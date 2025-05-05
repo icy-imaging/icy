@@ -204,6 +204,10 @@ public class IcyUpdater {
         changeLogArea.setEditable(false);
         final JLabel changeLogTitleLabel = GuiUtil.createBoldLabel("Change log :");
 
+        for (final ElementDescriptor element : elements) {
+            IcyLogger.debug(IcyUpdater.class, "Updating element: " + element.getName() + " version: " + element.getVersion().toShortString());
+        }
+
         final JList<Object> list = new JList<>(elements.toArray());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.getSelectionModel().addListSelectionListener(e -> {

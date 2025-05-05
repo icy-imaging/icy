@@ -18,11 +18,14 @@
 
 package org.bioimageanalysis.icy.system.preferences;
 
+import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.Version;
-import org.bioimageanalysis.icy.io.FileUtil;
 import org.bioimageanalysis.icy.common.math.MathUtil;
+import org.bioimageanalysis.icy.io.FileUtil;
 import org.bioimageanalysis.icy.network.NetworkUtil;
 import org.bioimageanalysis.icy.system.SystemUtil;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Stephane Dallongeville
@@ -70,6 +73,7 @@ public class ApplicationPreferences {
     /**
      * @return the preferences
      */
+    @Contract(pure = true)
     public static XMLPreferences getPreferences() {
         return preferences;
     }
@@ -94,7 +98,8 @@ public class ApplicationPreferences {
     }
 
     // TODO Enable get from preference when Icy 3 is ready
-    public static String getUpdateRepositoryBase() {
+    @Contract(pure = true)
+    public static @NotNull String getUpdateRepositoryBase() {
         //return preferences.get(ID_UPDATE_REPOSITORY_BASE, DEFAULT_UPDATE_REPOSITORY_BASE);
         return "https://icy.bioimageanalysis.org/update_test_icy3/";
     }
@@ -231,29 +236,28 @@ public class ApplicationPreferences {
     /**
      * @return Get the stored version number (used to detect new installed version).
      */
-    public static Version getVersion() {
-        return Version.fromString(preferences.get(ID_VERSION, "1.0.0"));
+    @Contract(" -> new")
+    public static @NotNull Version getVersion() {
+        //return Version.fromString(preferences.get(ID_VERSION, "1.0.0"));
+        return Version.fromString(preferences.get(ID_VERSION, Icy.VERSION.toShortString()));
     }
 
     /**
-     * @param value
-     *        Set max memory (in MB)
+     * @param value Set max memory (in MB)
      */
     public static void setMaxMemoryMB(final int value) {
         preferences.putInt(ID_MAX_MEMORY, Math.min(getMaxMemoryMBLimit(), value));
     }
 
     /**
-     * @param value
-     *        Set stack size (in KB)
+     * @param value Set stack size (in KB)
      */
     public static void setStackSizeKB(final int value) {
         preferences.putInt(ID_STACK_SIZE, value);
     }
 
     /**
-     * @param value
-     *        Set cache reserved memory (in % of max memory)
+     * @param value Set cache reserved memory (in % of max memory)
      */
     public static void setCacheMemoryPercent(final int value) {
         // 10 <= value <= 80
@@ -261,51 +265,45 @@ public class ApplicationPreferences {
     }
 
     /**
-     * @param value
-     *        Set cache path (folder where to create cache data, better to use fast storage)
+     * @param value Set cache path (folder where to create cache data, better to use fast storage)
      */
     public static void setCachePath(final String value) {
         preferences.put(ID_CACHE_PATH, value);
     }
 
     /**
-     * @param value
-     *        Set extra JVM parameters string
+     * @param value Set extra JVM parameters string
      */
     public static void setExtraVMParams(final String value) {
         preferences.put(ID_EXTRA_VMPARAMS, value);
     }
 
     /**
-     * @param value
-     *        Set OS specific extra JVM parameters string
+     * @param value Set OS specific extra JVM parameters string
      */
     public static void setOSExtraVMParams(final String value) {
         preferences.put(ID_OS_EXTRA_VMPARAMS + SystemUtil.getOSNameId(), value);
     }
 
     /**
-     * @param value
-     *        Set Icy application folder
+     * @param value Set Icy application folder
      */
     public static void setAppFolder(final String value) {
         preferences.put(ID_APP_FOLDER, value);
     }
 
     /**
-     * @param value
-     *        Set ICY application parameters string
+     * @param value Set ICY application parameters string
      */
     public static void setAppParams(final String value) {
         preferences.put(ID_APP_PARAMS, value);
     }
 
     /**
-     * @param value
-     *        Set the stored version number (used to detect new installed version)
+     * @param value Set the stored version number (used to detect new installed version)
      */
-    public static void setVersion(final Version value) {
-        preferences.put(ID_VERSION, value.toString());
+    public static void setVersion(final @NotNull Version value) {
+        preferences.put(ID_VERSION, value.toShortString());
     }
 
 }

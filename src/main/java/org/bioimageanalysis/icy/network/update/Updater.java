@@ -126,6 +126,7 @@ public class Updater {
      */
     public static ArrayList<ElementDescriptor> getLocalElements() {
         // get local elements from XML file
+        IcyLogger.debug(Updater.class, "Loading local elements");
         final ArrayList<ElementDescriptor> result = loadElementsFromXML(FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + VERSION_NAME);
 
         // validate elements
@@ -138,6 +139,7 @@ public class Updater {
      * Get the list of online elements (online update.xml file)
      */
     public static ArrayList<ElementDescriptor> getOnlineElements() {
+        IcyLogger.debug(Updater.class, "Loading online elements");
         return loadElementsFromXML(UPDATE_DIRECTORY + FileUtil.separator + UPDATE_NAME);
     }
 
@@ -194,6 +196,7 @@ public class Updater {
     }
 
     public static ArrayList<ElementDescriptor> loadElementsFromXML(final String path) {
+        IcyLogger.debug(Updater.class, "Loading elements from " + path);
         final ArrayList<ElementDescriptor> result = new ArrayList<>();
 
         final Document document = XMLUtil.loadDocument(path, true);

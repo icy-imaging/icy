@@ -27,5 +27,6 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface IcyROIPlugin {
-    ROIType value();
+    ROIType type();
+    ROIPoints nbPoints() default ROIPoints.INFINITE;
 }

@@ -16,21 +16,30 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.bioimageanalysis.icy.extension.abstract_;
+package org.bioimageanalysis.icy.gui.toolbar;
 
-import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
-import org.jetbrains.annotations.Contract;
-
-import java.util.ArrayList;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Thomas Musset
  */
-public abstract class Extension {
-    protected final ArrayList<Class<? extends Plugin>> plugins = new ArrayList<>();
+// TODO
+public class TaskProgress extends JProgressBar {
+    public TaskProgress() {
+        super(HORIZONTAL, 0, 100);
 
-    @Contract(pure = true)
-    public final ArrayList<Class<? extends Plugin>> getPlugins() {
-        return plugins;
+        final Dimension defaultSize = new Dimension(100, 5);
+
+        setPreferredSize(defaultSize);
+        setMinimumSize(defaultSize);
+        setMaximumSize(defaultSize);
+
+        setValue(0);
+        //setIndeterminate(true);
+
+        setToolTipText("Click to show background processes");
+
+        setVisible(false);
     }
 }

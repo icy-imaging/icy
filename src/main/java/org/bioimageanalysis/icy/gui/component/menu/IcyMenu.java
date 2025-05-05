@@ -97,6 +97,23 @@ public class IcyMenu extends JMenu {
         this(new SVGIconPack(icon), LookAndFeelUtil.getDefaultIconSize());
     }
 
+    /**
+     * Create a {@link JMenu} with an empty SVG icon for each state (default, disabled and selected) and custom size.
+     */
+    public IcyMenu(final @NotNull String text, final int size) {
+        super(text);
+        iconPack = new SVGIconPack(SVGIcon.NULL);
+        iconSize = size;
+        setSVGIcons();
+    }
+
+    /**
+     * Create a {@link JMenu} with an empty SVG icon for each state (default, disabled and selected) and default size.
+     */
+    public IcyMenu(final @NotNull String text) {
+        this(text, LookAndFeelUtil.getDefaultIconSize());
+    }
+
     protected final void setSVGIconPack(final @NotNull SVGIconPack pack) {
         this.iconPack = pack;
         setSVGIcons();

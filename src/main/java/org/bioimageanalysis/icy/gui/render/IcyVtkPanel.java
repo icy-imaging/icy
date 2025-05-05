@@ -849,6 +849,7 @@ public class IcyVtkPanel extends VtkJoglPanel implements MouseListener, MouseMot
         // get current mouse position
         final int x = e.getX();
         final int y = e.getY();
+        // Get display scale factor, and applying it to the mouse location
         final float[] scale = getCurrentSurfaceScale(new float[2]);
         int deltaX = (int) ((lastX - x) * scale[0]);
         int deltaY = (int) ((lastY - y) * scale[1]);

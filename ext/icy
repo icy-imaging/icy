@@ -16,7 +16,8 @@ fi
 if [[ "$_java" ]]; then
     version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
     echo "Java version: $version"
-    if [[ "$version" -ge $JAVA_TARGET ]]; then
+    first_number=$(echo "$version" | cut -d '.' -f 1)
+    if [[ "$first_number" -ge $JAVA_TARGET ]]; then
         java -jar "$BASEDIR"/updater.jar
     else
         echo "Version is lower than $JAVA_TARGET. Please install Java $JAVA_TARGET or greater."

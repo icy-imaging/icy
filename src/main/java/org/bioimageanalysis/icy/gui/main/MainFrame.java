@@ -26,6 +26,7 @@ import org.bioimageanalysis.icy.gui.component.ComponentUtil;
 import org.bioimageanalysis.icy.gui.frame.IcyExternalFrame;
 import org.bioimageanalysis.icy.gui.menu.ApplicationMenuBar;
 import org.bioimageanalysis.icy.gui.toolbar.InspectorBar;
+import org.bioimageanalysis.icy.gui.toolbar.ROIBar;
 import org.bioimageanalysis.icy.gui.toolbar.StatusBar;
 import org.bioimageanalysis.icy.gui.toolbar.container.InspectorPanel;
 import org.bioimageanalysis.icy.gui.toolbar.container.StatusPanel;
@@ -112,6 +113,7 @@ public class MainFrame extends JFrame {
     JSplitPane mainPane;
     private final JSplitPane centerPanel;
     private final IcyDesktopPane desktopPane;
+    private final ROIBar roiBar;
     private final InspectorBar inspectorBar;
     private final StatusBar statusBar;
     @Deprecated(since = "3.0.0", forRemoval = true)
@@ -267,6 +269,7 @@ public class MainFrame extends JFrame {
             }
         });*/
 
+        roiBar = new ROIBar();
         inspectorBar = new InspectorBar();
         statusBar = new StatusBar();
 
@@ -279,6 +282,7 @@ public class MainFrame extends JFrame {
         mainPane.setEnabled(false);
 
         add(mainPane, BorderLayout.CENTER);
+        add(roiBar, BorderLayout.WEST);
         add(inspectorBar, BorderLayout.EAST);
         add(statusBar, BorderLayout.SOUTH);
 
@@ -366,7 +370,7 @@ public class MainFrame extends JFrame {
             add(mainPane, BorderLayout.CENTER);*/
 
         add(mainPane, BorderLayout.CENTER);
-
+        add(roiBar, BorderLayout.WEST);
         add(inspectorBar, BorderLayout.EAST);
         add(statusBar, BorderLayout.SOUTH);
 

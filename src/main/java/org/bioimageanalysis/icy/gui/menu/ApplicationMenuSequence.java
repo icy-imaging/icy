@@ -106,7 +106,7 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
 
         addSeparator();
 
-        menuExtractChannel = new IcyMenu("Extract Channel...", SVGIcon.BROKEN_IMAGE);
+        menuExtractChannel = new IcyMenu("Extract Channel...");
         add(menuExtractChannel);
 
         itemExtractAllChannels = new IcyMenuItem(SequenceOperationActions.extractAllChannelAction);
@@ -114,61 +114,61 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
 
         menuExtractChannel.addSeparator();
 
-        menuRemoveChannel = new IcyMenu("Remove Channel", SVGIcon.BROKEN_IMAGE);
+        menuRemoveChannel = new IcyMenu("Remove Channel");
         add(menuRemoveChannel);
 
-        final IcyMenuItem itemMergeChannels = new IcyMenuItem(SequenceOperationActions.mergeChannelsAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemMergeChannels = new IcyMenuItem(SequenceOperationActions.mergeChannelsAction);
         add(itemMergeChannels);
 
         addSeparator();
 
-        final IcyMenuItem itemReverseSlices = new IcyMenuItem(SequenceOperationActions.reverseSlicesAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemReverseSlices = new IcyMenuItem(SequenceOperationActions.reverseSlicesAction);
         add(itemReverseSlices);
 
-        final IcyMenuItem itemExtractSlice = new IcyMenuItem(SequenceOperationActions.extractSliceAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemExtractSlice = new IcyMenuItem(SequenceOperationActions.extractSliceAction);
         add(itemExtractSlice);
 
-        final IcyMenuItem itemRemoveSlice = new IcyMenuItem(SequenceOperationActions.removeSliceAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemRemoveSlice = new IcyMenuItem(SequenceOperationActions.removeSliceAction);
         add(itemRemoveSlice);
 
-        final IcyMenuItem itemAddSlices = new IcyMenuItem(SequenceOperationActions.addSlicesAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemAddSlices = new IcyMenuItem(SequenceOperationActions.addSlicesAction);
         add(itemAddSlices);
 
-        final IcyMenuItem itemMergeSlices = new IcyMenuItem(SequenceOperationActions.mergeSlicesAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemMergeSlices = new IcyMenuItem(SequenceOperationActions.mergeSlicesAction);
         add(itemMergeSlices);
 
-        final IcyMenuItem itemRemoveSlices = new IcyMenuItem(SequenceOperationActions.removeSlicesAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemRemoveSlices = new IcyMenuItem(SequenceOperationActions.removeSlicesAction);
         add(itemRemoveSlices);
 
         addSeparator();
 
-        final IcyMenuItem itemReverseFrames = new IcyMenuItem(SequenceOperationActions.reverseFramesAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemReverseFrames = new IcyMenuItem(SequenceOperationActions.reverseFramesAction);
         add(itemReverseFrames);
 
-        final IcyMenuItem itemExtractFrame = new IcyMenuItem(SequenceOperationActions.extractFrameAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemExtractFrame = new IcyMenuItem(SequenceOperationActions.extractFrameAction);
         add(itemExtractFrame);
 
-        final IcyMenuItem itemRemoveFrame = new IcyMenuItem(SequenceOperationActions.removeFrameAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemRemoveFrame = new IcyMenuItem(SequenceOperationActions.removeFrameAction);
         add(itemRemoveFrame);
 
-        final IcyMenuItem itemAddFrames = new IcyMenuItem(SequenceOperationActions.addFramesAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemAddFrames = new IcyMenuItem(SequenceOperationActions.addFramesAction);
         add(itemAddFrames);
 
-        final IcyMenuItem itemMergeFrames = new IcyMenuItem(SequenceOperationActions.mergeFramesAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemMergeFrames = new IcyMenuItem(SequenceOperationActions.mergeFramesAction);
         add(itemMergeFrames);
 
-        final IcyMenuItem itemRemoveFrames = new IcyMenuItem(SequenceOperationActions.removeFramesAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemRemoveFrames = new IcyMenuItem(SequenceOperationActions.removeFramesAction);
         add(itemRemoveFrames);
 
         addSeparator();
 
-        final IcyMenuItem itemConvertToSlices = new IcyMenuItem(SequenceOperationActions.convertToSlicesAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemConvertToSlices = new IcyMenuItem(SequenceOperationActions.convertToSlicesAction);
         add(itemConvertToSlices);
 
-        final IcyMenuItem itemConvertToFrames = new IcyMenuItem(SequenceOperationActions.convertToFramesAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemConvertToFrames = new IcyMenuItem(SequenceOperationActions.convertToFramesAction);
         add(itemConvertToFrames);
 
-        final IcyMenuItem itemConvertAdvancedZT = new IcyMenuItem(SequenceOperationActions.advancedZTConvertAction, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemConvertAdvancedZT = new IcyMenuItem(SequenceOperationActions.advancedZTConvertAction);
         add(itemConvertAdvancedZT);
 
         reloadSequenceMenu();

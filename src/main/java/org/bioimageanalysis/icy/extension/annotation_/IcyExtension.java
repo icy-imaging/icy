@@ -24,5 +24,5 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface IcyExtension {
-    String value() default "/extension.yml";
+    String path() default "/";
 }

@@ -347,7 +347,7 @@ public final class SequenceOperationActions {
         public boolean isEnabled() {
             final Sequence seq = Icy.getMainInterface().getActiveSequence();
 
-            return super.isEnabled() && (seq != null) && (seq.getSize(dim) > 1);
+            return super.isEnabled() && (seq != null); // && (seq.getSize(dim) > 1);
         }
     }
 
@@ -1237,6 +1237,11 @@ public final class SequenceOperationActions {
         result.add(convertToFramesAction);
         result.add(advancedZTConvertAction);
 
+        result.add(extractSliceAction);
+        result.add(removeSliceAction);
+        result.add(extractFrameAction);
+        result.add(removeFrameAction);
+
         result.add(undoAction);
         result.add(redoAction);
         result.add(undoClearAction);
@@ -1252,6 +1257,14 @@ public final class SequenceOperationActions {
         result.add(removeSliceAction);
         result.add(extractFrameAction);
         result.add(removeFrameAction);
+
+        return result;
+    }
+
+    public static @NotNull List<IcyAbstractAction> getAllGlobalROIActions() {
+        final List<IcyAbstractAction> result = new ArrayList<>();
+
+        result.add(cropSequenceAction);
 
         return result;
     }

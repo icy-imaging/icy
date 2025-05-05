@@ -138,8 +138,6 @@ public final class LookAndFeelUtil {
         addSkin(new FlatGradiantoNatureGreenIJTheme());
         addSkin(new FlatGrayIJTheme());
         addSkin(new FlatGruvboxDarkHardIJTheme());
-        addSkin(new FlatGruvboxDarkMediumIJTheme());
-        addSkin(new FlatGruvboxDarkSoftIJTheme());
         addSkin(new FlatHiberbeeDarkIJTheme());
         addSkin(new FlatHighContrastIJTheme());
         addSkin(new FlatLightFlatIJTheme());

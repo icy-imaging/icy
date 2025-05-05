@@ -16,21 +16,12 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.bioimageanalysis.icy.extension.abstract_;
+package org.bioimageanalysis.icy.io.yaml;
 
-import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
-import org.jetbrains.annotations.Contract;
+import org.yaml.snakeyaml.nodes.Node;
 
-import java.util.ArrayList;
+public interface YAMLPersistent {
+    public boolean loadDocument(Node node);
 
-/**
- * @author Thomas Musset
- */
-public abstract class Extension {
-    protected final ArrayList<Class<? extends Plugin>> plugins = new ArrayList<>();
-
-    @Contract(pure = true)
-    public final ArrayList<Class<? extends Plugin>> getPlugins() {
-        return plugins;
-    }
+    public boolean saveDocument(Node node);
 }

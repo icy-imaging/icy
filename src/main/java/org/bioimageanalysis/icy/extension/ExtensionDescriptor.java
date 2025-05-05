@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -100,7 +101,7 @@ public class ExtensionDescriptor {
 
 
 
-        final String extensionFilePath = icyExtension.value();
+        final String extensionFilePath = icyExtension.path() + File.separator + "extension.properties";
         if (extensionFilePath != null && !extensionFilePath.isBlank()) {
             final String fileExt = FileUtil.getFileExtension(extensionFilePath, false);
             return switch (fileExt.toLowerCase(Locale.ROOT)) {

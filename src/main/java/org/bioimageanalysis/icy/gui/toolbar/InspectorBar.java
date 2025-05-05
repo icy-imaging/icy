@@ -46,10 +46,10 @@ public final class InspectorBar extends IcyToolbar {
         group.add(sequenceButton);
         add(sequenceButton);
 
-        final ROIButton ROIButton = new ROIButton();
-        ROIButton.setToolTipText("Open/close ROIs panel");
-        group.add(ROIButton);
-        add(ROIButton);
+        final ROIPanelButton ROIPanelButton = new ROIPanelButton();
+        ROIPanelButton.setToolTipText("Open/close ROIs panel");
+        group.add(ROIPanelButton);
+        add(ROIPanelButton);
 
         final LayersButton layersButton = new LayersButton();
         layersButton.setToolTipText("Open/close layers panel");
@@ -62,6 +62,10 @@ public final class InspectorBar extends IcyToolbar {
         add(historyButton);
 
         add(Box.createVerticalGlue());
+
+        final NotificationButton notificationButton = new NotificationButton();
+        notificationButton.setToolTipText("Show notifications");
+        //add(notificationButton);
 
         final ConsoleButton consoleButton = new ConsoleButton();
         consoleButton.setToolTipText("Open/close console panel");

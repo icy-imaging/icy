@@ -24,6 +24,7 @@ import org.bioimageanalysis.icy.extension.plugin.PluginInstaller;
 import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
 import org.bioimageanalysis.icy.extension.plugin.classloader.JarClassLoader;
 import org.bioimageanalysis.icy.io.Loader;
+import org.bioimageanalysis.icy.system.UserUtil;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.thread.SingleProcessor;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
@@ -38,9 +39,10 @@ import java.util.*;
 
 public class ExtensionLoader {
     public final static String PLUGIN_PACKAGE = "plugins";
+    public final static String EXTENSION_PACKAGE = "extensions";
     //public final static String PLUGIN_KERNEL_PACKAGE = "plugins.kernel";
     public final static String PLUGIN_KERNEL_PACKAGE = "org.bioimageanalysis.extension.kernel";
-    public final static String PLUGIN_PATH = "plugins";
+    public final static String EXTENSION_PATH = UserUtil.getIcyExtensionsDirectory().getAbsolutePath();
 
     // used to identify java version problem
     public final static String NEWER_JAVA_REQUIRED = "Newer java version required";
@@ -150,7 +152,7 @@ public class ExtensionLoader {
             newLoader = new ExtensionLoader.ExtensionClassLoader();
 
             // reload plugins directory to search path
-            ((ExtensionLoader.ExtensionClassLoader) newLoader).add(PLUGIN_PATH);
+            ((ExtensionLoader.ExtensionClassLoader) newLoader).add(EXTENSION_PATH);
         }
 
         // no need to complete loading...
@@ -159,15 +161,17 @@ public class ExtensionLoader {
 
         final Set<String> classes = new HashSet<>();
 
-        try {
+        //try {
             // search all classes in "Plugins" package (needed when working from JAR archive)
-            ClassUtil.findClassNamesInPackage(PLUGIN_PACKAGE, true, classes);
+            //ClassUtil.findClassNamesInPackage(PLUGIN_PACKAGE, true, classes);
             // search all classes in "Plugins" directory with default plugin package name
-            ClassUtil.findClassNamesInPath(PLUGIN_PATH, PLUGIN_PACKAGE, true, classes);
-        }
-        catch (final IOException e) {
+            //ClassUtil.findClassNamesInPath(EXTENSION_PATH, PLUGIN_PACKAGE, true, classes);
+            classes.addAll(ClassUtil.findClassNamesInPath(PLUGIN_PACKAGE, true));
+            classes.addAll(ClassUtil.findClassNamesInPath(EXTENSION_PATH, true));
+        //}
+        /*catch (final IOException e) {
             IcyLogger.error(this.getClass(), e, "Error loading extensions.");
-        }
+        }*/
 
         for (final String className : classes) {
             // we only want to load classes from 'plugins' package

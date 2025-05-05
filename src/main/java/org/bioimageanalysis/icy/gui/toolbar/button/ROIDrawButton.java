@@ -16,31 +16,46 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.bioimageanalysis.icy.gui.component.menu;
+package org.bioimageanalysis.icy.gui.toolbar.button;
 
-import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyROIPlugin;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginROI;
+import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
 import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
 import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 
-@Deprecated(since = "3.0.0", forRemoval = true)
-public class IcyROIMenuItem extends IcyRadioButtonMenuItem {
+/**
+ * @author Thomas Musset
+ */
+public class ROIDrawButton extends IcyToggleButton {
     private static final int SIZE = 32;
 
-    @SuppressWarnings("unchecked")
-    public IcyROIMenuItem(final @NotNull PluginDescriptor descriptor, final ButtonGroup group) {
-        super("Unknown ROI", SVGIcon.INDETERMINATE_QUESTION);
+    private final PluginDescriptor descriptor;
 
-        if (!descriptor.isInstanceOf(PluginROI.class))
+    public ROIDrawButton(final @NotNull PluginDescriptor descriptor) {
+        super(SVGIcon.INDETERMINATE_QUESTION);
+
+        this.descriptor = descriptor;
+
+        if (!this.descriptor.isInstanceOf(PluginROI.class))
             throw new IllegalArgumentException("PluginROI must be instance of " + PluginROI.class.getName());
 
-        setText(descriptor.getName());
+        final String type;
+        final IcyROIPlugin annotation = this.descriptor.getPluginClass().getAnnotation(IcyROIPlugin.class);
+        switch (annotation.type()) {
+            case ROI2D -> type = "2D ";
+            case ROI3D -> type = "3D ";
+            default -> type = "";
+        }
+
+        setToolTipText(type + this.descriptor.getName());
 
         // do it in background as loading icon can take sometime
         ThreadUtil.bgRun(() -> {
@@ -58,16 +73,10 @@ public class IcyROIMenuItem extends IcyRadioButtonMenuItem {
                 }
             }
         });
+    }
 
-        addActionListener(e -> {
-            //try {
-            Icy.getMainInterface().changeROITool((Class<? extends PluginROI>) descriptor.getPluginClass());
-            /*}
-            catch (final InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
-                IcyLogger.error(this.getClass(), "Unable to start pluginROI: " + descriptor.getPluginClass().getName());
-            }*/
-        });
-
-        group.add(this);
+    @Contract(pure = true)
+    public final PluginDescriptor getPluginROI() {
+        return descriptor;
     }
 }

@@ -86,6 +86,8 @@ public final class ActionManager {
         if (globalROIActions == null) {
             globalROIActions = new ArrayList<>();
 
+            globalROIActions.addAll(SequenceOperationActions.getAllGlobalROIActions());
+
             final GlobalROIListener globalROIListener = new GlobalROIListener() {
                 @Override
                 public void roiAdded(final ROI roi) {

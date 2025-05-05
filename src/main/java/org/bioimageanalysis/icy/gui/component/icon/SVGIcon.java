@@ -80,6 +80,7 @@ public class SVGIcon {
     public static final SVGIcon DEPLOYED_CODE = new SVGIcon(MONO + "deployed_code.svg", false);
     public static final SVGIcon DESCRIPTION = new SVGIcon(MONO + "description.svg", false);
     public static final SVGIcon DEVICE_RESET = new SVGIcon(MONO + "device_reset.svg", false);
+    public static final SVGIcon DRAG_PAN = new SVGIcon(MONO + "drag_pan.svg", false);
     public static final SVGIcon DRAW_ABSTRACT = new SVGIcon(MONO + "draw_abstract.svg", false);
     public static final SVGIcon EAST = new SVGIcon(MONO + "east.svg", false);
     public static final SVGIcon EDIT = new SVGIcon(MONO + "edit.svg", false);
@@ -143,6 +144,10 @@ public class SVGIcon {
     public static final SVGIcon NORTH_EAST = new SVGIcon(MONO + "north_east.svg", false);
     public static final SVGIcon NORTH_WEST = new SVGIcon(MONO + "north_west.svg", false);
     public static final SVGIcon NOTE_ADD = new SVGIcon(MONO + "note_add.svg", false);
+    public static final SVGIcon NOTIFICATIONS = new SVGIcon(MONO + "notifications.svg", false);
+    public static final SVGIcon NOTIFICATIONS_IMPORTANT = new SVGIcon(MONO + "notifications_important.svg", false);
+    public static final SVGIcon NOTIFICATIONS_UNREAD = new SVGIcon(MONO + "notifications_unread.svg", false);
+    public static final SVGIcon NULL = new SVGIcon(MONO + "null.svg", false);
     public static final SVGIcon OPEN_IN_NEW = new SVGIcon(MONO + "open_in_new.svg", false);
     public static final SVGIcon PAUSE_CIRCLE = new SVGIcon(MONO + "pause_circle.svg", false);
     public static final SVGIcon PENTAGON = new SVGIcon(MONO + "pentagon.svg", false);

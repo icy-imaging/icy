@@ -19,9 +19,15 @@
 package org.bioimageanalysis.icy.io.yaml;
 
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.nodes.Node;
 
 public final class YAMLUtil {
     public static Yaml createDocument() {
         return new Yaml();
+    }
+
+    public static boolean saveDocument(Yaml yaml, Node node) {
+        yaml.dump(node);
+        return true;
     }
 }

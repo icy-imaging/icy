@@ -36,7 +36,6 @@ import org.bioimageanalysis.icy.gui.dialog.IdConfirmDialog.Confirmer;
 import org.bioimageanalysis.icy.gui.frame.ExitFrame;
 import org.bioimageanalysis.icy.gui.frame.IcyExternalFrame;
 import org.bioimageanalysis.icy.gui.frame.NewVersionFrame;
-import org.bioimageanalysis.icy.gui.frame.SplashScreenFrame;
 import org.bioimageanalysis.icy.gui.frame.progress.AnnounceFrame;
 import org.bioimageanalysis.icy.gui.frame.progress.ToolTipFrame;
 import org.bioimageanalysis.icy.gui.main.MainFrame;
@@ -53,6 +52,7 @@ import org.bioimageanalysis.icy.network.update.Updater;
 import org.bioimageanalysis.icy.system.IcyExceptionHandler;
 import org.bioimageanalysis.icy.system.SingleInstanceCheck;
 import org.bioimageanalysis.icy.system.SystemUtil;
+import org.bioimageanalysis.icy.system.UserUtil;
 import org.bioimageanalysis.icy.system.audit.Audit;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.os.AppleUtil;
@@ -70,8 +70,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyVetoException;
 import java.io.File;
+import java.io.IOException;
 import java.nio.channels.FileLock;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.*;
 
@@ -88,7 +91,7 @@ public final class Icy {
     /**
      * Icy Version
      */
-    public static final Version VERSION = new Version(3, 0, 0, Version.DevelopmentStage.ALPHA, 1);
+    public static final Version VERSION = new Version(3, 0, 0, Version.DevelopmentStage.ALPHA, 4);
 
     /**
      * Main interface
@@ -100,10 +103,11 @@ public final class Icy {
      */
     static FileLock lock = null;
 
-    /**
+    // TODO : remove this block
+    /*
      * private splash for initial loading
      */
-    static SplashScreenFrame splashScreen = null;
+    //static SplashScreenFrame splashScreen = null;
 
     /**
      * VTK library loaded flag
@@ -155,8 +159,10 @@ public final class Icy {
         boolean headless = false;
 
         // Clear log file
-        final File logFile = new File("./icy.log");
-        if (logFile.isFile()) {
+        final File logFile = new File(UserUtil.getIcyHomeDirectory(), "icy.log");
+        if (!logFile.exists())
+            FileUtil.createFile(logFile);
+        else if (logFile.isFile()) {
             FileUtil.delete(logFile, false);
             FileUtil.createFile(logFile);
         }
@@ -208,22 +214,24 @@ public final class Icy {
             // fix possible IllegalArgumentException on Swing sorting
             //System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
             // set LOCI debug level (do it immediately as it can quickly show some log messages)
-            loci.common.DebugTools.enableLogging("ERROR");
+            //loci.common.DebugTools.enableLogging("ERROR");
+            loci.common.DebugTools.setRootLevel("ERROR");
 
-            if (!headless && !noSplash) {
+            // TODO : remove this block
+            //if (!headless && !noSplash) {
                 // prepare splashScreen (ok to create it here as we are not yet in substance laf)
-                splashScreen = new SplashScreenFrame();
+                //splashScreen = new SplashScreenFrame();
 
                 // It's important to initialize AWT now (with InvokeNow(...) for instance) to avoid
                 // the JVM deadlock bug (id: 5104239). It happen when the AWT thread is initialized
                 // while others threads load some new library with ClassLoader.loadLibrary
 
                 // display splash NOW (don't use ThreadUtil as headless is still false here)
-                EventQueue.invokeAndWait(() -> {
+                //EventQueue.invokeAndWait(() -> {
                     // display splash screen
-                    splashScreen.setVisible(true);
-                });
-            }
+                    //splashScreen.setVisible(true);
+                //});
+            //}
 
             // fast start
             // force image cache initialization so GUI won't wait after it (need preferences init)
@@ -233,7 +241,7 @@ public final class Icy {
             // initialize network (need preferences init)
             new Thread(NetworkUtil::init, "Initializer: Network").start();
 
-            new Thread(ExtensionLoader::reloadAsynch, "Initializer: Extension").start();
+            //new Thread(ExtensionLoader::reloadAsynch, "Initializer: Extension").start();
 
             // load plugins classes (need preferences init)
             new Thread(PluginLoader::reloadAsynch, "Initializer: Plugin").start();
@@ -253,11 +261,14 @@ public final class Icy {
         }
 
         if (!headless) {
+            ToolTipManager.sharedInstance().setInitialDelay(10);
+
             // do it on AWT thread NOW as this is what we want first
             ThreadUtil.invokeNow(() -> {
                 try {
                     // init Look And Feel (need mainInterface instance)
                     LookAndFeelUtil.init();
+
                     // init need "mainInterface" variable to be initialized
                     getMainInterface().init();
                 }
@@ -272,15 +283,16 @@ public final class Icy {
             getMainInterface().init();
         }
 
+        // TODO : remove this block
         // splash screen initialized --> hide it
-        if (splashScreen != null) {
+        //if (splashScreen != null) {
             // then do less important stuff later
-            ThreadUtil.invokeLater(() -> {
+            //ThreadUtil.invokeLater(() -> {
                 // we can now hide splash as we have interface
-                splashScreen.dispose();
-                splashScreen = null;
-            });
-        }
+                //splashScreen.dispose();
+                //splashScreen = null;
+            //});
+        //}
 
         // show general informations
         IcyLogger.info(Icy.class, String.format("%s %s (%d bit)", SystemUtil.getJavaName(), SystemUtil.getJavaVersion(), SystemUtil.getJavaArchDataModel()));
@@ -337,11 +349,12 @@ public final class Icy {
         // check only once per 12 hours slice
         if (!isNetworkDisabled() && (currentTime > (GeneralPreferences.getLastUpdateCheckTime() + halfDayInterval))) {
             // check for core update
-            if (GeneralPreferences.getAutomaticUpdate())
-                IcyUpdater.checkUpdate(true);
+            // TODO : enable this
+            /*if (GeneralPreferences.getAutomaticUpdate())
+                IcyUpdater.checkUpdate(true);*/
             // check for plugin update
-            if (PluginPreferences.getAutomaticUpdate())
-                PluginUpdater.checkUpdate(true);
+            /*if (PluginPreferences.getAutomaticUpdate())
+                PluginUpdater.checkUpdate(true);*/
 
             // update last update check time
             GeneralPreferences.setLastUpdateCheckTime(currentTime);
@@ -498,9 +511,10 @@ public final class Icy {
     }
 
     static void fatalError(final Throwable t, final boolean headless) {
+        // TODO remove this block
         // hide splashScreen if needed
-        if ((splashScreen != null) && (splashScreen.isVisible()))
-            splashScreen.dispose();
+        //if ((splashScreen != null) && (splashScreen.isVisible()))
+            //splashScreen.dispose();
 
         // show error in console
         IcyLogger.fatal(Icy.class, t, t.getLocalizedMessage());
@@ -862,10 +876,70 @@ public final class Icy {
         return "";
     }
 
+    private static boolean copyLibraries(final @NotNull String libName) {
+        final File newFolder = new File(UserUtil.getIcyLibrariesDirectory(), libName);
+        final File oldFolder = new File("." + File.separator + "lib" + File.separator + SystemUtil.getOSArchIdString() + File.separator + libName);
+
+        // Checking old folder before coying
+        if (!oldFolder.exists()) {
+            IcyLogger.error(Icy.class, "Could not find old " + libName + " folder. Abort copying!");
+            return false;
+        }
+        final File[] oldLibs = oldFolder.listFiles();
+        if (oldLibs == null || oldLibs.length == 0) {
+            IcyLogger.error(Icy.class, "Could not find old " + libName + " libraries. Abort copying!");
+            return false;
+        }
+
+        // Create new folder
+        if (!newFolder.exists()) {
+            if (newFolder.mkdirs()) {
+                IcyLogger.info(Icy.class, "Created " + libName + " folder. Start copying.");
+            }
+            else {
+                IcyLogger.error(Icy.class, "Could not create " + libName + " folder. Abort loading!");
+                return false;
+            }
+        }
+
+        // Start copying
+        for (final File oldLib : oldLibs) {
+            IcyLogger.debug(Icy.class, "Copying old " + libName + " library: " + oldLib.getName());
+            try {
+                // Replace files
+                Files.copy(oldLib.toPath(), new File(newFolder, oldLib.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            catch (final IOException e) {
+                IcyLogger.error(Icy.class, e, "Could not copy old " + libName + " library: " + oldLib.getName());
+                //return false;
+            }
+        }
+
+        final File[] newLibs = newFolder.listFiles();
+        if (newLibs != null && oldLibs.length == newLibs.length) {
+            IcyLogger.success(Icy.class, "Successfully copied " + newLibs.length + " " + libName + " library files.");
+            return true;
+        }
+        else {
+            IcyLogger.error(Icy.class, "An error occured while copying " + libName + " libraries. Abort loading!");
+            return false;
+        }
+    }
+
     static void nativeLibrariesInit() {
         // build the local native library path
-        final String libPath = LIB_PATH + FileUtil.separator + SystemUtil.getOSArchIdString();
-        final File libPathFile = new File(libPath);
+        //final String libPath = LIB_PATH + FileUtil.separator + SystemUtil.getOSArchIdString();
+        //final File libPathFile = new File(libPath);
+        final File libPathFile = new File(UserUtil.getIcyHomeDirectory(), "libraries");
+
+        if (!libPathFile.exists()) {
+            if (libPathFile.mkdirs())
+                IcyLogger.info(Icy.class, "Created libraries directory.");
+            else {
+                IcyLogger.error(Icy.class, "Could not create libraries directory. Abort loading!");
+                return;
+            }
+        }
 
         // load native libraries
         loadVtkLibrary(libPathFile);
@@ -875,7 +949,12 @@ public final class Icy {
     }
 
     private static void loadVtkLibrary(final File libPathFile) {
-        final String vtkLibPath = FileUtil.getGenericPath(new File(libPathFile, "vtk").getAbsolutePath());
+        final File vtkFolder = new File(libPathFile, "vtk");
+        if (!vtkFolder.exists())
+            if (!copyLibraries("vtk"))
+                return;
+
+        final String vtkLibPath = FileUtil.getGenericPath(vtkFolder.getAbsolutePath());
 
         // we load it directly from inner lib path if possible
         System.setProperty("vtk.lib.dir", vtkLibPath);
@@ -915,21 +994,26 @@ public final class Icy {
                 }
             }
 
-            // still some remaining files not loaded ? --> display a warning
-            if (!nativeLibraries.isEmpty())
+            // still some remaining files not loaded ? --> display a warning and prevent VTK trying to load
+            if (!nativeLibraries.isEmpty()) {
                 for (final String lib : nativeLibraries)
                     IcyLogger.warn(Icy.class, String.format("This VTK library file couldn't be loaded: %s", FileUtil.getFileName(lib)));
-
-            // at least one file was correctly loaded ? --> the library certainly loaded correctly then
-            if (nativeLibraries.size() < numFile)
+                vtkLibraryLoaded = false;
+            }
+            else
                 vtkLibraryLoaded = true;
+
+            // TODO : fix this ! it consider ready even if there are still libraries that are not loaded !
+            // at least one file was correctly loaded ? --> the library certainly loaded correctly then
+            //if (nativeLibraries.size() < numFile)
+                //vtkLibraryLoaded = true;
         }
         catch (final Throwable e1) {
             IcyLogger.error(Icy.class, e1, e1.getLocalizedMessage());
         }
 
         if (vtkLibraryLoaded) {
-            vtkNativeLibrary.DisableOutputWindow(new File("vtk.log"));
+            vtkNativeLibrary.DisableOutputWindow(new File(UserUtil.getIcyHomeDirectory(), "vtk.log"));
             final String vv = new vtkVersion().GetVTKVersion();
 
             IcyLogger.success(Icy.class, String.format("VTK %s library successfully loaded.", vv));

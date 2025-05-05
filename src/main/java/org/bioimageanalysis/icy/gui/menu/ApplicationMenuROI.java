@@ -18,23 +18,10 @@
 
 package org.bioimageanalysis.icy.gui.menu;
 
-import org.bioimageanalysis.icy.Icy;
-import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
-import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyROIPlugin;
-import org.bioimageanalysis.icy.extension.plugin.interface_.PluginROI;
 import org.bioimageanalysis.icy.gui.action.RoiActions;
 import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenu;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenuItem;
-import org.bioimageanalysis.icy.gui.component.menu.IcyROIMenuItem;
-import org.bioimageanalysis.icy.model.sequence.Sequence;
-import org.bioimageanalysis.icy.model.sequence.SequenceEvent;
-import org.bioimageanalysis.icy.system.logging.IcyLogger;
-import org.bioimageanalysis.icy.system.thread.ThreadUtil;
-
-import javax.swing.*;
-import java.util.ArrayList;
 
 /**
  * @author Thomas Musset
@@ -49,16 +36,8 @@ public final class ApplicationMenuROI extends AbstractApplicationMenu {
         return instance;
     }
 
-    private final IcyMenu menuDraw2D;
-    private final IcyMenu menuDraw3D;
-    private final IcyMenu menuTools;
-
-    private final ButtonGroup roiToolsGroup;
-
     private ApplicationMenuROI() {
         super("Region of Interest");
-
-        roiToolsGroup = new ButtonGroup();
 
         final IcyMenuItem itemLoadROI = new IcyMenuItem(RoiActions.loadAction, SVGIcon.FILE_OPEN);
         add(itemLoadROI);
@@ -68,19 +47,6 @@ public final class ApplicationMenuROI extends AbstractApplicationMenu {
 
         final IcyMenuItem itemExportExcelROI = new IcyMenuItem(RoiActions.xlsExportAction, SVGIcon.EXPORT_NOTES);
         add(itemExportExcelROI);
-
-        addSeparator();
-
-        menuDraw2D = new IcyMenu("Draw 2D", SVGIcon.DRAW_ABSTRACT);
-        add(menuDraw2D);
-
-        menuDraw3D = new IcyMenu("Draw 3D", SVGIcon.DEPLOYED_CODE);
-        add(menuDraw3D);
-
-        addSeparator();
-
-        menuTools = new IcyMenu("Tools", SVGIcon.HANDYMAN);
-        add(menuTools);
 
         addSeparator();
 
@@ -149,58 +115,5 @@ public final class ApplicationMenuROI extends AbstractApplicationMenu {
 
         final IcyMenuItem itemFillExterior = new IcyMenuItem(RoiActions.fillExteriorAction, SVGIcon.ROI_EXTERIOR);
         add(itemFillExterior);
-
-        reloadROIMenu();
-
-        addActiveSequenceListener();
-        addPluginLoaderListener();
-    }
-
-    private void reloadROIMenu() {
-        ThreadUtil.invokeLater(() -> {
-            final Sequence active = Icy.getMainInterface().getActiveSequence();
-
-            menuDraw2D.setEnabled((active != null));
-            menuDraw3D.setEnabled((active != null));
-            menuTools.setEnabled((active != null));
-        });
-    }
-
-    private void reloadPlugins() {
-        ThreadUtil.invokeLater(() -> {
-            menuDraw2D.removeAll();
-            menuDraw3D.removeAll();
-            menuTools.removeAll();
-
-            final ArrayList<PluginDescriptor> plugins = PluginLoader.getPlugins(PluginROI.class);
-            for (final PluginDescriptor plugin : plugins) {
-                if (!(plugin.isAnnotated(IcyROIPlugin.class))) {
-                    IcyLogger.warn(this.getClass(), "Plugin ROI [" + plugin.getClassName() + "] doesn't have 'IcyROIPlugin' annotation.");
-                    continue;
-                }
-
-                final IcyROIPlugin icyROIPlugin = plugin.getPluginClass().getAnnotation(IcyROIPlugin.class);
-                switch (icyROIPlugin.value()) {
-                    case TOOL -> menuTools.add(new IcyROIMenuItem(plugin, roiToolsGroup));
-                    case ROI2D -> menuDraw2D.add(new IcyROIMenuItem(plugin, roiToolsGroup));
-                    case ROI3D -> menuDraw3D.add(new IcyROIMenuItem(plugin, roiToolsGroup));
-                }
-            }
-        });
-    }
-
-    @Override
-    public void sequenceActivated(final Sequence sequence) {
-        reloadROIMenu();
-    }
-
-    @Override
-    public void activeSequenceChanged(final SequenceEvent event) {
-        reloadROIMenu();
-    }
-
-    @Override
-    public void pluginLoaderChanged(final PluginLoader.PluginLoaderEvent e) {
-        reloadPlugins();
     }
 }

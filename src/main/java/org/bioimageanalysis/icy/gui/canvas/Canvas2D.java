@@ -2016,8 +2016,8 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                         // unselect tool before ROI creation unless
                         // control modifier is used for multiple ROI creation
                         // FIXME change control behaviour
-                        if (!control)
-                            Icy.getMainInterface().setSelectedTool(null);
+                        /*if (!control)
+                            Icy.getMainInterface().setSelectedTool(null);*/
 
                         // only if sequence still live
                         if (seq != null) {
@@ -2126,7 +2126,8 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
             updateCursor();
 
             // Remove tool
-            ROITool = null;
+            // TODO : remove this
+            //ROITool = null;
 
             // consume event
             return true;

@@ -18,20 +18,15 @@
 
 package org.bioimageanalysis.icy.gui.toolbar.button;
 
-import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
-import org.bioimageanalysis.icy.gui.toolbar.container.InspectorPanel;
-import org.bioimageanalysis.icy.gui.toolbar.panel.RoisPanel;
+import org.bioimageanalysis.icy.gui.component.button.IcyButton;
 import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/**
- * @author Thomas Musset
- */
-public final class ROIButton extends IcyToggleButton implements ActionListener {
-    public ROIButton() {
-        super(SVGIcon.DRAW_ABSTRACT);
+public class NotificationButton extends IcyButton implements ActionListener {
+    public NotificationButton() {
+        super(SVGIcon.NOTIFICATIONS);
         setFocusable(false);
         addActionListener(this);
     }
@@ -43,10 +38,6 @@ public final class ROIButton extends IcyToggleButton implements ActionListener {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final InspectorPanel panel = InspectorPanel.getInstance();
-        if (isSelected())
-            panel.show(RoisPanel.getInstance());
-        else
-            panel.close();
+
     }
 }

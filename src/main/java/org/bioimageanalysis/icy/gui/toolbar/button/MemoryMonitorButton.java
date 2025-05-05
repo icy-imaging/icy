@@ -75,7 +75,7 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
             }
         };
 
-        timer.scheduleAtFixedRate(task, 100, 100);
+        timer.scheduleAtFixedRate(task, 1000, 1000);
     }
 
     private void updateStats() {

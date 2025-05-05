@@ -21,6 +21,7 @@ package org.bioimageanalysis.icy.gui.action;
 import org.bioimageanalysis.icy.gui.clipboard.Clipboard;
 import org.bioimageanalysis.icy.gui.clipboard.TransferableImage;
 import org.bioimageanalysis.icy.gui.frame.AboutFrame;
+import org.bioimageanalysis.icy.gui.frame.CatalogFrame;
 import org.bioimageanalysis.icy.gui.viewer.Viewer;
 import org.bioimageanalysis.icy.model.image.ImageUtil;
 import org.bioimageanalysis.icy.Icy;
@@ -267,7 +268,8 @@ public final class GeneralActions {
 
         @Override
         public boolean isEnabled() {
-            return super.isEnabled() && !(IcyUpdater.isCheckingForUpdate() || PluginUpdater.isCheckingForUpdate());
+            return false;
+            //return super.isEnabled() && !(IcyUpdater.isCheckingForUpdate() || PluginUpdater.isCheckingForUpdate()); // TODO uncomment this
         }
 
     };
@@ -292,6 +294,18 @@ public final class GeneralActions {
         @Override
         public boolean doAction(final ActionEvent e) {
             new AboutFrame(1);
+            return true;
+        }
+    };
+
+    public static final IcyAbstractAction catalogAction = new IcyAbstractAction(
+            "Open Catalog",
+            "Open extensions catalog",
+            "List online and installed extensions."
+    ) {
+        @Override
+        public boolean doAction(final ActionEvent e) {
+            new CatalogFrame();
             return true;
         }
     };

@@ -20,6 +20,7 @@ package org.bioimageanalysis.icy.gui.menu;
 
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
 import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
+import org.bioimageanalysis.icy.gui.action.GeneralActions;
 import org.bioimageanalysis.icy.gui.action.PreferencesActions;
 import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenu;
@@ -47,6 +48,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
 
     @NotNull
     private final IcyMenuItem itemPluginsSettings;
+    private final IcyMenuItem itemCatalog;
     //@NotNull
     //private final IcyTextFieldHint itemPluginSearch;
 
@@ -54,6 +56,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
         super("Plugins");
 
         itemPluginsSettings = new IcyMenuItem(PreferencesActions.pluginPreferencesAction, SVGIcon.SETTINGS);
+        itemCatalog = new IcyMenuItem(GeneralActions.catalogAction, SVGIcon.WIDGETS);
 
         //itemPluginSearch = new IcyTextFieldHint(SVGIcon.SEARCH, "Search Plugin...");
         //itemPluginSearch.setEnabled(false);
@@ -71,6 +74,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
             removeAll();
 
             add(itemPluginsSettings);
+            //add(itemCatalog);
             //add(itemPluginSearch);
 
             addSeparator();

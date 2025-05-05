@@ -22,6 +22,7 @@ import org.bioimageanalysis.icy.gui.toolbar.button.MemoryMonitorButton;
 import org.bioimageanalysis.icy.Icy;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Thomas Musset
@@ -33,12 +34,40 @@ public final class StatusBar extends IcyToolbar {
     public StatusBar() {
         super(HORIZONTAL, false);
 
-        add(Box.createHorizontalStrut(5));
+        add(Box.createHorizontalStrut(10));
 
         add(new JLabel("Icy v" + Icy.VERSION.toShortString()));
 
         add(Box.createHorizontalGlue());
 
+        add(new TaskProgress());
+
+        add(Box.createHorizontalStrut(5));
+
         add(new MemoryMonitorButton());
+
+        add(Box.createHorizontalStrut(10));
+
+        /*Dimension progressBarDimension = new Dimension(40, 10);
+
+        JProgressBar progressBarCPU = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
+        //progressBarCPU.setStringPainted(true);
+        progressBarCPU.setPreferredSize(progressBarDimension);
+        progressBarCPU.setMaximumSize(progressBarDimension);
+        progressBarCPU.setMinimumSize(progressBarDimension);
+        progressBarCPU.setValue(50);
+        add(progressBarCPU);
+
+        add(Box.createHorizontalStrut(5));
+
+        JProgressBar progressBarRAM = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
+        //progressBarRAM.setStringPainted(true);
+        progressBarRAM.setPreferredSize(progressBarDimension);
+        progressBarRAM.setMaximumSize(progressBarDimension);
+        progressBarRAM.setMinimumSize(progressBarDimension);
+        progressBarRAM.setValue(50);
+        add(progressBarRAM);*/
+
+        //add(Box.createHorizontalStrut(5));
     }
 }

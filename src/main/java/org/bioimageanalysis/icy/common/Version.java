@@ -125,7 +125,7 @@ public final class Version implements Comparable<Version> {
      */
     @Contract("_ -> new")
     public static @NotNull Version fromString(final @NotNull String version) {
-        final String lower = version.toLowerCase(Locale.ROOT).replaceAll("[0-9 \\-_]", "");
+        final String lower = version.toLowerCase(Locale.ROOT).replaceAll("[0-9 .\\-_]", "");
 
         final DevelopmentStage developmentStage;
         if (lower.equals(DevelopmentStage.RELEASE_CANDIDATE.getShortLabel()) || lower.equals(DevelopmentStage.RELEASE_CANDIDATE.getLongLabel()))

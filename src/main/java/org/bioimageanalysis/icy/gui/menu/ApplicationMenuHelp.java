@@ -22,6 +22,7 @@ import org.bioimageanalysis.icy.gui.action.GeneralActions;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenuItem;
 import org.bioimageanalysis.icy.network.NetworkUtil;
 import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.system.UserUtil;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.NotNull;
 
@@ -71,7 +72,7 @@ public final class ApplicationMenuHelp extends AbstractApplicationMenu {
         final IcyMenuItem itemShowLog = new IcyMenuItem("Show Log", SVGIcon.DESCRIPTION);
         itemShowLog.addActionListener(e -> {
             try {
-                final File log = new File("./icy.log");
+                final File log = new File(UserUtil.getIcyHomeDirectory(), "icy.log");
                 if (log.isFile())
                     Desktop.getDesktop().open(log);
             }
@@ -83,8 +84,7 @@ public final class ApplicationMenuHelp extends AbstractApplicationMenu {
 
         addSeparator();
 
-        final IcyMenuItem itemUpdate = new IcyMenuItem("Check for Update", SVGIcon.UPDATE);
-        itemUpdate.addActionListener(GeneralActions.checkUpdateAction);
+        final IcyMenuItem itemUpdate = new IcyMenuItem(GeneralActions.checkUpdateAction, SVGIcon.UPDATE);
         add(itemUpdate);
     }
 }

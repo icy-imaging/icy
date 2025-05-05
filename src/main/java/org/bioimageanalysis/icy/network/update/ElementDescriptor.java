@@ -23,6 +23,7 @@ import org.bioimageanalysis.icy.io.FileUtil;
 import org.bioimageanalysis.icy.io.xml.XMLPersistent;
 import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
+import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
@@ -348,7 +349,9 @@ public class ElementDescriptor implements XMLPersistent {
             return false;
 
         name = XMLUtil.getElementValue(node, ID_NAME, "");
-        version = Version.fromString(XMLUtil.getElementValue(node, ID_VERSION, ""));
+        String v = XMLUtil.getElementValue(node, ID_VERSION, "");
+        IcyLogger.debug(this.getClass(), "Element: " + name + " version: " + v);
+        version = Version.fromString(v);
         changelog = XMLUtil.getElementValue(node, ID_CHANGESLOG, "");
 
         final ArrayList<Node> nodesFile = XMLUtil.getChildren(XMLUtil.getElement(node, ID_FILES), ID_FILE);
@@ -374,7 +377,7 @@ public class ElementDescriptor implements XMLPersistent {
             return false;
 
         XMLUtil.addElement(node, ID_NAME, name);
-        XMLUtil.addElement(node, ID_VERSION, version.toString());
+        XMLUtil.addElement(node, ID_VERSION, version.toShortString());
 
         // some informations aren't needed for local version
         if (onlineSave)
@@ -654,6 +657,6 @@ public class ElementDescriptor implements XMLPersistent {
 
     @Override
     public String toString() {
-        return name + " " + version;
+        return name + " " + version.toShortString();
     }
 }

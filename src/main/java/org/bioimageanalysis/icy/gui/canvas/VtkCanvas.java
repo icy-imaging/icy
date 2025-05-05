@@ -18,6 +18,7 @@
 
 package org.bioimageanalysis.icy.gui.canvas;
 
+import com.jogamp.opengl.awt.GLJPanel;
 import org.bioimageanalysis.icy.gui.render.VtkSettingPanel;
 import org.bioimageanalysis.icy.common.collection.array.Array1DUtil;
 import org.bioimageanalysis.icy.common.color.ColorUtil;
@@ -380,21 +381,21 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         imageVolume.setShade(settingPanel.getVolumeShading());
         // axes.SetVisibility(axesButton.isSelected() ? 1 : 0);
         boundingBox.SetVisibility(boundingBoxButton.isSelected() ? 1 : 0);
-        rulerBox.SetDrawXGridlines(gridButton.isSelected() ? 1 : 0);
-        rulerBox.SetDrawYGridlines(gridButton.isSelected() ? 1 : 0);
-        rulerBox.SetDrawZGridlines(gridButton.isSelected() ? 1 : 0);
-        rulerBox.SetXAxisVisibility(rulerButton.isSelected() ? 1 : 0);
-        rulerBox.SetXAxisTickVisibility(rulerButton.isSelected() ? 1 : 0);
-        rulerBox.SetXAxisMinorTickVisibility(rulerButton.isSelected() ? 1 : 0);
-        rulerBox.SetYAxisVisibility(rulerButton.isSelected() ? 1 : 0);
-        rulerBox.SetYAxisTickVisibility(rulerButton.isSelected() ? 1 : 0);
-        rulerBox.SetYAxisMinorTickVisibility(rulerButton.isSelected() ? 1 : 0);
-        rulerBox.SetZAxisVisibility(rulerButton.isSelected() ? 1 : 0);
-        rulerBox.SetZAxisTickVisibility(rulerButton.isSelected() ? 1 : 0);
-        rulerBox.SetZAxisMinorTickVisibility(rulerButton.isSelected() ? 1 : 0);
-        rulerBox.SetXAxisLabelVisibility(rulerLabelButton.isSelected() ? 1 : 0);
-        rulerBox.SetYAxisLabelVisibility(rulerLabelButton.isSelected() ? 1 : 0);
-        rulerBox.SetZAxisLabelVisibility(rulerLabelButton.isSelected() ? 1 : 0);
+        rulerBox.SetDrawXGridlines(gridButton.isSelected());
+        rulerBox.SetDrawYGridlines(gridButton.isSelected());
+        rulerBox.SetDrawZGridlines(gridButton.isSelected());
+        rulerBox.SetXAxisVisibility(rulerButton.isSelected());
+        rulerBox.SetXAxisTickVisibility(rulerButton.isSelected());
+        rulerBox.SetXAxisMinorTickVisibility(rulerButton.isSelected());
+        rulerBox.SetYAxisVisibility(rulerButton.isSelected());
+        rulerBox.SetYAxisTickVisibility(rulerButton.isSelected());
+        rulerBox.SetYAxisMinorTickVisibility(rulerButton.isSelected());
+        rulerBox.SetZAxisVisibility(rulerButton.isSelected());
+        rulerBox.SetZAxisTickVisibility(rulerButton.isSelected());
+        rulerBox.SetZAxisMinorTickVisibility(rulerButton.isSelected());
+        rulerBox.SetXAxisLabelVisibility(rulerLabelButton.isSelected());
+        rulerBox.SetYAxisLabelVisibility(rulerLabelButton.isSelected());
+        rulerBox.SetZAxisLabelVisibility(rulerLabelButton.isSelected());
         // setPickOnMouseMove(pickOnMouseMoveButton.isSelected());
 
         // add volume to renderer
@@ -1001,6 +1002,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         if ((r == null) || (rw == null))
             return new Point3D.Double();
 
+        // Get display scale factor, and applying it to X and Y
         final float[] scale = panel3D.getCurrentSurfaceScale(new float[2]);
         // need to revert Y axis
         r.SetDisplayPoint(x * scale[0], (rw.GetSize()[1] - y) * scale[1], z);
@@ -2240,9 +2242,9 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
                 final boolean b = ((Boolean) value).booleanValue();
 
                 invokeOnEDT(() -> {
-                    rulerBox.SetDrawXGridlines(b ? 1 : 0);
-                    rulerBox.SetDrawYGridlines(b ? 1 : 0);
-                    rulerBox.SetDrawZGridlines(b ? 1 : 0);
+                    rulerBox.SetDrawXGridlines(b);
+                    rulerBox.SetDrawYGridlines(b);
+                    rulerBox.SetDrawZGridlines(b);
                 });
 
                 preferences.putBoolean(ID_BOUNDINGBOX_GRID, b);
@@ -2251,15 +2253,15 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
                 final boolean b = ((Boolean) value).booleanValue();
 
                 invokeOnEDT(() -> {
-                    rulerBox.SetXAxisVisibility(b ? 1 : 0);
-                    rulerBox.SetXAxisTickVisibility(b ? 1 : 0);
-                    rulerBox.SetXAxisMinorTickVisibility(b ? 1 : 0);
-                    rulerBox.SetYAxisVisibility(b ? 1 : 0);
-                    rulerBox.SetYAxisTickVisibility(b ? 1 : 0);
-                    rulerBox.SetYAxisMinorTickVisibility(b ? 1 : 0);
-                    rulerBox.SetZAxisVisibility(b ? 1 : 0);
-                    rulerBox.SetZAxisTickVisibility(b ? 1 : 0);
-                    rulerBox.SetZAxisMinorTickVisibility(b ? 1 : 0);
+                    rulerBox.SetXAxisVisibility(b);
+                    rulerBox.SetXAxisTickVisibility(b);
+                    rulerBox.SetXAxisMinorTickVisibility(b);
+                    rulerBox.SetYAxisVisibility(b);
+                    rulerBox.SetYAxisTickVisibility(b);
+                    rulerBox.SetYAxisMinorTickVisibility(b);
+                    rulerBox.SetZAxisVisibility(b);
+                    rulerBox.SetZAxisTickVisibility(b);
+                    rulerBox.SetZAxisMinorTickVisibility(b);
                 });
 
                 preferences.putBoolean(ID_BOUNDINGBOX_RULERS, b);
@@ -2268,9 +2270,9 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
                 final boolean b = ((Boolean) value).booleanValue();
 
                 invokeOnEDT(() -> {
-                    rulerBox.SetXAxisLabelVisibility(b ? 1 : 0);
-                    rulerBox.SetYAxisLabelVisibility(b ? 1 : 0);
-                    rulerBox.SetZAxisLabelVisibility(b ? 1 : 0);
+                    rulerBox.SetXAxisLabelVisibility(b);
+                    rulerBox.SetYAxisLabelVisibility(b);
+                    rulerBox.SetZAxisLabelVisibility(b);
                 });
 
                 preferences.putBoolean(ID_BOUNDINGBOX_LABELS, b);
