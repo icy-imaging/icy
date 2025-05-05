@@ -7,11 +7,11 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>3.0.0</version>
+        <version>3.0.0-a.4</version>
     </parent>
 
     <artifactId>icy-kernel</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.0-a.4</version>
 
     <packaging>jar</packaging>
 
@@ -38,7 +38,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>${build-helper-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>add-resource</id>
@@ -137,7 +137,7 @@
                             </customClasspathLayout>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>icy.main.Icy</mainClass>
+                            <mainClass>org.bioimageanalysis.icy.Icy</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Class-Path>ij/ij.jar</Class-Path>
@@ -185,7 +185,17 @@
         </dependency>
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt-natives-all</artifactId>
+            <artifactId>gluegen-rt-natives-linux-amd64</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.gluegen</groupId>
+            <artifactId>gluegen-rt-natives-macosx-universal</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.gluegen</groupId>
+            <artifactId>gluegen-rt-natives-windows-amd64</artifactId>
             <scope>compile</scope>
         </dependency>
         <!-- TODO implement imglib2 -->
@@ -216,7 +226,17 @@
         </dependency>
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-all</artifactId>
+            <artifactId>jogl-all-natives-linux-amd64</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-macosx-universal</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-windows-amd64</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -252,6 +272,11 @@
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-snakeyaml</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-vtk-all</artifactId>
             <scope>compile</scope>
         </dependency>
@@ -268,12 +293,10 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- Link to third-party Maven repositories -->
-    <repositories>
+    <!--<repositories>
         <repository>
             <id>icy</id>
-            <name>Icy's Nexus</name>
-            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
+            <url>https://nexus-icy.pasteur.cloud/repository/icy/</url>
         </repository>
-    </repositories>
+    </repositories>-->
 </project>

@@ -1,0 +1,344 @@
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.bioimageanalysis.icy.system.preferences;
+
+import org.bioimageanalysis.icy.network.auth.AuthenticationInfo;
+import org.bioimageanalysis.icy.network.NetworkUtil;
+import org.bioimageanalysis.icy.common.string.StringUtil;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * @author Stephane
+ */
+public class RepositoryPreferences
+{
+    public static class RepositoryInfo
+    {
+        private static final String ID_NAME = "name";
+        private static final String ID_LOCATION = "location";
+        private static final String ID_ENABLED = "enabled";
+        private static final String ID_SUPPORTPARAM = "supportParam";
+        private static final String ID_AUTHENTICATION = "authentication";
+
+        private String name;
+        private String location;
+        private boolean supportParam;
+        private boolean enabled;
+        private final AuthenticationInfo authInf;
+
+        public RepositoryInfo(String name, String location, String login, String password, boolean authEnabled,
+                boolean enabled, boolean supportParam)
+        {
+            super();
+
+            this.name = name;
+            this.location = location;
+            this.supportParam = supportParam;
+            this.enabled = enabled;
+            authInf = new AuthenticationInfo(login, password, authEnabled);
+        }
+
+        public RepositoryInfo(String name, String location, String login, String password, boolean authEnabled,
+                boolean enabled)
+        {
+            this(name, location, login, password, authEnabled, enabled, true);
+        }
+
+        public RepositoryInfo(String name, String location, boolean enabled)
+        {
+            this(name, location, "", "", false, enabled);
+        }
+
+        public RepositoryInfo(String name, String location)
+        {
+            this(name, location, "", "", false, true);
+        }
+
+        public RepositoryInfo(XMLPreferences node)
+        {
+            this("", "", "", "", false, false);
+
+            load(node);
+        }
+
+        public boolean isEmpty()
+        {
+            return StringUtil.isEmpty(location);
+        }
+
+        /**
+         * @return the name
+         */
+        public String getName()
+        {
+            return name;
+        }
+
+        /**
+         * @param name
+         *        the name to set
+         */
+        public void setName(String name)
+        {
+            this.name = name;
+        }
+
+        /**
+         * @return the location
+         */
+        public String getLocation()
+        {
+            return location;
+        }
+
+        /**
+         * @param location
+         *        the location to set
+         */
+        public void setLocation(String location)
+        {
+            this.location = location;
+        }
+
+        /**
+         * @return the supportParam
+         */
+        public boolean getSupportParam()
+        {
+            return supportParam;
+        }
+
+        /**
+         * @param supportParam
+         *        the supportParam to set
+         */
+        public void setSupportParam(boolean supportParam)
+        {
+            this.supportParam = supportParam;
+        }
+
+        /**
+         * /**
+         * 
+         * @return the enabled
+         */
+        public boolean isEnabled()
+        {
+            return enabled;
+        }
+
+        /**
+         * @param enabled
+         *        the enabled to set
+         */
+        public void setEnabled(boolean enabled)
+        {
+            this.enabled = enabled;
+        }
+
+        /**
+         * @return the login
+         */
+        public String getLogin()
+        {
+            return authInf.getLogin();
+        }
+
+        /**
+         * @param login
+         *        the login to set
+         */
+        public void setLogin(String login)
+        {
+            authInf.setLogin(login);
+        }
+
+        /**
+         * @return the password
+         */
+        public String getPassword()
+        {
+            return authInf.getPassword();
+        }
+
+        /**
+         * @param password
+         *        the password to set
+         */
+        public void setPassword(String password)
+        {
+            authInf.setPassword(password);
+        }
+
+        /**
+         * @return the authentication enabled
+         */
+        public boolean isAuthenticationEnabled()
+        {
+            return authInf.isEnabled();
+        }
+
+        /**
+         * @param value
+         *        the authentication enabled to set
+         */
+        public void setAuthenticationEnabled(boolean value)
+        {
+            authInf.setEnabled(value);
+        }
+
+        /**
+         * @return the authentication informations
+         */
+        public AuthenticationInfo getAuthenticationInfo()
+        {
+            return authInf;
+        }
+
+        public void load(XMLPreferences node)
+        {
+            if (node != null)
+            {
+                name = node.get(ID_NAME, "");
+                location = node.get(ID_LOCATION, "");
+                enabled = node.getBoolean(ID_ENABLED, false);
+                supportParam = node.getBoolean(ID_SUPPORTPARAM, true);
+                authInf.load(node.node(ID_AUTHENTICATION));
+            }
+        }
+
+        public void save(XMLPreferences node)
+        {
+            if (node != null)
+            {
+                node.put(ID_NAME, name);
+                node.put(ID_LOCATION, location);
+                node.putBoolean(ID_ENABLED, enabled);
+                node.putBoolean(ID_SUPPORTPARAM, supportParam);
+                authInf.save(node.node(ID_AUTHENTICATION));
+            }
+        }
+
+        public boolean isDefault()
+        {
+            return RepositoryPreferences.DEFAULT_REPOSITERY_NAME.equals(name)
+                    && RepositoryPreferences.DEFAULT_REPOSITERY_LOCATION.equals(location);
+        }
+
+        public boolean isOldDefault()
+        {
+            return RepositoryPreferences.DEFAULT_REPOSITERY_NAME.equals(name)
+                    && RepositoryPreferences.DEFAULT_REPOSITERY_LOCATION_OLD.equals(location);
+        }
+
+        @Override
+        public String toString()
+        {
+            return name + " - " + location;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return name.hashCode() ^ location.hashCode() ^ authInf.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj instanceof RepositoryInfo)
+            {
+                final RepositoryInfo repoInf = (RepositoryInfo) obj;
+
+                return StringUtil.equals(repoInf.toString(), toString()) && repoInf.authInf.equals(authInf);
+            }
+
+            return super.equals(obj);
+        }
+    }
+
+    /**
+     * pref id
+     */
+    private static final String PREF_ID = "repositories";
+
+    /**
+     * preferences
+     */
+    private static XMLPreferences preferences;
+
+    public static final String DEFAULT_REPOSITERY_NAME = "default";
+    public static final String DEFAULT_REPOSITERY_LOCATION = NetworkUtil.WEBSITE_URL + "repository/";
+    public static final String DEFAULT_REPOSITERY_LOCATION_OLD = "http://www.bioimageanalysis.org/icy/repository/";
+
+    public static void load()
+    {
+        // load preference
+        preferences = ApplicationPreferences.getPreferences().node(PREF_ID);
+    }
+
+    /**
+     * @return the preferences
+     */
+    public static XMLPreferences getPreferences()
+    {
+        return preferences;
+    }
+
+    public static ArrayList<RepositoryInfo> getRepositeries()
+    {
+        final Set<RepositoryInfo> result = new HashSet<RepositoryInfo>();
+        final List<String> childs = preferences.childrenNames();
+
+        for (String child : childs)
+        {
+            final RepositoryInfo reposInf = new RepositoryInfo(preferences.node(child));
+
+            // ignore empty and old default repository
+            if (!reposInf.isEmpty() && !reposInf.isOldDefault())
+                result.add(reposInf);
+        }
+
+        // add default repository if needed
+        result.add(new RepositoryInfo(DEFAULT_REPOSITERY_NAME, DEFAULT_REPOSITERY_LOCATION, true));
+
+        return new ArrayList<RepositoryInfo>(result);
+    }
+
+    public static void setRepositeries(ArrayList<RepositoryInfo> values)
+    {
+        // remove all child nodes
+        preferences.removeChildren();
+
+        int i = 0;
+        for (RepositoryInfo reposInf : values)
+        {
+            if (!reposInf.isEmpty())
+                reposInf.save(preferences.node("repos" + i));
+
+            i++;
+        }
+
+        // clean up all non element nodes
+        preferences.clean();
+    }
+}

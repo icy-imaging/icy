@@ -7,11 +7,11 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>3.0.0</version>
+        <version>3.0.0-a.1</version>
     </parent>
 
     <artifactId>icy-updater</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.0-a.1</version>
 
     <name>Icy-Updater</name>
     <description>Updater / Launcher tool for Icy software</description>
@@ -46,49 +46,45 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>icy/updater/*.java</include>
+                        <include>org/bioimageanalysis/updater/*.java</include>
 
-                        <include>icy/common/Version.java</include>
-                        <include>icy/file/FileUtil.java</include>
-                        <include>icy/file/xml/XMLPersistent.java</include>
-                        <include>icy/gui/main/IcyDesktopPane.java</include>
-                        <include>icy/gui/main/MainInterface.java</include>
-                        <include>icy/gui/main/MainInterfaceBatch.java</include>
-                        <include>icy/main/Icy.java</include>
-                        <include>icy/math/MathUtil.java</include>
-                        <include>icy/network/NetworkUtil.java</include>
-                        <include>icy/network/URLUtil.java</include>
-                        <include>icy/plugin/PluginDescriptor.java</include>
-                        <include>icy/preferences/ApplicationPreferences.java</include>
-                        <include>icy/preferences/CanvasPreferences.java</include>
-                        <include>icy/preferences/ChatPreferences.java</include>
-                        <include>icy/preferences/GeneralPreferences.java</include>
-                        <include>icy/preferences/IcyPreferences.java</include>
-                        <include>icy/preferences/MagicWandPreferences.java</include>
-                        <include>icy/preferences/PluginPreferences.java</include>
-                        <include>icy/preferences/PluginOnlinePreferences.java</include>
-                        <include>icy/preferences/PluginsPreferences.java</include>
-                        <include>icy/preferences/PluginLocalPreferences.java</include>
-                        <include>icy/preferences/NetworkPreferences.java</include>
-                        <include>icy/preferences/RepositoryPreferences.java</include>
-                        <include>icy/preferences/WorkspaceLocalPreferences.java</include>
-                        <include>icy/preferences/WorkspaceOnlinePreferences.java</include>
-                        <include>icy/preferences/WorkspacePreferences.java</include>
-                        <include>icy/preferences/XMLPreferences.java</include>
-                        <include>icy/swimmingPool/SwimmingPool.java</include>
-                        <include>icy/system/IcyExceptionHandler.java</include>
-                        <include>icy/system/SystemUtil.java</include>
-                        <include>icy/system/logging/IcyLogger.java</include>
-                        <include>icy/system/thread/ThreadUtil.java</include>
-                        <include>icy/system/thread/Processor.java</include>
-                        <include>icy/system/thread/InstanceProcessor.java</include>
-                        <include>icy/type/collection/array/DynamicArray.java</include>
-                        <include>icy/update/ElementDescriptor.java</include>
-                        <include>icy/update/Updater.java</include>
-                        <include>icy/util/DateUtil.java</include>
-                        <include>icy/util/XMLUtil.java</include>
-                        <include>icy/util/StringUtil.java</include>
-                        <include>icy/util/ZipUtil.java</include>
+                        <include>org/bioimageanalysis/icy/common/Version.java</include>
+                        <include>org/bioimageanalysis/icy/io/FileUtil.java</include>
+                        <include>org/bioimageanalysis/icy/io/xml/XMLPersistent.java</include>
+                        <include>org/bioimageanalysis/icy/gui/main/IcyDesktopPane.java</include>
+                        <include>org/bioimageanalysis/icy/gui/main/MainInterface.java</include>
+                        <include>org/bioimageanalysis/icy/gui/main/MainInterfaceBatch.java</include>
+                        <include>org/bioimageanalysis/icy/Icy.java</include>
+                        <include>org/bioimageanalysis/icy/common/math/MathUtil.java</include>
+                        <include>org/bioimageanalysis/icy/network/NetworkUtil.java</include>
+                        <include>org/bioimageanalysis/icy/network/URLUtil.java</include>
+                        <include>org/bioimageanalysis/icy/extension/plugin/PluginDescriptor.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/ApplicationPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/CanvasPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/GeneralPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/IcyPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/MagicWandPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/PluginPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/PluginOnlinePreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/PluginsPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/PluginLocalPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/NetworkPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/RepositoryPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/system/preferences/XMLPreferences.java</include>
+                        <include>org/bioimageanalysis/icy/model/swimmingPool/SwimmingPool.java</include>
+                        <include>org/bioimageanalysis/icy/system/IcyExceptionHandler.java</include>
+                        <include>org/bioimageanalysis/icy/system/SystemUtil.java</include>
+                        <include>org/bioimageanalysis/icy/system/logging/IcyLogger.java</include>
+                        <include>org/bioimageanalysis/icy/system/thread/ThreadUtil.java</include>
+                        <include>org/bioimageanalysis/icy/system/thread/Processor.java</include>
+                        <include>org/bioimageanalysis/icy/system/thread/InstanceProcessor.java</include>
+                        <include>org/bioimageanalysis/icy/common/collection/array/DynamicArray.java</include>
+                        <include>org/bioimageanalysis/icy/network/update/ElementDescriptor.java</include>
+                        <include>org/bioimageanalysis/icy/network/update/Updater.java</include>
+                        <include>org/bioimageanalysis/icy/common/datetime/DateUtil.java</include>
+                        <include>org/bioimageanalysis/icy/io/xml/XMLUtil.java</include>
+                        <include>org/bioimageanalysis/icy/common/string/StringUtil.java</include>
+                        <include>org/bioimageanalysis/icy/io/zip/ZipUtil.java</include>
                     </includes>
                 </configuration>
             </plugin>
@@ -104,7 +100,7 @@
                             <classpathLayoutType>custom</classpathLayoutType>
                             <!--suppress UnresolvedMavenProperty -->
                             <customClasspathLayout>$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
-                            <mainClass>icy.updater.Main</mainClass>
+                            <mainClass>org.bioimageanalysis.updater.Main</mainClass>
                         </manifest>
                         <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>
@@ -210,8 +206,7 @@
     <repositories>
         <repository>
             <id>icy</id>
-            <name>Icy's Nexus</name>
-            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
+            <url>https://nexus-icy.pasteur.cloud/repository/icy/</url>
         </repository>
     </repositories>
 </project>

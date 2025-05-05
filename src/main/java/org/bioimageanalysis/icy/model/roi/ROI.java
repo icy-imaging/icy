@@ -1,0 +1,2791 @@
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package org.bioimageanalysis.icy.model.roi;
+
+import org.bioimageanalysis.extension.kernel.roi.roi2d.ROI2DArea;
+import org.bioimageanalysis.extension.kernel.roi.roi3d.ROI3DArea;
+import org.bioimageanalysis.icy.Icy;
+import org.bioimageanalysis.icy.common.color.ColorUtil;
+import org.bioimageanalysis.icy.common.event.CollapsibleEvent;
+import org.bioimageanalysis.icy.common.event.UpdateEventHandler;
+import org.bioimageanalysis.icy.common.geom.point.Point5D;
+import org.bioimageanalysis.icy.common.geom.rectangle.Rectangle5D;
+import org.bioimageanalysis.icy.common.geom.shape.ShapeUtil.BooleanOperator;
+import org.bioimageanalysis.icy.common.listener.ChangeListener;
+import org.bioimageanalysis.icy.common.reflect.ClassUtil;
+import org.bioimageanalysis.icy.common.string.StringUtil;
+import org.bioimageanalysis.icy.extension.plugin.interface_.PluginROI;
+import org.bioimageanalysis.icy.gui.EventUtil;
+import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
+import org.bioimageanalysis.icy.gui.canvas.VtkCanvas;
+import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.toolbar.panel.RoisPanel;
+import org.bioimageanalysis.icy.io.xml.XMLPersistent;
+import org.bioimageanalysis.icy.io.xml.XMLUtil;
+import org.bioimageanalysis.icy.model.overlay.Overlay;
+import org.bioimageanalysis.icy.model.overlay.VtkPainter;
+import org.bioimageanalysis.icy.model.roi.ROIEvent.ROIEventType;
+import org.bioimageanalysis.icy.model.roi.edit.PositionROIEdit;
+import org.bioimageanalysis.icy.model.roi.mask.BooleanMask2D;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.system.IcyExceptionHandler;
+import org.bioimageanalysis.icy.system.logging.IcyLogger;
+import org.bioimageanalysis.icy.system.preferences.GeneralPreferences;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import vtk.vtkProp;
+
+import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.lang.reflect.Constructor;
+import java.util.List;
+import java.util.*;
+import java.util.Map.Entry;
+
+/**
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
+ */
+public abstract class ROI implements ChangeListener, XMLPersistent {
+    public static class ROIIdComparator implements Comparator<ROI> {
+        @Override
+        public int compare(final ROI roi1, final ROI roi2) {
+            if (roi1 == roi2)
+                return 0;
+
+            if (roi1 == null)
+                return -1;
+            if (roi2 == null)
+                return 1;
+
+            return Integer.compare(roi1.id, roi2.id);
+        }
+    }
+
+    public static class ROINameComparator implements Comparator<ROI> {
+        @Override
+        public int compare(final ROI roi1, final ROI roi2) {
+            if (roi1 == roi2)
+                return 0;
+
+            if (roi1 == null)
+                return -1;
+            if (roi2 == null)
+                return 1;
+
+            return roi1.getName().compareTo(roi2.getName());
+        }
+    }
+
+    /**
+     * Group if for ROI (used to do group type operation)
+     *
+     * @author Stephane
+     */
+    public enum ROIGroupId {
+        A, B
+    }
+
+    public static final String ID_ROI = "roi";
+
+    public static final String ID_CLASSNAME = "classname";
+    public static final String ID_ID = "id";
+    public static final String ID_NAME = "name";
+    // public static final String ID_GROUPID = "groupid";
+    public static final String ID_COLOR = "color";
+    public static final String ID_STROKE = "stroke";
+    public static final String ID_OPACITY = "opacity";
+    public static final String ID_SELECTED = "selected";
+    public static final String ID_READONLY = "readOnly";
+    public static final String ID_SHOWNAME = "showName";
+    public static final String ID_PROPERTIES = "properties";
+    // public static final String ID_PAINTER = "painter";
+
+    public static final ROIIdComparator idComparator = new ROIIdComparator();
+    public static final ROINameComparator nameComparator = new ROINameComparator();
+
+    public static final double DEFAULT_STROKE = 2;
+    public static final Color DEFAULT_COLOR = Color.GREEN;
+    public static final float DEFAULT_OPACITY = 0.3f;
+
+    // cached value (often used)
+    public static Color defaultColor = null;
+    public static Float defaultOpacity = null;
+    public static Double defaultStroke = null;
+    public static Boolean defaultShowName = null;
+
+    public static final String PROPERTY_NAME = ID_NAME;
+    public static final String PROPERTY_ID = ID_ID;
+    // public static final String PROPERTY_GROUPID = ID_GROUPID;
+    public static final String PROPERTY_ICON = "icon";
+    public static final String PROPERTY_CREATING = "creating";
+    public static final String PROPERTY_READONLY = ID_READONLY;
+    public static final String PROPERTY_SHOWNAME = ID_SHOWNAME;
+    public static final String PROPERTY_COLOR = ID_COLOR;
+    public static final String PROPERTY_STROKE = ID_STROKE;
+    public static final String PROPERTY_OPACITY = ID_OPACITY;
+
+    // special properties for ROI_CHANGED event
+    public static final String ROI_CHANGED_POSITION = "position";
+    public static final String ROI_CHANGED_ALL = "all";
+
+    /**
+     * Create a ROI from its class name or {@link PluginROI} class name.
+     *
+     * @param className
+     *        roi class name or {@link PluginROI} class name.
+     * @return ROI (null if command is an incorrect ROI class name)
+     */
+    public static ROI create(final String className) {
+        ROI result = null;
+
+        try {
+            // search for the specified className
+            final Class<?> clazz = ClassUtil.findClass(className);
+
+            // class found
+            if (clazz != null) {
+                try {
+                    // we first check if we have a PluginROI class here
+                    final Class<? extends PluginROI> roiClazz = clazz.asSubclass(PluginROI.class);
+                    // create the plugin
+                    final PluginROI plugin = roiClazz.getDeclaredConstructor().newInstance(); // roiClazz.newInstance();
+                    // create ROI
+                    result = plugin.createROI();
+                    // set ROI icon from plugin icon
+                    // TODO enable this
+                    /*final Image icon = ((Plugin) plugin).getDescriptor().getIconAsImage();
+                    if (icon != null)
+                        result.setIcon(icon);*/
+                }
+                catch (final ClassCastException e0) {
+                    // check if this is a ROI class
+                    final Class<? extends ROI> roiClazz = clazz.asSubclass(ROI.class);
+
+                    // default constructor
+                    final Constructor<? extends ROI> constructor = roiClazz.getConstructor();
+                    // build ROI
+                    result = constructor.newInstance();
+                }
+            }
+        }
+        catch (final NoSuchMethodException e) {
+            IcyExceptionHandler.handleException(new NoSuchMethodException("Default constructor not found in class '" + className + "', cannot create the ROI."), true);
+        }
+        catch (final ClassNotFoundException e) {
+            IcyExceptionHandler.handleException(new ClassNotFoundException("Cannot find '" + className + "' class, cannot create the ROI."), true);
+        }
+        catch (final Exception e) {
+            IcyExceptionHandler.handleException(e, true);
+        }
+
+        return result;
+    }
+
+    /**
+     * Create a ROI from its class name or {@link PluginROI} class name (interactive mode).
+     *
+     * @param className
+     *        roi class name or {@link PluginROI} class name.
+     * @param imagePoint
+     *        initial point position in image coordinates (interactive mode).
+     * @return ROI (null if the specified class name is an incorrect ROI class name)
+     */
+    public static ROI create(final String className, final Point5D imagePoint) {
+        if (imagePoint == null)
+            return create(className);
+
+        ROI result = null;
+
+        try {
+            // search for the specified className
+            final Class<?> clazz = ClassUtil.findClass(className);
+
+            // class found
+            if (clazz != null) {
+                try {
+                    // we first check if we have a PluginROI class here
+                    final Class<? extends PluginROI> roiClazz = clazz.asSubclass(PluginROI.class);
+                    // create the plugin
+                    final PluginROI plugin = roiClazz.getDeclaredConstructor().newInstance(); // roiClazz.newInstance();
+
+                    // then create ROI with the Point5D constructor
+                    result = plugin.createROI(imagePoint);
+                    // not supported --> use default constructor
+                    if (result == null)
+                        result = plugin.createROI();
+
+                    // set ROI icon from plugin icon
+                    // TODO enable this
+                    /*final Image icon = ((Plugin) plugin).getDescriptor().getIconAsImage();
+                    if (icon != null)
+                        result.setIcon(icon);*/
+                }
+                catch (final ClassCastException e0) {
+                    // check if this is a ROI class
+                    final Class<? extends ROI> roiClazz = clazz.asSubclass(ROI.class);
+
+                    try {
+                        // get constructor (Point5D)
+                        final Constructor<? extends ROI> constructor = roiClazz.getConstructor(Point5D.class);
+                        // build ROI
+                        result = constructor.newInstance(imagePoint);
+                    }
+                    catch (final NoSuchMethodException e1) {
+                        // try default constructor as last chance...
+                        final Constructor<? extends ROI> constructor = roiClazz.getConstructor();
+                        // build ROI
+                        result = constructor.newInstance();
+                    }
+                }
+            }
+        }
+        catch (final Exception e) {
+            IcyExceptionHandler.handleException(new NoSuchMethodException("Default constructor not found in class '" + className + "', cannot create the ROI."), true);
+        }
+
+        return result;
+    }
+
+    /**
+     * Create a ROI from a xml definition
+     *
+     * @param node
+     *        xml node defining the roi
+     * @return ROI (null if node is an incorrect ROI definition)
+     */
+    public static ROI createFromXML(final Node node) {
+        if (node == null)
+            return null;
+
+        final String className = XMLUtil.getElementValue(node, ID_CLASSNAME, "");
+        if (StringUtil.isEmpty(className))
+            return null;
+
+        final ROI roi = create(className);
+        // load properties from XML
+        if (roi != null) {
+            // error while loading infos --> return null
+            if (!roi.loadFromXML(node))
+                return null;
+
+            roi.setSelected(false);
+        }
+
+        return roi;
+    }
+
+    public static double getAdjustedStroke(final IcyCanvas canvas, final double stroke) {
+        final double adjStrkX = canvas.canvasToImageLogDeltaX((int) stroke);
+        final double adjStrkY = canvas.canvasToImageLogDeltaY((int) stroke);
+
+        return Math.max(adjStrkX, adjStrkY);
+    }
+
+    /**
+     * @param rois
+     *        List of ROI
+     * @param clazz
+     *        ROI class
+     * @return Return ROI of specified type from the ROI list
+     */
+    public static List<ROI> getROIList(final List<? extends ROI> rois, final Class<? extends ROI> clazz) {
+        final List<ROI> result = new ArrayList<>();
+
+        for (final ROI roi : rois)
+            if (clazz.isInstance(roi))
+                result.add(roi);
+
+        return result;
+    }
+
+    /**
+     * Return the number of ROI defined in the specified XML node.
+     * @param node
+     *        XML node defining the ROI list
+     * @return the number of ROI defined in the XML node.
+     */
+    public static int getROICount(final Node node) {
+        if (node != null) {
+            final List<Node> nodesROI = XMLUtil.getChildren(node, ID_ROI);
+
+            if (nodesROI != null)
+                return nodesROI.size();
+        }
+
+        return 0;
+    }
+
+    /**
+     * Return a list of ROI from a XML node.
+     *
+     * @param node
+     *        XML node defining the ROI list
+     * @return a list of ROI
+     */
+    public static List<ROI> loadROIsFromXML(final Node node) {
+        final List<ROI> result = new ArrayList<>();
+
+        if (node != null) {
+            final List<Node> nodesROI = XMLUtil.getChildren(node, ID_ROI);
+
+            if (nodesROI != null) {
+                for (final Node n : nodesROI) {
+                    final ROI roi = createFromXML(n);
+
+                    if (roi != null)
+                        result.add(roi);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Set a list of ROI to a XML node.
+     *
+     * @param node
+     *        XML node which is used to store the list of ROI
+     * @param rois
+     *        the list of ROI to store in the XML node
+     */
+    public static void saveROIsToXML(final Node node, final List<ROI> rois) {
+        if (node != null) {
+            for (final ROI roi : rois) {
+                final Node nodeROI = XMLUtil.addElement(node, ID_ROI);
+
+                if (!roi.saveToXML(nodeROI)) {
+                    XMLUtil.removeNode(node, nodeROI);
+                    IcyLogger.error(ROI.class, "The roi " + roi.getName() + " was not correctly saved to XML !");
+                }
+            }
+        }
+    }
+
+    public static Color getDefaultColor() {
+        if (defaultColor == null)
+            defaultColor = new Color(GeneralPreferences.getPreferencesRoiOverlay().getInt(ID_COLOR, DEFAULT_COLOR.getRGB()));
+
+        return defaultColor;
+    }
+
+    public static float getDefaultOpacity() {
+        if (defaultOpacity == null)
+            defaultOpacity = Float.valueOf(GeneralPreferences.getPreferencesRoiOverlay().getFloat(ID_OPACITY, DEFAULT_OPACITY));
+
+        return defaultOpacity.floatValue();
+    }
+
+    public static double getDefaultStroke() {
+        if (defaultStroke == null)
+            defaultStroke = Double.valueOf(GeneralPreferences.getPreferencesRoiOverlay().getDouble(ID_STROKE, DEFAULT_STROKE));
+
+        return defaultStroke.doubleValue();
+    }
+
+    public static boolean getDefaultShowName() {
+        if (defaultShowName == null)
+            defaultShowName = Boolean.valueOf(GeneralPreferences.getPreferencesRoiOverlay().getBoolean(ID_SHOWNAME, false));
+
+        return defaultShowName.booleanValue();
+    }
+
+    public static void setDefaultColor(final Color value) {
+        defaultColor = value;
+        GeneralPreferences.getPreferencesRoiOverlay().putInt(ID_COLOR, value.getRGB());
+    }
+
+    public static void setDefaultOpacity(final float value) {
+        defaultOpacity = Float.valueOf(value);
+        GeneralPreferences.getPreferencesRoiOverlay().putFloat(ID_OPACITY, value);
+    }
+
+    public static void setDefaultStroke(final double value) {
+        defaultStroke = Double.valueOf(value);
+        GeneralPreferences.getPreferencesRoiOverlay().putDouble(ID_STROKE, value);
+    }
+
+    public static void setDefaultShowName(final boolean value) {
+        defaultShowName = Boolean.valueOf(value);
+        GeneralPreferences.getPreferencesRoiOverlay().putBoolean(ID_SHOWNAME, value);
+    }
+
+    /**
+     * Abstract basic class for ROI overlay
+     */
+    public abstract class ROIPainter extends Overlay implements VtkPainter {
+        /**
+         * Overlay properties
+         */
+        protected double stroke;
+        protected Color color;
+        protected float opacity;
+        protected boolean showName;
+
+        /**
+         * Last mouse position (image coordinates).
+         * Needed for some internals operation
+         */
+        protected final Point5D.Double mousePos;
+
+        public ROIPainter() {
+            super("ROI painter", OverlayPriority.SHAPE_NORMAL);
+
+            stroke = getDefaultStroke();
+            color = getDefaultColor();
+            opacity = getDefaultOpacity();
+            showName = getDefaultShowName();
+
+            mousePos = new Point5D.Double();
+
+            // we fix the ROI overlay
+            canBeRemoved = false;
+        }
+
+        /**
+         * @return Return the ROI painter stroke.
+         */
+        public double getStroke() {
+            return painter.stroke;
+        }
+
+        /**
+         * @param canvas
+         *        canvas
+         * @return Get adjusted stroke for the current canvas transformation
+         */
+        public double getAdjustedStroke(final IcyCanvas canvas) {
+            return ROI.getAdjustedStroke(canvas, getStroke());
+        }
+
+        /**
+         * @param value
+         *        Set ROI painter stroke.
+         */
+        public void setStroke(final double value) {
+            if (stroke != value) {
+                stroke = value;
+                // painter changed event is done on property changed
+                ROI.this.propertyChanged(PROPERTY_STROKE);
+            }
+        }
+
+        /**
+         * @return Returns the content opacity factor (0 = transparent while 1 means opaque).
+         */
+        public float getOpacity() {
+            return opacity;
+        }
+
+        /**
+         * @param value
+         *        Sets the content opacity factor (0 = transparent while 1 means opaque).
+         */
+        public void setOpacity(final float value) {
+            if (opacity != value) {
+                opacity = value;
+                // painter changed event is done on property changed
+                ROI.this.propertyChanged(PROPERTY_OPACITY);
+            }
+        }
+
+        /**
+         * @return Returns the color for focused state
+         */
+        public Color getFocusedColor() {
+            final int lum = ColorUtil.getLuminance(getColor());
+
+            if (lum < (256 - 32))
+                return Color.white;
+
+            return Color.gray;
+        }
+
+        /**
+         * @return Returns the color used to display the ROI depending its current state.
+         */
+        public Color getDisplayColor() {
+            if (isFocused())
+                return getFocusedColor();
+
+            return getColor();
+        }
+
+        /**
+         * @return Return the ROI painter base color.
+         */
+        public Color getColor() {
+            return color;
+        }
+
+        /**
+         * @param value
+         *        Set the ROI painter base color.
+         */
+        public void setColor(final Color value) {
+            if ((color != null) && (color != value)) {
+                color = value;
+                // painter changed event is done on property changed
+                ROI.this.propertyChanged(PROPERTY_COLOR);
+            }
+        }
+
+        /**
+         * @return Return <code>true</code> if ROI painter should display the ROI name at draw time.<br>
+         */
+        public boolean getShowName() {
+            return showName;
+        }
+
+        /**
+         * @param value
+         *        When set to <code>true</code> the ROI painter display the ROI name at draw time.
+         */
+        public void setShowName(final boolean value) {
+            if (showName != value) {
+                showName = value;
+                ROI.this.propertyChanged(PROPERTY_SHOWNAME);
+            }
+        }
+
+        public void computePriority() {
+            if (isFocused())
+                setPriority(OverlayPriority.SHAPE_TOP);
+            else if (isSelected())
+                setPriority(OverlayPriority.SHAPE_HIGH);
+            else
+                setPriority(OverlayPriority.SHAPE_LOW);
+        }
+
+        @Override
+        public boolean isReadOnly() {
+            // use ROI read only property
+            return ROI.this.isReadOnly();
+        }
+
+        @Override
+        public void setReadOnly(final boolean readOnly) {
+            super.setReadOnly(readOnly);
+            ROI.this.setReadOnly(readOnly);
+        }
+
+        @Override
+        public String getName() {
+            // use ROI name property
+            return ROI.this.getName();
+        }
+
+        @Override
+        public void setName(final String name) {
+            // modifying layer name modify ROI name
+            ROI.this.setName(name);
+        }
+
+        /**
+         * @return Update the focus state of the ROI
+         * @param canvas
+         *        canvas
+         * @param imagePoint
+         *        image
+         * @param e
+         *        event
+         */
+        protected boolean updateFocus(final InputEvent e, final Point5D imagePoint, final IcyCanvas canvas) {
+            // empty implementation by default
+            return false;
+        }
+
+        /**
+         * @return Update the selection state of the ROI (default implementation)
+         * @param e
+         *        event
+         * @param imagePoint
+         *        5D point
+         * @param canvas
+         *        canvas
+         */
+        protected boolean updateSelect(final InputEvent e, final Point5D imagePoint, final IcyCanvas canvas) {
+            // nothing to do if the ROI does not have focus
+            if (!isFocused())
+                return false;
+
+            // union selection
+            if (EventUtil.isShiftDown(e)) {
+                // not already selected --> add ROI to selection
+                if (!isSelected()) {
+                    setSelected(true);
+                    return true;
+                }
+            }
+            else if (EventUtil.isControlDown(e))
+            // switch selection
+            {
+                // inverse state
+                setSelected(!isSelected());
+                return true;
+            }
+            else
+            // exclusive selection
+            {
+                // not selected --> exclusive ROI selection
+                if (!isSelected()) {
+                    // exclusive selection can fail if we use embedded ROI (as ROIStack)
+                    if (!canvas.getSequence().setSelectedROI(ROI.this))
+                        ROI.this.setSelected(true);
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        protected boolean updateDrag(final InputEvent e, final Point5D imagePoint, final IcyCanvas canvas) {
+            // empty implementation by default
+            return false;
+        }
+
+        @Override
+        public void keyPressed(final KeyEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
+            if (!e.isConsumed()) {
+                final Sequence seq = canvas.getSequence();
+
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_ESCAPE:
+                        // has selected ROI ? --> global unselect ROI
+                        if (!seq.getSelectedROIs().isEmpty())
+                            seq.setSelectedROI(null);
+
+                        // always consume to avoid unnecessary computation for ALL rois
+                        e.consume();
+                        break;
+
+                    case KeyEvent.VK_DELETE:
+                    case KeyEvent.VK_BACK_SPACE:
+                        // has selected ROI ? --> remove all selected ROI from the sequence
+                        if (!seq.getSelectedROIs().isEmpty())
+                            canvas.getSequence().removeSelectedROIs(true, true);
+                            // roi focused ? --> delete ROI
+                        else if (isFocused())
+                            canvas.getSequence().removeROI(ROI.this, true);
+
+                        // always consume to avoid unnecessary computation for ALL rois
+                        e.consume();
+                        break;
+
+                    case KeyEvent.VK_K:
+                        final List<ROI> selectedROIs = seq.getSelectedROIs();
+
+                        if (!selectedROIs.isEmpty()) {
+                            int numRO = 0;
+
+                            // has selected ROI ? --> global unselect ROI
+                            for (final ROI roi : selectedROIs)
+                                if (roi.isReadOnly())
+                                    numRO++;
+
+                            // more than half in RO ? --> ro
+                            final boolean ro = numRO > (selectedROIs.size() / 2);
+
+                            seq.beginUpdate();
+                            try {
+                                for (final ROI roi : selectedROIs)
+                                    roi.setReadOnly(!ro);
+                            }
+                            finally {
+                                seq.endUpdate();
+                            }
+                        }
+
+                        // always consume to avoid unnecessary computation for ALL rois
+                        e.consume();
+                        break;
+                }
+
+                // only for selected and modifiable ROIs not necessary visible
+                if (isSelected() && !isReadOnly()) {
+                    // shift modifier is used for ROI special actions
+                    if (EventUtil.isShiftDown(e)) {
+                        switch (e.getKeyCode()) {
+                            case KeyEvent.VK_T:
+                                // attach to current T position
+                                if (imagePoint.getT() != -1) {
+                                    final int t = (int) imagePoint.getT();
+                                    final Point5D savePos = getPosition5D();
+
+                                    if ((ROI.this instanceof ROI2D) && (((ROI2D) ROI.this).getT() != t)) {
+                                        ((ROI2D) ROI.this).setT(t);
+                                        // add position change to undo manager
+                                        Icy.getMainInterface().getUndoManager()
+                                                .addEdit(new PositionROIEdit(ROI.this, savePos, false));
+                                    }
+                                    else if ((ROI.this instanceof ROI3D) && (((ROI3D) ROI.this).getT() != t)) {
+                                        ((ROI3D) ROI.this).setT(t);
+                                        // add position change to undo manager
+                                        Icy.getMainInterface().getUndoManager()
+                                                .addEdit(new PositionROIEdit(ROI.this, savePos, false));
+                                    }
+                                }
+                                break;
+
+                            case KeyEvent.VK_Z:
+                                // attach to current Z position
+                                if (imagePoint.getZ() != -1) {
+                                    final int z = (int) imagePoint.getZ();
+
+                                    if ((ROI.this instanceof ROI2D) && (((ROI2D) ROI.this).getZ() != z)) {
+                                        final Point5D savePos = getPosition5D();
+                                        ((ROI2D) ROI.this).setZ(z);
+                                        // add position change to undo manager
+                                        Icy.getMainInterface().getUndoManager()
+                                                .addEdit(new PositionROIEdit(ROI.this, savePos, false));
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                }
+
+                // only if ROI is visible / active for current position
+                if (isActiveFor(canvas)) {
+                    // only for selected and modifiable ROIs
+                    if (isSelected() && !isReadOnly()) {
+                        // control modifier is used for ROI modification from keyboard
+                        if (EventUtil.isMenuControlDown(e)) {
+                            switch (e.getKeyCode()) {
+                                case KeyEvent.VK_LEFT:
+                                    if (EventUtil.isAltDown(e)) {
+                                        // resize
+                                        if (canSetBounds()) {
+                                            final Rectangle5D bnd = getBounds5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                bnd.setSizeX(Math.max(1, bnd.getSizeX() - 10));
+                                            else
+                                                bnd.setSizeX(Math.max(1, bnd.getSizeX() - 1));
+                                            setBounds5D(bnd);
+                                            e.consume();
+                                        }
+                                    }
+                                    else {
+                                        // move
+                                        if (canSetPosition()) {
+                                            final Point5D pos = getPosition5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                pos.setX(pos.getX() - 10);
+                                            else
+                                                pos.setX(pos.getX() - 1);
+                                            setPosition5D(pos);
+                                            e.consume();
+                                        }
+                                    }
+                                    break;
+
+                                case KeyEvent.VK_RIGHT:
+                                    if (EventUtil.isAltDown(e)) {
+                                        // resize
+                                        if (canSetBounds()) {
+                                            final Rectangle5D bnd = getBounds5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                bnd.setSizeX(Math.max(1, bnd.getSizeX() + 10));
+                                            else
+                                                bnd.setSizeX(Math.max(1, bnd.getSizeX() + 1));
+                                            setBounds5D(bnd);
+                                            e.consume();
+                                        }
+                                    }
+                                    else {
+                                        // move
+                                        if (canSetPosition()) {
+                                            final Point5D pos = getPosition5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                pos.setX(pos.getX() + 10);
+                                            else
+                                                pos.setX(pos.getX() + 1);
+                                            setPosition5D(pos);
+                                            e.consume();
+                                        }
+                                    }
+                                    break;
+
+                                case KeyEvent.VK_UP:
+                                    if (EventUtil.isAltDown(e)) {
+                                        // resize
+                                        if (canSetBounds()) {
+                                            final Rectangle5D bnd = getBounds5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                bnd.setSizeY(Math.max(1, bnd.getSizeY() - 10));
+                                            else
+                                                bnd.setSizeY(Math.max(1, bnd.getSizeY() - 1));
+                                            setBounds5D(bnd);
+                                            e.consume();
+                                        }
+                                    }
+                                    else {
+                                        // move
+                                        if (canSetPosition()) {
+                                            final Point5D pos = getPosition5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                pos.setY(pos.getY() - 10);
+                                            else
+                                                pos.setY(pos.getY() - 1);
+                                            setPosition5D(pos);
+                                            e.consume();
+                                        }
+                                    }
+                                    break;
+
+                                case KeyEvent.VK_DOWN:
+                                    if (EventUtil.isAltDown(e)) {
+                                        // resize
+                                        if (canSetBounds()) {
+                                            final Rectangle5D bnd = getBounds5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                bnd.setSizeY(Math.max(1, bnd.getSizeY() + 10));
+                                            else
+                                                bnd.setSizeY(Math.max(1, bnd.getSizeY() + 1));
+                                            setBounds5D(bnd);
+                                            e.consume();
+                                        }
+                                    }
+                                    else {
+                                        // move
+                                        if (canSetPosition()) {
+                                            final Point5D pos = getPosition5D();
+                                            if (EventUtil.isShiftDown(e))
+                                                pos.setY(pos.getY() + 10);
+                                            else
+                                                pos.setY(pos.getY() + 1);
+                                            setPosition5D(pos);
+                                            e.consume();
+                                        }
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // this allow to keep the backward compatibility
+            super.keyPressed(e, imagePoint, canvas);
+        }
+
+        @Override
+        public void keyReleased(final KeyEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
+            // this allow to keep the backward compatibility
+            super.keyReleased(e, imagePoint, canvas);
+
+            if (isActiveFor(canvas)) {
+                // just for the shift key state change
+                if (!isReadOnly())
+                    updateDrag(e, imagePoint, canvas);
+            }
+        }
+
+        @Override
+        public void mousePressed(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
+            // this allow to keep the backward compatibility
+            super.mousePressed(e, imagePoint, canvas);
+
+            // not yet consumed...
+            if (!e.isConsumed()) {
+                if (isActiveFor(canvas)) {
+                    // left button action
+                    if (EventUtil.isLeftMouseButton(e)) {
+                        ROI.this.beginUpdate();
+                        try {
+                            // update selection
+                            if (updateSelect(e, imagePoint, canvas))
+                                e.consume();
+                                // always consume when focused to enable dragging
+                            else if (isFocused())
+                                e.consume();
+                        }
+                        finally {
+                            ROI.this.endUpdate();
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void mouseReleased(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
+            // this allow to keep the backward compatibility
+            super.mouseReleased(e, imagePoint, canvas);
+        }
+
+        @Override
+        public void mouseClick(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
+            // this allow to keep the backward compatibility
+            super.mouseClick(e, imagePoint, canvas);
+
+            // not yet consumed...
+            if (!e.isConsumed()) {
+                // and process ROI stuff now
+                if (isActiveFor(canvas)) {
+                    final int clickCount = e.getClickCount();
+
+                    // single click
+                    if (clickCount == 1) {
+                        // right click action
+                        if (EventUtil.isRightMouseButton(e)) {
+                            // unselect (don't consume event)
+                            if (isSelected())
+                                ROI.this.setSelected(false);
+                        }
+                    }
+                    // double click
+                    else if (clickCount == 2) {
+                        // focused ?
+                        if (isFocused()) {
+                            // show in ROI panel
+                            final RoisPanel roiPanel = RoisPanel.getInstance();
+
+                            if (roiPanel != null) {
+                                roiPanel.scrollTo(ROI.this);
+                                // consume event
+                                e.consume();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void mouseDrag(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
+            // this allow to keep the backward compatibility
+            super.mouseDrag(e, imagePoint, canvas);
+
+            // nothing here by default, should be implemented in deriving classes...
+        }
+
+        @Override
+        public void mouseMove(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
+            // this allow to keep the backward compatibility
+            super.mouseMove(e, imagePoint, canvas);
+
+            // update focus
+            if (!e.isConsumed()) {
+                if (isActiveFor(canvas)) {
+                    if (updateFocus(e, imagePoint, canvas))
+                        e.consume();
+                }
+            }
+        }
+
+        @Override
+        public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
+            // special case of VTK canvas
+            if (canvas instanceof VtkCanvas) {
+                // hide object is not active for canvas
+                if (!isActiveFor(canvas))
+                    hideVtkObjects();
+            }
+        }
+
+        @Override
+        public boolean loadFromXML(final Node node) {
+            if (node == null)
+                return false;
+
+            beginUpdate();
+            try {
+                // we just load specific info from painter (not a proper XML load as it will be restored from ROI)
+                setColor(new Color(XMLUtil.getElementIntValue(node, ID_COLOR, getDefaultColor().getRGB())));
+                setStroke(XMLUtil.getElementDoubleValue(node, ID_STROKE, getDefaultStroke()));
+                setOpacity(XMLUtil.getElementFloatValue(node, ID_OPACITY, getDefaultOpacity()));
+                setShowName(XMLUtil.getElementBooleanValue(node, ID_SHOWNAME, getDefaultShowName()));
+            }
+            finally {
+                endUpdate();
+            }
+
+            return true;
+        }
+
+        @Override
+        public boolean saveToXML(final Node node) {
+            if (node == null)
+                return false;
+
+            // we just save specific info from painter (not a proper XML save as it will be restored from ROI)
+            XMLUtil.setElementIntValue(node, ID_COLOR, color.getRGB());
+            XMLUtil.setElementDoubleValue(node, ID_STROKE, stroke);
+            XMLUtil.setElementFloatValue(node, ID_OPACITY, opacity);
+            XMLUtil.setElementBooleanValue(node, ID_SHOWNAME, showName);
+
+            return true;
+        }
+
+        @Override
+        public vtkProp[] getProps() {
+            // default implementation
+            return new vtkProp[0];
+        }
+
+        public void hideVtkObjects() {
+            for (final vtkProp prop : getProps())
+                prop.SetVisibility(0);
+        }
+    }
+
+    /**
+     * id generator
+     */
+    private static int id_generator = 1;
+
+    /**
+     * associated ROI painter
+     */
+    protected final ROIPainter painter;
+
+    protected int id;
+    protected String name;
+    // protected ROIGroupId groupid;
+    protected boolean creating;
+    protected boolean focused;
+    protected boolean selected;
+    protected boolean readOnly;
+    protected final Map<String, String> properties;
+
+    // attached ROI icon
+    protected SVGIcon icon;
+
+    /**
+     * cached calculated properties
+     */
+    protected Rectangle5D cachedBounds;
+    protected double cachedNumberOfPoints;
+    protected double cachedNumberOfContourPoints;
+    protected boolean boundsInvalid;
+    protected boolean numberOfContourPointsInvalid;
+    protected boolean numberOfPointsInvalid;
+
+    /**
+     * listeners
+     */
+    protected final List<ROIListener> listeners;
+    /**
+     * internal updater
+     */
+    protected final UpdateEventHandler updater;
+
+    public ROI() {
+        super();
+
+        // ensure unique id
+        id = generateId();
+        painter = createPainter();
+        name = "";
+        // groupid = null;
+        readOnly = false;
+        creating = false;
+        focused = false;
+        selected = false;
+        properties = new HashMap<>();
+
+        cachedBounds = new Rectangle5D.Double();
+        cachedNumberOfPoints = 0d;
+        cachedNumberOfContourPoints = 0d;
+        boundsInvalid = true;
+        numberOfPointsInvalid = true;
+        numberOfContourPointsInvalid = true;
+
+        listeners = new ArrayList<>();
+        updater = new UpdateEventHandler(this, false);
+
+        // default icon & name
+        icon = SVGIcon.DRAW_ABSTRACT;
+        name = getDefaultName();
+    }
+
+    protected abstract ROIPainter createPainter();
+
+    /**
+     * @return Returns the number of dimension of the ROI:<br>
+     *         2 for ROI2D<br>
+     *         3 for ROI3D<br>
+     *         4 for ROI4D<br>
+     *         5 for ROI5D<br>
+     */
+    public abstract int getDimension();
+
+    /**
+     * @return generate unique id
+     */
+    private static synchronized int generateId() {
+        return id_generator++;
+    }
+
+    /**
+     * @param sequence
+     *        sequence
+     * @return Return true is this ROI is attached to at least one sequence
+     */
+    public boolean isAttached(final Sequence sequence) {
+        if (sequence != null)
+            return sequence.contains(this);
+
+        return false;
+    }
+
+    /**
+     * @return Return first sequence where ROI is attached
+     */
+    public Sequence getFirstSequence() {
+        return Icy.getMainInterface().getFirstSequenceContaining(this);
+    }
+
+    /**
+     * @return Return sequences where ROI is attached
+     */
+    public ArrayList<Sequence> getSequences() {
+        return Icy.getMainInterface().getSequencesContaining(this);
+    }
+
+    /**
+     * @param canUndo
+     *        Remove this ROI (detach from all sequence)
+     */
+    public void remove(final boolean canUndo) {
+        final List<Sequence> sequences = Icy.getMainInterface().getSequencesContaining(this);
+
+        for (final Sequence sequence : sequences)
+            sequence.removeROI(this, canUndo);
+    }
+
+    /**
+     * Remove this ROI (detach from all sequence)
+     */
+    public void remove() {
+        remove(true);
+    }
+
+    public String getClassName() {
+        return getClass().getName();
+    }
+
+    public String getSimpleClassName() {
+        return ClassUtil.getSimpleClassName(getClassName());
+    }
+
+    /**
+     * @return ROI unique id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @return Returns the ROI overlay (used to draw and interact with {@link ROI} on {@link IcyCanvas})
+     */
+    public ROIPainter getOverlay() {
+        return painter;
+    }
+
+    /**
+     * @return Return the ROI painter stroke.
+     */
+    public double getStroke() {
+        return getOverlay().getStroke();
+    }
+
+    /**
+     * @param canvas
+     *        canvas
+     * @return Get adjusted stroke for the current canvas transformation
+     */
+    public double getAdjustedStroke(final IcyCanvas canvas) {
+        return getOverlay().getAdjustedStroke(canvas);
+    }
+
+    /**
+     * @param value
+     *        Set ROI painter stroke.
+     */
+    public void setStroke(final double value) {
+        getOverlay().setStroke(value);
+    }
+
+    /**
+     * @return Returns the ROI painter opacity factor (0 = transparent while 1 means opaque).
+     */
+    public float getOpacity() {
+        return getOverlay().getOpacity();
+    }
+
+    /**
+     * @param value
+     *        Sets the ROI painter content opacity factor (0 = transparent while 1 means opaque).
+     */
+    public void setOpacity(final float value) {
+        getOverlay().setOpacity(value);
+    }
+
+    /**
+     * @return Return the ROI painter focused color.
+     */
+    public Color getFocusedColor() {
+        return getOverlay().getFocusedColor();
+    }
+
+    /**
+     * @return Returns the color used to display the ROI depending its current state.
+     */
+    public Color getDisplayColor() {
+        return getOverlay().getDisplayColor();
+    }
+
+    /**
+     * @return Return the ROI painter base color.
+     */
+    public Color getColor() {
+        return getOverlay().getColor();
+    }
+
+    /**
+     * @param value
+     *        Set the ROI painter base color.
+     */
+    public void setColor(final Color value) {
+        getOverlay().setColor(value);
+    }
+
+    /**
+     * @return the icon
+     */
+    public SVGIcon getIcon() {
+        return icon;
+    }
+
+    /**
+     * @param value
+     *        the icon to set
+     */
+    public void setIcon(final SVGIcon value) {
+        if (icon != value) {
+            icon = value;
+            propertyChanged(PROPERTY_ICON);
+        }
+    }
+
+    /**
+     * @return the default name for this ROI class
+     */
+    public String getDefaultName() {
+        return "ROI";
+    }
+
+    /**
+     * @return Returns <code>true</code> if the ROI has its default name
+     */
+    public boolean isDefaultName() {
+        return getName().equals(getDefaultName());
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param value
+     *        the name to set
+     */
+    public void setName(final String value) {
+        if (!Objects.equals(name, value)) {
+            name = value;
+            propertyChanged(PROPERTY_NAME);
+            // painter name is ROI name so we notify it
+            painter.propertyChanged(Overlay.PROPERTY_NAME);
+        }
+    }
+
+    /**
+     * @return Retrieve all custom ROI properties (map of (Key,Value)).
+     */
+    public Map<String, String> getProperties() {
+        return new HashMap<>(properties);
+    }
+
+    /**
+     * @return Retrieve a ROI property value.<br>
+     *         Returns <code>null</code> if the property value is empty.
+     * @param name
+     *        Property name.<br>
+     *        Note that it can be default property name (as {@value #PROPERTY_READONLY}) in which case the value will be
+     *        returned in String format if possible or launch an {@link IllegalArgumentException} when not possible.
+     */
+    public String getProperty(final String name) {
+        if (name == null)
+            return null;
+
+        // ignore case for property name
+        final String adjName = name.toLowerCase();
+
+        if (StringUtil.equals(adjName, PROPERTY_CREATING))
+            return Boolean.toString(isCreating());
+        if (StringUtil.equals(adjName, PROPERTY_NAME))
+            return getName();
+        if (StringUtil.equals(adjName, PROPERTY_OPACITY))
+            return Float.toString(getOpacity());
+        if (StringUtil.equals(adjName, PROPERTY_READONLY))
+            return Boolean.toString(isReadOnly());
+        if (StringUtil.equals(adjName, PROPERTY_SHOWNAME))
+            return Boolean.toString(getShowName());
+        if (StringUtil.equals(adjName, PROPERTY_STROKE))
+            return Double.toString(getStroke());
+
+        if (StringUtil.equals(adjName, PROPERTY_COLOR) || StringUtil.equals(adjName, PROPERTY_ICON))
+            throw new IllegalArgumentException("Cannot return value of property '" + adjName + "' as String");
+
+        synchronized (properties) {
+            return properties.get(adjName);
+        }
+    }
+
+    /**
+     * Generic way to set ROI property value.
+     *
+     * @param name
+     *        Property name.<br>
+     *        Note that it can be default property name (as {@value #PROPERTY_READONLY}) in which case the value will be
+     *        set in String format if possible or launch an {@link IllegalArgumentException} when not possible.
+     * @param value
+     *        the value to set in the property (for instance "FALSE" for {@link #PROPERTY_READONLY})
+     */
+    public void setProperty(final String name, final String value) {
+        if (name == null)
+            return;
+
+        // ignore case for property name
+        final String adjName = name.toLowerCase();
+
+        if (StringUtil.equals(adjName, PROPERTY_CREATING))
+            setCreating(Boolean.valueOf(value).booleanValue());
+        if (StringUtil.equals(adjName, PROPERTY_NAME))
+            setName(value);
+        if (StringUtil.equals(adjName, PROPERTY_OPACITY))
+            setOpacity(Float.valueOf(value).floatValue());
+        if (StringUtil.equals(adjName, PROPERTY_READONLY))
+            setReadOnly(Boolean.valueOf(value).booleanValue());
+        if (StringUtil.equals(adjName, PROPERTY_SHOWNAME))
+            setShowName(Boolean.valueOf(value).booleanValue());
+        if (StringUtil.equals(adjName, PROPERTY_STROKE))
+            setStroke(Double.valueOf(value).doubleValue());
+
+        if (StringUtil.equals(adjName, PROPERTY_COLOR) || StringUtil.equals(adjName, PROPERTY_ICON))
+            throw new IllegalArgumentException("Cannot set value of property '" + adjName + "' as String");
+
+        synchronized (properties) {
+            properties.put(adjName, value);
+        }
+
+        propertyChanged(adjName);
+    }
+
+    /**
+     * @return the creating
+     */
+    public boolean isCreating() {
+        return creating;
+    }
+
+    /**
+     * @param value
+     *        Set the internal <i>creation mode</i> state.<br>
+     *        The ROI interaction behave differently when in <i>creation mode</i>.<br>
+     *        You should not set this state when you create an ROI from the code.
+     */
+    public void setCreating(final boolean value) {
+        if (creating != value) {
+            creating = value;
+            propertyChanged(PROPERTY_CREATING);
+            // TODO Is this a good idea?
+            // if (!value) {
+            // setReadOnly(true);
+            // }
+        }
+    }
+
+    /**
+     * @return Returns true if the ROI has a (control) point which is currently focused/selected
+     */
+    public abstract boolean hasSelectedPoint();
+
+    /**
+     * Remove focus/selected state on all (control) points.<br>
+     * Override this method depending implementation
+     */
+    public void unselectAllPoints() {
+        // do nothing by default
+    }
+
+    /**
+     * @return the focused
+     */
+    public boolean isFocused() {
+        return focused;
+    }
+
+    /**
+     * @param value
+     *        the focused to set
+     */
+    public void setFocused(final boolean value) {
+        boolean done = false;
+
+        if (value) {
+            // only one ROI focused per sequence
+            final List<Sequence> attachedSeqs = Icy.getMainInterface().getSequencesContaining(this);
+
+            for (final Sequence seq : attachedSeqs)
+                done |= seq.setFocusedROI(this);
+        }
+
+        if (!done) {
+            if (value)
+                internalFocus();
+            else
+                internalUnfocus();
+        }
+    }
+
+    public void internalFocus() {
+        if (!focused) {
+            focused = true;
+            focusChanged();
+        }
+    }
+
+    public void internalUnfocus() {
+        if (focused) {
+            focused = false;
+            focusChanged();
+        }
+    }
+
+    /**
+     * @return the selected
+     */
+    public boolean isSelected() {
+        return selected;
+    }
+
+    /**
+     * Set the selected state of this ROI.<br>
+     * Use {@link Sequence#setSelectedROI(ROI)} for exclusive ROI selection.
+     *
+     * @param value
+     *        the selected to set
+     */
+    public void setSelected(final boolean value) {
+        if (selected != value) {
+            selected = value;
+            // as soon ROI has been unselected, we're not in create mode anymore
+            if (!value)
+                setCreating(false);
+
+            selectionChanged();
+        }
+    }
+
+    /**
+     * @return Return true if ROI is in <i>read only</i> state (cannot be modified from GUI).
+     */
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    /**
+     * @param value
+     *        Set the <i>read only</i> state of ROI.
+     */
+    public void setReadOnly(final boolean value) {
+        if (readOnly != value) {
+            readOnly = value;
+
+            propertyChanged(PROPERTY_READONLY);
+        }
+    }
+
+    /**
+     * @return Return <code>true</code> if ROI should display its name at draw time.<br>
+     */
+    public boolean getShowName() {
+        return getOverlay().getShowName();
+    }
+
+    /**
+     * @param value
+     *        Set the <i>show name</i> property of ROI.<br>
+     *        When set to <code>true</code> the ROI shows its name at draw time.
+     */
+    public void setShowName(final boolean value) {
+        getOverlay().setShowName(value);
+    }
+
+    /**
+     * @param canvas
+     *        canvas
+     * @return Return true if the ROI is active for the specified canvas.
+     */
+    public abstract boolean isActiveFor(IcyCanvas canvas);
+
+    /**
+     * @return Calculate and returns the bounding box of the <code>ROI</code>.<br>
+     *         This method is used by {@link #getBounds5D()} which should try to cache the result as the
+     *         bounding box calculation can take some computation time for complex ROI.
+     */
+    public abstract Rectangle5D computeBounds5D();
+
+    /**
+     * Returns the bounding box of the <code>ROI</code>. Note that there is no guarantee that the
+     * returned {@link Rectangle5D} is the smallest bounding box that encloses the <code>ROI</code>,
+     * only that the <code>ROI</code> lies entirely within the indicated <code>Rectangle5D</code>.
+     *
+     * @return an instance of <code>Rectangle5D</code> that is a bounding box of the <code>ROI</code>.
+     * @see #computeBounds5D()
+     */
+    public Rectangle5D getBounds5D() {
+        // we need to recompute bounds
+        if (boundsInvalid) {
+            cachedBounds = computeBounds5D();
+            boundsInvalid = false;
+        }
+
+        return (Rectangle5D) cachedBounds.clone();
+    }
+
+    /**
+     * @return Returns the ROI position which normally correspond to the <i>minimum</i> point of the ROI
+     *         bounds.<br>
+     * @see #getBounds5D()
+     */
+    public Point5D getPosition5D() {
+        return getBounds5D().getPosition();
+    }
+
+    /**
+     * @return Returns <code>true</code> if this ROI accepts bounds change through the {@link #setBounds5D(Rectangle5D)} method.
+     */
+    public abstract boolean canSetBounds();
+
+    /**
+     * @return Returns <code>true</code> if this ROI accepts position change through the {@link #setPosition5D(Point5D)} method.
+     */
+    public abstract boolean canSetPosition();
+
+    /**
+     * Set the <code>ROI</code> bounds.<br>
+     * Note that not all ROI supports bounds modification and you should call {@link #canSetBounds()} first to test if
+     * the operation is supported.<br>
+     *
+     * @param bounds
+     *        new ROI bounds
+     */
+    public abstract void setBounds5D(Rectangle5D bounds);
+
+    /**
+     * Set the <code>ROI</code> position.<br>
+     * Note that not all ROI supports position modification and you should call {@link #canSetPosition()} first to test
+     * if the operation is supported.<br>
+     *
+     * @param position
+     *        new ROI position
+     */
+    public abstract void setPosition5D(Point5D position);
+
+    /**
+     * @return Returns <code>true</code> if the ROI is empty (does not contains anything).
+     */
+    public boolean isEmpty() {
+        return getBounds5D().isEmpty();
+    }
+
+    /**
+     * Tests if a specified 5D point is inside the ROI.
+     *
+     * @return <code>true</code> if the specified <code>Point5D</code> is inside the boundary of the <code>ROI</code>;
+     *         <code>false</code> otherwise.
+     * @param x
+     *        double
+     * @param y
+     *        double
+     * @param t
+     *        double
+     * @param c
+     *        double
+     * @param z
+     *        double
+     */
+    public abstract boolean contains(double x, double y, double z, double t, double c);
+
+    /**
+     * Tests if a specified {@link Point5D} is inside the ROI.
+     *
+     * @param p
+     *        the specified <code>Point5D</code> to be tested
+     * @return <code>true</code> if the specified <code>Point2D</code> is inside the boundary of the <code>ROI</code>;
+     *         <code>false</code> otherwise.
+     */
+    public boolean contains(final Point5D p) {
+        if (p == null)
+            return false;
+
+        return contains(p.getX(), p.getY(), p.getZ(), p.getT(), p.getC());
+    }
+
+    /**
+     * Tests if the <code>ROI</code> entirely contains the specified 5D rectangular area. All
+     * coordinates that lie inside the rectangular area must lie within the <code>ROI</code> for the
+     * entire rectangular area to be considered contained within the <code>ROI</code>.
+     * <p>
+     * The {@code ROI.contains()} method allows a {@code ROI} implementation to conservatively return {@code false}
+     * when:
+     * <ul>
+     * <li>the <code>intersect</code> method returns <code>true</code> and
+     * <li>the calculations to determine whether or not the <code>ROI</code> entirely contains the rectangular area are
+     * prohibitively expensive.
+     * </ul>
+     * This means that for some {@code ROIs} this method might return {@code false} even though the {@code ROI} contains
+     * the rectangular area.
+     *
+     * @param x
+     *        the X coordinate of the start corner of the specified rectangular area
+     * @param y
+     *        the Y coordinate of the start corner of the specified rectangular area
+     * @param z
+     *        the Z coordinate of the start corner of the specified rectangular area
+     * @param t
+     *        the T coordinate of the start corner of the specified rectangular area
+     * @param c
+     *        the C coordinate of the start corner of the specified rectangular area
+     * @param sizeX
+     *        the X size of the specified rectangular area
+     * @param sizeY
+     *        the Y size of the specified rectangular area
+     * @param sizeZ
+     *        the Z size of the specified rectangular area
+     * @param sizeT
+     *        the T size of the specified rectangular area
+     * @param sizeC
+     *        the C size of the specified rectangular area
+     * @return <code>true</code> if the interior of the <code>ROI</code> entirely contains the
+     *         specified rectangular area; <code>false</code> otherwise or, if the <code>ROI</code> contains the
+     *         rectangular area and the <code>intersects</code> method returns <code>true</code> and
+     *         the containment
+     *         calculations would be too expensive to perform.
+     */
+    public abstract boolean contains(double x, double y, double z, double t, double c, double sizeX, double sizeY, double sizeZ, double sizeT, double sizeC);
+
+    /**
+     * Tests if the <code>ROI</code> entirely contains the specified <code>Rectangle5D</code>. The
+     * {@code ROI.contains()} method allows a implementation to conservatively return {@code false} when:
+     * <ul>
+     * <li>the <code>intersect</code> method returns <code>true</code> and
+     * <li>the calculations to determine whether or not the <code>ROI</code> entirely contains the
+     * <code>Rectangle2D</code> are prohibitively expensive.
+     * </ul>
+     * This means that for some ROIs this method might return {@code false} even though the {@code ROI} contains the
+     * {@code Rectangle5D}.
+     *
+     * @param r
+     *        The specified <code>Rectangle5D</code>
+     * @return <code>true</code> if the interior of the <code>ROI</code> entirely contains the <code>Rectangle5D</code>;
+     *         <code>false</code> otherwise or, if the <code>ROI</code> contains the <code>Rectangle5D</code> and the
+     *         <code>intersects</code> method returns <code>true</code> and the containment
+     *         calculations would be too
+     *         expensive to perform.
+     * @see #contains(double, double, double, double, double, double, double, double, double, double)
+     */
+    public boolean contains(final Rectangle5D r) {
+        if (r == null)
+            return false;
+
+        return contains(r.getX(), r.getY(), r.getZ(), r.getT(), r.getC(), r.getSizeX(), r.getSizeY(), r.getSizeZ(), r.getSizeT(), r.getSizeC());
+    }
+
+    /**
+     * @param roi
+     *        Tests if the <code>ROI</code> entirely contains the specified <code>ROI</code>.
+     *        WARNING: this method may be "pixel accurate" only depending the internal implementation.
+     * @return <code>true</code> if the current <code>ROI</code> entirely contains the
+     *         specified <code>ROI</code>; <code>false</code> otherwise.
+     */
+    public boolean contains(final ROI roi) throws InterruptedException {
+        // default implementation using BooleanMask
+        final Rectangle5D.Integer bounds = getBounds5D().toInteger();
+        final Rectangle5D.Integer roiBounds = roi.getBounds5D().toInteger();
+
+        // trivial optimization
+        if (bounds.isEmpty())
+            return false;
+
+        // special case of ROI Point --> just test position if contained
+        if (roiBounds.isEmpty())
+            return contains(roiBounds.getPosition());
+
+        // simple bounds contains test
+        if (bounds.contains(roiBounds)) {
+            final Rectangle5D.Integer containedBounds = bounds.createIntersection(roiBounds).toInteger();
+            final int minZ;
+            final int maxZ;
+            final int minT;
+            final int maxT;
+            final int minC;
+            final int maxC;
+
+            // special infinite case
+            if (containedBounds.isInfiniteZ()) {
+                minZ = -1;
+                maxZ = -1;
+            }
+            else {
+                minZ = (int) containedBounds.getMinZ();
+                maxZ = (int) containedBounds.getMaxZ();
+            }
+            if (containedBounds.isInfiniteT()) {
+                minT = -1;
+                maxT = -1;
+            }
+            else {
+                minT = (int) containedBounds.getMinT();
+                maxT = (int) containedBounds.getMaxT();
+            }
+            if (containedBounds.isInfiniteC()) {
+                minC = -1;
+                maxC = -1;
+            }
+            else {
+                minC = (int) containedBounds.getMinC();
+                maxC = (int) containedBounds.getMaxC();
+            }
+
+            final Rectangle containedBounds2D = (Rectangle) containedBounds.toRectangle2D();
+
+            // slow method using the boolean mask
+            for (int c = minC; c <= maxC; c++) {
+                for (int t = minT; t <= maxT; t++) {
+                    for (int z = minZ; z <= maxZ; z++) {
+                        BooleanMask2D mask;
+                        BooleanMask2D roiMask;
+
+                        // take content first
+                        mask = new BooleanMask2D(containedBounds2D,
+                                getBooleanMask2D(containedBounds2D, z, t, c, false));
+                        roiMask = new BooleanMask2D(containedBounds2D,
+                                roi.getBooleanMask2D(containedBounds2D, z, t, c, false));
+
+                        // test first only on content
+                        if (!mask.contains(roiMask))
+                            return false;
+
+                        // take content and edge
+                        mask = new BooleanMask2D(containedBounds2D, getBooleanMask2D(containedBounds2D, z, t, c, true));
+                        roiMask = new BooleanMask2D(containedBounds2D,
+                                roi.getBooleanMask2D(containedBounds2D, z, t, c, true));
+
+                        // then test on content and edge
+                        if (!mask.contains(roiMask))
+                            return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Tests if the interior of the <code>ROI</code> intersects the interior of a specified
+     * rectangular area. The rectangular area is considered to intersect the <code>ROI</code> if any
+     * point is contained in both the interior of the <code>ROI</code> and the specified rectangular
+     * area.
+     * <p>
+     * The {@code ROI.intersects()} method allows a {@code ROI} implementation to conservatively return {@code true}
+     * when:
+     * <ul>
+     * <li>there is a high probability that the rectangular area and the <code>ROI</code> intersect, but
+     * <li>the calculations to accurately determine this intersection are prohibitively expensive.
+     * </ul>
+     * This means that for some {@code ROIs} this method might return {@code true} even though the rectangular area does
+     * not intersect the {@code ROI}.
+     *
+     * @param x
+     *        double
+     * @param y
+     *        double
+     * @param z
+     *        double
+     * @param c
+     *        double
+     * @param t
+     *        double
+     * @param sizeX
+     *        double
+     * @param sizeY
+     *        double
+     * @param sizeT
+     *        double
+     * @param sizeC
+     *        double
+     * @param sizeZ
+     *        double
+     * @return <code>true</code> if the interior of the <code>ROI</code> and the interior of the
+     *         rectangular area intersect, or are both highly likely to intersect and intersection
+     *         calculations would be too expensive to perform; <code>false</code> otherwise.
+     */
+    public abstract boolean intersects(double x, double y, double z, double t, double c, double sizeX, double sizeY, double sizeZ, double sizeT, double sizeC);
+
+    /**
+     * Tests if the interior of the <code>ROI</code> intersects the interior of a specified
+     * rectangular area. The rectangular area is considered to intersect the <code>ROI</code> if any
+     * point is contained in both the interior of the <code>ROI</code> and the specified rectangular
+     * area.
+     * <p>
+     * The {@code ROI.intersects()} method allows a {@code ROI} implementation to conservatively return {@code true}
+     * when:
+     * <ul>
+     * <li>there is a high probability that the rectangular area and the <code>ROI</code> intersect, but
+     * <li>the calculations to accurately determine this intersection are prohibitively expensive.
+     * </ul>
+     *
+     * @param r
+     *        This means that for some {@code ROIs} this method might return {@code true} even though the rectangular area does
+     *        not intersect the {@code ROI}.
+     * @return <code>true</code> if the interior of the <code>ROI</code> and the interior of the
+     *         rectangular area intersect, or are both highly likely to intersect and intersection
+     *         calculations would be too expensive to perform; <code>false</code> otherwise.
+     */
+    public boolean intersects(final Rectangle5D r) {
+        if (r == null)
+            return false;
+
+        return intersects(r.getX(), r.getY(), r.getZ(), r.getT(), r.getC(), r.getSizeX(), r.getSizeY(), r.getSizeZ(), r.getSizeT(), r.getSizeC());
+    }
+
+    /**
+     * @param roi
+     *        Tests if the current <code>ROI</code> intersects the specified <code>ROI</code>.<br>
+     *        Note that this method may be "pixel accurate" only depending the internal implementation.
+     * @return <code>true</code> if <code>ROI</code> intersect, <code>false</code> otherwise.
+     */
+    public boolean intersects(final ROI roi) throws InterruptedException {
+        // default implementation using BooleanMask
+        final Rectangle5D.Integer bounds = getBounds5D().toInteger();
+        final Rectangle5D.Integer roiBounds = roi.getBounds5D().toInteger();
+        final Rectangle5D.Integer intersection = bounds.createIntersection(roiBounds).toInteger();
+
+        final int minZ;
+        final int maxZ;
+        final int minT;
+        final int maxT;
+        final int minC;
+        final int maxC;
+
+        // special infinite case
+        if (intersection.isInfiniteZ()) {
+            minZ = -1;
+            maxZ = -1;
+        }
+        else {
+            minZ = (int) intersection.getMinZ();
+            maxZ = (int) intersection.getMaxZ();
+        }
+        if (intersection.isInfiniteT()) {
+            minT = -1;
+            maxT = -1;
+        }
+        else {
+            minT = (int) intersection.getMinT();
+            maxT = (int) intersection.getMaxT();
+        }
+        if (intersection.isInfiniteC()) {
+            minC = -1;
+            maxC = -1;
+        }
+        else {
+            minC = (int) intersection.getMinC();
+            maxC = (int) intersection.getMaxC();
+        }
+
+        // slow method using the boolean mask
+        for (int c = minC; c <= maxC; c++) {
+            for (int t = minT; t <= maxT; t++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    if (getBooleanMask2D(z, t, c, true).intersects(roi.getBooleanMask2D(z, t, c, true)))
+                        return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the boolean array mask for the specified rectangular region at specified C, Z, T
+     * position.<br>
+     * <br>
+     * If pixel (x1, y1, c, z, t) is contained in the roi:<br>
+     * <code>&nbsp; result[((y1 - y) * width) + (x1 - x)] = true</code><br>
+     * If pixel (x1, y1, c, z, t) is not contained in the roi:<br>
+     * <code>&nbsp; result[((y1 - y) * width) + (x1 - x)] = false</code><br>
+     *
+     * @param x
+     *        the X coordinate of the upper-left corner of the specified rectangular region
+     * @param y
+     *        the Y coordinate of the upper-left corner of the specified rectangular region
+     * @param width
+     *        the width of the specified rectangular region
+     * @param height
+     *        the height of the specified rectangular region
+     * @param z
+     *        Z position we want to retrieve the boolean mask
+     * @param t
+     *        T position we want to retrieve the boolean mask
+     * @param c
+     *        C position we want to retrieve the boolean mask
+     * @param inclusive
+     *        If true then all partially contained (intersected) pixels are included in the mask.
+     * @return the boolean bitmap mask
+     */
+    public boolean[] getBooleanMask2D(final int x, final int y, final int width, final int height, final int z, final int t, final int c, final boolean inclusive)
+            throws InterruptedException {
+        final boolean[] result = new boolean[Math.max(0, width) * Math.max(0, height)];
+
+        // simple and basic implementation, override it to have better performance
+        int offset = 0;
+        for (int j = 0; j < height; j++) {
+            for (int i = 0; i < width; i++) {
+                if (inclusive)
+                    result[offset] = intersects(x + i, y + j, z, t, c, 1d, 1d, 1d, 1d, 1d);
+                else
+                    result[offset] = contains(x + i, y + j, z, t, c, 1d, 1d, 1d, 1d, 1d);
+                offset++;
+            }
+
+            // check for interruption from time to time as this can be a long process
+            if (((j & 0xF) == 0xF) && Thread.interrupted())
+                throw new InterruptedException("ROI.getBooleanMask2D(..) process interrupted.");
+        }
+
+        return result;
+    }
+
+    /**
+     * @return Get the boolean bitmap mask for the specified rectangular area of the roi and for the
+     *         specified Z,T position.<br>
+     *         if the pixel (x,y) is contained in the roi Z,T position then result[(y * width) + x] = true <br>
+     *         if the pixel (x,y) is not contained in the roi Z,T position then result[(y * width) + x] =
+     *         false
+     * @param rect
+     *        2D rectangular area we want to retrieve the boolean mask
+     * @param z
+     *        Z position we want to retrieve the boolean mask
+     * @param t
+     *        T position we want to retrieve the boolean mask
+     * @param c
+     *        C position we want to retrieve the boolean mask
+     * @param inclusive
+     *        If true then all partially contained (intersected) pixels are included in the mask.
+     */
+    public boolean[] getBooleanMask2D(final Rectangle rect, final int z, final int t, final int c, final boolean inclusive) throws InterruptedException {
+        return getBooleanMask2D(rect.x, rect.y, rect.width, rect.height, z, t, c, inclusive);
+    }
+
+    /**
+     * @return Returns the {@link BooleanMask2D} object representing the XY plan content at specified Z, T,
+     *         C position.<br>
+     *         <br>
+     *         If pixel (x, y, c, z, t) is contained in the roi:<br>
+     *         <code>&nbsp; mask[(y - bounds.y) * bounds.width) + (x - bounds.x)] = true</code> <br>
+     *         If pixel (x, y, c, z, t) is not contained in the roi:<br>
+     *         <code>&nbsp; mask[(y - bounds.y) * bounds.width) + (x - bounds.x)] = false</code>
+     * @param z
+     *        Z position we want to retrieve the boolean mask.<br>
+     *        Set it to -1 to retrieve the mask whatever is the Z position of ROI2D.
+     * @param t
+     *        T position we want to retrieve the boolean mask.<br>
+     *        Set it to -1 to retrieve the mask whatever is the T position of ROI2D/ROI3D.
+     * @param c
+     *        C position we want to retrieve the boolean mask.<br>
+     *        Set it to -1 to retrieve the mask whatever is the C position of ROI2D/ROI3D/ROI4D.
+     * @param inclusive
+     *        If true then all partially contained (intersected) pixels are included in the mask.
+     */
+    public BooleanMask2D getBooleanMask2D(final int z, final int t, final int c, final boolean inclusive) throws InterruptedException {
+        final Rectangle bounds2D = getBounds5D().toRectangle2D().getBounds();
+
+        // empty ROI --> return empty mask
+        if (bounds2D.isEmpty())
+            return new BooleanMask2D(new Rectangle(), new boolean[0]);
+
+        return new BooleanMask2D(bounds2D,
+                getBooleanMask2D(bounds2D.x, bounds2D.y, bounds2D.width, bounds2D.height, z, t, c, inclusive));
+    }
+
+    /**
+     * Same as {@link #merge(ROI, BooleanOperator)} except it modifies the current <code>ROI</code> to reflect the
+     * result of the boolean operation with specified <code>ROI</code>.<br>
+     * Note that this operation work only if the 2 ROIs are compatible for that type of operation.
+     * If that is not
+     * the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter is set to
+     * <code>false</code>, if the parameter is set to <code>true</code> the result may be returned
+     * in a new created ROI.
+     *
+     * @param roi
+     *        the <code>ROI</code> to merge with current <code>ROI</code>
+     * @param op
+     *        the boolean operation to process
+     * @param allowCreate
+     *        if set to <code>true</code> the method will create a new ROI to return the result of
+     *        the operation if it
+     *        cannot be directly processed on the current <code>ROI</code>
+     * @return the modified ROI or a new created ROI if the operation cannot be directly processed
+     *         on the current ROI
+     *         and <code>allowCreate</code> parameter was set to <code>true</code>
+     * @throws UnsupportedOperationException
+     *         if the two ROI cannot be merged together.
+     * @see ROI#merge(ROI, BooleanOperator)
+     */
+    public ROI mergeWith(final ROI roi, final BooleanOperator op, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
+        return switch (op) {
+            case AND -> intersect(roi, allowCreate);
+            case OR -> add(roi, allowCreate);
+            case XOR -> exclusiveAdd(roi, allowCreate);
+        };
+    }
+
+    /**
+     * Adds content of specified <code>ROI</code> into this <code>ROI</code>.
+     * The resulting content of this <code>ROI</code> will include
+     * the union of both ROI's contents.<br>
+     * Note that this operation work only if the 2 ROIs are compatible for that type of operation.
+     * If that is not the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter
+     * is set to <code>false</code>, if the parameter is set to <code>true</code> the result may be returned in a new
+     * created ROI.
+     *
+     * <pre>
+     *     // Example:
+     *      roi1 (before)     +         roi2       =    roi1 (after)
+     *
+     *     ################     ################     ################
+     *     ##############         ##############     ################
+     *     ############             ############     ################
+     *     ##########                 ##########     ################
+     *     ########                     ########     ################
+     *     ######                         ######     ######    ######
+     *     ####                             ####     ####        ####
+     *     ##                                 ##     ##            ##
+     * </pre>
+     *
+     * @param roi
+     *        the <code>ROI</code> to be added to the current <code>ROI</code>
+     * @param allowCreate
+     *        if set to <code>true</code> the method will create a new ROI to return the result of
+     *        the operation if it
+     *        cannot be directly processed on the current <code>ROI</code>
+     * @return the modified ROI or a new created ROI if the operation cannot be directly processed
+     *         on the current ROI
+     *         and <code>allowCreate</code> parameter was set to <code>true</code>
+     * @throws UnsupportedOperationException
+     *         if the two ROI cannot be added together.
+     * @see #getUnion(ROI)
+     */
+    public ROI add(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
+        // nothing to do
+        if (roi == null)
+            return this;
+
+        if (allowCreate)
+            return getUnion(roi);
+
+        throw new UnsupportedOperationException(getClassName() + " does not support add(ROI) operation !");
+    }
+
+    /**
+     * Sets the content of this <code>ROI</code> to the intersection of
+     * its current content and the content of the specified <code>ROI</code>.
+     * The resulting ROI will include only contents that were contained in both ROI.<br>
+     * Note that this operation work only if the 2 ROIs are compatible for that type of operation.
+     * If that is not the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter
+     * is set to <code>false</code>, if the parameter is set to <code>true</code> the result may be returned in a new
+     * created ROI.
+     *
+     * <pre>
+     *     // Example:
+     *     roi1 (before) intersect    roi2        =   roi1 (after)
+     *
+     *     ################     ################     ################
+     *     ##############         ##############       ############
+     *     ############             ############         ########
+     *     ##########                 ##########           ####
+     *     ########                     ########
+     *     ######                         ######
+     *     ####                             ####
+     *     ##                                 ##
+     * </pre>
+     *
+     * @param roi
+     *        the <code>ROI</code> to be intersected to the current <code>ROI</code>
+     * @param allowCreate
+     *        if set to <code>true</code> the method will create a new ROI to return the result of
+     *        the operation if it
+     *        cannot be directly processed on the current <code>ROI</code>
+     * @return the modified ROI or a new created ROI if the operation cannot be directly processed
+     *         on the current ROI
+     *         and <code>allowCreate</code> parameter was set to <code>true</code>
+     * @throws UnsupportedOperationException
+     *         if the two ROI cannot be intersected together.
+     * @see #getIntersection(ROI)
+     */
+    public ROI intersect(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
+        // nothing to do
+        if (roi == null)
+            return this;
+
+        if (allowCreate)
+            return getIntersection(roi);
+
+        throw new UnsupportedOperationException(getClassName() + " does not support intersect(ROI) operation !");
+    }
+
+    /**
+     * Sets the content of this <code>ROI</code> to be the union of its current content and the
+     * content of the specified <code>ROI</code>, minus their intersection.
+     * The resulting <code>ROI</code> will include only content that were contained in either this <code>ROI</code> or
+     * in the specified <code>ROI</code>, but not in both.<br>
+     * Note that this operation work only if the 2 ROIs are compatible for that type of operation.
+     * If that is not
+     * the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter is set to
+     * <code>false</code>, if the parameter is set to <code>true</code> the result may be returned
+     * in a new created ROI.
+     *
+     * <pre>
+     *     // Example:
+     *      roi1 (before)   xor      roi2         =    roi1 (after)
+     *
+     *     ################     ################
+     *     ##############         ##############     ##            ##
+     *     ############             ############     ####        ####
+     *     ##########                 ##########     ######    ######
+     *     ########                     ########     ################
+     *     ######                         ######     ######    ######
+     *     ####                             ####     ####        ####
+     *     ##                                 ##     ##            ##
+     * </pre>
+     *
+     * @param roi
+     *        the <code>ROI</code> to be exclusively added to the current <code>ROI</code>
+     * @param allowCreate
+     *        if set to <code>true</code> the method will create a new ROI to return the result of
+     *        the operation if it
+     *        cannot be directly processed on the current <code>ROI</code>
+     * @return the modified ROI or a new created ROI if the operation cannot be directly processed
+     *         on the current ROI
+     *         and <code>allowCreate</code> parameter was set to <code>true</code>
+     * @throws UnsupportedOperationException
+     *         if the two ROI cannot be exclusively added together.
+     * @see #getExclusiveUnion(ROI)
+     */
+    public ROI exclusiveAdd(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
+        // nothing to do
+        if (roi == null)
+            return this;
+
+        if (allowCreate)
+            return getExclusiveUnion(roi);
+
+        throw new UnsupportedOperationException(getClassName() + " does not support exclusiveAdd(ROI) operation !");
+    }
+
+    /**
+     * Subtract the specified <code>ROI</code> content from current <code>ROI</code>.<br>
+     * Note that this operation work only if the 2 ROIs are compatible for that type of operation.
+     * If that is not the case a {@link UnsupportedOperationException} is thrown if <code>allowCreate</code> parameter
+     * is set to <code>false</code>, if the parameter is set to <code>true</code> the result may be returned in a new
+     * created ROI.
+     *
+     * @param roi
+     *        the <code>ROI</code> to subtract from the current <code>ROI</code>
+     * @param allowCreate
+     *        if set to <code>true</code> the method will create a new ROI to return the result of
+     *        the operation if it
+     *        cannot be directly processed on the current <code>ROI</code>
+     * @return the modified ROI or a new created ROI if the operation cannot be directly processed
+     *         on the current ROI
+     *         and <code>allowCreate</code> parameter was set to <code>true</code>
+     * @throws UnsupportedOperationException
+     *         if we can't subtract the specified <code>ROI</code> from this <code>ROI</code>
+     * @see #getSubtraction(ROI)
+     */
+    public ROI subtract(final ROI roi, final boolean allowCreate) throws UnsupportedOperationException, InterruptedException {
+        // nothing to do
+        if (roi == null)
+            return this;
+
+        if (allowCreate)
+            return getSubtraction(roi);
+
+        throw new UnsupportedOperationException(getClassName() + " does not support subtract(ROI) operation !");
+    }
+
+    /**
+     * Compute the boolean operation with specified <code>ROI</code> and return result in a new <code>ROI</code>.
+     *
+     * @param op
+     *        boolean
+     * @param roi
+     *        ROI
+     * @return ROI
+     */
+    public ROI merge(final ROI roi, final BooleanOperator op) throws UnsupportedOperationException, InterruptedException {
+        return switch (op) {
+            case AND -> getIntersection(roi);
+            case OR -> getUnion(roi);
+            case XOR -> getExclusiveUnion(roi);
+        };
+
+    }
+
+    /**
+     * @return Compute union with specified <code>ROI</code> and return result in a new <code>ROI</code>.<br>
+     *         The default implementation use <code>ROIUtil.getUnion(ROI, ROI)</code> internally but it maybe overridden.
+     * @param roi
+     *        ROI
+     */
+    public ROI getUnion(final ROI roi) throws UnsupportedOperationException, InterruptedException {
+        return ROIUtil.getUnion(this, roi);
+    }
+
+    /**
+     * @return Compute intersection with specified <code>ROI</code> and return result in a new <code>ROI</code>.<br>
+     *         The default implementation use <code>ROIUtil.getIntersection(ROI, ROI)</code> internally but it maybe overridden.
+     * @param roi
+     *        ROI
+     */
+    public ROI getIntersection(final ROI roi) throws UnsupportedOperationException, InterruptedException {
+        return ROIUtil.getIntersection(this, roi);
+    }
+
+    /**
+     * @return Compute exclusive union with specified <code>ROI</code> and return result in a new <code>ROI</code>.<br>
+     *         The default implementation use <code>ROIUtil.getExclusiveUnion(ROI, ROI)</code> internally but it maybe overridden.
+     * @param roi
+     *        ROI
+     */
+    public ROI getExclusiveUnion(final ROI roi) throws UnsupportedOperationException, InterruptedException {
+        return ROIUtil.getExclusiveUnion(this, roi);
+    }
+
+    /**
+     * @return Subtract the specified <code>ROI</code> and return result in a new <code>ROI</code>.<br>
+     *         The default implementation use <code>ROIUtil.getSubtraction(ROI, ROI)</code> internally but it maybe overridden.
+     * @param roi
+     *        ROI
+     */
+    public ROI getSubtraction(final ROI roi) throws UnsupportedOperationException, InterruptedException {
+        return ROIUtil.getSubtraction(this, roi);
+    }
+
+    /**
+     * @return Compute and returns the number of point (pixel) composing the ROI contour.
+     */
+    /*
+     * Override this method to adapt and optimize for a specific ROI.
+     */
+    public abstract double computeNumberOfContourPoints() throws InterruptedException;
+
+    /**
+     * @return Returns the number of point (pixel) composing the ROI contour.<br>
+     *         It is used to calculate the perimeter (2D) or surface area (3D) of the ROI.
+     * @see #computeNumberOfContourPoints()
+     */
+    public double getNumberOfContourPoints() throws InterruptedException {
+        // we need to recompute the number of edge point
+        if (numberOfContourPointsInvalid) {
+            cachedNumberOfContourPoints = computeNumberOfContourPoints();
+            numberOfContourPointsInvalid = false;
+        }
+
+        return cachedNumberOfContourPoints;
+    }
+
+    /**
+     * @return Compute and returns the number of point (pixel) contained in the ROI.
+     */
+    /*
+     * Override this method to adapt and optimize for a specific ROI.
+     */
+    public abstract double computeNumberOfPoints() throws InterruptedException;
+
+    /**
+     * @return Returns the number of point (pixel) contained in the ROI.<br>
+     *         It is used to calculate the area (2D) or volume (3D) of the ROI.
+     */
+    public double getNumberOfPoints() throws InterruptedException {
+        // we need to recompute the number of point
+        if (numberOfPointsInvalid) {
+            cachedNumberOfPoints = computeNumberOfPoints();
+            numberOfPointsInvalid = false;
+        }
+
+        return cachedNumberOfPoints;
+    }
+
+    /**
+     * @return Computes and returns the length/perimeter of the ROI in um given the pixel size informations from the specified
+     *         Sequence.<br>
+     *         Generic implementation of length computation uses the number of contour point (approximation).
+     *         This method should be overridden whenever possible to provide faster and accurate calculation.<br>
+     *         Throws a UnsupportedOperationException if the operation is not supported for this ROI.
+     * @param sequence
+     *        sequence
+     * @see #getNumberOfContourPoints()
+     */
+    public double getLength(final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
+        return sequence.calculateSize(getNumberOfContourPoints(), getDimension(), 1);
+    }
+
+    /**
+     * @return Returns a copy of the ROI or <code>null</code> if the operation failed.
+     */
+    public ROI getCopy() {
+        // use XML persistence for cloning
+        final Node node = Objects.requireNonNull(XMLUtil.createDocument(true)).getDocumentElement();
+        int retry;
+
+        // XML methods sometime fails, better to offer retry (hacky)
+        retry = 3;
+        // save
+        while ((retry > 0) && !saveToXML(node))
+            retry--;
+
+        if (retry <= 0) {
+            IcyLogger.error(ROI.class, "Cannot get a copy of roi " + getName() + ": XML save operation failed.");
+            // throw new RuntimeException("Cannot get a copy of roi " + getName() + ": XML save
+            // operation failed !");
+            return null;
+        }
+
+        ROI result;
+
+        // XML methods sometime fails, better to offer retry (hacky)
+        retry = 3;
+        result = null;
+        while ((retry > 0) && (result == null)) {
+            result = createFromXML(node);
+            retry--;
+        }
+
+        if (result == null) {
+            IcyLogger.error(ROI.class, "Cannot get a copy of roi " + getName() + ": creation from XML failed.");
+            // throw new RuntimeException("Cannot get a copy of roi " + getName() + ": creation from
+            // XML failed !");
+            return null;
+        }
+
+        // then generate new id
+        result.id = generateId();
+
+        return result;
+    }
+
+    /**
+     * @return Returns the name suffix when we want to obtain only a sub part of the ROI (always in Z,T,C
+     *         order).<br>
+     *         For instance if we use for z=1, t=5 and c=-1 this method will return <code>[Z=1, T=5]</code>
+     * @param z
+     *        the specific Z position (slice) we want to retrieve (<code>-1</code> to retrieve the
+     *        whole ROI Z dimension)
+     * @param t
+     *        the specific T position (frame) we want to retrieve (<code>-1</code> to retrieve the
+     *        whole ROI T dimension)
+     * @param c
+     *        the specific C position (channel) we want to retrieve (<code>-1</code> to retrieve the
+     *        whole ROI C dimension)
+     */
+    static public String getNameSuffix(final int z, final int t, final int c) {
+        String result = "";
+
+        if (z != -1) {
+            if (StringUtil.isEmpty(result))
+                result = " [";
+            else
+                result += ", ";
+            result += "Z=" + z;
+        }
+        if (t != -1) {
+            if (StringUtil.isEmpty(result))
+                result = " [";
+            else
+                result += ", ";
+            result += "T=" + t;
+        }
+        if (c != -1) {
+            if (StringUtil.isEmpty(result))
+                result = " [";
+            else
+                result += ", ";
+            result += "C=" + c;
+        }
+
+        if (!StringUtil.isEmpty(result))
+            result += "]";
+
+        return result;
+    }
+
+    /**
+     * @return Returns a sub part of the ROI.<br>
+     *         The default implementation returns result in "area" format: ({@link ROI2DArea}, {@link ROI3DArea})
+     *         where only internals pixels are preserved.<br>
+     *         Note that this function can eventually return <code>null</code> when the result ROI is empty.
+     * @param z
+     *        the specific Z position (slice) we want to retrieve (<code>-1</code> to retrieve the
+     *        whole ROI Z dimension)
+     * @param t
+     *        the specific T position (frame) we want to retrieve (<code>-1</code> to retrieve the
+     *        whole ROI T dimension)
+     * @param c
+     *        the specific C position (channel) we want to retrieve (<code>-1</code> to retrieve the
+     *        whole ROI C dimension)
+     */
+    public ROI getSubROI(final int z, final int t, final int c) throws InterruptedException {
+        final ROI result;
+
+        switch (getDimension()) {
+            default:
+                result = new ROI2DArea(getBooleanMask2D(z, t, c, false));
+                break;
+
+            case 3:
+                if (z == -1)
+                    result = new ROI3DArea(((ROI3D) this).getBooleanMask3D(z, t, c, false));
+                else
+                    result = new ROI2DArea(getBooleanMask2D(z, t, c, false));
+                break;
+
+            // TODO remove this code once ROI4D and ROI5D completely removed
+            /*case 4:
+                if (z == -1) {
+                    if (t == -1)
+                        result = new ROI4DArea(((ROI4D) this).getBooleanMask4D(z, t, c, false));
+                    else
+                        result = new ROI3DArea(((ROI4D) this).getBooleanMask3D(z, t, c, false));
+                }
+                else {
+                    if (t == -1)
+                        result = new ROI4DArea(((ROI4D) this).getBooleanMask4D(z, t, c, false));
+                    else
+                        result = new ROI2DArea(getBooleanMask2D(z, t, c, false));
+                }
+                break;
+
+            case 5:
+                if (z == -1) {
+                    if (t == -1) {
+                        if (c == -1)
+                            result = new ROI5DArea(((ROI5D) this).getBooleanMask5D(z, t, c, false));
+                        else
+                            result = new ROI4DArea(((ROI5D) this).getBooleanMask4D(z, t, c, false));
+                    }
+                    else {
+                        if (c == -1)
+                            result = new ROI5DArea(((ROI5D) this).getBooleanMask5D(z, t, c, false));
+                        else
+                            result = new ROI3DArea(((ROI5D) this).getBooleanMask3D(z, t, c, false));
+                    }
+                }
+                else {
+                    if (t == -1) {
+                        if (c == -1)
+                            result = new ROI5DArea(((ROI5D) this).getBooleanMask5D(z, t, c, false));
+                        else
+                            result = new ROI4DArea(((ROI5D) this).getBooleanMask4D(z, t, c, false));
+                    }
+                    else {
+                        if (c == -1)
+                            result = new ROI5DArea(((ROI5D) this).getBooleanMask5D(z, t, c, false));
+                        else
+                            result = new ROI2DArea(getBooleanMask2D(z, t, c, false));
+                    }
+                }
+                break;*/
+        }
+
+        result.beginUpdate();
+        try {
+            if (result.canSetPosition()) {
+                final Point5D pos = result.getPosition5D();
+
+                // set Z, T, C position
+                if (z != -1)
+                    pos.setZ(z);
+                if (t != -1)
+                    pos.setT(t);
+                if (c != -1)
+                    pos.setC(c);
+
+                result.setPosition5D(pos);
+            }
+
+            // copy other properties
+            result.setColor(getColor());
+            result.setName(getName() + getNameSuffix(z, t, c));
+            result.setOpacity(getOpacity());
+            result.setStroke(getStroke());
+            result.setShowName(getShowName());
+        }
+        finally {
+            result.endUpdate();
+        }
+
+        return result;
+    }
+
+    /**
+     * @param roi
+     *        Copy all properties from the given ROI.<br>
+     *        All compatible properties from the source ROI are copied into current ROI
+     * @param copyId
+     *        need to also copy internal id from source ROI
+     * @return <code>false</code> if the operation failed
+     */
+    public boolean copyFrom(final ROI roi, final boolean copyId) {
+        // use XML persistence for cloning
+        final Node node = Objects.requireNonNull(XMLUtil.createDocument(true)).getDocumentElement();
+
+        // save operation can fails sometime...
+        if (!roi.saveToXML(node))
+            return false;
+        // can fail too (XML lib)
+        if (!loadFromXML(node))
+            return false;
+
+        // we want to preserve id here
+        if (copyId)
+            id = roi.id;
+
+        return true;
+    }
+
+    /**
+     * @param roi
+     *        Copy all properties from the given ROI.<br>
+     *        All compatible properties from the source ROI are copied into current ROI (even the internal id).
+     * @return <code>false</code> if the operation failed
+     */
+    public boolean copyFrom(final ROI roi) {
+        return copyFrom(roi, true);
+    }
+
+    @Override
+    public boolean loadFromXML(final Node node) {
+        if (node == null)
+            return false;
+
+        beginUpdate();
+        try {
+            id = XMLUtil.getElementIntValue(node, ID_ID, 0);
+            propertyChanged(PROPERTY_ID);
+            synchronized (ROI.class) {
+                // avoid having same id
+                if (id_generator <= id)
+                    id_generator = id + 1;
+            }
+            setName(XMLUtil.getElementValue(node, ID_NAME, ""));
+            // setGroupId(ROIGroupId.values()[XMLUtil.getElementIntValue(node, ID_GROUPID, 0)]);
+            setSelected(XMLUtil.getElementBooleanValue(node, ID_SELECTED, false));
+            setReadOnly(XMLUtil.getElementBooleanValue(node, ID_READONLY, false));
+
+            properties.clear();
+
+            final Node propertiesNode = XMLUtil.getElement(node, ID_PROPERTIES);
+            if (propertiesNode != null) {
+                synchronized (properties) {
+                    for (final Element element : XMLUtil.getElements(propertiesNode))
+                        properties.put(element.getNodeName(), XMLUtil.getValue(element, ""));
+                }
+            }
+
+            return painter.loadFromXML(node);
+        }
+        finally {
+            endUpdate();
+        }
+    }
+
+    @Override
+    public boolean saveToXML(final Node node) {
+        if (node == null)
+            return false;
+
+        XMLUtil.setElementValue(node, ID_CLASSNAME, getClassName());
+        XMLUtil.setElementIntValue(node, ID_ID, id);
+        XMLUtil.setElementValue(node, ID_NAME, getName());
+        // XMLUtil.setElementIntValue(node, ID_GROUPID, getGroupId().ordinal());
+        XMLUtil.setElementBooleanValue(node, ID_SELECTED, isSelected());
+        XMLUtil.setElementBooleanValue(node, ID_READONLY, isReadOnly());
+
+        final Element propertiesNode = XMLUtil.setElement(node, ID_PROPERTIES);
+        final Set<Entry<String, String>> entries = properties.entrySet();
+
+        synchronized (properties) {
+            for (final Entry<String, String> entry : entries)
+                XMLUtil.setElementValue(propertiesNode, entry.getKey(), entry.getValue());
+        }
+
+        return painter.saveToXML(node);
+    }
+
+    /**
+     * Called when ROI has changed its content and/or position.<br>
+     *
+     * @param contentChanged
+     *        mean that ROI content has changed otherwise we consider only a position change
+     */
+    public void roiChanged(final boolean contentChanged) {
+        // handle with updater
+        if (contentChanged)
+            updater.changed(new ROIEvent(this, ROIEventType.ROI_CHANGED, ROI_CHANGED_ALL));
+        else
+            updater.changed(new ROIEvent(this, ROIEventType.ROI_CHANGED, ROI_CHANGED_POSITION));
+    }
+
+    /**
+     * Called when ROI selected state changed.
+     */
+    public void selectionChanged() {
+        // handle with updater
+        updater.changed(new ROIEvent(this, ROIEventType.SELECTION_CHANGED));
+    }
+
+    /**
+     * Called when ROI focus state changed.
+     */
+    public void focusChanged() {
+        // handle with updater
+        updater.changed(new ROIEvent(this, ROIEventType.FOCUS_CHANGED));
+    }
+
+    /**
+     * @param propertyName
+     *        Called when ROI property has changed
+     */
+    public void propertyChanged(final String propertyName) {
+        // handle with updater
+        updater.changed(new ROIEvent(this, propertyName));
+    }
+
+    /**
+     * Add a listener
+     *
+     * @param listener
+     *        ROI listener
+     */
+    public void addListener(final ROIListener listener) {
+        if (listener != null)
+            listeners.add(listener);
+    }
+
+    /**
+     * Remove a listener
+     *
+     * @param listener
+     *        ROI listener
+     */
+    public void removeListener(final ROIListener listener) {
+        if (listener != null)
+            listeners.remove(listener);
+    }
+
+    private void fireChangedEvent(final ROIEvent event) {
+        for (final ROIListener listener : new ArrayList<>(listeners))
+            listener.roiChanged(event);
+    }
+
+    public void beginUpdate() {
+        updater.beginUpdate();
+        painter.beginUpdate();
+    }
+
+    public void endUpdate() {
+        painter.endUpdate();
+        updater.endUpdate();
+    }
+
+    public boolean isUpdating() {
+        return updater.isUpdating();
+    }
+
+    @Override
+    public void onChanged(final CollapsibleEvent object) {
+        final ROIEvent event = (ROIEvent) object;
+
+        // do here global process on ROI change
+        switch (event.getType()) {
+            case ROI_CHANGED:
+                // cached properties need to be recomputed
+                boundsInvalid = true;
+                // need to recompute points
+                if (StringUtil.equals(event.getPropertyName(), ROI_CHANGED_ALL)) {
+                    numberOfContourPointsInvalid = true;
+                    numberOfPointsInvalid = true;
+                }
+                painter.painterChanged();
+                break;
+
+            case SELECTION_CHANGED:
+            case FOCUS_CHANGED:
+                // compute painter priority
+                painter.computePriority();
+                painter.painterChanged();
+                break;
+
+            case PROPERTY_CHANGED:
+                final String property = event.getPropertyName();
+
+                // painter affecting display
+                if (StringUtil.isEmpty(property) || StringUtil.equals(property, PROPERTY_NAME)
+                        || StringUtil.equals(property, PROPERTY_SHOWNAME) || StringUtil.equals(property, PROPERTY_COLOR)
+                        || StringUtil.equals(property, PROPERTY_OPACITY)
+                        || StringUtil.equals(property, PROPERTY_SHOWNAME)
+                        || StringUtil.equals(property, PROPERTY_STROKE))
+                    painter.painterChanged();
+                break;
+
+            default:
+                break;
+        }
+
+        // notify listener we have changed
+        fireChangedEvent(event);
+    }
+}

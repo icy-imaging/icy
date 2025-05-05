@@ -1,0 +1,98 @@
+/*
+ * Copyright (c) 2010-2024. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package org.bioimageanalysis.icy.gui.frame;
+
+import org.bioimageanalysis.icy.io.FileUtil;
+import org.bioimageanalysis.icy.model.image.ImageUtil;
+import org.bioimageanalysis.icy.io.ResourceUtil;
+import org.bioimageanalysis.icy.system.logging.IcyLogger;
+import org.bioimageanalysis.icy.common.reflect.ClassUtil;
+import org.bioimageanalysis.icy.common.math.Random;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.net.URL;
+
+/**
+ * Animated ICY Logo.
+ *
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
+ * @deprecated Does not work anymore with FlatLaf
+ */
+@Deprecated(since = "3.0.0", forRemoval = true)
+public class SplashScreenFrame extends JFrame {
+    public static class SplashPanel extends JPanel {
+        private static final String SPLASH_FOLDER = ResourceUtil.IMAGE_PATH + "splash";
+        private static final int DEFAULT_WIDTH = 960;
+        private static final int DEFAULT_HEIGTH = 300;
+
+        private BufferedImage image;
+
+        public SplashPanel() {
+            image = null;
+
+            String[] files = FileUtil.getFiles(SPLASH_FOLDER, null, false, false, false);
+
+            if (files.length > 0)
+                image = ImageUtil.load(files[Random.nextInt(files.length)]);
+            else {
+                try {
+                    files = ClassUtil.getResourcesInPackage(SPLASH_FOLDER, null, true, false, false, false).toArray(new String[0]);
+                    if (files.length > 0) {
+                        final URL url = getClass().getResource("/" + files[Random.nextInt(files.length)]);
+                        if (url != null)
+                            image = ImageUtil.load(url, true);
+                    }
+                }
+                catch (final Exception e) {
+                    IcyLogger.warn(this.getClass(), e, "Cannot load splashscreen image.");
+                }
+            }
+
+            if (image != null)
+                setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
+            else
+                setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGTH));
+        }
+
+        @Override
+        public void paint(final Graphics g) {
+            super.paint(g);
+
+            if (image != null)
+                g.drawImage(image, 0, 0, this);
+        }
+    }
+
+    public SplashScreenFrame() {
+        super("Icy");
+
+        final SplashPanel splash = new SplashPanel();
+
+        setUndecorated(true);
+
+        add(splash);
+        pack();
+
+        setLocationRelativeTo(null);
+    }
+}
