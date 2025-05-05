@@ -1,3 +1,9 @@
+Icy 2.5.3.0 - 24/04/2025
+------------------------
+
+**Application**
+* Updated Bioformats & Apache Commons IO
+
 Icy 2.5.2.0 - 08/02/2024
 ------------------------
 
