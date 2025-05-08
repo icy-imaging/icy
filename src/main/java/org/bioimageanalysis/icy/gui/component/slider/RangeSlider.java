@@ -17,8 +17,7 @@
  */
 package org.bioimageanalysis.icy.gui.component.slider;
 
-import javax.swing.BoundedRangeModel;
-import javax.swing.JSlider;
+import javax.swing.*;
 
 /**
  * An extension of JSlider to select a range of values using two thumb controls.
@@ -56,7 +55,7 @@ public final class RangeSlider extends JSlider {
      * @see #setLowerValue
      * @see #setUpperValue
      */
-    public RangeSlider(int orientation, int min, int max, int low, int high) {
+    public RangeSlider(final int orientation, final int min, final int max, final int low, final int high) {
         super(orientation, min, max, low);
         // remove focus as we cannot choose which bound to move
         super.setFocusable(false);
@@ -80,7 +79,7 @@ public final class RangeSlider extends JSlider {
      * @see #setLowerValue
      * @see #setUpperValue
      */
-    public RangeSlider(int min, int max, int low, int high) {
+    public RangeSlider(final int min, final int max, final int low, final int high) {
         this(HORIZONTAL, min, max, low, high);
     }
 
@@ -98,7 +97,7 @@ public final class RangeSlider extends JSlider {
      * @see #setMinimum
      * @see #setMaximum
      */
-    public RangeSlider(int min, int max) {
+    public RangeSlider(final int min, final int max) {
         this(HORIZONTAL, min, max, (min + max) / 2, 0);
     }
 
@@ -112,7 +111,7 @@ public final class RangeSlider extends JSlider {
      * @throws IllegalArgumentException if orientation is not one of {@code VERTICAL}, {@code HORIZONTAL}
      * @see #setOrientation
      */
-    public RangeSlider(int orientation) {
+    public RangeSlider(final int orientation) {
         this(orientation, 0, 100, 40, 20);
     }
 
@@ -125,7 +124,7 @@ public final class RangeSlider extends JSlider {
     }
 
     @Override
-    public void setFocusable(boolean focusable) {
+    public void setFocusable(final boolean focusable) {
         // not focusable
         super.setFocusable(false);
     }
@@ -142,15 +141,15 @@ public final class RangeSlider extends JSlider {
      * Sets the lower value in the range.
      */
     @Override
-    public void setValue(int value) {
-        int oldValue = getValue();
+    public void setValue(final int value) {
+        final int oldValue = getValue();
         if (oldValue == value)
             return;
 
         // Compute new value and extent to maintain upper value.
-        int oldExtent = getExtent();
-        int newValue = Math.min(Math.max(getMinimum(), value), oldValue + oldExtent);
-        int newExtent = oldExtent + oldValue - newValue;
+        final int oldExtent = getExtent();
+        final int newValue = Math.min(Math.max(getMinimum(), value), oldValue + oldExtent);
+        final int newExtent = oldExtent + oldValue - newValue;
 
         // Set new value and extent, and fire a single change event.
         getModel().setRangeProperties(newValue, newExtent, getMinimum(), getMaximum(), getValueIsAdjusting());
@@ -166,7 +165,7 @@ public final class RangeSlider extends JSlider {
     /**
      * Sets the lower value in the range.
      */
-    public void setLowerValue(int value) {
+    public void setLowerValue(final int value) {
         setValue(value);
     }
 
@@ -180,12 +179,21 @@ public final class RangeSlider extends JSlider {
     /**
      * Sets the upper value in the range.
      */
-    public void setUpperValue(int value) {
+    public void setUpperValue(final int value) {
         // Compute new extent.
-        int lowerValue = getValue();
-        int newExtent = Math.min(Math.max(0, value - lowerValue), getMaximum() - lowerValue);
+        final int lowerValue = getValue();
+        final int newExtent = Math.min(Math.max(0, value - lowerValue), getMaximum() - lowerValue);
 
         // Set extent to set upper value.
         setExtent(newExtent);
+    }
+
+    /**
+     * Resets the UI property to a value from the current look and feel.
+     */
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        setUI(new RangeSliderUI(this));
     }
 }

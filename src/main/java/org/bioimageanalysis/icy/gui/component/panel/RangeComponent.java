@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,40 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package org.bioimageanalysis.icy.gui.component.panel;
 
 import org.bioimageanalysis.icy.gui.component.slider.RangeSlider;
 
-import java.awt.BorderLayout;
-
-import javax.swing.DefaultBoundedRangeModel;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.*;
 
 /**
  * Component letting user to define a range (RangeSlider + 2 inputs fields)
- * 
- * @author Stephane
+ *
+ * @author Stephane Dallongeville
  */
-public class RangeComponent extends JPanel implements ChangeListener
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 7244476681262628392L;
-
+public class RangeComponent extends JPanel implements ChangeListener {
     final protected JSpinner lowSpinner;
     final protected JSpinner highSpinner;
     final protected RangeSlider slider;
 
-    public RangeComponent(int orientation, double min, double max, double step)
-    {
+    public RangeComponent(final int orientation, final double min, final double max, final double step) {
         super();
 
         lowSpinner = new JSpinner(new SpinnerNumberModel(min, min, max, step));
@@ -66,14 +54,12 @@ public class RangeComponent extends JPanel implements ChangeListener
 
         setLayout(new BorderLayout(0, 0));
 
-        if (orientation == SwingConstants.VERTICAL)
-        {
+        if (orientation == SwingConstants.VERTICAL) {
             add(lowSpinner, BorderLayout.SOUTH);
             add(slider, BorderLayout.CENTER);
             add(highSpinner, BorderLayout.NORTH);
         }
-        else
-        {
+        else {
             add(lowSpinner, BorderLayout.WEST);
             add(slider, BorderLayout.CENTER);
             add(highSpinner, BorderLayout.EAST);
@@ -82,58 +68,47 @@ public class RangeComponent extends JPanel implements ChangeListener
         validate();
     }
 
-    public RangeComponent(double min, double max, double step)
-    {
+    public RangeComponent(final double min, final double max, final double step) {
         this(SwingConstants.HORIZONTAL, min, max, step);
     }
 
-    public RangeComponent(int orientation)
-    {
+    public RangeComponent(final int orientation) {
         this(orientation, 0d, 100d, 1d);
     }
 
-    public RangeComponent()
-    {
+    public RangeComponent() {
         this(SwingConstants.HORIZONTAL, 0d, 100d, 1d);
     }
 
-    public JSpinner getLowSpinner()
-    {
+    public JSpinner getLowSpinner() {
         return lowSpinner;
     }
 
-    public JSpinner getHighSpinner()
-    {
+    public JSpinner getHighSpinner() {
         return highSpinner;
     }
 
-    public RangeSlider getSlider()
-    {
+    public RangeSlider getSlider() {
         return slider;
     }
 
-    public SpinnerNumberModel getLowModel()
-    {
+    public SpinnerNumberModel getLowModel() {
         return (SpinnerNumberModel) lowSpinner.getModel();
     }
 
-    public SpinnerNumberModel getHighModel()
-    {
+    public SpinnerNumberModel getHighModel() {
         return (SpinnerNumberModel) highSpinner.getModel();
     }
 
-    private double getRange()
-    {
+    private double getRange() {
         return getMax() - getMin();
     }
 
-    private int getSliderRange()
-    {
+    private int getSliderRange() {
         return slider.getMaximum() - slider.getMinimum();
     }
 
-    private int spinnerToSlider(double value)
-    {
+    private int spinnerToSlider(final double value) {
         final double spinnerRange = getRange();
 
         if (spinnerRange == 0)
@@ -142,8 +117,7 @@ public class RangeComponent extends JPanel implements ChangeListener
         return (int) ((value - getMin()) * getSliderRange() / spinnerRange);
     }
 
-    private double sliderToSpinner(int value)
-    {
+    private double sliderToSpinner(final int value) {
         final int sliderRange = getSliderRange();
 
         if (sliderRange == 0)
@@ -152,8 +126,7 @@ public class RangeComponent extends JPanel implements ChangeListener
         return (value * getRange() / sliderRange) + getMin();
     }
 
-    private void updateSliderModel()
-    {
+    private void updateSliderModel() {
         final int sliderRange = (int) Math.round(getRange() / getStep());
 
         slider.setModel(new DefaultBoundedRangeModel(0, 0, 0, sliderRange));
@@ -163,67 +136,61 @@ public class RangeComponent extends JPanel implements ChangeListener
 
     /**
      * Set the lower and higher range value.
-     * 
+     *
      * @see #setLow(double)
      * @see #setHigh(double)
      * @see #setMin(double)
      * @see #setMax(double)
      */
-    public void setLowHigh(double low, double high)
-    {
+    public void setLowHigh(final double low, final double high) {
         getLowModel().setValue(Double.valueOf(low));
         getHighModel().setValue(Double.valueOf(high));
     }
 
     /**
      * Get the lower range value.
-     * 
+     *
      * @see #getHigh()
      * @see #getMin()
      */
-    public double getLow()
-    {
+    public double getLow() {
         return getLowModel().getNumber().doubleValue();
     }
 
     /**
      * Get the higher range value.
-     * 
+     *
      * @see #getLow()
      * @see #getMax()
      */
-    public double getHigh()
-    {
+    public double getHigh() {
         return getHighModel().getNumber().doubleValue();
     }
 
     /**
      * Set the lower range value.
-     * 
+     *
      * @see #setHigh(double)
      * @see #setMin(double)
      */
-    public void setLow(double value)
-    {
+    public void setLow(final double value) {
         getLowModel().setValue(Double.valueOf(value));
     }
 
     /**
      * Set the higher range value.
-     * 
+     *
      * @see #setLow(double)
      * @see #setMax(double)
      */
-    public void setHigh(double value)
-    {
+    public void setHigh(final double value) {
         getHighModel().setValue(Double.valueOf(value));
     }
 
     /**
      * Return true if the range use integer number
      */
-    public boolean isInteger()
-    {
+    public boolean isInteger() {
         final SpinnerNumberModel model = getLowModel();
         final Number value = model.getNumber();
         final Number step = model.getStepSize();
@@ -233,46 +200,42 @@ public class RangeComponent extends JPanel implements ChangeListener
 
     /**
      * Get range minimum value.
-     * 
+     *
      * @see #getMax()
      * @see #getLow()
      */
-    public double getMin()
-    {
+    public double getMin() {
         return ((Double) getLowModel().getMinimum()).doubleValue();
     }
 
     /**
      * Get range minimum value.
-     * 
+     *
      * @see #getMin()
      * @see #getHigh()
      */
-    public double getMax()
-    {
+    public double getMax() {
         return ((Double) getHighModel().getMaximum()).doubleValue();
     }
 
     /**
      * Get range step value.
-     * 
+     *
      * @see #getMin()
      * @see #getMax()
      */
-    public double getStep()
-    {
+    public double getStep() {
         return getLowModel().getStepSize().doubleValue();
     }
 
     /**
      * Set range bounds and step value.
-     * 
+     *
      * @see #setMin(double)
      * @see #setMax(double)
      * @see #setStep(double)
      */
-    public void setMinMaxStep(double min, double max, double step)
-    {
+    public void setMinMaxStep(final double min, final double max, final double step) {
         final double low = Math.max(Math.min(getLow(), max), min);
         final double high = Math.max(Math.min(getHigh(), max), min);
 
@@ -284,55 +247,50 @@ public class RangeComponent extends JPanel implements ChangeListener
 
     /**
      * Set range bounds value.
-     * 
+     *
      * @see #setMin(double)
      * @see #setMax(double)
      * @see #setLow(double)
      * @see #setHigh(double)
      */
-    public void setMinMax(double min, double max)
-    {
+    public void setMinMax(final double min, final double max) {
         setMinMaxStep(min, max, getStep());
     }
 
     /**
      * Set range minimum value.
-     * 
+     *
      * @see #setMax(double)
      * @see #setLow(double)
      */
-    public void setMin(double value)
-    {
+    public void setMin(final double value) {
         setMinMaxStep(value, getMax(), getStep());
     }
 
     /**
      * Set range maximum value.
-     * 
+     *
      * @see #setMin(double)
      * @see #setHigh(double)
      */
-    public void setMax(double value)
-    {
+    public void setMax(final double value) {
         setMinMaxStep(getMin(), value, getStep());
     }
 
     /**
      * Set range step value.
-     * 
+     *
      * @see #setMin(double)
      * @see #setMax(double)
      */
-    public void setStep(double value)
-    {
+    public void setStep(final double value) {
         setMinMaxStep(getMin(), getMax(), value);
     }
 
     /**
      * Set slider visible or not.
      */
-    public void setSliderVisible(boolean value)
-    {
+    public void setSliderVisible(final boolean value) {
         if (value)
             add(slider, BorderLayout.CENTER);
         else
@@ -340,16 +298,14 @@ public class RangeComponent extends JPanel implements ChangeListener
     }
 
     @Override
-    public void setToolTipText(String text)
-    {
+    public void setToolTipText(final String text) {
         slider.setToolTipText(text);
 
         super.setToolTipText(text);
     }
 
     @Override
-    public void setEnabled(boolean enabled)
-    {
+    public void setEnabled(final boolean enabled) {
         lowSpinner.setEnabled(enabled);
         highSpinner.setEnabled(enabled);
         slider.setEnabled(enabled);
@@ -357,31 +313,26 @@ public class RangeComponent extends JPanel implements ChangeListener
         super.setEnabled(enabled);
     }
 
-    protected void fireChangedEvent(ChangeEvent event)
-    {
-        for (ChangeListener listener : getListeners(ChangeListener.class))
+    protected void fireChangedEvent(final ChangeEvent event) {
+        for (final ChangeListener listener : getListeners(ChangeListener.class))
             listener.stateChanged(event);
     }
 
-    public void addChangeListener(ChangeListener listener)
-    {
+    public void addChangeListener(final ChangeListener listener) {
         listenerList.add(ChangeListener.class, listener);
     }
 
-    public void removeChangeListener(ChangeListener listener)
-    {
+    public void removeChangeListener(final ChangeListener listener) {
         listenerList.remove(ChangeListener.class, listener);
     }
 
     @Override
-    public void stateChanged(ChangeEvent e)
-    {
+    public void stateChanged(final ChangeEvent e) {
         final Object source = e.getSource();
         final double low = getLow();
         final double high = getHigh();
 
-        if (source == lowSpinner)
-        {
+        if (source == lowSpinner) {
             slider.setLowerValue(spinnerToSlider(low));
 
             if (high < low)
@@ -389,8 +340,7 @@ public class RangeComponent extends JPanel implements ChangeListener
 
             getHighModel().setMinimum(Double.valueOf(low));
         }
-        else if (source == highSpinner)
-        {
+        else if (source == highSpinner) {
             slider.setUpperValue(spinnerToSlider(high));
 
             if (low > high)
@@ -398,8 +348,7 @@ public class RangeComponent extends JPanel implements ChangeListener
 
             getLowModel().setMaximum(Double.valueOf(high));
         }
-        else if (source == slider)
-        {
+        else if (source == slider) {
             setLow(sliderToSpinner(slider.getLowerValue()));
             setHigh(sliderToSpinner(slider.getUpperValue()));
         }

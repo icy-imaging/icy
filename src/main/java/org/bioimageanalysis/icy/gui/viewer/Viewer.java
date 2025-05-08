@@ -526,36 +526,31 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         buildCanvasCombo();
 
         // build buttons
-        layersEnabledButton = new IcyToggleButton(new SVGIconPack(SVGIcon.LAYERS_CLEAR, SVGIcon.LAYERS));
-        layersEnabledButton.addActionListener(new ToggleLayersAction(true));
+        layersEnabledButton = new IcyToggleButton(new ToggleLayersAction(true), new SVGIconPack(SVGIcon.LAYERS_CLEAR, SVGIcon.LAYERS));
         layersEnabledButton.setHideActionText(true);
         layersEnabledButton.setFocusable(false);
         layersEnabledButton.setSelected(true);
 
-        screenShotButton = new IcyButton(SVGIcon.PHOTO_CAMERA);
-        screenShotButton.addActionListener(CanvasActions.screenShotAction);
+        screenShotButton = new IcyButton(CanvasActions.screenShotAction, SVGIcon.PHOTO_CAMERA);
         screenShotButton.setFocusable(false);
         screenShotButton.setHideActionText(true);
 
-        screenShotAlternateButton = new IcyButton(SVGIcon.ASPECT_RATIO);
-        screenShotAlternateButton.addActionListener(CanvasActions.screenShotAlternateAction);
+        screenShotAlternateButton = new IcyButton(CanvasActions.screenShotAlternateAction, SVGIcon.ASPECT_RATIO);
         screenShotAlternateButton.setFocusable(false);
         screenShotAlternateButton.setHideActionText(true);
 
-        duplicateButton = new IcyButton(SVGIcon.CONTENT_COPY);
-        duplicateButton.addActionListener(ViewerActions.duplicateAction);
+        duplicateButton = new IcyButton(ViewerActions.duplicateAction, SVGIcon.CONTENT_COPY);
         duplicateButton.setFocusable(false);
         duplicateButton.setHideActionText(true);
         // duplicateButton.setToolTipText("Duplicate view (no data duplication)");
 
-        switchStateButton = new IcyToggleButton(SVGIcon.OPEN_IN_NEW);
-        switchStateButton.addActionListener(getSwitchStateAction());
+        switchStateButton = new IcyToggleButton(getSwitchStateAction(), SVGIcon.OPEN_IN_NEW);
         switchStateButton.setSelected(isExternalized());
         switchStateButton.setFocusable(false);
         switchStateButton.setHideActionText(true);
 
         virtualButton = new IcyToggleButton(new SVGIconPack(SVGIcon.FLASH_OFF, SVGIcon.FLASH_ON));
-        virtualButton.addActionListener(new ToggleVirtualSequenceAction(false));
+        virtualButton.setAction(new ToggleVirtualSequenceAction(false));
         virtualButton.setFocusable(false);
         virtualButton.setHideActionText(true);
 

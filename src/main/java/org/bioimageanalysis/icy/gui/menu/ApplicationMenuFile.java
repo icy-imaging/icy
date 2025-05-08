@@ -27,7 +27,6 @@ import org.bioimageanalysis.icy.gui.component.menu.IcyMenuItem;
 import org.bioimageanalysis.icy.system.preferences.IcyPreferences;
 import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
-import org.bioimageanalysis.icy.system.SystemUtil;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import org.bioimageanalysis.icy.common.collection.CollectionUtil;
 import org.bioimageanalysis.icy.common.collection.list.RecentFileList;
@@ -106,7 +105,7 @@ public final class ApplicationMenuFile extends AbstractApplicationMenu {
         final IcyMenuItem itemSaveMetadata = new IcyMenuItem(FileActions.saveMetaDataAction, SVGIcon.ART_TRACK);
         add(itemSaveMetadata);
 
-        if (!SystemUtil.isMac()) {
+        //if (!SystemUtil.isMac()) {
             addSeparator();
 
             final IcyMenuItem itemPreferences = new IcyMenuItem(PreferencesActions.preferencesAction, SVGIcon.SETTINGS);
@@ -116,7 +115,7 @@ public final class ApplicationMenuFile extends AbstractApplicationMenu {
 
             final IcyMenuItem itemQuit = new IcyMenuItem(GeneralActions.exitApplicationAction, SVGIcon.POWER_SETTINGS_NEW);
             add(itemQuit);
-        }
+        //}
 
         reloadRecentFiles();
     }
