@@ -1221,11 +1221,4 @@ public class VtkUtil {
 
         return true;
     }
-
-    /**
-     * VTK forced garbage collection
-     */
-    public static void vtkGC() {
-        vtkObjectBase.JAVA_OBJECT_MANAGER.gc(false);
-    }
 }

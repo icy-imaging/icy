@@ -188,9 +188,6 @@ public class IcyVtkPanel extends VtkJoglPanel implements MouseListener, MouseMot
             axis = null;
             axisRenderer = null;
             picker = null;
-
-            // call it once in parent as this can take a lot fo time
-            // vtkObjectBase.JAVA_OBJECT_MANAGER.gc(false);
         }
         finally {
             // removing the renderWindow is let to the superclass

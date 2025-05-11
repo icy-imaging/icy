@@ -213,9 +213,6 @@ public class VtkJoglPanel extends GLJPanel {
             else {
                 IcyLogger.warn(VtkJoglPanel.class, "The renderwindow has been kept arount to prevent a crash");
             }
-
-            // call it only once in parent as this can take a lot of time
-            // vtkObjectBase.JAVA_OBJECT_MANAGER.gc(false);
         }
         finally {
             // removing the renderWindow is let to the superclass

@@ -27,7 +27,6 @@ import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
 import org.bioimageanalysis.icy.system.SystemUtil;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
-import vtk.vtkObjectBase;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,12 +59,9 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
         settings.addActionListener(PreferencesActions.generalPreferencesAction);
         final IcyMenuItem GB = new IcyMenuItem("Free Java Memory", SVGIcon.DELETE_SWEEP);
         GB.addActionListener(e -> forceGC());
-        final IcyMenuItem VTKGB = new IcyMenuItem("Free VTK Memory", SVGIcon.DELETE_SWEEP);
-        VTKGB.addActionListener(e -> forceVTKGC());
         popup.add(settings);
         popup.addSeparator();
         popup.add(GB);
-        popup.add(VTKGB);
 
         final Timer timer = new Timer("CPU-RAM", true);
         final TimerTask task = new TimerTask() {
@@ -118,17 +114,6 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
                     UnitUtil.getBytesString((usedMemory > 0) ? usedMemory : 0),
                     UnitUtil.getBytesString((released > 0) ? released : 0)
             ));
-        });
-    }
-
-    /**
-     * Force VTK garbage collection.
-     */
-    private void forceVTKGC() {
-        // TODO: 19/06/2023 Check if still needs to be done in EDT or it crashes on OSX
-        ThreadUtil.bgRun(() -> {
-            vtkObjectBase.JAVA_OBJECT_MANAGER.gc(true);
-            IcyLogger.info(MemoryMonitorButton.class, "VTK GC forced");
         });
     }
 

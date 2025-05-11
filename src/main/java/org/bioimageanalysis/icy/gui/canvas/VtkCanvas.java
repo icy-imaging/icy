@@ -517,9 +517,6 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
 
         // do parent shutdown now
         super.shutDown();
-
-        // call VTK GC: better if we can avoid this !
-        // vtkObjectBase.JAVA_OBJECT_MANAGER.gc(false);
     }
 
     /**
