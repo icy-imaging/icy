@@ -31,7 +31,7 @@ import java.awt.event.ActionListener;
  */
 public final class ConsoleButton extends IcyToggleButton implements ActionListener {
     public ConsoleButton() {
-        super(SVGIcon.BUG_REPORT);
+        super(SVGIcon.TERMINAL);
         setFocusable(false);
         addActionListener(this);
     }

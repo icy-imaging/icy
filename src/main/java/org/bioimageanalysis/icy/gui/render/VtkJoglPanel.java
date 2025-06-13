@@ -52,8 +52,11 @@ public class VtkJoglPanel extends GLJPanel {
                 // Init VTK OpenGL RenderWindow
                 rw.SetMapped(1);
                 rw.SetPosition(0, 0);
-                rw.InitializeFromCurrentContext();
-                // rw.OpenGLInit();
+                //rw.InitializeFromCurrentContext();
+                rw.OpenGLInitContext();
+                rw.OpenGLInit();
+                rw.MakeCurrent();
+                rw.SetIsCurrent(true);
 
                 // init light
                 if (!lightingset) {
@@ -99,8 +102,8 @@ public class VtkJoglPanel extends GLJPanel {
     }
 
     protected vtkGenericOpenGLRenderWindow rw;
-    protected vtkRenderer ren;
-    protected vtkRenderWindowInteractor wi;
+    protected vtkOpenGLRenderer ren;
+    protected vtkGenericRenderWindowInteractor wi;
     protected vtkCamera cam;
     protected vtkLight lgt;
 
@@ -116,23 +119,23 @@ public class VtkJoglPanel extends GLJPanel {
     private boolean failed;
 
     public VtkJoglPanel() {
-        super(new GLCapabilities(GLProfile.getMaximum(true)));
+        super(new GLCapabilities(GLProfile.getMaxProgrammableCore(true)));
 
         rw = new vtkGenericOpenGLRenderWindow();
 
         // init render window
         rw.SetIsDirect(1);
         rw.SetSupportsOpenGL(1);
-        rw.SetIsCurrent(true);
 
         // FIXME: smoothing is broken since VTK 6.3
+        //  EDIT 2025: Still there ?
         rw.SetPointSmoothing(1);
         rw.SetLineSmoothing(1);
         rw.SetPolygonSmoothing(1);
         // for use with deeph peeling (allow transparent geometry to intersect with volume)
         rw.SetAlphaBitPlanes(1);
         rw.SetMultiSamples(0);
-//        rw.SetMultiSamples(4);
+        //rw.SetMultiSamples(4);
 
         // Make sure when VTK internally request a Render, the Render get properly triggered
         rw.AddObserver("WindowFrameEvent", this, "render");
@@ -146,7 +149,7 @@ public class VtkJoglPanel extends GLJPanel {
         wi.AddObserver("RenderEvent", this, "render");
         wi.SetEnableRender(false);
 
-        ren = new vtkRenderer();
+        ren = new vtkOpenGLRenderer();
         ren.SetLightFollowCamera(1);
         ren.UseDepthPeelingOn();
         ren.UseDepthPeelingForVolumesOn();

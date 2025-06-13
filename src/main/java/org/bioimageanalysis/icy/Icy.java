@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -37,6 +37,7 @@ import org.bioimageanalysis.icy.gui.frame.ExitFrame;
 import org.bioimageanalysis.icy.gui.frame.IcyExternalFrame;
 import org.bioimageanalysis.icy.gui.frame.NewVersionFrame;
 import org.bioimageanalysis.icy.gui.frame.progress.AnnounceFrame;
+import org.bioimageanalysis.icy.gui.frame.progress.ProgressFrame;
 import org.bioimageanalysis.icy.gui.frame.progress.ToolTipFrame;
 import org.bioimageanalysis.icy.gui.main.MainFrame;
 import org.bioimageanalysis.icy.gui.main.MainInterface;
@@ -44,6 +45,7 @@ import org.bioimageanalysis.icy.gui.main.MainInterfaceBatch;
 import org.bioimageanalysis.icy.gui.main.MainInterfaceGui;
 import org.bioimageanalysis.icy.io.FileUtil;
 import org.bioimageanalysis.icy.io.Loader;
+import org.bioimageanalysis.icy.library.*;
 import org.bioimageanalysis.icy.model.cache.ImageCache;
 import org.bioimageanalysis.icy.model.sequence.SequencePrefetcher;
 import org.bioimageanalysis.icy.network.NetworkUtil;
@@ -91,7 +93,7 @@ public final class Icy {
     /**
      * Icy Version
      */
-    public static final Version VERSION = new Version(3, 0, 0, Version.DevelopmentStage.ALPHA, 4);
+    public static final Version VERSION = new Version(3, 0, 0, Version.DevelopmentStage.ALPHA, 5);
 
     /**
      * Main interface
@@ -156,7 +158,11 @@ public final class Icy {
      * @param args Received from the command line.
      */
     public static void main(final String[] args) {
+        System.setProperty("log4j.skipJansi", "false");
+
         boolean headless = false;
+
+        Locale.setDefault(Locale.ENGLISH);
 
         // Clear log file
         final File logFile = new File(UserUtil.getIcyHomeDirectory(), "icy.log");
@@ -166,8 +172,6 @@ public final class Icy {
             FileUtil.delete(logFile, false);
             FileUtil.createFile(logFile);
         }
-
-        System.setProperty("log4j.skipJansi", "false");
 
         IcyLogger.setConsoleLevel(IcyLogger.TRACE);
         IcyLogger.setGUILevel(IcyLogger.ERROR);
@@ -186,7 +190,7 @@ public final class Icy {
             IcyPreferences.init();
 
             // check if Icy is already running
-            lock = SingleInstanceCheck.lock("icy");
+            lock = SingleInstanceCheck.lock("icy-3");
             if (lock == null) {
                 // we always accept multi instance in headless mode
                 if (!headless) {
@@ -194,7 +198,7 @@ public final class Icy {
                     // Icy.getMainInterface().isHeadless() will return false here
                     final Confirmer confirmer = new Confirmer(
                             "Confirmation",
-                            "Icy is already running on this computer. Start anyway ?",
+                            "Icy 3 is already running on this computer. Start anyway ?",
                             JOptionPane.YES_NO_OPTION,
                             ApplicationPreferences.ID_SINGLE_INSTANCE
                     );
@@ -219,18 +223,18 @@ public final class Icy {
 
             // TODO : remove this block
             //if (!headless && !noSplash) {
-                // prepare splashScreen (ok to create it here as we are not yet in substance laf)
-                //splashScreen = new SplashScreenFrame();
+            // prepare splashScreen (ok to create it here as we are not yet in substance laf)
+            //splashScreen = new SplashScreenFrame();
 
-                // It's important to initialize AWT now (with InvokeNow(...) for instance) to avoid
-                // the JVM deadlock bug (id: 5104239). It happen when the AWT thread is initialized
-                // while others threads load some new library with ClassLoader.loadLibrary
+            // It's important to initialize AWT now (with InvokeNow(...) for instance) to avoid
+            // the JVM deadlock bug (id: 5104239). It happen when the AWT thread is initialized
+            // while others threads load some new library with ClassLoader.loadLibrary
 
-                // display splash NOW (don't use ThreadUtil as headless is still false here)
-                //EventQueue.invokeAndWait(() -> {
-                    // display splash screen
-                    //splashScreen.setVisible(true);
-                //});
+            // display splash NOW (don't use ThreadUtil as headless is still false here)
+            //EventQueue.invokeAndWait(() -> {
+            // display splash screen
+            //splashScreen.setVisible(true);
+            //});
             //}
 
             // fast start
@@ -286,12 +290,12 @@ public final class Icy {
         // TODO : remove this block
         // splash screen initialized --> hide it
         //if (splashScreen != null) {
-            // then do less important stuff later
-            //ThreadUtil.invokeLater(() -> {
-                // we can now hide splash as we have interface
-                //splashScreen.dispose();
-                //splashScreen = null;
-            //});
+        // then do less important stuff later
+        //ThreadUtil.invokeLater(() -> {
+        // we can now hide splash as we have interface
+        //splashScreen.dispose();
+        //splashScreen = null;
+        //});
         //}
 
         // show general informations
@@ -300,7 +304,19 @@ public final class Icy {
         IcyLogger.info(Icy.class, String.format("System total memory: %s", UnitUtil.getBytesString(SystemUtil.getTotalMemory())));
         IcyLogger.info(Icy.class, String.format("System available memory: %s", UnitUtil.getBytesString(SystemUtil.getFreeMemory())));
         IcyLogger.info(Icy.class, String.format("Max Java memory: %s", UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())));
-        IcyLogger.info(Icy.class, String.format("Application localisation: %s", Paths.get("").toAbsolutePath()));
+
+        IcyLogger.info(Icy.class, "Loading Icy libraries...");
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyApacheCommons.NAME, Version.fromString(IcyApacheCommons.VERSION).toShortString()));
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyApacheHTTP.NAME, Version.fromString(IcyApacheHTTP.VERSION).toShortString()));
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyBatik.NAME, Version.fromString(IcyBatik.VERSION).toShortString()));
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyBioFormats.NAME, Version.fromString(IcyBioFormats.VERSION).toShortString()));
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyEhcache.NAME, Version.fromString(IcyEhcache.VERSION).toShortString()));
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyFlatLaf.NAME, Version.fromString(IcyFlatLaf.VERSION).toShortString()));
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyJAI.NAME, Version.fromString(IcyJAI.VERSION).toShortString()));
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyJogamp.NAME, Version.fromString(IcyJogamp.VERSION).toShortString()));
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyLog4j.NAME, Version.fromString(IcyLog4j.VERSION).toShortString()));
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyApachePOI.NAME, Version.fromString(IcyApachePOI.VERSION).toShortString()));
+        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcySnakeYAML.NAME, Version.fromString(IcySnakeYAML.VERSION).toShortString()));
 
         // image cache disabled from command line ?
         if (isCacheDisabled())
@@ -514,7 +530,7 @@ public final class Icy {
         // TODO remove this block
         // hide splashScreen if needed
         //if ((splashScreen != null) && (splashScreen.isVisible()))
-            //splashScreen.dispose();
+        //splashScreen.dispose();
 
         // show error in console
         IcyLogger.fatal(Icy.class, t, t.getLocalizedMessage());
@@ -961,12 +977,12 @@ public final class Icy {
 
         vtkLibraryLoaded = false;
         try {
-            final Set<String> nativeLibraries = new HashSet<>(CollectionUtil.asList(FileUtil.getFiles(vtkLibPath, null, false, false)));
+            final Set<String> nativeLibraries = new HashSet<>(CollectionUtil.asList(FileUtil.getFiles(vtkLibPath, null, false, true)));
 
             final Set<String> filesToRemove = new HashSet<>();
             for (final String path : nativeLibraries) {
                 final String[] split = path.split("\\.");
-                final String extension = split[split.length - 1].toLowerCase(Locale.ROOT);
+                final String extension = split[split.length - 1].toLowerCase(Locale.getDefault());
                 if (!(extension.equals("dylib") || extension.equals("jnilib") || extension.equals("so") || extension.equals("dll") || path.contains(".so."))) {
                     IcyLogger.warn(Icy.class, String.format("Wrong file format for a native library: %s", path));
                     filesToRemove.add(path);
@@ -977,8 +993,13 @@ public final class Icy {
                 nativeLibraries.removeAll(filesToRemove);
 
             final int numFile = nativeLibraries.size();
-            boolean load = true;
 
+            // Show progress, as VTK may take a while to load
+            final ProgressFrame pf = new ProgressFrame("Loading VTK libraries: 0 / " + numFile);
+            pf.notifyProgress(0, numFile);
+
+            int i = 0;
+            boolean load = true;
             // so we can at least load 1 library at each iteration
             while (load) {
                 load = false;
@@ -990,9 +1011,15 @@ public final class Icy {
                         nativeLibraries.remove(lib);
                         // try another iteration
                         load = true;
+                        i++;
+                        pf.notifyProgress(i, numFile);
+                        pf.setMessage("Loading VTK libraries: " + i + " / " + numFile);
                     }
                 }
             }
+
+            // Close the progress bar, as we do not need it anymore
+            pf.close();
 
             // still some remaining files not loaded ? --> display a warning and prevent VTK trying to load
             if (!nativeLibraries.isEmpty()) {
@@ -1006,7 +1033,7 @@ public final class Icy {
             // TODO : fix this ! it consider ready even if there are still libraries that are not loaded !
             // at least one file was correctly loaded ? --> the library certainly loaded correctly then
             //if (nativeLibraries.size() < numFile)
-                //vtkLibraryLoaded = true;
+            //vtkLibraryLoaded = true;
         }
         catch (final Throwable e1) {
             IcyLogger.error(Icy.class, e1, e1.getLocalizedMessage());
@@ -1016,10 +1043,12 @@ public final class Icy {
             vtkNativeLibrary.DisableOutputWindow(new File(UserUtil.getIcyHomeDirectory(), "vtk.log"));
             final String vv = new vtkVersion().GetVTKVersion();
 
-            IcyLogger.success(Icy.class, String.format("VTK %s library successfully loaded.", vv));
+            IcyLogger.success(Icy.class, String.format("%s v%s (%s) loaded", IcyVTK.NAME, Version.fromString(IcyVTK.VERSION).toShortString(), vv));
+            //IcyLogger.success(Icy.class, String.format("VTK %s library successfully loaded.", vv));
         }
         else {
-            IcyLogger.error(Icy.class, "Cannot load VTK library.");
+            IcyLogger.error(Icy.class, String.format("%s v%s not loaded", IcyVTK.NAME, Version.fromString(IcyVTK.VERSION).toShortString()));
+            //IcyLogger.error(Icy.class, "Cannot load VTK library.");
         }
     }
 

@@ -104,7 +104,7 @@ public class ExtensionDescriptor {
         final String extensionFilePath = icyExtension.path() + File.separator + "extension.properties";
         if (extensionFilePath != null && !extensionFilePath.isBlank()) {
             final String fileExt = FileUtil.getFileExtension(extensionFilePath, false);
-            return switch (fileExt.toLowerCase(Locale.ROOT)) {
+            return switch (fileExt.toLowerCase(Locale.getDefault())) {
                 case "yml", "yaml" -> readYAMLFile(extensionFilePath);
                 case "json" -> readJSONFile(extensionFilePath);
                 case "xml" -> readXMLFile(extensionFilePath);

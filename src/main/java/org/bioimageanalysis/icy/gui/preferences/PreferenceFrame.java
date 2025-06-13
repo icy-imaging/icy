@@ -86,7 +86,7 @@ public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {
         preferencePanels.add(new RepositoryPreferencePanel(this));
         preferencePanels.add(new PluginPreferencePanel(this));
         preferencePanels.add(new PluginLocalPreferencePanel(this));
-        //preferencePanels.add(new PluginOnlinePreferencePanel(this)); // TODO re-enable this when Icy 3 plugins repository ready
+        preferencePanels.add(new PluginOnlinePreferencePanel(this));
         preferencePanels.add(new PluginStartupPreferencePanel(this));
         // TODO : add here PreferencePanel type plugins
 

@@ -7,13 +7,11 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>3.0.0-a.4</version>
+        <version>3.0.0-a.5</version>
     </parent>
 
     <artifactId>icy-kernel</artifactId>
-    <version>3.0.0-a.4</version>
-
-    <packaging>jar</packaging>
+    <version>3.0.0-a.5</version>
 
     <name>Icy</name>
     <description>Icy is an open community platform for bioimage informatics</description>
@@ -38,7 +36,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>${build-helper-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>add-resource</id>
@@ -77,23 +74,9 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <excludeGroupIds>sun.jdt,jdk.tools,net.imagej</excludeGroupIds>
+                            <excludeGroupIds>sun.jdt,jdk.tools</excludeGroupIds>
+                            <excludeArtifactIds>annotations,junit-jupiter</excludeArtifactIds>
                             <outputDirectory>${outputDirectory}/icy/lib</outputDirectory>
-                            <stripVersion>${stripVersion}</stripVersion>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                            <excludeTransitive>true</excludeTransitive>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>copy-dependencies-ij</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeArtifactIds>ij</includeArtifactIds>
-                            <outputDirectory>${outputDirectory}/icy/ij</outputDirectory>
                             <stripVersion>${stripVersion}</stripVersion>
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <excludeTransitive>true</excludeTransitive>
@@ -133,15 +116,11 @@
                         <manifest>
                             <classpathLayoutType>custom</classpathLayoutType>
                             <!--suppress UnresolvedMavenProperty -->
-                            <customClasspathLayout>$${artifact.artifactId}.$${artifact.extension}
-                            </customClasspathLayout>
+                            <customClasspathLayout>$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>org.bioimageanalysis.icy.Icy</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <Class-Path>ij/ij.jar</Class-Path>
-                        </manifestEntries>
                         <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>
                 </configuration>
@@ -163,98 +142,17 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf-intellij-themes</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt-natives-linux-amd64</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt-natives-macosx-universal</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt-natives-windows-amd64</artifactId>
-            <scope>compile</scope>
-        </dependency>
         <!-- TODO implement imglib2 -->
         <dependency>
-            <groupId>com.sun.media</groupId>
-            <artifactId>jai-codec</artifactId>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-apache-commons</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>javax.media</groupId>
-            <artifactId>jai-core</artifactId>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-apache-http</artifactId>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.fusesource.jansi</groupId>
-            <artifactId>jansi</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-linux-amd64</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-macosx-universal</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-windows-amd64</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.swinglabs.swingx</groupId>
-            <artifactId>swingx-all</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-batik</artifactId>
@@ -263,6 +161,31 @@
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-bioformats</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-ehcache</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-flatlaf</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-jai</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-jogamp</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-log4j</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -281,22 +204,4 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- We need to override jaxb-runtime version otherwise EhCache will throw an error while resolving dependencies -->
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>jaxb-runtime</artifactId>
-                <version>${library.jaxb-runtime.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <!--<repositories>
-        <repository>
-            <id>icy</id>
-            <url>https://nexus-icy.pasteur.cloud/repository/icy/</url>
-        </repository>
-    </repositories>-->
 </project>

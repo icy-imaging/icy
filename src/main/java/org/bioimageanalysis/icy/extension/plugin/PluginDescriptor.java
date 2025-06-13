@@ -571,7 +571,7 @@ public class PluginDescriptor implements XMLPersistent {
         }
 
         // load icon
-        if (url.toString().toLowerCase(Locale.ROOT).endsWith(".svg")) {
+        if (url.toString().toLowerCase(Locale.getDefault()).endsWith(".svg")) {
             svgIcon = new SVGIcon(url, !iconMono);
             icon = new IcySVGImageIcon(svgIcon);
         }

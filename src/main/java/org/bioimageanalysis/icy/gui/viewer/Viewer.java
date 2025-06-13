@@ -549,8 +549,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         switchStateButton.setFocusable(false);
         switchStateButton.setHideActionText(true);
 
-        virtualButton = new IcyToggleButton(new SVGIconPack(SVGIcon.FLASH_OFF, SVGIcon.FLASH_ON));
-        virtualButton.setAction(new ToggleVirtualSequenceAction(false));
+        virtualButton = new IcyToggleButton(new ToggleVirtualSequenceAction(false), new SVGIconPack(SVGIcon.FLASH_OFF, SVGIcon.FLASH_ON));
         virtualButton.setFocusable(false);
         virtualButton.setHideActionText(true);
 

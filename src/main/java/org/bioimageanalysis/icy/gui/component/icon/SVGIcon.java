@@ -193,6 +193,7 @@ public class SVGIcon {
     public static final SVGIcon STOP_CIRCLE = new SVGIcon(MONO + "stop_circle.svg", false);
     public static final SVGIcon STROKE_FULL = new SVGIcon(MONO + "stroke_full.svg", false);
     public static final SVGIcon SWITCH_ACCESS_2 = new SVGIcon(MONO + "switch_access_2.svg", false);
+    public static final SVGIcon TERMINAL = new SVGIcon(MONO + "terminal.svg", false);
     public static final SVGIcon TIMELINE = new SVGIcon(MONO + "timeline.svg", false);
     public static final SVGIcon TV_OPTIONS_INPUT_SETTINGS = new SVGIcon(MONO + "tv_options_input_settings.svg", false);
     public static final SVGIcon UNDO = new SVGIcon(MONO + "undo.svg", false);
