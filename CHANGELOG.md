@@ -1,3 +1,9 @@
+Icy 2.5.4.0 - 13/06/2025
+------------------------
+
+**Application**
+* Fixed a regression with BioFormats
+
 Icy 2.5.3.0 - 24/04/2025
 ------------------------
 

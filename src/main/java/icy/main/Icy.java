@@ -112,7 +112,7 @@ public class Icy
     /**
      * Icy Version
      */
-    public static Version version = new Version(2,5, 3, 0, false);
+    public static Version version = new Version(2,5, 4, 0, false);
 
     /**
      * Main interface
@@ -229,7 +229,8 @@ public class Icy
             // fix possible IllegalArgumentException on Swing sorting
             System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
             // set LOCI debug level (do it immediately as it can quickly show some log messages)
-            loci.common.DebugTools.enableLogging("ERROR");
+            //loci.common.DebugTools.enableLogging("ERROR");
+            loci.common.DebugTools.setRootLevel("ERROR");
             // disable GLSL on OSX otherwise GLJPanel stay blank (error on GL state preservation)
             if (SystemUtil.isMac())
                 System.setProperty("jogl.gljpanel.noglsl", "true");
