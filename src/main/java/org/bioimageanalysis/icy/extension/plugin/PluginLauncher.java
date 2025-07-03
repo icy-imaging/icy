@@ -176,7 +176,7 @@ public class PluginLauncher {
                 return result;
             }
             catch (final IllegalAccessException | InstantiationException e) {
-                IcyLogger.error(PluginLoader.class, e, "Cannot start plugin " + plugin.getName() + ".");
+                IcyLogger.error(PluginLauncher.class, e, "Cannot start plugin " + plugin.getName() + ".");
                 return null;
             }
         }

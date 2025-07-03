@@ -20,7 +20,6 @@ package org.bioimageanalysis.icy.extension.plugin;
 
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.reflect.ClassUtil;
-import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor.PluginIdent;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor.PluginKernelNameSorter;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
 import org.bioimageanalysis.icy.extension.plugin.classloader.JarClassLoader;
@@ -35,7 +34,6 @@ import org.bioimageanalysis.icy.system.thread.SingleProcessor;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.event.EventListenerList;
 import java.io.IOException;
@@ -50,7 +48,9 @@ import java.util.*;
  *
  * @author Stephane Dallongeville
  * @author Thommas Musset
+ * @deprecated Use {@link org.bioimageanalysis.icy.extension.ExtensionLoader} instead.
  */
+@Deprecated(since = "3.0.0-a.5", forRemoval = true)
 public class PluginLoader {
     public final static String PLUGIN_PACKAGE = "plugins";
     //public final static String PLUGIN_KERNEL_PACKAGE = "plugins.kernel";
@@ -539,71 +539,6 @@ public class PluginLoader {
     public static void waitWhileLoading() {
         while (isLoading())
             ThreadUtil.sleep(100);
-    }
-
-    /**
-     * Returns <code>true</code> if the specified plugin exists in the {@link PluginLoader}.
-     *
-     * @param plugin      the plugin we are looking for.
-     * @param acceptNewer allow newer version of the plugin
-     */
-    public static boolean isLoaded(final @NotNull PluginDescriptor plugin, final boolean acceptNewer) {
-        return (getPlugin(plugin.getIdent(), acceptNewer) != null);
-    }
-
-    /**
-     * Returns <code>true</code> if the specified plugin class exists in the {@link PluginLoader}.
-     *
-     * @param className class name of the plugin we are looking for.
-     */
-    public static boolean isLoaded(final String className) {
-        return (getPlugin(className) != null);
-    }
-
-    /**
-     * Returns the plugin corresponding to the specified plugin identity structure.<br>
-     * Returns <code>null</code> if the plugin does not exists in the {@link PluginLoader}.
-     *
-     * @param ident       plugin identity
-     * @param acceptNewer allow newer version of the plugin
-     */
-    public static PluginDescriptor getPlugin(final PluginIdent ident, final boolean acceptNewer) {
-        prepare();
-
-        synchronized (instance.plugins) {
-            return PluginDescriptor.getPlugin(instance.plugins, ident, acceptNewer);
-        }
-    }
-
-    /**
-     * Returns the plugin corresponding to the specified plugin class name.<br>
-     * Returns <code>null</code> if the plugin does not exists in the {@link PluginLoader}.
-     *
-     * @param className class name of the plugin we are looking for.
-     */
-    public static PluginDescriptor getPlugin(final String className) {
-        prepare();
-
-        synchronized (instance.plugins) {
-            return PluginDescriptor.getPlugin(instance.plugins, className);
-        }
-    }
-
-    /**
-     * Returns the plugin class corresponding to the specified plugin class name.<br>
-     * Returns <code>null</code> if the plugin does not exists in the {@link PluginLoader}.
-     *
-     * @param className class name of the plugin we are looking for.
-     */
-    public static @Nullable Class<? extends Plugin> getPluginClass(final String className) {
-        prepare();
-
-        final PluginDescriptor descriptor = getPlugin(className);
-
-        if (descriptor != null)
-            return descriptor.getPluginClass();
-
-        return null;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,13 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package org.bioimageanalysis.icy.gui.plugin;
 
 import org.bioimageanalysis.icy.common.math.Random;
 import org.bioimageanalysis.icy.common.string.StringUtil;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
 import org.bioimageanalysis.icy.extension.plugin.PluginLauncher;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
 import org.bioimageanalysis.icy.gui.EventUtil;
 import org.bioimageanalysis.icy.gui.GuiUtil;
 import org.bioimageanalysis.icy.gui.component.ComponentUtil;
@@ -270,7 +271,7 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
         // can't get JAR path ?
         if (StringUtil.isEmpty(jarPath)) {
             // try to get the local plugin (we were probably using the online descriptor)
-            final PluginDescriptor localPlugin = PluginLoader.getPlugin(plugin.getClassName());
+            final PluginDescriptor localPlugin = ExtensionLoader.getPlugin(plugin.getClassName());
 
             if (localPlugin != null)
                 jarPath = localPlugin.getPluginJarPath();

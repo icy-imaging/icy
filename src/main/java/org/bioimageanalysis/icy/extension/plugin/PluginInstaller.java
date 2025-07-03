@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ package org.bioimageanalysis.icy.extension.plugin;
 
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.string.StringUtil;
-import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor.PluginIdent;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.gui.dialog.ConfirmDialog;
 import org.bioimageanalysis.icy.gui.frame.progress.*;
 import org.bioimageanalysis.icy.io.FileUtil;
@@ -45,6 +45,7 @@ import java.util.*;
  * @author Stephane Dallongeville
  * @author Thomas Musset
  */
+@Deprecated(since = "3.0.0-a.5", forRemoval = true)
 public class PluginInstaller implements Runnable {
     public interface PluginInstallerListener extends EventListener {
         void pluginInstalled(PluginDescriptor plugin, boolean success);
@@ -118,9 +119,10 @@ public class PluginInstaller implements Runnable {
     /**
      * Return true if install or desinstall is possible
      */
+    @Deprecated(since = "3.0.0-a.5", forRemoval = true)
     @Contract(pure = true)
     private static boolean isEnabled() {
-        return !PluginLoader.isJCLDisabled();
+        return true;
     }
 
     /**
@@ -316,9 +318,8 @@ public class PluginInstaller implements Runnable {
     private static @NotNull String backup(final @NotNull PluginDescriptor plugin) {
         final boolean ok;
 
-        // backup JAR, XML and image files
+        // backup JAR and image files
         ok = Updater.backup(plugin.getJarFilename())
-                && Updater.backup(plugin.getXMLFilename())
                 && Updater.backup(plugin.getIconFilename())
                 && Updater.backup(plugin.getImageFilename());
 
@@ -336,9 +337,6 @@ public class PluginInstaller implements Runnable {
 
         if (taskFrame != null)
             taskFrame.setMessage("Downloading " + plugin);
-
-        // ensure descriptor is loaded
-        plugin.loadDescriptor();
 
         final RepositoryInfo repos = plugin.getRepository();
         final String login;
@@ -370,13 +368,9 @@ public class PluginInstaller implements Runnable {
 
         // download and save XML file
         url = URLUtil.buildURL(basePath, plugin.getUrl());
-        result = downloadAndSave(url, plugin.getXMLFilename(), login, pass, true, taskFrame);
+        //result = downloadAndSave(url, plugin.getXMLFilename(), login, pass, true, taskFrame);
         if (!StringUtil.isEmpty(result))
             return result;
-
-        // verify XML file is not corrupted
-        if (XMLUtil.loadDocument(plugin.getXMLFilename()) == null)
-            return "Downloaded XML file '" + plugin.getXMLFilename() + "' is corrupted !";
 
         // download and save icon & image files
         if (!StringUtil.isEmpty(plugin.getIconUrl())) {
@@ -423,10 +417,6 @@ public class PluginInstaller implements Runnable {
             return false;
         }
 
-        if (FileUtil.exists(plugin.getXMLFilename()))
-            if (!FileUtil.delete(plugin.getXMLFilename(), false))
-                IcyLogger.error(PluginInstaller.class, "Can't delete '" + plugin.getXMLFilename() + "' file !");
-
         FileUtil.delete(plugin.getImageFilename(), false);
         FileUtil.delete(plugin.getIconFilename(), false);
 
@@ -437,25 +427,7 @@ public class PluginInstaller implements Runnable {
      * Fill list with local dependencies (plugins) of specified plugin
      */
     public static void getLocalDependenciesOf(final List<PluginDescriptor> result, final @NotNull PluginDescriptor plugin) {
-        // load plugin descriptor informations if not yet done
-        plugin.loadDescriptor();
-
-        for (final PluginIdent ident : plugin.getRequired()) {
-            // already in our dependences ? --> pass to the next one
-            if (PluginDescriptor.getPlugin(result, ident, true) != null)
-                continue;
-
-            // find local dependent plugin
-            final PluginDescriptor dep = PluginLoader.getPlugin(ident, true);
-
-            // dependence found ?
-            if (dep != null) {
-                // and add it to list
-                PluginDescriptor.addToList(result, dep);
-                // search its dependencies too
-                getLocalDependenciesOf(result, dep);
-            }
-        }
+        //
     }
 
     /**
@@ -485,35 +457,17 @@ public class PluginInstaller implements Runnable {
      * Return local plugins list which depend from the specified plugin.
      */
     private static void getLocalDependenciesFrom(final PluginDescriptor plugin, final List<PluginDescriptor> result) {
-        for (final PluginDescriptor curPlug : PluginLoader.getPlugins())
+        //for (final PluginDescriptor curPlug : ExtensionLoader.getPlugins())
             // require specified plugin ?
-            if (curPlug.requires(plugin))
-                PluginDescriptor.addToList(result, curPlug);
+            //if (curPlug.requires(plugin))
+                //PluginDescriptor.addToList(result, curPlug);
     }
 
     /**
      * Fill list with 'sources' dependencies of specified plugin
      */
     private static void getLocalDependenciesOf(final List<PluginDescriptor> result, final List<PluginDescriptor> sources, final @NotNull PluginDescriptor plugin) {
-        // load plugin descriptor informations if not yet done
-        plugin.loadDescriptor();
-
-        for (final PluginIdent ident : plugin.getRequired()) {
-            // already in our dependences ? --> pass to the next one
-            if ((ident == null) || (PluginDescriptor.getPlugin(result, ident, true) != null))
-                continue;
-
-            // find sources dependent plugin
-            final PluginDescriptor dep = PluginDescriptor.getPlugin(sources, ident, true);
-
-            // dependence found ?
-            if (dep != null) {
-                // and add it to list
-                PluginDescriptor.addToList(result, dep);
-                // search its dependencies too
-                getLocalDependenciesOf(result, sources, dep);
-            }
-        }
+        //
     }
 
     /**
@@ -528,14 +482,6 @@ public class PluginInstaller implements Runnable {
 
             getLocalDependenciesOf(result, sources, sources.get(0));
 
-            // FIXME this loop does nothing
-            // add last to first dep
-            for (int i = deps.size() - 1; i >= 0; i--)
-                PluginDescriptor.addToList(result, deps.get(i));
-
-            // then add plugin
-            PluginDescriptor.addToList(result, sources.get(0));
-
             // remove tested plugin and its dependencies from source
             sources.removeAll(result);
         }
@@ -547,87 +493,7 @@ public class PluginInstaller implements Runnable {
      * Resolve dependencies for specified plugin
      */
     public static boolean getDependencies(final @NotNull PluginDescriptor plugin, final List<PluginDescriptor> pluginsToInstall, final CancelableProgressFrame taskFrame, final boolean showError) {
-        // load plugin descriptor informations if not yet done
-        plugin.loadDescriptor();
-
-        // check dependencies
-        for (final PluginIdent ident : plugin.getRequired()) {
-            if ((taskFrame != null) && taskFrame.isCancelRequested())
-                return false;
-
-            // should not happen but...
-            if (ident == null)
-                continue;
-
-            // already in our dependencies ? --> pass to the next one
-            if (PluginDescriptor.getPlugin(pluginsToInstall, ident, true) != null)
-                continue;
-
-            final String className = ident.getClassName();
-
-            // get local & online plugin
-            final PluginDescriptor localPlugin = PluginLoader.getPlugin(className);
-            final PluginDescriptor onlinePlugin = PluginRepositoryLoader.getPlugin(className);
-
-            // plugin not yet installed or outdated ?
-            if ((localPlugin == null) || ident.getVersion().isGreater(localPlugin.getVersion())) {
-                // online plugin not found ?
-                if (onlinePlugin == null) {
-                    // error
-                    if (showError) {
-                        final String[] messages;
-
-                        if (localPlugin == null)
-                            messages = new String[]{
-                                    "Can't resolve dependencies for plugin '" + plugin.getName() + "' :",
-                                    "Plugin class '" + ident.getClassName() + " not found !"
-                            };
-                        else
-                            messages = new String[]{
-                                    "Can't resolve dependencies for plugin '" + plugin.getName() + "' :",
-                                    localPlugin.getName() + " " + localPlugin.getVersion() + " installed",
-                                    "but version " + ident.getVersion() + " or greater needed."
-                            };
-
-                        IcyLogger.error(PluginInstaller.class, messages);
-                    }
-
-                    return false;
-                }
-                // online plugin version incorrect
-                else if (ident.getVersion().isGreater(onlinePlugin.getVersion())) {
-                    // error
-                    if (showError) {
-                        final String[] messages = new String[]{
-                                "Can't resolve dependencies for plugin '" + plugin.getName() + "' :",
-                                onlinePlugin.getName() + " " + onlinePlugin.getVersion() + " found in repository",
-                                "but version " + ident.getVersion() + " or greater needed."
-                        };
-                        IcyLogger.error(PluginInstaller.class, messages);
-                    }
-
-                    return false;
-                }
-
-                // add to the install list
-                PluginDescriptor.addToList(pluginsToInstall, onlinePlugin);
-                // and check dependencies for this plugin
-                if (!getDependencies(onlinePlugin, pluginsToInstall, taskFrame, showError))
-                    return false;
-            }
-            else {
-                // just check if we have update for dependency
-                if ((onlinePlugin != null) && (localPlugin.getVersion().isLower(onlinePlugin.getVersion()))) {
-                    // as web site doesn't handle version dependency, we force the update
-
-                    // add to the install list
-                    PluginDescriptor.addToList(pluginsToInstall, onlinePlugin);
-                    // and check dependencies for this plugin
-                    if (!getDependencies(onlinePlugin, pluginsToInstall, taskFrame, showError))
-                        return false;
-                }
-            }
-        }
+        //
 
         return true;
     }
@@ -646,7 +512,6 @@ public class PluginInstaller implements Runnable {
                 for (int i = infos.size() - 1; i >= 0; i--) {
                     final PluginInstallInfo info = infos.get(i);
 
-                    PluginDescriptor.addToList(installingPlugins, info.plugin);
                     showProgress |= info.showProgress;
                 }
 
@@ -690,9 +555,6 @@ public class PluginInstaller implements Runnable {
 
             // order dependencies
             dependencies = orderDependencies(dependencies);
-            // add dependencies at the beginning of the installing list
-            for (final PluginDescriptor plugin : dependencies)
-                PluginDescriptor.addToList(installingPlugins, plugin, 0);
 
             String error;
 
@@ -701,14 +563,6 @@ public class PluginInstaller implements Runnable {
 
             // now we can proceed the installation itself
             for (final PluginDescriptor plugin : installingPlugins) {
-                for (final PluginIdent ident : plugin.getRequired()) {
-                    // one of the dependencies was not correctly installed ?
-                    if (PluginDescriptor.existInList(pluginsNOk, ident)) {
-                        // we can't install the plugin, continue with the next one
-                        pluginsNOk.add(plugin);
-                    }
-                }
-
                 final String plugDesc = plugin.getName() + " " + plugin.getVersion();
 
                 if (taskFrame != null) {
@@ -751,7 +605,7 @@ public class PluginInstaller implements Runnable {
                 taskFrame.setMessage("Verifying plugins...");
 
             // reload plugin list
-            PluginLoader.reload();
+            ExtensionLoader.reload();
 
             for (final PluginDescriptor plugin : pluginsOk) {
                 error = PluginLoader.verifyPlugin(plugin);

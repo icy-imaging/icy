@@ -19,9 +19,9 @@
 package org.bioimageanalysis.icy.model.roi;
 
 import org.bioimageanalysis.icy.common.string.StringUtil;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
 import org.bioimageanalysis.icy.extension.plugin.PluginLauncher;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginROIDescriptor;
 import org.bioimageanalysis.icy.model.roi.ROIEvent.ROIEventType;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
@@ -32,10 +32,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Abstract class providing the basic methods to retrieve properties and compute a specific
@@ -56,7 +53,7 @@ public abstract class ROIDescriptor {
      */
     public static @NotNull Map<ROIDescriptor, PluginROIDescriptor> getDescriptors() {
         final Map<ROIDescriptor, PluginROIDescriptor> result = new HashMap<>();
-        final List<PluginDescriptor> pluginDescriptors = PluginLoader.getPlugins(PluginROIDescriptor.class);
+        final Set<PluginDescriptor> pluginDescriptors = ExtensionLoader.getPlugins(PluginROIDescriptor.class);
 
         for (final PluginDescriptor pluginDescriptor : pluginDescriptors) {
             try {

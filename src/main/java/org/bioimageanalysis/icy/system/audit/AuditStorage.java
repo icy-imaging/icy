@@ -20,7 +20,6 @@ package org.bioimageanalysis.icy.system.audit;
 
 import org.bioimageanalysis.icy.common.datetime.DateUtil;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor.PluginIdent;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
 import org.bioimageanalysis.icy.io.FileUtil;
 import org.bioimageanalysis.icy.io.xml.XMLPersistent;
@@ -49,13 +48,13 @@ public class AuditStorage implements XMLPersistent {
 
     private static final long SAVE_INTERVAL = 1000 * 60;
 
-    private final Map<PluginIdent, PluginStorage> pluginStats;
+    //private final Map<PluginIdent, PluginStorage> pluginStats;
     private long lastSaveTime;
 
     public AuditStorage() {
         super();
 
-        pluginStats = new HashMap<>();
+        //pluginStats = new HashMap<>();
 
         try {
             // load usage data from XML file
@@ -81,7 +80,7 @@ public class AuditStorage implements XMLPersistent {
     }
 
     private void clean() {
-        final List<PluginIdent> empties = new ArrayList<>();
+        /*final List<PluginIdent> empties = new ArrayList<>();
 
         synchronized (pluginStats) {
             // clean statistics
@@ -94,7 +93,7 @@ public class AuditStorage implements XMLPersistent {
             // remove empty ones
             for (final PluginIdent ident : empties)
                 pluginStats.remove(ident);
-        }
+        }*/
     }
 
     private void autoSave() {
@@ -108,7 +107,7 @@ public class AuditStorage implements XMLPersistent {
         }
     }
 
-    private PluginStorage getStorage(final PluginIdent ident) {
+    /*private PluginStorage getStorage(final PluginIdent ident) {
         PluginStorage result;
 
         synchronized (pluginStats) {
@@ -121,7 +120,7 @@ public class AuditStorage implements XMLPersistent {
         }
 
         return result;
-    }
+    }*/
 
     public void pluginLaunched(final Plugin plugin) {
         PluginDescriptor descriptor = null;
@@ -145,7 +144,7 @@ public class AuditStorage implements XMLPersistent {
             return;
 
         // increment launch
-        getStorage(descriptor.getIdent()).incLaunch(DateUtil.keepDay(System.currentTimeMillis()));
+        //getStorage(descriptor.getIdent()).incLaunch(DateUtil.keepDay(System.currentTimeMillis()));
 
         // save to disk if needed
         autoSave();
@@ -173,7 +172,7 @@ public class AuditStorage implements XMLPersistent {
             return;
 
         // increment instance
-        getStorage(descriptor.getIdent()).incInstance(DateUtil.keepDay(System.currentTimeMillis()));
+        //getStorage(descriptor.getIdent()).incInstance(DateUtil.keepDay(System.currentTimeMillis()));
 
         // save to disk if needed
         autoSave();
@@ -183,7 +182,7 @@ public class AuditStorage implements XMLPersistent {
      * Upload statistics to website
      */
     public boolean upload(final int id) {
-        final List<PluginIdent> dones = new ArrayList<>();
+        /*final List<PluginIdent> dones = new ArrayList<>();
         final List<Entry<PluginIdent, PluginStorage>> entries;
 
         synchronized (pluginStats) {
@@ -208,7 +207,8 @@ public class AuditStorage implements XMLPersistent {
             }
         }
 
-        return pluginStats.isEmpty();
+        return pluginStats.isEmpty();*/
+        return true;
     }
 
     @Override
@@ -216,7 +216,7 @@ public class AuditStorage implements XMLPersistent {
         if (node == null)
             return false;
 
-        synchronized (pluginStats) {
+        /*synchronized (pluginStats) {
             pluginStats.clear();
             for (final Node n : XMLUtil.getChildren(node, ID_PLUGIN)) {
                 final PluginIdent ident = new PluginIdent();
@@ -227,7 +227,7 @@ public class AuditStorage implements XMLPersistent {
 
                 pluginStats.put(ident, storage);
             }
-        }
+        }*/
 
         return true;
     }
@@ -239,21 +239,21 @@ public class AuditStorage implements XMLPersistent {
 
         XMLUtil.removeAllChildren(node);
 
-        synchronized (pluginStats) {
+        /*synchronized (pluginStats) {
             for (final Entry<PluginIdent, PluginStorage> entry : pluginStats.entrySet()) {
                 final Node n = XMLUtil.addElement(node, ID_PLUGIN);
 
                 entry.getKey().saveToXMLShort(n);
                 entry.getValue().saveToXML(n);
             }
-        }
+        }*/
 
         return true;
     }
 
     private static class PluginStorage implements XMLPersistent {
-        private static final String ID_CLASSNAME = PluginIdent.ID_CLASSNAME;
-        private static final String ID_VERSION = PluginIdent.ID_VERSION;
+        //private static final String ID_CLASSNAME = PluginIdent.ID_CLASSNAME;
+        //private static final String ID_VERSION = PluginIdent.ID_VERSION;
 
         private static final String ID_LAUNCH = "launch";
         private static final String ID_INSTANCE = "instance";
@@ -348,7 +348,7 @@ public class AuditStorage implements XMLPersistent {
             return new HashMap<>();
         }
 
-        public boolean upload(final int id, final PluginIdent ident) {
+        /*public boolean upload(final int id, final PluginIdent ident) {
             // init params
             final Map<String, String> params = getIdParam(id);
             int offset;
@@ -391,7 +391,7 @@ public class AuditStorage implements XMLPersistent {
             instanceStats.clear();
 
             return true;
-        }
+        }*/
 
         @Override
         public boolean loadFromXML(final Node node) {

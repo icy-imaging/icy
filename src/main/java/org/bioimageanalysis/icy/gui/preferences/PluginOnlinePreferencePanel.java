@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,13 +18,13 @@
 
 package org.bioimageanalysis.icy.gui.preferences;
 
-import org.bioimageanalysis.icy.gui.dialog.ConfirmDialog;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
 import org.bioimageanalysis.icy.extension.plugin.PluginInstaller;
 import org.bioimageanalysis.icy.extension.plugin.PluginInstaller.PluginInstallerListener;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginRepositoryLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginRepositoryLoader.PluginRepositoryLoaderListener;
+import org.bioimageanalysis.icy.gui.dialog.ConfirmDialog;
 import org.bioimageanalysis.icy.system.preferences.RepositoryPreferences.RepositoryInfo;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 
@@ -32,11 +32,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
-public class PluginOnlinePreferencePanel extends PluginListPreferencePanel implements PluginRepositoryLoaderListener,
-        PluginInstallerListener {
+public class PluginOnlinePreferencePanel extends PluginListPreferencePanel implements PluginRepositoryLoaderListener, PluginInstallerListener {
     private enum PluginOnlineState {
         NULL, INSTALLING, REMOVING, HAS_INSTALL, INSTALLED, INSTALLED_FAULTY, OLDER, NEWER
     }
@@ -82,7 +81,7 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
         // has a local version ?
         if (plugin.isInstalled()) {
             // get local version
-            final PluginDescriptor localPlugin = PluginLoader.getPlugin(plugin.getClassName());
+            final PluginDescriptor localPlugin = ExtensionLoader.getPlugin(plugin.getClassName());
 
             if (localPlugin != null) {
                 if (plugin.equals(localPlugin))
@@ -185,27 +184,15 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
 
     @Override
     protected String getStateValue(final PluginDescriptor plugin) {
-        switch (getPluginOnlineState(plugin)) {
-            case INSTALLING:
-                return "installing...";
-
-            case REMOVING:
-                return "removing...";
-
-            case NEWER:
-                return "update available";
-
-            case OLDER:
-                return "outdated";
-
-            case INSTALLED:
-                return "installed";
-
-            case INSTALLED_FAULTY:
-                return "faulty";
-        }
-
-        return "";
+        return switch (getPluginOnlineState(plugin)) {
+            case INSTALLING -> "installing...";
+            case REMOVING -> "removing...";
+            case NEWER -> "update available";
+            case OLDER -> "outdated";
+            case INSTALLED -> "installed";
+            case INSTALLED_FAULTY -> "faulty";
+            default -> "";
+        };
     }
 
     @Override

@@ -34,7 +34,9 @@ import java.util.List;
  *
  * @author Stephane Dallongeville
  * @author Thomas Musset
+ * @deprecated It is no longer the plugins that are updated but the extensions that contains them
  */
+@Deprecated(since = "3.0.0-a.5", forRemoval = true)
 public class PluginUpdater {
     private static final int ANNOUNCE_SHOWTIME = 15;
 
@@ -152,7 +154,7 @@ public class PluginUpdater {
                     // update found, add to the list
                     if (onlinePlugin != null) {
                         // we load complete descriptor so we will have the changeslog
-                        onlinePlugin.loadDescriptor();
+                        //onlinePlugin.loadDescriptor();
                         toInstallPlugins.add(onlinePlugin);
                     }
                 }
@@ -163,11 +165,11 @@ public class PluginUpdater {
                 for (final PluginDescriptor onlinePlugin : onlinePlugins) {
                     // we found a plugin which is installed but not correctly loaded
                     // so we try to reinstall it
-                    if (onlinePlugin.isInstalled() && !PluginLoader.isLoaded(onlinePlugin.getClassName())) {
+                    /*if (onlinePlugin.isInstalled() && !PluginLoader.isLoaded(onlinePlugin.getClassName())) {
                         // we load complete descriptor so we will have the changeslog
                         onlinePlugin.loadDescriptor();
                         toInstallPlugins.add(onlinePlugin);
-                    }
+                    }*/
                 }
             }
             finally {

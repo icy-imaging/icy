@@ -20,6 +20,7 @@ package org.bioimageanalysis.icy.gui.component.panel;
 
 import org.bioimageanalysis.extension.kernel.roi.descriptor.measure.*;
 import org.bioimageanalysis.extension.kernel.roi.descriptor.property.*;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.gui.component.field.IcyTextField;
 import org.bioimageanalysis.icy.gui.action.RoiActions;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
@@ -35,9 +36,6 @@ import org.bioimageanalysis.icy.gui.GuiUtil;
 import org.bioimageanalysis.icy.gui.viewer.Viewer;
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.math.MathUtil;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader.PluginLoaderEvent;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader.PluginLoaderListener;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginROIDescriptor;
 import org.bioimageanalysis.icy.system.preferences.XMLPreferences;
 import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
@@ -83,7 +81,7 @@ import java.util.concurrent.TimeUnit;
  * @author Stephane Dallongeville
  * @author Thomas Musset
  */
-public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSequenceListener, TextChangeListener, ListSelectionListener, PluginLoaderListener {
+public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSequenceListener, TextChangeListener, ListSelectionListener, ExtensionLoader.ExtensionLoaderListener {
     protected static final String ID_VIEW = "view";
     protected static final String ID_EXPORT = "export";
 
@@ -244,7 +242,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         refreshRois();
 
         // listen plugin loader changes
-        PluginLoader.addListener(this);
+        ExtensionLoader.addListener(this);
     }
 
     protected void initialize() {
@@ -1287,7 +1285,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     }
 
     @Override
-    public void pluginLoaderChanged(final PluginLoaderEvent e) {
+    public void extensionLoaderChanged(final ExtensionLoader.ExtensionLoaderEvent e) {
         refreshDescriptorList();
     }
 

@@ -20,9 +20,9 @@ package org.bioimageanalysis.icy.extension.plugin.abstract_;
 
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.reflect.ClassUtil;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
 import org.bioimageanalysis.icy.extension.plugin.PluginLauncher;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginThreaded;
 import org.bioimageanalysis.icy.gui.frame.IcyFrame;
 import org.bioimageanalysis.icy.gui.viewer.Viewer;
@@ -79,7 +79,7 @@ public abstract class Plugin implements AutoCloseable {
         super();
 
         // get descriptor from loader
-        descriptor = PluginLoader.getPlugin(getClass().getName());
+        descriptor = ExtensionLoader.getPlugin(getClass().getName());
 
         if (descriptor == null) {
             // descriptor not found (don't check for anonymous plugin class) ?

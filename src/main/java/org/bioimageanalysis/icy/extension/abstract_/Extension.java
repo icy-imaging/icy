@@ -19,18 +19,15 @@
 package org.bioimageanalysis.icy.extension.abstract_;
 
 import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
-import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * @author Thomas Musset
+ *
+ * This class allows to identify an extension.
  */
 public abstract class Extension {
-    protected final ArrayList<Class<? extends Plugin>> plugins = new ArrayList<>();
-
-    @Contract(pure = true)
-    public final ArrayList<Class<? extends Plugin>> getPlugins() {
-        return plugins;
-    }
+    public abstract @NotNull Set<Class<? extends Plugin>> getPlugins();
 }

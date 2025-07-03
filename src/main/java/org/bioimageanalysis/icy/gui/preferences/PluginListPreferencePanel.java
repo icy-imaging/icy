@@ -18,8 +18,6 @@
 
 package org.bioimageanalysis.icy.gui.preferences;
 
-import org.bioimageanalysis.icy.extension.ExtensionDescriptor;
-import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.gui.component.table.IcyTable;
 import org.bioimageanalysis.icy.gui.component.field.IcyTextField;
 import org.bioimageanalysis.icy.gui.component.field.IcyTextField.TextChangeListener;
@@ -28,7 +26,6 @@ import org.bioimageanalysis.icy.gui.component.ComponentUtil;
 import org.bioimageanalysis.icy.model.image.ImageUtil;
 import org.bioimageanalysis.icy.network.NetworkUtil;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.preferences.RepositoryPreferences;
 import org.bioimageanalysis.icy.system.preferences.RepositoryPreferences.RepositoryInfo;
 import org.bioimageanalysis.icy.gui.component.icon.IcySVGImageIcon;

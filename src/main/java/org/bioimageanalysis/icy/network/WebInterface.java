@@ -20,9 +20,8 @@ package org.bioimageanalysis.icy.network;
 
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.math.UnitUtil;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor.PluginIdent;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
 import org.bioimageanalysis.icy.system.preferences.ApplicationPreferences;
 import org.bioimageanalysis.icy.system.SystemUtil;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
@@ -184,10 +183,10 @@ public class WebInterface {
             values.put(PARAM_PLUGINCLASSNAME, className);
             values.put(PARAM_PLUGINVERSION, plugin.getVersion().toString());
 
-            if (plugin.getRequired().size() > 0) {
+            /*if (plugin.getRequired().size() > 0) {
                 pluginDepsId = new StringBuilder("Dependances:<br>");
                 for (final PluginIdent ident : plugin.getRequired()) {
-                    final PluginDescriptor installed = PluginLoader.getPlugin(ident.getClassName());
+                    final PluginDescriptor installed = ExtensionLoader.getPlugin(ident.getClassName());
 
                     if (installed == null)
                         pluginDepsId.append("Class ").append(ident.getClassName()).append(" not found !<br>");
@@ -196,7 +195,7 @@ public class WebInterface {
                 }
                 pluginDepsId.append("<br>");
             }
-            else
+            else*/
                 pluginDepsId = new StringBuilder();
         }
         else {

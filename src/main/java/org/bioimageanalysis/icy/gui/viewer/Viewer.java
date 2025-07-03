@@ -22,9 +22,7 @@ import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.listener.ProgressListener;
 import org.bioimageanalysis.icy.common.math.Random;
 import org.bioimageanalysis.icy.common.string.StringUtil;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader.PluginLoaderEvent;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader.PluginLoaderListener;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginCanvas;
 import org.bioimageanalysis.icy.gui.GraphicsUtil;
 import org.bioimageanalysis.icy.gui.action.CanvasActions;
@@ -85,7 +83,7 @@ import java.util.Vector;
  * @author Stephane Dallongeville
  * @author Thomas Musset
  */
-public class Viewer extends IcyFrame implements KeyListener, SequenceListener, IcyCanvasListener, PluginLoaderListener {
+public class Viewer extends IcyFrame implements KeyListener, SequenceListener, IcyCanvasListener, ExtensionLoader.ExtensionLoaderListener {
     private class ViewerMainPanel extends JPanel {
         public ViewerMainPanel() {
             super();
@@ -278,7 +276,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
 
         addKeyListener(this);
         sequence.addListener(this);
-        PluginLoader.addListener(this);
+        ExtensionLoader.addListener(this);
 
         // do this when viewer is initialized
         Icy.getMainInterface().registerViewer(this);
@@ -376,7 +374,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         sequence.removeListener(this);
         if (canvas != null)
             canvas.removeCanvasListener(this);
-        PluginLoader.removeListener(this);
+        ExtensionLoader.removeListener(this);
 
         Icy.getMainInterface().unRegisterViewer(this);
 
@@ -1347,7 +1345,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
     }
 
     @Override
-    public void pluginLoaderChanged(final PluginLoaderEvent e) {
+    public void extensionLoaderChanged(final ExtensionLoader.ExtensionLoaderEvent e) {
         ThreadUtil.invokeLater(() -> {
             // refresh available canvas
             buildCanvasCombo();

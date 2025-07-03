@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,44 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package org.bioimageanalysis.icy.gui.preferences;
 
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader.PluginLoaderEvent;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader.PluginLoaderListener;
 import org.bioimageanalysis.icy.system.preferences.PluginPreferences;
 
-import java.awt.BorderLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
+ * @author Thomas Musset
  */
-public class PluginStartupPreferencePanel extends PluginListPreferencePanel implements PluginLoaderListener
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -3485972129754541852L;
-
+public class PluginStartupPreferencePanel extends PluginListPreferencePanel implements ExtensionLoader.ExtensionLoaderListener {
     public static final String NODE_NAME = "Startup Plugin";
 
     final HashSet<String> inactives;
 
-    public PluginStartupPreferencePanel(PreferenceFrame parent)
-    {
+    public PluginStartupPreferencePanel(final PreferenceFrame parent) {
         super(parent, NODE_NAME, PluginPreferencePanel.NODE_NAME);
 
         inactives = new HashSet<String>();
 
-        PluginLoader.addListener(this);
+        ExtensionLoader.addListener(this);
 
         // remove columns 3 (not used here)
         table.removeColumn(table.getColumn(columnIds[3]));
@@ -76,95 +65,80 @@ public class PluginStartupPreferencePanel extends PluginListPreferencePanel impl
     }
 
     @Override
-    protected void closed()
-    {
+    protected void closed() {
         super.closed();
 
-        PluginLoader.removeListener(this);
+        ExtensionLoader.removeListener(this);
     }
 
     @Override
-    protected boolean isActive(PluginDescriptor plugin)
-    {
+    protected boolean isActive(final PluginDescriptor plugin) {
         return !inactives.contains(plugin.getClassName());
     }
 
     @Override
-    protected void setActive(PluginDescriptor plugin, boolean value)
-    {
+    protected void setActive(final PluginDescriptor plugin, final boolean value) {
         final String className = plugin.getClassName();
 
         if (value)
             inactives.remove(className);
-        else
-        {
+        else {
             if (!inactives.contains(className))
                 inactives.add(className);
         }
     }
 
     @Override
-    protected void load()
-    {
+    protected void load() {
         inactives.clear();
         inactives.addAll(PluginPreferences.getInactiveDaemons());
     }
 
     @Override
-    protected void save()
-    {
+    protected void save() {
         // save preferences
         PluginPreferences.setInactiveDaemons(new ArrayList<String>(inactives));
         // restart daemon plugins
-        PluginLoader.resetDaemons();
+        ExtensionLoader.resetDaemons();
     }
 
     @Override
-    protected void doAction1()
-    {
+    protected void doAction1() {
     }
 
     @Override
-    protected void doAction2()
-    {
+    protected void doAction2() {
     }
 
     @Override
-    protected void repositoryChanged()
-    {
+    protected void repositoryChanged() {
         // do nothing here
     }
 
     @Override
-    protected void reloadPlugins()
-    {
+    protected void reloadPlugins() {
         // do nothing here
     }
 
     @Override
-    protected String getStateValue(PluginDescriptor plugin)
-    {
+    protected String getStateValue(final PluginDescriptor plugin) {
         return "";
     }
 
     @Override
-    protected ArrayList<PluginDescriptor> getPlugins()
-    {
-        return PluginLoader.getDaemonPlugins();
+    protected ArrayList<PluginDescriptor> getPlugins() {
+        return new ArrayList<>(ExtensionLoader.getDaemonPlugins());
     }
 
     @Override
-    protected void updateButtonsStateInternal()
-    {
+    protected void updateButtonsStateInternal() {
         super.updateButtonsStateInternal();
 
-        if (PluginLoader.isLoading())
-        {
+        if (ExtensionLoader.isLoading()) {
             refreshButton.setText("Reloading...");
             refreshButton.setEnabled(false);
         }
-        else
-        {
+        else {
             refreshButton.setText("Reload list");
             refreshButton.setEnabled(true);
         }
@@ -174,8 +148,7 @@ public class PluginStartupPreferencePanel extends PluginListPreferencePanel impl
     }
 
     @Override
-    public void pluginLoaderChanged(PluginLoaderEvent e)
-    {
+    public void extensionLoaderChanged(final ExtensionLoader.ExtensionLoaderEvent e) {
         pluginsChanged();
     }
 }

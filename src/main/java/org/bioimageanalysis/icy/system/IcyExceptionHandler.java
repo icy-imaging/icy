@@ -21,8 +21,8 @@ package org.bioimageanalysis.icy.system;
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.reflect.ClassUtil;
 import org.bioimageanalysis.icy.common.string.StringUtil;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
 import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
 import org.bioimageanalysis.icy.gui.frame.progress.FailedAnnounceFrame;
 import org.bioimageanalysis.icy.gui.plugin.PluginErrorReport;
@@ -227,7 +227,7 @@ public class IcyExceptionHandler implements UncaughtExceptionHandler {
      */
     private static void handleException(final Thread thread, final @NotNull Throwable t, final boolean printStackStrace) {
         Throwable throwable = t;
-        final List<PluginDescriptor> plugins = PluginLoader.getPlugins();
+        final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins();
 
         while (throwable != null) {
             StackTraceElement[] stackTrace;
@@ -265,7 +265,7 @@ public class IcyExceptionHandler implements UncaughtExceptionHandler {
         handleException(thread, null, null, t, printStackStrace);
     }
 
-    private static @Nullable PluginDescriptor findMatchingLocalPlugin(final @NotNull List<PluginDescriptor> plugins, final String className) {
+    private static @Nullable PluginDescriptor findMatchingLocalPlugin(final @NotNull Set<PluginDescriptor> plugins, final String className) {
         // cleanup class name
         final String baseClassName = ClassUtil.getBaseClassName(className);
 
@@ -297,12 +297,12 @@ public class IcyExceptionHandler implements UncaughtExceptionHandler {
         return null;
     }
 
-    private static @Nullable PluginDescriptor findPluginFromStackTrace(final List<PluginDescriptor> plugins, final StackTraceElement @NotNull [] st) {
+    private static @Nullable PluginDescriptor findPluginFromStackTrace(final Set<PluginDescriptor> plugins, final StackTraceElement @NotNull [] st) {
         for (final StackTraceElement trace : st) {
             final String className = trace.getClassName();
 
             // plugin class ?
-            if (className.startsWith(PluginLoader.PLUGIN_PACKAGE + ".")) {
+            if (className.startsWith(ExtensionLoader.PLUGINS_PACKAGE + ".") || className.startsWith(ExtensionLoader.OLD_PLUGINS_PACKAGE + ".")) {
                 // try to find a matching plugin
                 final PluginDescriptor plugin = findMatchingLocalPlugin(plugins, className);
 
@@ -321,7 +321,7 @@ public class IcyExceptionHandler implements UncaughtExceptionHandler {
             final String className = trace.getClassName();
 
             // plugin class ?
-            if (className.startsWith(PluginLoader.PLUGIN_PACKAGE + "."))
+            if (className.startsWith(ExtensionLoader.PLUGINS_PACKAGE + ".") || className.startsWith(ExtensionLoader.OLD_PLUGINS_PACKAGE + "."))
                 // use plugin developer id (only send to last plugin raising the exception)
                 return className.split("\\.")[1];
         }

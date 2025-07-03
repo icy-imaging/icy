@@ -19,9 +19,7 @@
 package org.bioimageanalysis.icy.extension.plugin;
 
 import org.bioimageanalysis.icy.Icy;
-import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor.PluginIdent;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor.PluginNameSorter;
-import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor.PluginOnlineIdent;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
 import org.bioimageanalysis.icy.network.NetworkUtil;
 import org.bioimageanalysis.icy.network.URLUtil;
@@ -65,14 +63,14 @@ public class PluginRepositoryLoader {
                         return;
 
                     if (repoInfo.isEnabled()) {
-                        final List<PluginDescriptor> pluginsRepos = loadInternal(repoInfo);
+                        //final List<PluginDescriptor> pluginsRepos = loadInternal(repoInfo);
 
-                        if (pluginsRepos == null) {
+                        /*if (pluginsRepos == null) {
                             failed = true;
                             return;
                         }
 
-                        newPlugins.addAll(pluginsRepos);
+                        newPlugins.addAll(pluginsRepos);*/
                     }
                 }
 
@@ -143,7 +141,7 @@ public class PluginRepositoryLoader {
     /**
      * Return the plugins identifier list from a repository URL
      */
-    public static List<PluginOnlineIdent> getPluginIdents(final RepositoryInfo repos) {
+    /*public static List<PluginOnlineIdent> getPluginIdents(final RepositoryInfo repos) {
         String address = repos.getLocation();
         final boolean networkAddr = URLUtil.isNetworkURL(address);
         final boolean betaAllowed = PluginPreferences.getAllowBeta();
@@ -206,7 +204,7 @@ public class PluginRepositoryLoader {
         }
 
         return result;
-    }
+    }*/
 
     /**
      * Do loading process.
@@ -229,7 +227,7 @@ public class PluginRepositoryLoader {
     /**
      * Load and return the list of online plugins located at specified repository
      */
-    static List<PluginDescriptor> loadInternal(final RepositoryInfo repos) {
+    /*static List<PluginDescriptor> loadInternal(final RepositoryInfo repos) {
         // we start by loading only identifier part
         final List<PluginOnlineIdent> idents = getPluginIdents(repos);
 
@@ -251,7 +249,7 @@ public class PluginRepositoryLoader {
         }
 
         return result;
-    }
+    }*/
 
     /**
      * @return the pluginList
@@ -264,13 +262,15 @@ public class PluginRepositoryLoader {
 
     public static PluginDescriptor getPlugin(final String className) {
         synchronized (instance.plugins) {
-            return PluginDescriptor.getPlugin(instance.plugins, className);
+            //return PluginDescriptor.getPlugin(instance.plugins, className);
+            return null;
         }
     }
 
     public static List<PluginDescriptor> getPlugins(final String className) {
         synchronized (instance.plugins) {
-            return PluginDescriptor.getPlugins(instance.plugins, className);
+            //return PluginDescriptor.getPlugins(instance.plugins, className);
+            return Collections.emptyList();
         }
     }
 

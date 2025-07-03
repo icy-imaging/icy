@@ -18,13 +18,27 @@
 
 package org.bioimageanalysis.icy.system;
 
-import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 
 public final class UserUtil {
+    private UserUtil() {
+        //
+    }
+
+    public static void init() throws IOException {
+        new File(getUserHome(), ".icy").mkdirs();
+        new File(getIcyHomeDirectory(), "libraries").mkdirs();
+        new File(getIcyLibrariesDirectory(), "natives").mkdirs();
+        new File(getIcyHomeDirectory(), "extensions").mkdirs();
+        new File(getIcyHomeDirectory(), "config").mkdirs();
+        new File(getIcyHomeDirectory(), "scripts").mkdirs();
+    }
+
     /**
      * Get user home directory.<br>
      * For example in macOS : /User/username/
@@ -42,57 +56,50 @@ public final class UserUtil {
      *
      * @return the Icy's home folder.
      */
-    public static @NotNull File getIcyHomeDirectory() {
+    public static @Nullable File getIcyHomeDirectory() {
         final File folder = new File(getUserHome(), ".icy");
-        if (!folder.exists())
-            if (folder.mkdirs())
-                IcyLogger.info(UserUtil.class, "Created Icy's home directory: " + folder.getAbsolutePath());
-            else
-                IcyLogger.error(UserUtil.class, "Failed to create Icy's home directory: " + folder.getAbsolutePath());
+        if (!folder.exists() || !folder.isDirectory())
+            return null;
 
         return folder;
     }
 
-    public static @NotNull File getIcyLibrariesDirectory() {
+    public static @Nullable File getIcyLibrariesDirectory() {
         final File folder = new File(getIcyHomeDirectory(), "libraries");
-        if (!folder.exists())
-            if (folder.mkdirs())
-                IcyLogger.info(UserUtil.class, "Created Icy's libraries directory: " + folder.getAbsolutePath());
-            else
-                IcyLogger.error(UserUtil.class, "Failed to create Icy's libraries directory: " + folder.getAbsolutePath());
+        if (!folder.exists() || !folder.isDirectory())
+            return null;
 
         return folder;
     }
 
-    public static @NotNull File getIcyExtensionsDirectory() {
+    public static @Nullable File getIcyNativesDirectory() {
+        final File folder = new File(getIcyLibrariesDirectory(), "natives");
+        if (!folder.exists() || !folder.isDirectory())
+            return null;
+
+        return folder;
+    }
+
+    public static @Nullable File getIcyExtensionsDirectory() {
         final File folder = new File(getIcyHomeDirectory(), "extensions");
-        if (!folder.exists())
-            if (folder.mkdirs())
-                IcyLogger.info(UserUtil.class, "Created Icy's extension directory: " + folder.getAbsolutePath());
-            else
-                IcyLogger.error(UserUtil.class, "Failed to create Icy's extensions directory: " + folder.getAbsolutePath());
+        if (!folder.exists() || !folder.isDirectory())
+            return null;
 
         return folder;
     }
 
-    public static @NotNull File getIcyConfigDirectory() {
+    public static @Nullable File getIcyConfigDirectory() {
         final File folder = new File(getIcyHomeDirectory(), "config");
-        if (!folder.exists())
-            if (folder.mkdirs())
-                IcyLogger.info(UserUtil.class, "Created Icy's config directory: " + folder.getAbsolutePath());
-            else
-                IcyLogger.error(UserUtil.class, "Failed to create Icy's config directory: " + folder.getAbsolutePath());
+        if (!folder.exists() || !folder.isDirectory())
+            return null;
 
         return folder;
     }
 
-    public static @NotNull File getIcyScriptsDirectory() {
+    public static @Nullable File getIcyScriptsDirectory() {
         final File folder = new File(getIcyHomeDirectory(), "scripts");
-        if (!folder.exists())
-            if (folder.mkdirs())
-                IcyLogger.info(UserUtil.class, "Created Icy's scripts directory: " + folder.getAbsolutePath());
-            else
-                IcyLogger.error(UserUtil.class, "Failed to create Icy's scripts directory: " + folder.getAbsolutePath());
+        if (!folder.exists() || !folder.isDirectory())
+            return null;
 
         return folder;
     }

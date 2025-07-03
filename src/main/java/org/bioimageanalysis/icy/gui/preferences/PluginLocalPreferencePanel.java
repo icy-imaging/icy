@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,14 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package org.bioimageanalysis.icy.gui.preferences;
 
 import org.bioimageanalysis.icy.extension.ExtensionLoader;
-import org.bioimageanalysis.icy.extension.plugin.*;
+import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
+import org.bioimageanalysis.icy.extension.plugin.PluginInstaller;
 import org.bioimageanalysis.icy.extension.plugin.PluginInstaller.PluginInstallerListener;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader.PluginLoaderEvent;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader.PluginLoaderListener;
+import org.bioimageanalysis.icy.extension.plugin.PluginRepositoryLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginRepositoryLoader.PluginRepositoryLoaderListener;
+import org.bioimageanalysis.icy.extension.plugin.PluginUpdater;
 import org.bioimageanalysis.icy.gui.dialog.ConfirmDialog;
 
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ import java.util.List;
  * @author Stephane Dallongeville
  * @author Thomas Musset
  */
-public class PluginLocalPreferencePanel extends PluginListPreferencePanel implements PluginLoaderListener, PluginInstallerListener, PluginRepositoryLoaderListener, ExtensionLoader.ExtensionLoaderListener {
+public class PluginLocalPreferencePanel extends PluginListPreferencePanel implements ExtensionLoader.ExtensionLoaderListener, PluginInstallerListener, PluginRepositoryLoaderListener {
     private enum PluginLocalState {
         NULL, UPDATING, REMOVING, HAS_UPDATE, NO_UPDATE, CHECKING_UPDATE
     }
@@ -43,10 +45,8 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
         super(parent, NODE_NAME, PluginPreferencePanel.NODE_NAME);
 
         PluginRepositoryLoader.addListener(this);
-        PluginLoader.addListener(this);
-        PluginInstaller.addListener(this);
-
         ExtensionLoader.addListener(this);
+        PluginInstaller.addListener(this);
 
         // remove last column not used here
         table.removeColumn(table.getColumn(columnIds[4]));
@@ -65,7 +65,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
 
         PluginRepositoryLoader.removeListener(this);
         PluginInstaller.removeListener(this);
-        PluginLoader.removeListener(this);
+        ExtensionLoader.removeListener(this);
     }
 
     private PluginLocalState getPluginLocalState(final PluginDescriptor plugin) {
@@ -160,7 +160,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
 
     @Override
     protected void reloadPlugins() {
-        PluginLoader.reloadAsynch();
+        ExtensionLoader.reloadAsynch();
         // so we display the empty list during reload
         pluginsChanged();
     }
@@ -184,10 +184,10 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
     @Override
     protected List<PluginDescriptor> getPlugins() {
         // loading...
-        if (PluginLoader.isLoading())
+        if (ExtensionLoader.isLoading())
             return new ArrayList<>();
 
-        final List<PluginDescriptor> result = PluginLoader.getPlugins();
+        final List<PluginDescriptor> result = new ArrayList<>(ExtensionLoader.getPlugins());
 
         // TODO do we want to filter this automatically ?
         // only display installed plugins (this hide inner or dev plugins)
@@ -205,7 +205,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
         final List<PluginDescriptor> selectedPlugins = getSelectedPlugins();
         final boolean selected = (selectedPlugins.size() > 0);
 
-        if (PluginLoader.isLoading()) {
+        if (ExtensionLoader.isLoading()) {
             refreshButton.setText("Reloading...");
             refreshButton.setEnabled(false);
         }
@@ -308,7 +308,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
     }
 
     @Override
-    public void pluginLoaderChanged(final PluginLoaderEvent e) {
+    public void extensionLoaderChanged(final ExtensionLoader.ExtensionLoaderEvent e) {
         pluginsChanged();
     }
 
@@ -324,11 +324,6 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
 
     @Override
     public void pluginRepositeryLoaderChanged(final PluginDescriptor plugin) {
-        refreshTableData();
-    }
-
-    @Override
-    public void extensionLoaderChanged(final ExtensionLoader.ExtensionLoaderEvent e) {
         refreshTableData();
     }
 }

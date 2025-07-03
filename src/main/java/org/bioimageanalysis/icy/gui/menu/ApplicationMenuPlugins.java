@@ -18,21 +18,19 @@
 
 package org.bioimageanalysis.icy.gui.menu;
 
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
 import org.bioimageanalysis.icy.gui.action.GeneralActions;
 import org.bioimageanalysis.icy.gui.action.PreferencesActions;
 import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenu;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenuItem;
 import org.bioimageanalysis.icy.gui.component.menu.IcyPluginMenuItem;
-import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import javax.swing.*;
+import java.util.*;
 
 /**
  * @author Thomas Musset
@@ -66,21 +64,31 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
 
         addPluginLoaderListener();
 
-        PluginLoader.reloadAsynch();
+        if (!ExtensionLoader.isLoading())
+            reloadPluginsMenu();
     }
 
     private void reloadPluginsMenu() {
-        ThreadUtil.invokeLater(() -> {
+        setEnabled(false);
+        SwingUtilities.invokeLater(() -> {
             removeAll();
 
             add(itemPluginsSettings);
             //add(itemCatalog);
             //add(itemPluginSearch);
 
+            final Set<PluginDescriptor> plugins = ExtensionLoader.getActionablePlugins();
+
             addSeparator();
 
-            final List<PluginDescriptor> plugins = PluginLoader.getActionablePlugins();
-            //final List<PluginDescriptor> plugins = PluginLoader.getPlugins(true);
+            if (plugins.isEmpty()) {
+                final JMenuItem noPluginsMenuItem = new JMenuItem("No plugin installed");
+                noPluginsMenuItem.setEnabled(false);
+                noPluginsMenuItem.setFocusable(false);
+                add(noPluginsMenuItem);
+                setEnabled(true);
+                return;
+            }
 
             final Map<Character, List<PluginDescriptor>> characterListMap = new TreeMap<>();
             for (final PluginDescriptor descriptor : plugins) {
@@ -116,8 +124,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
     }
 
     @Override
-    public void pluginLoaderChanged(final PluginLoader.PluginLoaderEvent e) {
-        setEnabled(false);
+    public void extensionLoaderChanged(final ExtensionLoader.ExtensionLoaderEvent e) {
         reloadPluginsMenu();
     }
 }

@@ -26,7 +26,10 @@ import org.bioimageanalysis.icy.common.collection.CollectionUtil;
 import org.bioimageanalysis.icy.common.math.UnitUtil;
 import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.extension.ExtensionLoader;
-import org.bioimageanalysis.icy.extension.plugin.*;
+import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
+import org.bioimageanalysis.icy.extension.plugin.PluginInstaller;
+import org.bioimageanalysis.icy.extension.plugin.PluginLauncher;
+import org.bioimageanalysis.icy.extension.plugin.PluginUpdater;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
 import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
 import org.bioimageanalysis.icy.gui.action.ActionManager;
@@ -61,7 +64,6 @@ import org.bioimageanalysis.icy.system.os.AppleUtil;
 import org.bioimageanalysis.icy.system.preferences.ApplicationPreferences;
 import org.bioimageanalysis.icy.system.preferences.GeneralPreferences;
 import org.bioimageanalysis.icy.system.preferences.IcyPreferences;
-import org.bioimageanalysis.icy.system.preferences.PluginPreferences;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -72,13 +74,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyVetoException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 /**
  * Entry point for Icy.
@@ -110,6 +112,8 @@ public final class Icy {
      * private splash for initial loading
      */
     //static SplashScreenFrame splashScreen = null;
+
+    private static boolean firstStart = false;
 
     /**
      * VTK library loaded flag
@@ -163,6 +167,16 @@ public final class Icy {
         boolean headless = false;
 
         Locale.setDefault(Locale.ENGLISH);
+
+        firstStart = UserUtil.getIcyHomeDirectory() == null;
+
+        try {
+            if (firstStart)
+                UserUtil.init();
+        }
+        catch (final IOException e) {
+            fatalError(e, true);
+        }
 
         // Clear log file
         final File logFile = new File(UserUtil.getIcyHomeDirectory(), "icy.log");
@@ -245,10 +259,7 @@ public final class Icy {
             // initialize network (need preferences init)
             new Thread(NetworkUtil::init, "Initializer: Network").start();
 
-            //new Thread(ExtensionLoader::reloadAsynch, "Initializer: Extension").start();
-
-            // load plugins classes (need preferences init)
-            new Thread(PluginLoader::reloadAsynch, "Initializer: Plugin").start();
+            new Thread(ExtensionLoader::reloadAsynch, "Initializer: Extensions").start();
 
             WorkbookFactory.addProvider(new HSSFWorkbookFactory());
             WorkbookFactory.addProvider(new XSSFWorkbookFactory());
@@ -281,6 +292,10 @@ public final class Icy {
                     fatalError(t, false);
                 }
             });
+
+            // initialize OSX specific GUI stuff
+            if (SystemUtil.isMac())
+                AppleUtil.init();
         }
         else {
             // simple main interface init
@@ -298,25 +313,20 @@ public final class Icy {
         //});
         //}
 
+        // initialize exception handler
+        IcyExceptionHandler.init();
+
         // show general informations
         IcyLogger.info(Icy.class, String.format("%s %s (%d bit)", SystemUtil.getJavaName(), SystemUtil.getJavaVersion(), SystemUtil.getJavaArchDataModel()));
         IcyLogger.info(Icy.class, String.format("Running on %s %s (%s)", SystemUtil.getOSName(), SystemUtil.getOSVersion(), SystemUtil.getOSArch()));
         IcyLogger.info(Icy.class, String.format("System total memory: %s", UnitUtil.getBytesString(SystemUtil.getTotalMemory())));
         IcyLogger.info(Icy.class, String.format("System available memory: %s", UnitUtil.getBytesString(SystemUtil.getFreeMemory())));
         IcyLogger.info(Icy.class, String.format("Max Java memory: %s", UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())));
+        if (headless)
+            IcyLogger.info(Icy.class, "Headless mode");
 
-        IcyLogger.info(Icy.class, "Loading Icy libraries...");
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyApacheCommons.NAME, Version.fromString(IcyApacheCommons.VERSION).toShortString()));
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyApacheHTTP.NAME, Version.fromString(IcyApacheHTTP.VERSION).toShortString()));
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyBatik.NAME, Version.fromString(IcyBatik.VERSION).toShortString()));
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyBioFormats.NAME, Version.fromString(IcyBioFormats.VERSION).toShortString()));
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyEhcache.NAME, Version.fromString(IcyEhcache.VERSION).toShortString()));
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyFlatLaf.NAME, Version.fromString(IcyFlatLaf.VERSION).toShortString()));
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyJAI.NAME, Version.fromString(IcyJAI.VERSION).toShortString()));
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyJogamp.NAME, Version.fromString(IcyJogamp.VERSION).toShortString()));
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyLog4j.NAME, Version.fromString(IcyLog4j.VERSION).toShortString()));
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcyApachePOI.NAME, Version.fromString(IcyApachePOI.VERSION).toShortString()));
-        IcyLogger.info(Icy.class, String.format("%s v%s loaded", IcySnakeYAML.NAME, Version.fromString(IcySnakeYAML.VERSION).toShortString()));
+        // prepare native library files (need preferences init)
+        new Thread(Icy::nativeLibrariesInit, "Initializer: VTK").start();
 
         // image cache disabled from command line ?
         if (isCacheDisabled())
@@ -326,19 +336,9 @@ public final class Icy {
         else if (GeneralPreferences.getVirtualMode())
             ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
 
-        if (headless)
-            IcyLogger.info(Icy.class, "Headless mode.");
-
-        // initialize OSX specific GUI stuff
-        if (!headless && SystemUtil.isMac())
-            AppleUtil.init();
-        // initialize exception handler
-        IcyExceptionHandler.init();
         // initialize action manager
         if (!headless)
             ActionManager.init();
-        // prepare native library files (need preferences init)
-        nativeLibrariesInit();
 
         // changed version ?
         if (!ApplicationPreferences.getVersion().equals(Icy.VERSION)) {
@@ -384,12 +384,12 @@ public final class Icy {
         //SystemUtil.setProperty("jogl.verbose", "TRUE");
         //SystemUtil.setProperty("jogl.debug", "TRUE");
 
-        IcyLogger.info(Icy.class, String.format("Icy v%s started.", VERSION.toShortString()));
+        IcyLogger.info(Icy.class, String.format("Icy v%s started", VERSION.toShortString()));
 
         checkParameters();
 
         // handle startup arguments
-        if (startupImage != null && !startupImage.isEmpty() && !startupImage.isBlank())
+        if (startupImage != null && !startupImage.isBlank())
             Icy.getMainInterface().addSequence(Loader.loadSequence(FileUtil.getGenericPath(startupImage), 0, false));
 
         // wait while updates are occurring before starting command line plugin...
@@ -397,9 +397,9 @@ public final class Icy {
             ThreadUtil.sleep(1);
 
         if (startupPluginName != null) {
-            PluginLoader.waitWhileLoading();
+            ExtensionLoader.waitWhileLoading();
 
-            final PluginDescriptor plugin = PluginLoader.getPlugin(startupPluginName);
+            final PluginDescriptor plugin = ExtensionLoader.getPlugin(startupPluginName);
 
             if (plugin == null) {
                 IcyLogger.error(Icy.class, String.format("Could not launch plugin '%s': the plugin was not found.", startupPluginName));
@@ -435,9 +435,6 @@ public final class Icy {
                 pluginArgsList.add(arg);
             else if (execute)
                 startupPluginName = arg;
-                // special flag to disabled JCL (needed for development)
-            else if (arg.equalsIgnoreCase("--disableJCL") || arg.equalsIgnoreCase("-dJCL"))
-                PluginLoader.setJCLDisabled(true);
                 // headless mode
             else if (arg.equalsIgnoreCase("--headless") || arg.equalsIgnoreCase("-hl"))
                 headless = true;
@@ -524,6 +521,13 @@ public final class Icy {
             tooltip = new ToolTipFrame(message, 30, "magicWand");
             tooltip.setSize(300, 260);
         }
+    }
+
+    /**
+     * Check if Icy was just installed (no extension, no native libraries)
+     */
+    static void checkFirstInstall() {
+
     }
 
     static void fatalError(final Throwable t, final boolean headless) {
@@ -711,7 +715,7 @@ public final class Icy {
             });
 
             // stop daemon plugin
-            PluginLoader.stopDaemons();
+            ExtensionLoader.stopDaemons();
             // shutdown background processor after frame close
             ThreadUtil.shutdown();
             // shutdown prefetcher
@@ -892,6 +896,7 @@ public final class Icy {
         return "";
     }
 
+    // TODO remove this code as it should be managed outside Icy, and natives libraries should not be included with Icy by default
     private static boolean copyLibraries(final @NotNull String libName) {
         final File newFolder = new File(UserUtil.getIcyLibrariesDirectory(), libName);
         final File oldFolder = new File("." + File.separator + "lib" + File.separator + SystemUtil.getOSArchIdString() + File.separator + libName);
@@ -965,6 +970,7 @@ public final class Icy {
     }
 
     private static void loadVtkLibrary(final File libPathFile) {
+        IcyLogger.info(Icy.class, "Loading VTK...");
         final File vtkFolder = new File(libPathFile, "vtk");
         if (!vtkFolder.exists())
             if (!copyLibraries("vtk"))
@@ -1044,11 +1050,9 @@ public final class Icy {
             final String vv = new vtkVersion().GetVTKVersion();
 
             IcyLogger.success(Icy.class, String.format("%s v%s (%s) loaded", IcyVTK.NAME, Version.fromString(IcyVTK.VERSION).toShortString(), vv));
-            //IcyLogger.success(Icy.class, String.format("VTK %s library successfully loaded.", vv));
         }
         else {
             IcyLogger.error(Icy.class, String.format("%s v%s not loaded", IcyVTK.NAME, Version.fromString(IcyVTK.VERSION).toShortString()));
-            //IcyLogger.error(Icy.class, "Cannot load VTK library.");
         }
     }
 

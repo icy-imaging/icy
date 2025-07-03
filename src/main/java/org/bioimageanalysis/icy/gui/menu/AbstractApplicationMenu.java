@@ -19,9 +19,7 @@
 package org.bioimageanalysis.icy.gui.menu;
 
 import org.bioimageanalysis.icy.Icy;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader.PluginLoaderEvent;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader.PluginLoaderListener;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.gui.listener.ActiveSequenceListener;
 import org.bioimageanalysis.icy.gui.listener.GlobalROIListener;
 import org.bioimageanalysis.icy.gui.listener.GlobalSequenceListener;
@@ -34,7 +32,7 @@ import javax.swing.*;
 /**
  * @author Thomas Musset
  */
-public abstract class AbstractApplicationMenu extends JMenu implements GlobalSequenceListener, PluginLoaderListener, ActiveSequenceListener, GlobalROIListener {
+public abstract class AbstractApplicationMenu extends JMenu implements GlobalSequenceListener, ExtensionLoader.ExtensionLoaderListener, ActiveSequenceListener, GlobalROIListener {
 
     protected AbstractApplicationMenu(final String text) {
         super(text);
@@ -49,11 +47,11 @@ public abstract class AbstractApplicationMenu extends JMenu implements GlobalSeq
     }
 
     protected final void addPluginLoaderListener() {
-        PluginLoader.addListener(this);
+        ExtensionLoader.addListener(this);
     }
 
     protected final void removePluginLoaderListener() {
-        PluginLoader.removeListener(this);
+        ExtensionLoader.removeListener(this);
     }
 
     protected final void addActiveSequenceListener() {
@@ -81,7 +79,7 @@ public abstract class AbstractApplicationMenu extends JMenu implements GlobalSeq
     }
 
     @Override
-    public void pluginLoaderChanged(final PluginLoaderEvent e) {
+    public void extensionLoaderChanged(final ExtensionLoader.ExtensionLoaderEvent e) {
     }
 
     @Override

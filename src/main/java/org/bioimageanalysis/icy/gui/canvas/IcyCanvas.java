@@ -25,8 +25,8 @@ import org.bioimageanalysis.icy.common.geom.point.Point5D;
 import org.bioimageanalysis.icy.common.listener.ChangeListener;
 import org.bioimageanalysis.icy.common.listener.ProgressListener;
 import org.bioimageanalysis.icy.common.reflect.ClassUtil;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginCanvas;
 import org.bioimageanalysis.icy.gui.EventUtil;
 import org.bioimageanalysis.icy.gui.GuiUtil;
@@ -54,6 +54,8 @@ import org.bioimageanalysis.icy.model.sequence.SequenceEvent.SequenceEventType;
 import org.bioimageanalysis.icy.model.sequence.SequenceListener;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -63,25 +65,25 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 /**
- *         An IcyCanvas is a basic Canvas used into the viewer. It contains a visual representation
- *         of the sequence and provides some facilities as basic transformation and view
- *         synchronization.<br>
- *         Also IcyCanvas receives key events from Viewer when they are not consumed.<br>
- *         <br>
- *         By default transformations are applied in following order :<br>
- *         Rotation, Translation then Scaling.<br>
- *         The rotation transformation is relative to canvas center.<br>
- *         <br>
- *         Free feel to implement and override this design or not. <br>
- *         <br>
- *         (Canvas2D and Canvas3D derives from IcyCanvas)<br>
+ * An IcyCanvas is a basic Canvas used into the viewer. It contains a visual representation
+ * of the sequence and provides some facilities as basic transformation and view
+ * synchronization.<br>
+ * Also IcyCanvas receives key events from Viewer when they are not consumed.<br>
+ * <br>
+ * By default transformations are applied in following order :<br>
+ * Rotation, Translation then Scaling.<br>
+ * The rotation transformation is relative to canvas center.<br>
+ * <br>
+ * Free feel to implement and override this design or not. <br>
+ * <br>
+ * (Canvas2D and Canvas3D derives from IcyCanvas)<br>
  *
- *         @author Fabrice de Chaumont
- *         @author Stephane Dallongeville
+ * @author Fabrice de Chaumont
+ * @author Stephane Dallongeville
  */
 public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerListener, SequenceListener, LUTListener, ChangeListener, LayerListener {
     protected class IcyCanvasImageOverlay extends Overlay {
@@ -104,11 +106,12 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Returns all {@link PluginCanvas} plugins (plugins.kernel plugin are returned first).
      */
-    public static List<PluginDescriptor> getCanvasPlugins() {
+    public static @NotNull @Unmodifiable List<PluginDescriptor> getCanvasPlugins() {
         // get all canvas plugins
-        final List<PluginDescriptor> result = PluginLoader.getPlugins(PluginCanvas.class);
+        final List<PluginDescriptor> result = new ArrayList<>(ExtensionLoader.getPlugins(PluginCanvas.class));
+        if (result.isEmpty())
+            return Collections.emptyList();
 
-        // TODO re-enable this
         // VTK is not loaded ?
         /*if (!Icy.isVtkLibraryLoaded()) {
             // remove VtkCanvas
@@ -135,7 +138,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
             }
         });
 
-        return result;
+        return List.copyOf(result);
     }
 
     /**
@@ -194,7 +197,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Returns <code>null</code> if we can't find retrieve the corresponding canvas class name.
      */
     public static String getCanvasClassName(final String pluginClassName) {
-        return getCanvasClassName(PluginLoader.getPlugin(pluginClassName));
+        return getCanvasClassName(ExtensionLoader.getPlugin(pluginClassName));
     }
 
     /**
@@ -202,12 +205,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Throws an exception if an error occurred (canvas class was not found or it could not be
      * creatd).
      *
-     * @param viewer
-     *        {@link Viewer} to which to canvas is attached.
-     * @throws ClassCastException
-     *         if the specified class name is not a canvas plugin or canvas class name
-     * @throws Exception
-     *         if the specified canvas cannot be created for some reasons
+     * @param viewer {@link Viewer} to which to canvas is attached.
+     * @throws ClassCastException if the specified class name is not a canvas plugin or canvas class name
+     * @throws Exception          if the specified canvas cannot be created for some reasons
      */
     @SuppressWarnings("unchecked")
     public static IcyCanvas create(final String className, final Viewer viewer) throws ClassCastException, Exception {
@@ -640,8 +640,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Called by the parent viewer when building the toolbar.<br>
      * This way the canvas can customize it by adding specific command for instance.<br>
      *
-     * @param toolBar
-     *        the parent toolbar to customize
+     * @param toolBar the parent toolbar to customize
      */
     public abstract void customizeToolbar(final JToolBar toolBar);
 
@@ -656,10 +655,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Returns all layers attached to this canvas.<br>
      *
-     * @param sorted
-     *        If <code>true</code> the returned list is sorted on the layer priority.<br>
-     *        Sort operation is cached so the method could take sometime when sort cache need to be
-     *        rebuild.
+     * @param sorted If <code>true</code> the returned list is sorted on the layer priority.<br>
+     *               Sort operation is cached so the method could take sometime when sort cache need to be
+     *               rebuild.
      */
     public List<Layer> getLayers(final boolean sorted) {
         if (sorted) {
@@ -704,10 +702,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Returns all visible layers (visible property set to <code>true</code>) attached to this
      * canvas.
      *
-     * @param sorted
-     *        If <code>true</code> the returned list is sorted on the layer priority.<br>
-     *        Sort operation is cached so the method could take sometime when sort cache need to be
-     *        rebuild.
+     * @param sorted If <code>true</code> the returned list is sorted on the layer priority.<br>
+     *               Sort operation is cached so the method could take sometime when sort cache need to be
+     *               rebuild.
      */
     public List<Layer> getVisibleLayers(final boolean sorted) {
         final List<Layer> olayers = getLayers(sorted);
@@ -748,9 +745,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Set the synchronization group id (0 means unsynchronized).<br>
      *
+     * @param id the syncId to set
      * @return <code>false</code> if the canvas do not support synchronization group.
-     * @param id
-     *        the syncId to set
      */
     public boolean setSyncId(final int id) {
         if (!isSynchronizationSupported())
@@ -2312,10 +2308,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse press event to the overlays.
      *
-     * @param event
-     *        original mouse event
-     * @param pt
-     *        mouse image position
+     * @param event original mouse event
+     * @param pt    mouse image position
      */
     public void mousePressed(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
@@ -2330,8 +2324,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse press event to the overlays.
      *
-     * @param event
-     *        original mouse event
+     * @param event original mouse event
      */
     public void mousePressed(final MouseEvent event) {
         mousePressed(event, getMouseImagePos5D());
@@ -2340,10 +2333,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse release event to the overlays.
      *
-     * @param event
-     *        original mouse event
-     * @param pt
-     *        mouse image position
+     * @param event original mouse event
+     * @param pt    mouse image position
      */
     public void mouseReleased(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
@@ -2358,8 +2349,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse release event to the overlays.
      *
-     * @param event
-     *        original mouse event
+     * @param event original mouse event
      */
     public void mouseReleased(final MouseEvent event) {
         mouseReleased(event, getMouseImagePos5D());
@@ -2368,10 +2358,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse click event to the overlays.
      *
-     * @param event
-     *        original mouse event
-     * @param pt
-     *        mouse image position
+     * @param event original mouse event
+     * @param pt    mouse image position
      */
     public void mouseClick(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
@@ -2386,8 +2374,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse click event to the overlays.
      *
-     * @param event
-     *        original mouse event
+     * @param event original mouse event
      */
     public void mouseClick(final MouseEvent event) {
         mouseClick(event, getMouseImagePos5D());
@@ -2396,10 +2383,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse move event to the overlays.
      *
-     * @param event
-     *        original mouse event
-     * @param pt
-     *        mouse image position
+     * @param event original mouse event
+     * @param pt    mouse image position
      */
     public void mouseMove(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
@@ -2414,8 +2399,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse mouse event to the overlays.
      *
-     * @param event
-     *        original mouse event
+     * @param event original mouse event
      */
     public void mouseMove(final MouseEvent event) {
         mouseMove(event, getMouseImagePos5D());
@@ -2424,10 +2408,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse drag event to the overlays.
      *
-     * @param event
-     *        original mouse event
-     * @param pt
-     *        mouse image position
+     * @param event original mouse event
+     * @param pt    mouse image position
      */
     public void mouseDrag(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
@@ -2442,8 +2424,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse drag event to the overlays.
      *
-     * @param event
-     *        original mouse event
+     * @param event original mouse event
      */
     public void mouseDrag(final MouseEvent event) {
         mouseDrag(event, getMouseImagePos5D());
@@ -2452,10 +2433,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse enter event to the overlays.
      *
-     * @param event
-     *        original mouse event
-     * @param pt
-     *        mouse image position
+     * @param event original mouse event
+     * @param pt    mouse image position
      */
     public void mouseEntered(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
@@ -2470,8 +2449,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse entered event to the overlays.
      *
-     * @param event
-     *        original mouse event
+     * @param event original mouse event
      */
     public void mouseEntered(final MouseEvent event) {
         mouseEntered(event, getMouseImagePos5D());
@@ -2480,10 +2458,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse exit event to the overlays.
      *
-     * @param event
-     *        original mouse event
-     * @param pt
-     *        mouse image position
+     * @param event original mouse event
+     * @param pt    mouse image position
      */
     public void mouseExited(final MouseEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
@@ -2498,8 +2474,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse exited event to the overlays.
      *
-     * @param event
-     *        original mouse event
+     * @param event original mouse event
      */
     public void mouseExited(final MouseEvent event) {
         mouseExited(event, getMouseImagePos5D());
@@ -2508,10 +2483,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse wheel event to the overlays.
      *
-     * @param event
-     *        original mouse event
-     * @param pt
-     *        mouse image position
+     * @param event original mouse event
+     * @param pt    mouse image position
      */
     public void mouseWheelMoved(final MouseWheelEvent event, final Point5D.Double pt) {
         final boolean globalVisible = isLayersVisible();
@@ -2526,8 +2499,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Helper to forward mouse wheel event to the overlays.
      *
-     * @param event
-     *        original mouse event
+     * @param event original mouse event
      */
     public void mouseWheelMoved(final MouseWheelEvent event) {
         mouseWheelMoved(event, getMouseImagePos5D());
@@ -2762,14 +2734,10 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * image at position (t, z, c).<br>
      * Free feel to the canvas to handle or not a specific dimension.
      *
-     * @param t
-     *        T position of wanted image (-1 for complete sequence)
-     * @param z
-     *        Z position of wanted image (-1 for complete stack)
-     * @param c
-     *        C position of wanted image (-1 for all channels)
-     * @param canvasView
-     *        render with canvas view if true else use default sequence dimension
+     * @param t          T position of wanted image (-1 for complete sequence)
+     * @param z          Z position of wanted image (-1 for complete stack)
+     * @param c          C position of wanted image (-1 for all channels)
+     * @param canvasView render with canvas view if true else use default sequence dimension
      */
     public abstract BufferedImage getRenderedImage(int t, int z, int c, boolean canvasView) throws InterruptedException;
 
@@ -2777,10 +2745,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Return a sequence which contains rendered images.<br>
      * Default implementation, override it if needed in your canvas.
      *
-     * @param canvasView
-     *        render with canvas view if true else use default sequence dimension
-     * @param progressListener
-     *        progress listener which receive notifications about progression
+     * @param canvasView       render with canvas view if true else use default sequence dimension
+     * @param progressListener progress listener which receive notifications about progression
      */
     public Sequence getRenderedSequence(final boolean canvasView, final ProgressListener progressListener) throws InterruptedException {
         final Sequence seqIn = getSequence();
@@ -3276,8 +3242,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * position has changed<br>
      *
-     * @param dim
-     *        define the position which has changed
+     * @param dim define the position which has changed
      */
     protected void positionChanged(final DimensionId dim) {
         // handle with updater
@@ -3341,10 +3306,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * sequence data has changed
      *
-     * @param image
-     *        image which has changed (null if global data changed)
-     * @param type
-     *        event type
+     * @param image image which has changed (null if global data changed)
+     * @param type  event type
      */
     protected void sequenceDataChanged(final IcyBufferedImage image, final SequenceEventType type) {
         ThreadUtil.runSingle(guiUpdater);
@@ -3353,10 +3316,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Sequence overlay has changed
      *
-     * @param overlay
-     *        overlay which has changed
-     * @param type
-     *        event type
+     * @param overlay overlay which has changed
+     * @param type    event type
      */
     protected void sequenceOverlayChanged(final Overlay overlay, final SequenceEventType type) {
         switch (type) {
@@ -3377,10 +3338,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * sequence roi has changed
      *
-     * @param roi
-     *        roi which has changed (null if global roi changed)
-     * @param type
-     *        event type
+     * @param roi  roi which has changed (null if global roi changed)
+     * @param type event type
      */
     protected void sequenceROIChanged(final ROI roi, final SequenceEventType type) {
         // nothing here

@@ -16,11 +16,16 @@ In terms of development environment, Icy is coded in **Java** and uses a **Maven
 
 ## Installation
 
-As user of the application: [download Icy from the Icy website](https://icy.bioimageanalysis.org/download/) and follow the [installation instructions](https://icy.bioimageanalysis.org/tutorial/installation-instructions-for-icy-software/). You can reach the Icy development team to report a bug or ask for a new feature via the [image.sc forum](https://forum.image.sc/). For bug or feature request related questions, choose the "Usage and Issue" category. For more general questions, use the "Image Analysis" category. In any cases, don't forget the tag "icy".       
+[//]: # (As user of the application: [download Icy from the Icy website]&#40;https://icy.bioimageanalysis.org/download/&#41; and follow the [installation instructions]&#40;https://icy.bioimageanalysis.org/tutorial/installation-instructions-for-icy-software/&#41;. You can reach the Icy development team to report a bug or ask for a new feature via the [image.sc forum]&#40;https://forum.image.sc/&#41;. For bug or feature request related questions, choose the "Usage and Issue" category. For more general questions, use the "Image Analysis" category. In any cases, don't forget the tag "icy".       )
 
-As developer willing to contribute to the kernel or to write a plugin for Icy, please get started by reading our blog posts on [how to set your development environment for Icy](https://icy.bioimageanalysis.org/developer/setting-icy-development-environment/), [how to create a new Icy plugin](https://icy.bioimageanalysis.org/developer/create-a-new-icy-plugin/) and [how to migrate your old Icy plugin to Maven](https://icy.bioimageanalysis.org/developer/migrate-your-old-icy-plugin-to-maven/). You can reach the Icy development team via the [image.sc forum](https://forum.image.sc/). For development related questions, choose the "Development" category and don't forget the tag "icy".     
+[//]: # (As developer willing to contribute to the kernel or to write a plugin for Icy, please get started by reading our blog posts on [how to set your development environment for Icy]&#40;https://icy.bioimageanalysis.org/developer/setting-icy-development-environment/&#41;, [how to create a new Icy plugin]&#40;https://icy.bioimageanalysis.org/developer/create-a-new-icy-plugin/&#41; and [how to migrate your old Icy plugin to Maven]&#40;https://icy.bioimageanalysis.org/developer/migrate-your-old-icy-plugin-to-maven/&#41;. You can reach the Icy development team via the [image.sc forum]&#40;https://forum.image.sc/&#41;. For development related questions, choose the "Development" category and don't forget the tag "icy".     )
 
-Last but not least, we invite you to read our [Contributing guidelines](https://gitlab.pasteur.fr/bia/icy/-/blob/master/CONTRIBUTING.md) and our [Code of Conduct](https://gitlab.pasteur.fr/bia/icy/-/blob/master/CODE-OF-CONDUCT.md).    
+[//]: # (Last but not least, we invite you to read our [Contributing guidelines]&#40;https://gitlab.pasteur.fr/bia/icy/-/blob/master/CONTRIBUTING.md&#41; and our [Code of Conduct]&#40;https://gitlab.pasteur.fr/bia/icy/-/blob/master/CODE-OF-CONDUCT.md&#41;.    )
+
+Download source code
+execute **mvn -P kernel**
+copy the content of **./build/icy/** in your dev folder
+execute **icy.jar** from Eclipse or IntelliJ
 
 ## Documentation
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,35 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package org.bioimageanalysis.icy.gui.plugin;
 
-import org.bioimageanalysis.icy.gui.component.renderer.CustomComboBoxRenderer;
-import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
 import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
 import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.renderer.CustomComboBoxRenderer;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * @author Stephane
+ * @author Stephane Dallongeville
  * @author Thomas Musset
  */
 public class PluginComboBoxRenderer extends CustomComboBoxRenderer {
     private final boolean showLabel;
 
-    public PluginComboBoxRenderer(JComboBox<String> combo, boolean showLabel) {
+    public PluginComboBoxRenderer(final JComboBox<String> combo, final boolean showLabel) {
         super(combo);
 
         this.showLabel = showLabel;
     }
 
     @Override
-    protected void updateItem(JList<?> list, Object value) {
+    protected void updateItem(final JList<?> list, final Object value) {
         if (value instanceof String) {
-            final PluginDescriptor plugin = PluginLoader.getPlugin((String) value);
+            final PluginDescriptor plugin = ExtensionLoader.getPlugin((String) value);
 
             if (plugin != null) {
                 //setIcon(ResourceUtil.scaleIcon(plugin.getIcon(), 16));

@@ -25,9 +25,9 @@ import org.bioimageanalysis.icy.common.collection.CollectionUtil;
 import org.bioimageanalysis.icy.common.exception.UnsupportedFormatException;
 import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.common.type.DataType;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
 import org.bioimageanalysis.icy.extension.plugin.PluginLauncher;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
 import org.bioimageanalysis.icy.gui.dialog.ImporterSelectionDialog;
 import org.bioimageanalysis.icy.gui.dialog.SeriesSelectionDialog;
 import org.bioimageanalysis.icy.gui.frame.progress.FileFrame;
@@ -51,8 +51,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.Map.Entry;
 
 /**
@@ -107,8 +107,8 @@ public class Loader {
     /**
      * Returns all available resource importer.
      */
-    public static List<Importer> getImporters() {
-        final List<PluginDescriptor> plugins = PluginLoader.getPlugins(Importer.class);
+    public static @NotNull List<Importer> getImporters() {
+        final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(Importer.class);
         final List<Importer> result = new ArrayList<>();
 
         for (final PluginDescriptor plugin : plugins) {
@@ -127,8 +127,8 @@ public class Loader {
     /**
      * Returns all available resource (non image) importer which take file as input.
      */
-    public static List<FileImporter> getFileImporters() {
-        final List<PluginDescriptor> plugins = PluginLoader.getPlugins(FileImporter.class);
+    public static @NotNull List<FileImporter> getFileImporters() {
+        final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(FileImporter.class);
         final List<FileImporter> result = new ArrayList<>();
 
         for (final PluginDescriptor plugin : plugins) {
@@ -289,8 +289,8 @@ public class Loader {
     /**
      * Returns all available sequence importer (different from {@link SequenceIdImporter} or {@link SequenceFileImporter}).
      */
-    public static List<SequenceImporter> getSequenceImporters() {
-        final List<PluginDescriptor> plugins = PluginLoader.getPlugins(SequenceImporter.class);
+    public static @NotNull List<SequenceImporter> getSequenceImporters() {
+        final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(SequenceImporter.class);
         final List<SequenceImporter> result = new ArrayList<>();
 
         for (final PluginDescriptor plugin : plugins) {
@@ -312,8 +312,8 @@ public class Loader {
      *
      * @see #getSequenceFileImporters()
      */
-    public static List<SequenceIdImporter> getSequenceIdImporters() {
-        final List<PluginDescriptor> plugins = PluginLoader.getPlugins(SequenceIdImporter.class);
+    public static @NotNull List<SequenceIdImporter> getSequenceIdImporters() {
+        final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(SequenceIdImporter.class);
         final List<SequenceIdImporter> result = new ArrayList<>();
 
         for (final PluginDescriptor plugin : plugins) {
@@ -334,8 +334,8 @@ public class Loader {
      *
      * @see #getSequenceIdImporters()
      */
-    public static List<SequenceFileImporter> getSequenceFileImporters() {
-        final List<PluginDescriptor> plugins = PluginLoader.getPlugins(SequenceFileImporter.class);
+    public static @NotNull List<SequenceFileImporter> getSequenceFileImporters() {
+        final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(SequenceFileImporter.class);
         final List<SequenceFileImporter> result = new ArrayList<>();
 
         for (final PluginDescriptor plugin : plugins) {
