@@ -46,8 +46,11 @@ public class VtkJoglPanel extends GLJPanel
                 // Init VTK OpenGL RenderWindow
                 rw.SetMapped(1);
                 rw.SetPosition(0, 0);
-                rw.InitializeFromCurrentContext();
-                // rw.OpenGLInit();
+                //rw.InitializeFromCurrentContext();
+                rw.OpenGLInitContext();
+                rw.OpenGLInit();
+                rw.MakeCurrent();
+                rw.SetIsCurrent(true);
 
                 // init light
                 if (!lightingset)
@@ -122,14 +125,14 @@ public class VtkJoglPanel extends GLJPanel
 
     public VtkJoglPanel()
     {
-        super(new GLCapabilities(GLProfile.getMaximum(true)));
+        super(new GLCapabilities(GLProfile.getMaxProgrammableCore(true)));
 
         rw = new vtkGenericOpenGLRenderWindow();
 
         // init render window
         rw.SetIsDirect(1);
         rw.SetSupportsOpenGL(1);
-        rw.SetIsCurrent(true);
+        //rw.SetIsCurrent(true); // Crash OpenGL when called from here
 
         // FIXME: smoothing is broken since VTK 6.3
         rw.SetPointSmoothing(1);
@@ -138,7 +141,7 @@ public class VtkJoglPanel extends GLJPanel
         // for use with deeph peeling (allow transparent geometry to intersect with volume)
         rw.SetAlphaBitPlanes(1);
         rw.SetMultiSamples(0);
-//        rw.SetMultiSamples(4);
+        //rw.SetMultiSamples(4);
 
         // Make sure when VTK internally request a Render, the Render get properly triggered
         rw.AddObserver("WindowFrameEvent", this, "render");
