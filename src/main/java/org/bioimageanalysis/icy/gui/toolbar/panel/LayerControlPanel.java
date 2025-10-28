@@ -24,7 +24,7 @@ import org.bioimageanalysis.icy.gui.canvas.Layer;
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
 import org.bioimageanalysis.icy.gui.viewer.Viewer;
 import org.bioimageanalysis.icy.Icy;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 
 import javax.swing.*;
@@ -98,7 +98,7 @@ public final class LayerControlPanel extends JPanel implements ChangeListener {
         gbc_opacitySlider.gridy = 1;
         actionPanel.add(opacitySlider, gbc_opacitySlider);
 
-        deleteButton = new IcyButton(SVGIcon.DELETE);
+        deleteButton = new IcyButton(SVGResource.DELETE);
         deleteButton.addActionListener(CanvasActions.deleteLayersAction);
         final GridBagConstraints gbc_deleteButton = new GridBagConstraints();
         gbc_deleteButton.anchor = GridBagConstraints.EAST;

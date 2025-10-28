@@ -21,8 +21,8 @@ package org.bioimageanalysis.icy.gui.component.panel;
 import org.bioimageanalysis.icy.gui.GraphicsUtil;
 import org.bioimageanalysis.icy.gui.component.ComponentUtil;
 import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,7 +35,7 @@ import java.awt.geom.Rectangle2D;
 public class PopupPanel extends JPanel {
     public final class PopupTitlePanel extends IcyToggleButton {
         public PopupTitlePanel(final String text) {
-            super(text, new SVGIconPack(SVGIcon.ARROW_DROP_DOWN, SVGIcon.ARROW_DROP_UP));
+            super(text, new IcyIconPack(SVGResource.ARROW_DOWN, SVGResource.ARROW_UP));
 
             setHorizontalAlignment(SwingConstants.LEADING);
             setFocusPainted(false);

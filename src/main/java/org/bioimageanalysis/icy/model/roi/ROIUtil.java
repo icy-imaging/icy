@@ -89,7 +89,7 @@ public class ROIUtil {
      * @see ROIDescriptor#compute(ROI, Sequence)
      * @see PluginROIDescriptor#compute(ROI, Sequence)
      */
-    public static Map<ROIDescriptor, PluginROIDescriptor> getROIDescriptors() {
+    public static Map<ROIDescriptor<?>, PluginROIDescriptor> getROIDescriptors() {
         return ROIDescriptor.getDescriptors();
     }
 
@@ -108,7 +108,7 @@ public class ROIUtil {
      *                                       <code>null</code> while the calculation requires it, or if
      *                                       the specified Z, T or C position are not supported by the descriptor
      */
-    public static Object computeDescriptor(final Collection<ROIDescriptor> roiDescriptors, final String descriptorId, final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
+    public static Object computeDescriptor(final Collection<ROIDescriptor<?>> roiDescriptors, final String descriptorId, final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
         return ROIDescriptor.computeDescriptor(roiDescriptors, descriptorId, roi, sequence);
     }
 

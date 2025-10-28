@@ -27,7 +27,7 @@ import org.bioimageanalysis.icy.common.geom.poly.Polyline3D;
 import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
 import org.bioimageanalysis.icy.gui.canvas.VtkCanvas;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.render.IcyVtkPanel;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
 import org.bioimageanalysis.icy.model.overlay.anchor.Anchor3D;
@@ -191,7 +191,7 @@ public class ROI3DPolyLine extends ROI3DShape {
         updateShape();
 
         // set icon
-        setIcon(SVGIcon.TIMELINE);
+        setIcon(SVGResource.ROI_POLYLINE);
     }
 
     /**

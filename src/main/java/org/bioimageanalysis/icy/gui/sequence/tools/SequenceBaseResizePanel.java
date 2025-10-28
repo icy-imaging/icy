@@ -19,13 +19,13 @@
 package org.bioimageanalysis.icy.gui.sequence.tools;
 
 import org.bioimageanalysis.icy.gui.component.field.IcyTextField;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
 import org.bioimageanalysis.icy.gui.sequence.SequencePreviewPanel;
 import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
 import org.bioimageanalysis.icy.model.image.IcyBufferedImageUtil;
 import org.bioimageanalysis.icy.model.image.IcyBufferedImageUtil.FilterType;
 import org.bioimageanalysis.icy.common.math.UnitUtil;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.sequence.AbstractSequenceModel;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.jetbrains.annotations.NotNull;
@@ -165,7 +165,7 @@ public abstract class SequenceBaseResizePanel extends JPanel {
         setNewWidth(sequence.getSizeX());
         setNewHeight(sequence.getSizeY());
 
-        accolLeftLabel.setIcon(new IcySVGIcon(SVGIcon.BRACKET_RIGHT, 40));
+        accolLeftLabel.setIcon(new IcySVG(SVGResource.BRACKET_RIGHT).getIcon(40));
         accolLeftLabel.setText(null);
 
         originalPreview.setFitToView(false);

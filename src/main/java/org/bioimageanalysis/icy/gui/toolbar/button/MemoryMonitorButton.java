@@ -18,12 +18,13 @@
 
 package org.bioimageanalysis.icy.gui.toolbar.button;
 
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
 import org.bioimageanalysis.icy.gui.action.PreferencesActions;
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenuItem;
 import org.bioimageanalysis.icy.common.math.UnitUtil;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.system.SystemUtil;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
@@ -39,14 +40,16 @@ import java.util.TimerTask;
  * @author Thomas Musset
  */
 public final class MemoryMonitorButton extends IcyButton implements MouseListener {
-    private final IcySVGIcon OK = new IcySVGIcon(SVGIcon.CHECK_CIRCLE, Color.GREEN.darker());
-    private final IcySVGIcon WARN = new IcySVGIcon(SVGIcon.WARNING, Color.YELLOW.darker());
-    private final IcySVGIcon ERROR = new IcySVGIcon(SVGIcon.ERROR, Color.RED.darker());
+    private static final int ICON_SIZE = LookAndFeelUtil.getDefaultIconSize();
+
+    private final Icon OK = new IcySVG(SVGResource.CHECK_CIRCLE).getIcon(ICON_SIZE, Color.GREEN.darker());
+    private final Icon WARN = new IcySVG(SVGResource.WARNING).getIcon(ICON_SIZE, Color.YELLOW.darker());
+    private final Icon ERROR = new IcySVG(SVGResource.ERROR).getIcon(ICON_SIZE, Color.RED.darker());
 
     private final JPopupMenu popup;
 
     public MemoryMonitorButton() {
-        super("CPU: 0% | RAM: 0%", SVGIcon.CHECK_CIRCLE);
+        super("CPU: 0% | RAM: 0%", SVGResource.CHECK_CIRCLE);
         setFlat(true);
         setHorizontalAlignment(JButton.LEFT);
         setIcon(OK);
@@ -55,9 +58,9 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
         addMouseListener(this);
 
         popup = new JPopupMenu();
-        final IcyMenuItem settings = new IcyMenuItem("Open Settings...", SVGIcon.SETTINGS);
+        final IcyMenuItem settings = new IcyMenuItem("Open Settings...", SVGResource.SETTINGS);
         settings.addActionListener(PreferencesActions.generalPreferencesAction);
-        final IcyMenuItem GB = new IcyMenuItem("Free Java Memory", SVGIcon.DELETE_SWEEP);
+        final IcyMenuItem GB = new IcyMenuItem("Free Java Memory", SVGResource.DELETE_SWEEP);
         GB.addActionListener(e -> forceGC());
         popup.add(settings);
         popup.addSeparator();

@@ -18,6 +18,8 @@
 
 package org.bioimageanalysis.icy.extension.plugin.annotation_;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.lang.annotation.*;
 
 /**
@@ -26,11 +28,12 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
+@ApiStatus.Experimental
 public @interface IcyPluginIcon {
     /**
-     * Resource path. Always starts with '/'.
+     * Icon name from the icons folder (auto-generated)
      */
-    String path();
+    String value();
 
     /**
      * Only for SVG icons.

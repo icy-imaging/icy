@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,193 +18,125 @@
 
 package org.bioimageanalysis.icy.gui.component.icon;
 
-import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
-import org.bioimageanalysis.icy.model.image.ImageUtil;
-import org.bioimageanalysis.icy.system.logging.IcyLogger;
+import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
+import org.apache.batik.bridge.BridgeContext;
+import org.apache.batik.bridge.GVTBuilder;
 import org.apache.batik.bridge.UserAgentAdapter;
-import org.apache.batik.transcoder.TranscoderException;
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.image.ImageTranscoder;
+import org.apache.batik.gvt.GraphicsNode;
+import org.apache.batik.util.XMLResourceDescriptor;
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
+import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.svg.SVGDocument;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Dimension2D;
-import java.awt.image.BufferedImage;
-import java.net.URI;
+import java.awt.geom.AffineTransform;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Build an {@link Icon} from SVG.
+ * Icon from SVG content.
+ *
  * @author Thomas Musset
+ * @since 3.0.0
  */
-public final class IcySVGIcon extends UserAgentAdapter implements Icon {
-    /**
-     * The BufferedImage generated from the SVG document.
-     */
-    private BufferedImage bufferedImage;
-    private BufferedImage cache;
-
-    /**
-     * The width of the rendered image.
-     */
-    private int width;
-
-    /**
-     * The height of the rendered image.
-     */
-    private int height;
-
-    private final boolean colored;
-
-    private final @Nullable Color customColor;
-
+public final class IcySVGIcon implements Icon {
+    private SVGDocument svgDocument;
+    private BridgeContext ctx;
+    private GraphicsNode svgNode;
+    private final int width;
+    private final int height;
 
     private final @Nullable LookAndFeelUtil.ColorType colorType;
 
-    /**
-     * Main constructor, internal only.
-     */
-    private IcySVGIcon(final @Nullable URI uri, final @Nullable LookAndFeelUtil.ColorType colorType, final int width, final int height, final boolean colored) {
+    private IcySVGIcon(final String svgContent, final int width, final int height, final @Nullable Color color, final @Nullable LookAndFeelUtil.ColorType colorType) {
+        this.width = width;
+        this.height = height;
         this.colorType = colorType;
-        this.colored = colored;
-        this.customColor = null;
 
-        if (uri == null) {
-            IcyLogger.warn(IcySVGIcon.class, "Unable to draw SVG icon because URI is null");
-            bufferedImage = null;
-            cache = null;
-            return;
-        }
-
+        // load SVG document
+        final String parser = XMLResourceDescriptor.getXMLParserClassName();
+        final SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
+        svgDocument = null;
         try {
-            generateBufferedImage(new TranscoderInput(uri.toASCIIString()), width, height);
+            svgDocument = factory.createSVGDocument(null, new StringReader(svgContent));
         }
-        catch (final TranscoderException e) {
-            IcyLogger.warn(IcySVGIcon.class, e, "Unable to load SVG icon.");
-        }
-    }
-
-    /**
-     * Create a new SVGIcon object with automatic foreground color and custom size.
-     */
-    public IcySVGIcon(final @NotNull SVGIcon icon, final @NotNull LookAndFeelUtil.ColorType colorType, final int width, final int height) {
-        this(icon.getURI(), colorType, width, height, icon.isColored());
-    }
-
-    /**
-     * Create a new SVGIcon object with automatic foreground color and custom size.
-     */
-    public IcySVGIcon(final @NotNull SVGIcon icon, final @NotNull LookAndFeelUtil.ColorType colorType, final int size) {
-        this(icon.getURI(), colorType, size, size, icon.isColored());
-    }
-
-    /**
-     * Create a new SVGIcon object with automatic foreground color and default size.
-     */
-    public IcySVGIcon(final @NotNull SVGIcon icon, final @NotNull LookAndFeelUtil.ColorType colorType) {
-        this(icon.getURI(), colorType, LookAndFeelUtil.getDefaultIconSize(), LookAndFeelUtil.getDefaultIconSize(), icon.isColored());
-    }
-
-    /**
-     * Create a new SVGIcon object with custom size.
-     */
-    public IcySVGIcon(final @NotNull SVGIcon icon, final int width, final int height) {
-        this(icon.getURI(), null, width, height, icon.isColored());
-    }
-
-    /**
-     * Create a new SVGIcon object with custom size.
-     */
-    public IcySVGIcon(final @NotNull SVGIcon icon, final int size) {
-        this(icon.getURI(), null, size, size, icon.isColored());
-    }
-
-    /**
-     * Create a new SVGIcon object with custom size.
-     */
-    public IcySVGIcon(final @NotNull SVGIcon icon) {
-        this(icon.getURI(), null, LookAndFeelUtil.getDefaultIconSize(), LookAndFeelUtil.getDefaultIconSize(), icon.isColored());
-    }
-
-    /**
-     * Create a new SVGIcon object with specified foreground color and custom size.<br>
-     * Internal use only.
-     */
-    private IcySVGIcon(final @Nullable URI uri, final @NotNull Color color, final int width, final int height) {
-        this.colorType = null;
-        this.colored = false;
-        this.customColor = color;
-
-        if (uri == null) {
-            IcyLogger.warn(IcySVGIcon.class, "Unable to draw SVG icon because URI is null");
-            bufferedImage = null;
-            cache = null;
-            return;
+        catch (final IOException e) {
+            // Should not occur
+            IcyLogger.error(this.getClass(), e, "SVG could not be read.");
         }
 
-        try {
-            generateBufferedImage(new TranscoderInput(uri.toASCIIString()), width, height);
-        }
-        catch (final TranscoderException e) {
-            IcyLogger.warn(IcySVGIcon.class, e, "Unable to load SVG icon.");
-        }
-    }
-
-    /**
-     * Create a new SVGIcon object with specified foreground color and custom size.
-     */
-    public IcySVGIcon(final @NotNull SVGIcon icon, final @NotNull Color color, final int width, final int height) {
-        this(icon.getURI(), color, width, height);
-    }
-
-    /**
-     * Create a new SVGIcon object with specified foreground color and custom size.
-     */
-    public IcySVGIcon(final @NotNull SVGIcon icon, final @NotNull Color color, final int size) {
-        this(icon.getURI(), color, size, size);
-    }
-
-    /**
-     * Create a new SVGIcon object with specified foreground color and default size.
-     */
-    public IcySVGIcon(final @NotNull SVGIcon icon, final @NotNull Color color) {
-        this(icon.getURI(), color, LookAndFeelUtil.getDefaultIconSize(), LookAndFeelUtil.getDefaultIconSize());
-    }
-
-    /**
-     * Generate the BufferedImage.
-     * @param in transcoder input.
-     * @param w width.
-     * @param h height.
-     */
-    private void generateBufferedImage(final TranscoderInput in, final int w, final int h) throws TranscoderException {
-        final BufferedImageTranscoder t = new BufferedImageTranscoder();
-        if (w != 0 && h != 0)
-            t.setDimensions(w, h);
-
-        t.transcode(in, null);
-        if (colored) {
-            cache = null;
-            bufferedImage = t.getBufferedImage();
-            width = bufferedImage.getWidth();
-            height = bufferedImage.getHeight();
+        if (svgDocument != null) {
+            // Construire le GraphicsNode
+            if (color != null)
+                recolorSvg(color);
+            else if (colorType != null) {
+                final Color ui = LookAndFeelUtil.getUIColor(colorType);
+                if (ui != null)
+                    recolorSvg(ui);
+            }
+            //rebuildNode();
+            /*final UserAgentAdapter userAgent = new UserAgentAdapter();
+            ctx = new BridgeContext(userAgent);
+            ctx.setDynamicState(BridgeContext.STATIC);
+            final GVTBuilder builder = new GVTBuilder();
+            svgNode = builder.build(ctx, svgDocument);*/
         }
         else {
-            cache = t.getBufferedImage();
-            bufferedImage = new BufferedImage(cache.getWidth(), cache.getHeight(), BufferedImage.TYPE_INT_ARGB);
-            width = cache.getWidth();
-            height = cache.getHeight();
+            ctx = null;
+            svgNode = null;
         }
     }
 
-    /**
-     * Returns the default size of this user agent.
-     */
-    @Override
-    public Dimension2D getViewportSize() {
-        return new Dimension(width, height);
+    private void rebuildNode() {
+        if (svgDocument == null) {
+            ctx = null;
+            svgNode = null;
+            return;
+        }
+
+        final UserAgentAdapter userAgent = new UserAgentAdapter();
+        ctx = new BridgeContext(userAgent);
+        ctx.setDynamicState(BridgeContext.DYNAMIC);
+        final GVTBuilder builder = new GVTBuilder();
+        svgNode = builder.build(ctx, svgDocument);
+    }
+
+    private void recolorSvg(@NotNull final Color color) {
+        final String hex = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+        final NodeList elements = svgDocument.getElementsByTagName("*");
+        for (int i = 0; i < elements.getLength(); i++) {
+            final Element el = (Element) elements.item(i);
+            if (el.hasAttribute("fill") && !el.getAttribute("fill").startsWith("url(") && !el.getAttribute("fill").equalsIgnoreCase("none")) {
+                el.setAttribute("fill", hex);
+            }
+            if (el.hasAttribute("stroke") && !el.getAttribute("stroke").startsWith("url(") && !el.getAttribute("stroke").equalsIgnoreCase("none")) {
+                el.setAttribute("stroke", hex);
+            }
+        }
+    }
+
+    @NotNull
+    static IcySVGIcon fromBytes(final byte @NotNull [] data, final int width, final int height) {
+        final String svgContent = new String(data, StandardCharsets.UTF_8);
+        return new IcySVGIcon(svgContent, width, height, null, null);
+    }
+
+    @NotNull
+    static IcySVGIcon fromBytes(final byte @NotNull [] data, final int width, final int height, final @NotNull Color color) {
+        final String svgContent = new String(data, StandardCharsets.UTF_8);
+        return new IcySVGIcon(svgContent, width, height, color, null);
+    }
+
+    @NotNull
+    static IcySVGIcon fromBytes(final byte @NotNull [] data, final int width, final int height, final @NotNull LookAndFeelUtil.ColorType colorType) {
+        final String svgContent = new String(data, StandardCharsets.UTF_8);
+        return new IcySVGIcon(svgContent, width, height, null, colorType);
     }
 
     /**
@@ -219,21 +151,34 @@ public final class IcySVGIcon extends UserAgentAdapter implements Icon {
      */
     @Override
     public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
-        if (cache == null && bufferedImage == null)
+        if (colorType != null) {
+            final Color ui = LookAndFeelUtil.getUIColor(colorType);
+            if (ui != null)
+                recolorSvg(ui);
+        }
+        rebuildNode();
+
+        if (svgNode == null || ctx == null)
             return;
 
-        if (!colored) {
-            if (colorType == null) {
-                if (customColor == null)
-                    ImageUtil.paintColorImageFromAlphaImage(cache, bufferedImage, c.getForeground());
-                else
-                    ImageUtil.paintColorImageFromAlphaImage(cache, bufferedImage, customColor);
-            }
-            else
-                ImageUtil.paintColorImageFromAlphaImage(cache, bufferedImage, LookAndFeelUtil.getUIColor(colorType));
-        }
+        final Graphics2D g2d = (Graphics2D) g.create();
+        g2d.translate(x, y);
+        g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
+        g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
+        g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC));
 
-        g.drawImage(bufferedImage, x, y, null);
+        // Récupérer la taille originale du SVG
+        final Rectangle bounds = new Rectangle(0, 0, (int) ctx.getDocumentSize().getWidth(), (int) ctx.getDocumentSize().getHeight());
+
+        final double scaleX = (double) width / bounds.getWidth();
+        final double scaleY = (double) height / bounds.getHeight();
+
+        final AffineTransform at = new AffineTransform();
+        at.scale(scaleX, scaleY);
+
+        g2d.transform(at);
+        svgNode.paint(g2d);
+        g2d.dispose();
     }
 
     /**
@@ -254,50 +199,5 @@ public final class IcySVGIcon extends UserAgentAdapter implements Icon {
     @Override
     public int getIconHeight() {
         return height;
-    }
-
-    /**
-     * A transcoder that generates a BufferedImage.
-     */
-    private static final class BufferedImageTranscoder extends ImageTranscoder {
-        /**
-         * The BufferedImage generated from the SVG document.
-         */
-        private BufferedImage bufferedImage;
-
-        /**
-         * Creates a new ARGB image with the specified dimension.
-         * @param width the image width in pixels
-         * @param height the image height in pixels
-         */
-        @Override
-        public BufferedImage createImage(final int width, final int height) {
-            return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        }
-
-        /**
-         * Writes the specified image to the specified output.
-         * @param img the image to write
-         * @param output the output where to store the image
-         */
-        @Override
-        public void writeImage(final BufferedImage img, final TranscoderOutput output) {
-            bufferedImage = img;
-        }
-
-        /**
-         * Returns the BufferedImage generated from the SVG document.
-         */
-        public BufferedImage getBufferedImage() {
-            return bufferedImage;
-        }
-
-        /**
-         * Set the dimensions to be used for the image.
-         */
-        public void setDimensions(final int w, final int h) {
-            hints.put(KEY_WIDTH, (float) w);
-            hints.put(KEY_HEIGHT, (float) h);
-        }
     }
 }

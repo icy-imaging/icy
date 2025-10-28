@@ -18,8 +18,9 @@
 
 package org.bioimageanalysis.icy.gui.component.tabbedpane;
 
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,6 +32,8 @@ import java.awt.*;
  * @author Thomas Musset
  */
 public class CheckTabbedPane extends JTabbedPane {
+    private static final int ICON_SIZE = LookAndFeelUtil.getDefaultIconSize();
+
     private class CheckTabComponent extends JPanel {
         final private JCheckBox checkBox;
         final private JLabel label;
@@ -57,7 +60,8 @@ public class CheckTabbedPane extends JTabbedPane {
             add(checkBox);
             add(Box.createHorizontalStrut(10));
             add(label);
-            final Icon disabledIcon = new IcySVGIcon(SVGIcon.CIRCLE_FILL, Color.GRAY);
+            //final Icon disabledIcon = new IcySVGIcon(SVGIcon.CIRCLE_FILL, Color.GRAY);
+            final Icon disabledIcon = new IcySVG(SVGResource.CIRCLE_FILL).getIcon(ICON_SIZE, Color.GRAY);
             setIcon(disabledIcon);
             setDisabledIcon(disabledIcon);
 
@@ -87,7 +91,8 @@ public class CheckTabbedPane extends JTabbedPane {
         public void setBackgroundAll(final Color background) {
             //checkBox.setBackground(background);
             //label.setBackground(background);
-            setIcon(new IcySVGIcon(SVGIcon.CIRCLE_FILL, background));
+            //setIcon(new IcySVGIcon(SVGIcon.CIRCLE_FILL, background));
+            setIcon(new IcySVG(SVGResource.CIRCLE_FILL).getIcon(ICON_SIZE, background));
         }
 
         public void setForegroundAll(final Color foreground) {
@@ -107,6 +112,7 @@ public class CheckTabbedPane extends JTabbedPane {
      * @param defaultSelected by default checkbox is selected
      * @see JTabbedPane
      */
+    @SuppressWarnings("MagicConstant")
     public CheckTabbedPane(final int tabPlacement, final boolean defaultSelected) {
         super(tabPlacement);
 

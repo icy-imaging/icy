@@ -20,7 +20,7 @@ package org.bioimageanalysis.extension.kernel.roi.roi2d;
 import org.bioimageanalysis.icy.common.geom.areax.AreaX;
 import org.bioimageanalysis.icy.common.geom.point.Point5D;
 import org.bioimageanalysis.icy.common.geom.shape.ShapeUtil;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
 import org.bioimageanalysis.icy.model.overlay.anchor.Anchor2D;
 import org.bioimageanalysis.icy.model.overlay.anchor.PathAnchor2D;
@@ -74,7 +74,7 @@ public class ROI2DPath extends ROI2DShape {
         this.openPath = Objects.requireNonNullElseGet(openPath, () -> ShapeUtil.getOpenPath(path));
 
         // set icon (default name is defined by getDefaultName())
-        setIcon(SVGIcon.TIMELINE);
+        setIcon(SVGResource.TIMELINE);
     }
 
     /**

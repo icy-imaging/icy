@@ -23,7 +23,7 @@ import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.common.type.DataType;
 import org.bioimageanalysis.icy.gui.GuiUtil;
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.component.tabbedpane.CheckTabbedPane;
 import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
 import org.bioimageanalysis.icy.gui.viewer.Viewer;
@@ -253,7 +253,7 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
         // force apply selected mode (no event dispatched on setSelected)
         scaleTypeChanged(logButton.isSelected());
 
-        exportXLSButton = new IcyButton(SVGIcon.FILE_SAVE);
+        exportXLSButton = new IcyButton(SVGResource.FILE_SAVE);
         exportXLSButton.setToolTipText("Export histogram data into an excel file");
         exportXLSButton.addActionListener(e -> {
             try {

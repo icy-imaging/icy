@@ -18,6 +18,8 @@
 
 package org.bioimageanalysis.icy.extension.plugin.annotation_;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.lang.annotation.*;
 
 /**
@@ -26,7 +28,9 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
+@ApiStatus.Experimental
 public @interface IcyPluginDescription {
-    String shortDesc();
-    String longDesc() default "";
+    String value();
+    @Deprecated String shortDesc() default "";
+    @Deprecated String longDesc() default "";
 }

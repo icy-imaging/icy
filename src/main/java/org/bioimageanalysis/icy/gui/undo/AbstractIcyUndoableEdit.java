@@ -19,8 +19,9 @@
 package org.bioimageanalysis.icy.gui.undo;
 
 import org.bioimageanalysis.icy.common.string.StringUtil;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 
 import javax.swing.*;
 import javax.swing.undo.CannotRedoException;
@@ -34,7 +35,8 @@ import javax.swing.undo.UndoableEdit;
  * @author Thomas Musset
  */
 public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
-    protected static final Icon DEFAULT_ICON = new IcySVGIcon(SVGIcon.FLASH_ON);
+    private static final int ICON_SIZE = LookAndFeelUtil.getDefaultIconSize();
+    protected static final Icon DEFAULT_ICON = new IcySVG(SVGResource.FLASH_ON).getIcon(ICON_SIZE);
 
     /**
      * Source of the UndoableEdit
@@ -72,7 +74,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
      * Creates an <code>UndoableAction</code> which defaults <code>hasBeenDone</code> and
      * <code>alive</code> to <code>true</code>.
      */
-    public AbstractIcyUndoableEdit(final Object source, final String name, final SVGIcon icon) {
+    public AbstractIcyUndoableEdit(final Object source, final String name, final SVGResource icon) {
         super();
 
         // this.source = new WeakReference<Object>(source);
@@ -84,7 +86,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
 
         if (icon != null)
             //this.icon = new ImageIcon(icon.getScaledInstance(size, size, Image.SCALE_SMOOTH));
-            this.icon = new IcySVGIcon(icon);
+            this.icon = new IcySVG(icon).getIcon(ICON_SIZE);
         else
             this.icon = DEFAULT_ICON;
         presentationName = name;
@@ -104,7 +106,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
      * Creates an <code>UndoableAction</code> which defaults <code>hasBeenDone</code> and
      * <code>alive</code> to <code>true</code>.
      */
-    public AbstractIcyUndoableEdit(final Object source, final SVGIcon icon) {
+    public AbstractIcyUndoableEdit(final Object source, final SVGResource icon) {
         this(source, "", icon);
     }
 

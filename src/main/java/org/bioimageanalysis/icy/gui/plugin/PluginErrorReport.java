@@ -18,6 +18,7 @@
 
 package org.bioimageanalysis.icy.gui.plugin;
 
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
 import org.bioimageanalysis.icy.gui.frame.error.ErrorReportFrame;
 import org.bioimageanalysis.icy.gui.frame.progress.AnnounceFrame;
 import org.bioimageanalysis.icy.gui.frame.progress.CancelableProgressFrame;
@@ -155,7 +156,14 @@ public class PluginErrorReport {
         // build title
         if (plugin != null) {
             str = "<html><br>The plugin named <b>" + plugin.getName() + "</b> has encountered a problem";
-            icon = plugin.getIcon();
+            //icon = plugin.getIcon();
+
+            final IcySVG icons = plugin.getSVG();
+            if (icons != null) {
+                icon = icons.getIcon(32);
+            }
+            else
+                icon = null;
         }
         else if (!StringUtil.isEmpty(devId)) {
             str = "<html><br>The plugin from the developer <b>" + devId + "</b> has encountered a problem";

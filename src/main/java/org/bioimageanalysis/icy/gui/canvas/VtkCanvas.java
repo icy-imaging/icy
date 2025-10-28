@@ -18,7 +18,6 @@
 
 package org.bioimageanalysis.icy.gui.canvas;
 
-import com.jogamp.opengl.awt.GLJPanel;
 import org.bioimageanalysis.icy.gui.render.VtkSettingPanel;
 import org.bioimageanalysis.icy.common.collection.array.Array1DUtil;
 import org.bioimageanalysis.icy.common.color.ColorUtil;
@@ -31,8 +30,8 @@ import org.bioimageanalysis.icy.gui.canvas.CanvasLayerEvent.LayersEventType;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvasEvent.IcyCanvasEventType;
 import org.bioimageanalysis.icy.gui.component.ComponentUtil;
 import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.bioimageanalysis.icy.gui.render.IcyVtkPanel;
 import org.bioimageanalysis.icy.gui.viewer.Viewer;
 import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
@@ -200,22 +199,22 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         updateTNav();
 
         // create toolbar buttons
-        axesButton = new IcyToggleButton(SVGIcon.AXIS_3D);
+        axesButton = new IcyToggleButton(SVGResource.AXIS_3D);
         axesButton.setFocusable(false);
         axesButton.setToolTipText("Display 3D axis");
-        boundingBoxButton = new IcyToggleButton(SVGIcon.BOX_BOUNDS);
+        boundingBoxButton = new IcyToggleButton(SVGResource.BOX_BOUNDS_3D);
         boundingBoxButton.setFocusable(false);
         boundingBoxButton.setToolTipText("Display bounding box");
-        gridButton = new IcyToggleButton(new SVGIconPack(SVGIcon.GRID_ON, SVGIcon.GRID_OFF));
+        gridButton = new IcyToggleButton(new IcyIconPack(SVGResource.GRID_ON, SVGResource.GRID_OFF));
         gridButton.setFocusable(false);
         gridButton.setToolTipText("Display grid");
-        rulerButton = new IcyToggleButton(SVGIcon.RULER);
+        rulerButton = new IcyToggleButton(SVGResource.RULER);
         rulerButton.setFocusable(false);
         rulerButton.setToolTipText("Display rulers");
-        rulerLabelButton = new IcyToggleButton(SVGIcon.MEASURE_CENTIMETER);
+        rulerLabelButton = new IcyToggleButton(SVGResource.MEASURE_CENTIMETER);
         rulerLabelButton.setFocusable(false);
         rulerLabelButton.setToolTipText("Display rulers label");
-        volumeSlicerButton = new IcyToggleButton(SVGIcon.CUBE_SLICE);
+        volumeSlicerButton = new IcyToggleButton(SVGResource.CUBE_SLICE);
         volumeSlicerButton.setFocusable(false);
         volumeSlicerButton.setToolTipText("Enable volume slicer");
 

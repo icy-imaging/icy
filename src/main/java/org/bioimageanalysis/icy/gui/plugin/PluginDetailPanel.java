@@ -87,8 +87,8 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
     /*
      * gui
      */
-    final JPanel imagePanel;
-    final ImageComponent pluginImage;
+    //final JPanel imagePanel;
+    //final ImageComponent pluginImage;
     final JLabel pluginPathLabel;
     final JLabel pluginAuthorLabel;
     final JLabel pluginWebsiteLabel;
@@ -119,15 +119,15 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
         final JScrollPane scDescription = new JScrollPane(pluginDescriptionText);
         scDescription.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
 
-        pluginImage = new ImageComponent(plugin.isImageLoaded() ? plugin.getImage() : PluginDescriptor.DEFAULT_IMAGE);
+        //pluginImage = new ImageComponent(plugin.isImageLoaded() ? plugin.getImage() : PluginDescriptor.DEFAULT_IMAGE);
 
-        imagePanel = new JPanel(new BorderLayout());
-        imagePanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-        imagePanel.add(pluginImage, BorderLayout.CENTER);
+        //imagePanel = new JPanel(new BorderLayout());
+        //imagePanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        //imagePanel.add(pluginImage, BorderLayout.CENTER);
 
         final JPanel topPanel = new JPanel(new BorderLayout());
 
-        topPanel.add(imagePanel, BorderLayout.WEST);
+        //topPanel.add(imagePanel, BorderLayout.WEST);
         topPanel.add(scDescription, BorderLayout.CENTER);
 
         // center panel
@@ -259,7 +259,7 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
 
     void updateGui() {
         final Font sysFont = pluginAuthorLabel.getFont();
-        final Image img = plugin.getImage();
+        //final Image img = plugin.getImage();
         final String description = plugin.getDescription();
         final String changesLog = plugin.getChangeLog();
         final String author = plugin.getAuthor();
@@ -277,10 +277,10 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
                 jarPath = localPlugin.getPluginJarPath();
         }
 
-        if (img == null)
+        /*if (img == null)
             pluginImage.setImage(PluginDescriptor.DEFAULT_IMAGE);
         else
-            pluginImage.setImage(img);
+            pluginImage.setImage(img);*/
 
         if (StringUtil.isEmpty(description))
             pluginDescriptionText.setText("No description");

@@ -19,20 +19,25 @@
 package org.bioimageanalysis.icy.extension;
 
 import org.bioimageanalysis.icy.common.Version;
-import org.jetbrains.annotations.Contract;
+import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.xeustechnologies.jcl.JarClassLoader;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.*;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
+/**
+ * @author Thomas Musset
+ */
 public final class ExtensionDescriptor {
-    private final JarClassLoader jcl;
     private final File jar;
     private final String artifactId;
     private final String groupId;
@@ -41,43 +46,76 @@ public final class ExtensionDescriptor {
     private final String description;
     private final Version kernelVersion;
 
-    private final URL iconURL;
-    private final URL darkIconURL;
+    //private final ExtensionConfig config;
+
+    private final @NotNull IcySVG svg;
+
+    private final List<PluginDescriptor> plugins;
 
     private final List<Map<String, Object>> dependencies;
 
-    public ExtensionDescriptor(final @NotNull JarClassLoader jcl, final @NotNull File jar) throws IOException {
-        this.jcl = jcl;
+    public ExtensionDescriptor(final @NotNull File jar) throws IOException {
         this.jar = jar;
+        plugins = new ArrayList<>();
+        dependencies = new ArrayList<>();
+
         final Yaml yaml = new Yaml();
-        try (final InputStream propertiesIS = jcl.getResourceAsStream("META-INF/extension.yaml")) {
-            final Map<String, Object> properties = yaml.load(propertiesIS);
-            artifactId = (String) properties.get("artifactId");
-            groupId = (String) properties.get("groupId");
-            name = (String) properties.get("name");
-            version = Version.fromString((String) properties.get("version"));
-            description = (String) properties.get("description");
-            kernelVersion = Version.fromString((String) properties.get("kernelVersion"));
+        try (final JarFile jarFile = new JarFile(jar)) {
+            final ZipEntry extensionEntry =  jarFile.getEntry("META-INF/extension.yaml");
+            final ZipEntry dependenciesEntry =  jarFile.getEntry("META-INF/dependencies.yaml");
+            final ZipEntry iconEntry =  jarFile.getEntry("META-INF/icon.svg");
 
-            dependencies = new ArrayList<>();
+            try (final InputStream is = jarFile.getInputStream(extensionEntry)) {
+                final Map<String, Object> properties = yaml.load(is);
+                artifactId = (String) properties.get("artifactId");
+                groupId = (String) properties.get("groupId");
+                name = (String) properties.get("name");
+                version = Version.fromString((String) properties.get("version"));
+                description = (String) properties.get("description");
+                kernelVersion = Version.fromString((String) properties.get("kernelVersion"));
+            }
 
-            iconURL = jcl.getResource("META-INF/icon.svg");
-            darkIconURL = jcl.getResource("META-INF/icon_dark.svg");
-
-            try (final InputStream dependenciesIS = jcl.getResourceAsStream("META-INF/" + properties.get("groupId") + "." + properties.get("artifactId") + "/dependencies.yaml")) {
-                final List<Map<String, Object>> dependencies = yaml.load(dependenciesIS);
+            try (final InputStream is = jarFile.getInputStream(dependenciesEntry)) {
+                final List<Map<String, Object>> dependencies = yaml.load(is);
                 this.dependencies.addAll(dependencies);
             }
+
+            if (iconEntry != null) {
+                try (final InputStream is = jarFile.getInputStream(iconEntry)) {
+                    if (is != null)
+                        svg = new IcySVG(is.readAllBytes());
+                    else
+                        svg = new IcySVG(SVGResource.EXTENSION_DEFAULT);
+                }
+            }
+            else
+                svg = new IcySVG(SVGResource.EXTENSION_DEFAULT);
+        }
+
+        //final File configFile = new File(jar.getParentFile(), "config.yaml");
+        //config = new ExtensionConfig(configFile);
+    }
+
+    void addPlugin(final @NotNull PluginDescriptor pluginDescriptor) {
+        synchronized (plugins) {
+            plugins.add(pluginDescriptor);
         }
     }
 
-    @NotNull JarClassLoader getJCL() {
-        return jcl;
+    @NotNull
+    @Unmodifiable
+    public List<PluginDescriptor> getPlugins() {
+        synchronized (plugins) {
+            return List.copyOf(plugins);
+        }
     }
 
-    @Contract(pure = true)
-    @NotNull @Unmodifiable List<Map<String, Object>> getDependencies() {
-        return List.copyOf(dependencies);
+    @NotNull
+    @Unmodifiable
+    List<Map<String, Object>> getDependencies() {
+        synchronized (dependencies) {
+            return List.copyOf(dependencies);
+        }
     }
 
     public @NotNull File getJar() {
@@ -104,16 +142,45 @@ public final class ExtensionDescriptor {
         return version;
     }
 
-    public @NotNull URL getIconURL() {
-        return iconURL;
-    }
-
-    public @NotNull URL getDarkIconURL() {
-        return darkIconURL;
-    }
-
     public @NotNull Version getKernelVersion() {
         return kernelVersion;
+    }
+
+    /*public @NotNull ExtensionConfig getConfig() {
+        return config;
+    }*/
+
+    /**
+     * Returns default extension's SVG
+     */
+    public @NotNull IcySVG getSVG() {
+        return svg;
+    }
+
+    /**
+     * Returns SVG by it's name in extension's jar (META-INF/icon/...). Can be null.
+     */
+    @Nullable
+    public IcySVG getSVG(@NotNull final String name) {
+        try (final JarFile jarFile = new JarFile(jar)) {
+            final ZipEntry entry = jarFile.getEntry("META-INF/icons/" + name + ".svg");
+            if (entry != null) {
+                try (final InputStream is = jarFile.getInputStream(entry)) {
+                    if (is == null)
+                        return null;
+
+                    return new IcySVG(is.readAllBytes());
+                }
+            }
+            return null;
+        }
+        catch (final Throwable t) {
+            return null;
+        }
+    }
+
+    public boolean isKernel() {
+        return (groupId.equals(ExtensionLoader.KERNEL_GROUP_ID) && ExtensionLoader.KERNEL_ARTIFACT_IDS.contains(artifactId));
     }
 
     @Override

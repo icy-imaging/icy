@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -42,11 +42,11 @@ public class ImageTableCellRenderer extends DefaultTableCellRenderer {
 
     @Override
     public void setValue(final Object value) {
-        if (value instanceof Image)
-            setIcon(new ImageIcon(ImageUtil.scale((Image) value, size, size)));
-        else if (value instanceof Color)
-            setIcon(new ColorIcon((Color) value, size, size));
-        else
-            super.setValue(value);
+        switch (value) {
+            case final Image image -> setIcon(new ImageIcon(ImageUtil.scale(image, size, size)));
+            case final Icon icon -> setIcon(icon);
+            case final Color color -> setIcon(new ColorIcon(color, size, size));
+            case null, default -> super.setValue(value);
+        }
     }
 }

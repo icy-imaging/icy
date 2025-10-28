@@ -22,7 +22,7 @@ import org.bioimageanalysis.icy.gui.GuiUtil;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvas3D;
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
 import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.component.renderer.ColormapComboBoxRenderer;
 import org.bioimageanalysis.icy.gui.dialog.OpenDialog;
 import org.bioimageanalysis.icy.gui.dialog.SaveDialog;
@@ -85,15 +85,15 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         colormapViewer = new ColormapViewer(lutChannel);
 
         // colormap type
-        rgbBtn = new IcyToggleButton(SVGIcon.RGB_IMAGE);
+        rgbBtn = new IcyToggleButton(SVGResource.RGB_IMAGE);
         rgbBtn.setToolTipText("Set colormap type to Color");
         rgbBtn.setFocusPainted(false);
         //ComponentUtil.setFixedWidth(rgbBtn, 26);
-        grayBtn = new IcyToggleButton(SVGIcon.GRAYSCALE_IMAGE);
+        grayBtn = new IcyToggleButton(SVGResource.GRAYSCALE_IMAGE);
         grayBtn.setToolTipText("Set colormap type to Gray");
         grayBtn.setFocusPainted(false);
         //ComponentUtil.setFixedWidth(grayBtn, 26);
-        alphaBtn = new IcyToggleButton(SVGIcon.ARGB_IMAGE);
+        alphaBtn = new IcyToggleButton(SVGResource.ARGB_IMAGE);
         alphaBtn.setToolTipText("Set colormap type to Alpha (transparency)");
         alphaBtn.setFocusPainted(false);
         //ComponentUtil.setFixedWidth(alphaBtn, 26);
@@ -169,7 +169,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         colormapComboBox.addActionListener(e -> setColorMap((IcyColorMap) colormapComboBox.getSelectedItem()));
 
         // load button
-        final IcyButton loadButton = new IcyButton(SVGIcon.FOLDER_OPEN);
+        final IcyButton loadButton = new IcyButton(SVGResource.FOLDER_OPEN);
         loadButton.setToolTipText("Load colormap from file");
 
         // action to load colormap
@@ -185,7 +185,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         });
 
         // save button
-        final IcyButton saveButton = new IcyButton(SVGIcon.SAVE);
+        final IcyButton saveButton = new IcyButton(SVGResource.SAVE);
         saveButton.setToolTipText("Save colormap to file");
 
         // action to save colormap

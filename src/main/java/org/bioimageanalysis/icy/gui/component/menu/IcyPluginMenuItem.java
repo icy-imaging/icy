@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,12 +20,10 @@ package org.bioimageanalysis.icy.gui.component.menu;
 
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
 import org.bioimageanalysis.icy.extension.plugin.PluginLauncher;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -39,24 +37,14 @@ public class IcyPluginMenuItem extends IcyMenuItem implements ActionListener {
     private static final int SIZE = 32;
 
     public IcyPluginMenuItem(final PluginDescriptor descriptor, final String text) {
-        super(text, new SVGIconPack(SVGIcon.INDETERMINATE_QUESTION), SIZE);
+        super(text, SVGResource.INDETERMINATE_QUESTION, SIZE);
         this.descriptor = descriptor;
 
 
         // do it in background as loading icon can take sometime
         ThreadUtil.bgRun(() -> {
-            // Try with SVG at first
-            final SVGIcon svgIcon = descriptor.getSVGIcon();
-            if (svgIcon != null)
-                setSVGIconPack(new SVGIconPack(svgIcon));
-            else {
-                // Try with classic PNG/JPG icon
-                final ImageIcon imgIcon = descriptor.getIcon();
-                if (imgIcon != null) {
-                    final ImageIcon icon = new ImageIcon(imgIcon.getImage().getScaledInstance(SIZE, SIZE, Image.SCALE_SMOOTH));
-                    setIcons(icon);
-                }
-            }
+            final IcySVG icons = descriptor.getSVG();
+            setIcons(icons.getIcon(SIZE));
         });
 
         addActionListener(this);

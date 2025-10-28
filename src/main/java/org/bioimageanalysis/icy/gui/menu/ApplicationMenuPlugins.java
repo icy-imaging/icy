@@ -20,10 +20,9 @@ package org.bioimageanalysis.icy.gui.menu;
 
 import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
 import org.bioimageanalysis.icy.gui.action.GeneralActions;
 import org.bioimageanalysis.icy.gui.action.PreferencesActions;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenu;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenuItem;
 import org.bioimageanalysis.icy.gui.component.menu.IcyPluginMenuItem;
@@ -53,8 +52,8 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
     private ApplicationMenuPlugins() {
         super("Plugins");
 
-        itemPluginsSettings = new IcyMenuItem(PreferencesActions.pluginPreferencesAction, SVGIcon.SETTINGS);
-        itemCatalog = new IcyMenuItem(GeneralActions.catalogAction, SVGIcon.WIDGETS);
+        itemPluginsSettings = new IcyMenuItem(PreferencesActions.pluginPreferencesAction, SVGResource.SETTINGS);
+        itemCatalog = new IcyMenuItem(GeneralActions.catalogAction, SVGResource.WIDGETS);
 
         //itemPluginSearch = new IcyTextFieldHint(SVGIcon.SEARCH, "Search Plugin...");
         //itemPluginSearch.setEnabled(false);
@@ -109,7 +108,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
             }
 
             for (final Map.Entry<Character, List<PluginDescriptor>> characterListEntry : characterListMap.entrySet()) {
-                final IcyMenu menuFirstChar = new IcyMenu(characterListEntry.getKey().toString(), SVGIcon.FOLDER);
+                final IcyMenu menuFirstChar = new IcyMenu(characterListEntry.getKey().toString(), SVGResource.FOLDER);
                 for (final PluginDescriptor plugin : characterListEntry.getValue()) {
                     final IcyPluginMenuItem itemPlugin = new IcyPluginMenuItem(plugin);
                     if (!plugin.getShortDescription().isBlank())

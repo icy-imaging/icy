@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -21,26 +21,25 @@ package org.bioimageanalysis.icy.gui.toolbar.button;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyROIPlugin;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginROI;
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
 import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.awt.*;
 
 /**
  * @author Thomas Musset
  */
 public class ROIDrawButton extends IcyToggleButton {
-    private static final int SIZE = 32;
+    private static final int SIZE = 24;
 
     private final PluginDescriptor descriptor;
 
     public ROIDrawButton(final @NotNull PluginDescriptor descriptor) {
-        super(SVGIcon.INDETERMINATE_QUESTION);
+        super(SVGResource.INDETERMINATE_QUESTION, SIZE);
+        setText(null);
 
         this.descriptor = descriptor;
 
@@ -59,18 +58,14 @@ public class ROIDrawButton extends IcyToggleButton {
 
         // do it in background as loading icon can take sometime
         ThreadUtil.bgRun(() -> {
-            // Try with SVG at first
-            final SVGIcon svgIcon = descriptor.getSVGIcon();
-            if (svgIcon != null)
-                setSVGIconPack(new SVGIconPack(svgIcon));
-            else {
-                // Try with classic PNG/JPG icon
-                final ImageIcon imgIcon = descriptor.getIcon();
-
-                if (imgIcon != null) {
-                    final ImageIcon icon = new ImageIcon(imgIcon.getImage().getScaledInstance(SIZE, SIZE, Image.SCALE_SMOOTH));
-                    setIcons(icon);
+            try {
+                final IcySVG icons = descriptor.getSVG();
+                if (icons != null) {
+                    setIcons(icons.getIcon(SIZE, LookAndFeelUtil.ColorType.TOGGLEBUTTON_DEFAULT));
                 }
+            }
+            catch (final Throwable t) {
+                //
             }
         });
     }

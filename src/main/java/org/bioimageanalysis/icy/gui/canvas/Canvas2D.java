@@ -27,14 +27,13 @@ import org.bioimageanalysis.icy.common.math.MathUtil;
 import org.bioimageanalysis.icy.common.math.MultiSmoothMover;
 import org.bioimageanalysis.icy.common.math.SmoothMover;
 import org.bioimageanalysis.icy.common.string.StringUtil;
-import org.bioimageanalysis.icy.extension.plugin.interface_.PluginROI;
 import org.bioimageanalysis.icy.gui.EventUtil;
 import org.bioimageanalysis.icy.gui.GraphicsUtil;
 import org.bioimageanalysis.icy.gui.GuiUtil;
 import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGImageIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.listener.ROIToolChangeListener;
 import org.bioimageanalysis.icy.gui.viewer.Viewer;
 import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
@@ -51,11 +50,9 @@ import org.bioimageanalysis.icy.model.roi.tool.ROIMagicWand;
 import org.bioimageanalysis.icy.model.sequence.DimensionId;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.bioimageanalysis.icy.model.sequence.SequenceEvent;
-import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.preferences.CanvasPreferences;
 import org.bioimageanalysis.icy.system.preferences.XMLPreferences;
 import org.bioimageanalysis.icy.system.thread.SingleProcessor;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -76,8 +73,8 @@ import java.util.concurrent.TimeUnit;
 public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     static final int ICON_TARGET_SIZE = LookAndFeelUtil.getDefaultIconSize();
 
-    static final Image ICON_TARGET_BLACK = new IcySVGImageIcon(SVGIcon.POINT_SCAN, Color.BLACK).getImage();
-    static final Image ICON_TARGET_LIGHT = new IcySVGImageIcon(SVGIcon.POINT_SCAN, Color.WHITE).getImage();
+    static final Image ICON_TARGET_BLACK = new IcySVG(SVGResource.POINT_SCAN).getImage(ICON_TARGET_SIZE, Color.BLACK);
+    static final Image ICON_TARGET_LIGHT = new IcySVG(SVGResource.POINT_SCAN).getImage(ICON_TARGET_SIZE, Color.WHITE);
 
     /**
      * Possible rounded zoom factor : 0.01 --> 100
@@ -260,7 +257,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         panel.add(canvasMap, BorderLayout.CENTER);
 
         // fit canvas toggle
-        zoomFitCanvasButton = new IcyButton(SVGIcon.ZOOM_OUT_MAP);
+        zoomFitCanvasButton = new IcyButton(SVGResource.ZOOM_OUT_MAP);
         //zoomFitCanvasButton.setSelected(preferences.getBoolean(ID_FIT_CANVAS, false));
         zoomFitCanvasButton.setFocusable(false);
         //zoomFitCanvasButton.setToolTipText("Keep image fitting to window size");

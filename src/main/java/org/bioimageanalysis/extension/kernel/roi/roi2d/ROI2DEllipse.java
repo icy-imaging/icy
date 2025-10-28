@@ -20,7 +20,7 @@ package org.bioimageanalysis.extension.kernel.roi.roi2d;
 
 import org.bioimageanalysis.icy.common.geom.point.Point5D;
 import org.bioimageanalysis.icy.common.math.ArrayMath;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 
@@ -38,7 +38,7 @@ public class ROI2DEllipse extends ROI2DRectShape {
         super(new Ellipse2D.Double(), topLeft, bottomRight);
 
         // set icon (default name is defined by getDefaultName()) 
-        setIcon(SVGIcon.CIRCLE);
+        setIcon(SVGResource.ROI_ELLIPSE);
     }
 
     /**

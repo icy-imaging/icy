@@ -25,7 +25,7 @@ import org.bioimageanalysis.icy.io.Loader;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenu;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenuItem;
 import org.bioimageanalysis.icy.system.preferences.IcyPreferences;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import org.bioimageanalysis.icy.common.collection.CollectionUtil;
@@ -56,64 +56,64 @@ public final class ApplicationMenuFile extends AbstractApplicationMenu {
 
         recentFileList = new RecentFileList(IcyPreferences.applicationRoot().node("loader"));
 
-        final IcyMenu menuCreate = new IcyMenu("New", SVGIcon.ADD_PHOTO_ALTERNATE);
+        final IcyMenu menuCreate = new IcyMenu("New", SVGResource.PICTURE_ADD);
         add(menuCreate);
 
-        final IcyMenuItem itemCreateSequence = new IcyMenuItem(FileActions.newSequenceAction, SVGIcon.IMAGE);
+        final IcyMenuItem itemCreateSequence = new IcyMenuItem(FileActions.newSequenceAction, SVGResource.IMAGE);
         menuCreate.add(itemCreateSequence);
 
-        final IcyMenuItem itemCreateGraySequence = new IcyMenuItem(FileActions.newGraySequenceAction, SVGIcon.GRAYSCALE_IMAGE);
+        final IcyMenuItem itemCreateGraySequence = new IcyMenuItem(FileActions.newGraySequenceAction, SVGResource.GRAYSCALE_IMAGE);
         menuCreate.add(itemCreateGraySequence);
 
-        final IcyMenuItem itemCreateRGBSequence = new IcyMenuItem(FileActions.newRGBSequenceAction, SVGIcon.RGB_IMAGE);
+        final IcyMenuItem itemCreateRGBSequence = new IcyMenuItem(FileActions.newRGBSequenceAction, SVGResource.RGB_IMAGE);
         menuCreate.add(itemCreateRGBSequence);
 
         // TODO rework svg icon for ARGB sequence
-        final IcyMenuItem itemCreateRGBASequence = new IcyMenuItem(FileActions.newARGBSequenceAction, SVGIcon.ARGB_IMAGE);
+        final IcyMenuItem itemCreateRGBASequence = new IcyMenuItem(FileActions.newARGBSequenceAction, SVGResource.ARGB_IMAGE);
         menuCreate.add(itemCreateRGBASequence);
 
-        final IcyMenuItem itemOpen = new IcyMenuItem(FileActions.openSequenceAction, SVGIcon.FOLDER_OPEN);
+        final IcyMenuItem itemOpen = new IcyMenuItem(FileActions.openSequenceAction, SVGResource.FOLDER_OPEN);
         add(itemOpen);
 
         // TODO Make recent files menu
-        menuOpenRecent = new IcyMenu("Open Recent", SVGIcon.FOLDER);
+        menuOpenRecent = new IcyMenu("Open Recent", SVGResource.FOLDER);
         add(menuOpenRecent);
 
-        itemRemoveRecentFiles = new IcyMenuItem(FileActions.clearRecentFilesAction, SVGIcon.DELETE);
+        itemRemoveRecentFiles = new IcyMenuItem(FileActions.clearRecentFilesAction, SVGResource.DELETE);
         itemRemoveRecentFiles.addActionListener(e -> menuOpenRecent.setEnabled(false));
 
-        final IcyMenuItem itemOpenRegion = new IcyMenuItem(FileActions.openSequenceRegionAction, SVGIcon.PICTURE_IN_PICTURE);
+        final IcyMenuItem itemOpenRegion = new IcyMenuItem(FileActions.openSequenceRegionAction, SVGResource.PICTURE_IN_PICTURE);
         add(itemOpenRegion);
 
-        final IcyMenuItem itemCloseSequence = new IcyMenuItem(FileActions.closeCurrentSequenceAction, SVGIcon.CLOSE);
+        final IcyMenuItem itemCloseSequence = new IcyMenuItem(FileActions.closeCurrentSequenceAction, SVGResource.CLOSE);
         add(itemCloseSequence);
 
-        final IcyMenuItem itemCloseOther = new IcyMenuItem(FileActions.closeOthersSequencesAction, SVGIcon.CLEAR_ALL);
+        final IcyMenuItem itemCloseOther = new IcyMenuItem(FileActions.closeOthersSequencesAction, SVGResource.CLEAR_ALL);
         add(itemCloseOther);
 
-        final IcyMenuItem itemCloseAll = new IcyMenuItem(FileActions.closeAllSequencesAction, SVGIcon.CLEAR_ALL);
+        final IcyMenuItem itemCloseAll = new IcyMenuItem(FileActions.closeAllSequencesAction, SVGResource.CLEAR_ALL);
         add(itemCloseAll);
 
         addSeparator();
 
-        final IcyMenuItem itemSaveSequence = new IcyMenuItem(FileActions.saveSequenceAction, SVGIcon.SAVE);
+        final IcyMenuItem itemSaveSequence = new IcyMenuItem(FileActions.saveSequenceAction, SVGResource.SAVE);
         add(itemSaveSequence);
 
-        final IcyMenuItem itemSaveSequenceAs = new IcyMenuItem(FileActions.saveAsSequenceAction, SVGIcon.SAVE_AS);
+        final IcyMenuItem itemSaveSequenceAs = new IcyMenuItem(FileActions.saveAsSequenceAction, SVGResource.SAVE_AS);
         add(itemSaveSequenceAs);
 
-        final IcyMenuItem itemSaveMetadata = new IcyMenuItem(FileActions.saveMetaDataAction, SVGIcon.ART_TRACK);
+        final IcyMenuItem itemSaveMetadata = new IcyMenuItem(FileActions.saveMetaDataAction, SVGResource.PICTURE_METADATA);
         add(itemSaveMetadata);
 
         //if (!SystemUtil.isMac()) {
             addSeparator();
 
-            final IcyMenuItem itemPreferences = new IcyMenuItem(PreferencesActions.preferencesAction, SVGIcon.SETTINGS);
+            final IcyMenuItem itemPreferences = new IcyMenuItem(PreferencesActions.preferencesAction, SVGResource.SETTINGS);
             add(itemPreferences);
 
             addSeparator();
 
-            final IcyMenuItem itemQuit = new IcyMenuItem(GeneralActions.exitApplicationAction, SVGIcon.POWER_SETTINGS_NEW);
+            final IcyMenuItem itemQuit = new IcyMenuItem(GeneralActions.exitApplicationAction, SVGResource.POWER_SETTINGS_NEW);
             add(itemQuit);
         //}
 
@@ -134,7 +134,7 @@ public final class ApplicationMenuFile extends AbstractApplicationMenu {
                 for (int i = 0; i < nbRecentFiles; i++) {
                     final String entry = recentFileList.getEntryAsName(i, 100, true);
                     if (!StringUtil.isEmpty(entry)) {
-                        final IcyMenuItem itemFile = new IcyMenuItem(entry, SVGIcon.IMAGE);
+                        final IcyMenuItem itemFile = new IcyMenuItem(entry, SVGResource.IMAGE);
                         final String[] paths = recentFileList.getEntry(i);
                         itemFile.addActionListener(e -> Loader.load(CollectionUtil.asList(paths), false, true, true));
                         menuOpenRecent.add(itemFile);

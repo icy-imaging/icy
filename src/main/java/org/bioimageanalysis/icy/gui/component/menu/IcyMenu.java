@@ -19,9 +19,9 @@
 package org.bioimageanalysis.icy.gui.component.menu;
 
 import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,14 +31,14 @@ import javax.swing.*;
  * @author Thomas Musset
  */
 public class IcyMenu extends JMenu {
-    private @Nullable SVGIconPack iconPack;
+    private @Nullable IcyIconPack iconPack;
     private @Nullable Icon iconDefault = null, iconDisabled = null, iconSelected = null, iconDisabledSelected = null;
     private final int iconSize;
 
     /**
      * Create a {@link JMenu} with specified text, SVG icons for each state (default, disabled and selected) and custom size.
      */
-    public IcyMenu(final @NotNull String text, final @NotNull SVGIconPack pack, final int size) {
+    public IcyMenu(final @NotNull String text, final @NotNull IcyIconPack pack, final int size) {
         super(text);
         iconPack = pack;
         iconSize = size;
@@ -48,28 +48,28 @@ public class IcyMenu extends JMenu {
     /**
      * Create a {@link JMenu} with specified text, SVG icons for each state (default, disabled and selected) and default size.
      */
-    public IcyMenu(final @NotNull String text, final @NotNull SVGIconPack pack) {
+    public IcyMenu(final @NotNull String text, final @NotNull IcyIconPack pack) {
         this(text, pack, LookAndFeelUtil.getDefaultIconSize());
     }
 
     /**
      * Create a {@link JMenu} with specified text, same SVG icon for each state (default, disabled and selected) and custom size.
      */
-    public IcyMenu(final @NotNull String text, final @NotNull SVGIcon icon, final int size) {
-        this(text, new SVGIconPack(icon), size);
+    public IcyMenu(final @NotNull String text, final @NotNull SVGResource icon, final int size) {
+        this(text, new IcyIconPack(icon), size);
     }
 
     /**
      * Create a {@link JMenu} with specified text, same SVG icon for each state (default, disabled and selected) and default size.
      */
-    public IcyMenu(final @NotNull String text, final @NotNull SVGIcon icon) {
-        this(text, new SVGIconPack(icon), LookAndFeelUtil.getDefaultIconSize());
+    public IcyMenu(final @NotNull String text, final @NotNull SVGResource icon) {
+        this(text, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize());
     }
 
     /**
      * Create a {@link JMenu} with specified SVG icons for each state (default, disabled and selected) and custom size, but without text.
      */
-    public IcyMenu(final @NotNull SVGIconPack pack, final int size) {
+    public IcyMenu(final @NotNull IcyIconPack pack, final int size) {
         super();
         iconPack = pack;
         iconSize = size;
@@ -79,22 +79,22 @@ public class IcyMenu extends JMenu {
     /**
      * Create a {@link JMenu} with specified SVG icons for each state (default, disabled and selected) and default size, but without text.
      */
-    public IcyMenu(final @NotNull SVGIconPack pack) {
+    public IcyMenu(final @NotNull IcyIconPack pack) {
         this(pack, LookAndFeelUtil.getDefaultIconSize());
     }
 
     /**
      * Create a {@link JMenu} with same SVG icon for each state (default, disabled and selected) and custom size, but without text.
      */
-    public IcyMenu(final @NotNull SVGIcon icon, final int size) {
-        this(new SVGIconPack(icon), size);
+    public IcyMenu(final @NotNull SVGResource icon, final int size) {
+        this(new IcyIconPack(icon), size);
     }
 
     /**
      * Create a {@link JMenu} with same SVG icon for each state (default, disabled and selected) and default size, but without text.
      */
-    public IcyMenu(final @NotNull SVGIcon icon) {
-        this(new SVGIconPack(icon), LookAndFeelUtil.getDefaultIconSize());
+    public IcyMenu(final @NotNull SVGResource icon) {
+        this(new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize());
     }
 
     /**
@@ -102,7 +102,7 @@ public class IcyMenu extends JMenu {
      */
     public IcyMenu(final @NotNull String text, final int size) {
         super(text);
-        iconPack = new SVGIconPack(SVGIcon.NULL);
+        iconPack = new IcyIconPack(SVGResource.NULL);
         iconSize = size;
         setSVGIcons();
     }
@@ -114,7 +114,7 @@ public class IcyMenu extends JMenu {
         this(text, LookAndFeelUtil.getDefaultIconSize());
     }
 
-    protected final void setSVGIconPack(final @NotNull SVGIconPack pack) {
+    protected final void setSVGIconPack(final @NotNull IcyIconPack pack) {
         this.iconPack = pack;
         setSVGIcons();
     }
@@ -156,10 +156,10 @@ public class IcyMenu extends JMenu {
         if (iconPack == null)
             return;
 
-        iconDefault = new IcySVGIcon(iconPack.getDefaultIcon(), LookAndFeelUtil.ColorType.UI_MENUITEM_DEFAULT, iconSize);
-        iconDisabled = new IcySVGIcon(iconPack.getDisabledIcon(), LookAndFeelUtil.ColorType.UI_MENUITEM_DISABLED, iconSize);
-        iconSelected = new IcySVGIcon(iconPack.getSelectedtIcon(), LookAndFeelUtil.ColorType.UI_MENUITEM_SELECTED, iconSize);
-        iconDisabledSelected = new IcySVGIcon(iconPack.getDisabledSelectedIcon(), LookAndFeelUtil.ColorType.UI_MENUITEM_DISABLED, iconSize);
+        iconDefault = new IcySVG(iconPack.getDefaultIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_DEFAULT);
+        iconDisabled = new IcySVG(iconPack.getDisabledIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_DISABLED);
+        iconSelected = new IcySVG(iconPack.getSelectedtIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_SELECTED);
+        iconDisabledSelected = new IcySVG(iconPack.getDisabledSelectedIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_DISABLED);
 
         resetIcons();
     }

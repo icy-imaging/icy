@@ -18,18 +18,18 @@
 
 package org.bioimageanalysis.icy.gui.preferences;
 
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.component.table.IcyTable;
 import org.bioimageanalysis.icy.gui.component.field.IcyTextField;
 import org.bioimageanalysis.icy.gui.component.field.IcyTextField.TextChangeListener;
 import org.bioimageanalysis.icy.gui.plugin.PluginDetailPanel;
 import org.bioimageanalysis.icy.gui.component.ComponentUtil;
-import org.bioimageanalysis.icy.model.image.ImageUtil;
 import org.bioimageanalysis.icy.network.NetworkUtil;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
 import org.bioimageanalysis.icy.system.preferences.RepositoryPreferences;
 import org.bioimageanalysis.icy.system.preferences.RepositoryPreferences.RepositoryInfo;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGImageIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import org.bioimageanalysis.icy.common.string.StringUtil;
 
@@ -52,8 +52,8 @@ import java.util.List;
  * @author Thomas Musset
  */
 public abstract class PluginListPreferencePanel extends PreferencePanel implements TextChangeListener, ListSelectionListener {
-    static final String[] columnNames = {"", "Name", "Version", "State", "Enabled"};
-    static final String[] columnIds = {"Icon", "Name", "Version", "State", "Enabled"};
+    static final String[] columnNames = {"", "Extension", "Name", "Version", "State", "Enabled"};
+    static final String[] columnIds = {"Icon", "Extension", "Name", "Version", "State", "Enabled"};
 
     List<PluginDescriptor> plugins;
 
@@ -199,23 +199,27 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
                     final PluginDescriptor plugin = plugins.get(row);
 
                     switch (column) {
-                        case 0:
-                            if (plugin.isIconLoaded() && plugin.getIcon() != null)
-                                return new ImageIcon(ImageUtil.scale(plugin.getIcon().getImage(), 32, 32));
+                        case 0: {
+                            if (plugin.isIconLoaded())
+                                return plugin.getSVG().getIcon(30, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
 
                             loadIconAsync(plugin);
-                            return new IcySVGImageIcon(SVGIcon.INDETERMINATE_QUESTION, getForeground(), 32);
+                            return new IcySVG(SVGResource.HOURGLASS).getIcon(30, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
+                        }
 
                         case 1:
-                            return plugin.getName();
+                            return plugin.getExtension().getName();
 
                         case 2:
-                            return plugin.getVersion().toString();
+                            return plugin.getName();
 
                         case 3:
-                            return getStateValue(plugin);
+                            return plugin.getVersion().toShortString();
 
                         case 4:
+                            return getStateValue(plugin);
+
+                        case 5:
                             return Boolean.valueOf(isActive(plugin));
                     }
                 }
@@ -228,7 +232,7 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
                 if (rowIndex < plugins.size()) {
                     final PluginDescriptor plugin = plugins.get(rowIndex);
 
-                    if (columnIndex == 4) {
+                    if (columnIndex == 5) {
                         if (aValue instanceof Boolean)
                             setActive(plugin, ((Boolean) aValue).booleanValue());
                     }
@@ -237,14 +241,14 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
 
             @Override
             public boolean isCellEditable(final int row, final int column) {
-                return (column == 4);
+                return (column == 5);
             }
 
             @Override
             public Class<?> getColumnClass(final int columnIndex) {
                 return switch (columnIndex) {
                     case 0 -> ImageIcon.class;
-                    case 4 -> Boolean.class;
+                    case 5 -> Boolean.class;
                     default -> String.class;
                 };
             }
@@ -264,24 +268,30 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
 
         col = colModel.getColumn(1);
         col.setIdentifier(columnIds[1]);
+        col.setMinWidth(60);
+        col.setPreferredWidth(80);
+        col.setMaxWidth(200);
+
+        col = colModel.getColumn(2);
+        col.setIdentifier(columnIds[2]);
         col.setMinWidth(120);
         col.setPreferredWidth(200);
         col.setMaxWidth(500);
 
-        col = colModel.getColumn(2);
-        col.setIdentifier(columnIds[2]);
-        col.setMinWidth(60);
-        col.setPreferredWidth(60);
-        col.setMaxWidth(60);
-
         col = colModel.getColumn(3);
         col.setIdentifier(columnIds[3]);
+        col.setMinWidth(50);
+        col.setPreferredWidth(100);
+        col.setMaxWidth(200);
+
+        col = colModel.getColumn(4);
+        col.setIdentifier(columnIds[4]);
         col.setMinWidth(70);
         col.setPreferredWidth(90);
         col.setMaxWidth(120);
 
-        col = colModel.getColumn(4);
-        col.setIdentifier(columnIds[4]);
+        col = colModel.getColumn(5);
+        col.setIdentifier(columnIds[5]);
         col.setMinWidth(60);
         col.setPreferredWidth(60);
         col.setMaxWidth(60);
@@ -337,7 +347,7 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
     protected void loadIconAsync(final PluginDescriptor plugin) {
         ThreadUtil.bgRun(() -> {
             // icon correctly loaded ?
-            if (plugin.loadIcon())
+            if (plugin.loadSVG())
                 refreshTableData();
         });
     }

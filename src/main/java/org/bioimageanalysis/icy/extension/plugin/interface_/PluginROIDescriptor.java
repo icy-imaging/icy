@@ -49,7 +49,7 @@ public interface PluginROIDescriptor extends PluginNoEDTConstructor {
      * result.add(new ROIDescriptor("...", Double.class));
      * </pre>
      */
-    List<ROIDescriptor> getDescriptors();
+    List<ROIDescriptor<?>> getDescriptors();
 
     /**
      * Computes the descriptor(s) (declared in the {@link #getDescriptors()}) on the specified ROI.<br>
@@ -66,5 +66,5 @@ public interface PluginROIDescriptor extends PluginNoEDTConstructor {
      *                                       <code>null</code> while the calculation requires it.
      * @throws InterruptedException          if the thread was interrupted during the computation of the descriptor
      */
-    Map<ROIDescriptor, Object> compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException;
+    Map<ROIDescriptor<?>, Object> compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException;
 }

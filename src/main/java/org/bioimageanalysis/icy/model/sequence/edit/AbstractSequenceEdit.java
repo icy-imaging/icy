@@ -17,11 +17,9 @@
  */
 package org.bioimageanalysis.icy.model.sequence.edit;
 
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.undo.AbstractIcyUndoableEdit;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
-
-import java.awt.*;
 
 /**
  * Abstract sequence undoable edit.
@@ -30,7 +28,7 @@ import java.awt.*;
  * @author Thomas Musset
  */
 public abstract class AbstractSequenceEdit extends AbstractIcyUndoableEdit {
-    public AbstractSequenceEdit(final Sequence sequence, final String name, final SVGIcon icon) {
+    public AbstractSequenceEdit(final Sequence sequence, final String name, final SVGResource icon) {
         super(sequence, name, icon);
     }
 
@@ -38,7 +36,7 @@ public abstract class AbstractSequenceEdit extends AbstractIcyUndoableEdit {
         this(sequence, name, null);
     }
 
-    public AbstractSequenceEdit(final Sequence sequence, final SVGIcon icon) {
+    public AbstractSequenceEdit(final Sequence sequence, final SVGResource icon) {
         this(sequence, "Sequence changed", icon);
     }
 

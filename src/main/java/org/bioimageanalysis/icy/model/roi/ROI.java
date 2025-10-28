@@ -34,7 +34,7 @@ import org.bioimageanalysis.icy.extension.plugin.interface_.PluginROI;
 import org.bioimageanalysis.icy.gui.EventUtil;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
 import org.bioimageanalysis.icy.gui.canvas.VtkCanvas;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.toolbar.panel.RoisPanel;
 import org.bioimageanalysis.icy.io.xml.XMLPersistent;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
@@ -1070,7 +1070,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent {
     protected final Map<String, String> properties;
 
     // attached ROI icon
-    protected SVGIcon icon;
+    protected SVGResource icon;
 
     /**
      * cached calculated properties
@@ -1116,7 +1116,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent {
         updater = new UpdateEventHandler(this, false);
 
         // default icon & name
-        icon = SVGIcon.DRAW_ABSTRACT;
+        icon = SVGResource.DRAW_ABSTRACT;
         name = getDefaultName();
     }
 
@@ -1275,7 +1275,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent {
     /**
      * @return the icon
      */
-    public SVGIcon getIcon() {
+    public SVGResource getIcon() {
         return icon;
     }
 
@@ -1283,7 +1283,7 @@ public abstract class ROI implements ChangeListener, XMLPersistent {
      * @param value
      *        the icon to set
      */
-    public void setIcon(final SVGIcon value) {
+    public void setIcon(final SVGResource value) {
         if (icon != value) {
             icon = value;
             propertyChanged(PROPERTY_ICON);

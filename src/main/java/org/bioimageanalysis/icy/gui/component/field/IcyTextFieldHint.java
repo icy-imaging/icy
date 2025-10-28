@@ -20,7 +20,8 @@ package org.bioimageanalysis.icy.gui.component.field;
 
 import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
 import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -33,13 +34,15 @@ import java.awt.event.FocusListener;
  * @author Thomas Musset
  */
 public class IcyTextFieldHint extends JTextField implements FocusListener {
+    private static final int ICON_SIZE = LookAndFeelUtil.getDefaultIconSize();
+
     private final IcySVGIcon icon;
     private final String hint;
     private final Insets insets;
 
-    public IcyTextFieldHint(final @NotNull SVGIcon icon, final @NotNull String hint) {
+    public IcyTextFieldHint(final @NotNull SVGResource icon, final @NotNull String hint) {
         super();
-        this.icon = new IcySVGIcon(icon, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
+        this.icon = new IcySVG(icon).getIcon(ICON_SIZE, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
         this.hint = hint;
 
         final Border border = UIManager.getBorder("TextField.border");
@@ -48,9 +51,9 @@ public class IcyTextFieldHint extends JTextField implements FocusListener {
         addFocusListener(this);
     }
 
-    public IcyTextFieldHint(final @NotNull SVGIcon icon) {
+    public IcyTextFieldHint(final @NotNull SVGResource icon) {
         super();
-        this.icon = new IcySVGIcon(icon, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
+        this.icon = new IcySVG(icon).getIcon(ICON_SIZE, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
         this.hint = "";
 
         final Border border = UIManager.getBorder("TextField.border");
@@ -89,6 +92,8 @@ public class IcyTextFieldHint extends JTextField implements FocusListener {
             final Graphics2D g2d = (Graphics2D) g;
             final RenderingHints hints = g2d.getRenderingHints();
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             g2d.drawString(hint, x, textBottom);
             g2d.setRenderingHints(hints);
             g.setFont(prev);

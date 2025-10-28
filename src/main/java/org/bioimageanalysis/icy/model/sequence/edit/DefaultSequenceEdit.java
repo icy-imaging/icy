@@ -18,7 +18,7 @@
 
 package org.bioimageanalysis.icy.model.sequence.edit;
 
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
 import org.bioimageanalysis.icy.model.overlay.Overlay;
 import org.bioimageanalysis.icy.model.roi.ROI;
@@ -39,7 +39,7 @@ public class DefaultSequenceEdit extends AbstractSequenceEdit {
     Set<ROI> previousRois;
     Set<Overlay> previousOverlays;
 
-    public DefaultSequenceEdit(final Sequence previous, final Sequence sequence, final SVGIcon icon) {
+    public DefaultSequenceEdit(final Sequence previous, final Sequence sequence, final SVGResource icon) {
         super(sequence, icon);
 
         this.previous = previous;

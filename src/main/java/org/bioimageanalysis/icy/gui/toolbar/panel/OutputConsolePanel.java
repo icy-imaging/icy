@@ -23,8 +23,8 @@ import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
 import org.bioimageanalysis.icy.gui.frame.progress.ProgressFrame;
 import org.bioimageanalysis.icy.gui.GuiUtil;
 import org.bioimageanalysis.icy.system.preferences.GeneralPreferences;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.bioimageanalysis.icy.system.IcyExceptionHandler;
 import org.bioimageanalysis.icy.gui.EventUtil;
 import org.jetbrains.annotations.NotNull;
@@ -223,11 +223,11 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
 
         logMaxLineField = new JSpinner(new SpinnerNumberModel(GeneralPreferences.getOutputLogSize(), 100, 1000000, 100));
         logMaxLineTextField = ((JSpinner.DefaultEditor) logMaxLineField.getEditor()).getTextField();
-        final IcyButton clearLogButton = new IcyButton(SVGIcon.DELETE);
-        final IcyButton copyLogButton = new IcyButton(SVGIcon.CONTENT_COPY);
-        final IcyButton reportLogButton = new IcyButton(SVGIcon.BUG_REPORT);
-        final IcyToggleButton scrollLockButton = new IcyToggleButton(new SVGIconPack(SVGIcon.LOCK_OPEN, SVGIcon.LOCK));
-        fileLogButton = new IcyToggleButton(SVGIcon.FILE_SAVE);
+        final IcyButton clearLogButton = new IcyButton(SVGResource.DELETE);
+        final IcyButton copyLogButton = new IcyButton(SVGResource.CONTENT_COPY);
+        final IcyButton reportLogButton = new IcyButton(SVGResource.BUG_REPORT);
+        final IcyToggleButton scrollLockButton = new IcyToggleButton(new IcyIconPack(SVGResource.LOCK_OPEN, SVGResource.LOCK));
+        fileLogButton = new IcyToggleButton(SVGResource.FILE_SAVE);
         fileLogButton.setSelected(GeneralPreferences.getOutputLogToFile());
 
         textPane.setEditable(false);

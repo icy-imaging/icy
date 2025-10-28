@@ -18,13 +18,14 @@
 
 package org.bioimageanalysis.icy.system.os;
 
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.dialog.LoaderDialog;
 import org.bioimageanalysis.icy.gui.frame.AboutFrame;
 import org.bioimageanalysis.icy.gui.preferences.GeneralPreferencePanel;
 import org.bioimageanalysis.icy.gui.preferences.PreferenceFrame;
 import org.bioimageanalysis.icy.system.SystemUtil;
 import org.bioimageanalysis.icy.Icy;
-import org.bioimageanalysis.icy.io.ResourceUtil;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 
@@ -48,14 +49,18 @@ public class AppleUtil {
                 System.setProperty("apple.eawt.quitStrategy", "CLOSE_ALL_WINDOWS");
 
                 final Desktop desktop = Desktop.getDesktop();
-
-                desktop.setAboutHandler(e -> new AboutFrame());
-                desktop.setPreferencesHandler(e -> new PreferenceFrame(GeneralPreferencePanel.NODE_NAME));
-                desktop.setQuitHandler((e, r) -> Icy.exit(false));
-                desktop.setOpenFileHandler(e -> new LoaderDialog());
+                if (desktop.isSupported(Desktop.Action.APP_ABOUT))
+                    desktop.setAboutHandler(e -> new AboutFrame());
+                if (desktop.isSupported(Desktop.Action.APP_PREFERENCES))
+                    desktop.setPreferencesHandler(e -> new PreferenceFrame(GeneralPreferencePanel.NODE_NAME));
+                if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER))
+                    desktop.setQuitHandler((e, r) -> Icy.exit(false));
+                if (desktop.isSupported(Desktop.Action.APP_OPEN_FILE))
+                    desktop.setOpenFileHandler(e -> new LoaderDialog());
 
                 final Taskbar taskbar = Taskbar.getTaskbar();
-                taskbar.setIconImage(ResourceUtil.IMAGE_ICY_256);
+                if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE))
+                    taskbar.setIconImage(new IcySVG(SVGResource.ICY_MACOS).getImage(256));
 
                 // set menu bar name
                 SystemUtil.setProperty("com.apple.mrj.application.apple.menu.about.name", "Icy");

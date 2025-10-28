@@ -20,9 +20,9 @@ package org.bioimageanalysis.icy.gui.component.button;
 
 import org.bioimageanalysis.icy.gui.action.IcyAbstractAction;
 import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +33,7 @@ import javax.swing.*;
  * @author Thomas Musset
  */
 public class IcyToggleButton extends JToggleButton {
-    private @Nullable SVGIconPack iconPack;
+    private @Nullable IcyIconPack iconPack;
     private @Nullable Icon iconDefault = null, iconDisabled = null, iconSelected = null, iconDisabledSelected = null;
     private final int iconSize;
     private boolean flat;
@@ -43,7 +43,7 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * Create a {@link JToggleButton} with specified text, SVG icons for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyToggleButton(final @NotNull String text, final @NotNull SVGIconPack pack, final int size, final boolean flat) {
+    public IcyToggleButton(final @NotNull String text, final @NotNull IcyIconPack pack, final int size, final boolean flat) {
         super(text);
 
         iconPack = pack;
@@ -57,43 +57,43 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * Create a {@link JToggleButton} with specified text, SVG icons for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyToggleButton(final @NotNull String text, final @NotNull SVGIconPack pack, final boolean flat) {
+    public IcyToggleButton(final @NotNull String text, final @NotNull IcyIconPack pack, final boolean flat) {
         this(text, pack, LookAndFeelUtil.getDefaultIconSize(), flat);
     }
 
     /**
      * Create a {@link JToggleButton} with specified text, SVG icons for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyToggleButton(final @NotNull String text, final @NotNull SVGIconPack pack) {
+    public IcyToggleButton(final @NotNull String text, final @NotNull IcyIconPack pack) {
         this(text, pack, LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
     /**
      * Create a {@link JToggleButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyToggleButton(final @NotNull String text, final @NotNull SVGIcon icon, final int size, final boolean flat) {
-        this(text, new SVGIconPack(icon), size, flat);
+    public IcyToggleButton(final @NotNull String text, final @NotNull SVGResource icon, final int size, final boolean flat) {
+        this(text, new IcyIconPack(icon), size, flat);
     }
 
     /**
      * Create a {@link JToggleButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyToggleButton(final @NotNull String text, final @NotNull SVGIcon icon, final int size) {
-        this(text, new SVGIconPack(icon), size, false);
+    public IcyToggleButton(final @NotNull String text, final @NotNull SVGResource icon, final int size) {
+        this(text, new IcyIconPack(icon), size, false);
     }
 
     /**
      * Create a {@link JToggleButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyToggleButton(final @NotNull String text, final @NotNull SVGIcon icon, final boolean flat) {
-        this(text, new SVGIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), flat);
+    public IcyToggleButton(final @NotNull String text, final @NotNull SVGResource icon, final boolean flat) {
+        this(text, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), flat);
     }
 
     /**
      * Create a {@link JToggleButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyToggleButton(final @NotNull String text, final @NotNull SVGIcon icon) {
-        this(text, new SVGIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
+    public IcyToggleButton(final @NotNull String text, final @NotNull SVGResource icon) {
+        this(text, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
     // Constructors with SVGIcons but without text
@@ -101,7 +101,7 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * Create a {@link JToggleButton} with specified SVG icons for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
      */
-    public IcyToggleButton(final @NotNull SVGIconPack pack, final int size, final boolean flat) {
+    public IcyToggleButton(final @NotNull IcyIconPack pack, final int size, final boolean flat) {
         super();
 
         iconPack = pack;
@@ -115,43 +115,43 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * Create a {@link JToggleButton} with specified SVG icons for each state (default, disabled, selected and disabled-selected) and default size, but without text.
      */
-    public IcyToggleButton(final @NotNull SVGIconPack pack, final boolean flat) {
+    public IcyToggleButton(final @NotNull IcyIconPack pack, final boolean flat) {
         this(pack, LookAndFeelUtil.getDefaultIconSize(), flat);
     }
 
     /**
      * Create a {@link JToggleButton} with specified SVG icons for each state (default, disabled, selected and disabled-selected) and default size, but without text.
      */
-    public IcyToggleButton(final @NotNull SVGIconPack pack) {
+    public IcyToggleButton(final @NotNull IcyIconPack pack) {
         this(pack, LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
     /**
      * Create a {@link JToggleButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
      */
-    public IcyToggleButton(final @NotNull SVGIconPack pack, final int size) {
+    public IcyToggleButton(final @NotNull IcyIconPack pack, final int size) {
         this(pack, size, false);
     }
 
     /**
      * Create a {@link JToggleButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
      */
-    public IcyToggleButton(final @NotNull SVGIcon icon, final int size, final boolean flat) {
-        this(new SVGIconPack(icon), size, flat);
+    public IcyToggleButton(final @NotNull SVGResource icon, final int size, final boolean flat) {
+        this(new IcyIconPack(icon), size, flat);
     }
 
     /**
      * Create a {@link JToggleButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
      */
-    public IcyToggleButton(final @NotNull SVGIcon icon, final int size) {
-        this(new SVGIconPack(icon), size, false);
+    public IcyToggleButton(final @NotNull SVGResource icon, final int size) {
+        this(new IcyIconPack(icon), size, false);
     }
 
     /**
      * Create a {@link JToggleButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and default size, but without text.
      */
-    public IcyToggleButton(final @NotNull SVGIcon icon) {
-        this(new SVGIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
+    public IcyToggleButton(final @NotNull SVGResource icon) {
+        this(new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
     // Constructors with Action and SVGIcons
@@ -159,7 +159,7 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * Create a {@link JToggleButton} with specified {@link Action}, SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGIconPack pack, final int size, final boolean flat) {
+    public IcyToggleButton(final @NotNull Action action, final @NotNull IcyIconPack pack, final int size, final boolean flat) {
         super(action);
         iconPack = pack;
         iconSize = size;
@@ -173,43 +173,43 @@ public class IcyToggleButton extends JToggleButton {
     /**
      * Create a {@link JToggleButton} with specified {@link Action}, SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGIconPack pack, final boolean flat) {
+    public IcyToggleButton(final @NotNull Action action, final @NotNull IcyIconPack pack, final boolean flat) {
         this(action, pack, LookAndFeelUtil.getDefaultIconSize(), flat);
     }
 
     /**
      * Create a {@link JToggleButton} with specified {@link Action}, SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGIconPack pack) {
+    public IcyToggleButton(final @NotNull Action action, final @NotNull IcyIconPack pack) {
         this(action, pack, LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
     /**
      * Create a {@link JToggleButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGIcon icon, final int size, final boolean flat) {
-        this(action, new SVGIconPack(icon), size, flat);
+    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGResource icon, final int size, final boolean flat) {
+        this(action, new IcyIconPack(icon), size, flat);
     }
 
     /**
      * Create a {@link JToggleButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGIcon icon, final int size) {
-        this(action, new SVGIconPack(icon), size, false);
+    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGResource icon, final int size) {
+        this(action, new IcyIconPack(icon), size, false);
     }
 
     /**
      * Create a {@link JToggleButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGIcon icon, final boolean flat) {
-        this(action, new SVGIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), flat);
+    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGResource icon, final boolean flat) {
+        this(action, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), flat);
     }
 
     /**
      * Create a {@link JToggleButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGIcon icon) {
-        this(action, new SVGIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
+    public IcyToggleButton(final @NotNull Action action, final @NotNull SVGResource icon) {
+        this(action, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
     private void init() {
@@ -243,7 +243,7 @@ public class IcyToggleButton extends JToggleButton {
         }
     }
 
-    protected final void setSVGIconPack(final @NotNull SVGIconPack pack) {
+    protected final void setSVGIconPack(final @NotNull IcyIconPack pack) {
         this.iconPack = pack;
         setSVGIcons();
     }
@@ -285,10 +285,10 @@ public class IcyToggleButton extends JToggleButton {
         if (iconPack == null)
             return;
 
-        iconDefault = new IcySVGIcon(iconPack.getDefaultIcon(), LookAndFeelUtil.ColorType.UI_TOGGLEBUTTON_DEFAULT, iconSize);
-        iconDisabled = new IcySVGIcon(iconPack.getDisabledIcon(), LookAndFeelUtil.ColorType.UI_TOGGLEBUTTON_DISABLED, iconSize);
-        iconSelected = new IcySVGIcon(iconPack.getSelectedtIcon(), LookAndFeelUtil.ColorType.UI_TOGGLEBUTTON_SELECTED, iconSize);
-        iconDisabledSelected = new IcySVGIcon(iconPack.getDisabledSelectedIcon(), LookAndFeelUtil.ColorType.UI_TOGGLEBUTTON_DISABLED, iconSize);
+        iconDefault = new IcySVG(iconPack.getDefaultIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_DEFAULT);
+        iconDisabled = new IcySVG(iconPack.getDisabledIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_DISABLED);
+        iconSelected = new IcySVG(iconPack.getSelectedtIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_SELECTED);
+        iconDisabledSelected = new IcySVG(iconPack.getDisabledSelectedIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_DISABLED);
 
         resetIcons();
     }

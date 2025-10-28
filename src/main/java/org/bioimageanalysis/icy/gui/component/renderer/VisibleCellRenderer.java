@@ -19,8 +19,8 @@
 package org.bioimageanalysis.icy.gui.component.renderer;
 
 import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -33,8 +33,11 @@ import java.awt.*;
  * @author Thomas Musset
  */
 public class VisibleCellRenderer extends JLabel implements TableCellRenderer, TreeCellRenderer {
-    public static final @NotNull Icon VISIBILITY = new IcySVGIcon(SVGIcon.VISIBILITY, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
-    public static final @NotNull Icon VISIBILITY_OFF = new IcySVGIcon(SVGIcon.VISIBILITY_OFF, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
+    private static final int ICON_SIZE = LookAndFeelUtil.getDefaultIconSize();
+    //public static final @NotNull Icon VISIBILITY = new IcySVGIcon(SVGIcon.VISIBILITY, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
+    public static final @NotNull Icon VISIBILITY = new IcySVG(SVGResource.VISIBILITY).getIcon(ICON_SIZE);
+    //public static final @NotNull Icon VISIBILITY_OFF = new IcySVGIcon(SVGIcon.VISIBILITY_OFF, LookAndFeelUtil.ColorType.UI_BUTTON_DEFAULT);
+    public static final @NotNull Icon VISIBILITY_OFF = new IcySVG(SVGResource.VISIBILITY_OFF).getIcon(ICON_SIZE);
 
     public VisibleCellRenderer() {
         super();

@@ -26,8 +26,8 @@ import org.bioimageanalysis.icy.model.cache.ImageCache;
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.system.preferences.ApplicationPreferences;
 import org.bioimageanalysis.icy.system.preferences.GeneralPreferences;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 
 import java.awt.event.ActionEvent;
@@ -38,7 +38,7 @@ import java.awt.event.ActionListener;
  */
 public final class EHCacheButton extends IcyToggleButton implements ActionListener {
     public EHCacheButton() {
-        super(new SVGIconPack(SVGIcon.FLASH_OFF, SVGIcon.FLASH_ON));
+        super(new IcyIconPack(SVGResource.FLASH_OFF, SVGResource.FLASH_ON));
         setFocusable(false);
         if (Icy.isCacheDisabled()) {
             super.setEnabled(false);

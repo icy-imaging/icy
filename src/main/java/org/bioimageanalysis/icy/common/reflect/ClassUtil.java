@@ -93,26 +93,23 @@ public class ClassUtil {
             catch (final ClassNotFoundException e2) {
                 // try forName style from Plugin class loader with initialization
                 Class<?> c = null;
-                for (final ClassLoader cl : ExtensionLoader.getLoaders()) {
-                    try {
-                        c = Class.forName(className, true, cl);
-                    }
-                    catch (final ClassNotFoundException e3) {
-                        // ignore
-                    }
+                final ClassLoader cl = ExtensionLoader.getLoader();
+                try {
+                    c = Class.forName(className, true, cl);
+                }
+                catch (final ClassNotFoundException e3) {
+                    // ignore
                 }
 
                 if (c != null)
                     return c;
 
                 // try forName style from Plugin class loader without initialization
-                for (final ClassLoader cl : ExtensionLoader.getLoaders()) {
-                    try {
-                        c = Class.forName(className, false, cl);
-                    }
-                    catch (final ClassNotFoundException e4) {
-                        // ignore
-                    }
+                try {
+                    c = Class.forName(className, false, cl);
+                }
+                catch (final ClassNotFoundException e4) {
+                    // ignore
                 }
 
                 if (c != null)

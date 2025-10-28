@@ -29,7 +29,7 @@ import org.bioimageanalysis.icy.gui.GraphicsUtil;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvas2D;
 import org.bioimageanalysis.icy.gui.canvas.VtkCanvas;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.render.IcyVtkPanel;
 import org.bioimageanalysis.icy.gui.toolbar.panel.RoisPanel;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
@@ -947,7 +947,7 @@ public class ROI2DArea extends ROI2D {
         maskData = ((DataBufferByte) imageMask.getRaster().getDataBuffer()).getData();
 
         // set icon (default name is defined by getDefaultName())
-        setIcon(SVGIcon.STROKE_FULL);
+        setIcon(SVGResource.ROI_AREA);
     }
 
     /**
@@ -1013,7 +1013,7 @@ public class ROI2DArea extends ROI2D {
         bounds.setBounds(area.bounds);
 
         // set icon (default name is defined by getDefaultName())
-        setIcon(SVGIcon.STROKE_FULL);
+        setIcon(SVGResource.ROI_AREA);
     }
 
     @Override

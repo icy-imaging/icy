@@ -18,7 +18,7 @@
 package org.bioimageanalysis.extension.kernel.roi.roi2d;
 
 import org.bioimageanalysis.icy.common.geom.point.Point5D;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.roi.ROI;
 
 import java.awt.geom.Point2D;
@@ -33,7 +33,7 @@ public class ROI2DRectangle extends ROI2DRectShape {
         super(new Rectangle2D.Double(), topLeft, bottomRight);
 
         // set icon (default name is defined by getDefaultName()) 
-        setIcon(SVGIcon.RECTANGLE);
+        setIcon(SVGResource.ROI_RECTANGLE);
     }
 
     public ROI2DRectangle(final double xmin, final double ymin, final double xmax, final double ymax) {

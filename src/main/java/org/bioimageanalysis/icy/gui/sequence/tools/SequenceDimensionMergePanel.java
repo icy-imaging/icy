@@ -19,11 +19,11 @@
 package org.bioimageanalysis.icy.gui.sequence.tools;
 
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
 import org.bioimageanalysis.icy.gui.sequence.SequenceChooser;
 import org.bioimageanalysis.icy.gui.sequence.SequencePreviewPanel;
 import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.sequence.DimensionId;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.bioimageanalysis.icy.model.sequence.SequenceModel;
@@ -170,7 +170,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         });
 
         dimLabel.setText(dim.toString());
-        final Icon icon = new IcySVGIcon(SVGIcon.SOUTH, 20, 60);
+        final Icon icon = new IcySVG(SVGResource.SOUTH).getIcon(20, 60);
         bottomArrowLabel.setIcon(icon);
 
         // interlace not available for channel merge operation
@@ -206,7 +206,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_sequenceChooser.gridy = 1;
         add(sequenceChooser, gbc_sequenceChooser);
 
-        addButton = new IcyButton(SVGIcon.ADD, true);
+        addButton = new IcyButton(SVGResource.ADD, true);
         addButton.setToolTipText("Add selected sequence to the list.");
         final GridBagConstraints gbc_addButton = new GridBagConstraints();
         gbc_addButton.fill = GridBagConstraints.BOTH;
@@ -240,7 +240,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         scrollPane.setViewportView(sequenceList);
         sequenceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        removeButton = new IcyButton(SVGIcon.REMOVE, true);
+        removeButton = new IcyButton(SVGResource.REMOVE, true);
         removeButton.setToolTipText("Remove selected sequence from the list.");
         final GridBagConstraints gbc_removeButton = new GridBagConstraints();
         gbc_removeButton.fill = GridBagConstraints.BOTH;
@@ -258,7 +258,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_bottomArrowLabel.gridy = 3;
         add(bottomArrowLabel, gbc_bottomArrowLabel);
 
-        upButton = new IcyButton(SVGIcon.KEYBOARD_ARROW_UP);
+        upButton = new IcyButton(SVGResource.KEYBOARD_ARROW_UP);
         upButton.setToolTipText("Move up selected sequence.");
         upButton.setFlat(true);
         final GridBagConstraints gbc_upButton = new GridBagConstraints();
@@ -268,7 +268,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_upButton.gridy = 3;
         add(upButton, gbc_upButton);
 
-        downButton = new IcyButton(SVGIcon.KEYBOARD_ARROW_DOWN);
+        downButton = new IcyButton(SVGResource.KEYBOARD_ARROW_DOWN);
         downButton.setToolTipText("Move down selected sequence.");
         downButton.setFlat(true);
         final GridBagConstraints gbc_downButton = new GridBagConstraints();

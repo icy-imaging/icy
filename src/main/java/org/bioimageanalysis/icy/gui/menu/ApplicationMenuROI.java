@@ -19,7 +19,7 @@
 package org.bioimageanalysis.icy.gui.menu;
 
 import org.bioimageanalysis.icy.gui.action.RoiActions;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenu;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenuItem;
 
@@ -39,81 +39,81 @@ public final class ApplicationMenuROI extends AbstractApplicationMenu {
     private ApplicationMenuROI() {
         super("Region of Interest");
 
-        final IcyMenuItem itemLoadROI = new IcyMenuItem(RoiActions.loadAction, SVGIcon.FILE_OPEN);
+        final IcyMenuItem itemLoadROI = new IcyMenuItem(RoiActions.loadAction, SVGResource.FILE_OPEN);
         add(itemLoadROI);
 
-        final IcyMenuItem itemSaveROI = new IcyMenuItem(RoiActions.saveAction, SVGIcon.SAVE_AS);
+        final IcyMenuItem itemSaveROI = new IcyMenuItem(RoiActions.saveAction, SVGResource.SAVE_AS);
         add(itemSaveROI);
 
-        final IcyMenuItem itemExportExcelROI = new IcyMenuItem(RoiActions.xlsExportAction, SVGIcon.EXPORT_NOTES);
+        final IcyMenuItem itemExportExcelROI = new IcyMenuItem(RoiActions.xlsExportAction, SVGResource.EXPORT_NOTES);
         add(itemExportExcelROI);
 
         addSeparator();
 
-        final IcyMenu menuConvertion = new IcyMenu("Convertion", SVGIcon.CONVERT_SHAPE);
+        final IcyMenu menuConvertion = new IcyMenu("Convertion", SVGResource.CONVERT_SHAPE);
         add(menuConvertion);
 
-        final IcyMenuItem item2DTo3D = new IcyMenuItem(RoiActions.convertTo3DAction, SVGIcon.DEPLOYED_CODE);
+        final IcyMenuItem item2DTo3D = new IcyMenuItem(RoiActions.convertTo3DAction, SVGResource.DEPLOYED_CODE);
         menuConvertion.add(item2DTo3D);
 
-        final IcyMenuItem item3DTo2D = new IcyMenuItem(RoiActions.convertTo2DAction, SVGIcon.RECTANGLE);
+        final IcyMenuItem item3DTo2D = new IcyMenuItem(RoiActions.convertTo2DAction, SVGResource.ROI_RECTANGLE);
         menuConvertion.add(item3DTo2D);
 
-        final IcyMenuItem itemToEllipse = new IcyMenuItem(RoiActions.convertToEllipseAction, SVGIcon.CIRCLE);
+        final IcyMenuItem itemToEllipse = new IcyMenuItem(RoiActions.convertToEllipseAction, SVGResource.ROI_ELLIPSE);
         menuConvertion.add(itemToEllipse);
 
-        final IcyMenuItem itemToShape = new IcyMenuItem(RoiActions.convertToShapeAction, SVGIcon.PENTAGON);
+        final IcyMenuItem itemToShape = new IcyMenuItem(RoiActions.convertToShapeAction, SVGResource.ROI_POLYGON);
         menuConvertion.add(itemToShape);
 
-        final IcyMenuItem itemToMask = new IcyMenuItem(RoiActions.convertToMaskAction, SVGIcon.GRAIN);
+        final IcyMenuItem itemToMask = new IcyMenuItem(RoiActions.convertToMaskAction, SVGResource.GRAIN);
         menuConvertion.add(itemToMask);
 
         addSeparator();
 
-        final IcyMenuItem itemSeparateComponent = new IcyMenuItem(RoiActions.separateObjectsAction, SVGIcon.ROI_SPLIT);
+        final IcyMenuItem itemSeparateComponent = new IcyMenuItem(RoiActions.separateObjectsAction, SVGResource.ROI_SPLIT);
         add(itemSeparateComponent);
 
-        final IcyMenuItem itemSeparateWatershed = new IcyMenuItem(RoiActions.computeWatershedSeparation, SVGIcon.BROKEN_IMAGE);
+        final IcyMenuItem itemSeparateWatershed = new IcyMenuItem(RoiActions.computeWatershedSeparation, SVGResource.IMAGE_BROKEN);
         add(itemSeparateWatershed);
 
         addSeparator();
 
-        final IcyMenuItem itemDilate = new IcyMenuItem(RoiActions.dilateObjectsAction, SVGIcon.ROI_DILATE);
+        final IcyMenuItem itemDilate = new IcyMenuItem(RoiActions.dilateObjectsAction, SVGResource.ROI_DILATE);
         add(itemDilate);
 
-        final IcyMenuItem itemErode = new IcyMenuItem(RoiActions.erodeObjectsAction, SVGIcon.ROI_ERODE);
+        final IcyMenuItem itemErode = new IcyMenuItem(RoiActions.erodeObjectsAction, SVGResource.ROI_ERODE);
         add(itemErode);
 
-        final IcyMenuItem itemDistanceMap = new IcyMenuItem(RoiActions.computeDistanceMapAction, SVGIcon.ROI_DISTANCE_MAP);
+        final IcyMenuItem itemDistanceMap = new IcyMenuItem(RoiActions.computeDistanceMapAction, SVGResource.ROI_DISTANCE_MAP);
         add(itemDistanceMap);
 
         addSeparator();
 
-        final IcyMenu menuBoolean = new IcyMenu("Boolean Operation", SVGIcon.BOOLEAN);
+        final IcyMenu menuBoolean = new IcyMenu("Boolean Operation", SVGResource.ROI_BOOLEAN);
         add(menuBoolean);
 
-        final IcyMenuItem itemOperationUnion = new IcyMenuItem(RoiActions.boolOrAction, SVGIcon.BOOLEAN_OR);
+        final IcyMenuItem itemOperationUnion = new IcyMenuItem(RoiActions.boolOrAction, SVGResource.ROI_BOOLEAN_OR);
         menuBoolean.add(itemOperationUnion);
 
-        final IcyMenuItem itemOperationIntersection = new IcyMenuItem(RoiActions.boolAndAction, SVGIcon.BOOLEAN_AND);
+        final IcyMenuItem itemOperationIntersection = new IcyMenuItem(RoiActions.boolAndAction, SVGResource.ROI_BOOLEAN_AND);
         menuBoolean.add(itemOperationIntersection);
 
-        final IcyMenuItem itemOperationInversion = new IcyMenuItem(RoiActions.boolNotAction, SVGIcon.BOOLEAN_NOT);
+        final IcyMenuItem itemOperationInversion = new IcyMenuItem(RoiActions.boolNotAction, SVGResource.ROI_BOOLEAN_NOT);
         menuBoolean.add(itemOperationInversion);
 
-        final IcyMenuItem itemOperationExclusiveUnion = new IcyMenuItem(RoiActions.boolXorAction, SVGIcon.BOOLEAN_XOR);
+        final IcyMenuItem itemOperationExclusiveUnion = new IcyMenuItem(RoiActions.boolXorAction, SVGResource.ROI_BOOLEAN_XOR);
         menuBoolean.add(itemOperationExclusiveUnion);
 
-        final IcyMenuItem itemOperationSubstraction = new IcyMenuItem(RoiActions.boolSubtractAction, SVGIcon.BOOLEAN_SUBSTRACT);
+        final IcyMenuItem itemOperationSubstraction = new IcyMenuItem(RoiActions.boolSubtractAction, SVGResource.ROI_BOOLEAN_SUBSTRACT);
         menuBoolean.add(itemOperationSubstraction);
 
         addSeparator();
 
         // FIXME: 17/01/2023 change fill value
-        final IcyMenuItem itemFillInterior = new IcyMenuItem(RoiActions.fillInteriorAction, SVGIcon.ROI_INTERIOR);
+        final IcyMenuItem itemFillInterior = new IcyMenuItem(RoiActions.fillInteriorAction, SVGResource.ROI_INTERIOR);
         add(itemFillInterior);
 
-        final IcyMenuItem itemFillExterior = new IcyMenuItem(RoiActions.fillExteriorAction, SVGIcon.ROI_EXTERIOR);
+        final IcyMenuItem itemFillExterior = new IcyMenuItem(RoiActions.fillExteriorAction, SVGResource.ROI_EXTERIOR);
         add(itemFillExterior);
     }
 }

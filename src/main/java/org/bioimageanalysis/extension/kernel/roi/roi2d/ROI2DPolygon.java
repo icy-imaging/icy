@@ -19,7 +19,7 @@ package org.bioimageanalysis.extension.kernel.roi.roi2d;
 
 import org.bioimageanalysis.icy.common.geom.point.Point5D;
 import org.bioimageanalysis.icy.common.geom.poly.Polygon2D;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
 import org.bioimageanalysis.icy.model.overlay.anchor.Anchor2D;
 import org.bioimageanalysis.icy.model.overlay.anchor.LineAnchor2D;
@@ -71,7 +71,7 @@ public class ROI2DPolygon extends ROI2DShape {
         addPoint(point);
 
         // set icon (default name is defined by getDefaultName())
-        setIcon(SVGIcon.PENTAGON);
+        setIcon(SVGResource.ROI_POLYGON);
     }
 
     /**

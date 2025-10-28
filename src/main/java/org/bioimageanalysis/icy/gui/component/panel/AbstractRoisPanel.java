@@ -38,7 +38,7 @@ import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.math.MathUtil;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginROIDescriptor;
 import org.bioimageanalysis.icy.system.preferences.XMLPreferences;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.roi.*;
 import org.bioimageanalysis.icy.model.roi.ROIEvent.ROIEventType;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
@@ -154,7 +154,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     protected JLabel selectedRoiNumberLabel;
 
     // PluginDescriptors / ROIDescriptor map
-    protected final Map<ROIDescriptor, PluginROIDescriptor> descriptorMap = new HashMap<>();
+    protected final Map<ROIDescriptor<?>, PluginROIDescriptor> descriptorMap = new HashMap<>();
 
     // Descriptor / column info (static to the class)
     protected List<ColumnInfo> columnInfoList;
@@ -299,11 +299,11 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         middlePanel.add(roiTable.getTableHeader(), BorderLayout.NORTH);
         middlePanel.add(new JScrollPane(roiTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
-        final IcyButton settingButton = new IcyButton(SVGIcon.SETTINGS);
+        final IcyButton settingButton = new IcyButton(SVGResource.SETTINGS);
         settingButton.addActionListener(RoiActions.settingAction);
         settingButton.setHideActionText(true);
 
-        final IcyButton xlsExportButton = new IcyButton(SVGIcon.FILE_SAVE);
+        final IcyButton xlsExportButton = new IcyButton(SVGResource.FILE_SAVE);
         xlsExportButton.addActionListener(RoiActions.xlsExportAction);
         xlsExportButton.setHideActionText(true);
 
@@ -380,14 +380,14 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Returns ROI descriptor given its id.
      */
-    protected ROIDescriptor getROIDescriptor(final String descriptorId) {
-        final ROIDescriptor[] descriptors;
+    protected ROIDescriptor<?> getROIDescriptor(final String descriptorId) {
+        final ROIDescriptor<?>[] descriptors;
 
         synchronized (descriptorMap) {
             descriptors = descriptorMap.keySet().toArray(new ROIDescriptor[0]);
         }
 
-        for (final ROIDescriptor descriptor : descriptors)
+        for (final ROIDescriptor<?> descriptor : descriptors)
             if (descriptor.getId().equals(descriptorId))
                 return descriptor;
 
@@ -411,7 +411,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         return getColumnInfo(columnInfoList, column);
     }
 
-    protected ColumnInfo getColumnInfo(final List<ColumnInfo> columns, final ROIDescriptor descriptor, final int channel) {
+    protected ColumnInfo getColumnInfo(final List<ColumnInfo> columns, final ROIDescriptor<?> descriptor, final int channel) {
         for (final ColumnInfo ci : columns)
             if (ci.descriptor.equals(descriptor) && (ci.channel == channel))
                 return ci;
@@ -419,7 +419,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         return null;
     }
 
-    protected ColumnInfo getColumnInfo(final ROIDescriptor descriptor, final int channel) {
+    protected ColumnInfo getColumnInfo(final ROIDescriptor<?> descriptor, final int channel) {
         return getColumnInfo(columnInfoList, descriptor, channel);
     }
 
@@ -431,7 +431,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
 
     protected boolean computeROIResults(final ROIResults roiResults, final Sequence seq, final ColumnInfo columnInfo) {
         final Map<ColumnInfo, DescriptorResult> results = roiResults.descriptorResults;
-        final ROIDescriptor descriptor = columnInfo.descriptor;
+        final ROIDescriptor<?> descriptor = columnInfo.descriptor;
         final DescriptorResult result;
 
         synchronized (results) {
@@ -449,7 +449,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             }
 
             if (plugin != null) {
-                final Map<ROIDescriptor, Object> newResults;
+                final Map<ROIDescriptor<?>, Object> newResults;
 
                 try {
                     // need computation per channel ?
@@ -466,7 +466,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                     else
                         newResults = plugin.compute(roiResults.roi, seq);
 
-                    for (final Entry<ROIDescriptor, Object> entryNewResult : newResults.entrySet()) {
+                    for (final Entry<ROIDescriptor<?>, Object> entryNewResult : newResults.entrySet()) {
                         // get the column for this result
                         final ColumnInfo resultColumnInfo = getColumnInfo(entryNewResult.getKey(), columnInfo.channel);
                         final DescriptorResult oResult;
@@ -489,11 +489,11 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                     if (!(t instanceof UnsupportedOperationException) && !(t instanceof InterruptedException))
                         IcyExceptionHandler.handleException(t, true);
 
-                    final List<ROIDescriptor> descriptors = plugin.getDescriptors();
+                    final List<ROIDescriptor<?>> descriptors = plugin.getDescriptors();
 
                     if (descriptors != null) {
                         // not supported --> clear associated results and set them as computed
-                        for (final ROIDescriptor desc : descriptors) {
+                        for (final ROIDescriptor<?> desc : descriptors) {
                             // get the column for this result
                             final ColumnInfo resultColumnInfo = getColumnInfo(desc, columnInfo.channel);
                             final DescriptorResult oResult;
@@ -1017,7 +1017,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         final List<ColumnInfo> newColumnInfos = new ArrayList<>();
         final int numChannel = getChannelCount();
 
-        for (final ROIDescriptor descriptor : descriptorMap.keySet()) {
+        for (final ROIDescriptor<?> descriptor : descriptorMap.keySet()) {
             for (int ch = 0; ch < (descriptor.separateChannel() ? numChannel : 1); ch++)
                 newColumnInfos.add(new ColumnInfo(descriptor, ch, viewPreferences, false));
         }
@@ -1066,7 +1066,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         final int numChannel = getChannelCount();
 
         // get export column informations
-        for (final ROIDescriptor descriptor : descriptorMap.keySet()) {
+        for (final ROIDescriptor<?> descriptor : descriptorMap.keySet()) {
             for (int ch = 0; ch < (descriptor.separateChannel() ? numChannel : 1); ch++)
                 exportColumnInfos.add(new ColumnInfo(descriptor, ch, exportPreferences, true));
         }
@@ -1414,7 +1414,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             final ColumnInfo ci = getColumnInfo(column);
 
             if (ci != null) {
-                final ROIDescriptor descriptor = ci.descriptor;
+                final ROIDescriptor<?> descriptor = ci.descriptor;
                 final String id = descriptor.getId();
 
                 // only name and color descriptor are editable (a bit hacky)
@@ -1545,7 +1545,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             final ColumnInfo ci = getColumnInfo(column);
 
             if (ci != null) {
-                final ROIDescriptor descriptor = ci.descriptor;
+                final ROIDescriptor<?> descriptor = ci.descriptor;
                 final String id = descriptor.getId();
 
                 // only name descriptor is editable (a bit hacky)
@@ -1574,7 +1574,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                             if (key instanceof ColumnInfo && value instanceof DescriptorResult) {
                                 //final Entry<ColumnInfo, DescriptorResult> entry = (Entry<ColumnInfo, DescriptorResult>) entryObj;
                                 //final ColumnInfo key = entry.getKey();
-                                final ROIDescriptor descriptor = ((ColumnInfo) key).descriptor;
+                                final ROIDescriptor<?> descriptor = ((ColumnInfo) key).descriptor;
 
                                 // need to recompute this descriptor ?
                                 if (descriptor.needRecompute(event)) {
@@ -1625,7 +1625,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                     if (key instanceof ColumnInfo && value instanceof DescriptorResult) {
                         //final Entry<ColumnInfo, DescriptorResult> entry = (Entry<ColumnInfo, DescriptorResult>) entryObj;
                         //final ColumnInfo key = entry.getKey();
-                        final ROIDescriptor descriptor = ((ColumnInfo) key).descriptor;
+                        final ROIDescriptor<?> descriptor = ((ColumnInfo) key).descriptor;
 
                         // need to recompute this descriptor ?
                         if (descriptor.needRecompute(event)) {
@@ -1793,14 +1793,14 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     }
 
     public static class BaseColumnInfo implements Comparable<BaseColumnInfo> {
-        public final ROIDescriptor descriptor;
+        public final ROIDescriptor<?> descriptor;
         public int minSize;
         public int maxSize;
         public int defaultSize;
         public int order;
         public boolean visible;
 
-        public BaseColumnInfo(final ROIDescriptor descriptor, final XMLPreferences preferences, final boolean export) {
+        public BaseColumnInfo(final ROIDescriptor<?> descriptor, final XMLPreferences preferences, final boolean export) {
             super();
 
             this.descriptor = descriptor;
@@ -1976,9 +1976,9 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             final String id = descriptor.getId();
 
             if (StringUtil.equals(id, ROIIconDescriptor.ID))
-                return 22;
+                return 26;
             if (StringUtil.equals(id, ROIColorDescriptor.ID))
-                return 18;
+                return 20;
             // if (StringUtil.equals(id, ROIGroupIdDescriptor.ID))
             // return 18;
             if (StringUtil.equals(id, ROINameDescriptor.ID))
@@ -2133,7 +2133,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         String name;
         final int channel;
 
-        public ColumnInfo(final ROIDescriptor descriptor, final int channel, final XMLPreferences prefs, final boolean export) {
+        public ColumnInfo(final ROIDescriptor<?> descriptor, final int channel, final XMLPreferences prefs, final boolean export) {
             super(descriptor, prefs, export);
 
             this.channel = channel;
@@ -2190,7 +2190,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             // column info are sorted on their order
             int index = 0;
             for (final ColumnInfo ci : columnInfos) {
-                final ROIDescriptor descriptor = ci.descriptor;
+                final ROIDescriptor<?> descriptor = ci.descriptor;
                 final TableColumnExt column = new TableColumnExt(index++);
 
                 column.setIdentifier(descriptor.getId());
@@ -2208,7 +2208,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                 final Class<?> type = descriptor.getType();
 
                 // image class type column --> use a special renderer
-                if (type == Image.class)
+                if (type == Image.class || type == Icon.class)
                     column.setCellRenderer(new ImageTableCellRenderer());
                 else if (type == Color.class)
                     column.setCellRenderer(new ImageTableCellRenderer());
@@ -2231,7 +2231,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                 final ColumnInfo ci = getColumnInfo(columnInfos, column.getModelIndex());
 
                 if (ci != null) {
-                    final ROIDescriptor descriptor = ci.descriptor;
+                    final ROIDescriptor<?> descriptor = ci.descriptor;
 
                     // that should be always the case
                     if (StringUtil.equals((String) column.getIdentifier(), descriptor.getId())) {

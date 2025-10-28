@@ -221,7 +221,7 @@ public class PluginLoader {
                 // try to load class and check we have a Plugin class at same time
                 final Class<? extends Plugin> pluginClass = newLoader.loadClass(className).asSubclass(Plugin.class);
                 // add to list
-                newPlugins.add(new PluginDescriptor(pluginClass));
+                //newPlugins.add(new PluginDescriptor(pluginClass));
             }
             catch (final NoClassDefFoundError e) {
                 // fatal error

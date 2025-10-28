@@ -19,7 +19,7 @@
 package org.bioimageanalysis.icy.gui.sequence.tools;
 
 import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -35,19 +35,19 @@ import java.awt.event.ActionListener;
 public class PositionAlignmentPanel extends JPanel {
     static class PositionBox extends IcyToggleButton {
         enum Position {
-            CENTER(SVGIcon.RECENTER),
-            TOP(SVGIcon.NORTH), BOTTOM(SVGIcon.SOUTH),
-            LEFT(SVGIcon.WEST), RIGHT(SVGIcon.EAST),
-            TOP_LEFT(SVGIcon.NORTH_WEST), TOP_RIGHT(SVGIcon.NORTH_EAST),
-            BOTTOM_LEFT(SVGIcon.SOUTH_WEST), BOTTOM_RIGHT(SVGIcon.SOUTH_EAST);
+            CENTER(SVGResource.RECENTER),
+            TOP(SVGResource.NORTH), BOTTOM(SVGResource.SOUTH),
+            LEFT(SVGResource.WEST), RIGHT(SVGResource.EAST),
+            TOP_LEFT(SVGResource.NORTH_WEST), TOP_RIGHT(SVGResource.NORTH_EAST),
+            BOTTOM_LEFT(SVGResource.SOUTH_WEST), BOTTOM_RIGHT(SVGResource.SOUTH_EAST);
 
-            private final @NotNull SVGIcon icon;
+            private final @NotNull SVGResource icon;
 
-            Position(final @NotNull SVGIcon icon) {
+            Position(final @NotNull SVGResource icon) {
                 this.icon = icon;
             }
 
-            @NotNull SVGIcon getIcon() {
+            @NotNull SVGResource getIcon() {
                 return icon;
             }
         }

@@ -26,7 +26,7 @@ import org.bioimageanalysis.icy.common.geom.point.Point5D;
 import org.bioimageanalysis.icy.common.geom.poly.FlatPolygon3D;
 import org.bioimageanalysis.icy.common.geom.poly.Polygon2D;
 import org.bioimageanalysis.icy.common.geom.rectangle.Rectangle3D;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
 import org.bioimageanalysis.icy.model.overlay.anchor.Anchor3D;
 import org.bioimageanalysis.icy.model.overlay.anchor.LineAnchor3D;
@@ -77,7 +77,7 @@ public class ROI3DFlatPolygon extends ROI3DZShape {
         setPolygon3D(polygon3D);
 
         // set icon
-        setIcon(SVGIcon.BROKEN_IMAGE); // TODO change this icon
+        setIcon(SVGResource.IMAGE_BROKEN); // TODO change this icon
     }
 
     public ROI3DFlatPolygon(final Polygon2D polygon, final double z, final double sizeZ) {

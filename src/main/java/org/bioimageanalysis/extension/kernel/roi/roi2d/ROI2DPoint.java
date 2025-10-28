@@ -23,7 +23,7 @@ import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvas2D;
 import org.bioimageanalysis.icy.gui.canvas.VtkCanvas;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.render.IcyVtkPanel;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
 import org.bioimageanalysis.icy.model.overlay.OverlayEvent;
@@ -227,7 +227,7 @@ public class ROI2DPoint extends ROI2DShape {
         addPoint(this.position);
 
         // set icon (default name is defined by getDefaultName())
-        setIcon(SVGIcon.POINT);
+        setIcon(SVGResource.ROI_POINT);
     }
 
     /**

@@ -33,8 +33,8 @@ import org.bioimageanalysis.icy.gui.viewer.Viewer;
 import org.bioimageanalysis.icy.gui.viewer.ViewerEvent;
 import org.bioimageanalysis.icy.gui.viewer.ViewerEvent.ViewerEventType;
 import org.bioimageanalysis.icy.Icy;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.jdesktop.swingx.JXTable;
@@ -145,7 +145,7 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
         gbc_nameFilter.gridy = 0;
         panelNorth.add(nameFilter, gbc_nameFilter);
 
-        tglbtnLayerVisibility = new IcyToggleButton(new SVGIconPack(SVGIcon.VISIBILITY_OFF, SVGIcon.VISIBILITY));
+        tglbtnLayerVisibility = new IcyToggleButton(new IcyIconPack(SVGResource.VISIBILITY_OFF, SVGResource.VISIBILITY));
         tglbtnLayerVisibility.setFocusable(false);
         tglbtnLayerVisibility.setToolTipText("Change visibility for selected layer(s)");
         final GridBagConstraints gbc_tglbtnLayerVisibility = new GridBagConstraints();

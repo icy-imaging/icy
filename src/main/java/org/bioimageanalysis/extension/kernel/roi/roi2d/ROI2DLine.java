@@ -20,7 +20,7 @@ package org.bioimageanalysis.extension.kernel.roi.roi2d;
 import org.bioimageanalysis.icy.common.geom.point.Point2DUtil;
 import org.bioimageanalysis.icy.common.geom.point.Point5D;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
 import org.bioimageanalysis.icy.model.overlay.anchor.Anchor2D;
 import org.bioimageanalysis.icy.model.overlay.anchor.LineAnchor2D;
@@ -81,7 +81,7 @@ public class ROI2DLine extends ROI2DShape {
         addPoint(this.pt2);
 
         // set icon (default name is defined by getDefaultName()) 
-        setIcon(SVGIcon.LINE);
+        setIcon(SVGResource.ROI_LINE);
     }
 
     public ROI2DLine(final Line2D line) {

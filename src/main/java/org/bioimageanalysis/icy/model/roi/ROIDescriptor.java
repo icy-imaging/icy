@@ -42,7 +42,7 @@ import java.util.*;
  * @author Alexandre Dufour
  * @author Thomas Musset
  */
-public abstract class ROIDescriptor {
+public abstract class ROIDescriptor<O> {
     /**
      * Returns all available ROI descriptors (see {@link ROIDescriptor}) and their attached plugin
      * (see {@link PluginROIDescriptor}).<br>
@@ -51,17 +51,17 @@ public abstract class ROIDescriptor {
      * @see ROIDescriptor#compute(ROI, Sequence)
      * @see PluginROIDescriptor#compute(ROI, Sequence)
      */
-    public static @NotNull Map<ROIDescriptor, PluginROIDescriptor> getDescriptors() {
-        final Map<ROIDescriptor, PluginROIDescriptor> result = new HashMap<>();
+    public static @NotNull Map<ROIDescriptor<?>, PluginROIDescriptor> getDescriptors() {
+        final Map<ROIDescriptor<?>, PluginROIDescriptor> result = new HashMap<>();
         final Set<PluginDescriptor> pluginDescriptors = ExtensionLoader.getPlugins(PluginROIDescriptor.class);
 
         for (final PluginDescriptor pluginDescriptor : pluginDescriptors) {
             try {
                 final PluginROIDescriptor plugin = (PluginROIDescriptor) PluginLauncher.create(pluginDescriptor);
-                final List<ROIDescriptor> descriptors = plugin.getDescriptors();
+                final List<ROIDescriptor<?>> descriptors = plugin.getDescriptors();
 
                 if (descriptors != null) {
-                    for (final ROIDescriptor roiDescriptor : descriptors)
+                    for (final ROIDescriptor<?> roiDescriptor : descriptors)
                         result.put(roiDescriptor, plugin);
                 }
             }
@@ -84,8 +84,8 @@ public abstract class ROIDescriptor {
      * @see #getDescriptors()
      * @see #computeDescriptor(String, ROI, Sequence)
      */
-    public static @Nullable ROIDescriptor getDescriptor(final @NotNull Collection<ROIDescriptor> descriptors, final String id) {
-        for (final ROIDescriptor roiDescriptor : descriptors)
+    public static @Nullable ROIDescriptor<?> getDescriptor(final @NotNull Collection<ROIDescriptor<?>> descriptors, final String id) {
+        for (final ROIDescriptor<?> roiDescriptor : descriptors)
             if (StringUtil.equals(roiDescriptor.getId(), id))
                 return roiDescriptor;
 
@@ -100,7 +100,7 @@ public abstract class ROIDescriptor {
      * @see #getDescriptors()
      * @see #computeDescriptor(String, ROI, Sequence)
      */
-    public static ROIDescriptor getDescriptor(final String id) {
+    public static ROIDescriptor<?> getDescriptor(final String id) {
         return getDescriptor(getDescriptors().keySet(), id);
     }
 
@@ -119,9 +119,9 @@ public abstract class ROIDescriptor {
      *                                       the specified Z, T or C position are not supported by the descriptor
      * @throws InterruptedException          if the thread was interrupted during the computation of the descriptor
      */
-    public static @Nullable Object computeDescriptor(final Collection<ROIDescriptor> roiDescriptors, final String descriptorId, final ROI roi, final Sequence sequence)
+    public static @Nullable Object computeDescriptor(final Collection<ROIDescriptor<?>> roiDescriptors, final String descriptorId, final ROI roi, final Sequence sequence)
             throws UnsupportedOperationException, InterruptedException {
-        final ROIDescriptor roiDescriptor = getDescriptor(roiDescriptors, descriptorId);
+        final ROIDescriptor<?> roiDescriptor = getDescriptor(roiDescriptors, descriptorId);
 
         if (roiDescriptor != null)
             return roiDescriptor.compute(roi, sequence);
@@ -281,7 +281,7 @@ public abstract class ROIDescriptor {
      *                                       <code>null</code> while the calculation requires it
      * @throws InterruptedException          if the thread was interrupted during the computation of the descriptor
      */
-    public abstract Object compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException;
+    public abstract O compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException;
 
     /*
      * We want a unique id for each {@link ROIDescriptor}
@@ -290,7 +290,7 @@ public abstract class ROIDescriptor {
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof ROIDescriptor)
-            return StringUtil.equals(((ROIDescriptor) obj).getId(), getId());
+            return StringUtil.equals(((ROIDescriptor<?>) obj).getId(), getId());
 
         return super.equals(obj);
     }

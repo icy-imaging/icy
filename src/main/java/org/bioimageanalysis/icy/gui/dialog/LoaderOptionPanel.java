@@ -19,6 +19,7 @@
 package org.bioimageanalysis.icy.gui.dialog;
 
 import org.bioimageanalysis.icy.gui.component.button.ThumbnailComponent;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
 import org.bioimageanalysis.icy.gui.component.panel.PopupPanel;
 import org.bioimageanalysis.icy.gui.component.panel.RangeComponent;
 import org.bioimageanalysis.icy.gui.component.panel.Region2DComponent;
@@ -30,8 +31,7 @@ import org.bioimageanalysis.icy.io.SequenceFileSticher;
 import org.bioimageanalysis.icy.io.SequenceFileSticher.SequenceFileGroup;
 import org.bioimageanalysis.icy.gui.component.model.SpecialValueSpinnerModel;
 import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGImageIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.sequence.MetaDataUtil;
 import org.bioimageanalysis.icy.model.sequence.SequenceIdImporter;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
@@ -330,7 +330,7 @@ public class LoaderOptionPanel extends JPanel {
 
                     // no more update ? --> show that an error happened
                     if (!previewUpdater.getNeedUpdate())
-                        preview.setImage(new IcySVGImageIcon(SVGIcon.CLOSE, preview.getForeground(), 512).getImage());
+                        preview.setImage(new IcySVG(SVGResource.CLOSE).getImage(512, preview.getForeground()));
                 }
 
                 // image updated
@@ -359,7 +359,7 @@ public class LoaderOptionPanel extends JPanel {
                 }
 
                 // loading...
-                preview.setImage(new IcySVGImageIcon(SVGIcon.HOURGLASS, preview.getForeground(), 512).getImage());
+                preview.setImage(new IcySVG(SVGResource.HOURGLASS).getImage(512, preview.getForeground()));
                 preview.setInfos("loading...");
 
                 // use Callable as we can get interrupted here...
@@ -433,7 +433,7 @@ public class LoaderOptionPanel extends JPanel {
                 // no more update ? --> show that an error happened
                 if (!previewUpdater.getNeedUpdate()) {
                     // fatal error --> failed image
-                    preview.setImage(new IcySVGImageIcon(SVGIcon.CLOSE, preview.getForeground(), 512).getImage());
+                    preview.setImage(new IcySVG(SVGResource.CLOSE).getImage(512, preview.getForeground()));
 
                     // cannot even read metadata
                     if (!metadataFieldsOk) {

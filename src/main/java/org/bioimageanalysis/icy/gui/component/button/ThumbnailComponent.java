@@ -18,11 +18,12 @@
 
 package org.bioimageanalysis.icy.gui.component.button;
 
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
 import org.bioimageanalysis.icy.gui.component.ComponentUtil;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
 import org.bioimageanalysis.icy.gui.component.panel.ImageComponent;
 import org.bioimageanalysis.icy.model.image.ImageUtil;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGImageIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 
 import javax.swing.*;
 import java.awt.*;
@@ -121,7 +122,7 @@ public class ThumbnailComponent extends JToggleButton {
         float iy = image.getHeight(null);
 
         if ((ix <= 0f) || (iy <= 0f)) {
-            image = new IcySVGImageIcon(SVGIcon.CLOSE, this.getForeground()).getImage();
+            image = new IcySVG(SVGResource.CLOSE).getImage(LookAndFeelUtil.getDefaultIconSize(), this.getForeground());
             ix = image.getWidth(null);
             iy = image.getHeight(null);
         }

@@ -23,8 +23,8 @@ import ome.xml.meta.OMEXMLMetadata;
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.gui.component.ComponentUtil;
 import org.bioimageanalysis.icy.gui.component.button.ThumbnailComponent;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGImageIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.io.Loader;
 import org.bioimageanalysis.icy.io.SequenceFileImporter;
 import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
@@ -299,7 +299,7 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable {
 
             try {
                 // why does this sometime fails ???
-                serieComponents[i].setImage(new IcySVGImageIcon(SVGIcon.IMAGE, serieComponents[i].getForeground(), 512).getImage());
+                serieComponents[i].setImage(new IcySVG(SVGResource.IMAGE).getImage(512, serieComponents[i].getForeground()));
             }
             catch (final Exception e) {
                 // ignore
@@ -323,11 +323,11 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable {
                     }
                 }
                 else
-                    serieComponents[i].setImage(new IcySVGImageIcon(SVGIcon.CLOSE, serieComponents[i].getForeground(), 512).getImage());
+                    serieComponents[i].setImage(new IcySVG(SVGResource.CLOSE).getImage(512, serieComponents[i].getForeground()));
             }
             catch (final OutOfMemoryError | Exception e) {
                 // error image, we just totally ignore error here...
-                serieComponents[i].setImage(new IcySVGImageIcon(SVGIcon.CLOSE, serieComponents[i].getForeground(), 512).getImage());
+                serieComponents[i].setImage(new IcySVG(SVGResource.CLOSE).getImage(512, serieComponents[i].getForeground()));
             }
         }
     }

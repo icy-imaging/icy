@@ -22,8 +22,8 @@ import org.bioimageanalysis.icy.gui.component.slider.IcySlider;
 import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
 import org.bioimageanalysis.icy.gui.component.ComponentUtil;
 import org.bioimageanalysis.icy.gui.GuiUtil;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 
 import javax.swing.*;
@@ -95,7 +95,7 @@ public class TNavigationPanel extends JPanel {
             }
         });
 
-        play = new IcyToggleButton(new SVGIconPack(SVGIcon.PLAY_CIRCLE, SVGIcon.STOP_CIRCLE));
+        play = new IcyToggleButton(new IcyIconPack(SVGResource.PLAY_CIRCLE, SVGResource.STOP_CIRCLE));
         //play.setFlat(true);
         play.setToolTipText("play");
         play.addActionListener(e -> {
@@ -105,7 +105,7 @@ public class TNavigationPanel extends JPanel {
                 startPlay();
         });
 
-        loop = new IcyToggleButton(SVGIcon.REPEAT);
+        loop = new IcyToggleButton(SVGResource.REPEAT);
         //loop.setFlat(true);
         loop.setToolTipText("Enable loop playback");
         loop.addActionListener(e -> setRepeat(!isRepeat()));

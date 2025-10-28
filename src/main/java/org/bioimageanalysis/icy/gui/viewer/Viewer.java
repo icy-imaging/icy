@@ -25,6 +25,7 @@ import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginCanvas;
 import org.bioimageanalysis.icy.gui.GraphicsUtil;
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
 import org.bioimageanalysis.icy.gui.action.CanvasActions;
 import org.bioimageanalysis.icy.gui.action.CanvasActions.ToggleLayersAction;
 import org.bioimageanalysis.icy.gui.action.SequenceOperationActions.ToggleVirtualSequenceAction;
@@ -36,9 +37,9 @@ import org.bioimageanalysis.icy.gui.canvas.IcyCanvasEvent;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvasListener;
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
 import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.bioimageanalysis.icy.gui.component.renderer.LabelComboBoxRenderer;
 import org.bioimageanalysis.icy.gui.dialog.ConfirmDialog;
 import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
@@ -84,6 +85,8 @@ import java.util.Vector;
  * @author Thomas Musset
  */
 public class Viewer extends IcyFrame implements KeyListener, SequenceListener, IcyCanvasListener, ExtensionLoader.ExtensionLoaderListener {
+    private static final int ICON_SIZE = LookAndFeelUtil.getDefaultIconSize();
+
     private class ViewerMainPanel extends JPanel {
         public ViewerMainPanel() {
             super();
@@ -468,11 +471,11 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         final ArrayList<JLabel> labels = new ArrayList<>();
 
         // get sync action labels
-        labels.add(new JLabel("Sync OFF", new IcySVGIcon(SVGIcon.FILTER_NONE, Color.DARK_GRAY), JLabel.LEFT));
-        labels.add(new JLabel("Sync 1", new IcySVGIcon(SVGIcon.FILTER_1, Color.GREEN.darker()), JLabel.LEFT));
-        labels.add(new JLabel("Sync 2", new IcySVGIcon(SVGIcon.FILTER_2, Color.ORANGE.darker()), JLabel.LEFT));
-        labels.add(new JLabel("Sync 3", new IcySVGIcon(SVGIcon.FILTER_3, Color.BLUE.darker()), JLabel.LEFT));
-        labels.add(new JLabel("Sync 4", new IcySVGIcon(SVGIcon.FILTER_4, Color.RED.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync OFF", new IcySVG(SVGResource.FILTER_NONE).getIcon(ICON_SIZE, Color.DARK_GRAY), JLabel.LEFT));
+        labels.add(new JLabel("Sync 1", new IcySVG(SVGResource.FILTER_1).getIcon(ICON_SIZE, Color.GREEN.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync 2", new IcySVG(SVGResource.FILTER_2).getIcon(ICON_SIZE, Color.ORANGE.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync 3", new IcySVG(SVGResource.FILTER_3).getIcon(ICON_SIZE, Color.BLUE.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync 4", new IcySVG(SVGResource.FILTER_4).getIcon(ICON_SIZE, Color.RED.darker()), JLabel.LEFT));
 
         // build comboBox with lock id
         lockComboBox = new JComboBox<>(new Vector<>(labels));
@@ -524,30 +527,30 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         buildCanvasCombo();
 
         // build buttons
-        layersEnabledButton = new IcyToggleButton(new ToggleLayersAction(true), new SVGIconPack(SVGIcon.LAYERS_CLEAR, SVGIcon.LAYERS));
+        layersEnabledButton = new IcyToggleButton(new ToggleLayersAction(true), new IcyIconPack(SVGResource.LAYERS_CLEAR, SVGResource.LAYERS));
         layersEnabledButton.setHideActionText(true);
         layersEnabledButton.setFocusable(false);
         layersEnabledButton.setSelected(true);
 
-        screenShotButton = new IcyButton(CanvasActions.screenShotAction, SVGIcon.PHOTO_CAMERA);
+        screenShotButton = new IcyButton(CanvasActions.screenShotAction, SVGResource.PHOTO_CAMERA);
         screenShotButton.setFocusable(false);
         screenShotButton.setHideActionText(true);
 
-        screenShotAlternateButton = new IcyButton(CanvasActions.screenShotAlternateAction, SVGIcon.ASPECT_RATIO);
+        screenShotAlternateButton = new IcyButton(CanvasActions.screenShotAlternateAction, SVGResource.INDETERMINATE_QUESTION);
         screenShotAlternateButton.setFocusable(false);
         screenShotAlternateButton.setHideActionText(true);
 
-        duplicateButton = new IcyButton(ViewerActions.duplicateAction, SVGIcon.CONTENT_COPY);
+        duplicateButton = new IcyButton(ViewerActions.duplicateAction, SVGResource.CONTENT_COPY);
         duplicateButton.setFocusable(false);
         duplicateButton.setHideActionText(true);
         // duplicateButton.setToolTipText("Duplicate view (no data duplication)");
 
-        switchStateButton = new IcyToggleButton(getSwitchStateAction(), SVGIcon.OPEN_IN_NEW);
+        switchStateButton = new IcyToggleButton(getSwitchStateAction(), SVGResource.OPEN_IN_NEW);
         switchStateButton.setSelected(isExternalized());
         switchStateButton.setFocusable(false);
         switchStateButton.setHideActionText(true);
 
-        virtualButton = new IcyToggleButton(new ToggleVirtualSequenceAction(false), new SVGIconPack(SVGIcon.FLASH_OFF, SVGIcon.FLASH_ON));
+        virtualButton = new IcyToggleButton(new ToggleVirtualSequenceAction(false), new IcyIconPack(SVGResource.FLASH_OFF, SVGResource.FLASH_ON));
         virtualButton.setFocusable(false);
         virtualButton.setHideActionText(true);
 

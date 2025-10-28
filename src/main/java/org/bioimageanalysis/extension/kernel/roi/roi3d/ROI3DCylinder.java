@@ -24,7 +24,7 @@ import org.bioimageanalysis.icy.common.geom.point.Point3D;
 import org.bioimageanalysis.icy.common.geom.point.Point5D;
 import org.bioimageanalysis.icy.common.geom.rectangle.Rectangle3D;
 import org.bioimageanalysis.icy.common.geom.shape.BoxShape3D;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 
 import java.awt.geom.RectangularShape;
 
@@ -45,7 +45,7 @@ public class ROI3DCylinder extends ROI3DBoxShape {
         super(cylinder);
 
         // set icon
-        setIcon(SVGIcon.BROKEN_IMAGE); // TODO change this icon
+        setIcon(SVGResource.IMAGE_BROKEN); // TODO change this icon
     }
 
     /**

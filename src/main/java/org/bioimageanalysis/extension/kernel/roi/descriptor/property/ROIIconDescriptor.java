@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ package org.bioimageanalysis.extension.kernel.roi.descriptor.property;
 
 import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGImageIcon;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
 import org.bioimageanalysis.icy.model.roi.ROI;
 import org.bioimageanalysis.icy.model.roi.ROIDescriptor;
 import org.bioimageanalysis.icy.model.roi.ROIEvent;
@@ -29,6 +29,7 @@ import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.awt.*;
 
 /**
@@ -38,7 +39,7 @@ import java.awt.*;
  * @author Stephane Dallongeville
  * @author Thomas Musset
  */
-public class ROIIconDescriptor extends ROIDescriptor {
+public class ROIIconDescriptor extends ROIDescriptor<Icon> {
     public static final String ID = "Icon";
 
     public ROIIconDescriptor() {
@@ -56,18 +57,20 @@ public class ROIIconDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public Object compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
-        return getIcon(roi);
+    public Icon compute(final @NotNull ROI roi, final Sequence sequence) throws UnsupportedOperationException {
+        //return getIcon(roi);
+        return new IcySVG(roi.getIcon()).getIcon(20, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
     }
 
     /**
      * Returns ROI icon
      */
+    @Deprecated
     @Contract("null -> null")
-    public static Image getIcon(final ROI roi) {
+    public static Icon getIcon(final ROI roi) {
         if (roi == null)
             return null;
 
-        return new IcySVGImageIcon(roi.getIcon(), LookAndFeelUtil.isDarkMode() ? Color.WHITE : Color.BLACK).getImage();
+        return new IcySVG(roi.getIcon()).getIcon(20, LookAndFeelUtil.getUIColor(LookAndFeelUtil.ColorType.BUTTON_DEFAULT));
     }
 }

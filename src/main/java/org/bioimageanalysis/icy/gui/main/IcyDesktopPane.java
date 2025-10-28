@@ -21,8 +21,8 @@ package org.bioimageanalysis.icy.gui.main;
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.math.HungarianAlgorithm;
 import org.bioimageanalysis.icy.gui.component.ComponentUtil;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGImageIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.frame.IcyInternalFrame;
 import org.bioimageanalysis.icy.gui.viewer.Viewer;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +67,7 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
         public BackgroundDesktopOverlay() {
             super();
 
-            backGround = new IcySVGImageIcon(SVGIcon.ICY_TRANSPARENT, Color.GRAY, 512).getImage();
+            backGround = new IcySVG(SVGResource.ICY_TRANSPARENT).getImage(512, Color.GRAY);
         }
 
         @Override
@@ -78,30 +78,20 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
 
             final Color bgColor = desktop.getBackground();
 
-            /*if (desktop != null)
-                bgColor = desktop.getBackground();
-            else
-                bgColor = Color.lightGray;*/
-
             final int bgImgWidth = backGround.getWidth(this);
             final int bgImgHeight = backGround.getHeight(this);
 
-            // compute image scaling
-            //final double scale = Math.max((double) width / (double) bgImgWidth, (double) height / (double) bgImgHeight) * 1.5d;
             final Graphics2D g2 = (Graphics2D) g.create();
 
             // fill background color
             g2.setBackground(bgColor);
             g2.clearRect(0, 0, width, height);
 
-            //int imgWidth = Math.min(desktop.getWidth(), desktop.getHeight());
-            //int imgHeight = imgWidth;
-
             // paint image over background in transparency
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .2f));
-            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            //g2.drawImage(backGround, 0, 0, (int) (scale * bgImgWidth), (int) (scale * bgImgHeight), bgColor, this);
-            //g2.drawImage(backGround, (desktop.getWidth()/2)-(imgWidth/2), (desktop.getHeight()/2)-(imgWidth/2), imgWidth, imgHeight, bgColor, this);
+            g2.addRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
+            g2.addRenderingHints(new RenderingHints(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC));
+            g2.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
             g2.drawImage(backGround, (desktop.getWidth() / 2) - (bgImgWidth / 2), (desktop.getHeight() / 2) - (bgImgHeight / 2), bgImgWidth, bgImgHeight, null, this);
 
             g2.dispose();

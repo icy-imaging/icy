@@ -18,7 +18,7 @@
 
 package org.bioimageanalysis.icy.model.sequence.edit;
 
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.roi.ROI;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 
@@ -35,7 +35,7 @@ import java.util.List;
 public class AbstractROIsSequenceEdit extends AbstractSequenceEdit {
     Collection<ROI> rois;
 
-    public AbstractROIsSequenceEdit(final Sequence sequence, final Collection<ROI> rois, final String name, final SVGIcon icon) {
+    public AbstractROIsSequenceEdit(final Sequence sequence, final Collection<ROI> rois, final String name, final SVGResource icon) {
         super(sequence, name, icon);
 
         this.rois = rois;

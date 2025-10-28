@@ -81,6 +81,8 @@ public abstract class Plugin implements AutoCloseable {
         // get descriptor from loader
         descriptor = ExtensionLoader.getPlugin(getClass().getName());
 
+        // TODO remove this
+        /*
         if (descriptor == null) {
             // descriptor not found (don't check for anonymous plugin class) ?
             if (!getClass().isAnonymousClass()) {
@@ -95,6 +97,7 @@ public abstract class Plugin implements AutoCloseable {
             descriptor = new PluginDescriptor(this.getClass());
             descriptor.setName(getClass().getSimpleName());
         }
+        */
 
         // audit
         Audit.pluginInstanced(this);

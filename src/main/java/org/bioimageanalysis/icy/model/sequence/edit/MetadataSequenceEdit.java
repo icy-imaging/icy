@@ -19,7 +19,7 @@
 package org.bioimageanalysis.icy.model.sequence.edit;
 
 import ome.xml.meta.OMEXMLMetadata;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 
 import javax.swing.undo.CannotUndoException;
@@ -35,13 +35,13 @@ import javax.swing.undo.CannotUndoException;
 public class MetadataSequenceEdit extends AbstractSequenceEdit {
     OMEXMLMetadata previous;
 
-    public MetadataSequenceEdit(final OMEXMLMetadata previous, final Sequence sequence, final String name, final SVGIcon icon) {
+    public MetadataSequenceEdit(final OMEXMLMetadata previous, final Sequence sequence, final String name, final SVGResource icon) {
         super(sequence, name, icon);
 
         this.previous = previous;
     }
 
-    public MetadataSequenceEdit(final OMEXMLMetadata previous, final Sequence sequence, final SVGIcon icon) {
+    public MetadataSequenceEdit(final OMEXMLMetadata previous, final Sequence sequence, final SVGResource icon) {
         this(previous, sequence, "Sequence metadata changed", icon);
 
         this.previous = previous;

@@ -19,7 +19,7 @@
 package org.bioimageanalysis.icy.gui.component.tabbedpane;
 
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,7 +65,7 @@ public class CloseableTabbedPane extends JTabbedPane {
 
             sep = Box.createHorizontalStrut(6);
 
-            closeButton = new IcyButton(SVGIcon.CLOSE);
+            closeButton = new IcyButton(SVGResource.CLOSE);
             closeButton.setContentAreaFilled(false);
             closeButton.setToolTipText("close");
 

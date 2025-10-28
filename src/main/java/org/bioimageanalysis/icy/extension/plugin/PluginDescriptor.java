@@ -20,22 +20,19 @@ package org.bioimageanalysis.icy.extension.plugin;
 
 import org.bioimageanalysis.icy.common.Version;
 import org.bioimageanalysis.icy.common.reflect.ClassUtil;
-import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.extension.ExtensionDescriptor;
-import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.PluginActionable;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginDescription;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginDaemon;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGImageIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.io.FileUtil;
 import org.bioimageanalysis.icy.io.jar.JarUtil;
 import org.bioimageanalysis.icy.model.image.ImageUtil;
 import org.bioimageanalysis.icy.network.NetworkUtil;
-import org.bioimageanalysis.icy.network.URLUtil;
 import org.bioimageanalysis.icy.system.preferences.RepositoryPreferences.RepositoryInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +42,6 @@ import java.awt.*;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.*;
-import java.util.List;
 
 /**
  * <br>
@@ -58,59 +54,73 @@ import java.util.List;
  */
 public final class PluginDescriptor {
     public static final int ICON_SIZE = 32;
-    public static final int IMAGE_SIZE = 256;
+    //public static final int IMAGE_SIZE = 256;
 
-    public static final ImageIcon DEFAULT_ICON = new IcySVGImageIcon(SVGIcon.INDETERMINATE_QUESTION);
-    public static final Image DEFAULT_IMAGE = new IcySVGImageIcon(SVGIcon.INDETERMINATE_QUESTION).getImage();
+    //public static final ImageIcon DEFAULT_ICON = new IcySVGImageIcon(SVGIcon.INDETERMINATE_QUESTION);
+    //public static final Image DEFAULT_IMAGE = new IcySVGImageIcon(SVGIcon.INDETERMINATE_QUESTION).getImage();
 
     private Class<? extends Plugin> pluginClass;
     private ExtensionDescriptor extension;
 
-    private ImageIcon icon;
-    private Image image;
-    private SVGIcon svgIcon;
+    private Icon icon;
+    //private Image image;
+
+    private IcySVG svg;
 
     private String name;
     private String shortDescription;
+    @Deprecated
     private String jarUrl;
+    @Deprecated
     private String imageUrl;
+    @Deprecated
     private String iconUrl;
+    private String svgPath;
+    @Deprecated
     private String author;
+    @Deprecated
     private String web;
+    @Deprecated
     private String email;
     private String desc;
+    @Deprecated
     private String changeLog;
+    @Deprecated
+    private Version version;
 
     private boolean enabled;
     private boolean descriptorLoaded;
     private boolean iconLoaded;
-    private boolean imageLoaded;
+    //private boolean imageLoaded;
     private boolean changeLogLoaded;
     private boolean iconMono;
 
     // only for online descriptor
     private RepositoryInfo repository;
 
+    @Deprecated(forRemoval = true, since = "3.0.0-a.5")
     public PluginDescriptor() {
         super();
 
         extension = null;
         pluginClass = null;
 
-        icon = DEFAULT_ICON;
-        image = DEFAULT_IMAGE;
-        svgIcon = null;
+        svg = new IcySVG(SVGResource.EXTENSION_DEFAULT);
+        icon = svg.getIcon(ICON_SIZE);
+        //image = DEFAULT_IMAGE;
 
         name = "";
         shortDescription = "";
         jarUrl = "";
         imageUrl = "";
         iconUrl = "";
+        svgPath = "";
         author = "";
         web = "";
         email = "";
         desc = "";
         changeLog = "";
+        version = new Version();
 
         repository = null;
 
@@ -119,24 +129,24 @@ public final class PluginDescriptor {
         descriptorLoaded = true;
         changeLogLoaded = true;
         iconLoaded = true;
-        imageLoaded = true;
+        //imageLoaded = true;
         iconMono = false;
     }
 
     /**
      * Create from class, used for local plugin.
      */
-    public PluginDescriptor(final @NotNull Class<? extends Plugin> clazz) {
+    public PluginDescriptor(final @NotNull Class<? extends Plugin> clazz, final ExtensionDescriptor extension) {
         this();
 
         this.pluginClass = clazz;
+        this.extension = extension;
 
-        final String baseResourceName;
-        final String baseLocalName;
+        //final String baseResourceName;
+        //final String baseLocalName;
 
         String magicName = "";
-        String magicShortDescription = "";
-        String magicLongDescription = "";
+        String magicDescription = "";
         String magicIcon = "";
         boolean magicIconMono = false;
 
@@ -146,46 +156,17 @@ public final class PluginDescriptor {
         }
         if (clazz.isAnnotationPresent(IcyPluginDescription.class)) {
             final IcyPluginDescription annotation = clazz.getAnnotation(IcyPluginDescription.class);
-            magicShortDescription = annotation.shortDesc();
-            magicLongDescription = annotation.longDesc();
+            magicDescription = annotation.value();
         }
         if (clazz.isAnnotationPresent(IcyPluginIcon.class)) {
             final IcyPluginIcon annotation = clazz.getAnnotation(IcyPluginIcon.class);
-            magicIcon = annotation.path();
+            magicIcon = annotation.value();
             magicIconMono = annotation.monochrome();
         }
 
-        // TODO check if it's working
-        // bundled plugin ?
-        /*if (bundled) {
-            // find original JAR file
-            final String jarPath = getPluginJarPath();
-
-            // get base resource and local name from it
-            baseResourceName = FileUtil.getFileName(jarPath, false);
-            baseLocalName = FileUtil.setExtension(jarPath, "");
-        }
-        else {*/
-        baseResourceName = clazz.getSimpleName();
-        baseLocalName = ClassUtil.getPathFromQualifiedName(clazz.getName());
-        //}
-
         // load icon
-        URL iconUrl;
-        if (magicIcon.isEmpty())
-            //iconUrl = clazz.getResource(baseResourceName + getIconExtension());
-            iconUrl = clazz.getClassLoader().getResource("META-INF/icon.svg");
-        else
-            iconUrl = clazz.getResource(magicIcon);
-        if (iconUrl == null)
-            iconUrl = URLUtil.getURL(baseLocalName + getIconExtension());
-        // loadIcon(url);
-
-        // load image
-        URL imageUrl = clazz.getResource(baseResourceName + getImageExtension());
-        if (imageUrl == null)
-            imageUrl = URLUtil.getURL(baseLocalName + getImageExtension());
-        // loadImage(url);
+        if (!magicIcon.isBlank())
+            svgPath = magicIcon;
 
         // set default informations
         name = pluginClass.getSimpleName();
@@ -193,18 +174,13 @@ public final class PluginDescriptor {
 
         if (!magicName.isBlank())
             name = magicName;
-        if (!magicShortDescription.isBlank())
-            shortDescription = magicShortDescription;
-
-        // overwrite image, icon url with their local equivalent
-        this.iconUrl = iconUrl.toString();
-        this.imageUrl = imageUrl.toString();
+        if (!magicDescription.isBlank())
+            shortDescription = magicDescription;
 
         // only descriptor is loaded here
         descriptorLoaded = true;
         changeLogLoaded = false;
         iconLoaded = false;
-        imageLoaded = false;
         iconMono = magicIconMono;
     }
 
@@ -224,10 +200,7 @@ public final class PluginDescriptor {
         return false;
     }
 
-    /**
-     * Load 32x32 icon (icon url field should be correctly filled)
-     */
-    public boolean loadIcon() {
+    public boolean loadSVG() {
         // already loaded ?
         if (iconLoaded)
             return true;
@@ -236,36 +209,14 @@ public final class PluginDescriptor {
         iconLoaded = true;
 
         // load icon
-        return loadIcon(URLUtil.getURL(iconUrl));
-    }
-
-    /**
-     * Load 256x256 image (image url field should be correctly filled)
-     */
-    public boolean loadImage() {
-        // already loaded ?
-        if (imageLoaded)
-            return true;
-
-        // just to avoid retry indefinitely if it fails
-        imageLoaded = true;
-
-        // load image
-        return loadImage(URLUtil.getURL(imageUrl));
-    }
-
-    /**
-     * Load icon and image (both icon and image url fields should be correctly filled)
-     */
-    public boolean loadImages() {
-        return loadIcon() & loadImage();
+        return loadSVGIcon();
     }
 
     /**
      * Load descriptor and images if not already done
      */
     public boolean loadAll() {
-        return loadChangeLog() & loadImages();
+        return loadChangeLog() & loadSVG();
     }
 
     /**
@@ -336,9 +287,20 @@ public final class PluginDescriptor {
      * package).
      */
     public boolean isKernelPlugin() {
-        return getClassName().startsWith(ExtensionLoader.KERNEL_PLUGINS_PACKAGE + ".") || getClassName().startsWith(ExtensionLoader.OLD_KERNEL_PLUGINS_PACKAGE + ".");
+        return extension.isKernel();
+        //return getClassName().startsWith(ExtensionLoader.KERNEL_PLUGINS_PACKAGE + ".") || getClassName().startsWith(ExtensionLoader.OLD_KERNEL_PLUGINS_PACKAGE + ".");
     }
 
+    boolean loadSVGIcon() {
+        if (svgPath.isBlank())
+            svg = extension.getSVG();
+        else
+            svg = Objects.requireNonNullElseGet(extension.getSVG(svgPath), () -> extension.getSVG());
+
+        return true;
+    }
+
+    @Deprecated
     boolean loadIcon(final @Nullable URL url) {
         if (url == null) {
             icon = null; //DEFAULT_ICON;
@@ -347,8 +309,8 @@ public final class PluginDescriptor {
 
         // load icon
         if (url.toString().toLowerCase(Locale.getDefault()).endsWith(".svg")) {
-            svgIcon = new SVGIcon(url, !iconMono);
-            icon = new IcySVGImageIcon(svgIcon);
+            //svgIcon = new SVGIcon(url, !iconMono);
+            //icon = new IcySVGImageIcon(svgIcon);
         }
         else {
             final Image img = ImageUtil.scale(ImageUtil.load(NetworkUtil.getInputStream(url, (repository != null) ? repository.getAuthenticationInfo() : null, true, false), false), ICON_SIZE, ICON_SIZE);
@@ -367,7 +329,7 @@ public final class PluginDescriptor {
         return true;
     }
 
-    boolean loadImage(final URL url) {
+    /*boolean loadImage(final URL url) {
         // load image
         if (url != null)
             image = ImageUtil.scale(
@@ -391,7 +353,7 @@ public final class PluginDescriptor {
         }
 
         return true;
-    }
+    }*/
 
     /**
      * Returns the plugin class name.<br>
@@ -434,6 +396,10 @@ public final class PluginDescriptor {
         return "";
     }
 
+    public ExtensionDescriptor getExtension() {
+        return extension;
+    }
+
     /**
      * @return the pluginClass
      */
@@ -469,6 +435,7 @@ public final class PluginDescriptor {
     /**
      * return icon extension
      */
+    @Deprecated
     public String getIconExtension() {
         return "_icon.png";
     }
@@ -476,6 +443,7 @@ public final class PluginDescriptor {
     /**
      * return icon filename
      */
+    @Deprecated
     public String getIconFilename() {
         return getFilename() + getIconExtension();
     }
@@ -483,6 +451,7 @@ public final class PluginDescriptor {
     /**
      * return image extension
      */
+    @Deprecated
     public String getImageExtension() {
         return ".png";
     }
@@ -490,6 +459,7 @@ public final class PluginDescriptor {
     /**
      * return image filename
      */
+    @Deprecated
     public String getImageFilename() {
         return getFilename() + getImageExtension();
     }
@@ -501,41 +471,19 @@ public final class PluginDescriptor {
         return getFilename() + JarUtil.FILE_DOT_EXTENSION;
     }
 
-    /**
-     * @return the icon
-     */
-    public ImageIcon getIcon() {
-        loadIcon();
-        return icon;
-    }
-
-    /**
-     * @return the icon as image
-     */
-    public Image getIconAsImage() {
-        final ImageIcon i = getIcon();
-
-        if (i != null)
-            return i.getImage();
-
-        return null;
+    @NotNull
+    public IcySVG getSVG() {
+        loadSVG();
+        return svg;
     }
 
     /**
      * @return the image
      */
-    public Image getImage() {
+    /*public Image getImage() {
         loadImage();
         return image;
-    }
-
-    /**
-     * @return the plugin icon as SVG. Can be null.
-     */
-    public @Nullable SVGIcon getSVGIcon() {
-        loadIcon();
-        return svgIcon;
-    }
+    }*/
 
     /**
      * @return the name
@@ -555,19 +503,17 @@ public final class PluginDescriptor {
      * @return the version
      */
     public Version getVersion() {
+        //return version;
         return extension.getVersion();
     }
 
     /**
      * @return the url
      */
+    @Deprecated
     public String getUrl() {
         // url is default XML url
         return "";
-    }
-
-    public void setExtension(final ExtensionDescriptor extension) {
-        this.extension = extension;
     }
 
     /**
@@ -580,6 +526,7 @@ public final class PluginDescriptor {
     /**
      * @param repository the repository to set
      */
+    @Deprecated
     public void setRepository(final RepositoryInfo repository) {
         this.repository = repository;
     }
@@ -587,6 +534,7 @@ public final class PluginDescriptor {
     /**
      * @return the jarUrl
      */
+    @Deprecated
     public String getJarUrl() {
         return jarUrl;
     }
@@ -594,6 +542,7 @@ public final class PluginDescriptor {
     /**
      * @param jarUrl the jarUrl to set
      */
+    @Deprecated
     public void setJarUrl(final String jarUrl) {
         this.jarUrl = jarUrl;
     }
@@ -601,6 +550,7 @@ public final class PluginDescriptor {
     /**
      * @return the imageUrl
      */
+    @Deprecated
     public String getImageUrl() {
         return imageUrl;
     }
@@ -608,6 +558,7 @@ public final class PluginDescriptor {
     /**
      * @param imageUrl the imageUrl to set
      */
+    @Deprecated
     public void setImageUrl(final String imageUrl) {
         this.imageUrl = imageUrl;
     }
@@ -615,6 +566,7 @@ public final class PluginDescriptor {
     /**
      * @return the iconUrl
      */
+    @Deprecated
     public String getIconUrl() {
         return iconUrl;
     }
@@ -622,6 +574,7 @@ public final class PluginDescriptor {
     /**
      * @param iconUrl the iconUrl to set
      */
+    @Deprecated
     public void setIconUrl(final String iconUrl) {
         this.iconUrl = iconUrl;
     }
@@ -652,6 +605,11 @@ public final class PluginDescriptor {
      */
     public String getChangeLog() {
         return changeLog;
+    }
+
+    @Deprecated
+    public void setVersion(final Version version) {
+        this.version = version;
     }
 
     /**
@@ -685,22 +643,22 @@ public final class PluginDescriptor {
     /**
      * Returns true if image is loaded.
      */
-    public boolean isImageLoaded() {
+    /*public boolean isImageLoaded() {
         return imageLoaded;
-    }
+    }*/
 
     /**
      * Returns true if image and icon are loaded.
      */
     public boolean isImagesLoaded() {
-        return iconLoaded && imageLoaded;
+        return iconLoaded; // && imageLoaded;
     }
 
     /**
      * Returns true if both descriptor and images are loaded.
      */
     public boolean isAllLoaded() {
-        return descriptorLoaded && changeLogLoaded && iconLoaded && imageLoaded;
+        return descriptorLoaded && changeLogLoaded && iconLoaded; // && imageLoaded;
     }
 
     public RepositoryInfo getRepository() {
@@ -805,7 +763,7 @@ public final class PluginDescriptor {
     }
 
     /**
-     * Sort plugins on name with plugins.kernel plugins appearing first.
+     * Sort plugins to make kernel plugins appears first.
      */
     public static class PluginKernelNameSorter implements Comparator<PluginDescriptor> {
         // static class
@@ -818,14 +776,11 @@ public final class PluginDescriptor {
 
         @Override
         public int compare(final PluginDescriptor o1, final PluginDescriptor o2) {
-            final String packageName1 = o1.getPackageName();
-            final String packageName2 = o2.getPackageName();
-
-            if (packageName1.startsWith(ExtensionLoader.KERNEL_PLUGINS_PACKAGE)) {
-                if (!packageName2.startsWith(ExtensionLoader.KERNEL_PLUGINS_PACKAGE))
+            if (o1.extension.isKernel()) {
+                if (!o2.extension.isKernel())
                     return -1;
             }
-            else if (packageName2.startsWith(ExtensionLoader.KERNEL_PLUGINS_PACKAGE))
+            else if (o2.extension.isKernel())
                 return 1;
 
             return o1.toString().compareToIgnoreCase(o2.toString());

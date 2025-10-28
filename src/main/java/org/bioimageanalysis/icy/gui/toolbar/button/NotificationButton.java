@@ -19,14 +19,14 @@
 package org.bioimageanalysis.icy.gui.toolbar.button;
 
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class NotificationButton extends IcyButton implements ActionListener {
     public NotificationButton() {
-        super(SVGIcon.NOTIFICATIONS);
+        super(SVGResource.NOTIFICATIONS);
         setFocusable(false);
         addActionListener(this);
     }

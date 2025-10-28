@@ -1,8 +1,0 @@
-<svg fill="none" height="24" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M8 8h8v8h-8z"/>
-    <rect height="16" width="16" x="4" y="4"/>
-    <path d="M16 16l3.3 3.3"/>
-    <path d="M16 8l3.3 -3.3"/>
-    <path d="M8 8l-3.3 -3.3"/>
-    <path d="M8 16l-3.3 3.3"/>
-</svg>

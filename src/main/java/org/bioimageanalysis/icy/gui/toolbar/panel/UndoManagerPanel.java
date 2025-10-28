@@ -23,7 +23,7 @@ import org.bioimageanalysis.icy.gui.component.button.IcyButton;
 import org.bioimageanalysis.icy.gui.listener.ActiveSequenceListener;
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.system.preferences.GeneralPreferences;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.bioimageanalysis.icy.model.sequence.SequenceEvent;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
@@ -179,12 +179,12 @@ public final class UndoManagerPanel extends ToolbarPanel implements ActiveSequen
         bottomPanel.setBorder(new EmptyBorder(2, 0, 0, 0));
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
 
-        undoButton = new IcyButton(SVGIcon.UNDO);
+        undoButton = new IcyButton(SVGResource.UNDO);
         undoButton.addActionListener(SequenceOperationActions.undoAction);
         undoButton.setHideActionText(true);
         bottomPanel.add(undoButton);
 
-        redoButton = new IcyButton(SVGIcon.REDO);
+        redoButton = new IcyButton(SVGResource.REDO);
         redoButton.addActionListener(SequenceOperationActions.redoAction);
         redoButton.setHideActionText(true);
         bottomPanel.add(redoButton);
@@ -207,12 +207,12 @@ public final class UndoManagerPanel extends ToolbarPanel implements ActiveSequen
         final Component horizontalStrut_2 = Box.createHorizontalStrut(8);
         bottomPanel.add(horizontalStrut_2);
 
-        clearAllButLastButton = new IcyButton(SVGIcon.DELETE_SWEEP);
+        clearAllButLastButton = new IcyButton(SVGResource.DELETE_SWEEP);
         clearAllButLastButton.addActionListener(SequenceOperationActions.undoClearAllButLastAction);
         clearAllButLastButton.setHideActionText(true);
         bottomPanel.add(clearAllButLastButton);
 
-        clearAllButton = new IcyButton(SVGIcon.DELETE);
+        clearAllButton = new IcyButton(SVGResource.DELETE);
         clearAllButton.addActionListener(SequenceOperationActions.undoClearAction);
         clearAllButton.setHideActionText(true);
         bottomPanel.add(clearAllButton);

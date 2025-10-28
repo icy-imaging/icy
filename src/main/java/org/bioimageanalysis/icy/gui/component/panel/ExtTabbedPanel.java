@@ -19,7 +19,7 @@
 package org.bioimageanalysis.icy.gui.component.panel;
 
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,7 +58,7 @@ public class ExtTabbedPanel extends JTabbedPane {
             label = new JLabel(title + " ", icon, SwingConstants.CENTER);
             label.setOpaque(false);
 
-            externButton = new IcyButton(SVGIcon.OPEN_IN_NEW);
+            externButton = new IcyButton(SVGResource.OPEN_IN_NEW);
             externButton.setOpaque(false);
             externButton.setContentAreaFilled(false);
             externButton.setToolTipText("Externalize panel");

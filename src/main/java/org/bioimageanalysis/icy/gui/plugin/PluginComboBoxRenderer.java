@@ -21,12 +21,10 @@ package org.bioimageanalysis.icy.gui.plugin;
 import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
 import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
 import org.bioimageanalysis.icy.gui.component.renderer.CustomComboBoxRenderer;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * @author Stephane Dallongeville
@@ -49,11 +47,22 @@ public class PluginComboBoxRenderer extends CustomComboBoxRenderer {
             if (plugin != null) {
                 //setIcon(ResourceUtil.scaleIcon(plugin.getIcon(), 16));
                 final int size = LookAndFeelUtil.getDefaultIconSize();
-                final ImageIcon imgIcon = plugin.getIcon();
+
+                try {
+                    final IcySVG icons = plugin.getSVG();
+                    if (icons != null) {
+                        setIcon(icons.getIcon(size));
+                    }
+                }
+                catch (final Throwable t) {
+                    //
+                }
+
+                /*final ImageIcon imgIcon = plugin.getIcon();
                 if (imgIcon != null)
                     setIcon(new ImageIcon(imgIcon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH))); // TODO: 10/02/2023 Set smooth mode for ResourceUtil.scaleIcon
                 else
-                    setIcon(new IcySVGIcon(SVGIcon.BROKEN_IMAGE));
+                    setIcon(new IcySVGIcon(SVGIcon.BROKEN_IMAGE));*/
                 if (showLabel)
                     setText(plugin.getName());
                 else

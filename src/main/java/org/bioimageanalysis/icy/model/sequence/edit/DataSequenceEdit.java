@@ -18,7 +18,7 @@
 
 package org.bioimageanalysis.icy.model.sequence.edit;
 
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 
@@ -35,7 +35,7 @@ import javax.swing.undo.CannotUndoException;
 public class DataSequenceEdit extends AbstractSequenceEdit {
     Sequence previous;
 
-    public DataSequenceEdit(final Sequence previous, final Sequence sequence, final String name, final SVGIcon icon) {
+    public DataSequenceEdit(final Sequence previous, final Sequence sequence, final String name, final SVGResource icon) {
         super(sequence, name, icon);
 
         this.previous = previous;
@@ -45,7 +45,7 @@ public class DataSequenceEdit extends AbstractSequenceEdit {
         this(previous, sequence, name, null);
     }
 
-    public DataSequenceEdit(final Sequence previous, final Sequence sequence, final SVGIcon icon) {
+    public DataSequenceEdit(final Sequence previous, final Sequence sequence, final SVGResource icon) {
         this(previous, sequence, "Sequence data changed", icon);
     }
 

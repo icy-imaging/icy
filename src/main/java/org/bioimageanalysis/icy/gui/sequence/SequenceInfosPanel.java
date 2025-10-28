@@ -25,7 +25,7 @@ import org.bioimageanalysis.icy.gui.listener.ActiveSequenceListener;
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.math.UnitUtil;
 import org.bioimageanalysis.icy.common.math.UnitUtil.UnitPrefix;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.bioimageanalysis.icy.model.sequence.SequenceEvent;
 import org.bioimageanalysis.icy.system.SystemUtil;
@@ -378,7 +378,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_resZLabel.gridy = 6;
         add(resZLabel, gbc_resZLabel);
 
-        editBtn = new IcyButton("Edit", SVGIcon.EDIT);
+        editBtn = new IcyButton("Edit", SVGResource.EDIT);
         editBtn.setToolTipText("Edit sequence properties");
 
         final GridBagConstraints gbc_editBtn = new GridBagConstraints();
@@ -389,7 +389,7 @@ public class SequenceInfosPanel extends JPanel implements ActiveSequenceListener
         gbc_editBtn.gridy = 7;
         add(editBtn, gbc_editBtn);
 
-        detailBtn = new IcyButton("Show metadata", SVGIcon.DESCRIPTION);
+        detailBtn = new IcyButton("Show metadata", SVGResource.DESCRIPTION);
         detailBtn.setText("Metadata");
         detailBtn.setToolTipText("Show all associated metadata informations");
 

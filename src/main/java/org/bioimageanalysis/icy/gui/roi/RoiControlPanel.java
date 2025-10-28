@@ -30,8 +30,8 @@ import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
 import org.bioimageanalysis.icy.gui.component.model.SpecialValueSpinnerModel;
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.math.MathUtil;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIconPack;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.bioimageanalysis.icy.model.roi.ROI;
 import org.bioimageanalysis.icy.model.roi.ROIEvent;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
@@ -193,7 +193,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         alphaSlider.setMinimumSize(new Dimension(36, 20));
         alphaSlider.setToolTipText("ROI content opacity");
 
-        readOnlyToggle = new IcyToggleButton(new SVGIconPack(SVGIcon.LOCK_OPEN, SVGIcon.LOCK));
+        readOnlyToggle = new IcyToggleButton(new IcyIconPack(SVGResource.LOCK_OPEN, SVGResource.LOCK));
         readOnlyToggle.setSelected(true);
         readOnlyToggle.setBorderPainted(false);
         readOnlyToggle.setFocusPainted(false);

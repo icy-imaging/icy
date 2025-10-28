@@ -18,7 +18,7 @@
 
 package org.bioimageanalysis.icy.model.roi.edit;
 
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.overlay.anchor.Anchor3D;
 import org.bioimageanalysis.icy.model.roi.ROI3D;
 
@@ -31,7 +31,7 @@ import org.bioimageanalysis.icy.model.roi.ROI3D;
 public class AbstractPoint3DROIEdit extends AbstractROIEdit {
     protected Anchor3D point;
 
-    public AbstractPoint3DROIEdit(final ROI3D roi, final Anchor3D point, final String name, final SVGIcon icon) {
+    public AbstractPoint3DROIEdit(final ROI3D roi, final Anchor3D point, final String name, final SVGResource icon) {
         super(roi, name, icon);
 
         this.point = point;
@@ -41,7 +41,7 @@ public class AbstractPoint3DROIEdit extends AbstractROIEdit {
         this(roi, point, name, roi.getIcon());
     }
 
-    public AbstractPoint3DROIEdit(final ROI3D roi, final Anchor3D point, final SVGIcon icon) {
+    public AbstractPoint3DROIEdit(final ROI3D roi, final Anchor3D point, final SVGResource icon) {
         this(roi, point, "ROI point changed", icon);
     }
 

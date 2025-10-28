@@ -18,7 +18,7 @@
 
 package org.bioimageanalysis.icy.model.roi.edit;
 
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.undo.AbstractIcyUndoableEdit;
 import org.bioimageanalysis.icy.model.roi.ROI;
 
@@ -29,7 +29,7 @@ import org.bioimageanalysis.icy.model.roi.ROI;
  * @author Thomas Musset
  */
 public abstract class AbstractROIEdit extends AbstractIcyUndoableEdit {
-    public AbstractROIEdit(final ROI roi, final String name, final SVGIcon icon) {
+    public AbstractROIEdit(final ROI roi, final String name, final SVGResource icon) {
         super(roi, name, icon);
     }
 

@@ -19,8 +19,8 @@
 package org.bioimageanalysis.icy.gui.menu.search;
 
 import org.bioimageanalysis.icy.gui.component.field.IcyTextField;
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.network.search.SearchEngine;
 import org.bioimageanalysis.icy.network.search.SearchEngine.SearchEngineListener;
 import org.bioimageanalysis.icy.network.search.SearchResult;
@@ -74,7 +74,7 @@ public class SearchBar extends IcyTextField implements SearchEngineListener {
         searchEngine.addListener(this);
 
         resultsPanel = new SearchResultPanel(this);
-        searchIcon = new IcySVGIcon(SVGIcon.SEARCH, 16);
+        searchIcon = new IcySVG(SVGResource.SEARCH).getIcon(16);
 
         // modify margin so we have space for icon
         final Insets margin = getMargin();

@@ -63,30 +63,24 @@ public final class LookAndFeelUtil {
     private static final @NotNull Color YELLOW_BRIGHT = new Color(255, 150, 0);
 
     public enum ColorType {
-        UI_BUTTON_DEFAULT("Button.foreground"),
-        UI_BUTTON_DISABLED("Button.disabledText"),
-        UI_BUTTON_SELECTED("Button.selectedForeground"),
-        UI_TOGGLEBUTTON_DEFAULT("ToggleButton.foreground"),
-        UI_TOGGLEBUTTON_DISABLED("ToggleButton.disabledText"),
-        UI_TOGGLEBUTTON_SELECTED("ToggleButton.selectedForeground"),
-        UI_MENU_DEFAULT("Menu.foreground"),
-        UI_MENU_DISABLED("Menu.disabledForeground"),
-        UI_MENU_SELECTED("Menu.selectionForeground"),
-        UI_MENUITEM_DEFAULT("MenuItem.foreground"),
-        UI_MENUITEM_DISABLED("MenuItem.disabledForeground"),
-        UI_MENUITEM_SELECTED("MenuItem.selectionForeground");
+        BUTTON_DEFAULT("Button.foreground"),
+        BUTTON_DISABLED("Button.disabledText"),
+        BUTTON_SELECTED("Button.selectedForeground"),
+        TOGGLEBUTTON_DEFAULT("ToggleButton.foreground"),
+        TOGGLEBUTTON_DISABLED("ToggleButton.disabledText"),
+        TOGGLEBUTTON_SELECTED("ToggleButton.selectedForeground"),
+        MENU_DEFAULT("Menu.foreground"),
+        MENU_DISABLED("Menu.disabledForeground"),
+        MENU_SELECTED("Menu.selectionForeground"),
+        MENUITEM_DEFAULT("MenuItem.foreground"),
+        MENUITEM_DISABLED("MenuItem.disabledForeground"),
+        MENUITEM_SELECTED("MenuItem.selectionForeground");
 
-        public final @NotNull String type;
+        final @NotNull String type;
 
         @Contract(pure = true)
         ColorType(final @NotNull String s) {
             type = s;
-        }
-
-        @Contract(pure = true)
-        @Override
-        public final String toString() {
-            return type;
         }
     }
 
@@ -105,15 +99,38 @@ public final class LookAndFeelUtil {
         }
 
         final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        boolean ttfMedium = false;
         try (final InputStream is = Icy.class.getResourceAsStream("/fonts/JetBrainsMono-Medium.ttf")) {
             if (is != null) {
                 ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, is));
-                fontInstalled = true;
+                ttfMedium = true;
             }
         }
         catch (final IOException | FontFormatException e) {
-            IcyLogger.warn(LookAndFeelUtil.class, e, "Unable to install font.");
+            IcyLogger.warn(LookAndFeelUtil.class, e, "Unable to install default font.");
+        }
+
+        boolean ttfBold = false;
+        if (ttfMedium) {
+            try (final InputStream is = Icy.class.getResourceAsStream("/fonts/JetBrainsMono-Bold.ttf")) {
+                if (is != null) {
+                    ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, is));
+                    ttfBold = true;
+                }
+            }
+            catch (final IOException | FontFormatException e) {
+                IcyLogger.warn(LookAndFeelUtil.class, e, "Unable to install bold font.");
+            }
+        }
+
+        if (ttfMedium) {
+            fontInstalled = true;
+            if (!ttfBold)
+                IcyLogger.warn(LookAndFeelUtil.class, "Bold font not installed. Using only default font.");
+        }
+        else {
             fontInstalled = false;
+            IcyLogger.warn(LookAndFeelUtil.class, "Default font not installed. Some graphical elements will be broken.");
         }
 
         // Default themes

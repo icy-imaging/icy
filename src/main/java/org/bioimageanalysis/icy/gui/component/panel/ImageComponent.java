@@ -18,8 +18,9 @@
 
 package org.bioimageanalysis.icy.gui.component.panel;
 
-import org.bioimageanalysis.icy.gui.component.icon.IcySVGImageIcon;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.LookAndFeelUtil;
+import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.image.ImageUtil;
 
 import javax.swing.*;
@@ -86,7 +87,7 @@ public class ImageComponent extends JPanel {
 
         // something wrong here --> use 'fault' image
         if ((ix <= 0f) || (iy <= 0f)) {
-            image = new IcySVGImageIcon(SVGIcon.CLOSE, this.getForeground()).getImage();
+            image = new IcySVG(SVGResource.CLOSE).getImage(LookAndFeelUtil.getDefaultIconSize(), this.getForeground());
             ix = image.getWidth(null);
             iy = image.getHeight(null);
         }

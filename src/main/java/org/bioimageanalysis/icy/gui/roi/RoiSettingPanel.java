@@ -21,7 +21,7 @@ package org.bioimageanalysis.icy.gui.roi;
 import org.bioimageanalysis.icy.gui.component.panel.AbstractRoisPanel.BaseColumnInfo;
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
 import org.bioimageanalysis.icy.system.preferences.XMLPreferences;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.roi.ROIDescriptor;
 import org.bioimageanalysis.icy.model.roi.ROIUtil;
 
@@ -76,13 +76,13 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         prefView = viewPreferences;
         prefExport = exportPreferences;
 
-        final Set<ROIDescriptor> descriptors = ROIUtil.getROIDescriptors().keySet();
+        final Set<ROIDescriptor<?>> descriptors = ROIUtil.getROIDescriptors().keySet();
 
         idsView = new ArrayList<>();
         idsExport = new ArrayList<>();
 
         // build view and export lists
-        for (final ROIDescriptor descriptor : descriptors) {
+        for (final ROIDescriptor<?> descriptor : descriptors) {
             idsView.add(new BaseColumnInfo(descriptor, prefView, false));
             idsExport.add(new BaseColumnInfo(descriptor, prefExport, true));
         }
@@ -308,7 +308,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         gbc_btnHeaderColumnsToDisplay.gridy = 0;
         panelViewTop.add(btnHeaderColumnsToDisplay, gbc_btnHeaderColumnsToDisplay);
 
-        btnUpView = new IcyButton(SVGIcon.KEYBOARD_ARROW_UP);
+        btnUpView = new IcyButton(SVGResource.KEYBOARD_ARROW_UP);
         btnUpView.setToolTipText("Change order of selected column(s)");
         final GridBagConstraints gbc_btnUpView = new GridBagConstraints();
         gbc_btnUpView.insets = new Insets(0, 0, 0, 5);
@@ -316,7 +316,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         gbc_btnUpView.gridy = 0;
         panelViewTop.add(btnUpView, gbc_btnUpView);
 
-        btnDownView = new IcyButton(SVGIcon.KEYBOARD_ARROW_DOWN);
+        btnDownView = new IcyButton(SVGResource.KEYBOARD_ARROW_DOWN);
         btnDownView.setToolTipText("Change order of selected column(s)");
         final GridBagConstraints gbc_btnDownView = new GridBagConstraints();
         gbc_btnDownView.gridx = 3;
@@ -360,7 +360,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         gbc_btnHeaderColumnsToExport.gridy = 0;
         panelExportTop.add(btnHeaderColumnsToExport, gbc_btnHeaderColumnsToExport);
 
-        btnUpExport = new IcyButton(SVGIcon.KEYBOARD_ARROW_UP);
+        btnUpExport = new IcyButton(SVGResource.KEYBOARD_ARROW_UP);
         btnUpExport.setToolTipText("Change order of selected column(s)");
         final GridBagConstraints gbc_btnUpExport = new GridBagConstraints();
         gbc_btnUpExport.insets = new Insets(0, 0, 0, 5);
@@ -368,7 +368,7 @@ public class RoiSettingPanel extends JPanel implements ActionListener, ItemListe
         gbc_btnUpExport.gridy = 0;
         panelExportTop.add(btnUpExport, gbc_btnUpExport);
 
-        btnDownExport = new IcyButton(SVGIcon.KEYBOARD_ARROW_DOWN);
+        btnDownExport = new IcyButton(SVGResource.KEYBOARD_ARROW_DOWN);
         btnDownExport.setToolTipText("Change order of selected column(s)");
         final GridBagConstraints gbc_btnDownExport = new GridBagConstraints();
         gbc_btnDownExport.gridx = 3;

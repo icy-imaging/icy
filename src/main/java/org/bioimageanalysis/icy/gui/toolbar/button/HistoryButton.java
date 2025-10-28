@@ -21,7 +21,7 @@ package org.bioimageanalysis.icy.gui.toolbar.button;
 import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
 import org.bioimageanalysis.icy.gui.toolbar.container.InspectorPanel;
 import org.bioimageanalysis.icy.gui.toolbar.panel.UndoManagerPanel;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,7 +31,7 @@ import java.awt.event.ActionListener;
  */
 public final class HistoryButton extends IcyToggleButton implements ActionListener {
     public HistoryButton() {
-        super(SVGIcon.HISTORY);
+        super(SVGResource.HISTORY);
         setFocusable(false);
         addActionListener(this);
     }

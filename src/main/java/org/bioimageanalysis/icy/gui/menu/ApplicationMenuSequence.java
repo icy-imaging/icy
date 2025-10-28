@@ -24,7 +24,7 @@ import org.bioimageanalysis.icy.gui.component.menu.IcyMenu;
 import org.bioimageanalysis.icy.gui.component.menu.IcyMenuItem;
 import org.bioimageanalysis.icy.gui.component.menu.IcyRadioButtonMenuItem;
 import org.bioimageanalysis.icy.Icy;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.bioimageanalysis.icy.model.sequence.SequenceEvent;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
@@ -55,23 +55,23 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
     private ApplicationMenuSequence() {
         super("Sequence");
 
-        final IcyMenuItem itemUndo = new IcyMenuItem(SequenceOperationActions.undoAction, SVGIcon.UNDO);
+        final IcyMenuItem itemUndo = new IcyMenuItem(SequenceOperationActions.undoAction, SVGResource.UNDO);
         add(itemUndo);
 
-        final IcyMenuItem itemRedo = new IcyMenuItem(SequenceOperationActions.redoAction, SVGIcon.REDO);
+        final IcyMenuItem itemRedo = new IcyMenuItem(SequenceOperationActions.redoAction, SVGResource.REDO);
         add(itemRedo);
 
         addSeparator();
 
-        final IcyMenuItem itemDuplicate = new IcyMenuItem(SequenceOperationActions.cloneSequenceAction, SVGIcon.PHOTO_LIBRARY);
+        final IcyMenuItem itemDuplicate = new IcyMenuItem(SequenceOperationActions.cloneSequenceAction, SVGResource.PHOTO_LIBRARY);
         add(itemDuplicate);
 
         /* submenu conversion */
-        menuConversion = new IcyMenu("Convert to", SVGIcon.SWITCH_ACCESS_2);
+        menuConversion = new IcyMenu("Convert to", SVGResource.SWITCH_ACCESS_2);
         add(menuConversion);
 
         /* submenu raw conversion */
-        menuRawConversion = new IcyMenu("Convert to Raw", SVGIcon.SWITCH_ACCESS_2);
+        menuRawConversion = new IcyMenu("Convert to Raw", SVGResource.SWITCH_ACCESS_2);
         add(menuRawConversion);
 
         final DataType[] dataTypes = {
@@ -95,13 +95,13 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
 
         addSeparator();
 
-        final IcyMenuItem itemFastCrop = new IcyMenuItem(SequenceOperationActions.cropSequenceAction, SVGIcon.CROP);
+        final IcyMenuItem itemFastCrop = new IcyMenuItem(SequenceOperationActions.cropSequenceAction, SVGResource.CROP);
         add(itemFastCrop);
 
-        final IcyMenuItem itemResizeCanvas = new IcyMenuItem(SequenceOperationActions.canvasResizeAction, SVGIcon.IMAGE_ASPECT_RATIO);
+        final IcyMenuItem itemResizeCanvas = new IcyMenuItem(SequenceOperationActions.canvasResizeAction, SVGResource.IMAGE_ASPECT_RATIO);
         add(itemResizeCanvas);
 
-        final IcyMenuItem itemResizeImage = new IcyMenuItem(SequenceOperationActions.imageResizeAction, SVGIcon.ASPECT_RATIO);
+        final IcyMenuItem itemResizeImage = new IcyMenuItem(SequenceOperationActions.imageResizeAction, SVGResource.IMAGE_RESIZE);
         add(itemResizeImage);
 
         addSeparator();

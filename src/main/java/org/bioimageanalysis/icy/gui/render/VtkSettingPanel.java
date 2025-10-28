@@ -24,7 +24,7 @@ import org.bioimageanalysis.icy.gui.component.field.NumberTextField;
 import org.bioimageanalysis.icy.gui.component.button.ColorChooserButton;
 import org.bioimageanalysis.icy.gui.component.button.ColorChooserButton.ColorChangeListener;
 import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.model.render.vtk.VtkImageVolume;
 import org.bioimageanalysis.icy.model.render.vtk.VtkImageVolume.VtkVolumeBlendType;
 
@@ -189,7 +189,7 @@ public class VtkSettingPanel extends JPanel implements ActionListener, TextChang
         gbc_volumeSampleComboBox.gridy = 3;
         add(volumeSampleComboBox, gbc_volumeSampleComboBox);
 
-        shadingButton = new IcyToggleButton(SVGIcon.SHADING);
+        shadingButton = new IcyToggleButton(SVGResource.SHADING);
         shadingButton.setIconTextGap(8);
         shadingButton.setText("Shading");
         shadingButton.setFocusable(false);

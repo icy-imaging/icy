@@ -25,7 +25,7 @@ import org.bioimageanalysis.icy.common.geom.point.Point5D;
 import org.bioimageanalysis.icy.common.geom.rectangle.Rectangle3D;
 import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
 import org.bioimageanalysis.icy.gui.canvas.VtkCanvas;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.render.IcyVtkPanel;
 import org.bioimageanalysis.icy.io.xml.XMLUtil;
 import org.bioimageanalysis.icy.model.overlay.anchor.Anchor3D;
@@ -193,7 +193,7 @@ public class ROI3DLine extends ROI3DShape {
         addPoint(this.pt2);
 
         // set icon
-        setIcon(SVGIcon.LINE);
+        setIcon(SVGResource.LINE);
     }
 
     /**

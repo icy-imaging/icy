@@ -21,7 +21,7 @@ package org.bioimageanalysis.icy.gui.canvas;
 import org.bioimageanalysis.icy.gui.component.button.ColorChooserButton;
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
 import org.bioimageanalysis.icy.gui.component.ComponentUtil;
-import org.bioimageanalysis.icy.gui.component.icon.SVGIcon;
+import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
 import org.bioimageanalysis.icy.gui.EventUtil;
 
 import javax.swing.*;
@@ -175,7 +175,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_label_2.gridy = 0;
         panel.add(label_2, gbc_label_2);
 
-        zoomMinus = new IcyButton(SVGIcon.ZOOM_OUT);
+        zoomMinus = new IcyButton(SVGResource.ZOOM_OUT);
         zoomMinus.setToolTipText("Reduce zoom factor");
         final GridBagConstraints gbc_zoomMinus_1 = new GridBagConstraints();
         gbc_zoomMinus_1.insets = new Insets(0, 0, 5, 5);
@@ -183,7 +183,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_zoomMinus_1.gridy = 0;
         panel.add(zoomMinus, gbc_zoomMinus_1);
 
-        zoomPlus = new IcyButton(SVGIcon.ZOOM_IN);
+        zoomPlus = new IcyButton(SVGResource.ZOOM_IN);
         zoomPlus.setToolTipText("Increase zoom factor");
         final GridBagConstraints gbc_zoomPlus_1 = new GridBagConstraints();
         gbc_zoomPlus_1.insets = new Insets(0, 0, 5, 5);
@@ -221,7 +221,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_label_4.gridy = 1;
         panel.add(label_4, gbc_label_4);
 
-        rotateUnclock = new IcyButton(SVGIcon.ROTATE_LEFT);
+        rotateUnclock = new IcyButton(SVGResource.ROTATE_LEFT);
         rotateUnclock.setToolTipText("Rotate counter clockwise");
         final GridBagConstraints gbc_rotateUnclock_1 = new GridBagConstraints();
         gbc_rotateUnclock_1.insets = new Insets(0, 0, 0, 5);
@@ -229,7 +229,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_rotateUnclock_1.gridy = 1;
         panel.add(rotateUnclock, gbc_rotateUnclock_1);
 
-        rotateClock = new IcyButton(SVGIcon.ROTATE_RIGHT);
+        rotateClock = new IcyButton(SVGResource.ROTATE_RIGHT);
         rotateClock.setToolTipText("Rotate clockwise");
         final GridBagConstraints gbc_rotateClock_1 = new GridBagConstraints();
         gbc_rotateClock_1.insets = new Insets(0, 0, 0, 5);
@@ -237,7 +237,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_rotateClock_1.gridy = 1;
         panel.add(rotateClock, gbc_rotateClock_1);
 
-        zoomFitImageButton = new IcyButton(SVGIcon.ZOOM_OUT_MAP);
+        zoomFitImageButton = new IcyButton(SVGResource.ZOOM_OUT_MAP);
         zoomFitImageButton.setToolTipText("Fit window to image size");
         final GridBagConstraints gbc_zoomFitImage = new GridBagConstraints();
         gbc_zoomFitImage.insets = new Insets(0, 0, 0, 5);
@@ -245,7 +245,7 @@ public class Canvas2DSettingPanel extends JPanel {
         gbc_zoomFitImage.gridy = 1;
         panel.add(zoomFitImageButton, gbc_zoomFitImage);
 
-        centerImageButton = new IcyButton(SVGIcon.MY_LOCATION);
+        centerImageButton = new IcyButton(SVGResource.MY_LOCATION);
         centerImageButton.setToolTipText("Center image in window");
         final GridBagConstraints gbc_centerImageButton = new GridBagConstraints();
         gbc_centerImageButton.gridx = 7;
