@@ -237,7 +237,9 @@ public class LoaderDialog extends JFileChooser implements PropertyChangeListener
                     {
                         // assume not an image if all files are not a supported image file
                         notAnImage = true;
-                        for (int i = 0; i < paths.size(); i += (paths.size() / 4))
+                        //for (int i = 0; i < paths.size(); i += (paths.size() / 4))
+                        final int inc = Math.max(1, (paths.size() / 4));
+                        for (int i = 0; i < paths.size(); i += inc)
                         {
                             // supported image format ?
                             if (Loader.isSupportedImageFile(paths.get(i)))

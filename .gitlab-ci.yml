@@ -4,7 +4,7 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE != "push"
       when: never
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "icy-3.0.0"
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -14,9 +14,9 @@ stages:
   - build
   - package
   - test
-  - deploy-dev
-  - deploy-release
-  - package-software
+  #- deploy-dev
+  #- deploy-release
+  #- package-software
 
 cache:
   paths:
@@ -40,7 +40,7 @@ package-job:
     - build-job
   script:
     - echo "Packaging the code"
-    - mvn -X $MAVEN_CLI_OPTS package -Dmaven.test.skip=true
+    - mvn -X $MAVEN_CLI_OPTS package
   artifacts:
     expire_in: 7 days
     paths:
@@ -59,57 +59,57 @@ test-job:
     paths:
       - build/
 
-deploy-dev-job:
-  stage: deploy-dev
-  dependencies:
-    - package-job
-  script:
-    - echo "Deploy artifact to the Nexus development server"
-    - mvn -X $MAVEN_CLI_OPTS -P icy-kernel-deploy
-  artifacts:
-    when: on_success
-    expire_in: 1 hour
-    paths:
-      - build/*.jar
-
-deploy-release-job:
-  stage: deploy-release
-  dependencies:
-    - package-job
-  before_script:
-    - echo "Checking POM file..."
-    - export JAR_VERSION=$(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
-    - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; then exit 0; else >&2 echo "Impossible to send artifact to the Nexus, the application is in SNAPSHOT version"; fi
-  script:
-    - echo "Deploy artifacts to the Nexus production server"
-    - mvn -X $MAVEN_CLI_OPTS -P icy-kernel-deploy
-  artifacts:
-    when: on_success
-    expire_in: 1 hour
-    paths:
-      - build/*.jar
-  rules:
-    - if: $CI_COMMIT_TITLE =~ /^(Release\sv(\d+\.)?(\d+\.)?(\d))$/
-      when: on_success
-    - when: never
-
-package-software-job:
-  stage: package-software
-  dependencies:
-    - package-job
-  before_script:
-    - mkdir release
-    - echo "Opening Icy... "
-    - cd build/icy && java -jar icy.jar -hl
-  script:
-    - echo "Creating Icy for Windows zip"
-    - zip -r ../../release/icy-windows.zip colormap/ ij/ lib/ CHANGELOG icy.exe icy.jar LICENSE README.md setting.xml updater.jar version.xml
-    - echo "Creating Icy for Linux zip"
-    - zip -r ../../release/icy-linux.zip colormap/ ij/ lib/ CHANGELOG icy icy.jar LICENSE README.md setting.xml updater.jar version.xml
-    - echo "Creating Icy for Mac zip"
-    - mkdir -p ../icy.app && cp -t ../icy.app -r Contents/ colormap/ ij/ lib/ CHANGELOG icy.jar LICENSE README.md setting.xml version.xml updater.jar && zip -r ../../release/icy-mac.zip ../icy.app/
-  artifacts:
-    when: on_success
-    expire_in: 7 days
-    paths:
-      - release/*.zip
+#deploy-dev-job:
+#  stage: deploy-dev
+#  dependencies:
+#    - package-job
+#  script:
+#    - echo "Deploy artifact to the Nexus development server"
+#    - mvn -X $MAVEN_CLI_OPTS -P icy-kernel-deploy
+#  artifacts:
+#    when: on_success
+#    expire_in: 1 hour
+#    paths:
+#      - build/*.jar
+#
+#deploy-release-job:
+#  stage: deploy-release
+#  dependencies:
+#    - package-job
+#  before_script:
+#    - echo "Checking POM file..."
+#    - export JAR_VERSION=$(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
+#    - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; then exit 0; else >&2 echo "Impossible to send artifact to the Nexus, the application is in SNAPSHOT version"; fi
+#  script:
+#    - echo "Deploy artifacts to the Nexus production server"
+#    - mvn -X $MAVEN_CLI_OPTS -P icy-kernel-deploy
+#  artifacts:
+#    when: on_success
+#    expire_in: 1 hour
+#    paths:
+#      - build/*.jar
+#  rules:
+#    - if: $CI_COMMIT_TITLE =~ /^(Release\sv(\d+\.)?(\d+\.)?(\d))$/
+#      when: on_success
+#    - when: never
+#
+#package-software-job:
+#  stage: package-software
+#  dependencies:
+#    - package-job
+#  before_script:
+#    - mkdir release
+#    - echo "Opening Icy... "
+#    - cd build/icy && java -jar icy.jar -hl
+#  script:
+#    - echo "Creating Icy for Windows zip"
+#    - zip -r ../../release/icy-windows.zip colormap/ ij/ lib/ CHANGELOG icy.exe icy.jar LICENSE README.md setting.xml updater.jar version.xml
+#    - echo "Creating Icy for Linux zip"
+#    - zip -r ../../release/icy-linux.zip colormap/ ij/ lib/ CHANGELOG icy icy.jar LICENSE README.md setting.xml updater.jar version.xml
+#    - echo "Creating Icy for Mac zip"
+#    - mkdir -p ../icy.app && cp -t ../icy.app -r Contents/ colormap/ ij/ lib/ CHANGELOG icy.jar LICENSE README.md setting.xml version.xml updater.jar && zip -r ../../release/icy-mac.zip ../icy.app/
+#  artifacts:
+#    when: on_success
+#    expire_in: 7 days
+#    paths:
+#      - release/*.zip

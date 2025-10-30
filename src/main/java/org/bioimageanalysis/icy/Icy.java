@@ -73,10 +73,9 @@ import vtk.vtkVersion;
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyVetoException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.channels.FileLock;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
@@ -298,6 +297,11 @@ public final class Icy {
                 AppleUtil.init();
         }
         else {
+            if (ExtensionLoader.getExtensions().isEmpty()) {
+                IcyLogger.fatal(Icy.class, "No extensions were found. Exiting...");
+                exit(false);
+            }
+
             // simple main interface init
             getMainInterface().init();
         }
@@ -322,6 +326,7 @@ public final class Icy {
         IcyLogger.info(Icy.class, String.format("System total memory: %s", UnitUtil.getBytesString(SystemUtil.getTotalMemory())));
         IcyLogger.info(Icy.class, String.format("System available memory: %s", UnitUtil.getBytesString(SystemUtil.getFreeMemory())));
         IcyLogger.info(Icy.class, String.format("Max Java memory: %s", UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())));
+
         if (headless)
             IcyLogger.info(Icy.class, "Headless mode");
 
@@ -385,6 +390,13 @@ public final class Icy {
         //SystemUtil.setProperty("jogl.debug", "TRUE");
 
         IcyLogger.info(Icy.class, String.format("Icy v%s started", VERSION.toShortString()));
+
+        if (!headless) {
+            if (ExtensionLoader.getExtensions().isEmpty()) {
+                IcyLogger.error(Icy.class, "No extensions were found. You will not be able to use Icy properly.");
+                JOptionPane.showMessageDialog(getMainInterface().getMainFrame(), new String[] {"No extensions were found.", "You will not be able to use Icy properly."}, "No extension found", JOptionPane.ERROR_MESSAGE);
+            }
+        }
 
         checkParameters();
 
