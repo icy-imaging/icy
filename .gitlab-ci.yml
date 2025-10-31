@@ -1,4 +1,4 @@
-image: registry-gitlab.pasteur.fr/bia/icy:latest
+image: registry-gitlab.pasteur.fr/bia/icy/icy:3.0.0-a.5
 
 workflow:
   rules:
