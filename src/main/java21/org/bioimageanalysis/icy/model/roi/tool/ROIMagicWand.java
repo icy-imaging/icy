@@ -42,12 +42,14 @@ import java.awt.geom.Rectangle2D;
  * ROI Magic Wand.<br>
  * Used to make Magic Wand interaction easier.<br>
  * Based on smooth tolerance control ideas from Jerome Mutterer.
- *
+ * 
  * @author Stephane
  * @author Jerome Mutterer
  */
-public class ROIMagicWand extends ROI2DArea {
-    private class MagicWandProcess extends Thread {
+public class ROIMagicWand extends ROI2DArea
+{
+    private class MagicWandProcess extends Thread
+    {
         final Sequence sequence;
         final int x;
         final int y;
@@ -58,7 +60,8 @@ public class ROIMagicWand extends ROI2DArea {
         final MagicWand.MagicWandSetting settings;
 
         public MagicWandProcess(Sequence sequence, int x, int y, int z, int t, int channel, boolean in3D,
-                                MagicWand.MagicWandSetting mws) {
+                MagicWand.MagicWandSetting mws)
+        {
             super("Magic wand");
 
             this.sequence = sequence;
@@ -74,7 +77,8 @@ public class ROIMagicWand extends ROI2DArea {
         }
 
         @Override
-        public void run() {
+        public void run()
+        {
             ROI roi;
 
             if (in3D)
@@ -82,18 +86,22 @@ public class ROIMagicWand extends ROI2DArea {
             else
                 roi = MagicWand.doWand2D(sequence, x, y, z, t, channel, settings);
 
-            try {
+            try
+            {
                 magicWandDone(roi);
             }
-            catch (InterruptedException e) {
+            catch (InterruptedException e)
+            {
                 // ignore interruption
             }
         }
     }
 
-    public class ROIMagicWandPainter extends ROI2DAreaPainter {
+    public class ROIMagicWandPainter extends ROI2DAreaPainter
+    {
         @Override
-        public void mousePressed(MouseEvent e, Double imagePoint, IcyCanvas canvas) {
+        public void mousePressed(MouseEvent e, Double imagePoint, IcyCanvas canvas)
+        {
             // we need it
             if (imagePoint == null)
                 return;
@@ -108,7 +116,8 @@ public class ROIMagicWand extends ROI2DArea {
         }
 
         @Override
-        public void mouseDrag(MouseEvent e, Double imagePoint, IcyCanvas canvas) {
+        public void mouseDrag(MouseEvent e, Double imagePoint, IcyCanvas canvas)
+        {
             // we need it
             if (imagePoint == null)
                 return;
@@ -117,14 +126,16 @@ public class ROIMagicWand extends ROI2DArea {
                 return;
 
             // currently in process ?
-            if (inProcess) {
+            if (inProcess)
+            {
                 adjustTolerances(e.getPoint(), canvas, EventUtil.isShiftDown(e));
                 e.consume();
             }
         }
 
         @Override
-        public void mouseReleased(MouseEvent e, Double imagePoint, IcyCanvas canvas) {
+        public void mouseReleased(MouseEvent e, Double imagePoint, IcyCanvas canvas)
+        {
             // not left button click ? nothing to do..
             if (!EventUtil.isLeftMouseButton(e))
                 return;
@@ -135,7 +146,8 @@ public class ROIMagicWand extends ROI2DArea {
             ROIMagicWand.this.remove(false);
 
             // we have a result ?
-            if (result != null) {
+            if (result != null)
+            {
                 // add it to the sequence
                 seq.addROI(result, true);
                 // store it
@@ -144,7 +156,8 @@ public class ROIMagicWand extends ROI2DArea {
         }
 
         @Override
-        public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas) {
+        public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas)
+        {
             if (g == null)
                 return;
 
@@ -155,7 +168,8 @@ public class ROIMagicWand extends ROI2DArea {
                 result.getOverlay().paint(g, sequence, canvas);
         }
 
-        void paintAnchor(Graphics2D g, IcyCanvas canvas) {
+        void paintAnchor(Graphics2D g, IcyCanvas canvas)
+        {
             final MagicWand.MagicWandSetting mws = lastSettings;
             if (mws == null)
                 return;
@@ -166,7 +180,8 @@ public class ROIMagicWand extends ROI2DArea {
             final Canvas2D cnv2d = (Canvas2D) canvas;
             final Graphics2D g2 = (Graphics2D) g.create();
 
-            try {
+            try
+            {
                 // canvas coordinate
                 g2.transform(cnv2d.getInverseTransform());
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -193,12 +208,15 @@ public class ROIMagicWand extends ROI2DArea {
                 // draw hint
                 drawText(g2, cnv2d, text, 0.8f);
             }
-            finally {
+            finally
+
+            {
                 g2.dispose();
             }
         }
 
-        public void drawText(Graphics2D g, Canvas2D canvas2d, String text, float alpha) {
+        public void drawText(Graphics2D g, Canvas2D canvas2d, String text, float alpha)
+        {
             final Rectangle2D rect = GraphicsUtil.getStringBounds(g, text);
             //final int w = (int) rect.getWidth();
             //final int h = (int) rect.getHeight();
@@ -229,7 +247,8 @@ public class ROIMagicWand extends ROI2DArea {
 
     MagicWand.MagicWandSetting lastSettings;
 
-    public ROIMagicWand(Point5D pt) {
+    public ROIMagicWand(Point5D pt)
+    {
         super(pt);
 
         force3d = false;
@@ -241,16 +260,19 @@ public class ROIMagicWand extends ROI2DArea {
         roiAdded = null;
     }
 
-    public ROIMagicWand() {
-        this(new Point5D.Double());
+    public ROIMagicWand()
+    {
+        this(new Double());
     }
 
     @Override
-    public String getDefaultName() {
+    public String getDefaultName()
+    {
         return "Magic Wand";
     }
 
-    public void start(Double imagePoint, Point mousePoint, Sequence s, IcyCanvas canvas, boolean rgb) {
+    public void start(Double imagePoint, Point mousePoint, Sequence s, IcyCanvas canvas, boolean rgb)
+    {
         // previous task not yet done
         if ((processor != null) && processor.isAlive())
             return;
@@ -288,19 +310,23 @@ public class ROIMagicWand extends ROI2DArea {
     }
 
     @Override
-    protected ROI2DAreaPainter createPainter() {
+    protected ROI2DAreaPainter createPainter()
+    {
         return new ROIMagicWandPainter();
     }
 
-    public void setForce3d(boolean value) {
+    public void setForce3d(boolean value)
+    {
         force3d = value;
     }
 
-    void updateSettings(IcyCanvas canvas, boolean rgb, boolean init) {
+    void updateSettings(IcyCanvas canvas, boolean rgb, boolean init)
+    {
         // RGB mode
         if (rgb && (seq.getSizeC() == 3))
             c = -1;
-        else {
+        else
+        {
             // use active channel tab on LUT viewer to define C position
             final LUTViewer lv = canvas.getViewer().getLutViewer();
             c = (lv != null) ? lv.getActiveChannelIndex() : 0;
@@ -316,42 +342,53 @@ public class ROIMagicWand extends ROI2DArea {
         valueToleranceStep = (channelDelta > 0d) ? channelDelta / 800d : 0d;
     }
 
-    static MagicWand.MagicWandSetting getSettings(double valueTolerance, double colorSensitivity) {
+    static MagicWand.MagicWandSetting getSettings(double valueTolerance, double colorSensitivity)
+    {
         final MagicWand.MagicWandSetting settings = new MagicWand.MagicWandSetting();
 
         settings.colorSensitivity = colorSensitivity;
         settings.connectivity = MagicWandPreferences.getConnectivity();
         settings.valueTolerance = valueTolerance;
-        if (MagicWandPreferences.getGradientToleranceMode() == MagicWand.MagicWandGradientToleranceMode.FIXED)
-            settings.gradientTolerance = MagicWandPreferences.getGradientToleranceValue();
-        else if (MagicWandPreferences.getGradientToleranceMode() == MagicWand.MagicWandGradientToleranceMode.P05) {
-            settings.gradientTolerance = valueTolerance * 0.05d;
+        switch (MagicWandPreferences.getGradientToleranceMode())
+        {
+            default:
+            case MagicWand.MagicWandGradientToleranceMode.DISABLED:
+                settings.gradientTolerance = 0d;
+                break;
+            case MagicWand.MagicWandGradientToleranceMode.FIXED:
+                settings.gradientTolerance = MagicWandPreferences.getGradientToleranceValue();
+                break;
+            case MagicWand.MagicWandGradientToleranceMode.P05:
+                settings.gradientTolerance = valueTolerance * 0.05d;
+                break;
+            case MagicWand.MagicWandGradientToleranceMode.P10:
+                settings.gradientTolerance = valueTolerance * 0.10d;
+                break;
+            case MagicWand.MagicWandGradientToleranceMode.P15:
+                settings.gradientTolerance = valueTolerance * 0.15d;
+                break;
+            case MagicWand.MagicWandGradientToleranceMode.P20:
+                settings.gradientTolerance = valueTolerance * 0.20d;
+                break;
+            case MagicWand.MagicWandGradientToleranceMode.P25:
+                settings.gradientTolerance = valueTolerance * 0.25d;
+                break;
+            case MagicWand.MagicWandGradientToleranceMode.P33:
+                settings.gradientTolerance = valueTolerance * 0.33d;
+                break;
+            case MagicWand.MagicWandGradientToleranceMode.P40:
+                settings.gradientTolerance = valueTolerance * 0.40d;
+                break;
+            case MagicWand.MagicWandGradientToleranceMode.P50:
+                settings.gradientTolerance = valueTolerance * 0.50d;
+                break;
         }
-        else if (MagicWandPreferences.getGradientToleranceMode() == MagicWand.MagicWandGradientToleranceMode.P10) {
-            settings.gradientTolerance = valueTolerance * 0.10d;
-        }
-        else if (MagicWandPreferences.getGradientToleranceMode() == MagicWand.MagicWandGradientToleranceMode.P15) {
-            settings.gradientTolerance = valueTolerance * 0.15d;
-        }
-        else if (MagicWandPreferences.getGradientToleranceMode() == MagicWand.MagicWandGradientToleranceMode.P20)
-            settings.gradientTolerance = valueTolerance * 0.20d;
-        else if (MagicWandPreferences.getGradientToleranceMode() == MagicWand.MagicWandGradientToleranceMode.P25)
-            settings.gradientTolerance = valueTolerance * 0.25d;
-        else if (MagicWandPreferences.getGradientToleranceMode() == MagicWand.MagicWandGradientToleranceMode.P33)
-            settings.gradientTolerance = valueTolerance * 0.33d;
-        else if (MagicWandPreferences.getGradientToleranceMode() == MagicWand.MagicWandGradientToleranceMode.P40)
-            settings.gradientTolerance = valueTolerance * 0.40d;
-        else if (MagicWandPreferences.getGradientToleranceMode() == MagicWand.MagicWandGradientToleranceMode.P50)
-            settings.gradientTolerance = valueTolerance * 0.50d;
-        else if (MagicWandPreferences.getGradientToleranceMode() == MagicWand.MagicWandGradientToleranceMode.DISABLED)
-            settings.gradientTolerance = 0d;
-        else
-            settings.gradientTolerance = 0d;
 
         return settings;
     }
 
-    void adjustTolerances(Point mousePoint, IcyCanvas canvas, boolean rgb) {
+    void adjustTolerances(Point mousePoint, IcyCanvas canvas, boolean rgb)
+    {
         // interrupt previous process
         if (processor != null)
             processor.interrupt();
@@ -372,8 +409,10 @@ public class ROIMagicWand extends ROI2DArea {
         getOverlay().painterChanged();
     }
 
-    void magicWandDone(ROI roi) throws InterruptedException {
-        if (roi != null) {
+    void magicWandDone(ROI roi) throws InterruptedException
+    {
+        if (roi != null)
+        {
             result = roi;
             // read only
             // result.setReadOnly(true);
@@ -382,8 +421,9 @@ public class ROIMagicWand extends ROI2DArea {
             // just need to repaint
             if (inProcess)
                 getOverlay().painterChanged();
-                // directly set result into the Sequence
-            else if (seq != null) {
+            // directly set result into the Sequence
+            else if (seq != null)
+            {
                 // already added a ROI ? --> remove it
                 if (roiAdded != null)
                     seq.removeROI(roiAdded, false);

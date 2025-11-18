@@ -42,17 +42,11 @@ public class ImageTableCellRenderer extends DefaultTableCellRenderer {
 
     @Override
     public void setValue(final Object value) {
-        if (value instanceof final Image image) {
-            setIcon(new ImageIcon(ImageUtil.scale(image, size, size)));
-        }
-        else if (value instanceof final Icon icon) {
-            setIcon(icon);
-        }
-        else if (value instanceof final Color color) {
-            setIcon(new ColorIcon(color, size, size));
-        }
-        else {
-            super.setValue(value);
+        switch (value) {
+            case final Image image -> setIcon(new ImageIcon(ImageUtil.scale(image, size, size)));
+            case final Icon icon -> setIcon(icon);
+            case final Color color -> setIcon(new ColorIcon(color, size, size));
+            case null, default -> super.setValue(value);
         }
     }
 }

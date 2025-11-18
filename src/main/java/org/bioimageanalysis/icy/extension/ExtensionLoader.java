@@ -25,7 +25,6 @@ import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginDaemon;
 import org.bioimageanalysis.icy.io.Loader;
 import org.bioimageanalysis.icy.system.IcyExceptionHandler;
-import org.bioimageanalysis.icy.system.SystemUtil;
 import org.bioimageanalysis.icy.system.UserUtil;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.preferences.PluginPreferences;
@@ -35,14 +34,16 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.xeustechnologies.jcl.JarClassLoader;
 import org.yaml.snakeyaml.Yaml;
 
-import javax.swing.*;
 import javax.swing.event.EventListenerList;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
+import java.util.stream.Stream;
 
 public final class ExtensionLoader {
     public final static String PLUGINS_PACKAGE = "icy.plugins";
@@ -69,7 +70,9 @@ public final class ExtensionLoader {
     /**
      * class loader
      */
-    private final JarClassLoader jcl;
+    private URLClassLoader ucl;
+
+    private final Set<String> jarSet;
 
     private final Map<String, Set<String>> extensionsArtifacts;
     /**
@@ -118,8 +121,9 @@ public final class ExtensionLoader {
         // needReload = false;
         // logError = true;
 
-        jcl = new JarClassLoader();
+        ucl = new URLClassLoader(new URL[0], Thread.currentThread().getContextClassLoader());
 
+        jarSet = new HashSet<>();
         extensionsArtifacts = new HashMap<>();
         extensions = new HashSet<>();
         plugins = new HashMap<>();
@@ -171,6 +175,7 @@ public final class ExtensionLoader {
         if (processor.hasWaitingTasks())
             return;
 
+        jarSet.clear();
         extensionsArtifacts.clear();
         extensions.clear();
         plugins.clear();
@@ -180,16 +185,8 @@ public final class ExtensionLoader {
         final Set<File> jars = getJarList();
         IcyLogger.debug(Icy.class, "Loading Extensions: " + jars.size());
 
-        // release loaded resources
-        final Set<String> key = jcl.getLoadedClasses().keySet();
-        for (final String className : key) {
-            jcl.unloadClass(className);
-        }
-
         for (final File jar : jars)
             loadExtension(jar);
-
-        Thread.currentThread().setContextClassLoader(jcl);
 
         loading = false;
 
@@ -198,6 +195,14 @@ public final class ExtensionLoader {
     }
 
     private boolean loadExtension(final @NotNull File jar) {
+        final String path = jar.getAbsolutePath().toLowerCase(Locale.getDefault());
+        // If already loaded, skip it
+        if (jarSet.contains(path))
+            return true;
+
+        jarSet.add(path);
+
+        IcyLogger.debug(Icy.class, "Try loading extension: " + jar.getAbsolutePath());
         if (!jar.exists() || !jar.isFile()) {
             IcyLogger.error(Icy.class, "Extension not found: " + jar.getAbsolutePath());
             return false;
@@ -209,7 +214,13 @@ public final class ExtensionLoader {
         final Map<String, PluginDescriptor> apds = new HashMap<>();
 
         try {
-            jcl.add(jar.toURI().toURL());
+            ucl = new URLClassLoader(
+                    Stream.concat(
+                            Arrays.stream(ucl.getURLs()),
+                            Stream.of(jar.toURI().toURL())
+                    ).toArray(URL[]::new),
+                    ucl.getParent()
+            );
 
             final ExtensionDescriptor ed = new ExtensionDescriptor(jar);
             if (extensionsArtifacts.containsKey(ed.getGroupId())) {
@@ -231,8 +242,7 @@ public final class ExtensionLoader {
             for (final String className : classes) {
                 if (className.startsWith(PLUGINS_PACKAGE) || className.startsWith(OLD_PLUGINS_PACKAGE)) {
                     try {
-                        @SuppressWarnings("unchecked")
-                        final Class<? extends Plugin> pluginClass = jcl.loadClass(className, true).asSubclass(Plugin.class);
+                        final Class<? extends Plugin> pluginClass = ucl.loadClass(className).asSubclass(Plugin.class);
 
                         final PluginDescriptor pd = new PluginDescriptor(pluginClass, ed);
                         if (!pd.isAbstract() && !pd.isInterface()) {
@@ -243,8 +253,8 @@ public final class ExtensionLoader {
                             if (pd.isActionable())
                                 apds.put(className, pd);
 
-                            if (className.startsWith(OLD_PLUGINS_PACKAGE) && !ed.isKernel())
-                                IcyLogger.warn(this.getClass(), "Old plugins package detected for " + ClassUtil.getSimpleClassName(className));
+                            /*if (className.startsWith(OLD_PLUGINS_PACKAGE) && !ed.isKernel())
+                                IcyLogger.warn(this.getClass(), "Old plugins package detected for " + ClassUtil.getSimpleClassName(className));*/
                         }
                     }
                     catch (final Throwable e) {
@@ -264,6 +274,8 @@ public final class ExtensionLoader {
         plugins.putAll(pds);
         actionablePlugins.putAll(apds);
         daemonPlugins.putAll(dpds);
+
+        //jarSet.remove(jar);
 
         return true;
     }
@@ -289,7 +301,7 @@ public final class ExtensionLoader {
         //final String version = (String) dependency.get("version");
 
         final File dependencyFile = new File(EXTENSIONS_PATH + File.separator + groupId.replaceAll("\\.", File.separator) + File.separator + artifactId, artifactId + ".jar");
-        if (!dependencyFile.exists() ||!dependencyFile.isFile()) {
+        if (!dependencyFile.exists() || !dependencyFile.isFile()) {
             // TODO check version & request a download if missing a dependency
             IcyLogger.warn(this.getClass(), "Dependency not found: " + dependencyFile.getAbsolutePath());
             return false;
@@ -454,7 +466,7 @@ public final class ExtensionLoader {
         final List<ExtensionDescriptor> faulties = new ArrayList<>();
 
         //for (final ExtensionDescriptor extension : extensions) {
-            // ignore
+        // ignore
         //}
     }
 
@@ -510,17 +522,17 @@ public final class ExtensionLoader {
     /**
      * Return the loaders list
      */
-    public static JarClassLoader getLoader() {
-        synchronized (instance.jcl) {
-            return instance.jcl;
+    public static ClassLoader getLoader() {
+        synchronized (instance.ucl) {
+            return instance.ucl;
         }
     }
 
     public static @NotNull Class<?> loadClass(final String className) throws ClassNotFoundException {
         prepare();
 
-        synchronized (instance.jcl) {
-            final Class<?> result = instance.jcl.loadClass(className);
+        synchronized (instance.ucl) {
+            final Class<?> result = instance.ucl.loadClass(className);
 
             if (result == null)
                 throw new ClassNotFoundException(className);
@@ -553,7 +565,6 @@ public final class ExtensionLoader {
 
             final Set<File> files = new HashSet<>(extensionIndex.size());
             for (final Map<String, Object> item : extensionIndex) {
-                IcyLogger.debug(Icy.class, "Extensions list size: " + item.values());
                 final File jar = new File(UserUtil.getIcyExtensionsDirectory(), item.get("path").toString());
                 if (jar.isFile()) {
                     files.add(jar);

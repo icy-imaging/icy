@@ -20,7 +20,6 @@ package org.bioimageanalysis.icy.gui.dialog;
 
 import loci.formats.IFormatWriter;
 import loci.formats.gui.ExtensionFileFilter;
-import loci.plugins.out.Exporter;
 import org.bioimageanalysis.icy.Icy;
 import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.io.FileUtil;
@@ -40,7 +39,7 @@ import java.awt.*;
 import java.io.File;
 
 /**
- * Saver dialog used to save resource or image from the {@link Exporter} or {@link SequenceFileExporter}.
+ * Saver dialog used to save resource or image from the <code>loci.plugins.out.Exporter</code> or {@link SequenceFileExporter}.
  *
  * @author Stephane
  * @see Saver

@@ -39,23 +39,13 @@ public final class PropertyPanel extends JPanel implements ActionListener {
         for (@NotNull final Property<?> property : properties) {
             @Nullable
             final PropertyComponent<?, ?> pc;
-            if (property instanceof final SelectionProperty<?> selectionProperty) {
-                pc = new PropertyComboBox<>(selectionProperty);
-            }
-            else if (property instanceof final NumberProperty<?> numberProperty) {
-                pc = new PropertyNumberSpinner<>(numberProperty);
-            }
-            else if (property instanceof final ColorProperty colorProperty) {
-                pc = new PropertyColorChooser(colorProperty);
-            }
-            else if (property instanceof final StringProperty stringProperty) {
-                pc = new PropertyTextField(stringProperty);
-            }
-            else if (property instanceof final BooleanProperty booleanProperty) {
-                pc = new PropertyCheckBox(booleanProperty);
-            }
-            else {
-                pc = null;
+            switch (property) {
+                case @NotNull final SelectionProperty<?> selectionProperty -> pc = new PropertyComboBox<>(selectionProperty);
+                case @NotNull final NumberProperty<?> numberProperty -> pc = new PropertyNumberSpinner<>(numberProperty);
+                case @NotNull final ColorProperty colorProperty -> pc = new PropertyColorChooser(colorProperty);
+                case @NotNull final StringProperty stringProperty -> pc = new PropertyTextField(stringProperty);
+                case @NotNull final BooleanProperty booleanProperty -> pc = new PropertyCheckBox(booleanProperty);
+                default -> pc = null;
             }
             if (pc != null)
                 add(property.getName(), pc);

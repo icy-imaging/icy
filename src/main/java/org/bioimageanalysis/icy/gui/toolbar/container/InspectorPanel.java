@@ -18,7 +18,8 @@
 
 package org.bioimageanalysis.icy.gui.toolbar.container;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.*;
 
 /**
@@ -34,13 +35,13 @@ public final class InspectorPanel extends ToolbarContainer {
     }
 
     @Override
-    protected void showParent(@Nonnull final JSplitPane pane) {
+    protected void showParent(@NotNull final JSplitPane pane) {
         pane.setDividerLocation(pane.getWidth() - getPreferredSize().width - 5);
         pane.setEnabled(true);
     }
 
     @Override
-    protected void closeParent(@Nonnull final JSplitPane pane) {
+    protected void closeParent(@NotNull final JSplitPane pane) {
         pane.setDividerLocation(1.d);
         pane.setEnabled(false);
     }

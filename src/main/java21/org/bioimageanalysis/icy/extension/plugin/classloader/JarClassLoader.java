@@ -102,17 +102,11 @@ public class JarClassLoader extends AbstractClassLoader {
      * Loads local/remote source
      */
     public void add(final Object source) {
-        if (source instanceof InputStream) {
-            throw new JclException("Unsupported resource type");
-        }
-        else if (source instanceof final URL url) {
-            add(url);
-        }
-        else if (source instanceof final String s) {
-            add(s);
-        }
-        else {
-            throw new JclException("Unknown Resource type");
+        switch (source) {
+            case final InputStream ignored -> throw new JclException("Unsupported resource type");
+            case final URL url -> add(url);
+            case final String s -> add(s);
+            case null, default -> throw new JclException("Unknown Resource type");
         }
 
     }

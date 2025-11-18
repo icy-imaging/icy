@@ -41,7 +41,7 @@ public abstract class MultipleSelectionProperty<V> extends Property<List<V>> {
         if (!defaultValue.isEmpty()) {
             if (!Set.copyOf(this.options).containsAll(this.defaultValue)) {
                 IcyLogger.warn(this.getClass(), "Value(s) " + defaultValue + " is not a valid value for " + name + ".");
-                this.defaultValue = List.of(this.options.get(0));
+                this.defaultValue = List.of(this.options.getFirst());
             }
             allowEmpty = false;
         }
@@ -61,7 +61,7 @@ public abstract class MultipleSelectionProperty<V> extends Property<List<V>> {
         if (!defaultValue.isEmpty()) {
             if (!Set.copyOf(this.options).containsAll(this.defaultValue)) {
                 IcyLogger.warn(this.getClass(), "Value(s) " + defaultValue + " is not a valid value for " + name + ".");
-                this.defaultValue = List.of(this.options.get(0));
+                this.defaultValue = List.of(this.options.getFirst());
             }
             allowEmpty = false;
         }

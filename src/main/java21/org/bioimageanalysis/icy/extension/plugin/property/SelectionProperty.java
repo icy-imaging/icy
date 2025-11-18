@@ -36,7 +36,7 @@ public abstract class SelectionProperty<V> extends Property<V> {
         this.options = List.copyOf(options);
         if (!this.options.contains(defaultValue)) {
             IcyLogger.warn(this.getClass(), "Value " + defaultValue + " is not a valid default value for " + name + ".");
-            this.defaultValue = this.options.get(0);
+            this.defaultValue = this.options.getFirst();
         }
     }
 
@@ -45,7 +45,7 @@ public abstract class SelectionProperty<V> extends Property<V> {
         this.options = List.copyOf(options);
         if (!this.options.contains(defaultValue)) {
             IcyLogger.warn(this.getClass(), "Value " + defaultValue + " is not a valid default value for " + name + ".");
-            this.defaultValue = this.options.get(0);
+            this.defaultValue = this.options.getFirst();
         }
     }
 

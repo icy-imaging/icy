@@ -31,15 +31,12 @@ import org.bioimageanalysis.icy.gui.action.CanvasActions.ToggleLayersAction;
 import org.bioimageanalysis.icy.gui.action.SequenceOperationActions.ToggleVirtualSequenceAction;
 import org.bioimageanalysis.icy.gui.action.ViewerActions;
 import org.bioimageanalysis.icy.gui.action.WindowActions;
-import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
-import org.bioimageanalysis.icy.gui.canvas.IcyCanvas2D;
-import org.bioimageanalysis.icy.gui.canvas.IcyCanvasEvent;
-import org.bioimageanalysis.icy.gui.canvas.IcyCanvasListener;
+import org.bioimageanalysis.icy.gui.canvas.*;
 import org.bioimageanalysis.icy.gui.component.button.IcyButton;
 import org.bioimageanalysis.icy.gui.component.button.IcyToggleButton;
+import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.bioimageanalysis.icy.gui.component.icon.IcySVG;
 import org.bioimageanalysis.icy.gui.component.icon.SVGResource;
-import org.bioimageanalysis.icy.gui.component.icon.IcyIconPack;
 import org.bioimageanalysis.icy.gui.component.renderer.LabelComboBoxRenderer;
 import org.bioimageanalysis.icy.gui.dialog.ConfirmDialog;
 import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
@@ -63,7 +60,6 @@ import org.bioimageanalysis.icy.system.IcyExceptionHandler;
 import org.bioimageanalysis.icy.system.IcyHandledException;
 import org.bioimageanalysis.icy.system.preferences.GeneralPreferences;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
-import org.bioimageanalysis.icy.gui.canvas.VtkCanvas;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -778,16 +774,13 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                     newCanvas = IcyCanvas.create(className, this);
                 }
                 catch (final Throwable e) {
-                    if (e instanceof IcyHandledException) {// just ignore
-                    }
-                    else if (e instanceof UnsupportedOperationException) {
-                        MessageDialog.showDialog(e.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
-                    }
-                    else if (e instanceof Exception) {
-                        IcyExceptionHandler.handleException(new ClassNotFoundException("Cannot find '" + className + "' class --> cannot create the canvas.", e), true);
-                    }
-                    else {
-                        IcyExceptionHandler.handleException(e, true);
+                    switch (e) {
+                        case final IcyHandledException ignored -> {
+                            // just ignore
+                        }
+                        case final UnsupportedOperationException ignored -> MessageDialog.showDialog(e.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                        case final Exception ignored -> IcyExceptionHandler.handleException(new ClassNotFoundException("Cannot find '" + className + "' class --> cannot create the canvas.", e), true);
+                        default -> IcyExceptionHandler.handleException(e, true);
                     }
 
                     // create a new instance of current canvas

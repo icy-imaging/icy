@@ -30,8 +30,8 @@ import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import org.bioimageanalysis.icy.gui.undo.AbstractIcyUndoableEdit;
 import org.bioimageanalysis.icy.gui.undo.IcyUndoManager;
 import org.bioimageanalysis.icy.gui.undo.IcyUndoManagerListener;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;

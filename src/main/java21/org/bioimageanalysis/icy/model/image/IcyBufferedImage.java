@@ -56,8 +56,8 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.nio.channels.ClosedByInterruptException;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -334,32 +334,18 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         final int w = image.getWidth();
         final int h = image.getHeight();
 
-        if (db instanceof final DataBufferByte dataBufferByte) {
-            return new IcyBufferedImage(w, h, dataBufferByte.getBankData(), signedDataType);
-        }
-        else if (db instanceof final DataBufferShort dataBufferShort) {
-            return new IcyBufferedImage(w, h, dataBufferShort.getBankData(), signedDataType);
-        }
-        else if (db instanceof final DataBufferUShort dataBufferUShort) {
-            return new IcyBufferedImage(w, h, dataBufferUShort.getBankData(), signedDataType);
-        }
-        else if (db instanceof final DataBufferInt dataBufferInt) {
-            return new IcyBufferedImage(w, h, dataBufferInt.getBankData(), signedDataType);
-        }
-        else if (db instanceof final DataBufferFloat dataBufferFloat) {
-            return new IcyBufferedImage(w, h, dataBufferFloat.getBankData(), true);
-        }
-        else if (db instanceof final javax.media.jai.DataBufferFloat dataBufferFloat) {
-            return new IcyBufferedImage(w, h, dataBufferFloat.getBankData(), true);
-        }
-        else if (db instanceof final DataBufferDouble dataBufferDouble) {
-            return new IcyBufferedImage(w, h, dataBufferDouble.getBankData(), true);
-        }
-        else if (db instanceof final javax.media.jai.DataBufferDouble dataBufferDouble) {
-            return new IcyBufferedImage(w, h, dataBufferDouble.getBankData(), true);
+        return switch (db) {
+            case final DataBufferByte dataBufferByte -> new IcyBufferedImage(w, h, dataBufferByte.getBankData(), signedDataType);
+            case final DataBufferShort dataBufferShort -> new IcyBufferedImage(w, h, dataBufferShort.getBankData(), signedDataType);
+            case final DataBufferUShort dataBufferUShort -> new IcyBufferedImage(w, h, dataBufferUShort.getBankData(), signedDataType);
+            case final DataBufferInt dataBufferInt -> new IcyBufferedImage(w, h, dataBufferInt.getBankData(), signedDataType);
+            case final DataBufferFloat dataBufferFloat -> new IcyBufferedImage(w, h, dataBufferFloat.getBankData(), true);
+            case final javax.media.jai.DataBufferFloat dataBufferFloat -> new IcyBufferedImage(w, h, dataBufferFloat.getBankData(), true);
+            case final DataBufferDouble dataBufferDouble -> new IcyBufferedImage(w, h, dataBufferDouble.getBankData(), true);
+            case final javax.media.jai.DataBufferDouble dataBufferDouble -> new IcyBufferedImage(w, h, dataBufferDouble.getBankData(), true);
             // JAI keep dataType and others stuff in their BufferedImage
-        }
-        return IcyBufferedImage.createFrom(image.getAsBufferedImage());
+            case null, default -> IcyBufferedImage.createFrom(image.getAsBufferedImage());
+        };
     }
 
     /**
@@ -3061,7 +3047,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
     /**
      * Same as getRGB but by using the specified LUT instead of internal one
      *
-     * @see java.awt.image.BufferedImage#getRGB(int, int)
+     * @see BufferedImage#getRGB(int, int)
      */
     public int getRGB(final int x, final int y, final LUT lut) {
         return getIcyColorModel().getRGB(getRaster().getDataElements(x, y, null), lut);

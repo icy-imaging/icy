@@ -235,77 +235,77 @@ public abstract class AbstractImageProvider implements ImageProvider {
         final Object result = Array1DUtil.createArray(type, resDim.width * resDim.height);
 
         // create processor
-        final Processor readerProcessor = new Processor(Math.max(1, SystemUtil.getNumberOfCPUs() - 1));
-        readerProcessor.setThreadName("Image tile reader");
+        try (final Processor readerProcessor = new Processor(Math.max(1, SystemUtil.getNumberOfCPUs() - 1))) {
+            readerProcessor.setThreadName("Image tile reader");
 
-        int tw = tileW;
-        int th = tileH;
+            int tw = tileW;
+            int th = tileH;
 
-        // adjust tile size if needed
-        if (tw <= 0)
-            tw = getTileWidth(series);
-        if (tw <= 0)
-            tw = 512;
-        if (th <= 0)
-            th = getTileHeight(series);
-        if (th <= 0)
-            th = 512;
+            // adjust tile size if needed
+            if (tw <= 0)
+                tw = getTileWidth(series);
+            if (tw <= 0)
+                tw = 512;
+            if (th <= 0)
+                th = getTileHeight(series);
+            if (th <= 0)
+                th = 512;
 
-        final List<Rectangle> tiles = ImageUtil.getTileList(adjRegion, tw, th);
+            final List<Rectangle> tiles = ImageUtil.getTileList(adjRegion, tw, th);
 
-        // submit all tasks
-        for (final Rectangle tile : tiles) {
-            // wait a bit if the process queue is full
-            while (readerProcessor.isFull()) {
+            // submit all tasks
+            for (final Rectangle tile : tiles) {
+                // wait a bit if the process queue is full
+                while (readerProcessor.isFull()) {
+                    try {
+                        Thread.sleep(0);
+                    }
+                    catch (final InterruptedException e) {
+                        // interrupt all processes
+                        readerProcessor.shutdownNow();
+                        break;
+                    }
+                }
+
+                // submit next task
+                readerProcessor.submit(new TilePixelsReader(series, resolution, tile.intersection(adjRegion), z, t, c, result, resDim, signed));
+
+                // display progression
+                if (listener != null) {
+                    // process cancel requested ?
+                    if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size())) {
+                        // interrupt processes
+                        readerProcessor.shutdownNow();
+                        break;
+                    }
+                }
+            }
+
+            // wait for completion
+            while (readerProcessor.isProcessing()) {
                 try {
-                    Thread.sleep(0);
+                    Thread.sleep(1);
                 }
                 catch (final InterruptedException e) {
                     // interrupt all processes
                     readerProcessor.shutdownNow();
                     break;
                 }
-            }
 
-            // submit next task
-            readerProcessor.submit(new TilePixelsReader(series, resolution, tile.intersection(adjRegion), z, t, c, result, resDim, signed));
-
-            // display progression
-            if (listener != null) {
-                // process cancel requested ?
-                if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size())) {
-                    // interrupt processes
-                    readerProcessor.shutdownNow();
-                    break;
+                // display progression
+                if (listener != null) {
+                    // process cancel requested ?
+                    if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size())) {
+                        // interrupt processes
+                        readerProcessor.shutdownNow();
+                        break;
+                    }
                 }
             }
+
+            // last wait for completion just in case we were interrupted
+            readerProcessor.waitAll();
         }
-
-        // wait for completion
-        while (readerProcessor.isProcessing()) {
-            try {
-                Thread.sleep(1);
-            }
-            catch (final InterruptedException e) {
-                // interrupt all processes
-                readerProcessor.shutdownNow();
-                break;
-            }
-
-            // display progression
-            if (listener != null) {
-                // process cancel requested ?
-                if (!listener.notifyProgress(readerProcessor.getCompletedTaskCount(), tiles.size())) {
-                    // interrupt processes
-                    readerProcessor.shutdownNow();
-                    break;
-                }
-            }
-        }
-
-        // last wait for completion just in case we were interrupted
-        readerProcessor.waitAll();
-
         return result;
     }
 

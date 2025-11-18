@@ -39,3 +39,5 @@ build/
 ### Mac OS ###
 **/.DS_Store
 Icon?
+!icons
+!icon.svg

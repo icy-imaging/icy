@@ -1551,32 +1551,33 @@ public class SequenceFileSticher {
 
         // add FilePosition grouped by base path to group
         for (final List<FilePosition> positions : pathPositionsMap.values()) {
-            final Processor processor = new Processor(positions.size(), Processor.DEFAULT_MAX_PROCESSING);
-            final List<Future<SequenceIdent>> tasks = new ArrayList<>();
+            try (final Processor processor = new Processor(positions.size(), Processor.DEFAULT_MAX_PROCESSING)) {
+                final List<Future<SequenceIdent>> tasks = new ArrayList<>();
 
-            // add tasks
-            for (final FilePosition pos : positions)
-                tasks.add(processor.submit(new SequenceIdentGetter(importer, new SequencePosition(pos), true)));
+                // add tasks
+                for (final FilePosition pos : positions)
+                    tasks.add(processor.submit(new SequenceIdentGetter(importer, new SequencePosition(pos), true)));
 
-            boolean exception = false;
-            for (final Future<SequenceIdent> task : tasks) {
-                try {
-                    // build groups
-                    addToGroup(result, task.get(), importer);
-                }
-                catch (final InterruptedException ex) {
-                    // stop now
-                    processor.removeAllWaitingTasks();
-                    processor.shutdownNow();
+                boolean exception = false;
+                for (final Future<SequenceIdent> task : tasks) {
+                    try {
+                        // build groups
+                        addToGroup(result, task.get(), importer);
+                    }
+                    catch (final InterruptedException ex) {
+                        // stop now
+                        processor.removeAllWaitingTasks();
+                        processor.shutdownNow();
 
-                    // re-throw it
-                    throw new InterruptedException("Files grouping process interrupted");
-                }
-                catch (final ExecutionException e) {
-                    // display it only once
-                    if (!exception) {
-                        e.getCause().printStackTrace();
-                        exception = true;
+                        // re-throw it
+                        throw new InterruptedException("Files grouping process interrupted");
+                    }
+                    catch (final ExecutionException e) {
+                        // display it only once
+                        if (!exception) {
+                            e.getCause().printStackTrace();
+                            exception = true;
+                        }
                     }
                 }
             }

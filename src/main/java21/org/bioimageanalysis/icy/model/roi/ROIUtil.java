@@ -61,8 +61,8 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.Map.Entry;
 
 /**
@@ -879,30 +879,26 @@ public class ROIUtil {
     public static ROI convertTo3D(final ROI2D roi, final double z, final double sizeZ) throws InterruptedException {
         ROI result = null;
 
-        if (roi instanceof ROI2DRectangle) {
-            result = new ROI3DBox(roi.getBounds2D(), z, sizeZ);
-        }
-        else if (roi instanceof ROI2DEllipse) {
-            result = new ROI3DCylinder(roi.getBounds2D(), z, sizeZ);
-        }
-        else if (roi instanceof final ROI2DPolygon roi2DPolygon) {
-            result = new ROI3DFlatPolygon(roi2DPolygon.getPolygon2D(), z, sizeZ);
-        }
-        else {
-            final int zMin = (int) z;
-            int zMax = (int) (z + sizeZ);
-            // integer ? --> decrement by one
-            if ((double) zMax == (z + sizeZ))
-                zMax--;
+        switch (roi) {
+            case final ROI2DRectangle roi2DRectangle -> result = new ROI3DBox(roi.getBounds2D(), z, sizeZ);
+            case final ROI2DEllipse roi2DEllipse -> result = new ROI3DCylinder(roi.getBounds2D(), z, sizeZ);
+            case final ROI2DPolygon roi2DPolygon -> result = new ROI3DFlatPolygon(roi2DPolygon.getPolygon2D(), z, sizeZ);
+            case null, default -> {
+                final int zMin = (int) z;
+                int zMax = (int) (z + sizeZ);
+                // integer ? --> decrement by one
+                if ((double) zMax == (z + sizeZ))
+                    zMax--;
 
-            // empty
-            if (zMin > zMax)
-                return null;
+                // empty
+                if (zMin > zMax)
+                    return null;
 
-            if (roi instanceof ROI2DArea)
-                result = new ROI3DArea(roi.getBooleanMask(true), zMin, zMax);
-            else if (roi != null)
-                result = new ROI3DArea(roi.getBooleanMask2D(roi.getZ(), roi.getT(), roi.getC(), true), zMin, zMax);
+                if (roi instanceof ROI2DArea)
+                    result = new ROI3DArea(roi.getBooleanMask(true), zMin, zMax);
+                else if (roi != null)
+                    result = new ROI3DArea(roi.getBooleanMask2D(roi.getZ(), roi.getT(), roi.getC(), true), zMin, zMax);
+            }
         }
 
         if (result != null) {
@@ -1437,61 +1433,61 @@ public class ROIUtil {
      */
     public static void scale(final ROI roi, final double scaleX, final double scaleY, final double scaleZ) throws UnsupportedOperationException {
         // shape ROI --> can rescale easily
-        if (roi instanceof final ROI2DRectShape roi2DRectShape) {
-            roi2DRectShape.beginUpdate();
-            try {
-                final Rectangle2D bounds = roi2DRectShape.getBounds2D();
+        switch (roi) {
+            case final ROI2DRectShape roi2DRectShape -> {
+                roi2DRectShape.beginUpdate();
+                try {
+                    final Rectangle2D bounds = roi2DRectShape.getBounds2D();
 
-                // reshape directly
-                bounds.setFrame(bounds.getX() * scaleX, bounds.getY() * scaleY, bounds.getWidth() * scaleX, bounds.getHeight() * scaleY);
-                roi2DRectShape.setBounds2D(bounds);
+                    // reshape directly
+                    bounds.setFrame(bounds.getX() * scaleX, bounds.getY() * scaleY, bounds.getWidth() * scaleX, bounds.getHeight() * scaleY);
+                    roi2DRectShape.setBounds2D(bounds);
 
-                final int z = roi2DRectShape.getZ();
+                    final int z = roi2DRectShape.getZ();
 
-                // re scale Z position if needed
-                if ((z != -1) && (scaleZ != 1d))
-                    roi2DRectShape.setZ((int) (z * scaleZ));
-            }
-            finally {
-                roi2DRectShape.endUpdate();
-            }
-        }
-        else if (roi instanceof final ROI2DShape roi2DShape) {
-            roi2DShape.beginUpdate();
-            try {
-                // adjust control point position directly
-                for (final Anchor2D pt : roi2DShape.getControlPoints()) {
-                    final Point2D pos = pt.getPosition();
-                    // change control point position
-                    pt.setPosition(pos.getX() * scaleX, pos.getY() * scaleY);
+                    // re scale Z position if needed
+                    if ((z != -1) && (scaleZ != 1d))
+                        roi2DRectShape.setZ((int) (z * scaleZ));
                 }
-
-                final int z = roi2DShape.getZ();
-
-                // re scale Z position if needed
-                if ((z != -1) && (scaleZ != 1d))
-                    roi2DShape.setZ((int) (z * scaleZ));
-            }
-            finally {
-                roi2DShape.endUpdate();
-            }
-        }
-        else if (roi instanceof final ROI3DShape roi3DShape) {
-            roi3DShape.beginUpdate();
-            try {
-                // adjust control point position directly
-                for (final Anchor3D pt : roi3DShape.getControlPoints()) {
-                    final Point3D pos = pt.getPosition();
-                    // change control point position
-                    pt.setPosition(pos.getX() * scaleX, pos.getY() * scaleY, pos.getZ() * scaleZ);
+                finally {
+                    roi2DRectShape.endUpdate();
                 }
             }
-            finally {
-                roi3DShape.endUpdate();
+            case final ROI2DShape roi2DShape -> {
+                roi2DShape.beginUpdate();
+                try {
+                    // adjust control point position directly
+                    for (final Anchor2D pt : roi2DShape.getControlPoints()) {
+                        final Point2D pos = pt.getPosition();
+                        // change control point position
+                        pt.setPosition(pos.getX() * scaleX, pos.getY() * scaleY);
+                    }
+
+                    final int z = roi2DShape.getZ();
+
+                    // re scale Z position if needed
+                    if ((z != -1) && (scaleZ != 1d))
+                        roi2DShape.setZ((int) (z * scaleZ));
+                }
+                finally {
+                    roi2DShape.endUpdate();
+                }
             }
-        }
-        else {
-            throw new UnsupportedOperationException("ROIUtil.scale: cannot rescale " + Objects.requireNonNull(roi).getSimpleClassName() + " !");
+            case final ROI3DShape roi3DShape -> {
+                roi3DShape.beginUpdate();
+                try {
+                    // adjust control point position directly
+                    for (final Anchor3D pt : roi3DShape.getControlPoints()) {
+                        final Point3D pos = pt.getPosition();
+                        // change control point position
+                        pt.setPosition(pos.getX() * scaleX, pos.getY() * scaleY, pos.getZ() * scaleZ);
+                    }
+                }
+                finally {
+                    roi3DShape.endUpdate();
+                }
+            }
+            case null, default -> throw new UnsupportedOperationException("ROIUtil.scale: cannot rescale " + Objects.requireNonNull(roi).getSimpleClassName() + " !");
         }
     }
 

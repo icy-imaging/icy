@@ -53,10 +53,7 @@ import org.bioimageanalysis.icy.model.sequence.SequencePrefetcher;
 import org.bioimageanalysis.icy.network.NetworkUtil;
 import org.bioimageanalysis.icy.network.update.IcyUpdater;
 import org.bioimageanalysis.icy.network.update.Updater;
-import org.bioimageanalysis.icy.system.IcyExceptionHandler;
-import org.bioimageanalysis.icy.system.SingleInstanceCheck;
-import org.bioimageanalysis.icy.system.SystemUtil;
-import org.bioimageanalysis.icy.system.UserUtil;
+import org.bioimageanalysis.icy.system.*;
 import org.bioimageanalysis.icy.system.audit.Audit;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.os.AppleUtil;
@@ -64,7 +61,6 @@ import org.bioimageanalysis.icy.system.preferences.ApplicationPreferences;
 import org.bioimageanalysis.icy.system.preferences.GeneralPreferences;
 import org.bioimageanalysis.icy.system.preferences.IcyPreferences;
 import org.bioimageanalysis.icy.system.thread.ThreadUtil;
-import org.bioimageanalysis.icy.vtk.IcyVTK;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import vtk.vtkNativeLibrary;
@@ -75,7 +71,6 @@ import java.awt.*;
 import java.beans.PropertyVetoException;
 import java.io.*;
 import java.nio.channels.FileLock;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
@@ -326,6 +321,7 @@ public final class Icy {
         IcyLogger.info(Icy.class, String.format("System total memory: %s", UnitUtil.getBytesString(SystemUtil.getTotalMemory())));
         IcyLogger.info(Icy.class, String.format("System available memory: %s", UnitUtil.getBytesString(SystemUtil.getFreeMemory())));
         IcyLogger.info(Icy.class, String.format("Max Java memory: %s", UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())));
+        IcyLogger.info(Icy.class, String.format("MMJ version: %d", MMJUtil.getMMJVersion()));
 
         if (headless)
             IcyLogger.info(Icy.class, "Headless mode");
@@ -1061,10 +1057,10 @@ public final class Icy {
             vtkNativeLibrary.DisableOutputWindow(new File(UserUtil.getIcyHomeDirectory(), "vtk.log"));
             final String vv = new vtkVersion().GetVTKVersion();
 
-            IcyLogger.success(Icy.class, String.format("%s v%s (%s) loaded", IcyVTK.NAME, Version.fromString(IcyVTK.VERSION).toShortString(), vv));
+            IcyLogger.success(Icy.class, String.format("%s %s loaded", "VTK", vv));
         }
         else {
-            IcyLogger.error(Icy.class, String.format("%s v%s not loaded", IcyVTK.NAME, Version.fromString(IcyVTK.VERSION).toShortString()));
+            IcyLogger.error(Icy.class, String.format("%s not loaded", "VTK"));
         }
     }
 

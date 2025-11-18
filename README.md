@@ -1,9 +1,10 @@
 # Icy, a bioimage analysis software
 
 <!-- badges: start -->
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Twitter](https://img.shields.io/twitter/follow/Icy_BioImaging?style=social)](https://twitter.com/Icy_BioImaging)
-[![Image.sc forum](https://img.shields.io/badge/discourse-forum-brightgreen.svg?style=flat)](https://forum.image.sc/tag/icy)
+![version 3.0.0-a.5](https://img.shields.io/badge/v3.0.0-alpha_5-royalblue)
+[![License: LGPL v3](https://img.shields.io/badge/LGPLv3-BD0000?logo=GPLv3&logoSize=auto)](https://www.gnu.org/licenses/lgpl-3.0)
+[![Twitter](https://img.shields.io/twitter/follow/Icy_BioImaging)](https://x.com/Icy_BioImaging)
+[![Image.sc forum](https://img.shields.io/badge/discourse-forum-seagreen)](https://forum.image.sc/tag/icy)
 <!-- badges: end -->
 
 This is the **repository for the source code of the Icy kernel**, which was developed and is maintained by the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/). Icy is free and open source (**GPL3 license**). It has been funded both by Institut Pasteur and [France Bioimaging consortium](https://france-bioimaging.org). You can find more info and download Icy on the [Icy website](https://icy.bioimageanalysis.org/). 
