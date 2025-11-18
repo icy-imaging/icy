@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<root>
+<name>Isolum</name>
+<enabled>true</enabled>
+<type>RGB</type>
+<red rawdata="true">
+<value>78:9c:1:0:1:ff:fe:51:53:54:56:57:59:5a:5b:5d:5e:60:61:62:64:65:66:67:69:6a:6b:6c:6e:6f:70:71:72:74:75:76:77:78:79:7a:7c:7d:7e:7f:80:81:82:83:84:85:86:87:88:89:8a:8b:8c:8d:8e:8f:90:91:92:93:94:95:96:97:98:99:9a:9b:9c:9d:9f:a0:a1:a2:a3:a4:a5:a6:a7:a8:a9:aa:ab:ac:ad:ae:af:b0:b1:b2:b3:b4:b5:b6:b7:b8:b9:ba:bb:bc:bd:be:bf:c0:c1:c2:c3:c4:c5:c6:c7:c7:c8:c9:ca:cb:cc:cd:ce:cf:d0:d0:d1:d2:d3:d4:d5:d6:d7:d7:d8:d9:da:db:dc:dd:de:df:e0:e0:e1:e2:e3:e4:e5:e6:e7:e7:e8:e9:ea:eb:ec:ed:ed:ee:ef:f0:f1:f2:f2:f3:f4:f5:f6:f6:f7:f8:f9:fa:fb:fb:fc:fd:fc:fc:fc:fb:fb:fa:fa:f9:f9:f8:f8:f7:f7:f6:f6:f5:f5:f4:f4:f3:f3:f2:f2:f1:f1:f0:f0:ef:ef:ee:ed:ed:ec:ec:eb:eb:ea:ea:e9:e9:e8:e8:e7:e7:e6:e6:e5:e5:e4:e4:e3:e2:e2:e1:e1:e0:e0:df:df:de:de:dd:dd:dc:db:db:da:da:d9:d9:d8:d8:d7:d7:d6:d5:d5:d4:d4:d3:d3:d2:d1:d1:d0:c1:c:c1:16</value>
+</red>
+<green rawdata="true">
+<value>78:9c:4d:c1:45:2:82:40:0:0:c0:8f:2b:52:82:80:a4:49:77:89:dd:dd:89:f9:24:39:ee:4c:92:24:ad:4c:1c:c7:51:14:85:61:18:4:81:ef:fb:9e:e7:b9:19:c7:71:6c:db:b6:2c:cb:34:4d:c3:30:74:5d:d7:34:4d:55:55:45:51:64:b9:99:69:80:ea:a0:1a:a8:a:aa:0:24:49:14:5:81:e7:39:8e:65:d9:72:99:61:68:9a:a2:4a:24:49:10:c5:22:8e:63:18:8a:22:8:c:17:a:10:94:cf:e5:f2:10:8c:a0:18:4e:90:25:8a:66:58:8e:17:44:a9:52:ad:d5:9b:b2:a2:6a:ba:61:5a:b6:e3:7a:7e:10:46:71:2b:69:77:ba:bd:fe:60:38:1c:8d:27:d3:d9:7c:b1:5c:ad:37:9b:ed:6e:7f:38:9e:ce:e7:cb:f5:76:7f:a4:e9:f3:f5:fe:7c:bf:bf:3f:f:65:9c:7a</value>
+</green>
+<blue rawdata="true">
+<value>78:9c:1:0:1:ff:fe:dd:dd:dc:dc:db:db:da:da:da:d9:d9:d8:d8:d7:d7:d6:d6:d6:d5:d5:d4:d4:d3:d3:d2:d2:d1:d1:d1:d0:d0:cf:cf:ce:ce:cd:cd:cc:cc:cb:cb:ca:ca:ca:c9:c9:c8:c8:c7:c7:c6:c6:c5:c5:c4:c4:c3:c3:c2:c2:c1:c1:c0:bf:be:bd:bc:bb:bb:ba:b9:b8:b7:b6:b5:b4:b3:b2:b1:b0:b0:af:ae:ad:ac:ab:aa:a9:a8:a7:a6:a5:a4:a3:a2:a1:a0:9f:9e:9d:9c:9b:9a:99:97:96:95:94:93:92:91:90:8f:8e:8d:8b:8a:89:88:87:86:84:83:82:81:80:7f:7e:7d:7c:7b:7a:79:78:78:77:76:75:74:73:72:71:70:6f:6e:6d:6c:6b:6a:69:68:67:66:65:64:63:62:61:60:5f:5e:5d:5c:5b:5a:58:57:56:55:54:53:52:52:51:50:50:4f:4f:4e:4e:4d:4c:4c:4b:4b:4a:4a:49:48:48:47:47:46:45:45:44:43:43:42:42:41:40:40:3f:3e:3e:3d:3c:3b:3b:3a:39:39:38:37:36:36:35:34:33:32:32:31:30:2f:2e:2d:2d:2c:2b:2a:29:28:27:26:25:24:23:22:21:1f:1e:1d:1c:1a:19:18:16:14:13:11:f:b:8:4:0:e0:ab:7e:98</value>
+</blue>
+<gray rawdata="true">
+<value>78:9c:5b:b6:6c:64:3:0:58:dd:a6:1</value>
+</gray>
+<alpha rawdata="true">
+<value>78:9c:fb:ff:7f:64:3:0:8:0:ff:1</value>
+</alpha>
+</root>

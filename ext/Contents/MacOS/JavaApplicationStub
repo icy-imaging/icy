@@ -1,0 +1,23 @@
+#!/bin/bash
+
+PRG=$0
+while [ -h "$PRG" ]; do
+	ls=$(ls -ld "$PRG")
+	link=$(expr "$ls" : '^.*-> \(.*\)$' 2>/dev/null)
+	if expr "$link" : '^/' 2> /dev/null >/dev/null; then
+		PRG="$link"
+	else
+		PRG="$(dirname "$PRG")/$link"
+	fi
+done
+PROGDIR=$(dirname "$PRG")
+
+cd "$PROGDIR"/../../ || exit 11
+
+AppPackageFolder=$(pwd)
+AppResourcesFolder="${AppPackageFolder}"/Contents/Resources
+AppIconPath="${AppResourcesFolder}"/icy.icns
+
+cd "${AppPackageFolder}" || exit 11
+
+/usr/libexec/java_home -v 1.8 --exec java -Xdock:icon="${AppIconPath}" -Xdock:name="Icy" -jar updater.jar

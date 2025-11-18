@@ -1,0 +1,104 @@
+/*
+ * Copyright 2010-2015 Institut Pasteur.
+ * 
+ * This file is part of Icy.
+ * 
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ */
+package icy.canvas;
+
+import icy.common.CollapsibleEvent;
+import icy.sequence.DimensionId;
+
+/**
+ * @author Stephane
+ */
+public class IcyCanvasEvent implements CollapsibleEvent
+{
+    public enum IcyCanvasEventType
+    {
+        POSITION_CHANGED, OFFSET_CHANGED, SCALE_CHANGED, ROTATION_CHANGED, MOUSE_IMAGE_POSITION_CHANGED, SYNC_CHANGED;
+    }
+
+    private IcyCanvas source;
+    private final IcyCanvasEventType type;
+    private final DimensionId dim;
+
+    public IcyCanvasEvent(IcyCanvas source, IcyCanvasEventType type, DimensionId dim)
+    {
+        this.source = source;
+        this.type = type;
+        this.dim = dim;
+    }
+
+    public IcyCanvasEvent(IcyCanvas source, IcyCanvasEventType type)
+    {
+        this(source, type, DimensionId.NULL);
+    }
+
+    /**
+     * @return the source
+     */
+    public IcyCanvas getSource()
+    {
+        return source;
+    }
+
+    /**
+     * @return the type
+     */
+    public IcyCanvasEventType getType()
+    {
+        return type;
+    }
+
+    /**
+     * @return the dimension
+     */
+    public DimensionId getDim()
+    {
+        return dim;
+    }
+
+    @Override
+    public boolean collapse(CollapsibleEvent event)
+    {
+        if (equals(event))
+        {
+            // nothing to change here
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return source.hashCode() ^ type.hashCode() ^ dim.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof IcyCanvasEvent)
+        {
+            final IcyCanvasEvent e = (IcyCanvasEvent) obj;
+
+            return (e.getSource() == source) && (e.getType() == type) && (e.getDim() == dim);
+        }
+
+        return super.equals(obj);
+    }
+}

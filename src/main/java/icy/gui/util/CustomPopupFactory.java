@@ -1,0 +1,111 @@
+/*
+ * Copyright 2010-2015 Institut Pasteur.
+ * 
+ * This file is part of Icy.
+ * 
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <http://www.gnu.org/licenses/>.
+ */
+package icy.gui.util;
+
+import java.awt.Component;
+import java.lang.reflect.Method;
+
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
+
+import icy.system.IcyExceptionHandler;
+import icy.system.SystemUtil;
+import icy.util.ReflectionUtil;
+
+/**
+ * Since we use the OGL component the CustomPopupFactory isn't anymore required on OSX.<br>
+ * Also it cannot work with Java 17 as forced access from reflection are not anymore allowed.<br>
+ * Still we keep the class just in case as OpenGL will be soon removed from OSX and we may need to tweak that again then :-/
+ * 
+ * @author Stephane
+ */
+public class CustomPopupFactory extends PopupFactory
+{
+    private final boolean macos;
+
+    private Method getPopupMethod;
+    private int heavy;
+
+    public CustomPopupFactory()
+    {
+        super();
+
+        getPopupMethod = null;
+        heavy = 0;
+
+        macos = SystemUtil.isMac();
+
+        if (macos)
+        {
+            try
+            {
+                // those methods should be protected...
+                getPopupMethod = ReflectionUtil.getMethod(PopupFactory.class, "getPopup", true, Component.class,
+                        Component.class, int.class, int.class, int.class);
+                heavy = ReflectionUtil.getField(PopupFactory.class, "HEAVY_WEIGHT_POPUP", true).getInt(null);
+            }
+            catch (Throwable t)
+            {
+                // can safely ignore it, it was made for old macos version
+                getPopupMethod = null;
+                heavy = 0;
+            }
+        }
+    }
+
+    @Override
+    public Popup getPopup(Component owner, Component contents, int x, int y)
+    {
+        if (macos && (getPopupMethod != null))
+        {
+            if (contents == null)
+                throw new IllegalArgumentException("Popup.getPopup must be passed non-null contents");
+
+            try
+            {
+                return (Popup) getPopupMethod.invoke(this, owner, contents, Integer.valueOf(x), Integer.valueOf(y),
+                        Integer.valueOf(heavy));
+            }
+            catch (Exception e)
+            {
+                // ignore
+            }
+
+            // popup = getPopup(owner, contents, x, y, HEAVY_WEIGHT_POPUP);
+            //
+            // // this is intended to force Heavy Weight popup component
+            // final Popup popup = super.getPopup(null, component1, x, y);
+            //
+            // final Window window = getWindow(component1);
+            //
+            // if (window == null)
+            // return popup;
+            // if (!(window instanceof RootPaneContainer))
+            // return popup;
+            //
+            // final JRootPane popupRootPane = ((RootPaneContainer) window).getRootPane();
+            // popupRootPane.putClientProperty("Window.alpha", OPAQUE);
+            // popupRootPane.putClientProperty("Window.shadow", Boolean.FALSE);
+            //
+            // return popup;
+        }
+
+        return super.getPopup(owner, contents, x, y);
+    }
+}

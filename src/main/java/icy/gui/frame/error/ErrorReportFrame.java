@@ -1,0 +1,106 @@
+package icy.gui.frame.error;
+
+import icy.gui.frame.IcyFrame;
+import icy.gui.frame.TitledFrame;
+import icy.gui.frame.progress.ProgressFrame;
+import icy.system.IcyExceptionHandler;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.Icon;
+import javax.swing.text.BadLocationException;
+
+public class ErrorReportFrame extends TitledFrame implements ActionListener
+{
+    /**
+     * @return  This function test if we already have an active error report frame opened.
+     */
+    public static boolean hasErrorFrameOpened()
+    {
+        return !IcyFrame.getAllFrames(ErrorReportFrame.class).isEmpty();
+    }
+
+    // GUI
+    protected ErrorReportPanel panel;
+
+    // internals
+    protected ActionListener reportAction;
+
+    /**
+     * Create the frame.
+     * @param icon icon
+     * @param title string
+     * @param message string
+     */
+    public ErrorReportFrame(Icon icon, String title, String message)
+    {
+        super("Bug report", true, true, true, true);
+
+        panel = new ErrorReportPanel(icon, title, message);
+
+        panel.reportButton.addActionListener(this);
+        panel.closeButton.addActionListener(this);
+
+        // default report action
+        reportAction = new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                final ProgressFrame progressFrame = new ProgressFrame("Sending report...");
+
+                try
+                {
+                    IcyExceptionHandler.report(panel.getReportMessage());
+                }
+                catch (BadLocationException ex)
+                {
+                    System.err.println("Error while reporting error :");
+                    IcyExceptionHandler.showErrorMessage(ex, true);
+                }
+                finally
+                {
+                    progressFrame.close();
+                }
+            }
+        };
+
+        mainPanel.add(panel, BorderLayout.CENTER);
+
+        addToDesktopPane();
+        setSize(new Dimension(640, 450));
+        setVisible(true);
+        requestFocus();
+        center();
+    }
+
+    /**
+     * @return Returns formatted report message (ready to send to web site).
+     *
+     * @throws BadLocationException exceptioj
+     */
+    public String getReportMessage() throws BadLocationException
+    {
+        return panel.getReportMessage();
+    }
+
+    /**
+     * @param action Set a specific action on the report button
+     */
+    public void setReportAction(ActionListener action)
+    {
+        reportAction = action;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e)
+    {
+        if ((e.getSource() == panel.reportButton) && (reportAction != null))
+            reportAction.actionPerformed(e);
+
+        close();
+    }
+}
