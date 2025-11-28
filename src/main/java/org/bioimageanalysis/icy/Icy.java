@@ -387,12 +387,13 @@ public final class Icy {
 
         IcyLogger.info(Icy.class, String.format("Icy v%s started", VERSION.toShortString()));
 
-        if (!headless) {
+        // FIXME strange behaviour, happens even if extensions were loaded
+        /*if (!headless) {
             if (ExtensionLoader.getExtensions().isEmpty()) {
                 IcyLogger.error(Icy.class, "No extensions were found. You will not be able to use Icy properly.");
                 JOptionPane.showMessageDialog(getMainInterface().getMainFrame(), new String[] {"No extensions were found.", "You will not be able to use Icy properly."}, "No extension found", JOptionPane.ERROR_MESSAGE);
             }
-        }
+        }*/
 
         checkParameters();
 

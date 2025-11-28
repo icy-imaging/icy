@@ -1,13 +1,14 @@
-# Icy, a bioimage analysis software
-
 <!-- badges: start -->
-![version 3.0.0-a.5](https://img.shields.io/badge/v3.0.0-alpha_5-royalblue)
-[![License: LGPL v3](https://img.shields.io/badge/LGPLv3-BD0000?logo=GPLv3&logoSize=auto)](https://www.gnu.org/licenses/lgpl-3.0)
+![Version 3.0.0 alpha 5](https://img.shields.io/badge/v3.0.0-alpha_5-royalblue)
+![Java 17+](https://img.shields.io/badge/OpenJDK-17+-5382A1?labelColor=E76F00)
+[![License: LGPL v3](https://img.shields.io/badge/LGPLv3-008033?logo=GPLv3&logoSize=auto)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/Icy_BioImaging)](https://x.com/Icy_BioImaging)
-[![Image.sc forum](https://img.shields.io/badge/discourse-forum-seagreen)](https://forum.image.sc/tag/icy)
+[![Image.sc forum](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fforum.image.sc%2Ftag%2Ficy.json&query=%24.topic_list.tags.0.topic_count&suffix=%20topics&label=forum&color=0AA0B4)](https://forum.image.sc/tag/icy)
 <!-- badges: end -->
 
-This is the **repository for the source code of the Icy kernel**, which was developed and is maintained by the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/). Icy is free and open source (**GPL3 license**). It has been funded both by Institut Pasteur and [France Bioimaging consortium](https://france-bioimaging.org). You can find more info and download Icy on the [Icy website](https://icy.bioimageanalysis.org/). 
+# Icy, a bioimage analysis software
+
+This is the **repository for the source code of the Icy kernel**, which was developed and is maintained by the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/). Icy is free and open source (**LGPL3 license**). It has been funded both by Institut Pasteur and [France Bioimaging consortium](https://france-bioimaging.org). You can find more info and download Icy on the [Icy website](https://icy.bioimageanalysis.org/). 
 
 ## Description
 
@@ -24,7 +25,7 @@ In terms of development environment, Icy is coded in **Java** and uses a **Maven
 [//]: # (Last but not least, we invite you to read our [Contributing guidelines]&#40;https://gitlab.pasteur.fr/bia/icy/-/blob/master/CONTRIBUTING.md&#41; and our [Code of Conduct]&#40;https://gitlab.pasteur.fr/bia/icy/-/blob/master/CODE-OF-CONDUCT.md&#41;.    )
 
 Download source code
-execute **mvn -P kernel**
+execute **mvn**
 copy the content of **./build/icy/** in your dev folder
 execute **icy.jar** from Eclipse or IntelliJ
 
@@ -45,7 +46,7 @@ Please mention the version of Icy you used (bottom right corner of the GUI or fi
 ## Acknowledgements to main kernel and main plugins contributors
 
 We acknowledge every person who contributed one way or another to make Icy what is now, in particular:       
-*Kernel architecture and code*: Stephane Dallongeville and Fabrice de Chaumont              
+*Kernel architecture and code*: Stephane Dallongeville, Fabrice de Chaumont and Thomas Musset              
 *Head of unit hosting the Icy project*: Jean-Christophe Olivo-Marin                  
 *EzPlug and Protocols* (as many others plugins): Alexandre Dufour                
 *Scripting*: Thomas Provoost, Timothee Lecomte and Stephane Dallongeville              
@@ -66,8 +67,7 @@ The Icy website hosts a [**detailed list of all contributors**](https://icy.bioi
 ## Main libraries used in Icy               
 
 - [Bio-Formats](https://www.openmicroscopy.org/bio-formats/)                        
-- [VTK](https://vtk.org/)
-- [Substance / Insubstancial](https://github.com/Insubstantial/insubstantial)      
+- [VTK](https://vtk.org/)     
 - [EHCache](https://www.ehcache.org/)        
 
 

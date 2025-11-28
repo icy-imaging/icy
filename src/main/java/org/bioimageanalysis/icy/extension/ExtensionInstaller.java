@@ -43,7 +43,7 @@ public final class ExtensionInstaller {
             return false;
         }
 
-        try {
+        /*try {
             final ExtensionDescriptor ed = new ExtensionDescriptor(jar);
             final String fullPath = ed.getGroupId() + "." + ed.getArtifactId();
             final File extensionDir = new File(fullPath.replaceAll("\\.", File.separator));
@@ -56,7 +56,7 @@ public final class ExtensionInstaller {
         }
         catch (final Throwable t) {
             IcyLogger.error(ExtensionInstaller.class, t, "Cannot install extension: " + jar.getAbsolutePath());
-        }
+        }*/
 
         return true;
     }
