@@ -1,5 +1,5 @@
 <!-- badges: start -->
-![Version 3.0.0 alpha 5](https://img.shields.io/badge/v3.0.0-alpha_5-royalblue)
+![Version 3.0.0 alpha 6](https://img.shields.io/badge/v3.0.0-alpha_6-royalblue)
 ![Java 17+](https://img.shields.io/badge/OpenJDK-17+-5382A1?labelColor=E76F00)
 [![License: LGPL v3](https://img.shields.io/badge/LGPLv3-008033?logo=GPLv3&logoSize=auto)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/Icy_BioImaging)](https://x.com/Icy_BioImaging)
@@ -25,8 +25,8 @@ In terms of development environment, Icy is coded in **Java** and uses a **Maven
 [//]: # (Last but not least, we invite you to read our [Contributing guidelines]&#40;https://gitlab.pasteur.fr/bia/icy/-/blob/master/CONTRIBUTING.md&#41; and our [Code of Conduct]&#40;https://gitlab.pasteur.fr/bia/icy/-/blob/master/CODE-OF-CONDUCT.md&#41;.    )
 
 Download source code
-execute **mvn**
-copy the content of **./build/icy/** in your dev folder
+execute **mvn**  
+copy the content of **./build/icy/** in your dev folder  
 execute **icy.jar** from Eclipse or IntelliJ
 
 ## Documentation

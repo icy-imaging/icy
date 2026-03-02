@@ -100,7 +100,7 @@
                             <classpathLayoutType>custom</classpathLayoutType>
                             <!--suppress UnresolvedMavenProperty -->
                             <customClasspathLayout>$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
-                            <mainClass>org.bioimageanalysis.updater.Main</mainClass>
+                            <mainClass>updater.fr.Main</mainClass>
                         </manifest>
                         <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>

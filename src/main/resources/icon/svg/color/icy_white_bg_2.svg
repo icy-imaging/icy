@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="icy-logo" viewBox="0 0 512 512" width="512" height="512">
+    <style type="text/css">
+        .w{fill:#FFFFFF;}
+        .r{fill:#E30613;}
+        .g{fill:#3AAA35;}
+        .b{fill:#0069B4;}
+
+        .tmp{display: none}
+    </style>
+
+    <g>
+        <circle class="w" cx="256" cy="256" r="256"/>
+        <g transform="rotate(-25 256 256)">
+            <circle class="r" cx="256" cy="35" r="25"/>
+            <circle class="r" cx="315.4" cy="43.1" r="25"/>
+            <circle class="r" cx="370.5" cy="66.9" r="25"/>
+            <circle class="r" cx="417.1" cy="104.7" r="25"/>
+            <circle class="tmp" fill="#AAA" stroke="#000" cx="451.9" cy="153.6" r="25"/>
+
+            <path fill="none" d="M 472.2 210.1 A 221.0 221.0 0 1 1 196.6 43.1" stroke="#E30613" stroke-width="50" stroke-linecap="round"/>
+        </g>
+        <g transform="rotate(-90 256 256)">
+            <circle class="g" cx="256" cy="95" r="25"/>
+            <circle class="g" cx="314.9" cy="106.2" r="25"/>
+            <circle class="g" cx="365.7" cy="138.2" r="25"/>
+            <circle class="tmp" fill="#AAA" stroke="#000" cx="401.2" cy="186.5" r="25"/>
+
+            <path fill="none" d="M 416.6 244.5 A 161.0 161.0 0 1 1 197.1 106.2" stroke="#3AAA35" stroke-width="50" stroke-linecap="round"/>
+        </g>
+        <g transform="rotate(90 256 256)">
+            <circle class="b" cx="256" cy="155" r="25"/>
+            <circle class="b" cx="313.3" cy="172.8" r="25"/>
+            <circle class="tmp" fill="#AAA" stroke="#000" cx="350.4" cy="220.0" r="25"/>
+
+            <path fill="none" d="M 354.2 279.9 A 101.0 101.0 0 1 1 198.7 172.8" stroke="#0069B4" stroke-width="50" stroke-linecap="round"/>
+        </g>
+
+        <g class="tmp">
+            <circle cx="256" cy="256" r="221" fill="none" stroke="rgba(255, 0, 0, .2)" stroke-width="50"/>
+            <circle cx="256" cy="256" r="221" fill="none" stroke="#000"/>
+            <circle cx="256" cy="256" r="161" fill="none" stroke="rgba(0, 255, 0, .2)" stroke-width="50"/>
+            <circle cx="256" cy="256" r="161" fill="none" stroke="#000"/>
+            <circle cx="256" cy="256" r="101" fill="none" stroke="rgba(0, 0, 255, .2)" stroke-width="50"/>
+            <circle cx="256" cy="256" r="101" fill="none" stroke="#000"/>
+            <circle cx="256" cy="256" r="1" fill="#000"/>
+        </g>
+    </g>
+</svg>

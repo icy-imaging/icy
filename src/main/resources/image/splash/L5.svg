@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="splash" width="600" height="300" viewBox="0 0 600 300">
+    <style type="text/css">
+        .bg-light{fill:#E7EBF0;}
+        .checker-light{fill:#BBB;}
+        .bg-dark{fill:#3F434B;}
+        .checker-dark{fill:#666;}
+        .w{fill:#FFF;}
+        .r{fill:#E30613;}
+        .g{fill:#3AAA35;}
+        .b{fill:#0069B4;}
+        .m{fill:#E632F3;}
+        .y{fill:#F9F952;}
+        .c{fill:#72F5F7;}
+    </style>
+
+    <defs>
+        <radialGradient id="circle-shadow">
+            <stop offset="80%" stop-color="#000"/>
+            <stop offset="100%" stop-color="#E7EBF0"/>
+        </radialGradient>
+        <linearGradient id="box-shadow-rl">
+            <stop offset="0%" stop-color="#E7EBF0"/>
+            <stop offset="100%" stop-color="#000"/>
+        </linearGradient>
+        <linearGradient id="magenta-cmap">
+            <stop offset="0%" stop-color="#000" />
+            <stop offset="100%" stop-color="#E632F3" />
+        </linearGradient>
+        <linearGradient id="yellow-cmap">
+            <stop offset="0%" stop-color="#000" />
+            <stop offset="100%" stop-color="#F8F852" />
+        </linearGradient>
+        <linearGradient id="cyan-cmap">
+            <stop offset="0%" stop-color="#000" />
+            <stop offset="50%" stop-color="#72F5F7" />
+        </linearGradient>
+        <linearGradient id="fire-cmap">
+            <stop offset="0%" stop-color="#240292" />
+            <stop offset="30%" stop-color="#8D1BBC" />
+            <stop offset="50%" stop-color="#C33138" />
+            <stop offset="90%" stop-color="#FFFF7C" />
+            <stop offset="100%" stop-color="#FFFFF8" />
+        </linearGradient>
+        <linearGradient id="ice-cmap">
+            <stop offset="0%" stop-color="#49A192" />
+            <stop offset="20%" stop-color="#58A7E2" />
+            <stop offset="50%" stop-color="#9362F3" />
+            <stop offset="80%" stop-color="#E864AB" />
+            <stop offset="100%" stop-color="#D82F2B" />
+        </linearGradient>
+        <linearGradient id="glow-cmap">
+            <stop offset="0%" stop-color="#5F0F08" />
+            <stop offset="20%" stop-color="#EA4225" />
+            <stop offset="50%" stop-color="#F3B13D" />
+            <stop offset="99%" stop-color="#FFFF76" />
+            <stop offset="100%" stop-color="#0000F5" />
+        </linearGradient>
+        <linearGradient id="parula-cmap">
+            <stop offset="0%" stop-color="#363494" />
+            <stop offset="30%" stop-color="#428FCD" />
+            <stop offset="50%" stop-color="#60B6A0" />
+            <stop offset="80%" stop-color="#EABB5D" />
+            <stop offset="100%" stop-color="#F8F954" />
+        </linearGradient>
+
+        <pattern id="checker" viewBox="0 0 10 10" width="5%" height="5%">
+            <g>
+                <rect x="0" y="0" width="10" height="10" fill="#888"/>
+                <rect x="0" y="0" width="5" height="5" class="checker-light"/>
+                <rect x="5" y="5" width="5" height="5" class="checker-light"/>
+            </g>
+        </pattern>
+
+        <symbol overflow="visible" id="icy-logo" viewBox="0 0 512 512" width="100%" height="100%">
+            <g>
+                <circle class="w" cx="256" cy="256" r="256"/>
+                <g transform="rotate(-25 256 256)">
+                    <circle class="r" cx="256" cy="35" r="25"/>
+                    <circle class="r" cx="315.4" cy="43.1" r="25"/>
+                    <circle class="r" cx="370.5" cy="66.9" r="25"/>
+                    <circle class="r" cx="417.1" cy="104.7" r="25"/>
+                    <path fill="none" d="M 472.2 210.1 A 221.0 221.0 0 1 1 196.6 43.1" stroke="#E30613" stroke-width="50" stroke-linecap="round"/>
+                </g>
+                <g transform="rotate(-90 256 256)">
+                    <circle class="g" cx="256" cy="95" r="25"/>
+                    <circle class="g" cx="314.9" cy="106.2" r="25"/>
+                    <circle class="g" cx="365.7" cy="138.2" r="25"/>
+                    <path fill="none" d="M 416.6 244.5 A 161.0 161.0 0 1 1 197.1 106.2" stroke="#3AAA35" stroke-width="50" stroke-linecap="round"/>
+                </g>
+                <g transform="rotate(90 256 256)">
+                    <circle class="b" cx="256" cy="155" r="25"/>
+                    <circle class="b" cx="313.3" cy="172.8" r="25"/>
+                    <path fill="none" d="M 354.2 279.9 A 101.0 101.0 0 1 1 198.7 172.8" stroke="#0069B4" stroke-width="50" stroke-linecap="round"/>
+                </g>
+            </g>
+        </symbol>
+    </defs>
+
+    <rect x="0" y="0" width="100%" height="100%" class="bg-light"/>
+
+    <!--<rect x="345" y="0" width="30" height="300" fill="url(#box-shadow-rl)"/>
+    <rect x="350" y="0" width="300" height="300" fill="url(#checker)" stroke="#444" stroke-width="1"/>-->
+
+    <!--<g transform="translate(390 -50) rotate(10)">-->
+    <g transform="translate(470 -50) rotate(10)">
+        <!--<rect width="60" x="0" height="120%" class="c" style="filter: drop-shadow(0 0 5px #00000088);"/>
+        <rect width="60" x="60" height="120%" class="m" style="filter: drop-shadow(0 0 5px #00000088);"/>
+        <rect width="100%" x="120" height="120%" class="y" style="filter: drop-shadow(0 0 5px #00000088);"/>-->
+
+        <rect width="200" height="120%" fill="url(#parula-cmap)" stroke="#3F434B" stroke-width="2"/>
+    </g>
+
+    <circle cx="175" cy="150" r="75" fill="url(#circle-shadow)"/>
+    <use xlink:href="#icy-logo" width="140" x="105"/>
+</svg>

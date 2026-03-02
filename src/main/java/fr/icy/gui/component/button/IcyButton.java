@@ -1,0 +1,311 @@
+/*
+ * Copyright (c) 2010-2026. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package fr.icy.gui.component.button;
+
+import fr.icy.gui.action.IcyAbstractAction;
+import fr.icy.gui.LookAndFeelUtil;
+import fr.icy.gui.component.icon.IcySVG;
+import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcyIconPack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
+
+/**
+ * @author Thomas Musset
+ */
+public class IcyButton extends JButton {
+    private @Nullable IcyIconPack iconPack;
+    private @Nullable Icon iconDefault = null, iconDisabled = null, iconSelected = null, iconDisabledSelected = null;
+    private final int iconSize;
+    private boolean flat;
+
+    /**
+     * Create a {@link JButton} with specified text, SVG icons for each state (default, disabled, selected and disabled-selected) and custom size.
+     */
+    public IcyButton(final @NotNull String text, final @NotNull IcyIconPack pack, final int size, final boolean flat) {
+        super(text);
+
+        iconPack = pack;
+        iconSize = size;
+        setSVGIcons();
+
+        this.flat = flat;
+        init();
+    }
+
+    /**
+     * Create a {@link JButton} with specified text, SVG icons for each state (default, disabled, selected and disabled-selected) and custom size.
+     */
+    public IcyButton(final @NotNull String text, final @NotNull IcyIconPack pack, final int size) {
+        this(text, pack, size, false);
+    }
+
+    /**
+     * Create a {@link JButton} with specified text, SVG icons for each state (default, disabled, selected and disabled-selected) and default size.
+     */
+    public IcyButton(final @NotNull String text, final @NotNull IcyIconPack pack, final boolean flat) {
+        this(text, pack, LookAndFeelUtil.getDefaultIconSize(), flat);
+    }
+
+    /**
+     * Create a {@link JButton} with specified text, SVG icons for each state (default, disabled, selected and disabled-selected) and default size.
+     */
+    public IcyButton(final @NotNull String text, final @NotNull IcyIconPack pack) {
+        this(text, pack, LookAndFeelUtil.getDefaultIconSize(), false);
+    }
+
+    /**
+     * Create a {@link JButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
+     */
+    public IcyButton(final @NotNull String text, final @NotNull SVGResource icon, final int size, final boolean flat) {
+        this(text, new IcyIconPack(icon), size, flat);
+    }
+
+    /**
+     * Create a {@link JButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
+     */
+    public IcyButton(final @NotNull String text, final @NotNull SVGResource icon, final int size) {
+        this(text, new IcyIconPack(icon), size, false);
+    }
+
+    /**
+     * Create a {@link JButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
+     */
+    public IcyButton(final @NotNull String text, final @NotNull SVGResource icon, final boolean flat) {
+        this(text, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), flat);
+    }
+
+    /**
+     * Create a {@link JButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
+     */
+    public IcyButton(final @NotNull String text, final @NotNull SVGResource icon) {
+        this(text, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
+    }
+
+    /**
+     * Create a {@link JButton} with specified SVG icons for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
+     */
+    public IcyButton(final @NotNull IcyIconPack pack, final int size, final boolean flat) {
+        super();
+
+        iconPack = pack;
+        iconSize = size;
+        setSVGIcons();
+
+        this.flat = flat;
+        init();
+    }
+
+    /**
+     * Create a {@link JButton} with specified SVG icons for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
+     */
+    public IcyButton(final @NotNull IcyIconPack pack, final int size) {
+        this(pack, size, false);
+    }
+
+    /**
+     * Create a {@link JButton} with specified SVG icons for each state (default, disabled, selected and disabled-selected) and default size, but without text.
+     */
+    public IcyButton(final @NotNull IcyIconPack pack, final boolean flat) {
+        this(pack, LookAndFeelUtil.getDefaultIconSize(), flat);
+    }
+
+    /**
+     * Create a {@link JButton} with specified SVG icons for each state (default, disabled, selected and disabled-selected) and default size, but without text.
+     */
+    public IcyButton(final @NotNull IcyIconPack pack) {
+        this(pack, LookAndFeelUtil.getDefaultIconSize(), false);
+    }
+
+    /**
+     * Create a {@link JButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
+     */
+    public IcyButton(final @NotNull SVGResource icon, final int size, final boolean flat) {
+        this(new IcyIconPack(icon), size, flat);
+    }
+
+    /**
+     * Create a {@link JButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
+     */
+    public IcyButton(final @NotNull SVGResource icon, final int size) {
+        this(new IcyIconPack(icon), size, false);
+    }
+
+    /**
+     * Create a {@link JButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and default size, but without text.
+     */
+    public IcyButton(final @NotNull SVGResource icon, final boolean flat) {
+        this(new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), flat);
+    }
+
+    /**
+     * Create a {@link JButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and default size, but without text.
+     */
+    public IcyButton(final @NotNull SVGResource icon) {
+        this(new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
+    }
+
+    /**
+     * Create a {@link JButton} with specified {@link Action}, SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
+     */
+    public IcyButton(final @NotNull Action action, final @NotNull IcyIconPack pack, final int size, final boolean flat) {
+        super(action);
+        iconPack = pack;
+        iconSize = size;
+        setSVGIcons();
+        IcyAbstractAction.setToolTipTextFromAction(this, action);
+
+        this.flat = flat;
+        init();
+    }
+
+    /**
+     * Create a {@link JButton} with specified {@link Action}, SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
+     */
+    public IcyButton(final @NotNull Action action, final @NotNull IcyIconPack pack, final boolean flat) {
+        this(action, pack, LookAndFeelUtil.getDefaultIconSize(), flat);
+    }
+
+    /**
+     * Create a {@link JButton} with specified {@link Action}, SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
+     */
+    public IcyButton(final @NotNull Action action, final @NotNull IcyIconPack pack) {
+        this(action, pack, LookAndFeelUtil.getDefaultIconSize(), false);
+    }
+
+    /**
+     * Create a {@link JButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
+     */
+    public IcyButton(final @NotNull Action action, final @NotNull SVGResource icon, final int size, final boolean flat) {
+        this(action, new IcyIconPack(icon), size, flat);
+    }
+
+    /**
+     * Create a {@link JButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
+     */
+    public IcyButton(final @NotNull Action action, final @NotNull SVGResource icon, final int size) {
+        this(action, new IcyIconPack(icon), size, false);
+    }
+
+    /**
+     * Create a {@link JButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
+     */
+    public IcyButton(final @NotNull Action action, final @NotNull SVGResource icon, final boolean flat) {
+        this(action, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), flat);
+    }
+
+    /**
+     * Create a {@link JButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
+     */
+    public IcyButton(final @NotNull Action action, final @NotNull SVGResource icon) {
+        this(action, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
+    }
+
+    private void init() {
+        setHorizontalAlignment(SwingConstants.CENTER);
+        setVerticalAlignment(SwingConstants.CENTER);
+
+        setFlat(flat);
+    }
+
+    /**
+     * @return the flat
+     */
+    public final boolean isFlat() {
+        return flat;
+    }
+
+    /**
+     * @param flat the flat to set
+     */
+    public final void setFlat(final boolean flat) {
+        if (this.flat != flat) {
+            this.flat = flat;
+
+            setBorderPainted(!flat);
+            setFocusPainted(!flat);
+            setFocusable(!flat);
+            setOpaque(!flat);
+            setContentAreaFilled(!flat);
+        }
+    }
+
+    protected final void setSVGIconPack(final @NotNull IcyIconPack pack) {
+        this.iconPack = pack;
+        setSVGIcons();
+    }
+
+    /**
+     * Set icon for each state (default, disabled, selected and disabled-selected).<br>
+     * Internal use only.
+     */
+    protected final void setIcons(final @NotNull Icon icon, final @NotNull Icon disabled, final @NotNull Icon selected, final @NotNull Icon disabledSelected) {
+        iconDefault = icon;
+        iconDisabled = disabled;
+        iconSelected = selected;
+        iconDisabledSelected = disabledSelected;
+
+        resetIcons();
+    }
+
+    /**
+     * Set icon for each state (default, disabled, selected and disabled-selected).<br>
+     * Internal use only.
+     */
+    protected final void setIcons(final @NotNull Icon icon, final @NotNull Icon selected) {
+        setIcons(icon, icon, selected, selected);
+    }
+
+    /**
+     * Set icon for each state (default, disabled, selected and disabled-selected).<br>
+     * Internal use only.
+     */
+    protected final void setIcons(final @NotNull Icon icon) {
+        setIcons(icon, icon, icon, icon);
+    }
+
+    /**
+     * Set SVG icon for each state (default, disabled, selected and disabled-selected).<br>
+     * Internal use only.
+     */
+    protected final void setSVGIcons() {
+        if (iconPack == null)
+            return;
+
+        iconDefault = new IcySVG(iconPack.getDefaultIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
+        iconDisabled = new IcySVG(iconPack.getDisabledIcon()).getIcon(iconSize,  LookAndFeelUtil.ColorType.BUTTON_DISABLED);
+        iconSelected = new IcySVG(iconPack.getSelectedtIcon()).getIcon(iconSize,   LookAndFeelUtil.ColorType.BUTTON_SELECTED);
+        iconDisabledSelected = new IcySVG(iconPack.getDisabledSelectedIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.BUTTON_DISABLED);
+
+        resetIcons();
+    }
+
+    /**
+     * Reset all icons (useful when Action overrides icons).<br>
+     * Internal use only.
+     */
+    protected final void resetIcons() {
+        setIcon(iconDefault);
+        setDisabledIcon(iconDisabled);
+        setSelectedIcon(iconSelected);
+        setDisabledSelectedIcon(iconDisabledSelected);
+    }
+}
