@@ -22,7 +22,6 @@ import fr.icy.Icy;
 import fr.icy.common.math.Random;
 import fr.icy.extension.ExtensionLoader;
 import fr.icy.gui.LookAndFeelUtil;
-import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -61,7 +60,7 @@ public final class SplashScreenWindow extends JWindow implements ExtensionLoader
     }
 
     @Override
-    public void updateProgress(final ExtensionLoader.@NonNull ExtensionLoaderProgressEvent e) {
+    public void updateProgress(final ExtensionLoader.ExtensionLoaderProgressEvent e) {
         progressBar.setIndeterminate(false);
         progressBar.setMaximum(e.total());
 
