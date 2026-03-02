@@ -19,7 +19,7 @@
 package fr.icy.extension.plugin.property.gui;
 
 import fr.icy.extension.plugin.property.*;
-import org.bioimageanalysis.icy.extension.plugin.property.*;
+import fr.icy.extension.plugin.property.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;

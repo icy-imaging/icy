@@ -20,7 +20,7 @@ package fr.icy.gui.toolbar;
 
 import fr.icy.gui.component.button.IcyToggleButton;
 import fr.icy.gui.toolbar.button.*;
-import org.bioimageanalysis.icy.gui.toolbar.button.*;
+import fr.icy.gui.toolbar.button.*;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;

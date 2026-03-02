@@ -40,7 +40,7 @@ import fr.icy.system.thread.ThreadUtil;
 import fr.icy.common.geom.point.Point5D;
 import fr.icy.common.geom.rectangle.Rectangle5D;
 import fr.icy.common.string.StringUtil;
-import org.bioimageanalysis.icy.model.roi.edit.*;
+import fr.icy.model.roi.edit.*;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;

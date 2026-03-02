@@ -24,7 +24,7 @@ import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.OverlayEvent;
 import fr.icy.model.overlay.OverlayListener;
 import fr.icy.model.roi.*;
-import org.bioimageanalysis.icy.model.roi.*;
+import fr.icy.model.roi.*;
 import fr.icy.model.roi.ROI2D.ROI2DPainter;
 import fr.icy.model.roi.mask.BooleanMask2D;
 import fr.icy.model.sequence.Sequence;

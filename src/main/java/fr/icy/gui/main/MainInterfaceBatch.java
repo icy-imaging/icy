@@ -21,7 +21,7 @@ package fr.icy.gui.main;
 import fr.icy.common.listener.AcceptListener;
 import fr.icy.extension.plugin.interface_.PluginROI;
 import fr.icy.gui.listener.*;
-import org.bioimageanalysis.icy.gui.listener.*;
+import fr.icy.gui.listener.*;
 import fr.icy.gui.viewer.Viewer;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.lut.LUT;

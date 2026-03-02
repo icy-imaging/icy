@@ -40,7 +40,7 @@ import fr.icy.model.OMEUtil;
 import fr.icy.model.cache.ImageCache;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.image.ImageProvider;
-import org.bioimageanalysis.icy.model.sequence.*;
+import fr.icy.model.sequence.*;
 import fr.icy.system.IcyExceptionHandler;
 import fr.icy.system.SystemUtil;
 import fr.icy.system.logging.IcyLogger;

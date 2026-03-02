@@ -32,7 +32,7 @@ import fr.icy.gui.action.SequenceOperationActions.ToggleVirtualSequenceAction;
 import fr.icy.gui.action.ViewerActions;
 import fr.icy.gui.action.WindowActions;
 import fr.icy.gui.canvas.*;
-import org.bioimageanalysis.icy.gui.canvas.*;
+import fr.icy.gui.canvas.*;
 import fr.icy.gui.component.button.IcyButton;
 import fr.icy.gui.component.button.IcyToggleButton;
 import fr.icy.gui.component.icon.IcyIconPack;

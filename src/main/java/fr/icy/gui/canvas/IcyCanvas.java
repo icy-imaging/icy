@@ -38,7 +38,7 @@ import fr.icy.gui.canvas.CanvasLayerEvent.LayersEventType;
 import fr.icy.gui.canvas.IcyCanvasEvent.IcyCanvasEventType;
 import fr.icy.gui.canvas.Layer.LayerListener;
 import fr.icy.gui.viewer.*;
-import org.bioimageanalysis.icy.gui.viewer.*;
+import fr.icy.gui.viewer.*;
 import fr.icy.model.OMEUtil;
 import fr.icy.model.colormodel.IcyColorModel;
 import fr.icy.model.image.IcyBufferedImage;

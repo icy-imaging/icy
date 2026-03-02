@@ -21,7 +21,7 @@ import fr.icy.gui.frame.IcyFrame;
 import fr.icy.gui.component.ComponentUtil;
 import fr.icy.Icy;
 import fr.icy.model.swimmingPool.*;
-import org.bioimageanalysis.icy.model.swimmingPool.*;
+import fr.icy.model.swimmingPool.*;
 import fr.icy.system.thread.ThreadUtil;
 
 import java.awt.BorderLayout;

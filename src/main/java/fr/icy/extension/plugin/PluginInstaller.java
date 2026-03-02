@@ -23,7 +23,7 @@ import fr.icy.common.string.StringUtil;
 import fr.icy.extension.ExtensionLoader;
 import fr.icy.gui.dialog.ConfirmDialog;
 import fr.icy.gui.frame.progress.*;
-import org.bioimageanalysis.icy.gui.frame.progress.*;
+import fr.icy.gui.frame.progress.*;
 import fr.icy.io.FileUtil;
 import fr.icy.io.zip.ZipUtil;
 import fr.icy.network.NetworkUtil;

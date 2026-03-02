@@ -24,7 +24,7 @@ import fr.icy.common.event.UpdateEventHandler;
 import fr.icy.common.listener.ChangeListener;
 import fr.icy.common.type.DataType;
 import fr.icy.model.colormap.*;
-import org.bioimageanalysis.icy.model.colormap.*;
+import fr.icy.model.colormap.*;
 import fr.icy.model.colormap.IcyColorMap.IcyColorMapType;
 import fr.icy.model.colormodel.IcyColorModel;
 

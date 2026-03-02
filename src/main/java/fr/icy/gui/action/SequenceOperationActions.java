@@ -22,7 +22,7 @@ import fr.icy.gui.dialog.IdConfirmDialog;
 import fr.icy.gui.dialog.MessageDialog;
 import fr.icy.gui.frame.progress.FailedAnnounceFrame;
 import fr.icy.gui.sequence.tools.*;
-import org.bioimageanalysis.icy.gui.sequence.tools.*;
+import fr.icy.gui.sequence.tools.*;
 import fr.icy.gui.viewer.Viewer;
 import fr.icy.Icy;
 import fr.icy.model.roi.ROI;

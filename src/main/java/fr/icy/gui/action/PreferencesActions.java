@@ -20,7 +20,7 @@ package fr.icy.gui.action;
 
 import fr.icy.common.reflect.ClassUtil;
 import fr.icy.gui.preferences.*;
-import org.bioimageanalysis.icy.gui.preferences.*;
+import fr.icy.gui.preferences.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.event.ActionEvent;

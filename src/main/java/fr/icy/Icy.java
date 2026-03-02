@@ -55,7 +55,7 @@ import fr.icy.model.sequence.SequencePrefetcher;
 import fr.icy.network.NetworkUtil;
 import fr.icy.network.update.IcyUpdater;
 import fr.icy.network.update.Updater;
-import org.bioimageanalysis.icy.system.*;
+import fr.icy.system.*;
 import fr.icy.system.audit.Audit;
 import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.ApplicationPreferences;

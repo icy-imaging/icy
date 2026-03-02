@@ -55,7 +55,7 @@ import java.util.*;
 public class PluginLoader {
     public final static String PLUGIN_PACKAGE = "plugins";
     //public final static String PLUGIN_KERNEL_PACKAGE = "plugins.kernel";
-    public final static String PLUGIN_KERNEL_PACKAGE = "org.bioimageanalysis.extension.kernel";
+    public final static String PLUGIN_KERNEL_PACKAGE = "fr.icy.extension.kernel";
     public final static String PLUGIN_PATH = "plugins";
 
     // used to identify java version problem
