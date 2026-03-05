@@ -7,11 +7,11 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>3.0.0-a.5</version>
+        <version>3.0.0-a.6</version>
     </parent>
 
     <artifactId>icy-kernel</artifactId>
-    <version>3.0.0-a.5</version>
+    <version>3.0.0-a.6</version>
 
     <name>Icy</name>
     <description>Icy is an open community platform for bioimage informatics</description>
@@ -205,12 +205,10 @@
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-anim</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-awt-util</artifactId>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -221,121 +219,98 @@
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-bridge</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-css</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-codec</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-constants</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-dom</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-ext</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-gvt</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-i18n</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-parser</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-script</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-shared-resources</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-svg-dom</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-svggen</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-transcoder</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-util</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-xml</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- Apache POI -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- BioFormats -->
         <dependency>
             <groupId>ome</groupId>
             <artifactId>bio-formats_plugins</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ome</groupId>
             <artifactId>bio-formats-tools</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ome</groupId>
             <artifactId>formats-api</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ome</groupId>
             <artifactId>formats-bsd</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ome</groupId>
             <artifactId>formats-gpl</artifactId>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -346,154 +321,128 @@
         <dependency>
             <groupId>org.openmicroscopy</groupId>
             <artifactId>ome-codecs</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.openmicroscopy</groupId>
             <artifactId>ome-common</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.openmicroscopy</groupId>
             <artifactId>ome-xml</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.openmicroscopy</groupId>
             <artifactId>specification</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ome</groupId>
             <artifactId>turbojpeg</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- EhCache -->
         <dependency>
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- EJML -->
         <dependency>
             <groupId>org.ejml</groupId>
             <artifactId>ejml-all</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- FlatLaf -->
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-swingx</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- ImgLib2 -->
         <dependency>
             <groupId>net.imglib2</groupId>
             <artifactId>imglib2</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.imglib2</groupId>
             <artifactId>imglib2-algorithm</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.imglib2</groupId>
             <artifactId>imglib2-realtransform</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- JAI -->
         <dependency>
             <groupId>javax.media</groupId>
             <artifactId>jai-core</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.sun.media</groupId>
             <artifactId>jai-codec</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- Jansi -->
         <dependency>
             <groupId>org.fusesource.jansi</groupId>
             <artifactId>jansi</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- Jogamp -->
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all</artifactId>
             <classifier>natives-linux-amd64</classifier>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all</artifactId>
             <classifier>natives-macosx-universal</classifier>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all</artifactId>
             <classifier>natives-windows-amd64</classifier>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
             <classifier>natives-linux-amd64</classifier>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
             <classifier>natives-macosx-universal</classifier>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
             <classifier>natives-windows-amd64</classifier>
-            <scope>compile</scope>
         </dependency>
 
         <!-- Log4j -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- Maven Resolver -->
@@ -537,14 +486,12 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- SwingX -->
         <dependency>
             <groupId>org.swinglabs.swingx</groupId>
             <artifactId>swingx-all</artifactId>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -561,7 +508,6 @@
                 <dependency>
                     <groupId>org.bioimageanalysis.icy</groupId>
                     <artifactId>icy-vtk-linux-x64</artifactId>
-                    <scope>compile</scope>
                 </dependency>
             </dependencies>
         </profile>
@@ -577,7 +523,6 @@
                 <dependency>
                     <groupId>org.bioimageanalysis.icy</groupId>
                     <artifactId>icy-vtk-macos-arm64</artifactId>
-                    <scope>compile</scope>
                 </dependency>
             </dependencies>
         </profile>
@@ -593,7 +538,6 @@
                 <dependency>
                     <groupId>org.bioimageanalysis.icy</groupId>
                     <artifactId>icy-vtk-macos-x64</artifactId>
-                    <scope>compile</scope>
                 </dependency>
             </dependencies>
         </profile>
@@ -609,7 +553,6 @@
                 <dependency>
                     <groupId>org.bioimageanalysis.icy</groupId>
                     <artifactId>icy-vtk-windows-x64</artifactId>
-                    <scope>compile</scope>
                 </dependency>
             </dependencies>
         </profile>

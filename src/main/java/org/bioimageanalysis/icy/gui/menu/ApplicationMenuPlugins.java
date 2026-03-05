@@ -45,6 +45,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
 
     @NotNull
     private final IcyMenuItem itemPluginsSettings;
+    private final IcyMenuItem itemPluginsReload;
     private final IcyMenuItem itemCatalog;
     //@NotNull
     //private final IcyTextFieldHint itemPluginSearch;
@@ -53,6 +54,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
         super("Plugins");
 
         itemPluginsSettings = new IcyMenuItem(PreferencesActions.pluginPreferencesAction, SVGResource.SETTINGS);
+        itemPluginsReload = new IcyMenuItem(GeneralActions.reloadPluginsAction, SVGResource.REPEAT);
         itemCatalog = new IcyMenuItem(GeneralActions.catalogAction, SVGResource.WIDGETS);
 
         //itemPluginSearch = new IcyTextFieldHint(SVGIcon.SEARCH, "Search Plugin...");
@@ -73,6 +75,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
             removeAll();
 
             add(itemPluginsSettings);
+            add(itemPluginsReload);
             //add(itemCatalog);
             //add(itemPluginSearch);
 

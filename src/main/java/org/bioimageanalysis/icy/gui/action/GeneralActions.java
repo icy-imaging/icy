@@ -18,6 +18,7 @@
 
 package org.bioimageanalysis.icy.gui.action;
 
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.gui.clipboard.Clipboard;
 import org.bioimageanalysis.icy.gui.clipboard.TransferableImage;
 import org.bioimageanalysis.icy.gui.frame.AboutFrame;
@@ -294,6 +295,18 @@ public final class GeneralActions {
         @Override
         public boolean doAction(final ActionEvent e) {
             new AboutFrame(1);
+            return true;
+        }
+    };
+
+    public static final IcyAbstractAction reloadPluginsAction = new IcyAbstractAction(
+            "Reload Plugins",
+            "Reload locally installed plugins",
+            "Reload locally installed plugins."
+    ) {
+        @Override
+        public boolean doAction(final ActionEvent e) {
+            ExtensionLoader.reloadAsynch();
             return true;
         }
     };
