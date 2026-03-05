@@ -1,19 +1,31 @@
 <!-- badges: start -->
-![Version 3.0.0 alpha 5](https://img.shields.io/badge/v3.0.0-alpha_5-royalblue)
+![Version 3.0.0 alpha 6](https://img.shields.io/badge/v3.0.0-alpha_6-royalblue)
 ![Java 17+](https://img.shields.io/badge/OpenJDK-17+-5382A1?labelColor=E76F00)
 [![License: LGPL v3](https://img.shields.io/badge/LGPLv3-008033?logo=GPLv3&logoSize=auto)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/Icy_BioImaging)](https://x.com/Icy_BioImaging)
 [![Image.sc forum](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fforum.image.sc%2Ftag%2Ficy.json&query=%24.topic_list.tags.0.topic_count&suffix=%20topics&label=forum&color=0AA0B4)](https://forum.image.sc/tag/icy)
 <!-- badges: end -->
 
-# Icy, a bioimage analysis software
+# Icy, bioimage analysis software
 
-This is the **repository for the source code of the Icy kernel**, which was developed and is maintained by the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/). Icy is free and open source (**LGPL3 license**). It has been funded both by Institut Pasteur and [France Bioimaging consortium](https://france-bioimaging.org). You can find more info and download Icy on the [Icy website](https://icy.bioimageanalysis.org/). 
+This is the **repository for the source code of the Icy kernel**, which was developed and is maintained by the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/).
+<br>
+Icy is free and open source (**LGPL3 license**).
+<br>
+It has been funded both by Institut Pasteur and [France Bioimaging consortium](https://france-bioimaging.org).
+<br>
+You can find more info and download Icy on the [Icy website](https://icy.bioimageanalysis.org/).
 
 ## Description
 
-**Icy is a software to do image analysis**,and is mainly oriented toward the analysis of biological images. It was developed as a **toolbox containing state-of-the-art methods**, like the Gaussian filter, **and latest algorithmic developments of the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/)**. It was also developed as a **platform to gather and favor the exchanges** between biologists, computer vision scientists, bioimage analysts and developers. It notably has a righ graphical interface to ease the integration of non programming users, as well as possibility for more advanced users to do scripting (in Javascript), graphical programming using the Protocols tool and development of Java plugins. Last but not least, Icy was developed to promote **quantitative analysis** of biological images and **reproducibility** of analyses. It includes many possibilities to save and reuse parameters and even save and reuse complete workflows.              
-In terms of development environment, Icy is coded in **Java** and uses a **Maven project environment**. It is a modular software composed of a kernel and plugins. The kernel contains the main functions related to graphical user interface, image visualization (2D and 3D), regions of interest with statistics and basics image data manipulation tools such as [image cursors](https://icy.bioimageanalysis.org/developer/using-image-cursors-when-developing-plugins/). 
+**Icy is a software to do image analysis**,and is mainly oriented toward the analysis of biological images.
+It was developed as a **toolbox containing state-of-the-art methods**, like the Gaussian filter, **and latest algorithmic developments of the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/)**.
+It was also developed as a **platform to gather and favor the exchanges** between biologists, computer vision scientists, bioimage analysts and developers.
+It notably has a rich graphical interface to ease the integration of non-programming users, as well as the possibility for more advanced users to do scripting (in JavaScript), graphical programming using the Protocols tool and development of Java plugins.
+Last but not least, Icy was developed to promote **quantitative analysis** of biological images and **reproducibility** of analyses. It includes many possibilities to save and reuse parameters and even save and reuse complete workflows.
+<br>
+In terms of development environment, Icy is coded in **Java** and uses a **Maven project environment**. It is modular software composed of a kernel and plugins.
+The kernel contains the main functions related to graphical user interface, image visualization (2D and 3D), regions of interest with statistics and basics image data manipulation tools such as [image cursors](https://icy.bioimageanalysis.org/developer/using-image-cursors-when-developing-plugins/). 
 
 
 ## Installation
@@ -24,24 +36,46 @@ In terms of development environment, Icy is coded in **Java** and uses a **Maven
 
 [//]: # (Last but not least, we invite you to read our [Contributing guidelines]&#40;https://gitlab.pasteur.fr/bia/icy/-/blob/master/CONTRIBUTING.md&#41; and our [Code of Conduct]&#40;https://gitlab.pasteur.fr/bia/icy/-/blob/master/CODE-OF-CONDUCT.md&#41;.    )
 
-Download source code
-execute **mvn**
-copy the content of **./build/icy/** in your dev folder
-execute **icy.jar** from Eclipse or IntelliJ
+### From source code
+
+To install Icy from source code, follow the instructions below:
+
+1. clone the repository:
+    ```shell
+    git clone https://gitlab.pasteur.fr/bia/icy/icy.git
+    ```
+2. go to the directory:
+    ```shell
+    cd icy
+    ```
+3. run the Maven command:
+    ```shell
+    mvn
+    ```
+4. run Icy from the newly compiled JAR:
+    ```shell
+    java -jar build/icy/icy.jar
+   ```
+   
+   > **Note**: It is recommended to allocate at least 4GB of RAM to Icy.<br>
+   > You can do it by adding the following parameter to the command line: `-Xms4g` like this:
+   > `java -Xms4g -jar build/icy/icy.jar`
+
+### From the website
+
+*TODO*
 
 ## Documentation
 
 Plugin documentation for users is hosted on the Icy website, in the [Resources category](https://icy.bioimageanalysis.org/plugins/). General documentation is available in the [Training category](https://icy.bioimageanalysis.org/trainings/). You can also have a look at the article on [how to get help on the Icy software](https://icy.bioimageanalysis.org/tutorial/how-to-get-help-on-icy/).         
 For developers, there is also an [Icy Javadoc](https://icy.bioimageanalysis.org/javadoc/).        
 
-
 ## Citation information
 
-de Chaumont, F. et al. (2012) Icy: an open bioimage informatics platform for extended reproducible research, [Nature Methods](https://www.nature.com/articles/nmeth.2075), 9, pp. 690-696             
+de Chaumont, F. et al. (2012) Icy: an open bioimage informatics platform for extended reproducible research, [Nature Methods](https://www.nature.com/articles/nmeth.2075), 9, pp. 690–696             
 https://icy.bioimageanalysis.org    
 
-Please mention the version of Icy you used (bottom right corner of the GUI or first lines of the Output tab). Don't forget to also cite the plugins you use.           
-
+Please mention the version of Icy you used (bottom right corner of the GUI or first lines of the Output tab). Remember to also cite the plugins you use.           
 
 ## Acknowledgements to main kernel and main plugins contributors
 
@@ -55,26 +89,13 @@ We acknowledge every person who contributed one way or another to make Icy what 
 *Icy website graphic design*: Marcio de Moraes Marim              
 *Icy website code*: Fabrice de Chaumont / Marcio de Moraes Marim 
 
-
 The Icy website hosts a [**detailed list of all contributors**](https://icy.bioimageanalysis.org/contributors/) to the Icy software. Contributions include kernel development, plugin development, protocol creation, blog post writing...       
-
-
 
 <!--  M. Geissbuehler and T. Lasser - https://opg.optica.org/oe/fulltext.cfm?uri=oe-21-8-9862&id=252779
 "How to display data by color schemes compatible with red-green color perception deficiencies" Opt. Express 21, 9862-9874 (2013) -->
 
+## Main libraries used in Icy
 
-## Main libraries used in Icy               
-
-- [Bio-Formats](https://www.openmicroscopy.org/bio-formats/)                        
-- [VTK](https://vtk.org/)     
-- [EHCache](https://www.ehcache.org/)        
-
-
-<!-- ## Development tool for profiling/debugging       
-
- YourKit is kindly supporting open source projects with its full-featured Java Profiler.             
-YourKit, LLC is the creator of innovative and intelligent tools for profiling Java and .NET applications.     
-Take a look at YourKit's leading software products: YourKit Java Profiler and YourKit .NET Profiler.   -->      
-
-
+- [Bio-Formats](https://www.openmicroscopy.org/bio-formats/)
+- [VTK](https://vtk.org/)
+- [EHCache](https://www.ehcache.org/)
