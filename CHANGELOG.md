@@ -2124,7 +2124,7 @@ misinterpreted by JVM as right mouse button modifier.
   - added getVisibleRect() method.
 * Added new methods to the SwimmingPool class so we can now manipulate objects depending their names.
 * Added SwimmingObjectChooser component to select specific object type from the swimming pool.
-* Changed default pixel size unit to �m and time interval to second (compatible with OME).
+* Changed default pixel size unit to  m and time interval to second (compatible with OME).
 * Added convertToType methods can now rescale values on data bounds.
 * Added XMLPreferences.getXMLNode() method to get XML node.
 * Added WeakWindowFocusListener class.
@@ -2379,7 +2379,7 @@ Icy 1.2.1.0  - 03/02/2012
 ------------------------
 
 **Application**
-* Added support for "multi windows mode" (� la GIMP or ImageJ).
+* Added support for "multi windows mode" (  la GIMP or ImageJ).
 * Added internal chat so users can discuss together easily:)
 * Canvas2D:
   - fixed zoom centering when using '+' / '-' buttons.
