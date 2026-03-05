@@ -26,6 +26,7 @@ import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
 import org.bioimageanalysis.icy.extension.plugin.interface_.PluginDaemon;
 import org.bioimageanalysis.icy.io.Loader;
 import org.bioimageanalysis.icy.system.IcyExceptionHandler;
+import org.bioimageanalysis.icy.system.SystemUtil;
 import org.bioimageanalysis.icy.system.UserUtil;
 import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import org.bioimageanalysis.icy.system.preferences.PluginPreferences;
@@ -105,6 +106,7 @@ public final class ExtensionLoader {
      */
     private URLClassLoader ucl;
 
+    private final Set<URL> jarURLSet;
     private final Set<String> jarSet;
 
     private final Map<String, Set<String>> extensionsArtifacts;
@@ -208,8 +210,10 @@ public final class ExtensionLoader {
         repositories.add(netbeans);
         repositories.add(jboss);
 
-        ucl = new URLClassLoader(new URL[0], Thread.currentThread().getContextClassLoader());
+        //ucl = new URLClassLoader(new URL[0], Thread.currentThread().getContextClassLoader());
+        ucl = new URLClassLoader(new URL[0], SystemUtil.getSystemClassLoader());
 
+        jarURLSet = new HashSet<>();
         jarSet = new HashSet<>();
         extensionsArtifacts = new HashMap<>();
         extensions = new HashSet<>();
@@ -262,6 +266,7 @@ public final class ExtensionLoader {
         if (processor.hasWaitingTasks())
             return;
 
+        jarURLSet.clear();
         jarSet.clear();
         extensionsArtifacts.clear();
         extensions.clear();
@@ -271,6 +276,15 @@ public final class ExtensionLoader {
 
         final Map<String, Artifact> artifacts = getExtensionsArtifacts();
         IcyLogger.debug(this.getClass(), "Loading " + artifacts.size() + " artifacts from local repository");
+
+        if (jarURLSet.isEmpty()) {
+            loading = false;
+            changed();
+            return;
+        }
+
+        ucl = new URLClassLoader(jarURLSet.toArray(URL[]::new), SystemUtil.getSystemClassLoader());
+
         for (final Artifact artifact : artifacts.values()) {
             IcyLogger.debug(this.getClass(), "Found artifact " + artifact);
             loadArtifact(artifact);
@@ -342,7 +356,9 @@ public final class ExtensionLoader {
                     return false;
             }
 
-            artifacts.put(groupId + ":" + artifactId + ":jar:" + version, artifactResult.getArtifact());
+            final Artifact a = artifactResult.getArtifact();
+            artifacts.put(groupId + ":" + artifactId + ":jar:" + version, a);
+            jarURLSet.add(a.getFile().toURI().toURL());
             return true;
         }
         catch (final Error | Exception e) {
@@ -363,13 +379,13 @@ public final class ExtensionLoader {
         }
 
         try {
-            ucl = new URLClassLoader(
+            /*ucl = new URLClassLoader(
                     Stream.concat(
                             Arrays.stream(ucl.getURLs()),
                             Stream.of(jar.toURI().toURL())
                     ).toArray(URL[]::new),
                     ucl.getParent()
-            );
+            );*/
 
             if (isIcyExtension(artifact)) {
                 final Set<ExtensionDescriptor> eds = new HashSet<>();
