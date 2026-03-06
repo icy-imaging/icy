@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -77,9 +77,12 @@ import java.util.*;
 import java.util.List;
 
 /**
- * Entry point for Icy.
+ * The Icy class serves as the central entry point for the application. It includes various
+ * methods and fields responsible for initializing, managing, and interacting with the components
+ * of the application. This class also provides functionalities for handling application restart,
+ * command-line arguments, plugin interactions, and native library operations.
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class Icy {
@@ -89,7 +92,7 @@ public final class Icy {
     /**
      * Icy Version
      */
-    public static final Version VERSION = new Version(3, 0, 0, Version.DevelopmentStage.ALPHA, 6);
+    public static final Version VERSION = new Version(3, 0, 0, Version.DevelopmentStage.ALPHA, 7, true);
 
     /**
      * Main interface

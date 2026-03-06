@@ -1,5 +1,5 @@
 <!-- badges: start -->
-![Version 3.0.0 alpha 6](https://img.shields.io/badge/v3.0.0-alpha_6-royalblue)
+![Version 3.0.0 alpha 7](https://img.shields.io/badge/v3.0.0-alpha_7-royalblue)
 ![Java 17+](https://img.shields.io/badge/OpenJDK-17+-5382A1?labelColor=E76F00)
 [![License: LGPL v3](https://img.shields.io/badge/LGPLv3-008033?logo=GPLv3&logoSize=auto)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/Icy_BioImaging)](https://x.com/Icy_BioImaging)

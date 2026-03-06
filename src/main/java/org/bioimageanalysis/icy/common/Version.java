@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,15 +24,27 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
- * Version class.<br>
- * This class is used to describe a version number encoded on 3 digits.<br>
+ * Represents a semantic versioning object consisting of major, minor, patch numbers,
+ * development stage, revision, and snapshot state.
+ * <p>
+ * The {@code Version} class implements the {@code Comparable} interface to allow
+ * comparison between different version instances.
+ * <p>
+ * Instances of this class are immutable and thread-safe.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class Version implements Comparable<Version> {
+    /**
+     * Represents a stage in the development lifecycle of a software version.
+     * The stages include predefined phases such as RELEASE, ALPHA, BETA,
+     * and RELEASE_CANDIDATE, each of which may include a short and long label
+     * for identification purposes.
+     */
     public enum DevelopmentStage {
         RELEASE,
         ALPHA("a", "alpha"),
@@ -74,36 +86,155 @@ public final class Version implements Comparable<Version> {
     private final int minor;
     private final int patch;
     private final int revision;
+    private final boolean isSnapshot;
 
     private final @NotNull Version.DevelopmentStage developmentStage;
 
+    /**
+     * Constructs a new {@link Version} object using default values.
+     * <p>
+     * Creates a {@link Version} instance with the following default configurations:
+     * <ul>
+     *  <li>Major number set to 0.</li>
+     *  <li>Minor number set to 0.</li>
+     *  <li>Patch number set to 0.</li>
+     *  <li>Development stage set to {@link DevelopmentStage#RELEASE}.</li>
+     *  <li>Revision number set to 0.</li>
+     *  <li>Snapshot status set to {@code false}.</li>
+     * </ul>
+     */
     @Contract(pure = true)
     public Version() {
-        this(0, 0, 0, DevelopmentStage.RELEASE, 0);
+        this(0, 0, 0, DevelopmentStage.RELEASE, 0, false);
     }
 
+    /**
+     * Constructs a new {@link Version} object with the specified major version number.
+     * <p>
+     * Other version details will be initialized with the following default values:
+     * <ul>
+     *  <li>Minor number set to 0.</li>
+     *  <li>Patch number set to 0.</li>
+     *  <li>Development stage set to {@link DevelopmentStage#RELEASE}.</li>
+     *  <li>Revision number set to 0.</li>
+     *  <li>Snapshot status set to {@code false}.</li>
+     * </ul>
+     *
+     * @param major the major version number.
+     */
     @Contract(pure = true)
     public Version(final int major) {
-        this(major, 0, 0, DevelopmentStage.RELEASE, 0);
+        this(major, 0, 0, DevelopmentStage.RELEASE, 0, false);
     }
 
+    /**
+     * Constructs a new {@link Version} object with the specified major and minor version numbers.
+     * <p>
+     * Other version details will be initialized with the following default values:
+     * <ul>
+     *  <li>Patch number set to 0.</li>
+     *  <li>Development stage set to {@link DevelopmentStage#RELEASE}.</li>
+     *  <li>Revision number set to 0.</li>
+     *  <li>Snapshot status set to {@code false}.</li>
+     * </ul>
+     *
+     * @param major the major version number.
+     * @param minor the minor version number.
+     */
     @Contract(pure = true)
     public Version(final int major, final int minor) {
-        this(major, minor, 0, DevelopmentStage.RELEASE, 0);
+        this(major, minor, 0, DevelopmentStage.RELEASE, 0, false);
     }
 
+    /**
+     * Constructs a new {@link Version} object with the specified major, minor, and patch version numbers.
+     * <p>
+     * Other version details will be initialized with the following default values:
+     * <ul>
+     *  <li>Development stage set to {@link DevelopmentStage#RELEASE}.</li>
+     *  <li>Revision number set to 0.</li>
+     *  <li>Snapshot status set to {@code false}.</li>
+     * </ul>
+     *
+     * @param major the major version number.
+     * @param minor the minor version number.
+     * @param patch the patch version number.
+     */
     @Contract(pure = true)
     public Version(final int major, final int minor, final int patch) {
-        this(major, minor, patch, DevelopmentStage.RELEASE, 0);
+        this(major, minor, patch, DevelopmentStage.RELEASE, 0, false);
     }
 
+    /**
+     * Constructs a new {@link Version} object with the specified major, minor, patch version numbers and whether it is a snapshot version.
+     * <p>
+     * Other version details will be initialized with the following default values:
+     * <ul>
+     *  <li>Development stage set to {@link DevelopmentStage#RELEASE}.</li>
+     *  <li>Revision number set to 0.</li>
+     * </ul>
+     *
+     * @param major      the major version number.
+     * @param minor      the minor version number.
+     * @param patch      the patch version number.
+     * @param isSnapshot a boolean indicating whether this version is a snapshot.
+     */
+    @Contract(pure = true)
+    public Version(final int major, final int minor, final int patch, final boolean isSnapshot) {
+        this(major, minor, patch, DevelopmentStage.RELEASE, 0, isSnapshot);
+    }
+
+    /**
+     * Constructs a new {@link Version} object with the specified major, minor, patch version numbers and {@link DevelopmentStage}.
+     * <p>
+     * Other version details will be initialized with the following default values:
+     * <ul>
+     *  <li>Revision number set to 0.</li>
+     *  <li>Snapshot status set to {@code false}.</li>
+     * </ul>
+     *
+     * @param major            the major version number.
+     * @param minor            the minor version number.
+     * @param patch            the patch version number.
+     * @param developmentStage the development stage of the version, must not be {@code null}.
+     */
     @Contract(pure = true)
     public Version(final int major, final int minor, final int patch, final @NotNull DevelopmentStage developmentStage) {
-        this(major, minor, patch, developmentStage, 0);
+        this(major, minor, patch, developmentStage, 0, false);
     }
 
+    /**
+     * Constructs a new {@link Version} object with the specified major, minor, patch, revision version numbers and {@link DevelopmentStage}.
+     * <p>
+     * Other version details will be initialized with the following default values:
+     * <ul>
+     *  <li>Revision number set to 0.</li>
+     *  <li>Snapshot status set to {@code false}.</li>
+     * </ul>
+     *
+     * @param major            the major version number.
+     * @param minor            the minor version number.
+     * @param patch            the patch version number.
+     * @param developmentStage the development stage of the version, must not be {@code null}.
+     * @param revision         the revision number associated with the development stage.
+     */
     @Contract(pure = true)
-    public Version(final int major, final int minor, final int patch, final @NotNull Version.DevelopmentStage developmentStage, final int revision) {
+    public Version(final int major, final int minor, final int patch, final @NotNull DevelopmentStage developmentStage, final int revision) {
+        this(major, minor, patch, developmentStage, revision, false);
+    }
+
+    /**
+     * Constructs a new {@link Version} object with the specified version details.
+     *
+     * @param major            the major version number.
+     * @param minor            the minor version number.
+     * @param patch            the patch version number.
+     * @param developmentStage the development stage of the version, must not be {@code null}.
+     * @param revision         the revision number associated with the development stage.
+     * @param isSnapshot       a boolean indicating whether this version is a snapshot.
+     */
+    @Contract(pure = true)
+    public Version(final int major, final int minor, final int patch, final @NotNull Version.DevelopmentStage developmentStage, final int revision, final boolean isSnapshot) {
         super();
 
         this.major = major;
@@ -111,23 +242,49 @@ public final class Version implements Comparable<Version> {
         this.patch = patch;
         this.developmentStage = developmentStage;
         this.revision = revision;
+        this.isSnapshot = isSnapshot;
     }
 
     /**
-     * Return a new Version from a String with this format: 1.2.3-a.5 (major: 1, minor: 2, patch: 3, development stage: alpha, revision: 5), it's like 1.2.3.5 alpha.<br>
-     * There are 4 different development stages :
-     * <ul>
-     *     <li>Release (x.x.x)</li>
-     *     <li>Alpha (x.x.x-a.x)</li>
-     *     <li>Beta (x.x.x-b.x)</li>
-     *     <li>Release candidate (x.x.x-rc.x)</li>
-     * </ul>
+     * Parses a version string and constructs a {@link Version} object from it.
+     * <p>
+     * The input string is analyzed to extract the major, minor, and patch versions,
+     * along with additional metadata, such as whether the version is a snapshot
+     * and the associated development stage (e.g., {@link DevelopmentStage#ALPHA}, {@link DevelopmentStage#BETA},
+     * {@link DevelopmentStage#RELEASE_CANDIDATE}, or {@link DevelopmentStage#RELEASE}).
+     * <p>
+     * The version string is expected to follow a certain format, with optional
+     * labels to specify the development stage. A "-SNAPSHOT" suffix will be
+     * used to indicate whether the version is a snapshot version.
+     *
+     * @param version the version string to be parsed, must not be {@code null}.
+     *                It should follow the format: "{major}.{minor}.{patch}-{stage}-{revision}".
+     *                Stages may include {@link DevelopmentStage#ALPHA}, {@link DevelopmentStage#BETA},
+     *                {@link DevelopmentStage#RELEASE_CANDIDATE}, or {@link DevelopmentStage#RELEASE}.
+     *                A "-SNAPSHOT" suffix indicates a snapshot version.
+     * @return a {@link Version} object representing the parsed version string. The object
+     * includes information about the major, minor, and patch versions, the development
+     * stage, the stage revision, and whether it is a snapshot.
+     * @throws NumberFormatException if the numeric values in the version string cannot
+     *                               be correctly parsed.
+     * @throws NullPointerException  if the {@code version} parameter is {@code null}.
      */
     @Contract("_ -> new")
-    public static @NotNull Version fromString(final @NotNull String version) {
-        final String lower = version.toLowerCase(Locale.getDefault()).replaceAll("[0-9 .\\-_]", "");
+    public static @NotNull Version fromString(final @NotNull String version) throws NumberFormatException, NullPointerException {
+        final boolean isSnapshot;
+        final String s;
+        if (version.endsWith("-SNAPSHOT")) {
+            isSnapshot = true;
+            s = version.substring(0, version.length() - "-SNAPSHOT".length());
+        }
+        else {
+            s = version;
+            isSnapshot = false;
+        }
+        final String lower = s.toLowerCase(Locale.getDefault()).replaceAll("[0-9 .\\-_]", "");
 
         final DevelopmentStage developmentStage;
+        // Determines development stage by normalized label matching
         if (lower.equals(DevelopmentStage.RELEASE_CANDIDATE.getShortLabel()) || lower.equals(DevelopmentStage.RELEASE_CANDIDATE.getLongLabel()))
             developmentStage = DevelopmentStage.RELEASE_CANDIDATE;
         else if (lower.equals(DevelopmentStage.BETA.getShortLabel()) || lower.equals(DevelopmentStage.BETA.getLongLabel()))
@@ -137,7 +294,7 @@ public final class Version implements Comparable<Version> {
         else
             developmentStage = DevelopmentStage.RELEASE;
 
-        final String[] values = version.replaceAll("[a-zA-Z \\-]", "").split("\\.");
+        final String[] values = s.replaceAll("[a-zA-Z \\-]", "").split("\\.");
 
         int major = 0;
         if ((values.length > 0) && (!StringUtil.isEmpty(values[0], true)))
@@ -155,52 +312,127 @@ public final class Version implements Comparable<Version> {
         if ((values.length > 3) && (!StringUtil.isEmpty(values[3], true)))
             stage = Integer.parseInt(values[3]);
 
-        return new Version(major, minor, patch, developmentStage, stage);
+        return new Version(major, minor, patch, developmentStage, stage, isSnapshot);
     }
 
+    /**
+     * Retrieves the major version number.
+     *
+     * @return the major version as an integer.
+     */
     @Contract(pure = true)
     public int getMajor() {
         return major;
     }
 
+    /**
+     * Retrieves the minor version number.
+     *
+     * @return the minor version as an integer.
+     */
     @Contract(pure = true)
     public int getMinor() {
         return minor;
     }
 
+    /**
+     * Retrieves the patch version number.
+     *
+     * @return the patch version as an integer.
+     */
     @Contract(pure = true)
     public int getPatch() {
         return patch;
     }
 
-    @Contract(pure = true)
-    public boolean isNotRelease() {
-        return developmentStage != DevelopmentStage.RELEASE;
-    }
-
-    @Contract(pure = true)
-    public boolean isRelease() {
-        return developmentStage == DevelopmentStage.RELEASE;
-    }
-
+    /**
+     * Retrieves the patch version number.
+     *
+     * @return the patch version as an integer.
+     */
     @Contract(pure = true)
     public @NotNull Version.DevelopmentStage getDevelopmentStage() {
         return developmentStage;
     }
 
+    /**
+     * Retrieves the revision version number.
+     *
+     * @return the revision version as an integer.
+     */
     @Contract(pure = true)
     public int getRevision() {
         return revision;
     }
 
     /**
-     * @return True if equals '0.0.0' and not a snapshot.
+     * Checks whether the current state is a snapshot.
+     *
+     * @return {@code true} if the current state represents a snapshot, {@code false} otherwise.
+     */
+    @Contract(pure = true)
+    public boolean isSnapshot() {
+        return isSnapshot;
+    }
+
+    /**
+     * Determines if the current version is not a release version.
+     * <p>
+     * The method checks whether the current state is either a snapshot
+     * or a development stage other than {@link DevelopmentStage#RELEASE}.
+     *
+     * @return {@code true} if the current version is a snapshot or not in the {@link DevelopmentStage#RELEASE} stage; {@code false} otherwise.
+     */
+    @Contract(pure = true)
+    public boolean isNotRelease() {
+        if (isSnapshot)
+            return true;
+
+        return developmentStage != DevelopmentStage.RELEASE;
+    }
+
+    /**
+     * Determines if the current version is a release version.
+     * <p>
+     * The method checks whether the current state is either a snapshot
+     * or a development stage other than {@link DevelopmentStage#RELEASE}.
+     *
+     * @return {@code true} if the current version is not a snapshot and in the {@link DevelopmentStage#RELEASE} stage; {@code false} otherwise.
+     */
+    @Contract(pure = true)
+    public boolean isRelease() {
+        if (isSnapshot)
+            return false;
+
+        return developmentStage == DevelopmentStage.RELEASE;
+    }
+
+    /**
+     * Checks if the current version object represents an empty version.
+     * <p>
+     * An empty version is defined as having all version components set to
+     * their default values:
+     * <ul>
+     *  <li>major, minor, patch, and revision are all 0.</li>
+     *  <li>the development stage is set to RELEASE.</li>
+     *  <li>snapshot flag is false.</li>
+     * </ul>
+     *
+     * @return {@code true} if the version is empty, {@code false} otherwise.
      */
     @Contract(pure = true)
     public boolean isEmpty() {
-        return (major == 0) && (minor == 0) && (patch == 0) && (developmentStage == DevelopmentStage.RELEASE);
+        return (major == 0) && (minor == 0) && (patch == 0) && (developmentStage == DevelopmentStage.RELEASE) && (revision == 0) && (!isSnapshot);
     }
 
+    /**
+     * Converts the version information of the object into a concise string representation.
+     * The format includes the major, minor, and patch version numbers, and optionally,
+     * additional details such as development stage, revision, and snapshot status,
+     * if applicable.
+     *
+     * @return a non-null string representing the version in a shortened format.
+     */
     public @NotNull String toShortString() {
         if (isEmpty())
             return "0";
@@ -212,15 +444,28 @@ public final class Version implements Comparable<Version> {
                 patch
         );
 
+        // Appends development qualifiers to non-release version string
         if (isNotRelease()) {
             version += String.format("-%s", developmentStage.getShortLabel());
             if (revision > 0)
                 version += String.format(".%d", revision);
+
+            if (isSnapshot)
+                version += "-SNAPSHOT";
         }
 
         return version;
     }
 
+    /**
+     * Converts the version information into a formatted string representation.
+     * The string will include the major, minor, and patch numbers.
+     * If the version is not a release version, additional indicators such as
+     * the development stage, revision number, and "SNAPSHOT" will be appended
+     * to the string.
+     *
+     * @return A non-null string representation of the version.
+     */
     @Override
     public @NotNull String toString() {
         if (isEmpty())
@@ -233,15 +478,26 @@ public final class Version implements Comparable<Version> {
                 patch
         );
 
+        // Appends development qualifiers to version string
         if (isNotRelease()) {
             version += String.format(" %s", developmentStage.getLongLabel());
             if (revision > 0)
                 version += String.format(" %d", revision);
+
+            if (isSnapshot)
+                version += " SNAPSHOT";
         }
 
         return version;
     }
 
+    /**
+     * Compares this object with the specified object for equality.
+     *
+     * @param obj the object to be compared for equality with this object. Can be null.
+     * @return {@code true} if the specified object is equal to this object,
+     *         otherwise {@code false}.
+     */
     @Contract(value = "null -> false", pure = true)
     @Override
     public boolean equals(final @Nullable Object obj) {
@@ -251,19 +507,25 @@ public final class Version implements Comparable<Version> {
         return super.equals(obj);
     }
 
+    /**
+     * Computes a hash code for the object based on its fields.
+     *
+     * @return the hash code value for this object.
+     */
     @Contract(pure = true)
     @Override
     public int hashCode() {
-        // assume 8 bits for each number (0-255 range)
-        return (major/* << 0*/) | (minor << 8) | (patch << 16) | (developmentStage.ordinal() << 24);
+        return Objects.hash(major, minor, patch, developmentStage.ordinal(), revision, (isSnapshot ? 1 : 0));
     }
 
     /**
-     * Compares this version with the specified version for order.
-     * Returns a negative integer, zero, or a positive integer as this version is less than, equal to, or greater than the specified version.
+     * Compares this version object with the specified version for order.
+     * The comparison is based on the following hierarchical order:
+     * major, minor, patch, development stage, revision, and snapshot status.
      *
-     * @param version the object to be compared.
-     * @return negative if lower, zero if equal or positive if greater.
+     * @param version the version object to be compared with the current instance. Must not be null.
+     * @return a negative integer, zero, or a positive integer as this version
+     *         is less than, equal to, or greater than the specified version.
      */
     @Override
     public int compareTo(final @NotNull Version version) {
@@ -289,25 +551,60 @@ public final class Version implements Comparable<Version> {
             return 1;
         else if (version.revision > revision)
             return -1;
-        else
-            return 0;
+        else if (version.isSnapshot && !isSnapshot)
+            return 1;
+        else if (!version.isSnapshot && isSnapshot)
+            return -1;
+        return 0;
     }
 
+    /**
+     * Compares the current object with the specified version and determines
+     * if the current object is greater.
+     *
+     * @param version the version to compare with. Must not be null.
+     * @return {@code true} if the current object is greater than the specified version,
+     *         {@code false} otherwise.
+     */
     @Contract(pure = true)
     public boolean isGreater(final @NotNull Version version) {
         return compareTo(version) > 0;
     }
 
+    /**
+     * Compares the current object with the specified version and determines
+     * if the current object is greater or equal.
+     *
+     * @param version the version to compare with. Must not be null.
+     * @return {@code true} if the current object is greater or equal than the specified version,
+     *         {@code false} otherwise.
+     */
     @Contract(pure = true)
     public boolean isGreaterOrEqual(final @NotNull Version version) {
         return compareTo(version) >= 0;
     }
 
+    /**
+     * Compares the current object with the specified version and determines
+     * if the current object is lower.
+     *
+     * @param version the version to compare with. Must not be null.
+     * @return {@code true} if the current object is lower than the specified version,
+     *         {@code false} otherwise.
+     */
     @Contract(pure = true)
     public boolean isLower(final @NotNull Version version) {
         return compareTo(version) < 0;
     }
 
+    /**
+     * Compares the current object with the specified version and determines
+     * if the current object is lower or equal.
+     *
+     * @param version the version to compare with. Must not be null.
+     * @return {@code true} if the current object is lower or equal than the specified version,
+     *         {@code false} otherwise.
+     */
     @Contract(pure = true)
     public boolean isLowerOrEqual(final @NotNull Version version) {
         return compareTo(version) <= 0;

@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>icy-kernel</artifactId>
-    <version>3.0.0-a.6</version>
+    <version>3.0.0-a.7-SNAPSHOT</version>
 
     <name>Icy</name>
     <description>Icy is an open community platform for bioimage informatics</description>
