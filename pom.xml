@@ -6,11 +6,11 @@
 
     <parent>
         <artifactId>pom-icy</artifactId>
-        <groupId>org.bioimageanalysis.icy</groupId>
-        <version>3.0.0-a.6</version>
+        <groupId>fr.icy</groupId>
+        <version>3.0.0-a.7</version>
     </parent>
 
-    <artifactId>icy-kernel</artifactId>
+    <artifactId>icy</artifactId>
     <version>3.0.0-a.7-SNAPSHOT</version>
 
     <name>Icy</name>
@@ -87,6 +87,23 @@
         <defaultGoal>clean install</defaultGoal>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>icy-enforcer</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <validateVersion implementation="fr.icy.maven.plugin.enforcer.ValidateVersion"/>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -256,10 +273,10 @@
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-script</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-shared-resources</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-svg-dom</artifactId>
@@ -334,10 +351,10 @@
             <groupId>org.openmicroscopy</groupId>
             <artifactId>specification</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>ome</groupId>
             <artifactId>turbojpeg</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- EhCache -->
         <dependency>
