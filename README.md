@@ -8,7 +8,7 @@
 
 # Icy, bioimage analysis software
 
-This is the **repository for the source code of the Icy kernel**, which was developed and is maintained by the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/).
+This is the repository for the source code of **Icy**, a biological image analysis software, which was developed and is maintained by the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/).
 <br>
 Icy is free and open source (**LGPL3 license**).
 <br>

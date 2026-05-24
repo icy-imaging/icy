@@ -1,10 +1,87 @@
-image: registry-gitlab.pasteur.fr/bia/icy/icy:3.0.0-a.5
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: always
+    - when: never
+
+variables:
+  # Speed up Maven by using local repo within project and optimizing JVM
+  MAVEN_OPTS: >-
+    -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+    -Dorg.slf4j.simpleLogger.showDateTime=true
+    -Djava.awt.headless=true
+  MAVEN_CLI_OPTS: >-
+    --batch-mode
+    --errors
+    --fail-at-end
+    --show-version
+    --also-make-dependents
+    -DinstallAtEnd=true
+    -DdeployAtEnd=true
+
+# Cache Maven repository between jobs and pipelines
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .m2/repository
+    - target/
+
+stages:
+  - build
+  - deploy
+
+# Template for DRY configuration
+.maven_base:
+  image: maven:3.9.14-eclipse-temurin-25-noble
+  before_script:
+    - mvn --version
+
+compile:
+  extends: .maven_base
+  stage: build
+  script:
+    - mvn $MAVEN_CLI_OPTS compile
+  only:
+    changes:
+      - pom.xml
+
+# Deploy snapshots to internal Maven repo (Nexus/Artifactory)
+deploy_snapshot:
+  extends: .maven_base
+  stage: deploy
+  before_script:
+    - echo "Checking SNAPSHOT presence…"
+    - export JAR_VERSION=$(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
+    - if ! [[ $JAR_VERSION =~ .*SNAPSHOT ]]; then >&2 echo "Unable to deploy snapshot, the project is not a SNAPSHOT"; exit 0; fi # Should not happen
+  script:
+    - echo "Deploying snapshot…"
+  #    - mvn $MAVEN_CLI_OPTS deploy -s .m2/settings.xml -DskipTests
+  rules:
+    - if: $CI_COMMIT_TAG !~ /^v(\d+\.\d+\.\d+)(-(a|b|rc)(.\d+)?)?$/
+
+# Deploy releases only on tags
+deploy_release:
+  extends: .maven_base
+  stage: deploy
+  before_script:
+    - echo "Checking SNAPSHOT presence…"
+    - export JAR_VERSION=$(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
+    - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; then echo "Unable to deploy release, the project is a SNAPSHOT"; exit 0; fi # Should not happen
+  script:
+    - echo "Deploying release…"
+  #    - mvn $MAVEN_CLI_OPTS deploy -s .m2/settings.xml -DskipTests
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v(\d+\.\d+\.\d+)(-(a|b|rc)(.\d+)?)?$/
+  when: manual  # Require button click for releases
+
+###########################
+
+image: registry-gitlab.pasteur.fr/bia/icy/gitlab-ci:v1.0.0
 
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE != "push"
       when: never
-    - if: $CI_COMMIT_BRANCH == "icy-3.0.0"
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -14,6 +91,7 @@ stages:
   - build
   - package
   - test
+  - release
   #- deploy-dev
   #- deploy-release
   #- package-software
@@ -51,13 +129,26 @@ test-job:
   dependencies:
     - package-job
   script:
-    - echo "Checking files"
-    - mvn clean verify
+    - echo "Executing tests"
+    - mvn clean test
   artifacts:
     when: on_success
     expire_in: 1 hour
     paths:
       - build/
+
+release-job:
+  stage: release
+  dependencies:
+    - test-job
+  script:
+    - echo "Create release"
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v(\d+\.\d+\.\d+)(-(a|b|rc)(.\d+)?)?$/
+      when: on_success
+  release:
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG_MESSAGE'
 
 #deploy-dev-job:
 #  stage: deploy-dev

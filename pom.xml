@@ -10,6 +10,7 @@
         <version>3.0.0-a.7</version>
     </parent>
 
+    <groupId>fr.icy</groupId>
     <artifactId>icy</artifactId>
     <version>3.0.0-a.7-SNAPSHOT</version>
 
@@ -80,33 +81,35 @@
     <properties>
         <license.licenseName>GNU LGPLv3</license.licenseName>
         <license.copyrightOwners>Institut Pasteur</license.copyrightOwners>
+
+        <maven-resolver.version>1.9.27</maven-resolver.version>
+        <maven-resolver-impl.version>${maven-resolver.version}</maven-resolver-impl.version>
+        <maven-resolver-supplier.version>${maven-resolver.version}</maven-resolver-supplier.version>
+        <maven-resolver-connector-basic.version>${maven-resolver.version}</maven-resolver-connector-basic.version>
+        <maven-resolver-transport-http.version>${maven-resolver.version}</maven-resolver-transport-http.version>
+        <org.apache.maven.resolver.maven-resolver-impl.version>${maven-resolver-impl.version}</org.apache.maven.resolver.maven-resolver-impl.version>
+        <org.apache.maven.resolver.maven-resolver-supplier.version>${maven-resolver.version}</org.apache.maven.resolver.maven-resolver-supplier.version>
+        <org.apache.maven.resolver.maven-resolver-connector-basic.version>${maven-resolver.version}</org.apache.maven.resolver.maven-resolver-connector-basic.version>
+        <org.apache.maven.resolver.maven-resolver-transport-http.version>${maven-resolver.version}</org.apache.maven.resolver.maven-resolver-transport-http.version>
+
+        <maven-model-builder.version>3.9.16</maven-model-builder.version>
+        <org.apache.maven.maven-model-builder.version>${maven-model-builder.version}</org.apache.maven.maven-model-builder.version>
+
+        <plexus-utils.version>3.6.1</plexus-utils.version>
+        <org.codehaus.plexus.plexus-utils.version>${plexus-utils.version}</org.codehaus.plexus.plexus-utils.version>
+
+        <plexus-interpolation.version>1.29</plexus-interpolation.version>
+        <org.codehaus.plexusplexus-interpolation.version>${plexus-interpolation.version}</org.codehaus.plexusplexus-interpolation.version>
     </properties>
 
     <build>
         <directory>build</directory>
-        <defaultGoal>clean install</defaultGoal>
 
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>icy-enforcer</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <validateVersion implementation="fr.icy.maven.plugin.enforcer.ValidateVersion"/>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build-helper-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>add-resource</id>
@@ -135,8 +138,8 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven-dependency-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -155,7 +158,6 @@
                             <excludeScope>provided</excludeScope>
                         </configuration>
                     </execution>
-
                     <execution>
                         <id>copy-icy-jar</id>
                         <phase>package</phase>
@@ -179,8 +181,8 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
                 <configuration>
                     <excludes>
                         <exclude>doc/doc-files</exclude>
@@ -189,10 +191,10 @@
                         <manifest>
                             <classpathLayoutType>custom</classpathLayoutType>
                             <!--suppress UnresolvedMavenProperty -->
-                            <customClasspathLayout>$${artifact.groupId}.$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
+                            <customClasspathLayout>$${artifact.groupId}.$${artifact.artifactId}$${artifact.dashClassifier?}.$${artifact.extension}</customClasspathLayout>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.bioimageanalysis.icy.Icy</mainClass>
+                            <mainClass>fr.icy.Icy</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Multi-Release>true</Multi-Release>
@@ -200,19 +202,6 @@
                         <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <failOnError>false</failOnError>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -222,10 +211,12 @@
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-anim</artifactId>
+            <version>${org.apache.xmlgraphics.batik-anim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-awt-util</artifactId>
+            <version>${org.apache.xmlgraphics.batik-awt-util.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -236,98 +227,96 @@
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-bridge</artifactId>
+            <version>${org.apache.xmlgraphics.batik-bridge.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-css</artifactId>
+            <version>${org.apache.xmlgraphics.batik-css.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-codec</artifactId>
+            <version>${org.apache.xmlgraphics.batik-codec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-constants</artifactId>
+            <version>${org.apache.xmlgraphics.batik-constants.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-dom</artifactId>
+            <version>${org.apache.xmlgraphics.batik-dom.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-ext</artifactId>
+            <version>${org.apache.xmlgraphics.batik-ext.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-gvt</artifactId>
+            <version>${org.apache.xmlgraphics.batik-gvt.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-i18n</artifactId>
+            <version>${org.apache.xmlgraphics.batik-i18n.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-parser</artifactId>
+            <version>${org.apache.xmlgraphics.batik-parser.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-script</artifactId>
+            <version>${org.apache.xmlgraphics.batik-script.version}</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-shared-resources</artifactId>
-        </dependency>-->
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-svg-dom</artifactId>
+            <version>${org.apache.xmlgraphics.batik-svg-dom.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-svggen</artifactId>
+            <version>${org.apache.xmlgraphics.batik-svggen.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-transcoder</artifactId>
+            <version>${org.apache.xmlgraphics.batik-transcoder.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-util</artifactId>
+            <version>${org.apache.xmlgraphics.batik-util.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-xml</artifactId>
+            <version>${org.apache.xmlgraphics.batik-xml.version}</version>
         </dependency>
 
         <!-- Apache POI -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
+            <version>${org.apache.poi.poi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
+            <version>${org.apache.poi.poi-ooxml.version}</version>
         </dependency>
 
         <!-- BioFormats -->
         <dependency>
             <groupId>ome</groupId>
             <artifactId>bio-formats_plugins</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>bio-formats-tools</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>formats-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>formats-bsd</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>formats-gpl</artifactId>
+            <version>${ome.bio-formats_plugins.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -336,20 +325,50 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>ome</groupId>
+            <artifactId>bio-formats-tools</artifactId>
+            <version>${ome.bio-formats-tools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ome</groupId>
+            <artifactId>formats-api</artifactId>
+            <version>${ome.formats-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ome</groupId>
+            <artifactId>formats-bsd</artifactId>
+            <version>${ome.formats-bsd.version}</version>
+        </dependency>
+        <!--<dependency>
+            <groupId>ome</groupId>
+            <artifactId>formats-gpl</artifactId>
+            <version>${ome.formats-gpl.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>-->
+        <dependency>
             <groupId>org.openmicroscopy</groupId>
             <artifactId>ome-codecs</artifactId>
+            <version>${org.openmicroscopy.ome-codecs.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmicroscopy</groupId>
             <artifactId>ome-common</artifactId>
+            <version>${org.openmicroscopy.ome-common.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmicroscopy</groupId>
             <artifactId>ome-xml</artifactId>
+            <version>${org.openmicroscopy.ome-xml.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmicroscopy</groupId>
             <artifactId>specification</artifactId>
+            <version>${org.openmicroscopy.specification.version}</version>
         </dependency>
         <!--<dependency>
             <groupId>ome</groupId>
@@ -360,95 +379,112 @@
         <dependency>
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
-        </dependency>
-
-        <!-- EJML -->
-        <dependency>
-            <groupId>org.ejml</groupId>
-            <artifactId>ejml-all</artifactId>
+            <version>${org.ehcache.ehcache.version}</version>
         </dependency>
 
         <!-- FlatLaf -->
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
+            <version>${com.formdev.flatlaf.version}</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
+            <version>${com.formdev.flatlaf.version}</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-swingx</artifactId>
+            <version>${com.formdev.flatlaf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-fonts-jetbrains-mono</artifactId>
+            <version>${com.formdev.flatlaf-fonts-jetbrains-mono.version}</version>
         </dependency>
 
         <!-- ImgLib2 -->
         <dependency>
             <groupId>net.imglib2</groupId>
             <artifactId>imglib2</artifactId>
+            <version>${net.imglib2.imglib2.version}</version>
         </dependency>
         <dependency>
             <groupId>net.imglib2</groupId>
             <artifactId>imglib2-algorithm</artifactId>
+            <version>${net.imglib2.imglib2-algorithm.version}</version>
         </dependency>
         <dependency>
             <groupId>net.imglib2</groupId>
             <artifactId>imglib2-realtransform</artifactId>
+            <version>${net.imglib2.imglib2-realtransform.version}</version>
         </dependency>
 
         <!-- JAI -->
         <dependency>
             <groupId>javax.media</groupId>
             <artifactId>jai-core</artifactId>
+            <version>${javax.media.jai-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.media</groupId>
             <artifactId>jai-codec</artifactId>
+            <version>${com.sun.media.jai-codec.version}</version>
         </dependency>
 
         <!-- Jansi -->
         <dependency>
             <groupId>org.fusesource.jansi</groupId>
             <artifactId>jansi</artifactId>
+            <version>${org.fusesource.jansi.version}</version>
         </dependency>
 
         <!-- Jogamp -->
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all</artifactId>
+            <version>${org.jogamp.jogl.jogl-all.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all</artifactId>
+            <version>${org.jogamp.jogl.jogl-all.version}</version>
             <classifier>natives-linux-amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all</artifactId>
+            <version>${org.jogamp.jogl.jogl-all.version}</version>
             <classifier>natives-macosx-universal</classifier>
         </dependency>
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all</artifactId>
+            <version>${org.jogamp.jogl.jogl-all.version}</version>
             <classifier>natives-windows-amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
+            <version>${org.jogamp.gluegen.gluegen-rt.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
+            <version>${org.jogamp.gluegen.gluegen-rt.version}</version>
             <classifier>natives-linux-amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
+            <version>${org.jogamp.gluegen.gluegen-rt.version}</version>
             <classifier>natives-macosx-universal</classifier>
         </dependency>
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt</artifactId>
+            <version>${org.jogamp.gluegen.gluegen-rt.version}</version>
             <classifier>natives-windows-amd64</classifier>
         </dependency>
 
@@ -456,122 +492,93 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <version>${org.apache.logging.log4j.log4j-core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
+            <version>${org.apache.logging.log4j.log4j-api.version}</version>
         </dependency>
 
         <!-- Maven Resolver -->
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-impl</artifactId>
-            <version>1.9.24</version>
+            <version>${org.apache.maven.resolver.maven-resolver-impl.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-supplier</artifactId>
-            <version>1.9.24</version>
+            <version>${org.apache.maven.resolver.maven-resolver-supplier.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-connector-basic</artifactId>
-            <version>1.9.24</version>
+            <version>${org.apache.maven.resolver.maven-resolver-connector-basic.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-transport-http</artifactId>
-            <version>1.9.24</version>
+            <version>${org.apache.maven.resolver.maven-resolver-transport-http.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-model-builder</artifactId>
-            <version>3.9.6</version>
+            <version>${org.apache.maven.maven-model-builder.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>3.5.1</version>
+            <version>${org.codehaus.plexus.plexus-utils.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-interpolation</artifactId>
-            <version>1.26</version>
+            <version>${org.codehaus.plexusplexus-interpolation.version}</version>
         </dependency>
 
         <!-- SnakeYAML -->
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
+            <version>${org.yaml.snakeyaml.version}</version>
         </dependency>
 
         <!-- SwingX -->
         <dependency>
             <groupId>org.swinglabs.swingx</groupId>
             <artifactId>swingx-all</artifactId>
+            <version>${org.swinglabs.swingx.swingx-all.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fr.icy.lib</groupId>
+            <artifactId>vtk</artifactId>
+            <version>${fr.icy.lib.vtk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.icy.lib</groupId>
+            <artifactId>vtk</artifactId>
+            <version>${fr.icy.lib.vtk.version}</version>
+            <classifier>natives-linux-amd64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>fr.icy.lib</groupId>
+            <artifactId>vtk</artifactId>
+            <version>${fr.icy.lib.vtk.version}</version>
+            <classifier>natives-macos-amd64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>fr.icy.lib</groupId>
+            <artifactId>vtk</artifactId>
+            <version>${fr.icy.lib.vtk.version}</version>
+            <classifier>natives-macos-arm64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>fr.icy.lib</groupId>
+            <artifactId>vtk</artifactId>
+            <version>${fr.icy.lib.vtk.version}</version>
+            <classifier>natives-windows-amd64</classifier>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>vtk-linux-amd64</id>
-            <activation>
-                <os>
-                    <family>linux</family>
-                    <arch>amd64</arch>
-                </os>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.bioimageanalysis.icy</groupId>
-                    <artifactId>icy-vtk-linux-x64</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>vtk-mac-arm64</id>
-            <activation>
-                <os>
-                    <family>mac</family>
-                    <arch>aarch64</arch>
-                </os>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.bioimageanalysis.icy</groupId>
-                    <artifactId>icy-vtk-macos-arm64</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>vtk-mac-amd64</id>
-            <activation>
-                <os>
-                    <family>mac</family>
-                    <arch>amd64</arch>
-                </os>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.bioimageanalysis.icy</groupId>
-                    <artifactId>icy-vtk-macos-x64</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>vtk-windows-amd64</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                    <arch>amd64</arch>
-                </os>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.bioimageanalysis.icy</groupId>
-                    <artifactId>icy-vtk-windows-x64</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 </project>
