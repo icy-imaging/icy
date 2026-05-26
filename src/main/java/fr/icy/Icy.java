@@ -986,7 +986,7 @@ public final class Icy {
         IcyLogger.info(Icy.class, "Loading VTK...");
 
         try {
-            fr.icy.lib.vtk.Loader.init();
+            fr.icy.shared.vtk.Loader.init();
             vtkLibraryLoaded = true;
             IcyLogger.success(Icy.class, "VTK library loaded.");
         }
