@@ -552,32 +552,32 @@
         </dependency>
 
         <dependency>
-            <groupId>fr.icy.lib</groupId>
+            <groupId>fr.icy.shared</groupId>
             <artifactId>vtk</artifactId>
-            <version>${fr.icy.lib.vtk.version}</version>
+            <version>${fr.icy.shared.vtk.version}</version>
         </dependency>
         <dependency>
-            <groupId>fr.icy.lib</groupId>
+            <groupId>fr.icy.shared</groupId>
             <artifactId>vtk</artifactId>
-            <version>${fr.icy.lib.vtk.version}</version>
+            <version>${fr.icy.shared.vtk.version}</version>
             <classifier>natives-linux-amd64</classifier>
         </dependency>
         <dependency>
-            <groupId>fr.icy.lib</groupId>
+            <groupId>fr.icy.shared</groupId>
             <artifactId>vtk</artifactId>
-            <version>${fr.icy.lib.vtk.version}</version>
+            <version>${fr.icy.shared.vtk.version}</version>
             <classifier>natives-macos-amd64</classifier>
         </dependency>
         <dependency>
-            <groupId>fr.icy.lib</groupId>
+            <groupId>fr.icy.shared</groupId>
             <artifactId>vtk</artifactId>
-            <version>${fr.icy.lib.vtk.version}</version>
+            <version>${fr.icy.shared.vtk.version}</version>
             <classifier>natives-macos-arm64</classifier>
         </dependency>
         <dependency>
-            <groupId>fr.icy.lib</groupId>
+            <groupId>fr.icy.shared</groupId>
             <artifactId>vtk</artifactId>
-            <version>${fr.icy.lib.vtk.version}</version>
+            <version>${fr.icy.shared.vtk.version}</version>
             <classifier>natives-windows-amd64</classifier>
         </dependency>
     </dependencies>
