@@ -12,7 +12,7 @@
 
     <groupId>fr.icy</groupId>
     <artifactId>icy</artifactId>
-    <version>3.0.0-a.7-SNAPSHOT</version>
+    <version>3.0.0-a.7</version>
 
     <name>Icy</name>
     <description>Icy is an open community platform for bioimage informatics</description>
