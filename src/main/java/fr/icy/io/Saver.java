@@ -18,13 +18,6 @@
 
 package fr.icy.io;
 
-import loci.common.services.ServiceException;
-import loci.formats.FormatException;
-import loci.formats.IFormatWriter;
-import loci.formats.UnknownFormatException;
-import loci.formats.meta.MetadataRetrieve;
-import loci.formats.out.*;
-import ome.xml.meta.OMEXMLMetadata;
 import fr.icy.Icy;
 import fr.icy.common.string.StringUtil;
 import fr.icy.common.type.DataType;
@@ -39,13 +32,23 @@ import fr.icy.model.overlay.Overlay;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.sequence.MetaDataUtil;
 import fr.icy.model.sequence.Sequence;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.GeneralPreferences;
+import loci.common.services.ServiceException;
+import loci.formats.FormatException;
+import loci.formats.IFormatWriter;
+import loci.formats.UnknownFormatException;
+import loci.formats.meta.MetadataRetrieve;
+import loci.formats.out.*;
+import ome.xml.meta.OMEXMLMetadata;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Sequence / Image saver class.<br>
@@ -54,15 +57,18 @@ import java.text.DecimalFormat;
  * When sequence is saved as multiple file the following naming convention is used :<br>
  * <code>filename-tttt-zzzz</code>
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Fabrice de Chaumont
  * @author Thomas Musset
  */
 public class Saver {
+    private static final Logger LOGGER = Logger.getLogger(Saver.class.getName());
+
     /**
      * Returns the {@link ImageFileFormat} corresponding to specified {@link IFormatWriter}.<br>
      * <code>defaultValue</code> is returned if no matching format is found.
      */
+    @Contract(value = "null, _ -> param2", pure = true)
     public static ImageFileFormat getImageFileFormat(final IFormatWriter writer, final ImageFileFormat defaultValue) {
         if (writer instanceof TiffWriter)
             return ImageFileFormat.TIFF;
@@ -95,7 +101,7 @@ public class Saver {
      *               {@link ImageFileFormat#AVI}<br>
      *               null
      */
-    public static IFormatWriter getWriter(final ImageFileFormat format) {
+    public static IFormatWriter getWriter(final @NonNull ImageFileFormat format) {
         final IFormatWriter result;
 
         switch (format) {
@@ -166,7 +172,7 @@ public class Saver {
      *                      {@link ImageFileFormat#AVI}<br>
      *                      null
      */
-    public static IFormatWriter getWriter(final File file, final ImageFileFormat defaultFormat) {
+    public static IFormatWriter getWriter(final @NonNull File file, final ImageFileFormat defaultFormat) {
         return getWriter(FileUtil.getFileExtension(file.getName(), false), defaultFormat);
     }
 
@@ -181,7 +187,7 @@ public class Saver {
      * @param numChannel      number of channel of the image
      * @param dataType        image data type
      */
-    public static IcyColorModel getCompatibleColorModel(final ImageFileFormat imageFileFormat, final int numChannel, final DataType dataType) {
+    public static @NonNull IcyColorModel getCompatibleColorModel(final @NonNull ImageFileFormat imageFileFormat, final int numChannel, final DataType dataType) {
         final DataType outDataType;
         final int outNumChannel;
 
@@ -238,7 +244,7 @@ public class Saver {
      * @param imageFileFormat Image file format we want to test compatibility
      * @param colorModel      the colorModel describing data / image format
      */
-    public static IcyColorModel getCompatibleColorModel(final ImageFileFormat imageFileFormat, final IcyColorModel colorModel) {
+    public static @NonNull IcyColorModel getCompatibleColorModel(final ImageFileFormat imageFileFormat, final @NonNull IcyColorModel colorModel) {
         return getCompatibleColorModel(imageFileFormat, colorModel.getNumComponents(), colorModel.getDataType());
     }
 
@@ -261,7 +267,7 @@ public class Saver {
      * any loss or conversion.<br>
      * The color map data are never preserved, they are always restored to their default.<br>
      */
-    public static boolean isCompatible(final ImageFileFormat imageFileFormat, final IcyColorModel colorModel) {
+    public static boolean isCompatible(final ImageFileFormat imageFileFormat, final @NonNull IcyColorModel colorModel) {
         return colorModel.isCompatible(getCompatibleColorModel(imageFileFormat, colorModel));
     }
 
@@ -269,7 +275,7 @@ public class Saver {
      * Return true if the specified image file format is compatible to save the given Sequence.<br>
      * That means this image file format supports saving all original data (3D/4D/5D) without any loss or conversion.
      */
-    public static boolean isCompatible(final ImageFileFormat imageFileFormat, final Sequence sequence) {
+    public static boolean isCompatible(final @NonNull ImageFileFormat imageFileFormat, final @NonNull Sequence sequence) {
         final boolean multiZ = sequence.getSizeZ() > 1;
         final boolean multiT = sequence.getSizeT() > 1;
 
@@ -309,7 +315,7 @@ public class Saver {
     /**
      * Return the separate channel flag from specified image file format and color space
      */
-    private static boolean getSeparateChannelFlag(final ImageFileFormat imageFileFormat, final IcyColorModel colorModel) {
+    private static boolean getSeparateChannelFlag(final ImageFileFormat imageFileFormat, final @NonNull IcyColorModel colorModel) {
         return getSeparateChannelFlag(imageFileFormat, colorModel.getNumComponents(), colorModel.getDataType());
     }
 
@@ -323,7 +329,7 @@ public class Saver {
      * @param numChannel number of channel of the image
      * @param dataType   image data type
      */
-    public static IcyColorModel getCompatibleColorModel(final IFormatWriter writer, final int numChannel, final DataType dataType) {
+    public static @NonNull IcyColorModel getCompatibleColorModel(final IFormatWriter writer, final int numChannel, final DataType dataType) {
         return getCompatibleColorModel(getImageFileFormat(writer, ImageFileFormat.TIFF), numChannel, dataType);
     }
 
@@ -336,7 +342,7 @@ public class Saver {
      * @param writer     IFormatWriter we want to test compatibility
      * @param colorModel the colorModel describing data / image format
      */
-    public static IcyColorModel getCompatibleColorModel(final IFormatWriter writer, final IcyColorModel colorModel) {
+    public static @NonNull IcyColorModel getCompatibleColorModel(final IFormatWriter writer, final @NonNull IcyColorModel colorModel) {
         return getCompatibleColorModel(writer, colorModel.getNumComponents(), colorModel.getDataType());
     }
 
@@ -358,7 +364,7 @@ public class Saver {
      * or conversion.<br>
      * The color map data are never preserved, they are always restored to their default.<br>
      */
-    public static boolean isCompatible(final IFormatWriter writer, final IcyColorModel colorModel) {
+    public static boolean isCompatible(final IFormatWriter writer, final @NonNull IcyColorModel colorModel) {
         return colorModel.isCompatible(getCompatibleColorModel(writer, colorModel));
     }
 
@@ -380,7 +386,7 @@ public class Saver {
     /**
      * Return the separate channel flag from specified writer and color space
      */
-    private static boolean getSeparateChannelFlag(final IFormatWriter writer, final IcyColorModel colorModel) {
+    private static boolean getSeparateChannelFlag(final IFormatWriter writer, final @NonNull IcyColorModel colorModel) {
         return getSeparateChannelFlag(writer, colorModel.getNumComponents(), colorModel.getDataType());
     }
 
@@ -448,7 +454,7 @@ public class Saver {
      * @param showProgress show progress bar
      * @param addToRecent  add the saved sequence to recent opened sequence list
      */
-    public static void save(final IFormatWriter formatWriter, final Sequence sequence, final File file, final int fps, final boolean multipleFile, final boolean showProgress, final boolean addToRecent) {
+    public static void save(final IFormatWriter formatWriter, final @NonNull Sequence sequence, final @NonNull File file, final int fps, final boolean multipleFile, final boolean showProgress, final boolean addToRecent) {
         final String filePath = FileUtil.cleanPath(FileUtil.getGenericPath(file.getAbsolutePath()));
         final int sizeT = sequence.getSizeT();
         final int sizeZ = sequence.getSizeZ();
@@ -590,10 +596,8 @@ public class Saver {
                 savedSequence.saveXMLData();
         }
         catch (final Exception e) {
-            IcyLogger.error(Saver.class, e, "Failed to save image(s).");
-            /*if (showProgress && !Icy.getMainInterface().isHeadLess())
-                new FailedAnnounceFrame("Failed to save image(s) (see output console for details)", 15);
-            return;*/
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Failed to save image(s)..", e);
         }
         finally {
             if (saveFrame != null)
@@ -604,7 +608,7 @@ public class Saver {
     /**
      * Save a single image from bytes buffer to the specified file.
      */
-    private static void saveImage(final IFormatWriter formatWriter, final byte[] data, final int width, final int height, final int numChannel, final boolean separateChannel, final DataType dataType, final File file, final boolean force) throws FormatException, IOException {
+    private static void saveImage(final IFormatWriter formatWriter, final byte[] data, final int width, final int height, final int numChannel, final boolean separateChannel, final DataType dataType, final @NonNull File file, final boolean force) throws FormatException, IOException {
         final String filePath = FileUtil.cleanPath(FileUtil.getGenericPath(file.getAbsolutePath()));
 
         if (FileUtil.exists(filePath)) {
@@ -630,7 +634,8 @@ public class Saver {
                 writer.setMetadataRetrieve((MetadataRetrieve) MetaDataUtil.generateMetaData(width, height, numChannel, dataType, separateCh));
             }
             catch (final ServiceException e) {
-                IcyLogger.error(Saver.class, e, "Saver.saveImage(...) error.");
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Unable to generate metadata.", e);
             }
         }
         else {
@@ -664,7 +669,8 @@ public class Saver {
                 writer.saveBytes(0, data);
         }
         catch (final Exception e) {
-            IcyLogger.error(Saver.class, e, "Saver.saveImage(...) error.");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Failed to save image.", e);
         }
 
         writer.close();
@@ -692,7 +698,8 @@ public class Saver {
             writer.setMetadataRetrieve((MetadataRetrieve) MetaDataUtil.generateMetaData(image, separateChannel));
         }
         catch (final ServiceException e) {
-            IcyLogger.error(Saver.class, e, "Saver.saveImage(...) error.");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Unable to generate metadata.", e);
         }
 
         // get byte order
@@ -863,7 +870,7 @@ public class Saver {
      * @param posZ     slice index to keep (-1 for all slice)
      * @return the compatible sequence for given Writer
      */
-    public static Sequence getCompatibleSequenceForWriter(final IFormatWriter writer, final Sequence sequence, final int posT, final int posZ) throws IllegalArgumentException, InterruptedException {
+    public static @NonNull Sequence getCompatibleSequenceForWriter(final IFormatWriter writer, final @NonNull Sequence sequence, final int posT, final int posZ) throws IllegalArgumentException, InterruptedException {
         final int sizeC = sequence.getSizeC();
         final DataType dataType = sequence.getDataType();
         final boolean needConvert;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -16,76 +16,61 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * 
- */
 package fr.icy.gui.component.table;
 
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 /**
  * Basically a JTable component with minor improvement.
- * 
- * @author Stephane
+ *
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
-public class IcyTable extends JTable
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -3434771353006383970L;
-
+public class IcyTable extends JTable {
     /**
      * @see JTable#JTable(int, int)
      */
-    public IcyTable(int numRows, int numColumns)
-    {
+    public IcyTable(final int numRows, final int numColumns) {
         super(numRows, numColumns);
     }
 
     /**
      * @see JTable#JTable(Object[][], Object[])
      */
-    public IcyTable(Object[][] rowData, Object[] columnNames)
-    {
+    public IcyTable(final Object[][] rowData, final Object[] columnNames) {
         super(rowData, columnNames);
     }
 
     /**
      * @see JTable#JTable(TableModel, TableColumnModel, ListSelectionModel)
      */
-    public IcyTable(TableModel dm, TableColumnModel cm, ListSelectionModel sm)
-    {
+    public IcyTable(final TableModel dm, final TableColumnModel cm, final ListSelectionModel sm) {
         super(dm, cm, sm);
     }
 
     /**
      * @see JTable#JTable(TableModel, TableColumnModel)
      */
-    public IcyTable(TableModel dm, TableColumnModel cm)
-    {
+    public IcyTable(final TableModel dm, final TableColumnModel cm) {
         super(dm, cm);
     }
 
     /**
      * @see JTable#JTable(TableModel)
      */
-    public IcyTable(TableModel dm)
-    {
+    public IcyTable(final TableModel dm) {
         super(dm);
     }
 
     @Override
-    public boolean getScrollableTracksViewportWidth()
-    {
+    public boolean getScrollableTracksViewportWidth() {
         final boolean result = super.getScrollableTracksViewportWidth();
 
         if (result)
             return getPreferredSize().width < getParent().getWidth();
 
-        return result;
+        return false;
     }
 }

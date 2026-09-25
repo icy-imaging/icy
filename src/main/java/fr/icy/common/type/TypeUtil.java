@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,21 +18,25 @@
 
 package fr.icy.common.type;
 
+import fr.icy.common.math.MathUtil;
 import loci.formats.FormatTools;
 import ome.xml.model.enums.PixelType;
-import fr.icy.common.math.MathUtil;
-import org.jetbrains.annotations.NotNull;
+import org.intellij.lang.annotations.MagicConstant;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.DataBuffer;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class TypeUtil {
-    public static String toString(final boolean signed) {
+    @Contract(pure = true)
+    public static @NonNull String toString(final boolean signed) {
         if (signed)
             return "signed";
 
@@ -40,42 +44,37 @@ public class TypeUtil {
     }
 
     /**
-     * Return true if specified DataBuffer type is considered as signed type
+     * Return true if the specified DataBuffer type is considered as a signed type
      */
-    public static boolean isSignedDataBufferType(final int type) {
+    @Contract(pure = true)
+    public static boolean isSignedDataBufferType(final @MagicConstant(intValues = {DataBuffer.TYPE_BYTE, DataBuffer.TYPE_SHORT, DataBuffer.TYPE_USHORT, DataBuffer.TYPE_INT, DataBuffer.TYPE_FLOAT, DataBuffer.TYPE_DOUBLE, DataBuffer.TYPE_UNDEFINED}) int type) {
         return switch (type) {
-            case DataBuffer.TYPE_BYTE ->
-                // assume byte is unsigned
-                    false;
-            case DataBuffer.TYPE_SHORT -> true;
-            case DataBuffer.TYPE_USHORT -> false;
-            case DataBuffer.TYPE_INT ->
-                // assume int is unsigned
-                    false;
-            case DataBuffer.TYPE_FLOAT -> true;
-            case DataBuffer.TYPE_DOUBLE -> true;
-            default -> false;
+            //case DataBuffer.TYPE_BYTE, DataBuffer.TYPE_USHORT, DataBuffer.TYPE_INT -> false;
+            case DataBuffer.TYPE_SHORT, DataBuffer.TYPE_FLOAT, DataBuffer.TYPE_DOUBLE -> true;
+            default -> false; // assume DataBuffer.TYPE_BYTE, DataBuffer.TYPE_USHORT and DataBuffer.TYPE_INT are unsigned
         };
     }
 
     /**
-     * Return true if specified FormatTools type is a signed type
+     * Return true if the specified FormatTools type is a signed type
      */
-    public static boolean isSignedFormatToolsType(final int type) {
+    @Contract(pure = true)
+    public static boolean isSignedFormatToolsType(final @MagicConstant(intValues = {FormatTools.INT8, FormatTools.UINT8, FormatTools.INT16, FormatTools.UINT16, FormatTools.INT32, FormatTools.UINT32, FormatTools.FLOAT, FormatTools.DOUBLE}) int type) {
         return switch (type) {
             case FormatTools.INT8, FormatTools.INT16, FormatTools.INT32, FormatTools.FLOAT, FormatTools.DOUBLE -> true;
-            case FormatTools.UINT8, FormatTools.UINT16, FormatTools.UINT32 -> false;
+            //case FormatTools.UINT8, FormatTools.UINT16, FormatTools.UINT32 -> false;
             default -> false;
         };
     }
 
     /**
-     * Return true if specified PixelType is signed
+     * Return true if the specified PixelType is signed
      */
-    public static boolean isSignedPixelType(final @NotNull PixelType type) {
+    @Contract(pure = true)
+    public static boolean isSignedPixelType(final @NonNull PixelType type) {
         return switch (type) {
             case INT8, INT16, INT32, FLOAT, DOUBLE -> true;
-            case UINT8, UINT16, UINT32 -> false;
+            //case UINT8, UINT16, UINT32 -> false;
             default -> false;
         };
     }
@@ -83,6 +82,7 @@ public class TypeUtil {
     /**
      * Unsign the specified byte value and return it as int
      */
+    @Contract(pure = true)
     public static int unsign(final byte value) {
         return value & 0xFF;
     }
@@ -90,6 +90,7 @@ public class TypeUtil {
     /**
      * Unsign the specified short value and return it as int
      */
+    @Contract(pure = true)
     public static int unsign(final short value) {
         return value & 0xFFFF;
     }
@@ -97,6 +98,7 @@ public class TypeUtil {
     /**
      * Unsign the specified byte value and return it as long
      */
+    @Contract(pure = true)
     public static long unsignL(final byte value) {
         return value & 0xFFL;
     }
@@ -104,6 +106,7 @@ public class TypeUtil {
     /**
      * Unsign the specified short value and return it as long
      */
+    @Contract(pure = true)
     public static long unsignL(final short value) {
         return value & 0xFFFFL;
     }
@@ -111,6 +114,7 @@ public class TypeUtil {
     /**
      * Unsign the specified int value and return it as long
      */
+    @Contract(pure = true)
     public static long unsign(final int value) {
         return value & 0xFFFFFFFFL;
     }
@@ -118,6 +122,7 @@ public class TypeUtil {
     /**
      * Unsign the specified long value and return it as double (possible information loss)
      */
+    @Contract(pure = true)
     public static double unsign(final long value) {
         if ((double) value < 0d)
             return MathUtil.POW2_64_DOUBLE + (double) value;
@@ -128,6 +133,7 @@ public class TypeUtil {
     /**
      * Unsign the specified long value and return it as float (possible information loss)
      */
+    @Contract(pure = true)
     public static float unsignF(final long value) {
         if ((float) value < 0f)
             return MathUtil.POW2_64_FLOAT + (float) value;
@@ -135,6 +141,7 @@ public class TypeUtil {
         return (float) value;
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static int toShort(final byte value, final boolean signed) {
         if (signed)
             return value;
@@ -142,6 +149,7 @@ public class TypeUtil {
         return unsign(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static int toInt(final byte value, final boolean signed) {
         if (signed)
             return value;
@@ -149,6 +157,7 @@ public class TypeUtil {
         return unsign(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static int toInt(final short value, final boolean signed) {
         if (signed)
             return value;
@@ -156,18 +165,21 @@ public class TypeUtil {
         return unsign(value);
     }
 
+    @Contract(pure = true)
     public static int toInt(final float value) {
         // we have to cast to long before else value is limited to
-        // [Integer.MIN_VALUE..Integer.MAX_VALUE] range
+        // [Integer.MIN_VALUE, Integer.MAX_VALUE] range
         return (int) (long) value;
     }
 
+    @Contract(pure = true)
     public static int toInt(final double value) {
         // we have to cast to long before else value is limited to
-        // [Integer.MIN_VALUE..Integer.MAX_VALUE] range
+        // [Integer.MIN_VALUE, Integer.MAX_VALUE] range
         return (int) (long) value;
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static long toLong(final byte value, final boolean signed) {
         if (signed)
             return value;
@@ -175,6 +187,7 @@ public class TypeUtil {
         return unsignL(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static long toLong(final short value, final boolean signed) {
         if (signed)
             return value;
@@ -182,6 +195,7 @@ public class TypeUtil {
         return unsignL(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static long toLong(final int value, final boolean signed) {
         if (signed)
             return value;
@@ -189,6 +203,7 @@ public class TypeUtil {
         return unsign(value);
     }
 
+    @Contract(pure = true)
     public static long toLong(final float value) {
         // handle unsigned long type (else value is clamped to Long.MAX_VALUE)
         if (value > DataType.LONG_MAX_VALUE_F)
@@ -197,6 +212,7 @@ public class TypeUtil {
         return (long) value;
     }
 
+    @Contract(pure = true)
     public static long toLong(final double value) {
         // handle unsigned long type (else value is clamped to Long.MAX_VALUE)
         if (value > DataType.LONG_MAX_VALUE)
@@ -205,6 +221,7 @@ public class TypeUtil {
         return (long) value;
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static float toFloat(final byte value, final boolean signed) {
         if (signed)
             return value;
@@ -212,6 +229,7 @@ public class TypeUtil {
         return unsign(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static float toFloat(final short value, final boolean signed) {
         if (signed)
             return value;
@@ -219,6 +237,7 @@ public class TypeUtil {
         return unsign(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static float toFloat(final int value, final boolean signed) {
         if (signed)
             return value;
@@ -226,6 +245,7 @@ public class TypeUtil {
         return unsign(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static float toFloat(final long value, final boolean signed) {
         if (signed)
             return value;
@@ -233,6 +253,7 @@ public class TypeUtil {
         return unsignF(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static double toDouble(final byte value, final boolean signed) {
         if (signed)
             return value;
@@ -240,6 +261,7 @@ public class TypeUtil {
         return unsign(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static double toDouble(final short value, final boolean signed) {
         if (signed)
             return value;
@@ -247,6 +269,7 @@ public class TypeUtil {
         return unsign(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static double toDouble(final int value, final boolean signed) {
         if (signed)
             return value;
@@ -254,6 +277,7 @@ public class TypeUtil {
         return unsign(value);
     }
 
+    @Contract(value = "_, true -> param1", pure = true)
     public static double toDouble(final long value, final boolean signed) {
         if (signed)
             return value;
@@ -262,37 +286,40 @@ public class TypeUtil {
     }
 
     /**
-     * Safe integer evaluation from Integer object.<br>
-     * Return <code>defaultValue</code> if specified object is null.
+     * Safe integer evaluation from an Integer object.<br>
+     * Return <code>defaultValue</code> if the specified object is null.
      */
-    public static int getInt(final Integer obj, final int defaultValue) {
+    @Contract(value = "null, _ -> param2; !null, _ -> param1", pure = true)
+    public static int getInt(final @Nullable Integer obj, final int defaultValue) {
         if (obj == null)
             return defaultValue;
 
-        return obj.intValue();
+        return obj;
     }
 
     /**
-     * Safe float evaluation from Float object.<br>
-     * Return <code>defaultValue</code> if specified object is null.
+     * Safe float evaluation from a Float object.<br>
+     * Return <code>defaultValue</code> if the specified object is null.
      */
-    public static float getFloat(final Float obj, final float defaultValue) {
+    @Contract(value = "null, _ -> param2; !null, _ -> param1", pure = true)
+    public static float getFloat(final @Nullable Float obj, final float defaultValue) {
         if (obj == null)
             return defaultValue;
 
-        return obj.floatValue();
+        return obj;
     }
 
     /**
-     * Safe double evaluation from Double object.<br>
+     * Safe double evaluation from a Double object.<br>
      * Return <code>defaultValue</code> if <code>obj</code> is null or equal to infinite with
      * <code>allowInfinite</code> set to false.
      */
-    public static double getDouble(final Double obj, final double defaultValue, final boolean allowInfinite) {
+    @Contract(value = "null, _, _ -> param2", pure = true)
+    public static double getDouble(final @Nullable Double obj, final double defaultValue, final boolean allowInfinite) {
         if (obj == null)
             return defaultValue;
 
-        final double result = obj.doubleValue();
+        final double result = obj;
 
         if ((!allowInfinite) && Double.isInfinite(result))
             return defaultValue;
@@ -301,47 +328,54 @@ public class TypeUtil {
     }
 
     /**
-     * Safe double evaluation from Double object.<br>
-     * Return <code>defaultValue</code> if specified object is null.
+     * Safe double evaluation from a Double object.<br>
+     * Return <code>defaultValue</code> if the specified object is null.
      */
-    public static double getDouble(final Double obj, final double defaultValue) {
+    @Contract(value = "null, _ -> param2", pure = true)
+    public static double getDouble(final @Nullable Double obj, final double defaultValue) {
         return getDouble(obj, defaultValue, true);
     }
 
-    public static Point toPoint(final @NotNull Point2D p) {
+    @Contract("_ -> new")
+    public static @NonNull Point toPoint(final @NonNull Point2D p) {
         return new Point((int) p.getX(), (int) p.getY());
     }
 
-    public static Point2D.Double toPoint2D(final @NotNull Point p) {
+    @Contract(value = "_ -> new", pure = true)
+    public static Point2D.@NonNull Double toPoint2D(final @NonNull Point p) {
         return new Point2D.Double(p.x, p.y);
     }
 
-    public static Point toPoint(final @NotNull Dimension d) {
+    @Contract(value = "_ -> new", pure = true)
+    public static @NonNull Point toPoint(final @NonNull Dimension d) {
         return new Point(d.width, d.height);
     }
 
-    public static Point2D.Double toPoint2D(final @NotNull Dimension d) {
+    @Contract(value = "_ -> new", pure = true)
+    public static Point2D.@NonNull Double toPoint2D(final @NonNull Dimension d) {
         return new Point2D.Double(d.width, d.height);
     }
 
-    public static Dimension toDimension(final @NotNull Point p) {
+    @Contract(value = "_ -> new", pure = true)
+    public static @NonNull Dimension toDimension(final @NonNull Point p) {
         return new Dimension(p.x, p.y);
     }
 
     /**
      * Create an array of Point from the input integer array.<br>
      * <br>
-     * The format of the input array should be as follow:<br>
+     * The format of the input array should be as follows:<br>
      * <code>input.lenght</code> = number of point * 2.<br>
      * <code>input[(pt * 2) + 0]</code> = X coordinate for point <i>pt</i><br>
      * <code>input[(pt * 2) + 1]</code> = Y coordinate for point <i>pt</i><br>
      */
-    public static Point[] toPoint(final int @NotNull [] input) {
+    @Contract(pure = true)
+    public static Point @NonNull [] toPoint(final int @NonNull [] input) {
         final Point[] result = new Point[input.length / 2];
 
         int pt = 0;
         for (int i = 0; i < input.length; i += 2)
-            result[pt++] = new Point(input[i + 0], input[i + 1]);
+            result[pt++] = new Point(input[i/* + 0*/], input[i + 1]);
 
         return result;
     }

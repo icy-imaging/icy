@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  * Abstract class loader that can load classes from different resources
  *
  * @author Kamran Zafar
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class AbstractClassLoader extends ClassLoader {

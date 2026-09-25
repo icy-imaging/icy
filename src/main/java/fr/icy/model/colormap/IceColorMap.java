@@ -20,7 +20,7 @@ package fr.icy.model.colormap;
 import java.awt.Color;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class IceColorMap extends IcyColorMap
 {

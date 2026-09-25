@@ -33,8 +33,8 @@ import java.util.List;
 /**
  * Layer class.<br>
  * This class encapsulate {@link Overlay} in a canvas to<br>
- * add specific display properties (visibility, transparency...).
- * @author Stephane Dallongeville
+ * add specific display properties (visibility, transparency…).
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class Layer implements OverlayListener, Comparable<Layer> {

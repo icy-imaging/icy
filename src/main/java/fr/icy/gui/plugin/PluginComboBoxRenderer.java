@@ -27,7 +27,7 @@ import fr.icy.gui.component.renderer.CustomComboBoxRenderer;
 import javax.swing.*;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PluginComboBoxRenderer extends CustomComboBoxRenderer {

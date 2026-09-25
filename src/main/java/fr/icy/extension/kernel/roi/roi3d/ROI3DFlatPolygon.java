@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,18 +18,19 @@
 
 package fr.icy.extension.kernel.roi.roi3d;
 
-import fr.icy.extension.kernel.roi.roi2d.ROI2DPolygon;
-import fr.icy.extension.kernel.roi.roi2d.ROI2DShape;
 import fr.icy.common.collection.CollectionUtil;
 import fr.icy.common.geom.point.Point3D;
 import fr.icy.common.geom.point.Point5D;
 import fr.icy.common.geom.poly.FlatPolygon3D;
 import fr.icy.common.geom.poly.Polygon2D;
 import fr.icy.common.geom.rectangle.Rectangle3D;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.extension.kernel.roi.roi2d.ROI2DPolygon;
+import fr.icy.extension.kernel.roi.roi2d.ROI2DShape;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.anchor.Anchor3D;
 import fr.icy.model.overlay.anchor.LineAnchor3D;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -40,7 +41,7 @@ import java.util.List;
 /**
  * Class defining a 3D Flat Polygon ROI.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI3DFlatPolygon extends ROI3DZShape {
@@ -77,7 +78,7 @@ public class ROI3DFlatPolygon extends ROI3DZShape {
         setPolygon3D(polygon3D);
 
         // set icon
-        setIcon(SVGResource.IMAGE_BROKEN); // TODO change this icon
+        setIcon(IcySVG.IMAGE_BROKEN); // TODO change this icon
     }
 
     public ROI3DFlatPolygon(final Polygon2D polygon, final double z, final double sizeZ) {
@@ -87,7 +88,7 @@ public class ROI3DFlatPolygon extends ROI3DZShape {
     /**
      * Generic constructor for interactive mode
      */
-    public ROI3DFlatPolygon(final Point5D pt) {
+    public ROI3DFlatPolygon(final @NonNull Point5D pt) {
         this(new Polygon2D(CollectionUtil.createArrayList(pt.toPoint2D())), pt.getZ(), 0d);
     }
 
@@ -114,7 +115,7 @@ public class ROI3DFlatPolygon extends ROI3DZShape {
         return (FlatPolygon3D) shape;
     }
 
-    public void setPolygon3D(final FlatPolygon3D polygon3D) {
+    public void setPolygon3D(final @NonNull FlatPolygon3D polygon3D) {
         beginUpdate();
         try {
             final double centerZ = polygon3D.getCenterZ();
@@ -148,10 +149,9 @@ public class ROI3DFlatPolygon extends ROI3DZShape {
     }
 
     /**
-     * @param pts
-     *        the list of 3points
+     * @param pts the list of 3points
      */
-    public void setPoints(final List<Point2D> pts) {
+    public void setPoints(final @NonNull List<Point2D> pts) {
         beginUpdate();
         try {
             final List<Anchor3D> ctrlPts = getControlPoints();
@@ -179,19 +179,17 @@ public class ROI3DFlatPolygon extends ROI3DZShape {
         }
     }
 
-    public void setPolygon2D(final Polygon2D polygon2D) {
+    public void setPolygon2D(final @NonNull Polygon2D polygon2D) {
         setPoints(polygon2D.getPoints());
     }
 
     /**
      * Add a new point to the Polyline 3D ROI.
      *
-     * @param pos
-     *        position of the new point
-     * @param insert
-     *        if set to <code>true</code> the new point will be inserted between the 2 closest
-     *        points (in pixels distance) else the new point is inserted at the end of the point
-     *        list
+     * @param pos    position of the new point
+     * @param insert if set to <code>true</code> the new point will be inserted between the 2 closest
+     *               points (in pixels distance) else the new point is inserted at the end of the point
+     *               list
      * @return the new created Anchor3D point
      */
     public Anchor3D addNewPoint(final Point2D pos, final boolean insert) {
@@ -207,7 +205,7 @@ public class ROI3DFlatPolygon extends ROI3DZShape {
     }
 
     @Override
-    public void setBounds3D(final Rectangle3D bounds) {
+    public void setBounds3D(final @NonNull Rectangle3D bounds) {
         beginUpdate();
         try {
             // only support set Z bounds

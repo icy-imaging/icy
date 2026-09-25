@@ -18,6 +18,10 @@
 
 package fr.icy.extension.kernel.roi.morphology;
 
+import fr.icy.common.geom.dimension.Dimension3D;
+import fr.icy.common.geom.dimension.Dimension5D;
+import fr.icy.common.type.DataIteratorUtil;
+import fr.icy.common.type.DataType;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.roi.ROI2D;
@@ -25,15 +29,12 @@ import fr.icy.model.roi.ROI3D;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceDataIterator;
 import fr.icy.model.sequence.VolumetricImage;
-import fr.icy.system.logging.IcyLogger;
-import fr.icy.common.type.DataIteratorUtil;
-import fr.icy.common.type.DataType;
-import fr.icy.common.geom.dimension.Dimension3D;
-import fr.icy.common.geom.dimension.Dimension5D;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class computes the distance transform of a list containing {@link ROI}s. As a result, an area ROI is generated as a result of the size of
@@ -46,6 +47,8 @@ import java.util.List;
  * @author Thomas Musset
  */
 public class ROIDistanceTransformCalculator {
+    private static final Logger LOGGER = Logger.getLogger(ROIDistanceTransformCalculator.class.getName());
+
     private final Dimension5D imageSize;
     private final Dimension3D pixelSize;
     private final boolean constrainImageBorders;
@@ -262,7 +265,7 @@ public class ROIDistanceTransformCalculator {
                             break;
                     }
                     catch (final Exception e) {
-                        IcyLogger.error(ROIDistanceTransformCalculator.class, e, e.getLocalizedMessage());
+                        LOGGER.log(Level.SEVERE, "Error while computing the distance transform.", e);
                         throw e;
                     }
                     if (m < getValueAt(currentI, j + n, currentK) / squaredSizeY)

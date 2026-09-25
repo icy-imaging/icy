@@ -44,7 +44,7 @@ import java.util.ArrayList;
  * IcyFrame should be 100% AWT safe
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class IcyFrame implements InternalFrameListener, WindowListener, ImageObserver, PropertyChangeListener {

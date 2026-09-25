@@ -26,7 +26,7 @@ import java.awt.Dimension;
 /**
  * The <code>Dimension2D</code> class is to encapsulate a 2D dimension (X,Y).
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class Dimension2D extends java.awt.geom.Dimension2D
 {

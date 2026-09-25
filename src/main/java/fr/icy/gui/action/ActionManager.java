@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class ActionManager {
@@ -86,6 +86,7 @@ public final class ActionManager {
         if (globalROIActions == null) {
             globalROIActions = new ArrayList<>();
 
+            globalROIActions.addAll(FileActions.getAllGlobalROIActions());
             globalROIActions.addAll(SequenceOperationActions.getAllGlobalROIActions());
 
             final GlobalROIListener globalROIListener = new GlobalROIListener() {

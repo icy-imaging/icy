@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,8 +22,9 @@ import fr.icy.system.thread.ThreadUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.event.TableModelListener;
@@ -44,14 +45,14 @@ public class ExcelTable extends JScrollPane {
         table = new JTable();
     }
 
-    public ExcelTable(final @NotNull Sheet page) {
+    public ExcelTable(final @NonNull Sheet page) {
         this();
         updateSheet(page);
         setViewportView(table);
         setAutoscrolls(true);
     }
 
-    public synchronized void updateSheet(final @NotNull Sheet page) {
+    public synchronized void updateSheet(final @NonNull Sheet page) {
         ThreadUtil.invokeLater(() -> {
             synchronized (table) {
                 clearTable();
@@ -87,10 +88,10 @@ public class ExcelTable extends JScrollPane {
 
         /**
          * Copied from javax.swing.table.AbstractTableModel, to name columns using spreadsheet
-         * conventions: A, B, C, . Z, AA, AB, etc.
+         * conventions: A, B, C, […], Z, AA, AB, etc.
          */
         @Override
-        public @NotNull String getColumnName(int column) {
+        public @NonNull String getColumnName(int column) {
             final StringBuilder result = new StringBuilder();
             for (; column >= 0; column = column / 26 - 1) {
                 result.insert(0, (char) ((char) (column % 26) + 'A'));
@@ -98,11 +99,13 @@ public class ExcelTable extends JScrollPane {
             return result.toString();
         }
 
+        @Contract(pure = true)
         @Override
-        public @NotNull Class<?> getColumnClass(final int columnIndex) {
+        public @NonNull Class<?> getColumnClass(final int columnIndex) {
             return String.class;
         }
 
+        @Contract(pure = true)
         @Override
         public boolean isCellEditable(final int rowIndex, final int columnIndex) {
             return false;
@@ -124,16 +127,19 @@ public class ExcelTable extends JScrollPane {
             }
         }
 
+        @Contract(pure = true)
         @Override
         public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
 
         }
 
+        @Contract(pure = true)
         @Override
         public void addTableModelListener(final TableModelListener l) {
 
         }
 
+        @Contract(pure = true)
         @Override
         public void removeTableModelListener(final TableModelListener l) {
 

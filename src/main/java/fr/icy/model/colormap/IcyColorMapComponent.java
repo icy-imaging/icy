@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class IcyColorMapComponent implements XMLPersistent {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,31 +18,21 @@
 
 package fr.icy.gui.frame;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
+import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
 
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
-public class NewVersionFrame extends IcyFrame
-{
-    private JPanel contentPane;
+public class NewVersionFrame extends IcyFrame {
     private JTextPane changesLogTextPane;
 
     /**
      * Create the New Version Frame.
      */
-    public NewVersionFrame(String changesLog)
-    {
+    public NewVersionFrame(final String changesLog) {
         super("New version installed !", true, true, false, false);
-        
+
         setPreferredSize(new Dimension(640, 480));
         setSize(640, 480);
 
@@ -57,11 +47,10 @@ public class NewVersionFrame extends IcyFrame
         toFront();
     }
 
-    private void initialize()
-    {
+    private void initialize() {
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        contentPane = new JPanel();
+        final JPanel contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.setLayout(new BorderLayout(0, 0));
         setContentPane(contentPane);
@@ -75,10 +64,10 @@ public class NewVersionFrame extends IcyFrame
         panel.add(panel_1);
         panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.LINE_AXIS));
 
-        final JLabel lblHeresTheChanges = new JLabel("A new version has been installed !");
-        panel_1.add(lblHeresTheChanges);
-        lblHeresTheChanges.setFont(new Font("Tahoma", Font.BOLD, 12));
-        lblHeresTheChanges.setHorizontalAlignment(SwingConstants.CENTER);
+        final JLabel lblHereTheChanges = new JLabel("A new version has been installed !");
+        panel_1.add(lblHereTheChanges);
+        lblHereTheChanges.setFont(new Font(FlatJetBrainsMonoFont.FAMILY, Font.BOLD, 12));
+        lblHereTheChanges.setHorizontalAlignment(SwingConstants.CENTER);
 
         final JPanel panel_2 = new JPanel();
         panel_2.setBorder(new EmptyBorder(2, 0, 2, 0));
@@ -88,7 +77,7 @@ public class NewVersionFrame extends IcyFrame
         final JLabel lblNewLabel = new JLabel("Checkout what is new in this version:");
         panel_2.add(lblNewLabel);
         lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lblNewLabel.setFont(new Font(FlatJetBrainsMonoFont.FAMILY, Font.BOLD, 12));
 
         final JScrollPane scrollPane = new JScrollPane();
         contentPane.add(scrollPane, BorderLayout.CENTER);

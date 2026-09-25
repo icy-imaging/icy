@@ -21,7 +21,7 @@ package fr.icy.common.type.value;
 import fr.icy.common.string.StringUtil;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ShortValue extends AbstractValue<Short>
 {

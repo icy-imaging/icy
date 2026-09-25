@@ -24,7 +24,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class WeakWindowListener extends WeakListener<WindowListener> implements WindowListener
 {

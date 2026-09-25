@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,41 +18,40 @@
 
 package fr.icy.extension.kernel.roi.roi3d;
 
-import fr.icy.extension.kernel.roi.roi2d.ROI2DEllipse;
 import fr.icy.common.geom.cylinder.Cylinder3D;
 import fr.icy.common.geom.point.Point3D;
 import fr.icy.common.geom.point.Point5D;
 import fr.icy.common.geom.rectangle.Rectangle3D;
 import fr.icy.common.geom.shape.BoxShape3D;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.extension.kernel.roi.roi2d.ROI2DEllipse;
+import fr.icy.gui.component.icon.IcySVG;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.geom.RectangularShape;
 
 /**
  * Class defining a 3D Cylinder ROI.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI3DCylinder extends ROI3DBoxShape {
     /**
      * Construct 3D cylinder ROI
      *
-     * @param cylinder
-     *        source 3D cylinder
+     * @param cylinder source 3D cylinder
      */
     public ROI3DCylinder(final Cylinder3D cylinder) {
         super(cylinder);
 
         // set icon
-        setIcon(SVGResource.IMAGE_BROKEN); // TODO change this icon
+        setIcon(IcySVG.IMAGE_BROKEN); // TODO change this icon
     }
 
     /**
      * Construct 3D cylinder ROI
      *
-     * @param box
-     *        source 3D box
+     * @param box source 3D box
      */
     public ROI3DCylinder(final BoxShape3D box) {
         this(new Cylinder3D(box));
@@ -61,31 +60,28 @@ public class ROI3DCylinder extends ROI3DBoxShape {
     /**
      * Construct 3D cylinder ROI
      *
-     * @param pt
-     *        source 3D point
+     * @param pt source 3D point
      */
-    public ROI3DCylinder(final Point3D pt) {
+    public ROI3DCylinder(final @NonNull Point3D pt) {
         this(new Cylinder3D(pt.getX(), pt.getY(), pt.getZ(), 0d, 0d, 0d));
     }
 
     /**
      * Construct 3D cylinder ROI
      *
-     * @param pt
-     *        source 5D point
+     * @param pt source 5D point
      */
-    public ROI3DCylinder(final Point5D pt) {
+    public ROI3DCylinder(final @NonNull Point5D pt) {
         this(pt.toPoint3D());
     }
 
     /**
      * Construct 3D cylinder ROI from 2D rect and Z information
      *
-     * @param r
-     *        2D rect
+     * @param r 2D rect
      */
 
-    public ROI3DCylinder(final RectangularShape r, final double z, final double sizeZ) {
+    public ROI3DCylinder(final @NonNull RectangularShape r, final double z, final double sizeZ) {
         this(new Rectangle3D.Double(r.getX(), r.getY(), z, r.getWidth(), r.getHeight(), sizeZ));
     }
 

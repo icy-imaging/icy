@@ -19,7 +19,7 @@
 package fr.icy.model.cache;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class CacheException extends Exception {

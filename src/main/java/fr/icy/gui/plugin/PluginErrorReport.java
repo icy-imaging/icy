@@ -18,44 +18,43 @@
 
 package fr.icy.gui.plugin;
 
+import fr.icy.Icy;
+import fr.icy.common.string.StringUtil;
+import fr.icy.extension.plugin.PluginDescriptor;
+import fr.icy.extension.plugin.PluginInstaller;
+import fr.icy.extension.plugin.PluginRepositoryLoader;
+import fr.icy.extension.plugin.PluginUpdater;
 import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.frame.error.ErrorReportFrame;
 import fr.icy.gui.frame.progress.AnnounceFrame;
 import fr.icy.gui.frame.progress.CancelableProgressFrame;
 import fr.icy.gui.frame.progress.ProgressFrame;
-import fr.icy.Icy;
-import fr.icy.extension.plugin.PluginDescriptor;
-import fr.icy.extension.plugin.PluginInstaller;
-import fr.icy.extension.plugin.PluginRepositoryLoader;
-import fr.icy.extension.plugin.PluginUpdater;
 import fr.icy.system.IcyExceptionHandler;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
-import fr.icy.common.string.StringUtil;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class create a report from a plugin crash and ask the
  * user if he wants to send it to the dev team of the plugin.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PluginErrorReport {
+    private static final Logger LOGGER = Logger.getLogger(PluginErrorReport.class.getName());
+
     /**
      * Report an error thrown by the specified plugin.
      *
-     * @param plugin
-     *        {@link PluginDescriptor} of the plugin which thrown the error.
-     * @param devId
-     *        Plugin developer Id, used only if we do not have plugin descriptor information.
-     * @param title
-     *        Error title if any
-     * @param message
-     *        Error message to report
+     * @param plugin  {@link PluginDescriptor} of the plugin which thrown the error.
+     * @param devId   Plugin developer Id, used only if we do not have plugin descriptor information.
+     * @param title   Error title if any
+     * @param message Error message to report
      */
     public static void report(final PluginDescriptor plugin, final String devId, final String title, final String message) {
         // headless mode ?
@@ -68,7 +67,7 @@ public class PluginErrorReport {
             return;
         }
 
-        // cannot be reported...
+        // cannot be reported…
         // if ((plugin == null) && StringUtil.isEmpty(devId))
         // return;
 
@@ -78,7 +77,7 @@ public class PluginErrorReport {
         // always do that in background process
         ThreadUtil.bgRun(() -> {
             if (plugin != null) {
-                final CancelableProgressFrame info = new CancelableProgressFrame("Plugin '" + plugin.getName() + "' has crashed, searching for update...");
+                final CancelableProgressFrame info = new CancelableProgressFrame("Plugin '" + plugin.getName() + "' has crashed, searching for update…");
 
                 // wait for online basic info loaded
                 PluginRepositoryLoader.waitLoaded();
@@ -115,12 +114,9 @@ public class PluginErrorReport {
     /**
      * Report an error thrown by the specified plugin.
      *
-     * @param plugin
-     *        {@link PluginDescriptor} of the plugin which thrown the error.
-     * @param devId
-     *        Plugin developer Id, used only if we do not have plugin descriptor information.
-     * @param message
-     *        Error message to report
+     * @param plugin  {@link PluginDescriptor} of the plugin which thrown the error.
+     * @param devId   Plugin developer Id, used only if we do not have plugin descriptor information.
+     * @param message Error message to report
      */
     public static void report(final PluginDescriptor plugin, final String devId, final String message) {
         report(plugin, devId, null, message);
@@ -129,10 +125,8 @@ public class PluginErrorReport {
     /**
      * Report an error thrown by the specified plugin.
      *
-     * @param plugin
-     *        {@link PluginDescriptor} of the plugin which thrown the error.
-     * @param message
-     *        Error message to report
+     * @param plugin  {@link PluginDescriptor} of the plugin which thrown the error.
+     * @param message Error message to report
      */
     public static void report(final PluginDescriptor plugin, final String message) {
         report(plugin, null, null, message);
@@ -185,13 +179,14 @@ public class PluginErrorReport {
 
         // set specific report action here
         frame.setReportAction(e -> {
-            final ProgressFrame progressFrame = new ProgressFrame("Sending report...");
+            final ProgressFrame progressFrame = new ProgressFrame("Sending report…");
 
             try {
                 IcyExceptionHandler.report(plugin, devId, frame.getReportMessage());
             }
             catch (final BadLocationException ex) {
-                IcyLogger.error(PluginErrorReport.class, ex, "Error while reporting error.");
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Error while reporting error.", ex);
             }
             finally {
                 progressFrame.close();

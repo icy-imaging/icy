@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PluginStartupPreferencePanel extends PluginListPreferencePanel implements ExtensionLoader.ExtensionLoaderListener {
@@ -135,7 +135,7 @@ public class PluginStartupPreferencePanel extends PluginListPreferencePanel impl
         super.updateButtonsStateInternal();
 
         if (ExtensionLoader.isLoading()) {
-            refreshButton.setText("Reloading...");
+            refreshButton.setText("Reloading…");
             refreshButton.setEnabled(false);
         }
         else {

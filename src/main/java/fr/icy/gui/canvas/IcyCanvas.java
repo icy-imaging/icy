@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -52,10 +52,10 @@ import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent;
 import fr.icy.model.sequence.SequenceEvent.SequenceEventType;
 import fr.icy.model.sequence.SequenceListener;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -67,25 +67,29 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * An IcyCanvas is a basic Canvas used into the viewer. It contains a visual representation
- * of the sequence and provides some facilities as basic transformation and view
+ * An IcyCanvas is a basic Canvas used by the viewer. It contains a visual representation
+ * of the sequence and provides some facilities such as basic transformation and view
  * synchronization.<br>
- * Also IcyCanvas receives key events from Viewer when they are not consumed.<br>
+ * Also, IcyCanvas receives key events from Viewer when they are not consumed.<br>
  * <br>
- * By default transformations are applied in following order :<br>
+ * By default, transformations are applied in the following order :<br>
  * Rotation, Translation then Scaling.<br>
- * The rotation transformation is relative to canvas center.<br>
+ * The rotation transformation is relative to the canvas center.<br>
  * <br>
  * Free feel to implement and override this design or not. <br>
  * <br>
- * (Canvas2D and Canvas3D derives from IcyCanvas)<br>
+ * (Canvas2D and Canvas3D derive from IcyCanvas)<br>
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  */
 public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerListener, SequenceListener, LUTListener, ChangeListener, LayerListener {
+    private static final Logger LOGGER = Logger.getLogger(IcyCanvas.class.getName());
+
     protected class IcyCanvasImageOverlay extends Overlay {
         public IcyCanvasImageOverlay() {
             super((getSequence() == null) ? "Image" : getSequence().getName(), OverlayPriority.IMAGE_NORMAL);
@@ -104,15 +108,15 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Returns all {@link PluginCanvas} plugins (plugins.kernel plugin are returned first).
+     * Returns all {@link PluginCanvas} plugins (plugins.kernel plugins are returned first).
      */
-    public static @NotNull @Unmodifiable List<PluginDescriptor> getCanvasPlugins() {
+    public static @NonNull @Unmodifiable List<PluginDescriptor> getCanvasPlugins() {
         // get all canvas plugins
         final List<PluginDescriptor> result = new ArrayList<>(ExtensionLoader.getPlugins(PluginCanvas.class));
         if (result.isEmpty())
             return Collections.emptyList();
 
-        // VTK is not loaded ?
+        // VTK is not loaded ? // TODO add the ability to disable VTK functions if VTK is not loaded
         /*if (!Icy.isVtkLibraryLoaded()) {
             // remove VtkCanvas
             final int ind = PluginDescriptor.getIndex(result, VtkCanvasPlugin.class.getName());
@@ -120,7 +124,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                 result.remove(ind);
         }*/
 
-        // sort plugins list
+        // sort plugin list
         result.sort(new Comparator<PluginDescriptor>() {
             @Override
             public int compare(final PluginDescriptor o1, final PluginDescriptor o2) {
@@ -128,7 +132,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                 return Integer.compare(getOrder(o1), getOrder(o2));
             }
 
-            int getOrder(final PluginDescriptor p) {
+            int getOrder(final @NonNull PluginDescriptor p) {
                 if (p.getClassName().endsWith(".Canvas2DPlugin"))
                     return 0;
                 if (p.getClassName().endsWith(".VtkCanvasPlugin"))
@@ -142,9 +146,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Returns all {@link PluginCanvas} plugins class name (plugins.kernel plugin are returned first).
+     * Returns all {@link PluginCanvas} plugins class name (plugins.kernel plugins are returned first).
      */
-    public static List<String> getCanvasPluginNames() {
+    public static @NonNull List<String> getCanvasPluginNames() {
         // get all canvas plugins
         final List<PluginDescriptor> plugins = getCanvasPlugins();
         final List<String> result = new ArrayList<>();
@@ -159,7 +163,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Returns the plugin class name corresponding to the specified Canvas class name.<br>
      * Returns <code>null</code> if we can't find a corresponding plugin.
      */
-    public static String getPluginClassName(final String canvasClassName) {
+    public static @Nullable String getPluginClassName(final String canvasClassName) {
         for (final PluginDescriptor plugin : IcyCanvas.getCanvasPlugins()) {
             final String className = getCanvasClassName(plugin);
 
@@ -176,7 +180,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Returns the canvas class name corresponding to the specified {@link PluginCanvas} plugin.<br>
      * Returns <code>null</code> if we can't retrieve the corresponding canvas class name.
      */
-    public static String getCanvasClassName(final PluginDescriptor plugin) {
+    public static @Nullable String getCanvasClassName(final PluginDescriptor plugin) {
         try {
             if (plugin != null) {
                 //final PluginCanvas pluginCanvas = (PluginCanvas) plugin.getPluginClass().newInstance();
@@ -186,7 +190,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
             }
         }
         catch (final Exception e) {
-            IcyLogger.error(IcyCanvas.class, e, "Unable to start plugin canvas: " + plugin.getName());
+            LOGGER.log(Level.SEVERE, "Unable to get canvas class name for plugin " + plugin.getName() + ".", e);
         }
 
         return null;
@@ -202,12 +206,12 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
     /**
      * Create a {@link IcyCanvas} object from its class name or {@link PluginCanvas} class name.<br>
-     * Throws an exception if an error occurred (canvas class was not found or it could not be
-     * creatd).
+     * Throws an exception if an error occurred (canvas class was not found, or it could not be
+     * created).
      *
      * @param viewer {@link Viewer} to which to canvas is attached.
      * @throws ClassCastException if the specified class name is not a canvas plugin or canvas class name
-     * @throws Exception          if the specified canvas cannot be created for some reasons
+     * @throws Exception          if the specified canvas cannot be created for some reason
      */
     @SuppressWarnings("unchecked")
     public static IcyCanvas create(final String className, final Viewer viewer) throws ClassCastException, Exception {
@@ -216,11 +220,11 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
         final Class<? extends PluginCanvas<? extends IcyCanvas>> pluginCanvasClazz;
 
         try {
-            // we first check if we have a IcyCanvas Plugin class here
+            // we first check if we have an IcyCanvas Plugin class here
             pluginCanvasClazz = (Class<? extends PluginCanvas<? extends IcyCanvas>>) clazz.asSubclass(PluginCanvas.class);
         }
         catch (final ClassCastException e0) {
-            // check if this is a IcyCanvas class
+            // check if this is an IcyCanvas class
             final Class<? extends IcyCanvas> canvasClazz = clazz.asSubclass(IcyCanvas.class);
 
             // get constructor (Viewer)
@@ -242,19 +246,19 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     public static final String PROPERTY_LAYERS_VISIBLE = "layersVisible";
 
     /**
-     * Navigations bar
+     * Navigation bars
      */
     final protected ZNavigationPanel zNav;
     final protected TNavigationPanel tNav;
 
     /**
-     * The panel where mouse informations are displayed
+     * The panel where mouse information is displayed
      */
     protected final MouseImageInfosPanel mouseInfPanel;
 
     /**
-     * The panel contains all settings and informations data such as<br>
-     * scale factor, rendering mode...
+     * The panel contains all settings and information data such as
+     * scale factor, rendering mode…
      * Will be retrieved by the inspector to get information on the current canvas.
      */
     protected JPanel panel;
@@ -278,7 +282,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     protected int syncId;
 
     /**
-     * Overlay/Layer used to display sequence image
+     * Overlay/Layer used to display a sequence image
      */
     protected final Overlay imageOverlay;
     protected final Layer imageLayer;
@@ -304,23 +308,23 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     protected final List<CanvasLayerListener> layerListeners;
 
     /**
-     * Current X position (should be -1 when canvas handle multi X dimension view).
+     * Current X position (should be -1 when canvas handles multi X dimension view).
      */
     protected int posX;
     /**
-     * Current Y position (should be -1 when canvas handle multi Y dimension view).
+     * Current Y position (should be -1 when canvas handles multi Y dimension view).
      */
     protected int posY;
     /**
-     * Current Z position (should be -1 when canvas handle multi Z dimension view).
+     * Current Z position (should be -1 when canvas handles multi Z dimension view).
      */
     protected int posZ;
     /**
-     * Current T position (should be -1 when canvas handle multi T dimension view).
+     * Current T position (should be -1 when canvas handles multi T dimension view).
      */
     protected int posT;
     /**
-     * Current C position (should be -1 when canvas handle multi C dimension view).
+     * Current C position (should be -1 when canvas handles multi C dimension view).
      */
     protected int posC;
 
@@ -396,7 +400,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
         // asynchronous updater for GUI
         guiUpdater = () -> ThreadUtil.invokeNow(() -> {
-            // update sliders bounds if needed
+            // update slider bounds if needed
             updateZNav();
             updateTNav();
 
@@ -430,7 +434,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
             if ((curT != -1) && (curT > maxT))
                 setPositionT(maxT);
 
-            // refresh mouse panel informations (data values can have changed)
+            // refresh mouse panel information (data values can have changed)
             mouseInfPanel.updateInfos(IcyCanvas.this);
         });
 
@@ -451,7 +455,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                     addLayer(overlay);
             }
             else
-                IcyLogger.error(IcyCanvas.class, "Sequence null when canvas created.");
+                LOGGER.severe("Sequence was null when canvas was created.");
         }
         finally {
             endUpdate();
@@ -469,8 +473,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Called by the viewer when canvas is closed to release some resources.<br>
-     * Be careful to not restore previous state here (as the colormap) because generally <code>shutdown</code> is called
+     * Called by the viewer when the canvas is closed to release some resources.<br>
+     * Be careful to not restore the previous state here (as the colormap) because generally <code>shutdown</code> is called
      * <b>after</b> the creation of the other canvas.
      */
     public void shutDown() {
@@ -600,7 +604,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * @return the mouse image informations panel
+     * @return the mouse image information panel
      */
     public MouseImageInfosPanel getMouseImageInfosPanel() {
         return mouseInfPanel;
@@ -646,7 +650,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
     /**
      * Returns the setting panel of this canvas.<br>
-     * The setting panel is displayed in the inspector so user can change canvas parameters.
+     * The setting panel is displayed in the inspector so the user can change canvas parameters.
      */
     public JPanel getPanel() {
         return panel;
@@ -656,8 +660,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Returns all layers attached to this canvas.<br>
      *
      * @param sorted If <code>true</code> the returned list is sorted on the layer priority.<br>
-     *               Sort operation is cached so the method could take sometime when sort cache need to be
-     *               rebuild.
+     *               Sort operation is cached so the method could take sometime when sort cache needs to be
+     *               rebuilt.
      */
     public List<Layer> getLayers(final boolean sorted) {
         if (sorted) {
@@ -692,7 +696,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Returns all layers attached to this canvas.<br>
      * The returned list is sorted on the layer priority.<br>
-     * Sort operation is cached so the method could take sometime when cache need to be rebuild.
+     * Sort operation is cached so the method could take sometime when the cache needs to be rebuilt.
      */
     public List<Layer> getLayers() {
         return getLayers(true);
@@ -703,14 +707,14 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * canvas.
      *
      * @param sorted If <code>true</code> the returned list is sorted on the layer priority.<br>
-     *               Sort operation is cached so the method could take sometime when sort cache need to be
-     *               rebuild.
+     *               Sort operation is cached so the method could take sometime when sort cache needs to be
+     *               rebuilt.
      */
     public List<Layer> getVisibleLayers(final boolean sorted) {
-        final List<Layer> olayers = getLayers(sorted);
-        final List<Layer> result = new ArrayList<>(olayers.size());
+        final List<Layer> layers = getLayers(sorted);
+        final List<Layer> result = new ArrayList<>(layers.size());
 
-        for (final Layer l : olayers)
+        for (final Layer l : layers)
             if (l.isVisible())
                 result.add(l);
 
@@ -746,7 +750,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Set the synchronization group id (0 means unsynchronized).<br>
      *
      * @param id the syncId to set
-     * @return <code>false</code> if the canvas do not support synchronization group.
+     * @return <code>false</code> if the canvas do not support the synchronization group.
      */
     public boolean setSyncId(final int id) {
         if (!isSynchronizationSupported())
@@ -763,7 +767,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Return true if this canvas support synchronization
+     * Return true if this canvas supports synchronization
      */
     public boolean isSynchronizationSupported() {
         // default (override it when supported)
@@ -778,14 +782,14 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Return true if current canvas is synchronized and is currently the synchronize leader.
+     * Return true if the current canvas is synchronized and is currently the synchronized leader.
      */
     public boolean isSynchMaster() {
         return synchMaster;
     }
 
     /**
-     * Return true if current canvas is synchronized and it's not the synchronize master
+     * Return true if the current canvas is synchronized and it's not the synchronized master
      */
     public boolean isSynchSlave() {
         if (isSynchronized()) {
@@ -802,7 +806,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Return true if this canvas is synchronized on view (offset, zoom and rotation).
+     * Return true if this canvas is synchronized on view (offset, zoom, and rotation).
      */
     public boolean isSynchOnView() {
         return (syncId == 1) || (syncId == 2) || (syncId == 3);
@@ -816,7 +820,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Return true if this canvas is synchronized on cursor (mouse cursor)
+     * Return true if this canvas is synchronized on the cursor (mouse cursor)
      */
     public boolean isSynchOnCursor() {
         return (syncId > 0);
@@ -830,14 +834,14 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Return true if we get the synchronizer master from specified canvas list.
+     * Return true if we get the synchronizer master from the specified canvas list.
      */
-    protected boolean getSynchMaster(final List<IcyCanvas> canvasList) {
+    protected boolean getSynchMaster(final @NonNull List<IcyCanvas> canvasList) {
         for (final IcyCanvas canvas : canvasList)
             if (canvas.isSynchMaster())
                 return canvas == this;
 
-        // no master found so we are master
+        // no master found, so we are master
         synchMaster = true;
 
         return true;
@@ -853,7 +857,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Return the list of canvas which are synchronized with the current one
      */
-    private List<IcyCanvas> getSynchronizedCanvas() {
+    private @NonNull List<IcyCanvas> getSynchronizedCanvas() {
         final List<IcyCanvas> result = new ArrayList<>();
 
         if (isSynchronized()) {
@@ -879,9 +883,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Synchronize views of specified list of canvas
+     * Synchronize views of the specified list of canvas
      */
-    protected void synchronizeCanvas(final List<IcyCanvas> canvasList, final IcyCanvasEvent event, final boolean processAll) {
+    protected void synchronizeCanvas(final List<IcyCanvas> canvasList, final @NonNull IcyCanvasEvent event, final boolean processAll) {
         final IcyCanvasEventType type = event.getType();
         final DimensionId dim = event.getDim();
 
@@ -967,7 +971,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                 }
             }
 
-            // process offset in last as it can be limited depending destination scale value
+            // process offset in last as it can be limited depending on destination scale value
             if (processAll || (type == IcyCanvasEventType.OFFSET_CHANGED)) {
                 // no information about dimension --> set all
                 if (processAll || (dim == DimensionId.NULL)) {
@@ -1021,9 +1025,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Get position for specified dimension
+     * Get position for the specified dimension
      */
-    public int getPosition(final DimensionId dim) {
+    public int getPosition(final @NonNull DimensionId dim) {
         return switch (dim) {
             case X -> getPositionX();
             case Y -> getPositionY();
@@ -1078,9 +1082,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Get maximum position for specified dimension
+     * Get maximum position for the specified dimension
      */
-    public double getMaxPosition(final DimensionId dim) {
+    public double getMaxPosition(final @NonNull DimensionId dim) {
         return switch (dim) {
             case X -> getMaxPositionX();
             case Y -> getMaxPositionY();
@@ -1168,9 +1172,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Get canvas view size for specified Dimension
+     * Get canvas view size for the specified Dimension
      */
-    public int getCanvasSize(final DimensionId dim) {
+    public int getCanvasSize(final @NonNull DimensionId dim) {
         return switch (dim) {
             case X -> getCanvasSizeX();
             case Y -> getCanvasSizeY();
@@ -1178,7 +1182,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
             case T -> getCanvasSizeT();
             case C -> getCanvasSizeC();
             default ->
-                // size not supported
+                // size isn't supported
                     -1;
         };
 
@@ -1192,7 +1196,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
         int res = 0;
 
         if (comp != null) {
-            // by default we use view component width
+            // by default, we use view component width
             res = comp.getWidth();
             // preferred width if size not yet set
             if (res == 0)
@@ -1210,7 +1214,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
         int res = 0;
 
         if (comp != null) {
-            // by default we use view component width
+            // by default, we use view component width
             res = comp.getHeight();
             // preferred width if size not yet set
             if (res == 0)
@@ -1224,7 +1228,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Returns the canvas view size Z.
      */
     public int getCanvasSizeZ() {
-        // by default : no Z dimension
+        // by default: no Z dimension
         return 1;
     }
 
@@ -1232,7 +1236,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Returns the canvas view size T.
      */
     public int getCanvasSizeT() {
-        // by default : no T dimension
+        // by default: no T dimension
         return 1;
     }
 
@@ -1240,7 +1244,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Returns the canvas view size C.
      */
     public int getCanvasSizeC() {
-        // by default : no C dimension
+        // by default: no C dimension
         return 1;
     }
 
@@ -1252,9 +1256,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Get mouse image position for specified Dimension
+     * Get mouse image position for the specified Dimension
      */
-    public double getMouseImagePos(final DimensionId dim) {
+    public double getMouseImagePos(final @NonNull DimensionId dim) {
         return switch (dim) {
             case X -> getMouseImagePosX();
             case Y -> getMouseImagePosY();
@@ -1315,9 +1319,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Get offset for specified Dimension
+     * Get offset for the specified Dimension
      */
-    public int getOffset(final DimensionId dim) {
+    public int getOffset(final @NonNull DimensionId dim) {
         return switch (dim) {
             case X -> getOffsetX();
             case Y -> getOffsetY();
@@ -1371,9 +1375,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Get scale factor for specified Dimension
+     * Get scale factor for the specified Dimension
      */
-    public double getScale(final DimensionId dim) {
+    public double getScale(final @NonNull DimensionId dim) {
         return switch (dim) {
             case X -> getScaleX();
             case Y -> getScaleY();
@@ -1420,9 +1424,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Get rotation angle (radian) for specified Dimension
+     * Get rotation angle (radian) for the specified Dimension
      */
-    public double getRotation(final DimensionId dim) {
+    public double getRotation(final @NonNull DimensionId dim) {
         return switch (dim) {
             case X -> getRotationX();
             case Y -> getRotationY();
@@ -1469,9 +1473,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Get image size for specified Dimension
+     * Get image size for the specified Dimension
      */
-    public int getImageSize(final DimensionId dim) {
+    public int getImageSize(final @NonNull DimensionId dim) {
         return switch (dim) {
             case X -> getImageSizeX();
             case Y -> getImageSizeY();
@@ -1543,9 +1547,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Set position for specified dimension
+     * Set position for the specified dimension
      */
-    public void setPosition(final DimensionId dim, final int value) {
+    public void setPosition(final @NonNull DimensionId dim, final int value) {
         switch (dim) {
             case X:
                 setPositionX(value);
@@ -1616,7 +1620,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Set X position internal
+     * Set X position internally
      */
     protected void setPositionXInternal(final int x) {
         posX = x;
@@ -1625,7 +1629,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Set Y position internal
+     * Set Y position internally
      */
     protected void setPositionYInternal(final int y) {
         posY = y;
@@ -1634,7 +1638,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Set Z position internal
+     * Set Z position internally
      */
     protected void setPositionZInternal(final int z) {
         posZ = z;
@@ -1643,7 +1647,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Set T position internal
+     * Set T position internally
      */
     protected void setPositionTInternal(final int t) {
         posT = t;
@@ -1652,7 +1656,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Set C position internal
+     * Set C position internally
      */
     protected void setPositionCInternal(final int c) {
         posC = c;
@@ -1661,7 +1665,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Set mouse position (in canvas coordinate space).<br>
+     * Set the mouse position (in canvas coordinate space).<br>
      * The method returns <code>true</code> if the mouse position actually changed.
      */
     public boolean setMousePos(final int x, final int y) {
@@ -1681,14 +1685,14 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Set mouse position (in canvas coordinate space)
      */
-    public void setMousePos(final Point point) {
+    public void setMousePos(final @NonNull Point point) {
         setMousePos(point.x, point.y);
     }
 
     /**
      * Set mouse image position for specified dimension (required for synchronization)
      */
-    public void setMouseImagePos(final DimensionId dim, final double value) {
+    public void setMouseImagePos(final @NonNull DimensionId dim, final double value) {
         switch (dim) {
             case X:
                 setMouseImagePosX(value);
@@ -1794,9 +1798,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Set offset for specified dimension
+     * Set offset for the specified dimension
      */
-    public void setOffset(final DimensionId dim, final int value) {
+    public void setOffset(final @NonNull DimensionId dim, final int value) {
         switch (dim) {
             case X:
                 setOffsetX(value);
@@ -1902,9 +1906,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Set scale factor for specified dimension
+     * Set the scale factor for the specified dimension
      */
-    public void setScale(final DimensionId dim, final double value) {
+    public void setScale(final @NonNull DimensionId dim, final double value) {
         switch (dim) {
             case X:
                 setScaleX(value);
@@ -2010,9 +2014,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Set rotation angle (radian) for specified dimension
+     * Set the rotation angle (radian) for the specified dimension
      */
-    public void setRotation(final DimensionId dim, final double value) {
+    public void setRotation(final @NonNull DimensionId dim, final double value) {
         switch (dim) {
             case X:
                 setRotationX(value);
@@ -2134,7 +2138,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Called when scale factor changed
+     * Called when the scale factor changes
      */
     public void scaleChanged(final DimensionId dim) {
         // handle with updater
@@ -2142,7 +2146,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Called when rotation angle changed
+     * Called when the rotation angle changes
      */
     public void rotationChanged(final DimensionId dim) {
         // handle with updater
@@ -2151,8 +2155,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
     /**
      * Convert specified canvas delta X to image delta X.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageDeltaX(final int value) {
         return value / getScaleX();
@@ -2160,8 +2164,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
     /**
      * Convert specified canvas delta Y to image delta Y.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageDeltaY(final int value) {
         return value / getScaleY();
@@ -2169,8 +2173,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
     /**
      * Convert specified canvas delta Z to image delta Z.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageDeltaZ(final int value) {
         return value / getScaleZ();
@@ -2178,8 +2182,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
     /**
      * Convert specified canvas delta T to image delta T.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageDeltaT(final int value) {
         return value / getScaleT();
@@ -2187,8 +2191,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
     /**
      * Convert specified canvas delta C to image delta C.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageDeltaC(final int value) {
         return value / getScaleC();
@@ -2197,8 +2201,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Convert specified canvas delta X to log image delta X.<br>
      * The conversion is still affected by zoom ratio but with specified logarithm form.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageLogDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageLogDeltaX(final int value, final double logFactor) {
         final double scaleFactor = getScaleX();
@@ -2209,8 +2213,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Convert specified canvas delta X to log image delta X.<br>
      * The conversion is still affected by zoom ratio but with logarithm form.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageLogDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageLogDeltaX(final int value) {
         return canvasToImageLogDeltaX(value, 5d);
@@ -2219,8 +2223,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Convert specified canvas delta Y to log image delta Y.<br>
      * The conversion is still affected by zoom ratio but with specified logarithm form.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageLogDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageLogDeltaY(final int value, final double logFactor) {
         final double scaleFactor = getScaleY();
@@ -2231,8 +2235,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Convert specified canvas delta Y to log image delta Y.<br>
      * The conversion is still affected by zoom ratio but with logarithm form.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageLogDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageLogDeltaY(final int value) {
         return canvasToImageLogDeltaY(value, 5d);
@@ -2241,8 +2245,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Convert specified canvas delta Z to log image delta Z.<br>
      * The conversion is still affected by zoom ratio but with specified logarithm form.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageLogDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageLogDeltaZ(final int value, final double logFactor) {
         final double scaleFactor = getScaleZ();
@@ -2253,26 +2257,26 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Convert specified canvas delta Z to log image delta Z.<br>
      * The conversion is still affected by zoom ratio but with logarithm form.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.canvasToImageLogDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.canvasToImageLogDelta(…) method instead for rotation-transformed delta.
      */
     public double canvasToImageLogDeltaZ(final int value) {
         return canvasToImageLogDeltaZ(value, 5d);
     }
 
     /**
-     * Convert specified image delta X to canvas delta X.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.imageToCanvasDelta(...) method instead for rotation transformed delta.
+     * Convert the specified image delta X to canvas delta X.<br>
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.imageToCanvasDelta(…) method instead for rotation-transformed delta.
      */
     public int imageToCanvasDeltaX(final double value) {
         return (int) (value * getScaleX());
     }
 
     /**
-     * Convert specified image delta Y to canvas delta Y.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.imageToCanvasDelta(...) method instead for rotation transformed delta.
+     * Convert the specified image delta Y to canvas delta Y.<br>
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.imageToCanvasDelta(…) method instead for rotation-transformed delta.
      */
     public int imageToCanvasDeltaY(final double value) {
         return (int) (value * getScaleY());
@@ -2280,26 +2284,26 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
     /**
      * Convert specified image delta Z to canvas delta Z.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.imageToCanvasDelta(...) method instead for rotation transformed delta.
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.imageToCanvasDelta(…) method instead for rotation-transformed delta.
      */
     public int imageToCanvasDeltaZ(final double value) {
         return (int) (value * getScaleZ());
     }
 
     /**
-     * Convert specified image delta T to canvas delta T.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.imageToCanvasDelta(...) method instead for rotation transformed delta.
+     * Convert the specified image delta T to canvas delta T.<br>
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.imageToCanvasDelta(…) method instead for rotation-transformed delta.
      */
     public int imageToCanvasDeltaT(final double value) {
         return (int) (value * getScaleT());
     }
 
     /**
-     * Convert specified image delta C to canvas delta C.<br>
-     * WARNING: Does not take in account the rotation transformation.<br>
-     * Use the IcyCanvasXD.imageToCanvasDelta(...) method instead for rotation transformed delta.
+     * Convert the specified image delta C to canvas delta C.<br>
+     * WARNING: Does not take account of the rotation transformation.<br>
+     * Use the IcyCanvasXD.imageToCanvasDelta(…) method instead for rotation-transformed delta.
      */
     public int imageToCanvasDeltaC(final double value) {
         return (int) (value * getScaleC());
@@ -2397,7 +2401,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Helper to forward mouse mouse event to the overlays.
+     * Helper to forward mouse event to the overlays.
      *
      * @param event original mouse event
      */
@@ -2525,7 +2529,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isNoModifier(e)) {
+                    else if (EventUtil.isNoModifierEx(e)) {
                         if (CanvasActions.disableSyncAction.isEnabled()) {
                             CanvasActions.disableSyncAction.execute();
                             e.consume();
@@ -2540,7 +2544,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isNoModifier(e)) {
+                    else if (EventUtil.isNoModifierEx(e)) {
                         if (CanvasActions.syncGroup1Action.isEnabled()) {
                             CanvasActions.syncGroup1Action.execute();
                             e.consume();
@@ -2555,7 +2559,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isNoModifier(e)) {
+                    else if (EventUtil.isNoModifierEx(e)) {
                         if (CanvasActions.syncGroup2Action.isEnabled()) {
                             CanvasActions.syncGroup2Action.execute();
                             e.consume();
@@ -2570,7 +2574,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isNoModifier(e)) {
+                    else if (EventUtil.isNoModifierEx(e)) {
                         if (CanvasActions.syncGroup3Action.isEnabled()) {
                             CanvasActions.syncGroup3Action.execute();
                             e.consume();
@@ -2585,7 +2589,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                             e.consume();
                         }
                     }
-                    else if (EventUtil.isNoModifier(e)) {
+                    else if (EventUtil.isNoModifierEx(e)) {
                         if (CanvasActions.syncGroup4Action.isEnabled()) {
                             CanvasActions.syncGroup4Action.execute();
                             e.consume();
@@ -2730,14 +2734,14 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Returns a RGB or ARGB (depending support) BufferedImage representing the canvas view for
+     * Returns an RGB or ARGB (depending on support) BufferedImage representing the canvas view for
      * image at position (t, z, c).<br>
      * Free feel to the canvas to handle or not a specific dimension.
      *
-     * @param t          T position of wanted image (-1 for complete sequence)
-     * @param z          Z position of wanted image (-1 for complete stack)
-     * @param c          C position of wanted image (-1 for all channels)
-     * @param canvasView render with canvas view if true else use default sequence dimension
+     * @param t          T position of the wanted image (-1 for complete sequence)
+     * @param z          Z position of the wanted image (-1 for complete stack)
+     * @param c          C position of the wanted image (-1 for all channels)
+     * @param canvasView render with a canvas view if true else use the default sequence dimension
      */
     public abstract BufferedImage getRenderedImage(int t, int z, int c, boolean canvasView) throws InterruptedException;
 
@@ -2745,8 +2749,8 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
      * Return a sequence which contains rendered images.<br>
      * Default implementation, override it if needed in your canvas.
      *
-     * @param canvasView       render with canvas view if true else use default sequence dimension
-     * @param progressListener progress listener which receive notifications about progression
+     * @param canvasView       render with a canvas view if true else use the default sequence dimension
+     * @param progressListener progress listeners that receive notifications about progression
      */
     public Sequence getRenderedSequence(final boolean canvasView, final ProgressListener progressListener) throws InterruptedException {
         final Sequence seqIn = getSequence();
@@ -2774,7 +2778,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                 len *= sizeC;
 
             result.beginUpdate();
-            // This cause position changed event to not be sent during rendering.
+            // This causes position-changed event to not be sent during rendering.
             // Painters have to take care of that, they should check the canvas position
             // in the paint() method
             beginUpdate();
@@ -2953,7 +2957,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Find the layer corresponding to the specified ROI (use the ROI overlay internally).
      */
-    public Layer getLayer(final ROI roi) {
+    public Layer getLayer(final @NonNull ROI roi) {
         return getLayer(roi.getOverlay());
     }
 
@@ -2966,7 +2970,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
         }
     }
 
-    public boolean hasLayer(final Layer layer) {
+    public boolean hasLayer(final @NonNull Layer layer) {
         final Overlay overlay = layer.getOverlay();
 
         // faster to test from overlay
@@ -3007,7 +3011,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
     /**
      * Remove the layer for the specified {@link Overlay} from the canvas.<br>
-     * Returns <code>true</code> if the method succeed.
+     * Returns <code>true</code> if the method succeeds.
      */
     public boolean removeLayer(final Overlay overlay) {
         final Layer layer;
@@ -3018,7 +3022,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
         }
 
         if (layer != null) {
-            // stop listening layer
+            // stop listening to layer
             layer.removeListener(this);
             // notify remove
             layerRemoved(layer);
@@ -3032,7 +3036,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Remove the specified layer from the canvas.
      */
-    public void removeLayer(final Layer layer) {
+    public void removeLayer(final @NonNull Layer layer) {
         removeLayer(layer.getOverlay());
     }
 
@@ -3091,7 +3095,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Add a IcyCanvas listener
+     * Add an IcyCanvas listener
      */
     public void addCanvasListener(final IcyCanvasListener listener) {
         synchronized (listeners) {
@@ -3100,7 +3104,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * Remove a IcyCanvas listener
+     * Remove an IcyCanvas listener
      */
     public void removeCanvasListener(final IcyCanvasListener listener) {
         synchronized (listeners) {
@@ -3152,9 +3156,9 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
 
     /**
      * canvas changed (packed event).<br>
-     * do global changes processing here
+     * do a global changes process here
      */
-    public void changed(final IcyCanvasEvent event) {
+    public void changed(final @NonNull IcyCanvasEvent event) {
         final IcyCanvasEventType eventType = event.getType();
 
         // handle synchronized canvas
@@ -3211,24 +3215,24 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
                             tNav.setValue(curT);
                         break;
                 }
-                // refresh mouse panel informations
+                // refresh mouse panel information
                 mouseInfPanel.updateInfos(this);
                 break;
 
             case MOUSE_IMAGE_POSITION_CHANGED:
-                // refresh mouse panel informations
+                // refresh mouse panel information
                 mouseInfPanel.updateInfos(this);
                 break;
         }
 
-        // notify listeners that canvas have changed
+        // notify listeners that canvas has changed
         fireCanvasChangedEvent(event);
     }
 
     /**
      * layer property has changed (packed event)
      */
-    protected void layerChanged(final CanvasLayerEvent event) {
+    protected void layerChanged(final @NonNull CanvasLayerEvent event) {
         final String property = event.getProperty();
 
         // we need to rebuild sorted layer list
@@ -3253,7 +3257,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     public void lutChanged(final LUTEvent event) {
         final int curC = getPositionC();
 
-        // single channel mode ?
+        // single channel mode?
         if (curC != -1) {
             final int channel = event.getComponent();
 
@@ -3269,35 +3273,35 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     /**
-     * lut changed
+     * the lut changed
      */
     protected void lutChanged(final int component) {
         // nothing to do by default
     }
 
     /**
-     * sequence meta data has changed
+     * the sequence metadata has changed
      */
     protected void sequenceMetaChanged(final String metadataName) {
         // nothing to do by default
     }
 
     /**
-     * sequence type has changed
+     * the sequence type has changed
      */
     protected void sequenceTypeChanged() {
         // nothing to do by default
     }
 
     /**
-     * sequence component bounds has changed
+     * sequence component bounds have changed
      */
     protected void sequenceComponentBoundsChanged(final IcyColorModel colorModel, final int component) {
         // nothing to do by default
     }
 
     /**
-     * sequence component bounds has changed
+     * sequence component bounds have changed
      */
     protected void sequenceColorMapChanged(final IcyColorModel colorModel, final int component) {
         // nothing to do by default
@@ -3316,10 +3320,10 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * Sequence overlay has changed
      *
-     * @param overlay overlay which has changed
+     * @param overlay overlay that has changed
      * @param type    event type
      */
-    protected void sequenceOverlayChanged(final Overlay overlay, final SequenceEventType type) {
+    protected void sequenceOverlayChanged(final Overlay overlay, final @NonNull SequenceEventType type) {
         switch (type) {
             case ADDED:
                 addLayer(overlay);
@@ -3338,7 +3342,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     /**
      * sequence roi has changed
      *
-     * @param roi  roi which has changed (null if global roi changed)
+     * @param roi  roi that has changed (null if global roi changed)
      * @param type event type
      */
     protected void sequenceROIChanged(final ROI roi, final SequenceEventType type) {
@@ -3347,7 +3351,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     @Override
-    public void viewerChanged(final ViewerEvent event) {
+    public void viewerChanged(final @NonNull ViewerEvent event) {
         switch (event.getType()) {
             case POSITION_CHANGED:
                 // ignore this event as we are launching it
@@ -3370,7 +3374,7 @@ public abstract class IcyCanvas extends JPanel implements KeyListener, ViewerLis
     }
 
     @Override
-    public final void sequenceChanged(final SequenceEvent event) {
+    public final void sequenceChanged(final @NonNull SequenceEvent event) {
         switch (event.getSourceType()) {
             case SEQUENCE_META:
                 sequenceMetaChanged((String) event.getSource());

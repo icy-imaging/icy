@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,38 +18,38 @@
 
 package fr.icy.extension.plugin.property;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public final class FloatProperty extends NumberProperty<Float> {
-    public FloatProperty(final @NotNull String name, final @NotNull String description, final @NotNull Float defaultValue, final @NotNull Float min, final @NotNull Float max, final @NotNull Float step) {
+    public FloatProperty(final @NonNull String name, final @NonNull String description, final @NonNull Float defaultValue, final @NonNull Float min, final @NonNull Float max, final @NonNull Float step) {
         super(name, description, defaultValue, min, max, step);
     }
 
-    public FloatProperty(final @NotNull String name, final @NotNull String description, final @NotNull Float min, final @NotNull Float max, final @NotNull Float step) {
+    public FloatProperty(final @NonNull String name, final @NonNull String description, final @NonNull Float min, final @NonNull Float max, final @NonNull Float step) {
         this(name, description, 0F, min, max, step);
     }
 
-    public FloatProperty(final @NotNull String name, final @NotNull String description, final @NotNull Float defaultValue) {
+    public FloatProperty(final @NonNull String name, final @NonNull String description, final @NonNull Float defaultValue) {
         this(name, description, defaultValue, Float.MIN_VALUE, Float.MAX_VALUE, .1F);
     }
 
-    public FloatProperty(final @NotNull String name, final @NotNull String description) {
+    public FloatProperty(final @NonNull String name, final @NonNull String description) {
         this(name, description, 0F, Float.MIN_VALUE, Float.MAX_VALUE, .1F);
     }
 
-    public FloatProperty(final @NotNull String name, final @NotNull Float defaultValue, final @NotNull Float min, final @NotNull Float max, final @NotNull Float step) {
+    public FloatProperty(final @NonNull String name, final @NonNull Float defaultValue, final @NonNull Float min, final @NonNull Float max, final @NonNull Float step) {
         super(name, defaultValue, min, max, step);
     }
 
-    public FloatProperty(final @NotNull String name, final @NotNull Float min, final @NotNull Float max, final @NotNull Float step) {
+    public FloatProperty(final @NonNull String name, final @NonNull Float min, final @NonNull Float max, final @NonNull Float step) {
         this(name, 0F, min, max, step);
     }
 
-    public FloatProperty(final @NotNull String name, final @NotNull Float defaultValue) {
+    public FloatProperty(final @NonNull String name, final @NonNull Float defaultValue) {
         this(name, defaultValue, Float.MIN_VALUE, Float.MAX_VALUE, .1F);
     }
 
-    public FloatProperty(final @NotNull String name) {
+    public FloatProperty(final @NonNull String name) {
         this(name, 0F, Float.MIN_VALUE, Float.MAX_VALUE, .1F);
     }
 }

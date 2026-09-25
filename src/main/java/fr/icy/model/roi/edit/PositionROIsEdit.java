@@ -32,7 +32,7 @@ import javax.swing.undo.UndoableEdit;
 /**
  * Multiple position change implementation for ROI undoable edition.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class PositionROIsEdit extends AbstractROIsEdit
 {

@@ -35,7 +35,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequenceActionFrame extends ActionFrame
 {

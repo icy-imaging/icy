@@ -27,7 +27,7 @@ import java.io.File;
 /**
  * Global class for Preferences.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class IcyPreferences {

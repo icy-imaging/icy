@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -21,7 +21,6 @@ package fr.icy.extension;
 import fr.icy.common.Version;
 import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 import org.eclipse.aether.artifact.Artifact;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
@@ -53,8 +52,6 @@ public final class ExtensionDescriptor {
 
     private final List<PluginDescriptor> plugins;
 
-    //private final Map<String, List<Map<String, Object>>> dependencies;
-
     public ExtensionDescriptor(final @NonNull Artifact artifact) throws IOException, IllegalArgumentException {
         this.artifact = artifact;
         final File jar = artifact.getFile();
@@ -62,12 +59,10 @@ public final class ExtensionDescriptor {
             throw new IllegalArgumentException("Artifact is not a jar or is not resolved");
 
         plugins = new ArrayList<>();
-        //dependencies = new HashMap<>();
 
         final Yaml yaml = new Yaml();
         try (final JarFile jarFile = new JarFile(jar)) {
-            final ZipEntry extensionEntry =  jarFile.getEntry("META-INF/extension.yaml");
-            //final ZipEntry dependenciesEntry =  jarFile.getEntry("META-INF/dependencies.yaml");
+            final ZipEntry extensionEntry = jarFile.getEntry("META-INF/extension.yaml");
             final ZipEntry iconEntry =  jarFile.getEntry("META-INF/icon.svg");
 
             try (final InputStream is = jarFile.getInputStream(extensionEntry)) {
@@ -78,21 +73,16 @@ public final class ExtensionDescriptor {
                 kernelVersion = Version.fromString((String) properties.get("kernelVersion"));
             }
 
-            /*try (final InputStream is = jarFile.getInputStream(dependenciesEntry)) {
-                final Map<String, List<Map<String, Object>>> dependencies = yaml.load(is);
-                this.dependencies.putAll(dependencies);
-            }*/
-
             if (iconEntry != null) {
                 try (final InputStream is = jarFile.getInputStream(iconEntry)) {
                     if (is != null)
                         svg = new IcySVG(is.readAllBytes());
                     else
-                        svg = new IcySVG(SVGResource.EXTENSION_DEFAULT);
+                        svg = IcySVG.EXTENSION_DEFAULT;
                 }
             }
             else
-                svg = new IcySVG(SVGResource.EXTENSION_DEFAULT);
+                svg = IcySVG.EXTENSION_DEFAULT;
         }
 
         //final File configFile = new File(jar.getParentFile(), "config.yaml");
@@ -111,14 +101,6 @@ public final class ExtensionDescriptor {
             return List.copyOf(plugins);
         }
     }
-
-    /*@NotNull
-    @Unmodifiable
-    Map<String, List<Map<String, Object>>> getDependencies() {
-        synchronized (dependencies) {
-            return Map.copyOf(dependencies);
-        }
-    }*/
 
     public @NonNull File getFile() {
         return artifact.getFile();
@@ -152,7 +134,7 @@ public final class ExtensionDescriptor {
         return kernelVersion;
     }
 
-    /*public @NotNull ExtensionConfig getConfig() {
+    /*public @NonNull ExtensionConfig getConfig() {
         return config;
     }*/
 
@@ -165,10 +147,11 @@ public final class ExtensionDescriptor {
     }
 
     /**
-     * Returns SVG by it's name in extension's jar (META-INF/icon/...). Can be null.
+     * Returns SVG by its name in extension's jar (META-INF/icon/…). Can be null.
      */
-    @Nullable
-    public IcySVG getSVG(@NonNull final String name) {
+    @Contract("null, _ -> null")
+    public @Nullable IcySVG getSVG(final @Nullable String name, final boolean monochrome) {
+        if (name == null) return null;
         try (final JarFile jarFile = new JarFile(getFile())) {
             final ZipEntry entry = jarFile.getEntry("META-INF/icons/" + name + ".svg");
             if (entry != null) {
@@ -176,7 +159,7 @@ public final class ExtensionDescriptor {
                     if (is == null)
                         return null;
 
-                    return new IcySVG(is.readAllBytes());
+                    return new IcySVG(is.readAllBytes(), monochrome);
                 }
             }
             return null;
@@ -184,6 +167,11 @@ public final class ExtensionDescriptor {
         catch (final Throwable t) {
             return null;
         }
+    }
+
+    @Contract("null -> null")
+    public @Nullable IcySVG getSVG(final @Nullable String name) {
+        return getSVG(name, false);
     }
 
     public boolean isKernel() {

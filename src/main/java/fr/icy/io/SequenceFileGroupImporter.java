@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,18 +18,12 @@
 
 package fr.icy.io;
 
-import fr.icy.gui.frame.progress.FileFrame;
-import loci.formats.FormatTools;
-import loci.formats.MetadataTools;
-import ome.xml.meta.OMEXMLMetadata;
-import ome.xml.model.Channel;
-import ome.xml.model.Pixels;
-import ome.xml.model.Plane;
 import fr.icy.common.collection.CollectionUtil;
 import fr.icy.common.collection.array.Array1DUtil;
 import fr.icy.common.exception.UnsupportedFormatException;
 import fr.icy.common.string.StringUtil;
 import fr.icy.gui.dialog.LoaderDialog;
+import fr.icy.gui.frame.progress.FileFrame;
 import fr.icy.io.SequenceFileSticher.SequenceFileGroup;
 import fr.icy.io.SequenceFileSticher.SequenceIdent;
 import fr.icy.io.SequenceFileSticher.SequencePosition;
@@ -40,24 +34,34 @@ import fr.icy.model.image.AbstractImageProvider;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.image.ImageUtil;
 import fr.icy.model.sequence.MetaDataUtil;
-import fr.icy.system.logging.IcyLogger;
-import org.jetbrains.annotations.NotNull;
+import loci.formats.FormatTools;
+import loci.formats.MetadataTools;
+import ome.xml.meta.OMEXMLMetadata;
+import ome.xml.model.Channel;
+import ome.xml.model.Pixels;
+import ome.xml.model.Plane;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
-import java.util.List;
 import java.util.*;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Special importer able to group a list of path ({@link SequenceFileGroup}) to build a single Sequence out of it.<br>
  * Note that this importer is limited to single series group, we don't allow group mixing several series.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SequenceFileGroupImporter extends AbstractImageProvider implements SequenceFileImporter {
+    private static final Logger LOGGER = Logger.getLogger(SequenceFileGroupImporter.class.getName());
+
     static final int MAX_IMPORTER = 16;
 
     protected static class FileCursor {
@@ -134,7 +138,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     @Override
-    public @NotNull List<FileFilter> getFileFilters() {
+    public @NonNull List<FileFilter> getFileFilters() {
         // return a generic image file filter here
         final List<FileFilter> result = new ArrayList<>();
         result.add(LoaderDialog.allImagesFileFilter);
@@ -200,7 +204,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         }
         catch (final Exception e) {
             // should not prevent from opening
-            IcyLogger.warn(SequenceFileGroupImporter.class, e, "Unable to close importers.");
+            LOGGER.log(Level.SEVERE, "Unable to close importers.", e);
         }
 
         // can't open null group
@@ -226,7 +230,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
      *
      * @see #releaseImporter(String, SequenceFileImporter)
      */
-    protected boolean openImporter(final SequenceFileImporter result, final String path) throws Exception {
+    protected boolean openImporter(final @NonNull SequenceFileImporter result, final String path) throws Exception {
         // importer is already opened ? --> close it first
         if (!StringUtil.isEmpty(result.getOpened()))
             result.close();
@@ -675,10 +679,10 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     // internal use only
-    private Object getPixelsInternal(final SequencePosition pos, final int series, final int resolution, final Rectangle region, final int z, final int t, final int c) throws Exception {
+    private @Nullable Object getPixelsInternal(final SequencePosition pos, final int series, final int resolution, final Rectangle region, final int z, final int t, final int c) throws Exception {
         if (pos == null) {
             final SequenceType bt = currentGroup.ident.baseType;
-            IcyLogger.error(SequenceFileGroupImporter.class, "SequenceIdGroupImporter.getPixelsInternal: no image for tile [" + (region.x / bt.sizeX) + "," + (region.y / bt.sizeY) + "] !");
+            LOGGER.severe("SequenceIdGroupImporter.getPixelsInternal: no image for tile [" + (region.x / bt.sizeX) + "," + (region.y / bt.sizeY) + "] !");
             return null;
         }
 
@@ -686,7 +690,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         final SequenceFileImporter imp = getImporter(pos.getPath());
 
         if (imp == null) {
-            IcyLogger.error(SequenceFileGroupImporter.class, "SequenceIdGroupImporter.getPixelsInternal: cannot get importer for image '" + pos.getPath() + "' !");
+            LOGGER.severe("SequenceIdGroupImporter.getPixelsInternal: cannot get importer for image '" + pos.getPath() + "' !");
             return null;
         }
 
@@ -760,10 +764,10 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     // internal use only
-    private IcyBufferedImage getImageInternal(final SequencePosition pos, final int series, final int resolution, final Rectangle region, final int z, final int t, final int c) throws Exception {
+    private @Nullable IcyBufferedImage getImageInternal(final SequencePosition pos, final int series, final int resolution, final Rectangle region, final int z, final int t, final int c) throws Exception {
         if (pos == null) {
             final SequenceType bt = currentGroup.ident.baseType;
-            IcyLogger.error(SequenceFileGroupImporter.class, "SequenceIdGroupImporter.getImageInternal: no image for tile [" + (region.x / bt.sizeX) + "," + (region.y / bt.sizeY) + "] !");
+            LOGGER.severe("SequenceIdGroupImporter.getImageInternal: no image for tile [" + (region.x / bt.sizeX) + "," + (region.y / bt.sizeY) + "] !");
             return null;
         }
 
@@ -771,7 +775,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
         final SequenceFileImporter imp = getImporter(pos.getPath());
 
         if (imp == null) {
-            IcyLogger.error(SequenceFileGroupImporter.class, "SequenceIdGroupImporter.getImageInternal: cannot get importer for image '" + pos.getPath() + "' !");
+            LOGGER.severe("SequenceIdGroupImporter.getImageInternal: cannot get importer for image '" + pos.getPath() + "' !");
             return null;
         }
 
@@ -786,7 +790,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
     }
 
     // internal use only, at this point c cannot be -1
-    private IcyBufferedImage getImageInternal(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c) throws Exception {
+    private @Nullable IcyBufferedImage getImageInternal(final int series, final int resolution, final Rectangle rectangle, final int z, final int t, final int c) throws Exception {
         if (!isOpen())
             return null;
 
@@ -921,7 +925,7 @@ public class SequenceFileGroupImporter extends AbstractImageProvider implements 
 
         if (imp == null) {
             // should not happen
-            IcyLogger.error(SequenceFileGroupImporter.class, "SequenceIdGroupImporter.getThumbnail: cannot find importer...");
+            LOGGER.severe("SequenceIdGroupImporter.getThumbnail: cannot find importer…");
             return null;
         }
 

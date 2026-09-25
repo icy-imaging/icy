@@ -27,7 +27,7 @@ import javax.swing.JOptionPane;
  * Almost same as ConfirmDialog except it is not modal so you have to check<br>
  * for both <code>ready()</code> and <code>confirmed()</code> methods.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ConfirmFrame extends JOptionPane
 {

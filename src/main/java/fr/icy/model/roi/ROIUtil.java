@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -54,8 +54,9 @@ import fr.icy.model.roi.watershed.ROIWatershedCalculator;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceDataIterator;
 import fr.icy.model.sequence.SequenceUtil;
-import fr.icy.system.logging.IcyLogger;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
@@ -64,14 +65,17 @@ import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 /**
  * ROI utilities class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROIUtil {
+    private static final Logger LOGGER = Logger.getLogger(ROIUtil.class.getName());
+
     final public static String ZEXT_SUFFIX = " Z extended";
     final public static String STACK_SUFFIX = " stack";
     final public static String MASK_SUFFIX = " mask";
@@ -89,7 +93,7 @@ public class ROIUtil {
      * @see ROIDescriptor#compute(ROI, Sequence)
      * @see PluginROIDescriptor#compute(ROI, Sequence)
      */
-    public static Map<ROIDescriptor<?>, PluginROIDescriptor> getROIDescriptors() {
+    public static @NonNull Map<ROIDescriptor<?>, PluginROIDescriptor> getROIDescriptors() {
         return ROIDescriptor.getDescriptors();
     }
 
@@ -156,7 +160,7 @@ public class ROIUtil {
     /**
      * Returns the effective ROI number of dimension needed for the specified bounds.
      */
-    public static int getEffectiveDimension(final Rectangle5D bounds) {
+    public static int getEffectiveDimension(final @NonNull Rectangle5D bounds) {
         int result = 5;
 
         if (bounds.isInfiniteC() || (bounds.getSizeC() <= 1d)) {
@@ -174,7 +178,7 @@ public class ROIUtil {
     /**
      * Calculate the multiplier factor depending the wanted dimension information.
      */
-    public static double getMultiplierFactor(final Sequence sequence, final @NotNull ROI roi, final int dim) {
+    public static double getMultiplierFactor(final Sequence sequence, final @NonNull ROI roi, final int dim) {
         final int dimRoi = roi.getDimension();
 
         // cannot give this information for this roi
@@ -233,7 +237,7 @@ public class ROIUtil {
     /**
      * Return 5D dimension for specified operation dimension
      */
-    private static Dimension5D.Integer getOpDim(final int dim, final Rectangle5D.Integer bounds) {
+    private static Dimension5D.@NonNull Integer getOpDim(final int dim, final Rectangle5D.Integer bounds) {
         final Dimension5D.Integer result = new Dimension5D.Integer();
 
         switch (dim) {
@@ -323,6 +327,7 @@ public class ROIUtil {
      * Compute the resulting bounds for <i>union</i> operation between specified ROIs.<br>
      * It throws an exception if the <i>union</i> operation cannot be done (incompatible dimension).
      */
+    @Contract("null, null -> new")
     public static Rectangle5D getUnionBounds(final ROI roi1, final ROI roi2) throws UnsupportedOperationException {
         // null checking
         if (roi1 == null) {
@@ -370,7 +375,8 @@ public class ROIUtil {
      * Compute the resulting bounds for <i>intersection</i> operation between specified ROIs.<br>
      * It throws an exception if the <i>intersection</i> operation cannot be done (incompatible dimension).
      */
-    protected static Rectangle5D getIntersectionBounds(final ROI roi1, final ROI roi2) throws UnsupportedOperationException {
+    @Contract("null, _ -> new; !null, null -> new")
+    protected static @NonNull Rectangle5D getIntersectionBounds(final ROI roi1, final ROI roi2) throws UnsupportedOperationException {
         // null checking
         if ((roi1 == null) || (roi2 == null))
             return new Rectangle5D.Double();
@@ -400,6 +406,7 @@ public class ROIUtil {
      * Compute the resulting bounds for <i>subtraction</i> of (roi1 - roi2).<br>
      * It throws an exception if the <i>subtraction</i> operation cannot be done (incompatible dimension).
      */
+    @Contract("null, _ -> new")
     protected static Rectangle5D getSubtractionBounds(final ROI roi1, final ROI roi2) throws UnsupportedOperationException {
         // null checking
         if (roi1 == null)
@@ -433,6 +440,7 @@ public class ROIUtil {
     /**
      * Computes union of specified <code>ROI</code> and return result in a new <code>ROI</code>.
      */
+    @Contract("null, null -> new")
     public static ROI getUnion(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
         // null checking
         if (roi1 == null) {
@@ -490,7 +498,8 @@ public class ROIUtil {
     /**
      * Computes intersection of specified <code>ROI</code> and return result in a new <code>ROI</code>.
      */
-    public static ROI getIntersection(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
+    @Contract("null, _ -> new; !null, null -> new")
+    public static @NonNull ROI getIntersection(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
         // null checking
         if ((roi1 == null) || (roi2 == null))
             // return empty ROI
@@ -546,6 +555,7 @@ public class ROIUtil {
     /**
      * Compute exclusive union of specified <code>ROI</code> and return result in a new <code>ROI</code>.
      */
+    @Contract("null, null -> new")
     public static ROI getExclusiveUnion(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
         // null checking
         if (roi1 == null) {
@@ -603,6 +613,7 @@ public class ROIUtil {
     /**
      * Computes the subtraction of roi1 - roi2 and returns result in a new <code>ROI</code>.
      */
+    @Contract("null, _ -> new")
     public static ROI getSubtraction(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
         // return empty ROI
         if (roi1 == null)
@@ -660,8 +671,8 @@ public class ROIUtil {
      * @param operator {@link BooleanOperator} to apply.
      * @return {@link ROI} representing the result of the merge operation.
      */
-    public static ROI merge(final List<? extends ROI> rois, final BooleanOperator operator) throws UnsupportedOperationException, InterruptedException {
-        if (rois.size() == 0)
+    public static @Nullable ROI merge(final @NonNull List<? extends ROI> rois, final BooleanOperator operator) throws UnsupportedOperationException, InterruptedException {
+        if (rois.isEmpty())
             return null;
 
         final List<ROI2DShape> roi2dShapes = new ArrayList<>();
@@ -687,7 +698,7 @@ public class ROIUtil {
         else
             result = rois.get(0).getCopy();
 
-        // copy can fail...
+        // copy can fail…
         if (result != null) {
             switch (operator) {
                 case AND:
@@ -767,7 +778,7 @@ public class ROIUtil {
      *
      * @return {@link ROI} representing the result of subtraction.
      */
-    public static ROI subtract(final ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
+    public static ROI subtract(final @NonNull ROI roi1, final ROI roi2) throws UnsupportedOperationException, InterruptedException {
         return roi1.getSubtraction(roi2);
     }
 
@@ -776,7 +787,7 @@ public class ROIUtil {
      *
      * @return the ROI point representing the mass center of the input ROI.
      */
-    public static ROI convertToPoint(final ROI roi) throws InterruptedException {
+    public static @NonNull ROI convertToPoint(final ROI roi) throws InterruptedException {
         final ROI result;
         final Point5D pt = computeMassCenter(roi);
 
@@ -808,7 +819,7 @@ public class ROIUtil {
      *
      * @return the 2D ellipse ROI centered on the mass center of the input ROI.
      */
-    public static ROI2DEllipse convertToEllipse(final ROI roi, final double radiusX, final double radiusY) throws InterruptedException {
+    public static @NonNull ROI2DEllipse convertToEllipse(final ROI roi, final double radiusX, final double radiusY) throws InterruptedException {
         final Point5D pt = computeMassCenter(roi);
         final double x = pt.getX();
         final double y = pt.getY();
@@ -841,7 +852,7 @@ public class ROIUtil {
      *
      * @return the 2D rectangle ROI centered on the mass center of the input ROI.
      */
-    public static ROI2DRectangle convertToRectangle(final ROI roi, final double width, final double height) throws InterruptedException {
+    public static @NonNull ROI2DRectangle convertToRectangle(final ROI roi, final double width, final double height) throws InterruptedException {
         final Point5D pt = computeMassCenter(roi);
         final double x = pt.getX();
         final double y = pt.getY();
@@ -876,7 +887,7 @@ public class ROIUtil {
      *
      * @return the converted 3D ROI
      */
-    public static ROI convertTo3D(final ROI2D roi, final double z, final double sizeZ) throws InterruptedException {
+    public static @Nullable ROI convertTo3D(final ROI2D roi, final double z, final double sizeZ) throws InterruptedException {
         ROI result = null;
 
         if (roi instanceof ROI2DRectangle) {
@@ -960,7 +971,7 @@ public class ROIUtil {
             }
             result = new ROI[]{roi2d};
         }
-        else if (roi instanceof final ROI3DArea roi3d) {
+        else if (roi instanceof final ROI3DArea roi3d) { // TODO: check if always false
             final List<ROI> rois2d = new ArrayList<>(roi3d.getSizeZ());
             final int z0 = (int) Math.floor(roi3d.getBounds3D().getZ());
             for (int z = z0; z < z0 + roi3d.getSizeZ(); z++) {
@@ -988,7 +999,7 @@ public class ROIUtil {
             result = rois2d.toArray(new ROI[0]);
         }
 
-        if ((roi != null) && (result != null)) {
+        if ((roi != null) && (result != null)) { // TODO: check if always true
             String name = roi.getName();
 
             // remove "stack" suffix is present
@@ -1019,8 +1030,7 @@ public class ROIUtil {
      */
     public static ROI convertToMask(final ROI roi) throws InterruptedException {
         // no conversion needed
-        // TODO remove this comment once ROI4D and ROI5D completely removed
-        if ((roi instanceof ROI2DArea) || (roi instanceof ROI3DArea)/* || (roi instanceof ROI4DArea) || (roi instanceof ROI5DArea)*/)
+        if ((roi instanceof ROI2DArea) || (roi instanceof ROI3DArea))
             return roi;
 
         final Rectangle5D bounds5D = roi.getBounds5D();
@@ -1083,7 +1093,8 @@ public class ROIUtil {
      * @return the ROI Polygon or ROI Mesh corresponding to the input ROI.<br>
      * If the ROI is already of shape type then it's directly returned without any conversion.
      */
-    public static ROI convertToShape(final ROI roi, final double maxDeviation) throws UnsupportedOperationException, InterruptedException {
+    @Contract("null, _ -> fail")
+    public static @NonNull ROI convertToShape(final ROI roi, final double maxDeviation) throws UnsupportedOperationException, InterruptedException {
         if (roi instanceof ROI2DShape)
             return roi;
 
@@ -1150,7 +1161,8 @@ public class ROIUtil {
     /**
      * Returns connected component from specified ROI as a list of ROI (AreaX type).
      */
-    public static List<ROI> getConnectedComponents(final ROI roi) throws UnsupportedOperationException, InterruptedException {
+    @Contract("null -> fail")
+    public static @NonNull List<ROI> getConnectedComponents(final ROI roi) throws UnsupportedOperationException, InterruptedException {
         final List<ROI> result = new ArrayList<>();
 
         if (roi instanceof final ROI2D roi2d) {
@@ -1236,7 +1248,7 @@ public class ROIUtil {
      * list.<br>
      * If the specified ROI cannot be cut by the given Line2D then <code>null</code> is returned.
      */
-    public static List<ROI> split(final ROI roi, final Line2D line) throws UnsupportedOperationException, InterruptedException {
+    public static @Nullable List<ROI> split(final @NonNull ROI roi, final Line2D line) throws UnsupportedOperationException, InterruptedException {
         final Rectangle2D bounds2d = roi.getBounds5D().toRectangle2D();
         // need to enlarge bounds a bit to avoid roundness issues on line intersection
         final Rectangle2D extendedBounds2d = Rectangle2DUtil.getScaledRectangle(bounds2d, 1.1d, true);
@@ -1308,7 +1320,7 @@ public class ROIUtil {
      * @param label     if set to <code>true</code> then each ROI will be draw as a separate label (value) in the sequence
      *                  starting from 1.
      */
-    public static Sequence convertToSequence(final List<ROI> inputRois, final int sizeX, final int sizeY, final int sizeC, final int sizeZ, final int sizeT, final DataType dataType, final boolean label)
+    public static @NonNull Sequence convertToSequence(final List<ROI> inputRois, final int sizeX, final int sizeY, final int sizeC, final int sizeZ, final int sizeT, final DataType dataType, final boolean label)
             throws InterruptedException {
         final List<ROI> rois = new ArrayList<>();
         final Rectangle5D bounds = new Rectangle5D.Double();
@@ -1409,7 +1421,7 @@ public class ROIUtil {
      * @param label     if set to <code>true</code> then each ROI will be draw as a separate label (value) in the sequence
      *                  starting from 1.
      */
-    public static Sequence convertToSequence(final List<ROI> inputRois, final Sequence sequence, final boolean label) throws InterruptedException {
+    public static @NonNull Sequence convertToSequence(final List<ROI> inputRois, final Sequence sequence, final boolean label) throws InterruptedException {
         if (sequence == null)
             return convertToSequence(inputRois, 0, 0, 0, 0, 0, label ? ((inputRois.size() > 255) ? DataType.USHORT : DataType.UBYTE) : DataType.UBYTE, label);
 
@@ -1424,7 +1436,7 @@ public class ROIUtil {
      *                 If this field is <code>null</code> then the global ROI bounds will be used to define the Sequence
      *                 dimension
      */
-    public static Sequence convertToSequence(final ROI inputRoi, final Sequence sequence) throws InterruptedException {
+    public static @NonNull Sequence convertToSequence(final ROI inputRoi, final Sequence sequence) throws InterruptedException {
         return convertToSequence(CollectionUtil.createArrayList(inputRoi), sequence, false);
     }
 
@@ -1435,6 +1447,7 @@ public class ROIUtil {
      * @param roi input ROI we want to rescale
      * @throws UnsupportedOperationException if input ROI is not ROI2DShape or ROI3DShape (scaling supported only for these ROI)
      */
+    @Contract("null, _, _, _ -> fail")
     public static void scale(final ROI roi, final double scaleX, final double scaleY, final double scaleZ) throws UnsupportedOperationException {
         // shape ROI --> can rescale easily
         if (roi instanceof final ROI2DRectShape roi2DRectShape) {
@@ -1502,6 +1515,7 @@ public class ROIUtil {
      * @param roi input ROI we want to rescale
      * @throws UnsupportedOperationException if input ROI is not ROI2DShape or ROI3DShape (scaling supported only for these ROI)
      */
+    @Contract("null, _, _ -> fail")
     public static void scale(final ROI roi, final double scaleX, final double scaleY) throws UnsupportedOperationException {
         scale(roi, scaleX, scaleY, 1d);
     }
@@ -1513,6 +1527,7 @@ public class ROIUtil {
      * @param roi input ROI we want to rescale
      * @throws UnsupportedOperationException if input ROI is not ROI2DShape or ROI3DShape (scaling supported only for these ROI)
      */
+    @Contract("null, _ -> fail")
     public static void scale(final ROI roi, final double scale) throws UnsupportedOperationException {
         scale(roi, scale, scale, scale);
     }
@@ -1527,6 +1542,7 @@ public class ROIUtil {
      * @param down     Set to <code>true</code> for down scaling and <code>false</code> for up scaling operation
      * @throws UnsupportedOperationException if input ROI is ROI4D or ROI5D (up scaling not supported for these ROI)
      */
+    @Contract("null, _, _ -> null")
     public static ROI get2XScaled(final ROI roi, final boolean scaleOnZ, final boolean down) throws UnsupportedOperationException, InterruptedException {
         if (roi == null)
             return null;
@@ -1658,6 +1674,7 @@ public class ROIUtil {
      * @param scaleOnZ Set to <code>true</code> to scale as well on Z dimension (XY dimension only otherwise)
      * @throws UnsupportedOperationException if input ROI is ROI4D or ROI5D (up scaling not supported for these ROI)
      */
+    @Contract("null, _ -> null")
     public static ROI getUpscaled(final ROI roi, final boolean scaleOnZ) throws UnsupportedOperationException, InterruptedException {
         return get2XScaled(roi, scaleOnZ, false);
     }
@@ -1671,6 +1688,7 @@ public class ROIUtil {
      * @param scaleOnZ Set to <code>true</code> to scale as well on Z dimension (XY dimension only otherwise)
      * @throws UnsupportedOperationException if input ROI is ROI4D or ROI5D (up scaling not supported for these ROI)
      */
+    @Contract("null, _ -> null")
     public static ROI getDownscaled(final ROI roi, final boolean scaleOnZ) throws UnsupportedOperationException, InterruptedException {
         return get2XScaled(roi, scaleOnZ, true);
     }
@@ -1692,6 +1710,7 @@ public class ROIUtil {
      * @throws UnsupportedOperationException if input ROI is ROI4D or ROI5D while scaling is required (scaling not supported for these ROI) and <code>ignoreErrorOnScale</code> is set to
      *                                       <code>FALSE</code>
      */
+    @Contract("null, _, _, _, _, _ -> null")
     public static ROI adjustToSequence(final ROI roi, final Sequence source, final Sequence destination, final boolean translate, final boolean scale, final boolean ignoreErrorOnScale)
             throws UnsupportedOperationException, InterruptedException {
         if (roi == null)
@@ -1715,7 +1734,7 @@ public class ROIUtil {
                 if (MathUtil.round(scaleX / scaleY, 3) != 1d) {
                     doRescale = false;
                     if (ignoreErrorOnScale)
-                        IcyLogger.warn(ROIUtil.class, "ROIUtil.adjustToSequence: cannot rescale ROI with different X/Y scale ratio.");
+                        LOGGER.warning("ROIUtil.adjustToSequence: cannot rescale ROI with different X/Y scale ratio.");
                     else
                         throw new UnsupportedOperationException("ROIUtil.adjustToSequence: cannot rescale ROI (different X/Y scale ratio) !");
                 }
@@ -1727,7 +1746,7 @@ public class ROIUtil {
                 if (Math.round(resDelta) != resDelta) {
                     doRescale = false;
                     if (ignoreErrorOnScale)
-                        IcyLogger.warn(ROIUtil.class, "ROIUtil.adjustToSequence: cannot rescale ROI with scale XY = " + scaleX);
+                        LOGGER.warning("ROIUtil.adjustToSequence: cannot rescale ROI with scale XY = " + scaleX);
                     else
                         throw new UnsupportedOperationException("ROIUtil.adjustToSequence: cannot rescale ROI (scale XY = " + scaleX + ") !");
                 }
@@ -1738,7 +1757,7 @@ public class ROIUtil {
                 if (Math.round(resDeltaZ) != resDeltaZ) {
                     doRescaleZ = false;
                     if (ignoreErrorOnScale)
-                        IcyLogger.warn(ROIUtil.class, "ROIUtil.adjustToSequence: ignoring ROI Z rescaling (scale Z = " + scaleZ + ")");
+                        LOGGER.warning("ROIUtil.adjustToSequence: ignoring ROI Z rescaling (scale Z = " + scaleZ + ")");
                     else
                         throw new UnsupportedOperationException("ROIUtil.adjustToSequence: cannot rescale ROI (scale Z = " + scaleZ + ") !");
                 }
@@ -1749,7 +1768,7 @@ public class ROIUtil {
                 if (zScaling && (MathUtil.round(resDeltaZ / resDelta, 3) != 1d)) {
                     doRescaleZ = false;
                     if (ignoreErrorOnScale)
-                        IcyLogger.warn(ROIUtil.class, "ROIUtil.adjustToSequence: ignoring ROI Z rescaling (scale XY = " + scaleX + " while scale Z = " + scaleZ + ")");
+                        LOGGER.warning("ROIUtil.adjustToSequence: ignoring ROI Z rescaling (scale XY = " + scaleX + " while scale Z = " + scaleZ + ")");
                     else
                         throw new UnsupportedOperationException("ROIUtil.adjustToSequence: cannot rescale ROI (scale XY = " + scaleX + " while scale Z = " + scaleZ + ") !");
                 }
@@ -1843,6 +1862,7 @@ public class ROIUtil {
      * @throws UnsupportedOperationException if input ROI is ROI4D or ROI5D while scaling is required (scaling not supported for these ROI) and <code>ignoreErrorOnScale</code> is set to
      *                                       <code>FALSE</code>
      */
+    @Contract("null, _, _, _, _ -> null")
     public static ROI adjustToSequence(final ROI roi, final Sequence source, final Sequence destination, final boolean translate, final boolean scale) throws UnsupportedOperationException, InterruptedException {
         return adjustToSequence(roi, source, destination, translate, scale, false);
     }
@@ -1860,12 +1880,13 @@ public class ROIUtil {
      * @return adjusted ROI
      * @throws UnsupportedOperationException if input ROI is ROI4D or ROI5D while scaling is required (scaling not supported for these ROI)
      */
+    @Contract("null, _, _ -> null")
     public static ROI adjustToSequence(final ROI roi, final Sequence source, final Sequence destination) throws UnsupportedOperationException, InterruptedException {
         return adjustToSequence(roi, source, destination, true, true);
     }
 
     /**
-     * Copy properties (name, color...) from <code>source</code> ROI and apply it to <code>destination</code> ROI.
+     * Copy properties (name, color, etc.) from <code>source</code> ROI and apply it to <code>destination</code> ROI.
      */
     public static void copyROIProperties(final ROI source, final ROI destination, final boolean copyName) {
         if ((source == null) || (destination == null))
@@ -1953,7 +1974,7 @@ public class ROIUtil {
         return wsCalculator.getLabelRois();
     }
 
-    public static List<ROI> computeSkeleton(final List<ROI2D> selectedROIs, final Dimension3D pixelSize, final double distance) throws InterruptedException {
+    public static @NonNull List<ROI> computeSkeleton(final @NonNull List<ROI2D> selectedROIs, final Dimension3D pixelSize, final double distance) throws InterruptedException {
         final List<ROI> result = new ArrayList<>();
         for (final ROI roi : selectedROIs) {
             if (roi.getBounds5D().getSizeX() == 0)
@@ -1983,7 +2004,7 @@ public class ROIUtil {
         return result;
     }
 
-    public static List<ROI> computeDilation(final List<? extends ROI> selectedROIs, final Dimension3D pixelSize, final double distance) throws InterruptedException {
+    public static @NonNull List<ROI> computeDilation(final @NonNull List<? extends ROI> selectedROIs, final Dimension3D pixelSize, final double distance) throws InterruptedException {
         final List<ROI> result = new ArrayList<>();
         for (final ROI roi : selectedROIs) {
             if (roi.getBounds5D().getSizeX() == 0)
@@ -2055,7 +2076,7 @@ public class ROIUtil {
         return result;
     }
 
-    public static List<ROI> computeErosion(final List<? extends ROI> selectedROIs, final Dimension3D pixelSize, final double distance) throws InterruptedException {
+    public static @NonNull List<ROI> computeErosion(final @NonNull List<? extends ROI> selectedROIs, final Dimension3D pixelSize, final double distance) throws InterruptedException {
         final List<ROI> result = new ArrayList<>();
         for (final ROI roi : selectedROIs) {
             if (roi.getBounds5D().getSizeX() == 0)
@@ -2086,7 +2107,7 @@ public class ROIUtil {
     /**
      * Compute and returns the mass center of specified ROI.
      */
-    public static Point5D computeMassCenter(final @NotNull ROI roi) throws InterruptedException {
+    public static Point5D computeMassCenter(final @NonNull ROI roi) throws InterruptedException {
         final Rectangle5D bounds = roi.getBounds5D();
 
         // special case of empty bounds ? --> return position
@@ -2139,7 +2160,7 @@ public class ROIUtil {
      * @throws UnsupportedOperationException If the C dimension of the ROI is &gt; 1 while allowMultiChannel parameter is set to <code>false</code>
      * @throws InterruptedException          if the thread was interrupted during the computation of the intensity descriptor
      */
-    public static @NotNull IntensityDescriptorInfos computeIntensityDescriptors(final ROI roi, final Sequence sequence, final boolean allowMultiChannel) throws UnsupportedOperationException, InterruptedException {
+    public static @NonNull IntensityDescriptorInfos computeIntensityDescriptors(final ROI roi, final Sequence sequence, final boolean allowMultiChannel) throws UnsupportedOperationException, InterruptedException {
         if (!allowMultiChannel && (roi.getBounds5D().getSizeC() > 1d))
             throw new UnsupportedOperationException("Not allowed to compute intensity descriptor on a multi channel ROI (sizeC > 1).");
 
@@ -2152,7 +2173,7 @@ public class ROIUtil {
         double sum2 = 0;
 
         // FIXME: we were using interior pixels only, now we also use edge pixels so we can have intensities info
-        // for intersection only ROI --> see if that is a good idea...
+        // for intersection only ROI --> see if that is a good idea…
         final SequenceDataIterator it = new SequenceDataIterator(sequence, roi, true);
 
         while (!it.done()) {

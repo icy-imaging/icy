@@ -23,7 +23,7 @@ import fr.icy.common.math.UnitUtil;
 import fr.icy.common.string.StringUtil;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class DownloadFrame extends CancelableProgressFrame {

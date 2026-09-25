@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,62 +15,61 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.frame;
 
 import java.util.EventListener;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
-public interface IcyFrameListener extends EventListener
-{
+public interface IcyFrameListener extends EventListener {
     /**
      * Invoked the first time the icyFrame is made visible.
      */
-    public void icyFrameOpened(IcyFrameEvent e);
+    void icyFrameOpened(IcyFrameEvent e);
 
     /**
      * Invoked when the user attempts to close the icyFrame from the icyFrame's system menu.
      */
-    public void icyFrameClosing(IcyFrameEvent e);
+    void icyFrameClosing(IcyFrameEvent e);
 
     /**
-     * Invoked when an icyFrame has been closed as the result of calling dispose on the icyFrame.
+     * Invoked when an icyFrame has been closed as the result of calling disposal on the icyFrame.
      */
-    public void icyFrameClosed(IcyFrameEvent e);
+    void icyFrameClosed(IcyFrameEvent e);
 
     /**
      * Invoked when an icyFrame is changed from a normal to a minimized state. For many platforms, a
      * minimized icyFrame is displayed as the icon specified in the icyFrame's iconImage property.
      */
-    public void icyFrameIconified(IcyFrameEvent e);
+    void icyFrameIconified(IcyFrameEvent e);
 
     /**
      * Invoked when an icyFrame is changed from a minimized to a normal state.
      */
-    public void icyFrameDeiconified(IcyFrameEvent e);
+    void icyFrameDeiconified(IcyFrameEvent e);
 
     /**
      * Invoked when the icyFrame is set to be the active icyFrame. The active Window is always
-     * either the focused Window, or the first Frame or Dialog that is an owner of the focused
+     * either the focused Window or the first Frame or Dialog that is an owner of the focused
      * Window.
      */
-    public void icyFrameActivated(IcyFrameEvent e);
+    void icyFrameActivated(IcyFrameEvent e);
 
     /**
      * Invoked when an icyFrame is no longer the active Window. The active Window is always either
-     * the focused Window, or the first Frame or Dialog that is an owner of the focused Window.
+     * the focused Window or the first Frame or Dialog that is an owner of the focused Window.
      */
-    public void icyFrameDeactivated(IcyFrameEvent e);
+    void icyFrameDeactivated(IcyFrameEvent e);
 
     /**
      * Invoked when an IcyFrame is changed to externalized to internalized state
      */
-    public void icyFrameInternalized(IcyFrameEvent e);
+    void icyFrameInternalized(IcyFrameEvent e);
 
     /**
      * Invoked when an IcyFrame is changed to internalized to externalized state
      */
-    public void icyFrameExternalized(IcyFrameEvent e);
-
+    void icyFrameExternalized(IcyFrameEvent e);
 }

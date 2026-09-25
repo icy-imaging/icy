@@ -25,7 +25,7 @@ import fr.icy.common.geom.point.Point3D;
 /**
  * Line3D iterator (iterate over Line3D points given a wanted step).
  * 
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  */
 public class Line3DIterator implements Iterator<Point3D>
 {

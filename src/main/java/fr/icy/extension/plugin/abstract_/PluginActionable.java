@@ -24,7 +24,7 @@ package fr.icy.extension.plugin.abstract_;
  * An actionable plugin will appear in workspace or plugin menu.<br>
  * Also it should implement the "run()" method which contains the main process code.
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class PluginActionable extends Plugin implements Runnable {

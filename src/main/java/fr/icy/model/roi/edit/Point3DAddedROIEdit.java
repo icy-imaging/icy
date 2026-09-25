@@ -34,7 +34,7 @@ import fr.icy.extension.kernel.roi.roi3d.ROI3DPolyLine;
 /**
  * 3D control point added implementation for ROI undoable edition.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Point3DAddedROIEdit extends AbstractPoint3DROIEdit
 {

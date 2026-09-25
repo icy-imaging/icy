@@ -22,7 +22,7 @@ import java.awt.Dimension;
 import javax.swing.JComponent;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class GenericFrame extends IcyFrame
 {

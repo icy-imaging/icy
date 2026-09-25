@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,14 +18,15 @@
 
 package fr.icy.gui.action;
 
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import fr.icy.Icy;
 import fr.icy.common.geom.dimension.Dimension3D;
 import fr.icy.common.geom.shape.ShapeUtil.BooleanOperator;
 import fr.icy.common.reflect.ClassUtil;
 import fr.icy.common.string.StringUtil;
 import fr.icy.common.type.DataIteratorUtil;
+import fr.icy.extension.kernel.roi.roi2d.ROI2DPoint;
+import fr.icy.extension.kernel.roi.roi2d.ROI2DRectangle;
+import fr.icy.extension.kernel.roi.roi3d.ROI3DBox;
 import fr.icy.gui.clipboard.Clipboard;
 import fr.icy.gui.dialog.IdConfirmDialog;
 import fr.icy.gui.dialog.MessageDialog;
@@ -48,12 +49,12 @@ import fr.icy.model.sequence.edit.ROIAddsSequenceEdit;
 import fr.icy.model.sequence.edit.ROIReplacesSequenceEdit;
 import fr.icy.system.IcyHandledException;
 import fr.icy.system.SystemUtil;
-import org.jetbrains.annotations.NotNull;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Document;
-import fr.icy.extension.kernel.roi.roi2d.ROI2DPoint;
-import fr.icy.extension.kernel.roi.roi2d.ROI2DRectangle;
-import fr.icy.extension.kernel.roi.roi3d.ROI3DBox;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -65,9 +66,9 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * Roi actions (open / save / copy / paste / merge...)
+ * Roi actions (open, save, copy, paste, merge, etc.)
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class RoiActions {
@@ -78,13 +79,13 @@ public final class RoiActions {
     }
 
     public static final IcyAbstractAction loadAction = new IcyAbstractAction(
-            "Load ROI(s)...",
+            "Load ROI(s)…",
             "Load ROI(s) from file",
             "Load ROI(s) from a XML file and add them to the active sequence"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
-            final String filename = OpenDialog.chooseFile("Load ROI(s)...", DEFAULT_ROI_DIR, DEFAULT_ROI_NAME);
+            final String filename = OpenDialog.chooseFile("Load ROI(s)…", DEFAULT_ROI_DIR, DEFAULT_ROI_NAME);
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if ((filename != null) && (sequence != null)) {
@@ -120,19 +121,19 @@ public final class RoiActions {
     };
 
     public static final IcyAbstractAction saveAction = new IcyAbstractAction(
-            "Save ROI(s) as...",
+            "Save ROI(s) as…",
             "Save selected ROI(s) to file",
             "Save the selected ROI(s) from active sequence into an XML file"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
-            final String filename = SaveDialog.chooseFile("Save ROI(s)...", DEFAULT_ROI_DIR, DEFAULT_ROI_NAME);
+            final String filename = SaveDialog.chooseFile("Save ROI(s)…", DEFAULT_ROI_DIR, DEFAULT_ROI_NAME);
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
             if ((filename != null) && (sequence != null)) {
                 final List<ROI> rois = sequence.getSelectedROIs();
 
-                if (rois.size() > 0) {
+                if (!rois.isEmpty()) {
                     final Document doc = XMLUtil.createDocument(true);
 
                     if (doc != null) {
@@ -167,7 +168,7 @@ public final class RoiActions {
             if (sequence != null) {
                 final List<ROI> rois = sequence.getSelectedROIs();
 
-                if (rois.size() > 0) {
+                if (!rois.isEmpty()) {
                     // need to get a copy of the ROI (as it can change meanwhile)
                     for (int i = 0; i < rois.size(); i++) {
                         final ROI roi = rois.get(i).getCopy();
@@ -193,7 +194,7 @@ public final class RoiActions {
         @Override
         public boolean isEnabled() {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-            return super.isEnabled() && (sequence != null) && (sequence.getSelectedROIs().size() > 0);
+            return super.isEnabled() && (sequence != null) && (!sequence.getSelectedROIs().isEmpty());
         }
     };
 
@@ -210,7 +211,7 @@ public final class RoiActions {
             if (sequence != null) {
                 final List<ROI> rois = sequence.getSelectedROIs();
 
-                if (rois.size() > 0) {
+                if (!rois.isEmpty()) {
                     // save in the Icy clipboard
                     Clipboard.put(Clipboard.TYPE_ROILINKLIST, rois);
                     // clear system clipboard
@@ -228,7 +229,7 @@ public final class RoiActions {
         @Override
         public boolean isEnabled() {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-            return super.isEnabled() && (sequence != null) && (sequence.getSelectedROIs().size() > 0);
+            return super.isEnabled() && (sequence != null) && (!sequence.getSelectedROIs().isEmpty());
         }
     };
 
@@ -248,7 +249,7 @@ public final class RoiActions {
                     final Sequence sequenceSrc = sequenceRoiList.sequence;
                     final List<ROI> rois = sequenceRoiList.rois;
 
-                    if ((rois != null) && (rois.size() > 0)) {
+                    if ((rois != null) && (!rois.isEmpty())) {
                         try {
                             final List<ROI> copyRois = new ArrayList<>();
 
@@ -257,7 +258,7 @@ public final class RoiActions {
                                 // unselect all rois
                                 sequence.setSelectedROI(null);
 
-                                // add copy to sequence (so we can do the paste operation severals time)
+                                // add copy to sequence (so we can do the paste operation several times)
                                 for (final ROI roi : rois) {
                                     // final ROI newROI = roi.getCopy();
                                     final ROI newROI = ROIUtil.adjustToSequence(roi, sequenceSrc, sequence, true, true, true);
@@ -324,7 +325,7 @@ public final class RoiActions {
                     final List<ROI> rois = new ArrayList<>();
 
                     //if ((rois != null) && (rois.size() > 0)) {
-                    if ((list.size() > 0)) {
+                    if ((!list.isEmpty())) {
                         sequence.beginUpdate();
                         try {
 
@@ -412,7 +413,7 @@ public final class RoiActions {
         public boolean isEnabled() {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
 
-            return super.isEnabled() && (sequence != null) && (sequence.getROIs().size() > 0);
+            return super.isEnabled() && (sequence != null) && (!sequence.getROIs().isEmpty());
         }
     };
 
@@ -461,7 +462,7 @@ public final class RoiActions {
         @Override
         public boolean isEnabled() {
             final Sequence sequence = Icy.getMainInterface().getActiveSequence();
-            return super.isEnabled() && (sequence != null) && (sequence.getSelectedROIs().size() > 0);
+            return super.isEnabled() && (sequence != null) && (!sequence.getSelectedROIs().isEmpty());
         }
     };
 
@@ -470,7 +471,7 @@ public final class RoiActions {
             "Boolean inversion operation",
             "Create a new ROI representing the inverse of selected ROI",
             true,
-            "Computing inverse..."
+            "Computing inverse…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -543,10 +544,10 @@ public final class RoiActions {
                             }
                         }
                         else
-                            MessageDialog.showDialog("Operation not supported", "Input ROI has incorrect dimension !", MessageDialog.ERROR_MESSAGE);
+                            MessageDialog.showDialog("Operation not supported", "Input ROI has incorrect dimension !", JOptionPane.ERROR_MESSAGE);
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -573,7 +574,7 @@ public final class RoiActions {
             "Boolean union operation",
             "Create a new ROI representing the union of selected ROIs",
             true,
-            "Computing union..."
+            "Computing union…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -597,10 +598,10 @@ public final class RoiActions {
                     }
                 }
                 catch (final InterruptedException e1) {
-                    MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                 }
                 catch (final UnsupportedOperationException ex) {
-                    MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                 }
                 finally {
                     sequence.endUpdate();
@@ -623,7 +624,7 @@ public final class RoiActions {
             "Boolean intersection operation",
             "Create a new ROI representing the intersection of selected ROIs",
             true,
-            "Computing intersection..."
+            "Computing intersection…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -647,10 +648,10 @@ public final class RoiActions {
                     }
                 }
                 catch (final InterruptedException e1) {
-                    MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                 }
                 catch (final UnsupportedOperationException ex) {
-                    MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                 }
                 finally {
                     sequence.endUpdate();
@@ -673,7 +674,7 @@ public final class RoiActions {
             "Boolean exclusive union operation",
             "Create a new ROI representing the exclusive union of selected ROIs",
             true,
-            "Computing exclusive union..."
+            "Computing exclusive union…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -697,10 +698,10 @@ public final class RoiActions {
                     }
                 }
                 catch (final InterruptedException e1) {
-                    MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                 }
                 catch (final UnsupportedOperationException ex) {
-                    MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                 }
                 finally {
                     sequence.endUpdate();
@@ -723,7 +724,7 @@ public final class RoiActions {
             "Boolean subtraction",
             "Create 2 ROIs representing the result of (A - B) and (B - A)",
             true,
-            "Computing subtraction..."
+            "Computing subtraction…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -765,7 +766,7 @@ public final class RoiActions {
                         }
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -792,7 +793,7 @@ public final class RoiActions {
             "Fill ROI(s) interior",
             "Fill interior of the selected ROI(s) with specified value",
             true,
-            "Fill ROI(s) interior..."
+            "Fill ROI(s) interior…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -809,7 +810,7 @@ public final class RoiActions {
                         // create undo point
                         final boolean canUndo = sequence.createUndoDataPoint("ROI fill interior");
 
-                        // cannot backup
+                        // cannot back up
                         if (!canUndo) {
                             // ask confirmation to continue
                             if (!IdConfirmDialog.confirm(
@@ -829,7 +830,7 @@ public final class RoiActions {
                             sequence.clearUndoManager();
                     }
                     catch (final InterruptedException e1) {
-                        MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                     }
 
                     return true;
@@ -852,7 +853,7 @@ public final class RoiActions {
             "Fill ROI(s) exterior",
             "Fill exterior of the selected ROI(s) with specified value",
             true,
-            "Fill ROI(s) exterior..."
+            "Fill ROI(s) exterior…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -870,7 +871,7 @@ public final class RoiActions {
                         // create undo point
                         canUndo = sequence.createUndoDataPoint("ROI fill exterior");
 
-                        // cannot backup
+                        // cannot back up
                         if (!canUndo) {
                             // ask confirmation to continue
                             if (!IdConfirmDialog.confirm(
@@ -899,14 +900,14 @@ public final class RoiActions {
                         if (canUndo)
                             sequence.undo();
 
-                        MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation interrupted", e1.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                     }
                     catch (final UnsupportedOperationException ex) {
                         // undo operation if possible
                         if (canUndo)
                             sequence.undo();
 
-                        MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
 
                         return false;
                     }
@@ -925,11 +926,11 @@ public final class RoiActions {
     };
 
     public static final IcyAbstractAction xlsExportAction = new IcyAbstractAction(
-            "Export ROI(s) as Excel...",
+            "Export ROI(s) as Excel…",
             "ROI Excel export",
             "Export the content of the ROI table into a XLS/CSV file",
             true,
-            "Exporting ROI informations..."
+            "Exporting ROI information…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -941,15 +942,15 @@ public final class RoiActions {
                 final String content = roisPanel.getCSVFormattedInfos();
 
                 if (StringUtil.isEmpty(content) || roisPanel.getVisibleRois().isEmpty()) {
-                    MessageDialog.showDialog("Nothing to export !", MessageDialog.INFORMATION_MESSAGE);
+                    MessageDialog.showDialog("Nothing to export !", JOptionPane.INFORMATION_MESSAGE);
                     return true;
                 }
 
-                final String filename = SaveDialog.chooseFileForResult("Export ROIs...", "result", XLSXUtil.FILE_DOT_EXTENSION);
+                final String filename = SaveDialog.chooseFileForResult("Export ROIs…", "result", XLSXUtil.FILE_DOT_EXTENSION);
 
                 if (filename != null) {
                     try {
-                        // CSV format wanted ?
+                        // CSV format wanted?
                         if (!FileUtil.getFileExtension(filename, false).toLowerCase().startsWith(XLSXUtil.FILE_EXTENSION)) {
                             // just write CSV content
                             final PrintWriter out = new PrintWriter(filename);
@@ -964,13 +965,13 @@ public final class RoiActions {
                             if (XLSXUtil.setFromCSV(sheet, content))
                                 XLSXUtil.saveAndClose(workbook, filename);
                             else {
-                                MessageDialog.showDialog("Error", "Error while exporting ROIs table content to XLSX file.", MessageDialog.ERROR_MESSAGE);
+                                MessageDialog.showDialog("Error", "Error while exporting ROIs table content to XLSX file.", JOptionPane.ERROR_MESSAGE);
                                 return false;
                             }
                         }
                     }
                     catch (final Exception e1) {
-                        MessageDialog.showDialog("Error", e1.getMessage(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Error", e1.getMessage(), JOptionPane.ERROR_MESSAGE);
                         return false;
                     }
                 }
@@ -1054,7 +1055,7 @@ public final class RoiActions {
                             );
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1123,7 +1124,7 @@ public final class RoiActions {
                             );
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1190,7 +1191,7 @@ public final class RoiActions {
                             );
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1232,7 +1233,8 @@ public final class RoiActions {
                     for (final ROI roi : selectedROIs) {
                         final ROI roiPoint = ROIUtil.convertToPoint(roi);
 
-                        if (roiPoint != null) {
+                        /*if (roiPoint != null)*/
+                        {
                             // select it by default
                             roiPoint.setSelected(true);
 
@@ -1256,10 +1258,10 @@ public final class RoiActions {
                         );
                 }
                 catch (final UnsupportedOperationException ex) {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                 }
                 catch (final InterruptedException ex) {
-                    MessageDialog.showDialog("Operation interrupted", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation interrupted", ex.toString(), JOptionPane.ERROR_MESSAGE);
                 }
                 finally {
                     sequence.endUpdate();
@@ -1307,7 +1309,8 @@ public final class RoiActions {
                             else
                                 resultRoi = ROIUtil.convertToEllipse(roi, radius, radius);
 
-                            if (resultRoi != null) {
+                            /*if (resultRoi != null)*/
+                            {
                                 // select it by default
                                 resultRoi.setSelected(true);
 
@@ -1331,10 +1334,10 @@ public final class RoiActions {
                             );
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     catch (final InterruptedException ex) {
-                        MessageDialog.showDialog("Operation interrupted", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation interrupted", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1384,7 +1387,8 @@ public final class RoiActions {
                             else
                                 resultRoi = ROIUtil.convertToRectangle(roi, size, size);
 
-                            if (resultRoi != null) {
+                            /*if (resultRoi != null)*/
+                            {
                                 // select it by default
                                 resultRoi.setSelected(true);
 
@@ -1408,10 +1412,10 @@ public final class RoiActions {
                             );
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     catch (final InterruptedException ex) {
-                        MessageDialog.showDialog("Operation interrupted", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation interrupted", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1451,7 +1455,8 @@ public final class RoiActions {
                         for (final ROI roi : selectedROIs) {
                             final ROI shapeRoi = ROIUtil.convertToShape(roi, -1);
 
-                            if (shapeRoi != null) {
+                            /*if (shapeRoi != null)*/
+                            {
                                 // select it by default
                                 shapeRoi.setSelected(true);
 
@@ -1475,7 +1480,7 @@ public final class RoiActions {
                             );
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1517,7 +1522,7 @@ public final class RoiActions {
                         for (final ROI roi : selectedROIs) {
                             final List<ROI> components = ROIUtil.getConnectedComponents(roi);
 
-                            // nothing to do if we obtain only 1 component
+                            // nothing to do if we get only 1 component
                             if (components.size() > 1) {
                                 sequence.removeROI(roi);
                                 removedROIs.add(roi);
@@ -1541,7 +1546,7 @@ public final class RoiActions {
                             );
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1594,7 +1599,7 @@ public final class RoiActions {
                         }
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1647,7 +1652,7 @@ public final class RoiActions {
                         }
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1700,7 +1705,7 @@ public final class RoiActions {
                         }
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1753,7 +1758,7 @@ public final class RoiActions {
                         }
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     finally {
                         sequence.endUpdate();
@@ -1822,7 +1827,7 @@ public final class RoiActions {
                         );
                 }
                 catch (final UnsupportedOperationException ex) {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                 }
                 finally {
                     sequence.endUpdate();
@@ -1858,7 +1863,7 @@ public final class RoiActions {
                     distanceMap = ROIUtil.computeDistanceMap(selectedROIs, sequence.getDimension5D(), pixelSize, false);
                 }
                 catch (final UnsupportedOperationException ex) {
-                    MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
                 catch (final InterruptedException ex1) {
@@ -1890,7 +1895,7 @@ public final class RoiActions {
                 final List<ROI> seedRois = sequence.getSelectedROIs(ROI2DPoint.class, true);
                 selectedRois.removeAll(new HashSet<>(seedRois));
 
-                final Thread thrd = new Thread(() -> {
+                final Thread thread = new Thread(() -> {
                     try {
                         final Dimension3D pixelSize = new Dimension3D.Double(1, 1, 1);
                         final List<ROI> separationRois;
@@ -1914,13 +1919,13 @@ public final class RoiActions {
                         sequence.endUpdate();
                     }
                     catch (final UnsupportedOperationException ex) {
-                        MessageDialog.showDialog("Operation not supported", ex.toString(), MessageDialog.ERROR_MESSAGE);
+                        MessageDialog.showDialog("Operation not supported", ex.toString(), JOptionPane.ERROR_MESSAGE);
                     }
                     catch (final InterruptedException ex1) {
                         throw new IcyHandledException(ex1);
                     }
                 }, "ROIWatershed");
-                thrd.start();
+                thread.start();
             }
             return false;
         }
@@ -1955,7 +1960,7 @@ public final class RoiActions {
                     sequence.endUpdate();
                 }
                 catch (final UnsupportedOperationException ex) {
-                    MessageDialog.showDialog("Operation not supported", ex.getMessage(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
                 catch (final InterruptedException ex1) {
@@ -1995,7 +2000,7 @@ public final class RoiActions {
                     sequence.endUpdate();
                 }
                 catch (final UnsupportedOperationException ex) {
-                    MessageDialog.showDialog("Operation not supported", ex.getMessage(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
                 catch (final InterruptedException ex1) {
@@ -2014,7 +2019,7 @@ public final class RoiActions {
     public static final IcyAbstractAction erodeObjectsAction = new IcyAbstractAction(
             "Erode",
             "Erodes selected 2D ROIs",
-            "Computes the erotion of selected 2D ROIs using the provided distance."
+            "Computes the erosion of selected 2D ROIs using the provided distance."
     ) {
         @Override
         protected boolean doAction(final ActionEvent e) {
@@ -2035,7 +2040,7 @@ public final class RoiActions {
                     sequence.endUpdate();
                 }
                 catch (final UnsupportedOperationException ex) {
-                    MessageDialog.showDialog("Operation not supported", ex.getMessage(), MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Operation not supported", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
                 catch (final InterruptedException ex1) {
@@ -2055,7 +2060,7 @@ public final class RoiActions {
      * Return all actions of this class
      */
     @Deprecated(forRemoval = true)
-    public static @NotNull List<IcyAbstractAction> getAllActions() {
+    public static @NonNull List<IcyAbstractAction> getAllActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
         for (final Field field : RoiActions.class.getFields()) {
@@ -2075,7 +2080,7 @@ public final class RoiActions {
         return result;
     }
 
-    public static @NotNull List<IcyAbstractAction> getAllActiveSequenceActions() {
+    public static @NonNull List<IcyAbstractAction> getAllActiveSequenceActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
         result.add(loadAction);

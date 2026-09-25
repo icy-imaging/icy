@@ -18,11 +18,12 @@
 
 package fr.icy.common.geom.areax;
 
-import fr.icy.system.logging.IcyLogger;
-
 import java.awt.geom.PathIterator;
+import java.util.logging.Logger;
 
 public abstract class CrossingsX {
+    private static final Logger LOGGER = Logger.getLogger(CrossingsX.class.getName());
+
     public static final boolean debug = false;
 
     int limit = 0;
@@ -63,7 +64,7 @@ public abstract class CrossingsX {
             builder.append("  [").append(yranges[i]).append(", ").append(yranges[i + 1]).append("]\n\r");
         builder.append("]");
 
-        IcyLogger.trace(CrossingsX.class, builder.toString());
+        LOGGER.fine(builder.toString());
 
         /*System.out.println("CrossingsX [");
         System.out.println("  bounds = [" + ylo + ", " + yhi + "]");

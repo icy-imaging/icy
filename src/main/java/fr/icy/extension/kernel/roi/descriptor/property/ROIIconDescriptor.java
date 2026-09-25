@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,14 +20,13 @@ package fr.icy.extension.kernel.roi.descriptor.property;
 
 import fr.icy.common.string.StringUtil;
 import fr.icy.gui.LookAndFeelUtil;
-import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.roi.ROIDescriptor;
 import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.roi.ROIEvent.ROIEventType;
 import fr.icy.model.sequence.Sequence;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,7 +35,7 @@ import java.awt.*;
  * Icon descriptor class (see {@link ROIDescriptor}).<br>
  * Return the ROI icon a 20 pixels side icon
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROIIconDescriptor extends ROIDescriptor<Icon> {
@@ -52,14 +51,14 @@ public class ROIIconDescriptor extends ROIDescriptor<Icon> {
     }
 
     @Override
-    public boolean needRecompute(final @NotNull ROIEvent change) {
+    public boolean needRecompute(final @NonNull ROIEvent change) {
         return (change.getType() == ROIEventType.PROPERTY_CHANGED) && (StringUtil.equals(change.getPropertyName(), ROI.PROPERTY_ICON));
     }
 
     @Override
-    public Icon compute(final @NotNull ROI roi, final Sequence sequence) throws UnsupportedOperationException {
+    public Icon compute(final @NonNull ROI roi, final Sequence sequence) throws UnsupportedOperationException {
         //return getIcon(roi);
-        return new IcySVG(roi.getIcon()).getIcon(20, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
+        return roi.getIcon().getIcon(20, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
     }
 
     /**
@@ -71,6 +70,6 @@ public class ROIIconDescriptor extends ROIDescriptor<Icon> {
         if (roi == null)
             return null;
 
-        return new IcySVG(roi.getIcon()).getIcon(20, LookAndFeelUtil.getUIColor(LookAndFeelUtil.ColorType.BUTTON_DEFAULT));
+        return roi.getIcon().getIcon(20, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,11 +24,10 @@ import fr.icy.common.Version;
 import fr.icy.common.collection.CollectionUtil;
 import fr.icy.common.string.StringUtil;
 import fr.icy.io.FileUtil;
-import fr.icy.system.logging.IcyLogger;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.Desktop.Action;
@@ -44,12 +43,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SystemUtil {
+    private static final Logger LOGGER = Logger.getLogger(SystemUtil.class.getName());
+
     public static final String SYSTEM_WINDOWS = "win";
     public static final String SYSTEM_MAC_OS = "mac";
     public static final String SYSTEM_UNIX = "unix";
@@ -64,149 +67,89 @@ public class SystemUtil {
     private static int lastCpuLoad = 0;
 
     /**
-     * Launch specified jar file.
-     *
-     * @param jarPath jar file path.
-     * @param vmArgs  arguments for the java virtual machine.
-     * @param appArgs arguments for jar application.
-     * @param workDir working directory.
-     * @deprecated Use {@link #execJAR(String, String[], String, String)} instead.
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public static Process execJAR(final String jarPath, final String vmArgs, final String appArgs, final String workDir) {
-        //return exec("java " + vmArgs + " -jar " + jarPath + " " + appArgs, workDir);
-        return exec(new String[]{"java", vmArgs, "-jar", jarPath, appArgs}, workDir);
-    }
-
-    /**
-     * Launch specified jar file.
+     * Launch the specified jar file.
      *
      * @param jarPath jar file path.
      * @param vmArgs  arguments for the java virtual machine.
      * @param appArgs arguments for jar application.
      * @param workDir working directory.
      */
-    public static Process execJAR(final String jarPath, final String @NotNull [] vmArgs, final String appArgs, final String workDir) {
+    public static Process execJAR(final @NonNull String jarPath, final String @NonNull [] vmArgs, final @NonNull String appArgs, final @NonNull String workDir) {
         //return exec("java " + vmArgs + " -jar " + jarPath + " " + appArgs, workDir);
-        final List<String> cmdarray = new ArrayList<>();
-        cmdarray.add("java");
+        final List<String> cmdArray = new ArrayList<>();
+        cmdArray.add("java");
         if (vmArgs.length > 0)
-            cmdarray.addAll(Arrays.asList(vmArgs));
-        cmdarray.add("-jar");
-        cmdarray.add(jarPath);
-        cmdarray.add(appArgs);
+            cmdArray.addAll(Arrays.asList(vmArgs));
+        cmdArray.add("-jar");
+        cmdArray.add(jarPath);
+        cmdArray.add(appArgs);
 
         //return exec(new String[]{"java", vmArgs, "-jar", jarPath, appArgs}, workDir);
-        return exec(cmdarray.toArray(new String[0]), workDir);
+        return exec(cmdArray.toArray(new String[0]), workDir);
     }
 
     /**
-     * Launch specified jar file.
-     *
-     * @param jarPath jar file path.
-     * @param vmArgs  arguments for the java virtual machine.
-     * @param appArgs arguments for jar application.
-     * @deprecated Use {@link #execJAR(String, String[], String)} instead.
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public static Process execJAR(final String jarPath, final String vmArgs, final String appArgs) {
-        //return exec("java " + vmArgs + " -jar " + jarPath + " " + appArgs);
-        return exec(new String[]{"java", vmArgs, "-jar", jarPath, appArgs});
-    }
-
-    /**
-     * Launch specified jar file.
+     * Launch the specified jar file.
      *
      * @param jarPath jar file path.
      * @param vmArgs  arguments for the java virtual machine.
      * @param appArgs arguments for jar application.
      */
-    public static Process execJAR(final String jarPath, final String @NotNull [] vmArgs, final String appArgs) {
-        //return exec("java " + vmArgs + " -jar " + jarPath + " " + appArgs, workDir);
-        final List<String> cmdarray = new ArrayList<>();
-        cmdarray.add("java");
+    public static Process execJAR(final @NonNull String jarPath, final String @NonNull [] vmArgs, final @NonNull String appArgs) {
+        final List<String> cmdArray = new ArrayList<>();
+        cmdArray.add("java");
         if (vmArgs.length > 0)
-            cmdarray.addAll(Arrays.asList(vmArgs));
-        cmdarray.add("-jar");
-        cmdarray.add(jarPath);
-        cmdarray.add(appArgs);
+            cmdArray.addAll(Arrays.asList(vmArgs));
+        cmdArray.add("-jar");
+        cmdArray.add(jarPath);
+        cmdArray.add(appArgs);
 
-        //return exec(new String[]{"java", vmArgs, "-jar", jarPath, appArgs}, workDir);
-        return exec(cmdarray.toArray(new String[0]));
+        return exec(cmdArray.toArray(new String[0]));
     }
 
     /**
-     * Launch specified jar file.
+     * Launch the specified jar file.
      *
      * @param jarPath jar file path.
      * @param appArgs arguments for jar application.
      */
-    public static Process execJAR(final String jarPath, final String appArgs) {
+    public static Process execJAR(final @NonNull String jarPath, final @NonNull String appArgs) {
         //return execJAR(jarPath, "", appArgs);
         return execJAR(jarPath, new String[]{}, appArgs);
     }
 
     /**
-     * Launch specified jar file.
+     * Launch the specified jar file.
      *
      * @param jarPath jar file path.
      */
-    public static Process execJAR(final String jarPath) {
-        return execJAR(jarPath, "", "");
+    public static Process execJAR(final @NonNull String jarPath) {
+        return execJAR(jarPath, new String[]{}, "");
     }
 
     /**
      * Execute a system command and return the attached process.
      *
-     * @param cmd system command to execute.
-     * @deprecated Use {@link #exec(String[])} instead.
+     * @param cmdArray the system command list to execute.
      */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public static Process exec(final String cmd) {
-        return exec(cmd, ".");
+    public static Process exec(final String @NonNull [] cmdArray) {
+        return exec(cmdArray, ".");
     }
 
     /**
      * Execute a system command and return the attached process.
      *
-     * @param cmdarray system commands list to execute.
-     */
-    public static Process exec(final String[] cmdarray) {
-        return exec(cmdarray, ".");
-    }
-
-    /**
-     * Execute a system command and return the attached process.
-     *
-     * @param cmd system command to execute.
-     * @param dir the working directory of the subprocess, or null if the subprocess should inherit the
-     *            working directory of the current process.
-     * @deprecated Use {@link #exec(String[], String)} instead.
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    public static @Nullable Process exec(final String cmd, final String dir) {
-        try {
-            return Runtime.getRuntime().exec(cmd, null, new File(dir));
-        }
-        catch (final Exception e) {
-            IcyLogger.error(SystemUtil.class, e, "SystemUtil.exec(" + cmd + ") error.");
-            return null;
-        }
-    }
-
-    /**
-     * Execute a system command and return the attached process.
-     *
-     * @param cmdarray system commands list to execute.
+     * @param cmdArray the system command list to execute.
      * @param dir      the working directory of the subprocess, or null if the subprocess should inherit the
      *                 working directory of the current process.
      */
-    public static @Nullable Process exec(final String[] cmdarray, final String dir) {
+    public static @Nullable Process exec(final String @NonNull [] cmdArray, final @NonNull String dir) {
         try {
-            return Runtime.getRuntime().exec(cmdarray, null, new File(dir));
+            return Runtime.getRuntime().exec(cmdArray, null, new File(dir));
         }
         catch (final IOException e) {
-            IcyLogger.error(SystemUtil.class, e, "SystemUtil.exec(" + Arrays.toString(cmdarray) + ") error.");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Unable to execute '" + Arrays.toString(cmdArray) + "'.", e);
             return null;
         }
     }
@@ -259,7 +202,7 @@ public class SystemUtil {
     }
 
     /**
-     * Launch the system file manager on specified folder (if supported)
+     * Launch the system file manager on a specified folder (if supported)
      */
     public static boolean openFolder(final String folder) throws IOException {
         final Desktop desktop = getDesktop();
@@ -294,31 +237,15 @@ public class SystemUtil {
     }
 
     /**
-     * Return the CTRL key mask used for Menu shortcut.
-     */
-    @SuppressWarnings({"MagicConstant", "deprecation"})
-    @MagicConstant(flags = {Event.CTRL_MASK})
-    public static int getMenuCtrlMask() {
-        try {
-            return Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-        }
-        catch (final HeadlessException e) {
-            // headless mode, use default Ctrl Mask
-            return Event.CTRL_MASK;
-        }
-    }
-
-    /**
      * Return the CTRL extended key mask used for Menu shortcut.
      */
-    @SuppressWarnings("MagicConstant")
-    @MagicConstant(flags = {InputEvent.CTRL_DOWN_MASK})
+    @MagicConstant(flagsFromClass = java.awt.event.InputEvent.class)
     public static int getMenuCtrlMaskEx() {
         try {
             return Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         }
         catch (final HeadlessException e) {
-            // headless mode, use default Ctrl Mask Ex
+            // in headless mode, use default Ctrl Mask Ex
             return InputEvent.CTRL_DOWN_MASK;
         }
     }
@@ -368,7 +295,7 @@ public class SystemUtil {
     }
 
     /**
-     * Return the number of screen device.
+     * Return the number of screen devices.
      */
     public static int getScreenDeviceCount() {
         if (Icy.getMainInterface().isHeadLess())
@@ -383,7 +310,7 @@ public class SystemUtil {
     }
 
     /**
-     * Return the screen device corresponding to specified index.
+     * Return the screen device corresponding to the specified index.
      */
     public static @Nullable GraphicsDevice getScreenDevice(final int index) {
         if (Icy.getMainInterface().isHeadLess())
@@ -399,9 +326,9 @@ public class SystemUtil {
 
     /**
      * Returns all screen device intersecting the given region.<br>
-     * Can return an empty list if given region do not intersect any screen device.
+     * Can return an empty list if the given region does not intersect any screen device.
      */
-    public static @NotNull List<GraphicsDevice> getScreenDevices(final Rectangle region) {
+    public static @NonNull List<GraphicsDevice> getScreenDevices(final Rectangle region) {
         final List<GraphicsDevice> result = new ArrayList<>();
 
         if (Icy.getMainInterface().isHeadLess())
@@ -416,8 +343,8 @@ public class SystemUtil {
 
     /**
      * Returns the main screen device corresponding to the given region.<br>
-     * If the given region intersect multiple screen, it return screen containing the largest area.<br>
-     * Can return <code>null</code> if given region do not intersect any screen device.
+     * If the given region intersects multiple screen, it returns a screen containing the largest area.<br>
+     * Can return <code>null</code> if the given region does not intersect any screen device.
      */
     public static @Nullable GraphicsDevice getScreenDevice(final Rectangle region) {
         if (Icy.getMainInterface().isHeadLess())
@@ -430,7 +357,7 @@ public class SystemUtil {
             final Rectangle2D intersection = getScreenBounds(gd, true).createIntersection(region);
 
             if (!intersection.isEmpty()) {
-                // bigger intersection ?
+                // bigger intersection?
                 if ((largest == null) || ((intersection.getWidth() * intersection.getHeight()) > (largest.getWidth() * largest.getHeight()))) {
                     largest = intersection;
                     result = gd;
@@ -443,7 +370,7 @@ public class SystemUtil {
 
     /**
      * Returns the screen device corresponding to the given position.<br>
-     * Can return <code>null</code> if given position is not located in any screen device.
+     * Can return <code>null</code> if a given position is not located in any screen device.
      */
     public static @Nullable GraphicsDevice getScreenDevice(final Point position) {
         if (Icy.getMainInterface().isHeadLess())
@@ -457,7 +384,7 @@ public class SystemUtil {
     }
 
     /**
-     * Returns true if current system is "head less" (no screen output device).
+     * Returns true if the current system is "head less" (no screen output device).
      */
     public static boolean isHeadLess() {
         return GraphicsEnvironment.isHeadless();
@@ -508,12 +435,12 @@ public class SystemUtil {
     }
 
     /**
-     * Return bounds for specified screen.
+     * Return bounds for a specified screen.
      *
-     * @param removeInsets remove any existing taskbars and menubars from the result
+     * @param removeInsets remove any existing taskbars and menu bars from the result
      */
     @Contract("null, _ -> new")
-    public static @NotNull Rectangle getScreenBounds(final GraphicsDevice graphicsDevice, final boolean removeInsets) {
+    public static @NonNull Rectangle getScreenBounds(final GraphicsDevice graphicsDevice, final boolean removeInsets) {
         if (graphicsDevice == null)
             return new Rectangle();
 
@@ -530,9 +457,9 @@ public class SystemUtil {
     }
 
     /**
-     * Return the entire desktop bounds (take multi screens in account).
+     * Return the entire desktop bounds (compatible with multi screens).
      *
-     * @param removeInsets remove any existing taskbars and menubars from the result
+     * @param removeInsets remove any existing taskbars and menu bars from the result
      */
     public static Rectangle getDesktopBounds(final boolean removeInsets) {
         Rectangle result = new Rectangle();
@@ -549,7 +476,7 @@ public class SystemUtil {
     }
 
     /**
-     * Return the entire desktop bounds (take multi screens in account)
+     * Return the entire desktop bounds (compatible with multi screens)
      *
      * @see #getDesktopBounds(boolean)
      */
@@ -580,21 +507,21 @@ public class SystemUtil {
     }
 
     /**
-     * Return total number of processors or cores available to the JVM (same as system)
+     * Return the total number of processors or cores available to the JVM (same as the system)
      */
     public static int getNumberOfCPUs() {
         return Runtime.getRuntime().availableProcessors();
     }
 
     /**
-     * Return total amount of free memory available to the JVM (in bytes)
+     * Return the total amount of free memory available to the JVM (in bytes)
      */
     public static long getJavaFreeMemory() {
         return getJavaMaxMemory() - getJavaUsedMemory();
     }
 
     /**
-     * Return maximum amount of memory the JVM will attempt to use (in bytes)
+     * Return the maximum amount of memory the JVM will attempt to use (in bytes)
      */
     public static long getJavaMaxMemory() {
         return Runtime.getRuntime().maxMemory();
@@ -641,7 +568,7 @@ public class SystemUtil {
     }
 
     /**
-     * Return total physic memory of system (in bytes)
+     * Return total physic memory of the system (in bytes)
      */
     public static long getTotalMemory() {
         final OperatingSystemMXBean bean = getOSMXBean();
@@ -653,7 +580,7 @@ public class SystemUtil {
     }
 
     /**
-     * Return free physic memory of system (in bytes)
+     * Return free physic memory of the system (in bytes)
      */
     public static long getFreeMemory() {
         final OperatingSystemMXBean bean = getOSMXBean();
@@ -665,7 +592,7 @@ public class SystemUtil {
     }
 
     /**
-     * Return system process CPU time
+     * Return the system process CPU time
      */
     public static long getProcessCpuTime() {
         final OperatingSystemMXBean bean = getOSMXBean();
@@ -677,7 +604,7 @@ public class SystemUtil {
     }
 
     /**
-     * Return average CPU load of the application processes from the last call<br>
+     * Return the average CPU load of the application processes from the last call<br>
      * (-1 if no available)
      */
     public static int getCpuLoad() {
@@ -711,7 +638,7 @@ public class SystemUtil {
     }
 
     /**
-     * Returns the user name.
+     * Returns the username.
      */
     public static String getUserName() {
         return getProperty("user.name");
@@ -737,7 +664,7 @@ public class SystemUtil {
     }
 
     /**
-     * Returns the JVM version in number format (ex: 6.091, 7.071, 8.151..)
+     * Returns the JVM version in number format (ex: 6.091, 7.071, 8.151, etc.)
      */
     public static double getJavaVersionAsNumber() {
         // remove all unwanted characters
@@ -768,19 +695,19 @@ public class SystemUtil {
     }
 
     /**
-     * Returns the JVM integer version (ex: 6.0.91, 7.0.71, 8.0.151..)
+     * Returns the JVM integer version (ex: 6.0.91, 7.0.71, 8.0.151, etc.)
      */
-    public static @NotNull Version getJavaVersionAsVersion() {
+    public static @NonNull Version getJavaVersionAsVersion() {
         // replace separators by '.'
-        String version = getJavaVersion().replaceAll("-", ".");
-        version = version.replaceAll("_", ".");
+        String version = getJavaVersion().replace("-", ".");
+        version = version.replace("_", ".");
         // then remove all unwanted characters
         version = version.replaceAll("[^\\d.]", "");
 
         final int firstSepInd = version.indexOf('.');
 
         if (firstSepInd >= 0) {
-            // version 1.xxx ?
+            // version 1.xxx?
             if (version.substring(0, firstSepInd).equals("1")) {
                 // remove "1."
                 version = version.substring(firstSepInd + 1);
@@ -824,7 +751,7 @@ public class SystemUtil {
      * Return an id OS string :<br>
      * <br>
      * Windows system return <code>SystemUtil.SYSTEM_WINDOWS</code><br>
-     * MAC OS return <code>SystemUtil.SYSTEM_MAC_OS</code><br>
+     * macOS return <code>SystemUtil.SYSTEM_MAC_OS</code><br>
      * Unix system return <code>SystemUtil.SYSTEM_UNIX</code><br>
      * <br>
      * An empty string is returned is OS is unknown.
@@ -843,11 +770,11 @@ public class SystemUtil {
     /**
      * Return an id OS architecture string<br>
      * example : "win32", "win64", "mac32", "mac64", "maca64", "unix32", "unix64", "unixa64"<br>
-     * The bits number depends only from current installed JVM (32 or 64 bit)
-     * and not directly from host OS.<br>
-     * An empty string is returned if OS is unknown.
+     * The number of bits depends only on the current installed JVM (32 or 64 bit)
+     * and not directly from the host OS.<br>
+     * An empty string is returned if the OS is unknown.
      */
-    public static @NotNull String getOSArchIdString() {
+    public static @NonNull String getOSArchIdString() {
         final String javaBit;
 
         // arm64 architecture ?
@@ -875,40 +802,34 @@ public class SystemUtil {
 
     /**
      * Returns true is the JVM is 32 bits.
-     *
-     * @deprecated Since Java 11, there is no 32bits version of the JVM.
      */
-    @Deprecated(since = "3.0.0", forRemoval = true)
     public static boolean is32bits() {
         return getJavaArchDataModel() == 32;
     }
 
     /**
      * Returns true is the JVM is 64 bits.
-     *
-     * @deprecated Since Java 11, there is only 64bits version of the JVM.
      */
-    @Deprecated(since = "3.0.0", forRemoval = true)
     public static boolean is64bits() {
         return getJavaArchDataModel() == 64;
     }
 
     /**
-     * Returns true is the Operating System is Windows based.
+     * Returns true is the Operating System is Windows-based.
      */
     public static boolean isWindows() {
         return (getOSName().toLowerCase().contains("win"));
     }
 
     /**
-     * Returns true is the Operating System is Mac OS based.
+     * Returns true is the Operating System is macOS-based.
      */
     public static boolean isMac() {
         return (getOSName().toLowerCase().contains("mac"));
     }
 
     /**
-     * Returns true is the Operating System is Unix / Linux based.
+     * Returns true is the Operating System is Unix / Linux-based.
      */
     public static boolean isUnix() {
         final String os = getOSName().toLowerCase();
@@ -927,10 +848,7 @@ public class SystemUtil {
             return true;
 
         final String arch = System.getenv("PROCESSOR_ARCHITECTURE");
-        if ((arch != null) && arch.endsWith("64"))
-            return true;
-
-        return false;
+        return (arch != null) && arch.endsWith("64");
     }
 
     /**
@@ -940,14 +858,14 @@ public class SystemUtil {
      * <code>/tmp</code><br>
      * Same as {@link FileUtil#getTempDirectory()}
      */
-    public static @NotNull String getTempDirectory() {
+    public static @NonNull String getTempDirectory() {
         return FileUtil.getTempDirectory();
     }
 
     /**
-     * Returns temporary native library path (used to load native libraries from plugin)
+     * Returns the temporary native library path (used to load native libraries from a plugin)
      */
-    public static @NotNull String getTempLibraryDirectory() {
+    public static @NonNull String getTempLibraryDirectory() {
         return FileUtil.getTempDirectory() + "/lib";
     }
 
@@ -956,7 +874,7 @@ public class SystemUtil {
      *
      * @param dir  directory from where we want to load the native library.
      * @param name name of the library.<br>
-     *             The filename of the library is automatically built depending the operating system.
+     *             The filename of the library is automatically built depending on the operating system.
      */
     public static void loadLibrary(final String dir, final String name) {
         final File libPath = new File(dir, System.mapLibraryName(name));
@@ -970,7 +888,7 @@ public class SystemUtil {
     /**
      * Load the specified native library.
      *
-     * @param pathname complete path or name of the library we want to load
+     * @param pathname complete the path or name of the library we want to load
      */
     public static void loadLibrary(final String pathname) {
         final File file = new File(pathname);

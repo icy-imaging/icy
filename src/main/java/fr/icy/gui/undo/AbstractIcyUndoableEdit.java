@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ package fr.icy.gui.undo;
 import fr.icy.common.string.StringUtil;
 import fr.icy.gui.LookAndFeelUtil;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
+import org.jetbrains.annotations.Contract;
 
 import javax.swing.*;
 import javax.swing.undo.CannotRedoException;
@@ -31,12 +31,12 @@ import javax.swing.undo.UndoableEdit;
 /**
  * Abstract Icy {@link UndoableEdit} class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
     private static final int ICON_SIZE = LookAndFeelUtil.getDefaultIconSize();
-    protected static final Icon DEFAULT_ICON = new IcySVG(SVGResource.FLASH_ON).getIcon(ICON_SIZE);
+    protected static final Icon DEFAULT_ICON = IcySVG.FLASH_ON.getIcon(ICON_SIZE);
 
     /**
      * Source of the UndoableEdit
@@ -74,7 +74,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
      * Creates an <code>UndoableAction</code> which defaults <code>hasBeenDone</code> and
      * <code>alive</code> to <code>true</code>.
      */
-    public AbstractIcyUndoableEdit(final Object source, final String name, final SVGResource icon) {
+    public AbstractIcyUndoableEdit(final Object source, final String name, final IcySVG icon) {
         super();
 
         // this.source = new WeakReference<Object>(source);
@@ -86,7 +86,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
 
         if (icon != null)
             //this.icon = new ImageIcon(icon.getScaledInstance(size, size, Image.SCALE_SMOOTH));
-            this.icon = new IcySVG(icon).getIcon(ICON_SIZE);
+            this.icon = icon.getIcon(ICON_SIZE);
         else
             this.icon = DEFAULT_ICON;
         presentationName = name;
@@ -106,7 +106,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
      * Creates an <code>UndoableAction</code> which defaults <code>hasBeenDone</code> and
      * <code>alive</code> to <code>true</code>.
      */
-    public AbstractIcyUndoableEdit(final Object source, final SVGResource icon) {
+    public AbstractIcyUndoableEdit(final Object source, final IcySVG icon) {
         this(source, "", icon);
     }
 
@@ -151,8 +151,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
      * operation represented by this edit. Override should begin with
      * a call to super.
      *
-     * @exception CannotUndoException
-     *            if <code>canUndo</code> returns <code>false</code>
+     * @throws CannotUndoException if <code>canUndo</code> returns <code>false</code>
      * @see #canUndo
      */
     @Override
@@ -174,8 +173,7 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
      * Subclasses should override to redo the operation represented by
      * this edit. Override should begin with a call to super.
      *
-     * @exception CannotRedoException
-     *            if <code>canRedo</code> returns <code>false</code>
+     * @throws CannotRedoException if <code>canRedo</code> returns <code>false</code>
      * @see #canRedo
      */
     @Override
@@ -210,9 +208,10 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
     /*
      * This default implementation returns true.
      */
+    @Contract(pure = true)
     @Override
     final public boolean isSignificant() {
-        // should always returns true for easier UndoManager manipulation
+        // should always return true for easier UndoManager manipulation
         return true;
     }
 
@@ -249,10 +248,10 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
      * then the defaults value is returned alone.
      *
      * @return the value from the defaults table with key <code>AbstractUndoableEdit.undoText</code>
-     *         , followed
-     *         by a space, followed by <code>getPresentationName</code> unless
-     *         <code>getPresentationName</code> is "" in which
-     *         case, the defaults value is returned alone.
+     * , followed
+     * by a space, followed by <code>getPresentationName</code> unless
+     * <code>getPresentationName</code> is "" in which
+     * case, the defaults value is returned alone.
      * @see #getPresentationName
      */
     @Override
@@ -275,10 +274,10 @@ public abstract class AbstractIcyUndoableEdit implements IcyUndoableEdit {
      * then the defaults value is returned alone.
      *
      * @return the value from the defaults table with key <code>AbstractUndoableEdit.redoText</code>
-     *         , followed
-     *         by a space, followed by <code>getPresentationName</code> unless
-     *         <code>getPresentationName</code> is "" in which
-     *         case, the defaults value is returned alone.
+     * , followed
+     * by a space, followed by <code>getPresentationName</code> unless
+     * <code>getPresentationName</code> is "" in which
+     * case, the defaults value is returned alone.
      * @see #getPresentationName
      */
     @Override

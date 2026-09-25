@@ -54,7 +54,7 @@ import java.util.List;
 /**
  * Base class defining a generic 3D ROI as an Z extended 2DShape
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class ROI3DZShape extends ROI3DShape {

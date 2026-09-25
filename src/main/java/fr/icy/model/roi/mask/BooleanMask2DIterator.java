@@ -34,7 +34,7 @@ import java.util.NoSuchElementException;
  * <b>If the BooleanMask is modified during iteration the iterator becomes invalid and exception can
  * happen.</b>
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class BooleanMask2DIterator implements Position2DIterator
 {

@@ -18,20 +18,23 @@
 
 package fr.icy.model.cache;
 
-import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.Icy;
-import fr.icy.system.logging.IcyLogger;
+import fr.icy.model.image.IcyBufferedImage;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Image Cache static util class.<br>
  * The cache store and return 1D array data corresponding to the internal {@link IcyBufferedImage#getDataXY(int)} image data.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class ImageCache {
+    private static final Logger LOGGER = Logger.getLogger(ImageCache.class.getName());
+
     private static AbstractCache cache = null;
 
     public static synchronized boolean init(final int cacheSizeMB, final String path) {
@@ -40,7 +43,7 @@ public final class ImageCache {
                 final String cacheName = "/icy3_cache";
                 cache = new EHCache3(cacheSizeMB, path + cacheName);
 
-                IcyLogger.info(ImageCache.class, String.format(
+                LOGGER.info(String.format(
                         "Image cache initialized (reserved memory = %d MB, disk cache location = '%s%s'",
                         cacheSizeMB,
                         path,
@@ -48,7 +51,7 @@ public final class ImageCache {
                 ));
             }
             catch (final Exception e) {
-                IcyLogger.error(ImageCache.class, e, "Error while initialize image cache.");
+                LOGGER.log(Level.SEVERE, "Error while initialize image cache.", e);
             }
         }
 
@@ -86,7 +89,7 @@ public final class ImageCache {
             cache.end();
             cache = null;
 
-            IcyLogger.info(ImageCache.class, "Image cache shutdown..");
+            LOGGER.info("Image cache shutdown..");
         }
     }
 
@@ -180,8 +183,8 @@ public final class ImageCache {
     /**
      * Puts the specified data array (2D native array) into cache with its associated key.
      *
-     * @param key     Image used as key for the array.
-     * @param object  Data array to store.
+     * @param key    Image used as key for the array.
+     * @param object Data array to store.
      * @throws CacheException   If an error occurs during cache storage.
      * @throws RuntimeException If the cache module has not been loaded.
      */

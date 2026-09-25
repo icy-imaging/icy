@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColorMapListener {

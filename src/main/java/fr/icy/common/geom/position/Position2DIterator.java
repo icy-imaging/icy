@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
 /**
  * Position 2D iterator.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface Position2DIterator
 {

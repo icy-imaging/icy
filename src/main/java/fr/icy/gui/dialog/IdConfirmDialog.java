@@ -34,10 +34,10 @@ import javax.swing.JOptionPane;
 /**
  * Confirmation dialog with a "do not display again" bottom checkbox.<br>
  * The id is used to store the "do not display again" state.<br>
- * If you call confirm(...) with "do not display again" already set to true then confirm dialog is
+ * If you call confirm(…) with "do not display again" already set to true then confirm dialog is
  * not displayed.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class IdConfirmDialog
 {

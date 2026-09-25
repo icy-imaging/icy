@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,11 +18,13 @@
 
 package fr.icy.gui.dialog;
 
+import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
 import fr.icy.Icy;
 import fr.icy.extension.ExtensionLoader;
 import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.io.FileUtil;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -36,7 +38,7 @@ import java.util.List;
  * Dialog to let the user select the appropriate importer to open a file when several importers are
  * available.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ImporterSelectionDialog extends ActionDialog {
@@ -51,7 +53,7 @@ public class ImporterSelectionDialog extends ActionDialog {
         pathLabel.setText("  " + FileUtil.getFileName(path));
 
         importerList.setListData(getItems(importers).toArray());
-        if (importers.size() > 0)
+        if (!importers.isEmpty())
             importerList.setSelectedIndex(0);
 
         importerList.addMouseListener(new MouseAdapter() {
@@ -59,7 +61,7 @@ public class ImporterSelectionDialog extends ActionDialog {
             public void mouseClicked(final MouseEvent e) {
                 // double click ?
                 if ((e.getClickCount() == 2) && (e.getButton() == MouseEvent.BUTTON1)) {
-                    // have an item selected ? select it !
+                    // has an item selected ? select it !
                     if (importerList.getSelectedIndex() != -1)
                         getOkBtn().doClick();
                 }
@@ -95,7 +97,7 @@ public class ImporterSelectionDialog extends ActionDialog {
         panel.setLayout(gbl_panel);
 
         final JLabel newLabel = new JLabel(" Select the importer to open the following file:");
-        newLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+        newLabel.setFont(new Font(FlatJetBrainsMonoFont.FAMILY, Font.BOLD, 11));
         final GridBagConstraints gbc_newLabel = new GridBagConstraints();
         gbc_newLabel.anchor = GridBagConstraints.WEST;
         gbc_newLabel.insets = new Insets(0, 0, 5, 0);
@@ -104,7 +106,7 @@ public class ImporterSelectionDialog extends ActionDialog {
         panel.add(newLabel, gbc_newLabel);
 
         pathLabel = new JLabel("  ");
-        pathLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        pathLabel.setFont(new Font(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, 11));
         final GridBagConstraints gbc_pathLabel = new GridBagConstraints();
         gbc_pathLabel.anchor = GridBagConstraints.WEST;
         gbc_pathLabel.gridx = 0;
@@ -112,7 +114,7 @@ public class ImporterSelectionDialog extends ActionDialog {
         panel.add(pathLabel, gbc_pathLabel);
     }
 
-    private @NotNull List<ImporterPluginItem> getItems(final @NotNull List<?> importers) {
+    private @NonNull List<ImporterPluginItem> getItems(final @NonNull List<?> importers) {
         final List<ImporterPluginItem> result = new ArrayList<>();
 
         for (final Object importer : importers) {
@@ -129,8 +131,9 @@ public class ImporterSelectionDialog extends ActionDialog {
     }
 
     private record ImporterPluginItem(PluginDescriptor plugin, Object importer) {
+        @Contract(pure = true)
         @Override
-        public @NotNull String toString() {
+        public @NonNull String toString() {
             return plugin.toString();
         }
     }

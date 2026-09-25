@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,21 +18,21 @@
 
 package fr.icy.extension;
 
-import fr.icy.common.Version;
-import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import fr.icy.Icy;
+import fr.icy.common.Version;
 import fr.icy.common.reflect.ClassUtil;
 import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.extension.plugin.abstract_.Plugin;
 import fr.icy.extension.plugin.interface_.PluginDaemon;
 import fr.icy.io.Loader;
+import fr.icy.shared.logging.CustomLevel;
 import fr.icy.system.IcyExceptionHandler;
 import fr.icy.system.SystemUtil;
 import fr.icy.system.UserUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.PluginPreferences;
 import fr.icy.system.thread.SingleProcessor;
 import fr.icy.system.thread.ThreadUtil;
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.artifact.Artifact;
@@ -41,7 +41,10 @@ import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.Exclusion;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
-import org.eclipse.aether.resolution.*;
+import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
+import org.eclipse.aether.resolution.ArtifactDescriptorResult;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.supplier.RepositorySystemSupplier;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.graph.selector.AndDependencySelector;
@@ -61,6 +64,8 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles the loading, management, and lifecycle of plugins and extensions.
@@ -80,6 +85,8 @@ import java.util.jar.JarFile;
  * @author Thomas Musset
  */
 public final class ExtensionLoader {
+    private static final Logger LOGGER = Logger.getLogger(ExtensionLoader.class.getName());
+
     public final static String PLUGINS_PACKAGE = "icy.plugins";
     public final static String OLD_PLUGINS_PACKAGE = "plugins"; // For legacy compatibility
     public final static String EXTENSIONS_PATH = UserUtil.getIcyExtensionsDirectory().getAbsolutePath();
@@ -250,11 +257,14 @@ public final class ExtensionLoader {
     }
 
     private void reloadInternal() {
+        if (LOGGER.isLoggable(Level.INFO))
+            LOGGER.info("Reloading extensions");
+
         loading = true;
 
         stopDaemons();
 
-        // no need to complete loading...
+        // no need to complete loading…
         if (processor.hasWaitingTasks())
             return;
 
@@ -267,7 +277,8 @@ public final class ExtensionLoader {
         daemonPlugins.clear();
 
         final Map<String, Artifact> artifacts = getExtensionsArtifacts();
-        IcyLogger.debug(this.getClass(), "Loading " + artifacts.size() + " artifacts from local repository");
+        if (LOGGER.isLoggable(Level.CONFIG))
+            LOGGER.config("Loading " + artifacts.size() + " artifacts from local repository");
 
         // Stop if no Jar found
         if (jarURLSet.isEmpty()) {
@@ -279,7 +290,8 @@ public final class ExtensionLoader {
         ucl = new URLClassLoader(jarURLSet.toArray(URL[]::new), SystemUtil.getSystemClassLoader());
 
         for (final Artifact artifact : artifacts.values()) {
-            IcyLogger.debug(this.getClass(), "Found artifact " + artifact);
+            if (LOGGER.isLoggable(Level.CONFIG))
+                LOGGER.config("Found artifact " + artifact);
             loadArtifact(artifact);
         }
 
@@ -288,18 +300,24 @@ public final class ExtensionLoader {
         changed();
     }
 
+    @SuppressWarnings("UrlHashCode")
     private boolean resolveArtifact(final @NonNull String groupId, final @NonNull String artifactId, final @NonNull String version, final @NonNull LinkedHashMap<String, Artifact> artifacts, final @NonNull List<RemoteRepository> repositories) {
+        if (LOGGER.isLoggable(CustomLevel.DEBUG))
+            LOGGER.log(CustomLevel.DEBUG, "Resolving artifact " + groupId + ":" + artifactId + ":jar:" + version);
         try {
             if (artifacts.containsKey(groupId + ":" + artifactId + ":jar:" + version)) {
-                IcyLogger.debug(this.getClass(), "duplicate artifact: " + groupId + ":" + artifactId + ":jar:" + version);
+                if (LOGGER.isLoggable(Level.CONFIG))
+                    LOGGER.config("duplicate artifact: " + groupId + ":" + artifactId + ":jar:" + version);
                 return true;
             }
 
             // Resolve artifact
             final Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":jar:" + version);
             final ArtifactRequest artifactRequest = new ArtifactRequest()
-                    .setArtifact(artifact)
-                    .setRepositories(this.repositories);
+                    .setArtifact(artifact);
+            //.setRepositories(this.repositories);
+
+            artifactRequest.setRepositories(this.repositories);
 
             if (!repositories.isEmpty()) {
                 for (final RemoteRepository repository : repositories) {
@@ -316,8 +334,10 @@ public final class ExtensionLoader {
 
             // Collect dependencies
             final ArtifactDescriptorRequest artifactDescriptorRequest = new ArtifactDescriptorRequest()
-                    .setArtifact(artifactResult.getArtifact())
-                    .setRepositories(this.repositories);
+                    .setArtifact(artifactResult.getArtifact());
+            //.setRepositories(this.repositories);
+
+            artifactDescriptorRequest.setRepositories(this.repositories);
 
             if (!repositories.isEmpty()) {
                 for (final RemoteRepository repository : repositories) {
@@ -350,7 +370,8 @@ public final class ExtensionLoader {
             return true;
         }
         catch (final Error | Exception e) {
-            IcyLogger.error(this.getClass(), e, "Failed to resolve artifact: " + groupId + ":" + artifactId + ":" + version);
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Failed to resolve artifact: " + groupId + ":" + artifactId + ":" + version, e);
             return false;
         }
     }
@@ -360,9 +381,13 @@ public final class ExtensionLoader {
     }
 
     private boolean loadArtifact(final @NonNull Artifact artifact) {
+        if (LOGGER.isLoggable(CustomLevel.DEBUG))
+            LOGGER.log(CustomLevel.DEBUG, "Loading artifact " + artifact);
+
         final File jar = artifact.getFile();
         if (jar == null || !jar.exists() || !jar.isFile()) {
-            IcyLogger.error(Icy.class, "Jar not found for artifact: " + artifact);
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.severe("Jar not found for artifact: " + artifact);
             return false;
         }
 
@@ -384,7 +409,8 @@ public final class ExtensionLoader {
                 if (extensionsArtifacts.containsKey(ed.getGroupId())) {
                     final Set<String> artifactIds = extensionsArtifacts.get(ed.getGroupId());
                     if (artifactIds.contains(ed.getArtifactId())) {
-                        IcyLogger.debug(this.getClass(), "Extension " + ed.getName() + " already loaded, skipping it");
+                        if (LOGGER.isLoggable(Level.CONFIG))
+                            LOGGER.config("Extension " + ed.getName() + " already loaded, skipping it");
                         return true;
                     }
                 }
@@ -404,8 +430,9 @@ public final class ExtensionLoader {
                                 if (pd.isActionable())
                                     apds.put(className, pd);
 
-                            /*if (className.startsWith(OLD_PLUGINS_PACKAGE) && !ed.isKernel())
-                                IcyLogger.warn(this.getClass(), "Old plugins package detected for " + ClassUtil.getSimpleClassName(className));*/
+                                if (className.startsWith(OLD_PLUGINS_PACKAGE) && !ed.isKernel())
+                                    if (LOGGER.isLoggable(Level.WARNING))
+                                        LOGGER.warning("Old plugins package detected for " + ClassUtil.getSimpleClassName(className));
                             }
                         }
                         catch (final Throwable t) {
@@ -421,7 +448,8 @@ public final class ExtensionLoader {
             }
         }
         catch (final Throwable t) {
-            IcyLogger.error(this.getClass(), t, "Failed to load artifact: " + artifact);
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Failed to load artifact: " + artifact, t);
             return false;
         }
 
@@ -431,7 +459,7 @@ public final class ExtensionLoader {
     private boolean isIcyExtension(final @NonNull Artifact artifact) {
         final File jar = artifact.getFile();
         if (jar == null || !jar.exists() || !jar.isFile()) {
-            // Shouldn't happening, but in case of...
+            // Shouldn't happening, but in case of…
             return false;
         }
 
@@ -507,7 +535,8 @@ public final class ExtensionLoader {
     private @NonNull @Unmodifiable Map<String, Artifact> getExtensionsArtifacts() {
         final File indexFile = new File(UserUtil.getIcyHomeDirectory(), "extensions.yml");
         if (!indexFile.exists() || !indexFile.isFile() || !indexFile.canRead()) {
-            IcyLogger.error(Icy.class, "Cannot find or read extensions config file: " + indexFile.getAbsolutePath());
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.severe("Cannot find or read extensions config file: " + indexFile.getAbsolutePath());
             return Collections.emptyMap();
         }
 
@@ -516,7 +545,7 @@ public final class ExtensionLoader {
             //final byte[] readData = Base64.getDecoder().decode(readRawData);
             //final StringBuilder sb = new StringBuilder();
             //for (final byte readByte : readData)
-                //sb.append((char) readByte);
+            //sb.append((char) readByte);
 
             final Yaml yaml = new Yaml();
             //final List<Map<String, Object>> extensionIndex = yaml.loadAs(sb.toString(), List.class);
@@ -524,7 +553,8 @@ public final class ExtensionLoader {
             final List<Map<String, Object>> extensionIndex = yaml.loadAs(reader, List.class);
             reader.close();
             if (extensionIndex.isEmpty()) {
-                IcyLogger.error(Icy.class, "Extensions config file has no extensions registered");
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.severe("Extensions config file has no extensions registered");
                 return Collections.emptyMap();
             }
 
@@ -536,13 +566,15 @@ public final class ExtensionLoader {
 
                 final boolean resolved = resolveArtifact(groupId, artifactId, version, artifacts);
                 if (!resolved)
-                    IcyLogger.error(this.getClass(), "Unable to resolve artifact " + groupId + ":" + artifactId + ":" + version);
+                    if (LOGGER.isLoggable(Level.SEVERE))
+                        LOGGER.severe("Unable to resolve artifact " + groupId + ":" + artifactId + ":" + version);
             }
 
             return Collections.unmodifiableMap(artifacts);
         }
         catch (final Throwable t) {
-            IcyLogger.fatal(this.getClass(), t, "Unable to read extensions config file");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Unable to read extensions config file", t);
             return Collections.emptyMap();
         }
     }

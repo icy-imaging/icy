@@ -28,7 +28,7 @@ import fr.icy.model.sequence.Sequence;
 /**
  * Contour ROI descriptor class (see {@link ROIDescriptor})
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ROIContourDescriptor extends ROIDescriptor
 {
@@ -87,7 +87,7 @@ public class ROIContourDescriptor extends ROIDescriptor
 //     * @param sequence
 //     *        the input sequence used to retrieve operation unit by using pixel size information.
 //     * @param dim
-//     *        the dimension for the contour size operation (2 = perimeter, 3 = surface area, ...)
+//     *        the dimension for the contour size operation (2 = perimeter, 3 = surface area, …)
 //     * @return the number of contour point
 //     * @see Sequence#getBestPixelSizeUnit(int, int)
 //     * @throws UnsupportedOperationException

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,36 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component;
 
 import fr.icy.common.listener.weak.WeakListener;
+import org.jspecify.annotations.NonNull;
 
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
 /**
  * Weak wrapper for ComponentListener.
- * 
- * @author Stephane
+ *
+ * @author Stéphane Dallongeville
  */
-public class WeakComponentListener extends WeakListener<ComponentListener> implements ComponentListener
-{
-    public WeakComponentListener(ComponentListener listener)
-    {
+public class WeakComponentListener extends WeakListener<ComponentListener> implements ComponentListener {
+    public WeakComponentListener(final ComponentListener listener) {
         super(listener);
     }
 
     @Override
-    public void removeListener(Object source)
-    {
+    public void removeListener(final Object source) {
         if (source != null)
             ((Component) source).removeComponentListener(this);
     }
 
     @Override
-    public void componentResized(ComponentEvent e)
-    {
+    public void componentResized(final @NonNull ComponentEvent e) {
         final ComponentListener listener = getListener(e.getComponent());
 
         if (listener != null)
@@ -52,8 +50,7 @@ public class WeakComponentListener extends WeakListener<ComponentListener> imple
     }
 
     @Override
-    public void componentMoved(ComponentEvent e)
-    {
+    public void componentMoved(final @NonNull ComponentEvent e) {
         final ComponentListener listener = getListener(e.getComponent());
 
         if (listener != null)
@@ -61,8 +58,7 @@ public class WeakComponentListener extends WeakListener<ComponentListener> imple
     }
 
     @Override
-    public void componentShown(ComponentEvent e)
-    {
+    public void componentShown(final @NonNull ComponentEvent e) {
         final ComponentListener listener = getListener(e.getComponent());
 
         if (listener != null)
@@ -70,8 +66,7 @@ public class WeakComponentListener extends WeakListener<ComponentListener> imple
     }
 
     @Override
-    public void componentHidden(ComponentEvent e)
-    {
+    public void componentHidden(final @NonNull ComponentEvent e) {
         final ComponentListener listener = getListener(e.getComponent());
 
         if (listener != null)

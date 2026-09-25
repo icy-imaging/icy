@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
  * Data iterator interface.<br>
  * This interface provides iteration for both read and write operation on double data.<br>
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public interface DataIterator {

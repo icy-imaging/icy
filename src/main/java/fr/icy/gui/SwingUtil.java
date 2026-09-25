@@ -34,14 +34,14 @@ import javax.swing.JMenuItem;
 /**
  * Swing utilities class.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SwingUtil
 {
     /**
      * Class used to wrap a AWT CheckboxMenuItem in a Swing JCheckBoxMenuItem.
      * 
-     * @author Stephane
+     * @author Stéphane Dallongeville
      */
     private static class JCheckBoxMenuItemWrapper extends JCheckBoxMenuItem implements ActionListener, ItemListener
     {
@@ -106,7 +106,7 @@ public class SwingUtil
     /**
      * Class used to wrap a AWT MenuItem in a Swing JMenuItem.
      * 
-     * @author Stephane
+     * @author Stéphane Dallongeville
      */
     private static class JMenuItemWrapper extends JMenuItem implements ActionListener
     {

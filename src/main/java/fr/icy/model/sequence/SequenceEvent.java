@@ -130,7 +130,7 @@ public class SequenceEvent implements CollapsibleEvent {
      * It's used to specify the component number when <code>sourceType</code> is <code>SEQUENCE_COLORMAP</code> or
      * <code>SEQUENCE_COMPONENTBOUNDS</code> (in both case source
      * is instance of <code>IcyColorModel</code>).<br>
-     * Also used internally...
+     * Also used internally…
      */
     public int getParam() {
         return param;

@@ -24,7 +24,7 @@ import fr.icy.network.search.SearchResultProducer;
  * Plugin Search Provider interface.<br>
  * Used to define a plugin which provide results for the global search tool.<br>
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public interface PluginSearchProvider extends PluginNoEDTConstructor {

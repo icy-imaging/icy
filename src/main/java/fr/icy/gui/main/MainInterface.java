@@ -42,7 +42,7 @@ import java.util.List;
  * MainInterface
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  * @see MainInterfaceGui
  */
@@ -404,10 +404,4 @@ public interface MainInterface {
      * Remove "can exit" listener
      */
     void removeCanExitListener(AcceptListener listener);
-
-    void addROIToolChangeListener(ROIToolChangeListener listener);
-
-    void removeROIToolChangeListener(ROIToolChangeListener listener);
-
-    void changeROITool(Class<? extends PluginROI> pluginROI);
 }

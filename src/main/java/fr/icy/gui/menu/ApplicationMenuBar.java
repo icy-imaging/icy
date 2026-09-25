@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,7 +18,8 @@
 
 package fr.icy.gui.menu;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 
@@ -26,11 +27,10 @@ import javax.swing.*;
  * @author Thomas Musset
  */
 public final class ApplicationMenuBar extends JMenuBar {
-    @NotNull
-    private static final ApplicationMenuBar instance = new ApplicationMenuBar();
+    private static final @NonNull ApplicationMenuBar instance = new ApplicationMenuBar();
 
-    @NotNull
-    public static synchronized ApplicationMenuBar getInstance() {
+    @Contract(pure = true)
+    public static synchronized @NonNull ApplicationMenuBar getInstance() {
         return instance;
     }
 

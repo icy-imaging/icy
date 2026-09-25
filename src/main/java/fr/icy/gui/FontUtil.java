@@ -22,7 +22,7 @@ import java.awt.Font;
 /**
  * Font utilities.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class FontUtil
 {

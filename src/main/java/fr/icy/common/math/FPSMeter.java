@@ -20,7 +20,7 @@ package fr.icy.common.math;
 /**
  * "Frame Per Second" calculator class.
  * 
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class FPSMeter extends RateMeter
 {

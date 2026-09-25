@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,9 +19,9 @@
 package fr.icy.gui.toolbar.button;
 
 import fr.icy.gui.component.button.IcyToggleButton;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.toolbar.container.InspectorPanel;
 import fr.icy.gui.toolbar.panel.RoisPanel;
-import fr.icy.gui.component.icon.SVGResource;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,7 +31,7 @@ import java.awt.event.ActionListener;
  */
 public final class ROIPanelButton extends IcyToggleButton implements ActionListener {
     public ROIPanelButton() {
-        super(SVGResource.DRAW_ABSTRACT);
+        super(IcySVG.DRAW_ABSTRACT);
         setFocusable(false);
         addActionListener(this);
     }

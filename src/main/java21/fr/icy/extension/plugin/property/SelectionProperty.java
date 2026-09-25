@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,39 +18,40 @@
 
 package fr.icy.extension.plugin.property;
 
-import fr.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 public abstract class SelectionProperty<V> extends Property<V> {
-    @Unmodifiable
-    @NotNull
-    private final List<V> options;
+    private static final Logger LOGGER = Logger.getLogger(SelectionProperty.class.getName());
 
-    SelectionProperty(@NotNull final String name, @NotNull final String description, @NotNull final List<V> options, @NotNull final V defaultValue) {
+    @Unmodifiable
+    private final @NonNull List<V> options;
+
+    SelectionProperty(final @NonNull String name, final @NonNull String description, final @NonNull List<V> options, final @NonNull V defaultValue) {
         super(name, description, defaultValue);
         this.options = List.copyOf(options);
         if (!this.options.contains(defaultValue)) {
-            IcyLogger.warn(this.getClass(), "Value " + defaultValue + " is not a valid default value for " + name + ".");
+            LOGGER.warning("Value " + defaultValue + " is not a valid default value for " + name + ".");
             this.defaultValue = this.options.getFirst();
         }
     }
 
-    SelectionProperty(@NotNull final String name, @NotNull final List<V> options, @NotNull final V defaultValue) {
+    SelectionProperty(final @NonNull String name, final @NonNull List<V> options, final @NonNull V defaultValue) {
         super(name, defaultValue);
         this.options = List.copyOf(options);
         if (!this.options.contains(defaultValue)) {
-            IcyLogger.warn(this.getClass(), "Value " + defaultValue + " is not a valid default value for " + name + ".");
+            LOGGER.warning("Value " + defaultValue + " is not a valid default value for " + name + ".");
             this.defaultValue = this.options.getFirst();
         }
     }
 
     @Override
-    public final void setValue(@Nullable final V value) {
+    public final void setValue(final @Nullable V value) {
         if (value == null || !options.contains(value))
             this.value = defaultValue;
         else
@@ -59,8 +60,7 @@ public abstract class SelectionProperty<V> extends Property<V> {
 
     @Contract(pure = true)
     @Unmodifiable
-    @NotNull
-    public final List<V> getOptions() {
+    public final @NonNull List<V> getOptions() {
         return options;
     }
 }

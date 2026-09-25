@@ -27,7 +27,7 @@ import fr.icy.gui.EventUtil;
  * Anchor for 3D rectangular shape.<br>
  * Support special rectangular drag operation when shift is maintained.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class RectAnchor3D extends Anchor3D
 {

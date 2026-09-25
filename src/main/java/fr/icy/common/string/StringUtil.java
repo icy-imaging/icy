@@ -19,19 +19,23 @@
 package fr.icy.common.string;
 
 import fr.icy.common.math.MathUtil;
-import fr.icy.system.logging.IcyLogger;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class StringUtil {
+    private static final Logger LOGGER = Logger.getLogger(StringUtil.class.getName());
+
     /*
      * The Alphanum Algorithm is an improved sorting algorithm for strings
      * containing numbers. Instead of sorting numbers in ASCII order like
@@ -355,11 +359,11 @@ public final class StringUtil {
         if (len > maxlen) {
             // simple truncation
             if (tailLimit || (maxlen <= 8))
-                return value.substring(0, maxlen - 2).trim() + "...";
+                return value.substring(0, maxlen - 2).trim() + "…";
 
             // cut center
             final int cut = (maxlen - 3) / 2;
-            return value.substring(0, cut).trim() + "..." + value.substring(len - cut).trim();
+            return value.substring(0, cut).trim() + "…" + value.substring(len - cut).trim();
         }
 
         return value;
@@ -376,7 +380,7 @@ public final class StringUtil {
      * Truncate the text to a specific size, according a keyword.<br>
      * The text will be truncated around the place where the keyword is found.<br>
      * If the string is found at the beginning, the text will be like this:<br>
-     * <b>Lorem ipsum dolor sit amet, consec...</b>
+     * <b>Lorem ipsum dolor sit amet, consec…</b>
      *
      * @param fullText
      *        : text to be truncated.
@@ -411,20 +415,20 @@ public final class StringUtil {
             // determine if we are at the beginning, the end, or at the middle
             if (idx <= maxSize / 2) {
                 toReturn = fullText.substring(0, maxSize);
-                toReturn = toReturn.trim() + "...";
+                toReturn = toReturn.trim() + "…";
             }
             else if ((fullTextSize - idx) <= maxSize / 2) {
                 toReturn = fullText.substring(fullTextSize - maxSize, fullTextSize);
-                toReturn = "..." + toReturn.trim();
+                toReturn = "…" + toReturn.trim();
             }
             else {
                 final int beginIndex = idx - maxSize / 2;
                 final int endIndex = idx + maxSize / 2;
                 if (endIndex > fullTextSize)
-                    IcyLogger.trace(StringUtil.class, "End index superior to full text size: " + endIndex);
+                    LOGGER.fine("End index superior to full text size: " + endIndex);
                 // beginIndex = beginIndex < 0 ? 0 : beginIndex;
                 // endIndex = endIndex > fullTextSize ? fullTextSize : endIndex;
-                toReturn = "..." + fullText.substring(beginIndex, endIndex).trim() + "...";
+                toReturn = "…" + fullText.substring(beginIndex, endIndex).trim() + "…";
             }
         }
 
@@ -457,28 +461,63 @@ public final class StringUtil {
     }
 
     /**
-     * Return true if the specified String is empty.
+     * Checks if a given string is empty or null.
      *
-     * @param trim
-     *        trim the String before doing the empty test
+     * @param value the string to check; can be null
+     * @param trim if true, the string will be trimmed before checking
+     * @return true if the string is null or empty (considering trim if specified), false otherwise
      */
-    public static boolean isEmpty(final String value, final boolean trim) {
+    @Contract("null, _ -> true")
+    public static boolean isEmpty(final @Nullable String value, final boolean trim) {
         if (value != null) {
             if (trim)
-                return value.trim().length() == 0;
+                return value.trim().isEmpty();
 
-            return value.length() == 0;
+            return value.isEmpty();
         }
 
         return true;
     }
 
     /**
-     * Return true if the specified String is empty.
-     * The String is trimed by default before doing the test
+     * Checks if a given string is empty or null.
+     *
+     * @param value the string to be checked; may be null
+     * @return true if the string is null or empty, false otherwise
      */
-    public static boolean isEmpty(final String value) {
+    @Contract("null -> true")
+    public static boolean isEmpty(final @Nullable String value) {
         return isEmpty(value, true);
+    }
+
+    /**
+     * Evaluates whether a given string is blank, optionally trimming it before the check.
+     *
+     * @param value the string to be evaluated; can be null
+     * @param trim whether to trim the string before evaluating its blank status
+     * @return true if the string is null or blank (optionally after trimming); false otherwise
+     */
+    @Contract("null, _ -> true")
+    public static boolean isBlank(final @Nullable String value, final boolean trim) {
+        if (value != null) {
+            if (trim)
+                return value.trim().isBlank();
+
+            return value.isBlank();
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if the given string is blank (null, empty, or containing only whitespace).
+     *
+     * @param value the string to be checked; may be null
+     * @return true if the string is null, empty, or contains only whitespace; false otherwise
+     */
+    @Contract("null -> true")
+    public static boolean isBlank(final @Nullable String value) {
+        return isBlank(value, true);
     }
 
     /**

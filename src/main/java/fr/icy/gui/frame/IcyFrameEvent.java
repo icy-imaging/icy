@@ -23,7 +23,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.event.InternalFrameEvent;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class IcyFrameEvent
 {

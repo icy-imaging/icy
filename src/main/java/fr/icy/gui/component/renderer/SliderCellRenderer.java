@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,39 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.renderer;
 
-import java.awt.Component;
-import java.awt.Rectangle;
-
-import javax.swing.JSlider;
-import javax.swing.JTable;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
+import java.awt.*;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
-public class SliderCellRenderer extends JSlider implements TableCellRenderer, TreeCellRenderer
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -3945777382338073635L;
-
-    public SliderCellRenderer()
-    {
+public class SliderCellRenderer extends JSlider implements TableCellRenderer, TreeCellRenderer {
+    public SliderCellRenderer() {
         super(0, 1000);
     }
 
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-            int row, int column)
-    {
-        if (value instanceof Integer)
-        {
-            final int intValue = ((Integer) value).intValue();
+    public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
+        if (value instanceof Integer) {
+            final int intValue = (Integer) value;
 
             if (getValue() != intValue)
                 setValue(intValue);
@@ -57,12 +45,9 @@ public class SliderCellRenderer extends JSlider implements TableCellRenderer, Tr
     }
 
     @Override
-    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded,
-            boolean leaf, int row, boolean hasFocus)
-    {
-        if (value instanceof Integer)
-        {
-            final int intValue = ((Integer) value).intValue();
+    public Component getTreeCellRendererComponent(final JTree tree, final Object value, final boolean selected, final boolean expanded, final boolean leaf, final int row, final boolean hasFocus) {
+        if (value instanceof Integer) {
+            final int intValue = (Integer) value;
 
             if (getValue() != intValue)
                 setValue(intValue);
@@ -75,49 +60,43 @@ public class SliderCellRenderer extends JSlider implements TableCellRenderer, Tr
      * Overridden for performance reasons.
      */
     @Override
-    public void invalidate()
-    {
+    public void invalidate() {
     }
 
     /**
      * Overridden for performance reasons.
      */
     @Override
-    public void validate()
-    {
+    public void validate() {
     }
 
     /**
      * Overridden for performance reasons.
      */
     @Override
-    public void revalidate()
-    {
+    public void revalidate() {
     }
 
     /**
      * Overridden for performance reasons.
      */
     @Override
-    public void repaint(long tm, int x, int y, int width, int height)
-    {
+    public void repaint(final long tm, final int x, final int y, final int width, final int height) {
     }
 
     /**
      * Overridden for performance reasons.
      */
     @Override
-    public void repaint(Rectangle r)
-    {
+    public void repaint(final Rectangle r) {
     }
 
     /**
      * Overridden for performance reasons.
-     * 
+     *
      * @since 1.5
      */
     @Override
-    public void repaint()
-    {
+    public void repaint() {
     }
 }

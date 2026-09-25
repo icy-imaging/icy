@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class AbstractSequenceModel implements SequenceModel
 {

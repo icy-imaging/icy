@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,16 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.extension.kernel.roi.roi2d;
 
 import fr.icy.common.geom.point.Point2DUtil;
 import fr.icy.common.geom.point.Point5D;
 import fr.icy.gui.canvas.IcyCanvas;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.anchor.Anchor2D;
 import fr.icy.model.overlay.anchor.LineAnchor2D;
 import fr.icy.model.roi.ROI;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Node;
 
 import java.awt.*;
@@ -36,7 +38,7 @@ import java.util.List;
 /**
  * ROI 2D Line.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI2DLine extends ROI2DShape {
@@ -81,10 +83,10 @@ public class ROI2DLine extends ROI2DShape {
         addPoint(this.pt2);
 
         // set icon (default name is defined by getDefaultName()) 
-        setIcon(SVGResource.ROI_LINE);
+        setIcon(IcySVG.ROI_LINE);
     }
 
-    public ROI2DLine(final Line2D line) {
+    public ROI2DLine(final @NonNull Line2D line) {
         this(line.getP1(), line.getP2());
     }
 
@@ -95,7 +97,7 @@ public class ROI2DLine extends ROI2DShape {
     /**
      * Generic constructor for interactive mode
      */
-    public ROI2DLine(final Point5D pt) {
+    public ROI2DLine(final @NonNull Point5D pt) {
         this(pt.toPoint2D());
         // getOverlay().setMousePos(pt);
     }
@@ -133,7 +135,7 @@ public class ROI2DLine extends ROI2DShape {
     }
 
     @Override
-    public void setBounds2D(final Rectangle2D bounds) {
+    public void setBounds2D(final @NonNull Rectangle2D bounds) {
         beginUpdate();
         try {
             pt1.setPosition(bounds.getMinX(), bounds.getMinY());
@@ -144,7 +146,7 @@ public class ROI2DLine extends ROI2DShape {
         }
     }
 
-    public void setLine(final Line2D line) {
+    public void setLine(final @NonNull Line2D line) {
         beginUpdate();
         try {
             pt1.setPosition(line.getP1());

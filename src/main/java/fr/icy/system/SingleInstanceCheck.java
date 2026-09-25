@@ -27,7 +27,7 @@ import java.nio.channels.FileLock;
 /**
  * Class to verify we have a single instance of an object or whatever (use {@link FileLock}).
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SingleInstanceCheck
 {

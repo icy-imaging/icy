@@ -22,7 +22,7 @@ import java.lang.ref.WeakReference;
 /**
  * Base weak listener class.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class WeakListener<T>
 {

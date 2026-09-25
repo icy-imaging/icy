@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,14 +18,15 @@
 
 package fr.icy.extension.plugin.property;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 public abstract class NumberProperty<N extends Number> extends Property<N> {
-    private final @NotNull Comparable<N> min;
-    private final @NotNull Comparable<N> max;
-    private final @NotNull N step;
+    private final @NonNull Comparable<N> min;
+    private final @NonNull Comparable<N> max;
+    private final @NonNull N step;
 
-    NumberProperty(final @NotNull String name, final @NotNull String description, final @NotNull N defaultValue, final @NotNull Comparable<N> min, final @NotNull Comparable<N> max, final @NotNull N step) {
+    NumberProperty(final @NonNull String name, final @NonNull String description, final @NonNull N defaultValue, final @NonNull Comparable<N> min, final @NonNull Comparable<N> max, final @NonNull N step) {
         super(name, description, defaultValue);
         this.min = min;
         this.max = max;
@@ -34,7 +35,7 @@ public abstract class NumberProperty<N extends Number> extends Property<N> {
             throw new IllegalArgumentException("Default value must be between " + min + " and " + max);
     }
 
-    NumberProperty(final @NotNull String name, final @NotNull N defaultValue, final @NotNull Comparable<N> min, final @NotNull Comparable<N> max, final @NotNull N step) {
+    NumberProperty(final @NonNull String name, final @NonNull N defaultValue, final @NonNull Comparable<N> min, final @NonNull Comparable<N> max, final @NonNull N step) {
         super(name, defaultValue);
         this.min = min;
         this.max = max;
@@ -43,15 +44,18 @@ public abstract class NumberProperty<N extends Number> extends Property<N> {
             throw new IllegalArgumentException("Default value must be between " + min + " and " + max);
     }
 
-    public final @NotNull Comparable<N> getMin() {
+    @Contract(pure = true)
+    public final @NonNull Comparable<N> getMin() {
         return min;
     }
 
-    public final @NotNull Comparable<N> getMax() {
+    @Contract(pure = true)
+    public final @NonNull Comparable<N> getMax() {
         return max;
     }
 
-    public final @NotNull N getStep() {
+    @Contract(pure = true)
+    public final @NonNull N getStep() {
         return step;
     }
 }

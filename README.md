@@ -1,5 +1,5 @@
 <!-- badges: start -->
-![Version 3.0.0 alpha 7](https://img.shields.io/badge/v3.0.0-alpha_7-royalblue)
+![Version 3.0.0 alpha 8](https://img.shields.io/badge/v3.0.0-alpha_8-royalblue)
 ![Java 17+](https://img.shields.io/badge/OpenJDK-17+-5382A1?labelColor=E76F00)
 [![License: LGPL v3](https://img.shields.io/badge/LGPLv3-008033?logo=GPLv3&logoSize=auto)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/Icy_BioImaging)](https://x.com/Icy_BioImaging)
@@ -80,16 +80,16 @@ Please mention the version of Icy you used (bottom right corner of the GUI or fi
 ## Acknowledgements to main kernel and main plugins contributors
 
 We acknowledge every person who contributed one way or another to make Icy what is now, in particular:       
-*Kernel architecture and code*: Stephane Dallongeville, Fabrice de Chaumont and Thomas Musset              
+*Kernel architecture and code*: Stéphane Dallongeville, Fabrice de Chaumont and Thomas Musset              
 *Head of unit hosting the Icy project*: Jean-Christophe Olivo-Marin                  
 *EzPlug and Protocols* (as many others plugins): Alexandre Dufour                
-*Scripting*: Thomas Provoost, Timothee Lecomte and Stephane Dallongeville              
-*MicroManager for Icy*: Thomas Provoost, Irsath Nguyen and Stephane Dallongeville                
+*Scripting*: Thomas Provoost, Timothee Lecomte and Stéphane Dallongeville              
+*MicroManager for Icy*: Thomas Provoost, Irsath Nguyen and Stéphane Dallongeville                
 *Beta testers and main contributors*: Nicolas Chenouard, Alexandre Dufour, Nicolas Herve, Vannary Meas-Yedid, Sorin Pop, Thibault Lagache, Jérôme Mutterer and the [Biomedical Imaging Group](http://bigwww.epfl.ch/)       
 *Icy website graphic design*: Marcio de Moraes Marim              
 *Icy website code*: Fabrice de Chaumont / Marcio de Moraes Marim 
 
-The Icy website hosts a [**detailed list of all contributors**](https://icy.bioimageanalysis.org/contributors/) to the Icy software. Contributions include kernel development, plugin development, protocol creation, blog post writing...       
+The Icy website hosts a [**detailed list of all contributors**](https://icy.bioimageanalysis.org/contributors/) to the Icy software. Contributions include kernel development, plugin development, protocol creation, blog post writing…
 
 <!--  M. Geissbuehler and T. Lasser - https://opg.optica.org/oe/fulltext.cfm?uri=oe-21-8-9862&id=252779
 "How to display data by color schemes compatible with red-green color perception deficiencies" Opt. Express 21, 9862-9874 (2013) -->

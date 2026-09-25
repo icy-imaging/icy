@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,16 +18,17 @@
 
 package fr.icy.gui.toolbar.panel;
 
+import fr.icy.gui.EventUtil;
+import fr.icy.gui.GuiUtil;
 import fr.icy.gui.component.button.IcyButton;
 import fr.icy.gui.component.button.IcyToggleButton;
-import fr.icy.gui.frame.progress.ProgressFrame;
-import fr.icy.gui.GuiUtil;
-import fr.icy.system.preferences.GeneralPreferences;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.gui.component.icon.IcyIconPack;
+import fr.icy.gui.component.icon.IcySVG;
+import fr.icy.gui.frame.progress.ProgressFrame;
 import fr.icy.system.IcyExceptionHandler;
-import fr.icy.gui.EventUtil;
-import org.jetbrains.annotations.NotNull;
+import fr.icy.system.preferences.GeneralPreferences;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -43,7 +44,7 @@ import java.awt.event.MouseEvent;
 import java.io.PrintStream;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class OutputConsolePanel extends ToolbarPanel implements ClipboardOwner {
@@ -66,7 +67,7 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
         }
 
         @Override
-        public void write(final byte @NotNull [] buf, final int off, final int len) {
+        public void write(final byte @NonNull [] buf, final int off, final int len) {
             try {
                 super.write(buf, off, len);
 
@@ -133,7 +134,7 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
             final String addString = remaining + s;
             remaining = "";
 
-            if (addString.length() > 0) {
+            if (!addString.isEmpty()) {
                 aIndex = addString.indexOf("\u001B"); // find first escape
                 if (aIndex == -1) { // no escape/color change in this string, so just send it with current color
                     append(colorCurrent, addString);
@@ -223,11 +224,11 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
 
         logMaxLineField = new JSpinner(new SpinnerNumberModel(GeneralPreferences.getOutputLogSize(), 100, 1000000, 100));
         logMaxLineTextField = ((JSpinner.DefaultEditor) logMaxLineField.getEditor()).getTextField();
-        final IcyButton clearLogButton = new IcyButton(SVGResource.DELETE);
-        final IcyButton copyLogButton = new IcyButton(SVGResource.CONTENT_COPY);
-        final IcyButton reportLogButton = new IcyButton(SVGResource.BUG_REPORT);
-        final IcyToggleButton scrollLockButton = new IcyToggleButton(new IcyIconPack(SVGResource.LOCK_OPEN, SVGResource.LOCK));
-        fileLogButton = new IcyToggleButton(SVGResource.FILE_SAVE);
+        final IcyButton clearLogButton = new IcyButton(IcySVG.DELETE);
+        final IcyButton copyLogButton = new IcyButton(IcySVG.CONTENT_COPY);
+        final IcyButton reportLogButton = new IcyButton(IcySVG.BUG_REPORT);
+        final IcyToggleButton scrollLockButton = new IcyToggleButton(new IcyIconPack(IcySVG.LOCK_OPEN, IcySVG.LOCK));
+        fileLogButton = new IcyToggleButton(IcySVG.FILE_SAVE);
         fileLogButton.setSelected(GeneralPreferences.getOutputLogToFile());
 
         textPane.setEditable(false);
@@ -295,7 +296,7 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
             clipboard.setContents(new StringSelection(getText()), OutputConsolePanel.this);
         });
         reportLogButton.addActionListener(e -> {
-            final ProgressFrame progressFrame = new ProgressFrame("Sending report...");
+            final ProgressFrame progressFrame = new ProgressFrame("Sending report…");
             try {
                 // send report
                 IcyExceptionHandler.report(getText());
@@ -386,9 +387,10 @@ public final class OutputConsolePanel extends ToolbarPanel implements ClipboardO
      * Returns maximum log line number
      */
     private int getLogMaxLine() {
-        return ((Integer) logMaxLineField.getValue()).intValue();
+        return (Integer) logMaxLineField.getValue();
     }
 
+    @Contract(pure = true)
     @Override
     public void lostOwnership(final Clipboard clipboard, final Transferable contents) {
         // ignore

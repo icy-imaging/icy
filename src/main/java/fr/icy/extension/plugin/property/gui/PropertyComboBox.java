@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,8 +19,8 @@
 package fr.icy.extension.plugin.property.gui;
 
 import fr.icy.extension.plugin.property.SelectionProperty;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.Vector;
@@ -29,12 +29,12 @@ public final class PropertyComboBox<V> extends PropertyComponent<JComboBox<V>, V
     private int indexOldValue = 0;
     private int indexDefaultValue = 0;
 
-    PropertyComboBox(@NotNull final SelectionProperty<V> property) {
+    PropertyComboBox(final @NonNull SelectionProperty<V> property) {
         super(property);
     }
 
     @Override
-    protected @NotNull JComboBox<V> createComponent() {
+    protected @NonNull JComboBox<V> createComponent() {
         final SelectionProperty<V> sp = (SelectionProperty<V>) property;
         final Vector<V> vector = new Vector<>(sp.getOptions());
         indexOldValue = vector.indexOf(oldValue);

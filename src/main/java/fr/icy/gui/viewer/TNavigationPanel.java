@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,12 +18,12 @@
 
 package fr.icy.gui.viewer;
 
-import fr.icy.gui.component.slider.IcySlider;
-import fr.icy.gui.component.button.IcyToggleButton;
-import fr.icy.gui.component.ComponentUtil;
 import fr.icy.gui.GuiUtil;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.ComponentUtil;
+import fr.icy.gui.component.button.IcyToggleButton;
 import fr.icy.gui.component.icon.IcyIconPack;
+import fr.icy.gui.component.icon.IcySVG;
+import fr.icy.gui.component.slider.IcySlider;
 import fr.icy.system.thread.ThreadUtil;
 
 import javax.swing.*;
@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class TNavigationPanel extends JPanel {
@@ -80,7 +80,7 @@ public class TNavigationPanel extends JPanel {
 
                 incTPosition();
 
-                // end reached ?
+                // end reached?
                 if (oldT == getTPosition()) {
                     // loop mode --> reset
                     if (isRepeat())
@@ -95,8 +95,7 @@ public class TNavigationPanel extends JPanel {
             }
         });
 
-        play = new IcyToggleButton(new IcyIconPack(SVGResource.PLAY_CIRCLE, SVGResource.STOP_CIRCLE));
-        //play.setFlat(true);
+        play = new IcyToggleButton(new IcyIconPack(IcySVG.PLAY_CIRCLE, IcySVG.STOP_CIRCLE));
         play.setToolTipText("play");
         play.addActionListener(e -> {
             if (isPlaying())
@@ -105,8 +104,7 @@ public class TNavigationPanel extends JPanel {
                 startPlay();
         });
 
-        loop = new IcyToggleButton(SVGResource.REPEAT);
-        //loop.setFlat(true);
+        loop = new IcyToggleButton(IcySVG.REPEAT);
         loop.setToolTipText("Enable loop playback");
         loop.addActionListener(e -> setRepeat(!isRepeat()));
         // default
@@ -120,7 +118,7 @@ public class TNavigationPanel extends JPanel {
         tf.setFocusable(false);
         frameRate.setToolTipText("Change playback frame rate");
         frameRate.addChangeListener(e -> {
-            final int f = ((Integer) frameRate.getValue()).intValue();
+            final int f = (Integer) frameRate.getValue();
             // adjust timer delay
             setTimerDelay(1000 / f);
         });
@@ -195,14 +193,14 @@ public class TNavigationPanel extends JPanel {
      * Returns the frame rate (given in frame per second) for play command.
      */
     public int getFrameRate() {
-        return ((Integer) frameRate.getValue()).intValue();
+        return (Integer) frameRate.getValue();
     }
 
     /**
      * Sets the frame rate (given in frame per second) for play command.
      */
     public void setFrameRate(final int fps) {
-        frameRate.setValue(Integer.valueOf(fps));
+        frameRate.setValue(fps);
     }
 
     /**
@@ -217,12 +215,10 @@ public class TNavigationPanel extends JPanel {
      */
     public void setRepeat(final boolean value) {
         if (value) {
-            //loop.setIcon(new IcyIcon(ResourceUtil.ICON_RELOAD, 16));
             loop.setSelected(true);
             loop.setToolTipText("Disable loop playback");
         }
         else {
-            //loop.setIcon(new IcyIcon(ResourceUtil.ICON_ARROW_RIGHT, 16));
             loop.setSelected(false);
             loop.setToolTipText("Enable loop playback");
         }
@@ -260,7 +256,6 @@ public class TNavigationPanel extends JPanel {
      */
     public void startPlay() {
         timer.start();
-        //play.setIcon(new IcyIcon(ResourceUtil.ICON_PAUSE));
         play.setSelected(true);
         play.setToolTipText("pause");
     }
@@ -272,7 +267,6 @@ public class TNavigationPanel extends JPanel {
      */
     public void stopPlay() {
         timer.stop();
-        //play.setIcon(new IcyIcon(ResourceUtil.ICON_PLAY));
         play.setSelected(false);
         play.setToolTipText("play");
     }

@@ -20,7 +20,7 @@ package fr.icy.model.roi;
 import java.util.EventListener;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface ROIListener extends EventListener
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,65 +18,63 @@
 
 package fr.icy.extension.plugin.property;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Objects;
 
 public abstract class Property<V> {
     private final int uid;
-    @NotNull
-    protected final String name;
-    @Nullable
-    protected final String description;
+    protected final @NonNull String name;
+    protected final @Nullable String description;
 
-    @Nullable
-    protected V value;
-    @NotNull
-    protected V defaultValue;
+    protected @Nullable V value;
+    protected @NonNull V defaultValue;
 
-    Property(@NotNull final String name, @NotNull final String description, @NotNull final V defaultValue) {
+    Property(final @NonNull String name, final @NonNull String description, final @NonNull V defaultValue) {
         this.name = name;
         this.description = description;
         this.defaultValue = defaultValue;
 
-        this.uid = this.name.toLowerCase(Locale.getDefault()).replaceAll(" ", "-").hashCode();
+        this.uid = this.name.toLowerCase(Locale.getDefault()).replace(" ", "-").hashCode();
     }
 
-    Property(@NotNull final String name, @NotNull final V defaultValue) {
+    Property(final @NonNull String name, final @NonNull V defaultValue) {
         this.name = name;
         this.description = null;
         this.defaultValue = defaultValue;
 
-        this.uid = this.name.toLowerCase(Locale.getDefault()).replaceAll(" ", "-").hashCode();
+        this.uid = this.name.toLowerCase(Locale.getDefault()).replace(" ", "-").hashCode();
     }
 
+    @Contract(pure = true)
     public final int getUid() {
         return uid;
     }
 
-    @NotNull
-    public final String getName() {
+    @Contract(pure = true)
+    public final @NonNull String getName() {
         return name;
     }
 
-    @Nullable
-    public final String getDescription() {
+    @Contract(pure = true)
+    public final @Nullable String getDescription() {
         return description;
     }
 
-    public void setValue(@Nullable final V value) {
+    public void setValue(final @Nullable V value) {
         this.value = Objects.requireNonNullElse(value, defaultValue);
     }
 
-    @NotNull
-    public final V getValue() {
+    @Contract(pure = true)
+    public final @NonNull V getValue() {
         return value == null ? defaultValue : value;
     }
 
-    @NotNull
-    public final V getDefaultValue() {
+    @Contract(pure = true)
+    public final @NonNull V getDefaultValue() {
         return defaultValue;
     }
 }

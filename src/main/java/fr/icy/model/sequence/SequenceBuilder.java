@@ -38,7 +38,7 @@ import fr.icy.common.collection.array.Array2DUtil;
  * <br>
  *  <pre>
  *   // Input sequence
- *   Sequence in = ...
+ *   Sequence in = …
  *   
  *   // Create a SequenceBuilder object, that will be in charge of allocating
  *   // and feeding the output sequence.
@@ -56,7 +56,7 @@ import fr.icy.common.collection.array.Array2DUtil;
  *     // Here, the copy can be multi-threaded. No synchronization or mutex-locking
  *     // is required on the side of the SequenceBuilder object.
  *     
- *     ...
+ *     …
  *     
  *     // Thread 1
  *     forall(int t,z,c in listOfXYPlanesToBeDoneByThread1)
@@ -69,7 +69,7 @@ import fr.icy.common.collection.array.Array2DUtil;
  *       // SequenceBuilder constructor.
  *       // 
  *       // Remark: depending on the context, it may be more convenient to call
- *       // builder.getDataAsDouble, builder.getDataAsByte, etc...
+ *       // builder.getDataAsDouble, builder.getDataAsByte, etc…
  *       // 
  *       Object buffer = builder.getData(t, z, c);
  *       
@@ -85,14 +85,14 @@ import fr.icy.common.collection.array.Array2DUtil;
  *       builder.validateData(t, z, c);
  *     }
  *     
- *     ...
+ *     …
  *     
  *     // Thread 2
  *     forall(int t,z,c in listOfXYPlanesToBeDoneByThread2) {
- *       // etc...
+ *       // etc.
  *     }
  *     
- *     ...
+ *     …
  *     
  *   }
  *   
@@ -222,14 +222,14 @@ public class SequenceBuilder
 	{
 		return
 			
-			// Match the size ...
+			// Match the size …
 			_result.getSizeX()==_sizeX &&
 			_result.getSizeY()==_sizeY &&
 			_result.getSizeZ()==_sizeZ &&
 			_result.getSizeT()==_sizeT &&
 			_result.getSizeC()==_sizeC &&
 			
-			// ... and the data-type in the case of non-empty sequences
+			// … and the data-type in the case of non-empty sequences
 			(_result.getDataType()==_dataType
 				|| _sizeX==0
 				|| _sizeY==0

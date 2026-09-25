@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.field;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,13 +26,14 @@ import java.util.List;
  * Component to display and modify a numeric (double) value
  *
  * @author Yoann Le Montagner
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class NumberTextField extends IcyTextField {
     /**
      * Listener interface
      */
+    @FunctionalInterface
     public interface ValueChangeListener {
         /**
          * Method triggered when the numeric value in the component changes
@@ -46,7 +48,7 @@ public class NumberTextField extends IcyTextField {
     /**
      * Constructor
      */
-    public NumberTextField(boolean integer) {
+    public NumberTextField(final boolean integer) {
         super();
 
         value = 0;
@@ -71,7 +73,7 @@ public class NumberTextField extends IcyTextField {
     /**
      * Return true if the range use integer number
      */
-    public void setInteger(boolean integer) {
+    public void setInteger(final boolean integer) {
         this.integer = integer;
 
         // force value adjustment
@@ -81,14 +83,14 @@ public class NumberTextField extends IcyTextField {
     /**
      * Add a new listener
      */
-    public void addValueListener(ValueChangeListener l) {
+    public void addValueListener(final ValueChangeListener l) {
         listeners.add(l);
     }
 
     /**
      * Remove a listener
      */
-    public void removeValueListener(ValueChangeListener l) {
+    public void removeValueListener(final ValueChangeListener l) {
         listeners.remove(l);
     }
 
@@ -102,22 +104,22 @@ public class NumberTextField extends IcyTextField {
     /**
      * Set the value
      */
-    public void setNumericValue(double value) {
+    public void setNumericValue(final double value) {
         if (integer)
             setText(Integer.toString((int) value));
         else
             setText(Double.toString(value));
     }
 
-    protected void valueChanged(boolean validate) {
+    protected void valueChanged(final boolean validate) {
         fireValueChangedEvent(validate);
     }
 
     @Override
-    protected void textChanged(boolean validate) {
+    protected void textChanged(final boolean validate) {
         super.textChanged(validate);
 
-        double oldValue = value;
+        final double oldValue = value;
 
         try {
             final String text = getText();
@@ -127,7 +129,7 @@ public class NumberTextField extends IcyTextField {
                 value = (int) value;
             setForeground(null);
         }
-        catch (NumberFormatException err) {
+        catch (final NumberFormatException err) {
             setForeground(Color.RED.brighter());
         }
 
@@ -140,8 +142,8 @@ public class NumberTextField extends IcyTextField {
     /**
      * Fire the value changed event
      */
-    private void fireValueChangedEvent(boolean validate) {
-        for (ValueChangeListener l : listeners)
+    private void fireValueChangedEvent(final boolean validate) {
+        for (final ValueChangeListener l : listeners)
             l.valueChanged(value, validate);
     }
 }

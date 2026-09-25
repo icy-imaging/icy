@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,17 +18,17 @@
 
 package fr.icy.gui.menu;
 
+import fr.icy.Icy;
+import fr.icy.common.type.DataType;
 import fr.icy.gui.action.IcyAbstractAction;
 import fr.icy.gui.action.SequenceOperationActions;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.menu.IcyMenu;
 import fr.icy.gui.component.menu.IcyMenuItem;
 import fr.icy.gui.component.menu.IcyRadioButtonMenuItem;
-import fr.icy.Icy;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent;
 import fr.icy.system.thread.ThreadUtil;
-import fr.icy.common.type.DataType;
 
 import java.util.Objects;
 
@@ -55,23 +55,23 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
     private ApplicationMenuSequence() {
         super("Sequence");
 
-        final IcyMenuItem itemUndo = new IcyMenuItem(SequenceOperationActions.undoAction, SVGResource.UNDO);
+        final IcyMenuItem itemUndo = new IcyMenuItem(SequenceOperationActions.undoAction, IcySVG.UNDO);
         add(itemUndo);
 
-        final IcyMenuItem itemRedo = new IcyMenuItem(SequenceOperationActions.redoAction, SVGResource.REDO);
+        final IcyMenuItem itemRedo = new IcyMenuItem(SequenceOperationActions.redoAction, IcySVG.REDO);
         add(itemRedo);
 
         addSeparator();
 
-        final IcyMenuItem itemDuplicate = new IcyMenuItem(SequenceOperationActions.cloneSequenceAction, SVGResource.PHOTO_LIBRARY);
+        final IcyMenuItem itemDuplicate = new IcyMenuItem(SequenceOperationActions.cloneSequenceAction, IcySVG.PHOTO_LIBRARY);
         add(itemDuplicate);
 
         /* submenu conversion */
-        menuConversion = new IcyMenu("Convert to", SVGResource.SWITCH_ACCESS_2);
+        menuConversion = new IcyMenu("Convert to", IcySVG.SWITCH_ACCESS_2);
         add(menuConversion);
 
         /* submenu raw conversion */
-        menuRawConversion = new IcyMenu("Convert to Raw", SVGResource.SWITCH_ACCESS_2);
+        menuRawConversion = new IcyMenu("Convert to Raw", IcySVG.SWITCH_ACCESS_2);
         add(menuRawConversion);
 
         final DataType[] dataTypes = {
@@ -95,18 +95,18 @@ public final class ApplicationMenuSequence extends AbstractApplicationMenu {
 
         addSeparator();
 
-        final IcyMenuItem itemFastCrop = new IcyMenuItem(SequenceOperationActions.cropSequenceAction, SVGResource.CROP);
+        final IcyMenuItem itemFastCrop = new IcyMenuItem(SequenceOperationActions.cropSequenceAction, IcySVG.CROP);
         add(itemFastCrop);
 
-        final IcyMenuItem itemResizeCanvas = new IcyMenuItem(SequenceOperationActions.canvasResizeAction, SVGResource.IMAGE_ASPECT_RATIO);
+        final IcyMenuItem itemResizeCanvas = new IcyMenuItem(SequenceOperationActions.canvasResizeAction, IcySVG.IMAGE_ASPECT_RATIO);
         add(itemResizeCanvas);
 
-        final IcyMenuItem itemResizeImage = new IcyMenuItem(SequenceOperationActions.imageResizeAction, SVGResource.IMAGE_RESIZE);
+        final IcyMenuItem itemResizeImage = new IcyMenuItem(SequenceOperationActions.imageResizeAction, IcySVG.IMAGE_RESIZE);
         add(itemResizeImage);
 
         addSeparator();
 
-        menuExtractChannel = new IcyMenu("Extract Channel...");
+        menuExtractChannel = new IcyMenu("Extract Channel…");
         add(menuExtractChannel);
 
         itemExtractAllChannels = new IcyMenuItem(SequenceOperationActions.extractAllChannelAction);

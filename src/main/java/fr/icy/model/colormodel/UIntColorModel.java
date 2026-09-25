@@ -25,7 +25,7 @@ import fr.icy.common.type.DataType;
 import fr.icy.common.type.TypeUtil;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class UIntColorModel extends IcyColorModel
 {

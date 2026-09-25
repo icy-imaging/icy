@@ -23,7 +23,7 @@ import java.awt.*;
 /**
  * Class to represent a 3D binary image as a 3D VTK volume object.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class VtkBinaryVolume extends VtkImageVolume {

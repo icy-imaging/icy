@@ -23,7 +23,7 @@ import loci.formats.gui.ExtensionFileFilter;
 /**
  * Define some default image file format for Icy.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public enum ImageFileFormat {

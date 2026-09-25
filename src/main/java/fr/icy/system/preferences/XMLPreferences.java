@@ -18,10 +18,12 @@
 
 package fr.icy.system.preferences;
 
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.common.reflect.ClassUtil;
 import fr.icy.common.string.StringUtil;
 import fr.icy.io.xml.XMLUtil;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -29,12 +31,16 @@ import org.w3c.dom.Node;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class XMLPreferences {
+    private static final Logger LOGGER = Logger.getLogger(XMLPreferences.class.getName());
+
     public static class XMLPreferencesRoot {
         private final String filename;
         private Document doc;
@@ -58,6 +64,7 @@ public class XMLPreferences {
 
         /**
          * Load preferences from file
+         *
          * @param filename string
          */
         public void load(final String filename) {
@@ -66,7 +73,8 @@ public class XMLPreferences {
                 doc = XMLUtil.loadDocument(new File(filename));
             }
             catch (final Throwable t) {
-                IcyLogger.error(XMLPreferences.class, t, filename + " preferences file is corrupted, cannot recover settings.");
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Unable to load '" + filename + "' preferences file.", t);
                 // corrupted XML file
                 doc = null;
             }
@@ -91,6 +99,7 @@ public class XMLPreferences {
 
         /**
          * Save preferences to file
+         *
          * @param filename string
          */
         public void save(final String filename) {
@@ -124,6 +133,7 @@ public class XMLPreferences {
      * <code>new XMLPreferencesRoot(filename).getPreferences()</code><br>
      * to load preferences from file.
      */
+    @Contract(pure = true)
     XMLPreferences(final XMLPreferencesRoot root, final Element element) {
         super();
 
@@ -189,7 +199,7 @@ public class XMLPreferences {
         return result;
     }
 
-    private Element getSection(final String name) {
+    private @Nullable Element getSection(final String name) {
         if (StringUtil.isEmpty(name))
             return currentElement;
 
@@ -215,7 +225,7 @@ public class XMLPreferences {
         return element;
     }
 
-    private Element setSection(final String name) {
+    private @Nullable Element setSection(final String name) {
         if (StringUtil.isEmpty(name))
             return currentElement;
 
@@ -255,10 +265,10 @@ public class XMLPreferences {
     }
 
     /**
+     * @param object object
      * @return Return XMLPreferences of specified node using class name of specified object.<br>
      * <code>nodeForClass(object) == node(object.getClass().getName())</code><br>
      * Ex : <code>nodeForClass("text") == node("java.lang.String")</code>
-     * @param object object
      */
     public XMLPreferences nodeForClass(final Object object) {
         if (object != null)
@@ -307,10 +317,10 @@ public class XMLPreferences {
     }
 
     /**
+     * @param object object
      * @return Return true if node for specified object exists.<br>
      * <code>nodeForClassExists(object) == nodeExists(object.getClass().getName())</code><br>
      * Ex : <code>nodeForClassExists("text") == nodeExists("java.lang.String")</code>
-     * @param object object
      */
     public boolean nodeForClassExists(final Object object) {
         if (object != null)
@@ -378,6 +388,7 @@ public class XMLPreferences {
 
     /**
      * Remove specified section
+     *
      * @param name string
      */
     public void remove(final String name) {
@@ -447,7 +458,7 @@ public class XMLPreferences {
         }
     }
 
-    public void putBytes(final String key, final byte[] value) {
+    public void putBytes(final String key, final byte @NonNull [] value) {
         synchronized (root) {
             XMLUtil.setGenericElementBytesValue(currentElement, TYPE_KEY, key, value.clone());
         }

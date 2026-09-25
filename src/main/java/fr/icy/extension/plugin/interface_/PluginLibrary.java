@@ -24,7 +24,7 @@ package fr.icy.extension.plugin.interface_;
  * Can be shared between severals plugins.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)

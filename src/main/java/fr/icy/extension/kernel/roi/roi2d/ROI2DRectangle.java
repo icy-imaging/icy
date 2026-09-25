@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,17 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.extension.kernel.roi.roi2d;
 
 import fr.icy.common.geom.point.Point5D;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.model.roi.ROI;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI2DRectangle extends ROI2DRectShape {
@@ -33,14 +35,14 @@ public class ROI2DRectangle extends ROI2DRectShape {
         super(new Rectangle2D.Double(), topLeft, bottomRight);
 
         // set icon (default name is defined by getDefaultName()) 
-        setIcon(SVGResource.ROI_RECTANGLE);
+        setIcon(IcySVG.ROI_RECTANGLE);
     }
 
     public ROI2DRectangle(final double xmin, final double ymin, final double xmax, final double ymax) {
         this(new Point2D.Double(xmin, ymin), new Point2D.Double(xmax, ymax));
     }
 
-    public ROI2DRectangle(final Rectangle2D rectangle) {
+    public ROI2DRectangle(final @NonNull Rectangle2D rectangle) {
         this(new Point2D.Double(rectangle.getMinX(), rectangle.getMinY()), new Point2D.Double(rectangle.getMaxX(),
                 rectangle.getMaxY()));
     }
@@ -52,7 +54,7 @@ public class ROI2DRectangle extends ROI2DRectShape {
     /**
      * Generic constructor for interactive mode
      */
-    public ROI2DRectangle(final Point5D pt) {
+    public ROI2DRectangle(final @NonNull Point5D pt) {
         this(pt.toPoint2D());
     }
 

@@ -49,7 +49,8 @@ import fr.icy.system.thread.ThreadUtil;
  * This class is the most important part of this plugin: it will handle and
  * display all local and online requests when characters are being typed in the {@link SearchBar}.
  *
- * @author Thomas Provoost &amp; Stephane
+ * @author Thomas Provoost
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SearchResultPanel extends JWindow implements ListSelectionListener {

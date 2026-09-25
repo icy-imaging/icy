@@ -32,7 +32,7 @@ import fr.icy.extension.kernel.roi.roi2d.ROI2DArea;
 /**
  * ROI2DARea change implementation for ROI undoable edition.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Area2DChangeROIEdit extends AbstractROIEdit
 {

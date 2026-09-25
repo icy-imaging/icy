@@ -38,7 +38,7 @@ import fr.icy.model.sequence.SequenceUtil.AddZHelper;
 import fr.icy.system.thread.ThreadUtil;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequenceDimensionExtendFrame extends ActionDialog
 {
@@ -155,7 +155,7 @@ public class SequenceDimensionExtendFrame extends ActionDialog
                     public void run()
                     {
                         final Sequence sequence = SequenceDimensionExtendFrame.this.sequence;
-                        final ProgressFrame pf = new ProgressFrame("Extending sequence...");
+                        final ProgressFrame pf = new ProgressFrame("Extending sequence…");
 
                         try
                         { // create undo point

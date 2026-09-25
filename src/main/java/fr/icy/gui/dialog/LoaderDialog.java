@@ -44,7 +44,7 @@ import fr.icy.common.string.StringUtil;
  * Loader dialog used to load resource or image from the {@link FileImporter} or
  * {@link SequenceFileImporter}.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @see Loader
  */
 public class LoaderDialog extends JFileChooser implements PropertyChangeListener

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -27,15 +27,15 @@ import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent;
 import fr.icy.model.sequence.SequenceEvent.SequenceEventSourceType;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Area ROI descriptor class (see {@link ROIDescriptor})
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-public class ROIAreaDescriptor extends ROIDescriptor {
+public class ROIAreaDescriptor extends ROIDescriptor<Double> {
     public static final String ID = "Area";
 
     public ROIAreaDescriptor() {
@@ -56,7 +56,7 @@ public class ROIAreaDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public boolean needRecompute(final @NotNull SequenceEvent change) {
+    public boolean needRecompute(final @NonNull SequenceEvent change) {
         final SequenceEventSourceType sourceType = change.getSourceType();
 
         if (sourceType == SequenceEventSourceType.SEQUENCE_DATA)
@@ -73,14 +73,14 @@ public class ROIAreaDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public Object compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
-        return Double.valueOf(computeArea(roi, sequence));
+    public @NonNull Double compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
+        return computeArea(roi, sequence);
     }
 
     /**
      * Computes and returns the area expressed in the unit of the descriptor (see {@link #getUnit(Sequence)}) for the
      * specified ROI.<br>
-     * It may thrown an <code>UnsupportedOperationException</code> if the operation is not supported for that ROI.
+     * It may throw an <code>UnsupportedOperationException</code> if the operation is not supported for that ROI.
      *
      * @param roi      the ROI on which we want to compute the surface area
      * @param sequence an optional sequence where the pixel size can be retrieved
@@ -88,18 +88,18 @@ public class ROIAreaDescriptor extends ROIDescriptor {
      * @throws UnsupportedOperationException if the operation is not supported for this ROI
      */
     @Contract("null, _ -> fail")
-    public static double computeArea(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
+    public static @NonNull Double computeArea(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
         return computeArea(ROIInteriorDescriptor.computeInterior(roi), roi, sequence);
     }
 
     /**
      * Computes and returns the surface area from a given number of contour points expressed in the
      * unit of the descriptor (see {@link #getUnit(Sequence)}) for the specified sequence and ROI.<br>
-     * It may thrown an <code>UnsupportedOperationException</code> if the operation is not supported for that ROI.
+     * It may throw an <code>UnsupportedOperationException</code> if the operation is not supported for that ROI.
      *
      * @param interiorPoints the number of contour points (override the ROI value)
      * @param roi            the ROI we want to compute the surface area
-     * @param sequence       the input sequence used to retrieve operation unit by using pixel size
+     * @param sequence       the input sequence used to retrieve the operation unit by using pixel size
      *                       information.
      * @return the area expressed in the unit of the descriptor (see {@link #getUnit(Sequence)})
      * @throws UnsupportedOperationException if the operation is not supported for this ROI

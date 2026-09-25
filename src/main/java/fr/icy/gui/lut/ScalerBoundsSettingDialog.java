@@ -31,8 +31,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
+import javax.swing.*;
 
 public class ScalerBoundsSettingDialog extends ActionDialog
 {
@@ -97,13 +96,13 @@ public class ScalerBoundsSettingDialog extends ActionDialog
                 {
                     MessageDialog.showDialog("Invalids settings",
                             "The maximum range value should be above the minimum range value",
-                            MessageDialog.ERROR_MESSAGE);
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 if ((lowBound < rangeMin) || (highBound > rangeMax))
                 {
                     MessageDialog.showDialog("Invalids settings", "The view range should be inside the full range",
-                            MessageDialog.ERROR_MESSAGE);
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 

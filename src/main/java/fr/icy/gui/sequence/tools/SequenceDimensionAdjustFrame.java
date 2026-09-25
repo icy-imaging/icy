@@ -33,7 +33,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequenceDimensionAdjustFrame extends ActionDialog
 {
@@ -146,9 +146,9 @@ public class SequenceDimensionAdjustFrame extends ActionDialog
                         final ProgressFrame pf;
 
                         if (dim == DimensionId.Z)
-                            pf = new ProgressFrame("Removing slices...");
+                            pf = new ProgressFrame("Removing slices…");
                         else
-                            pf = new ProgressFrame("Removing frames...");
+                            pf = new ProgressFrame("Removing frames…");
 
                         final Sequence seq = SequenceDimensionAdjustFrame.this.sequence;
                         final Sequence tmp = new Sequence();

@@ -27,7 +27,7 @@ import fr.icy.gui.viewer.Viewer;
  * The plugin will appears in the Canvas list.<br>
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public interface PluginCanvas<C extends IcyCanvas> extends PluginNoEDTConstructor {

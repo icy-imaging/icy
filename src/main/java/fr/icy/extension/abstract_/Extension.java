@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,15 +19,16 @@
 package fr.icy.extension.abstract_;
 
 import fr.icy.extension.plugin.abstract_.Plugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Set;
 
 /**
  * @author Thomas Musset
- *
+ * <p>
  * This class allows to identify an extension.
  */
+@Deprecated(forRemoval = true, since = "3.0.0")
 public abstract class Extension {
-    public abstract @NotNull Set<Class<? extends Plugin>> getPlugins();
+    public abstract @NonNull Set<Class<? extends Plugin>> getPlugins();
 }

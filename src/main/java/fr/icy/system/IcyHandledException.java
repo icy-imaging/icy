@@ -23,7 +23,7 @@ package fr.icy.system;
  * when it catches this exception.<br>
  * Also no log is saved in the console.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class IcyHandledException extends RuntimeException
 {

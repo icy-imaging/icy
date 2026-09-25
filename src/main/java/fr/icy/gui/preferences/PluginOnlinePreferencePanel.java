@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PluginOnlinePreferencePanel extends PluginListPreferencePanel implements PluginRepositoryLoaderListener, PluginInstallerListener {
@@ -75,7 +75,7 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
 
         if ((PluginInstaller.isInstallingPlugin(plugin)))
             return PluginOnlineState.INSTALLING;
-        if ((PluginInstaller.isDesinstallingPlugin(plugin)))
+        if ((PluginInstaller.isUninstallingPlugin(plugin)))
             return PluginOnlineState.REMOVING;
 
         // has a local version ?
@@ -137,7 +137,7 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
         if (ConfirmDialog.confirm(message.toString())) {
             // remove plugins
             for (final PluginDescriptor plugin : toRemove)
-                PluginInstaller.desinstall(plugin, false, true);
+                PluginInstaller.uninstall(plugin, false, true);
         }
 
         // refresh state
@@ -185,8 +185,8 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
     @Override
     protected String getStateValue(final PluginDescriptor plugin) {
         return switch (getPluginOnlineState(plugin)) {
-            case INSTALLING -> "installing...";
-            case REMOVING -> "removing...";
+            case INSTALLING -> "installing…";
+            case REMOVING -> "removing…";
             case NEWER -> "update available";
             case OLDER -> "outdated";
             case INSTALLED -> "installed";
@@ -197,7 +197,7 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
 
     @Override
     protected List<PluginDescriptor> getPlugins() {
-        // loading...
+        // loading…
         if (!PluginRepositoryLoader.isLoaded())
             return new ArrayList<>();
 
@@ -224,7 +224,7 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
             repository.setEnabled(true);
         }
         else {
-            refreshButton.setText("Reloading...");
+            refreshButton.setText("Reloading…");
             refreshButton.setEnabled(false);
             repository.setEnabled(false);
         }
@@ -257,7 +257,7 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
         switch (state) {
             case REMOVING:
                 // special case where plugins are currently begin removed
-                action1Button.setText("Deleting...");
+                action1Button.setText("Deleting…");
                 action1Button.setEnabled(false);
                 break;
 
@@ -299,7 +299,7 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
 
         switch (state) {
             case INSTALLING:
-                action2Button.setText("Installing...");
+                action2Button.setText("Installing…");
                 action2Button.setEnabled(false);
                 break;
 
@@ -326,7 +326,7 @@ public class PluginOnlinePreferencePanel extends PluginListPreferencePanel imple
     }
 
     @Override
-    public void pluginRepositeryLoaderChanged(final PluginDescriptor plugin) {
+    public void pluginRepositoryLoaderChanged(final PluginDescriptor plugin) {
         if (plugin != null) {
             final int ind = getPluginModelIndex(plugin.getClassName());
 

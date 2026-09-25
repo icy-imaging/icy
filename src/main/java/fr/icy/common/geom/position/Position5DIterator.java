@@ -28,7 +28,7 @@ import fr.icy.common.geom.point.Point5D;
 /**
  * Position 5D iterator.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface Position5DIterator
 {

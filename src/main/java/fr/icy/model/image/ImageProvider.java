@@ -36,7 +36,7 @@ import java.awt.*;
  * <li>image database interface.</li>
  * </ul>
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public interface ImageProvider {
@@ -98,7 +98,7 @@ public interface ImageProvider {
      * <code>true</code>).<br>
      * <i>Resolution 1</i> is half of the original resolution<br>
      * <i>Resolution 2</i> is quarter of the original resolution<br>
-     * <i>...</i>
+     * <i>…</i>
      *
      * @param series     Series index for multi series image (use 0 if unsure).
      * @param resolution Resolution level
@@ -122,7 +122,7 @@ public interface ImageProvider {
      * @param resolution Wanted resolution level for the image (use 0 if unsure).<br>
      *                   The retrieved image resolution is equal to <code>image.originalResolution / (2^resolution)</code><br>
      *                   So for instance level 0 is the default image resolution while level 1 is base image
-     *                   resolution / 2 and so on...
+     *                   resolution / 2 and so on…
      * @param region     The 2D region we want to retrieve (considering the original image resolution).<br>
      *                   If set to <code>null</code> then the whole image is returned.
      * @param z          Z position of the image (slice) we want retrieve data from
@@ -140,7 +140,7 @@ public interface ImageProvider {
      * @param resolution Wanted resolution level for the image (use 0 if unsure).<br>
      *                   The retrieved image resolution is equal to <code>image.originalResolution / (2^resolution)</code><br>
      *                   So for instance level 0 is the default image resolution while level 1 is base image
-     *                   resolution / 2 and so on...
+     *                   resolution / 2 and so on…
      * @param region     The 2D region we want to retrieve (considering the original image resolution).<br>
      *                   If set to <code>null</code> then the whole image is returned.
      * @param z          Z position of the image (slice) we want retrieve
@@ -158,7 +158,7 @@ public interface ImageProvider {
      * @param resolution Wanted resolution level for the image (use 0 if unsure).<br>
      *                   The retrieved image resolution is equal to <code>image.originalResolution / (2^resolution)</code><br>
      *                   So for instance level 0 is the default image resolution while level 1 is base image
-     *                   resolution / 2 and so on...
+     *                   resolution / 2 and so on…
      * @param region     The 2D region we want to retrieve (considering the original image resolution).<br>
      *                   If set to <code>null</code> then the whole image is returned.
      * @param z          Z position of the image (slice) we want retrieve
@@ -175,7 +175,7 @@ public interface ImageProvider {
      * @param resolution Wanted resolution level for the image (use 0 if unsure).<br>
      *                   The retrieved image resolution is equal to <code>image.originalResolution / (2^resolution)</code><br>
      *                   So for instance level 0 is the default image resolution while level 1 is base image
-     *                   resolution / 2 and so on...
+     *                   resolution / 2 and so on…
      * @param z          Z position of the image (slice) we want retrieve
      * @param t          T position of the image (frame) we want retrieve
      * @param c          C position of the image (channel) we want retrieve (-1 means all channel).
@@ -191,7 +191,7 @@ public interface ImageProvider {
      * @param resolution Wanted resolution level for the image (use 0 if unsure).<br>
      *                   The retrieved image resolution is equal to <code>image.originalResolution / (2^resolution)</code><br>
      *                   So for instance level 0 is the default image resolution while level 1 is base image
-     *                   resolution / 2 and so on...
+     *                   resolution / 2 and so on…
      * @param z          Z position of the image (slice) we want retrieve
      * @param t          T position of the image (frame) we want retrieve
      * @return image

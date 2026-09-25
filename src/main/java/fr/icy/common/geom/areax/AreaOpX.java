@@ -18,12 +18,13 @@
 
 package fr.icy.common.geom.areax;
 
-import fr.icy.system.logging.IcyLogger;
-
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 public abstract class AreaOpX {
+    private static final Logger LOGGER = Logger.getLogger(AreaOpX.class.getName());
+
     public static abstract class CAGOp extends AreaOpX {
         boolean inLeft;
         boolean inRight;
@@ -98,7 +99,7 @@ public abstract class AreaOpX {
 
         @Override
         public int classify(final EdgeX e) {
-            // Note: the right curves should be an empty set with this op...
+            // Note: the right curves should be an empty set with this op…
             // assert(e.getCurveTag() == CTAG_LEFT);
             int newCount = count;
             final int type = (newCount == 0 ? ETAG_ENTER : ETAG_IGNORE);
@@ -123,7 +124,7 @@ public abstract class AreaOpX {
 
         @Override
         public int classify(final EdgeX e) {
-            // Note: the right curves should be an empty set with this op...
+            // Note: the right curves should be an empty set with this op…
             // assert(e.getCurveTag() == CTAG_LEFT);
             final boolean newInside = !inside;
             inside = newInside;
@@ -329,20 +330,20 @@ public abstract class AreaOpX {
             }
             // assert(getState() == AreaOp.RSTAG_OUTSIDE);
             if (getState() != AreaOpX.RSTAG_OUTSIDE) {
-                IcyLogger.trace(AreaOpX.class, "Still inside at end of active edge list!");
-                IcyLogger.trace(AreaOpX.class, "num curves = " + (right - left));
-                IcyLogger.trace(AreaOpX.class, "num links = " + links.size());
-                IcyLogger.trace(AreaOpX.class, "y top = " + yrange[0]);
+                LOGGER.fine("Still inside at end of active edge list!");
+                LOGGER.fine("num curves = " + (right - left));
+                LOGGER.fine("num links = " + links.size());
+                LOGGER.fine("y top = " + yrange[0]);
                 if (right < numedges)
-                    IcyLogger.trace(AreaOpX.class, "y top of next curve = " + edgelist[right].getCurve().getYTop());
+                    LOGGER.fine("y top of next curve = " + edgelist[right].getCurve().getYTop());
                 else
-                    IcyLogger.trace(AreaOpX.class, "no more curves");
+                    LOGGER.fine("no more curves");
                 for (cur = left; cur < right; cur++) {
                     e = edgelist[cur];
-                    IcyLogger.trace(AreaOpX.class, e.toString());
+                    LOGGER.fine(e.toString());
                     final int eq = e.getEquivalence();
                     if (eq != 0)
-                        IcyLogger.trace(AreaOpX.class, "  was equal to " + eq + "...");
+                        LOGGER.fine("  was equal to " + eq + "…");
                 }
             }
             chains = resolveLinks(subcurves, chains, links);
@@ -408,7 +409,7 @@ public abstract class AreaOpX {
         while (chain != null || link != null) {
             /*
              * Strategy 1: Connect chains or links if they are the only things
-             * left...
+             * left…
              */
             boolean connectchains = (link == null);
             boolean connectlinks = (chain == null);
@@ -417,7 +418,7 @@ public abstract class AreaOpX {
                 // assert(link != null && chain != null);
                 /*
                  * Strategy 2: Connect chains or links if they close off an open
-                 * area...
+                 * area…
                  */
                 connectchains = ((curchain & 1) == 0 && (nextchain != null && chain.getX() == nextchain.getX())); // ((curchain & 1) == 0 && chain.getX() == nextchain.getX());
                 connectlinks = ((curlink & 1) == 0 && (nextlink != null && link.getX() == nextlink.getX())); // ((curlink & 1) == 0 && link.getX() == nextlink.getX());
@@ -425,7 +426,7 @@ public abstract class AreaOpX {
                 if (!connectchains && !connectlinks) {
                     /*
                      * Strategy 3: Connect chains or links if their successor is
-                     * between them and their potential connectee...
+                     * between them and their potential connectee…
                      */
                     final double cx = chain.getX();
                     final double lx = link.getX();
@@ -466,7 +467,7 @@ public abstract class AreaOpX {
             }
         }
         if ((newChains.size() & 1) != 0)
-            IcyLogger.trace(AreaOpX.class, "Odd number of chains!");
+            LOGGER.fine("Odd number of chains!");
         return newChains;
     }
 

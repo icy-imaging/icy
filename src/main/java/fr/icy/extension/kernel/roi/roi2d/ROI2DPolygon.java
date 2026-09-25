@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,14 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.extension.kernel.roi.roi2d;
 
 import fr.icy.common.geom.point.Point5D;
 import fr.icy.common.geom.poly.Polygon2D;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.anchor.Anchor2D;
 import fr.icy.model.overlay.anchor.LineAnchor2D;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -33,7 +35,7 @@ import java.util.List;
 /**
  * ROI 2D polygon class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI2DPolygon extends ROI2DShape {
@@ -71,13 +73,13 @@ public class ROI2DPolygon extends ROI2DShape {
         addPoint(point);
 
         // set icon (default name is defined by getDefaultName())
-        setIcon(SVGResource.ROI_POLYGON);
+        setIcon(IcySVG.ROI_POLYGON);
     }
 
     /**
      * Generic constructor for interactive mode
      */
-    public ROI2DPolygon(final Point5D pt) {
+    public ROI2DPolygon(final @NonNull Point5D pt) {
         this(pt.toPoint2D());
         // getOverlay().setMousePos(pt);
     }
@@ -110,7 +112,7 @@ public class ROI2DPolygon extends ROI2DShape {
         return new ROI2DPolygonAnchor2D(pos, getColor(), getFocusedColor());
     }
 
-    public void setPoints(final List<Point2D> pts) {
+    public void setPoints(final @NonNull List<Point2D> pts) {
         beginUpdate();
         try {
             final List<Anchor2D> ctrlPts = getControlPoints();
@@ -141,7 +143,7 @@ public class ROI2DPolygon extends ROI2DShape {
         return (Polygon2D) shape;
     }
 
-    public void setPolygon2D(final Polygon2D polygon2D) {
+    public void setPolygon2D(final @NonNull Polygon2D polygon2D) {
         setPoints(polygon2D.getPoints());
     }
 

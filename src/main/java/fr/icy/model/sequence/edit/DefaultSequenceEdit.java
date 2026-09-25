@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,12 +18,14 @@
 
 package fr.icy.model.sequence.edit;
 
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.dialog.MessageDialog;
 import fr.icy.model.overlay.Overlay;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.sequence.Sequence;
+import org.jspecify.annotations.NonNull;
 
+import javax.swing.*;
 import javax.swing.undo.CannotUndoException;
 import java.util.Set;
 
@@ -31,7 +33,7 @@ import java.util.Set;
  * Default lazy sequence undoable edit (do a complete sequence copy to restore previous state).<br>
  * Do not handle redo operation to not consume too much memory.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class DefaultSequenceEdit extends AbstractSequenceEdit {
@@ -39,7 +41,7 @@ public class DefaultSequenceEdit extends AbstractSequenceEdit {
     Set<ROI> previousRois;
     Set<Overlay> previousOverlays;
 
-    public DefaultSequenceEdit(final Sequence previous, final Sequence sequence, final SVGResource icon) {
+    public DefaultSequenceEdit(final @NonNull Sequence previous, final Sequence sequence, final IcySVG icon) {
         super(sequence, icon);
 
         this.previous = previous;
@@ -80,7 +82,7 @@ public class DefaultSequenceEdit extends AbstractSequenceEdit {
                     sequence.removeOverlay(overlay);
         }
         catch (final InterruptedException e) {
-            MessageDialog.showDialog("Undo operation interrupted", e.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+            MessageDialog.showDialog("Undo operation interrupted", e.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
         }
         finally {
             sequence.endUpdate();

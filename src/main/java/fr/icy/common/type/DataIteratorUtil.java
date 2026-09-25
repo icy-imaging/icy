@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,19 +20,19 @@ package fr.icy.common.type;
 
 import fr.icy.model.image.ImageDataIterator;
 import fr.icy.model.sequence.SequenceDataIterator;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Utilities for {@link DataIterator} classes.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class DataIteratorUtil {
     /**
-     * Returns the number of element contained in the specified {@link DataIterator}.
+     * Returns the number of elements contained in the specified {@link DataIterator}.
      */
-    public static long count(final @NotNull DataIterator it) throws InterruptedException {
+    public static long count(final @NonNull DataIterator it) throws InterruptedException {
         long result = 0;
 
         it.reset();
@@ -52,17 +52,17 @@ public class DataIteratorUtil {
     /**
      * Sets the specified value to the specified {@link DataIterator}.
      */
-    public static void set(final DataIterator it, final double value) throws InterruptedException {
+    public static void set(final @NonNull DataIterator it, final double value) throws InterruptedException {
         it.reset();
 
         try {
-            int i = 0;
+            final int i = 0;
             while (!it.done()) {
                 it.set(value);
                 it.next();
 
                 // check for interruption from time to time as this can be a long process
-                if (((i & 0xFFF) == 0xFFF) && Thread.interrupted())
+                if (((i & 0xFFF) == 0xFFF) && Thread.interrupted()) // TODO check why always false
                     throw new InterruptedException("DataIteratorUtil.set(..) process interrupted.");
             }
         }

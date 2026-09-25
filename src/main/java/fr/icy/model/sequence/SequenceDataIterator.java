@@ -36,7 +36,7 @@ import java.util.NoSuchElementException;
  * <b>If the sequence size or type is modified during iteration the iterator
  * becomes invalid and can exception can happen.</b>
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SequenceDataIterator implements DataIterator {

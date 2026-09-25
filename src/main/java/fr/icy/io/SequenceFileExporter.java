@@ -31,7 +31,7 @@ import javax.swing.filechooser.FileFilter;
  * {@link Saver} class to open Sequence.<br>
  * It takes a {@link Sequence} and saves it in {@link File}.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface SequenceFileExporter
 {

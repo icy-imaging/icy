@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -25,15 +25,16 @@ import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.roi.ROIEvent.ROIEventType;
 import fr.icy.model.sequence.Sequence;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.*;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-public class ROIColorDescriptor extends ROIDescriptor {
+public class ROIColorDescriptor extends ROIDescriptor<Color> {
     public static final String ID = "Color";
 
     public ROIColorDescriptor() {
@@ -46,13 +47,13 @@ public class ROIColorDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public boolean needRecompute(final @NotNull ROIEvent change) {
+    public boolean needRecompute(final @NonNull ROIEvent change) {
         return (change.getType() == ROIEventType.PROPERTY_CHANGED)
                 && (StringUtil.equals(change.getPropertyName(), ROI.PROPERTY_COLOR));
     }
 
     @Override
-    public Object compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
+    public @Nullable Color compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
         return getColor(roi);
     }
 
@@ -60,7 +61,7 @@ public class ROIColorDescriptor extends ROIDescriptor {
      * Returns ROI color
      */
     @Contract("null -> null")
-    public static Color getColor(final ROI roi) {
+    public static @Nullable Color getColor(final ROI roi) {
         if (roi == null)
             return null;
 

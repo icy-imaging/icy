@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,20 +18,20 @@
 
 package fr.icy.model.sequence.edit;
 
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.sequence.Sequence;
 
 /**
  * Abstract ROI sequence undoable edit.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class AbstractROISequenceEdit extends AbstractSequenceEdit {
     ROI roi;
 
-    public AbstractROISequenceEdit(final Sequence sequence, final ROI roi, final String name, final SVGResource icon) {
+    public AbstractROISequenceEdit(final Sequence sequence, final ROI roi, final String name, final IcySVG icon) {
         super(sequence, name, icon);
 
         this.roi = roi;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 
 package fr.icy.gui.frame;
 
+import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
 import fr.icy.Icy;
 
 import javax.swing.*;
@@ -98,7 +99,7 @@ public class ExitFrame extends JFrame {
             // close frame
             dispose();
         });
-        //button.setFont(new Font("Tahoma", Font.BOLD, 14));
+        button.setFont(new Font(FlatJetBrainsMonoFont.FAMILY, Font.BOLD, 14));
         buttonPanel.add(button);
 
         final JPanel panel = new JPanel();
@@ -108,17 +109,17 @@ public class ExitFrame extends JFrame {
         final JPanel panel_2 = new JPanel();
         panel.add(panel_2);
 
-        final JLabel label = new JLabel("Please wait while exiting...");
+        final JLabel label = new JLabel("Please wait while exiting…");
         panel_2.add(label);
         label.setHorizontalAlignment(SwingConstants.CENTER);
-        //label.setFont(new Font("Tahoma", Font.BOLD, 16));
+        label.setFont(new Font(FlatJetBrainsMonoFont.FAMILY, Font.BOLD, 16));
 
         forceQuitPanel = new JPanel();
         panel.add(forceQuitPanel);
 
         final JLabel forceQuitLabel = new JLabel("Click on 'Force Quit' to kill remaining tasks and exit.");
         forceQuitPanel.add(forceQuitLabel);
-        //forceQuitLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        forceQuitLabel.setFont(new Font(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, 14));
         forceQuitLabel.setHorizontalAlignment(SwingConstants.CENTER);
     }
 }

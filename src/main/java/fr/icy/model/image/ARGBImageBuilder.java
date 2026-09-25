@@ -18,10 +18,9 @@
 
 package fr.icy.model.image;
 
-import fr.icy.model.lut.LUT;
 import fr.icy.common.math.Scaler;
+import fr.icy.model.lut.LUT;
 import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.Processor;
 import fr.icy.system.thread.ThreadUtil;
 
@@ -31,12 +30,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 class ARGBImageBuilder {
+    private static final Logger LOGGER = Logger.getLogger(ARGBImageBuilder.class.getName());
+
     private static final int BLOC_SIZE = 512 * 512;
 
     class BlockBuilder implements Runnable {
@@ -66,7 +69,7 @@ class ARGBImageBuilder {
             numChannel = image.getSizeC();
 
             if (this.lut.getNumChannel() != numChannel)
-                throw new IllegalArgumentException("ARGBImageBuilder.prepare(...): LUT.numChannel != IMAGE.numChannel");
+                throw new IllegalArgumentException("ARGBImageBuilder.prepare(…): LUT.numChannel != IMAGE.numChannel");
         }
 
         @Override
@@ -156,13 +159,10 @@ class ARGBImageBuilder {
      * Note that output {@link BufferedImage} is fixed to ARGB type (TYPE_INT_ARGB) and the image
      * cannot be volatile accelerated.
      *
-     * @param image
-     *        source image
-     * @param lut
-     *        {@link LUT} is used for color calculation (internal lut is used if null).
-     * @param out
-     *        destination image. Note that we access image data so it can't be volatile anymore
-     *        which may result in slower drawing.
+     * @param image source image
+     * @param lut   {@link LUT} is used for color calculation (internal lut is used if null).
+     * @param out   destination image. Note that we access image data so it can't be volatile anymore
+     *              which may result in slower drawing.
      */
     public BufferedImage buildARGBImage(final IcyBufferedImage image, final LUT lut, final BufferedImage out) throws InterruptedException {
         // planar size
@@ -207,10 +207,8 @@ class ARGBImageBuilder {
      * Use {@link IcyBufferedImageUtil#toBufferedImage(IcyBufferedImage, int, LUT)} instead if you
      * want volatile accelerated image.
      *
-     * @param image
-     *        source image
-     * @param lut
-     *        {@link LUT} is used for color calculation (internal lut is used if null).
+     * @param image source image
+     * @param lut   {@link LUT} is used for color calculation (internal lut is used if null).
      */
     public BufferedImage buildARGBImage(final IcyBufferedImage image, final LUT lut) throws InterruptedException {
         return buildARGBImage(image, lut, null);
@@ -220,7 +218,7 @@ class ARGBImageBuilder {
         final BlockBuilder builder = new BlockBuilder(image, lut, dest, offset, length);
         Future<?> result = processor.submit(builder);
 
-        // not accepted ? retry until it is accepted...
+        // not accepted ? retry until it is accepted…
         while (result == null) {
             // wait a bit
             ThreadUtil.sleep(1);
@@ -242,7 +240,7 @@ class ARGBImageBuilder {
             }
             catch (final ExecutionException e) {
                 // warning
-                IcyLogger.warn(ARGBImageBuilder.class, e, "ARGBImageBuilder - Warning");
+                LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             }
 
             // remove it

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -25,10 +25,10 @@ import fr.icy.io.FileUtil;
 import fr.icy.network.NetworkUtil;
 import fr.icy.system.SystemUtil;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ApplicationPreferences {
@@ -87,7 +87,7 @@ public class ApplicationPreferences {
     }
 
     /**
-     * @return Return Icy unique Id (-1 if not yet set)
+     * @return Return Icy unique ID (-1 if not yet set)
      */
     public static int getId() {
         return preferences.getInt(ID_ICY_ID, -1);
@@ -99,7 +99,7 @@ public class ApplicationPreferences {
 
     // TODO Enable get from preference when Icy 3 is ready
     @Contract(pure = true)
-    public static @NotNull String getUpdateRepositoryBase() {
+    public static @NonNull String getUpdateRepositoryBase() {
         //return preferences.get(ID_UPDATE_REPOSITORY_BASE, DEFAULT_UPDATE_REPOSITORY_BASE);
         return "https://icy.bioimageanalysis.org/update_test_icy3/";
     }
@@ -132,7 +132,7 @@ public class ApplicationPreferences {
     public static int getMaxMemoryMB() {
         int result = preferences.getInt(ID_MAX_MEMORY, -1);
 
-        // no value ?
+        // no value?
         if (result == -1)
             result = getDefaultMemoryMB();
 
@@ -145,7 +145,7 @@ public class ApplicationPreferences {
 
         // take system total memory / 2
         long calculatedMaxMem = SystemUtil.getTotalMemory() / 2;
-        // current available memory is low ?
+        // current available memory is low?
         if (calculatedMaxMem > freeMemory)
             // adjust max memory
             calculatedMaxMem -= (calculatedMaxMem - freeMemory) / 2;
@@ -187,7 +187,7 @@ public class ApplicationPreferences {
      */
     public static String getCachePath() {
         final String result = preferences.get(ID_CACHE_PATH, SystemUtil.getTempDirectory());
-        // doesn't exist ? --> use default folder as config may have changed
+        // doesn't exist? --> use the default folder as config may have changed
         if (!FileUtil.exists(result))
             return SystemUtil.getTempDirectory();
 
@@ -208,15 +208,14 @@ public class ApplicationPreferences {
     public static String getOSExtraVMParams() {
         final String os = SystemUtil.getOSNameId();
 
-        // we have different default extra VM parameters depending OS
-        if (os.equals(SystemUtil.SYSTEM_WINDOWS))
-            return preferences.get(ID_OS_EXTRA_VMPARAMS + SystemUtil.SYSTEM_WINDOWS, "");
-        if (os.equals(SystemUtil.SYSTEM_MAC_OS))
-            return preferences.get(ID_OS_EXTRA_VMPARAMS + SystemUtil.SYSTEM_MAC_OS, "-Xdock:name=Icy");
-        if (os.equals(SystemUtil.SYSTEM_UNIX))
-            return preferences.get(ID_OS_EXTRA_VMPARAMS + SystemUtil.SYSTEM_UNIX, "");
+        // we have different default extra VM parameters depending on OS
+        return switch (os) {
+            case SystemUtil.SYSTEM_WINDOWS -> preferences.get(ID_OS_EXTRA_VMPARAMS + SystemUtil.SYSTEM_WINDOWS, "");
+            case SystemUtil.SYSTEM_MAC_OS -> preferences.get(ID_OS_EXTRA_VMPARAMS + SystemUtil.SYSTEM_MAC_OS, "-Xdock:name=Icy");
+            case SystemUtil.SYSTEM_UNIX -> preferences.get(ID_OS_EXTRA_VMPARAMS + SystemUtil.SYSTEM_UNIX, "");
+            default -> "";
+        };
 
-        return "";
     }
 
     /**
@@ -234,10 +233,10 @@ public class ApplicationPreferences {
     }
 
     /**
-     * @return Get the stored version number (used to detect new installed version).
+     * @return Get the stored version number (used to detect the new installed version).
      */
     @Contract(" -> new")
-    public static @NotNull Version getVersion() {
+    public static @NonNull Version getVersion() {
         //return Version.fromString(preferences.get(ID_VERSION, "1.0.0"));
         return Version.fromString(preferences.get(ID_VERSION, Icy.VERSION.toShortString()));
     }
@@ -265,7 +264,7 @@ public class ApplicationPreferences {
     }
 
     /**
-     * @param value Set cache path (folder where to create cache data, better to use fast storage)
+     * @param value Set a cache path (folder where to create cache data, better to use fast storage)
      */
     public static void setCachePath(final String value) {
         preferences.put(ID_CACHE_PATH, value);
@@ -300,9 +299,9 @@ public class ApplicationPreferences {
     }
 
     /**
-     * @param value Set the stored version number (used to detect new installed version)
+     * @param value Set the stored version number (used to detect the new installed version)
      */
-    public static void setVersion(final @NotNull Version value) {
+    public static void setVersion(final @NonNull Version value) {
         preferences.put(ID_VERSION, value.toShortString());
     }
 

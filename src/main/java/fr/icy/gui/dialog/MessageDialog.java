@@ -19,36 +19,29 @@
 package fr.icy.gui.dialog;
 
 import fr.icy.Icy;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
+import org.intellij.lang.annotations.MagicConstant;
 
 import javax.swing.*;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class MessageDialog {
-    public static final int ERROR_MESSAGE = JOptionPane.ERROR_MESSAGE;
-    /** Used for information messages. */
-    public static final int INFORMATION_MESSAGE = JOptionPane.INFORMATION_MESSAGE;
-    /** Used for warning messages. */
-    public static final int WARNING_MESSAGE = JOptionPane.WARNING_MESSAGE;
-    /** Used for questions. */
-    public static final int QUESTION_MESSAGE = JOptionPane.QUESTION_MESSAGE;
-    /** No icon is used. */
-    public static final int PLAIN_MESSAGE = JOptionPane.PLAIN_MESSAGE;
+    private static final Logger LOGGER = Logger.getLogger(MessageDialog.class.getName());
 
     public static void showDialog(final String message) {
-        showDialog("Information", message, INFORMATION_MESSAGE);
+        showDialog("Information", message, JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public static void showDialog(final String message, final int messageType) {
+    public static void showDialog(final String message, final @MagicConstant(intValues = {JOptionPane.INFORMATION_MESSAGE, JOptionPane.ERROR_MESSAGE, JOptionPane.WARNING_MESSAGE, JOptionPane.QUESTION_MESSAGE,JOptionPane.PLAIN_MESSAGE}) int messageType) {
         final String title = switch (messageType) {
-            case INFORMATION_MESSAGE -> "Information";
-            case WARNING_MESSAGE -> "Warning";
-            case ERROR_MESSAGE -> "Error";
-            case QUESTION_MESSAGE -> "Confirmation";
+            case JOptionPane.INFORMATION_MESSAGE -> "Information";
+            case JOptionPane.WARNING_MESSAGE -> "Warning";
+            case JOptionPane.ERROR_MESSAGE -> "Error";
+            case JOptionPane.QUESTION_MESSAGE -> "Confirmation";
             default -> "Message";
         };
 
@@ -59,7 +52,7 @@ public class MessageDialog {
         showDialog(title, message, JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public static void showDialog(final String title, final String message, final int messageType) {
+    public static void showDialog(final String title, final String message, final @MagicConstant(intValues = {JOptionPane.INFORMATION_MESSAGE, JOptionPane.ERROR_MESSAGE, JOptionPane.WARNING_MESSAGE, JOptionPane.QUESTION_MESSAGE,JOptionPane.PLAIN_MESSAGE}) int messageType) {
         if (!Icy.getMainInterface().isHeadLess()) {
             ThreadUtil.invokeLater(() -> {
                 final JFrame parent = Icy.getMainInterface().getMainFrame();
@@ -67,10 +60,10 @@ public class MessageDialog {
             });
         }
         else {
-            if (messageType == ERROR_MESSAGE)
-                IcyLogger.error(MessageDialog.class, title + ": " + message);
+            if (messageType == JOptionPane.ERROR_MESSAGE)
+                LOGGER.severe(title + ": " + message);
             else
-                IcyLogger.info(MessageDialog.class, title + ": " + message);
+                LOGGER.info(title + ": " + message);
         }
     }
 }

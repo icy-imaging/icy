@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,32 +20,27 @@ package fr.icy.gui.component.panel;
 
 import fr.icy.gui.component.field.NumberTextField;
 import fr.icy.gui.component.field.NumberTextField.ValueChangeListener;
+import org.jspecify.annotations.NonNull;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 /**
- * Component letting user to define a range (RangeSlider + 2 inputs fields)
- * 
- * @author Stephane
+ * Component letting user define a range (RangeSlider + 2 inputs fields)
+ *
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
-public class Region2DComponent extends JPanel implements ValueChangeListener
-{
+public class Region2DComponent extends JPanel implements ValueChangeListener {
     protected NumberTextField xStartField;
     protected NumberTextField yStartField;
     protected NumberTextField widthField;
     protected NumberTextField heightField;
 
-    public Region2DComponent(double x, double y, double w, double h, boolean integer)
-    {
+    public Region2DComponent(final double x, final double y, final double w, final double h, final boolean integer) {
         super();
 
         initialize();
@@ -59,39 +54,34 @@ public class Region2DComponent extends JPanel implements ValueChangeListener
         yStartField.setNumericValue(y);
         widthField.setNumericValue(w);
         heightField.setNumericValue(h);
-
     }
 
-    public Region2DComponent(double x, double y, double w, double h)
-    {
+    public Region2DComponent(final double x, final double y, final double w, final double h) {
         this(x, y, w, h, false);
     }
 
-    public Region2DComponent(boolean integer)
-    {
+    public Region2DComponent(final boolean integer) {
         this(0d, 0d, 100d, 100d, integer);
     }
 
-    public Region2DComponent()
-    {
+    public Region2DComponent() {
         this(0d, 0d, 100d, 100d, false);
     }
 
-    protected void initialize()
-    {
+    protected void initialize() {
         setBorder(null);
 
-        GridBagLayout gridBagLayout = new GridBagLayout();
-        gridBagLayout.columnWidths = new int[] {0, 0, 0, 0, 0, 0};
-        gridBagLayout.rowHeights = new int[] {0, 0};
-        gridBagLayout.columnWeights = new double[] {1.0, 1.0, 0.0, 1.0, 1.0, Double.MIN_VALUE};
-        gridBagLayout.rowWeights = new double[] {0.0, Double.MIN_VALUE};
+        final GridBagLayout gridBagLayout = new GridBagLayout();
+        gridBagLayout.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
+        gridBagLayout.rowHeights = new int[]{0, 0};
+        gridBagLayout.columnWeights = new double[]{1.0, 1.0, 0.0, 1.0, 1.0, Double.MIN_VALUE};
+        gridBagLayout.rowWeights = new double[]{0.0, Double.MIN_VALUE};
         setLayout(gridBagLayout);
 
         xStartField = new NumberTextField();
         xStartField.setToolTipText("Start X position of the region");
         xStartField.addValueListener(this);
-        GridBagConstraints gbc_xStartField = new GridBagConstraints();
+        final GridBagConstraints gbc_xStartField = new GridBagConstraints();
         gbc_xStartField.fill = GridBagConstraints.HORIZONTAL;
         gbc_xStartField.insets = new Insets(0, 0, 0, 2);
         gbc_xStartField.gridx = 0;
@@ -100,7 +90,7 @@ public class Region2DComponent extends JPanel implements ValueChangeListener
         yStartField = new NumberTextField();
         yStartField.setToolTipText("Start Y position of the region");
         yStartField.addValueListener(this);
-        GridBagConstraints gbc_yStartField = new GridBagConstraints();
+        final GridBagConstraints gbc_yStartField = new GridBagConstraints();
         gbc_yStartField.fill = GridBagConstraints.HORIZONTAL;
         gbc_yStartField.insets = new Insets(0, 0, 0, 2);
         gbc_yStartField.gridx = 1;
@@ -112,20 +102,20 @@ public class Region2DComponent extends JPanel implements ValueChangeListener
         widthField = new NumberTextField();
         widthField.setToolTipText("Width of the region");
         widthField.addValueListener(this);
-        JLabel sepLabel = new JLabel("-");
-        GridBagConstraints gbc_sepLabel = new GridBagConstraints();
+        final JLabel sepLabel = new JLabel("-");
+        final GridBagConstraints gbc_sepLabel = new GridBagConstraints();
         gbc_sepLabel.fill = GridBagConstraints.VERTICAL;
         gbc_sepLabel.insets = new Insets(0, 0, 0, 2);
         gbc_sepLabel.gridx = 2;
         gbc_sepLabel.gridy = 0;
         add(sepLabel, gbc_sepLabel);
-        GridBagConstraints gbc_widthField = new GridBagConstraints();
+        final GridBagConstraints gbc_widthField = new GridBagConstraints();
         gbc_widthField.fill = GridBagConstraints.HORIZONTAL;
         gbc_widthField.insets = new Insets(0, 0, 0, 2);
         gbc_widthField.gridx = 3;
         gbc_widthField.gridy = 0;
         add(widthField, gbc_widthField);
-        GridBagConstraints gbc_heightField = new GridBagConstraints();
+        final GridBagConstraints gbc_heightField = new GridBagConstraints();
         gbc_heightField.fill = GridBagConstraints.HORIZONTAL;
         gbc_heightField.gridx = 4;
         gbc_heightField.gridy = 0;
@@ -137,8 +127,7 @@ public class Region2DComponent extends JPanel implements ValueChangeListener
     /**
      * Set 2D region values.
      */
-    public void setRegion(double x, double y, double w, double h)
-    {
+    public void setRegion(final double x, final double y, final double w, final double h) {
         xStartField.setNumericValue(x);
         yStartField.setNumericValue(y);
         widthField.setNumericValue(w);
@@ -148,8 +137,7 @@ public class Region2DComponent extends JPanel implements ValueChangeListener
     /**
      * Set 2D region values.
      */
-    public void setRegion(int x, int y, int w, int h)
-    {
+    public void setRegion(final int x, final int y, final int w, final int h) {
         xStartField.setNumericValue(x);
         yStartField.setNumericValue(y);
         widthField.setNumericValue(w);
@@ -159,37 +147,31 @@ public class Region2DComponent extends JPanel implements ValueChangeListener
     /**
      * Set 2D region values.
      */
-    public void setRegion(Rectangle region)
-    {
+    public void setRegion(final @NonNull Rectangle region) {
         setRegion(region.x, region.y, region.width, region.height);
     }
 
     /**
      * Get 2D region values.
      */
-    public Rectangle2D getRegion()
-    {
+    public Rectangle2D getRegion() {
         if (isInteger())
-            return new Rectangle((int) xStartField.getNumericValue(), (int) yStartField.getNumericValue(),
-                    (int) widthField.getNumericValue(), (int) heightField.getNumericValue());
+            return new Rectangle((int) xStartField.getNumericValue(), (int) yStartField.getNumericValue(), (int) widthField.getNumericValue(), (int) heightField.getNumericValue());
 
-        return new Rectangle2D.Double(xStartField.getNumericValue(), yStartField.getNumericValue(),
-                widthField.getNumericValue(), heightField.getNumericValue());
+        return new Rectangle2D.Double(xStartField.getNumericValue(), yStartField.getNumericValue(), widthField.getNumericValue(), heightField.getNumericValue());
     }
 
     /**
      * Return true if the range use integer number
      */
-    public boolean isInteger()
-    {
+    public boolean isInteger() {
         return xStartField.isInteger();
     }
 
     /**
      * Return true if the range use integer number
      */
-    public void setInteger(boolean value)
-    {
+    public void setInteger(final boolean value) {
         xStartField.setInteger(value);
         yStartField.setInteger(value);
         widthField.setInteger(value);
@@ -197,8 +179,7 @@ public class Region2DComponent extends JPanel implements ValueChangeListener
     }
 
     @Override
-    public void setEnabled(boolean enabled)
-    {
+    public void setEnabled(final boolean enabled) {
         xStartField.setEnabled(enabled);
         yStartField.setEnabled(enabled);
         widthField.setEnabled(enabled);
@@ -207,27 +188,23 @@ public class Region2DComponent extends JPanel implements ValueChangeListener
         super.setEnabled(enabled);
     }
 
-    protected void fireChangedEvent()
-    {
+    protected void fireChangedEvent() {
         final ChangeEvent event = new ChangeEvent(this);
 
-        for (ChangeListener listener : getListeners(ChangeListener.class))
+        for (final ChangeListener listener : getListeners(ChangeListener.class))
             listener.stateChanged(event);
     }
 
-    public void addChangeListener(ChangeListener listener)
-    {
+    public void addChangeListener(final ChangeListener listener) {
         listenerList.add(ChangeListener.class, listener);
     }
 
-    public void removeChangeListener(ChangeListener listener)
-    {
+    public void removeChangeListener(final ChangeListener listener) {
         listenerList.remove(ChangeListener.class, listener);
     }
 
     @Override
-    public void valueChanged(double newValue, boolean validate)
-    {
+    public void valueChanged(final double newValue, final boolean validate) {
         if (validate)
             fireChangedEvent();
     }

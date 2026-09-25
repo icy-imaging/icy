@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * Clipboard object (used for easy internal Copy/Paste operation).
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Clipboard
 {

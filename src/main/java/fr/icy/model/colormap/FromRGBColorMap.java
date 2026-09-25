@@ -18,7 +18,7 @@
 package fr.icy.model.colormap;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class FromRGBColorMap
 {

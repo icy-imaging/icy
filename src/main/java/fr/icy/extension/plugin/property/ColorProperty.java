@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,24 +18,24 @@
 
 package fr.icy.extension.plugin.property;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 
 public final class ColorProperty extends Property<Color> {
-    public ColorProperty(final @NotNull String name, final @NotNull String description, final @NotNull Color defaultValue) {
+    public ColorProperty(final @NonNull String name, final @NonNull String description, final @NonNull Color defaultValue) {
         super(name, description, defaultValue);
     }
 
-    public ColorProperty(final @NotNull String name, final @NotNull String description) {
+    public ColorProperty(final @NonNull String name, final @NonNull String description) {
         this(name, description, Color.RED);
     }
 
-    public ColorProperty(final @NotNull String name, final @NotNull Color defaultValue) {
+    public ColorProperty(final @NonNull String name, final @NonNull Color defaultValue) {
         super(name, defaultValue);
     }
 
-    public ColorProperty(final @NotNull String name) {
+    public ColorProperty(final @NonNull String name) {
         this(name, Color.RED);
     }
 }

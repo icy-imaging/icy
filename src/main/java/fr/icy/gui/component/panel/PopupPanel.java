@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -21,21 +21,23 @@ package fr.icy.gui.component.panel;
 import fr.icy.gui.GraphicsUtil;
 import fr.icy.gui.component.ComponentUtil;
 import fr.icy.gui.component.button.IcyToggleButton;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.gui.component.icon.IcyIconPack;
+import fr.icy.gui.component.icon.IcySVG;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PopupPanel extends JPanel {
     public final class PopupTitlePanel extends IcyToggleButton {
         public PopupTitlePanel(final String text) {
-            super(text, new IcyIconPack(SVGResource.ARROW_DOWN, SVGResource.ARROW_UP));
+            super(text, new IcyIconPack(IcySVG.ARROW_DOWN, IcySVG.ARROW_UP));
 
             setHorizontalAlignment(SwingConstants.LEADING);
             setFocusPainted(false);
@@ -69,7 +71,8 @@ public class PopupPanel extends JPanel {
             updateIconTextGap();
         }
 
-        private Dimension getTextSize() {
+        @Contract(" -> new")
+        private @NonNull Dimension getTextSize() {
             final String text = getText();
 
             if (text != null) {

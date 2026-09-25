@@ -34,7 +34,7 @@ import java.util.TreeMap;
  * Class to define a 4D boolean mask region and make basic boolean operation between masks.<br>
  * The bounds property of this object represents the region defined by the boolean mask.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class BooleanMask4D
 {

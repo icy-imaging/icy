@@ -29,7 +29,7 @@ import java.util.EventListener;
  * Global {@link ROI} listener class.
  * Used to listen add and remove event for all roi.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface GlobalROIListener extends EventListener
 {

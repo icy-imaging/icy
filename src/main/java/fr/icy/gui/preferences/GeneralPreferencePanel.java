@@ -29,7 +29,7 @@ import java.awt.*;
 import java.io.File;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class GeneralPreferencePanel extends PreferencePanel {
@@ -236,7 +236,7 @@ public class GeneralPreferencePanel extends PreferencePanel {
         cachePath.setToolTipText("Folder used to store image data cache (it's recommended to use fast storage location as SSD disk)");
         cachePath.setColumns(10);
 
-        setCachePathButton = new JButton("...");
+        setCachePathButton = new JButton("…");
         //setCachePathButton.setPreferredSize(new Dimension(32, 23));
         final GridBagConstraints gbc_setCachePathButton = new GridBagConstraints();
         gbc_setCachePathButton.anchor = GridBagConstraints.WEST;

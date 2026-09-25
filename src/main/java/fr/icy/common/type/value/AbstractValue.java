@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import org.w3c.dom.Node;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class AbstractValue<T> implements Comparable<T>, XMLPersistent
 {

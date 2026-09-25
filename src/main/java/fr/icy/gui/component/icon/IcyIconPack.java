@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,7 +18,8 @@
 
 package fr.icy.gui.component.icon;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 /**
  * SVG icons pack for Icy GUI components.
@@ -26,42 +27,61 @@ import org.jetbrains.annotations.NotNull;
  * @author Thomas Musset
  */
 public final class IcyIconPack {
-    private final SVGResource def, dis, sel, dis_sel;
+    private final IcySVG def, dis, sel, dis_sel;
 
-    public IcyIconPack(final @NotNull SVGResource def, final @NotNull SVGResource dis, final @NotNull SVGResource sel, final @NotNull SVGResource dis_sel) {
+    private IcySVGIcon.Badge badge = IcySVGIcon.NONE;
+
+    public IcyIconPack(final @NonNull IcySVG def, final @NonNull IcySVG dis, final @NonNull IcySVG sel, final @NonNull IcySVG dis_sel) {
         this.def = def;
         this.dis = dis;
         this.sel = sel;
         this.dis_sel = dis_sel;
     }
 
-    public IcyIconPack(final @NotNull SVGResource def, final @NotNull SVGResource sel) {
+    public IcyIconPack(final @NonNull IcySVG def, final @NonNull IcySVG sel) {
         this.def = def;
         this.dis = def;
         this.sel = sel;
         this.dis_sel = sel;
     }
 
-    public IcyIconPack(final @NotNull SVGResource def) {
+    public IcyIconPack(final @NonNull IcySVG def) {
         this.def = def;
         this.dis = def;
         this.sel = def;
         this.dis_sel = def;
     }
 
-    public @NotNull SVGResource getDefaultIcon() {
+    public IcyIconPack(final @NonNull IcySVG def, final IcySVGIcon.Badge badge) {
+        this.def = def;
+        this.dis = def;
+        this.sel = def;
+        this.dis_sel = def;
+        this.badge = badge;
+    }
+
+    @Contract(pure = true)
+    public @NonNull IcySVG getDefaultIcon() {
         return def;
     }
 
-    public @NotNull SVGResource getDisabledIcon() {
+    @Contract(pure = true)
+    public @NonNull IcySVG getDisabledIcon() {
         return dis;
     }
 
-    public @NotNull SVGResource getSelectedtIcon() {
+    @Contract(pure = true)
+    public @NonNull IcySVG getSelectedIcon() {
         return sel;
     }
 
-    public @NotNull SVGResource getDisabledSelectedIcon() {
+    @Contract(pure = true)
+    public @NonNull IcySVG getDisabledSelectedIcon() {
         return dis_sel;
+    }
+
+    @Contract(pure = true)
+    public IcySVGIcon.Badge getBadge() {
+        return badge;
     }
 }

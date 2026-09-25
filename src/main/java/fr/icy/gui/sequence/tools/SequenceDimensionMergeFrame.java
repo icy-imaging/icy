@@ -39,7 +39,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequenceDimensionMergeFrame extends ActionDialog
 {
@@ -181,7 +181,7 @@ public class SequenceDimensionMergeFrame extends ActionDialog
                     @Override
                     public void run()
                     {
-                        final ProgressFrame pf = new ProgressFrame("Merging sequences...");
+                        final ProgressFrame pf = new ProgressFrame("Merging sequences…");
 
                         try
                         {

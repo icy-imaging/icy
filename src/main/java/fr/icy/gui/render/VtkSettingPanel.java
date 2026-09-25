@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,15 +18,16 @@
 
 package fr.icy.gui.render;
 
-import fr.icy.gui.component.field.IcyTextField;
-import fr.icy.gui.component.field.IcyTextField.TextChangeListener;
-import fr.icy.gui.component.field.NumberTextField;
 import fr.icy.gui.component.button.ColorChooserButton;
 import fr.icy.gui.component.button.ColorChooserButton.ColorChangeListener;
 import fr.icy.gui.component.button.IcyToggleButton;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.field.IcyTextField;
+import fr.icy.gui.component.field.IcyTextField.TextChangeListener;
+import fr.icy.gui.component.field.NumberTextField;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.model.render.vtk.VtkImageVolume;
 import fr.icy.model.render.vtk.VtkImageVolume.VtkVolumeBlendType;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -37,7 +38,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.EventListener;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class VtkSettingPanel extends JPanel implements ActionListener, TextChangeListener, ColorChangeListener {
@@ -189,7 +190,7 @@ public class VtkSettingPanel extends JPanel implements ActionListener, TextChang
         gbc_volumeSampleComboBox.gridy = 3;
         add(volumeSampleComboBox, gbc_volumeSampleComboBox);
 
-        shadingButton = new IcyToggleButton(SVGResource.SHADING);
+        shadingButton = new IcyToggleButton(IcySVG.SHADING);
         shadingButton.setIconTextGap(8);
         shadingButton.setText("Shading");
         shadingButton.setFocusable(false);
@@ -372,7 +373,7 @@ public class VtkSettingPanel extends JPanel implements ActionListener, TextChang
     }
 
     @Override
-    public void actionPerformed(final ActionEvent e) {
+    public void actionPerformed(final @NonNull ActionEvent e) {
         final Object source = e.getSource();
 
         if (source == gpuMapperCheckBox) {
@@ -412,6 +413,7 @@ public class VtkSettingPanel extends JPanel implements ActionListener, TextChang
         updateState();
     }
 
+    @FunctionalInterface
     public interface SettingChangeListener extends EventListener {
         void settingChange(PropertyChangeEvent evt);
     }

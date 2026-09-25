@@ -63,7 +63,7 @@ import java.util.*;
 /**
  * Base class for 3D shape ROI (working from 3D control points).
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  */
 public class ROI3DShape extends ROI3D implements Shape3D {
     public class ROI3DShapePainter extends ROI3DPainter implements Runnable {
@@ -1409,7 +1409,7 @@ public class ROI3DShape extends ROI3D implements Shape3D {
      *        Called when anchor overlay changed
      */
     public void controlPointOverlayChanged(final OverlayEvent event) {
-        // we only mind about painter change from anchor...
+        // we only mind about painter change from anchor…
         if (event.getType() == OverlayEventType.PAINTER_CHANGED) {
             // we have a control point selected --> remove focus on ROI
             if (hasSelectedPoint())

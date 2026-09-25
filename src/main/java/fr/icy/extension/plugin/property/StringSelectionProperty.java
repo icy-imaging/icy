@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,16 +18,16 @@
 
 package fr.icy.extension.plugin.property;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
 public final class StringSelectionProperty extends SelectionProperty<String> {
-    public StringSelectionProperty(final @NotNull String name, final @NotNull String description, final @NotNull List<String> collection, final @NotNull String defaultValue) {
+    public StringSelectionProperty(final @NonNull String name, final @NonNull String description, final @NonNull List<String> collection, final @NonNull String defaultValue) {
         super(name, description, collection, defaultValue);
     }
 
-    public StringSelectionProperty(final @NotNull String name, final @NotNull List<String> collection, final @NotNull String defaultValue) {
+    public StringSelectionProperty(final @NonNull String name, final @NonNull List<String> collection, final @NonNull String defaultValue) {
         super(name, collection, defaultValue);
     }
 }

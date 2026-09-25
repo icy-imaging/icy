@@ -43,7 +43,7 @@ import java.awt.geom.Rectangle2D;
  * Used to make Magic Wand interaction easier.<br>
  * Based on smooth tolerance control ideas from Jerome Mutterer.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Jerome Mutterer
  */
 public class ROIMagicWand extends ROI2DArea
@@ -142,7 +142,7 @@ public class ROIMagicWand extends ROI2DArea
 
             // no more processing
             inProcess = false;
-            // remove the ROI, we don't need it anymore...
+            // remove the ROI, we don't need it anymore…
             ROIMagicWand.this.remove(false);
 
             // we have a result ?

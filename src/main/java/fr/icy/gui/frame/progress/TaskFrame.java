@@ -32,7 +32,8 @@ import java.awt.*;
 /**
  * Use it to create a Task Window on the border like the loader (Thread Safe)<br>
  *
- * @author fab &amp; Stephane
+ * @author Fabrice de Chaumont
+ * @author Stéphane Dallongeville
  */
 public abstract class TaskFrame extends IcyFrame {
     protected JPanel mainPanel;

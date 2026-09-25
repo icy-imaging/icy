@@ -27,6 +27,7 @@ import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent;
 import fr.icy.model.sequence.SequenceEvent.SequenceEventSourceType;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
@@ -35,7 +36,7 @@ import java.awt.*;
  * ROI Panel component displayed in the Icy inspector.<br>
  * Use the {@link AbstractRoisPanel} if you want to embed the ROI table in your own component.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class RoisPanel extends AbstractRoisPanel {
@@ -106,7 +107,7 @@ public final class RoisPanel extends AbstractRoisPanel {
 
     // called when selection changed in the ROI roiTable
     @Override
-    public void valueChanged(final ListSelectionEvent e) {
+    public void valueChanged(final @NonNull ListSelectionEvent e) {
         super.valueChanged(e);
 
         // currently changing the selection ? --> exit
@@ -124,7 +125,7 @@ public final class RoisPanel extends AbstractRoisPanel {
     }
 
     @Override
-    public void activeSequenceChanged(final SequenceEvent event) {
+    public void activeSequenceChanged(final @NonNull SequenceEvent event) {
         super.activeSequenceChanged(event);
 
         // if data changed (more or less Z, T or C) we need to refresh action

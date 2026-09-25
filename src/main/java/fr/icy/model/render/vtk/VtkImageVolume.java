@@ -39,7 +39,7 @@ import vtk.vtkVolumeProperty;
 /**
  * Class to represent a 3D image as a 3D VTK volume object.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class VtkImageVolume
 {

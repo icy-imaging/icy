@@ -32,7 +32,7 @@ import fr.icy.gui.swimmingpool.SwimmingPoolViewer;
 import fr.icy.common.reflect.ClassUtil;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class WindowActions {

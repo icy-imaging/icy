@@ -25,12 +25,12 @@ package fr.icy.extension.plugin.interface_;
  * PluginThreaded.<br>
  * They can be enabled / disabled from the Icy preferences window.
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public interface PluginDaemon extends PluginThreaded {
     /**
-     * Called by Icy to initialize the daemon plugin (init singleton, register listeners...)<br>
+     * Called by Icy to initialize the daemon plugin (init singleton, register listeners…)<br>
      * This method is synchronous and should not consume too much time.
      */
     void init();

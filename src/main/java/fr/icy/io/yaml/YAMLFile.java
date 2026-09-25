@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,11 +18,10 @@
 
 package fr.icy.io.yaml;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.util.Map;
 
 /**
  * WIP
@@ -34,19 +33,19 @@ public class YAMLFile implements Closeable {
         yaml = new Yaml();
     }
 
-    public YAMLFile(final @NotNull String yamlFile) {
+    public YAMLFile(final @NonNull String yamlFile) {
         this();
 
         yaml.load(yamlFile);
     }
 
-    public YAMLFile(final @NotNull InputStream inputStream) {
+    public YAMLFile(final @NonNull InputStream inputStream) {
         this();
 
         yaml.load(inputStream);
     }
 
-    public YAMLFile(final @NotNull File file) throws FileNotFoundException {
+    public YAMLFile(final @NonNull File file) throws FileNotFoundException {
         this();
 
         yaml.load(new FileInputStream(file));

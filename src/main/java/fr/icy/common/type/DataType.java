@@ -18,21 +18,24 @@
 
 package fr.icy.common.type;
 
-import loci.formats.FormatTools;
-import ome.xml.model.enums.PixelType;
 import fr.icy.common.math.MathUtil;
 import fr.icy.model.render.vtk.VtkUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import loci.formats.FormatTools;
+import ome.xml.model.enums.PixelType;
+import org.intellij.lang.annotations.MagicConstant;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.DataBuffer;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * DataType class.<br>
  * This class is used to define the internal native data type of a given object.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public enum DataType {
@@ -79,7 +82,7 @@ public enum DataType {
             "Signed Integer (32 bits)", "32 bits (signed)"
     ),
     // ULONG (unsigned 64 bits integer)
-    // WARNING : double data type loss information here for min/max
+    // WARNING : double data type loss information here for min/ma
     ULONG(
             Long.SIZE, true, false,
             0d, MathUtil.POW2_64_DOUBLE - 1d,
@@ -133,12 +136,10 @@ public enum DataType {
     /**
      * Return all dataType as String items array (can be used for ComboBox).<br>
      *
-     * @param javaTypeOnly
-     *        Define if we want only java compatible data type (no unsigned integer types)
-     * @param longString
-     *        Define if we want long string format (bpp information)
+     * @param javaTypeOnly Define if we want only java compatible data type (no unsigned integer types)
+     * @param longString   Define if we want long string format (bpp information)
      */
-    public static @NotNull String[] getItems(final boolean javaTypeOnly, final boolean longString) {
+    public static String @NonNull [] getItems(final boolean javaTypeOnly, final boolean longString) {
         final ArrayList<String> result = new ArrayList<>();
 
         for (final DataType dataType : DataType.values())
@@ -151,16 +152,13 @@ public enum DataType {
     /**
      * Return all dataType as String items array (can be used for ComboBox).<br>
      *
-     * @param javaTypeOnly
-     *        Define if we want only java compatible data type (no unsigned integer types)
-     * @param longString
-     *        Define if we want long string format (bpp information)
-     * @param wantUndef
-     *        Define if we want the UNDEFINED data type in the list
+     * @param javaTypeOnly Define if we want only java compatible data type (no unsigned integer types)
+     * @param longString   Define if we want long string format (bpp information)
+     * @param wantUndef    Define if we want the UNDEFINED data type in the list
      * @deprecated Use {@link #getItems(boolean, boolean)} instead.
      */
     @Deprecated(since = "3.0.0", forRemoval = true)
-    public static @NotNull String[] getItems(final boolean javaTypeOnly, final boolean longString, final boolean wantUndef) {
+    public static String @NonNull [] getItems(final boolean javaTypeOnly, final boolean longString, final boolean wantUndef) {
         final ArrayList<String> result = new ArrayList<>();
 
         for (final DataType dataType : DataType.values())
@@ -185,7 +183,9 @@ public enum DataType {
     /**
      * Return a DataType from the specified primitive class type
      */
-    public static @Nullable DataType getDataType(final @NotNull Class<?> classType) {
+    public static @NonNull DataType getDataType(final @NonNull Class<?> classType) throws IllegalArgumentException {
+        Objects.requireNonNull(classType, "Class type cannot be null.");
+
         if (classType.equals(Byte.TYPE))
             return DataType.BYTE;
         if (classType.equals(Short.TYPE))
@@ -199,13 +199,14 @@ public enum DataType {
         if (classType.equals(Double.TYPE))
             return DataType.DOUBLE;
 
-        return null;
+        throw new IllegalArgumentException("Unsupported data type: " + classType);
     }
 
     /**
      * Return a DataType from the specified VTK type.<br>
      * ex : <code>getDataTypeFromVTKType(VtkUtil.VTK_INT)</code> will return <code>DataType.INT</code>
      */
+    @Contract(pure = true)
     public static @Nullable DataType getDataTypeFromVTKType(final int vtkType) {
         return switch (vtkType) {
             case VtkUtil.VTK_UNSIGNED_CHAR -> UBYTE;
@@ -226,6 +227,7 @@ public enum DataType {
      * Return a DataType from the specified DataBuffer type.<br>
      * ex : <code>getDataTypeFromDataBufferType(DataBuffer.TYPE_BYTE)</code> will return <code>DataType.UBYTE</code>
      */
+    @Contract(pure = true)
     public static @Nullable DataType getDataTypeFromDataBufferType(final int dataBufferType) {
         return switch (dataBufferType) {
             case DataBuffer.TYPE_BYTE -> UBYTE; // consider as unsigned by default
@@ -242,6 +244,7 @@ public enum DataType {
      * Return a DataType from the specified FormatTools type.<br>
      * ex : <code>getDataTypeFromFormatToolsType(FormatTools.UINT8)</code> will return <code>DataType.UBYTE</code>
      */
+    @Contract(pure = true)
     public static @Nullable DataType getDataTypeFromFormatToolsType(final int type) {
         return switch (type) {
             case FormatTools.INT8 -> BYTE;
@@ -260,7 +263,8 @@ public enum DataType {
      * Return a DataType from the specified PixelType.<br>
      * ex : <code>getDataTypeFromPixelType(FormatTools.UINT8)</code> will return <code>DataType.UBYTE</code>
      */
-    public static @Nullable DataType getDataTypeFromPixelType(final @NotNull PixelType type) {
+    @Contract(pure = true)
+    public static @Nullable DataType getDataTypeFromPixelType(final @NonNull PixelType type) {
         return switch (type) {
             case INT8 -> BYTE;
             case UINT8 -> UBYTE;
@@ -277,6 +281,7 @@ public enum DataType {
     /**
      * Check if DataType is undefined.
      */
+    @Contract(value = "null -> true; !null -> false", pure = true)
     public static boolean isUndefined(final @Nullable DataType dataType) {
         return dataType == null;
     }
@@ -298,8 +303,8 @@ public enum DataType {
     DataType(
             final int bitSize, final boolean integer, final boolean signed,
             final double min, final double max,
-            final @NotNull Class<?> primitiveClass, final int dataBufferType, final @Nullable PixelType pixelType, // FIXME LONG and ULONG have PixelType = null
-            final @NotNull String longString, final @NotNull String string
+            final @NonNull Class<?> primitiveClass, final int dataBufferType, final @Nullable PixelType pixelType, // FIXME LONG and ULONG have PixelType = null
+            final @NonNull String longString, final @NonNull String string
     ) {
         this.bitSize = bitSize;
         this.integer = integer;
@@ -323,19 +328,22 @@ public enum DataType {
      * {@link DataType#FLOAT}<br>
      * {@link DataType#DOUBLE}<br>
      */
-    public @NotNull DataType getJavaType() {
+    @Contract(pure = true)
+    public @NonNull DataType getJavaType() {
         return switch (this) {
-            case UBYTE -> BYTE;
-            case USHORT -> SHORT;
-            case UINT -> INT;
-            case ULONG -> LONG;
-            default -> this;
+            case UBYTE, BYTE -> BYTE;
+            case USHORT, SHORT -> SHORT;
+            case UINT, INT -> INT;
+            case ULONG, LONG -> LONG;
+            case FLOAT -> FLOAT;
+            case DOUBLE -> DOUBLE;
         };
     }
 
     /**
      * Return the minimum value for current DataType
      */
+    @Contract(pure = true)
     public double getMinValue() {
         return min;
     }
@@ -343,6 +351,7 @@ public enum DataType {
     /**
      * Return the maximum value for current DataType
      */
+    @Contract(pure = true)
     public double getMaxValue() {
         return max;
     }
@@ -351,7 +360,8 @@ public enum DataType {
      * Get the default bounds for current DataType.<br>
      * This actually returns <code>[0,1]</code> for Float or Double DataType.
      */
-    public double @NotNull [] getDefaultBounds() {
+    @Contract(" -> new")
+    public double @NonNull [] getDefaultBounds() {
         if (!integer)
             return new double[]{0d, 1d};
 
@@ -361,13 +371,15 @@ public enum DataType {
     /**
      * Get the bounds <code>[min,max]</code> for current DataType.
      */
-    public double @NotNull [] getBounds() {
+    @Contract(" -> new")
+    public double @NonNull [] getBounds() {
         return new double[]{getMinValue(), getMaxValue()};
     }
 
     /**
      * Return true if this is a compatible java data type (signed integer type only)
      */
+    @Contract(pure = true)
     public boolean isJavaType() {
         return this == getJavaType();
     }
@@ -375,6 +387,7 @@ public enum DataType {
     /**
      * Return true if this is a signed data type
      */
+    @Contract(pure = true)
     public boolean isSigned() {
         return signed;
     }
@@ -382,6 +395,7 @@ public enum DataType {
     /**
      * Return true if this is a float data type
      */
+    @Contract(pure = true)
     public boolean isFloat() {
         return !isInteger();
     }
@@ -389,6 +403,7 @@ public enum DataType {
     /**
      * Return true if this is an integer data type
      */
+    @Contract(pure = true)
     public boolean isInteger() {
         return integer;
     }
@@ -396,6 +411,7 @@ public enum DataType {
     /**
      * Return the size (in byte) of the specified dataType
      */
+    @Contract(pure = true)
     public int getSize() {
         return getBitSize() / 8;
     }
@@ -403,6 +419,7 @@ public enum DataType {
     /**
      * Return the size (in bit) of the specified dataType
      */
+    @Contract(pure = true)
     public int getBitSize() {
         return bitSize;
     }
@@ -420,13 +437,15 @@ public enum DataType {
     /**
      * Return the corresponding primitive class type corresponding to this DataType.
      */
-    public @NotNull Class<?> toPrimitiveClass() {
+    @Contract(pure = true)
+    public @NonNull Class<?> toPrimitiveClass() {
         return primitiveClass;
     }
 
     /**
      * Return the DataBuffer type corresponding to current DataType
      */
+    @Contract(pure = true)
     public int toDataBufferType() {
         return dataBufferType;
     }
@@ -435,6 +454,7 @@ public enum DataType {
      * Return the PixelType corresponding to current DataType
      */
     // FIXME LONG and ULONG have PixelType = null
+    @Contract(pure = true)
     public @Nullable PixelType toPixelType() {
         return pixelType;
     }
@@ -442,10 +462,9 @@ public enum DataType {
     /**
      * Convert DataType to String.<br>
      *
-     * @param longString
-     *        Define if we want long description (bpp information)
+     * @param longString Define if we want long description (bpp information)
      */
-    public @NotNull String toString(final boolean longString) {
+    public @NonNull String toString(final boolean longString) {
         if (longString)
             return toLongString();
 
@@ -455,12 +474,14 @@ public enum DataType {
     /**
      * Convert DataType to long String (long description with bpp information)
      */
-    public @NotNull String toLongString() {
+    @Contract(pure = true)
+    public @NonNull String toLongString() {
         return longString;
     }
 
+    @Contract(pure = true)
     @Override
-    public @NotNull String toString() {
+    public @NonNull String toString() {
         return string;
     }
 }

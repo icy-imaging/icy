@@ -33,7 +33,7 @@ import java.awt.*;
 import java.util.ArrayList;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class RepositoryPreferencePanel extends PreferencePanel implements ListSelectionListener {
@@ -64,11 +64,11 @@ public class RepositoryPreferencePanel extends PreferencePanel implements ListSe
         load();
 
         // build buttons
-        addButton = new JButton("add...");
+        addButton = new JButton("add…");
         addButton.setToolTipText("Add a new repository");
         addButton.addActionListener(e -> addRepository());
 
-        editButton = new JButton("edit...");
+        editButton = new JButton("edit…");
         editButton.setToolTipText("Edit selected repository");
         editButton.addActionListener(e -> editRepository(getSelectedRepository()));
 

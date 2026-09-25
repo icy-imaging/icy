@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -25,15 +25,15 @@ import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.roi.ROIEvent.ROIEventType;
 import fr.icy.model.sequence.Sequence;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Name descriptor class (see {@link ROIDescriptor})
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-public class ROINameDescriptor extends ROIDescriptor {
+public class ROINameDescriptor extends ROIDescriptor<String> {
     public static final String ID = "Name";
 
     public ROINameDescriptor() {
@@ -46,13 +46,13 @@ public class ROINameDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public boolean needRecompute(final @NotNull ROIEvent change) {
+    public boolean needRecompute(final @NonNull ROIEvent change) {
         return (change.getType() == ROIEventType.PROPERTY_CHANGED)
                 && (StringUtil.equals(change.getPropertyName(), ROI.PROPERTY_NAME));
     }
 
     @Override
-    public Object compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
+    public @NonNull String compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
         return getName(roi);
     }
 
@@ -60,7 +60,7 @@ public class ROINameDescriptor extends ROIDescriptor {
      * Returns ROI name
      */
     @Contract("null -> !null")
-    public static String getName(final ROI roi) {
+    public static @NonNull String getName(final ROI roi) {
         if (roi == null)
             return "";
 

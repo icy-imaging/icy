@@ -20,7 +20,7 @@ package fr.icy.gui.undo;
 import javax.swing.event.UndoableEditEvent;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class IcyUndoableEditEvent extends UndoableEditEvent
 {

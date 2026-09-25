@@ -30,7 +30,7 @@ import fr.icy.io.SequenceFileImporter;
  * Note that you have {@link SequenceFileImporter} interface which allow to import {@link Sequence}
  * from file(s).
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 
 public interface SequenceImporter

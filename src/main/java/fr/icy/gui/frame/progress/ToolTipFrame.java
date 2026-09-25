@@ -43,7 +43,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ToolTipFrame extends TaskFrame
 {

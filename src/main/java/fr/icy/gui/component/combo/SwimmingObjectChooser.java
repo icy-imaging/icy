@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,81 +15,63 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.combo;
 
 import fr.icy.Icy;
+import fr.icy.common.string.StringUtil;
 import fr.icy.model.swimmingPool.SwimmingObject;
 import fr.icy.model.swimmingPool.SwimmingPoolEvent;
 import fr.icy.model.swimmingPool.SwimmingPoolListener;
 import fr.icy.model.swimmingPool.WeakSwimmingPoolListener;
-import fr.icy.common.string.StringUtil;
 
-import java.awt.Component;
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.ListCellRenderer;
-import javax.swing.SwingUtilities;
-
 /**
  * @author Nicolas Chenouard
- * @author Stephane
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
-public class SwimmingObjectChooser extends JComboBox implements SwimmingPoolListener
-{
-    public interface SwimmingObjectChooserListener
-    {
-        public void objectChanged(Object object);
+public class SwimmingObjectChooser extends JComboBox<Object> implements SwimmingPoolListener {
+    @FunctionalInterface
+    public interface SwimmingObjectChooserListener {
+        void objectChanged(Object object);
     }
 
-    private static final long serialVersionUID = 1594001236878708868L;
+    private final List<SwimmingObjectChooserListener> listeners;
+    private final Class<?> itemClass;
 
-    private List<SwimmingObjectChooserListener> listeners;
-    private final Class<? extends Object> itemClass;
-
-    public SwimmingObjectChooser(Class<? extends Object> itemClass)
-    {
+    public SwimmingObjectChooser(final Class<?> itemClass) {
         this(itemClass, 50, "No valid object to display in SwimmingPool");
     }
 
-    public SwimmingObjectChooser(Class<? extends Object> itemClass, final int maxSize, final String defaultMessage)
-    {
+    public SwimmingObjectChooser(final Class<?> itemClass, final int maxSize, final String defaultMessage) {
         super();
 
         this.itemClass = itemClass;
-        this.listeners = new ArrayList<SwimmingObjectChooserListener>();
+        this.listeners = new ArrayList<>();
 
         Icy.getMainInterface().getSwimmingPool().addListener(new WeakSwimmingPoolListener(this));
 
-        this.setRenderer(new ListCellRenderer()
-        {
-            @Override
-            public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-                    boolean cellHasFocus)
-            {
-                if (value == null)
-                    return new JLabel(defaultMessage);
+        this.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            if (value == null)
+                return new JLabel(defaultMessage);
 
-                if (value instanceof SwimmingObject)
-                {
-                    JLabel label = new JLabel(StringUtil.limit(((SwimmingObject) value).getName(), maxSize));
-                    label.setToolTipText(((SwimmingObject) value).getName());
-                    return label;
-                }
-
-                return new JLabel(value.toString());
+            if (value instanceof SwimmingObject) {
+                final JLabel label = new JLabel(StringUtil.limit(((SwimmingObject) value).getName(), maxSize));
+                label.setToolTipText(((SwimmingObject) value).getName());
+                return label;
             }
+
+            return new JLabel(value.toString());
         });
     }
 
-    public Object getSelectedObject()
-    {
+    public Object getSelectedObject() {
         final Object o = getSelectedItem();
 
         if (o != null)
@@ -99,76 +81,63 @@ public class SwimmingObjectChooser extends JComboBox implements SwimmingPoolList
     }
 
     @Override
-    public void swimmingPoolChangeEvent(final SwimmingPoolEvent event)
-    {
-        SwingUtilities.invokeLater(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                refreshList();
+    public void swimmingPoolChangeEvent(final SwimmingPoolEvent event) {
+        SwingUtilities.invokeLater(() -> {
+            refreshList();
 
-                final SwimmingObject swimObj = event.getResult();
+            final SwimmingObject swimObj = event.getResult();
 
-                if (swimObj != null)
-                {
-                    final Object obj = swimObj.getObject();
+            if (swimObj != null) {
+                final Object obj = swimObj.getObject();
 
-                    // Select the last entry computed
-                    if (obj != null)
-                        setSelectedItem(obj);
-                }
+                // Select the last entry computed
+                if (obj != null)
+                    setSelectedItem(obj);
             }
         });
 
     }
 
-    void refreshList()
-    {
+    void refreshList() {
         // save old selection
         final Object oldSelected = getSelectedItem();
         // rebuild model
-        setModel(new DefaultComboBoxModel(getSwimmingObjects()));
+        setModel(new DefaultComboBoxModel<>(getSwimmingObjects()));
         // restore selection
         setSelectedItem(oldSelected);
     }
 
-    Object[] getSwimmingObjects()
-    {
-        final List<Object> objectList = new ArrayList<Object>();
+    Object[] getSwimmingObjects() {
+        final List<Object> objectList = new ArrayList<>();
         final List<SwimmingObject> objects = Icy.getMainInterface().getSwimmingPool().getObjects();
 
-        for (SwimmingObject so : objects)
+        for (final SwimmingObject so : objects)
             if (itemClass.isInstance(so.getObject()))
                 objectList.add(so);
 
         return objectList.toArray();
     }
 
-    public void addListener(SwimmingObjectChooserListener listener)
-    {
+    public void addListener(final SwimmingObjectChooserListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
     }
 
-    public void removeListener(SwimmingObjectChooserListener listener)
-    {
+    public void removeListener(final SwimmingObjectChooserListener listener) {
         listeners.remove(listener);
     }
 
     @Override
-    public void fireItemStateChanged(ItemEvent e)
-    {
-        for (SwimmingObjectChooserListener listener : listeners)
+    public void fireItemStateChanged(final ItemEvent e) {
+        for (final SwimmingObjectChooserListener listener : listeners)
             listener.objectChanged(getSelectedObject());
 
         super.fireItemStateChanged(e);
     }
 
     @Override
-    public void actionPerformed(ActionEvent e)
-    {
-        for (SwimmingObjectChooserListener listener : listeners)
+    public void actionPerformed(final ActionEvent e) {
+        for (final SwimmingObjectChooserListener listener : listeners)
             listener.objectChanged(getSelectedObject());
 
         super.actionPerformed(e);

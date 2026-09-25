@@ -27,7 +27,7 @@ import fr.icy.gui.viewer.ViewerEvent;
 import fr.icy.Icy;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class WeakActiveViewerListener extends WeakListener<ActiveViewerListener> implements ActiveViewerListener
 {

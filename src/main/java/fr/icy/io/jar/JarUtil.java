@@ -20,7 +20,9 @@ package fr.icy.io.jar;
 
 import fr.icy.network.NetworkUtil;
 import fr.icy.network.URLUtil;
-import fr.icy.system.logging.IcyLogger;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.JarURLConnection;
@@ -30,20 +32,25 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * JAR utilities class
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class JarUtil {
+    private static final Logger LOGGER = Logger.getLogger(JarUtil.class.getName());
+
     public static final String FILE_EXTENSION = "jar";
     public static final String FILE_DOT_EXTENSION = "." + FILE_EXTENSION;
 
     /**
      * Return true if specified URL is a JAR url
      */
+    @Contract("null -> false")
     public static boolean isJarURL(final String path) {
         return (path != null) && path.toUpperCase().startsWith("JAR:") && URLUtil.isURL(path.substring(4));
     }
@@ -51,6 +58,7 @@ public class JarUtil {
     /**
      * Return a JAR URL from the specified path
      */
+    @Contract("null -> null")
     public static URL getJarURL(final String path) {
         if (path == null)
             return null;
@@ -64,14 +72,14 @@ public class JarUtil {
     /**
      * Return a JAR URL from the specified JAR path and JAR entry
      */
-    public static URL getJarURL(final String jarPath, final JarEntry entry) {
+    public static URL getJarURL(final String jarPath, final @NonNull JarEntry entry) {
         return URLUtil.getURL(getJarURL(jarPath) + entry.getName());
     }
 
     /**
      * Return a JAR File from the specified path
      */
-    public static JarFile getJarFile(final String path) {
+    public static @Nullable JarFile getJarFile(final String path) {
         try {
             if (isJarURL(path))
                 return ((JarURLConnection) NetworkUtil.openConnection(getJarURL(path), false, true)).getJarFile();
@@ -79,7 +87,8 @@ public class JarUtil {
             return new JarFile(path);
         }
         catch (final IOException e) {
-            IcyLogger.error(JarUtil.class, e, "Cannot open " + path + ".");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Cannot open " + path + ".", e);
             return null;
         }
     }
@@ -87,24 +96,22 @@ public class JarUtil {
     /**
      * Find a class entry in the specified JAR file
      */
-    public static JarEntry getJarClassEntry(final JarFile file, final String className) {
+    public static JarEntry getJarClassEntry(final @NonNull JarFile file, final @NonNull String className) {
         return file.getJarEntry(className.replace('.', '/') + ".class");
     }
 
     /**
      * Find the specified entry in the specified JAR file
      */
-    public static JarEntry getJarEntry(final JarFile file, final String entryName) {
+    public static JarEntry getJarEntry(final @NonNull JarFile file, final String entryName) {
         return file.getJarEntry(entryName);
     }
 
     /**
      * Returns all files contained in the specified JAR file.
      *
-     * @param includeFolderEntry
-     *        if <code>true</code> all folder entry are also included
-     * @param includeHidden
-     *        if <code>true</code> all hidden files (starting by '.' character) are also included
+     * @param includeFolderEntry if <code>true</code> all folder entry are also included
+     * @param includeHidden      if <code>true</code> all hidden files (starting by '.' character) are also included
      */
     public static void getAllFiles(final String fileName, final boolean includeFolderEntry, final boolean includeHidden, final List<String> result) {
         final JarFile jarFile = getJarFile(fileName);
@@ -137,12 +144,10 @@ public class JarUtil {
     /**
      * Returns all files contained in the specified JAR file.
      *
-     * @param includeFolderEntry
-     *        if <code>true</code> all folder entry are also included
-     * @param includeHidden
-     *        if <code>true</code> all hidden files (starting by '.' character) are also included
+     * @param includeFolderEntry if <code>true</code> all folder entry are also included
+     * @param includeHidden      if <code>true</code> all hidden files (starting by '.' character) are also included
      */
-    public static List<String> getAllFiles(final String fileName, final boolean includeFolderEntry, final boolean includeHidden) {
+    public static @NonNull List<String> getAllFiles(final String fileName, final boolean includeFolderEntry, final boolean includeHidden) {
         final List<String> result = new ArrayList<>();
 
         getAllFiles(fileName, includeFolderEntry, includeHidden, result);

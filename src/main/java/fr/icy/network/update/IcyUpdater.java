@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -28,20 +28,23 @@ import fr.icy.network.NetworkUtil;
 import fr.icy.network.URLUtil;
 import fr.icy.network.update.ElementDescriptor.ElementFile;
 import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.ApplicationPreferences;
 import fr.icy.system.thread.ThreadUtil;
+import org.jetbrains.annotations.Contract;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class IcyUpdater {
+    private static final Logger LOGGER = Logger.getLogger(IcyUpdater.class.getName());
+
     private final static int ANNOUNCE_SHOWTIME = 15;
 
     public final static String PARAM_ARCH = "arch";
@@ -55,19 +58,20 @@ public class IcyUpdater {
     private static ActionFrame frame = null;
     private static final Runnable checker = IcyUpdater::processCheckUpdate;
 
+    @Contract(pure = true)
     public static boolean getWantUpdate() {
         return wantUpdate;
     }
 
     /**
-     * return true if we are currently checking for update
+     * return true if we are currently checking for an update
      */
     public static boolean isCheckingForUpdate() {
         return checking || ThreadUtil.hasWaitingBgSingleTask(checker);
     }
 
     /**
-     * return true if we are currently processing update
+     * return true if we are currently processing the update
      */
     public static boolean isUpdating() {
         return isCheckingForUpdate() || ((frame != null) && frame.isVisible()) || updating;
@@ -84,7 +88,7 @@ public class IcyUpdater {
     }
 
     /**
-     * Check for application update process (synchronized method)
+     * Check for the application update process (synchronized method)
      */
     public static synchronized void processCheckUpdate() {
         checking = true;
@@ -98,14 +102,14 @@ public class IcyUpdater {
             final ProgressFrame checkingFrame;
 
             if (!silent && !Icy.getMainInterface().isHeadLess())
-                checkingFrame = new CancelableProgressFrame("checking for application update...");
+                checkingFrame = new CancelableProgressFrame("checking for application update…");
             else
                 checkingFrame = null;
 
             final String params = PARAM_ARCH + "=" + SystemUtil.getOSArchIdString() + "&" + PARAM_VERSION + "=" + Icy.VERSION.toShortString();
 
             try {
-                // error (or cancel) while downloading XML ?
+                // error (or cancel) while downloading XML?
                 if (!downloadAndSaveForUpdate(
                         ApplicationPreferences.getUpdateRepositoryBase() + ApplicationPreferences.getUpdateRepositoryFile() + "?" + params,
                         Updater.UPDATE_NAME,
@@ -131,29 +135,29 @@ public class IcyUpdater {
             // otherwise --> update
             if (toUpdate.isEmpty())
                 needUpdate = false;
-                // only the updater require updates ? --> no update
+                // only the updater requires updates? --> no update
             else needUpdate = (toUpdate.size() != 1) || (!toUpdate.get(0).getName().equals(Updater.ICYUPDATER_NAME));
 
-            // some elements need to be updated ?
+            // some elements need to be updated?
             if (needUpdate) {
                 // silent update or headless mode
                 if (silent || Icy.getMainInterface().isHeadLess()) {
                     // automatically install updates
                     if (prepareUpdate(toUpdate, true))
-                        // we want update when application will exit
+                        // we want to update when application will exit
                         wantUpdate = true;
                 }
                 else {
                     final String mess;
 
                     if (toUpdate.size() > 1)
-                        mess = "Some updates are available...";
+                        mess = "Some updates are available…";
                     else
-                        mess = "An update is available...";
+                        mess = "An update is available…";
 
                     // show announcement for 15 seconds
                     new AnnounceFrame(mess, "View", () -> {
-                        // display updates and process them if user accept
+                        // display updates and process them if user accepts
                         showUpdateAndProcess(toUpdate);
                     }, ANNOUNCE_SHOWTIME);
                 }
@@ -193,7 +197,7 @@ public class IcyUpdater {
                 Icy.confirmRestart();
             }
             else
-                new FailedAnnounceFrame("An error occured while downloading files (see details in console)", 10000);
+                new FailedAnnounceFrame("An error occurred while downloading files (see details in console)", 10000);
         }));
 
         final JPanel topPanel = GuiUtil.createPageBoxPanel(Box.createVerticalStrut(4),
@@ -205,7 +209,7 @@ public class IcyUpdater {
         final JLabel changeLogTitleLabel = GuiUtil.createBoldLabel("Change log :");
 
         for (final ElementDescriptor element : elements) {
-            IcyLogger.debug(IcyUpdater.class, "Updating element: " + element.getName() + " version: " + element.getVersion().toShortString());
+            LOGGER.config("Updating element: " + element.getName() + " version: " + element.getVersion().toShortString());
         }
 
         final JList<Object> list = new JList<>(elements.toArray());
@@ -278,7 +282,7 @@ public class IcyUpdater {
                         downloadingFrame.setToolTipText(toolTip);
                     }
 
-                    // symbolic link file ?
+                    // symbolic link file?
                     if (elementFile.isLink()) {
                         // special treatment
                         if (!FileUtil.createLink(Updater.UPDATE_DIRECTORY + FileUtil.separator + elementFile.getLocalPath(), elementFile.getOnlinePath())) {
@@ -288,9 +292,9 @@ public class IcyUpdater {
                         }
                     }
                     else {
-                        // local file need to be updated --> download new file
+                        // local files need to be updated --> download new files
                         if (Updater.needUpdate(elementFile.getLocalPath(), elementFile.getDateModif())) {
-                            // error (or cancel) while downloading ?
+                            // error (or cancel) while downloading?
                             if (!downloadAndSaveForUpdate(
                                     URLUtil.getNetworkURLString(ApplicationPreferences.getUpdateRepositoryBase(), elementFile.getOnlinePath()),
                                     elementFile.getLocalPath(),
@@ -340,10 +344,10 @@ public class IcyUpdater {
     private static boolean canDoUpdate() {
         // check for updater presence
         boolean requiredFilesExist = FileUtil.exists(FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + Updater.UPDATER_NAME);
-        // // in update directory ?
+        // // in the update directory?
         // requiredFilesExist |= FileUtil.exists(Updater.UPDATE_DIRECTORY + FileUtil.separator +
         // Updater.UPDATER_NAME);
-        // check for update xml file
+        // check for update XML file
         requiredFilesExist &= FileUtil.exists(Updater.UPDATE_DIRECTORY + FileUtil.separator + Updater.UPDATE_NAME);
 
         // required files present so we can do update
@@ -357,18 +361,18 @@ public class IcyUpdater {
         if (doUpdate) {
             final String updateName = Updater.UPDATE_DIRECTORY + FileUtil.separator + Updater.UPDATER_NAME;
 
-            // updater need update ? process it first
+            // updater needs update ? process it first
             if (FileUtil.exists(updateName)) {
                 // replace updater
                 if (!FileUtil.rename(updateName, FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + Updater.UPDATER_NAME, true)) {
-                    IcyLogger.error(IcyUpdater.class, "Can't update 'Upater.jar', Update process can't continue.");
+                    LOGGER.severe("Can't update 'Upater.jar', Update process can't continue.");
                     return false;
                 }
             }
 
-            // this is not really needed...
+            // this is not really needed…
             if (!canDoUpdate()) {
-                IcyLogger.error(IcyUpdater.class, "Can't process update : some required files are missing.");
+                LOGGER.severe("Can't process update : some required files are missing.");
                 return false;
             }
         }
@@ -381,10 +385,10 @@ public class IcyUpdater {
             params += Updater.ARG_NOSTART + " ";
 
         // launch updater
-        // WARNING: don't use application folder here, it doesn't work as expected !
+        // WARNING: don't use application folder here, it doesn't work as expected!
         SystemUtil.execJAR(Updater.UPDATER_NAME, params);
 
-        // you have to exit application then...
+        // you have to exit application then…
         return true;
     }
 }

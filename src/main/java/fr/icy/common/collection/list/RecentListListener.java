@@ -21,7 +21,7 @@ package fr.icy.common.collection.list;
 import java.util.EventListener;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public interface RecentListListener extends EventListener
 {

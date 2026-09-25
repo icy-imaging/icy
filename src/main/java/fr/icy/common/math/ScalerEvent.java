@@ -20,7 +20,7 @@ package fr.icy.common.math;
 import fr.icy.common.event.CollapsibleEvent;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ScalerEvent implements CollapsibleEvent {

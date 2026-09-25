@@ -25,7 +25,7 @@ import fr.icy.model.sequence.Sequence;
  * Note that you have {@link FileImporter} and {@link SequenceFileImporter} interfaces
  * which allow to import resources from file or {@link Sequence} from file.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface Importer
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,8 +22,8 @@ import fr.icy.common.exception.UnsupportedFormatException;
 import fr.icy.model.image.AbstractImageProvider;
 import fr.icy.model.image.ImageProvider;
 import fr.icy.model.sequence.SequenceIdImporter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.filechooser.FileFilter;
 import java.io.IOException;
@@ -38,19 +38,19 @@ import java.util.List;
  * See details about the image data access implementation with the {@link ImageProvider} interface
  * and {@link AbstractImageProvider} abstract class helper.
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  * @see SequenceIdImporter
  */
 public interface SequenceFileImporter extends SequenceIdImporter {
     /**
-     * Return <code>true</code> if the specified file can be opened by the importer
+     * Return <code>true</code> if the importer can open the specified file
      */
     boolean acceptFile(String path);
 
     /**
      * @return The path of the image file of the image currently opened or <code>null</code> otherwise.<br>
-     * Note that path is always returned in generic java path style (see {@link FileUtil#getGenericPath(String)} method).
+     * Note that the path is always returned in generic java path style (see {@link FileUtil#getGenericPath(String)} method).
      * @see #open(String, int)
      * @see #close()
      */
@@ -60,13 +60,13 @@ public interface SequenceFileImporter extends SequenceIdImporter {
     /**
      * Open the image designed by the specified file <code>path</code> to allow image data / metadata access.<br>
      * Calling this method will automatically close the previous opened image.<br>
-     * Don't forget to call {@link #close()} to close the image when you're done.<br>
+     * Remember to call {@link #close()} to close the image when you're done.<br>
      *
      * @param path  Path of the image file to open.
      * @param flags operation flag:<br>
      *              <ul>
-     *              <li>{@link #FLAG_METADATA_MINIMUM} = load minimum metadata informations</li>
-     *              <li>{@link #FLAG_METADATA_ALL} = load all metadata informations</li>
+     *              <li>{@link #FLAG_METADATA_MINIMUM} = load minimum metadata information</li>
+     *              <li>{@link #FLAG_METADATA_ALL} = load all metadata information</li>
      *              </ul>
      * @return <code>true</code> if the operation has succeeded and <code>false</code> otherwise.
      */
@@ -76,5 +76,5 @@ public interface SequenceFileImporter extends SequenceIdImporter {
     /**
      * Return the supported FileFilter for this importer.
      */
-    @NotNull List<FileFilter> getFileFilters();
+    @NonNull List<FileFilter> getFileFilters();
 }

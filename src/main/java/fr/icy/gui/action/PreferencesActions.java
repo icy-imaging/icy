@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ package fr.icy.gui.action;
 
 import fr.icy.common.reflect.ClassUtil;
 import fr.icy.gui.preferences.*;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.event.ActionEvent;
 import java.lang.reflect.Field;
@@ -31,12 +31,12 @@ import java.util.List;
 /**
  * Preferences actions.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class PreferencesActions {
-    public static final @NotNull IcyAbstractAction preferencesAction = new IcyAbstractAction(
-            "Preferences...",
+    public static final @NonNull IcyAbstractAction preferencesAction = new IcyAbstractAction(
+            "Preferences…",
             "Show the preferences window",
             "Setup Icy preferences"
     ) {
@@ -47,10 +47,10 @@ public final class PreferencesActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction generalPreferencesAction = new IcyAbstractAction(
-            "General Preferences...",
+    public static final @NonNull IcyAbstractAction generalPreferencesAction = new IcyAbstractAction(
+            "General Preferences…",
             "Show the general preferences window",
-            "Setup general setting as font size, automatic update, maximum memory..."
+            "Setup general setting as font size, automatic update, maximum memory…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -59,10 +59,10 @@ public final class PreferencesActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction canvasPreferencesAction = new IcyAbstractAction(
-            "Canvas Preferences...",
+    public static final @NonNull IcyAbstractAction canvasPreferencesAction = new IcyAbstractAction(
+            "Canvas Preferences…",
             "Show the canvas preferences window",
-            "Setup canvas setting as filtering, mouse wheel sensivity and reverse mouse axis..."
+            "Setup canvas setting as filtering, mouse wheel sensitivity and reverse mouse axis…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -71,10 +71,10 @@ public final class PreferencesActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction magicWandPreferencesAction = new IcyAbstractAction(
-            "Magic Wand Preferences...",
+    public static final @NonNull IcyAbstractAction magicWandPreferencesAction = new IcyAbstractAction(
+            "Magic Wand Preferences…",
             "Show the Magic Wand preferences window",
-            "Setup Magic Wand advanced setting as connectivity, gradient tolerance..."
+            "Setup Magic Wand advanced setting as connectivity, gradient tolerance…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -83,8 +83,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction networkPreferencesAction = new IcyAbstractAction(
-            "Network Preferences...",
+    public static final @NonNull IcyAbstractAction networkPreferencesAction = new IcyAbstractAction(
+            "Network Preferences…",
             "Show the network preferences window",
             "Setup network setting as proxy server."
     ) {
@@ -95,8 +95,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction pluginPreferencesAction = new IcyAbstractAction(
-            "Plugin Preferences...",
+    public static final @NonNull IcyAbstractAction pluginPreferencesAction = new IcyAbstractAction(
+            "Plugin Preferences…",
             "Show the plugin preferences window",
             "Setup plugin setting as automatic update and enable beta version."
     ) {
@@ -107,10 +107,10 @@ public final class PreferencesActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction localPluginPreferencesAction = new IcyAbstractAction(
-            "Local Plugin Preferences...",
+    public static final @NonNull IcyAbstractAction localPluginPreferencesAction = new IcyAbstractAction(
+            "Local Plugin Preferences…",
             "Show the local plugin window",
-            "Browse, remove, update and show informations about installed plugin."
+            "Browse, remove, update and show information about installed plugin."
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -119,8 +119,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction onlinePluginPreferencesAction = new IcyAbstractAction(
-            "Online Plugin Preferences...",
+    public static final @NonNull IcyAbstractAction onlinePluginPreferencesAction = new IcyAbstractAction(
+            "Online Plugin Preferences…",
             "Show the online plugin window",
             "Browse online plugins and install them."
     ) {
@@ -131,8 +131,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction startupPluginPreferencesAction = new IcyAbstractAction(
-            "Startup Plugin Preferences...",
+    public static final @NonNull IcyAbstractAction startupPluginPreferencesAction = new IcyAbstractAction(
+            "Startup Plugin Preferences…",
             "Show the startup plugin window",
             "Enable / disable startup plugins."
     ) {
@@ -143,8 +143,8 @@ public final class PreferencesActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction repositoryPreferencesAction = new IcyAbstractAction(
-            "Repository Preferences...",
+    public static final @NonNull IcyAbstractAction repositoryPreferencesAction = new IcyAbstractAction(
+            "Repository Preferences…",
             "Show the repository preferences window",
             "Add, edit or remove repository address."
     ) {
@@ -159,7 +159,7 @@ public final class PreferencesActions {
      * Return all actions of this class
      */
     @Deprecated(forRemoval = true)
-    public static @NotNull List<IcyAbstractAction> getAllActions() {
+    public static @NonNull List<IcyAbstractAction> getAllActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
         for (final Field field : PreferencesActions.class.getFields()) {

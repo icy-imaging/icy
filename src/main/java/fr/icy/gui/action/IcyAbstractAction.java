@@ -29,7 +29,7 @@ import java.awt.event.ActionEvent;
 /**
  * Icy basic AbstractAction class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class IcyAbstractAction extends AbstractAction {
@@ -316,8 +316,8 @@ public abstract class IcyAbstractAction extends AbstractAction {
             return;
         }
 
-        // background processing...
-        final String mess = StringUtil.isEmpty(getProcessMessage()) ? "Processing..." : getProcessMessage();
+        // background processing…
+        final String mess = StringUtil.isEmpty(getProcessMessage()) ? "Processing…" : getProcessMessage();
         if (!Icy.getMainInterface().isHeadLess())
             progressFrame = new CancelableProgressFrame(mess);
         else

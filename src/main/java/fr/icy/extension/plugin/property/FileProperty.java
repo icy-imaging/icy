@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,24 +19,24 @@
 package fr.icy.extension.plugin.property;
 
 import fr.icy.system.UserUtil;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 
 public final class FileProperty extends Property<File> {
-    public FileProperty(final @NotNull String name, final @NotNull String description, final @NotNull File defaultValue) {
+    public FileProperty(final @NonNull String name, final @NonNull String description, final @NonNull File defaultValue) {
         super(name, description, defaultValue);
     }
 
-    public FileProperty(final @NotNull String name, final @NotNull String description) {
+    public FileProperty(final @NonNull String name, final @NonNull String description) {
         this(name, description, UserUtil.getUserHome());
     }
 
-    public FileProperty(final @NotNull String name, final @NotNull File defaultValue) {
+    public FileProperty(final @NonNull String name, final @NonNull File defaultValue) {
         super(name, defaultValue);
     }
 
-    public FileProperty(final @NotNull String name) {
+    public FileProperty(final @NonNull String name) {
         this(name, UserUtil.getUserHome());
     }
 }

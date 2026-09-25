@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,10 +19,9 @@
 package fr.icy.gui.component.field;
 
 import fr.icy.gui.LookAndFeelUtil;
-import fr.icy.gui.component.icon.IcySVGIcon;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
-import org.jetbrains.annotations.NotNull;
+import fr.icy.gui.component.icon.IcySVGIcon;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -40,9 +39,9 @@ public class IcyTextFieldHint extends JTextField implements FocusListener {
     private final String hint;
     private final Insets insets;
 
-    public IcyTextFieldHint(final @NotNull SVGResource icon, final @NotNull String hint) {
+    public IcyTextFieldHint(final @NonNull IcySVG icon, final @NonNull String hint) {
         super();
-        this.icon = new IcySVG(icon).getIcon(ICON_SIZE, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
+        this.icon = icon.getIcon(ICON_SIZE, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
         this.hint = hint;
 
         final Border border = UIManager.getBorder("TextField.border");
@@ -51,9 +50,9 @@ public class IcyTextFieldHint extends JTextField implements FocusListener {
         addFocusListener(this);
     }
 
-    public IcyTextFieldHint(final @NotNull SVGResource icon) {
+    public IcyTextFieldHint(final @NonNull IcySVG icon) {
         super();
-        this.icon = new IcySVG(icon).getIcon(ICON_SIZE, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
+        this.icon = icon.getIcon(ICON_SIZE, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
         this.hint = "";
 
         final Border border = UIManager.getBorder("TextField.border");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -26,23 +26,26 @@ import fr.icy.extension.plugin.interface_.PluginNoEDTConstructor;
 import fr.icy.extension.plugin.interface_.PluginThreaded;
 import fr.icy.system.IcyExceptionHandler;
 import fr.icy.system.audit.Audit;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class launch plugins and register them to the main application.<br>
- * The launch can be in a decicated thread or in the EDT.
+ * The launch can be in a dedicated thread or in the EDT.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PluginLauncher {
+    private static final Logger LOGGER = Logger.getLogger(PluginLauncher.class.getName());
+
     protected static class PluginExecutor implements Callable<Boolean>, Runnable {
         final Plugin plugin;
 
@@ -55,9 +58,7 @@ public class PluginLauncher {
 
         @Override
         public Boolean call() throws Exception {
-            // some plugins (as EzPlug) do not respect the PluginActionable convention (run() method
-            // contains all the process)
-            // so we can't yet use this bloc of code
+            // some plugins (as EzPlug) do not respect the PluginActionable convention (run() method contains all the process), so we can't yet use this bloc of code
 
             // if (plugin instanceof PluginActionable)
             // ((PluginActionable) plugin).run();
@@ -90,11 +91,11 @@ public class PluginLauncher {
      * Executes the specified plugin.<br>
      * If the specified plugin implements {@link PluginThreaded} then the plugin will be executed in
      * a separate thread and the method will return before completion.<br>
-     * In other case the plugin is executed on the EDT by using {@link ThreadUtil#invokeNow(Callable)} and so method
-     * return after completion.
+     * In another case the plugin is executed on the EDT by using {@link ThreadUtil#invokeNow(Callable)} and so the method
+     * returns after completion.
      *
      * @throws InterruptedException if the current thread was interrupted while waiting for execution on EDT.
-     * @throws Exception            if the computation threw an exception (only when plugin is executed on EDT).
+     * @throws Exception            if the computation threw an exception (only when the plugin is executed on EDT).
      */
     private static void internalExecute(final Plugin plugin) throws Exception {
         if (plugin instanceof PluginThreaded) {
@@ -126,11 +127,11 @@ public class PluginLauncher {
      * @param register if we want to register the plugin in the active plugin list
      * @see #startSafe(PluginDescriptor)
      */
-    public static Plugin create(final @NotNull PluginDescriptor plugin, final boolean register) throws Exception {
+    public static Plugin create(final @NonNull PluginDescriptor plugin, final boolean register) throws Exception {
         final Class<? extends Plugin> clazz = plugin.getPluginClass();
         final Plugin result;
 
-        // use the special PluginNoEDTConstructor interface or headless mode ?
+        // use the special PluginNoEDTConstructor interface or headless mode?
         if (ClassUtil.isSubClass(clazz, PluginNoEDTConstructor.class) || Icy.getMainInterface().isHeadLess())
             result = clazz.getDeclaredConstructor().newInstance();
         else {
@@ -157,7 +158,7 @@ public class PluginLauncher {
     }
 
     /**
-     * Starts the specified plugin (catched exception version).<br>
+     * Starts the specified plugin (caught exception version).<br>
      * Returns the plugin instance (only meaningful for {@link PluginThreaded} plugin) or <code>null</code> if an error
      * occurred.
      *
@@ -176,7 +177,7 @@ public class PluginLauncher {
                 return result;
             }
             catch (final IllegalAccessException | InstantiationException e) {
-                IcyLogger.error(PluginLauncher.class, e, "Cannot start plugin " + plugin.getName() + ".");
+                LOGGER.log(Level.SEVERE, "Cannot start plugin " + plugin.getName() + ".", e);
                 return null;
             }
         }
@@ -192,12 +193,11 @@ public class PluginLauncher {
 
     /**
      * Same as {@link #start(PluginDescriptor)} except it throws {@link Exception} on error
-     * so user can handle them.
+     * so the user can handle them.
      *
-     * @param plugin descriptor of the plugin we want to start
-     *               compatibility)
+     * @param plugin descriptor of the plugin we want to start compatibility
      * @throws InterruptedException if the current thread was interrupted while waiting for execution on EDT.
-     * @throws Exception            if the computation threw an exception (only when plugin is executed on EDT).
+     * @throws Exception            if the computation threw an exception (only when the plugin is executed on EDT).
      */
     public static Plugin startSafe(final PluginDescriptor plugin) throws Exception {
         final Plugin result;

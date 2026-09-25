@@ -845,7 +845,7 @@ public class Intersections {
 
 		// they don't intersect, but does one polygon contain the other?
 		// We need to ask the bigger if it contains the smaller.
-		// ... so first we identify the bigger:
+		// … so first we identify the bigger:
 
 		double minX1 = coords1[0];
 		double maxX1 = coords1[0];

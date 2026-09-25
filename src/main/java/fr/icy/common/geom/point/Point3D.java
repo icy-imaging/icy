@@ -23,9 +23,9 @@ import java.util.List;
 
 /**
  * Point3D class.<br>
- * Incomplete implementation (work in progress...)
+ * Incomplete implementation (work in progress…)
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class Point3D implements Cloneable
 {

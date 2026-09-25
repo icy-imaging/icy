@@ -27,7 +27,7 @@ import java.awt.geom.Point2D;
  * Anchor for line type shape.<br>
  * Support special line drag operation when shift is maintained.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class LineAnchor2D extends Anchor2D
 {

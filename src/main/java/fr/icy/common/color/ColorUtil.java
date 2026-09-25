@@ -27,7 +27,7 @@ import java.awt.color.ColorSpace;
 /**
  * Color utilities class.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ColorUtil
 {

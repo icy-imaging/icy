@@ -30,7 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequenceCanvasResizeFrame extends ActionDialog
 {
@@ -61,7 +61,7 @@ public class SequenceCanvasResizeFrame extends ActionDialog
                     @Override
                     public void run()
                     {
-                        final ProgressFrame pf = new ProgressFrame("Resizing sequence...");
+                        final ProgressFrame pf = new ProgressFrame("Resizing sequence…");
                         try
                         {
                             Icy.getMainInterface().addSequence(

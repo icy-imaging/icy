@@ -34,7 +34,7 @@ import java.awt.*;
  * Merely based on Magic Wand Tool from ImageJ from Michael Schmid and
  * from the smooth tolerance control ideas from Jerome Mutterer.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class MagicWand {
@@ -318,7 +318,7 @@ public class MagicWand {
     }
 
     private static double getPixel(final Object pixels, final DataType dataType, final int offset) {
-        return Array1DUtil.getValue(pixels, offset, dataType);
+        return Array1DUtil.getValueAsDouble(pixels, offset, dataType);
     }
 
     private static double getPixel(final Object pixels, final DataType dataType, final int x, final int y, final int w) {
@@ -326,9 +326,9 @@ public class MagicWand {
     }
 
     private static void getRGBPixel(final Object[] pixels, final DataType dataType, final int offset, final int[] dest) {
-        dest[0] = (int) Array1DUtil.getValue(pixels[0], offset, dataType);
-        dest[1] = (int) Array1DUtil.getValue(pixels[1], offset, dataType);
-        dest[2] = (int) Array1DUtil.getValue(pixels[2], offset, dataType);
+        dest[0] = (int) Array1DUtil.getValueAsDouble(pixels[0], offset, dataType);
+        dest[1] = (int) Array1DUtil.getValueAsDouble(pixels[1], offset, dataType);
+        dest[2] = (int) Array1DUtil.getValueAsDouble(pixels[2], offset, dataType);
     }
 
     private static void getRGBPixel(final Object[] pixels, final DataType dataType, final int x, final int y, final int w, final int[] dest) {

@@ -24,7 +24,7 @@ import vtk.vtkProp;
  * Painter implementing this interface are automatically
  * added / removed from Canvas3D.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface VtkPainter
 {

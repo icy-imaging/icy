@@ -41,7 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class IcyColorModel extends ColorModel implements ScalerListener, IcyColorSpaceListener, ChangeListener {

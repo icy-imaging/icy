@@ -27,7 +27,7 @@ import java.awt.geom.Rectangle2D;
 /**
  * Utilities for geom objects
  * 
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  */
 public class GeomUtil
 {

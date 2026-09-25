@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,38 +18,38 @@
 
 package fr.icy.extension.plugin.property;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public final class IntegerProperty extends NumberProperty<Integer> {
-    public IntegerProperty(final @NotNull String name, final @NotNull String description, final @NotNull Integer defaultValue, final @NotNull Integer min, final @NotNull Integer max, final @NotNull Integer step) {
+    public IntegerProperty(final @NonNull String name, final @NonNull String description, final @NonNull Integer defaultValue, final @NonNull Integer min, final @NonNull Integer max, final @NonNull Integer step) {
         super(name, description, defaultValue, min, max, step);
     }
 
-    public IntegerProperty(final @NotNull String name, final @NotNull String description, final @NotNull Integer min, final @NotNull Integer max, final @NotNull Integer step) {
+    public IntegerProperty(final @NonNull String name, final @NonNull String description, final @NonNull Integer min, final @NonNull Integer max, final @NonNull Integer step) {
         this(name, description, 0, min, max, step);
     }
 
-    public IntegerProperty(final @NotNull String name, final @NotNull String description, final @NotNull Integer defaultValue) {
+    public IntegerProperty(final @NonNull String name, final @NonNull String description, final @NonNull Integer defaultValue) {
         this(name, description, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
     }
 
-    public IntegerProperty(final @NotNull String name, final @NotNull String description) {
+    public IntegerProperty(final @NonNull String name, final @NonNull String description) {
         this(name, description, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
     }
 
-    public IntegerProperty(final @NotNull String name, final @NotNull Integer defaultValue, final @NotNull Integer min, final @NotNull Integer max, final @NotNull Integer step) {
+    public IntegerProperty(final @NonNull String name, final @NonNull Integer defaultValue, final @NonNull Integer min, final @NonNull Integer max, final @NonNull Integer step) {
         super(name, defaultValue, min, max, step);
     }
 
-    public IntegerProperty(final @NotNull String name, final @NotNull Integer min, final @NotNull Integer max, final @NotNull Integer step) {
+    public IntegerProperty(final @NonNull String name, final @NonNull Integer min, final @NonNull Integer max, final @NonNull Integer step) {
         this(name, 0, min, max, step);
     }
 
-    public IntegerProperty(final @NotNull String name, final @NotNull Integer defaultValue) {
-        this(name, defaultValue,  Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
+    public IntegerProperty(final @NonNull String name, final @NonNull Integer defaultValue) {
+        this(name, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
     }
 
-    public IntegerProperty(final @NotNull String name) {
-        this(name, 0,  Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
+    public IntegerProperty(final @NonNull String name) {
+        this(name, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
     }
 }

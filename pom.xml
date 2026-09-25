@@ -7,16 +7,16 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>fr.icy</groupId>
-        <version>3.0.0-a.7</version>
+        <version>3.0.0-a.8-SNAPSHOT</version>
     </parent>
 
     <groupId>fr.icy</groupId>
     <artifactId>icy</artifactId>
-    <version>3.0.0-a.7</version>
+    <version>3.0.0-a.8-SNAPSHOT</version>
 
     <name>Icy</name>
     <description>Icy is an open community platform for bioimage informatics</description>
-    <url>https://icy.bioimageanalysis.org/</url>
+    <url>https://icy.fr/</url>
     <inceptionYear>2010</inceptionYear>
 
     <scm>
@@ -53,6 +53,15 @@
             <organization>Institut Pasteur</organization>
             <organizationUrl>https://pasteur.fr</organizationUrl>
             <url>https://icy.bioimageanalysis.org/author/tmusset/</url>
+            <timezone>Europe/Paris</timezone>
+            <roles>
+                <role>lead</role>
+                <role>developer</role>
+                <role>debugger</role>
+                <role>reviewer</role>
+                <role>support</role>
+                <role>maintainer</role>
+            </roles>
         </developer>
     </developers>
 
@@ -60,14 +69,19 @@
         <contributor>
             <name>Stéphane Dallongeville</name>
             <url>https://icy.bioimageanalysis.org/author/stef/</url>
+            <timezone>Europe/Paris</timezone>
+            <roles><role>founder</role></roles>
         </contributor>
         <contributor>
             <name>Fabrice de Chaumont</name>
             <url>https://icy.bioimageanalysis.org/author/fab/</url>
+            <timezone>Europe/Paris</timezone>
+            <roles><role>founder</role></roles>
         </contributor>
         <contributor>
             <name>Amandine Tournay</name>
             <url>https://icy.bioimageanalysis.org/author/amandine-tournay/</url>
+            <timezone>Europe/Paris</timezone>
         </contributor>
     </contributors>
 
@@ -374,6 +388,22 @@
             <groupId>ome</groupId>
             <artifactId>turbojpeg</artifactId>
         </dependency>-->
+        <dependency>
+            <groupId>ome</groupId>
+            <artifactId>OMEZarrReader</artifactId>
+            <version>0.6.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>ch.epfl.biop</groupId>
+            <artifactId>quick-start-czi-reader</artifactId>
+            <version>0.3.0</version>
+        </dependency>
 
         <!-- EhCache -->
         <dependency>
@@ -488,18 +518,6 @@
             <classifier>natives-windows-amd64</classifier>
         </dependency>
 
-        <!-- Log4j -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${org.apache.logging.log4j.log4j-core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${org.apache.logging.log4j.log4j-api.version}</version>
-        </dependency>
-
         <!-- Maven Resolver -->
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
@@ -551,6 +569,11 @@
             <version>${org.swinglabs.swingx.swingx-all.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>fr.icy.shared</groupId>
+            <artifactId>logging</artifactId>
+            <version>${fr.icy.shared.logging.version}</version>
+        </dependency>
         <dependency>
             <groupId>fr.icy.shared</groupId>
             <artifactId>vtk</artifactId>

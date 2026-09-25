@@ -26,7 +26,7 @@ import fr.icy.model.sequence.Sequence;
 /**
  * Define a channel position for {@link Sequence} class.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ChannelPosition extends ImagePosition
 {

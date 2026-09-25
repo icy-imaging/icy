@@ -36,7 +36,7 @@ import java.util.List;
  * You can get it with getSequenceSelected()
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 

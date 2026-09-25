@@ -45,7 +45,7 @@ import java.util.List;
  * Default implementation used when Icy is launched in batch mode, without any GUI
  *
  * @author Nicolas Herve
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  * @see MainInterfaceGui
  */
@@ -417,14 +417,6 @@ public class MainInterfaceBatch implements MainInterface {
     }
 
     @Override
-    public void addROIToolChangeListener(final ROIToolChangeListener listener) {
-    }
-
-    @Override
-    public void removeROIToolChangeListener(final ROIToolChangeListener listener) {
-    }
-
-    @Override
     public void addSequence(final Sequence sequence) {
         if (sequence != null)
             activeSequence = sequence;
@@ -448,9 +440,5 @@ public class MainInterfaceBatch implements MainInterface {
     @Override
     public void setVirtualMode(final boolean value) {
         GeneralPreferences.setVirtualMode(value);
-    }
-
-    @Override
-    public void changeROITool(final Class<? extends PluginROI> pluginROI) {
     }
 }

@@ -26,7 +26,7 @@ import java.awt.Dimension;
 /**
  * The <code>Dimension4D</code> class is to encapsulate a 4D dimension (X,Y,Z,T).
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class Dimension4D implements Cloneable
 {

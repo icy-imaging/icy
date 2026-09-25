@@ -20,7 +20,7 @@ package fr.icy.common.math;
 import java.util.EventListener;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public interface ScalerListener extends EventListener
 {

@@ -28,7 +28,7 @@ import java.awt.*;
 import java.util.EventListener;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SequenceDimensionAdjustPanel extends JPanel {

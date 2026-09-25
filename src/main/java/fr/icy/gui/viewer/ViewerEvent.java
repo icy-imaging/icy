@@ -20,7 +20,7 @@ package fr.icy.gui.viewer;
 import fr.icy.model.sequence.DimensionId;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class ViewerEvent
 {

@@ -26,7 +26,7 @@ import java.io.File;
 import java.util.Arrays;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class RecentFileList extends RecentList
 {

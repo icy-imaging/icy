@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,10 +24,14 @@ import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.extension.plugin.annotation_.IcyROIPlugin;
 import fr.icy.extension.plugin.interface_.PluginROI;
 import fr.icy.gui.component.button.IcyToggleButton;
+import fr.icy.gui.listener.ActiveSequenceListener;
 import fr.icy.gui.toolbar.button.ROIDrawButton;
-import fr.icy.system.logging.IcyLogger;
+import fr.icy.model.sequence.Sequence;
+import fr.icy.model.sequence.SequenceEvent;
 import fr.icy.system.thread.ThreadUtil;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -35,11 +39,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Thomas Musset
  */
-public final class ROIBar extends IcyToolbar implements ExtensionLoader.ExtensionLoaderListener {
+public final class ROIBar extends IcyToolbar implements ExtensionLoader.ExtensionLoaderListener, ActiveSequenceListener {
+    private static final Logger LOGGER = Logger.getLogger(ROIBar.class.getName());
+
     private @Nullable ROIDrawButton selected = null;
     private final ButtonGroup roiGroup = new ButtonGroup();
     private final ActionListener openClose;
@@ -58,24 +66,27 @@ public final class ROIBar extends IcyToolbar implements ExtensionLoader.Extensio
         return Integer.compare(ao1.nbPoints().ordinal(), ao2.nbPoints().ordinal());
     };
 
+    private static final @NonNull ROIBar INSTANCE = new ROIBar();
+
+    @Contract(pure = true)
+    public static @NonNull ROIBar getInstance() {
+        return INSTANCE;
+    }
+
     /**
-     * Creates a new tool bar; orientation defaults to <code>VERTICAL</code>.
+     * Creates a new toolbar; orientation defaults to <code>VERTICAL</code>.
      */
-    @SuppressWarnings("unchecked")
-    public ROIBar() {
+    private ROIBar() {
         super(VERTICAL, false);
 
         openClose = e -> {
             if (e.getSource() instanceof IcyToggleButton) {
                 if (selected == null || !selected.equals(e.getSource())) {
                     selected = (ROIDrawButton) e.getSource();
-                    if (selected != null)
-                        Icy.getMainInterface().changeROITool((Class<? extends PluginROI>) selected.getPluginROI().getPluginClass());
                 }
                 else if (selected.equals(e.getSource())) {
                     roiGroup.clearSelection();
                     selected = null;
-                    Icy.getMainInterface().changeROITool(null);
                 }
             }
         };
@@ -84,6 +95,7 @@ public final class ROIBar extends IcyToolbar implements ExtensionLoader.Extensio
             reloadPlugins();
 
         ExtensionLoader.addListener(this);
+        Icy.getMainInterface().addActiveSequenceListener(this);
     }
 
     private void reloadPlugins() {
@@ -103,7 +115,8 @@ public final class ROIBar extends IcyToolbar implements ExtensionLoader.Extensio
             final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(PluginROI.class);
             for (final PluginDescriptor plugin : plugins) {
                 if (!(plugin.isAnnotated(IcyROIPlugin.class))) {
-                    IcyLogger.warn(this.getClass(), "Plugin ROI [" + plugin.getClassName() + "] doesn't have 'IcyROIPlugin' annotation.");
+                    if (LOGGER.isLoggable(Level.WARNING))
+                        LOGGER.warning("Plugin ROI [" + plugin.getClassName() + "] doesn't have 'IcyROIPlugin' annotation.");
                     continue;
                 }
 
@@ -158,6 +171,7 @@ public final class ROIBar extends IcyToolbar implements ExtensionLoader.Extensio
                 final AbstractButton b = buttons.nextElement();
                 if (b instanceof IcyToggleButton)
                     b.addActionListener(openClose);
+                b.setEnabled(Icy.getMainInterface().getActiveSequence() != null);
             }
 
             ROIBar.this.revalidate();
@@ -167,5 +181,39 @@ public final class ROIBar extends IcyToolbar implements ExtensionLoader.Extensio
     @Override
     public void extensionLoaderChanged(final ExtensionLoader.ExtensionLoaderEvent e) {
         reloadPlugins();
+    }
+
+    @Contract(pure = true)
+    public @Nullable PluginDescriptor getROITool() {
+        if (selected == null)
+            return null;
+
+        return selected.getPluginROI();
+    }
+
+    public void unselectROITool() {
+        roiGroup.clearSelection();
+        selected = null;
+    }
+
+    @Override
+    public void sequenceActivated(final Sequence sequence) {
+        final Enumeration<AbstractButton> buttons = roiGroup.getElements();
+        while (buttons.hasMoreElements()) {
+            final AbstractButton b = buttons.nextElement();
+            b.setEnabled(sequence != null);
+        }
+    }
+
+    @Contract(pure = true)
+    @Override
+    public void sequenceDeactivated(final Sequence sequence) {
+        //
+    }
+
+    @Contract(pure = true)
+    @Override
+    public void activeSequenceChanged(final SequenceEvent event) {
+        //
     }
 }

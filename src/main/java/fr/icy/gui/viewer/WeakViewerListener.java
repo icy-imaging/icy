@@ -22,7 +22,7 @@ import fr.icy.common.listener.weak.WeakListener;
 /**
  * Weak listener wrapper for ViewerListener.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class WeakViewerListener extends WeakListener<ViewerListener> implements ViewerListener
 {

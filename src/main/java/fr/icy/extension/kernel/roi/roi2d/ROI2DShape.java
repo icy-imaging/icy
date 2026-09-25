@@ -61,7 +61,7 @@ import java.util.List;
 import java.util.*;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class ROI2DShape extends ROI2D implements Shape {
@@ -1617,7 +1617,7 @@ public abstract class ROI2DShape extends ROI2D implements Shape {
      *        source event
      */
     public void controlPointOverlayChanged(final OverlayEvent event) {
-        // we only mind about painter change from anchor...
+        // we only mind about painter change from anchor…
         if (event.getType() == OverlayEventType.PAINTER_CHANGED) {
             // we have a control point selected --> remove focus on ROI
             if (hasSelectedPoint())

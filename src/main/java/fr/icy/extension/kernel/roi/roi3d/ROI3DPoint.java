@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ import fr.icy.gui.GraphicsUtil;
 import fr.icy.gui.canvas.IcyCanvas;
 import fr.icy.gui.canvas.IcyCanvas2D;
 import fr.icy.gui.canvas.VtkCanvas;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.render.IcyVtkPanel;
 import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.OverlayEvent;
@@ -36,6 +36,7 @@ import fr.icy.model.overlay.anchor.Anchor3D;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.sequence.Sequence;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Node;
 import vtk.vtkActor;
 import vtk.vtkPolyDataMapper;
@@ -49,7 +50,7 @@ import java.awt.geom.Rectangle2D;
 /**
  * ROI 3D Point class.<br>
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI3DPoint extends ROI3DShape {
@@ -173,7 +174,7 @@ public class ROI3DPoint extends ROI3DShape {
 
             final Point3D pos = getPoint();
 
-            // actor can be accessed in canvas3d for rendering so we need to synchronize access
+            // actor can be accessed in Canvas3D for rendering so we need to synchronize access
             vtkPanel.lock();
             try {
                 // need to handle scaling on radius and position to keep a "round" sphere (else we obtain ellipsoid)
@@ -251,16 +252,15 @@ public class ROI3DPoint extends ROI3DShape {
         addPoint(this.position);
 
         // set icon
-        setIcon(SVGResource.ROI_POINT);
+        setIcon(IcySVG.ROI_POINT);
     }
 
     /**
      * Generic constructor for interactive mode
      *
-     * @param pt
-     *        5D point
+     * @param pt 5D point
      */
-    public ROI3DPoint(final Point5D pt) {
+    public ROI3DPoint(final @NonNull Point5D pt) {
         this(pt.toPoint3D());
     }
 
@@ -293,12 +293,11 @@ public class ROI3DPoint extends ROI3DShape {
     /**
      * Called when anchor overlay changed
      *
-     * @param event
-     *        Overlay event
+     * @param event Overlay event
      */
     @Override
-    public void controlPointOverlayChanged(final OverlayEvent event) {
-        // we only mind about painter change from anchor...
+    public void controlPointOverlayChanged(final @NonNull OverlayEvent event) {
+        // we only mind about painter change from anchor…
         if (event.getType() == OverlayEventType.PAINTER_CHANGED) {
             // here we want to have ROI focused when point is selected (special case for ROIPoint)
             // Stephane: not a good idea if we selected several ROI points as setFocused is *exclusive*
@@ -315,7 +314,7 @@ public class ROI3DPoint extends ROI3DShape {
      */
     @Override
     public boolean isOverEdge(final IcyCanvas canvas, final double x, final double y, final double z) {
-        // selected ? --> use control point isOver(..)
+        // selected ? --> use control point isOver(…)
         if (isSelected())
             return position.isOver(canvas, new Point3D.Double(x, y, z));
 
@@ -363,8 +362,7 @@ public class ROI3DPoint extends ROI3DShape {
     }
 
     /**
-     * @param object
-     *        roi changed
+     * @param object roi changed
      */
     @Override
     public void onChanged(final CollapsibleEvent object) {

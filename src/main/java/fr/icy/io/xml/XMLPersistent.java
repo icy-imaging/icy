@@ -20,7 +20,7 @@ package fr.icy.io.xml;
 import org.w3c.dom.Node;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface XMLPersistent
 {

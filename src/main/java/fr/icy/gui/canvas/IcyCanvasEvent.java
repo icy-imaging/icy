@@ -21,7 +21,7 @@ import fr.icy.common.event.CollapsibleEvent;
 import fr.icy.model.sequence.DimensionId;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class IcyCanvasEvent implements CollapsibleEvent
 {

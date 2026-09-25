@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,15 +24,15 @@ import fr.icy.model.roi.ROIDescriptor;
 import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.roi.ROIEvent.ROIEventType;
 import fr.icy.model.sequence.Sequence;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Opacity descriptor class (see {@link ROIDescriptor})
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-public class ROIOpacityDescriptor extends ROIDescriptor {
+public class ROIOpacityDescriptor extends ROIDescriptor<Float> {
     public static final String ID = "Opacity";
 
     public ROIOpacityDescriptor() {
@@ -45,21 +45,21 @@ public class ROIOpacityDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public boolean needRecompute(final @NotNull ROIEvent change) {
+    public boolean needRecompute(final @NonNull ROIEvent change) {
         return (change.getType() == ROIEventType.PROPERTY_CHANGED)
                 && (StringUtil.equals(change.getPropertyName(), ROI.PROPERTY_OPACITY));
     }
 
 
     @Override
-    public Object compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
-        return Float.valueOf(getOpacity(roi));
+    public Float compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
+        return getOpacity(roi);
     }
 
     /**
      * Returns ROI opacity
      */
-    public static float getOpacity(final ROI roi) {
+    public static @NonNull Float getOpacity(final ROI roi) {
         if (roi == null)
             return 1f;
 

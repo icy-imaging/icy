@@ -18,14 +18,13 @@
 
 package fr.icy.model.sequence;
 
+import fr.icy.common.string.StringUtil;
 import fr.icy.io.FileUtil;
 import fr.icy.io.xml.XMLPersistent;
+import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.lut.LUT;
 import fr.icy.model.overlay.Overlay;
 import fr.icy.model.roi.ROI;
-import fr.icy.system.logging.IcyLogger;
-import fr.icy.common.string.StringUtil;
-import fr.icy.io.xml.XMLUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -35,12 +34,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SequencePersistent implements XMLPersistent {
+    private static final Logger LOGGER = Logger.getLogger(SequencePersistent.class.getName());
+
     private final static String ID_META = "meta";
     private final static String ID_ROIS = "rois";
     private final static String ID_OVERLAYS = "overlays";
@@ -103,15 +106,12 @@ public class SequencePersistent implements XMLPersistent {
                 // backup the problematic file
                 final String backupName = FileUtil.backup(xmlFilename);
 
-                final String[] messages = new String[]{
-                        "Error while loading Sequence XML persistent data.",
-                        "The faulty file '" + xmlFilename + "' has been backuped as '" + backupName
-                };
+                final String message = "Error while loading Sequence XML persistent data.\r\nThe faulty file '" + xmlFilename + "' has been backup as '" + backupName + "'.";
 
                 if (exc != null)
-                    IcyLogger.error(SequencePersistent.class, exc, messages);
+                    LOGGER.log(Level.SEVERE, message, exc);
                 else
-                    IcyLogger.error(SequencePersistent.class, messages);
+                    LOGGER.severe(message);
 
                 return false;
             }
@@ -155,7 +155,7 @@ public class SequencePersistent implements XMLPersistent {
             result = false;
         if (!loadROIsFromXML(node))
             result = false;
-        // some overlays does not support persistence so we can ignore errors...
+        // some overlays does not support persistence so we can ignore errors…
         loadOverlaysFromXML(node);
         if (!loadLUTFromXML(node))
             result = false;
@@ -168,7 +168,7 @@ public class SequencePersistent implements XMLPersistent {
     private boolean loadMetaDataFromXML(final Node node) {
         final Node nodeMeta = XMLUtil.getElement(node, ID_META);
 
-        // no node --> nothing to load...
+        // no node --> nothing to load…
         if (nodeMeta == null)
             return true;
 
@@ -220,7 +220,7 @@ public class SequencePersistent implements XMLPersistent {
     private boolean loadROIsFromXML(final Node node) {
         final Node roisNode = XMLUtil.getElement(node, ID_ROIS);
 
-        // no node --> nothing to load...
+        // no node --> nothing to load…
         if (roisNode == null)
             return true;
 
@@ -238,7 +238,7 @@ public class SequencePersistent implements XMLPersistent {
     private boolean loadOverlaysFromXML(final Node node) {
         final Node overlaysNode = XMLUtil.getElement(node, ID_OVERLAYS);
 
-        // no node --> nothing to load...
+        // no node --> nothing to load…
         if (overlaysNode == null)
             return true;
 
@@ -256,7 +256,7 @@ public class SequencePersistent implements XMLPersistent {
     private boolean loadLUTFromXML(final Node node) {
         final Node nodeLut = XMLUtil.getElement(node, ID_LUT);
 
-        // no node --> nothing to load...
+        // no node --> nothing to load…
         if (nodeLut == null)
             return true;
 
@@ -388,8 +388,7 @@ public class SequencePersistent implements XMLPersistent {
     /**
      * Get XML data node identified by specified name
      *
-     * @param name
-     *        name of wanted node
+     * @param name name of wanted node
      */
     public Node getNode(final String name) {
         return XMLUtil.getChild(getRootNode(), name);
@@ -399,8 +398,7 @@ public class SequencePersistent implements XMLPersistent {
      * Create a new node with specified name and return it.<br>
      * If the node already exists the existing node is returned.
      *
-     * @param name
-     *        name of node to set in attached XML data
+     * @param name name of node to set in attached XML data
      */
     public Node setNode(final String name) {
         return XMLUtil.setElement(getRootNode(), name);

@@ -22,9 +22,9 @@ import java.awt.geom.Point2D;
 
 /**
  * Point4D class.<br>
- * Incomplete implementation (work in progress...)
+ * Incomplete implementation (work in progress…)
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class Point4D implements Cloneable
 {

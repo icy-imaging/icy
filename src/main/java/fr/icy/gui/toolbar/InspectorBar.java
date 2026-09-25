@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ package fr.icy.gui.toolbar;
 
 import fr.icy.gui.component.button.IcyToggleButton;
 import fr.icy.gui.toolbar.button.*;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -30,11 +30,10 @@ import java.util.Enumeration;
  * @author Thomas Musset
  */
 public final class InspectorBar extends IcyToolbar {
-    @Nullable
-    private IcyToggleButton selected = null;
+    private @Nullable IcyToggleButton selected = null;
 
     /**
-     * Creates a new tool bar; orientation defaults to <code>VERTICAL</code>.
+     * Creates a new toolbar; orientation defaults to <code>VERTICAL</code>.
      */
     public InspectorBar() {
         super(VERTICAL, false);

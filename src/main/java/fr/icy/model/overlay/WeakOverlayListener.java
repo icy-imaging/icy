@@ -22,7 +22,7 @@ import fr.icy.common.listener.weak.WeakListener;
 /**
  * Weak wrapper for OverlayListener.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class WeakOverlayListener extends WeakListener<OverlayListener> implements OverlayListener
 {

@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * Unit conversion utilities class.
  *
  * @author Thomas Provoost
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class UnitUtil {
@@ -63,7 +63,7 @@ public class UnitUtil {
      * 1024 --&gt; "1 KB"<br>
      * 1024*1000 --&gt; "1 MB"<br>
      * 1024*1000*1000 --&gt; "1 GB"<br>
-     * ...<br>
+     * …<br>
      */
     public static String getBytesString(final double value) {
         final double absValue = Math.abs(value);

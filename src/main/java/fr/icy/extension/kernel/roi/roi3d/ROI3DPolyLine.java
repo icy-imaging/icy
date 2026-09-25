@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -27,13 +27,14 @@ import fr.icy.common.geom.poly.Polyline3D;
 import fr.icy.common.string.StringUtil;
 import fr.icy.gui.canvas.IcyCanvas;
 import fr.icy.gui.canvas.VtkCanvas;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.render.IcyVtkPanel;
 import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.anchor.Anchor3D;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.sequence.Sequence;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import vtk.vtkTubeFilter;
@@ -46,7 +47,7 @@ import java.util.List;
 /**
  * 3D Polyline ROI
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI3DPolyLine extends ROI3DShape {
@@ -175,8 +176,7 @@ public class ROI3DPolyLine extends ROI3DShape {
     /**
      * Construct 3D polyline ROI
      *
-     * @param pt
-     *        source 3D point
+     * @param pt source 3D point
      */
     public ROI3DPolyLine(final Point3D pt) {
         super(new Polyline3D());
@@ -191,24 +191,22 @@ public class ROI3DPolyLine extends ROI3DShape {
         updateShape();
 
         // set icon
-        setIcon(SVGResource.ROI_POLYLINE);
+        setIcon(IcySVG.ROI_POLYLINE);
     }
 
     /**
      * Generic constructor for interactive mode
      *
-     * @param pt
-     *        source 5D point
+     * @param pt source 5D point
      */
-    public ROI3DPolyLine(final Point5D pt) {
+    public ROI3DPolyLine(final @NonNull Point5D pt) {
         this(pt.toPoint3D());
     }
 
     /**
      * Construct 3D polyline ROI
      *
-     * @param polyline
-     *        source polyline
+     * @param polyline source polyline
      */
     public ROI3DPolyLine(final Polyline3D polyline) {
         this(new Point3D.Double());
@@ -219,8 +217,7 @@ public class ROI3DPolyLine extends ROI3DShape {
     /**
      * Construct 3D polyline ROI
      *
-     * @param points
-     *        source 3D points list
+     * @param points source 3D points list
      */
     public ROI3DPolyLine(final List<Point3D> points) {
         this(new Point3D.Double());
@@ -255,10 +252,9 @@ public class ROI3DPolyLine extends ROI3DShape {
     /**
      * Set ROI from lst of points
      *
-     * @param pts
-     *        source 3D points list
+     * @param pts source 3D points list
      */
-    public void setPoints(final List<Point3D> pts) {
+    public void setPoints(final @NonNull List<Point3D> pts) {
         beginUpdate();
         try {
             removeAllPoint();
@@ -273,10 +269,9 @@ public class ROI3DPolyLine extends ROI3DShape {
     /**
      * Set ROI from shape
      *
-     * @param value
-     *        the source shape
+     * @param value the source shape
      */
-    public void setPolyline3D(final Polyline3D value) {
+    public void setPolyline3D(final @NonNull Polyline3D value) {
         beginUpdate();
         try {
             removeAllPoint();
@@ -314,18 +309,13 @@ public class ROI3DPolyLine extends ROI3DShape {
     /**
      * Draw (print) a 3D line into the given 2D BooleanMask
      *
-     * @param bounds2d
-     *        boolean mask bounds
-     * @param result
-     *        boolean mask array
-     * @param z
-     *        Z position
-     * @param p1
-     *        start 3D point of line
-     * @param p2
-     *        end 3D point of line
+     * @param bounds2d boolean mask bounds
+     * @param result   boolean mask array
+     * @param z        Z position
+     * @param p1       start 3D point of line
+     * @param p2       end 3D point of line
      */
-    public static void drawLine3DInBooleanMask2D(final Rectangle bounds2d, final boolean[] result, final int z, final Point3D p1, final Point3D p2) {
+    public static void drawLine3DInBooleanMask2D(final Rectangle bounds2d, final boolean[] result, final int z, final @NonNull Point3D p1, final @NonNull Point3D p2) {
         final Line2D l = new Line2D.Double(p1.getX(), p1.getY(), p2.getX(), p2.getY());
 
         // 2D intersection ?
@@ -472,9 +462,9 @@ public class ROI3DPolyLine extends ROI3DShape {
         if (!super.saveToXML(node))
             return false;
 
-        final Element dependances = XMLUtil.setElement(node, ID_POINTS);
+        final Element dependencies = XMLUtil.setElement(node, ID_POINTS);
         for (final Anchor3D pt : controlPoints)
-            pt.savePositionToXML(XMLUtil.addElement(dependances, ID_POINT));
+            pt.savePositionToXML(XMLUtil.addElement(dependencies, ID_POINT));
 
         return true;
     }

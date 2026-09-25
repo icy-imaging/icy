@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,16 +18,17 @@
 
 package fr.icy.io.xls;
 
-import fr.icy.system.logging.IcyLogger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * XLSX (excel) utilities class (create and write XLSX documents).
@@ -35,6 +36,8 @@ import java.util.Date;
  * @author Thomas Musset
  */
 public final class XLSXUtil {
+    private static final Logger LOGGER = Logger.getLogger(XLSXUtil.class.getName());
+
     public static final String FILE_EXTENSION = "xlsx";
     public static final String FILE_DOT_EXTENSION = "." + FILE_EXTENSION;
 
@@ -43,7 +46,7 @@ public final class XLSXUtil {
      * WARNING: do not forget to end by {@link #saveAndClose(Workbook, File)}
      * or {@link #saveAndClose(Workbook, String)}
      */
-    public static @NotNull Workbook createWorkbook() throws IOException {
+    public static @NonNull Workbook createWorkbook() throws IOException {
         return WorkbookFactory.create(true);
     }
 
@@ -52,7 +55,7 @@ public final class XLSXUtil {
      *
      * @throws FileNotFoundException if the file does not exist.
      */
-    public static @NotNull Workbook loadWorkbookForRead(final @NotNull File file) throws IOException {
+    public static @NonNull Workbook loadWorkbookForRead(final @NonNull File file) throws IOException {
         return WorkbookFactory.create(file, null, true);
     }
 
@@ -64,7 +67,7 @@ public final class XLSXUtil {
      *
      * @throws FileNotFoundException if the file does not exist.
      */
-    public static @NotNull Workbook loadWorkbookForWrite(final @NotNull File file) throws IOException {
+    public static @NonNull Workbook loadWorkbookForWrite(final @NonNull File file) throws IOException {
         return WorkbookFactory.create(new FileInputStream(file), null);
     }
 
@@ -72,7 +75,7 @@ public final class XLSXUtil {
      * Saves and closes the specified Workbook.<br>
      * Create the file if does not exists.
      */
-    public static void saveAndClose(final @NotNull Workbook workbook, final @NotNull String path) throws IOException {
+    public static void saveAndClose(final @NonNull Workbook workbook, final @NonNull String path) throws IOException {
         final FileOutputStream os = new FileOutputStream(path);
         workbook.write(os);
         os.close();
@@ -83,9 +86,9 @@ public final class XLSXUtil {
      * Saves and closes the specified Workbook.<br>
      * Create the file if does not exists.
      */
-    public static void saveAndClose(final @NotNull Workbook workbook, final @NotNull File file) throws IOException {
+    public static void saveAndClose(final @NonNull Workbook workbook, final @NonNull File file) throws IOException {
         if (!file.getName().endsWith(FILE_DOT_EXTENSION))
-            IcyLogger.warn(XLSXUtil.class, "Saving workbook in non-xlsx file.");
+            LOGGER.warning("Saving workbook in non-xlsx file.");
         final FileOutputStream os = new FileOutputStream(file);
         workbook.write(os);
         os.close();
@@ -98,7 +101,7 @@ public final class XLSXUtil {
      *
      * @see #createNewPage(Workbook, String)
      */
-    public static @NotNull Sheet getPage(final @NotNull Workbook workbook, final @NotNull String title) {
+    public static @NonNull Sheet getPage(final @NonNull Workbook workbook, final @NonNull String title) {
         Sheet result = workbook.getSheet(title);
 
         if (result == null)
@@ -113,7 +116,7 @@ public final class XLSXUtil {
      *
      * @see #getPage(Workbook, String)
      */
-    public static @NotNull Sheet createNewPage(final @NotNull Workbook workbook, final @NotNull String title) {
+    public static @NonNull Sheet createNewPage(final @NonNull Workbook workbook, final @NonNull String title) {
         if (workbook.getSheet(title) == null)
             return workbook.createSheet(title);
 
@@ -131,7 +134,7 @@ public final class XLSXUtil {
     /**
      * Clear the specified workbook (remove all pages).
      */
-    public static void clear(final @NotNull Workbook workbook) {
+    public static void clear(final @NonNull Workbook workbook) {
         for (final Sheet sheet : workbook)
             workbook.removeSheetAt(workbook.getSheetIndex(sheet));
     }
@@ -139,7 +142,7 @@ public final class XLSXUtil {
     /**
      * Clear the specified page (remove all rows).
      */
-    public static void clearPage(final @NotNull Sheet sheet) {
+    public static void clearPage(final @NonNull Sheet sheet) {
         for (final Row row : sheet)
             sheet.removeRow(row);
     }
@@ -147,7 +150,7 @@ public final class XLSXUtil {
     /**
      * Sets name of specified Sheet.
      */
-    public static void setPageName(final @NotNull Sheet sheet, final @NotNull String name) {
+    public static void setPageName(final @NonNull Sheet sheet, final @NonNull String name) {
         final Workbook workbook = sheet.getWorkbook();
         workbook.setSheetName(workbook.getSheetIndex(sheet), name);
     }
@@ -157,7 +160,7 @@ public final class XLSXUtil {
      *
      * @return the {@link Cell} or <code>null</code> if it fails creating it.
      */
-    private static @Nullable Cell getOrCreateCell(final @NotNull Sheet sheet, final int x, final int y) {
+    private static @Nullable Cell getOrCreateCell(final @NonNull Sheet sheet, final int x, final int y) {
         Row row = sheet.getRow(y);
         Cell cell;
         if (row != null) {
@@ -176,21 +179,21 @@ public final class XLSXUtil {
     /**
      * Change the width of the given column.
      */
-    public static void setColumnWidth(final @NotNull Sheet sheet, final int col, final int width) {
+    public static void setColumnWidth(final @NonNull Sheet sheet, final int col, final int width) {
         sheet.setColumnWidth(col, width);
     }
 
     /**
      * Make the width automatic of the given column.
      */
-    public static void setColumnAutoWidth(final @NotNull Sheet sheet, final int col) {
+    public static void setColumnAutoWidth(final @NonNull Sheet sheet, final int col) {
         sheet.autoSizeColumn(col);
     }
 
     /**
      * Merge the given cells coordinates (y1, y2, x1, x2).
      */
-    public static void mergeCells(final @NotNull Sheet sheet, final int firstRow, final int lastRow, final int firstCol, final int lastCol) {
+    public static void mergeCells(final @NonNull Sheet sheet, final int firstRow, final int lastRow, final int firstCol, final int lastCol) {
         sheet.addMergedRegion(new CellRangeAddress(firstRow, lastRow, firstCol, lastCol));
     }
 
@@ -199,7 +202,7 @@ public final class XLSXUtil {
      *
      * @param background Apply default style if set to null.
      */
-    private static void applyBackground(final @NotNull Cell cell, final @Nullable Color background) {
+    private static void applyBackground(final @NonNull Cell cell, final @Nullable Color background) {
         if (background != null) {
             final CellStyle style = cell.getCellStyle();
             style.setFillBackgroundColor(background);
@@ -213,7 +216,7 @@ public final class XLSXUtil {
      * Sets cell content in string format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellString(final @NotNull Sheet sheet, final int x, final int y, final @NotNull String value, final @Nullable Color background) {
+    public static boolean setCellString(final @NonNull Sheet sheet, final int x, final int y, final @NonNull String value, final @Nullable Color background) {
         final Cell cell = getOrCreateCell(sheet, x, y);
         if (cell != null) {
             cell.setCellValue(value);
@@ -228,7 +231,7 @@ public final class XLSXUtil {
      * Sets cell content in string format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellString(final @NotNull Sheet sheet, final int x, final int y, final @NotNull String value) {
+    public static boolean setCellString(final @NonNull Sheet sheet, final int x, final int y, final @NonNull String value) {
         return setCellString(sheet, x, y, value, null);
     }
 
@@ -236,7 +239,7 @@ public final class XLSXUtil {
      * Sets cell content in long format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Long value, final @Nullable Color background) {
+    public static boolean setCellNumber(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Long value, final @Nullable Color background) {
         final Cell cell = getOrCreateCell(sheet, x, y);
         if (cell != null) {
             cell.setCellValue(value);
@@ -251,7 +254,7 @@ public final class XLSXUtil {
      * Sets cell content in long format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Long value) {
+    public static boolean setCellNumber(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Long value) {
         return setCellNumber(sheet, x, y, value, null);
     }
 
@@ -259,7 +262,7 @@ public final class XLSXUtil {
      * Sets cell content in integer format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Integer value, final @Nullable Color background) {
+    public static boolean setCellNumber(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Integer value, final @Nullable Color background) {
         final Cell cell = getOrCreateCell(sheet, x, y);
         if (cell != null) {
             cell.setCellValue(value);
@@ -274,7 +277,7 @@ public final class XLSXUtil {
      * Sets cell content in integer format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Integer value) {
+    public static boolean setCellNumber(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Integer value) {
         return setCellNumber(sheet, x, y, value, null);
     }
 
@@ -282,7 +285,7 @@ public final class XLSXUtil {
      * Sets cell content in short format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Short value, final @Nullable Color background) {
+    public static boolean setCellNumber(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Short value, final @Nullable Color background) {
         final Cell cell = getOrCreateCell(sheet, x, y);
         if (cell != null) {
             cell.setCellValue(value);
@@ -297,7 +300,7 @@ public final class XLSXUtil {
      * Sets cell content in short format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Short value) {
+    public static boolean setCellNumber(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Short value) {
         return setCellNumber(sheet, x, y, value, null);
     }
 
@@ -305,7 +308,7 @@ public final class XLSXUtil {
      * Sets cell content in double format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Double value, final @Nullable Color background) {
+    public static boolean setCellNumber(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Double value, final @Nullable Color background) {
         final Cell cell = getOrCreateCell(sheet, x, y);
         if (cell != null) {
             cell.setCellValue(value);
@@ -320,7 +323,7 @@ public final class XLSXUtil {
      * Sets cell content in double format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Double value) {
+    public static boolean setCellNumber(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Double value) {
         return setCellNumber(sheet, x, y, value, null);
     }
 
@@ -328,7 +331,7 @@ public final class XLSXUtil {
      * Sets cell content in float format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Float value, final @Nullable Color background) {
+    public static boolean setCellNumber(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Float value, final @Nullable Color background) {
         final Cell cell = getOrCreateCell(sheet, x, y);
         if (cell != null) {
             cell.setCellValue(value);
@@ -343,7 +346,7 @@ public final class XLSXUtil {
      * Sets cell content in float format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellNumber(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Float value) {
+    public static boolean setCellNumber(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Float value) {
         return setCellNumber(sheet, x, y, value, null);
     }
 
@@ -351,7 +354,7 @@ public final class XLSXUtil {
      * Sets cell content in date format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellDate(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Date value, final @Nullable Color background) {
+    public static boolean setCellDate(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Date value, final @Nullable Color background) {
         final Cell cell = getOrCreateCell(sheet, x, y);
         if (cell != null) {
             cell.setCellValue(value);
@@ -366,7 +369,7 @@ public final class XLSXUtil {
      * Sets cell content in date format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellDate(final @NotNull Sheet sheet, final int x, final int y, final @NotNull Date value) {
+    public static boolean setCellDate(final @NonNull Sheet sheet, final int x, final int y, final @NonNull Date value) {
         return setCellDate(sheet, x, y, value, null);
     }
 
@@ -374,7 +377,7 @@ public final class XLSXUtil {
      * Sets cell content in date format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellFormula(final @NotNull Sheet sheet, final int x, final int y, final @NotNull String value, final @Nullable Color background) {
+    public static boolean setCellFormula(final @NonNull Sheet sheet, final int x, final int y, final @NonNull String value, final @Nullable Color background) {
         final Cell cell = getOrCreateCell(sheet, x, y);
         if (cell != null) {
             cell.setCellFormula(value);
@@ -389,7 +392,7 @@ public final class XLSXUtil {
      * Sets cell content in date format of specified Sheet.<br>
      * Returns <code>false</code> if the operation failed.
      */
-    public static boolean setCellFormula(final @NotNull Sheet sheet, final int x, final int y, final @NotNull String value) {
+    public static boolean setCellFormula(final @NonNull Sheet sheet, final int x, final int y, final @NonNull String value) {
         return setCellFormula(sheet, x, y, value, null);
     }
 
@@ -398,7 +401,7 @@ public final class XLSXUtil {
      *
      * @return <code>true</code> if the operation succeed.
      */
-    private static boolean readCSVLines(final @NotNull Sheet sheet, final @NotNull BufferedReader reader, final @NotNull String separator) throws InterruptedException {
+    private static boolean readCSVLines(final @NonNull Sheet sheet, final @NonNull BufferedReader reader, final @NonNull String separator) throws InterruptedException {
         try {
             String line;
             int y = 0;
@@ -408,7 +411,7 @@ public final class XLSXUtil {
                 // use tab as separator
                 for (final String col : line.split(separator)) {
                     if (!setCellString(sheet, x, y, col))
-                        IcyLogger.warn(XLSXUtil.class, String.format("Cannot write in XLSX cell at position (%d, %d)", x, y));
+                        LOGGER.warning(String.format("Cannot write in XLSX cell at position (%d, %d)", x, y));
                     x++;
                 }
 
@@ -421,7 +424,7 @@ public final class XLSXUtil {
             return true;
         }
         catch (final IOException e) {
-            IcyLogger.error(XLSXUtil.class, e, e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             return false;
         }
     }
@@ -432,7 +435,7 @@ public final class XLSXUtil {
      * @param separator Must be a regex string, like "\t" for tabulation.
      * @return <code>true</code> if the operation succeed.
      */
-    public static boolean setFromCSV(final @NotNull Sheet sheet, final @NotNull String csvContent, final @NotNull String separator) throws InterruptedException {
+    public static boolean setFromCSV(final @NonNull Sheet sheet, final @NonNull String csvContent, final @NonNull String separator) throws InterruptedException {
         return readCSVLines(sheet, new BufferedReader(new StringReader(csvContent)), separator);
     }
 
@@ -441,7 +444,7 @@ public final class XLSXUtil {
      *
      * @return <code>true</code> if the operation succeed.
      */
-    public static boolean setFromCSV(final @NotNull Sheet sheet, final @NotNull String csvContent) throws InterruptedException {
+    public static boolean setFromCSV(final @NonNull Sheet sheet, final @NonNull String csvContent) throws InterruptedException {
         return setFromCSV(sheet, csvContent, "\t");
     }
 
@@ -451,9 +454,9 @@ public final class XLSXUtil {
      * @param separator Must be a regex string, like "\t" for tabulation.
      * @return <code>true</code> if the operation succeed.
      */
-    public static boolean setFromCSVFile(final @NotNull Sheet sheet, final @NotNull File file, final @NotNull String separator) throws InterruptedException {
+    public static boolean setFromCSVFile(final @NonNull Sheet sheet, final @NonNull File file, final @NonNull String separator) throws InterruptedException {
         if (!file.exists() || !file.isFile() || !file.canRead()) {
-            IcyLogger.error(XLSXUtil.class, String.format("Cannot read CSV file: %s", file.getAbsolutePath()));
+            LOGGER.severe(String.format("Cannot read CSV file: %s", file.getAbsolutePath()));
             return false;
         }
 
@@ -463,7 +466,7 @@ public final class XLSXUtil {
             return readCSVLines(sheet, reader, separator);
         }
         catch (final IOException e) {
-            IcyLogger.error(XLSXUtil.class, e, e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             return false;
         }
     }
@@ -473,7 +476,7 @@ public final class XLSXUtil {
      *
      * @return <code>true</code> if the operation succeed.
      */
-    public static boolean setFromCSVFile(final @NotNull Sheet sheet, final @NotNull File file) throws InterruptedException {
+    public static boolean setFromCSVFile(final @NonNull Sheet sheet, final @NonNull File file) throws InterruptedException {
         return setFromCSVFile(sheet, file, "\t");
     }
 }

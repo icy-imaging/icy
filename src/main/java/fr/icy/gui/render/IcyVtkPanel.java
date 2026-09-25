@@ -31,7 +31,7 @@ import java.awt.event.*;
 /**
  * Icy custom VTK panel used for VTK rendering.
  *
- * @author stephane dallongeville
+ * @author Stéphane Dallongeville
  */
 public class IcyVtkPanel extends VtkJoglPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, Runnable {
     private enum SlicerPickState {

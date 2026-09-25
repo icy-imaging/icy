@@ -26,7 +26,7 @@ import fr.icy.common.geom.rectangle.Rectangle5D;
 /**
  * Size X ROI descriptor class (see {@link ROIDescriptor})
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ROISizeXDescriptor extends ROIDescriptor
 {

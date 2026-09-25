@@ -26,7 +26,7 @@ import java.util.EventListener;
  * Global {@link Plugin} listener class.
  * Used to listen start and end event for Plugin.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface GlobalPluginListener extends EventListener
 {

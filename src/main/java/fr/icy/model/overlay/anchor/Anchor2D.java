@@ -48,7 +48,7 @@ import java.util.List;
 /**
  * Anchor2D class, used for 2D point control.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class Anchor2D extends Overlay implements VtkPainter, Runnable {

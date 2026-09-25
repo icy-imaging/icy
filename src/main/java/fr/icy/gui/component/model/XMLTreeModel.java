@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,39 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.model;
 
 import fr.icy.common.string.StringUtil;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.jetbrains.annotations.Contract;
+import org.w3c.dom.*;
 
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
-public class XMLTreeModel implements TreeModel
-{
-    public static class XMLAdapterNode
-    {
+public class XMLTreeModel implements TreeModel {
+    public static class XMLAdapterNode {
         public Node node;
 
         /**
          * Creates a new instance of the XMLAdapterNode class
          */
-        public XMLAdapterNode(Node node)
-        {
+        @Contract(pure = true)
+        public XMLAdapterNode(final Node node) {
             super();
 
             this.node = node;
@@ -56,12 +51,10 @@ public class XMLTreeModel implements TreeModel
         /**
          * Return all children
          */
-        public List<Node> getChildren()
-        {
-            final List<Node> result = new ArrayList<Node>();
+        public List<Node> getChildren() {
+            final List<Node> result = new ArrayList<>();
 
-            if (node.hasAttributes())
-            {
+            if (node.hasAttributes()) {
                 final NamedNodeMap attributes = node.getAttributes();
                 final int count = attributes.getLength();
 
@@ -72,8 +65,7 @@ public class XMLTreeModel implements TreeModel
             final NodeList nodes = node.getChildNodes();
             final int count = nodes.getLength();
 
-            for (int i = 0; i < count; i++)
-            {
+            for (int i = 0; i < count; i++) {
                 final Node node = nodes.item(i);
 
                 if (node instanceof Element)
@@ -85,17 +77,14 @@ public class XMLTreeModel implements TreeModel
 
         /**
          * Return index of child in this node.
-         * 
-         * @param child
-         *        The child to look for
+         *
+         * @param child The child to look for
          * @return index of child, -1 if not present (error)
          */
-        public int index(XMLAdapterNode child)
-        {
+        public int index(final XMLAdapterNode child) {
             int result = 0;
 
-            for (Node node : getChildren())
-            {
+            for (final Node node : getChildren()) {
                 if (child.node == node)
                     return result;
 
@@ -108,13 +97,11 @@ public class XMLTreeModel implements TreeModel
         /**
          * Returns an adapter node given a valid index found through
          * the method: public int index(XMLAdapterNode child)
-         * 
-         * @param index
-         *        find this by calling index(XMLAdapterNode)
+         *
+         * @param index find this by calling index(XMLAdapterNode)
          * @return the desired child
          */
-        public XMLAdapterNode child(int index)
-        {
+        public XMLAdapterNode child(final int index) {
             final Node n = getChildren().get(index);
 
             if (n == null)
@@ -125,43 +112,38 @@ public class XMLTreeModel implements TreeModel
 
         /**
          * Return the number of element children for this element/node
-         * 
+         *
          * @return int number of element children
          */
-        public int childCount()
-        {
+        public int childCount() {
             return getChildren().size();
         }
 
         /**
          * Return the value of this node from its sub text nodes
          */
-        protected String getValue()
-        {
+        protected String getValue() {
             final NodeList nodes = node.getChildNodes();
             final int count = nodes.getLength();
-            String result = "";
+            final StringBuilder result = new StringBuilder();
 
-            for (int i = 0; i < count; i++)
-            {
+            for (int i = 0; i < count; i++) {
                 final Node node = nodes.item(i);
 
                 // text node
-                if (!(node instanceof Element))
-                {
+                if (!(node instanceof Element)) {
                     final String value = node.getNodeValue();
 
                     if ((value != null) && !StringUtil.equals(value, "null"))
-                        result += value + " ";
+                        result.append(value).append(" ");
                 }
             }
 
-            return result.trim();
+            return result.toString().trim();
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             final String nodeName = node.getNodeName();
             final String nodeValue = node.getNodeValue();
 
@@ -179,8 +161,7 @@ public class XMLTreeModel implements TreeModel
      */
     protected EventListenerList listeners = new EventListenerList();
 
-    public XMLTreeModel(Document doc)
-    {
+    public XMLTreeModel(final Document doc) {
         super();
 
         if (doc == null)
@@ -190,8 +171,7 @@ public class XMLTreeModel implements TreeModel
     }
 
     @Override
-    public Object getRoot()
-    {
+    public Object getRoot() {
         if (document.getDocumentElement() == null)
             return null;
 
@@ -199,32 +179,27 @@ public class XMLTreeModel implements TreeModel
     }
 
     @Override
-    public Object getChild(Object parent, int index)
-    {
+    public Object getChild(final Object parent, final int index) {
         return ((XMLAdapterNode) parent).child(index);
     }
 
     @Override
-    public int getIndexOfChild(Object parent, Object child)
-    {
+    public int getIndexOfChild(final Object parent, final Object child) {
         return ((XMLAdapterNode) parent).index((XMLAdapterNode) child);
     }
 
     @Override
-    public int getChildCount(Object parent)
-    {
+    public int getChildCount(final Object parent) {
         return ((XMLAdapterNode) parent).childCount();
     }
 
     @Override
-    public boolean isLeaf(Object node)
-    {
+    public boolean isLeaf(final Object node) {
         return ((XMLAdapterNode) node).childCount() == 0;
     }
 
     @Override
-    public void valueForPathChanged(TreePath path, Object newValue)
-    {
+    public void valueForPathChanged(final TreePath path, final Object newValue) {
         // ignore here
     }
 
@@ -235,51 +210,43 @@ public class XMLTreeModel implements TreeModel
 
     /**
      * Adds a listener for the TreeModelEvent posted after the tree changes.
-     * 
+     *
+     * @param l the listener to add
      * @see #removeTreeModelListener
-     * @param l
-     *        the listener to add
      */
     @Override
-    public void addTreeModelListener(TreeModelListener l)
-    {
+    public void addTreeModelListener(final TreeModelListener l) {
         listeners.add(TreeModelListener.class, l);
     }
 
     /**
      * Removes a listener previously added with <B>addTreeModelListener()</B>.
-     * 
+     *
+     * @param l the listener to remove
      * @see #addTreeModelListener
-     * @param l
-     *        the listener to remove
      */
     @Override
-    public void removeTreeModelListener(TreeModelListener l)
-    {
+    public void removeTreeModelListener(final TreeModelListener l) {
         listeners.remove(TreeModelListener.class, l);
     }
 
-    public void fireTreeNodesChanged(TreeModelEvent e)
-    {
-        for (TreeModelListener listener : listeners.getListeners(TreeModelListener.class))
+    public void fireTreeNodesChanged(final TreeModelEvent e) {
+        for (final TreeModelListener listener : listeners.getListeners(TreeModelListener.class))
             listener.treeNodesChanged(e);
     }
 
-    public void fireTreeNodesInserted(TreeModelEvent e)
-    {
-        for (TreeModelListener listener : listeners.getListeners(TreeModelListener.class))
+    public void fireTreeNodesInserted(final TreeModelEvent e) {
+        for (final TreeModelListener listener : listeners.getListeners(TreeModelListener.class))
             listener.treeNodesInserted(e);
     }
 
-    public void fireTreeNodesRemoved(TreeModelEvent e)
-    {
-        for (TreeModelListener listener : listeners.getListeners(TreeModelListener.class))
+    public void fireTreeNodesRemoved(final TreeModelEvent e) {
+        for (final TreeModelListener listener : listeners.getListeners(TreeModelListener.class))
             listener.treeNodesRemoved(e);
     }
 
-    public void fireTreeStructureChanged(TreeModelEvent e)
-    {
-        for (TreeModelListener listener : listeners.getListeners(TreeModelListener.class))
+    public void fireTreeStructureChanged(final TreeModelEvent e) {
+        for (final TreeModelListener listener : listeners.getListeners(TreeModelListener.class))
             listener.treeStructureChanged(e);
     }
 }

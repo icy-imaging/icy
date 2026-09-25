@@ -50,9 +50,11 @@ import fr.icy.model.sequence.SequencePrefetcher;
 import fr.icy.network.NetworkUtil;
 import fr.icy.network.update.IcyUpdater;
 import fr.icy.network.update.Updater;
+import fr.icy.shared.logging.CustomLevel;
+import fr.icy.shared.logging.LogConfig;
+import fr.icy.shared.logging.LogManager;
 import fr.icy.system.*;
 import fr.icy.system.audit.Audit;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.os.AppleUtil;
 import fr.icy.system.preferences.ApplicationPreferences;
 import fr.icy.system.preferences.GeneralPreferences;
@@ -62,7 +64,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbookFactory;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbookFactory;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import vtk.vtkNativeLibrary;
 import vtk.vtkVersion;
 
@@ -76,6 +78,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The Icy class serves as the central entry point for the application. It includes various
@@ -87,13 +91,15 @@ import java.util.List;
  * @author Thomas Musset
  */
 public final class Icy {
+    private static final Logger LOGGER = Logger.getLogger(Icy.class.getName());
+
     public static final String LIB_PATH = "lib";
     public static final int EXIT_FORCE_DELAY = 3000;
 
     /**
      * Icy Version
      */
-    public static final Version VERSION = new Version(3, 0, 0, Version.DevelopmentStage.ALPHA, 7, true);
+    public static final Version VERSION = new Version(3, 0, 0, Version.DevelopmentStage.ALPHA, 8, true);
 
     /**
      * Main interface
@@ -159,8 +165,16 @@ public final class Icy {
     /**
      * @param args Received from the command line.
      */
-    public static void main(final String[] args) {
-        System.setProperty("log4j.skipJansi", "false");
+    public static void main(final String[] args) throws IOException {
+        LogManager.init(LogConfig.builder()
+                .consoleEnabled(true)
+                .consoleLevel(CustomLevel.DEBUG)
+                .logFile("%h/.icy/icy_%g.log")
+                .fileLevel(Level.WARNING)
+                .maxFileBytes(10 * 1024 * 1024)
+                .fileCount(5)
+                .build()
+        );
 
         boolean headless = false;
 
@@ -176,20 +190,8 @@ public final class Icy {
             fatalError(e, true);
         }
 
-        // Clear log file
-        final File logFile = new File(UserUtil.getIcyHomeDirectory(), "icy.log");
-        if (!logFile.exists())
-            FileUtil.createFile(logFile);
-        else if (logFile.isFile()) {
-            FileUtil.delete(logFile, false);
-            FileUtil.createFile(logFile);
-        }
-
-        IcyLogger.setConsoleLevel(IcyLogger.TRACE);
-        IcyLogger.setGUILevel(IcyLogger.ERROR);
-
         try {
-            IcyLogger.info(Icy.class, "Initializing...");
+            LOGGER.info("Initializing…");
 
             // handle arguments (must be the first thing to do)
             headless = handleAppArgs(args);
@@ -217,7 +219,7 @@ public final class Icy {
                     ThreadUtil.invokeNow(confirmer);
 
                     if (!confirmer.getResult()) {
-                        IcyLogger.info(Icy.class, "Exiting...");
+                        LOGGER.info("Exiting…");
                         // save preferences
                         IcyPreferences.save();
                         // and quit
@@ -238,7 +240,7 @@ public final class Icy {
             // prepare splashScreen (ok to create it here as we are not yet in substance laf)
             //splashScreen = new SplashScreenFrame();
 
-            // It's important to initialize AWT now (with InvokeNow(...) for instance) to avoid
+            // It's important to initialize AWT now (with InvokeNow(…) for instance) to avoid
             // the JVM deadlock bug (id: 5104239). It happen when the AWT thread is initialized
             // while others threads load some new library with ClassLoader.loadLibrary
 
@@ -297,7 +299,7 @@ public final class Icy {
         }
         else {
             if (ExtensionLoader.getExtensions().isEmpty()) {
-                IcyLogger.fatal(Icy.class, "No extensions were found. Exiting...");
+                LOGGER.severe("No extensions were found. Exiting…");
                 exit(false);
             }
 
@@ -320,22 +322,23 @@ public final class Icy {
         IcyExceptionHandler.init();
 
         // show general informations
-        IcyLogger.info(Icy.class, String.format("%s %s (%d bit)", SystemUtil.getJavaName(), SystemUtil.getJavaVersion(), SystemUtil.getJavaArchDataModel()));
-        IcyLogger.info(Icy.class, String.format("Running on %s %s (%s)", SystemUtil.getOSName(), SystemUtil.getOSVersion(), SystemUtil.getOSArch()));
-        IcyLogger.info(Icy.class, String.format("System total memory: %s", UnitUtil.getBytesString(SystemUtil.getTotalMemory())));
-        IcyLogger.info(Icy.class, String.format("System available memory: %s", UnitUtil.getBytesString(SystemUtil.getFreeMemory())));
-        IcyLogger.info(Icy.class, String.format("Max Java memory: %s", UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())));
-        IcyLogger.info(Icy.class, String.format("MMJ version: %d", MMJUtil.getMMJVersion()));
+        LOGGER.info(String.format("%s %s (%d bit)", SystemUtil.getJavaName(), SystemUtil.getJavaVersion(), SystemUtil.getJavaArchDataModel()));
+        LOGGER.info(String.format("Running on %s %s (%s)", SystemUtil.getOSName(), SystemUtil.getOSVersion(), SystemUtil.getOSArch()));
+        LOGGER.info(String.format("System total memory: %s", UnitUtil.getBytesString(SystemUtil.getTotalMemory())));
+        LOGGER.info(String.format("System available memory: %s", UnitUtil.getBytesString(SystemUtil.getFreeMemory())));
+        LOGGER.info(String.format("Max Java memory: %s", UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())));
+        if (LOGGER.isLoggable(CustomLevel.DEBUG))
+            LOGGER.log(CustomLevel.DEBUG, String.format("MMJ version: %d", MMJUtil.getMMJVersion()));
 
         if (headless)
-            IcyLogger.info(Icy.class, "Headless mode");
+            LOGGER.info("Headless mode");
 
         // prepare native library files (need preferences init)
         new Thread(Icy::nativeLibrariesInit, "Initializer: VTK").start();
 
         // image cache disabled from command line ?
         if (isCacheDisabled())
-            IcyLogger.info(Icy.class, "Image cache is disabled.");
+            LOGGER.info("Image cache is disabled.");
 
             // virtual mode enabled ? --> initialize image cache
         else if (GeneralPreferences.getVirtualMode())
@@ -389,10 +392,10 @@ public final class Icy {
         //SystemUtil.setProperty("jogl.verbose", "TRUE");
         //SystemUtil.setProperty("jogl.debug", "TRUE");
 
-        IcyLogger.info(Icy.class, String.format("Icy v%s started", VERSION.toShortString()));
+        LOGGER.info(String.format("Icy v%s started", VERSION.toShortString()));
 
         if (ExtensionLoader.getExtensions().isEmpty()) {
-            IcyLogger.error(Icy.class, "No extensions were found. You will not be able to use Icy properly.");
+            LOGGER.severe("No extensions were found. You will not be able to use Icy properly.");
             if (!headless)
                 JOptionPane.showMessageDialog(getMainInterface().getMainFrame(), new String[]{"No extensions were found.", "You will not be able to use Icy properly."}, "No extension found", JOptionPane.ERROR_MESSAGE);
         }
@@ -404,7 +407,7 @@ public final class Icy {
         if (startupImage != null && !startupImage.isBlank())
             Icy.getMainInterface().addSequence(Loader.loadSequence(FileUtil.getGenericPath(startupImage), 0, false));
 
-        // wait while updates are occurring before starting command line plugin...
+        // wait while updates are occurring before starting command line plugin…
         while (PluginUpdater.isCheckingForUpdate() || PluginInstaller.isProcessing())
             ThreadUtil.sleep(1);
 
@@ -414,20 +417,20 @@ public final class Icy {
             final PluginDescriptor plugin = ExtensionLoader.getPlugin(startupPluginName);
 
             if (plugin == null) {
-                IcyLogger.error(Icy.class, String.format("Could not launch plugin '%s': the plugin was not found.", startupPluginName));
-                IcyLogger.info(Icy.class, "Be sure you correctly wrote the complete class name and respected the case.");
-                IcyLogger.info(Icy.class, "Ex: plugins.mydevid.analysis.MyPluginClass");
+                LOGGER.severe(String.format("Could not launch plugin '%s': the plugin was not found.", startupPluginName));
+                LOGGER.severe("Be sure you correctly wrote the complete class name and respected the case.");
+                LOGGER.severe("Ex: plugins.mydevid.analysis.MyPluginClass");
             }
             else
                 startupPlugin = PluginLauncher.start(plugin);
         }
 
-        // headless mode ? we can exit now...
+        // headless mode ? we can exit now…
         if (headless && !noHLExit)
             exit(false);
     }
 
-    private static boolean handleAppArgs(final String @NotNull [] args) {
+    private static boolean handleAppArgs(final String @NonNull [] args) {
         final List<String> pluginArgsList = new ArrayList<>();
 
         startupImage = null;
@@ -464,7 +467,7 @@ public final class Icy {
             else if (arg.equalsIgnoreCase("--execute") || arg.equalsIgnoreCase("-x"))
                 execute = true;
             else if (arg.trim().equalsIgnoreCase(Updater.ARG_UPDATE) || arg.trim().equalsIgnoreCase(Updater.ARG_NOSTART))
-                IcyLogger.error(Icy.class, "Wrong parameter: " + arg);
+                LOGGER.severe("Wrong parameter: " + arg);
                 // assume image name ?
             else if (!arg.trim().isBlank())
                 startupImage = arg;
@@ -481,7 +484,7 @@ public final class Icy {
         if ((ApplicationPreferences.getMaxMemoryMB() <= 128) && (ApplicationPreferences.getMaxMemoryMBLimit() > 256)) {
             final String text = "Your maximum memory setting is low, you should increase it in Preferences.";
 
-            IcyLogger.warn(Icy.class, text);
+            LOGGER.warning(text);
 
             if (!Icy.getMainInterface().isHeadLess())
                 new ToolTipFrame("<html>" + text + "</html>", 15, "lowMemoryTip");
@@ -549,7 +552,7 @@ public final class Icy {
         //splashScreen.dispose();
 
         // show error in console
-        IcyLogger.fatal(Icy.class, t, t.getLocalizedMessage());
+        LOGGER.log(Level.SEVERE, t.getLocalizedMessage(), t);
         // and show error in dialog if not headless
         if (!headless) {
             JOptionPane.showMessageDialog(
@@ -607,7 +610,7 @@ public final class Icy {
 
         if (Icy.getMainInterface().isHeadLess()) {
             // just display this message
-            IcyLogger.info(Icy.class, mess);
+            LOGGER.info(mess);
         }
         else {
             new AnnounceFrame(mess, "Restart Now", () -> {
@@ -674,7 +677,7 @@ public final class Icy {
             // mark the application as exiting
             exiting = true;
 
-            IcyLogger.info(Icy.class, "Exiting...");
+            LOGGER.info("Exiting…");
 
             // get main frame
             final MainFrame mainFrame = Icy.getMainInterface().getMainFrame();
@@ -707,7 +710,7 @@ public final class Icy {
                             }
                         }
                         catch (final Throwable t) {
-                            // ignore further error here...
+                            // ignore further error here…
                         }
                     }
                 }
@@ -790,7 +793,7 @@ public final class Icy {
             if (doUpdate || restart)
                 IcyUpdater.launchUpdater(doUpdate, restart);
 
-            IcyLogger.info(Icy.class, "Done.");
+            LOGGER.info("Done.");
 
             // good exit
             System.exit(0);
@@ -881,7 +884,7 @@ public final class Icy {
     /**
      * Return content of the <code>CHANGELOG</code> file
      */
-    public static @NotNull String getChangeLog() {
+    public static @NonNull String getChangeLog() {
         if (FileUtil.exists("CHANGELOG.md"))
             return new String(FileUtil.load("CHANGELOG.md", false));
 
@@ -891,7 +894,7 @@ public final class Icy {
     /**
      * Return content of the <code>LICENSE</code> file
      */
-    public static @NotNull String getLicense() {
+    public static @NonNull String getLicense() {
         if (FileUtil.exists("LICENSE"))
             return new String(FileUtil.load("LICENSE", false));
 
@@ -901,7 +904,7 @@ public final class Icy {
     /**
      * Return content of the <code>README</code> file
      */
-    public static @NotNull String getReadMe() {
+    public static @NonNull String getReadMe() {
         if (FileUtil.exists("README.md"))
             return new String(FileUtil.load("README.md", false));
 
@@ -909,52 +912,52 @@ public final class Icy {
     }
 
     // TODO remove this code as it should be managed outside Icy, and natives libraries should not be included with Icy by default
-    private static boolean copyLibraries(final @NotNull String libName) {
+    private static boolean copyLibraries(final @NonNull String libName) {
         final File newFolder = new File(UserUtil.getIcyLibrariesDirectory(), libName);
         final File oldFolder = new File("." + File.separator + "lib" + File.separator + SystemUtil.getOSArchIdString() + File.separator + libName);
 
         // Checking old folder before coying
         if (!oldFolder.exists()) {
-            IcyLogger.error(Icy.class, "Could not find old " + libName + " folder. Abort copying!");
+            LOGGER.severe("Could not find old " + libName + " folder. Abort copying!");
             return false;
         }
         final File[] oldLibs = oldFolder.listFiles();
         if (oldLibs == null || oldLibs.length == 0) {
-            IcyLogger.error(Icy.class, "Could not find old " + libName + " libraries. Abort copying!");
+            LOGGER.severe("Could not find old " + libName + " libraries. Abort copying!");
             return false;
         }
 
         // Create new folder
         if (!newFolder.exists()) {
             if (newFolder.mkdirs()) {
-                IcyLogger.info(Icy.class, "Created " + libName + " folder. Start copying.");
+                LOGGER.config("Created " + libName + " folder. Start copying.");
             }
             else {
-                IcyLogger.error(Icy.class, "Could not create " + libName + " folder. Abort loading!");
+                LOGGER.severe("Could not create " + libName + " folder. Abort loading!");
                 return false;
             }
         }
 
         // Start copying
         for (final File oldLib : oldLibs) {
-            IcyLogger.debug(Icy.class, "Copying old " + libName + " library: " + oldLib.getName());
+            LOGGER.config("Copying old " + libName + " library: " + oldLib.getName());
             try {
                 // Replace files
                 Files.copy(oldLib.toPath(), new File(newFolder, oldLib.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
             catch (final IOException e) {
-                IcyLogger.error(Icy.class, e, "Could not copy old " + libName + " library: " + oldLib.getName());
+                LOGGER.log(Level.SEVERE, "Could not copy old " + libName + " library: " + oldLib.getName(), e);
                 //return false;
             }
         }
 
         final File[] newLibs = newFolder.listFiles();
         if (newLibs != null && oldLibs.length == newLibs.length) {
-            IcyLogger.success(Icy.class, "Successfully copied " + newLibs.length + " " + libName + " library files.");
+            LOGGER.info("Successfully copied " + newLibs.length + " " + libName + " library files.");
             return true;
         }
         else {
-            IcyLogger.error(Icy.class, "An error occured while copying " + libName + " libraries. Abort loading!");
+            LOGGER.severe("An error occurred while copying " + libName + " libraries. Abort loading!");
             return false;
         }
     }
@@ -983,22 +986,22 @@ public final class Icy {
     }
 
     private static void loadVTK() {
-        IcyLogger.info(Icy.class, "Loading VTK...");
+        LOGGER.info("Loading VTK…");
 
         try {
             fr.icy.shared.vtk.Loader.init();
             vtkLibraryLoaded = true;
-            IcyLogger.success(Icy.class, "VTK library loaded.");
+            LOGGER.info("VTK library loaded.");
         }
         catch (final Throwable t) {
             vtkLibraryLoaded = false;
-            IcyLogger.warn(Icy.class, t, "Could not initialize VTK.");
+            LOGGER.log(Level.SEVERE, "Could not initialize VTK.", t);
         }
     }
 
     @Deprecated(forRemoval = true)
     private static void loadVtkLibrary(final File libPathFile) {
-        IcyLogger.info(Icy.class, "Loading VTK...");
+        LOGGER.info("Loading VTK…");
         final File vtkFolder = new File(libPathFile, "vtk");
         if (!vtkFolder.exists())
             if (!copyLibraries("vtk"))
@@ -1018,7 +1021,7 @@ public final class Icy {
                 final String[] split = path.split("\\.");
                 final String extension = split[split.length - 1].toLowerCase(Locale.getDefault());
                 if (!(extension.equals("dylib") || extension.equals("jnilib") || extension.equals("so") || extension.equals("dll") || path.contains(".so."))) {
-                    IcyLogger.warn(Icy.class, String.format("Wrong file format for a native library: %s", path));
+                    LOGGER.warning(String.format("Wrong file format for a native library: %s", path));
                     filesToRemove.add(path);
                 }
             }
@@ -1058,7 +1061,7 @@ public final class Icy {
             // still some remaining files not loaded ? --> display a warning and prevent VTK trying to load
             if (!nativeLibraries.isEmpty()) {
                 for (final String lib : nativeLibraries)
-                    IcyLogger.warn(Icy.class, String.format("This VTK library file couldn't be loaded: %s", FileUtil.getFileName(lib)));
+                    LOGGER.warning(String.format("This VTK library file couldn't be loaded: %s", FileUtil.getFileName(lib)));
                 vtkLibraryLoaded = false;
             }
             else
@@ -1070,17 +1073,17 @@ public final class Icy {
             //vtkLibraryLoaded = true;
         }
         catch (final Throwable e1) {
-            IcyLogger.error(Icy.class, e1, e1.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, e1.getLocalizedMessage(), e1);
         }
 
         if (vtkLibraryLoaded) {
             vtkNativeLibrary.DisableOutputWindow(new File(UserUtil.getIcyHomeDirectory(), "vtk.log"));
             final String vv = new vtkVersion().GetVTKVersion();
 
-            IcyLogger.success(Icy.class, String.format("%s %s loaded", "VTK", vv));
+            LOGGER.info(String.format("%s %s loaded", "VTK", vv));
         }
         else {
-            IcyLogger.error(Icy.class, String.format("%s not loaded", "VTK"));
+            LOGGER.severe(String.format("%s not loaded", "VTK"));
         }
     }
 

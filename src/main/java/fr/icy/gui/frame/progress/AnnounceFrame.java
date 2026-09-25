@@ -29,7 +29,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class AnnounceFrame extends TaskFrame implements ActionListener {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,16 +24,15 @@ import fr.icy.model.roi.ROIDescriptor;
 import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.roi.ROIEvent.ROIEventType;
 import fr.icy.model.sequence.Sequence;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Read-Only descriptor class (see {@link ROIDescriptor})
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-public class ROIReadOnlyDescriptor extends ROIDescriptor {
+public class ROIReadOnlyDescriptor extends ROIDescriptor<Boolean> {
     public static final String ID = "Read only";
 
     public ROIReadOnlyDescriptor() {
@@ -46,22 +45,21 @@ public class ROIReadOnlyDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public boolean needRecompute(final @NotNull ROIEvent change) {
+    public boolean needRecompute(final @NonNull ROIEvent change) {
         return (change.getType() == ROIEventType.PROPERTY_CHANGED)
                 && (StringUtil.equals(change.getPropertyName(), ROI.PROPERTY_READONLY));
     }
 
 
     @Override
-    public Object compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
-        return Boolean.valueOf(getReadOnly(roi));
+    public @NonNull Boolean compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
+        return getReadOnly(roi);
     }
 
     /**
-     * Returns ROI read only state
+     * Returns ROI read-only state
      */
-    @Contract("null -> false")
-    public static boolean getReadOnly(final ROI roi) {
+    public static @NonNull Boolean getReadOnly(final ROI roi) {
         if (roi == null)
             return false;
 

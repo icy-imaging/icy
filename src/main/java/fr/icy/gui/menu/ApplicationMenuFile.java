@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,20 +18,21 @@
 
 package fr.icy.gui.menu;
 
-import fr.icy.gui.action.FileActions;
-import fr.icy.gui.action.GeneralActions;
-import fr.icy.gui.action.PreferencesActions;
-import fr.icy.io.Loader;
-import fr.icy.gui.component.menu.IcyMenu;
-import fr.icy.gui.component.menu.IcyMenuItem;
-import fr.icy.system.preferences.IcyPreferences;
-import fr.icy.gui.component.icon.SVGResource;
-import fr.icy.model.sequence.Sequence;
-import fr.icy.system.thread.ThreadUtil;
 import fr.icy.common.collection.CollectionUtil;
 import fr.icy.common.collection.list.RecentFileList;
 import fr.icy.common.string.StringUtil;
-import org.jetbrains.annotations.NotNull;
+import fr.icy.gui.action.FileActions;
+import fr.icy.gui.action.GeneralActions;
+import fr.icy.gui.action.PreferencesActions;
+import fr.icy.gui.component.icon.IcySVG;
+import fr.icy.gui.component.menu.IcyMenu;
+import fr.icy.gui.component.menu.IcyMenuItem;
+import fr.icy.io.Loader;
+import fr.icy.model.sequence.Sequence;
+import fr.icy.system.preferences.IcyPreferences;
+import fr.icy.system.thread.ThreadUtil;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.util.List;
@@ -40,14 +41,15 @@ import java.util.List;
  * @author Thomas Musset
  */
 public final class ApplicationMenuFile extends AbstractApplicationMenu {
-    private static final @NotNull ApplicationMenuFile instance = new ApplicationMenuFile();
+    private static final @NonNull ApplicationMenuFile instance = new ApplicationMenuFile();
 
-    public static synchronized @NotNull ApplicationMenuFile getInstance() {
+    @Contract(pure = true)
+    public static synchronized @NonNull ApplicationMenuFile getInstance() {
         return instance;
     }
 
-    private final @NotNull IcyMenu menuOpenRecent;
-    private final @NotNull IcyMenuItem itemRemoveRecentFiles;
+    private final @NonNull IcyMenu menuOpenRecent;
+    private final @NonNull IcyMenuItem itemRemoveRecentFiles;
 
     private final RecentFileList recentFileList;
 
@@ -56,65 +58,65 @@ public final class ApplicationMenuFile extends AbstractApplicationMenu {
 
         recentFileList = new RecentFileList(IcyPreferences.applicationRoot().node("loader"));
 
-        final IcyMenu menuCreate = new IcyMenu("New", SVGResource.PICTURE_ADD);
+        final IcyMenu menuCreate = new IcyMenu("New", IcySVG.PICTURE_ADD);
         add(menuCreate);
 
-        final IcyMenuItem itemCreateSequence = new IcyMenuItem(FileActions.newSequenceAction, SVGResource.IMAGE);
+        final IcyMenuItem itemCreateSequence = new IcyMenuItem(FileActions.newSequenceAction, IcySVG.IMAGE);
         menuCreate.add(itemCreateSequence);
 
-        final IcyMenuItem itemCreateGraySequence = new IcyMenuItem(FileActions.newGraySequenceAction, SVGResource.GRAYSCALE_IMAGE);
+        final IcyMenuItem itemCreateGraySequence = new IcyMenuItem(FileActions.newGraySequenceAction, IcySVG.GRAYSCALE_IMAGE);
         menuCreate.add(itemCreateGraySequence);
 
-        final IcyMenuItem itemCreateRGBSequence = new IcyMenuItem(FileActions.newRGBSequenceAction, SVGResource.RGB_IMAGE);
+        final IcyMenuItem itemCreateRGBSequence = new IcyMenuItem(FileActions.newRGBSequenceAction, IcySVG.RGB_IMAGE);
         menuCreate.add(itemCreateRGBSequence);
 
         // TODO rework svg icon for ARGB sequence
-        final IcyMenuItem itemCreateRGBASequence = new IcyMenuItem(FileActions.newARGBSequenceAction, SVGResource.ARGB_IMAGE);
+        final IcyMenuItem itemCreateRGBASequence = new IcyMenuItem(FileActions.newARGBSequenceAction, IcySVG.ARGB_IMAGE);
         menuCreate.add(itemCreateRGBASequence);
 
-        final IcyMenuItem itemOpen = new IcyMenuItem(FileActions.openSequenceAction, SVGResource.FOLDER_OPEN);
+        final IcyMenuItem itemOpen = new IcyMenuItem(FileActions.openSequenceAction, IcySVG.FOLDER_OPEN);
         add(itemOpen);
 
         // TODO Make recent files menu
-        menuOpenRecent = new IcyMenu("Open Recent", SVGResource.FOLDER);
+        menuOpenRecent = new IcyMenu("Open Recent", IcySVG.FOLDER);
         add(menuOpenRecent);
 
-        itemRemoveRecentFiles = new IcyMenuItem(FileActions.clearRecentFilesAction, SVGResource.DELETE);
+        itemRemoveRecentFiles = new IcyMenuItem(FileActions.clearRecentFilesAction, IcySVG.DELETE);
         itemRemoveRecentFiles.addActionListener(e -> menuOpenRecent.setEnabled(false));
 
-        final IcyMenuItem itemOpenRegion = new IcyMenuItem(FileActions.openSequenceRegionAction, SVGResource.PICTURE_IN_PICTURE);
+        final IcyMenuItem itemOpenRegion = new IcyMenuItem(FileActions.openSequenceRegionAction, IcySVG.PICTURE_IN_PICTURE);
         add(itemOpenRegion);
 
-        final IcyMenuItem itemCloseSequence = new IcyMenuItem(FileActions.closeCurrentSequenceAction, SVGResource.CLOSE);
+        final IcyMenuItem itemCloseSequence = new IcyMenuItem(FileActions.closeCurrentSequenceAction, IcySVG.CLOSE);
         add(itemCloseSequence);
 
-        final IcyMenuItem itemCloseOther = new IcyMenuItem(FileActions.closeOthersSequencesAction, SVGResource.CLEAR_ALL);
+        final IcyMenuItem itemCloseOther = new IcyMenuItem(FileActions.closeOthersSequencesAction, IcySVG.CLEAR_ALL);
         add(itemCloseOther);
 
-        final IcyMenuItem itemCloseAll = new IcyMenuItem(FileActions.closeAllSequencesAction, SVGResource.CLEAR_ALL);
+        final IcyMenuItem itemCloseAll = new IcyMenuItem(FileActions.closeAllSequencesAction, IcySVG.CLEAR_ALL);
         add(itemCloseAll);
 
         addSeparator();
 
-        final IcyMenuItem itemSaveSequence = new IcyMenuItem(FileActions.saveSequenceAction, SVGResource.SAVE);
+        final IcyMenuItem itemSaveSequence = new IcyMenuItem(FileActions.saveSequenceAction, IcySVG.SAVE);
         add(itemSaveSequence);
 
-        final IcyMenuItem itemSaveSequenceAs = new IcyMenuItem(FileActions.saveAsSequenceAction, SVGResource.SAVE_AS);
+        final IcyMenuItem itemSaveSequenceAs = new IcyMenuItem(FileActions.saveAsSequenceAction, IcySVG.SAVE_AS);
         add(itemSaveSequenceAs);
 
-        final IcyMenuItem itemSaveMetadata = new IcyMenuItem(FileActions.saveMetaDataAction, SVGResource.PICTURE_METADATA);
+        final IcyMenuItem itemSaveMetadata = new IcyMenuItem(FileActions.saveMetaDataAction, IcySVG.PICTURE_METADATA);
         add(itemSaveMetadata);
 
         //if (!SystemUtil.isMac()) {
-            addSeparator();
+        addSeparator();
 
-            final IcyMenuItem itemPreferences = new IcyMenuItem(PreferencesActions.preferencesAction, SVGResource.SETTINGS);
-            add(itemPreferences);
+        final IcyMenuItem itemPreferences = new IcyMenuItem(PreferencesActions.preferencesAction, IcySVG.SETTINGS);
+        add(itemPreferences);
 
-            addSeparator();
+        addSeparator();
 
-            final IcyMenuItem itemQuit = new IcyMenuItem(GeneralActions.exitApplicationAction, SVGResource.POWER_SETTINGS_NEW);
-            add(itemQuit);
+        final IcyMenuItem itemQuit = new IcyMenuItem(GeneralActions.exitApplicationAction, IcySVG.POWER_SETTINGS_NEW);
+        add(itemQuit);
         //}
 
         reloadRecentFiles();
@@ -134,7 +136,7 @@ public final class ApplicationMenuFile extends AbstractApplicationMenu {
                 for (int i = 0; i < nbRecentFiles; i++) {
                     final String entry = recentFileList.getEntryAsName(i, 100, true);
                     if (!StringUtil.isEmpty(entry)) {
-                        final IcyMenuItem itemFile = new IcyMenuItem(entry, SVGResource.IMAGE);
+                        final IcyMenuItem itemFile = new IcyMenuItem(entry, IcySVG.IMAGE);
                         final String[] paths = recentFileList.getEntry(i);
                         itemFile.addActionListener(e -> Loader.load(CollectionUtil.asList(paths), false, true, true));
                         menuOpenRecent.add(itemFile);
@@ -149,11 +151,12 @@ public final class ApplicationMenuFile extends AbstractApplicationMenu {
         });
     }
 
+    @Contract(pure = true)
     public RecentFileList getRecentFileList() {
         return recentFileList;
     }
 
-    public void addRecentLoadedFile(final List<File> files) {
+    public void addRecentLoadedFile(final @NonNull List<File> files) {
         addRecentLoadedFile(files.toArray(new File[0]));
     }
 
@@ -168,7 +171,7 @@ public final class ApplicationMenuFile extends AbstractApplicationMenu {
     /**
      * Add a list of recently opened files (String format)
      */
-    public void addRecentFile(final List<String> paths) {
+    public void addRecentFile(final @NonNull List<String> paths) {
         addRecentFile(paths.toArray(new String[0]));
     }
 

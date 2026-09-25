@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,14 +19,14 @@
 package fr.icy.gui.toolbar.button;
 
 import fr.icy.gui.component.button.IcyButton;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class NotificationButton extends IcyButton implements ActionListener {
     public NotificationButton() {
-        super(SVGResource.NOTIFICATIONS);
+        super(IcySVG.NOTIFICATIONS);
         setFocusable(false);
         addActionListener(this);
     }

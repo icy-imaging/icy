@@ -30,7 +30,7 @@ import javax.swing.undo.UndoableEdit;
 /**
  * Default lazy implementation for ROI undoable edition (full copy)
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class DefaultROIEdit extends AbstractROIEdit
 {

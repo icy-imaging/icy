@@ -26,7 +26,7 @@ import javax.swing.JOptionPane;
 /**
  * Simple confirmation dialog.
  * 
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class ConfirmDialog
 {

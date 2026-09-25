@@ -20,7 +20,7 @@ package fr.icy.common.math;
 /**
  * Uses this class to maintain and calculate a rate.
  * 
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class RateMeter
 {

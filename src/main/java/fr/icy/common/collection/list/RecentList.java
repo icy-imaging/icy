@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import javax.swing.event.EventListenerList;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class RecentList
 {

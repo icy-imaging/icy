@@ -18,39 +18,42 @@
 
 package fr.icy.model.roi.watershed;
 
+import fr.icy.common.geom.dimension.Dimension3D;
+import fr.icy.common.geom.dimension.Dimension5D;
+import fr.icy.common.geom.point.Point5D;
+import fr.icy.common.math.Random;
+import fr.icy.common.type.DataIteratorUtil;
+import fr.icy.common.type.DataType;
 import fr.icy.extension.kernel.filtering.GaussianFiltering;
 import fr.icy.extension.kernel.filtering.LocalMaxFiltering;
 import fr.icy.extension.kernel.filtering.convolution.ConvolutionException;
 import fr.icy.extension.kernel.roi.morphology.ROIDistanceTransformCalculator;
+import fr.icy.extension.kernel.roi.roi2d.ROI2DArea;
+import fr.icy.extension.kernel.roi.roi2d.ROI2DPoint;
+import fr.icy.extension.kernel.roi.roi3d.ROI3DArea;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceDataIterator;
 import fr.icy.model.sequence.VolumetricImage;
 import fr.icy.model.sequence.VolumetricImageCursor;
-import fr.icy.system.logging.IcyLogger;
-import fr.icy.common.type.DataIteratorUtil;
-import fr.icy.common.type.DataType;
-import fr.icy.common.geom.dimension.Dimension3D;
-import fr.icy.common.geom.dimension.Dimension5D;
-import fr.icy.common.geom.point.Point5D;
-import fr.icy.common.math.Random;
-import fr.icy.extension.kernel.roi.roi2d.ROI2DArea;
-import fr.icy.extension.kernel.roi.roi2d.ROI2DPoint;
-import fr.icy.extension.kernel.roi.roi3d.ROI3DArea;
 
 import java.awt.*;
+import java.util.*;
 import java.util.List;
 import java.util.Queue;
-import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROIWatershedCalculator implements Callable<Void> {
+    private static final Logger LOGGER = Logger.getLogger(ROIWatershedCalculator.class.getName());
+
     public static class Builder {
         private final Dimension5D imageSize;
         private final Dimension3D pixelSize;
@@ -205,13 +208,13 @@ public class ROIWatershedCalculator implements Callable<Void> {
             smoothingFilter.computeFiltering();
         }
         catch (final ConvolutionException e) {
-            IcyLogger.warn(ROIWatershedCalculator.class, e, "z sigma 2 too large.. trying 1");
+            LOGGER.log(Level.WARNING, "z sigma 2 too large. Trying with 1.", e);
             try {
                 smoothingFilter = GaussianFiltering.create(this.domainDistanceMap, new double[]{2, 2, 1});
                 smoothingFilter.computeFiltering();
             }
             catch (final ConvolutionException e1) {
-                IcyLogger.warn(ROIWatershedCalculator.class, e1, "z sigma 1 too large.. using original distance map");
+                LOGGER.log(Level.WARNING, "z sigma 1 too large. Using original distance map.", e1);
                 return this.domainDistanceMap;
             }
         }

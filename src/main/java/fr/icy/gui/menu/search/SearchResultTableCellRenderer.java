@@ -31,7 +31,7 @@ import java.awt.*;
  * This class is a renderer to display the filtered data.
  *
  * @author Thomas Provoost
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SearchResultTableCellRenderer extends DefaultTableCellRenderer {

@@ -24,7 +24,7 @@ package fr.icy.common.exception;
 /**
  * Exception when trying to allocate a too large array (length &gt; 2^31)
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class TooLargeArrayException extends RuntimeException
 {

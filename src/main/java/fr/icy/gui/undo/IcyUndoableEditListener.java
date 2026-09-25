@@ -28,7 +28,7 @@ import javax.swing.event.UndoableEditListener;
  * the icyUndoableEdit event occurs, that object's appropriate
  * method is invoked.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface IcyUndoableEditListener extends UndoableEditListener
 {

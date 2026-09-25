@@ -20,13 +20,12 @@ package fr.icy.network;
 
 import fr.icy.Icy;
 import fr.icy.common.math.UnitUtil;
-import fr.icy.extension.plugin.PluginDescriptor;
-import fr.icy.system.preferences.ApplicationPreferences;
-import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
-import fr.icy.system.thread.ThreadUtil;
 import fr.icy.common.string.StringUtil;
+import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.io.xml.XMLUtil;
+import fr.icy.system.SystemUtil;
+import fr.icy.system.preferences.ApplicationPreferences;
+import fr.icy.system.thread.ThreadUtil;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
@@ -34,12 +33,16 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class WebInterface {
+    private static final Logger LOGGER = Logger.getLogger(WebInterface.class.getName());
+
     public static final String BASE_URL = NetworkUtil.WEBSITE_URL + "interface/";
 
     public static final String PARAM_ACTION = "action";
@@ -76,24 +79,22 @@ public class WebInterface {
     /**
      * Process search on the website in a specific resource and return result in a XML Document.
      *
-     * @param text
-     *        Text used for the search request, it can contains several words and use operators.<br>
-     *        Examples:<br>
-     *        <ul>
-     *        <li><i>spot detector</i> : any of word should be present</li>
-     *        <li><i>+spot +detector</i> : both words should be present</li>
-     *        <li><i>"spot detector"</i> : the exact expression should be present</li>
-     *        <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
-     *        </ul>
-     * @param type
-     *        type of resource we want to search in.<br>
-     *        Accepted values are:<br>
-     *        <ul>
-     *        <li>SEARCH_TYPE_PLUGIN</li>
-     *        <li>SEARCH_TYPE_SCRIPT</li>
-     *        <li>SEARCH_TYPE_PROTOCOL</li>
-     *        <li>null (all resources)</li>
-     *        </ul>
+     * @param text Text used for the search request, it can contains several words and use operators.<br>
+     *             Examples:<br>
+     *             <ul>
+     *             <li><i>spot detector</i> : any of word should be present</li>
+     *             <li><i>+spot +detector</i> : both words should be present</li>
+     *             <li><i>"spot detector"</i> : the exact expression should be present</li>
+     *             <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
+     *             </ul>
+     * @param type type of resource we want to search in.<br>
+     *             Accepted values are:<br>
+     *             <ul>
+     *             <li>SEARCH_TYPE_PLUGIN</li>
+     *             <li>SEARCH_TYPE_SCRIPT</li>
+     *             <li>SEARCH_TYPE_PROTOCOL</li>
+     *             <li>null (all resources)</li>
+     *             </ul>
      * @return result in XML Document format
      */
     public static Document doSearch(final String text, final String type) {
@@ -115,15 +116,14 @@ public class WebInterface {
     /**
      * Process search on the website in all resources and return result in a XML Document.
      *
-     * @param text
-     *        Text used for the search request, it can contains several words and use operators.<br>
-     *        Examples:<br>
-     *        <ul>
-     *        <li><i>spot detector</i> : any of word should be present</li>
-     *        <li><i>+spot +detector</i> : both words should be present</li>
-     *        <li><i>"spot detector"</i> : the exact expression should be present</li>
-     *        <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
-     *        </ul>
+     * @param text Text used for the search request, it can contains several words and use operators.<br>
+     *             Examples:<br>
+     *             <ul>
+     *             <li><i>spot detector</i> : any of word should be present</li>
+     *             <li><i>+spot +detector</i> : both words should be present</li>
+     *             <li><i>"spot detector"</i> : the exact expression should be present</li>
+     *             <li><i>+"spot detector" -tracking</i> : <i>spot detector</i> should be present and <i>tracking</i> absent</li>
+     *             </ul>
      * @return result in XML Document format
      */
     public static Document doSearch(final String text) {
@@ -133,14 +133,11 @@ public class WebInterface {
     /**
      * Report an error log from a given plugin or developer id to Icy web site.
      *
-     * @param plugin
-     *        The plugin responsible of the error or <code>null</code> if the error comes from the
-     *        application or if we are not able to get the plugin descriptor.
-     * @param devId
-     *        The developer id of the plugin responsible of the error when the plugin descriptor was
-     *        not found or <code>null</code> if the error comes from the application.
-     * @param errorLog
-     *        Error log to report.
+     * @param plugin   The plugin responsible of the error or <code>null</code> if the error comes from the
+     *                 application or if we are not able to get the plugin descriptor.
+     * @param devId    The developer id of the plugin responsible of the error when the plugin descriptor was
+     *                 not found or <code>null</code> if the error comes from the application.
+     * @param errorLog Error log to report.
      */
     public static void reportError(final PluginDescriptor plugin, final String devId, final String errorLog) {
         final String icyId;
@@ -195,7 +192,7 @@ public class WebInterface {
                 pluginDepsId.append("<br>");
             }
             else*/
-                pluginDepsId = new StringBuilder();
+            pluginDepsId = new StringBuilder();
         }
         else {
             // no plugin information available
@@ -208,9 +205,9 @@ public class WebInterface {
         // add dev id
         if (!StringUtil.isEmpty(devId))
             values.put(PARAM_DEVELOPERID, devId);
-        else if (plugin != null)
+        //else if (plugin != null)
             // package author package name is developer id
-            values.put(PARAM_DEVELOPERID, plugin.getAuthorPackageName());
+            //values.put(PARAM_DEVELOPERID, plugin.getAuthorPackageName());
         else
             // empty
             values.put(PARAM_DEVELOPERID, "");
@@ -229,10 +226,10 @@ public class WebInterface {
                 final String result = NetworkUtil.postData(BASE_URL, values);
 
                 if (result == null)
-                    IcyLogger.warn(WebInterface.class, "Error while reporting data, verifying your internet connection.");
+                    LOGGER.warning("Error while reporting data, verifying your internet connection.");
             }
             catch (final IOException e) {
-                IcyLogger.error(WebInterface.class, e, "Error while reporting data.");
+                LOGGER.log(Level.SEVERE, "Error while reporting data.", e);
             }
         });
     }

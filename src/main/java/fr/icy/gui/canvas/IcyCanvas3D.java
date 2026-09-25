@@ -25,7 +25,7 @@ import fr.icy.common.geom.rectangle.Rectangle3D;
 import java.awt.Point;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class IcyCanvas3D extends IcyCanvas
 {

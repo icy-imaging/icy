@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,17 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.renderer;
 
-import fr.icy.common.math.MathUtil;
 import fr.icy.common.collection.array.Array1DUtil;
 import fr.icy.common.collection.array.ArrayUtil;
+import fr.icy.common.math.MathUtil;
 
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class NativeArrayTableCellRenderer extends DefaultTableCellRenderer {
@@ -48,20 +49,20 @@ public class NativeArrayTableCellRenderer extends DefaultTableCellRenderer {
         if ((value != null) && (ArrayUtil.getDim(value) == 1)) {
             final int len = ArrayUtil.getLength(value);
 
-            String s;
+            final StringBuilder s;
 
             if (len == 0)
-                s = "";
+                s = new StringBuilder();
             else if (len == 1)
-                s = Double.toString(MathUtil.roundSignificant(Array1DUtil.getValue(value, 0, signed), 5));
+                s = new StringBuilder(Double.toString(MathUtil.roundSignificant(Array1DUtil.getValueAsDouble(value, 0, signed), 5)));
             else {
-                s = "[" + Double.toString(MathUtil.roundSignificant(Array1DUtil.getValue(value, 0, signed), 5));
+                s = new StringBuilder("[" + MathUtil.roundSignificant(Array1DUtil.getValueAsDouble(value, 0, signed), 5));
                 for (int i = 1; i < len; i++)
-                    s += " " + MathUtil.roundSignificant(Array1DUtil.getValue(value, i, signed), 5);
-                s += "]";
+                    s.append(" ").append(MathUtil.roundSignificant(Array1DUtil.getValueAsDouble(value, i, signed), 5));
+                s.append("]");
             }
 
-            setText(s);
+            setText(s.toString());
         }
         else
             super.setValue(value);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,17 +18,17 @@
 
 package fr.icy.extension.plugin.interface_;
 
-import fr.icy.model.roi.ROI;
 import fr.icy.common.geom.point.Point5D;
-import org.jetbrains.annotations.NotNull;
+import fr.icy.model.roi.ROI;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Plugin ROI interface.<br>
  * Used to define a plugin representing a specific ROI.<br>
- * The plugin will appears in the ROI list.<br>
+ * The plugin will appear in the ROI list.<br>
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public interface PluginROI extends PluginNoEDTConstructor {
@@ -37,15 +37,15 @@ public interface PluginROI extends PluginNoEDTConstructor {
      *
      * @return ROI's class name
      */
-    @NotNull String getROIClassName();
+    @NonNull String getROIClassName();
 
     /**
      * Create and return a new ROI for <i>interactive</i> mode.<br>
-     * The first point will be created in <i>selected</i> state so will support direct drag
+     * The first point will be created in a <i>selected</i> state so will support direct drag
      * operation.
      *
      * @param pt location of the creation point
-     * @return the new created ROI
+     * @return the newly created ROI
      */
     ROI createROI(Point5D pt);
 
@@ -53,7 +53,7 @@ public interface PluginROI extends PluginNoEDTConstructor {
      * Create and return a new ROI.<br>
      * Default constructor.
      *
-     * @return the new created ROI
+     * @return the newly created ROI
      */
     ROI createROI();
 }

@@ -24,7 +24,7 @@ import fr.icy.model.lut.LUT;
 import fr.icy.common.type.DataType;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class IntColorModel extends IcyColorModel
 {

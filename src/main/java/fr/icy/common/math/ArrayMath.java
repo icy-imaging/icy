@@ -25,7 +25,7 @@ import fr.icy.common.type.TypeUtil;
  * Class defining basic arithmetic and statistic operations on 1D double arrays.
  *
  * @author Alexandre Dufour
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ArrayMath {

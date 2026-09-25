@@ -32,7 +32,6 @@ import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.OverlayEvent.OverlayEventType;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.system.IcyExceptionHandler;
-import fr.icy.system.logging.IcyLogger;
 import org.w3c.dom.Node;
 
 import javax.swing.*;
@@ -44,6 +43,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 /**
  * Overlay class.<br>
@@ -51,10 +51,12 @@ import java.util.Objects;
  * This class allow interaction and rich informations display on Sequences.<br>
  * {@link IcyCanvas} subclasses should propagate mouse and key events to overlay.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XMLPersistent {
+    private static final Logger LOGGER = Logger.getLogger(Overlay.class.getName());
+
     /**
      * Define the overlay priority:
      *
@@ -66,7 +68,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
      *          |   TOOLTIP     (all over the rest)
      * Highest  |   TOPMOST     (absolute topmost)
      * </pre>
-     *
+     * <p>
      * You have 4 levels for each category (except TOPMOST) for finest adjustment:
      *
      * <pre>
@@ -75,7 +77,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
      *          |   HIGH
      * Highest  |   TOP
      * </pre>
-     *
+     * <p>
      * TOP level should be used to give <i>focus</i> to a specific Overlay over all other in the same
      * category.
      */
@@ -113,11 +115,10 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Create a Overlay from a XML node.
      *
-     * @param node
-     *        XML node defining the overlay
+     * @param node XML node defining the overlay
      * @return the created Overlay or <code>null</code> if the Overlay class does not support XML
-     *         persistence a default
-     *         constructor
+     * persistence a default
+     * constructor
      */
     public static Overlay createFromXML(final Node node) {
         if (node == null)
@@ -168,8 +169,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Return the number of Overlay defined in the specified XML node.
      *
-     * @param node
-     *        XML node defining the Overlay list
+     * @param node XML node defining the Overlay list
      * @return the number of Overlay defined in the XML node.
      */
     public static int getOverlayCount(final Node node) {
@@ -186,8 +186,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Return a list of Overlay from a XML node.
      *
-     * @param node
-     *        XML node defining the Overlay list
+     * @param node XML node defining the Overlay list
      * @return a list of Overlay
      */
     public static List<Overlay> loadOverlaysFromXML(final Node node) {
@@ -215,10 +214,8 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Set a list of Overlay to a XML node.
      *
-     * @param node
-     *        XML node which is used to store the list of Overlay
-     * @param overlays
-     *        the list of Overlay to store in the XML node
+     * @param node     XML node which is used to store the list of Overlay
+     * @param overlays the list of Overlay to store in the XML node
      */
     public static void saveOverlaysToXML(final Node node, final List<Overlay> overlays) {
         if (node != null) {
@@ -229,7 +226,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
 
                     if (!overlay.saveToXML(nodeOverlay)) {
                         XMLUtil.removeNode(node, nodeOverlay);
-                        IcyLogger.error(Overlay.class, "The overlay " + overlay.getName() + " was not correctly saved to XML !");
+                        LOGGER.severe(Overlay.class.getName() + " : The overlay " + overlay.getName() + " was not correctly saved to XML.");
                     }
                 }
             }
@@ -287,8 +284,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     }
 
     /**
-     * @param name
-     *        the name to set
+     * @param name the name to set
      */
     public void setName(final String name) {
         if (!Objects.equals(this.name, name)) {
@@ -305,8 +301,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     }
 
     /**
-     * @param priority
-     *        the priority to set
+     * @param priority the priority to set
      */
     public void setPriority(final OverlayPriority priority) {
         if (this.priority != priority) {
@@ -316,8 +311,8 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     }
 
     /**
-     * @return Returns <code>true</code> if the overlay is attached to the specified {@link Sequence}.
      * @param sequence sequence
+     * @return Returns <code>true</code> if the overlay is attached to the specified {@link Sequence}.
      */
     public boolean isAttached(final Sequence sequence) {
         if (sequence != null)
@@ -329,7 +324,6 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * @return Returns <code>true</code> if the overlay can be freely removed from the Canvas where it
      * appears and <code>false</code> otherwise.<br>
-     *
      * @see #setCanBeRemoved(boolean)
      */
     public boolean getCanBeRemoved() {
@@ -340,6 +334,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
      * Set the <code>canBeRemoved</code> property.<br>
      * Set it to false if you want to prevent the overlay to be removed from the Canvas where it
      * appears.
+     *
      * @param value boolean
      */
     public void setCanBeRemoved(final boolean value) {
@@ -359,8 +354,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
 
     /**
      * Set persistent property.<br>
+     *
      * @param value When set to <code>true</code> the Overlay will be saved in the Sequence persistent XML data
-     * (default is <code>false</code>).
+     *              (default is <code>false</code>).
      */
     public void setPersistent(final boolean value) {
         if (persistent != value) {
@@ -379,6 +375,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
 
     /**
      * Set read only property.<br>
+     *
      * @param value When set to <code>true</code> we cannot anymore modify overlay properties from the GUI.
      */
     public void setReadOnly(final boolean value) {
@@ -390,7 +387,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
 
     /**
      * @return <code>true</code> is the overlay should receive {@link KeyEvent} even when it is not
-     *         visible.
+     * visible.
      */
     public boolean getReceiveKeyEventOnHidden() {
         return receiveKeyEventOnHidden;
@@ -398,7 +395,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
 
     /**
      * @param value Set to <code>true</code> if you want to overlay to receive {@link KeyEvent} even when it is
-     * not visible.
+     *              not visible.
      */
     public void setReceiveKeyEventOnHidden(final boolean value) {
         if (receiveKeyEventOnHidden != value) {
@@ -409,7 +406,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
 
     /**
      * @return <code>true</code> is the overlay should receive {@link MouseEvent} even when it is
-     *         not visible.
+     * not visible.
      */
     public boolean getReceiveMouseEventOnHidden() {
         return receiveMouseEventOnHidden;
@@ -418,6 +415,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Set to <code>true</code> if you want to overlay to receive {@link KeyEvent} even when it is
      * not visible.
+     *
      * @param value boolean
      */
     public void setReceiveMouseEventOnHidden(final boolean value) {
@@ -490,6 +488,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
 
     /**
      * Notify the overlay property has changed.
+     *
      * @param propertyName string
      */
     public void propertyChanged(final String propertyName) {
@@ -508,6 +507,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
 
     /**
      * Add a listener.
+     *
      * @param listener overlay listener
      */
     public void addOverlayListener(final OverlayListener listener) {
@@ -516,6 +516,7 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
 
     /**
      * Remove a listener.
+     *
      * @param listener overlay listener
      */
     public void removeOverlayListener(final OverlayListener listener) {
@@ -524,9 +525,10 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
 
     /**
      * Paint method called to draw the overlay.
+     *
      * @param sequence sequence
-     * @param canvas canvas
-     * @param g 2D graphics
+     * @param canvas   canvas
+     * @param g        2D graphics
      */
     public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
         // nothing by default
@@ -535,12 +537,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Mouse press event forwarded to the overlay.
      *
-     * @param e
-     *        mouse event
-     * @param imagePoint
-     *        mouse position (image coordinates)
-     * @param canvas
-     *        icy canvas
+     * @param e          mouse event
+     * @param imagePoint mouse position (image coordinates)
+     * @param canvas     icy canvas
      */
     public void mousePressed(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
 
@@ -549,12 +548,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Mouse release event forwarded to the overlay.
      *
-     * @param e
-     *        mouse event
-     * @param imagePoint
-     *        mouse position (image coordinates)
-     * @param canvas
-     *        icy canvas
+     * @param e          mouse event
+     * @param imagePoint mouse position (image coordinates)
+     * @param canvas     icy canvas
      */
     public void mouseReleased(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
 
@@ -563,12 +559,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Mouse click event forwarded to the overlay.
      *
-     * @param e
-     *        mouse event
-     * @param imagePoint
-     *        mouse position (image coordinates)
-     * @param canvas
-     *        icy canvas
+     * @param e          mouse event
+     * @param imagePoint mouse position (image coordinates)
+     * @param canvas     icy canvas
      */
     public void mouseClick(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
 
@@ -577,12 +570,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Mouse move event forwarded to the overlay.
      *
-     * @param e
-     *        mouse event
-     * @param imagePoint
-     *        mouse position (image coordinates)
-     * @param canvas
-     *        icy canvas
+     * @param e          mouse event
+     * @param imagePoint mouse position (image coordinates)
+     * @param canvas     icy canvas
      */
     public void mouseMove(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
 
@@ -591,12 +581,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Mouse drag event forwarded to the overlay.
      *
-     * @param e
-     *        mouse event
-     * @param imagePoint
-     *        mouse position (image coordinates)
-     * @param canvas
-     *        icy canvas
+     * @param e          mouse event
+     * @param imagePoint mouse position (image coordinates)
+     * @param canvas     icy canvas
      */
     public void mouseDrag(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
 
@@ -605,12 +592,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Mouse enter event forwarded to the overlay.
      *
-     * @param e
-     *        mouse event
-     * @param imagePoint
-     *        mouse position (image coordinates)
-     * @param canvas
-     *        icy canvas
+     * @param e          mouse event
+     * @param imagePoint mouse position (image coordinates)
+     * @param canvas     icy canvas
      */
     public void mouseEntered(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
 
@@ -619,12 +603,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Mouse exit event forwarded to the overlay.
      *
-     * @param e
-     *        mouse event
-     * @param imagePoint
-     *        mouse position (image coordinates)
-     * @param canvas
-     *        icy canvas
+     * @param e          mouse event
+     * @param imagePoint mouse position (image coordinates)
+     * @param canvas     icy canvas
      */
     public void mouseExited(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
 
@@ -633,12 +614,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Mouse wheel moved event forwarded to the overlay.
      *
-     * @param e
-     *        mouse event
-     * @param imagePoint
-     *        mouse position (image coordinates)
-     * @param canvas
-     *        icy canvas
+     * @param e          mouse event
+     * @param imagePoint mouse position (image coordinates)
+     * @param canvas     icy canvas
      */
     public void mouseWheelMoved(final MouseWheelEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
 
@@ -647,12 +625,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Key press event forwarded to the overlay.
      *
-     * @param e
-     *        key event
-     * @param imagePoint
-     *        mouse position (image coordinates)
-     * @param canvas
-     *        icy canvas
+     * @param e          key event
+     * @param imagePoint mouse position (image coordinates)
+     * @param canvas     icy canvas
      */
     public void keyPressed(final KeyEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
 
@@ -661,12 +636,9 @@ public abstract class Overlay implements ChangeListener, Comparable<Overlay>, XM
     /**
      * Key release event forwarded to the overlay.
      *
-     * @param e
-     *        key event
-     * @param imagePoint
-     *        mouse position (image coordinates)
-     * @param canvas
-     *        icy canvas
+     * @param e          key event
+     * @param imagePoint mouse position (image coordinates)
+     * @param canvas     icy canvas
      */
     public void keyReleased(final KeyEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
 

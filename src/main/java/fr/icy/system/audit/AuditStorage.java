@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,8 +24,8 @@ import fr.icy.io.FileUtil;
 import fr.icy.io.xml.XMLPersistent;
 import fr.icy.io.xml.XMLPersistentHelper;
 import fr.icy.io.xml.XMLUtil;
-import fr.icy.system.logging.IcyLogger;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Node;
 
 import java.util.ArrayList;
@@ -33,12 +33,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class AuditStorage implements XMLPersistent {
+    private static final Logger LOGGER = Logger.getLogger(AuditStorage.class.getName());
+
     private static final String ID_PLUGIN = "plugin";
 
     private static final String AUDIT_FILENAME = "icy_usage.xml";
@@ -60,7 +64,7 @@ public class AuditStorage implements XMLPersistent {
             clean();
         }
         catch (final Exception e) {
-            IcyLogger.warn(AuditStorage.class, e, "Can't reload usage statistics data.");
+            LOGGER.log(Level.WARNING, "Can't load usage statistics data.", e);
         }
 
         lastSaveTime = System.currentTimeMillis();
@@ -72,7 +76,7 @@ public class AuditStorage implements XMLPersistent {
             XMLPersistentHelper.saveToXML(this, FileUtil.getTempDirectory() + FileUtil.separator + AUDIT_FILENAME);
         }
         catch (final Exception e) {
-            IcyLogger.warn(AuditStorage.class, e, "Can't save usage statistics data.");
+            LOGGER.log(Level.WARNING, "Can't save usage statistics data.", e);
         }
     }
 
@@ -126,8 +130,8 @@ public class AuditStorage implements XMLPersistent {
             descriptor = plugin.getDescriptor();
         }
         catch (final Throwable t) {
-            // ignore possible ClassNotFound error here...
-            IcyLogger.warn(this.getClass(), t, t.getLocalizedMessage());
+            // ignore possible ClassNotFound error here…
+            LOGGER.log(Level.WARNING, "Can't get plugin descriptor.", t);
         }
 
         // ignore if no descriptor
@@ -154,8 +158,8 @@ public class AuditStorage implements XMLPersistent {
             descriptor = plugin.getDescriptor();
         }
         catch (final Throwable t) {
-            // ignore possible ClassNotFound error here...
-            IcyLogger.warn(this.getClass(), t, t.getLocalizedMessage());
+            // ignore possible ClassNotFound error here…
+            LOGGER.log(Level.WARNING, "Can't get plugin descriptor.", t);
         }
 
         // ignore if no descriptor
@@ -176,7 +180,7 @@ public class AuditStorage implements XMLPersistent {
     }
 
     /**
-     * Upload statistics to website
+     * Upload statistics to the website
      */
     public boolean upload(final int id) {
         /*final List<PluginIdent> dones = new ArrayList<>();
@@ -197,7 +201,7 @@ public class AuditStorage implements XMLPersistent {
             }
         }
         finally {
-            // remove stats which has been correctly uploaded
+            // remove stats that have been correctly uploaded
             synchronized (pluginStats) {
                 for (final PluginIdent ident : dones)
                     pluginStats.remove(ident);
@@ -280,7 +284,7 @@ public class AuditStorage implements XMLPersistent {
             // find obsoletes entries
             //olds.clear();
             for (final Long date : launchStats.keySet())
-                if (date.longValue() < timeLimit)
+                if (date < timeLimit)
                     olds.add(date);
 
             // remove them
@@ -290,7 +294,7 @@ public class AuditStorage implements XMLPersistent {
             // find obsoletes entries
             olds.clear();
             for (final Long date : instanceStats.keySet())
-                if (date.longValue() < timeLimit)
+                if (date < timeLimit)
                     olds.add(date);
 
             // remove them
@@ -308,7 +312,7 @@ public class AuditStorage implements XMLPersistent {
             if (result == null)
                 return 0L;
 
-            return result.longValue();
+            return result;
         }
 
         public long getInstance(final Long date) {
@@ -317,25 +321,25 @@ public class AuditStorage implements XMLPersistent {
             if (result == null)
                 return 0L;
 
-            return result.longValue();
+            return result;
         }
 
         public void incLaunch(final long date) {
-            final Long key = Long.valueOf(date);
-            launchStats.put(key, Long.valueOf(getLaunch(key) + 1L));
+            final Long key = date;
+            launchStats.put(key, getLaunch(key) + 1L);
         }
 
         public void incInstance(final long date) {
-            final Long key = Long.valueOf(date);
-            instanceStats.put(key, Long.valueOf(getInstance(key) + 1L));
+            final Long key = date;
+            instanceStats.put(key, getInstance(key) + 1L);
         }
 
-        private @NotNull Map<String, String> getIdParam(final int id) {
-            // id ok ?
+        private @NonNull Map<String, String> getIdParam(final int id) {
+            // is ID ok?
             if (id != -1) {
                 final Map<String, String> values = new HashMap<>();
 
-                // set id
+                // set ID
                 values.put(Audit.ID_ICY_ID, Integer.toString(id));
 
                 return values;
@@ -375,7 +379,7 @@ public class AuditStorage implements XMLPersistent {
             }
 
             try {
-                // null return means website did not accepted them...
+                // null return means the website did not accept them…
                 if (NetworkUtil.postData(Audit.URL_AUDIT_PLUGIN, params) == null)
                     return false;
             }
@@ -390,6 +394,7 @@ public class AuditStorage implements XMLPersistent {
             return true;
         }*/
 
+        @Contract("null -> false")
         @Override
         public boolean loadFromXML(final Node node) {
             if (node == null)
@@ -400,7 +405,7 @@ public class AuditStorage implements XMLPersistent {
                 final long date = XMLUtil.getElementLongValue(n, ID_DATE, 0L);
                 final long value = XMLUtil.getElementLongValue(n, ID_VALUE, 0L);
 
-                launchStats.put(Long.valueOf(date), Long.valueOf(value));
+                launchStats.put(date, value);
             }
 
             instanceStats.clear();
@@ -408,12 +413,13 @@ public class AuditStorage implements XMLPersistent {
                 final long date = XMLUtil.getElementLongValue(n, ID_DATE, 0L);
                 final long value = XMLUtil.getElementLongValue(n, ID_VALUE, 0L);
 
-                instanceStats.put(Long.valueOf(date), Long.valueOf(value));
+                instanceStats.put(date, value);
             }
 
             return true;
         }
 
+        @Contract("null -> false")
         @Override
         public boolean saveToXML(final Node node) {
             if (node == null)
@@ -422,19 +428,18 @@ public class AuditStorage implements XMLPersistent {
             for (final Entry<Long, Long> entry : launchStats.entrySet()) {
                 final Node n = XMLUtil.addElement(node, ID_LAUNCH);
 
-                XMLUtil.setElementLongValue(n, ID_DATE, entry.getKey().longValue());
-                XMLUtil.setElementLongValue(n, ID_VALUE, entry.getValue().longValue());
+                XMLUtil.setElementLongValue(n, ID_DATE, entry.getKey());
+                XMLUtil.setElementLongValue(n, ID_VALUE, entry.getValue());
             }
 
             for (final Entry<Long, Long> entry : instanceStats.entrySet()) {
                 final Node n = XMLUtil.addElement(node, ID_INSTANCE);
 
-                XMLUtil.setElementLongValue(n, ID_DATE, entry.getKey().longValue());
-                XMLUtil.setElementLongValue(n, ID_VALUE, entry.getValue().longValue());
+                XMLUtil.setElementLongValue(n, ID_DATE, entry.getKey());
+                XMLUtil.setElementLongValue(n, ID_VALUE, entry.getValue());
             }
 
             return true;
         }
     }
-
 }

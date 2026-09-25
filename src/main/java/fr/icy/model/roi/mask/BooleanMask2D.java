@@ -30,7 +30,7 @@ import java.util.*;
  * Class to define a 2D boolean mask region and make basic boolean operation between masks.<br>
  * The bounds property of this object represents the region defined by the boolean mask.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class BooleanMask2D implements Cloneable {
@@ -1663,7 +1663,7 @@ public class BooleanMask2D implements Cloneable {
 
         // some parts can't be connected --> display warning
         // if (!allPoints.isEmpty())
-        // System.out.println("Warning: can't connect some points...");
+        // System.out.println("Warning: can't connect some points…");
 
         return result;
     }

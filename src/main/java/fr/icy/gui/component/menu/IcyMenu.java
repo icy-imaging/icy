@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,11 +19,10 @@
 package fr.icy.gui.component.menu;
 
 import fr.icy.gui.LookAndFeelUtil;
-import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.gui.component.icon.IcyIconPack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import fr.icy.gui.component.icon.IcySVG;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 
@@ -38,7 +37,7 @@ public class IcyMenu extends JMenu {
     /**
      * Create a {@link JMenu} with specified text, SVG icons for each state (default, disabled and selected) and custom size.
      */
-    public IcyMenu(final @NotNull String text, final @NotNull IcyIconPack pack, final int size) {
+    public IcyMenu(final @NonNull String text, final @NonNull IcyIconPack pack, final int size) {
         super(text);
         iconPack = pack;
         iconSize = size;
@@ -48,28 +47,28 @@ public class IcyMenu extends JMenu {
     /**
      * Create a {@link JMenu} with specified text, SVG icons for each state (default, disabled and selected) and default size.
      */
-    public IcyMenu(final @NotNull String text, final @NotNull IcyIconPack pack) {
+    public IcyMenu(final @NonNull String text, final @NonNull IcyIconPack pack) {
         this(text, pack, LookAndFeelUtil.getDefaultIconSize());
     }
 
     /**
      * Create a {@link JMenu} with specified text, same SVG icon for each state (default, disabled and selected) and custom size.
      */
-    public IcyMenu(final @NotNull String text, final @NotNull SVGResource icon, final int size) {
+    public IcyMenu(final @NonNull String text, final @NonNull IcySVG icon, final int size) {
         this(text, new IcyIconPack(icon), size);
     }
 
     /**
      * Create a {@link JMenu} with specified text, same SVG icon for each state (default, disabled and selected) and default size.
      */
-    public IcyMenu(final @NotNull String text, final @NotNull SVGResource icon) {
+    public IcyMenu(final @NonNull String text, final @NonNull IcySVG icon) {
         this(text, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize());
     }
 
     /**
      * Create a {@link JMenu} with specified SVG icons for each state (default, disabled and selected) and custom size, but without text.
      */
-    public IcyMenu(final @NotNull IcyIconPack pack, final int size) {
+    public IcyMenu(final @NonNull IcyIconPack pack, final int size) {
         super();
         iconPack = pack;
         iconSize = size;
@@ -79,30 +78,30 @@ public class IcyMenu extends JMenu {
     /**
      * Create a {@link JMenu} with specified SVG icons for each state (default, disabled and selected) and default size, but without text.
      */
-    public IcyMenu(final @NotNull IcyIconPack pack) {
+    public IcyMenu(final @NonNull IcyIconPack pack) {
         this(pack, LookAndFeelUtil.getDefaultIconSize());
     }
 
     /**
      * Create a {@link JMenu} with same SVG icon for each state (default, disabled and selected) and custom size, but without text.
      */
-    public IcyMenu(final @NotNull SVGResource icon, final int size) {
+    public IcyMenu(final @NonNull IcySVG icon, final int size) {
         this(new IcyIconPack(icon), size);
     }
 
     /**
      * Create a {@link JMenu} with same SVG icon for each state (default, disabled and selected) and default size, but without text.
      */
-    public IcyMenu(final @NotNull SVGResource icon) {
+    public IcyMenu(final @NonNull IcySVG icon) {
         this(new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize());
     }
 
     /**
      * Create a {@link JMenu} with an empty SVG icon for each state (default, disabled and selected) and custom size.
      */
-    public IcyMenu(final @NotNull String text, final int size) {
+    public IcyMenu(final @NonNull String text, final int size) {
         super(text);
-        iconPack = new IcyIconPack(SVGResource.NULL);
+        iconPack = new IcyIconPack(IcySVG.NULL);
         iconSize = size;
         setSVGIcons();
     }
@@ -110,11 +109,11 @@ public class IcyMenu extends JMenu {
     /**
      * Create a {@link JMenu} with an empty SVG icon for each state (default, disabled and selected) and default size.
      */
-    public IcyMenu(final @NotNull String text) {
+    public IcyMenu(final @NonNull String text) {
         this(text, LookAndFeelUtil.getDefaultIconSize());
     }
 
-    protected final void setSVGIconPack(final @NotNull IcyIconPack pack) {
+    protected final void setSVGIconPack(final @NonNull IcyIconPack pack) {
         this.iconPack = pack;
         setSVGIcons();
     }
@@ -123,7 +122,7 @@ public class IcyMenu extends JMenu {
      * Set icon for each state (default, disabled, selected and disabled-selected).<br>
      * Internal use only.
      */
-    protected final void setIcons(final @NotNull Icon icon, final @NotNull Icon disabled, final @NotNull Icon selected, final @NotNull Icon disabledSelected) {
+    protected final void setIcons(final @NonNull Icon icon, final @NonNull Icon disabled, final @NonNull Icon selected, final @NonNull Icon disabledSelected) {
         iconDefault = icon;
         iconDisabled = disabled;
         iconSelected = selected;
@@ -136,7 +135,7 @@ public class IcyMenu extends JMenu {
      * Set icon for each state (default, disabled, selected and disabled-selected).<br>
      * Internal use only.
      */
-    protected final void setIcons(final @NotNull Icon icon, final @NotNull Icon selected) {
+    protected final void setIcons(final @NonNull Icon icon, final @NonNull Icon selected) {
         setIcons(icon, icon, selected, selected);
     }
 
@@ -144,7 +143,7 @@ public class IcyMenu extends JMenu {
      * Set icon for each state (default, disabled, selected and disabled-selected).<br>
      * Internal use only.
      */
-    protected final void setIcons(final @NotNull Icon icon) {
+    protected final void setIcons(final @NonNull Icon icon) {
         setIcons(icon, icon, icon, icon);
     }
 
@@ -156,10 +155,10 @@ public class IcyMenu extends JMenu {
         if (iconPack == null)
             return;
 
-        iconDefault = new IcySVG(iconPack.getDefaultIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_DEFAULT);
-        iconDisabled = new IcySVG(iconPack.getDisabledIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_DISABLED);
-        iconSelected = new IcySVG(iconPack.getSelectedtIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_SELECTED);
-        iconDisabledSelected = new IcySVG(iconPack.getDisabledSelectedIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_DISABLED);
+        iconDefault = iconPack.getDefaultIcon().getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_DEFAULT);
+        iconDisabled = iconPack.getDisabledIcon().getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_DISABLED);
+        iconSelected = iconPack.getSelectedIcon().getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_SELECTED);
+        iconDisabledSelected = iconPack.getDisabledSelectedIcon().getIcon(iconSize, LookAndFeelUtil.ColorType.MENU_DISABLED);
 
         resetIcons();
     }

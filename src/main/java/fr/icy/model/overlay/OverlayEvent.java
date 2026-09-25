@@ -21,7 +21,7 @@ import fr.icy.common.event.CollapsibleEvent;
 import fr.icy.common.string.StringUtil;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class OverlayEvent implements CollapsibleEvent
 {

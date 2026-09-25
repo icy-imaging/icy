@@ -53,10 +53,11 @@ import fr.icy.model.roi.*;
 import fr.icy.model.sequence.SequenceEvent.SequenceEventSourceType;
 import fr.icy.model.sequence.SequenceEvent.SequenceEventType;
 import fr.icy.model.sequence.edit.*;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.GeneralPreferences;
 import fr.icy.system.thread.ThreadUtil;
 import ome.xml.meta.OMEXMLMetadata;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Node;
 
 import javax.swing.undo.UndoManager;
@@ -67,6 +68,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Image sequence object.<br>
@@ -81,11 +84,13 @@ import java.util.Map.Entry;
  * information.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 
 public class Sequence implements SequenceModel, IcyColorModelListener, IcyBufferedImageListener, ChangeListener, ROIListener, OverlayListener, AutoCloseable {
+    private static final Logger LOGGER = Logger.getLogger(Sequence.class.getName());
+
     public static final String DEFAULT_NAME = "no name";
 
     public static final String ID_ID = "id";
@@ -170,7 +175,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * 0 --&gt; full image resolution<br>
      * 1 --&gt; resolution / 2<br>
      * 2 --&gt; resolution / 4<br>
-     * 3 --&gt; ...<br>
+     * 3 --&gt; …<br>
      * Default value is 0
      */
     protected int originResolution;
@@ -444,7 +449,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *
      * @param source sequence
      */
-    public void copyDataFrom(final Sequence source) throws InterruptedException {
+    public void copyDataFrom(final @NonNull Sequence source) throws InterruptedException {
         final int sizeT = source.getSizeT();
         final int sizeZ = source.getSizeZ();
 
@@ -477,7 +482,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param source   the source sequence to copy metadata from
      * @param copyName if set to <code>true</code> it will also copy the name from the source sequence
      */
-    public void copyMetaDataFrom(final Sequence source, final boolean copyName) {
+    public void copyMetaDataFrom(final @NonNull Sequence source, final boolean copyName) {
         // copy all metadata from source (preserve user name if we want to keep same name)
         metaData = OMEUtil.createOMEXMLMetadata(source.getOMEXMLMetadata(), !copyName);
 
@@ -669,10 +674,11 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
                 Loader.checkOpening(0, getSizeX(), getSizeY(), getSizeC(), getSizeZ(), getSizeT(), getDataType(), "");
             }
             catch (final OutOfMemoryError e) {
-                // better to keep trace of that in console...
-                IcyLogger.error(Sequence.class, e, "Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Not enough memory to set sequence data back in memory.", e);
 
-                throw new OutOfMemoryError("Sequence.setVolatile(false) error: not enough memory to set sequence data back in memory.");
+                //throw new OutOfMemoryError("Not enough memory to set sequence data back in memory.");
+                throw e;
             }
         }
 
@@ -687,6 +693,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
         }
         catch (final OutOfMemoryError e) {
             // not enough memory to complete the operation --> restore previous state
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Not enough memory. Restoring previous state.", e);
+
             for (final IcyBufferedImage image : getAllImage())
                 if (image != null)
                     image.setVolatile(!value);
@@ -780,7 +789,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
     /**
      * Set the origin filename (from/to which the sequence has been loaded/saved).<br>
-     * When you set the filename you need to ensure that "sub part" information are correctly reset (setOriginXXX(...)
+     * When you set the filename you need to ensure that "sub part" information are correctly reset (setOriginXXX(…)
      * methods) as this filename will be used to generate the XML persistent data file name.<br>
      * null / empty --&gt; no file attachment<br>
      * image file --&gt; single file attachment
@@ -807,7 +816,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * Set the {@link ImageProvider} used to load the sequence data.<br>
      * When you set the <i>ImageProvider</i> you need to ensure we can use it (should be opened for {@link SequenceIdImporter}).<br>
-     * Also "sub part" informations has to be correctly set (setOriginXXX(...) methods) as we may use it to retrieve sequence data from the
+     * Also "sub part" informations has to be correctly set (setOriginXXX(…) methods) as we may use it to retrieve sequence data from the
      * {@link ImageProvider}.
      *
      * @param value image
@@ -943,7 +952,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * 1 --&gt; original resolution / 2<br>
      * 2 --&gt; original resolution / 4<br>
      * 3 --&gt; original resolution / 8<br>
-     * ...
+     * …
      */
     public int getOriginResolution() {
         return originResolution;
@@ -1672,7 +1681,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param value If set to <code>true</code> (default) then channel bounds will be automatically recalculated
      *              when sequence data is modified.<br>
      *              This can consume a lot of time if you make many updates on large sequence.<br>
-     *              In this case you should do your updates in a {@link #beginUpdate()} ... {@link #endUpdate()} block to avoid
+     *              In this case you should do your updates in a {@link #beginUpdate()} … {@link #endUpdate()} block to avoid
      *              severals recalculation.
      */
     public void setAutoUpdateChannelBounds(final boolean value) {
@@ -1820,7 +1829,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return true if the sequence contains at least one ROI.
      */
     public boolean hasROI() {
-        return rois.size() > 0;
+        return !rois.isEmpty();
     }
 
     /**
@@ -2269,7 +2278,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @return <code>true</code> if the operation succeed or <code>false</code> if some ROIs could
      * not be added (already present)
      */
-    public boolean addROIs(final Collection<? extends ROI> rois, final boolean canUndo) {
+    public boolean addROIs(final @NonNull Collection<? extends ROI> rois, final boolean canUndo) {
         if (!rois.isEmpty()) {
             final List<ROI> addedRois = new ArrayList<>();
 
@@ -2376,7 +2385,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param canUndo If true the action can be canceled by the undo manager.
      * @return <code>true</code> if all ROI from the collection has been correctly removed.
      */
-    public boolean removeROIs(final Collection<? extends ROI> rois, final boolean canUndo) {
+    public boolean removeROIs(final @NonNull Collection<? extends ROI> rois, final boolean canUndo) {
         if (!rois.isEmpty()) {
             final List<ROI> removedRois = new ArrayList<>();
 
@@ -2768,9 +2777,9 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * T=0 Z=0
      * T=0 Z=1
      * T=0 Z=2
-     * ...
+     * …
      * T=1 Z=0
-     * ...
+     * …
      *         </pre>
      */
     public ArrayList<IcyBufferedImage> getAllImage() {
@@ -3142,7 +3151,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     /**
      * @return the size of the specified dimension
      */
-    public int getSize(final DimensionId dim) {
+    public int getSize(final @NonNull DimensionId dim) {
         return switch (dim) {
             case X -> getSizeX();
             case Y -> getSizeY();
@@ -3408,6 +3417,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * @param bounds    2D array
      * @return Internal use only.
      */
+    @Contract("_, null -> param1")
     private static double[][] adjustBounds(final double[][] curBounds, final double[][] bounds) {
         if (bounds == null)
             return curBounds;
@@ -3430,7 +3440,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      * Internal use only.
      */
     protected void recalculateAllImageChannelsBounds() {
-        // nothing to do...
+        // nothing to do…
         if ((colorModel == null) || isEmpty())
             return;
 
@@ -3456,7 +3466,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     protected void internalUpdateChannelsBounds() {
         final IcyColorModel cm = colorModel;
 
-        // nothing to do...
+        // nothing to do…
         if ((cm == null) || isEmpty())
             return;
 
@@ -4549,7 +4559,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyXYCZAsByte(t, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -4578,7 +4588,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyXYCZAsShort(t, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -4607,7 +4617,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyXYCZAsInt(t, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -4636,7 +4646,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyXYCZAsFloat(t, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -4665,7 +4675,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyXYCZAsDouble(t, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -4696,7 +4706,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYCAsByte(t, z, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -4726,7 +4736,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYCAsShort(t, z, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -4756,7 +4766,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYCAsInt(t, z, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -4787,7 +4797,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYCAsFloat(t, z, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -4818,7 +4828,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYCAsDouble(t, z, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5107,7 +5117,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyCXYZAsByte(t, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5136,7 +5146,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyCXYZAsShort(t, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5165,7 +5175,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyCXYZAsInt(t, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5194,7 +5204,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyCXYZAsFloat(t, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5223,7 +5233,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyCXYZAsDouble(t, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5254,7 +5264,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyCXYAsByte(t, z, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5285,7 +5295,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyCXYAsShort(t, z, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5315,7 +5325,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyCXYAsInt(t, z, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5346,7 +5356,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyCXYAsFloat(t, z, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5377,7 +5387,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyCXYAsDouble(t, z, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5679,7 +5689,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyXYZAsByte(t, c, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5710,7 +5720,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyXYZAsShort(t, c, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5741,7 +5751,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyXYZAsInt(t, c, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5772,7 +5782,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyXYZAsFloat(t, c, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5803,7 +5813,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int t = 0; t < sizeT; t++) {
             getDataCopyXYZAsDouble(t, c, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5836,7 +5846,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYAsByte(t, z, c, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5869,7 +5879,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYAsShort(t, z, c, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5902,7 +5912,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYAsInt(t, z, c, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5935,7 +5945,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYAsFloat(t, z, c, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -5967,7 +5977,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
 
         for (int z = 0; z < sizeZ; z++) {
             getDataCopyXYAsDouble(t, z, c, result, offset);
-            offset += len;
+            offset += (int) len;
         }
 
         return result;
@@ -6130,7 +6140,8 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
             retry++;
         }
 
-        IcyLogger.error(Sequence.class, exc, "Error while saving Sequence XML persistent data.");
+        if (LOGGER.isLoggable(Level.SEVERE))
+            LOGGER.log(Level.SEVERE, "Failed to save XML data", exc);
 
         return false;
     }
@@ -6367,7 +6378,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
      *              Use {@link #overlayChanged(Overlay)} instead.
      */
     @Override
-    public void overlayChanged(final OverlayEvent event) {
+    public void overlayChanged(final @NonNull OverlayEvent event) {
         // only take care about overlay painter change here (need redraw)
         if (event.getType() == OverlayEventType.PAINTER_CHANGED)
             overlayChanged(event.getSource(), SequenceEventType.CHANGED);
@@ -6406,7 +6417,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     @Override
-    public void colorModelChanged(final IcyColorModelEvent e) {
+    public void colorModelChanged(final @NonNull IcyColorModelEvent e) {
         switch (e.getType()) {
             case COLORMAP_CHANGED:
                 colormapChanged(e.getColorModel(), e.getComponent());
@@ -6419,7 +6430,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     @Override
-    public void imageChanged(final IcyBufferedImageEvent e) {
+    public void imageChanged(final @NonNull IcyBufferedImageEvent e) {
         final IcyBufferedImage image = e.getImage();
 
         switch (e.getType()) {
@@ -6447,7 +6458,7 @@ public class Sequence implements SequenceModel, IcyColorModelListener, IcyBuffer
     }
 
     @Override
-    public void roiChanged(final ROIEvent event) {
+    public void roiChanged(final @NonNull ROIEvent event) {
         // notify the ROI has changed
         roiChanged(event.getSource(), SequenceEventType.CHANGED);
     }

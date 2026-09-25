@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class Interpolator
 {

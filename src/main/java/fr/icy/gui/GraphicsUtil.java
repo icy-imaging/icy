@@ -46,7 +46,7 @@ import java.awt.geom.RoundRectangle2D;
 /**
  * Graphics utilities class.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class GraphicsUtil
 {
@@ -263,7 +263,7 @@ public class GraphicsUtil
         }
 
         if (changed)
-            return str.trim() + "...";
+            return str.trim() + "…";
 
         return text;
     }

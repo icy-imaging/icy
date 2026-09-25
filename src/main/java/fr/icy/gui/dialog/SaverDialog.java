@@ -41,7 +41,7 @@ import java.io.File;
 /**
  * Saver dialog used to save resource or image from the <code>loci.plugins.out.Exporter</code> or {@link SequenceFileExporter}.
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @see Saver
  */
 public class SaverDialog extends JFileChooser {
@@ -196,7 +196,7 @@ public class SaverDialog extends JFileChooser {
                 accepted = true;
         }
 
-        // only if accepted...
+        // only if accepted…
         if (accepted) {
             File file = getSelectedFile();
             final String outFilename = file.getAbsolutePath();

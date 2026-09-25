@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,7 +19,8 @@
 package fr.icy.gui.component.panel;
 
 import fr.icy.gui.component.button.IcyButton;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
+import org.intellij.lang.annotations.MagicConstant;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,10 +29,11 @@ import java.util.ArrayList;
 /**
  * Basically a JTabbedPane which can handle ExternalizablePanel.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class ExtTabbedPanel extends JTabbedPane {
     public static class TabComponent extends JPanel {
         final ExternalizablePanel extPanel;
@@ -58,7 +60,7 @@ public class ExtTabbedPanel extends JTabbedPane {
             label = new JLabel(title + " ", icon, SwingConstants.CENTER);
             label.setOpaque(false);
 
-            externButton = new IcyButton(SVGResource.OPEN_IN_NEW);
+            externButton = new IcyButton(IcySVG.OPEN_IN_NEW);
             externButton.setOpaque(false);
             externButton.setContentAreaFilled(false);
             externButton.setToolTipText("Externalize panel");
@@ -110,11 +112,11 @@ public class ExtTabbedPanel extends JTabbedPane {
         this(TOP, WRAP_TAB_LAYOUT);
     }
 
-    public ExtTabbedPanel(final int tabPlacement) {
+    public ExtTabbedPanel(final @MagicConstant(intValues = {TOP, BOTTOM, LEFT, RIGHT}) int tabPlacement) {
         this(tabPlacement, WRAP_TAB_LAYOUT);
     }
 
-    public ExtTabbedPanel(final int tabPlacement, final int tabLayoutPolicy) {
+    public ExtTabbedPanel(final @MagicConstant(intValues = {TOP, BOTTOM, LEFT, RIGHT}) int tabPlacement, final @MagicConstant(intValues = {WRAP_TAB_LAYOUT, SCROLL_TAB_LAYOUT}) int tabLayoutPolicy) {
         super(tabPlacement, tabLayoutPolicy);
 
         tabComponents = new ArrayList<>();
@@ -140,8 +142,7 @@ public class ExtTabbedPanel extends JTabbedPane {
             // already existing ?
             if (tabComp != null) {
                 // use its parameter
-                insertTab(tabComp.getTitle(), tabComp.getIcon(), component, tabComp.tip,
-                        Math.min(tabComp.index, getTabCount()));
+                insertTab(tabComp.getTitle(), tabComp.getIcon(), component, tabComp.tip, Math.min(tabComp.index, getTabCount()));
                 return component;
             }
         }

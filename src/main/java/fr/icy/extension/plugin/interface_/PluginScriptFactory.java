@@ -23,7 +23,7 @@ import javax.script.ScriptEngineFactory;
 /**
  * Plugin interface to provide scripting language factory (see {@link ScriptEngineFactory})
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)

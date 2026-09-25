@@ -34,13 +34,14 @@ import javax.media.jai.operator.ScaleDescriptor;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
  * {@link IcyBufferedImage} utilities class.<br>
- * You can find here tools to clone, manipulate the image data type, its size...
+ * You can find here tools to clone, manipulate the image data type, its size…
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class IcyBufferedImageUtil {
     public enum FilterType {
@@ -66,7 +67,7 @@ public class IcyBufferedImageUtil {
 
         result = Objects.requireNonNullElseGet(dest, () -> new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_ARGB));
 
-        // else we need to convert to wanted type...
+        // else we need to convert to wanted type…
         final Graphics2D g = result.createGraphics();
         // we don't want to blend over previous image (if any)
         g.setComposite(AlphaComposite.Src);

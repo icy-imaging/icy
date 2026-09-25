@@ -37,9 +37,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Canvas associated actions (disable/enable layers, fit, remove layer...)
+ * Canvas associated actions (disable/enable layers, fit, remove layer, etc.)
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class CanvasActions {
@@ -178,7 +178,7 @@ public final class CanvasActions {
             "Screenshot (view)",
             "Take a screenshot of current view",
             true,
-            "Rendering..."
+            "Rendering…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -218,7 +218,7 @@ public final class CanvasActions {
             "Screenshot (global)",
             "Take a screenshot of current view with original sequence dimension",
             true,
-            "Rendering..."
+            "Rendering…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {

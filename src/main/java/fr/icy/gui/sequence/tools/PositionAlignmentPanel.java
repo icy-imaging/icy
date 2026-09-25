@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,8 +19,9 @@
 package fr.icy.gui.sequence.tools;
 
 import fr.icy.gui.component.button.IcyToggleButton;
-import fr.icy.gui.component.icon.SVGResource;
-import org.jetbrains.annotations.NotNull;
+import fr.icy.gui.component.icon.IcySVG;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -29,30 +30,36 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PositionAlignmentPanel extends JPanel {
     static class PositionBox extends IcyToggleButton {
         enum Position {
-            CENTER(SVGResource.RECENTER),
-            TOP(SVGResource.NORTH), BOTTOM(SVGResource.SOUTH),
-            LEFT(SVGResource.WEST), RIGHT(SVGResource.EAST),
-            TOP_LEFT(SVGResource.NORTH_WEST), TOP_RIGHT(SVGResource.NORTH_EAST),
-            BOTTOM_LEFT(SVGResource.SOUTH_WEST), BOTTOM_RIGHT(SVGResource.SOUTH_EAST);
+            CENTER(IcySVG.RECENTER),
+            TOP(IcySVG.NORTH),
+            BOTTOM(IcySVG.SOUTH),
+            LEFT(IcySVG.WEST),
+            RIGHT(IcySVG.EAST),
+            TOP_LEFT(IcySVG.NORTH_WEST),
+            TOP_RIGHT(IcySVG.NORTH_EAST),
+            BOTTOM_LEFT(IcySVG.SOUTH_WEST),
+            BOTTOM_RIGHT(IcySVG.SOUTH_EAST);
 
-            private final @NotNull SVGResource icon;
+            private final @NonNull IcySVG icon;
 
-            Position(final @NotNull SVGResource icon) {
+            @Contract(pure = true)
+            Position(final @NonNull IcySVG icon) {
                 this.icon = icon;
             }
 
-            @NotNull SVGResource getIcon() {
+            @Contract(pure = true)
+            @NonNull IcySVG getIcon() {
                 return icon;
             }
         }
 
-        PositionBox(final @NotNull Position position) {
+        PositionBox(final @NonNull Position position) {
             super(position.getIcon());
         }
     }

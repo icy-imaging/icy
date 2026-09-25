@@ -20,7 +20,7 @@ package fr.icy.model.colormap;
 import java.util.EventListener;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public interface IcyColorMapListener extends EventListener
 {

@@ -23,7 +23,7 @@ import fr.icy.common.string.StringUtil;
 /**
  * display a loading TaskFrame
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class FileFrame extends CancelableProgressFrame
 {
@@ -44,7 +44,7 @@ public class FileFrame extends CancelableProgressFrame
             return "";
 
         if (StringUtil.isEmpty(text))
-            return super.buildMessage(action + "...");
+            return super.buildMessage(action + "…");
 
         return super.buildMessage(action + " " + text);
     }

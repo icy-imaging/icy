@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class ROI2D extends ROI {
@@ -193,7 +193,7 @@ public abstract class ROI2D extends ROI {
             // do parent stuff
             super.mouseDrag(e, imagePoint, canvas);
 
-            // not yet consumed and ROI editable...
+            // not yet consumed and ROI editable…
             if (!e.isConsumed() && !isReadOnly()) {
                 // check we can do the action
                 if (imagePoint != null) {
@@ -1088,7 +1088,7 @@ public abstract class ROI2D extends ROI {
 
         final ROI2D result = (ROI2D) getCopy();
 
-        // copy can fail...
+        // copy can fail…
         if (result != null) {
             // set Z, T, C position
             if (z != -1)

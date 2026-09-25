@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,16 +18,16 @@
 
 package fr.icy.gui.toolbar.button;
 
+import fr.icy.common.math.UnitUtil;
 import fr.icy.gui.LookAndFeelUtil;
 import fr.icy.gui.action.PreferencesActions;
 import fr.icy.gui.component.button.IcyButton;
 import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.menu.IcyMenuItem;
-import fr.icy.common.math.UnitUtil;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,21 +35,24 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Logger;
 
 /**
  * @author Thomas Musset
  */
 public final class MemoryMonitorButton extends IcyButton implements MouseListener {
+    private static final Logger LOGGER = Logger.getLogger(MemoryMonitorButton.class.getName());
+
     private static final int ICON_SIZE = LookAndFeelUtil.getDefaultIconSize();
 
-    private final Icon OK = new IcySVG(SVGResource.CHECK_CIRCLE).getIcon(ICON_SIZE, Color.GREEN.darker());
-    private final Icon WARN = new IcySVG(SVGResource.WARNING).getIcon(ICON_SIZE, Color.YELLOW.darker());
-    private final Icon ERROR = new IcySVG(SVGResource.ERROR).getIcon(ICON_SIZE, Color.RED.darker());
+    private final Icon OK = IcySVG.CHECK_CIRCLE.getIcon(ICON_SIZE, Color.GREEN.darker());
+    private final Icon WARN = IcySVG.WARNING.getIcon(ICON_SIZE, Color.YELLOW.darker());
+    private final Icon ERROR = IcySVG.ERROR.getIcon(ICON_SIZE, Color.RED.darker());
 
     private final JPopupMenu popup;
 
     public MemoryMonitorButton() {
-        super("CPU: 0% | RAM: 0%", SVGResource.CHECK_CIRCLE);
+        super("CPU: 0% | RAM: 0%", IcySVG.CHECK_CIRCLE);
         setFlat(true);
         setHorizontalAlignment(JButton.LEFT);
         setIcon(OK);
@@ -58,9 +61,9 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
         addMouseListener(this);
 
         popup = new JPopupMenu();
-        final IcyMenuItem settings = new IcyMenuItem("Open Settings...", SVGResource.SETTINGS);
+        final IcyMenuItem settings = new IcyMenuItem("Open Settings…", IcySVG.SETTINGS);
         settings.addActionListener(PreferencesActions.generalPreferencesAction);
-        final IcyMenuItem GB = new IcyMenuItem("Free Java Memory", SVGResource.DELETE_SWEEP);
+        final IcyMenuItem GB = new IcyMenuItem("Free Java Memory", IcySVG.DELETE_SWEEP);
         GB.addActionListener(e -> forceGC());
         popup.add(settings);
         popup.addSeparator();
@@ -111,7 +114,7 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
             final double released = freeAfter - freeBefore;
             final double usedMemory = SystemUtil.getJavaUsedMemory();
 
-            IcyLogger.info(MemoryMonitorButton.class, String.format(
+            LOGGER.info(String.format(
                     "Max | Used memory: %s | %s (released by GC: %s)",
                     UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory()),
                     UnitUtil.getBytesString((usedMemory > 0) ? usedMemory : 0),
@@ -126,7 +129,7 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
      * @param e {@inheritDoc}
      */
     @Override
-    public void mouseClicked(final MouseEvent e) {
+    public void mouseClicked(final @NonNull MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1)
             forceGC();
         else if (e.getButton() == MouseEvent.BUTTON3)
@@ -138,6 +141,7 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
      *
      * @param e {@inheritDoc}
      */
+    @Contract(pure = true)
     @Override
     public void mousePressed(final MouseEvent e) {
 
@@ -148,6 +152,7 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
      *
      * @param e {@inheritDoc}
      */
+    @Contract(pure = true)
     @Override
     public void mouseReleased(final MouseEvent e) {
 
@@ -158,6 +163,7 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
      *
      * @param e {@inheritDoc}
      */
+    @Contract(pure = true)
     @Override
     public void mouseEntered(final MouseEvent e) {
 
@@ -168,6 +174,7 @@ public final class MemoryMonitorButton extends IcyButton implements MouseListene
      *
      * @param e {@inheritDoc}
      */
+    @Contract(pure = true)
     @Override
     public void mouseExited(final MouseEvent e) {
 

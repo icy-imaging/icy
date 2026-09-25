@@ -41,7 +41,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class NetworkPreferencePanel extends PreferencePanel implements ActionListener, TextChangeListener,
         ChangeListener, DocumentListener

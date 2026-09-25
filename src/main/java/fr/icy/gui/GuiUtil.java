@@ -36,7 +36,7 @@ import java.util.Objects;
  * This class is a toolbox with many simple GUI routines.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class GuiUtil {

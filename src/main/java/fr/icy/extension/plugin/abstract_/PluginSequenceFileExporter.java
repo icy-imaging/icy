@@ -25,7 +25,7 @@ import fr.icy.extension.plugin.interface_.PluginNoEDTConstructor;
  * Plugin specialized for Sequence file export operation (see the {@link SequenceFileExporter}
  * interface)
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  * @see PluginSequenceExporter
  */

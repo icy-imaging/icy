@@ -31,7 +31,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequenceMetadataPanel extends JPanel
 {
@@ -53,7 +53,7 @@ public class SequenceMetadataPanel extends JPanel
         final JTree tree = new JTree();
         tree.setVisible(false);
 
-        final JLabel loading = new JLabel("loading...");
+        final JLabel loading = new JLabel("loading…");
 
         add(loading, BorderLayout.NORTH);
         add(new JScrollPane(tree), BorderLayout.CENTER);

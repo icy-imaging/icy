@@ -28,7 +28,7 @@ import vtk.vtkPolyDataMapper;
 /**
  * Class helper to draw VTK arrow object
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class VtkArrowObject
 {

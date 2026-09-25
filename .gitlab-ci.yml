@@ -168,7 +168,7 @@ release-job:
 #  dependencies:
 #    - package-job
 #  before_script:
-#    - echo "Checking POM file..."
+#    - echo "Checking POM file…"
 #    - export JAR_VERSION=$(cat pom.xml | sed '2 s/xmlns=".*"//g' | xmllint --xpath 'string(//project/version)' -)
 #    - if [[ $JAR_VERSION =~ .*SNAPSHOT ]]; then exit 0; else >&2 echo "Impossible to send artifact to the Nexus, the application is in SNAPSHOT version"; fi
 #  script:
@@ -190,7 +190,7 @@ release-job:
 #    - package-job
 #  before_script:
 #    - mkdir release
-#    - echo "Opening Icy... "
+#    - echo "Opening Icy…"
 #    - cd build/icy && java -jar icy.jar -hl
 #  script:
 #    - echo "Creating Icy for Windows zip"

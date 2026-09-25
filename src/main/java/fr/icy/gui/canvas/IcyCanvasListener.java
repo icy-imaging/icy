@@ -20,7 +20,7 @@ package fr.icy.gui.canvas;
 import java.util.EventListener;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface IcyCanvasListener extends EventListener
 {

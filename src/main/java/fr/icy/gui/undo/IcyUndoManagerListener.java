@@ -20,7 +20,7 @@ package fr.icy.gui.undo;
 import java.util.EventListener;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface IcyUndoManagerListener extends EventListener
 {

@@ -24,7 +24,7 @@ import fr.icy.model.sequence.SequenceExporter;
 /**
  * Plugin specialized for Sequence export operation (see the {@link SequenceExporter} interface)
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  * @see PluginSequenceFileExporter
  */

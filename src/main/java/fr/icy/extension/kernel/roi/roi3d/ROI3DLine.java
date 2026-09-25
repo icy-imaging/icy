@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -25,12 +25,13 @@ import fr.icy.common.geom.point.Point5D;
 import fr.icy.common.geom.rectangle.Rectangle3D;
 import fr.icy.gui.canvas.IcyCanvas;
 import fr.icy.gui.canvas.VtkCanvas;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.render.IcyVtkPanel;
 import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.anchor.Anchor3D;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.sequence.Sequence;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Node;
 import vtk.vtkTubeFilter;
 
@@ -42,7 +43,7 @@ import java.util.List;
 /**
  * ROI 3D Line.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI3DLine extends ROI3DShape {
@@ -176,10 +177,8 @@ public class ROI3DLine extends ROI3DShape {
     protected final Anchor3D pt2;
 
     /**
-     * @param pt1
-     *        start point
-     * @param pt2
-     *        end point
+     * @param pt1 start point
+     * @param pt2 end point
      */
     public ROI3DLine(final Point3D pt1, final Point3D pt2) {
         super(new Line3D());
@@ -193,24 +192,22 @@ public class ROI3DLine extends ROI3DShape {
         addPoint(this.pt2);
 
         // set icon
-        setIcon(SVGResource.LINE);
+        setIcon(IcySVG.LINE);
     }
 
     /**
      * Create 3D line ROI
      *
-     * @param line
-     *        source 3D line
+     * @param line source 3D line
      */
-    public ROI3DLine(final Line3D line) {
+    public ROI3DLine(final @NonNull Line3D line) {
         this(line.getP1(), line.getP2());
     }
 
     /**
      * Create 3D line ROI
      *
-     * @param pt
-     *        source 3D point
+     * @param pt source 3D point
      */
     public ROI3DLine(final Point3D pt) {
         this(new Point3D.Double(pt.getX(), pt.getY(), pt.getZ()), pt);
@@ -219,10 +216,9 @@ public class ROI3DLine extends ROI3DShape {
     /**
      * Generic constructor for interactive mode
      *
-     * @param pt
-     *        source 5D point
+     * @param pt source 5D point
      */
-    public ROI3DLine(final Point5D pt) {
+    public ROI3DLine(final @NonNull Point5D pt) {
         this(pt.toPoint3D());
         // getOverlay().setMousePos(pt);
     }
@@ -230,18 +226,12 @@ public class ROI3DLine extends ROI3DShape {
     /**
      * Create 3D line ROI
      *
-     * @param x1
-     *        start point X coordinate
-     * @param y1
-     *        start point Y coordinate
-     * @param z1
-     *        start point Z coordinate
-     * @param x2
-     *        end point X coordinate
-     * @param y2
-     *        end point Y coordinate
-     * @param z2
-     *        end point Z coordinate
+     * @param x1 start point X coordinate
+     * @param y1 start point Y coordinate
+     * @param z1 start point Z coordinate
+     * @param x2 end point X coordinate
+     * @param y2 end point Y coordinate
+     * @param z2 end point Z coordinate
      */
     public ROI3DLine(final double x1, final double y1, final double z1, final double x2, final double y2, final double z2) {
         this(new Point3D.Double(x1, y1, z1), new Point3D.Double(x2, y2, z2));
@@ -303,7 +293,7 @@ public class ROI3DLine extends ROI3DShape {
     }
 
     @Override
-    public void setBounds3D(final Rectangle3D bounds) {
+    public void setBounds3D(final @NonNull Rectangle3D bounds) {
         beginUpdate();
         try {
             pt1.setPosition(bounds.getMinX(), bounds.getMinY(), bounds.getMinZ());
@@ -317,10 +307,9 @@ public class ROI3DLine extends ROI3DShape {
     /**
      * Set ROI from shape
      *
-     * @param line
-     *        3D line shape
+     * @param line 3D line shape
      */
-    public void setLine(final Line3D line) {
+    public void setLine(final @NonNull Line3D line) {
         setBounds3D(line.getBounds());
     }
 
@@ -344,7 +333,7 @@ public class ROI3DLine extends ROI3DShape {
         return result;
     }
 
-    public static void drawLine3DInBooleanMask2D(final Rectangle bounds2d, final boolean[] result, final int z, final Point3D p1, final Point3D p2) {
+    public static void drawLine3DInBooleanMask2D(final Rectangle bounds2d, final boolean[] result, final int z, final @NonNull Point3D p1, final @NonNull Point3D p2) {
         final Line2D l = new Line2D.Double(p1.getX(), p1.getY(), p2.getX(), p2.getY());
 
         // 2D intersection ?

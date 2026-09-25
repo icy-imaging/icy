@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,11 +22,11 @@ import fr.icy.extension.ExtensionLoader;
 import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.gui.action.GeneralActions;
 import fr.icy.gui.action.PreferencesActions;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.menu.IcyMenu;
 import fr.icy.gui.component.menu.IcyMenuItem;
 import fr.icy.gui.component.menu.IcyPluginMenuItem;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
 
 import javax.swing.*;
 import java.util.*;
@@ -35,29 +35,26 @@ import java.util.*;
  * @author Thomas Musset
  */
 public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
-    @NotNull
     private static final ApplicationMenuPlugins instance = new ApplicationMenuPlugins();
 
-    @NotNull
+    @Contract(pure = true)
     public static synchronized ApplicationMenuPlugins getInstance() {
         return instance;
     }
 
-    @NotNull
     private final IcyMenuItem itemPluginsSettings;
     private final IcyMenuItem itemPluginsReload;
-    private final IcyMenuItem itemCatalog;
-    //@NotNull
+    //private final IcyMenuItem itemCatalog;
     //private final IcyTextFieldHint itemPluginSearch;
 
     private ApplicationMenuPlugins() {
         super("Plugins");
 
-        itemPluginsSettings = new IcyMenuItem(PreferencesActions.pluginPreferencesAction, SVGResource.SETTINGS);
-        itemPluginsReload = new IcyMenuItem(GeneralActions.reloadPluginsAction, SVGResource.REPEAT);
-        itemCatalog = new IcyMenuItem(GeneralActions.catalogAction, SVGResource.WIDGETS);
+        itemPluginsSettings = new IcyMenuItem(PreferencesActions.pluginPreferencesAction, IcySVG.SETTINGS);
+        itemPluginsReload = new IcyMenuItem(GeneralActions.reloadPluginsAction, IcySVG.REPEAT);
+        //itemCatalog = new IcyMenuItem(GeneralActions.catalogAction, IcySVG.WIDGETS);
 
-        //itemPluginSearch = new IcyTextFieldHint(SVGIcon.SEARCH, "Search Plugin...");
+        //itemPluginSearch = new IcyTextFieldHint(SVGIcon.SEARCH, "Search Plugin…");
         //itemPluginSearch.setEnabled(false);
 
         // wait for plugin reload
@@ -111,7 +108,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
             }
 
             for (final Map.Entry<Character, List<PluginDescriptor>> characterListEntry : characterListMap.entrySet()) {
-                final IcyMenu menuFirstChar = new IcyMenu(characterListEntry.getKey().toString(), SVGResource.FOLDER);
+                final IcyMenu menuFirstChar = new IcyMenu(characterListEntry.getKey().toString(), IcySVG.FOLDER);
                 for (final PluginDescriptor plugin : characterListEntry.getValue()) {
                     final IcyPluginMenuItem itemPlugin = new IcyPluginMenuItem(plugin);
                     if (!plugin.getShortDescription().isBlank())

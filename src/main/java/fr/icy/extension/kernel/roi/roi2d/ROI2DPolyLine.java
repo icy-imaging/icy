@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,16 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.extension.kernel.roi.roi2d;
 
 import fr.icy.common.geom.point.Point2DUtil;
 import fr.icy.common.geom.point.Point5D;
 import fr.icy.common.geom.poly.Polyline2D;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.anchor.Anchor2D;
 import fr.icy.model.overlay.anchor.LineAnchor2D;
 import fr.icy.model.roi.ROI;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -36,7 +38,7 @@ import java.awt.image.DataBufferByte;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI2DPolyLine extends ROI2DShape {
@@ -77,13 +79,13 @@ public class ROI2DPolyLine extends ROI2DShape {
         addPoint(point);
 
         // set icon (default name is defined by getDefaultName())
-        setIcon(SVGResource.ROI_POLYLINE);
+        setIcon(IcySVG.ROI_POLYLINE);
     }
 
     /**
      * Generic constructor for interactive mode
      */
-    public ROI2DPolyLine(final Point5D pt) {
+    public ROI2DPolyLine(final @NonNull Point5D pt) {
         this(pt.toPoint2D());
         // getOverlay().setMousePos(pt);
     }
@@ -120,7 +122,7 @@ public class ROI2DPolyLine extends ROI2DShape {
         return new ROI2DPolyLineAnchor2D(pos, getColor(), getFocusedColor());
     }
 
-    public void setPoints(final List<Point2D> pts) {
+    public void setPoints(final @NonNull List<Point2D> pts) {
         beginUpdate();
         try {
             final List<Anchor2D> ctrlPts = getControlPoints();
@@ -151,7 +153,7 @@ public class ROI2DPolyLine extends ROI2DShape {
         return (Polyline2D) shape;
     }
 
-    public void setPolyline2D(final Polyline2D polyline2D) {
+    public void setPolyline2D(final @NonNull Polyline2D polyline2D) {
         setPoints(polyline2D.getPoints());
     }
 

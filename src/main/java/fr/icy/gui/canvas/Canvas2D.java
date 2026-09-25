@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,7 +18,6 @@
 
 package fr.icy.gui.canvas;
 
-import fr.icy.Icy;
 import fr.icy.common.geom.rectangle.Rectangle2DUtil;
 import fr.icy.common.geom.rectangle.Rectangle5D;
 import fr.icy.common.geom.shape.ShapeUtil;
@@ -27,14 +26,14 @@ import fr.icy.common.math.MathUtil;
 import fr.icy.common.math.MultiSmoothMover;
 import fr.icy.common.math.SmoothMover;
 import fr.icy.common.string.StringUtil;
+import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.gui.EventUtil;
 import fr.icy.gui.GraphicsUtil;
 import fr.icy.gui.GuiUtil;
 import fr.icy.gui.LookAndFeelUtil;
 import fr.icy.gui.component.button.IcyButton;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
-import fr.icy.gui.listener.ROIToolChangeListener;
+import fr.icy.gui.toolbar.ROIBar;
 import fr.icy.gui.viewer.Viewer;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.image.IcyBufferedImageUtil;
@@ -50,10 +49,11 @@ import fr.icy.model.roi.tool.ROIMagicWand;
 import fr.icy.model.sequence.DimensionId;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent;
+import fr.icy.shared.logging.CustomLevel;
 import fr.icy.system.preferences.CanvasPreferences;
 import fr.icy.system.preferences.XMLPreferences;
 import fr.icy.system.thread.SingleProcessor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,19 +65,22 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
+public class Canvas2D extends IcyCanvas2D {
+    private static final Logger LOGGER = Logger.getLogger(Canvas2D.class.getName());
+
     static final int ICON_TARGET_SIZE = LookAndFeelUtil.getDefaultIconSize();
 
-    static final Image ICON_TARGET_BLACK = new IcySVG(SVGResource.POINT_SCAN).getImage(ICON_TARGET_SIZE, Color.BLACK);
-    static final Image ICON_TARGET_LIGHT = new IcySVG(SVGResource.POINT_SCAN).getImage(ICON_TARGET_SIZE, Color.WHITE);
+    static final Image ICON_TARGET_BLACK = IcySVG.POINT_SCAN.getImage(ICON_TARGET_SIZE, Color.BLACK);
+    static final Image ICON_TARGET_LIGHT = IcySVG.POINT_SCAN.getImage(ICON_TARGET_SIZE, Color.WHITE);
 
     /**
-     * Possible rounded zoom factor : 0.01 --> 100
+     * Possible rounded zoom factor: 0.01 --> 100
      */
     final static double[] zoomRoundedFactors = new double[]{
             0.01d, 0.02d, 0.0333d, 0.05d, 0.075d, 0.1d, 0.15d, 0.2d, 0.25d, 0.333d, 0.5d, 0.66d, 0.75d, 1d,
@@ -222,8 +225,6 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
         updateZNav();
         updateTNav();
-
-        Icy.getMainInterface().addROIToolChangeListener(this);
     }
 
     @Override
@@ -234,8 +235,6 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
         // shutdown mover object (else internal timer keep a reference to Canvas2D)
         smoothTransform.shutDown();
-
-        Icy.getMainInterface().removeROIToolChangeListener(this);
     }
 
     @Override
@@ -257,7 +256,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         panel.add(canvasMap, BorderLayout.CENTER);
 
         // fit canvas toggle
-        zoomFitCanvasButton = new IcyButton(SVGResource.ZOOM_OUT_MAP);
+        zoomFitCanvasButton = new IcyButton(IcySVG.ZOOM_OUT_MAP);
         //zoomFitCanvasButton.setSelected(preferences.getBoolean(ID_FIT_CANVAS, false));
         zoomFitCanvasButton.setFocusable(false);
         //zoomFitCanvasButton.setToolTipText("Keep image fitting to window size");
@@ -948,7 +947,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * Synchronize views of specified list of canvas
      */
     @Override
-    protected void synchronizeCanvas(final List<IcyCanvas> canvasList, final IcyCanvasEvent event, final boolean processAll) {
+    protected void synchronizeCanvas(final List<IcyCanvas> canvasList, final @NonNull IcyCanvasEvent event, final boolean processAll) {
         final IcyCanvasEvent.IcyCanvasEventType type = event.getType();
         final DimensionId dim = event.getDim();
 
@@ -1048,7 +1047,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    public void changed(final IcyCanvasEvent event) {
+    public void changed(final @NonNull IcyCanvasEvent event) {
         super.changed(event);
 
         // not yet initialized
@@ -1124,10 +1123,10 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    protected void layerChanged(final CanvasLayerEvent event) {
+    protected void layerChanged(final @NonNull CanvasLayerEvent event) {
         super.layerChanged(event);
 
-        // layer visibility property modified ?
+        // layer visibility property modified?
         if ((event.getType() == CanvasLayerEvent.LayersEventType.CHANGED) && Layer.isPaintProperty(event.getProperty())) {
             // layer refresh
             if (canvasView != null) {
@@ -1138,7 +1137,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
     }
 
     @Override
-    protected void sequenceOverlayChanged(final Overlay overlay, final SequenceEvent.SequenceEventType type) {
+    protected void sequenceOverlayChanged(final Overlay overlay, final SequenceEvent.@NonNull SequenceEventType type) {
         super.sequenceOverlayChanged(overlay, type);
 
         // layer refresh
@@ -1175,19 +1174,6 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
         }
     }
 
-    @Override
-    public void toolChanged(final @Nullable String roiTool) {
-        final Sequence seq = getSequence();
-
-        ROITool = roiTool;
-        if (roiTool != null && !roiTool.isBlank())
-            setLayersVisible(true);
-
-        // unselected all ROI
-        if (seq != null)
-            seq.setSelectedROI(null);
-    }
-
     /**
      * Image overlay to encapsulate image display in a canvas layer
      */
@@ -1214,7 +1200,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
                 if (canvasView.imageCache.isProcessing())
                     // cache not yet built
-                    canvasView.drawTextCenter(g2, "Loading...", 0.8f);
+                    canvasView.drawTextCenter(g2, "Loading…", 0.8f);
                 else if (canvasView.imageCache.getNotEnoughMemory())
                     // not enough memory to render image
                     canvasView.drawTextCenter(g2, "Not enough memory to display image", 0.8f);
@@ -2005,6 +1991,12 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
                 // left button press ?
                 if (left) {
+                    final PluginDescriptor roipd = ROIBar.getInstance().getROITool();
+                    if (roipd != null) {
+                        ROITool = roipd.getPluginClass().getName();
+                        if (LOGGER.isLoggable(CustomLevel.DEBUG))
+                            LOGGER.log(CustomLevel.DEBUG, "Selected ROI tool : " + ROITool);
+                    }
                     // ROI tool selected --> ROI creation
                     if (ROITool != null && !ROITool.isEmpty()) {
                         // get the ROI plugin class name
@@ -2012,9 +2004,12 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
 
                         // unselect tool before ROI creation unless
                         // control modifier is used for multiple ROI creation
-                        // FIXME change control behaviour
-                        /*if (!control)
-                            Icy.getMainInterface().setSelectedTool(null);*/
+                        if (LOGGER.isLoggable(CustomLevel.DEBUG))
+                            LOGGER.log(CustomLevel.DEBUG, "Control key activated : " + control);
+                        if (!control) {
+                            ROIBar.getInstance().unselectROITool();
+                            ROITool = null;
+                        }
 
                         // only if sequence still live
                         if (seq != null) {
@@ -2094,7 +2089,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
                     final List<ROI> rois = seq.getROIs();
 
                     // we have some rois ?
-                    if (rois.size() > 0) {
+                    if (!rois.isEmpty()) {
                         final Rectangle2D area = canvasToImage(getAreaSelection());
                         // 5D area
                         final Rectangle5D area5d = new Rectangle5D.Double(area.getX(), area.getY(), getPositionZ(), getPositionT(), Double.NEGATIVE_INFINITY,
@@ -2732,7 +2727,7 @@ public class Canvas2D extends IcyCanvas2D implements ROIToolChangeListener {
      * scale X (double) index 3 : scale Y (double) index 4 : rotation angle
      * (double)
      *
-     * @author Stephane
+     * @author Stéphane Dallongeville
      */
     static class Canvas2DSmoothMover extends MultiSmoothMover {
         public Canvas2DSmoothMover(final int size, final SmoothMover.SmoothMoveType type) {

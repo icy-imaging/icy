@@ -57,7 +57,7 @@ import vtk.vtkSphereSource;
 /**
  * Anchor3D class, used for 3D point control.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Anchor3D extends Overlay implements VtkPainter, Runnable
 {

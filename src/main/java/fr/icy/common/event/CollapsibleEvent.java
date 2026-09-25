@@ -26,7 +26,7 @@ package fr.icy.common.event;
  * As we use HashMap to store these events, so we rely on Object.equals(..) and
  * Object.hashcode() implementation for these events.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface CollapsibleEvent
 {

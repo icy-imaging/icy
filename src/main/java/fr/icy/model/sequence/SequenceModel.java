@@ -25,7 +25,7 @@ import java.util.EventListener;
  * <br>
  * Basic sequence model (5D image data structure).
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface SequenceModel
 {

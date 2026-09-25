@@ -19,22 +19,28 @@
 package fr.icy.extension.plugin;
 
 import fr.icy.extension.plugin.PluginDescriptor.PluginNameSorter;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.RepositoryPreferences;
 import fr.icy.system.preferences.RepositoryPreferences.RepositoryInfo;
 import fr.icy.system.thread.SingleProcessor;
 import fr.icy.system.thread.ThreadUtil;
 
 import javax.swing.event.EventListenerList;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EventListener;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PluginRepositoryLoader {
+    private static final Logger LOGGER = Logger.getLogger(PluginRepositoryLoader.class.getName());
+
     public interface PluginRepositoryLoaderListener extends EventListener {
-        void pluginRepositeryLoaderChanged(PluginDescriptor plugin);
+        void pluginRepositoryLoaderChanged(PluginDescriptor plugin);
     }
 
     private class Loader implements Runnable {
@@ -75,7 +81,7 @@ public class PluginRepositoryLoader {
                 //plugins = newPlugins;
             }
             catch (final Exception e) {
-                IcyLogger.error(PluginRepositoryLoader.class, e, e.getLocalizedMessage());
+                LOGGER.log(Level.SEVERE, "Error while loading plugins", e);
                 failed = true;
                 return;
             }
@@ -273,11 +279,11 @@ public class PluginRepositoryLoader {
     public static List<PluginDescriptor> getPlugins(final RepositoryInfo repos) {
         final List<PluginDescriptor> result = new ArrayList<>();
 
-        synchronized (instance.plugins) {
-            for (final PluginDescriptor plugin : instance.plugins)
-                if (plugin.getRepository().equals(repos))
-                    result.add(plugin);
-        }
+        //synchronized (instance.plugins) {
+        //    for (final PluginDescriptor plugin : instance.plugins)
+        //        if (plugin.getRepository().equals(repos))
+        //            result.add(plugin);
+        //}
 
         return result;
     }
@@ -290,7 +296,7 @@ public class PluginRepositoryLoader {
     }
 
     /**
-     * @return true if basic informations (class names, versions...) are loaded.
+     * @return true if basic informations (class names, versions, etc.) are loaded.
      */
     public static boolean isLoaded() {
         return instance.failed || instance.loaded;
@@ -341,6 +347,6 @@ public class PluginRepositoryLoader {
      */
     private void fireEvent(final PluginDescriptor plugin) {
         for (final PluginRepositoryLoaderListener listener : listeners.getListeners(PluginRepositoryLoaderListener.class))
-            listener.pluginRepositeryLoaderChanged(plugin);
+            listener.pluginRepositoryLoaderChanged(plugin);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,12 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.panel;
 
 import fr.icy.common.collection.array.Array1DUtil;
 import fr.icy.common.math.ArrayMath;
 import fr.icy.common.math.Histogram;
 import fr.icy.common.math.MathUtil;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 import java.util.EventListener;
@@ -28,10 +30,11 @@ import java.util.EventListener;
 /**
  * Histogram component.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class HistogramPanel extends BorderedPanel {
+    @FunctionalInterface
     public interface HistogramPanelListener extends EventListener {
         /**
          * histogram need to be refreshed (send values for recalculation)
@@ -46,7 +49,7 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * internal histogram
      */
-    Histogram histogram;
+    private Histogram histogram;
     /**
      * histogram data cache
      */
@@ -55,26 +58,26 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * histogram properties
      */
-    double minValue;
-    double maxValue;
-    boolean integer;
+    private double minValue;
+    private double maxValue;
+    private boolean integer;
 
     /**
      * display properties
      */
-    boolean logScaling;
-    boolean useLAFColors;
-    Color color;
-    Color backgroundColor;
+    private boolean logScaling;
+    private boolean useLAFColors;
+    private Color color;
+    private Color backgroundColor;
 
     /**
      * internals
      */
-    boolean updating;
+    private boolean updating;
 
     /**
      * Create a new histogram panel for the specified value range.<br>
-     * By default it uses a Logarithm representation (modifiable via {@link #setLogScaling(boolean)}
+     * By default, it uses a Logarithm representation (modifiable via {@link #setLogScaling(boolean)}
      */
     public HistogramPanel(final double minValue, final double maxValue, final boolean integer) {
         super();
@@ -194,7 +197,7 @@ public class HistogramPanel extends BorderedPanel {
 
     /**
      * Returns true if the input value are integer values only.<br>
-     * This is used to adapt the bin number of histogram..
+     * This is used to adapt the bin number of histogram.
      */
     public boolean isIntegerType() {
         return histogram.isIntegerType();
@@ -303,9 +306,9 @@ public class HistogramPanel extends BorderedPanel {
         }
     }
 
-    protected void checkHisto() {
+    protected void checkHistogram() {
         // create temporary histogram
-        final Histogram newHisto = new Histogram(
+        final Histogram newHistogram = new Histogram(
                 histogram.getMinValue(),
                 histogram.getMaxValue(),
                 Math.max(getClientWidth(), MIN_SIZE),
@@ -313,9 +316,9 @@ public class HistogramPanel extends BorderedPanel {
         );
 
         // histogram properties changed ?
-        if (!hasSameProperties(newHisto)) {
+        if (!hasSameProperties(newHistogram)) {
             // set new histogram
-            histogram = newHisto;
+            histogram = newHistogram;
             // notify listeners so they can fill it
             fireHistogramNeedRefresh();
         }
@@ -323,7 +326,7 @@ public class HistogramPanel extends BorderedPanel {
 
     protected void buildHistogram(final double min, final double max, final boolean intType) {
         // create temporary histogram
-        final Histogram newHisto = new Histogram(
+        final Histogram newHistogram = new Histogram(
                 min,
                 max,
                 Math.max(getClientWidth(), MIN_SIZE),
@@ -331,9 +334,9 @@ public class HistogramPanel extends BorderedPanel {
         );
 
         // histogram properties changed ?
-        if (!hasSameProperties(newHisto)) {
+        if (!hasSameProperties(newHistogram)) {
             // set new histogram
-            histogram = newHisto;
+            histogram = newHistogram;
             // notify listeners so they can fill it
             fireHistogramNeedRefresh();
         }
@@ -342,7 +345,7 @@ public class HistogramPanel extends BorderedPanel {
     /**
      * Return true if specified histogram has same bounds and number of bin than current one
      */
-    protected boolean hasSameProperties(final Histogram h) {
+    protected boolean hasSameProperties(final @NonNull Histogram h) {
         return (histogram.getBinNumber() == h.getBinNumber()) &&
                 (histogram.getMinValue() == h.getMinValue()) &&
                 (histogram.getMaxValue() == h.getMaxValue()) &&
@@ -395,23 +398,23 @@ public class HistogramPanel extends BorderedPanel {
         final double pixelRange = Math.max(getClientWidth() - 1, 32);
         final double dataRange = maxValue - minValue;
 
-        if (pixelRange != 0d)
-            return dataRange / pixelRange;
+        //if (pixelRange != 0d)
+        return dataRange / pixelRange;
 
-        return 0d;
+        //return 0d;
     }
 
     /**
      * Returns the ratio to convert a pixel X position to corresponding histo bin
      */
-    protected double getPixelToHistoRatio() {
+    protected double getPixelToHistogramRatio() {
         final double histogramRange = histogramData.length - 1;
         final double pixelRange = Math.max(getClientWidth() - 1, 32);
 
-        if (pixelRange != 0d)
-            return histogramRange / pixelRange;
+        //if (pixelRange != 0d)
+        return histogramRange / pixelRange;
 
-        return 0d;
+        //return 0d;
     }
 
     /**
@@ -433,7 +436,7 @@ public class HistogramPanel extends BorderedPanel {
      * Convert a pixel position to corresponding bin index
      */
     public int pixelToBin(final int value) {
-        final int index = (int) Math.round((value - getClientX()) * getPixelToHistoRatio());
+        final int index = (int) Math.round((value - getClientX()) * getPixelToHistogramRatio());
         return Math.min(Math.max(index, 0), histogramData.length - 1);
     }
 
@@ -477,12 +480,12 @@ public class HistogramPanel extends BorderedPanel {
             g2.clearRect(0, 0, getWidth(), getHeight());
 
         // data cache
-        final double ratio = getPixelToHistoRatio();
+        final double ratio = getPixelToHistogramRatio();
         final double[] data = histogramData;
 
         // not yet computed
         if (data.length != 0) {
-            final int histoRange = data.length - 1;
+            final int histogramRange = data.length - 1;
             final int hRange = getClientHeight() - 1;
             final int bottom = getClientY() + hRange;
             final int l = getClientX();
@@ -493,8 +496,8 @@ public class HistogramPanel extends BorderedPanel {
 
                 if (index < 0)
                     index = 0;
-                else if (index > histoRange)
-                    index = histoRange;
+                else if (index > histogramRange)
+                    index = histogramRange;
 
                 g2.drawLine(i, bottom, i, bottom - (int) Math.round(data[index] * hRange));
             }
@@ -504,12 +507,12 @@ public class HistogramPanel extends BorderedPanel {
             final int x = (getWidth() / 2) - 60;
             final int y = (getHeight() / 2) - 20;
 
-            g2.drawString("computing...", x, y);
+            g2.drawString("computing…", x, y);
         }
 
         g2.dispose();
 
         // just check for histogram properties change
-        checkHisto();
+        checkHistogram();
     }
 }

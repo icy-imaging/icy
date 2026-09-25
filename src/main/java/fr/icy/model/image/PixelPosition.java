@@ -18,7 +18,7 @@
 package fr.icy.model.image;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class PixelPosition extends ChannelPosition
 {

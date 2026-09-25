@@ -30,7 +30,7 @@ import fr.icy.model.sequence.SequenceEvent.SequenceEventSourceType;
 /**
  * Number of contained ROI(s) descriptor (see {@link ROIDescriptor})
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ROIContainedDescriptor extends ROIDescriptor
 {

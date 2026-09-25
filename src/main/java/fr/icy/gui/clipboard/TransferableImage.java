@@ -28,7 +28,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class TransferableImage implements Transferable
 {

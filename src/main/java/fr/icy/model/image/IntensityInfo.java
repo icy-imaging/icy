@@ -20,7 +20,7 @@ package fr.icy.model.image;
 /**
  * Intensity information
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class IntensityInfo
 {

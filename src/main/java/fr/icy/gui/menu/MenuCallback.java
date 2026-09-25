@@ -20,7 +20,7 @@ package fr.icy.gui.menu;
 import javax.swing.JMenu;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface MenuCallback
 {

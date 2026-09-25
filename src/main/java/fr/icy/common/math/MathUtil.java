@@ -20,7 +20,7 @@ package fr.icy.common.math;
 /**
  * Math utilities class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class MathUtil {

@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class CollectionUtil
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -39,7 +39,7 @@ import fr.icy.gui.canvas.IcyCanvas3D;
 import fr.icy.gui.component.button.IcyButton;
 import fr.icy.gui.component.field.IcyTextField;
 import fr.icy.gui.component.field.IcyTextField.TextChangeListener;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.renderer.ImageTableCellRenderer;
 import fr.icy.gui.listener.ActiveSequenceListener;
 import fr.icy.gui.roi.RoiSettingFrame;
@@ -51,7 +51,6 @@ import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent;
 import fr.icy.model.sequence.SequenceEvent.SequenceEventSourceType;
 import fr.icy.system.IcyExceptionHandler;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.XMLPreferences;
 import fr.icy.system.thread.InstanceProcessor;
 import fr.icy.system.thread.ThreadUtil;
@@ -59,6 +58,10 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.sort.DefaultSortController;
 import org.jdesktop.swingx.table.DefaultTableColumnModelExt;
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Range;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -74,14 +77,18 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract ROI panel component
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSequenceListener, TextChangeListener, ListSelectionListener, ExtensionLoader.ExtensionLoaderListener {
+    private static final Logger LOGGER = Logger.getLogger(AbstractRoisPanel.class.getName());
+
     protected static final String ID_VIEW = "view";
     protected static final String ID_EXPORT = "export";
 
@@ -107,16 +114,16 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
 
         if (o1 instanceof String) {
             if (o1.equals("-" + MathUtil.INFINITE_STRING))
-                obj1 = Double.valueOf(Double.NEGATIVE_INFINITY);
+                obj1 = Double.NEGATIVE_INFINITY;
             else if (o1.equals(MathUtil.INFINITE_STRING))
                 obj1 = Double.valueOf(Double.POSITIVE_INFINITY);
         }
 
         if (o2 instanceof String) {
             if (o2.equals("-" + MathUtil.INFINITE_STRING))
-                obj2 = Double.valueOf(Double.NEGATIVE_INFINITY);
+                obj2 = Double.NEGATIVE_INFINITY;
             else if (o2.equals(MathUtil.INFINITE_STRING))
-                obj2 = Double.valueOf(Double.POSITIVE_INFINITY);
+                obj2 = Double.POSITIVE_INFINITY;
         }
 
         if ((obj1 instanceof Number) && (obj2 instanceof Number)) {
@@ -157,7 +164,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     protected final Map<ROIDescriptor<?>, PluginROIDescriptor> descriptorMap = new HashMap<>();
 
     // Descriptor / column info (static to the class)
-    protected List<ColumnInfo> columnInfoList;
+    protected @NonNull List<ColumnInfo> columnInfoList;
     // // last visible columns (used to detect change in column configuration)
     // List<String> lastVisibleColumnIds;
 
@@ -299,11 +306,11 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         middlePanel.add(roiTable.getTableHeader(), BorderLayout.NORTH);
         middlePanel.add(new JScrollPane(roiTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
-        final IcyButton settingButton = new IcyButton(SVGResource.SETTINGS);
+        final IcyButton settingButton = new IcyButton(IcySVG.SETTINGS);
         settingButton.addActionListener(RoiActions.settingAction);
         settingButton.setHideActionText(true);
 
-        final IcyButton xlsExportButton = new IcyButton(SVGResource.FILE_SAVE);
+        final IcyButton xlsExportButton = new IcyButton(IcySVG.FILE_SAVE);
         xlsExportButton.addActionListener(RoiActions.xlsExportAction);
         xlsExportButton.setHideActionText(true);
 
@@ -397,29 +404,31 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Get column info for specified column index.
      */
-    protected ColumnInfo getColumnInfo(final List<ColumnInfo> columns, final int column) {
-        if (column < columns.size())
-            return columns.get(column);
+    protected @NonNull ColumnInfo getColumnInfo(final @NonNull List<ColumnInfo> columns, final @Range(from = 0, to = Integer.MAX_VALUE) int column) throws NullPointerException, IndexOutOfBoundsException {
+        Objects.requireNonNull(columns, "Columns must not be null.");
 
-        return null;
+        return columns.get(column);
     }
 
     /**
      * Get column info for specified column index.
      */
-    protected ColumnInfo getColumnInfo(final int column) {
+    protected @NonNull ColumnInfo getColumnInfo(final @Range(from = 0, to = Integer.MAX_VALUE) int column) throws NullPointerException, IndexOutOfBoundsException {
         return getColumnInfo(columnInfoList, column);
     }
 
-    protected ColumnInfo getColumnInfo(final List<ColumnInfo> columns, final ROIDescriptor<?> descriptor, final int channel) {
+    protected @NonNull ColumnInfo getColumnInfo(final @NonNull List<ColumnInfo> columns, final @NonNull ROIDescriptor<?> descriptor, final @Range(from = 0, to = Integer.MAX_VALUE) int channel) throws NullPointerException, NoSuchElementException {
+        Objects.requireNonNull(columns, "Columns must not be null.");
+        Objects.requireNonNull(descriptor, "ROI Descriptor must not be null.");
+
         for (final ColumnInfo ci : columns)
             if (ci.descriptor.equals(descriptor) && (ci.channel == channel))
                 return ci;
 
-        return null;
+        throw new NoSuchElementException("Couldn't find column info for descriptor " + descriptor + " and channel " + channel + ".");
     }
 
-    protected ColumnInfo getColumnInfo(final ROIDescriptor<?> descriptor, final int channel) {
+    protected @NonNull ColumnInfo getColumnInfo(final @NonNull ROIDescriptor<?> descriptor, final @Range(from = 0, to = Integer.MAX_VALUE) int channel) throws NullPointerException, NoSuchElementException {
         return getColumnInfo(columnInfoList, descriptor, channel);
     }
 
@@ -429,7 +438,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         nameFilter.setText(name);
     }
 
-    protected boolean computeROIResults(final ROIResults roiResults, final Sequence seq, final ColumnInfo columnInfo) {
+    protected boolean computeROIResults(final @NonNull ROIResults roiResults, final Sequence seq, final @NonNull ColumnInfo columnInfo) {
         final Map<ColumnInfo, DescriptorResult> results = roiResults.descriptorResults;
         final ROIDescriptor<?> descriptor = columnInfo.descriptor;
         final DescriptorResult result;
@@ -458,8 +467,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                         final ROI roi = roiResults.getRoiForChannel(columnInfo.channel);
 
                         if (roi == null)
-                            throw new UnsupportedOperationException(
-                                    "Can't retrieve sub ROI for channel " + columnInfo.channel);
+                            throw new UnsupportedOperationException("Can't retrieve sub ROI for channel " + columnInfo.channel);
 
                         newResults = plugin.compute(roi, seq);
                     }
@@ -522,7 +530,8 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Return index of specified ROI in the filtered ROI list
      */
-    protected int getRoiIndex(final ROI roi) {
+    protected @Range(from = -1, to = Integer.MAX_VALUE) int getRoiIndex(final @NonNull ROI roi) throws NullPointerException {
+        Objects.requireNonNull(roi, "ROI must not be null.");
         final int result = Collections.binarySearch(filteredRoiList, roi, ROI.idComparator);
 
         if (result >= 0)
@@ -534,14 +543,14 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     /**
      * Return index of specified ROI in the model
      */
-    protected int getRoiModelIndex(final ROI roi) {
+    protected @Range(from = -1, to = Integer.MAX_VALUE) int getRoiModelIndex(final @NonNull ROI roi) throws NullPointerException {
         return getRoiIndex(roi);
     }
 
     /**
      * Return index of specified ROI in the table (view)
      */
-    protected int getRoiViewIndex(final ROI roi) {
+    protected @Range(from = -1, to = Integer.MAX_VALUE) int getRoiViewIndex(final @NonNull ROI roi) throws NullPointerException {
         final int ind = getRoiModelIndex(roi);
 
         if (ind == -1)
@@ -555,20 +564,15 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
     }
 
-    protected ROIResults getRoiResults(final int rowModelIndex) {
-        final List<ROIResults> entries = filteredRoiResultsList;
-
-        if ((rowModelIndex >= 0) && (rowModelIndex < entries.size()))
-            return entries.get(rowModelIndex);
-
-        return null;
+    protected @NonNull ROIResults getRoiResults(final @Range(from = 0, to = Integer.MAX_VALUE) int rowModelIndex) throws IndexOutOfBoundsException {
+        return filteredRoiResultsList.get(rowModelIndex);
     }
 
     /**
      * Returns the visible ROI in the ROI control panel.
      */
-    public List<ROI> getVisibleRois() {
-        return new ArrayList<>(filteredRoiList);
+    public @NonNull @Unmodifiable List<ROI> getVisibleRois() {
+        return List.copyOf(filteredRoiList);
     }
 
     /**
@@ -579,8 +583,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
 
         synchronized (roiSelectionModel) {
             if (!roiSelectionModel.isSelectionEmpty()) {
-                for (int i = roiSelectionModel.getMinSelectionIndex(); i <= roiSelectionModel
-                        .getMaxSelectionIndex(); i++)
+                for (int i = roiSelectionModel.getMinSelectionIndex(); i <= roiSelectionModel.getMaxSelectionIndex(); i++)
                     if (roiSelectionModel.isSelectedIndex(i))
                         result++;
             }
@@ -757,7 +760,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                 cancelDescriptorComputation(roiResults);
         }
 
-        // interrupt current descriptor processings
+        // interrupt current descriptor processes
         primaryDescriptorComputer.interrupt();
         basicDescriptorComputer.interrupt();
         advancedDescriptorComputer.interrupt();
@@ -900,7 +903,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                         roiTableModel.fireTableDataChanged();
                     }
                     catch (final Exception e) {
-                        // Sorter don't like when we change data while it's sorting...
+                        // Sorter don't like when we change data while it's sorting…
                     }
                 }
 
@@ -956,7 +959,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                         roiTableModel.fireTableRowsUpdated(0, rowCount - 1);
                     }
                     catch (final Exception e) {
-                        // Sorter don't like when we change data while it's sorting...
+                        // Sorter don't like when we change data while it's sorting…
                     }
                 }
 
@@ -1152,7 +1155,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
 
     // called when selection changed in the ROI table
     @Override
-    public void valueChanged(final ListSelectionEvent e) {
+    public void valueChanged(final @NonNull ListSelectionEvent e) {
         // currently changing the selection ? --> exit
         if (e.getValueIsAdjusting())
             return;
@@ -1178,11 +1181,11 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         refreshRoiNumbers();
     }
 
-    // called when a ROI has been double clicked in the ROI table
+    // called when a ROI has been double-clicked in the ROI table
     protected void roiTableDoubleClicked() {
         final List<ROI> selectedRois = getSelectedRois();
 
-        if (selectedRois.size() > 0) {
+        if (!selectedRois.isEmpty()) {
             final ROI selected = selectedRois.get(0);
             // get active viewer
             final Viewer v = Icy.getMainInterface().getActiveViewer();
@@ -1227,7 +1230,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
     }
 
     @Override
-    public void activeSequenceChanged(final SequenceEvent event) {
+    public void activeSequenceChanged(final @NonNull SequenceEvent event) {
         // we are modifying externally
         // if (modifySelection.availablePermits() == 0)
         // return;
@@ -1295,61 +1298,62 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public int getColumnCount() {
+        public @Range(from = 0, to = Integer.MAX_VALUE) int getColumnCount() {
             return columnInfoList.size();
         }
 
         @Override
-        public String getColumnName(final int column) {
+        public @NonNull String getColumnName(final @Range(from = 0, to = Integer.MAX_VALUE) int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
-            if ((ci != null) && (ci.showName))
+            //if ((ci != null) && (ci.showName))
+            if (ci.showName)
                 return ci.name;
 
             return "";
         }
 
         @Override
-        public Class<?> getColumnClass(final int column) {
+        public @NonNull Class<?> getColumnClass(final @Range(from = 0, to = Integer.MAX_VALUE) int column) {
             final ColumnInfo ci = getColumnInfo(column);
 
-            if (ci != null)
-                return ci.descriptor.getType();
+            //if (ci != null)
+            return ci.descriptor.getType();
 
-            return String.class;
+            //return String.class;
         }
 
         @Override
-        public int getRowCount() {
+        public @Range(from = 0, to = Integer.MAX_VALUE) int getRowCount() {
             return filteredRoiResultsList.size();
         }
 
         @Override
-        public Object getValueAt(final int row, final int column) {
+        public Object getValueAt(final int row, final int column) throws IndexOutOfBoundsException {
             final ROIResults roiResults = getRoiResults(row);
 
-            if (roiResults != null)
-                return roiResults.getValueAt(column);
+            //if (roiResults != null)
+            return roiResults.getValueAt(column);
 
-            return null;
+            //return null;
         }
 
         @Override
-        public void setValueAt(final Object value, final int row, final int column) {
+        public void setValueAt(final Object value, final int row, final int column) throws IndexOutOfBoundsException {
             final ROIResults roiResults = getRoiResults(row);
 
-            if (roiResults != null)
-                roiResults.setValueAt(value, column);
+            //if (roiResults != null)
+            roiResults.setValueAt(value, column);
         }
 
         @Override
-        public boolean isCellEditable(final int row, final int column) {
+        public boolean isCellEditable(final int row, final int column) throws IndexOutOfBoundsException {
             final ROIResults roiResults = getRoiResults(row);
 
-            if (roiResults != null)
-                return roiResults.isEditable(column);
+            //if (roiResults != null)
+            return roiResults.isEditable(column);
 
-            return false;
+            //return false;
         }
     }
 
@@ -1358,7 +1362,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         public final ROI roi;
         private final Map<Integer, WeakReference<ROI>> channelRois;
 
-        protected ROIResults(final ROI roi) {
+        protected ROIResults(final @NonNull ROI roi) {
             super();
 
             this.roi = roi;
@@ -1376,7 +1380,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         public ROI getRoiForChannel(final int channel) throws InterruptedException {
-            final Integer key = Integer.valueOf(channel);
+            final Integer key = channel;
             final WeakReference<ROI> reference;
             ROI result;
 
@@ -1410,10 +1414,11 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return result;
         }
 
-        public boolean isEditable(final int column) {
+        public boolean isEditable(final int column) throws NullPointerException, IndexOutOfBoundsException {
             final ColumnInfo ci = getColumnInfo(column);
 
-            if (ci != null) {
+            //if (ci != null)
+            {
                 final ROIDescriptor<?> descriptor = ci.descriptor;
                 final String id = descriptor.getId();
 
@@ -1421,7 +1426,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                 return id.equals(ROINameDescriptor.ID) || id.equals(ROIColorDescriptor.ID);
             }
 
-            return false;
+            //return false;
         }
 
         public Object formatValue(final Object value, final String id) {
@@ -1469,27 +1474,26 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                     if (Math.abs(doubleValue) < 10000000) {
                         // simple integer ? -> show it as integer
                         if (doubleValue == (int) doubleValue)
-                            result = Integer.valueOf((int) doubleValue);
+                            result = (int) doubleValue;
                             // small integer value ?
                         else if (Math.abs(doubleValue) < 100)
-                            result = Double.valueOf(MathUtil.roundSignificant(doubleValue, 5));
+                            result = MathUtil.roundSignificant(doubleValue, 5);
                             // medium integer value ?
                         else if (Math.abs(doubleValue) < 10000)
-                            result = Double.valueOf(MathUtil.round(doubleValue, 2));
+                            result = MathUtil.round(doubleValue, 2);
                             // medium large integer value ?
                         else if (Math.abs(doubleValue) < 1000000)
-                            result = Double.valueOf(MathUtil.round(doubleValue, 1));
+                            result = MathUtil.round(doubleValue, 1);
                         else
                             // large integer value ?
-                            result = Integer.valueOf((int) Math.round(doubleValue));
+                            result = (int) Math.round(doubleValue);
                     }
                     else
                         // format double value
-                        result = Double.valueOf(MathUtil.roundSignificant(doubleValue, 5));
+                        result = MathUtil.roundSignificant(doubleValue, 5);
                 }
                 else {
-                    if (value instanceof Long || value instanceof Integer || value instanceof Short
-                            || value instanceof Byte) {
+                    if (value instanceof Long || value instanceof Integer || value instanceof Short || value instanceof Byte) {
                         result = ((Number) value).longValue();
                     }
                     else {
@@ -1532,19 +1536,20 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return formatValue(result.getValue(), column.descriptor.getId());
         }
 
-        public Object getValueAt(final int column) {
+        public Object getValueAt(final int column) throws NullPointerException, IndexOutOfBoundsException {
             final ColumnInfo ci = getColumnInfo(column);
 
-            if (ci != null)
-                return getValue(ci);
+            //if (ci != null)
+            return getValue(ci);
 
-            return null;
+            //return null;
         }
 
-        public void setValueAt(final Object aValue, final int column) {
+        public void setValueAt(final Object aValue, final int column) throws NullPointerException, IndexOutOfBoundsException {
             final ColumnInfo ci = getColumnInfo(column);
 
-            if (ci != null) {
+            //if (ci != null)
+            {
                 final ROIDescriptor<?> descriptor = ci.descriptor;
                 final String id = descriptor.getId();
 
@@ -1571,7 +1576,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                         if (entryObj instanceof final Entry<?, ?> entry) {
                             final Object key = entry.getKey();
                             final Object value = entry.getValue();
-                            if (key instanceof ColumnInfo && value instanceof DescriptorResult) {
+                            if (key instanceof ColumnInfo && value instanceof final DescriptorResult result) {
                                 //final Entry<ColumnInfo, DescriptorResult> entry = (Entry<ColumnInfo, DescriptorResult>) entryObj;
                                 //final ColumnInfo key = entry.getKey();
                                 final ROIDescriptor<?> descriptor = ((ColumnInfo) key).descriptor;
@@ -1579,7 +1584,6 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                                 // need to recompute this descriptor ?
                                 if (descriptor.needRecompute(event)) {
                                     //final DescriptorResult result = entry.getValue();
-                                    final DescriptorResult result = (DescriptorResult) value;
 
                                     // mark as outdated
                                     //if (result != null)
@@ -1622,7 +1626,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                 if (entryObj instanceof final Entry<?, ?> entry) {
                     final Object key = entry.getKey();
                     final Object value = entry.getValue();
-                    if (key instanceof ColumnInfo && value instanceof DescriptorResult) {
+                    if (key instanceof ColumnInfo && value instanceof final DescriptorResult result) {
                         //final Entry<ColumnInfo, DescriptorResult> entry = (Entry<ColumnInfo, DescriptorResult>) entryObj;
                         //final ColumnInfo key = entry.getKey();
                         final ROIDescriptor<?> descriptor = ((ColumnInfo) key).descriptor;
@@ -1630,7 +1634,6 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                         // need to recompute this descriptor ?
                         if (descriptor.needRecompute(event)) {
                             //final DescriptorResult result = entry.getValue();
-                            final DescriptorResult result = (DescriptorResult) value;
 
                             // mark as outdated
                             //if (result != null)
@@ -1646,8 +1649,8 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         protected final LinkedHashSet<ROIResults> resultsToCompute;
         protected final DescriptorType type;
 
-        public DescriptorComputer(final DescriptorType type) {
-            super("ROI " + type.toString() + " descriptor calculator");
+        public DescriptorComputer(final @NonNull DescriptorType type) {
+            super("ROI " + type + " descriptor calculator");
 
             resultsToCompute = new LinkedHashSet<>(256);
             this.type = type;
@@ -1656,7 +1659,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         public boolean hasPendingComputation() {
-            return resultsToCompute.size() > 0;
+            return !resultsToCompute.isEmpty();
         }
 
         public boolean hasPendingComputation(final ROIResults results) {
@@ -1733,11 +1736,12 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                 // just interrupt processing thread
             }
             catch (final Throwable t) {
-                IcyLogger.error(AbstractRoisPanel.class, t, "Error while computing ROI descriptors.");
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Error while computing ROI descriptors.", t);
             }
         }
 
-        protected void computeROIResults(final ROIResults roiResults, final Sequence seq) {
+        protected void computeROIResults(final @NonNull ROIResults roiResults, final Sequence seq) {
             final Map<ColumnInfo, DescriptorResult> results = roiResults.descriptorResults;
             final ColumnInfo[] columnInfos;
 
@@ -1762,6 +1766,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         private Object value;
         private boolean outdated;
 
+        @Contract(pure = true)
         public DescriptorResult(final ColumnInfo column) {
             super();
 
@@ -1808,7 +1813,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             load(preferences, export);
         }
 
-        public boolean load(final XMLPreferences preferences, final boolean export) {
+        public boolean load(final @NonNull XMLPreferences preferences, final boolean export) {
             final XMLPreferences p = preferences.node(descriptor.getId());
 
             if (p != null) {
@@ -1824,7 +1829,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return false;
         }
 
-        public boolean save(final XMLPreferences preferences) {
+        public boolean save(final @NonNull XMLPreferences preferences) {
             final XMLPreferences p = preferences.node(descriptor.getId());
 
             if (p != null) {
@@ -2025,7 +2030,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         /**
-         * Used to know if this is a primary (name, color...) ROI descriptor.
+         * Used to know if this is a primary (name, color, etc.) ROI descriptor.
          *
          * @see #isBasicDescriptor()
          * @see #isExtendedDescriptor()
@@ -2038,8 +2043,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             final String id = descriptor.getId();
 
             return (StringUtil.equals(id, ROIIconDescriptor.ID)) || (StringUtil.equals(id, ROIColorDescriptor.ID))
-                    || (StringUtil.equals(id,
-                    ROINameDescriptor.ID)) /* || (StringUtil.equals(id, ROIGroupIdDescriptor.ID)) */
+                    || (StringUtil.equals(id, ROINameDescriptor.ID)) /* || (StringUtil.equals(id, ROIGroupIdDescriptor.ID)) */
                     || (StringUtil.equals(id, ROIPositionXDescriptor.ID))
                     || (StringUtil.equals(id, ROIPositionYDescriptor.ID))
                     || (StringUtil.equals(id, ROIPositionZDescriptor.ID))
@@ -2109,7 +2113,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
         }
 
         @Override
-        public int compareTo(final BaseColumnInfo obj) {
+        public int compareTo(final @NonNull BaseColumnInfo obj) {
             return Integer.compare(order, obj.order);
         }
 
@@ -2118,6 +2122,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return descriptor.hashCode();
         }
 
+        @Contract(value = "null -> false", pure = true)
         @Override
         public boolean equals(final Object obj) {
             if (obj instanceof BaseColumnInfo)
@@ -2169,6 +2174,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             return descriptor.hashCode() ^ channel;
         }
 
+        @Contract(value = "null -> false", pure = true)
         @Override
         public boolean equals(final Object obj) {
             if (obj instanceof final ColumnInfo ci) {
@@ -2228,17 +2234,23 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             final List<ColumnInfo> columnInfos = columnInfoList;
             final List<TableColumn> columns = getColumns(true);
             for (final TableColumn column : columns) {
-                final ColumnInfo ci = getColumnInfo(columnInfos, column.getModelIndex());
+                try {
+                    final ColumnInfo ci = getColumnInfo(columnInfos, column.getModelIndex());
 
-                if (ci != null) {
-                    final ROIDescriptor<?> descriptor = ci.descriptor;
+                    //if (ci != null)
+                    {
+                        final ROIDescriptor<?> descriptor = ci.descriptor;
 
-                    // that should be always the case
-                    if (StringUtil.equals((String) column.getIdentifier(), descriptor.getId())) {
-                        column.setHeaderValue(ci.showName ? ci.name : "");
-                        if (column instanceof TableColumnExt)
-                            ((TableColumnExt) column).setToolTipText(descriptor.getDescription() + ci.getSuffix());
+                        // that should be always the case
+                        if (StringUtil.equals((String) column.getIdentifier(), descriptor.getId())) {
+                            column.setHeaderValue(ci.showName ? ci.name : "");
+                            if (column instanceof TableColumnExt)
+                                ((TableColumnExt) column).setToolTipText(descriptor.getDescription() + ci.getSuffix());
+                        }
                     }
+                }
+                catch (final Exception e) {
+                    // ignore
                 }
             }
         }
@@ -2258,7 +2270,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                 super.sort();
             }
             catch (final Exception e) {
-                // ignore this...
+                // ignore this…
                 // System.err.println("ROI table column sort failed:");
                 // System.err.println(e.getMessage());
             }
@@ -2272,7 +2284,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
             catch (final Exception e) {
                 return 0;
 
-                // ignore this...
+                // ignore this…
                 // System.err.println("ROI table column sort failed:");
                 // System.err.println(e.getMessage());
             }
@@ -2311,6 +2323,7 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                 super();
             }
 
+            @Contract(pure = true)
             @Override
             @SuppressWarnings("unchecked")
             public M getModel() {
@@ -2337,9 +2350,10 @@ public abstract class AbstractRoisPanel extends ToolbarPanel implements ActiveSe
                 return getStringValueProvider().getStringValue(row, column).getString(getValueAt(row, column));
             }
 
+            @Contract(pure = true)
             @Override
-            public Integer getIdentifier(final int index) {
-                return Integer.valueOf(index);
+            public @NonNull Integer getIdentifier(final int index) {
+                return index;
             }
         }
     }

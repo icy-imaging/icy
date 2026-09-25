@@ -23,7 +23,7 @@ import fr.icy.extension.ExtensionLoader;
 import fr.icy.extension.plugin.abstract_.Plugin;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PluginsPreferences {

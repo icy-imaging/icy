@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import javax.swing.Timer;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SmoothMover implements ActionListener
 {

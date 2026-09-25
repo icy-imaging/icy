@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,27 +18,31 @@
 
 package fr.icy.gui.toolbar.button;
 
+import fr.icy.Icy;
 import fr.icy.gui.component.button.IcyToggleButton;
+import fr.icy.gui.component.icon.IcyIconPack;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.frame.progress.FailedAnnounceFrame;
 import fr.icy.gui.main.MainFrame;
 import fr.icy.gui.viewer.Viewer;
 import fr.icy.model.cache.ImageCache;
-import fr.icy.Icy;
 import fr.icy.system.preferences.ApplicationPreferences;
 import fr.icy.system.preferences.GeneralPreferences;
-import fr.icy.gui.component.icon.SVGResource;
-import fr.icy.gui.component.icon.IcyIconPack;
-import fr.icy.system.logging.IcyLogger;
+import org.jetbrains.annotations.Contract;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Thomas Musset
  */
 public final class EHCacheButton extends IcyToggleButton implements ActionListener {
+    private static final Logger LOGGER = Logger.getLogger(EHCacheButton.class.getName());
+
     public EHCacheButton() {
-        super(new IcyIconPack(SVGResource.FLASH_OFF, SVGResource.FLASH_ON));
+        super(new IcyIconPack(IcySVG.FLASH_OFF, IcySVG.FLASH_ON));
         setFocusable(false);
         if (Icy.isCacheDisabled()) {
             super.setEnabled(false);
@@ -71,12 +75,13 @@ public final class EHCacheButton extends IcyToggleButton implements ActionListen
                 ok = ImageCache.shutDownIfEmpty();
         }
         catch (final Exception e) {
-            IcyLogger.error(EHCacheButton.class, e, "Unable to init/shutdown image cache.");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Unable to init/shutdown image cache.", e);
         }
 
         // failed to change virtual mode state ?
         if (!ok) {
-            // trying to disable cache ? --> show a message so user can understand why it didn't worked
+            // trying to disable cache ? --> show a message so user can understand why it didn't work
             if (!value)
                 new FailedAnnounceFrame("Cannot disable Image cache now. Some open images or sequences are using it.");
 
@@ -101,6 +106,7 @@ public final class EHCacheButton extends IcyToggleButton implements ActionListen
     /**
      * Method disable to prevent use from public access.
      */
+    @Contract(pure = true)
     @Override
     public void setEnabled(final boolean b) {
         // Do nothing

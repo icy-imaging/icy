@@ -28,7 +28,7 @@ import java.awt.Graphics2D;
 import javax.swing.Icon;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ColormapIcon implements Icon
 {

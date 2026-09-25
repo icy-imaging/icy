@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,13 +18,13 @@
 
 package fr.icy.gui.toolbar.panel;
 
+import fr.icy.Icy;
 import fr.icy.gui.action.CanvasActions;
 import fr.icy.gui.canvas.IcyCanvas;
 import fr.icy.gui.canvas.Layer;
 import fr.icy.gui.component.button.IcyButton;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.viewer.Viewer;
-import fr.icy.Icy;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.system.thread.ThreadUtil;
 
 import javax.swing.*;
@@ -34,7 +34,7 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class LayerControlPanel extends JPanel implements ChangeListener {
@@ -98,7 +98,7 @@ public final class LayerControlPanel extends JPanel implements ChangeListener {
         gbc_opacitySlider.gridy = 1;
         actionPanel.add(opacitySlider, gbc_opacitySlider);
 
-        deleteButton = new IcyButton(SVGResource.DELETE);
+        deleteButton = new IcyButton(IcySVG.DELETE);
         deleteButton.addActionListener(CanvasActions.deleteLayersAction);
         final GridBagConstraints gbc_deleteButton = new GridBagConstraints();
         gbc_deleteButton.anchor = GridBagConstraints.EAST;
@@ -113,7 +113,7 @@ public final class LayerControlPanel extends JPanel implements ChangeListener {
 
     public void refresh() {
         final List<Layer> selectedLayers = layerPanel.getSelectedLayers();
-        final boolean hasSelected = (selectedLayers.size() > 0);
+        final boolean hasSelected = (!selectedLayers.isEmpty());
         final boolean singleSelected = (selectedLayers.size() == 1);
         final Layer firstSelected = hasSelected ? selectedLayers.get(0) : null;
 
@@ -167,7 +167,7 @@ public final class LayerControlPanel extends JPanel implements ChangeListener {
                 final List<Layer> selectedLayers = layerPanel.getSelectedLayers();
                 final int value = opacitySlider.getValue();
 
-                if (selectedLayers.size() > 0) {
+                if (!selectedLayers.isEmpty()) {
                     canvas.beginUpdate();
                     try {
                         // set layer transparency
@@ -180,6 +180,5 @@ public final class LayerControlPanel extends JPanel implements ChangeListener {
                 }
             }
         }
-
     }
 }

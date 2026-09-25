@@ -18,7 +18,7 @@
 package fr.icy.model.sequence;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public enum DimensionId
 {

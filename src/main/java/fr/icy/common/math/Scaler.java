@@ -30,7 +30,7 @@ import javax.swing.event.EventListenerList;
 import org.w3c.dom.Node;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class Scaler implements ChangeListener, XMLPersistent
 {
@@ -1047,7 +1047,7 @@ public class Scaler implements ChangeListener, XMLPersistent
     {
         if (this.canCross != canCross)
         {
-            // crossed and we can't anymore...
+            // crossed and we can't anymore…
             if (!canCross && crossed)
             {
                 final double ali = absLeftIn;

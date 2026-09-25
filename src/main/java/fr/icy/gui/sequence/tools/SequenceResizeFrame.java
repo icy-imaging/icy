@@ -30,7 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequenceResizeFrame extends ActionDialog
 {
@@ -61,7 +61,7 @@ public class SequenceResizeFrame extends ActionDialog
                     @Override
                     public void run()
                     {
-                        final ProgressFrame pf = new ProgressFrame("Resizing sequence...");
+                        final ProgressFrame pf = new ProgressFrame("Resizing sequence…");
                         try
                         {
                             final Sequence seqOut = SequenceUtil.scale(resizePanel.getSequence(),

@@ -40,7 +40,7 @@ import java.util.EventListener;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class LUT implements IcyColorSpaceListener, ScalerListener, ChangeListener, XMLPersistent {

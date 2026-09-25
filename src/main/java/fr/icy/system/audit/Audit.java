@@ -18,34 +18,37 @@
 
 package fr.icy.system.audit;
 
-import fr.icy.io.FileUtil;
+import fr.icy.Icy;
+import fr.icy.common.string.StringUtil;
+import fr.icy.extension.plugin.abstract_.Plugin;
 import fr.icy.gui.frame.progress.CancelableProgressFrame;
 import fr.icy.gui.main.MainFrame;
-import fr.icy.Icy;
+import fr.icy.io.FileUtil;
+import fr.icy.io.xml.XMLUtil;
 import fr.icy.network.NetworkUtil;
-import fr.icy.extension.plugin.abstract_.Plugin;
+import fr.icy.system.SystemUtil;
 import fr.icy.system.preferences.ApplicationPreferences;
 import fr.icy.system.preferences.GeneralPreferences;
 import fr.icy.system.preferences.XMLPreferences;
-import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
-import fr.icy.common.string.StringUtil;
-import fr.icy.io.xml.XMLUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * General audit tools class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class Audit {
+    private static final Logger LOGGER = Logger.getLogger(Audit.class.getName());
+
     // network URL
     static final String URL_REGISTER = NetworkUtil.WEBSITE_URL + "register/registerClient.php?";
     static final String URL_LINK_USER = NetworkUtil.WEBSITE_URL + "register/linkUser.php?";
@@ -82,7 +85,7 @@ public class Audit {
 
     /**
      * Audit process on application start.<br>
-     * Check id, register...
+     * Check id, register…
      */
     public static synchronized void prepare() {
         if (initialized)
@@ -116,7 +119,7 @@ public class Audit {
                 // save upload time whatever happened
                 prefs.putLong(ID_LAST_UPLOAD_DATE, System.currentTimeMillis());
 
-                // do that in background as it can take sometime if website does not reply...
+                // do that in background as it can take sometime if website does not reply…
                 ThreadUtil.bgRun(() -> {
                     // upload usage statistics
                     storage.upload(id);
@@ -159,7 +162,7 @@ public class Audit {
      */
     public static void pluginLaunched(final Plugin plugin) {
         // we don't want to wait for initialization here (can lock the application loading for sometime)
-        // and we don't care about init usage stats (ROI and daemons plugins)...
+        // and we don't care about init usage stats (ROI and daemons plugins)…
         if (!initialized)
             return;
 
@@ -171,7 +174,7 @@ public class Audit {
      */
     public static void pluginInstanced(final Plugin plugin) {
         // we don't want to wait for initialization here (can lock the application loading for sometime)
-        // and we don't care about init usage stats (ROI and daemons plugins)...
+        // and we don't care about init usage stats (ROI and daemons plugins)…
         if (!initialized)
             return;
 
@@ -248,7 +251,7 @@ public class Audit {
                 NetworkUtil.postData(URL_AUDIT_VERSION, values);
             }
             catch (final IOException e) {
-                // silent fail...
+                // silent fail…
                 // IcyExceptionHandler.showErrorMessage(e, false, false);
             }
         }
@@ -306,7 +309,7 @@ public class Audit {
                 // display linking in progress
                 new Thread(() -> {
                     final CancelableProgressFrame waitFrame = new CancelableProgressFrame(
-                            "Waiting for user to link account...");
+                            "Waiting for user to link account…");
 
                     while (!Thread.interrupted() && !waitFrame.isCancelRequested()) {
                         try {
@@ -341,7 +344,7 @@ public class Audit {
 
         // id param ok ?
         if (params != null) {
-            // do that in background as it can take sometime...
+            // do that in background as it can take sometime…
             ThreadUtil.bgRun(() -> {
                 // set action
                 params.put(ID_ACTION, "unlink");
@@ -351,8 +354,8 @@ public class Audit {
                     NetworkUtil.postData(URL_LINK_USER, params);
                 }
                 catch (final IOException e) {
-                    // can't unlink on web site, not a big deal...
-                    IcyLogger.warn(Audit.class, e, "Cannot unlink online user infos.");
+                    // can't unlink on web site, not a big deal…
+                    LOGGER.log(Level.WARNING, "Cannot unlink online user infos.", e);
                 }
             });
         }

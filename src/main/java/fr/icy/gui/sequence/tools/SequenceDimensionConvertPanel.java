@@ -44,7 +44,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequenceDimensionConvertPanel extends JPanel
 {

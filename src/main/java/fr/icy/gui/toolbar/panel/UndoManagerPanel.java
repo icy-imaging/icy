@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,19 +18,21 @@
 
 package fr.icy.gui.toolbar.panel;
 
+import fr.icy.Icy;
 import fr.icy.gui.action.SequenceOperationActions;
 import fr.icy.gui.component.button.IcyButton;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.listener.ActiveSequenceListener;
-import fr.icy.Icy;
-import fr.icy.system.preferences.GeneralPreferences;
-import fr.icy.gui.component.icon.SVGResource;
-import fr.icy.model.sequence.Sequence;
-import fr.icy.model.sequence.SequenceEvent;
-import fr.icy.system.thread.ThreadUtil;
 import fr.icy.gui.undo.AbstractIcyUndoableEdit;
 import fr.icy.gui.undo.IcyUndoManager;
 import fr.icy.gui.undo.IcyUndoManagerListener;
-import org.jetbrains.annotations.Nullable;
+import fr.icy.model.sequence.Sequence;
+import fr.icy.model.sequence.SequenceEvent;
+import fr.icy.system.preferences.GeneralPreferences;
+import fr.icy.system.thread.ThreadUtil;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -44,7 +46,7 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class UndoManagerPanel extends ToolbarPanel implements ActiveSequenceListener, ListSelectionListener, IcyUndoManagerListener, ChangeListener {
@@ -179,12 +181,12 @@ public final class UndoManagerPanel extends ToolbarPanel implements ActiveSequen
         bottomPanel.setBorder(new EmptyBorder(2, 0, 0, 0));
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
 
-        undoButton = new IcyButton(SVGResource.UNDO);
+        undoButton = new IcyButton(IcySVG.UNDO);
         undoButton.addActionListener(SequenceOperationActions.undoAction);
         undoButton.setHideActionText(true);
         bottomPanel.add(undoButton);
 
-        redoButton = new IcyButton(SVGResource.REDO);
+        redoButton = new IcyButton(IcySVG.REDO);
         redoButton.addActionListener(SequenceOperationActions.redoAction);
         redoButton.setHideActionText(true);
         bottomPanel.add(redoButton);
@@ -207,12 +209,12 @@ public final class UndoManagerPanel extends ToolbarPanel implements ActiveSequen
         final Component horizontalStrut_2 = Box.createHorizontalStrut(8);
         bottomPanel.add(horizontalStrut_2);
 
-        clearAllButLastButton = new IcyButton(SVGResource.DELETE_SWEEP);
+        clearAllButLastButton = new IcyButton(IcySVG.DELETE_SWEEP);
         clearAllButLastButton.addActionListener(SequenceOperationActions.undoClearAllButLastAction);
         clearAllButLastButton.setHideActionText(true);
         bottomPanel.add(clearAllButLastButton);
 
-        clearAllButton = new IcyButton(SVGResource.DELETE);
+        clearAllButton = new IcyButton(IcySVG.DELETE);
         clearAllButton.addActionListener(SequenceOperationActions.undoClearAction);
         clearAllButton.setHideActionText(true);
         bottomPanel.add(clearAllButton);
@@ -232,7 +234,7 @@ public final class UndoManagerPanel extends ToolbarPanel implements ActiveSequen
         Icy.getMainInterface().addActiveSequenceListener(this);
     }
 
-    public void setUndoManager(@Nullable final IcyUndoManager value) {
+    public void setUndoManager(final @Nullable IcyUndoManager value) {
         if (undoManager != value) {
             if (undoManager != null)
                 undoManager.removeListener(this);
@@ -247,7 +249,7 @@ public final class UndoManagerPanel extends ToolbarPanel implements ActiveSequen
         }
     }
 
-    public AbstractIcyUndoableEdit getLastSelectedEdit() {
+    public @Nullable AbstractIcyUndoableEdit getLastSelectedEdit() {
         if (undoManager != null) {
             final int index = tableSelectionModel.getMaxSelectionIndex();
 
@@ -305,7 +307,7 @@ public final class UndoManagerPanel extends ToolbarPanel implements ActiveSequen
     }
 
     @Override
-    public void valueChanged(final ListSelectionEvent e) {
+    public void valueChanged(final @NonNull ListSelectionEvent e) {
         if (e.getValueIsAdjusting() || isSelectionAdjusting)
             return;
 
@@ -345,11 +347,13 @@ public final class UndoManagerPanel extends ToolbarPanel implements ActiveSequen
             setUndoManager(sequence.getUndoManager());
     }
 
+    @Contract(pure = true)
     @Override
     public void sequenceDeactivated(@Nullable final Sequence sequence) {
         // nothing here
     }
 
+    @Contract(pure = true)
     @Override
     public void activeSequenceChanged(@Nullable final SequenceEvent event) {
         // nothing here

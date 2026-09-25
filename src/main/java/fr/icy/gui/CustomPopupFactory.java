@@ -26,7 +26,7 @@ import java.awt.*;
  * Since we use the OGL component the CustomPopupFactory isn't anymore required on OSX.<br>
  * Still we keep the class just in case as OpenGL will be soon removed from OSX and we may need to tweak that again then :-/
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class CustomPopupFactory extends PopupFactory {

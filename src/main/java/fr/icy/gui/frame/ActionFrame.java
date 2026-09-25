@@ -28,7 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ActionFrame extends TitledFrame
 {

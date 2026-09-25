@@ -33,7 +33,7 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class ROI3DBoxShape extends ROI3DZShape {

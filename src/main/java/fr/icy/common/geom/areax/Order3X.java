@@ -76,14 +76,14 @@ final class Order3X extends CurveX {
 		tmp[10] = y1;
 		double t = tmp[0];
 		if (numparams > 1 && t > tmp[1]) {
-			// Perform a "2 element sort"...
+			// Perform a "2 element sort"…
 			tmp[0] = tmp[1];
 			tmp[1] = t;
 			t = tmp[0];
 		}
 		split(tmp, 3, t);
 		if (numparams > 1) {
-			// Recalculate tmp[1] relative to the range [tmp[0]...1]
+			// Recalculate tmp[1] relative to the range [tmp[0]…1]
 			t = (tmp[1] - t) / (1 - t);
 			split(tmp, 9, t);
 		}
@@ -162,10 +162,10 @@ final class Order3X extends CurveX {
 	}
 
 	/*
-	 * Split the cubic Bezier stored at coords[pos...pos+7] representing the
+	 * Split the cubic Bezier stored at coords[pos…pos+7] representing the
 	 * parametric range [0..1] into two subcurves representing the parametric
 	 * subranges [0..t] and [t..1]. Store the results back into the array at
-	 * coords[pos...pos+7] and coords[pos+6...pos+13].
+	 * coords[pos…pos+7] and coords[pos+6…pos+13].
 	 */
 	public static void split(double coords[], int pos, double t) {
 		double x0, y0, cx0, cy0, cx1, cy1, x1, y1;
@@ -204,7 +204,7 @@ final class Order3X extends CurveX {
 		super(direction);
 		// REMIND: Better accuracy in the root finding methods would
 		// ensure that cys are in range. As it stands, they are never
-		// more than "1 mantissa bit" out of range...
+		// more than "1 mantissa bit" out of range…
 		if (cy0 < y0)
 			cy0 = y0;
 		if (cy1 > y1)
@@ -329,7 +329,7 @@ final class Order3X extends CurveX {
 			return TforY3;
 		// From Numerical Recipes, 5.6, Quadratic and Cubic Equations
 		if (ycoeff3 == 0.0) {
-			// The cubic degenerated to quadratic (or line or ...).
+			// The cubic degenerated to quadratic (or line or …).
 			return Order2X.TforY(y, ycoeff0, ycoeff1, ycoeff2);
 		}
 		double a = ycoeff2 / ycoeff3;

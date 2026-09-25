@@ -29,7 +29,7 @@ import java.util.EventListener;
  * Global {@link Overlay} listener class.
  * Used to listen add and remove event for all overlay.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface GlobalOverlayListener extends EventListener
 {

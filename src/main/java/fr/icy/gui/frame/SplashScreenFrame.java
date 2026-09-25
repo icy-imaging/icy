@@ -18,28 +18,31 @@
 
 package fr.icy.gui.frame;
 
-import fr.icy.io.FileUtil;
-import fr.icy.model.image.ImageUtil;
-import fr.icy.io.ResourceUtil;
-import fr.icy.system.logging.IcyLogger;
-import fr.icy.common.reflect.ClassUtil;
 import fr.icy.common.math.Random;
+import fr.icy.common.reflect.ClassUtil;
+import fr.icy.io.FileUtil;
+import fr.icy.io.ResourceUtil;
+import fr.icy.model.image.ImageUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Animated ICY Logo.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  * @deprecated Does not work anymore with FlatLaf
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
 public class SplashScreenFrame extends JFrame {
+    private static final Logger LOGGER = Logger.getLogger(SplashScreenFrame.class.getName());
+
     public static class SplashPanel extends JPanel {
         private static final String SPLASH_FOLDER = ResourceUtil.IMAGE_PATH + "splash";
         private static final int DEFAULT_WIDTH = 960;
@@ -64,7 +67,7 @@ public class SplashScreenFrame extends JFrame {
                     }
                 }
                 catch (final Exception e) {
-                    IcyLogger.warn(this.getClass(), e, "Cannot load splashscreen image.");
+                    LOGGER.log(Level.WARNING, "Cannot load splashscreen image.", e);
                 }
             }
 

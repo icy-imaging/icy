@@ -25,7 +25,7 @@ import java.util.Objects;
 /**
  * Reflection tools class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ReflectionUtil {

@@ -18,7 +18,7 @@
 package fr.icy.gui.frame;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class IcyFrameAdapter implements IcyFrameListener
 {

@@ -30,7 +30,7 @@ import java.util.Set;
 /**
  * Property change implementation for multiple ROI undoable edition
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PropertyROIsEdit extends AbstractROIsEdit {

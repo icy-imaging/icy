@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * Plugin updater class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  * @deprecated It is no longer the plugins that are updated but the extensions that contains them
  */
@@ -112,7 +112,7 @@ public class PluginUpdater {
                 PluginInstaller.install(plugin, showProgress);
         }
         finally {
-            PluginLoader.reloadAsynch();
+            PluginLoader.reloadAsync();
         }
     }
 
@@ -127,7 +127,7 @@ public class PluginUpdater {
             final ProgressFrame checkingFrame;
 
             if (!silent && !Icy.getMainInterface().isHeadLess())
-                checkingFrame = new CancelableProgressFrame("checking for plugins update...");
+                checkingFrame = new CancelableProgressFrame("checking for plugins update…");
             else
                 checkingFrame = null;
             try {
@@ -141,7 +141,7 @@ public class PluginUpdater {
                         if (!NetworkUtil.hasInternetAccess())
                             new AnnounceFrame("You are not connected to internet.", 10);
                         else
-                            new AnnounceFrame("Can't access the repositories... You should verify your connection.", 10);
+                            new AnnounceFrame("Can't access the repositories… You should verify your connection.", 10);
                     }
 
                     return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,7 +20,6 @@ package fr.icy.gui.component.panel;
 
 import fr.icy.gui.LookAndFeelUtil;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.model.image.ImageUtil;
 
 import javax.swing.*;
@@ -28,7 +27,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ImageComponent extends JPanel {
@@ -62,8 +61,7 @@ public class ImageComponent extends JPanel {
     }
 
     /**
-     * @param image
-     *        the image to set
+     * @param image the image to set
      */
     public void setImage(final Image image) {
         if (this.image != image) {
@@ -87,16 +85,17 @@ public class ImageComponent extends JPanel {
 
         // something wrong here --> use 'fault' image
         if ((ix <= 0f) || (iy <= 0f)) {
-            image = new IcySVG(SVGResource.CLOSE).getImage(LookAndFeelUtil.getDefaultIconSize(), this.getForeground());
+            image = IcySVG.CLOSE.getImage(LookAndFeelUtil.getDefaultIconSize(), this.getForeground());
             ix = image.getWidth(null);
             iy = image.getHeight(null);
         }
 
         // we want a minimal appearance of 100,100
-        final float w = Math.max(getWidth(), 100);
-        final float h = Math.max(getHeight(), 100);
+        final float w = Math.max(getWidth(), 100f);
+        final float h = Math.max(getHeight(), 100f);
 
-        if ((w > 0f) && (h > 0f)) {
+        //if ((w > 0f) && (h > 0f))
+        {
             final float sx = w / ix;
             final float sy = h / iy;
             final float s = Math.min(sx, sy);

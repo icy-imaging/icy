@@ -20,7 +20,7 @@ package fr.icy.system.preferences;
 import java.util.ArrayList;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class PluginPreferences
 {

@@ -26,7 +26,7 @@ import com.jogamp.opengl.GLProfile;
 /**
  * Utilities class for OpenGL.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class OpenGLUtil
 {

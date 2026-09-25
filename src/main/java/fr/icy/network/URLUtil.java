@@ -24,7 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class URLUtil
 {

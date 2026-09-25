@@ -20,7 +20,7 @@ package fr.icy.system.preferences;
 import fr.icy.network.NetworkUtil;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class NetworkPreferences
 {

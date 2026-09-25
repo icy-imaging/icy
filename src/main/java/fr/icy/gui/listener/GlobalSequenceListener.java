@@ -26,7 +26,7 @@ import java.util.EventListener;
  * Global {@link Sequence} listener class.
  * Used to listen open, focus and close event for all sequence.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface GlobalSequenceListener extends EventListener
 {

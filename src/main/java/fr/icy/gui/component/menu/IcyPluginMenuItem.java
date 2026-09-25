@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -21,7 +21,6 @@ package fr.icy.gui.component.menu;
 import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.extension.plugin.PluginLauncher;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.system.thread.ThreadUtil;
 
 import java.awt.event.ActionEvent;
@@ -37,7 +36,7 @@ public class IcyPluginMenuItem extends IcyMenuItem implements ActionListener {
     private static final int SIZE = 32;
 
     public IcyPluginMenuItem(final PluginDescriptor descriptor, final String text) {
-        super(text, SVGResource.INDETERMINATE_QUESTION, SIZE);
+        super(text, IcySVG.INDETERMINATE_QUESTION, SIZE);
         this.descriptor = descriptor;
 
 

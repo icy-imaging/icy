@@ -20,7 +20,7 @@ package fr.icy.common.listener;
 /**
  * Progress notification listener.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface ProgressListener
 {

@@ -43,7 +43,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class VtkUtil {
@@ -315,7 +315,7 @@ public class VtkUtil {
     }
 
     /**
-     * Get vtkCellArray from a 1D prepared cells array ( {n, i1, i2, ..., n, i1, i2,...} )
+     * Get vtkCellArray from a 1D prepared cells array ( {n, i1, i2, …, n, i1, i2,…} )
      */
     public static vtkCellArray getCells(final int numCell, final int[] cells) {
         final vtkCellArray result = new vtkCellArray();

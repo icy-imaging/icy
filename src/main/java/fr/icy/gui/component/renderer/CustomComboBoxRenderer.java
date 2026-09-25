@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,17 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.renderer;
 
-import java.awt.*;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * CustomComboBox renderer, based on Substance look and feel code.<br>
  * Override the getListCellRendererComponent() or updateItem() methods to do your own rendering.
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class CustomComboBoxRenderer extends DefaultListCellRenderer {
@@ -34,7 +36,7 @@ public class CustomComboBoxRenderer extends DefaultListCellRenderer {
     private static final Color background = new Color(220, 220, 220);
     private static final Color foreground = Color.DARK_GRAY;
 
-    public CustomComboBoxRenderer(JComboBox<?> combo) {
+    public CustomComboBoxRenderer(final JComboBox<?> combo) {
         this.combo = combo;
         this.combo.setBackground(background);
         this.combo.setForeground(foreground);
@@ -45,7 +47,7 @@ public class CustomComboBoxRenderer extends DefaultListCellRenderer {
     }
 
     @Override
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+    public Component getListCellRendererComponent(final @NonNull JList<?> list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus) {
         if (!getComponentOrientation().equals(list.getComponentOrientation()))
             setComponentOrientation(list.getComponentOrientation());
 
@@ -59,7 +61,7 @@ public class CustomComboBoxRenderer extends DefaultListCellRenderer {
         return this;
     }
 
-    protected void updateItem(JList<?> list, Object value) {
+    protected void updateItem(final JList<?> list, final Object value) {
         if (value instanceof Icon) {
             setIcon((Icon) value);
             setText("");

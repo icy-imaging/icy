@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Utility class to handle <code>Update</code> type event.
  * 
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class UpdateEventHandler
 {
@@ -130,7 +130,7 @@ public class UpdateEventHandler
         final CollapsibleEvent previousChange;
 
         // TODO: can take sometime (select all on many ROI)
-        // TODO: check how fast is it now...
+        // TODO: check how fast is it now…
         synchronized (pendingChanges)
         {
             // search in pending changes if we have an equivalent change

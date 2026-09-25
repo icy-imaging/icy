@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,9 +18,9 @@
 
 package fr.icy.extension.plugin;
 
-import fr.icy.extension.ExtensionLoader;
 import fr.icy.Icy;
 import fr.icy.common.reflect.ClassUtil;
+import fr.icy.extension.ExtensionLoader;
 import fr.icy.extension.plugin.PluginDescriptor.PluginKernelNameSorter;
 import fr.icy.extension.plugin.abstract_.Plugin;
 import fr.icy.extension.plugin.classloader.JarClassLoader;
@@ -29,12 +29,11 @@ import fr.icy.gui.frame.progress.ProgressFrame;
 import fr.icy.io.Loader;
 import fr.icy.network.NetworkUtil;
 import fr.icy.system.IcyExceptionHandler;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.PluginPreferences;
 import fr.icy.system.thread.SingleProcessor;
 import fr.icy.system.thread.ThreadUtil;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.event.EventListenerList;
 import java.io.IOException;
@@ -42,17 +41,21 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Plugin Loader class.<br>
- * This class is used to load plugins from "plugins" package and "plugins" directory
+ * This class is used to load plugins from the "plugins" package and "plugins" directory
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thommas Musset
  * @deprecated Use {@link ExtensionLoader} instead.
  */
 @Deprecated(since = "3.0.0-a.5", forRemoval = true)
-public class PluginLoader {
+public final class PluginLoader {
+    private static final Logger LOGGER = Logger.getLogger(PluginLoader.class.getName());
+
     public final static String PLUGIN_PACKAGE = "plugins";
     //public final static String PLUGIN_KERNEL_PACKAGE = "plugins.kernel";
     public final static String PLUGIN_KERNEL_PACKAGE = "org.bioimageanalysis.extension.kernel";
@@ -87,7 +90,7 @@ public class PluginLoader {
     /**
      * JAR Class Loader disabled flag
      */
-    protected boolean JCLDisabled;
+    private boolean JCLDisabled;
 
     /*
      * internals
@@ -140,7 +143,7 @@ public class PluginLoader {
     /**
      * Reload the list of installed plugins (asynchronous version).
      */
-    public static void reloadAsynch() {
+    public static void reloadAsync() {
         instance.processor.submit(instance.reloader);
     }
 
@@ -155,7 +158,7 @@ public class PluginLoader {
     }
 
     /**
-     * Stop and restart all daemons plugins.
+     * Stop and restart all daemon plugins.
      */
     public static synchronized void resetDaemons() {
         // reset will be done later
@@ -167,7 +170,7 @@ public class PluginLoader {
     }
 
     /**
-     * Reload the list of installed plugins (in "plugins" directory)
+     * Reload the list of installed plugins (in the "plugins" directory)
      */
     void reloadInternal() {
         // needReload = false;
@@ -190,7 +193,7 @@ public class PluginLoader {
             ((PluginClassLoader) newLoader).add(PLUGIN_PATH);
         }
 
-        // no need to complete loading...
+        // no need to complete loading…
         if (processor.hasWaitingTasks())
             return;
 
@@ -203,7 +206,7 @@ public class PluginLoader {
             ClassUtil.findClassNamesInPath(PLUGIN_PATH, PLUGIN_PACKAGE, true, classes);
         }
         catch (final IOException e) {
-            IcyLogger.error(PluginLoader.class, e, "Error loading plugins.");
+            LOGGER.log(Level.SEVERE, "Error loading plugins.", e);
         }
 
         for (final String className : classes) {
@@ -214,7 +217,7 @@ public class PluginLoader {
             if (className.endsWith("$py") || className.endsWith("$ImageAnalyser") || className.endsWith("$CustomEventCallback"))
                 continue;
 
-            // no need to complete loading...
+            // no need to complete loading…
             if (processor.hasWaitingTasks())
                 return;
 
@@ -226,25 +229,22 @@ public class PluginLoader {
             }
             catch (final NoClassDefFoundError e) {
                 // fatal error
-                final String[] messages = new String[]{
-                        "Class '" + className + "' cannot be loaded :",
-                        "Required class '" + ClassUtil.getQualifiedNameFromPath(e.getLocalizedMessage()) + "' not found."
-                };
-                IcyLogger.fatal(PluginLoader.class, e, messages);
+                final String message = "Class '" + className + "' cannot be loaded: Required class '" + ClassUtil.getQualifiedNameFromPath(e.getLocalizedMessage()) + "' not found.";
+                LOGGER.log(Level.SEVERE, message, e);
             }
             catch (final UnsupportedClassVersionError e) {
                 // java version error (here we just notify in the console)
-                IcyLogger.warn(PluginLoader.class, e, NEWER_JAVA_REQUIRED + " for class '" + className + "' (discarded).");
+                LOGGER.log(Level.SEVERE, NEWER_JAVA_REQUIRED + " for class '" + className + "' (discarded).", e);
             }
             catch (final ClassCastException e) {
-                // ignore ClassCastException (for classes which doesn't extend Plugin)
+                // ignore ClassCastException (for classes that don't extend Plugin)
             }
             catch (final ClassNotFoundException e) {
                 // ignore ClassNotFoundException (for no public classes)
             }
             catch (final Error | Exception e) {
                 // fatal error
-                IcyLogger.fatal(PluginLoader.class, "Class '" + className + "' is discarded.");
+                LOGGER.log(Level.SEVERE, "Class '" + className + "' is discarded.", e);
             }
         }
 
@@ -269,13 +269,13 @@ public class PluginLoader {
     /**
      * Returns the list of daemon type plugins.
      */
-    public static @NotNull ArrayList<PluginDescriptor> getDaemonPlugins() {
+    public static @NonNull ArrayList<PluginDescriptor> getDaemonPlugins() {
         final ArrayList<PluginDescriptor> result = new ArrayList<>();
 
         synchronized (instance.plugins) {
             for (final PluginDescriptor pluginDescriptor : instance.plugins) {
                 if (pluginDescriptor.isInstanceOf(PluginDaemon.class)) {
-                    // accept class ?
+                    // accept class?
                     if (!pluginDescriptor.isAbstract() && !pluginDescriptor.isInterface())
                         result.add(pluginDescriptor);
                 }
@@ -289,17 +289,17 @@ public class PluginLoader {
      * Returns the list of active daemon plugins.
      */
     @Contract(value = " -> new", pure = true)
-    public static @NotNull ArrayList<PluginDaemon> getActiveDaemons() {
+    public static @NonNull ArrayList<PluginDaemon> getActiveDaemons() {
         synchronized (instance.activeDaemons) {
             return new ArrayList<>(instance.activeDaemons);
         }
     }
 
     /**
-     * Start daemons plugins.
+     * Start daemon plugins.
      */
     static synchronized void startDaemons() {
-        // at this point active daemons should be empty !
+        // at this point active daemons should be empty!
         if (!instance.activeDaemons.isEmpty())
             stopDaemons();
 
@@ -307,14 +307,14 @@ public class PluginLoader {
         final List<PluginDaemon> newDaemons = new ArrayList<>();
 
         for (final PluginDescriptor pluginDesc : getDaemonPlugins()) {
-            // not found in inactives ?
+            // not found inactives?
             if (!inactives.contains(pluginDesc.getClassName())) {
                 try {
                     final PluginDaemon plugin = (PluginDaemon) pluginDesc.getPluginClass().getDeclaredConstructor().newInstance();
                     final Thread thread = new Thread(plugin, pluginDesc.getName());
 
                     thread.setName(pluginDesc.getName());
-                    // so icy can exit even with running daemon plugin
+                    // so icy can exit, even with running daemon plugin
                     thread.setDaemon(true);
 
                     // init daemon
@@ -339,7 +339,7 @@ public class PluginLoader {
     }
 
     /**
-     * Stop daemons plugins.
+     * Stop daemon plugins.
      */
     public synchronized static void stopDaemons() {
         for (final PluginDaemon daemonPlug : getActiveDaemons()) {
@@ -397,7 +397,7 @@ public class PluginLoader {
      * Return all loaded classes.
      */
     @Contract(" -> new")
-    public static @NotNull Map<String, Class<?>> getLoadedClasses() {
+    public static @NonNull Map<String, Class<?>> getLoadedClasses() {
         prepare();
 
         //synchronized (instance.loader) {
@@ -412,7 +412,7 @@ public class PluginLoader {
     }
 
     /**
-     * Return a resource as data stream from given resource name
+     * Return a resource as a data stream from a given resource name
      *
      * @param name resource name
      */
@@ -443,20 +443,20 @@ public class PluginLoader {
     /**
      * Return the list of loaded plugins which derive from the specified class.
      *
-     * @param clazz The class object defining the class we want plugin derive from.
+     * @param clazz The class object defining the class we want the plugin to derive from.
      */
-    public static @NotNull ArrayList<PluginDescriptor> getPlugins(final Class<?> clazz) {
+    public static @NonNull ArrayList<PluginDescriptor> getPlugins(final Class<?> clazz) {
         return getPlugins(clazz, false, false);
     }
 
     /**
      * Return the list of loaded plugins which derive from the specified class.
      *
-     * @param clazz         The class object defining the class we want plugin derive from.
+     * @param clazz         The class object defining the class we want the plugin to derive from.
      * @param wantAbstract  specify if we also want abstract classes
      * @param wantInterface specify if we also want interfaces
      */
-    public static @NotNull ArrayList<PluginDescriptor> getPlugins(final Class<?> clazz, final boolean wantAbstract, final boolean wantInterface) {
+    public static @NonNull ArrayList<PluginDescriptor> getPlugins(final Class<?> clazz, final boolean wantAbstract, final boolean wantInterface) {
         prepare();
 
         final ArrayList<PluginDescriptor> result = new ArrayList<>();
@@ -465,7 +465,7 @@ public class PluginLoader {
             synchronized (instance.plugins) {
                 for (final PluginDescriptor pluginDescriptor : instance.plugins) {
                     if (pluginDescriptor.isInstanceOf(clazz)) {
-                        // accept class ?
+                        // accept class?
                         if ((wantAbstract || !pluginDescriptor.isAbstract()) && (wantInterface || !pluginDescriptor.isInterface()))
                             result.add(pluginDescriptor);
                     }
@@ -481,7 +481,7 @@ public class PluginLoader {
      *
      * @param annotation The class object defining the annotation we want.
      */
-    public static @NotNull ArrayList<PluginDescriptor> getAnnotatedPlugins(final Class<? extends Annotation> annotation) {
+    public static @NonNull ArrayList<PluginDescriptor> getAnnotatedPlugins(final Class<? extends Annotation> annotation) {
         return getAnnotatedPlugins(annotation, false, false);
     }
 
@@ -492,14 +492,14 @@ public class PluginLoader {
      * @param wantAbstract  specify if we also want abstract classes
      * @param wantInterface specify if we also want interfaces
      */
-    public static @NotNull ArrayList<PluginDescriptor> getAnnotatedPlugins(final @NotNull Class<? extends Annotation> annotation, final boolean wantAbstract, final boolean wantInterface) {
+    public static @NonNull ArrayList<PluginDescriptor> getAnnotatedPlugins(final @NonNull Class<? extends Annotation> annotation, final boolean wantAbstract, final boolean wantInterface) {
         prepare();
 
         final ArrayList<PluginDescriptor> result = new ArrayList<>();
         synchronized (instance.plugins) {
             for (final PluginDescriptor pluginDescriptor : instance.plugins) {
                 if (pluginDescriptor.isAnnotated(annotation)) {
-                    // accept class ?
+                    // accept class?
                     if ((wantAbstract || !pluginDescriptor.isAbstract()) && (wantInterface || !pluginDescriptor.isInterface()))
                         result.add(pluginDescriptor);
                 }
@@ -512,7 +512,7 @@ public class PluginLoader {
     /**
      * Return the list of "actionable" plugins (mean we can launch them from GUI).
      */
-    public static @NotNull ArrayList<PluginDescriptor> getActionablePlugins() {
+    public static @NonNull ArrayList<PluginDescriptor> getActionablePlugins() {
         prepare();
 
         final ArrayList<PluginDescriptor> result = new ArrayList<>();
@@ -560,7 +560,7 @@ public class PluginLoader {
 
     /**
      * Verify the specified plugin is correctly installed.<br>
-     * Returns an empty string if the plugin is valid otherwise it returns the error message.
+     * Returns an empty string if the plugin is valid, otherwise it returns the error message.
      */
     public static String verifyPlugin(final PluginDescriptor plugin) {
         //synchronized (instance.loader) {
@@ -602,7 +602,7 @@ public class PluginLoader {
     /**
      * Called when class loader changed
      */
-    protected void changed() {
+    private void changed() {
         // check for missing or mis-installed plugins on first start
         if (!initialized) {
             initialized = true;
@@ -619,7 +619,7 @@ public class PluginLoader {
             if (!PluginInstaller.getInstallFIFO().isEmpty() || !PluginInstaller.getRemoveFIFO().isEmpty() || isLoading())
                 return;
 
-            // pre load the importers classes as they can be heavy
+            // preload the importer classes as they can be heavy
             Loader.getSequenceFileImporters();
             Loader.getFileImporters();
             Loader.getImporters();
@@ -639,7 +639,7 @@ public class PluginLoader {
             final ProgressFrame pf;
 
             if (showProgress) {
-                pf = new ProgressFrame("Checking plugins...");
+                pf = new ProgressFrame("Checking plugins…");
                 pf.setLength(plugins.size());
                 pf.setPosition(0);
             }
@@ -664,7 +664,7 @@ public class PluginLoader {
 
             // check for missing plugins
             for (final PluginDescriptor plugin : required) {
-                // dependency missing ? --> try to reinstall the plugin
+                // is dependency missing? --> try to reinstall the plugin
                 if (!plugin.isInstalled()) {
                     final PluginDescriptor toInstall = PluginRepositoryLoader.getPlugin(plugin.getClassName());
                     if (toInstall != null)
@@ -675,9 +675,9 @@ public class PluginLoader {
                     pf.incPosition();
             }
 
-            if ((faulties.size() > 0) || (missings.size() > 0)) {
+            if ((!faulties.isEmpty()) || (!missings.isEmpty())) {
                 if (pf != null) {
-                    pf.setMessage("Installing missing plugins...");
+                    pf.setMessage("Installing missing plugins…");
                     pf.setPosition(0);
                     pf.setLength(faulties.size() + missings.size());
                 }
@@ -752,6 +752,7 @@ public class PluginLoader {
         }
     }
 
+    @FunctionalInterface
     public interface PluginLoaderListener extends EventListener {
         void pluginLoaderChanged(PluginLoaderEvent e);
     }

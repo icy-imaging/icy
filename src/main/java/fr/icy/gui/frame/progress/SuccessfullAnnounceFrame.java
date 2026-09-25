@@ -22,7 +22,7 @@ import fr.icy.gui.LookAndFeelUtil;
 import fr.icy.system.thread.ThreadUtil;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SuccessfullAnnounceFrame extends AnnounceFrame {

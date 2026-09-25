@@ -25,9 +25,9 @@ import java.awt.geom.Rectangle2D;
 
 /**
  * Rectangle4D class.<br>
- * Incomplete implementation (work in progress...)
+ * Incomplete implementation (work in progress…)
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class Rectangle4D implements Cloneable
 {

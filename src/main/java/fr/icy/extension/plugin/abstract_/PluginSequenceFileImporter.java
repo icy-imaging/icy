@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,7 +18,6 @@
 
 package fr.icy.extension.plugin.abstract_;
 
-import ome.xml.meta.OMEXMLMetadata;
 import fr.icy.common.exception.UnsupportedFormatException;
 import fr.icy.common.listener.ProgressListener;
 import fr.icy.extension.plugin.interface_.PluginNoEDTConstructor;
@@ -26,7 +25,8 @@ import fr.icy.io.SequenceFileImporter;
 import fr.icy.model.image.AbstractImageProvider;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.sequence.SequenceIdImporter;
-import org.jetbrains.annotations.Nullable;
+import ome.xml.meta.OMEXMLMetadata;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.*;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import java.io.IOException;
 /**
  * Plugin specialized for Sequence file import operation (see the {@link SequenceFileImporter} interface)
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  * @see PluginImporter
  * @see PluginFileImporter
@@ -45,8 +45,7 @@ public abstract class PluginSequenceFileImporter extends Plugin implements Seque
     // default helper
     protected class InternalSequenceIdImporterHelper extends AbstractImageProvider implements SequenceIdImporter {
         @Override
-        @Nullable
-        public String getOpened() {
+        public @Nullable String getOpened() {
             return PluginSequenceFileImporter.this.getOpened();
         }
 

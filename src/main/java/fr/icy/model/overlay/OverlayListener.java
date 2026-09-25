@@ -22,7 +22,7 @@ import java.util.EventListener;
 /**
  * Overlay event listener interface.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface OverlayListener extends EventListener
 {

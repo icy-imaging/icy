@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -26,9 +26,10 @@
  * More information about the Pumpernickel project is available here:
  * https://mickleness.github.io/pumpernickel/
  */
+
 package fr.icy.common.geom.areax;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,6 +39,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class is a direct branch from the <code>java.awt.geom.Area</code>.
@@ -62,7 +65,7 @@ import java.util.Map;
  * non-overlapping. Paths are decomposed during construction into separate
  * component non-overlapping parts, empty pieces of the path are discarded, and
  * then these non-empty and non-overlapping properties are maintained through
- * all subsequent CAG operations. Outlines of different component sub-paths may
+ * all following CAG operations. Outlines of different component sub-paths may
  * touch each other, as long as they do not cross so that their enclosed areas
  * overlap.
  * <li>The geometry of the path describing the outline of the <code>AreaX</code>
@@ -81,7 +84,7 @@ import java.util.Map;
  * will be empty since the line encloses no area. An empty <code>AreaX</code>
  * will iterate no geometry in its <code>PathIterator</code> objects.
  * <li>A self-intersecting <code>Shape</code> may be split into two (or more)
- * sub-paths each enclosing one of the non-intersecting portions of the original
+ * sub-paths, each enclosing one of the non-intersecting portions of the original
  * path.
  * <li>An <code>AreaX</code> may take more path segments to describe the same
  * geometry even when the original outline is simple and obvious. The analysis
@@ -95,7 +98,7 @@ import java.util.Map;
  * related to the <code>AreaX</code> class:
  * <p>
  * The AreaX class is intended to achieve exactly the same visual results as the
- * Area class. However several possible optimizations have been carefully
+ * Area class. However, several possible optimizations have been carefully
  * implemented to reach those results faster.
  * <p>
  * The most customizable change is the implementation of the
@@ -103,12 +106,14 @@ import java.util.Map;
  * object and experiment with it. (And if they make improvements: email them to
  * me to include in this project!)
  * <p>
- * Each <code>AreaX</code> object has a reference to a rules object that can be
- * changed by calling: <code>myArea.setRules()</code>. However you can also
+ * Each <code>AreaX</code> object has a reference to a rule object that can be
+ * changed by calling: <code>myArea.setRules()</code>. However, you can also
  * change the <i>default</i> rules for all future <code>AreaX</code> objects by
  * calling: <code>UIManager.put("AreaX.rules", myRules)</code>.
  */
 public class AreaX implements Shape, Cloneable {
+    private static final Logger LOGGER = Logger.getLogger(AreaX.class.getName());
+
     public static final int RELATIONSHIP_LHS_CONTAINS = 0;
     public static final int RELATIONSHIP_RHS_CONTAINS = 1;
     public static final int RELATIONSHIP_COMPLEX = 2;
@@ -116,7 +121,7 @@ public class AreaX implements Shape, Cloneable {
 
     private static final AreaXBody emptyBody = new AreaXBody(null, 0);
     private static final AreaXRules minimalRules = new AreaXRules();
-    private static final Map<String, AreaXRules> rulesTable = new HashMap<>();
+    private static final Map<String, AreaXRules> rulesTable = new HashMap<>(); // FIXME: This Map is not populated
 
     private static AreaXRules getDefaultRules() {
         final Object rulesObject = UIManager.get("AreaX.rules");
@@ -135,7 +140,8 @@ public class AreaX implements Shape, Cloneable {
             return rules;
         }
         catch (final Throwable t) {
-            t.printStackTrace();
+            if (LOGGER.isLoggable(Level.WARNING))
+                LOGGER.log(Level.WARNING, "Failed to load AreaX rules.", t);
             return minimalRules;
         }
     }
@@ -145,7 +151,7 @@ public class AreaX implements Shape, Cloneable {
     private AreaXRules rules = getDefaultRules();
 
     /**
-     * Default constructor which creates an empty area.
+     * Default constructor that creates an empty area.
      */
     public AreaX() {
         body = emptyBody;
@@ -160,7 +166,7 @@ public class AreaX implements Shape, Cloneable {
 
     /**
      * The <code>AreaX</code> class creates an area geometry from the specified
-     * {@link Shape} object. The geometry is explicitly closed, if the
+     * {@link Shape} object. The geometry is explicitly closed if the
      * <code>Shape</code> is not already closed. The fill rule (even-odd or
      * winding) specified by the geometry of the <code>Shape</code> is used to
      * determine the resulting enclosed area.
@@ -256,7 +262,6 @@ public class AreaX implements Shape, Cloneable {
      * This uses <code>getRelationship()</code> to determine if the argument is
      * inside this shape.
      *
-     * @param shape
      * @return true whether the argument is completely contained inside this
      * shape.
      */
@@ -268,7 +273,6 @@ public class AreaX implements Shape, Cloneable {
      * This uses <code>getRelationship()</code> to determine if the argument is
      * inside this shape.
      *
-     * @param shape
      * @param transform a transform to apply to the argument shape.
      * @return true whether the argument (when transformed) is completely
      * contained inside this shape.
@@ -282,7 +286,6 @@ public class AreaX implements Shape, Cloneable {
      * inside this shape.
      *
      * @param lhsTransform the optional transform to apply to this operand.
-     * @param shape
      * @param transform    an optional transform to apply to the argument shape.
      * @return true whether the argument (when transformed) is completely
      * contained inside this shape.
@@ -295,7 +298,6 @@ public class AreaX implements Shape, Cloneable {
      * This uses <code>getRelationship()</code> to determine if the argument
      * intersects this shape.
      *
-     * @param shape
      * @return true whether the argument (when transformed) intersects this
      * shape.
      */
@@ -308,7 +310,6 @@ public class AreaX implements Shape, Cloneable {
      * This uses <code>getRelationship()</code> to determine if the argument
      * intersects this shape.
      *
-     * @param shape
      * @param transform a transform to apply to the argument shape.
      * @return true whether the argument (when transformed) intersects this
      * shape.
@@ -323,7 +324,6 @@ public class AreaX implements Shape, Cloneable {
      * intersects this shape.
      *
      * @param lhsTransform the optional transform to apply to this operand.
-     * @param shape
      * @param transform    an optional transform to apply to the argument shape.
      * @return true whether the argument (when transformed) intersects this
      * shape.
@@ -338,7 +338,6 @@ public class AreaX implements Shape, Cloneable {
      * between this shape and the argument (with the optional transform).
      *
      * @param lhsTransform the optional transform to apply to this operand.
-     * @param shape
      * @param transform    an optional transform to apply to the argument.
      * @return one of the 4 relationship constants: RELATIONSHIP_LHS_CONTAINS,
      * RELATIONSHIP_RHS_CONTAINS, RELATIONSHIP_NONE, or
@@ -372,13 +371,13 @@ public class AreaX implements Shape, Cloneable {
      *     ##                                 ##     ##            ##
      * </pre>
      * <p>
-     * This call immediately executes. It executes any pending operations first,
-     * and then executes this add.
+     * This call immediately executes. It executes any pending operations first
+     * and then executes this adding.
      *
      * @param rhs the <code>AreaX</code> to be added to the current shape
      * @throws NullPointerException if <code>rhs</code> is null
      */
-    public synchronized void executeAdd(@NotNull final AreaX rhs) {
+    public synchronized void executeAdd(final @NonNull AreaX rhs) {
         body = getBody().add(rhs.getBody());
     }
 
@@ -440,13 +439,13 @@ public class AreaX implements Shape, Cloneable {
      *     ##                                 ##     ##
      * </pre>
      * <p>
-     * This call immediately executes. It executes any pending operations first,
-     * and then executes this add.
+     * This call immediately executes. It executes any pending operations first
+     * and then executes this adding.
      *
      * @param rhs the <code>AreaX</code> to be subtracted from the current shape
      * @throws NullPointerException if <code>rhs</code> is null
      */
-    public synchronized void executeSubtract(@NotNull final AreaX rhs) {
+    public synchronized void executeSubtract(final @NonNull AreaX rhs) {
         body = getBody().subtract(rhs.getBody());
     }
 
@@ -511,14 +510,14 @@ public class AreaX implements Shape, Cloneable {
      *     ##                                 ##
      * </pre>
      * <p>
-     * This call immediately executes. It executes any pending operations first,
-     * and then executes this add.
+     * This call immediately executes. It executes any pending operations first
+     * and then executes this adding.
      *
      * @param rhs the <code>AreaX</code> to be intersected with this
      *            <code>AreaX</code>
      * @throws NullPointerException if <code>rhs</code> is null
      */
-    public synchronized void executeIntersect(@NotNull final AreaX rhs) {
+    public synchronized void executeIntersect(final @NonNull AreaX rhs) {
         body = getBody().intersect(rhs.getBody());
     }
 
@@ -583,19 +582,19 @@ public class AreaX implements Shape, Cloneable {
      *     ##                                 ##     ##            ##
      * </pre>
      * <p>
-     * This call immediately executes. It executes any pending operations first,
-     * and then executes this add.
+     * This call immediately executes. It executes any pending operations first
+     * and then executes this adding.
      *
      * @param rhs the <code>AreaX</code> to be exclusive ORed with this
      *            <code>AreaX</code>.
      * @throws NullPointerException if <code>rhs</code> is null
      */
-    public synchronized void executeExclusiveOr(@NotNull final AreaX rhs) {
+    public synchronized void executeExclusiveOr(final @NonNull AreaX rhs) {
         body = getBody().xor(rhs.getBody());
     }
 
     /**
-     * Removes all of the geometry from this <code>AreaX</code> and restores it
+     * Removes all the geometry from this <code>AreaX</code> and restores it
      * to an empty area.
      */
     public synchronized void reset() {
@@ -613,11 +612,11 @@ public class AreaX implements Shape, Cloneable {
      */
     public synchronized boolean isEmpty() {
         processQueue();
-        return (body.size() == 0);
+        return (body.isEmpty());
     }
 
     /**
-     * Tests whether this <code>AreaX</code> consists entirely of straight edged
+     * Tests whether this <code>AreaX</code> consists entirely of straight-edged
      * polygonal geometry.
      * <p>
      * This forces any pending operations to be performed.
@@ -636,12 +635,12 @@ public class AreaX implements Shape, Cloneable {
     }
 
     /**
-     * Tests whether this <code>AreaX</code> is rectangular in shape.
+     * Tests whether this <code>AreaX</code> is rectangular.
      * <p>
      * This forces any pending operations to be performed.
      *
      * @return <code>true</code> if the geometry of this <code>AreaX</code> is
-     * rectangular in shape; <code>false</code> otherwise.
+     * rectangular; <code>false</code> otherwise.
      */
     public synchronized boolean isRectangular() {
         processQueue();
@@ -660,12 +659,12 @@ public class AreaX implements Shape, Cloneable {
         if (c1.getXTop() != c1.getXBot() || c2.getXTop() != c2.getXBot()) {
             return false;
         }
-        // One might be able to prove that this is impossible...
+        // One might be able to prove that this is impossible…
         return (c1.getYTop() == c2.getYTop()) && (c1.getYBot() == c2.getYBot());
     }
 
     /**
-     * Tests whether this <code>AreaX</code> is comprised of a single closed
+     * Tests whether this <code>AreaX</code> is composed of a single closed
      * subpath. This method returns <code>true</code> if the path contains 0 or
      * 1 subpaths, or <code>false</code> if the path contains more than 1
      * subpath. The subpaths are counted by the number of
@@ -674,7 +673,7 @@ public class AreaX implements Shape, Cloneable {
      * <p>
      * This forces any pending operations to be performed.
      *
-     * @return <code>true</code> if the <code>AreaX</code> is comprised of a
+     * @return <code>true</code> if the <code>AreaX</code> is composed of a
      * single basic geometry; <code>false</code> otherwise.
      */
     public synchronized boolean isSingular() {
@@ -691,7 +690,7 @@ public class AreaX implements Shape, Cloneable {
     }
 
     /**
-     * Returns a high precision bounding {@link Rectangle2D} that completely
+     * Returns a high-precision bounding {@link Rectangle2D} that completely
      * encloses this <code>AreaX</code>.
      * <p>
      * The Area class will attempt to return the tightest bounding box possible
@@ -736,7 +735,7 @@ public class AreaX implements Shape, Cloneable {
      * <p>
      * This forces any pending operations to be performed.
      *
-     * @return Created clone object
+     * @return Created a clone object
      */
     @Override
     public synchronized AreaX clone() {
@@ -755,7 +754,7 @@ public class AreaX implements Shape, Cloneable {
      * @return <code>true</code> if the two geometries are equal;
      * <code>false</code> otherwise.
      */
-    public synchronized boolean equals(@NotNull final AreaX other) {
+    public synchronized boolean equals(final @NonNull AreaX other) {
         return getBody().equals(other.getBody());
     }
 
@@ -841,7 +840,7 @@ public class AreaX implements Shape, Cloneable {
      * This forces any pending operations to be performed.
      */
     @Override
-    public synchronized boolean contains(@NotNull final Rectangle2D r) {
+    public synchronized boolean contains(final @NonNull Rectangle2D r) {
         return contains(r.getX(), r.getY(), r.getWidth(), r.getHeight());
     }
 
@@ -869,7 +868,7 @@ public class AreaX implements Shape, Cloneable {
      * This forces any pending operations to be performed.
      */
     @Override
-    public synchronized boolean intersects(@NotNull final Rectangle2D r) {
+    public synchronized boolean intersects(final @NonNull Rectangle2D r) {
         return intersects(r.getX(), r.getY(), r.getWidth(), r.getHeight());
     }
 
@@ -893,15 +892,15 @@ public class AreaX implements Shape, Cloneable {
 
     /**
      * Creates a <code>PathIterator</code> for the flattened outline of this
-     * <code>AreaX</code> object. Only uncurved path segments represented by the
-     * SEG_MOVETO, SEG_LINETO, and SEG_CLOSE point types are returned by the
-     * iterator. This <code>AreaX</code> object is unchanged.
+     * <code>AreaX</code> object. The iterator returns only uncurved path
+     * segments represented by the SEG_MOVETO, SEG_LINETO, and SEG_CLOSE
+     * point types. This <code>AreaX</code> object is unchanged.
      *
      * @param at       an optional <code>AffineTransform</code> to be applied to the
      *                 coordinates as they are returned in the iteration, or
      *                 <code>null</code> if untransformed coordinates are desired
      * @param flatness the maximum amount that the control points for a given curve
-     *                 can vary from colinear before a subdivided curve is replaced
+     *                 can vary from co-linear before a subdivided curve is replaced
      *                 by a straight line connecting the end points
      * @return the <code>PathIterator</code> object that returns the geometry of
      * the outline of this <code>AreaX</code>, one segment at a time.

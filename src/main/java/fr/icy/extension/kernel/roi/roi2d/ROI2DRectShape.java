@@ -31,7 +31,7 @@ import java.awt.geom.RectangularShape;
 /**
  * Base class for rectangular shape ROI.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class ROI2DRectShape extends ROI2DShape {

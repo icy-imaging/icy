@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,8 +20,7 @@ package fr.icy.extension.plugin.classloader;
 
 import fr.icy.extension.plugin.classloader.exception.JclException;
 import fr.icy.extension.plugin.classloader.exception.ResourceNotFoundException;
-import fr.icy.system.logging.IcyLogger;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -36,10 +35,12 @@ import java.util.logging.Logger;
  * ClasspathResources
  *
  * @author Kamran Zafar
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class JarClassLoader extends AbstractClassLoader {
+    private static final Logger LOGGER = Logger.getLogger(JarClassLoader.class.getName());
+
     /**
      * Class cache
      */
@@ -48,8 +49,6 @@ public class JarClassLoader extends AbstractClassLoader {
     protected final ClasspathResources classpathResources;
     private char classNameReplacementChar;
     private final ProxyClassLoader localLoader = new LocalLoader();
-
-    private static final Logger logger = Logger.getLogger(JarClassLoader.class.getName());
 
     public JarClassLoader(final ClassLoader parent) {
         super(parent);
@@ -85,7 +84,7 @@ public class JarClassLoader extends AbstractClassLoader {
     /**
      * Add all jar/class sources
      */
-    public void addAll(final Object @NotNull [] sources) {
+    public void addAll(final Object @NonNull [] sources) {
         for (final Object source : sources)
             add(source);
     }
@@ -93,7 +92,7 @@ public class JarClassLoader extends AbstractClassLoader {
     /**
      * Add all jar/class sources
      */
-    public void addAll(final @NotNull List<Object> sources) {
+    public void addAll(final @NonNull List<Object> sources) {
         for (final Object source : sources)
             add(source);
     }
@@ -155,12 +154,12 @@ public class JarClassLoader extends AbstractClassLoader {
      * JCL
      */
     public void unloadClass(final String className) {
-        if (logger.isLoggable(Level.FINEST))
-            logger.finest("Unloading class " + className);
+        if (LOGGER.isLoggable(Level.FINEST))
+            LOGGER.finest("Unloading class " + className);
 
         if (loadedClasses.containsKey(className)) {
-            if (logger.isLoggable(Level.FINEST))
-                logger.finest("Removing loaded class " + className);
+            if (LOGGER.isLoggable(Level.FINEST))
+                LOGGER.finest("Removing loaded class " + className);
             loadedClasses.remove(className);
             try {
                 classpathResources.unload(formatClassName(className));
@@ -181,7 +180,7 @@ public class JarClassLoader extends AbstractClassLoader {
         }
     }
 
-    protected String formatClassName(final @NotNull String className) {
+    protected String formatClassName(final @NonNull String className) {
         String cname = className.replace('/', '~');
 
         if (classNameReplacementChar == '\u0000')
@@ -198,7 +197,7 @@ public class JarClassLoader extends AbstractClassLoader {
      * Local class loader
      */
     class LocalLoader extends ProxyClassLoader {
-        private final Logger logger = Logger.getLogger(LocalLoader.class.getName());
+        private static final Logger LOGGER = Logger.getLogger(LocalLoader.class.getName());
 
         public LocalLoader() {
             super(50);
@@ -218,8 +217,8 @@ public class JarClassLoader extends AbstractClassLoader {
 
             result = loadedClasses.get(className);
             if (result != null) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("Returning local loaded class [" + className + "] from cache");
+                if (LOGGER.isLoggable(Level.FINEST))
+                    LOGGER.finest("Returning local loaded class [" + className + "] from cache");
                 return result;
             }
 
@@ -257,8 +256,8 @@ public class JarClassLoader extends AbstractClassLoader {
                 resolveClass(result);
 
             loadedClasses.put(className, result);
-            if (logger.isLoggable(Level.FINEST))
-                logger.finest("Return new local loaded class " + className);
+            if (LOGGER.isLoggable(Level.FINEST))
+                LOGGER.finest("Return new local loaded class " + className);
 
             return result;
         }
@@ -269,14 +268,15 @@ public class JarClassLoader extends AbstractClassLoader {
                 final byte[] arr = classpathResources.getResourceContent(name);
 
                 if (arr != null) {
-                    if (logger.isLoggable(Level.FINEST))
-                        logger.finest("Returning newly loaded resource " + name);
+                    if (LOGGER.isLoggable(Level.FINEST))
+                        LOGGER.finest("Returning newly loaded resource " + name);
 
                     return new ByteArrayInputStream(arr);
                 }
             }
             catch (final IOException e) {
-                IcyLogger.error(JarClassLoader.class, e, e.getLocalizedMessage());
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Unable to get resource as stream.", e);
             }
 
             return null;
@@ -287,8 +287,8 @@ public class JarClassLoader extends AbstractClassLoader {
             final URL url = classpathResources.getResource(name);
 
             if (url != null) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("Returning newly loaded resource " + name);
+                if (LOGGER.isLoggable(Level.FINEST))
+                    LOGGER.finest("Returning newly loaded resource " + name);
 
                 return url;
             }

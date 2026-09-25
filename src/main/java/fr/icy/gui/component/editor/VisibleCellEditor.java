@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,8 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.editor;
 
+import fr.icy.gui.LookAndFeelUtil;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.renderer.VisibleCellRenderer;
 
 import javax.swing.*;
@@ -27,7 +30,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class VisibleCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor {
@@ -50,29 +53,29 @@ public class VisibleCellEditor extends AbstractCellEditor implements TableCellEd
 
     @Override
     public Object getCellEditorValue() {
-        return Boolean.valueOf(visible);
+        return visible;
     }
 
     @Override
     public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected, final int row, final int column) {
-        visible = ((Boolean) value).booleanValue();
+        visible = (Boolean) value;
 
         if (visible)
-            label.setIcon(VisibleCellRenderer.VISIBILITY);
+            label.setIcon(IcySVG.VISIBILITY.getIcon(LookAndFeelUtil.getDefaultIconSize()));
         else
-            label.setIcon(VisibleCellRenderer.VISIBILITY_OFF);
+            label.setIcon(IcySVG.VISIBILITY_OFF.getIcon(LookAndFeelUtil.getDefaultIconSize()));
 
         return label;
     }
 
     @Override
     public Component getTreeCellEditorComponent(final JTree tree, final Object value, final boolean isSelected, final boolean expanded, final boolean leaf, final int row) {
-        visible = ((Boolean) value).booleanValue();
+        visible = (Boolean) value;
 
         if (visible)
-            label.setIcon(VisibleCellRenderer.VISIBILITY);
+            label.setIcon(IcySVG.VISIBILITY.getIcon(LookAndFeelUtil.getDefaultIconSize()));
         else
-            label.setIcon(VisibleCellRenderer.VISIBILITY_OFF);
+            label.setIcon(IcySVG.VISIBILITY_OFF.getIcon(LookAndFeelUtil.getDefaultIconSize()));
 
         return label;
     }

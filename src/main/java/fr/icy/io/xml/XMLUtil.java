@@ -18,6 +18,7 @@
 
 package fr.icy.io.xml;
 
+import fr.icy.common.collection.array.Array1DUtil;
 import fr.icy.common.collection.array.ArrayUtil;
 import fr.icy.common.string.StringUtil;
 import fr.icy.common.type.DataType;
@@ -26,7 +27,6 @@ import fr.icy.io.zip.ZipUtil;
 import fr.icy.network.NetworkUtil;
 import fr.icy.network.URLUtil;
 import fr.icy.network.auth.AuthenticationInfo;
-import fr.icy.system.logging.IcyLogger;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -41,6 +41,9 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -48,10 +51,12 @@ import java.util.zip.Inflater;
 /**
  * XML utilities class (parse, read, create and write XML documents).
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class XMLUtil {
+    private static final Logger LOGGER = Logger.getLogger(XMLUtil.class.getName());
+
     public static final String FILE_EXTENSION = "xml";
     public static final String FILE_DOT_EXTENSION = "." + FILE_EXTENSION;
 
@@ -120,7 +125,7 @@ public class XMLUtil {
             result = transformerFactory.newTransformer();
         }
         catch (final TransformerConfigurationException e) {
-            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, "Unable to create the XML transformer.", e);
             return null;
         }
 
@@ -204,7 +209,7 @@ public class XMLUtil {
     public static Document loadDocument(final String path, final AuthenticationInfo auth, final boolean showError) {
         if (StringUtil.isEmpty(path)) {
             if (showError)
-                IcyLogger.error(XMLUtil.class, "XMLUtil.loadDocument('" + path + "') error: empty path !");
+                LOGGER.severe("XMLUtil.loadDocument('" + path + "') error: empty path !");
 
             return null;
         }
@@ -234,7 +239,7 @@ public class XMLUtil {
     public static Document loadDocument(final File f, final boolean showError) {
         if ((f == null) || !f.exists()) {
             if (showError)
-                IcyLogger.error(XMLUtil.class, "XMLUtil.loadDocument('" + f + "') error: file not found !");
+                LOGGER.severe("XMLUtil.loadDocument('" + f + "') error: file not found !");
 
             return null;
         }
@@ -249,7 +254,7 @@ public class XMLUtil {
         }
         catch (final Exception e) {
             if (showError)
-                IcyLogger.error(XMLUtil.class, e, "XMLUtil.loadDocument('" + f.getPath() + "') error.");
+                LOGGER.log(Level.SEVERE, "XMLUtil.loadDocument('" + f + "') error.", e);
         }
 
         return null;
@@ -302,7 +307,7 @@ public class XMLUtil {
         }
 
         if (showError)
-            IcyLogger.error(XMLUtil.class, "XMLUtil.loadDocument('" + url + "') failed.");
+            LOGGER.severe("XMLUtil.loadDocument('" + url + "') error.");
 
         return null;
     }
@@ -319,7 +324,7 @@ public class XMLUtil {
                 return builder.parse(is);
             }
             catch (final Exception e) {
-                IcyLogger.error(XMLUtil.class, e, "XMLUtil.loadDocument('" + is.toString() + "') error :");
+                LOGGER.log(Level.SEVERE, "XMLUtil.loadDocument('" + is.toString() + "') error.", e);
             }
         }
 
@@ -340,7 +345,7 @@ public class XMLUtil {
      */
     public static boolean saveDocument(final Document doc, final File f) {
         if ((doc == null) || (f == null)) {
-            IcyLogger.error(XMLUtil.class, "XMLUtil.saveDocument(...) error: specified document or file is null !");
+            LOGGER.severe("XMLUtil.saveDocument(…) error: specified document or file is null.");
 
             return false;
         }
@@ -368,7 +373,7 @@ public class XMLUtil {
             return true;
         }
         catch (final Exception e) {
-            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, "XMLUtil.saveDocument('" + f.getAbsolutePath() + "') error.", e);
         }
 
         return false;
@@ -829,7 +834,7 @@ public class XMLUtil {
             return def;
 
         // get packed byte data
-        final byte[] result = (byte[]) ArrayUtil.stringToArray1D(value, DataType.BYTE, true, ":");
+        final byte[] result = (byte[]) Array1DUtil.stringToArray(value, DataType.BYTE, true, ":");
 
         synchronized (inflater) {
             // unpack and return
@@ -931,7 +936,7 @@ public class XMLUtil {
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
 
-            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, "XMLUtil.getAttributeBytesValue('" + attribute + "') error.", e);
             return null;
         }
     }
@@ -1093,7 +1098,7 @@ public class XMLUtil {
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
 
-            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, "XMLUtil.getBytesValue(" + element + ", " + Arrays.toString(def) + ") error.", e);
             return null;
         }
     }
@@ -1174,7 +1179,7 @@ public class XMLUtil {
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
 
-            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, "XMLUtil.getElementBytesValue(" + node + ", " + name + ", " + Arrays.toString(def) + ") error.", e);
             return null;
         }
     }
@@ -1247,7 +1252,7 @@ public class XMLUtil {
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
 
-            IcyLogger.error(XMLUtil.class, e, e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, "XMLUtil.getGenericElementBytesValue(" + node + ", " + type + ", " + name + ", " + Arrays.toString(def) + ") error.", e);
             return null;
         }
     }

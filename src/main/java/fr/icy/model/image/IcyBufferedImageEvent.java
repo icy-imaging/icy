@@ -20,7 +20,7 @@ package fr.icy.model.image;
 import fr.icy.common.event.CollapsibleEvent;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class IcyBufferedImageEvent implements CollapsibleEvent
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,17 +19,19 @@
 package fr.icy.system;
 
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 
 public final class UserUtil {
+    @Contract(pure = true)
     private UserUtil() {
         //
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void init() throws IOException {
         new File(getUserHome(), ".icy").mkdirs();
         new File(getIcyHomeDirectory(), "libraries").mkdirs();
@@ -46,7 +48,7 @@ public final class UserUtil {
      * @return the user's home directory.
      */
     @Contract(" -> new")
-    public static @NotNull File getUserHome() {
+    public static @NonNull File getUserHome() {
         return new File(System.getProperty("user.home"));
     }
 

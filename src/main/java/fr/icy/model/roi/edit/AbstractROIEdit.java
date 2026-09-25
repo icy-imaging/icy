@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,18 +18,18 @@
 
 package fr.icy.model.roi.edit;
 
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.undo.AbstractIcyUndoableEdit;
 import fr.icy.model.roi.ROI;
 
 /**
  * Base ROI undoable edit.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class AbstractROIEdit extends AbstractIcyUndoableEdit {
-    public AbstractROIEdit(final ROI roi, final String name, final SVGResource icon) {
+    public AbstractROIEdit(final ROI roi, final String name, final IcySVG icon) {
         super(roi, name, icon);
     }
 

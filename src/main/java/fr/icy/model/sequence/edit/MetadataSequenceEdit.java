@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,9 +18,9 @@
 
 package fr.icy.model.sequence.edit;
 
-import ome.xml.meta.OMEXMLMetadata;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.model.sequence.Sequence;
+import ome.xml.meta.OMEXMLMetadata;
 
 import javax.swing.undo.CannotUndoException;
 
@@ -29,19 +29,19 @@ import javax.swing.undo.CannotUndoException;
  * previous state).<br>
  * Do not handle redo operation to not consume too much memory.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class MetadataSequenceEdit extends AbstractSequenceEdit {
     OMEXMLMetadata previous;
 
-    public MetadataSequenceEdit(final OMEXMLMetadata previous, final Sequence sequence, final String name, final SVGResource icon) {
+    public MetadataSequenceEdit(final OMEXMLMetadata previous, final Sequence sequence, final String name, final IcySVG icon) {
         super(sequence, name, icon);
 
         this.previous = previous;
     }
 
-    public MetadataSequenceEdit(final OMEXMLMetadata previous, final Sequence sequence, final SVGResource icon) {
+    public MetadataSequenceEdit(final OMEXMLMetadata previous, final Sequence sequence, final IcySVG icon) {
         this(previous, sequence, "Sequence metadata changed", icon);
 
         this.previous = previous;

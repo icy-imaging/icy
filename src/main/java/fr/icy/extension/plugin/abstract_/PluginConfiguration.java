@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -21,7 +21,8 @@ package fr.icy.extension.plugin.abstract_;
 import fr.icy.Icy;
 import fr.icy.extension.plugin.property.Property;
 import fr.icy.extension.plugin.property.gui.PropertyPanel;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,8 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class PluginConfiguration extends Plugin {
-    @NotNull
-    private final Set<Property<?>> properties;
+    private final @NonNull Set<Property<?>> properties;
 
     public PluginConfiguration() {
         super();
@@ -38,10 +38,10 @@ public abstract class PluginConfiguration extends Plugin {
         setProperties(properties);
     }
 
-    protected abstract void setProperties(@NotNull final Set<Property<?>> properties);
+    protected abstract void setProperties(final @NonNull Set<Property<?>> properties);
 
-    @NotNull
-    public final JPanel createConfigurationPanel() throws HeadlessException {
+    @Contract(" -> new")
+    public final @NonNull JPanel createConfigurationPanel() throws HeadlessException {
         if (Icy.getMainInterface().isHeadLess() || properties.isEmpty())
             throw new HeadlessException();
 

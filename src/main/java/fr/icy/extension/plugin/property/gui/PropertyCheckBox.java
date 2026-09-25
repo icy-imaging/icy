@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,36 +19,34 @@
 package fr.icy.extension.plugin.property.gui;
 
 import fr.icy.extension.plugin.property.BooleanProperty;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 
 public final class PropertyCheckBox extends PropertyComponent<JCheckBox, Boolean> {
-    PropertyCheckBox(final @NotNull BooleanProperty property) {
+    PropertyCheckBox(final @NonNull BooleanProperty property) {
         super(property);
     }
 
-    @NotNull
     @Override
-    protected JCheckBox createComponent() {
+    protected @NonNull JCheckBox createComponent() {
         final JCheckBox component = new JCheckBox();
-        component.setSelected(oldValue.booleanValue());
+        component.setSelected(oldValue);
         return component;
     }
 
-    @NotNull
     @Override
-    protected Boolean getValue() {
-        return Boolean.valueOf(component.isSelected());
+    protected @NonNull Boolean getValue() {
+        return component.isSelected();
     }
 
     @Override
     protected void resetValue() {
-        component.setSelected(oldValue.booleanValue());
+        component.setSelected(oldValue);
     }
 
     @Override
     protected void resetToDefault() {
-        component.setSelected(property.getDefaultValue().booleanValue());
+        component.setSelected(property.getDefaultValue());
     }
 }

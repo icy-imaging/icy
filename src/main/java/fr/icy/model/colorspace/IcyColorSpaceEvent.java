@@ -20,7 +20,7 @@ package fr.icy.model.colorspace;
 import fr.icy.common.event.CollapsibleEvent;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class IcyColorSpaceEvent implements CollapsibleEvent {

@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * SearchEngine for Icy.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SearchEngine implements SearchResultConsumer, ExtensionLoader.ExtensionLoaderListener {

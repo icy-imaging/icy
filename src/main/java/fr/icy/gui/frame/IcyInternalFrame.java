@@ -22,7 +22,6 @@ import fr.icy.gui.action.IcyAbstractAction;
 import fr.icy.gui.menu.MenuCallback;
 import fr.icy.io.ResourceUtil;
 import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
 
 import javax.swing.*;
@@ -31,12 +30,16 @@ import javax.swing.event.InternalFrameEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class IcyInternalFrame extends JInternalFrame {
+    private static final Logger LOGGER = Logger.getLogger(IcyInternalFrame.class.getName());
+
     private class CloseAction extends IcyAbstractAction {
         public CloseAction() {
             super(
@@ -178,7 +181,8 @@ public class IcyInternalFrame extends JInternalFrame {
                 setIcon(value);
             }
             catch (final PropertyVetoException e) {
-                IcyLogger.error(IcyInternalFrame.class, e, e.getLocalizedMessage());
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Unable to minimize internal frame.", e);
             }
         }
     }
@@ -198,7 +202,8 @@ public class IcyInternalFrame extends JInternalFrame {
                 setMaximum(value);
             }
             catch (final PropertyVetoException e) {
-                IcyLogger.error(IcyInternalFrame.class, e, e.getLocalizedMessage());
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Unable to maximize internal frame.", e);
             }
         }
     }

@@ -28,7 +28,7 @@ import java.awt.geom.Point2D;
  * Anchor for path type shape.<br>
  * Support extra coordinate to store curve informations.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PathAnchor2D extends Anchor2D {

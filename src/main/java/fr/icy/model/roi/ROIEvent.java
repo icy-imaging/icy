@@ -21,7 +21,7 @@ import fr.icy.common.event.CollapsibleEvent;
 import fr.icy.common.string.StringUtil;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROIEvent implements CollapsibleEvent {

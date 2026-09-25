@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,9 +19,7 @@
 package fr.icy.extension.plugin.property.gui;
 
 import fr.icy.extension.plugin.property.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,17 +32,16 @@ public final class PropertyPanel extends JPanel implements ActionListener {
     private final JButton applyButton;
     private final JButton okButton;
 
-    public PropertyPanel(@NotNull @Unmodifiable final Set<Property<?>> properties) {
+    public PropertyPanel(final @NonNull Set<Property<?>> properties) {
         super(new GridLayout(properties.size() + 1, 1, 5, 5));
-        for (@NotNull final Property<?> property : properties) {
-            @Nullable
+        for (final Property<?> property : properties) {
             final PropertyComponent<?, ?> pc;
             switch (property) {
-                case @NotNull final SelectionProperty<?> selectionProperty -> pc = new PropertyComboBox<>(selectionProperty);
-                case @NotNull final NumberProperty<?> numberProperty -> pc = new PropertyNumberSpinner<>(numberProperty);
-                case @NotNull final ColorProperty colorProperty -> pc = new PropertyColorChooser(colorProperty);
-                case @NotNull final StringProperty stringProperty -> pc = new PropertyTextField(stringProperty);
-                case @NotNull final BooleanProperty booleanProperty -> pc = new PropertyCheckBox(booleanProperty);
+                case final SelectionProperty<?> selectionProperty -> pc = new PropertyComboBox<>(selectionProperty);
+                case final NumberProperty<?> numberProperty -> pc = new PropertyNumberSpinner<>(numberProperty);
+                case final ColorProperty colorProperty -> pc = new PropertyColorChooser(colorProperty);
+                case final StringProperty stringProperty -> pc = new PropertyTextField(stringProperty);
+                case final BooleanProperty booleanProperty -> pc = new PropertyCheckBox(booleanProperty);
                 default -> pc = null;
             }
             if (pc != null)
@@ -71,7 +68,7 @@ public final class PropertyPanel extends JPanel implements ActionListener {
      * @param e the event to be processed
      */
     @Override
-    public void actionPerformed(@NotNull final ActionEvent e) {
+    public void actionPerformed(final @NonNull ActionEvent e) {
         if (e.getSource().equals(cancelButton)) {
         }
         else if (e.getSource().equals(applyButton)) {

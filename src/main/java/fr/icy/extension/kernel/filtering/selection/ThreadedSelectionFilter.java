@@ -111,7 +111,7 @@ public abstract class ThreadedSelectionFilter implements SelectionFilter
                                 // process each pixel of the current line
                                 for (int x = 0; x < width; x++, outXY++)
                                 {
-                                    currentPixel = Array1DUtil.getValue(_inXY, outXY, type);
+                                    currentPixel = Array1DUtil.getValueAsDouble(_inXY, outXY, type);
 
                                     int localNeighborHoodSize = 0;
                                     int minXinclusive = Math.max(x - kWidth, 0);
@@ -132,7 +132,7 @@ public abstract class ThreadedSelectionFilter implements SelectionFilter
                                             for (inX = minXinclusive; inX < maxXexclusive; inX++, inXY++, localNeighborHoodSize++)
                                             {
                                                 neighborhood[localNeighborHoodSize] = Array1DUtil
-                                                        .getValue(neighborSlice, inXY, type);
+                                                        .getValueAsDouble(neighborSlice, inXY, type);
                                             }
                                         }
                                     }

@@ -21,7 +21,7 @@ import fr.icy.system.preferences.XMLPreferences;
 import fr.icy.common.string.StringUtil;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class AuthenticationInfo
 {

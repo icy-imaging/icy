@@ -21,8 +21,9 @@ package fr.icy.model.image;
 import fr.icy.gui.FontUtil;
 import fr.icy.gui.GraphicsUtil;
 import fr.icy.network.URLUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -36,15 +37,20 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Image utilities class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ImageUtil {
-    public static String getImageTypeString(final int type) {
+    private static final Logger LOGGER = Logger.getLogger(ImageUtil.class.getName());
+
+    @Contract(pure = true)
+    public static @NonNull String getImageTypeString(final int type) {
         return switch (type) {
             case BufferedImage.TYPE_CUSTOM -> "TYPE_CUSTOM";
             case BufferedImage.TYPE_INT_RGB -> "TYPE_INT_RGB";
@@ -64,7 +70,8 @@ public class ImageUtil {
         };
     }
 
-    public static String getTransparencyString(final int transparency) {
+    @Contract(pure = true)
+    public static @NonNull String getTransparencyString(final int transparency) {
         return switch (transparency) {
             case Transparency.OPAQUE -> "OPAQUE";
             case Transparency.BITMASK -> "BITMASK";
@@ -76,8 +83,7 @@ public class ImageUtil {
     /**
      * Wait for dimension information of specified image being loaded.
      *
-     * @param image
-     *        image we are waiting informations for.
+     * @param image image we are waiting informations for.
      */
     public static void waitImageReady(final Image image) {
         if (image != null) {
@@ -93,7 +99,7 @@ public class ImageUtil {
      * Create a 8 bits indexed buffered image from specified <code>IndexColorModel</code><br>
      * and byte array data.
      */
-    public static BufferedImage createIndexedImage(final int w, final int h, final IndexColorModel cm, final byte[] data) {
+    public static @NonNull BufferedImage createIndexedImage(final int w, final int h, final IndexColorModel cm, final byte[] data) {
         final WritableRaster raster = Raster.createInterleavedRaster(new DataBufferByte(data, w * h, 0), w, h, w, 1, new int[]{0}, null);
 
         return new BufferedImage(cm, raster, false, null);
@@ -116,6 +122,7 @@ public class ImageUtil {
     /**
      * Load an image from specified url
      */
+    @Contract("null, _ -> null")
     public static BufferedImage load(final URL url, final boolean displayError) {
         if (url != null) {
             try {
@@ -124,7 +131,8 @@ public class ImageUtil {
             // important to catch Exception as sometime we got NPE here (inflater closed)
             catch (final Exception e) {
                 if (displayError)
-                    IcyLogger.error(ImageUtil.class, e, "Can't load image from " + url);
+                    if (LOGGER.isLoggable(Level.SEVERE))
+                        LOGGER.log(Level.SEVERE, "Can't load image from " + url + ".", e);
             }
         }
 
@@ -150,6 +158,7 @@ public class ImageUtil {
     /**
      * Load an image from specified url
      */
+    @Contract("null -> null")
     public static BufferedImage load(final URL url) {
         return load(url, true);
     }
@@ -157,6 +166,7 @@ public class ImageUtil {
     /**
      * Load an image from specified file
      */
+    @Contract("null, _ -> null")
     public static BufferedImage load(final File file, final boolean displayError) {
         if (file != null) {
             try {
@@ -164,7 +174,8 @@ public class ImageUtil {
             }
             catch (final IOException e) {
                 if (displayError)
-                    IcyLogger.error(ImageUtil.class, e, "Can't load image from " + file);
+                    if (LOGGER.isLoggable(Level.SEVERE))
+                        LOGGER.log(Level.SEVERE, "Can't load image from " + file + ".", e);
             }
         }
 
@@ -174,6 +185,7 @@ public class ImageUtil {
     /**
      * Load an image from specified file
      */
+    @Contract("null -> null")
     public static BufferedImage load(final File file) {
         return load(file, true);
     }
@@ -181,6 +193,7 @@ public class ImageUtil {
     /**
      * Load an image from specified InputStream
      */
+    @Contract("null, _ -> null")
     public static BufferedImage load(final InputStream input, final boolean displayError) {
         if (input != null) {
             try {
@@ -188,7 +201,8 @@ public class ImageUtil {
             }
             catch (final Exception e) {
                 if (displayError)
-                    IcyLogger.error(ImageUtil.class, e, "Can't load image from stream " + input);
+                    if (LOGGER.isLoggable(Level.SEVERE))
+                        LOGGER.log(Level.SEVERE, "Can't load image from stream " + input + ".", e);
             }
         }
 
@@ -198,6 +212,7 @@ public class ImageUtil {
     /**
      * Load an image from specified InputStream
      */
+    @Contract("null -> null")
     public static BufferedImage load(final InputStream input) {
         return load(input, true);
     }
@@ -205,13 +220,15 @@ public class ImageUtil {
     /**
      * Save an image to specified path in specified format
      */
+    @Contract("_, _, null -> false")
     public static boolean save(final RenderedImage image, final String format, final String path) {
         if (path != null) {
             try {
                 return ImageIO.write(image, format, new FileOutputStream(path));
             }
             catch (final IOException e) {
-                IcyLogger.error(ImageUtil.class, e, "Can't save image to " + path);
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Can't save image to " + path + ".", e);
             }
         }
 
@@ -221,13 +238,15 @@ public class ImageUtil {
     /**
      * Save an image to specified file in specified format
      */
+    @Contract("_, _, null -> false")
     public static boolean save(final RenderedImage image, final String format, final File file) {
         if (file != null) {
             try {
                 return ImageIO.write(image, format, file);
             }
             catch (final IOException e) {
-                IcyLogger.error(ImageUtil.class, e, "Can't save image to " + file);
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Can't save image to " + file + ".", e);
             }
         }
 
@@ -237,7 +256,7 @@ public class ImageUtil {
     /**
      * Return a RenderedImage from the given Image object.
      */
-    public static RenderedImage toRenderedImage(final Image image) {
+    public static @NonNull RenderedImage toRenderedImage(final Image image) {
         return toBufferedImage(image);
     }
 
@@ -245,7 +264,7 @@ public class ImageUtil {
      * Return a ARGB BufferedImage from the given Image object.
      * If the image is already a BufferedImage image then it's directly returned
      */
-    public static BufferedImage toBufferedImage(final Image image) {
+    public static @NonNull BufferedImage toBufferedImage(final Image image) {
         if (image instanceof BufferedImage)
             return (BufferedImage) image;
 
@@ -263,6 +282,7 @@ public class ImageUtil {
     /**
      * Scale an image with specified size.
      */
+    @Contract("null, _, _ -> null")
     public static BufferedImage scale(final Image image, final int width, final int height) {
         if (image != null) {
             final BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -282,6 +302,7 @@ public class ImageUtil {
     /**
      * Scale an image with specified size (try to keep best quality).
      */
+    @Contract("null, _, _ -> null")
     public static BufferedImage scaleQuality(final Image image, final int width, final int height) {
         if (image != null) {
             Image current = image;
@@ -332,7 +353,7 @@ public class ImageUtil {
      * Convert an image to a BufferedImage.<br>
      * If <code>out</code>is null, by default a <code>BufferedImage.TYPE_INT_ARGB</code> is created.
      */
-    public static BufferedImage convert(final Image in, final BufferedImage out) {
+    public static @NonNull BufferedImage convert(final Image in, final BufferedImage out) {
         final BufferedImage result;
 
         // be sure image data are ready
@@ -350,8 +371,9 @@ public class ImageUtil {
 
     /**
      * Returns <code>true</code> if the specified image is a grayscale image whatever is the image
-     * type (GRAY, RGB, ARGB...)
+     * type (GRAY, RGB, ARGB, etc.)
      */
+    @Contract("null -> false")
     public static boolean isGray(final BufferedImage image) {
         if (image == null)
             return false;
@@ -380,6 +402,7 @@ public class ImageUtil {
     /**
      * Convert an image to grey image (<code>BufferedImage.TYPE_BYTE_GRAY</code>).
      */
+    @Contract("null -> null")
     public static BufferedImage toGray(final Image image) {
         if (image != null) {
             // be sure image data are ready
@@ -393,6 +416,7 @@ public class ImageUtil {
     /**
      * Convert an image to RGB image (<code>BufferedImage.TYPE_INT_RGB</code>).
      */
+    @Contract("null -> null")
     public static BufferedImage toRGBImage(final Image image) {
         if (image != null) {
             // be sure image data are ready
@@ -406,6 +430,7 @@ public class ImageUtil {
     /**
      * Convert an image to ARGB image (<code>BufferedImage.TYPE_INT_ARGB</code>).
      */
+    @Contract("null -> null")
     public static BufferedImage toARGBImage(final Image image) {
         if (image != null) {
             // be sure image data are ready
@@ -420,14 +445,14 @@ public class ImageUtil {
      * Create a copy of the input image.<br>
      * Result is always a <code>BufferedImage.TYPE_INT_ARGB</code> type image.
      */
-    public static BufferedImage getCopy(final Image in) {
+    public static @NonNull BufferedImage getCopy(final Image in) {
         return convert(in, null);
     }
 
     /**
      * Return true if image has the same size
      */
-    public static boolean sameSize(final BufferedImage im1, final BufferedImage im2) {
+    public static boolean sameSize(final @NonNull BufferedImage im1, final @NonNull BufferedImage im2) {
         return (im1.getWidth() == im2.getWidth()) && (im1.getHeight() == im2.getHeight());
     }
 
@@ -435,14 +460,11 @@ public class ImageUtil {
      * Get the list of tiles to cover the given XY region.<br>
      * Note that the resulting tiles surface may be larger than input region as we enforce using specified tile size / position to cover the whole region.
      *
-     * @param region
-     *        the XY region to cover
-     * @param tileW
-     *        tile width
-     * @param tileH
-     *        tile height
+     * @param region the XY region to cover
+     * @param tileW  tile width
+     * @param tileH  tile height
      */
-    public static List<Rectangle> getTileList(final Rectangle region, final int tileW, final int tileH) {
+    public static @NonNull List<Rectangle> getTileList(final Rectangle region, final int tileW, final int tileH) {
         final List<Rectangle> result = new ArrayList<>();
 
         if ((tileW <= 0) || (tileH <= 0) || region.isEmpty())
@@ -469,16 +491,12 @@ public class ImageUtil {
      * Get the list of tiles to fill the given XY plan size.<br>
      * Note that the resulting tiles surface may be larger than input region as we enforce using specified tile size / position to cover the whole region.
      *
-     * @param sizeX
-     *        plan sizeX
-     * @param sizeY
-     *        plan sizeY
-     * @param tileW
-     *        tile width
-     * @param tileH
-     *        tile height
+     * @param sizeX plan sizeX
+     * @param sizeY plan sizeY
+     * @param tileW tile width
+     * @param tileH tile height
      */
-    public static List<Rectangle> getTileList(final int sizeX, final int sizeY, final int tileW, final int tileH) {
+    public static @NonNull List<Rectangle> getTileList(final int sizeX, final int sizeY, final int tileW, final int tileH) {
         return getTileList(new Rectangle(0, 0, sizeX, sizeY), tileW, tileH);
     }
 
@@ -504,6 +522,7 @@ public class ImageUtil {
     /**
      * Return an image which contains specified color depending original alpha intensity image
      */
+    @Contract("null, _ -> null")
     public static Image getColorImageFromAlphaImage(final Image alphaImage, final Color color) {
         return paintColorImageFromAlphaImage(alphaImage, null, color);
     }
@@ -511,6 +530,7 @@ public class ImageUtil {
     /**
      * Paint the specified color in 'out' image depending original alpha intensity from 'alphaImage'
      */
+    @Contract("null, _, _ -> null")
     public static Image paintColorImageFromAlphaImage(final Image alphaImage, final Image out, final Color color) {
         if (alphaImage == null)
             return null;
@@ -568,7 +588,7 @@ public class ImageUtil {
     /**
      * Draw text in the specified image with specified parameters.<br>
      */
-    public static void drawText(final Image image, final String text, final float x, final float y, final int size, final Color color) {
+    public static void drawText(final @NonNull Image image, final String text, final float x, final float y, final int size, final Color color) {
         final Graphics2D g = (Graphics2D) image.getGraphics();
 
         // prepare setting
@@ -585,7 +605,7 @@ public class ImageUtil {
     /**
      * Draw text at top right in the specified image with specified parameters.<br>
      */
-    public static void drawTextTopRight(final Image image, final String text, final int size, final boolean bold, final Color color) {
+    public static void drawTextTopRight(final @NonNull Image image, final String text, final int size, final boolean bold, final Color color) {
         final Graphics2D g = (Graphics2D) image.getGraphics();
 
         // prepare setting

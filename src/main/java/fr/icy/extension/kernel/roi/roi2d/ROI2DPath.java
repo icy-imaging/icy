@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,16 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.extension.kernel.roi.roi2d;
 
 import fr.icy.common.geom.areax.AreaX;
 import fr.icy.common.geom.point.Point5D;
 import fr.icy.common.geom.shape.ShapeUtil;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.anchor.Anchor2D;
 import fr.icy.model.overlay.anchor.PathAnchor2D;
 import fr.icy.model.roi.ROI;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -41,7 +43,7 @@ import java.util.Objects;
  * This ROI can display a Path2D shape.<br>
  * You can modify and remove points (adding new point isn't supported).
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI2DPath extends ROI2DShape {
@@ -52,7 +54,7 @@ public class ROI2DPath extends ROI2DShape {
     protected AreaX closedAreaX;
     protected Path2D openPath;
 
-    static Path2D initPath(final Point2D position) {
+    static @NonNull Path2D initPath(final Point2D position) {
         final Path2D result = new Path2D.Double();
 
         result.reset();
@@ -73,8 +75,7 @@ public class ROI2DPath extends ROI2DShape {
         this.closedAreaX = Objects.requireNonNullElseGet(closedAreaX, () -> new AreaX(ShapeUtil.getClosedPath(path)));
         this.openPath = Objects.requireNonNullElseGet(openPath, () -> ShapeUtil.getOpenPath(path));
 
-        // set icon (default name is defined by getDefaultName())
-        setIcon(SVGResource.TIMELINE);
+        setIcon(IcySVG.ROI_POLYLINE);
     }
 
     /**
@@ -99,7 +100,7 @@ public class ROI2DPath extends ROI2DShape {
     /**
      * Generic constructor for interactive mode
      */
-    public ROI2DPath(final Point5D pt) {
+    public ROI2DPath(final @NonNull Point5D pt) {
         this(pt.toPoint2D());
     }
 
@@ -113,7 +114,7 @@ public class ROI2DPath extends ROI2DShape {
     }
 
     @Override
-    protected Anchor2D createAnchor(final Point2D pos) {
+    protected Anchor2D createAnchor(final @NonNull Point2D pos) {
         return new PathAnchor2D(pos.getX(), pos.getY(), getColor(), getFocusedColor());
     }
 
@@ -182,14 +183,14 @@ public class ROI2DPath extends ROI2DShape {
 
     @Override
     public boolean contains(final ROI roi) throws InterruptedException {
-        // not closed --> do not contains anything
+        // not closed --> do not contain anything
         if (!ShapeUtil.isClosed(shape))
             return false;
 
         return super.contains(roi);
     }
 
-    public List<ROI2DShape> addFast(final List<ROI2DShape> rois) throws InterruptedException {
+    public List<ROI2DShape> addFast(final @NonNull List<ROI2DShape> rois) throws InterruptedException {
         final List<ROI2DShape> discardedRois = new ArrayList<>();
 
         for (final ROI2DShape roi : rois) {
@@ -221,7 +222,7 @@ public class ROI2DPath extends ROI2DShape {
         return discardedRois;
     }
 
-    public List<ROI2DShape> intersectFast(final List<ROI2DShape> rois) throws InterruptedException {
+    public List<ROI2DShape> intersectFast(final @NonNull List<ROI2DShape> rois) throws InterruptedException {
         final List<ROI2DShape> discardedRois = new ArrayList<>();
 
         if (!rois.isEmpty())
@@ -254,7 +255,7 @@ public class ROI2DPath extends ROI2DShape {
         return discardedRois;
     }
 
-    public List<ROI2DShape> exclusiveAddFast(final List<ROI2DShape> rois) throws InterruptedException {
+    public List<ROI2DShape> exclusiveAddFast(final @NonNull List<ROI2DShape> rois) throws InterruptedException {
         final List<ROI2DShape> discardedRois = new ArrayList<>();
 
         for (final ROI2DShape roi : rois) {

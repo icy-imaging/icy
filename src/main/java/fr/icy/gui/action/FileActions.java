@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,25 +18,26 @@
 
 package fr.icy.gui.action;
 
-import fr.icy.io.Saver;
+import fr.icy.Icy;
+import fr.icy.common.reflect.ClassUtil;
+import fr.icy.common.string.StringUtil;
+import fr.icy.common.type.DataType;
 import fr.icy.gui.dialog.LoaderDialog;
 import fr.icy.gui.dialog.MessageDialog;
 import fr.icy.gui.dialog.SaverDialog;
 import fr.icy.gui.menu.ApplicationMenuFile;
 import fr.icy.gui.viewer.Viewer;
+import fr.icy.io.Saver;
 import fr.icy.model.image.IcyBufferedImage;
-import fr.icy.Icy;
-import fr.icy.system.preferences.GeneralPreferences;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceUtil;
 import fr.icy.system.SystemUtil;
+import fr.icy.system.preferences.GeneralPreferences;
 import fr.icy.system.thread.ThreadUtil;
-import fr.icy.common.type.DataType;
-import fr.icy.common.reflect.ClassUtil;
-import fr.icy.common.string.StringUtil;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -48,13 +49,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * File actions (open / save / close...)
+ * File actions (open, save, close, etc.)
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class FileActions {
-    public static final @NotNull IcyAbstractAction clearRecentFilesAction = new IcyAbstractAction(
+    public static final @NonNull IcyAbstractAction clearRecentFilesAction = new IcyAbstractAction(
             "Clear Recent Files",
             "Clear recent files",
             "Clear the list of last opened files"
@@ -68,7 +69,7 @@ public final class FileActions {
     };
 
     // TODO Replace multiple "new sequence" actions with one action that open a dialog to select the type to create
-    public static final @NotNull IcyAbstractAction newSequenceAction = new IcyAbstractAction(
+    public static final @NonNull IcyAbstractAction newSequenceAction = new IcyAbstractAction(
             "Empty Sequence",
             "Create an empty sequence"
     ) {
@@ -81,7 +82,7 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction newGraySequenceAction = new IcyAbstractAction(
+    public static final @NonNull IcyAbstractAction newGraySequenceAction = new IcyAbstractAction(
             "Grayscale Sequence",
             "Create a new gray sequence",
             "Create a new single channel (gray level) sequence."
@@ -96,7 +97,7 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction newRGBSequenceAction = new IcyAbstractAction(
+    public static final @NonNull IcyAbstractAction newRGBSequenceAction = new IcyAbstractAction(
             "RGB Sequence",
             "Create a new RGB color sequence",
             "Create a 3 channels sequence (red, green, blue)."
@@ -111,12 +112,12 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction newARGBSequenceAction = new IcyAbstractAction(
+    public static final @NonNull IcyAbstractAction newARGBSequenceAction = new IcyAbstractAction(
             "RGBA Sequence",
             "Create a new RGBA color sequence",
             "Create a 4 channels sequence (red, green, blue, alpha).",
             true,
-            "Creating RGBA sequence...") {
+            "Creating RGBA sequence…") {
         @Override
         public boolean doAction(final ActionEvent e) {
             final IcyBufferedImage image = new IcyBufferedImage(512, 512, 4, DataType.UBYTE);
@@ -127,8 +128,8 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction openSequenceAction = new IcyAbstractAction(
-            "Open...",
+    public static final @NonNull IcyAbstractAction openSequenceAction = new IcyAbstractAction(
+            "Open…",
             "Open a file",
             "Display a file selection dialog and choose the file to open",
             KeyEvent.VK_O,
@@ -141,8 +142,8 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction openSequenceRegionAction = new IcyAbstractAction(
-            "Open Region...",
+    public static final @NonNull IcyAbstractAction openSequenceRegionAction = new IcyAbstractAction(
+            "Open Region…",
             "Open selected region",
             "Open the selected ROI region from the original image",
             KeyEvent.VK_O,
@@ -157,7 +158,7 @@ public final class FileActions {
                 int size = rois.size();
 
                 if (size == 0) {
-                    MessageDialog.showDialog("There is no ROI in the current sequence.\nYou need a ROI to define the region to open.", MessageDialog.INFORMATION_MESSAGE);
+                    MessageDialog.showDialog("There is no ROI in the current sequence.\nYou need a ROI to define the region to open.", JOptionPane.INFORMATION_MESSAGE);
                     return false;
                 }
                 else if (size > 1) {
@@ -165,11 +166,11 @@ public final class FileActions {
                     size = rois.size();
 
                     if (size == 0) {
-                        MessageDialog.showDialog("You need to select a ROI to do this operation.", MessageDialog.INFORMATION_MESSAGE);
+                        MessageDialog.showDialog("You need to select a ROI to do this operation.", JOptionPane.INFORMATION_MESSAGE);
                         return false;
                     }
                     else if (size > 1) {
-                        MessageDialog.showDialog("You must have only one selected ROI to do this operation.", MessageDialog.INFORMATION_MESSAGE);
+                        MessageDialog.showDialog("You must have only one selected ROI to do this operation.", JOptionPane.INFORMATION_MESSAGE);
                         return false;
                     }
                 }
@@ -195,7 +196,7 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction saveSequenceAction = new IcyAbstractAction(
+    public static final @NonNull IcyAbstractAction saveSequenceAction = new IcyAbstractAction(
             "Save",
             "Save active sequence",
             "Save the active sequence with its default filename",
@@ -235,8 +236,8 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction saveAsSequenceAction = new IcyAbstractAction(
-            "Save as...",
+    public static final @NonNull IcyAbstractAction saveAsSequenceAction = new IcyAbstractAction(
+            "Save as…",
             "Save active sequence",
             "Save the active sequence under selected file name",
             KeyEvent.VK_S,
@@ -266,14 +267,14 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction saveMetaDataAction = new IcyAbstractAction(
+    public static final @NonNull IcyAbstractAction saveMetaDataAction = new IcyAbstractAction(
             "Save Metadata",
             "Save active sequence metadata",
             "Save the metadata of the active sequence now",
             KeyEvent.VK_S,
             InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK,
             true,
-            "Saving metadata..."
+            "Saving metadata…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -295,7 +296,7 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction closeCurrentSequenceAction = new IcyAbstractAction(
+    public static final @NonNull IcyAbstractAction closeCurrentSequenceAction = new IcyAbstractAction(
             "Close Sequence",
             "Close active sequence",
             "Close the current active sequence",
@@ -322,7 +323,7 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction closeOthersSequencesAction = new IcyAbstractAction(
+    public static final @NonNull IcyAbstractAction closeOthersSequencesAction = new IcyAbstractAction(
             "Close Others",
             "Close others sequences",
             "Close all opened sequences except the active one.",
@@ -348,7 +349,7 @@ public final class FileActions {
         }
     };
 
-    public static final @NotNull IcyAbstractAction closeAllSequencesAction = new IcyAbstractAction(
+    public static final @NonNull IcyAbstractAction closeAllSequencesAction = new IcyAbstractAction(
             "Close All Sequences",
             "Close all sequences",
             "Close all opened sequences.",
@@ -373,7 +374,7 @@ public final class FileActions {
      * Return all actions of this class
      */
     @Deprecated(forRemoval = true)
-    public static @NotNull List<IcyAbstractAction> getAllActions() {
+    public static @NonNull List<IcyAbstractAction> getAllActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
         for (final Field field : FileActions.class.getFields()) {
@@ -393,7 +394,7 @@ public final class FileActions {
         return result;
     }
 
-    public static @NotNull List<IcyAbstractAction> getAllActiveSequenceActions() {
+    public static @NonNull List<IcyAbstractAction> getAllActiveSequenceActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
         result.add(openSequenceRegionAction);
@@ -405,11 +406,19 @@ public final class FileActions {
         return result;
     }
 
-    public static @NotNull List<IcyAbstractAction> getAllGlobalViewerActions() {
+    public static @NonNull List<IcyAbstractAction> getAllGlobalViewerActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
         result.add(closeOthersSequencesAction);
         result.add(closeAllSequencesAction);
+
+        return result;
+    }
+
+    public static @NonNull List<IcyAbstractAction> getAllGlobalROIActions() {
+        final List<IcyAbstractAction> result = new ArrayList<>();
+
+        result.add(openSequenceRegionAction);
 
         return result;
     }

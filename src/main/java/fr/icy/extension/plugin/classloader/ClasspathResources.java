@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,12 +18,11 @@
 
 package fr.icy.extension.plugin.classloader;
 
-import fr.icy.io.FileUtil;
-import fr.icy.network.NetworkUtil;
 import fr.icy.extension.plugin.classloader.exception.JclException;
 import fr.icy.extension.plugin.classloader.exception.ResourceNotFoundException;
-import fr.icy.system.logging.IcyLogger;
-import org.jetbrains.annotations.NotNull;
+import fr.icy.io.FileUtil;
+import fr.icy.network.NetworkUtil;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,11 +36,11 @@ import java.util.logging.Logger;
  * files/paths
  *
  * @author Kamran Zafar
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ClasspathResources extends JarResources {
-    private static final Logger logger = Logger.getLogger(ClasspathResources.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ClasspathResources.class.getName());
     private boolean ignoreMissingResources;
 
     public ClasspathResources() {
@@ -52,16 +51,17 @@ public class ClasspathResources extends JarResources {
     /**
      * Attempts to load a remote resource (jars, properties files, etc)
      */
-    protected void loadRemoteResource(final URL url) {
-        if (logger.isLoggable(Level.FINEST))
-            logger.finest("Attempting to load a remote resource.");
+    protected void loadRemoteResource(final @NonNull URL url) {
+        if (LOGGER.isLoggable(Level.FINEST))
+            LOGGER.finest("Attempting to load a remote resource.");
 
         if (url.toString().toLowerCase().endsWith(".jar")) {
             try {
                 loadJar(url);
             }
             catch (final IOException e) {
-                IcyLogger.error(ClasspathResources.class, e, "JarResources.loadJar(" + url + ") error.");
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "JarResources.loadJar(" + url + ") error.", e);
             }
             return;
         }
@@ -70,13 +70,13 @@ public class ClasspathResources extends JarResources {
             if (!collisionAllowed)
                 throw new JclException("Resource " + url + " already loaded");
 
-            if (logger.isLoggable(Level.FINEST))
-                logger.finest("Resource " + url + " already loaded; ignoring entry...");
+            if (LOGGER.isLoggable(Level.FINEST))
+                LOGGER.finest("Resource " + url + " already loaded; ignoring entry…");
             return;
         }
 
-        if (logger.isLoggable(Level.FINEST))
-            logger.finest("Loading remote resource.");
+        if (LOGGER.isLoggable(Level.FINEST))
+            LOGGER.finest("Loading remote resource.");
 
         entryUrls.put(url.toString(), url);
     }
@@ -84,7 +84,7 @@ public class ClasspathResources extends JarResources {
     /**
      * Loads and returns content the remote resource (jars, properties files, etc)
      */
-    protected byte[] loadRemoteResourceContent(final @NotNull URL url) throws IOException {
+    protected byte[] loadRemoteResourceContent(final @NonNull URL url) throws IOException {
         final byte[] result = NetworkUtil.download(url.openStream());
 
         if (result != null)
@@ -96,7 +96,7 @@ public class ClasspathResources extends JarResources {
     /**
      * Reads local and remote resources
      */
-    protected void loadResource(final @NotNull URL url) {
+    protected void loadResource(final @NonNull URL url) {
         try {
             final File file = new File(url.toURI());
             // Is Local
@@ -116,8 +116,8 @@ public class ClasspathResources extends JarResources {
      * folders
      */
     protected void loadResource(final String path) {
-        if (logger.isLoggable(Level.FINEST))
-            logger.finest("Resource: " + path);
+        if (LOGGER.isLoggable(Level.FINEST))
+            LOGGER.finest("Resource: " + path);
 
         final File fp = new File(path);
 
@@ -131,7 +131,7 @@ public class ClasspathResources extends JarResources {
      * Reads local resources from - Jar files - Class folders - Jar Library
      * folders
      */
-    protected void loadResource(final @NotNull File fol, final String packName) {
+    protected void loadResource(final @NonNull File fol, final String packName) {
         // FILE
         if (fol.isFile()) {
             if (fol.getName().toLowerCase().endsWith(".jar")) {
@@ -139,7 +139,8 @@ public class ClasspathResources extends JarResources {
                     loadJar(fol.toURI().toURL());
                 }
                 catch (final IOException e) {
-                    IcyLogger.error(ClasspathResources.class, e, "JarResources.loadJar(" + fol.getAbsolutePath() + ") error.");
+                    if (LOGGER.isLoggable(Level.SEVERE))
+                        LOGGER.log(Level.SEVERE, "JarResources.loadJar(" + fol.getAbsolutePath() + ") error.", e);
                 }
             }
             else
@@ -156,7 +157,7 @@ public class ClasspathResources extends JarResources {
 
                     if (fl.isDirectory()) {
 
-                        if (!pn.equals(""))
+                        if (!pn.isEmpty())
                             pn = pn + "/";
 
                         pn = pn + fl.getName();
@@ -171,10 +172,10 @@ public class ClasspathResources extends JarResources {
     /**
      * Loads the local resource.
      */
-    protected void loadResourceInternal(final File file, final @NotNull String pack) {
+    protected void loadResourceInternal(final File file, final @NonNull String pack) {
         String entryName = "";
 
-        if (pack.length() > 0)
+        if (!pack.isEmpty())
             entryName = pack + "/";
         entryName += file.getName();
 
@@ -182,27 +183,25 @@ public class ClasspathResources extends JarResources {
             if (!collisionAllowed)
                 throw new JclException("Resource " + entryName + " already loaded");
 
-            if (logger.isLoggable(Level.WARNING))
-                logger.finest("Resource " + entryName + " already loaded; ignoring entry...");
+            if (LOGGER.isLoggable(Level.WARNING))
+                LOGGER.warning("Resource " + entryName + " already loaded; ignoring entry…");
             return;
         }
 
-        if (logger.isLoggable(Level.FINEST))
-            logger.finest("Loading resource: " + entryName);
+        if (LOGGER.isLoggable(Level.FINEST))
+            LOGGER.finest("Loading resource: " + entryName);
 
         try {
             entryUrls.put(entryName, file.toURI().toURL());
         }
         catch (final Exception e) {
-            if (logger.isLoggable(Level.SEVERE))
-                logger.finest("Error while loading: " + entryName);
-
-            IcyLogger.error(ClasspathResources.class, e, "JarResources.loadResourceInternal(" + file.getAbsolutePath() + ") error:");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Error while loading: " + entryName + ".", e);
         }
     }
 
     @Override
-    protected void loadContent(final String name, final @NotNull URL url) throws IOException {
+    protected void loadContent(final String name, final @NonNull URL url) throws IOException {
         // JAR protocol
         if (url.getProtocol().equalsIgnoreCase(("jar")))
             super.loadContent(name, url);
@@ -221,7 +220,7 @@ public class ClasspathResources extends JarResources {
     /**
      * Loads and returns the local resource content.
      */
-    protected byte[] loadResourceContent(final @NotNull URL url) throws IOException {
+    protected byte[] loadResourceContent(final @NonNull URL url) throws IOException {
         final byte[] result = NetworkUtil.download(url.openStream());
 
         if (result != null)
@@ -235,8 +234,8 @@ public class ClasspathResources extends JarResources {
      */
     public void unload(final String resource) {
         if (entryContents.containsKey(resource)) {
-            if (logger.isLoggable(Level.FINEST))
-                logger.finest("Removing resource " + resource);
+            if (LOGGER.isLoggable(Level.FINEST))
+                LOGGER.finest("Removing resource " + resource);
             entryContents.remove(resource);
         }
         else

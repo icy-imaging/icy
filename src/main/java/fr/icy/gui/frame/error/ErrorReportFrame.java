@@ -22,19 +22,22 @@ import fr.icy.gui.frame.IcyFrame;
 import fr.icy.gui.frame.TitledFrame;
 import fr.icy.gui.frame.progress.ProgressFrame;
 import fr.icy.system.IcyExceptionHandler;
-import fr.icy.system.logging.IcyLogger;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ErrorReportFrame extends TitledFrame implements ActionListener {
+    private static final Logger LOGGER = Logger.getLogger(ErrorReportFrame.class.getName());
+
     /**
      * @return This function test if we already have an active error report frame opened.
      */
@@ -50,8 +53,9 @@ public class ErrorReportFrame extends TitledFrame implements ActionListener {
 
     /**
      * Create the frame.
-     * @param icon icon
-     * @param title string
+     *
+     * @param icon    icon
+     * @param title   string
      * @param message string
      */
     public ErrorReportFrame(final Icon icon, final String title, final String message) {
@@ -64,13 +68,14 @@ public class ErrorReportFrame extends TitledFrame implements ActionListener {
 
         // default report action
         reportAction = e -> {
-            final ProgressFrame progressFrame = new ProgressFrame("Sending report...");
+            final ProgressFrame progressFrame = new ProgressFrame("Sending report…");
 
             try {
                 IcyExceptionHandler.report(panel.getReportMessage());
             }
             catch (final BadLocationException ex) {
-                IcyLogger.error(ErrorReportFrame.class, ex, "Error while reporting error.");
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Error while reporting error.", ex);
             }
             finally {
                 progressFrame.close();
@@ -88,7 +93,6 @@ public class ErrorReportFrame extends TitledFrame implements ActionListener {
 
     /**
      * @return Returns formatted report message (ready to send to web site).
-     *
      * @throws BadLocationException exceptioj
      */
     public String getReportMessage() throws BadLocationException {

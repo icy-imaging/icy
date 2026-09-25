@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,7 +19,8 @@
 package fr.icy.gui.component.tabbedpane;
 
 import fr.icy.gui.component.button.IcyButton;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
+import org.intellij.lang.annotations.MagicConstant;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +29,7 @@ import java.util.EventListener;
 /**
  * JTabbedPane with close button (configurable) in tab.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class CloseableTabbedPane extends JTabbedPane {
@@ -65,7 +66,7 @@ public class CloseableTabbedPane extends JTabbedPane {
 
             sep = Box.createHorizontalStrut(6);
 
-            closeButton = new IcyButton(SVGResource.CLOSE);
+            closeButton = new IcyButton(IcySVG.CLOSE);
             closeButton.setContentAreaFilled(false);
             closeButton.setToolTipText("close");
 
@@ -133,14 +134,14 @@ public class CloseableTabbedPane extends JTabbedPane {
     /**
      * {@link JTabbedPane}
      */
-    public CloseableTabbedPane(final int tabPlacement) {
+    public CloseableTabbedPane(final @MagicConstant(intValues = {TOP, BOTTOM, LEFT, RIGHT}) int tabPlacement) {
         super(tabPlacement);
     }
 
     /**
      * {@link JTabbedPane}
      */
-    public CloseableTabbedPane(final int tabPlacement, final int tabLayoutPolicy) {
+    public CloseableTabbedPane(final @MagicConstant(intValues = {TOP, BOTTOM, LEFT, RIGHT}) int tabPlacement, final @MagicConstant(intValues = {WRAP_TAB_LAYOUT, SCROLL_TAB_LAYOUT}) int tabLayoutPolicy) {
         super(tabPlacement, tabLayoutPolicy);
     }
 

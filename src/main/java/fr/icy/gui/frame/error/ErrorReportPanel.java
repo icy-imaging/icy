@@ -18,10 +18,9 @@
 
 package fr.icy.gui.frame.error;
 
+import fr.icy.common.string.StringUtil;
 import fr.icy.gui.component.field.IcyTextField;
 import fr.icy.system.preferences.GeneralPreferences;
-import fr.icy.system.logging.IcyLogger;
-import fr.icy.common.string.StringUtil;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -32,12 +31,16 @@ import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ErrorReportPanel extends JPanel {
+    private static final Logger LOGGER = Logger.getLogger(ErrorReportPanel.class.getName());
+
     // GUI
     private JTextPane errorMessageTextPane;
     private JTextPane commentTextPane;
@@ -60,7 +63,8 @@ public class ErrorReportPanel extends JPanel {
             errorMessageTextPane.getStyledDocument().insertString(errorMessageTextPane.getStyledDocument().getLength(), message, new SimpleAttributeSet());
         }
         catch (final BadLocationException e) {
-            IcyLogger.error(ErrorReportPanel.class, e, "PluginErrorReport(...) error.");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Error while displaying error message.", e);
         }
         errorMessageTextPane.setCaretPosition(0);
 
@@ -105,14 +109,9 @@ public class ErrorReportPanel extends JPanel {
         emailTextField.setText(GeneralPreferences.getUserEmail());
     }
 
-    @SuppressWarnings("unused")
-    ErrorReportPanel() {
-        this(null, "Test", "An error occured");
-    }
-
     private void initialize() {
         // top
-        label = new JLabel("An error occured !", SwingConstants.CENTER);
+        label = new JLabel("An error occurred !", SwingConstants.CENTER);
 
         // center
         errorMessageTextPane = new JTextPane();
@@ -193,7 +192,6 @@ public class ErrorReportPanel extends JPanel {
 
     /**
      * @return Returns formatted report message (ready to send to web site).
-     *
      * @throws BadLocationException exception
      */
     public String getReportMessage() throws BadLocationException {

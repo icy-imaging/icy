@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,20 +18,19 @@
 
 package fr.icy.gui.preferences;
 
+import fr.icy.common.string.StringUtil;
+import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.gui.LookAndFeelUtil;
-import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
-import fr.icy.gui.component.table.IcyTable;
+import fr.icy.gui.component.ComponentUtil;
 import fr.icy.gui.component.field.IcyTextField;
 import fr.icy.gui.component.field.IcyTextField.TextChangeListener;
+import fr.icy.gui.component.icon.IcySVG;
+import fr.icy.gui.component.table.IcyTable;
 import fr.icy.gui.plugin.PluginDetailPanel;
-import fr.icy.gui.component.ComponentUtil;
-import fr.icy.network.NetworkUtil;
-import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.system.preferences.RepositoryPreferences;
 import fr.icy.system.preferences.RepositoryPreferences.RepositoryInfo;
 import fr.icy.system.thread.ThreadUtil;
-import fr.icy.common.string.StringUtil;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -48,7 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class PluginListPreferencePanel extends PreferencePanel implements TextChangeListener, ListSelectionListener {
@@ -135,8 +134,8 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
             final List<PluginDescriptor> selectedPlugins = getSelectedPlugins();
 
             // open plugin web page
-            if (selectedPlugins.size() == 1)
-                NetworkUtil.openBrowser(selectedPlugins.get(0).getWeb());
+            //if (selectedPlugins.size() == 1)
+            //    NetworkUtil.openBrowser(selectedPlugins.get(0).getWeb());
         });
         ComponentUtil.setFixedSize(documentationButton, buttonsDim);
 
@@ -204,7 +203,7 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
                                 return plugin.getSVG().getIcon(30, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
 
                             loadIconAsync(plugin);
-                            return new IcySVG(SVGResource.HOURGLASS).getIcon(30, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
+                            return IcySVG.HOURGLASS.getIcon(30, LookAndFeelUtil.ColorType.BUTTON_DEFAULT);
                         }
 
                         case 1:
@@ -360,7 +359,7 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
         plugins.clear();
     }
 
-    private List<PluginDescriptor> filterList(final List<PluginDescriptor> list, final String filter) {
+    private @NonNull List<PluginDescriptor> filterList(final List<PluginDescriptor> list, final String filter) {
         final List<PluginDescriptor> result = new ArrayList<>();
         final boolean empty = StringUtil.isEmpty(filter, true);
         final String filterUp;
@@ -521,7 +520,7 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
         final PluginDescriptor singlePlugin = singleSelection ? selectedPlugins.get(0) : null;
 
         detailButton.setEnabled(singleSelection);
-        documentationButton.setEnabled(singleSelection && !StringUtil.isEmpty(singlePlugin.getWeb()));
+        //documentationButton.setEnabled(singleSelection && !StringUtil.isEmpty(singlePlugin.getWeb()));
     }
 
     protected final void updateButtonsState() {
@@ -532,17 +531,17 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
         // final RepositoryPreferencePanel panel = (RepositoryPreferencePanel)
         // getPreferencePanel(RepositoryPreferencePanel.class);
         // // refresh repositories list (use list from GUI)
-        // final ArrayList<RepositoryInfo> repositeries = panel.repositories;
+        // final ArrayList<RepositoryInfo> repositories = panel.repositories;
 
         // refresh repositories list
-        final List<RepositoryInfo> repositeries = RepositoryPreferences.getRepositeries();
+        final List<RepositoryInfo> repositories = RepositoryPreferences.getRepositeries();
         final RepositoryInfo savedRepository = (RepositoryInfo) repository.getSelectedItem();
 
         // needed to disable events during update time
         repository.removeActionListener(repositoryActionListener);
 
         repository.removeAllItems();
-        for (final RepositoryInfo repos : repositeries)
+        for (final RepositoryInfo repos : repositories)
             if (repos.isEnabled())
                 repository.addItem(repos);
 
@@ -592,7 +591,7 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
             tableModel.fireTableDataChanged();
         }
         catch (final Throwable t) {
-            // sometime sorting can throw exception, ignore them...
+            // sometime sorting can throw exception, ignore them…
         }
 
         // restore previous selected plugins if possible
@@ -626,7 +625,7 @@ public abstract class PluginListPreferencePanel extends PreferencePanel implemen
     }
 
     @Override
-    public void valueChanged(final ListSelectionEvent e) {
+    public void valueChanged(final @NonNull ListSelectionEvent e) {
         final int selected = table.getSelectedRow();
 
         if (!e.getValueIsAdjusting() && (selected != -1)) {

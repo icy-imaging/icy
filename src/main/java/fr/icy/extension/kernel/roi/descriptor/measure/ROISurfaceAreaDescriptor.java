@@ -34,7 +34,7 @@ import fr.icy.common.string.StringUtil;
 /**
  * Surface area ROI descriptor class (see {@link ROIDescriptor})
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ROISurfaceAreaDescriptor extends ROIDescriptor
 {

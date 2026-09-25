@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,86 +15,52 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.slider;
 
 import fr.icy.gui.component.ComponentUtil;
+import org.intellij.lang.annotations.MagicConstant;
 
-import javax.swing.BoundedRangeModel;
-import javax.swing.JSlider;
+import javax.swing.*;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
-public class IcySlider extends JSlider
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3416400365856996824L;
-
+public class IcySlider extends JSlider {
     private boolean smartTickMarkers;
 
-    /**
-     * 
-     */
-    public IcySlider()
-    {
+    public IcySlider() {
         super();
 
         smartTickMarkers = true;
     }
 
-    /**
-     * @param brm
-     */
-    public IcySlider(BoundedRangeModel brm)
-    {
+    public IcySlider(final BoundedRangeModel brm) {
         super(brm);
 
         smartTickMarkers = true;
     }
 
-    /**
-     * @param orientation
-     * @param min
-     * @param max
-     * @param value
-     */
-    public IcySlider(int orientation, int min, int max, int value)
-    {
+    public IcySlider(final int orientation, final int min, final int max, final int value) {
         super(orientation, min, max, value);
 
         smartTickMarkers = true;
     }
 
-    /**
-     * @param min
-     * @param max
-     * @param value
-     */
-    public IcySlider(int min, int max, int value)
-    {
+    public IcySlider(final int min, final int max, final int value) {
         super(min, max, value);
 
         smartTickMarkers = true;
     }
 
-    /**
-     * @param min
-     * @param max
-     */
-    public IcySlider(int min, int max)
-    {
+    public IcySlider(final int min, final int max) {
         super(min, max);
 
         smartTickMarkers = true;
     }
 
-    /**
-     * @param orientation
-     */
-    public IcySlider(int orientation)
-    {
+    public IcySlider(final @MagicConstant(intValues = {SwingConstants.HORIZONTAL, SwingConstants.VERTICAL}) int orientation) {
         super(orientation);
 
         smartTickMarkers = true;
@@ -103,50 +69,42 @@ public class IcySlider extends JSlider
     /**
      * @return the smartTickMarkers
      */
-    public boolean isSmartTickMarkers()
-    {
+    public boolean isSmartTickMarkers() {
         return smartTickMarkers;
     }
 
     /**
-     * @param value
-     *        the smartTickMarkers to set
+     * @param value the smartTickMarkers to set
      */
-    public void setSmartTickMarkers(boolean value)
-    {
-        if (smartTickMarkers != value)
-        {
+    public void setSmartTickMarkers(final boolean value) {
+        if (smartTickMarkers != value) {
             smartTickMarkers = value;
 
             updateTicksAndLabels();
         }
     }
 
-    private void updateTicksAndLabels()
-    {
+    private void updateTicksAndLabels() {
         if (smartTickMarkers && (getPaintTicks() || getPaintLabels()))
             ComponentUtil.setTickMarkers(this);
     }
 
     @Override
-    public void setPaintLabels(boolean b)
-    {
+    public void setPaintLabels(final boolean b) {
         super.setPaintLabels(b);
 
         updateTicksAndLabels();
     }
 
     @Override
-    public void setPaintTicks(boolean b)
-    {
+    public void setPaintTicks(final boolean b) {
         super.setPaintTicks(b);
 
         updateTicksAndLabels();
     }
 
     @Override
-    protected void fireStateChanged()
-    {
+    protected void fireStateChanged() {
         super.fireStateChanged();
 
         updateTicksAndLabels();

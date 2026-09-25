@@ -25,7 +25,7 @@ import javax.swing.text.StyledDocument;
 import java.awt.*;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class UpdateFrame extends JFrame {
@@ -87,7 +87,7 @@ public class UpdateFrame extends JFrame {
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.LINE_AXIS));
         progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.LINE_AXIS));
 
-        title.setText("Waiting shutdown, please wait...");
+        title.setText("Waiting shutdown, please wait…");
         title.setHorizontalAlignment(SwingConstants.CENTER);
         title.setHorizontalTextPosition(SwingConstants.CENTER);
 

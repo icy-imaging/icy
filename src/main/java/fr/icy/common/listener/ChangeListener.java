@@ -22,7 +22,7 @@ import fr.icy.common.event.CollapsibleEvent;
 /**
  * Common interface for change notification
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface ChangeListener
 {

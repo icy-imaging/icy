@@ -51,7 +51,7 @@ import java.lang.reflect.Array;
 import java.util.EventListener;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ScalerViewer extends JPanel implements SequenceListener, LUTChannelListener, ViewerListener {
@@ -552,12 +552,12 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
 
                             for (int i = 0; i < len; i++) {
                                 if ((i & 0xFFF) == 0) {
-                                    // need to be recalculated so don't waste time here...
+                                    // need to be recalculated so don't waste time here…
                                     if (ThreadUtil.hasWaitingBgSingleTask(histoUpdater))
                                         return;
                                 }
 
-                                histo.addValue(Array1DUtil.getValue(data, i, dataType));
+                                histo.addValue(Array1DUtil.getValueAsDouble(data, i, dataType));
                             }
                         }
                     }
@@ -694,7 +694,7 @@ public class ScalerViewer extends JPanel implements SequenceListener, LUTChannel
                 getHistogram().getHistogram().doXLSExport();
             }
             catch (final Exception e1) {
-                MessageDialog.showDialog("Error", e1.getMessage(), MessageDialog.ERROR_MESSAGE);
+                MessageDialog.showDialog("Error", e1.getMessage(), JOptionPane.ERROR_MESSAGE);
             }
         });
 

@@ -27,7 +27,7 @@ import javax.swing.undo.UndoableEdit;
 /**
  * Property change implementation for ROI undoable edition
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PropertyROIEdit extends AbstractROIEdit {

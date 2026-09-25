@@ -18,7 +18,7 @@
 package fr.icy.system.preferences;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class CanvasPreferences
 {

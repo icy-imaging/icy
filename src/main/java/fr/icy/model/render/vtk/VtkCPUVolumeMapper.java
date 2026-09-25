@@ -25,7 +25,7 @@ import vtk.vtkFixedPointVolumeRayCastMapper;
  * Afaik it was done to try to get rid of some bug with VTK 8.1 / VTK 8.2 when IntermixIntersectingGeometry is set to On (which is the default).
  * Volume and polydata couldn't be mixed (volume disappears as soon polydata becomes visible)
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class VtkCPUVolumeMapper extends vtkFixedPointVolumeRayCastMapper
 {

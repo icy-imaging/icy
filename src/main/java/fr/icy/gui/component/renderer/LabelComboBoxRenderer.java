@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,26 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.renderer;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
+import javax.swing.*;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class LabelComboBoxRenderer extends CustomComboBoxRenderer {
-    public LabelComboBoxRenderer(JComboBox<JLabel> combo) {
+    public LabelComboBoxRenderer(final JComboBox<JLabel> combo) {
         super(combo);
     }
 
     @Override
-    protected void updateItem(JList<?> list, Object value) {
-        if (value instanceof JLabel) {
-            final JLabel label = (JLabel) value;
-
+    protected void updateItem(final JList<?> list, final Object value) {
+        if (value instanceof final JLabel label) {
             setIcon(label.getIcon());
             setText(label.getText());
             setToolTipText(label.getToolTipText());

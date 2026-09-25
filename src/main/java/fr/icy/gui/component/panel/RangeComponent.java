@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@
 package fr.icy.gui.component.panel;
 
 import fr.icy.gui.component.slider.RangeSlider;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -27,9 +28,9 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 
 /**
- * Component letting user to define a range (RangeSlider + 2 inputs fields)
+ * Component letting user define a range (RangeSlider + 2 inputs fields)
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  */
 public class RangeComponent extends JPanel implements ChangeListener {
     final protected JSpinner lowSpinner;
@@ -143,8 +144,8 @@ public class RangeComponent extends JPanel implements ChangeListener {
      * @see #setMax(double)
      */
     public void setLowHigh(final double low, final double high) {
-        getLowModel().setValue(Double.valueOf(low));
-        getHighModel().setValue(Double.valueOf(high));
+        getLowModel().setValue(low);
+        getHighModel().setValue(high);
     }
 
     /**
@@ -174,7 +175,7 @@ public class RangeComponent extends JPanel implements ChangeListener {
      * @see #setMin(double)
      */
     public void setLow(final double value) {
-        getLowModel().setValue(Double.valueOf(value));
+        getLowModel().setValue(value);
     }
 
     /**
@@ -184,7 +185,7 @@ public class RangeComponent extends JPanel implements ChangeListener {
      * @see #setMax(double)
      */
     public void setHigh(final double value) {
-        getHighModel().setValue(Double.valueOf(value));
+        getHighModel().setValue(value);
     }
 
     /**
@@ -205,7 +206,7 @@ public class RangeComponent extends JPanel implements ChangeListener {
      * @see #getLow()
      */
     public double getMin() {
-        return ((Double) getLowModel().getMinimum()).doubleValue();
+        return (Double) getLowModel().getMinimum();
     }
 
     /**
@@ -215,7 +216,7 @@ public class RangeComponent extends JPanel implements ChangeListener {
      * @see #getHigh()
      */
     public double getMax() {
-        return ((Double) getHighModel().getMaximum()).doubleValue();
+        return (Double) getHighModel().getMaximum();
     }
 
     /**
@@ -327,7 +328,7 @@ public class RangeComponent extends JPanel implements ChangeListener {
     }
 
     @Override
-    public void stateChanged(final ChangeEvent e) {
+    public void stateChanged(final @NonNull ChangeEvent e) {
         final Object source = e.getSource();
         final double low = getLow();
         final double high = getHigh();
@@ -338,7 +339,7 @@ public class RangeComponent extends JPanel implements ChangeListener {
             if (high < low)
                 setHigh(low);
 
-            getHighModel().setMinimum(Double.valueOf(low));
+            getHighModel().setMinimum(low);
         }
         else if (source == highSpinner) {
             slider.setUpperValue(spinnerToSlider(high));
@@ -346,7 +347,7 @@ public class RangeComponent extends JPanel implements ChangeListener {
             if (low > high)
                 setLow(high);
 
-            getLowModel().setMaximum(Double.valueOf(high));
+            getLowModel().setMaximum(high);
         }
         else if (source == slider) {
             setLow(sliderToSpinner(slider.getLowerValue()));

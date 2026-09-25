@@ -27,7 +27,7 @@ import fr.icy.model.sequence.Sequence;
 /**
  * MassCenter C coordinate ROI descriptor class (see {@link ROIDescriptor})
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROIMassCenterCDescriptor extends ROIDescriptor {

@@ -27,12 +27,13 @@ import fr.icy.common.string.StringUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Histogram
 {
@@ -135,7 +136,7 @@ public class Histogram
      */
     public void doXLSExport() throws IOException
     {
-        exportToXLS(SaveDialog.chooseFileForResult("Export histogram...", "histo", XLSXUtil.FILE_DOT_EXTENSION));
+        exportToXLS(SaveDialog.chooseFileForResult("Export histogram…", "histo", XLSXUtil.FILE_DOT_EXTENSION));
     }
 
     /**
@@ -164,10 +165,10 @@ public class Histogram
                 if (XLSXUtil.setFromCSV(sheet, csvContent))
                     XLSXUtil.saveAndClose(workbook, path);
                 else
-                    MessageDialog.showDialog("Error", "Error while exporting ROIs table content to XLSX file.", MessageDialog.ERROR_MESSAGE);
+                    MessageDialog.showDialog("Error", "Error while exporting ROIs table content to XLSX file.", JOptionPane.ERROR_MESSAGE);
             }
             catch (final InterruptedException e) {
-                MessageDialog.showDialog("Operation interrupted", e.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                MessageDialog.showDialog("Operation interrupted", e.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
             }
         }
     }

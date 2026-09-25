@@ -26,7 +26,7 @@ import java.awt.Dimension;
 /**
  * The <code>Dimension3D</code> class is to encapsulate a 3D dimension (X,Y,Z).
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class Dimension3D implements Cloneable
 {

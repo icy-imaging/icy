@@ -22,7 +22,7 @@ import fr.icy.common.color.ColorUtil;
 import java.awt.Color;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class LinearColorMap extends IcyColorMap
 {

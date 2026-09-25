@@ -18,9 +18,6 @@
 
 package fr.icy.model.image;
 
-import loci.formats.gui.SignedByteBuffer;
-import loci.formats.gui.SignedShortBuffer;
-import loci.formats.gui.UnsignedIntBuffer;
 import fr.icy.common.collection.array.Array1DUtil;
 import fr.icy.common.collection.array.Array2DUtil;
 import fr.icy.common.collection.array.ArrayUtil;
@@ -45,9 +42,11 @@ import fr.icy.model.lut.LUT;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceIdImporter;
 import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.GeneralPreferences;
 import fr.icy.system.thread.Processor;
+import loci.formats.gui.SignedByteBuffer;
+import loci.formats.gui.SignedShortBuffer;
+import loci.formats.gui.UnsignedIntBuffer;
 
 import javax.media.jai.PlanarImage;
 import java.awt.*;
@@ -62,12 +61,16 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class IcyBufferedImage extends BufferedImage implements IcyColorModelListener, ChangeListener, AutoCloseable {
+    private static final Logger LOGGER = Logger.getLogger(IcyBufferedImage.class.getName());
+
     static class WeakIcyBufferedImageReference extends WeakReference<IcyBufferedImage> {
         final int hc;
 
@@ -118,7 +121,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         public Object call() throws Exception {
             final IcyBufferedImage image = imageRef.get();
 
-            // image has been released, we probably don't need its data anymore...
+            // image has been released, we probably don't need its data anymore…
             if (image == null)
                 return null;
 
@@ -849,11 +852,11 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 ImageCache.remove(this);
             }
             catch (final OutOfMemoryError e) {
-                IcyLogger.error(IcyBufferedImage.class, e, "IcyBufferedImage.setVolatile(false) error: not enough memory to set image data back in memory.");
+                LOGGER.log(Level.SEVERE, "Not enough memory to set image data back in memory.", e);
                 throw e;
             }
             catch (final Throwable e) {
-                IcyLogger.error(IcyBufferedImage.class, e, "IcyBufferedImage.setVolatile(..) error.");
+                LOGGER.log(Level.SEVERE, "Error while setting image data back in memory.", e);
             }
         }
     }
@@ -1045,7 +1048,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
     @Override
     public void coerceData(final boolean isAlphaPremultiplied) {
-        // don't need to do any conversion here...
+        // don't need to do any conversion here…
     }
 
     @Override
@@ -1255,7 +1258,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         }
         catch (final Throwable e) {
             datalost = true;
-            IcyLogger.error(IcyBufferedImage.class, e, "Data lost: " + e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, "Error while loading image data from cache.", e);
         }
 
         // should happen only for unmodified data
@@ -1274,7 +1277,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             else {
                 // data could not be loaded from cache but was correctly restored
                 if (datalost)
-                    IcyLogger.error(IcyBufferedImage.class, "Data re-initialized (changes are lost).");
+                    LOGGER.severe("Image data could not be loaded from cache but was correctly restored (changes are lost).");
 
                 // save it in cache (not eternal here as this is default data)
                 saveRasterDataInCache(rasterData);
@@ -1307,7 +1310,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
                 ImageCache.set(this, rasterData);
             }
             catch (final Throwable e) {
-                IcyLogger.error(IcyBufferedImage.class, e, "Unable to save raster data in cache.");
+                LOGGER.log(Level.SEVERE, "Error while saving image data in cache.", e);
             }
         }
     }
@@ -1380,7 +1383,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         }
         catch (final ClosedByInterruptException e) {
             // this one should never happen as loading is done in a separate thread (executor)
-            IcyLogger.error(IcyBufferedImage.class, "IcyBufferedImage.loadDataFromImporter() error: image loading from ImageProvider was interrupted (further image won't be loaded) !");
+            LOGGER.log(Level.SEVERE, "Image loading from ImageProvider was interrupted (further image won't be loaded).", e);
 
             // we want to keep the interrupted state here
             Thread.currentThread().interrupt();
@@ -1388,7 +1391,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             return null;
         }
         catch (final Exception e) {
-            IcyLogger.error(IcyBufferedImage.class, e, "IcyBufferedImage.loadDataFromImporter() warning: cannot get image from ImageProvider (possible data loss).");
+            LOGGER.log(Level.WARNING, "Cannot get image from ImageProvider (possible data loss).", e);
 
             return null;
         }
@@ -1441,7 +1444,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * If set to <code>true</code> (default) then channel bounds will be automatically recalculated
      * when image data is modified.<br>
      * This can consume some time if you make many updates on a large image.<br>
-     * In this case you should do your updates in a {@link #beginUpdate()} ... {@link #endUpdate()}
+     * In this case you should do your updates in a {@link #beginUpdate()} … {@link #endUpdate()}
      * block to avoid
      * severals recalculation.
      */
@@ -2869,7 +2872,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * whatever is the internal data type
      */
     public double getData(final int x, final int y, final int c) {
-        return Array1DUtil.getValue(getDataXY(c), getOffset(x, y), getDataType());
+        return Array1DUtil.getValueAsDouble(getDataXY(c), getOffset(x, y), getDataType());
     }
 
     /**
@@ -3555,7 +3558,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
         lockRaster();
         try {
-            ByteArrayConvert.byteArrayTo(data, offset, getDataXY(c), 0, -1, little);
+            ByteArrayConvert.byteArrayToArray(data, offset, getDataXY(c), 0, -1, little);
         }
         finally {
             releaseRaster(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,38 +18,38 @@
 
 package fr.icy.extension.plugin.property;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public final class DoubleProperty extends NumberProperty<Double> {
-    public DoubleProperty(final @NotNull String name, final @NotNull String description, final @NotNull Double defaultValue, final @NotNull Double min, final @NotNull Double max, final @NotNull Double step) {
+    public DoubleProperty(final @NonNull String name, final @NonNull String description, final @NonNull Double defaultValue, final @NonNull Double min, final @NonNull Double max, final @NonNull Double step) {
         super(name, description, defaultValue, min, max, step);
     }
 
-    public DoubleProperty(final @NotNull String name, final @NotNull String description, final @NotNull Double min, final @NotNull Double max, final @NotNull Double step) {
+    public DoubleProperty(final @NonNull String name, final @NonNull String description, final @NonNull Double min, final @NonNull Double max, final @NonNull Double step) {
         this(name, description, 0D, min, max, step);
     }
 
-    public DoubleProperty(final @NotNull String name, final @NotNull String description, final @NotNull Double defaultValue) {
+    public DoubleProperty(final @NonNull String name, final @NonNull String description, final @NonNull Double defaultValue) {
         this(name, description, defaultValue, Double.MIN_VALUE, Double.MAX_VALUE, .1D);
     }
 
-    public DoubleProperty(final @NotNull String name, final @NotNull String description) {
+    public DoubleProperty(final @NonNull String name, final @NonNull String description) {
         this(name, description, 0D, Double.MIN_VALUE, Double.MAX_VALUE, .1D);
     }
 
-    public DoubleProperty(final @NotNull String name, final @NotNull Double defaultValue, final @NotNull Double min, final @NotNull Double max, final @NotNull Double step) {
+    public DoubleProperty(final @NonNull String name, final @NonNull Double defaultValue, final @NonNull Double min, final @NonNull Double max, final @NonNull Double step) {
         super(name, defaultValue, min, max, step);
     }
 
-    public DoubleProperty(final @NotNull String name, final @NotNull Double min, final @NotNull Double max, final @NotNull Double step) {
+    public DoubleProperty(final @NonNull String name, final @NonNull Double min, final @NonNull Double max, final @NonNull Double step) {
         this(name, 0D, min, max, step);
     }
 
-    public DoubleProperty(final @NotNull String name, final @NotNull Double defaultValue) {
+    public DoubleProperty(final @NonNull String name, final @NonNull Double defaultValue) {
         this(name, defaultValue, Double.MIN_VALUE, Double.MAX_VALUE, .1D);
     }
 
-    public DoubleProperty(final @NotNull String name) {
+    public DoubleProperty(final @NonNull String name) {
         this(name, 0D, Double.MIN_VALUE, Double.MAX_VALUE, .1D);
     }
 }

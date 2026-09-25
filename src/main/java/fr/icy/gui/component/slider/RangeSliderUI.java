@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,6 +19,8 @@
 package fr.icy.gui.component.slider;
 
 import fr.icy.gui.LookAndFeelUtil;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -29,6 +31,9 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.util.Objects;
 
+/**
+ * @author Thomas Musset
+ */
 public class RangeSliderUI extends BasicSliderUI {
     /**
      * Location and size of thumb for upper value.
@@ -257,7 +262,7 @@ public class RangeSliderUI extends BasicSliderUI {
     /**
      * Paints the thumb for the lower value using the specified graphics object.
      */
-    private void paintLowerThumb(final Graphics g) {
+    private void paintLowerThumb(final @NonNull Graphics g) {
         final Rectangle knobBounds = thumbRect;
         final int w = knobBounds.width;
         final int h = knobBounds.height;
@@ -286,7 +291,7 @@ public class RangeSliderUI extends BasicSliderUI {
     /**
      * Paints the thumb for the upper value using the specified graphics object.
      */
-    private void paintUpperThumb(final Graphics g) {
+    private void paintUpperThumb(final @NonNull Graphics g) {
         final Rectangle knobBounds = upperThumbRect;
         final int w = knobBounds.width;
         final int h = knobBounds.height;
@@ -315,7 +320,8 @@ public class RangeSliderUI extends BasicSliderUI {
     /**
      * Returns a Shape representing a thumb.
      */
-    private Shape createThumbShape(final int width, final int height) {
+    @Contract("_, _ -> new")
+    private @NonNull Shape createThumbShape(final int width, final int height) {
         // Use circular shape.
         return new Ellipse2D.Double(0, 0, width, height);
     }
@@ -342,22 +348,22 @@ public class RangeSliderUI extends BasicSliderUI {
      */
     @Override
     public void scrollByBlock(final int direction) {
-        synchronized (slider) {
-            int blockIncrement = (slider.getMaximum() - slider.getMinimum()) / 10;
-            if (blockIncrement <= 0 && slider.getMaximum() > slider.getMinimum()) {
-                blockIncrement = 1;
-            }
-            final int delta = blockIncrement * ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
-
-            if (upperThumbSelected) {
-                final int oldValue = ((RangeSlider) slider).getUpperValue();
-                ((RangeSlider) slider).setUpperValue(oldValue + delta);
-            }
-            else {
-                final int oldValue = ((RangeSlider) slider).getLowerValue();
-                ((RangeSlider) slider).setLowerValue(oldValue + delta);
-            }
+        //synchronized (slider) {
+        int blockIncrement = (slider.getMaximum() - slider.getMinimum()) / 10;
+        if (blockIncrement <= 0 && slider.getMaximum() > slider.getMinimum()) {
+            blockIncrement = 1;
         }
+        final int delta = blockIncrement * ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
+
+        if (upperThumbSelected) {
+            final int oldValue = ((RangeSlider) slider).getUpperValue();
+            ((RangeSlider) slider).setUpperValue(oldValue + delta);
+        }
+        else {
+            final int oldValue = ((RangeSlider) slider).getLowerValue();
+            ((RangeSlider) slider).setLowerValue(oldValue + delta);
+        }
+        //}
     }
 
     /**
@@ -366,18 +372,18 @@ public class RangeSliderUI extends BasicSliderUI {
      */
     @Override
     public void scrollByUnit(final int direction) {
-        synchronized (slider) {
-            final int delta = ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
+        //synchronized (slider) {
+        final int delta = ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
 
-            if (upperThumbSelected) {
-                final int oldValue = ((RangeSlider) slider).getUpperValue();
-                ((RangeSlider) slider).setUpperValue(oldValue + delta);
-            }
-            else {
-                final int oldValue = ((RangeSlider) slider).getLowerValue();
-                ((RangeSlider) slider).setLowerValue(oldValue + delta);
-            }
+        if (upperThumbSelected) {
+            final int oldValue = ((RangeSlider) slider).getUpperValue();
+            ((RangeSlider) slider).setUpperValue(oldValue + delta);
         }
+        else {
+            final int oldValue = ((RangeSlider) slider).getLowerValue();
+            ((RangeSlider) slider).setLowerValue(oldValue + delta);
+        }
+        //}
     }
 
     /**

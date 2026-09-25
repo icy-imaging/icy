@@ -26,7 +26,7 @@ import java.awt.Dimension;
 /**
  * Frame to change ROI table settings.
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class RoiSettingFrame extends ActionFrame {

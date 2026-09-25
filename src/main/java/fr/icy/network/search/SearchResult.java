@@ -22,7 +22,8 @@ import java.awt.Image;
 /**
  * Defines an item in the SearchResultPanel.
  *
- * @author Thomas Provoost &amp; Stephane Dallongeville
+ * @author Thomas Provoost
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class SearchResult implements Comparable<SearchResult> {

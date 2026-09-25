@@ -26,7 +26,7 @@ import java.util.Date;
 /**
  * Date utilities class.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class DateUtil
 {

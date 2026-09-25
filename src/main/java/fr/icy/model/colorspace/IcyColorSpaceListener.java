@@ -20,7 +20,7 @@ package fr.icy.model.colorspace;
 import java.util.EventListener;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public interface IcyColorSpaceListener extends EventListener
 {

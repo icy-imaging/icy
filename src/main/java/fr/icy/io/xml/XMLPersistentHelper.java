@@ -23,7 +23,7 @@ import java.net.URL;
 import org.w3c.dom.Document;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class XMLPersistentHelper
 {

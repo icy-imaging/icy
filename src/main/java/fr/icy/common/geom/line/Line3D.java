@@ -29,7 +29,7 @@ import fr.icy.common.geom.shape.Shape3D;
  * This <code>Line3D</code> (3D equivalent to java Line2D class) represents a 3D line segment in {@code (x,y,z)}
  * coordinate space.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Line3D implements Shape3D, Cloneable
 {

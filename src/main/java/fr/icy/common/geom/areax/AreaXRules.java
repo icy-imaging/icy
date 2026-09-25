@@ -48,7 +48,7 @@ import java.awt.Shape;
  * <p>
  * Also an instance of this object may be applied to multiple <code>AreaX</code>
  * objects, so it is important that this object not use its own class-level
- * variables. Several different threads may call <code>execute(...)</code> for
+ * variables. Several different threads may call <code>execute(…)</code> for
  * different operations at the same time.
  */
 public class AreaXRules

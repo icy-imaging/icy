@@ -30,8 +30,8 @@ import fr.icy.gui.frame.IcyFrame;
 import fr.icy.io.FileUtil;
 import fr.icy.network.NetworkUtil;
 import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
@@ -42,12 +42,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
+    private static final Logger LOGGER = Logger.getLogger(PluginDetailPanel.class.getName());
+
     private class ExecuteActionButton extends JButton implements ActionListener {
         public ExecuteActionButton() {
             super("Execute");
@@ -96,7 +100,7 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
     final JTextPane pluginChangeLogText;
 
     // FIXME: 31/01/2023 Textpane strange behaviour when skin change
-    public PluginDetailPanel(final PluginDescriptor plugin) {
+    public PluginDetailPanel(final @NonNull PluginDescriptor plugin) {
         super(plugin.getName() + " " + plugin.getVersion(), false, true);
 
         this.plugin = plugin;
@@ -145,7 +149,8 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
                             SystemUtil.openFolder(FileUtil.getDirectory(path));
                     }
                     catch (final IOException e1) {
-                        IcyLogger.error(this.getClass(), e1, e1.getLocalizedMessage());
+                        if (LOGGER.isLoggable(Level.SEVERE))
+                            LOGGER.log(Level.SEVERE, "Unable to open folder.", e1);
                     }
 
                     e.consume();
@@ -248,10 +253,8 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
         // some parts of the descriptor are not loaded --> async update
         if (!plugin.isAllLoaded()) {
             ThreadUtil.bgRun(() -> {
-                PluginDetailPanel.this.plugin.loadAll();
-
-                // rebuild interface
-                ThreadUtil.invokeLater(this::updateGui);
+                if (PluginDetailPanel.this.plugin.loadAll())
+                    ThreadUtil.invokeLater(this::updateGui);
             });
         }
     }
@@ -260,10 +263,10 @@ public class PluginDetailPanel extends IcyFrame implements HyperlinkListener {
         final Font sysFont = pluginAuthorLabel.getFont();
         //final Image img = plugin.getImage();
         final String description = plugin.getDescription();
-        final String changesLog = plugin.getChangeLog();
-        final String author = plugin.getAuthor();
-        final String email = plugin.getEmail();
-        final String web = plugin.getWeb();
+        final String changesLog = ""; //plugin.getChangeLog();
+        final String author = ""; //plugin.getAuthor();
+        final String email = ""; //plugin.getEmail();
+        final String web = ""; //plugin.getWeb();
 
         String jarPath = plugin.getPluginJarPath();
 

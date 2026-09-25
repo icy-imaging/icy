@@ -30,7 +30,7 @@ import fr.icy.model.sequence.SequenceEvent.SequenceEventSourceType;
 /**
  * Number of intersected ROI(s) descriptor (see {@link ROIDescriptor})
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ROIIntersectedDescriptor extends ROIDescriptor
 {

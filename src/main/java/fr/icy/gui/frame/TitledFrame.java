@@ -22,7 +22,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  */
 public class TitledFrame extends IcyFrame {
     protected final JPanel mainPanel;

@@ -35,7 +35,7 @@ import fr.icy.model.roi.mask.BooleanMask2DIterator;
  * <b>If the ROI is modified during iteration the iterator becomes invalid and exception can
  * happen.</b>
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ROIIterator implements Position5DIterator
 {

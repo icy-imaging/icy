@@ -25,7 +25,7 @@ package fr.icy.common.exception;
  * UnsupportedFormatException is the exception thrown when try to load a resource and the format in
  * not recognized or incorrect.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class UnsupportedFormatException extends Exception
 {

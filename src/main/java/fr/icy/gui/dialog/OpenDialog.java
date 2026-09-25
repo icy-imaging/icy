@@ -32,7 +32,7 @@ import javax.swing.JFileChooser;
 /**
  * Simple dialog to let user select a file or a folder for open operation.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class OpenDialog
 {
@@ -122,7 +122,7 @@ public class OpenDialog
      */
     public static String chooseFile(String defaultDir, String defaultName)
     {
-        return chooseFile("Load file...", defaultDir, defaultName);
+        return chooseFile("Load file…", defaultDir, defaultName);
     }
 
     /**

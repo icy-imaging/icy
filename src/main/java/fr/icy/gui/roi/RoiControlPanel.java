@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ import fr.icy.gui.component.button.IcyToggleButton;
 import fr.icy.gui.component.field.IcyTextField;
 import fr.icy.gui.component.field.IcyTextField.TextChangeListener;
 import fr.icy.gui.component.icon.IcyIconPack;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.model.SpecialValueSpinnerModel;
 import fr.icy.gui.component.panel.AbstractRoisPanel;
 import fr.icy.gui.component.spinner.SpecialValueSpinner;
@@ -40,6 +40,7 @@ import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.roi.edit.*;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.system.thread.ThreadUtil;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -55,7 +56,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class RoiControlPanel extends JPanel implements ColorChangeListener, TextChangeListener, ClipboardListener, ChangeListener, ActionListener {
@@ -193,7 +194,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
         alphaSlider.setMinimumSize(new Dimension(36, 20));
         alphaSlider.setToolTipText("ROI content opacity");
 
-        readOnlyToggle = new IcyToggleButton(new IcyIconPack(SVGResource.LOCK_OPEN, SVGResource.LOCK));
+        readOnlyToggle = new IcyToggleButton(new IcyIconPack(IcySVG.LOCK_OPEN, IcySVG.LOCK));
         readOnlyToggle.setSelected(true);
         readOnlyToggle.setBorderPainted(false);
         readOnlyToggle.setFocusPainted(false);
@@ -800,7 +801,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     }
 
     @Override
-    public void textChanged(final IcyTextField source, final boolean validate) {
+    public void textChanged(final @NonNull IcyTextField source, final boolean validate) {
         // source not anymore enable --> cancel validation
         if (!source.isEnabled())
             return;
@@ -815,7 +816,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
             return;
         }
 
-        // at this point the text is validated so we can recover modified ROIs...
+        // at this point the text is validated so we can recover modified ROIs…
         final List<ROI> rois = new ArrayList<>();
         for (final Reference<ROI> ref : modifiedRois) {
             final ROI roi = ref.get();
@@ -1056,7 +1057,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     }
 
     @Override
-    public void colorChanged(final ColorChooserButton source) {
+    public void colorChanged(final @NonNull ColorChooserButton source) {
         // source not anymore enable --> cancel change
         if (!source.isEnabled())
             return;
@@ -1091,7 +1092,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     }
 
     @Override
-    public void stateChanged(final ChangeEvent e) {
+    public void stateChanged(final @NonNull ChangeEvent e) {
         if (!(e.getSource() instanceof final JComponent source))
             return;
 
@@ -1259,7 +1260,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     }
 
     @Override
-    public void actionPerformed(final ActionEvent e) {
+    public void actionPerformed(final @NonNull ActionEvent e) {
         if (!(e.getSource() instanceof final JComponent source))
             return;
 
@@ -1317,7 +1318,7 @@ public class RoiControlPanel extends JPanel implements ColorChangeListener, Text
     }
 
     // one of the selected ROI changed
-    public void roiChanged(final ROIEvent event) {
+    public void roiChanged(final @NonNull ROIEvent event) {
         switch (event.getType()) {
             case ROI_CHANGED:
                 // refresh the properties

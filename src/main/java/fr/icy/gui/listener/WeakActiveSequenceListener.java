@@ -27,7 +27,7 @@ import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class WeakActiveSequenceListener extends WeakListener<ActiveSequenceListener> implements ActiveSequenceListener
 {

@@ -24,12 +24,13 @@ import fr.icy.common.math.UnitUtil;
 import fr.icy.common.math.UnitUtil.UnitPrefix;
 import fr.icy.model.sequence.Sequence;
 
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequencePropertiesDialog extends ActionDialog
 {
@@ -64,7 +65,7 @@ public class SequencePropertiesDialog extends ActionDialog
 
                 if ((sx <= 0d) || (sy <= 0d) || (sz <= 0d))
                 {
-                    MessageDialog.showDialog("Pixel size values should be > 0 !", MessageDialog.WARNING_MESSAGE);
+                    MessageDialog.showDialog("Pixel size values should be > 0 !", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 

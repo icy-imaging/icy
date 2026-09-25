@@ -21,7 +21,7 @@ import fr.icy.model.roi.tool.MagicWand.MagicWandConnectivity;
 import fr.icy.model.roi.tool.MagicWand.MagicWandGradientToleranceMode;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class MagicWandPreferences
 {

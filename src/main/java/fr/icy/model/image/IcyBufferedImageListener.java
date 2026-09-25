@@ -20,7 +20,7 @@ package fr.icy.model.image;
 import java.util.EventListener;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface IcyBufferedImageListener extends EventListener
 {

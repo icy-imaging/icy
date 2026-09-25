@@ -27,22 +27,25 @@ import fr.icy.model.roi.ROIEvent.ROIEventType;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent;
 import fr.icy.system.IcyExceptionHandler;
-import fr.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract class providing the basic methods to retrieve properties and compute a specific
  * descriptor for a region of interest (ROI)
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Alexandre Dufour
  * @author Thomas Musset
  */
 public abstract class ROIDescriptor<O> {
+    private static final Logger LOGGER = Logger.getLogger(ROIDescriptor.class.getName());
+
     /**
      * Returns all available ROI descriptors (see {@link ROIDescriptor}) and their attached plugin
      * (see {@link PluginROIDescriptor}).<br>
@@ -51,7 +54,7 @@ public abstract class ROIDescriptor<O> {
      * @see ROIDescriptor#compute(ROI, Sequence)
      * @see PluginROIDescriptor#compute(ROI, Sequence)
      */
-    public static @NotNull Map<ROIDescriptor<?>, PluginROIDescriptor> getDescriptors() {
+    public static @NonNull Map<ROIDescriptor<?>, PluginROIDescriptor> getDescriptors() {
         final Map<ROIDescriptor<?>, PluginROIDescriptor> result = new HashMap<>();
         final Set<PluginDescriptor> pluginDescriptors = ExtensionLoader.getPlugins(PluginROIDescriptor.class);
 
@@ -66,10 +69,10 @@ public abstract class ROIDescriptor<O> {
                 }
             }
             catch (final Throwable e) {
-                // show a message in the output console
-                IcyLogger.error(ROIDescriptor.class, e, e.getLocalizedMessage());
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Unable to get descriptors.", e);
                 // and send an error report (silent as we don't want a dialog appearing here)
-                IcyExceptionHandler.report(pluginDescriptor, IcyExceptionHandler.getErrorMessage(e, true));
+                IcyExceptionHandler.report(pluginDescriptor, IcyExceptionHandler.getErrorMessage(e, true)); // FIXME: auto-report ?
             }
         }
 
@@ -84,7 +87,7 @@ public abstract class ROIDescriptor<O> {
      * @see #getDescriptors()
      * @see #computeDescriptor(String, ROI, Sequence)
      */
-    public static @Nullable ROIDescriptor<?> getDescriptor(final @NotNull Collection<ROIDescriptor<?>> descriptors, final String id) {
+    public static @Nullable ROIDescriptor<?> getDescriptor(final @NonNull Collection<ROIDescriptor<?>> descriptors, final String id) {
         for (final ROIDescriptor<?> roiDescriptor : descriptors)
             if (StringUtil.equals(roiDescriptor.getId(), id))
                 return roiDescriptor;
@@ -194,7 +197,7 @@ public abstract class ROIDescriptor<O> {
     public abstract String getDescription();
 
     /**
-     * Returns the unit of this descriptor (<code>ex: "px", "mm", "µm2"...</code>).<br>
+     * Returns the unit of this descriptor (<code>ex: "px", "mm", "µm2", etc.</code>).<br>
      * It can return an empty or <code>null</code> string (default implementation) if there is no
      * specific unit attached to the descriptor.<br>
      * Note that unit is concatenated to the name to build the title (column header) in the ROI
@@ -267,7 +270,7 @@ public abstract class ROIDescriptor<O> {
      *
      * @see #compute(ROI, Sequence)
      */
-    public boolean needRecompute(final @NotNull ROIEvent change) {
+    public boolean needRecompute(final @NonNull ROIEvent change) {
         return (change.getType() == ROIEventType.ROI_CHANGED);
     }
 

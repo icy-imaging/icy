@@ -24,7 +24,7 @@ import fr.icy.io.FileUtil;
 import fr.icy.model.roi.ROI.ROIPainter;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class GeneralPreferences {

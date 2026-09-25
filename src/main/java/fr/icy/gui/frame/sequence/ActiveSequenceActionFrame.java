@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Basic frame to do a simple action on the current active sequence.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ActiveSequenceActionFrame extends ActionFrame implements ActiveSequenceListener {

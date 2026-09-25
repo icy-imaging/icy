@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -25,12 +25,11 @@ import fr.icy.Icy;
 import fr.icy.common.string.StringUtil;
 import fr.icy.gui.listener.SkinChangeListener;
 import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.GeneralPreferences;
 import fr.icy.system.thread.ThreadUtil;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -39,6 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * LookAndFeelUtil class. Use to install all skins used by Icy and helps manipulating UI manager.
@@ -46,21 +47,23 @@ import java.util.List;
  * @author Thomas Musset
  */
 public final class LookAndFeelUtil {
-    private static final @NotNull Set<SkinChangeListener> LISTENERS = new HashSet<>();
-    private static final @NotNull List<FlatLaf> SKINS = new ArrayList<>();
+    private static final Logger LOGGER = Logger.getLogger(LookAndFeelUtil.class.getName());
+
+    private static final @NonNull Set<SkinChangeListener> LISTENERS = new HashSet<>();
+    private static final @NonNull List<FlatLaf> SKINS = new ArrayList<>();
     private static @Nullable FlatLaf currentSkin = null;
     private static @Nullable UIDefaults defaults = null;
     private static boolean fontInstalled = false;
     private static int fontSize = getDefaultFontSize();
 
-    private static final @NotNull Color RED_DARK = new Color(200, 64, 64);
-    private static final @NotNull Color RED_BRIGHT = new Color(255, 128, 128);
-    private static final @NotNull Color GREEN_DARK = new Color(64, 128, 64);
-    private static final @NotNull Color GREEN_BRIGHT = new Color(128, 255, 128);
-    private static final @NotNull Color BLUE_DARK = new Color(0, 85, 174);
-    private static final @NotNull Color BLUE_BRIGHT = new Color(157, 205, 255);
-    private static final @NotNull Color YELLOW_DARK = new Color(200, 100, 0);
-    private static final @NotNull Color YELLOW_BRIGHT = new Color(255, 150, 0);
+    private static final @NonNull Color RED_DARK = new Color(200, 64, 64);
+    private static final @NonNull Color RED_BRIGHT = new Color(255, 128, 128);
+    private static final @NonNull Color GREEN_DARK = new Color(64, 128, 64);
+    private static final @NonNull Color GREEN_BRIGHT = new Color(128, 255, 128);
+    private static final @NonNull Color BLUE_DARK = new Color(0, 85, 174);
+    private static final @NonNull Color BLUE_BRIGHT = new Color(157, 205, 255);
+    private static final @NonNull Color YELLOW_DARK = new Color(200, 100, 0);
+    private static final @NonNull Color YELLOW_BRIGHT = new Color(255, 150, 0);
 
     public enum ColorType {
         BUTTON_DEFAULT("Button.foreground"),
@@ -76,10 +79,10 @@ public final class LookAndFeelUtil {
         MENUITEM_DISABLED("MenuItem.disabledForeground"),
         MENUITEM_SELECTED("MenuItem.selectionForeground");
 
-        final @NotNull String type;
+        final @NonNull String type;
 
         @Contract(pure = true)
-        ColorType(final @NotNull String s) {
+        ColorType(final @NonNull String s) {
             type = s;
         }
     }
@@ -108,7 +111,7 @@ public final class LookAndFeelUtil {
             }
         }
         catch (final IOException | FontFormatException e) {
-            IcyLogger.warn(LookAndFeelUtil.class, e, "Unable to install default font.");
+            LOGGER.log(Level.WARNING, "Unable to install default font.", e);
         }
 
         boolean ttfBold = false;
@@ -120,18 +123,18 @@ public final class LookAndFeelUtil {
                 }
             }
             catch (final IOException | FontFormatException e) {
-                IcyLogger.warn(LookAndFeelUtil.class, e, "Unable to install bold font.");
+                LOGGER.log(Level.WARNING, "Unable to install bold font.", e);
             }
         }
 
         if (ttfMedium) {
             fontInstalled = true;
             if (!ttfBold)
-                IcyLogger.warn(LookAndFeelUtil.class, "Bold font not installed. Using only default font.");
+                LOGGER.warning("Bold font not installed. Using only default font.");
         }
         else {
             fontInstalled = false;
-            IcyLogger.warn(LookAndFeelUtil.class, "Default font not installed. Some graphical elements will be broken.");
+            LOGGER.warning("Default font not installed. Some graphical elements will be broken.");
         }
 
         // Default themes
@@ -176,10 +179,11 @@ public final class LookAndFeelUtil {
         setSkin(GeneralPreferences.getGuiSkin());
         setFontSize(GeneralPreferences.getGuiFontSize());
 
-        UIManager.put("SplitPaneDivider.gripDotCount", 1);
+        UIManager.put("SplitPaneDivider.gripDotCount", 3);
+        //UIManager.put("SplitPaneDivider.gripDotSize", 5);
     }
 
-    private static void addSkin(final @NotNull FlatLaf skin) {
+    private static void addSkin(final @NonNull FlatLaf skin) {
         SKINS.add(skin);
     }
 
@@ -187,7 +191,7 @@ public final class LookAndFeelUtil {
      * @return the skins list
      */
     @Contract(pure = true)
-    public static @NotNull List<FlatLaf> getSkins() {
+    public static @NonNull List<FlatLaf> getSkins() {
         return SKINS;
     }
 
@@ -200,41 +204,41 @@ public final class LookAndFeelUtil {
         return defaults;
     }
 
-    public static @Nullable Color getUIColor(final @NotNull ColorType colorType) {
+    public static @Nullable Color getUIColor(final @NonNull ColorType colorType) {
         if (defaults == null)
             return null;
         return defaults.getColor(colorType.type);
     }
 
-    public static @NotNull Color getAccentForeground() {
+    public static @NonNull Color getAccentForeground() {
         if (isDarkMode())
             return Color.WHITE;
         else
             return Color.BLACK;
     }
 
-    public static @NotNull Color getRed() {
+    public static @NonNull Color getRed() {
         if (isDarkMode())
             return RED_DARK;
         else
             return RED_BRIGHT;
     }
 
-    public static @NotNull Color getGreen() {
+    public static @NonNull Color getGreen() {
         if (isDarkMode())
             return GREEN_DARK;
         else
             return GREEN_BRIGHT;
     }
 
-    public static @NotNull Color getBlue() {
+    public static @NonNull Color getBlue() {
         if (isDarkMode())
             return BLUE_DARK;
         else
             return BLUE_BRIGHT;
     }
 
-    public static @NotNull Color getYellow() {
+    public static @NonNull Color getYellow() {
         if (isDarkMode())
             return YELLOW_DARK;
         else
@@ -245,11 +249,11 @@ public final class LookAndFeelUtil {
         return (RED_DARK.equals(color) || RED_BRIGHT.equals(color));
     }
 
-    public static boolean isGreen(final @NotNull Color color) {
+    public static boolean isGreen(final @NonNull Color color) {
         return (GREEN_DARK.equals(color) || GREEN_BRIGHT.equals(color));
     }
 
-    public static boolean isBlue(final @NotNull Color color) {
+    public static boolean isBlue(final @NonNull Color color) {
         return (BLUE_DARK.equals(color) || BLUE_BRIGHT.equals(color));
     }
 
@@ -265,7 +269,7 @@ public final class LookAndFeelUtil {
      * @param name the skin name.
      * @return the skin if found, otherwise returns null.
      */
-    public static @Nullable FlatLaf getSkinByName(final @NotNull String name) {
+    public static @Nullable FlatLaf getSkinByName(final @NonNull String name) {
         for (final FlatLaf skin : SKINS)
             if (skin.getName().equals(name))
                 return skin;
@@ -278,7 +282,7 @@ public final class LookAndFeelUtil {
      * @param className the skin classname in String.
      * @return the skin if found, otherwise returns null.
      */
-    public static @Nullable FlatLaf getSkinByClassName(final @NotNull String className) {
+    public static @Nullable FlatLaf getSkinByClassName(final @NonNull String className) {
         for (final FlatLaf skin : SKINS)
             if (skin.getClass().getName().equals(className))
                 return skin;
@@ -297,7 +301,7 @@ public final class LookAndFeelUtil {
      * @return the currently used skin display name. May be empty if called before {@link #init()}.
      * @see #getCurrentSkin()
      */
-    public static @NotNull String getCurrentSkinName() {
+    public static @NonNull String getCurrentSkinName() {
         final FlatLaf skin = getCurrentSkin();
         return (skin != null) ? skin.getName() : "";
     }
@@ -305,8 +309,8 @@ public final class LookAndFeelUtil {
     /**
      * @return the default skin name.
      */
-    @NotNull
-    public static String getDefaultSkinName() {
+    @Contract(pure = true)
+    public static @NonNull String getDefaultSkinName() {
         return FlatLightLaf.NAME;
     }
 
@@ -324,6 +328,7 @@ public final class LookAndFeelUtil {
         GeneralPreferences.setGuiFontSize(size);
     }
 
+    @Contract(pure = true)
     public static int getFontSize() {
         return fontSize;
     }
@@ -339,7 +344,7 @@ public final class LookAndFeelUtil {
      * @param skin the skin to use.
      * @see #fireSkinChangeListeners()
      */
-    public static void setSkin(final @NotNull FlatLaf skin) {
+    public static void setSkin(final @NonNull FlatLaf skin) {
         if ((getCurrentSkin() == null || !skin.getClass().equals(getCurrentSkin().getClass())) && SKINS.contains(skin)) {
             ThreadUtil.invokeLater(() -> {
                 try {
@@ -353,7 +358,7 @@ public final class LookAndFeelUtil {
                     updateUI();
                 }
                 catch (final Exception e) {
-                    IcyLogger.error(LookAndFeelUtil.class, e, "LookAndFeelUtil.setSkin(" + skin.getName() + ") error.");
+                    LOGGER.log(Level.SEVERE, "LookAndFeelUtil.setSkin(" + skin.getName() + ") error.", e);
                 }
             });
         }
@@ -365,7 +370,7 @@ public final class LookAndFeelUtil {
      * @param skinName the skin name.
      * @see #setSkin(FlatLaf)
      */
-    public static void setSkin(final @NotNull String skinName) {
+    public static void setSkin(final @NonNull String skinName) {
         if (!StringUtil.equals(skinName, getCurrentSkinName()))
             try {
                 for (final FlatLaf skin : SKINS)
@@ -373,7 +378,7 @@ public final class LookAndFeelUtil {
                         setSkin(skin);
             }
             catch (final Exception e) {
-                IcyLogger.error(LookAndFeelUtil.class, e, "LookAndFeelUtil.setSkin(" + skinName + ") error.");
+                LOGGER.log(Level.SEVERE, "LookAndFeelUtil.setSkin(" + skinName + ") error.", e);
             }
     }
 
@@ -397,14 +402,14 @@ public final class LookAndFeelUtil {
     /**
      * @param listener the listener to add.
      */
-    public static void addListener(final @NotNull SkinChangeListener listener) {
+    public static void addListener(final @NonNull SkinChangeListener listener) {
         LISTENERS.add(listener);
     }
 
     /**
      * @param listener the listener to remove.
      */
-    public static void removeListener(final @NotNull SkinChangeListener listener) {
+    public static void removeListener(final @NonNull SkinChangeListener listener) {
         LISTENERS.remove(listener);
     }
 

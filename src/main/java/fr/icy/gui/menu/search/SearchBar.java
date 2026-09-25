@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,15 +18,14 @@
 
 package fr.icy.gui.menu.search;
 
+import fr.icy.common.string.StringUtil;
 import fr.icy.gui.component.field.IcyTextField;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.network.search.SearchEngine;
 import fr.icy.network.search.SearchEngine.SearchEngineListener;
 import fr.icy.network.search.SearchResult;
-import fr.icy.common.string.StringUtil;
 import org.jdesktop.swingx.painter.BusyPainter;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,7 +36,7 @@ import java.util.TimerTask;
 
 /**
  * @author Thomas Provoost
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SearchBar extends IcyTextField implements SearchEngineListener {
@@ -47,7 +46,9 @@ public class SearchBar extends IcyTextField implements SearchEngineListener {
     private static final int BUSY_PAINTER_POINTS = 40;
     private static final int BUSY_PAINTER_TRAIL = 20;
 
-    /** Internal search engine */
+    /**
+     * Internal search engine
+     */
     final SearchEngine searchEngine;
 
     /**
@@ -74,7 +75,7 @@ public class SearchBar extends IcyTextField implements SearchEngineListener {
         searchEngine.addListener(this);
 
         resultsPanel = new SearchResultPanel(this);
-        searchIcon = new IcySVG(SVGResource.SEARCH).getIcon(16);
+        searchIcon = IcySVG.SEARCH.getIcon(16);
 
         // modify margin so we have space for icon
         final Insets margin = getMargin();
@@ -166,14 +167,14 @@ public class SearchBar extends IcyTextField implements SearchEngineListener {
 
     void buildActionMap() {
         final InputMap imap = getInputMap(JComponent.WHEN_FOCUSED);
-        final ActionMap amap = getActionMap();
+        final ActionMap actionMap = getActionMap();
 
         imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "Cancel");
         imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "MoveDown");
         imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "MoveUp");
         imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "Execute");
 
-        amap.put("Cancel", new AbstractAction() {
+        actionMap.put("Cancel", new AbstractAction() {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 if (initialized)
@@ -259,15 +260,15 @@ public class SearchBar extends IcyTextField implements SearchEngineListener {
 
     /**
      * Request search for the specified text.
-     * @param text string
      *
+     * @param text string
      * @see SearchEngine#search(String)
      */
     public void search(final String text) {
         setText(text);
     }
 
-    protected void searchInternal(final @NotNull String text) {
+    protected void searchInternal(final @NonNull String text) {
         final String filter = text.trim();
 
         if (StringUtil.isEmpty(filter))
@@ -347,7 +348,7 @@ public class SearchBar extends IcyTextField implements SearchEngineListener {
         // make sure the animation timer for the busy icon is stopped
         busyPainterTimer.cancel();
 
-        // ... and restart it
+        // … and restart it
         final Timer newTimer = new Timer("Search animation timer");
         newTimer.scheduleAtFixedRate(new TimerTask() {
             @Override

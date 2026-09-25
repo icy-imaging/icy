@@ -33,7 +33,7 @@ import javax.swing.undo.UndoableEdit;
 /**
  * Custom UndoManager for Icy.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 // public class IcyUndoManager extends UndoManager implements IcyUndoableEditListener
 public class IcyUndoManager extends AbstractUndoableEdit implements UndoableEditListener

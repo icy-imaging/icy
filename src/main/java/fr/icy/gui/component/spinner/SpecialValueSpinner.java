@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -21,41 +21,25 @@ package fr.icy.gui.component.spinner;
 import fr.icy.gui.component.editor.SpecialValueSpinnerEditor;
 import fr.icy.gui.component.model.SpecialValueSpinnerModel;
 
-import javax.swing.JComponent;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerModel;
+import javax.swing.*;
 
 /**
  * JSpinner component using a special value for a specific state.
- * 
- * @author Stephane
+ *
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
-public class SpecialValueSpinner extends JSpinner
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1858500300780069742L;
-
-    /**
-     * Create a new IcySpinner
-     */
-    public SpecialValueSpinner()
-    {
+public class SpecialValueSpinner extends JSpinner {
+    public SpecialValueSpinner() {
         this(new SpecialValueSpinnerModel());
     }
 
-    /**
-     * @param model
-     */
-    public SpecialValueSpinner(SpecialValueSpinnerModel model)
-    {
+    public SpecialValueSpinner(final SpecialValueSpinnerModel model) {
         super(model);
     }
 
     @Override
-    protected JComponent createEditor(SpinnerModel model)
-    {
+    protected JComponent createEditor(final SpinnerModel model) {
         if (model instanceof SpecialValueSpinnerModel)
             return new SpecialValueSpinnerEditor(this);
 

@@ -20,8 +20,8 @@ package fr.icy.common;
 
 import fr.icy.common.string.StringUtil;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -51,8 +51,8 @@ public final class Version implements Comparable<Version> {
         BETA("b", "beta"),
         RELEASE_CANDIDATE("rc", "release-candidate");
 
-        private final @NotNull String shortLabel;
-        private final @NotNull String longLabel;
+        private final @NonNull String shortLabel;
+        private final @NonNull String longLabel;
 
         @Contract(pure = true)
         DevelopmentStage() {
@@ -60,18 +60,18 @@ public final class Version implements Comparable<Version> {
         }
 
         @Contract(pure = true)
-        DevelopmentStage(final @NotNull String shortLabel, final @NotNull String longLabel) {
+        DevelopmentStage(final @NonNull String shortLabel, final @NonNull String longLabel) {
             this.shortLabel = shortLabel;
             this.longLabel = longLabel;
         }
 
         @Contract(pure = true)
-        public final @NotNull String getShortLabel() {
+        public final @NonNull String getShortLabel() {
             return shortLabel;
         }
 
         @Contract(pure = true)
-        public final @NotNull String getLongLabel() {
+        public final @NonNull String getLongLabel() {
             return longLabel;
         }
 
@@ -88,7 +88,7 @@ public final class Version implements Comparable<Version> {
     private final int revision;
     private final boolean isSnapshot;
 
-    private final @NotNull Version.DevelopmentStage developmentStage;
+    private final @NonNull DevelopmentStage developmentStage;
 
     /**
      * Constructs a new {@link Version} object using default values.
@@ -196,10 +196,10 @@ public final class Version implements Comparable<Version> {
      * @param major            the major version number.
      * @param minor            the minor version number.
      * @param patch            the patch version number.
-     * @param developmentStage the development stage of the version, must not be {@code null}.
+     * @param developmentStage the development stage of the version. Must not be {@code null}.
      */
     @Contract(pure = true)
-    public Version(final int major, final int minor, final int patch, final @NotNull DevelopmentStage developmentStage) {
+    public Version(final int major, final int minor, final int patch, final @NonNull DevelopmentStage developmentStage) {
         this(major, minor, patch, developmentStage, 0, false);
     }
 
@@ -215,11 +215,11 @@ public final class Version implements Comparable<Version> {
      * @param major            the major version number.
      * @param minor            the minor version number.
      * @param patch            the patch version number.
-     * @param developmentStage the development stage of the version, must not be {@code null}.
+     * @param developmentStage the development stage of the version. Must not be {@code null}.
      * @param revision         the revision number associated with the development stage.
      */
     @Contract(pure = true)
-    public Version(final int major, final int minor, final int patch, final @NotNull DevelopmentStage developmentStage, final int revision) {
+    public Version(final int major, final int minor, final int patch, final @NonNull DevelopmentStage developmentStage, final int revision) {
         this(major, minor, patch, developmentStage, revision, false);
     }
 
@@ -229,12 +229,12 @@ public final class Version implements Comparable<Version> {
      * @param major            the major version number.
      * @param minor            the minor version number.
      * @param patch            the patch version number.
-     * @param developmentStage the development stage of the version, must not be {@code null}.
+     * @param developmentStage the development stage of the version. Must not be {@code null}.
      * @param revision         the revision number associated with the development stage.
      * @param isSnapshot       a boolean indicating whether this version is a snapshot.
      */
     @Contract(pure = true)
-    public Version(final int major, final int minor, final int patch, final @NotNull Version.DevelopmentStage developmentStage, final int revision, final boolean isSnapshot) {
+    public Version(final int major, final int minor, final int patch, final @NonNull DevelopmentStage developmentStage, final int revision, final boolean isSnapshot) {
         super();
 
         this.major = major;
@@ -257,7 +257,7 @@ public final class Version implements Comparable<Version> {
      * labels to specify the development stage. A "-SNAPSHOT" suffix will be
      * used to indicate whether the version is a snapshot version.
      *
-     * @param version the version string to be parsed, must not be {@code null}.
+     * @param version the version string to be parsed. Must not be {@code null}.
      *                It should follow the format: "{major}.{minor}.{patch}-{stage}-{revision}".
      *                Stages may include {@link DevelopmentStage#ALPHA}, {@link DevelopmentStage#BETA},
      *                {@link DevelopmentStage#RELEASE_CANDIDATE}, or {@link DevelopmentStage#RELEASE}.
@@ -270,7 +270,7 @@ public final class Version implements Comparable<Version> {
      * @throws NullPointerException  if the {@code version} parameter is {@code null}.
      */
     @Contract("_ -> new")
-    public static @NotNull Version fromString(final @NotNull String version) throws NumberFormatException, NullPointerException {
+    public static @NonNull Version fromString(final @NonNull String version) throws NumberFormatException, NullPointerException {
         final boolean isSnapshot;
         final String s;
         if (version.endsWith("-SNAPSHOT")) { // TODO: Add real snapshot support (with timestamp)
@@ -351,7 +351,7 @@ public final class Version implements Comparable<Version> {
      * @return the patch version as an integer.
      */
     @Contract(pure = true)
-    public @NotNull Version.DevelopmentStage getDevelopmentStage() {
+    public @NonNull DevelopmentStage getDevelopmentStage() {
         return developmentStage;
     }
 
@@ -415,7 +415,7 @@ public final class Version implements Comparable<Version> {
      * <ul>
      *  <li>major, minor, patch, and revision are all 0.</li>
      *  <li>the development stage is set to RELEASE.</li>
-     *  <li>snapshot flag is false.</li>
+     *  <li>the snapshot flag is false.</li>
      * </ul>
      *
      * @return {@code true} if the version is empty, {@code false} otherwise.
@@ -433,7 +433,7 @@ public final class Version implements Comparable<Version> {
      *
      * @return a non-null string representing the version in a shortened format.
      */
-    public @NotNull String toShortString() {
+    public @NonNull String toShortString() {
         if (isEmpty())
             return "0";
 
@@ -467,7 +467,7 @@ public final class Version implements Comparable<Version> {
      * @return A non-null string representation of the version.
      */
     @Override
-    public @NotNull String toString() {
+    public @NonNull String toString() {
         if (isEmpty())
             return "0";
 
@@ -496,7 +496,7 @@ public final class Version implements Comparable<Version> {
      *
      * @param obj the object to be compared for equality with this object. Can be null.
      * @return {@code true} if the specified object is equal to this object,
-     *         otherwise {@code false}.
+     * otherwise {@code false}.
      */
     @Contract(value = "null -> false", pure = true)
     @Override
@@ -525,10 +525,10 @@ public final class Version implements Comparable<Version> {
      *
      * @param version the version object to be compared with the current instance. Must not be null.
      * @return a negative integer, zero, or a positive integer as this version
-     *         is less than, equal to, or greater than the specified version.
+     * is less than, equal to, or greater than the specified version.
      */
     @Override
-    public int compareTo(final @NotNull Version version) {
+    public int compareTo(final @NonNull Version version) {
         if (version.isEmpty() || isEmpty())
             return 0;
         else if (version.major < major)
@@ -564,10 +564,10 @@ public final class Version implements Comparable<Version> {
      *
      * @param version the version to compare with. Must not be null.
      * @return {@code true} if the current object is greater than the specified version,
-     *         {@code false} otherwise.
+     * {@code false} otherwise.
      */
     @Contract(pure = true)
-    public boolean isGreater(final @NotNull Version version) {
+    public boolean isGreater(final @NonNull Version version) {
         return compareTo(version) > 0;
     }
 
@@ -577,10 +577,10 @@ public final class Version implements Comparable<Version> {
      *
      * @param version the version to compare with. Must not be null.
      * @return {@code true} if the current object is greater or equal than the specified version,
-     *         {@code false} otherwise.
+     * {@code false} otherwise.
      */
     @Contract(pure = true)
-    public boolean isGreaterOrEqual(final @NotNull Version version) {
+    public boolean isGreaterOrEqual(final @NonNull Version version) {
         return compareTo(version) >= 0;
     }
 
@@ -590,10 +590,10 @@ public final class Version implements Comparable<Version> {
      *
      * @param version the version to compare with. Must not be null.
      * @return {@code true} if the current object is lower than the specified version,
-     *         {@code false} otherwise.
+     * {@code false} otherwise.
      */
     @Contract(pure = true)
-    public boolean isLower(final @NotNull Version version) {
+    public boolean isLower(final @NonNull Version version) {
         return compareTo(version) < 0;
     }
 
@@ -603,10 +603,10 @@ public final class Version implements Comparable<Version> {
      *
      * @param version the version to compare with. Must not be null.
      * @return {@code true} if the current object is lower or equal than the specified version,
-     *         {@code false} otherwise.
+     * {@code false} otherwise.
      */
     @Contract(pure = true)
-    public boolean isLowerOrEqual(final @NotNull Version version) {
+    public boolean isLowerOrEqual(final @NonNull Version version) {
         return compareTo(version) <= 0;
     }
 }

@@ -20,7 +20,7 @@ package fr.icy.system.thread;
 import java.util.concurrent.FutureTask;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SingleProcessor extends Processor {

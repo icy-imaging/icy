@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,15 +24,15 @@ import fr.icy.model.roi.ROIUtil;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent;
 import fr.icy.model.sequence.SequenceEvent.SequenceEventSourceType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Standard Deviation intensity ROI descriptor class (see {@link ROIDescriptor})
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-public class ROIStandardDeviationDescriptor extends ROIDescriptor {
+public class ROIStandardDeviationDescriptor extends ROIDescriptor<Double> {
     public static final String ID = "Standard deviation";
 
     public ROIStandardDeviationDescriptor() {
@@ -50,24 +50,24 @@ public class ROIStandardDeviationDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public boolean needRecompute(final @NotNull SequenceEvent change) {
+    public boolean needRecompute(final @NonNull SequenceEvent change) {
         return (change.getSourceType() == SequenceEventSourceType.SEQUENCE_DATA);
     }
 
     @Override
-    public Object compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
-        return Double.valueOf(computeStandardDeviation(roi, sequence));
+    public @NonNull Double compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
+        return computeStandardDeviation(roi, sequence);
     }
 
     /**
-     * Computes and returns the compute standard deviation for the specified ROI on given sequence.<br>
-     * It may returns <code>Double.Nan</code> if the operation is not supported for that ROI.
+     * Computes and returns the compute standard deviation for the specified ROI on a given sequence.<br>
+     * It may return <code>Double.Nan</code> if the operation is not supported for that ROI.
      *
      * @param roi      the ROI on which we want to compute the standard deviation
      * @param sequence the sequence used to compute the pixel intensity
      * @throws UnsupportedOperationException if the operation is not supported for this ROI
      */
-    public static double computeStandardDeviation(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
+    public static @NonNull Double computeStandardDeviation(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
         return ROIUtil.computeIntensityDescriptors(roi, sequence, false).deviation;
     }
 }

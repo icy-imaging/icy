@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,57 +19,60 @@
 package fr.icy.gui.menu;
 
 import fr.icy.gui.action.GeneralActions;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.menu.IcyMenuItem;
 import fr.icy.network.NetworkUtil;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.system.UserUtil;
-import fr.icy.system.logging.IcyLogger;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Thomas Musset
  */
 public final class ApplicationMenuHelp extends AbstractApplicationMenu {
-    @NotNull
-    private static final ApplicationMenuHelp instance = new ApplicationMenuHelp();
+    private static final Logger LOGGER = Logger.getLogger(ApplicationMenuHelp.class.getName());
 
-    @NotNull
-    public static synchronized ApplicationMenuHelp getInstance() {
+    private static final @NonNull ApplicationMenuHelp instance = new ApplicationMenuHelp();
+
+    @Contract(pure = true)
+    public static synchronized @NonNull ApplicationMenuHelp getInstance() {
         return instance;
     }
 
     private ApplicationMenuHelp() {
         super("Help");
 
-        final IcyMenuItem itemHelp = new IcyMenuItem("Get Help", SVGResource.HELP);
+        final IcyMenuItem itemHelp = new IcyMenuItem("Get Help", IcySVG.HELP);
         itemHelp.addActionListener(e -> NetworkUtil.openBrowser(NetworkUtil.IMAGE_SC_ICY_URL));
         itemHelp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
         add(itemHelp);
 
-        final IcyMenuItem itemGettingStarted = new IcyMenuItem("Getting Started", SVGResource.FLAG);
+        final IcyMenuItem itemGettingStarted = new IcyMenuItem("Getting Started", IcySVG.FLAG);
         itemGettingStarted.addActionListener(e -> NetworkUtil.openBrowser(NetworkUtil.WEBSITE_URL + "trainings/"));
         itemGettingStarted.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
         add(itemGettingStarted);
 
         // TODO make shortcuts visible
-        final IcyMenuItem itemShortcuts = new IcyMenuItem("See Shortcuts", SVGResource.KEYBOARD);
+        final IcyMenuItem itemShortcuts = new IcyMenuItem("See Shortcuts", IcySVG.KEYBOARD);
         itemShortcuts.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
         itemShortcuts.setEnabled(false);
         add(itemShortcuts);
 
         // TODO change action to use Icy's internal bug report system ?
-        final IcyMenuItem itemSubmitBug = new IcyMenuItem("Submit a Bug Report", SVGResource.BUG_REPORT);
+        final IcyMenuItem itemSubmitBug = new IcyMenuItem("Submit a Bug Report", IcySVG.BUG_REPORT);
         itemSubmitBug.addActionListener(e -> NetworkUtil.openBrowser("https://gitlab.pasteur.fr/bia/icy/-/issues"));
         itemSubmitBug.setEnabled(false);
         add(itemSubmitBug);
 
-        final IcyMenuItem itemShowLog = new IcyMenuItem("Show Log", SVGResource.DESCRIPTION);
+        final IcyMenuItem itemShowLog = new IcyMenuItem("Show Log", IcySVG.DESCRIPTION);
         itemShowLog.addActionListener(e -> {
             try {
                 final File log = new File(UserUtil.getIcyHomeDirectory(), "icy.log");
@@ -77,14 +80,15 @@ public final class ApplicationMenuHelp extends AbstractApplicationMenu {
                     Desktop.getDesktop().open(log);
             }
             catch (final IOException ex) {
-                IcyLogger.error(ApplicationMenuHelp.class, ex, "An error occured while opening log file.");
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "An error occurred while opening log file.", ex);
             }
         });
         add(itemShowLog);
 
         addSeparator();
 
-        final IcyMenuItem itemUpdate = new IcyMenuItem(GeneralActions.checkUpdateAction, SVGResource.UPDATE);
+        final IcyMenuItem itemUpdate = new IcyMenuItem(GeneralActions.checkUpdateAction, IcySVG.UPDATE);
         add(itemUpdate);
     }
 }

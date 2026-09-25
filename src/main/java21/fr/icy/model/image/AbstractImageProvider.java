@@ -35,7 +35,7 @@ import java.util.List;
  * It provide methods wrapper so you only need implement one method the get your importer working.<br>
  * But free feel to override more methods to provide better support and/or better performance.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class AbstractImageProvider implements ImageProvider {
@@ -205,7 +205,7 @@ public abstract class AbstractImageProvider implements ImageProvider {
      * @param resolution Wanted resolution level for the image (use 0 if unsure).<br>
      *                   The retrieved image resolution is equal to <code>image.resolution / (2^resolution)</code><br>
      *                   So for instance level 0 is the default image resolution while level 1 is base image
-     *                   resolution / 2 and so on...
+     *                   resolution / 2 and so on…
      * @param region     The 2D region we want to retrieve (considering the original image resolution).<br>
      *                   If set to <code>null</code> then the whole image is returned.
      * @param z          Z position of the image (slice) we want retrieve

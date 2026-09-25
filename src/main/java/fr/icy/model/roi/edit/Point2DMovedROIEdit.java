@@ -34,7 +34,7 @@ import fr.icy.extension.kernel.roi.roi2d.ROI2DShape;
 /**
  * Control point position change implementation for ROI undoable edition.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Point2DMovedROIEdit extends AbstractPoint2DROIEdit
 {

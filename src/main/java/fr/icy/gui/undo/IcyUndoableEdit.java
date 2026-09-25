@@ -24,7 +24,7 @@ import javax.swing.undo.UndoableEdit;
 /**
  * Icy {@link UndoableEdit} interface
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public interface IcyUndoableEdit extends UndoableEdit {

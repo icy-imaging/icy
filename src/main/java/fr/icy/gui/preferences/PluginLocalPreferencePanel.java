@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PluginLocalPreferencePanel extends PluginListPreferencePanel implements ExtensionLoader.ExtensionLoaderListener, PluginInstallerListener, PluginRepositoryLoaderListener {
@@ -73,7 +73,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
             if (!PluginRepositoryLoader.isLoaded())
                 return PluginLocalState.CHECKING_UPDATE;
 
-            if ((PluginInstaller.isDesinstallingPlugin(plugin)))
+            if ((PluginInstaller.isUninstallingPlugin(plugin)))
                 return PluginLocalState.REMOVING;
 
             // get online version
@@ -103,7 +103,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
         final List<PluginDescriptor> toRemove = new ArrayList<>();
 
         for (final PluginDescriptor plugin : selectedPlugins)
-            if (!PluginInstaller.isDesinstallingPlugin(plugin) && plugin.isInstalled())
+            if (!PluginInstaller.isUninstallingPlugin(plugin) && plugin.isInstalled())
                 toRemove.add(plugin);
 
         // nothing to remove
@@ -131,7 +131,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
         if (ConfirmDialog.confirm(message.toString())) {
             // remove plugins
             for (final PluginDescriptor plugin : toRemove)
-                PluginInstaller.desinstall(plugin, false, true);
+                PluginInstaller.uninstall(plugin, false, true);
         }
 
         // refresh state
@@ -171,9 +171,9 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
             return "";
 
         return switch (getPluginLocalState(plugin)) {
-            case REMOVING -> "removing...";
-            case CHECKING_UPDATE -> "checking...";
-            case UPDATING -> "updating...";
+            case REMOVING -> "removing…";
+            case CHECKING_UPDATE -> "checking…";
+            case UPDATING -> "updating…";
             case HAS_UPDATE -> "update available";
             case NO_UPDATE -> "";
             default -> "";
@@ -183,7 +183,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
 
     @Override
     protected List<PluginDescriptor> getPlugins() {
-        // loading...
+        // loading…
         if (ExtensionLoader.isLoading())
             return new ArrayList<>();
 
@@ -206,7 +206,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
         final boolean selected = (selectedPlugins.size() > 0);
 
         if (ExtensionLoader.isLoading()) {
-            refreshButton.setText("Reloading...");
+            refreshButton.setText("Reloading…");
             refreshButton.setEnabled(false);
         }
         else {
@@ -222,7 +222,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
 
         boolean removing = true;
         for (final PluginDescriptor plugin : selectedPlugins) {
-            if (!PluginInstaller.isDesinstallingPlugin(plugin)) {
+            if (!PluginInstaller.isUninstallingPlugin(plugin)) {
                 removing = false;
                 break;
             }
@@ -230,7 +230,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
 
         // special case where plugins are currently begin removed
         if (removing) {
-            action1Button.setText("Removing...");
+            action1Button.setText("Removing…");
             action1Button.setEnabled(false);
         }
         else {
@@ -267,13 +267,13 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
         switch (state) {
             case CHECKING_UPDATE:
                 action1Button.setEnabled(false);
-                action2Button.setText("Checking...");
+                action2Button.setText("Checking…");
                 action2Button.setEnabled(false);
                 break;
 
             case UPDATING:
                 action1Button.setEnabled(false);
-                action2Button.setText("Updating...");
+                action2Button.setText("Updating…");
                 action2Button.setEnabled(false);
                 break;
 
@@ -323,7 +323,7 @@ public class PluginLocalPreferencePanel extends PluginListPreferencePanel implem
     }
 
     @Override
-    public void pluginRepositeryLoaderChanged(final PluginDescriptor plugin) {
+    public void pluginRepositoryLoaderChanged(final PluginDescriptor plugin) {
         refreshTableData();
     }
 }

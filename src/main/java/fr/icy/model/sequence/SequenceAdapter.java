@@ -20,7 +20,7 @@ package fr.icy.model.sequence;
 /**
  * Adapter for SequenceListener interface
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequenceAdapter implements SequenceListener
 {

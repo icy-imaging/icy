@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,15 +18,17 @@
 
 package fr.icy.gui.sequence.tools;
 
+import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
 import fr.icy.gui.component.button.IcyButton;
 import fr.icy.gui.component.icon.IcySVG;
+import fr.icy.gui.dialog.MessageDialog;
 import fr.icy.gui.sequence.SequenceChooser;
 import fr.icy.gui.sequence.SequencePreviewPanel;
-import fr.icy.gui.dialog.MessageDialog;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.model.sequence.DimensionId;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceModel;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -37,7 +39,7 @@ import java.awt.*;
 /**
  * Frame for dimension merge operation.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SequenceDimensionMergePanel extends JPanel {
@@ -45,6 +47,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         final Sequence sequence;
         final int c;
 
+        @Contract(pure = true)
         public SequenceChannelEntry(final Sequence sequence, final int c) {
             super();
 
@@ -52,6 +55,7 @@ public class SequenceDimensionMergePanel extends JPanel {
             this.c = c;
         }
 
+        @Contract(pure = true)
         public SequenceChannelEntry(final Sequence sequence) {
             this(sequence, -1);
         }
@@ -87,7 +91,7 @@ public class SequenceDimensionMergePanel extends JPanel {
     /**
      * Create the panel.
      */
-    public SequenceDimensionMergePanel(final DimensionId dim) {
+    public SequenceDimensionMergePanel(final @NonNull DimensionId dim) {
         super();
 
         this.dim = dim;
@@ -170,7 +174,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         });
 
         dimLabel.setText(dim.toString());
-        final Icon icon = new IcySVG(SVGResource.SOUTH).getIcon(20, 60);
+        final Icon icon = IcySVG.SOUTH.getIcon(20, 60);
         bottomArrowLabel.setIcon(icon);
 
         // interlace not available for channel merge operation
@@ -206,7 +210,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_sequenceChooser.gridy = 1;
         add(sequenceChooser, gbc_sequenceChooser);
 
-        addButton = new IcyButton(SVGResource.ADD, true);
+        addButton = new IcyButton(IcySVG.ADD, true);
         addButton.setToolTipText("Add selected sequence to the list.");
         final GridBagConstraints gbc_addButton = new GridBagConstraints();
         gbc_addButton.fill = GridBagConstraints.BOTH;
@@ -217,7 +221,7 @@ public class SequenceDimensionMergePanel extends JPanel {
 
         dimLabel = new JLabel("Z");
         dimLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        dimLabel.setFont(new Font("Tahoma", Font.BOLD, 14));
+        dimLabel.setFont(new Font(FlatJetBrainsMonoFont.FAMILY, Font.BOLD, 14));
         final GridBagConstraints gbc_dimLabel = new GridBagConstraints();
         gbc_dimLabel.fill = GridBagConstraints.HORIZONTAL;
         gbc_dimLabel.anchor = GridBagConstraints.BASELINE;
@@ -240,7 +244,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         scrollPane.setViewportView(sequenceList);
         sequenceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        removeButton = new IcyButton(SVGResource.REMOVE, true);
+        removeButton = new IcyButton(IcySVG.REMOVE, true);
         removeButton.setToolTipText("Remove selected sequence from the list.");
         final GridBagConstraints gbc_removeButton = new GridBagConstraints();
         gbc_removeButton.fill = GridBagConstraints.BOTH;
@@ -258,7 +262,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_bottomArrowLabel.gridy = 3;
         add(bottomArrowLabel, gbc_bottomArrowLabel);
 
-        upButton = new IcyButton(SVGResource.KEYBOARD_ARROW_UP);
+        upButton = new IcyButton(IcySVG.KEYBOARD_ARROW_UP);
         upButton.setToolTipText("Move up selected sequence.");
         upButton.setFlat(true);
         final GridBagConstraints gbc_upButton = new GridBagConstraints();
@@ -268,7 +272,7 @@ public class SequenceDimensionMergePanel extends JPanel {
         gbc_upButton.gridy = 3;
         add(upButton, gbc_upButton);
 
-        downButton = new IcyButton(SVGResource.KEYBOARD_ARROW_DOWN);
+        downButton = new IcyButton(IcySVG.KEYBOARD_ARROW_DOWN);
         downButton.setToolTipText("Move down selected sequence.");
         downButton.setFlat(true);
         final GridBagConstraints gbc_downButton = new GridBagConstraints();
@@ -431,7 +435,7 @@ public class SequenceDimensionMergePanel extends JPanel {
                                         "You can enable the \"" +
                                         "Scale image\" " +
                                         "option to resize images if needed.",
-                                MessageDialog.WARNING_MESSAGE
+                                JOptionPane.WARNING_MESSAGE
                         );
                         warningXYDone = true;
                     }

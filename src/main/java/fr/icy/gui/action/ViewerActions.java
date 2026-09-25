@@ -35,9 +35,9 @@ import java.util.List;
 import fr.icy.gui.canvas.VtkCanvas;
 
 /**
- * Viewer associated actions (Duplicate, externalize...)
+ * Viewer associated actions (duplicate, externalize, etc.)
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class ViewerActions {

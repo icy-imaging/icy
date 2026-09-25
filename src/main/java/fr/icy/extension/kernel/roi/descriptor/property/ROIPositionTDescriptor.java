@@ -26,7 +26,7 @@ import fr.icy.common.geom.point.Point5D;
 /**
  * Position T ROI descriptor class (see {@link ROIDescriptor})
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ROIPositionTDescriptor extends ROIDescriptor
 {

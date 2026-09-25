@@ -25,7 +25,7 @@ import fr.icy.io.SequenceFileExporter;
  * Note that you have the {@link SequenceFileExporter} interface* which allow to export
  * {@link Sequence} to file.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface SequenceExporter
 {

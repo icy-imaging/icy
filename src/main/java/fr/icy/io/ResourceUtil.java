@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,16 +19,16 @@
 package fr.icy.io;
 
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
 /**
- * Resources (images, icons...) utilities class.
+ * Resources (images, icons, etc.) utilities class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ResourceUtil {
@@ -41,7 +41,7 @@ public class ResourceUtil {
     public static final String SVG_ICON_PATH = ICON_PATH + "svg/";
     public static final String SVG_IMAGE_PATH = IMAGE_PATH + "svg/";
 
-    public static final IcySVG ICY_LOGO_SVG = new IcySVG(SVGResource.ICY_WHITE_BG);
+    public static final IcySVG ICY_LOGO_SVG = IcySVG.ICY_WHITE_BG;
     // application icons
     //public static final Icon ICON_ICY_16 = ICY_LOGO_SVG.getIcon(16);
     public static final Icon ICON_ICY_20 = ICY_LOGO_SVG.getIcon(20);
@@ -58,7 +58,7 @@ public class ResourceUtil {
     public static final Image IMAGE_ICY_128 = ICY_LOGO_SVG.getImage(128);
     public static final Image IMAGE_ICY_256 = ICY_LOGO_SVG.getImage(256);
 
-    public static ArrayList<Image> getIcyIconImages() {
+    public static @NonNull ArrayList<Image> getIcyIconImages() {
         final ArrayList<Image> result = new ArrayList<>();
 
         result.add(ResourceUtil.IMAGE_ICY_256);

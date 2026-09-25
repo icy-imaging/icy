@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,17 +19,16 @@
 package fr.icy.model.cache;
 
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-@SuppressWarnings("UnstableApiUsage")
 abstract class AbstractCache {
     boolean profiling;
     long profilingTime;
@@ -75,23 +74,7 @@ abstract class AbstractCache {
     /**
      * Test presence of a key in the cache
      */
-    abstract boolean isInCache(@NotNull Integer key);
-
-    /**
-     * Test presence of a key in the cache
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    boolean isOnMemoryCache(final @NotNull Integer key) {
-        return isInCache(key);
-    }
-
-    /**
-     * Test presence of a key in the cache
-     */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    boolean isOnDiskCache(final @NotNull Integer key) {
-        return isInCache(key);
-    }
+    abstract boolean isInCache(@NonNull Integer key);
 
     /**
      * Return used memory for cache (in bytes)
@@ -106,27 +89,19 @@ abstract class AbstractCache {
     /**
      * Get all element keys in the cache
      */
-    @NotNull Collection<Integer> getAllKeys() {
+    @NonNull Collection<Integer> getAllKeys() {
         return Collections.emptyList();
     }
 
     /**
      * Get an object from cache from its key
      */
-    abstract @Nullable Object get(@NotNull Integer key) throws CacheException;
+    abstract @Nullable Object get(@NonNull Integer key) throws CacheException;
 
     /**
      * Put an object in cache with its associated key
      */
-    @Deprecated(since = "3.0.0", forRemoval = true)
-    void set(final @NotNull Integer key, final @NotNull Object object, final boolean eternal) {
-
-    }
-
-    /**
-     * Put an object in cache with its associated key
-     */
-    abstract void set(@NotNull Integer key, @NotNull Object object) throws CacheException;
+    abstract void set(@NonNull Integer key, @NonNull Object object) throws CacheException;
 
     /**
      * Clean the cache (evict all no eternal data)
@@ -141,7 +116,7 @@ abstract class AbstractCache {
     /**
      * Remove an object from the cache from its key
      */
-    abstract void remove(@NotNull Integer key) throws CacheException;
+    abstract void remove(@NonNull Integer key) throws CacheException;
 
     /**
      * Call it when you're done with the cache (release resources and cleanup)

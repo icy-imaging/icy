@@ -29,7 +29,7 @@ import java.util.EventListener;
 /**
  * Listener interface for the current active {@link Sequence}.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface ActiveSequenceListener extends EventListener
 {

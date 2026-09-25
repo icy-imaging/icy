@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.extension.kernel.roi.roi2d;
 
 import fr.icy.common.event.CollapsibleEvent;
@@ -23,7 +24,7 @@ import fr.icy.common.string.StringUtil;
 import fr.icy.gui.canvas.IcyCanvas;
 import fr.icy.gui.canvas.IcyCanvas2D;
 import fr.icy.gui.canvas.VtkCanvas;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.render.IcyVtkPanel;
 import fr.icy.io.xml.XMLUtil;
 import fr.icy.model.overlay.OverlayEvent;
@@ -32,6 +33,7 @@ import fr.icy.model.overlay.anchor.Anchor2D;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.sequence.Sequence;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Node;
 import vtk.vtkActor;
 import vtk.vtkPolyDataMapper;
@@ -48,7 +50,7 @@ import java.awt.geom.Rectangle2D;
  * ROI 2D Point class.<br>
  * Define a single point ROI<br>
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI2DPoint extends ROI2DShape {
@@ -227,13 +229,13 @@ public class ROI2DPoint extends ROI2DShape {
         addPoint(this.position);
 
         // set icon (default name is defined by getDefaultName())
-        setIcon(SVGResource.ROI_POINT);
+        setIcon(IcySVG.ROI_POINT);
     }
 
     /**
      * Generic constructor for interactive mode
      */
-    public ROI2DPoint(final Point5D pt) {
+    public ROI2DPoint(final @NonNull Point5D pt) {
         this(pt.toPoint2D());
         // getOverlay().setMousePos(pt);
     }
@@ -268,8 +270,8 @@ public class ROI2DPoint extends ROI2DShape {
      * Called when anchor overlay changed
      */
     @Override
-    public void controlPointOverlayChanged(final OverlayEvent event) {
-        // we only mind about painter change from anchor...
+    public void controlPointOverlayChanged(final @NonNull OverlayEvent event) {
+        // we only mind about painter change from anchor…
         if (event.getType() == OverlayEventType.PAINTER_CHANGED) {
             // here we want to have ROI focused when point is selected (special case for ROIPoint)
             // Stephane: not a good idea if we selected several ROI points as setFocused is *exclusive*

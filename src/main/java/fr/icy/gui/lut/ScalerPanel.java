@@ -26,7 +26,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ScalerPanel extends JPanel {

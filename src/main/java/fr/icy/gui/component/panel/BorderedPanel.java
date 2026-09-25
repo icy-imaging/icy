@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,40 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.panel;
 
-import java.awt.Insets;
-
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
-public class BorderedPanel extends JPanel
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 6826826211630147354L;
-
-    public int getClientY()
-    {
+public class BorderedPanel extends JPanel {
+    public int getClientY() {
         return getInsets().top;
     }
 
-    public int getClientX()
-    {
+    public int getClientX() {
         return getInsets().left;
     }
 
-    public int getClientHeight()
-    {
+    public int getClientHeight() {
         final Insets insets = getInsets();
         return getHeight() - (insets.top + insets.bottom);
     }
 
-    public int getClientWidth()
-    {
+    public int getClientWidth() {
         final Insets insets = getInsets();
         return getWidth() - (insets.left + insets.right);
     }

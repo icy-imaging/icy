@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,18 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.icon;
 
 import fr.icy.gui.LookAndFeelUtil;
+import org.jetbrains.annotations.Contract;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-
-import javax.swing.Icon;
+import javax.swing.*;
+import java.awt.*;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class ColorIcon implements Icon {
@@ -34,6 +33,7 @@ public final class ColorIcon implements Icon {
     private int w;
     private int h;
 
+    @Contract(pure = true)
     public ColorIcon(final Color color, final int width, final int height) {
         super();
 
@@ -47,34 +47,41 @@ public final class ColorIcon implements Icon {
         this(color, LookAndFeelUtil.getDefaultIconSize(), LookAndFeelUtil.getDefaultIconSize());
     }
 
+    @Contract(pure = true)
     public Color getColor() {
         return color;
     }
 
-    public void setWidth(int value) {
+    @Contract(mutates = "this")
+    public void setWidth(final int value) {
         // width >= 8
         w = Math.min(8, value);
     }
 
-    public void setHeight(int value) {
+    @Contract(mutates = "this")
+    public void setHeight(final int value) {
         h = value;
     }
 
     @Override
-    public void paintIcon(Component c, Graphics g, int x, int y) {
+    public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
         if (color != null) {
             g.setColor(color);
             g.fillRect(0, 0, w, h);
-            //g.setColor(Color.black);
-            //g.drawRect(0, 0, w, h);
+        }
+        else {
+            g.setColor(Color.black);
+            g.drawRect(0, 0, w, h);
         }
     }
 
+    @Contract(pure = true)
     @Override
     public int getIconWidth() {
         return w;
     }
 
+    @Contract(pure = true)
     @Override
     public int getIconHeight() {
         return h;

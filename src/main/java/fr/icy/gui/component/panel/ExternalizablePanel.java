@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,52 +15,43 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.panel;
 
+import fr.icy.Icy;
 import fr.icy.common.listener.weak.WeakListener;
+import fr.icy.common.string.StringUtil;
+import fr.icy.gui.WindowPositionSaver;
 import fr.icy.gui.frame.IcyFrame;
 import fr.icy.gui.frame.IcyFrameAdapter;
 import fr.icy.gui.frame.IcyFrameEvent;
-import fr.icy.gui.WindowPositionSaver;
-import fr.icy.Icy;
-import fr.icy.common.string.StringUtil;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.HeadlessException;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.util.EventListener;
-
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
 
 /**
  * Externalizable panel component.<br>
  * Basically this is a JPanel you can externalize and display in an IcyFrame.<br>
- * 
- * @author Stephane
+ *
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)
-public class ExternalizablePanel extends JPanel
-{
-    public static class WeakStateListener extends WeakListener<StateListener> implements StateListener
-    {
-        public WeakStateListener(StateListener listener)
-        {
+public class ExternalizablePanel extends JPanel {
+    public static class WeakStateListener extends WeakListener<StateListener> implements StateListener {
+        public WeakStateListener(final StateListener listener) {
             super(listener);
         }
 
         @Override
-        public void removeListener(Object source)
-        {
+        public void removeListener(final Object source) {
             if (source != null)
                 ((ExternalizablePanel) source).removeStateListener(this);
         }
 
         @Override
-        public void stateChanged(ExternalizablePanel source, boolean externalized)
-        {
+        public void stateChanged(final ExternalizablePanel source, final boolean externalized) {
             final StateListener listener = getListener(source);
 
             if (listener != null)
@@ -68,29 +59,24 @@ public class ExternalizablePanel extends JPanel
         }
     }
 
-    public static interface StateListener extends EventListener
-    {
-        public void stateChanged(ExternalizablePanel source, boolean externalized);
+    @FunctionalInterface
+    public interface StateListener extends EventListener {
+        void stateChanged(ExternalizablePanel source, boolean externalized);
     }
 
-    public class Frame extends IcyFrame
-    {
-        public Frame(String title) throws HeadlessException
-        {
+    public class Frame extends IcyFrame {
+        public Frame(final String title) throws HeadlessException {
             super(title, true, true, true, true);
 
             setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
-            addFrameListener(new IcyFrameAdapter()
-            {
+            addFrameListener(new IcyFrameAdapter() {
                 @Override
-                public void icyFrameClosing(IcyFrameEvent e)
-                {
+                public void icyFrameClosing(final IcyFrameEvent e) {
                     super.icyFrameClosing(e);
 
                     // ignore the event when frame is manually closed or application is exiting
-                    if (!(closed || Icy.isExiting()))
-                    {
+                    if (!(closed || Icy.isExiting())) {
                         if (ExternalizablePanel.this.isExternalized())
                             ExternalizablePanel.this.internalizeInternal();
                     }
@@ -101,11 +87,6 @@ public class ExternalizablePanel extends JPanel
             setSize(400, 400);
         }
     }
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -7690543443681714719L;
 
     /**
      * extern frame
@@ -119,8 +100,8 @@ public class ExternalizablePanel extends JPanel
     /**
      * internals
      */
-    private boolean internalizationAutorized;
-    private boolean externalizationAutorized;
+    private boolean internalizationAuthorized;
+    private boolean externalizationAuthorized;
     boolean closed;
 
     // we need to keep reference on it as the object only use weak reference
@@ -128,25 +109,20 @@ public class ExternalizablePanel extends JPanel
 
     /**
      * Create a new externalizable panel.
-     * 
-     * @param title
-     *        title for the associated frame.
-     * @param key
-     *        save key, used for WindowPositionSaver.<br>
-     *        Set to null or empty string disable parameter saving.
-     * @param defLoc
-     *        the default location for the frame (externalized state)
-     * @param defDim
-     *        the default dimension for the frame (externalized state)
+     *
+     * @param title  title for the associated frame.
+     * @param key    save key, used for WindowPositionSaver.<br>
+     *               Set to null or empty string disable parameter saving.
+     * @param defLoc the default location for the frame (externalized state)
+     * @param defDim the default dimension for the frame (externalized state)
      */
-    public ExternalizablePanel(String title, String key, Point defLoc, Dimension defDim)
-    {
+    public ExternalizablePanel(final String title, final String key, final Point defLoc, final Dimension defDim) {
         super();
 
         frame = new Frame(title);
         parent = null;
-        internalizationAutorized = true;
-        externalizationAutorized = true;
+        internalizationAuthorized = true;
+        externalizationAuthorized = true;
         closed = false;
 
         // use window position saver with default parameters
@@ -158,37 +134,30 @@ public class ExternalizablePanel extends JPanel
 
     /**
      * Create a new externalizable panel.
-     * 
-     * @param title
-     *        title for the associated frame.
-     * @param key
-     *        save key, used for WindowPositionSaver.<br>
-     *        Set to null or empty string disable parameter saving.
+     *
+     * @param title title for the associated frame.
+     * @param key   save key, used for WindowPositionSaver.<br>
+     *              Set to null or empty string disable parameter saving.
      */
-    public ExternalizablePanel(String title, String key)
-    {
+    public ExternalizablePanel(final String title, final String key) {
         // default location and dimension for extern frame
         this(title, key, new Point(200, 200), new Dimension(400, 300));
     }
 
-    public ExternalizablePanel(String title)
-    {
+    public ExternalizablePanel(final String title) {
         this(title, null);
     }
 
-    public ExternalizablePanel()
-    {
+    public ExternalizablePanel() {
         this("", null);
     }
 
     @Override
-    public void addNotify()
-    {
+    public void addNotify() {
         super.addNotify();
 
         // set parent on first attachment
-        if (parent == null)
-        {
+        if (parent == null) {
             final Container p = getParent();
 
             if ((p != frame.getInternalFrame().getContentPane()) && (p != frame.getExternalFrame().getContentPane()))
@@ -199,8 +168,7 @@ public class ExternalizablePanel extends JPanel
     /**
      * Close the panel (close and release associated frames and resources).
      */
-    public void close()
-    {
+    public void close() {
         closed = true;
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.close();
@@ -209,50 +177,42 @@ public class ExternalizablePanel extends JPanel
     /**
      * Manual parent set
      */
-    public void setParent(Container value)
-    {
+    public void setParent(final Container value) {
         parent = value;
     }
 
     /**
-     * @return the internalizationAutorized
+     * @return the internalizationAuthorized
      */
-    public boolean isInternalizationAutorized()
-    {
-        return internalizationAutorized;
+    public boolean isInternalizationAuthorized() {
+        return internalizationAuthorized;
     }
 
     /**
-     * @param internalizationAutorized
-     *        the internalizationAutorized to set
+     * @param internalizationAuthorized the internalizationAuthorized to set
      */
-    public void setInternalizationAutorized(boolean internalizationAutorized)
-    {
-        this.internalizationAutorized = internalizationAutorized;
+    public void setInternalizationAuthorized(final boolean internalizationAuthorized) {
+        this.internalizationAuthorized = internalizationAuthorized;
     }
 
     /**
-     * @return the externalizationAutorized
+     * @return the externalizationAuthorized
      */
-    public boolean isExternalizationAutorized()
-    {
-        return externalizationAutorized;
+    public boolean isExternalizationAuthorized() {
+        return externalizationAuthorized;
     }
 
     /**
-     * @param externalizationAutorized
-     *        the externalizationAutorized to set
+     * @param externalizationAuthorized the externalizationAuthorized to set
      */
-    public void setExternalizationAutorized(boolean externalizationAutorized)
-    {
-        this.externalizationAutorized = externalizationAutorized;
+    public void setExternalizationAuthorized(final boolean externalizationAuthorized) {
+        this.externalizationAuthorized = externalizationAuthorized;
     }
 
     /**
      * Externalize panel in an independent frame
      */
-    public void externalize()
-    {
+    public void externalize() {
         if (isInternalized())
             externalizeInternal();
     }
@@ -260,8 +220,7 @@ public class ExternalizablePanel extends JPanel
     /**
      * Internalize panel (remove from independent frame)
      */
-    public void internalize()
-    {
+    public void internalize() {
         if (isExternalized())
             internalizeInternal();
     }
@@ -269,14 +228,12 @@ public class ExternalizablePanel extends JPanel
     /**
      * Externalize panel (internal method)
      */
-    void externalizeInternal()
-    {
-        if (!externalizationAutorized)
+    void externalizeInternal() {
+        if (!externalizationAuthorized)
             return;
 
         // externalize
-        if (parent != null)
-        {
+        if (parent != null) {
             parent.remove(this);
             parent.validate();
         }
@@ -293,9 +250,8 @@ public class ExternalizablePanel extends JPanel
     /**
      * Internalize panel (internal method)
      */
-    void internalizeInternal()
-    {
-        if (!internalizationAutorized)
+    void internalizeInternal() {
+        if (!internalizationAuthorized)
             return;
 
         // internalize
@@ -304,8 +260,7 @@ public class ExternalizablePanel extends JPanel
         frame.validate();
         frame.removeFromMainDesktopPane();
 
-        if (parent != null)
-        {
+        if (parent != null) {
             parent.add(this);
             parent.validate();
         }
@@ -317,29 +272,25 @@ public class ExternalizablePanel extends JPanel
     /**
      * Switch from internalized &lt;--&gt; externalized state and vice versa
      */
-    public void switchState()
-    {
+    public void switchState() {
         if (isExternalized())
             internalizeInternal();
         else
             externalizeInternal();
     }
 
-    public boolean isInternalized()
-    {
+    public boolean isInternalized() {
         return !frame.isVisible();
     }
 
-    public boolean isExternalized()
-    {
+    public boolean isExternalized() {
         return frame.isVisible();
     }
 
     /**
      * @return the frame
      */
-    public IcyFrame getFrame()
-    {
+    public IcyFrame getFrame() {
         return frame;
     }
 
@@ -466,8 +417,7 @@ public class ExternalizablePanel extends JPanel
     /**
      * Fire state change event
      */
-    private void fireStateChange(boolean externalized)
-    {
+    private void fireStateChange(final boolean externalized) {
         for (StateListener l : listenerList.getListeners(StateListener.class))
             l.stateChanged(this, externalized);
     }
@@ -475,16 +425,14 @@ public class ExternalizablePanel extends JPanel
     /**
      * Implement addFrameListener method
      */
-    public void addStateListener(StateListener l)
-    {
+    public void addStateListener(final StateListener l) {
         listenerList.add(StateListener.class, l);
     }
 
     /**
      * Implement removeFrameListener method
      */
-    public void removeStateListener(StateListener l)
-    {
+    public void removeStateListener(final StateListener l) {
         listenerList.remove(StateListener.class, l);
     }
 }

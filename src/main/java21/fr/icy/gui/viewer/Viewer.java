@@ -36,7 +36,6 @@ import fr.icy.gui.component.button.IcyButton;
 import fr.icy.gui.component.button.IcyToggleButton;
 import fr.icy.gui.component.icon.IcyIconPack;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.gui.component.renderer.LabelComboBoxRenderer;
 import fr.icy.gui.dialog.ConfirmDialog;
 import fr.icy.gui.dialog.MessageDialog;
@@ -77,7 +76,7 @@ import java.util.Vector;
  * Viewer send an event if the IcyCanvas change.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class Viewer extends IcyFrame implements KeyListener, SequenceListener, IcyCanvasListener, ExtensionLoader.ExtensionLoaderListener {
@@ -114,7 +113,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
 
                 g2.setFont(new Font("Arial", Font.BOLD, 16));
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                drawTextCenter(g2, "Loading canvas...", 0.8f);
+                drawTextCenter(g2, "Loading canvas…", 0.8f);
                 g2.dispose();
             }
         }
@@ -467,11 +466,11 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         final ArrayList<JLabel> labels = new ArrayList<>();
 
         // get sync action labels
-        labels.add(new JLabel("Sync OFF", new IcySVG(SVGResource.FILTER_NONE).getIcon(ICON_SIZE, Color.DARK_GRAY), JLabel.LEFT));
-        labels.add(new JLabel("Sync 1", new IcySVG(SVGResource.FILTER_1).getIcon(ICON_SIZE, Color.GREEN.darker()), JLabel.LEFT));
-        labels.add(new JLabel("Sync 2", new IcySVG(SVGResource.FILTER_2).getIcon(ICON_SIZE, Color.ORANGE.darker()), JLabel.LEFT));
-        labels.add(new JLabel("Sync 3", new IcySVG(SVGResource.FILTER_3).getIcon(ICON_SIZE, Color.BLUE.darker()), JLabel.LEFT));
-        labels.add(new JLabel("Sync 4", new IcySVG(SVGResource.FILTER_4).getIcon(ICON_SIZE, Color.RED.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync OFF", IcySVG.FILTER_NONE.getIcon(ICON_SIZE, Color.DARK_GRAY), JLabel.LEFT));
+        labels.add(new JLabel("Sync 1", IcySVG.FILTER_1.getIcon(ICON_SIZE, Color.GREEN.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync 2", IcySVG.FILTER_2.getIcon(ICON_SIZE, Color.ORANGE.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync 3", IcySVG.FILTER_3.getIcon(ICON_SIZE, Color.BLUE.darker()), JLabel.LEFT));
+        labels.add(new JLabel("Sync 4", IcySVG.FILTER_4.getIcon(ICON_SIZE, Color.RED.darker()), JLabel.LEFT));
 
         // build comboBox with lock id
         lockComboBox = new JComboBox<>(new Vector<>(labels));
@@ -523,30 +522,30 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
         buildCanvasCombo();
 
         // build buttons
-        layersEnabledButton = new IcyToggleButton(new ToggleLayersAction(true), new IcyIconPack(SVGResource.LAYERS_CLEAR, SVGResource.LAYERS));
+        layersEnabledButton = new IcyToggleButton(new ToggleLayersAction(true), new IcyIconPack(IcySVG.LAYERS_CLEAR, IcySVG.LAYERS));
         layersEnabledButton.setHideActionText(true);
         layersEnabledButton.setFocusable(false);
         layersEnabledButton.setSelected(true);
 
-        screenShotButton = new IcyButton(CanvasActions.screenShotAction, SVGResource.PHOTO_CAMERA);
+        screenShotButton = new IcyButton(CanvasActions.screenShotAction, IcySVG.PHOTO_CAMERA);
         screenShotButton.setFocusable(false);
         screenShotButton.setHideActionText(true);
 
-        screenShotAlternateButton = new IcyButton(CanvasActions.screenShotAlternateAction, SVGResource.PHOTO_EXPAND);
+        screenShotAlternateButton = new IcyButton(CanvasActions.screenShotAlternateAction, IcySVG.PHOTO_EXPAND);
         screenShotAlternateButton.setFocusable(false);
         screenShotAlternateButton.setHideActionText(true);
 
-        duplicateButton = new IcyButton(ViewerActions.duplicateAction, SVGResource.CONTENT_COPY);
+        duplicateButton = new IcyButton(ViewerActions.duplicateAction, IcySVG.CONTENT_COPY);
         duplicateButton.setFocusable(false);
         duplicateButton.setHideActionText(true);
         // duplicateButton.setToolTipText("Duplicate view (no data duplication)");
 
-        switchStateButton = new IcyToggleButton(getSwitchStateAction(), SVGResource.OPEN_IN_NEW);
+        switchStateButton = new IcyToggleButton(getSwitchStateAction(), IcySVG.OPEN_IN_NEW);
         switchStateButton.setSelected(isExternalized());
         switchStateButton.setFocusable(false);
         switchStateButton.setHideActionText(true);
 
-        virtualButton = new IcyToggleButton(new ToggleVirtualSequenceAction(false), new IcyIconPack(SVGResource.FLASH_OFF, SVGResource.FLASH_ON));
+        virtualButton = new IcyToggleButton(new ToggleVirtualSequenceAction(false), new IcyIconPack(IcySVG.FLASH_OFF, IcySVG.FLASH_ON));
         virtualButton.setFocusable(false);
         virtualButton.setHideActionText(true);
 
@@ -778,7 +777,7 @@ public class Viewer extends IcyFrame implements KeyListener, SequenceListener, I
                         case final IcyHandledException ignored -> {
                             // just ignore
                         }
-                        case final UnsupportedOperationException ignored -> MessageDialog.showDialog(e.getLocalizedMessage(), MessageDialog.ERROR_MESSAGE);
+                        case final UnsupportedOperationException ignored -> MessageDialog.showDialog(e.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
                         case final Exception ignored -> IcyExceptionHandler.handleException(new ClassNotFoundException("Cannot find '" + className + "' class --> cannot create the canvas.", e), true);
                         default -> IcyExceptionHandler.handleException(e, true);
                     }

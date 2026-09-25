@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.field;
 
 import fr.icy.common.string.StringUtil;
@@ -32,10 +33,11 @@ import java.util.EventListener;
 /**
  * IcyTextField extends JFormattedTextField and provide easier text change handling.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class IcyTextField extends JFormattedTextField implements DocumentListener, ActionListener, FocusListener {
+    @FunctionalInterface
     public interface TextChangeListener extends EventListener {
         void textChanged(IcyTextField source, boolean validate);
     }

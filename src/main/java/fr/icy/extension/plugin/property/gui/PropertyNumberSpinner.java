@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,25 +19,26 @@
 package fr.icy.extension.plugin.property.gui;
 
 import fr.icy.extension.plugin.property.NumberProperty;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 
 public final class PropertyNumberSpinner<N extends Number> extends PropertyComponent<JSpinner, N> {
-    PropertyNumberSpinner(@NotNull final NumberProperty<N> property) {
+    PropertyNumberSpinner(final @NonNull NumberProperty<N> property) {
         super(property);
     }
 
-    @NotNull
+    @Contract(" -> new")
     @Override
-    protected JSpinner createComponent() {
+    protected @NonNull JSpinner createComponent() {
         final NumberProperty<N> np = (NumberProperty<N>) property;
         return new JSpinner(new SpinnerNumberModel(oldValue, np.getMin(), np.getMax(), np.getStep()));
     }
 
-    @NotNull
+    @Contract(pure = true)
     @Override
-    protected N getValue() {
+    protected @NonNull N getValue() {
         return property.getValue();
     }
 

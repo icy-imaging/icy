@@ -19,7 +19,7 @@
 package fr.icy.common.collection.list;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class RecentListEvent
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,24 +19,27 @@
 package fr.icy.network.update;
 
 import fr.icy.common.Version;
+import fr.icy.common.string.StringUtil;
 import fr.icy.io.FileUtil;
 import fr.icy.io.xml.XMLPersistent;
-import fr.icy.common.string.StringUtil;
 import fr.icy.io.xml.XMLUtil;
-import fr.icy.system.logging.IcyLogger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ElementDescriptor implements XMLPersistent {
+    private static final Logger LOGGER = Logger.getLogger(ElementDescriptor.class.getName());
+
     private static final String ID_NAME = "name";
     private static final String ID_VERSION = "version";
     private static final String ID_FILES = "files";
@@ -45,11 +48,11 @@ public class ElementDescriptor implements XMLPersistent {
     private static final String ID_EXECUTE = "execute";
     private static final String ID_WRITE = "write";
     private static final String ID_DIRECTORY = "directory";
-    private static final String ID_FILENUMBER = "fileNumber";
-    private static final String ID_DATEMODIF = "datemodif";
-    private static final String ID_LOCALPATH = "localpath";
-    private static final String ID_ONLINEPATH = "onlinepath";
-    private static final String ID_CHANGESLOG = "changeslog";
+    private static final String ID_FILE_NUMBER = "fileNumber";
+    private static final String ID_DATE_MODIF = "datemodif";
+    private static final String ID_LOCAL_PATH = "localpath";
+    private static final String ID_ONLINE_PATH = "onlinepath";
+    private static final String ID_CHANGES_LOG = "changeslog";
 
     public static class ElementFile implements XMLPersistent {
         private String localPath;
@@ -81,7 +84,7 @@ public class ElementDescriptor implements XMLPersistent {
         private long dateModif;
 
         /**
-         * number of file (for directory only, -1 = don't check file number)
+         * number of files (for directory only, -1 = don't check file number)
          */
         private int fileNumber;
 
@@ -95,9 +98,10 @@ public class ElementDescriptor implements XMLPersistent {
         }
 
         /**
-         * Create a new element file using specified element informations
+         * Create a new element file using specified element information
          */
-        public ElementFile(final @NotNull ElementFile elementFile) {
+        @Contract(pure = true)
+        public ElementFile(final @NonNull ElementFile elementFile) {
             super();
 
             localPath = elementFile.localPath;
@@ -115,14 +119,14 @@ public class ElementDescriptor implements XMLPersistent {
             if (node == null)
                 return false;
 
-            localPath = XMLUtil.getElementValue(node, ID_LOCALPATH, "");
-            onlinePath = XMLUtil.getElementValue(node, ID_ONLINEPATH, "");
-            dateModif = XMLUtil.getElementLongValue(node, ID_DATEMODIF, 0L);
+            localPath = XMLUtil.getElementValue(node, ID_LOCAL_PATH, "");
+            onlinePath = XMLUtil.getElementValue(node, ID_ONLINE_PATH, "");
+            dateModif = XMLUtil.getElementLongValue(node, ID_DATE_MODIF, 0L);
             link = XMLUtil.getElementBooleanValue(node, ID_LINK, false);
             executable = XMLUtil.getElementBooleanValue(node, ID_EXECUTE, false);
             writable = XMLUtil.getElementBooleanValue(node, ID_WRITE, false);
             directory = XMLUtil.getElementBooleanValue(node, ID_DIRECTORY, false);
-            fileNumber = XMLUtil.getElementIntValue(node, ID_FILENUMBER, 1);
+            fileNumber = XMLUtil.getElementIntValue(node, ID_FILE_NUMBER, 1);
 
             return true;
         }
@@ -136,11 +140,11 @@ public class ElementDescriptor implements XMLPersistent {
             if (node == null)
                 return false;
 
-            XMLUtil.addElement(node, ID_LOCALPATH, localPath);
+            XMLUtil.addElement(node, ID_LOCAL_PATH, localPath);
 
             if (onlineSave) {
-                XMLUtil.addElement(node, ID_ONLINEPATH, onlinePath);
-                XMLUtil.addElement(node, ID_DATEMODIF, Long.toString(dateModif));
+                XMLUtil.addElement(node, ID_ONLINE_PATH, onlinePath);
+                XMLUtil.addElement(node, ID_DATE_MODIF, Long.toString(dateModif));
                 if (link)
                     XMLUtil.addElement(node, ID_LINK, Boolean.toString(link));
                 if (executable)
@@ -149,7 +153,7 @@ public class ElementDescriptor implements XMLPersistent {
                     XMLUtil.addElement(node, ID_WRITE, Boolean.toString(writable));
                 if (directory) {
                     XMLUtil.addElement(node, ID_DIRECTORY, Boolean.toString(directory));
-                    XMLUtil.addElement(node, ID_FILENUMBER, Integer.toString(fileNumber));
+                    XMLUtil.addElement(node, ID_FILE_NUMBER, Integer.toString(fileNumber));
                 }
             }
 
@@ -221,62 +225,53 @@ public class ElementDescriptor implements XMLPersistent {
         }
 
         /**
-         * @param dateModif
-         *        the dateModif to set
+         * @param dateModif the dateModif to set
          */
         public void setDateModif(final long dateModif) {
             this.dateModif = dateModif;
         }
 
         /**
-         * @param link
-         *        the link to set
+         * @param link the link to set
          */
         public void setLink(final boolean link) {
             this.link = link;
         }
 
         /**
-         * @param executable
-         *        the executable to set
+         * @param executable the executable to set
          */
         public void setExecutable(final boolean executable) {
             this.executable = executable;
         }
 
         /**
-         * @param writable
-         *        the writable to set
+         * @param writable the writable to set
          */
         public void setWritable(final boolean writable) {
             this.writable = writable;
         }
 
         /**
-         * @param directory
-         *        the directory to set
+         * @param directory the directory to set
          */
         public void setDirectory(final boolean directory) {
             this.directory = directory;
         }
 
         /**
-         * @param fileNumber
-         *        the fileNumber to set
+         * @param fileNumber the fileNumber to set
          */
         public void setFileNumber(final int fileNumber) {
             this.fileNumber = fileNumber;
         }
 
         /**
-         * Return true if the specified ElementFile is the same than current one.<br>
+         * Return true if the specified ElementFile is the same as the current one.<br>
          *
-         * @param elementFile
-         *        the element file to compare
-         * @param compareOnlinePath
-         *        specify if we compare online path information
-         * @param compareValidDateOnly
-         *        true if we do compare only valid date (!= 0)
+         * @param elementFile          the element file to compare
+         * @param compareOnlinePath    specify if we compare online path information
+         * @param compareValidDateOnly true if we do compare only valid date (!= 0)
          */
         public boolean isSame(final ElementFile elementFile, final boolean compareOnlinePath, final boolean compareValidDateOnly) {
             if (elementFile == null)
@@ -294,11 +289,8 @@ public class ElementDescriptor implements XMLPersistent {
 
             if ((elementFile.dateModif == 0) || (dateModif == 0)) {
                 // don't compare dates if one is invalid
-                if (compareValidDateOnly)
-                    return true;
-
-                // one of the date is not valid --> can't compare
-                return false;
+                // one of the dates is not valid --> can't compare
+                return compareValidDateOnly;
             }
 
             return (elementFile.dateModif == dateModif);
@@ -328,9 +320,9 @@ public class ElementDescriptor implements XMLPersistent {
     }
 
     /**
-     * Create a new element descriptor using specified element informations
+     * Create a new element descriptor using specified element information
      */
-    public ElementDescriptor(final @NotNull ElementDescriptor element) {
+    public ElementDescriptor(final @NonNull ElementDescriptor element) {
         super();
 
         name = element.name;
@@ -349,10 +341,10 @@ public class ElementDescriptor implements XMLPersistent {
             return false;
 
         name = XMLUtil.getElementValue(node, ID_NAME, "");
-        String v = XMLUtil.getElementValue(node, ID_VERSION, "");
-        IcyLogger.debug(this.getClass(), "Element: " + name + " version: " + v);
+        final String v = XMLUtil.getElementValue(node, ID_VERSION, "");
+        LOGGER.config("Element: " + name + " version: " + v);
         version = Version.fromString(v);
-        changelog = XMLUtil.getElementValue(node, ID_CHANGESLOG, "");
+        changelog = XMLUtil.getElementValue(node, ID_CHANGES_LOG, "");
 
         final ArrayList<Node> nodesFile = XMLUtil.getChildren(XMLUtil.getElement(node, ID_FILES), ID_FILE);
         if (nodesFile != null) {
@@ -379,9 +371,9 @@ public class ElementDescriptor implements XMLPersistent {
         XMLUtil.addElement(node, ID_NAME, name);
         XMLUtil.addElement(node, ID_VERSION, version.toShortString());
 
-        // some informations aren't needed for local version
+        // some information isn't needed for local version
         if (onlineSave)
-            XMLUtil.addElement(node, ID_CHANGESLOG, changelog);
+            XMLUtil.addElement(node, ID_CHANGES_LOG, changelog);
 
         final Element filesNode = XMLUtil.addElement(node, ID_FILES);
         for (final ElementFile elementFile : files)
@@ -391,9 +383,9 @@ public class ElementDescriptor implements XMLPersistent {
     }
 
     /**
-     * return ElementFile containing specified local path
+     * return ElementFile containing the specified local path
      */
-    public @Nullable ElementFile getElementFile(final @NotNull String localPath) {
+    public @Nullable ElementFile getElementFile(final @NonNull String localPath) {
         for (final ElementFile file : files)
             if (file.getLocalPath().compareToIgnoreCase(localPath) == 0)
                 return file;
@@ -402,7 +394,7 @@ public class ElementDescriptor implements XMLPersistent {
     }
 
     /**
-     * return true if element contains the specified local path
+     * return true if the element contains the specified local path
      */
     public boolean hasLocalPath(final String localPath) {
         return getElementFile(localPath) != null;
@@ -422,7 +414,7 @@ public class ElementDescriptor implements XMLPersistent {
 
     /**
      * Validate the current element descriptor.<br>
-     * It actually remove missing files from the element.<br>
+     * It actually removes missing files from the element.<br>
      * Return true if all files are valid.
      */
     public boolean validate() {
@@ -436,9 +428,9 @@ public class ElementDescriptor implements XMLPersistent {
                 // update modification date
                 elementFile.setDateModif(file.lastModified());
 
-                // directory file ?
+                // directory file?
                 if (file.isDirectory()) {
-                    // update directory informations
+                    // update directory information
                     elementFile.setDirectory(true);
                     elementFile.setFileNumber(FileUtil.getFiles(file, null, true, false, false).length);
                 }
@@ -504,20 +496,17 @@ public class ElementDescriptor implements XMLPersistent {
     }
 
     /**
-     * @param version
-     *        the version to set
+     * @param version the version to set
      */
     public void setVersion(final Version version) {
         this.version = version;
     }
 
     /**
-     * Return true if the specified ElementDescriptor is the same than current one.<br>
+     * Return true if the specified ElementDescriptor is the same as the current one.<br>
      *
-     * @param element
-     *        the element descriptor to compare
-     * @param compareFileOnlinePath
-     *        specify if we compare file online path information
+     * @param element               the element descriptor to compare
+     * @param compareFileOnlinePath specify if we compare file online path information
      */
     public boolean isSame(final ElementDescriptor element, final boolean compareFileOnlinePath) {
         if (element == null)
@@ -551,6 +540,7 @@ public class ElementDescriptor implements XMLPersistent {
     }
 
     // TODO Remove this temporary method
+    @Contract("_, null, _ -> null")
     @Deprecated(forRemoval = true)
     public static ElementDescriptor getUpdateElement(final @Nullable ElementDescriptor localElement, final @Nullable ElementDescriptor onlineElement, final boolean force) {
         if (onlineElement == null)
@@ -573,14 +563,14 @@ public class ElementDescriptor implements XMLPersistent {
             final ElementFile onlineFile = result.files.get(i);
             final ElementFile localFile = localElement.getElementFile(onlineFile.getLocalPath());
 
-            // same file ? --> remove it (no need to be updated)
+            // same file? --> remove it (no need to be updated)
             if (!force) {
                 if ((localFile != null) && onlineFile.isSame(localFile, false, compareValidDateOnly))
                     result.files.remove(i);
             }
         }
 
-        // no files to update ? --> return null
+        // no files to update? --> return null
         if (result.files.isEmpty())
             return null;
 
@@ -588,13 +578,14 @@ public class ElementDescriptor implements XMLPersistent {
     }
 
     /**
-     * Process and return the update the element which contain differences<br>
+     * Process and return the update the element which contains differences<br>
      * from the specified local and online elements.<br>
-     * If local element refers the same item, only missing or different files will remains.<br>
-     * If local element refers a different element, online element is returned unchanged.
+     * If the local element refers to the same item, only missing or different files will remain.<br>
+     * If the local element refers to a different element, the online element is returned unchanged.
      *
      * @return the update element (null if local and online elements are the same)
      */
+    @Contract("_, null -> null")
     public static ElementDescriptor getUpdateElement(final ElementDescriptor localElement, final ElementDescriptor onlineElement) {
         if (onlineElement == null)
             return null;
@@ -616,12 +607,12 @@ public class ElementDescriptor implements XMLPersistent {
             final ElementFile onlineFile = result.files.get(i);
             final ElementFile localFile = localElement.getElementFile(onlineFile.getLocalPath());
 
-            // same file ? --> remove it (no need to be updated)
+            // same file? --> remove it (no need to be updated)
             if ((localFile != null) && onlineFile.isSame(localFile, false, compareValidDateOnly))
                 result.files.remove(i);
         }
 
-        // no files to update ? --> return null
+        // no files to update? --> return null
         if (result.files.isEmpty())
             return null;
 
@@ -629,19 +620,19 @@ public class ElementDescriptor implements XMLPersistent {
     }
 
     /**
-     * Update current element with informations from specified element
+     * Update the current element with information from the specified element
      */
-    public void update(final @NotNull ElementDescriptor updateElement) {
+    public void update(final @NonNull ElementDescriptor updateElement) {
         // update version info
         version = updateElement.version;
 
-        // updateElement contains only new or modified files (do not contain unmodified ones)
+        // updateElement contains only new or modified files (do not contain unmodified ones),
         // so we have to add or update files but not remove old ones.
         for (final ElementFile updateFile : updateElement.files) {
             // get corresponding file
             final ElementFile localFile = getElementFile(updateFile.getLocalPath());
 
-            // file missing ? --> add it
+            // is the file missing? --> add it
             if (localFile == null)
                 files.add(updateFile);
             else {

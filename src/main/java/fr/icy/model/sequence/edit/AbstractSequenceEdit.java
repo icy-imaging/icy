@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,20 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.model.sequence.edit;
 
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.undo.AbstractIcyUndoableEdit;
 import fr.icy.model.sequence.Sequence;
 
 /**
  * Abstract sequence undoable edit.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class AbstractSequenceEdit extends AbstractIcyUndoableEdit {
-    public AbstractSequenceEdit(final Sequence sequence, final String name, final SVGResource icon) {
+    public AbstractSequenceEdit(final Sequence sequence, final String name, final IcySVG icon) {
         super(sequence, name, icon);
     }
 
@@ -36,7 +37,7 @@ public abstract class AbstractSequenceEdit extends AbstractIcyUndoableEdit {
         this(sequence, name, null);
     }
 
-    public AbstractSequenceEdit(final Sequence sequence, final SVGResource icon) {
+    public AbstractSequenceEdit(final Sequence sequence, final IcySVG icon) {
         this(sequence, "Sequence changed", icon);
     }
 

@@ -29,9 +29,9 @@ import fr.icy.common.geom.point.Point3D;
 
 /**
  * Rectangle3D class.<br>
- * Incomplete implementation (work in progress...)
+ * Incomplete implementation (work in progress…)
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class Rectangle3D extends BoxShape3D implements Shape3D, Cloneable
 {

@@ -25,19 +25,21 @@ import fr.icy.gui.frame.progress.FailedAnnounceFrame;
 import fr.icy.model.render.opengl.OpenGLUtil;
 import fr.icy.system.IcyExceptionHandler;
 import fr.icy.system.IcyHandledException;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
 import vtk.*;
 
 import java.awt.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 /**
  * Kind of custom vtkJoglPanelComponent
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  */
 public class VtkJoglPanel extends GLJPanel {
+    private static final Logger LOGGER = Logger.getLogger(VtkJoglPanel.class.getName());
+
     class GLEventImpl implements GLEventListener {
         @Override
         public void init(final GLAutoDrawable drawable) {
@@ -214,7 +216,7 @@ public class VtkJoglPanel extends GLJPanel {
                 rw = null;
             }
             else {
-                IcyLogger.warn(VtkJoglPanel.class, "The renderwindow has been kept arount to prevent a crash");
+                LOGGER.warning("The render window has been kept around to prevent a crash");
             }
         }
         finally {

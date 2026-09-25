@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,30 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.editor;
 
-import java.awt.Component;
-
-import javax.swing.AbstractCellEditor;
-import javax.swing.JSlider;
-import javax.swing.JTable;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.tree.TreeCellEditor;
+import java.awt.*;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
-public class SliderCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor, ChangeListener
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -4946926120641246542L;
-
-    private JSlider slider;
+public class SliderCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor, ChangeListener {
+    private final JSlider slider;
 
     /**
      * internals
@@ -50,12 +42,10 @@ public class SliderCellEditor extends AbstractCellEditor implements TableCellEdi
 
     /**
      * Create a SliderEditor for JTable or JTree.
-     * 
-     * @param liveUpdate
-     *        set to true if you want live update on slider change
+     *
+     * @param liveUpdate set to true if you want live update on slider change
      */
-    public SliderCellEditor(boolean liveUpdate)
-    {
+    public SliderCellEditor(final boolean liveUpdate) {
         slider = new JSlider(0, 1000);
 
         slider.addChangeListener(this);
@@ -66,23 +56,19 @@ public class SliderCellEditor extends AbstractCellEditor implements TableCellEdi
     }
 
     @Override
-    public Object getCellEditorValue()
-    {
-        return Integer.valueOf(slider.getValue());
+    public Object getCellEditorValue() {
+        return slider.getValue();
     }
 
     @Override
-    public void stateChanged(ChangeEvent e)
-    {
-        if (slider.getValueIsAdjusting())
-        {
+    public void stateChanged(final ChangeEvent e) {
+        if (slider.getValueIsAdjusting()) {
             // not very elegant but needed for live update on JTable
-            if (liveUpdate && (table != null))
-            {
+            if (liveUpdate && (table != null)) {
                 final int value = slider.getValue();
 
-                if (((Integer) table.getValueAt(row, column)).intValue() != value)
-                    table.setValueAt(Integer.valueOf(value), row, column);
+                if ((Integer) table.getValueAt(row, column) != value)
+                    table.setValueAt(value, row, column);
             }
         }
         else
@@ -90,13 +76,12 @@ public class SliderCellEditor extends AbstractCellEditor implements TableCellEdi
     }
 
     @Override
-    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
-    {
+    public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected, final int row, final int column) {
         this.table = table;
         this.row = row;
         this.column = column;
 
-        final int intValue = ((Integer) value).intValue();
+        final int intValue = (Integer) value;
 
         if (slider.getValue() != intValue)
             slider.setValue(intValue);
@@ -107,10 +92,8 @@ public class SliderCellEditor extends AbstractCellEditor implements TableCellEdi
     }
 
     @Override
-    public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected, boolean expanded,
-            boolean leaf, int row)
-    {
-        final int intValue = ((Integer) value).intValue();
+    public Component getTreeCellEditorComponent(final JTree tree, final Object value, final boolean isSelected, final boolean expanded, final boolean leaf, final int row) {
+        final int intValue = (Integer) value;
 
         if (slider.getValue() != intValue)
             slider.setValue(intValue);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,29 +18,30 @@
 
 package fr.icy.extension.plugin.property;
 
-import fr.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public abstract class MultipleSelectionProperty<V> extends Property<List<V>> {
+    private static final Logger LOGGER = Logger.getLogger(MultipleSelectionProperty.class.getName());
+
     @Unmodifiable
-    @NotNull
-    private final List<V> options;
+    private final @NonNull List<V> options;
 
     private final boolean allowEmpty;
 
-    MultipleSelectionProperty(@NotNull final String name, @NotNull final String description, @NotNull final List<V> options, @NotNull final List<V> defaultValue) {
+    MultipleSelectionProperty(final @NonNull String name, final @NonNull String description, final @NonNull List<V> options, final @NonNull List<V> defaultValue) {
         super(name, description, defaultValue);
         this.options = List.copyOf(options);
         if (!defaultValue.isEmpty()) {
             if (!Set.copyOf(this.options).containsAll(this.defaultValue)) {
-                IcyLogger.warn(this.getClass(), "Value(s) " + defaultValue + " is not a valid value for " + name + ".");
+                LOGGER.warning("Value(s) " + defaultValue + " is not a valid value for " + name + ".");
                 this.defaultValue = List.of(this.options.getFirst());
             }
             allowEmpty = false;
@@ -51,16 +52,16 @@ public abstract class MultipleSelectionProperty<V> extends Property<List<V>> {
         }
     }
 
-    MultipleSelectionProperty(@NotNull final String name, @NotNull final String description, final @NotNull List<V> options, final @NotNull V defaultValue) {
+    MultipleSelectionProperty(final @NonNull String name, final @NonNull String description, final @NonNull List<V> options, final @NonNull V defaultValue) {
         this(name, description, options, List.of(defaultValue));
     }
 
-    MultipleSelectionProperty(@NotNull final String name, @NotNull final List<V> options, @NotNull final List<V> defaultValue) {
+    MultipleSelectionProperty(final @NonNull String name, final @NonNull List<V> options, final @NonNull List<V> defaultValue) {
         super(name, defaultValue);
         this.options = List.copyOf(options);
         if (!defaultValue.isEmpty()) {
             if (!Set.copyOf(this.options).containsAll(this.defaultValue)) {
-                IcyLogger.warn(this.getClass(), "Value(s) " + defaultValue + " is not a valid value for " + name + ".");
+                LOGGER.warning("Value(s) " + defaultValue + " is not a valid value for " + name + ".");
                 this.defaultValue = List.of(this.options.getFirst());
             }
             allowEmpty = false;
@@ -71,12 +72,12 @@ public abstract class MultipleSelectionProperty<V> extends Property<List<V>> {
         }
     }
 
-    MultipleSelectionProperty(@NotNull final String name, @NotNull final List<V> options, @NotNull final V defaultValue) {
+    MultipleSelectionProperty(final @NonNull String name, final @NonNull List<V> options, final @NonNull V defaultValue) {
         this(name, options, List.of(defaultValue));
     }
 
     @Override
-    public final void setValue(@Nullable final List<V> value) {
+    public final void setValue(final @Nullable List<V> value) {
         if (value == null || !Set.copyOf(options).containsAll(value))
             this.value = defaultValue;
         else
@@ -85,8 +86,7 @@ public abstract class MultipleSelectionProperty<V> extends Property<List<V>> {
 
     @Contract(pure = true)
     @Unmodifiable
-    @NotNull
-    public final List<V> getOptions() {
+    public final @NonNull List<V> getOptions() {
         return options;
     }
 

@@ -30,7 +30,7 @@ import java.util.Objects;
  * A progress TaskFrame (thread safe)
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ProgressFrame extends TaskFrame implements ProgressListener, Runnable {

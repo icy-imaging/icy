@@ -25,7 +25,7 @@ package fr.icy.extension.plugin.interface_;
  * preserve backward compatibility) and sometime we really want to avoid it as plugin using many
  * others classes make lock the EDT for severals second just with some heavy class loading work.
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public interface PluginNoEDTConstructor {

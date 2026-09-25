@@ -35,7 +35,7 @@ import java.io.IOException;
  * Note that you have {@link SequenceFileImporter} interface which allow to import {@link Sequence}
  * from file(s).
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public interface SequenceIdImporter extends ImageProvider, AutoCloseable {

@@ -33,7 +33,7 @@ import fr.icy.common.string.StringUtil;
 /**
  * Perimeter ROI descriptor class (see {@link ROIDescriptor})
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ROIPerimeterDescriptor extends ROIDescriptor
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 package fr.icy.extension.plugin.classloader.exception;
 
 import fr.icy.extension.plugin.classloader.ResourceType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * @author Kamran Zafar
@@ -40,7 +40,7 @@ public class ResourceNotFoundException extends JclException {
         super(message);
     }
 
-    public ResourceNotFoundException(final @NotNull String resource, final String message) {
+    public ResourceNotFoundException(final @NonNull String resource, final String message) {
         super(message);
         resourceName = resource;
         determineResourceType(resource);
@@ -52,7 +52,7 @@ public class ResourceNotFoundException extends JclException {
         determineResourceType(resource);
     }
 
-    private void determineResourceType(final @NotNull String resourceName) {
+    private void determineResourceType(final @NonNull String resourceName) {
         if (resourceName.toLowerCase().endsWith("." + ResourceType.CLASS.name().toLowerCase()))
             resourceType = ResourceType.CLASS;
         else if (resourceName.toLowerCase().endsWith("." + ResourceType.PROPERTIES.name().toLowerCase()))

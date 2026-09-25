@@ -32,7 +32,7 @@ import javax.swing.undo.UndoableEdit;
 /**
  * 3D control point position change implementation for ROI undoable edition.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Point3DMovedROIEdit extends AbstractPoint3DROIEdit
 {

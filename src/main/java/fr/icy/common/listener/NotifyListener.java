@@ -22,7 +22,7 @@ import java.util.EventListener;
 /**
  * Basic notification listener.
  * 
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public interface NotifyListener extends EventListener
 {

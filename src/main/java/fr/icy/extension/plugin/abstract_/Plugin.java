@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -34,11 +34,10 @@ import fr.icy.network.NetworkUtil;
 import fr.icy.system.IcyExceptionHandler;
 import fr.icy.system.SystemUtil;
 import fr.icy.system.audit.Audit;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.PluginsPreferences;
 import fr.icy.system.preferences.XMLPreferences;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -50,18 +49,22 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base class for Plugin, provide some helper methods.<br>
- * By default the constructor of a Plugin class is called in the EDT (Event Dispatch Thread).<br>
+ * By default, the constructor of a Plugin class is called in the EDT (Event Dispatch Thread).<br>
  * If the plugin implements the {@link PluginThreaded} there is no more guarantee that is the case.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class Plugin implements AutoCloseable {
-    public static @Nullable Plugin getPlugin(final @NotNull List<Plugin> list, final String className) {
+    private static final Logger LOGGER = Logger.getLogger(Plugin.class.getName());
+
+    public static @Nullable Plugin getPlugin(final @NonNull List<Plugin> list, final String className) {
         for (final Plugin plugin : list)
             if (plugin.getClass().getName().equals(className))
                 return plugin;
@@ -73,7 +76,7 @@ public abstract class Plugin implements AutoCloseable {
 
     /**
      * Default Plugin constructor.<br>
-     * The {@link PluginLauncher} is normally responsible of Plugin class instantiation.
+     * The {@link PluginLauncher} is normally responsible for Plugin class instantiation.
      */
     public Plugin() {
         super();
@@ -156,14 +159,14 @@ public abstract class Plugin implements AutoCloseable {
      *
      * @param frame the frame to add
      */
-    public void addIcyFrame(final @NotNull IcyFrame frame) {
+    public void addIcyFrame(final @NonNull IcyFrame frame) {
         frame.addToDesktopPane();
     }
 
     /**
      * Display a new sequence
      *
-     * @param sequence the sequence to dispay
+     * @param sequence the sequence to display
      */
     public void addSequence(final Sequence sequence) {
         Icy.getMainInterface().addSequence(sequence);
@@ -174,7 +177,7 @@ public abstract class Plugin implements AutoCloseable {
      *
      * @param sequence the sequence to close
      */
-    public void removeSequence(final @NotNull Sequence sequence) {
+    public void removeSequence(final @NonNull Sequence sequence) {
         sequence.closeSequence();
     }
 
@@ -187,7 +190,7 @@ public abstract class Plugin implements AutoCloseable {
 
     /**
      * @param name resource name
-     * @return Return the resource URL from given resource name.<br>
+     * @return Return the resource URL from the given resource name.<br>
      * Ex: <code>getResource("plugins/author/resources/def.xml");</code>
      */
     public URL getResource(final String name) {
@@ -196,7 +199,7 @@ public abstract class Plugin implements AutoCloseable {
 
     /**
      * @param name resource name
-     * @return Return resources corresponding to given resource name.<br>
+     * @return Return resources corresponding to the given resource name.<br>
      * Ex: <code>getResources("plugins/author/resources/def.xml");</code>
      * @throws IOException ioexception
      */
@@ -206,7 +209,7 @@ public abstract class Plugin implements AutoCloseable {
 
     /**
      * @param name resource name
-     * @return Return the resource as data stream from given resource name.<br>
+     * @return Return the resource as a data stream from a given resource name.<br>
      * Ex: <code>getResourceAsStream("plugins/author/resources/def.xml");</code>
      */
     public InputStream getResourceAsStream(final String name) {
@@ -215,7 +218,7 @@ public abstract class Plugin implements AutoCloseable {
 
     /**
      * @param resourceName resource name
-     * @return Return the image resource from given resource name
+     * @return Return the image resource from the given resource name
      * Ex: <code>getResourceAsStream("plugins/author/resources/image.png");</code>
      */
     public BufferedImage getImageResource(final String resourceName) {
@@ -224,7 +227,7 @@ public abstract class Plugin implements AutoCloseable {
 
     /**
      * @param resourceName resource name
-     * @return Return the icon resource from given resource name
+     * @return Return the icon resource from the given resource name
      * Ex: <code>getResourceAsStream("plugins/author/resources/icon.png");</code>
      */
     public ImageIcon getIconResource(final String resourceName) {
@@ -232,7 +235,7 @@ public abstract class Plugin implements AutoCloseable {
     }
 
     /**
-     * @return Retrieve the preferences root for this plugin.<br>
+     * @return Retrieve the preference root for this plugin.<br>
      */
     public XMLPreferences getPreferencesRoot() {
         return PluginsPreferences.root(this);
@@ -240,8 +243,8 @@ public abstract class Plugin implements AutoCloseable {
 
     /**
      * @param name string
-     * @return Retrieve the plugin preferences node for specified name.<br>
-     * i.e : getPreferences("window") will return node
+     * @return Retrieve the plugin preferences node for a specified name.<br>
+     * i.e.: getPreferences("window") will return node
      * "plugins.[authorPackage].[pluginClass].window"
      */
     public XMLPreferences getPreferences(final String name) {
@@ -250,7 +253,7 @@ public abstract class Plugin implements AutoCloseable {
 
     /**
      * @return Returns the base resource path for plugin native libraries.<br>
-     * Depending the Operating System it can returns these values:
+     * Depending on the Operating System, it can return these values:
      * <ul>
      * <li>lib/unix32</li>
      * <li>lib/unix64</li>
@@ -260,17 +263,17 @@ public abstract class Plugin implements AutoCloseable {
      * <li>lib/win64</li>
      * </ul>
      */
-    protected static @NotNull String getResourceNativeLibraryPath() {
+    protected static @NonNull String getResourceNativeLibraryPath() {
         return "lib" + FileUtil.separator + SystemUtil.getOSArchIdString();
     }
 
     /**
      * @param name  resource name
      * @param clazz class
-     * @return Return the resource URL from given resource name and class instance.<br>
+     * @return Return the resource URL from the given resource name and class instance.<br>
      * Ex: <code>getResource(Plugin.class, "plugins/author/resources/def.xml");</code>
      */
-    public static URL getResource(final @NotNull Class<?> clazz, final String name) {
+    public static URL getResource(final @NonNull Class<?> clazz, final String name) {
         return clazz.getClassLoader().getResource(name);
     }
 
@@ -293,11 +296,11 @@ public abstract class Plugin implements AutoCloseable {
      *   xxx.dll
      * /plugins/myname/mypackage
      *   MyPlugin.class
-     *   ....
+     *   ….
      * </pre>
      * <p>
      * Here "xxx" is the name of the native library.<br>
-     * Current approach is to unpack the native library into a temporary file and load from there.
+     * The current approach is to unpack the native library into a temporary file and load from there.
      *
      * @param libName string
      * @param clazz   class
@@ -336,7 +339,7 @@ public abstract class Plugin implements AutoCloseable {
      *   xxx.dll
      * /plugins/myname/mypackage
      *   MyPlugin.class
-     *   ....
+     *   ….
      * </pre>
      * <p>
      * Here "xxx" is the name of the native library.<br>
@@ -356,7 +359,7 @@ public abstract class Plugin implements AutoCloseable {
             // search for library in resource
             URL libUrl = getResource(clazz, basePath + mappedlibName);
 
-            // not found ?
+            // not found?
             if (libUrl == null) {
                 // jnilib extension may not work, try with "dylib" extension instead
                 if (mappedlibName.endsWith(".jnilib")) {
@@ -370,7 +373,7 @@ public abstract class Plugin implements AutoCloseable {
                 }
             }
 
-            // resource not found --> error
+            // resource isn't found --> error
             if (libUrl == null)
                 throw new IOException("Couldn't find resource " + basePath + mappedlibName);
 
@@ -378,7 +381,7 @@ public abstract class Plugin implements AutoCloseable {
             return extractResourceTo(SystemUtil.getTempLibraryDirectory() + FileUtil.separator + mappedlibName, libUrl);
         }
         catch (final IOException e) {
-            IcyLogger.error(Plugin.class, e, "Error while extracting packed library " + libName);
+            LOGGER.log(Level.SEVERE, "Error while extracting packed library " + libName + ".", e);
         }
 
         return null;
@@ -392,7 +395,7 @@ public abstract class Plugin implements AutoCloseable {
      * @return the extracted file
      * @throws IOException io exception
      */
-    protected static @NotNull File extractResourceTo(final String outputPath, final @NotNull URL resource) throws IOException {
+    protected static @NonNull File extractResourceTo(final String outputPath, final @NonNull URL resource) throws IOException {
         // open resource stream
         final InputStream in = resource.openStream();
         // create output file
@@ -407,7 +410,7 @@ public abstract class Plugin implements AutoCloseable {
             in.close();
         }
 
-        // file already exist ??
+        // files already exist?
         if (result.exists()) {
             // same size --> assume it's the same
             if (result.length() == data.length)
@@ -442,11 +445,11 @@ public abstract class Plugin implements AutoCloseable {
      *   xxx.dll
      * /plugins/myname/mypackage
      *   MyPlugin.class
-     *   ....
+     *   ….
      * </pre>
      * <p>
      * Here "xxx" is the name of the native library.<br>
-     * Current approach is to unpack the native library into a temporary file and load from there.
+     * The current approach is to unpack the native library into a temporary file and load from there.
      *
      * @param libName string
      * @return true if the library was correctly loaded.
@@ -476,7 +479,7 @@ public abstract class Plugin implements AutoCloseable {
      *   xxx.dll
      * /plugins/myname/mypackage
      *   MyPlugin.class
-     *   ....
+     *   ….
      * </pre>
      * <p>
      * Here "xxx" is the name of the native library.<br>
@@ -490,7 +493,7 @@ public abstract class Plugin implements AutoCloseable {
     }
 
     /**
-     * @param errorLog Report an error log for this plugin (reported to Icy web site which report then to the
+     * @param errorLog Report an error log for this plugin (reported to Icy website which reports then to the
      *                 author of the plugin).
      * @see IcyExceptionHandler#report(PluginDescriptor, String)
      */

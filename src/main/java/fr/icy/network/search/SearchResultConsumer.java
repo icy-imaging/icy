@@ -18,7 +18,7 @@
 package fr.icy.network.search;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface SearchResultConsumer
 {

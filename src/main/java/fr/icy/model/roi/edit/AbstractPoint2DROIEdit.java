@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,19 +19,19 @@
 package fr.icy.model.roi.edit;
 
 import fr.icy.extension.kernel.roi.roi2d.ROI2DShape;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.model.overlay.anchor.Anchor2D;
 
 /**
  * Base class of 2D control point change implementation for ROI undoable edition.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class AbstractPoint2DROIEdit extends AbstractROIEdit {
     protected Anchor2D point;
 
-    public AbstractPoint2DROIEdit(final ROI2DShape roi, final Anchor2D point, final String name, final SVGResource icon) {
+    public AbstractPoint2DROIEdit(final ROI2DShape roi, final Anchor2D point, final String name, final IcySVG icon) {
         super(roi, name, icon);
 
         this.point = point;
@@ -41,7 +41,7 @@ public class AbstractPoint2DROIEdit extends AbstractROIEdit {
         this(roi, point, name, roi.getIcon());
     }
 
-    public AbstractPoint2DROIEdit(final ROI2DShape roi, final Anchor2D point, final SVGResource icon) {
+    public AbstractPoint2DROIEdit(final ROI2DShape roi, final Anchor2D point, final IcySVG icon) {
         this(roi, point, "ROI point changed", icon);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.model;
 
 import javax.swing.*;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SpecialValueSpinnerModel extends SpinnerNumberModel {
@@ -28,11 +29,11 @@ public class SpecialValueSpinnerModel extends SpinnerNumberModel {
     private final String specialText;
 
     public SpecialValueSpinnerModel() {
-        this(Integer.valueOf(0), null, null, Integer.valueOf(1), Integer.valueOf(0), null);
+        this(0, null, null, 1, 0, null);
     }
 
     public SpecialValueSpinnerModel(final int special, final String specialText) {
-        this(Integer.valueOf(0), null, null, Integer.valueOf(1), Integer.valueOf(special), specialText);
+        this(0, null, null, 1, special, specialText);
     }
 
     public SpecialValueSpinnerModel(final double value, final double minimum, final double maximum, final double stepSize, final double special, final String specialText) {

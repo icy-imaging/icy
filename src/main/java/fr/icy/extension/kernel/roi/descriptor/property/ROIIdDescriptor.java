@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,19 +24,19 @@ import fr.icy.model.roi.ROIDescriptor;
 import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.roi.ROIEvent.ROIEventType;
 import fr.icy.model.sequence.Sequence;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Internal unique Id descriptor class (see {@link ROIDescriptor})
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-public class ROIIdDescriptor extends ROIDescriptor {
+public class ROIIdDescriptor extends ROIDescriptor<Integer> {
     public static final String ID = "Id";
 
     public ROIIdDescriptor() {
-        super(ID, "Id", String.class);
+        super(ID, "Id", Integer.class);
     }
 
     @Override
@@ -45,20 +45,20 @@ public class ROIIdDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public boolean needRecompute(final @NotNull ROIEvent change) {
+    public boolean needRecompute(final @NonNull ROIEvent change) {
         return (change.getType() == ROIEventType.PROPERTY_CHANGED)
                 && (StringUtil.equals(change.getPropertyName(), ROI.PROPERTY_ID));
     }
 
     @Override
-    public Object compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
-        return Integer.valueOf(getId(roi));
+    public @NonNull Integer compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException {
+        return getId(roi);
     }
 
     /**
      * Returns ROI group id
      */
-    public static int getId(final ROI roi) {
+    public static @NonNull Integer getId(final ROI roi) {
         if (roi == null)
             return 0;
 

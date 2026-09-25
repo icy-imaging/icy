@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,10 +22,9 @@ import fr.icy.Icy;
 import fr.icy.common.math.HungarianAlgorithm;
 import fr.icy.gui.component.ComponentUtil;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.gui.frame.IcyInternalFrame;
 import fr.icy.gui.viewer.Viewer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,7 +42,7 @@ import java.util.List;
  * the IcyDesktopPane.repaint() method to update overlays.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class IcyDesktopPane extends JDesktopPane implements ContainerListener, MouseListener, MouseMotionListener, MouseWheelListener {
@@ -67,7 +66,7 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
         public BackgroundDesktopOverlay() {
             super();
 
-            backGround = new IcySVG(SVGResource.ICY_TRANSPARENT).getImage(512, Color.GRAY);
+            backGround = IcySVG.ICY_TRANSPARENT.getImage(512, Color.GRAY);
         }
 
         @Override
@@ -155,22 +154,22 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
             overlay.paint(g, w, h);
     }
 
-    private void registerFrame(final @NotNull JInternalFrame frame) {
+    private void registerFrame(final @NonNull JInternalFrame frame) {
         frame.addComponentListener(componentAdapter);
     }
 
-    void unregisterFrame(final @NotNull JInternalFrame frame) {
+    void unregisterFrame(final @NonNull JInternalFrame frame) {
         frame.removeComponentListener(componentAdapter);
     }
 
-    void checkPosition(final @NotNull JInternalFrame frame) {
+    void checkPosition(final @NonNull JInternalFrame frame) {
         final Rectangle rect = frame.getBounds();
 
         if (fixPosition(rect))
             frame.setBounds(rect);
     }
 
-    boolean fixPosition(final @NotNull Rectangle rect) {
+    boolean fixPosition(final @NonNull Rectangle rect) {
         final int limit = getY();
         if (rect.y < limit) {
             rect.y = limit;
@@ -186,7 +185,7 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
      * @param wantNotVisible Also return not visible viewers
      * @param wantIconized   Also return iconized viewers
      */
-    public static Viewer[] getInternalViewers(final boolean wantNotVisible, final boolean wantIconized) {
+    public static Viewer @NonNull [] getInternalViewers(final boolean wantNotVisible, final boolean wantIconized) {
         final List<Viewer> result = new ArrayList<>();
 
         for (final Viewer viewer : Icy.getMainInterface().getViewers()) {
@@ -337,7 +336,7 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
     }
 
     @Override
-    public void componentAdded(final @NotNull ContainerEvent e) {
+    public void componentAdded(final @NonNull ContainerEvent e) {
         final Component comp = e.getChild();
 
         if (comp instanceof JInternalFrame)
@@ -345,7 +344,7 @@ public class IcyDesktopPane extends JDesktopPane implements ContainerListener, M
     }
 
     @Override
-    public void componentRemoved(final @NotNull ContainerEvent e) {
+    public void componentRemoved(final @NonNull ContainerEvent e) {
         final Component comp = e.getChild();
 
         if (comp instanceof JInternalFrame)

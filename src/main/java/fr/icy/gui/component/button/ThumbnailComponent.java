@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@ import fr.icy.gui.component.ComponentUtil;
 import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.panel.ImageComponent;
 import fr.icy.model.image.ImageUtil;
-import fr.icy.gui.component.icon.SVGResource;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,8 +38,7 @@ public class ThumbnailComponent extends JToggleButton {
     /**
      * Create the thumbnail.
      *
-     * @param selectable
-     *        If true then the thumbnail component can be selected as a toggle button.
+     * @param selectable If true then the thumbnail component can be selected as a toggle button.
      */
     public ThumbnailComponent(final boolean selectable) {
         super();
@@ -122,7 +120,7 @@ public class ThumbnailComponent extends JToggleButton {
         float iy = image.getHeight(null);
 
         if ((ix <= 0f) || (iy <= 0f)) {
-            image = new IcySVG(SVGResource.CLOSE).getImage(LookAndFeelUtil.getDefaultIconSize(), this.getForeground());
+            image = IcySVG.CLOSE.getImage(LookAndFeelUtil.getDefaultIconSize(), this.getForeground());
             ix = image.getWidth(null);
             iy = image.getHeight(null);
         }

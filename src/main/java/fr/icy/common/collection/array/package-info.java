@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -16,12 +16,8 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package fr.icy.gui.listener;
-
-import org.jetbrains.annotations.Nullable;
-
-import java.util.EventListener;
-
-public interface ROIToolChangeListener extends EventListener {
-    void toolChanged(@Nullable String roiTool);
-}
+/**
+ * Provides utilities and metadata to represent and manipulate types of multidimensional arrays,
+ * including their native data type and the dimensionality of the arrays.
+ */
+package fr.icy.common.collection.array;

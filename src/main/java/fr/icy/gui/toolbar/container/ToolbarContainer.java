@@ -31,17 +31,20 @@ import java.awt.*;
 public abstract class ToolbarContainer extends JPanel {
     private static final Dimension DEFAULT_DIMENSION = new Dimension(0, 0);
 
-    private ToolbarPanel panel = null;
+    private JPanel panel = null;
 
     protected ToolbarContainer() {
         super(new BorderLayout());
         updateSize(null);
     }
 
-    protected final void updateSize(final ToolbarPanel panel) {
+    protected final void updateSize(final JPanel panel) {
         if (panel != null) {
-            setPreferredSize((panel.getSaveSize() != null) ? panel.getSaveSize() : panel.getPreferredSize());
-            setMinimumSize(panel.getPreferredSize());
+            if (panel instanceof ToolbarPanel)
+                setPreferredSize((((ToolbarPanel) panel).getSaveSize() != null) ? ((ToolbarPanel) panel).getSaveSize() : panel.getPreferredSize());
+            else
+                setPreferredSize(panel.getPreferredSize());
+            setMinimumSize(panel.getMinimumSize() != null ? panel.getMinimumSize() : panel.getPreferredSize());
         }
         else {
             setPreferredSize(DEFAULT_DIMENSION);
@@ -50,23 +53,37 @@ public abstract class ToolbarContainer extends JPanel {
     }
 
     private void saveSize() {
-        if (panel != null)
-            panel.setSaveSize(new Dimension(getWidth(), getHeight()));
+        if (panel != null && panel instanceof ToolbarPanel)
+            ((ToolbarPanel) panel).setSaveSize(new Dimension(getWidth(), getHeight()));
     }
 
     protected abstract void showParent(final JSplitPane pane);
 
-    public final void show(final ToolbarPanel panel) {
-        removeAll();
-        this.panel = panel;
-        add(panel, BorderLayout.CENTER);
-        updateSize(panel);
-        revalidate();
-        getParent().repaint();
+    public final void show(final JPanel panel) {
+        if (panel instanceof ToolbarPanel) {
+            removeAll();
+            this.panel = panel;
+            add(panel, BorderLayout.CENTER);
+            updateSize(panel);
+            revalidate();
+            getParent().repaint();
 
-        final Container c = getParent();
-        if (c instanceof JSplitPane)
-            showParent((JSplitPane) c);
+            final Container c = getParent();
+            if (c instanceof JSplitPane)
+                showParent((JSplitPane) c);
+        }
+        else  {
+            removeAll();
+            this.panel = panel;
+            add(panel, BorderLayout.CENTER);
+            updateSize(panel);
+            revalidate();
+            getParent().repaint();
+
+            final Container c = getParent();
+            if (c instanceof JSplitPane)
+                showParent((JSplitPane) c);
+        }
     }
 
     protected abstract void closeParent(final JSplitPane pane);

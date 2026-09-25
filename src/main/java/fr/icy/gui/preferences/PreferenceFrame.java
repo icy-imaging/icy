@@ -37,7 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author fab &amp; stephane
+ * @author Fabrice de Chaumont
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PreferenceFrame extends IcyFrame implements TreeSelectionListener {

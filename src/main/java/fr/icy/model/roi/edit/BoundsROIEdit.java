@@ -28,7 +28,7 @@ import javax.swing.undo.UndoableEdit;
 /**
  * Position change implementation for ROI undoable edition.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class BoundsROIEdit extends AbstractROIEdit
 {

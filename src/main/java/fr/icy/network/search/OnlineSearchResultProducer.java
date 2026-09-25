@@ -19,9 +19,11 @@ package fr.icy.network.search;
 
 import fr.icy.common.string.StringUtil;
 import fr.icy.network.WebInterface;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
 import org.w3c.dom.Document;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The OnlineSearchResultProducer is the basic class for {@link SearchResult} producer from online
@@ -29,11 +31,13 @@ import org.w3c.dom.Document;
  * It does use a single static instance to do the online search then dispatch XML result the
  * overriding class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  * @see SearchResultProducer
  */
 public abstract class OnlineSearchResultProducer extends SearchResultProducer {
+    private static final Logger LOGGER = Logger.getLogger(OnlineSearchResultProducer.class.getName());
+
     public static final long REQUEST_INTERVAL = 250;
     public static final long MAXIMUM_SEARCH_TIME = 5000;
 
@@ -63,7 +67,8 @@ public abstract class OnlineSearchResultProducer extends SearchResultProducer {
                 document = doSearchRequest(text);
             }
             catch (final Exception e) {
-                IcyLogger.error(OnlineSearchResultProducer.class, e, e.getLocalizedMessage());
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Error while searching '" + text + "'.", e);
             }
 
             // abort
@@ -85,8 +90,8 @@ public abstract class OnlineSearchResultProducer extends SearchResultProducer {
     }
 
     /**
-     * @return Default implementation for the search request, override it if needed
      * @param text string
+     * @return Default implementation for the search request, override it if needed
      */
     protected Document doSearchRequest(final String text) {
         // TODO: deprecated, to remove

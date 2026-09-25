@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,8 +18,10 @@
 
 package fr.icy.gui.dialog;
 
+import fr.icy.common.collection.CollectionUtil;
 import fr.icy.gui.component.button.ThumbnailComponent;
 import fr.icy.gui.component.icon.IcySVG;
+import fr.icy.gui.component.model.SpecialValueSpinnerModel;
 import fr.icy.gui.component.panel.PopupPanel;
 import fr.icy.gui.component.panel.RangeComponent;
 import fr.icy.gui.component.panel.Region2DComponent;
@@ -29,16 +31,13 @@ import fr.icy.io.SequenceFileGroupImporter;
 import fr.icy.io.SequenceFileImporter;
 import fr.icy.io.SequenceFileSticher;
 import fr.icy.io.SequenceFileSticher.SequenceFileGroup;
-import fr.icy.gui.component.model.SpecialValueSpinnerModel;
+import fr.icy.model.OMEUtil;
 import fr.icy.model.image.IcyBufferedImage;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.model.sequence.MetaDataUtil;
 import fr.icy.model.sequence.SequenceIdImporter;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
-import fr.icy.common.collection.CollectionUtil;
-import fr.icy.model.OMEUtil;
 import ome.xml.meta.OMEXMLMetadata;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -48,12 +47,16 @@ import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class LoaderOptionPanel extends JPanel {
+    private static final Logger LOGGER = Logger.getLogger(LoaderOptionPanel.class.getName());
+
     public enum LoaderLoadingType {
         GROUP {
             @Override
@@ -96,7 +99,7 @@ public class LoaderOptionPanel extends JPanel {
             // softInterrupted = false;
         }
 
-        public List<SequenceFileImporter> getSingleFileImporters() {
+        public @NonNull List<SequenceFileImporter> getSingleFileImporters() {
             // get importer and open image
             final List<SequenceFileImporter> result = Loader.getSequenceFileImporters(files.get(0));
 
@@ -283,7 +286,7 @@ public class LoaderOptionPanel extends JPanel {
             // only need to update image
             if (imageRefreshOnly) {
                 // can't re open importer ? --> nothing to do here
-                if ((importer == null) && (files.size() == 0))
+                if ((importer == null) && (files.isEmpty()))
                     return;
 
                 try {
@@ -330,7 +333,7 @@ public class LoaderOptionPanel extends JPanel {
 
                     // no more update ? --> show that an error happened
                     if (!previewUpdater.getNeedUpdate())
-                        preview.setImage(new IcySVG(SVGResource.CLOSE).getImage(512, preview.getForeground()));
+                        preview.setImage(IcySVG.CLOSE.getImage(512, preview.getForeground()));
                 }
 
                 // image updated
@@ -341,12 +344,12 @@ public class LoaderOptionPanel extends JPanel {
                 metadata = null;
 
                 // no files ?
-                if (files.size() == 0) {
+                if (files.isEmpty()) {
                     preview.setImage(null);
                     preview.setInfos("");
                     metadata = OMEUtil.createOMEXMLMetadata();
 
-                    // use Callable as we can get interrupted here...
+                    // use Callable as we can get interrupted here…
                     ThreadUtil.invokeNow(() -> {
                         // disable panel while we are loading metadata
                         disablePanel();
@@ -358,11 +361,11 @@ public class LoaderOptionPanel extends JPanel {
                     return;
                 }
 
-                // loading...
-                preview.setImage(new IcySVG(SVGResource.HOURGLASS).getImage(512, preview.getForeground()));
-                preview.setInfos("loading...");
+                // loading…
+                preview.setImage(IcySVG.HOURGLASS.getImage(512, preview.getForeground()));
+                preview.setInfos("loading…");
 
-                // use Callable as we can get interrupted here...
+                // use Callable as we can get interrupted here…
                 ThreadUtil.invokeNow(() -> {
                     // disable panel while we are loading metadata
                     disablePanel();
@@ -373,7 +376,7 @@ public class LoaderOptionPanel extends JPanel {
                 // close previous importer (shouldn't exist here)
                 close();
 
-                // open file(s)...
+                // open file(s)…
                 if (!open())
                     throw new IOException("Can't open '" + files.get(0) + "' image file..");
 
@@ -384,7 +387,7 @@ public class LoaderOptionPanel extends JPanel {
 
                     metadata = getMetaData();
 
-                    // update it as soon as possible (use Callable as we can get interrupted here...)
+                    // update it as soon as possible (use Callable as we can get interrupted here…)
                     ThreadUtil.invokeNow(() -> {
                         // update panel
                         updatePanel();
@@ -433,14 +436,14 @@ public class LoaderOptionPanel extends JPanel {
                 // no more update ? --> show that an error happened
                 if (!previewUpdater.getNeedUpdate()) {
                     // fatal error --> failed image
-                    preview.setImage(new IcySVG(SVGResource.CLOSE).getImage(512, preview.getForeground()));
+                    preview.setImage(IcySVG.CLOSE.getImage(512, preview.getForeground()));
 
                     // cannot even read metadata
                     if (!metadataFieldsOk) {
                         preview.setInfos("Cannot read file");
 
                         try {
-                            // use Callable as we can get interrupted here...
+                            // use Callable as we can get interrupted here…
                             ThreadUtil.invokeNow(() -> {
                                 // update panel
                                 updatePanel();
@@ -449,7 +452,7 @@ public class LoaderOptionPanel extends JPanel {
                             });
                         }
                         catch (final Throwable t2) {
-                            // probably interrupted...
+                            // probably interrupted…
 
                         }
                     }
@@ -648,7 +651,7 @@ public class LoaderOptionPanel extends JPanel {
             // {
             // try
             // {
-            // // open file(s) if needed...
+            // // open file(s) if needed…
             // if (!singleUpdater.open())
             // return;
             //
@@ -666,7 +669,7 @@ public class LoaderOptionPanel extends JPanel {
             // }
             // catch (Throwable t)
             // {
-            // // we tried...
+            // // we tried…
             // }
             // }
             // }
@@ -701,10 +704,10 @@ public class LoaderOptionPanel extends JPanel {
                 }
             }
             catch (final InterruptedException t) {
-                // no need to do more here...
+                // no need to do more here…
             }
             catch (final Throwable t) {
-                IcyLogger.error(LoaderOptionPanel.class, t, t.getLocalizedMessage());
+                LOGGER.log(Level.SEVERE, "Error while updating preview.", t);
             }
         }
     }
@@ -769,7 +772,7 @@ public class LoaderOptionPanel extends JPanel {
         updatePanel();
     }
 
-    private void initialize(final LoaderLoadingType loadType) {
+    private void initialize(final @NonNull LoaderLoadingType loadType) {
         setBorder(BorderFactory.createTitledBorder((Border) null));
         setLayout(new BorderLayout());
 
@@ -1013,7 +1016,7 @@ public class LoaderOptionPanel extends JPanel {
             changed = true;
         }
 
-        // changed ? --> update preview...
+        // changed ? --> update preview…
         if (changed)
             updatePreview(z, t);
     }
@@ -1024,7 +1027,7 @@ public class LoaderOptionPanel extends JPanel {
 
     protected void seriesChanged() {
         // update preview series index
-        previewUpdater.updatePreview(((Integer) seriesSpinner.getValue()).intValue());
+        previewUpdater.updatePreview((Integer) seriesSpinner.getValue());
     }
 
     void updateLoadingType() {

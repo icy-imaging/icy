@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,17 +18,16 @@
 
 package fr.icy.gui.sequence.tools;
 
+import fr.icy.common.math.UnitUtil;
 import fr.icy.gui.component.field.IcyTextField;
 import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.sequence.SequencePreviewPanel;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.image.IcyBufferedImageUtil;
 import fr.icy.model.image.IcyBufferedImageUtil.FilterType;
-import fr.icy.common.math.UnitUtil;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.model.sequence.AbstractSequenceModel;
 import fr.icy.model.sequence.Sequence;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.JSpinner.DefaultEditor;
@@ -38,7 +37,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class SequenceBaseResizePanel extends JPanel {
@@ -155,7 +154,7 @@ public abstract class SequenceBaseResizePanel extends JPanel {
     /**
      * Create the panel.
      */
-    public SequenceBaseResizePanel(final @NotNull Sequence sequence) {
+    public SequenceBaseResizePanel(final @NonNull Sequence sequence) {
         super();
 
         this.sequence = sequence;
@@ -165,7 +164,7 @@ public abstract class SequenceBaseResizePanel extends JPanel {
         setNewWidth(sequence.getSizeX());
         setNewHeight(sequence.getSizeY());
 
-        accolLeftLabel.setIcon(new IcySVG(SVGResource.BRACKET_RIGHT).getIcon(40));
+        accolLeftLabel.setIcon(IcySVG.BRACKET_RIGHT.getIcon(40));
         accolLeftLabel.setText(null);
 
         originalPreview.setFitToView(false);
@@ -434,17 +433,17 @@ public abstract class SequenceBaseResizePanel extends JPanel {
 
     public SizeUnit getSizeUnit() {
         return switch (sizeUnitComboBox.getSelectedIndex()) {
-            default -> SizeUnit.PIXEL;
             case 1 -> SizeUnit.PERCENT;
             case 2 -> SizeUnit.MICRON;
+            default -> SizeUnit.PIXEL;
         };
     }
 
-    public int unitToPixel(final double value, final int originPixel, final SizeUnit unit, final double micronPerPixel) {
+    public int unitToPixel(final double value, final int originPixel, final @NonNull SizeUnit unit, final double micronPerPixel) {
         return switch (unit) {
-            default -> (int) Math.round(value);
             case PERCENT -> (int) Math.round((originPixel * value) / 100d);
             case MICRON -> (int) Math.round(value / micronPerPixel);
+            default -> (int) Math.round(value);
         };
     }
 
@@ -456,11 +455,11 @@ public abstract class SequenceBaseResizePanel extends JPanel {
         return unitToPixel(value, originPixel, unit, getPixelSizeY());
     }
 
-    public double pixelToUnit(final int value, final int originPixel, final SizeUnit unit, final double micronPerPixel) {
+    public double pixelToUnit(final int value, final int originPixel, final @NonNull SizeUnit unit, final double micronPerPixel) {
         return switch (unit) {
-            default -> value;
             case PERCENT -> (int) Math.round((value * 100d) / originPixel);
             case MICRON -> (int) (value * micronPerPixel);
+            default -> value;
         };
     }
 
@@ -474,8 +473,8 @@ public abstract class SequenceBaseResizePanel extends JPanel {
 
     public double getSpinnerSizeValue(final JSpinner spinner) {
         return switch (getSizeUnit()) {
-            default -> ((Integer) spinner.getValue()).intValue();
-            case PERCENT, MICRON -> ((Double) spinner.getValue()).doubleValue();
+            case PERCENT, MICRON -> (Double) spinner.getValue();
+            default -> (Integer) spinner.getValue();
         };
     }
 
@@ -493,13 +492,6 @@ public abstract class SequenceBaseResizePanel extends JPanel {
 
     void setSpinnerSizeValue(final JSpinner spinner, final double value) {
         switch (getSizeUnit()) {
-            default:
-            case PIXEL:
-                spinner.setModel(new SpinnerNumberModel((int) value, 0, 65535, 1));
-                // we don't want the model to affect
-                ((DefaultEditor) spinner.getEditor()).getTextField().setColumns(1);
-                break;
-
             case PERCENT:
                 spinner.setModel(new SpinnerNumberModel(value, 0d, Double.MAX_VALUE, 1d));
                 // we don't want the model to affect
@@ -508,6 +500,12 @@ public abstract class SequenceBaseResizePanel extends JPanel {
 
             case MICRON:
                 spinner.setModel(new SpinnerNumberModel(value, 0d, Double.MAX_VALUE, 0.01d));
+                // we don't want the model to affect
+                ((DefaultEditor) spinner.getEditor()).getTextField().setColumns(1);
+                break;
+
+            default: // PIXEL
+                spinner.setModel(new SpinnerNumberModel((int) value, 0, 65535, 1));
                 // we don't want the model to affect
                 ((DefaultEditor) spinner.getEditor()).getTextField().setColumns(1);
                 break;

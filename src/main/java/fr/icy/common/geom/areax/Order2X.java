@@ -121,10 +121,10 @@ final class Order2X extends CurveX {
 	}
 
 	/*
-	 * Split the quadratic Bezier stored at coords[pos...pos+5] representing the
+	 * Split the quadratic Bezier stored at coords[pos…pos+5] representing the
 	 * paramtric range [0..1] into two subcurves representing the parametric
 	 * subranges [0..t] and [t..1]. Store the results back into the array at
-	 * coords[pos...pos+5] and coords[pos+4...pos+9].
+	 * coords[pos…pos+5] and coords[pos+4…pos+9].
 	 */
 	public static void split(double coords[], int pos, double t) {
 		double x0, y0, cx, cy, x1, y1;
@@ -153,7 +153,7 @@ final class Order2X extends CurveX {
 		super(direction);
 		// REMIND: Better accuracy in the root finding methods would
 		// ensure that cy0 is in range. As it stands, it is never
-		// more than "1 mantissa bit" out of range...
+		// more than "1 mantissa bit" out of range…
 		if (cy0 < y0) {
 			cy0 = y0;
 		} else if (cy0 > y1) {
@@ -331,7 +331,7 @@ final class Order2X extends CurveX {
 		 */
 		// First calculate the midpoint between y0 and y1 and choose to
 		// return either 0.0 or 1.0 depending on whether y is above
-		// or below the midpoint...
+		// or below the midpoint…
 		// Note that we subtracted y from ycoeff0 above so both y0 and y1
 		// will be "relative to y" so we are really just looking at where
 		// zero falls with respect to the "relative midpoint" here.

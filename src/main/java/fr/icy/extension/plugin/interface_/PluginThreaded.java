@@ -30,7 +30,7 @@ package fr.icy.extension.plugin.interface_;
  * for GUI creation / modification. Also there is no more guarantee that plugin constructor is called
  * in the EDT (which is the case for default plugin).
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public interface PluginThreaded extends Runnable {

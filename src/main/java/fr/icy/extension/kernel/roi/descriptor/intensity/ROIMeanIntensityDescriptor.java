@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -24,15 +24,15 @@ import fr.icy.model.roi.ROIUtil;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent;
 import fr.icy.model.sequence.SequenceEvent.SequenceEventSourceType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Mean intensity ROI descriptor class (see {@link ROIDescriptor})
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-public class ROIMeanIntensityDescriptor extends ROIDescriptor {
+public class ROIMeanIntensityDescriptor extends ROIDescriptor<Double> {
     public static final String ID = "Mean intensity";
 
     public ROIMeanIntensityDescriptor() {
@@ -50,13 +50,13 @@ public class ROIMeanIntensityDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public boolean needRecompute(final @NotNull SequenceEvent change) {
+    public boolean needRecompute(final @NonNull SequenceEvent change) {
         return (change.getSourceType() == SequenceEventSourceType.SEQUENCE_DATA);
     }
 
     @Override
-    public Object compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
-        return Double.valueOf(computeMeanIntensity(roi, sequence));
+    public Double compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
+        return computeMeanIntensity(roi, sequence);
     }
 
     /**
@@ -67,7 +67,7 @@ public class ROIMeanIntensityDescriptor extends ROIDescriptor {
      * @param sequence the sequence used to compute the pixel intensity
      * @throws UnsupportedOperationException if the operation is not supported for this ROI
      */
-    public static double computeMeanIntensity(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
+    public static Double computeMeanIntensity(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
         return ROIUtil.computeIntensityDescriptors(roi, sequence, false).mean;
     }
 }

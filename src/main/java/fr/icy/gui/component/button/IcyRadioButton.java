@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,11 +20,11 @@ package fr.icy.gui.component.button;
 
 import fr.icy.gui.LookAndFeelUtil;
 import fr.icy.gui.action.IcyAbstractAction;
-import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.gui.component.icon.IcyIconPack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import fr.icy.gui.component.icon.IcySVG;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 
@@ -39,7 +39,7 @@ public class IcyRadioButton extends JRadioButton {
     /**
      * Create a {@link JRadioButton} with specified text, SVG icons for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyRadioButton(final @NotNull String text, final @NotNull IcyIconPack pack, final int size, final boolean flat) {
+    public IcyRadioButton(final @NonNull String text, final @NonNull IcyIconPack pack, final int size, final boolean flat) {
         super(text);
 
         iconPack = pack;
@@ -53,42 +53,42 @@ public class IcyRadioButton extends JRadioButton {
     /**
      * Create a {@link JRadioButton} with specified text, SVG icons for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyRadioButton(final @NotNull String text, final @NotNull IcyIconPack pack, final boolean flat) {
+    public IcyRadioButton(final @NonNull String text, final @NonNull IcyIconPack pack, final boolean flat) {
         this(text, pack, LookAndFeelUtil.getDefaultIconSize(), flat);
     }
 
     /**
      * Create a {@link JRadioButton} with specified text, SVG icons for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyRadioButton(final @NotNull String text, final @NotNull IcyIconPack pack) {
+    public IcyRadioButton(final @NonNull String text, final @NonNull IcyIconPack pack) {
         this(text, pack, LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
     /**
      * Create a {@link JRadioButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyRadioButton(final @NotNull String text, final @NotNull SVGResource icon, final int size, final boolean flat) {
+    public IcyRadioButton(final @NonNull String text, final @NonNull IcySVG icon, final int size, final boolean flat) {
         this(text, new IcyIconPack(icon), size, flat);
     }
 
     /**
      * Create a {@link JRadioButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyRadioButton(final @NotNull String text, final @NotNull SVGResource icon, final int size) {
+    public IcyRadioButton(final @NonNull String text, final @NonNull IcySVG icon, final int size) {
         this(text, new IcyIconPack(icon), size, false);
     }
 
     /**
      * Create a {@link JRadioButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyRadioButton(final @NotNull String text, final @NotNull SVGResource icon, final boolean flat) {
+    public IcyRadioButton(final @NonNull String text, final @NonNull IcySVG icon, final boolean flat) {
         this(text, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), flat);
     }
 
     /**
      * Create a {@link JRadioButton} with specified text, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyRadioButton(final @NotNull String text, final @NotNull SVGResource icon) {
+    public IcyRadioButton(final @NonNull String text, final @NonNull IcySVG icon) {
         this(text, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
@@ -97,7 +97,7 @@ public class IcyRadioButton extends JRadioButton {
     /**
      * Create a {@link JRadioButton} with specified SVG icons for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
      */
-    public IcyRadioButton(final @NotNull IcyIconPack pack, final int size, final boolean flat) {
+    public IcyRadioButton(final @NonNull IcyIconPack pack, final int size, final boolean flat) {
         super();
 
         iconPack = pack;
@@ -111,42 +111,42 @@ public class IcyRadioButton extends JRadioButton {
     /**
      * Create a {@link JRadioButton} with specified SVG icons for each state (default, disabled, selected and disabled-selected) and default size, but without text.
      */
-    public IcyRadioButton(final @NotNull IcyIconPack pack, final boolean flat) {
+    public IcyRadioButton(final @NonNull IcyIconPack pack, final boolean flat) {
         this(pack, LookAndFeelUtil.getDefaultIconSize(), flat);
     }
 
     /**
      * Create a {@link JRadioButton} with specified SVG icons for each state (default, disabled, selected and disabled-selected) and default size, but without text.
      */
-    public IcyRadioButton(final @NotNull IcyIconPack pack) {
+    public IcyRadioButton(final @NonNull IcyIconPack pack) {
         this(pack, LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
     /**
      * Create a {@link JRadioButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
      */
-    public IcyRadioButton(final @NotNull IcyIconPack pack, final int size) {
+    public IcyRadioButton(final @NonNull IcyIconPack pack, final int size) {
         this(pack, size, false);
     }
 
     /**
      * Create a {@link JRadioButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
      */
-    public IcyRadioButton(final @NotNull SVGResource icon, final int size, final boolean flat) {
+    public IcyRadioButton(final @NonNull IcySVG icon, final int size, final boolean flat) {
         this(new IcyIconPack(icon), size, flat);
     }
 
     /**
      * Create a {@link JRadioButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size, but without text.
      */
-    public IcyRadioButton(final @NotNull SVGResource icon, final int size) {
+    public IcyRadioButton(final @NonNull IcySVG icon, final int size) {
         this(new IcyIconPack(icon), size, false);
     }
 
     /**
      * Create a {@link JRadioButton} with same SVG icon for each state (default, disabled, selected and disabled-selected) and default size, but without text.
      */
-    public IcyRadioButton(final @NotNull SVGResource icon) {
+    public IcyRadioButton(final @NonNull IcySVG icon) {
         this(new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
@@ -155,7 +155,7 @@ public class IcyRadioButton extends JRadioButton {
     /**
      * Create a {@link JRadioButton} with specified {@link Action}, SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyRadioButton(final @NotNull Action action, final @NotNull IcyIconPack pack, final int size, final boolean flat) {
+    public IcyRadioButton(final @NonNull Action action, final @NonNull IcyIconPack pack, final int size, final boolean flat) {
         super(action);
         iconPack = pack;
         iconSize = size;
@@ -169,46 +169,44 @@ public class IcyRadioButton extends JRadioButton {
     /**
      * Create a {@link JRadioButton} with specified {@link Action}, SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyRadioButton(final @NotNull Action action, final @NotNull IcyIconPack pack, final boolean flat) {
+    public IcyRadioButton(final @NonNull Action action, final @NonNull IcyIconPack pack, final boolean flat) {
         this(action, pack, LookAndFeelUtil.getDefaultIconSize(), flat);
     }
 
     /**
      * Create a {@link JRadioButton} with specified {@link Action}, SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyRadioButton(final @NotNull Action action, final @NotNull IcyIconPack pack) {
+    public IcyRadioButton(final @NonNull Action action, final @NonNull IcyIconPack pack) {
         this(action, pack, LookAndFeelUtil.getDefaultIconSize(), false);
     }
 
     /**
      * Create a {@link JRadioButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyRadioButton(final @NotNull Action action, final @NotNull SVGResource icon, final int size, final boolean flat) {
+    public IcyRadioButton(final @NonNull Action action, final @NonNull IcySVG icon, final int size, final boolean flat) {
         this(action, new IcyIconPack(icon), size, flat);
     }
 
     /**
      * Create a {@link JRadioButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and custom size.
      */
-    public IcyRadioButton(final @NotNull Action action, final @NotNull SVGResource icon, final int size) {
+    public IcyRadioButton(final @NonNull Action action, final @NonNull IcySVG icon, final int size) {
         this(action, new IcyIconPack(icon), size, false);
     }
 
     /**
      * Create a {@link JRadioButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyRadioButton(final @NotNull Action action, final @NotNull SVGResource icon, final boolean flat) {
+    public IcyRadioButton(final @NonNull Action action, final @NonNull IcySVG icon, final boolean flat) {
         this(action, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), flat);
     }
 
     /**
      * Create a {@link JRadioButton} with specified {@link Action}, same SVG icon for each state (default, disabled, selected and disabled-selected) and default size.
      */
-    public IcyRadioButton(final @NotNull Action action, final @NotNull SVGResource icon) {
+    public IcyRadioButton(final @NonNull Action action, final @NonNull IcySVG icon) {
         this(action, new IcyIconPack(icon), LookAndFeelUtil.getDefaultIconSize(), false);
     }
-
-    // #####################
 
     private void init() {
         setHorizontalAlignment(SwingConstants.CENTER);
@@ -224,6 +222,7 @@ public class IcyRadioButton extends JRadioButton {
     /**
      * @return the flat
      */
+    @Contract(pure = true)
     public final boolean isFlat() {
         return flat;
     }
@@ -241,7 +240,7 @@ public class IcyRadioButton extends JRadioButton {
         }
     }
 
-    protected final void setSVGIconPack(final @NotNull IcyIconPack pack) {
+    protected final void setSVGIconPack(final @NonNull IcyIconPack pack) {
         this.iconPack = pack;
         setSVGIcons();
     }
@@ -250,7 +249,7 @@ public class IcyRadioButton extends JRadioButton {
      * Set icon for each state (default, disabled, selected and disabled-selected).<br>
      * Internal use only.
      */
-    protected final void setIcons(final @NotNull Icon icon, final @NotNull Icon disabled, final @NotNull Icon selected, final @NotNull Icon disabledSelected) {
+    protected final void setIcons(final @NonNull Icon icon, final @NonNull Icon disabled, final @NonNull Icon selected, final @NonNull Icon disabledSelected) {
         iconDefault = icon;
         iconDisabled = disabled;
         iconSelected = selected;
@@ -263,7 +262,7 @@ public class IcyRadioButton extends JRadioButton {
      * Set icon for each state (default, disabled, selected and disabled-selected).<br>
      * Internal use only.
      */
-    protected final void setIcons(final @NotNull Icon icon, final @NotNull Icon selected) {
+    protected final void setIcons(final @NonNull Icon icon, final @NonNull Icon selected) {
         setIcons(icon, icon, selected, selected);
     }
 
@@ -271,7 +270,7 @@ public class IcyRadioButton extends JRadioButton {
      * Set icon for each state (default, disabled, selected and disabled-selected).<br>
      * Internal use only.
      */
-    protected final void setIcons(final @NotNull Icon icon) {
+    protected final void setIcons(final @NonNull Icon icon) {
         setIcons(icon, icon, icon, icon);
     }
 
@@ -283,10 +282,10 @@ public class IcyRadioButton extends JRadioButton {
         if (iconPack == null)
             return;
 
-        iconDefault = new IcySVG(iconPack.getDefaultIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_DEFAULT);
-        iconDisabled = new IcySVG(iconPack.getDisabledIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_DISABLED);
-        iconSelected = new IcySVG(iconPack.getSelectedtIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_SELECTED);
-        iconDisabledSelected = new IcySVG(iconPack.getDisabledSelectedIcon()).getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_DISABLED);
+        iconDefault = iconPack.getDefaultIcon().getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_DEFAULT);
+        iconDisabled = iconPack.getDisabledIcon().getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_DISABLED);
+        iconSelected = iconPack.getSelectedIcon().getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_SELECTED);
+        iconDisabledSelected = iconPack.getDisabledSelectedIcon().getIcon(iconSize, LookAndFeelUtil.ColorType.TOGGLEBUTTON_DISABLED);
 
         resetIcons();
     }

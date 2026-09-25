@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,6 +18,8 @@
 
 package fr.icy.gui.action;
 
+import fr.icy.Icy;
+import fr.icy.common.reflect.ClassUtil;
 import fr.icy.extension.ExtensionLoader;
 import fr.icy.gui.clipboard.Clipboard;
 import fr.icy.gui.clipboard.TransferableImage;
@@ -25,15 +27,12 @@ import fr.icy.gui.frame.AboutFrame;
 import fr.icy.gui.frame.CatalogFrame;
 import fr.icy.gui.viewer.Viewer;
 import fr.icy.model.image.ImageUtil;
-import fr.icy.Icy;
-import fr.icy.network.NetworkUtil;
-import fr.icy.system.preferences.GeneralPreferences;
 import fr.icy.model.sequence.Sequence;
-import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
+import fr.icy.network.NetworkUtil;
 import fr.icy.network.update.IcyUpdater;
-import fr.icy.common.reflect.ClassUtil;
-import org.jetbrains.annotations.NotNull;
+import fr.icy.system.SystemUtil;
+import fr.icy.system.preferences.GeneralPreferences;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -44,14 +43,18 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * General actions.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class GeneralActions {
+    private static final Logger LOGGER = Logger.getLogger(GeneralActions.class.getName());
+
     public static final IcyAbstractAction searchAction = new IcyAbstractAction(
             "Search",
             "Application search tool", KeyEvent.VK_F,
@@ -102,7 +105,7 @@ public final class GeneralActions {
 
         @Override
         public boolean isEnabled() {
-            return false; // TODO disable for now...
+            return false; // TODO disable for now…
         }
     };
 
@@ -113,7 +116,7 @@ public final class GeneralActions {
             KeyEvent.VK_C,
             SystemUtil.getMenuCtrlMaskEx(),
             true,
-            "Copying image to the clipboard..."
+            "Copying image to the clipboard…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -134,7 +137,7 @@ public final class GeneralActions {
                         return true;
                     }
                     catch (final Throwable e1) {
-                        IcyLogger.error(GeneralActions.class, e1, "Can't copy image to clipboard.");
+                        LOGGER.log(Level.SEVERE, "Can't copy image to clipboard.", e1);
                     }
                 }
             }
@@ -155,7 +158,7 @@ public final class GeneralActions {
             KeyEvent.VK_V,
             SystemUtil.getMenuCtrlMaskEx(),
             true,
-            "Creating new sequence from clipboard image..."
+            "Creating new sequence from clipboard image…"
     ) {
         @Override
         public boolean doAction(final ActionEvent e) {
@@ -167,7 +170,7 @@ public final class GeneralActions {
                 }
             }
             catch (final Throwable e1) {
-                IcyLogger.error(GeneralActions.class, e1, "Can't paste image from clipboard.");
+                LOGGER.log(Level.SEVERE, "Can't paste image from clipboard.", e1);
             }
 
             return false;
@@ -326,7 +329,7 @@ public final class GeneralActions {
      * Return all actions of this class
      */
     @Deprecated(forRemoval = true)
-    public static @NotNull List<IcyAbstractAction> getAllActions() {
+    public static @NonNull List<IcyAbstractAction> getAllActions() {
         final List<IcyAbstractAction> result = new ArrayList<>();
 
         for (final Field field : GeneralActions.class.getFields()) {

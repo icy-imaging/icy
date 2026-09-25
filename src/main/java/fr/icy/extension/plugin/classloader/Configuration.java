@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 
 package fr.icy.extension.plugin.classloader;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * General configuration using System properties
@@ -61,7 +61,7 @@ public class Configuration {
         return Boolean.parseBoolean(System.getProperty(AUTO_PROXY));
     }
 
-    public static boolean isLoaderEnabled(final @NotNull Class<?> cls) {
+    public static boolean isLoaderEnabled(final @NonNull Class<?> cls) {
         if (System.getProperty(cls.getName()) == null)
             return true;
 

@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.plugin;
 
 import fr.icy.gui.frame.ActionFrame;
@@ -22,7 +23,6 @@ import fr.icy.gui.GuiUtil;
 import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.extension.plugin.PluginUpdater;
 import fr.icy.system.thread.ThreadUtil;
-import fr.icy.common.string.StringUtil;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -41,7 +41,7 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class PluginUpdateFrame extends ActionFrame {
@@ -70,8 +70,8 @@ public class PluginUpdateFrame extends ActionFrame {
             final PluginDescriptor plugin = pluginList.getSelectedValue();
 
             if (plugin != null) {
-                // plugin.loadChangeLog() can take lot of time, better to do that in background...
-                ThreadUtil.bgRun(() -> {
+                // plugin.loadChangeLog() can take lot of time, better to do that in background…
+                /*ThreadUtil.bgRun(() -> {
                     plugin.loadChangeLog();
                     final String changeLog = plugin.getChangeLog();
 
@@ -81,7 +81,7 @@ public class PluginUpdateFrame extends ActionFrame {
                         changeLogArea.setText(changeLog);
                     changeLogArea.setCaretPosition(0);
                     changeLogTitleLabel.setText(plugin.getName() + " change log");
-                });
+                });*/
             }
         });
         pluginList.setSelectionInterval(0, toInstallPlugins.size() - 1);

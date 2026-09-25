@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,7 +20,6 @@ package fr.icy.gui.component.tabbedpane;
 
 import fr.icy.gui.LookAndFeelUtil;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +27,7 @@ import java.awt.*;
 /**
  * Basically a JTabbedPane with checkbox in tab.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class CheckTabbedPane extends JTabbedPane {
@@ -53,15 +52,13 @@ public class CheckTabbedPane extends JTabbedPane {
 
             checkBox.addActionListener(actionevent -> CheckTabbedPane.this.fireStateChanged());
 
-            //label = new JLabel(" " + title, icon, SwingConstants.CENTER);
             label = new JLabel(title, icon, SwingConstants.CENTER);
             label.setOpaque(false);
 
             add(checkBox);
             add(Box.createHorizontalStrut(10));
             add(label);
-            //final Icon disabledIcon = new IcySVGIcon(SVGIcon.CIRCLE_FILL, Color.GRAY);
-            final Icon disabledIcon = new IcySVG(SVGResource.CIRCLE_FILL).getIcon(ICON_SIZE, Color.GRAY);
+            final Icon disabledIcon = IcySVG.CIRCLE_FILL.getIcon(ICON_SIZE, LookAndFeelUtil.ColorType.BUTTON_DISABLED);
             setIcon(disabledIcon);
             setDisabledIcon(disabledIcon);
 
@@ -89,10 +86,7 @@ public class CheckTabbedPane extends JTabbedPane {
         }
 
         public void setBackgroundAll(final Color background) {
-            //checkBox.setBackground(background);
-            //label.setBackground(background);
-            //setIcon(new IcySVGIcon(SVGIcon.CIRCLE_FILL, background));
-            setIcon(new IcySVG(SVGResource.CIRCLE_FILL).getIcon(ICON_SIZE, background));
+            setIcon(IcySVG.CIRCLE_FILL.getIcon(ICON_SIZE, background));
         }
 
         public void setForegroundAll(final Color foreground) {

@@ -32,7 +32,7 @@ import javax.swing.undo.CannotUndoException;
 /**
  * ROI group replace Sequence edit event.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ROIReplacesSequenceEdit extends AbstractROIsSequenceEdit
 {

@@ -20,27 +20,27 @@ package fr.icy.io.zip;
 
 import fr.icy.io.FileUtil;
 import fr.icy.network.NetworkUtil;
-import fr.icy.system.logging.IcyLogger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.*;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ZipUtil {
+    private static final Logger LOGGER = Logger.getLogger(ZipUtil.class.getName());
+
     /**
      * Compress the specified array of byte with given level of compression and return packed data.<br>
      *
-     * @param packer
-     *        the packer object, can be <code>null</code> in which case we create a new Deflater object
-     * @param rawData
-     *        raw data to compress
-     * @param level
-     *        level of compression where 0 is low and 9 is high (use -1 to keep current / use default level)
+     * @param packer  the packer object, can be <code>null</code> in which case we create a new Deflater object
+     * @param rawData raw data to compress
+     * @param level   level of compression where 0 is low and 9 is high (use -1 to keep current / use default level)
      */
     public static byte[] pack(final Deflater packer, final byte[] rawData, final int level) {
         final Deflater compressor;
@@ -95,10 +95,8 @@ public class ZipUtil {
     /**
      * Uncompress the specified array of byte and return unpacked data
      *
-     * @param unpacker
-     *        the unpacker object, can be <code>null</code> in which case we create a new Inflater object
-     * @param packedData
-     *        packed data to uncompress
+     * @param unpacker   the unpacker object, can be <code>null</code> in which case we create a new Inflater object
+     * @param packedData packed data to uncompress
      */
     public static byte[] unpack(final Inflater unpacker, final byte[] packedData) throws DataFormatException {
         final Inflater decompressor;
@@ -148,10 +146,8 @@ public class ZipUtil {
     /**
      * Extract the specified zip file to the specified destination directory.
      *
-     * @param zipFile
-     *        input zip file name
-     * @param outputDirectory
-     *        output directory name
+     * @param zipFile         input zip file name
+     * @param outputDirectory output directory name
      * @return true if file was correctly extracted, false otherwise
      */
     public static boolean extract(final String zipFile, final String outputDirectory) {
@@ -166,17 +162,14 @@ public class ZipUtil {
 
                 if (entry.isDirectory()) {
                     if (!FileUtil.createDir(outputDirectory + FileUtil.separator + entry.getName())) {
-                        final String[] messages = new String[]{
-                                "ZipUtil.extract(" + zipFile + "," + outputDirectory + ") error :",
-                                "Can't create directory : '" + outputDirectory + FileUtil.separator + entry.getName() + "'"
-                        };
-                        IcyLogger.error(ZipUtil.class, messages);
+                        final String message = "ZipUtil.extract(" + zipFile + "," + outputDirectory + ") error: Can't create directory : '" + outputDirectory + FileUtil.separator + entry.getName() + "'.";
+                        LOGGER.severe(message);
                         ok = false;
                         break;
                     }
                 }
                 else if (!FileUtil.save(outputDirectory + FileUtil.separator + entry.getName(), NetworkUtil.download(file.getInputStream(entry)), true)) {
-                    IcyLogger.error(ZipUtil.class, "ZipUtil.extract(" + zipFile + "," + outputDirectory + ") failed.");
+                    LOGGER.severe("ZipUtil.extract(" + zipFile + "," + outputDirectory + ") error: Can't save file : '" + outputDirectory + FileUtil.separator + entry.getName() + "'.");
                     ok = false;
                     break;
                 }
@@ -185,7 +178,7 @@ public class ZipUtil {
             file.close();
         }
         catch (final IOException ioe) {
-            IcyLogger.error(ZipUtil.class, ioe, "ZipUtil.extract(" + zipFile + "," + outputDirectory + ") error.");
+            LOGGER.log(Level.SEVERE, "ZipUtil.extract(" + zipFile + "," + outputDirectory + ") error.", ioe);
             ok = false;
         }
 
@@ -195,8 +188,7 @@ public class ZipUtil {
     /**
      * Extract the specified zip file in to default location.
      *
-     * @param zipFile
-     *        input zip file name
+     * @param zipFile input zip file name
      * @return true if file was correctly extracted, false otherwise
      */
     public static boolean extract(final String zipFile) {
@@ -206,10 +198,8 @@ public class ZipUtil {
     /**
      * Verify that specified file is a valid ZIP file
      *
-     * @param zipFile
-     *        input zip file name
-     * @throws IOException
-     *         if the input file is not a valid zip file.
+     * @param zipFile input zip file name
+     * @throws IOException if the input file is not a valid zip file.
      */
     public static void isValid(final String zipFile) throws IOException {
         try (final ZipFile file = new ZipFile(zipFile)) {
@@ -225,10 +215,8 @@ public class ZipUtil {
     /**
      * Verify that specified file is a valid ZIP file
      *
-     * @param zipFile
-     *        input zip file name
-     * @param showError
-     *        indicate if the method should show the error (in the output console) if the verify operation failed.
+     * @param zipFile   input zip file name
+     * @param showError indicate if the method should show the error (in the output console) if the verify operation failed.
      * @return true if the specified file is a valid ZIP file
      */
     public static boolean isValid(final String zipFile, final boolean showError) {
@@ -237,7 +225,7 @@ public class ZipUtil {
         }
         catch (final IOException e) {
             if (showError)
-                IcyLogger.error(ZipUtil.class, e, "ZipUtil.isValid(" + zipFile + ") error.");
+                LOGGER.log(Level.SEVERE, "ZipUtil.isValid(" + zipFile + ") error.", e);
             return false;
         }
 

@@ -44,7 +44,7 @@ import java.util.List;
 
 /**
  * 3D ROI base class
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class ROI3D extends ROI {
@@ -192,7 +192,7 @@ public abstract class ROI3D extends ROI {
             // do parent stuff
             super.mouseDrag(e, imagePoint, canvas);
 
-            // not yet consumed and ROI editable...
+            // not yet consumed and ROI editable…
             if (!e.isConsumed() && !isReadOnly()) {
                 // check we can do the action
                 if (imagePoint != null) {

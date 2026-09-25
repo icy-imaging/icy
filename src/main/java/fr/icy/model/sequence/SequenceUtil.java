@@ -52,9 +52,9 @@ import java.util.TreeMap;
 
 /**
  * {@link Sequence} utilities class.<br>
- * You can find here tools to manipulate the sequence organization, its data type, its size...
+ * You can find here tools to manipulate the sequence organization, its data type, its size…
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class SequenceUtil {
@@ -379,7 +379,7 @@ public final class SequenceUtil {
      *        0 means that new frames are empty.<br>
      *        1 means we duplicate the last frame.<br>
      *        2 means we duplicate the two last frames.<br>
-     *        and so on...
+     *        and so on…
      */
     public static void addT(final Sequence sequence, final int t, final int num, final int copyLast) {
         final int sizeZ = sequence.getSizeZ();
@@ -619,7 +619,7 @@ public final class SequenceUtil {
      *        0 means that new slices are empty.<br>
      *        1 means we duplicate the last slice.<br>
      *        2 means we duplicate the two last slices.<br>
-     *        and so on...
+     *        and so on…
      */
     public static void addZ(final Sequence sequence, final int z, final int num, final int copyLast) {
         final int sizeZ = sequence.getSizeZ();
@@ -959,7 +959,7 @@ public final class SequenceUtil {
      *        entry in the <code>sequences</code> parameter :<br>
      *        <code>sequences[n] = Sequence1; channels[n] = 0;</code><br>
      *        <code>sequences[n+1] = Sequence1; channels[n+1] = 2;</code><br>
-     *        <code>...</code>
+     *        <code>…</code>
      * @param fillEmpty
      *        Replace empty image by the previous non empty one.
      * @param rescale
@@ -2021,7 +2021,7 @@ public final class SequenceUtil {
     }
 
     /**
-     * Convert the given Point2D coordinate from an input resolution and a wanted output resolution level (0/1/2/3/...)
+     * Convert the given Point2D coordinate from an input resolution and a wanted output resolution level (0/1/2/3/…)
      *
      * @see Sequence#getOriginResolution()
      */
@@ -2035,7 +2035,7 @@ public final class SequenceUtil {
     }
 
     /**
-     * Convert the given Rectangle2D from an input resolution and a wanted output resolution level (0/1/2/3/...)
+     * Convert the given Rectangle2D from an input resolution and a wanted output resolution level (0/1/2/3/…)
      *
      * @see Sequence#getOriginResolution()
      */

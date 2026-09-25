@@ -18,13 +18,12 @@
 
 package fr.icy.network.update;
 
-import fr.icy.io.FileUtil;
-import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
-import fr.icy.network.update.ElementDescriptor.ElementFile;
 import fr.icy.common.string.StringUtil;
+import fr.icy.io.FileUtil;
 import fr.icy.io.xml.XMLUtil;
 import fr.icy.io.zip.ZipUtil;
+import fr.icy.network.update.ElementDescriptor.ElementFile;
+import fr.icy.system.SystemUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -32,12 +31,15 @@ import org.w3c.dom.Node;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class Updater {
+    private static final Logger LOGGER = Logger.getLogger(Updater.class.getName());
+
     public static final String ICYKERNEL_NAME = "ICY Kernel";
     public static final String ICYUPDATER_NAME = "ICY Updater";
 
@@ -126,7 +128,7 @@ public class Updater {
      */
     public static ArrayList<ElementDescriptor> getLocalElements() {
         // get local elements from XML file
-        IcyLogger.debug(Updater.class, "Loading local elements");
+        LOGGER.config("Loading local elements");
         final ArrayList<ElementDescriptor> result = loadElementsFromXML(FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + VERSION_NAME);
 
         // validate elements
@@ -139,7 +141,7 @@ public class Updater {
      * Get the list of online elements (online update.xml file)
      */
     public static ArrayList<ElementDescriptor> getOnlineElements() {
-        IcyLogger.debug(Updater.class, "Loading online elements");
+        LOGGER.config("Loading online elements");
         return loadElementsFromXML(UPDATE_DIRECTORY + FileUtil.separator + UPDATE_NAME);
     }
 
@@ -196,7 +198,7 @@ public class Updater {
     }
 
     public static ArrayList<ElementDescriptor> loadElementsFromXML(final String path) {
-        IcyLogger.debug(Updater.class, "Loading elements from " + path);
+        LOGGER.config("Loading elements from " + path);
         final ArrayList<ElementDescriptor> result = new ArrayList<>();
 
         final Document document = XMLUtil.loadDocument(path, true);
@@ -354,7 +356,7 @@ public class Updater {
         if (updateFile(localPath, file.getDateModif())) {
             final File dest = new File(FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + localPath);
 
-            // there is no reason the file doesn't exists but anyway...
+            // there is no reason the file doesn't exists but anyway…
             if (dest.exists()) {
                 if (file.isExecutable())
                     dest.setExecutable(true, false);
@@ -418,7 +420,7 @@ public class Updater {
         // backup file
         if (!backup(localPath)) {
             // backup failed
-            IcyLogger.error(Updater.class, "Updater.udpateFile(" + localPath + ") failed.");
+            LOGGER.severe("Updater.udpateFile(" + localPath + ") failed.");
             // System.err.println("Cannot backup file to '" + BACKUP_DIRECTORY + FileUtil.separator
             // + localPath);
             return false;
@@ -427,7 +429,7 @@ public class Updater {
         // move file
         if (!FileUtil.rename(UPDATE_DIRECTORY + FileUtil.separator + localPath, FileUtil.APPLICATION_DIRECTORY + FileUtil.separator + localPath, true)) {
             // move failed
-            IcyLogger.error(Updater.class, "Updater.udpateFile('" + localPath + "') failed !");
+            LOGGER.severe("Updater.udpateFile('" + localPath + "') failed !");
             // System.err.println("Cannot rename file from '" + UPDATE_DIRECTORY +
             // FileUtil.separator + localPath
             // + "' to '" + localPath + "'");
@@ -464,7 +466,7 @@ public class Updater {
 
             if (!FileUtil.rename(backupPath, finalPath, true)) {
                 // rename failed (FileUtil.rename is already displaying error messages if needed)
-                IcyLogger.error(Updater.class, "Updater.restore() cannot restore '" + finalPath + "', you should do it manually.");
+                LOGGER.severe("Updater.restore() cannot restore '" + finalPath + "', you should do it manually.");
                 result = false;
             }
         }

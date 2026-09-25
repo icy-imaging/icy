@@ -18,7 +18,8 @@
 
 package fr.icy.system;
 
-import fr.icy.system.logging.IcyLogger;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -31,6 +32,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TooManyListenersException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * <p>
@@ -43,14 +46,14 @@ import java.util.TooManyListenersException;
  * <i>Listener</i> to receive notification when file(s) have been dropped. Here is an example:
  * </p>
  * <code>
- *      JPanel myPanel = new JPanel();
- *      new FileDrop( myPanel, new FileDrop.Listener()
- *      {   public void filesDropped( File[] files )
- *          {
- *              // handle file drop
- *              ...
- *          }
- *      });
+ * JPanel myPanel = new JPanel();
+ * new FileDrop( myPanel, new FileDrop.Listener()
+ * {   public void filesDropped( File[] files )
+ * {
+ * // handle file drop
+ * …
+ * }
+ * });
  * </code>
  * <p>
  * You can specify the border that will appear when files are being dragged by calling the
@@ -73,10 +76,12 @@ import java.util.TooManyListenersException;
  *
  * @author Robert Harder
  * @author rharder@users.sf.net
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @version 1.0.2
  */
 public class FileDrop {
+    private static final Logger LOGGER = Logger.getLogger(FileDrop.class.getName());
+
     public static class TransferableObject implements Transferable {
         /**
          * The MIME type for {@link #DATA_FLAVOR} is
@@ -107,11 +112,10 @@ public class FileDrop {
          * determined from <code>data.getClass()</code> and the MIME type
          * <i>application/x-net.iharder.TransferableObject</i>.
          *
-         * @param data
-         *        The data to transfer
+         * @param data The data to transfer
          * @since 1.1
          */
-        public TransferableObject(final Object data) {
+        public TransferableObject(final @NonNull Object data) {
             this.data = data;
             this.customFlavor = new DataFlavor(data.getClass(), MIME_TYPE);
         }
@@ -121,11 +125,11 @@ public class FileDrop {
          * object that is returned by <var>fetcher</var>.
          * No custom data flavor is set other than the default {@link #DATA_FLAVOR}.
          *
+         * @param fetcher The {@link Fetcher} that will return the data object
          * @see Fetcher
-         * @param fetcher
-         *        The {@link Fetcher} that will return the data object
          * @since 1.1
          */
+        @Contract(pure = true)
         public TransferableObject(final Fetcher fetcher) {
             this.fetcher = fetcher;
         }
@@ -137,11 +141,9 @@ public class FileDrop {
          * this creates a custom data flavor with a representation class <var>dataClass</var>
          * and the MIME type <i>application/x-net.iharder.TransferableObject</i>.
          *
+         * @param dataClass The {@link Class} to use in the custom data flavor
+         * @param fetcher   The {@link Fetcher} that will return the data object
          * @see Fetcher
-         * @param dataClass
-         *        The {@link Class} to use in the custom data flavor
-         * @param fetcher
-         *        The {@link Fetcher} that will return the data object
          * @since 1.1
          */
         public TransferableObject(final Class<?> dataClass, final Fetcher fetcher) {
@@ -184,13 +186,12 @@ public class FileDrop {
          * If the requested data flavor is not supported, then the {@link Fetcher#getObject
          * getObject()} method will not be called.
          *
-         * @param flavor
-         *        The data flavor for the data to return
+         * @param flavor The data flavor for the data to return
          * @return The dropped data
          * @since 1.1
          */
         @Override
-        public Object getTransferData(final DataFlavor flavor) throws UnsupportedFlavorException {
+        public Object getTransferData(final @NonNull DataFlavor flavor) throws UnsupportedFlavorException {
             // Native object
             if (flavor.equals(DATA_FLAVOR))
                 return fetcher == null ? data : fetcher.getObject();
@@ -205,15 +206,14 @@ public class FileDrop {
 
         /**
          * Returns <i>true</i> if <var>flavor</var> is one of the supported
-         * flavors. Flavors are supported using the <code>equals(...)</code> method.
+         * flavors. Flavors are supported using the <code>equals(…)</code> method.
          *
-         * @param flavor
-         *        The data flavor to check
+         * @param flavor The data flavor to check
          * @return Whether or not the flavor is supported
          * @since 1.1
          */
         @Override
-        public boolean isDataFlavorSupported(final DataFlavor flavor) {
+        public boolean isDataFlavorSupported(final @NonNull DataFlavor flavor) {
             // Native object
             if (flavor.equals(DATA_FLAVOR))
                 return true;
@@ -230,7 +230,7 @@ public class FileDrop {
          * Instead of passing your data directly to the {@link TransferableObject} constructor, you
          * may want to know exactly when your data was received
          * in case you need to remove it from its source (or do anyting else to it).
-         * When the {@link #getTransferData getTransferData(...)} method is called
+         * When the {@link #getTransferData getTransferData(…)} method is called
          * on the {@link TransferableObject}, the {@link Fetcher}'s {@link #getObject getObject()}
          * method will be called.
          *
@@ -238,6 +238,7 @@ public class FileDrop {
          * @version 1.1
          * @since 1.1
          */
+        @FunctionalInterface
         public interface Fetcher {
             /**
              * Return the object being encapsulated in the {@link TransferableObject}.
@@ -262,10 +263,8 @@ public class FileDrop {
      * <i>null</i> value for
      * the parameter <i>out</i> will result in no debugging output.
      *
-     * @param c
-     *        Component on which files will be dropped.
-     * @param listener
-     *        Listens for <i>filesDropped</i>.
+     * @param c        Component on which files will be dropped.
+     * @param listener Listens for <i>filesDropped</i>.
      * @since 1.0
      */
     public FileDrop(final Component c, final FileDropListener listener) {
@@ -282,12 +281,9 @@ public class FileDrop {
      * <i>null</i> value for
      * the parameter <i>out</i> will result in no debugging output.
      *
-     * @param c
-     *        Component on which files will be dropped.
-     * @param recursive
-     *        Recursively set children as drop targets.
-     * @param listener
-     *        Listens for <i>filesDropped</i>.
+     * @param c         Component on which files will be dropped.
+     * @param recursive Recursively set children as drop targets.
+     * @param listener  Listens for <i>filesDropped</i>.
      * @since 1.0
      */
     public FileDrop(final Component c, final boolean recursive, final FileDropListener listener) {
@@ -297,12 +293,9 @@ public class FileDrop {
     /**
      * Constructor with a specified border
      *
-     * @param c
-     *        Component on which files will be dropped.
-     * @param dragBorder
-     *        Border to use on <i>JComponent</i> when dragging occurs.
-     * @param listener
-     *        Listens for <i>filesDropped</i>.
+     * @param c          Component on which files will be dropped.
+     * @param dragBorder Border to use on <i>JComponent</i> when dragging occurs.
+     * @param listener   Listens for <i>filesDropped</i>.
      * @since 1.0
      */
     public FileDrop(final Component c, final Border dragBorder, final FileDropListener listener) {
@@ -314,14 +307,10 @@ public class FileDrop {
      * If your component is a <i>Container</i>, then each of its children
      * components will also listen for drops, though only the parent will change borders.
      *
-     * @param c
-     *        Component on which files will be dropped.
-     * @param dragBorder
-     *        Border to use on <i>JComponent</i> when dragging occurs.
-     * @param recursive
-     *        Recursively set children as drop targets.
-     * @param listener
-     *        Listens for <i>filesDropped</i>.
+     * @param c          Component on which files will be dropped.
+     * @param dragBorder Border to use on <i>JComponent</i> when dragging occurs.
+     * @param recursive  Recursively set children as drop targets.
+     * @param listener   Listens for <i>filesDropped</i>.
      * @since 1.0
      */
     public FileDrop(final Component c, final Border dragBorder, final boolean recursive, final FileDropListener listener) {
@@ -333,14 +322,10 @@ public class FileDrop {
      * If your component is a <i>Container</i>, then each of its children
      * components will also listen for drops, though only the parent will change borders.
      *
-     * @param c
-     *        Component on which files will be dropped.
-     * @param dragBorder
-     *        Border to use on <i>JComponent</i> when dragging occurs.
-     * @param recursive
-     *        Recursively set children as drop targets.
-     * @param listener
-     *        Listens for <i>filesDropped</i>.
+     * @param c          Component on which files will be dropped.
+     * @param dragBorder Border to use on <i>JComponent</i> when dragging occurs.
+     * @param recursive  Recursively set children as drop targets.
+     * @param listener   Listens for <i>filesDropped</i>.
      * @since 1.0
      */
     public FileDrop(final Component c, final Border dragBorder, final boolean recursive, final FileDropExtListener listener) {
@@ -354,14 +339,10 @@ public class FileDrop {
      * <i>null</i> value for
      * the parameter <i>out</i> will result in no debugging output.
      *
-     * @param c
-     *        Component on which files will be dropped.
-     * @param dragBorder
-     *        Border to use on <i>JComponent</i> when dragging occurs.
-     * @param recursive
-     *        Recursively set children as drop targets.
-     * @param listener
-     *        Listens for <i>filesDropped</i>.
+     * @param c          Component on which files will be dropped.
+     * @param dragBorder Border to use on <i>JComponent</i> when dragging occurs.
+     * @param recursive  Recursively set children as drop targets.
+     * @param listener   Listens for <i>filesDropped</i>.
      * @since 1.0
      */
     FileDrop(final Component c, final Border dragBorder, final boolean recursive, final FileDropListener listener, final FileDropExtListener listenerExt) {
@@ -404,7 +385,8 @@ public class FileDrop {
                         evt.acceptDrop(DnDConstants.ACTION_COPY);
 
                         // Get a useful list
-                        @SuppressWarnings("unchecked") final List<File> fileList = (List<File>) tr.getTransferData(DataFlavor.javaFileListFlavor);
+                        @SuppressWarnings("unchecked")
+                        final List<File> fileList = (List<File>) tr.getTransferData(DataFlavor.javaFileListFlavor);
                         // Iterator<File> iterator = fileList.iterator();
 
                         // Convert list to array
@@ -452,12 +434,9 @@ public class FileDrop {
                             evt.rejectDrop();
                     }
                 }
-                catch (final IOException io) {
-                    IcyLogger.error(FileDrop.class, io, "FileDrop: IOException - abort.");
-                    evt.rejectDrop();
-                }
-                catch (final UnsupportedFlavorException ufe) {
-                    IcyLogger.error(FileDrop.class, ufe, "FileDrop: UnsupportedFlavorException - abort.");
+                catch (final IOException | UnsupportedFlavorException io) {
+                    if (LOGGER.isLoggable(Level.SEVERE))
+                        LOGGER.log(Level.SEVERE, "Unable to drop.", io);
                     evt.rejectDrop();
                 }
                 finally {
@@ -491,7 +470,7 @@ public class FileDrop {
 
     private static final String ZERO_CHAR_STRING = "" + (char) 0;
 
-    static File[] createFileArray(final BufferedReader bReader) {
+    static File @NonNull [] createFileArray(final @NonNull BufferedReader bReader) {
         try {
             final List<File> list = new ArrayList<>();
             String line; // = null;
@@ -505,14 +484,16 @@ public class FileDrop {
                     list.add(file);
                 }
                 catch (final Exception ex) {
-                    IcyLogger.error(FileDrop.class, ex, "Error with " + line + ": " + ex.getLocalizedMessage());
+                    if (LOGGER.isLoggable(Level.SEVERE))
+                        LOGGER.log(Level.SEVERE, "Unable to convert '" + line + "' to file.", ex);
                 }
             }
 
             return list.toArray(new File[0]);
         }
         catch (final IOException ex) {
-            IcyLogger.error(FileDrop.class, ex, "FileDrop: IOException");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Unable to create file array.", ex);
         }
 
         return new File[0];
@@ -525,7 +506,8 @@ public class FileDrop {
             dt.addDropTargetListener(dropListener);
         }
         catch (final TooManyListenersException e) {
-            IcyLogger.error(FileDrop.class, e, "FileDrop: Drop will not work due to previous error. Do you have another listener attached?");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Drop will not work due to previous error. Do you have another listener attached?", e);
         }
 
         // Listen for hierarchy changes and remove the drop target when the parent gets cleared out.
@@ -551,8 +533,10 @@ public class FileDrop {
         }
     }
 
-    /** Determine if the dragged data is a file list. */
-    boolean isDragOk(final DropTargetDragEvent evt) {
+    /**
+     * Determine if the dragged data is a file list.
+     */
+    boolean isDragOk(final @NonNull DropTargetDragEvent evt) {
         boolean ok = false;
 
         // Get data flavors being dragged
@@ -579,8 +563,7 @@ public class FileDrop {
      * This will recursively unregister all components contained within
      * <var>c</var> if <var>c</var> is a {@link Container}.
      *
-     * @param c
-     *        The component to unregister as a drop target
+     * @param c The component to unregister as a drop target
      * @since 1.0
      */
     public static boolean remove(final Component c) {
@@ -592,15 +575,12 @@ public class FileDrop {
      * from the all children. You should call this if you add and remove
      * components after you've set up the drag-and-drop.
      *
-     * @param out
-     *        Optional {@link PrintStream} for logging drag and drop messages
-     * @param c
-     *        The component to unregister
-     * @param recursive
-     *        Recursively unregister components within a container
+     * @param out       Optional {@link PrintStream} for logging drag and drop messages
+     * @param c         The component to unregister
+     * @param recursive Recursively unregister components within a container
      * @since 1.0
      */
-    public static boolean remove(final PrintStream out, final Component c, final boolean recursive) {
+    public static boolean remove(final PrintStream out, final @NonNull Component c, final boolean recursive) {
         // Make sure we support
         c.setDropTarget(null);
 
@@ -617,24 +597,24 @@ public class FileDrop {
     /**
      * Implement this inner interface to listen for when files are dropped. For example
      * your class declaration may begin like this: <code>
-     *      public class MyClass implements FileDrop.Listener
-     *      ...
-     *      public void filesDropped( File[] files )
-     *      {
-     *          ...
-     *      }
-     *      ...
+     * public class MyClass implements FileDrop.Listener
+     * …
+     * public void filesDropped( File[] files )
+     * {
+     * …
+     * }
+     * …
      * </code>
      *
      * @since 1.1
      */
+    @FunctionalInterface
     public interface FileDropListener {
 
         /**
          * This method is called when files have been successfully dropped.
          *
-         * @param files
-         *        An array of <i>File</i>s that were dropped.
+         * @param files An array of <i>File</i>s that were dropped.
          * @since 1.0
          */
         void filesDropped(File[] files);
@@ -643,25 +623,24 @@ public class FileDrop {
     /**
      * Implement this inner interface to listen for when files are dropped. For example
      * your class declaration may begin like this: <code>
-     *      public class MyClass implements FileDrop.Listener
-     *      ...
-     *      public void filesDropped( File[] files )
-     *      {
-     *          ...
-     *      }
-     *      ...
+     * public class MyClass implements FileDrop.Listener
+     * …
+     * public void filesDropped( File[] files )
+     * {
+     * …
+     * }
+     * …
      * </code>
      *
      * @since 1.1
      */
+    @FunctionalInterface
     public interface FileDropExtListener {
         /**
          * This method is called when files have been successfully dropped.
          *
-         * @param evt
-         *        The DropTargetDropEvent which initiated the drop operation.
-         * @param files
-         *        An array of <i>File</i>s that were dropped.
+         * @param evt   The DropTargetDropEvent which initiated the drop operation.
+         * @param files An array of <i>File</i>s that were dropped.
          * @since 2.0
          */
         void filesDropped(DropTargetDropEvent evt, File[] files);

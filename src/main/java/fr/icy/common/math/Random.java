@@ -20,7 +20,7 @@ package fr.icy.common.math;
 /**
  * Random utilities class.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Random
 {

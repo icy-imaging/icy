@@ -42,7 +42,7 @@ import java.util.*;
  * Meta data utilities class.<br>
  * Basically provide safe access to metadata.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class MetaDataUtil {
@@ -175,7 +175,7 @@ public class MetaDataUtil {
         // can't compute plane index --> return 0 by default
         if ((t < 0) || (z < 0) || (c < 0))
             return 0;
-        // trivial opti...
+        // trivial opti…
         if ((t == 0) && (z == 0) && (c == 0))
             return 0;
 
@@ -528,7 +528,7 @@ public class MetaDataUtil {
     /**
      * @return Returns the total data size (in bytes) of the specified image series
      * @param resolution
-     *        for the given resolution (0 = full, 1 = 1/2, ...)
+     *        for the given resolution (0 = full, 1 = 1/2, etc.)
      * @param metaData
      *        OME metadata
      * @param series
@@ -541,7 +541,7 @@ public class MetaDataUtil {
     /**
      * @return Returns the total data size (in bytes) of the specified image series
      * @param resolution
-     *        for the given resolution (0 = full, 1 = 1/2, ...) and size informations
+     *        for the given resolution (0 = full, 1 = 1/2, etc.) and size informations
      * @param metaData
      *        OME metadata
      * @param series
@@ -558,7 +558,7 @@ public class MetaDataUtil {
     /**
      * @return Returns the total data size (in bytes) of the specified image series
      * @param resolution
-     *        for the given resolution (0 = full, 1 = 1/2, ...) and size informations
+     *        for the given resolution (0 = full, 1 = 1/2, …) and size informations
      * @param metaData
      *        OME metadata
      * @param series

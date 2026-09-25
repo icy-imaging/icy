@@ -31,7 +31,7 @@ import javax.swing.filechooser.FileFilter;
  * type except image (use the {@link SequenceFileImporter} interface for image file).<br>
  * It is from his responsibility to make the opened file available in the application.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface FileImporter
 {

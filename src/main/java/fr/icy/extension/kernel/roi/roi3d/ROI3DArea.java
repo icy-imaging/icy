@@ -18,13 +18,14 @@
 
 package fr.icy.extension.kernel.roi.roi3d;
 
-import fr.icy.gui.canvas.VtkCanvas;
 import fr.icy.common.event.CollapsibleEvent;
 import fr.icy.common.geom.point.Point3D;
 import fr.icy.common.geom.point.Point5D;
 import fr.icy.common.geom.rectangle.Rectangle3D;
 import fr.icy.common.string.StringUtil;
+import fr.icy.extension.kernel.roi.roi2d.ROI2DArea;
 import fr.icy.gui.canvas.IcyCanvas;
+import fr.icy.gui.canvas.VtkCanvas;
 import fr.icy.gui.render.IcyVtkPanel;
 import fr.icy.gui.toolbar.panel.RoisPanel;
 import fr.icy.model.render.vtk.VtkUtil;
@@ -34,9 +35,8 @@ import fr.icy.model.roi.ROIEvent;
 import fr.icy.model.roi.mask.BooleanMask2D;
 import fr.icy.model.roi.mask.BooleanMask3D;
 import fr.icy.model.sequence.Sequence;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
-import fr.icy.extension.kernel.roi.roi2d.ROI2DArea;
+import org.jspecify.annotations.NonNull;
 import vtk.*;
 
 import java.awt.*;
@@ -48,14 +48,18 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 3D Area ROI.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI3DArea extends ROI3DStack<ROI2DArea> {
+    private static final Logger LOGGER = Logger.getLogger(ROI3DArea.class.getName());
+
     public class ROI3DAreaPainter extends ROI3DStackPainter implements Runnable {
         // VTK 3D objects
         protected vtkPolyData outline;
@@ -281,8 +285,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
         }
 
         @Override
-        public void mouseClick(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
-            // not yet consumed...
+        public void mouseClick(final MouseEvent e, final Point5D.Double imagePoint, final @NonNull IcyCanvas canvas) {
+            // not yet consumed…
             if (!e.isConsumed()) {
                 // and process ROI stuff now
                 if (isActiveFor(canvas)) {
@@ -307,7 +311,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
         }
 
         @Override
-        public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
+        public void paint(final Graphics2D g, final Sequence sequence, final @NonNull IcyCanvas canvas) {
             super.paint(g, sequence, canvas);
 
             if (isActiveFor(canvas)) {
@@ -373,7 +377,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
                 rebuildVtkObjects();
             }
             catch (final IllegalArgumentException e) {
-                IcyLogger.error(ROI3DArea.class, e, "Couldn't rebuild VTK objects.");
+                LOGGER.log(Level.SEVERE, "Couldn't rebuild VTK objects.", e);
             }
             catch (final InterruptedException ie) {
                 // ignore
@@ -398,8 +402,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     /**
      * Create a 3D Area ROI type from the specified {@link BooleanMask3D}.
      *
-     * @param mask
-     *        3D Mask
+     * @param mask 3D Mask
      */
     public ROI3DArea(final BooleanMask3D mask) {
         this();
@@ -410,8 +413,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     /**
      * Create a copy of the specified 3D Area ROI.
      *
-     * @param area
-     *        3D area
+     * @param area 3D area
      */
     public ROI3DArea(final ROI3DArea area) {
         this();
@@ -426,12 +428,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     /**
      * Create a 3D Area ROI type from the specified {@link BooleanMask3D}.
      *
-     * @param mask2d
-     *        2D mask
-     * @param zMax
-     *        int
-     * @param zMin
-     *        int
+     * @param mask2d 2D mask
+     * @param zMax   int
+     * @param zMin   int
      */
     public ROI3DArea(final BooleanMask2D mask2d, final int zMin, final int zMax) {
         this();
@@ -462,12 +461,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     /**
      * Adds the specified point to this ROI
      *
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param z
-     *        int
+     * @param x int
+     * @param y int
+     * @param z int
      */
     public void addPoint(final int x, final int y, final int z) {
         setPoint(x, y, z, true);
@@ -478,12 +474,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
      * Don't forget to call optimizeBounds() after consecutive remove operation
      * to refresh the mask bounds.
      *
-     * @param x
-     *        int
-     * @param z
-     *        int
-     * @param y
-     *        int
+     * @param x int
+     * @param z int
+     * @param y int
      */
     public void removePoint(final int x, final int y, final int z) {
         setPoint(x, y, z, false);
@@ -494,14 +487,10 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
      * Don't forget to call optimizeBounds() after consecutive remove point operation
      * to refresh the mask bounds.
      *
-     * @param x
-     *        int
-     * @param y
-     *        int
-     * @param z
-     *        int
-     * @param value
-     *        boolean
+     * @param x     int
+     * @param y     int
+     * @param z     int
+     * @param value boolean
      */
     public void setPoint(final int x, final int y, final int z, final boolean value) {
         final ROI2DArea slice = getSlice(z, value);
@@ -513,10 +502,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     /**
      * Add brush point at specified position and for specified Z slice.
      *
-     * @param z
-     *        int
-     * @param pos
-     *        2D point
+     * @param z   int
+     * @param pos 2D point
      */
     public void addBrush(final Point2D pos, final int z) {
         getSlice(z, true).addBrush(pos);
@@ -527,10 +514,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
      * Don't forget to call optimizeBounds() after consecutive remove operation
      * to refresh the mask bounds.
      *
-     * @param z
-     *        int
-     * @param pos
-     *        2D point
+     * @param z   int
+     * @param pos 2D point
      */
     public void removeBrush(final Point2D pos, final int z) {
         final ROI2DArea slice = getSlice(z, false);
@@ -540,8 +525,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     }
 
     /**
-     * @param mask
-     *        Add the specified {@link BooleanMask3D} content to this ROI3DArea
+     * @param mask Add the specified {@link BooleanMask3D} content to this ROI3DArea
      */
     public void add(final BooleanMask3D mask) {
         beginUpdate();
@@ -559,10 +543,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
      * If there is no slice at this Z position then the method is equivalent to setSlice(int, ROI2DArea) with
      * <code>new ROI2DArea(maskSlice)</code>
      *
-     * @param z
-     *        the position where the slice must be added
-     * @param maskSlice
-     *        the 2D boolean mask to merge
+     * @param z         the position where the slice must be added
+     * @param maskSlice the 2D boolean mask to merge
      */
     public void add(final int z, final BooleanMask2D maskSlice) {
         if (maskSlice == null)
@@ -579,8 +561,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     }
 
     /**
-     * @param mask
-     *        Exclusively add the specified {@link BooleanMask3D} content to this ROI3DArea
+     * @param mask Exclusively add the specified {@link BooleanMask3D} content to this ROI3DArea
      */
     public void exclusiveAdd(final BooleanMask3D mask) {
         beginUpdate();
@@ -598,10 +579,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
      * If there is no slice at this Z position then the method is equivalent to setSlice(int, ROI2DArea) with
      * <code>new ROI2DArea(maskSlice)</code>
      *
-     * @param z
-     *        the position where the slice must be exclusively added
-     * @param maskSlice
-     *        the 2D boolean mask to merge
+     * @param z         the position where the slice must be exclusively added
+     * @param maskSlice the 2D boolean mask to merge
      */
     public void exclusiveAdd(final int z, final BooleanMask2D maskSlice) {
         if (maskSlice == null)
@@ -623,8 +602,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     }
 
     /**
-     * @param mask
-     *        Intersect the specified {@link BooleanMask3D} content with this ROI3DArea
+     * @param mask Intersect the specified {@link BooleanMask3D} content with this ROI3DArea
      */
     public void intersect(final BooleanMask3D mask) throws UnsupportedOperationException, InterruptedException {
         beginUpdate();
@@ -653,10 +631,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     /**
      * Intersect the specified BooleanMask2D with the existing slice at given Z position.
      *
-     * @param z
-     *        the position where the slice must be set
-     * @param maskSlice
-     *        the 2D boolean mask to merge
+     * @param z         the position where the slice must be set
+     * @param maskSlice the 2D boolean mask to merge
      */
     public void intersect(final int z, final BooleanMask2D maskSlice) throws UnsupportedOperationException, InterruptedException {
         // better to throw an exception here than removing slice
@@ -683,8 +659,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     }
 
     /**
-     * @param mask
-     *        Subtract the specified {@link BooleanMask3D} from this ROI3DArea
+     * @param mask Subtract the specified {@link BooleanMask3D} from this ROI3DArea
      */
     public void subtract(final BooleanMask3D mask) {
         beginUpdate();
@@ -700,10 +675,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     /**
      * Subtract the specified BooleanMask2D from the existing slice at given Z position.
      *
-     * @param z
-     *        the position where the slice must be subtracted
-     * @param maskSlice
-     *        the 2D boolean mask to subtract
+     * @param z         the position where the slice must be subtracted
+     * @param maskSlice the 2D boolean mask to subtract
      */
     public void subtract(final int z, final BooleanMask2D maskSlice) {
         if (maskSlice == null)
@@ -792,10 +765,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     /**
      * Sets the BooleanMask2D slice at given Z position to this 3D ROI
      *
-     * @param z
-     *        the position where the slice must be set
-     * @param maskSlice
-     *        the BooleanMask2D to set
+     * @param z         the position where the slice must be set
+     * @param maskSlice the BooleanMask2D to set
      */
     public void setSlice(final int z, final BooleanMask2D maskSlice) {
         // empty mask --> just remove previous
@@ -830,8 +801,7 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     }
 
     /**
-     * @param newPosition
-     *        Set all 2D slices ROI to same position.
+     * @param newPosition Set all 2D slices ROI to same position.
      */
     public void setPosition2D(final Point2D newPosition) {
         beginUpdate();
@@ -845,9 +815,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     }
 
     /**
-     * @param mask
-     *        Set the mask from a BooleanMask3D object.<br>
-     *        If specified mask is <i>null</i> then ROI is cleared.
+     * @param mask Set the mask from a BooleanMask3D object.<br>
+     *             If specified mask is <i>null</i> then ROI is cleared.
      */
     public void setAsBooleanMask(final BooleanMask3D mask) {
         // mask empty ? --> just clear the ROI
@@ -869,10 +838,8 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     /**
      * Set the 3D mask from a 2D boolean mask array
      *
-     * @param rect
-     *        the 3D region defined by 2D boolean mask array
-     * @param mask
-     *        the 3D mask data (array length should be equals to rect.sizeZ)
+     * @param rect the 3D region defined by 2D boolean mask array
+     * @param mask the 3D mask data (array length should be equals to rect.sizeZ)
      */
     public void setAsBooleanMask(final Rectangle3D.Integer rect, final BooleanMask2D[] mask) {
         if (rect.isInfiniteZ())
@@ -900,10 +867,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
     /**
      * Fast 2x down scaling (each 2x2x2 block points become 1 point).
      *
-     * @param nbPointForTrue
-     *        the minimum number of <code>true</code>points from a 2x2x2 block to give a <code>true</code> resulting
-     *        point.<br>
-     *        Accepted value: 1 to 5 (default is 5)
+     * @param nbPointForTrue the minimum number of <code>true</code>points from a 2x2x2 block to give a <code>true</code> resulting
+     *                       point.<br>
+     *                       Accepted value: 1 to 5 (default is 5)
      */
     public void downscale(final int nbPointForTrue) throws InterruptedException {
         setAsBooleanMask(getBooleanMask(true).downscale(nbPointForTrue));
@@ -928,10 +894,9 @@ public class ROI3DArea extends ROI3DStack<ROI2DArea> {
      * Fast 2x down scaling (each 2x2 block points become 1 point).<br>
      * 2D version (down scale is done on XY dimension only).
      *
-     * @param nbPointForTrue
-     *        the minimum number of <code>true</code>points from a 2x2 block to give a <code>true</code> resulting
-     *        point.<br>
-     *        Accepted value: 1 to 4
+     * @param nbPointForTrue the minimum number of <code>true</code>points from a 2x2 block to give a <code>true</code> resulting
+     *                       point.<br>
+     *                       Accepted value: 1 to 4
      */
     public void downscale2D(final int nbPointForTrue) throws InterruptedException {
         setAsBooleanMask(getBooleanMask(true).downscale2D(nbPointForTrue));

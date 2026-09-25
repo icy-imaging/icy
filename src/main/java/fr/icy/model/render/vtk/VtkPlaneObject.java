@@ -28,7 +28,7 @@ import vtk.vtkPolyDataMapper;
 /**
  * Class helper to draw VTK plane object
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class VtkPlaneObject
 {

@@ -25,7 +25,7 @@ import fr.icy.gui.frame.IcyFrameListener;
 /**
  * Weak wrapper for IcyFrameListener.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class WeakIcyFrameListener extends WeakListener<IcyFrameListener> implements IcyFrameListener
 {

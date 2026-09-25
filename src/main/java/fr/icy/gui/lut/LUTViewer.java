@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@ import fr.icy.common.string.StringUtil;
 import fr.icy.common.type.DataType;
 import fr.icy.gui.GuiUtil;
 import fr.icy.gui.component.button.IcyButton;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.tabbedpane.CheckTabbedPane;
 import fr.icy.gui.dialog.MessageDialog;
 import fr.icy.gui.viewer.Viewer;
@@ -40,6 +40,7 @@ import fr.icy.model.sequence.SequenceListener;
 import fr.icy.system.preferences.ApplicationPreferences;
 import fr.icy.system.preferences.XMLPreferences;
 import fr.icy.system.thread.ThreadUtil;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,22 +48,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceListener {
     /**
      * pref id
      */
-    private static final String PREF_ID_HISTO = "gui.histo";
+    private static final String PREF_ID_HISTOGRAM = "gui.histo";
 
     private static final String ID_AUTO_REFRESH = "autoRefresh";
     private static final String ID_AUTO_BOUNDS = "autoBounds";
     private static final String ID_LOG_VIEW = "logView";
 
-    /*
-     * gui
-     */
     /**
      * associated Viewer &amp; LUT
      */
@@ -70,21 +68,15 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
     private final LUT lut;
     final CheckTabbedPane bottomPane;
 
-    final JCheckBox autoRefreshHistoCheckBox;
+    final JCheckBox autoRefreshHistogramCheckBox;
     final JCheckBox autoBoundsCheckBox;
     final ButtonGroup scaleGroup;
     final JRadioButton logButton;
     final JRadioButton linearButton;
     final IcyButton exportXLSButton;
 
-    /*
-     * data
-     */
     final List<LUTChannelViewer> lutChannelViewers;
 
-    /*
-     * preferences
-     */
     final XMLPreferences pref;
 
     final Runnable boundsUpdater;
@@ -92,13 +84,13 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
     final Runnable channelEnableUpdater;
     final Runnable channelTabColorUpdater;
 
-    public LUTViewer(final Viewer viewer, final LUT lut) {
+    public LUTViewer(final Viewer viewer, final @NonNull LUT lut) {
         super();
 
         this.viewer = viewer;
         this.lut = lut;
 
-        pref = ApplicationPreferences.getPreferences().node(PREF_ID_HISTO);
+        pref = ApplicationPreferences.getPreferences().node(PREF_ID_HISTOGRAM);
 
         boundsUpdater = () -> {
             final Sequence sequence = getSequence();
@@ -180,7 +172,7 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
 
             for (int i = 0; i < size; i++) {
                 try {
-                    // null pointer exception can sometime happen here, normal
+                    // null pointer exception can sometimes happen here, normal
                     enabledState[i] = bottomPane.isTabChecked(i);
                     changedState[i] = lutChannelViewers.get(i).getLutChannel().isEnabled() != enabledState[i];
                 }
@@ -190,8 +182,7 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
                 }
             }
 
-            // we really want to only set state which changed here and not the one which has
-            // been set from a "setEnabled" event
+            // we really want to only set state, which changed here, and not the one that has been set from a "setEnabled" event
             for (int i = 0; i < size; i++) {
                 if (changedState[i]) {
                     lutChannelViewers.get(i).getLutChannel().setEnabled(enabledState[i]);
@@ -199,34 +190,34 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
             }
         });
 
-        autoRefreshHistoCheckBox = new JCheckBox("Refresh", pref.getBoolean(ID_AUTO_REFRESH, true));
-        autoRefreshHistoCheckBox.setToolTipText("Automatically refresh histogram when data is modified");
-        autoRefreshHistoCheckBox.addActionListener(e -> {
-            final boolean value = autoRefreshHistoCheckBox.isSelected();
+        autoRefreshHistogramCheckBox = new JCheckBox("Refresh", pref.getBoolean(ID_AUTO_REFRESH, true));
+        autoRefreshHistogramCheckBox.setToolTipText("Automatically refresh histogram when data is modified");
+        autoRefreshHistogramCheckBox.addActionListener(e -> {
+            final boolean value = autoRefreshHistogramCheckBox.isSelected();
             if (value)
                 refreshAllHistogram();
             pref.putBoolean(ID_AUTO_REFRESH, value);
         });
-        if (autoRefreshHistoCheckBox.isSelected())
+        if (autoRefreshHistogramCheckBox.isSelected())
             refreshAllHistogram();
 
         autoBoundsCheckBox = new JCheckBox("Auto bounds", getPreferredAutoBounds());
-        autoBoundsCheckBox.setToolTipText("Automatically ajdust bounds when data is modified");
+        autoBoundsCheckBox.setToolTipText("Automatically adjust bounds when data is modified");
         autoBoundsCheckBox.addActionListener(e -> {
             final boolean value = autoBoundsCheckBox.isSelected();
 
             if (value) {
                 ThreadUtil.runSingle(boundsUpdater);
                 refreshAllHistogram();
-                autoRefreshHistoCheckBox.setSelected(true);
-                autoRefreshHistoCheckBox.setEnabled(false);
+                autoRefreshHistogramCheckBox.setSelected(true);
+                autoRefreshHistogramCheckBox.setEnabled(false);
             }
             else {
                 final boolean refreshValue = pref.getBoolean(ID_AUTO_REFRESH, true);
                 if (refreshValue)
                     refreshAllHistogram();
-                autoRefreshHistoCheckBox.setSelected(refreshValue);
-                autoRefreshHistoCheckBox.setEnabled(true);
+                autoRefreshHistogramCheckBox.setSelected(refreshValue);
+                autoRefreshHistogramCheckBox.setEnabled(true);
             }
 
             pref.putBoolean(ID_AUTO_BOUNDS, value);
@@ -250,10 +241,10 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
             logButton.setSelected(true);
         else
             linearButton.setSelected(true);
-        // force apply selected mode (no event dispatched on setSelected)
+        // apply selected mode (no event dispatched on setSelected)
         scaleTypeChanged(logButton.isSelected());
 
-        exportXLSButton = new IcyButton(SVGResource.FILE_SAVE);
+        exportXLSButton = new IcyButton(IcySVG.FILE_SAVE);
         exportXLSButton.setToolTipText("Export histogram data into an excel file");
         exportXLSButton.addActionListener(e -> {
             try {
@@ -262,13 +253,13 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
                         .getHistogram().getHistogram().doXLSExport();
             }
             catch (final Exception e1) {
-                MessageDialog.showDialog("Error", e1.getMessage(), MessageDialog.ERROR_MESSAGE);
+                MessageDialog.showDialog("Error", e1.getMessage(), JOptionPane.ERROR_MESSAGE);
             }
         });
 
         setLayout(new BorderLayout());
 
-        add(GuiUtil.createLineBoxPanel(autoRefreshHistoCheckBox, autoBoundsCheckBox, Box.createHorizontalGlue(),
+        add(GuiUtil.createLineBoxPanel(autoRefreshHistogramCheckBox, autoBoundsCheckBox, Box.createHorizontalGlue(),
                         Box.createHorizontalStrut(4), logButton, linearButton, Box.createHorizontalStrut(4), exportXLSButton),
                 BorderLayout.NORTH);
         add(bottomPane, BorderLayout.CENTER);
@@ -283,8 +274,8 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
             if (!seq.hasUserLUT() && autoBoundsCheckBox.isSelected()) {
                 ThreadUtil.runSingle(boundsUpdater);
                 refreshAllHistogram();
-                autoRefreshHistoCheckBox.setSelected(true);
-                autoRefreshHistoCheckBox.setEnabled(false);
+                autoRefreshHistogramCheckBox.setSelected(true);
+                autoRefreshHistogramCheckBox.setEnabled(false);
             }
 
             seq.addListener(this);
@@ -307,7 +298,7 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
         final Sequence sequence = getSequence();
 
         if (sequence != null) {
-            // byte data type ?
+            // byte data type?
             if (sequence.getDataType() == DataType.UBYTE) {
                 final int numChannel = getLut().getNumChannel();
 
@@ -358,11 +349,11 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
     }
 
     public boolean getAutoRefreshHistogram() {
-        return autoRefreshHistoCheckBox.isSelected();
+        return autoRefreshHistogramCheckBox.isSelected();
     }
 
     public void setAutoRefreshHistogram(final boolean value) {
-        autoRefreshHistoCheckBox.setSelected(value);
+        autoRefreshHistogramCheckBox.setSelected(value);
     }
 
     public boolean getLogScale() {
@@ -389,7 +380,7 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
     }
 
     @Override
-    public void colorMapChanged(final IcyColorMapEvent e) {
+    public void colorMapChanged(final @NonNull IcyColorMapEvent e) {
         switch (e.getType()) {
             case ENABLED_CHANGED:
                 ThreadUtil.runSingle(channelEnableUpdater);
@@ -413,7 +404,7 @@ public class LUTViewer extends JPanel implements IcyColorMapListener, SequenceLi
     }
 
     @Override
-    public void sequenceChanged(final SequenceEvent sequenceEvent) {
+    public void sequenceChanged(final @NonNull SequenceEvent sequenceEvent) {
         switch (sequenceEvent.getSourceType()) {
             case SEQUENCE_META:
                 ThreadUtil.runSingle(channelNameUpdater);

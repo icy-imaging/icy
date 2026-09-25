@@ -21,7 +21,7 @@ package fr.icy.model.colormap;
 import java.awt.*;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class FireColorMap extends IcyColorMap {

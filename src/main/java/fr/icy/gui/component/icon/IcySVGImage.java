@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,15 +18,14 @@
 
 package fr.icy.gui.component.icon;
 
+import fr.icy.model.image.ImageUtil;
 import org.apache.batik.gvt.renderer.ImageRenderer;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
-import fr.icy.model.image.ImageUtil;
-import fr.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -35,6 +34,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * BufferedImage from SVG content.
@@ -42,14 +43,16 @@ import java.nio.charset.StandardCharsets;
  * @author Thomas Musset
  * @since 3.0.0
  */
-public class IcySVGImage extends BufferedImage {
+public final class IcySVGImage extends BufferedImage {
+    private static final Logger LOGGER = Logger.getLogger(IcySVGImage.class.getName());
+
     private IcySVGImage(final String svgContent, final int width, final int height, final @Nullable Color color) {
         super(width, height, BufferedImage.TYPE_INT_ARGB);
 
         try {
             final PNGTranscoder transcoder = new PNGTranscoder() {
                 @Override
-                protected @NotNull ImageRenderer createRenderer() {
+                protected @NonNull ImageRenderer createRenderer() {
                     final ImageRenderer r = super.createRenderer();
 
                     final RenderingHints rh = r.getRenderingHints();
@@ -93,17 +96,17 @@ public class IcySVGImage extends BufferedImage {
                 getGraphics().drawImage(temp, 0, 0, null);
         }
         catch (final Exception e) {
-            IcyLogger.warn(this.getClass(), e, "Can't create SVG image from SVG content");
+            LOGGER.log(Level.WARNING, "Can't create SVG image from SVG content", e);
         }
     }
 
     @Contract("_, _, _ -> new")
-    static @NotNull IcySVGImage fromBytes(final byte @NotNull [] data, final int width, final int height) {
+    static @NonNull IcySVGImage fromBytes(final byte @NonNull [] data, final int width, final int height) {
         return new IcySVGImage(new String(data, StandardCharsets.UTF_8), width, height, null);
     }
 
     @Contract("_, _, _, _ -> new")
-    static @NotNull IcySVGImage fromBytes(final byte @NotNull [] data, final int width, final int height, final @NotNull Color color) {
+    static @NonNull IcySVGImage fromBytes(final byte @NonNull [] data, final int width, final int height, final @NonNull Color color) {
         return new IcySVGImage(new String(data, StandardCharsets.UTF_8), width, height, color);
     }
 }

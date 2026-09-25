@@ -30,7 +30,7 @@ import javax.swing.JOptionPane;
 /**
  * Simple dialog to let user select a file for save operation.
  * 
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class SaveDialog
 {
@@ -127,7 +127,7 @@ public class SaveDialog
      */
     public static String chooseFile(String defaultDir, String defaultName)
     {
-        return chooseFile("Save file...", defaultDir, defaultName);
+        return chooseFile("Save file…", defaultDir, defaultName);
     }
 
     /**
@@ -166,7 +166,7 @@ public class SaveDialog
      */
     public static String chooseFileForResult(String defaultName, String extension)
     {
-        return chooseFileForResult("Save file...", defaultName, extension);
+        return chooseFileForResult("Save file…", defaultName, extension);
     }
     
     /**
@@ -175,6 +175,6 @@ public class SaveDialog
      */
     public static String chooseFileForResult(String defaultName)
     {
-        return chooseFileForResult("Save file...", defaultName, null);
+        return chooseFileForResult("Save file…", defaultName, null);
     }
 }

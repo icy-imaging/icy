@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -23,10 +23,9 @@ import fr.icy.extension.ExtensionLoader;
 import fr.icy.io.FileUtil;
 import fr.icy.io.jar.JarUtil;
 import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,13 +38,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipFile;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ClassUtil {
+    private static final Logger LOGGER = Logger.getLogger(ClassUtil.class.getName());
+
     /**
      * Return the current thread context class loader
      */
@@ -65,7 +68,7 @@ public class ClassUtil {
      * not represent a primitive type
      */
     @Contract(pure = true)
-    public static @Nullable Class<?> getPrimitiveType(final @NotNull String primitiveName) {
+    public static @Nullable Class<?> getPrimitiveType(final @NonNull String primitiveName) {
         return switch (primitiveName) {
             case "byte" -> byte.class;
             case "short" -> short.class;
@@ -81,9 +84,9 @@ public class ClassUtil {
     }
 
     /**
-     * Get Class object of specified class name.<br>
+     * Get a Class object of a specified class name.<br>
      * First search in Plugin Class loader then from the system class loader.<br>
-     * Primitive type are accepted.
+     * Primitive types are accepted.
      */
     public static Class<?> findClass(final String className) throws ClassNotFoundException {
         try {
@@ -120,36 +123,36 @@ public class ClassUtil {
                 if (c != null)
                     return c;
 
-                // try with primitive type...
+                // try with primitive type…
                 final Class<?> result = getPrimitiveType(className);
 
                 if (result != null)
                     return result;
 
-                // last luck...
+                // last luck…
                 return Class.forName(className);
             }
         }
     }
 
     /**
-     * Transform the specified path in qualified name.<br>
+     * Transform the specified path in a qualified name.<br>
      * <br>
-     * ex : "document/class/loader.class" --&gt; "document.class.loader.class" (unix)
+     * ex: "document/class/loader.class" --&gt; "document.class.loader.class" (unix)
      * "document\class\loader.class" --&gt; "document.class.loader.class" (win)
      */
-    public static @NotNull String getQualifiedNameFromPath(final String path) {
+    public static @NonNull String getQualifiedNameFromPath(final String path) {
         return FileUtil.getGenericPath(path).replace(FileUtil.separatorChar, '.');
     }
 
     /**
-     * Transform the specified qualified name in path.<br>
-     * Be careful, this function do not handle the file extension.<br>
+     * Transform the specified qualified name in a path.<br>
+     * Be careful, this function does not handle the file extension.<br>
      * <br>
      * ex : "plugins.user.loader.test" --&gt; "plugins/user/loader/test"
      */
     @Contract(pure = true)
-    public static @NotNull String getPathFromQualifiedName(final @NotNull String qualifiedName) {
+    public static @NonNull String getPathFromQualifiedName(final @NonNull String qualifiedName) {
         return qualifiedName.replace('.', FileUtil.separatorChar);
     }
 
@@ -157,7 +160,7 @@ public class ClassUtil {
      * Get package name<br>
      * ex : "plugin.test.myClass" --&gt; "plugin.test"
      */
-    public static @NotNull String getPackageName(final @NotNull String className) {
+    public static @NonNull String getPackageName(final @NonNull String className) {
         final int index = className.lastIndexOf('.');
 
         if (index != -1)
@@ -170,7 +173,7 @@ public class ClassUtil {
      * Get first package name<br>
      * ex : "plugin.test.myClass" --&gt; "plugin"
      */
-    public static @NotNull String getFirstPackageName(final String className) {
+    public static @NonNull String getFirstPackageName(final String className) {
         final String packageName = getPackageName(className);
         final int index = packageName.lastIndexOf('.');
 
@@ -184,8 +187,8 @@ public class ClassUtil {
      * Get the base class name<br>
      * ex : "plugin.myClass$InternClass$1" --&gt; "plugin.myClass"
      */
-    public static @NotNull String getBaseClassName(final @NotNull String className) {
-        // handle inner classes...
+    public static @NonNull String getBaseClassName(final @NonNull String className) {
+        // handle inner classes…
         final int lastDollar = className.indexOf('$');
         if (lastDollar > 0)
             return className.substring(0, lastDollar);
@@ -194,10 +197,10 @@ public class ClassUtil {
     }
 
     /**
-     * Get simple class name<br>
+     * Get a simple class name<br>
      * ex : "plugin.test.myClass$InternClass$1" --&gt; "myClass$InternClass$1"
      */
-    public static @NotNull String getSimpleClassName(final @NotNull String className) {
+    public static @NonNull String getSimpleClassName(final @NonNull String className) {
         final int index = className.lastIndexOf('.');
 
         if (index != -1)
@@ -209,7 +212,7 @@ public class ClassUtil {
     /**
      * Returns the source JAR file (if any) from where the specified class has been loaded from
      */
-    public static @NotNull String getJarPath(final @NotNull Class<?> c) {
+    public static @NonNull String getJarPath(final @NonNull Class<?> c) {
         final URL url = c.getResource('/' + c.getName().replace('.', '/') + ".class");
 
         // JAR url ?
@@ -238,7 +241,7 @@ public class ClassUtil {
      * Return true if clazz implements the specified interface
      */
     @Contract(value = "null -> new", pure = true)
-    public static Class<?> @NotNull [] getInterfaces(final Class<?> c) {
+    public static Class<?> @NonNull [] getInterfaces(final Class<?> c) {
         if (c == null)
             return new Class[0];
 
@@ -246,8 +249,9 @@ public class ClassUtil {
     }
 
     /**
-     * Return true if class is abstract
+     * Return true if the class is abstract
      */
+    @Contract("null -> false")
     public static boolean isAbstract(final Class<?> c) {
         if (c == null)
             return false;
@@ -256,8 +260,9 @@ public class ClassUtil {
     }
 
     /**
-     * Return true if class is public
+     * Return true if the class is public
      */
+    @Contract("null -> false")
     public static boolean isPublic(final Class<?> c) {
         if (c == null)
             return false;
@@ -266,8 +271,9 @@ public class ClassUtil {
     }
 
     /**
-     * Return true if class is private
+     * Return true if the class is private
      */
+    @Contract("null -> false")
     public static boolean isPrivate(final Class<?> c) {
         if (c == null)
             return false;
@@ -278,6 +284,7 @@ public class ClassUtil {
     /**
      * Return true if clazz is the same class or extends baseClass
      */
+    @Contract(value = "null, _ -> false; !null, null -> false", pure = true)
     public static boolean isSubClass(final Class<?> clazz, final Class<?> baseClass) {
         if ((clazz == null) || (baseClass == null))
             return false;
@@ -289,20 +296,20 @@ public class ClassUtil {
      * This method returns all resources that are located in the package identified by the given
      * <code>packageName</code>.<br>
      * <b>WARNING:</b><br>
-     * This is a relative expensive operation. Depending on your classpath multiple directories, JAR and WAR files may
+     * This is a relatively expensive operation. Depending on your classpath multiple directories, JAR and WAR files may
      * need to be scanned.<br>
-     * Original code written by Jorg Hohwiller for the m-m-m project (http://m-m-m.sf.net)
+     * Original code written by Jorg Hohwiller for the m-m-m project (<a href="http://m-m-m.sf.net">http://m-m-m.sf.net</a>)
      *
      * @param packageName   is the name of the {@link Package} to scan (ex: "java.awt.metrics")
      * @param extension     resource extension if we want to retrieve only a specific type of resource (ex: ".class")<br>
-     *                      Note that extension filtering is not case sensitive.
+     *                      Note that extension filtering is not case-sensitive.
      * @param recursive     if set to <code>true</code> files from sub packages/folder are also returned.
-     * @param includeFolder if <code>true</code> folder entry are also returned
+     * @param includeFolder if <code>true</code> folder entries are also returned
      * @param includeJar    if <code>true</code> all sub JAR files are also scanned
      * @param includeHidden if <code>true</code> all hidden files (starting by '.' character) are also scanned
      * @return all files contained in this package represented in path format (ex: "java/awt/geom/Rectangle2D.class")
      */
-    public static @NotNull List<String> getResourcesInPackage(final String packageName, final String extension, final boolean recursive, final boolean includeFolder, final boolean includeJar, final boolean includeHidden) throws IOException {
+    public static @NonNull List<String> getResourcesInPackage(final String packageName, final String extension, final boolean recursive, final boolean includeFolder, final boolean includeJar, final boolean includeHidden) throws IOException {
         final List<String> result = new ArrayList<>();
 
         getResourcesInPackage(packageName, extension, recursive, includeFolder, includeJar, includeHidden, result);
@@ -367,12 +374,12 @@ public class ClassUtil {
      * This method returns all resources that are located in the specified path.<br>
      *
      * @param path          path to scan.
-     * @param recursive     if <code>true</code> all sub folder are also scanned.
+     * @param recursive     if <code>true</code> all subfolder are also scanned.
      * @param includeJar    if <code>true</code> all JAR files are also scanned
      * @param includeHidden if <code>true</code> all hidden files (starting by '.' character) are also scanned
      * @return list of found resources.
      */
-    public static @NotNull List<String> getResourcesInPath(final String path, final boolean recursive, final boolean includeFolder, final boolean includeJar, final boolean includeHidden) {
+    public static @NonNull List<String> getResourcesInPath(final String path, final boolean recursive, final boolean includeFolder, final boolean includeJar, final boolean includeHidden) {
         final List<String> result = new ArrayList<>();
 
         getResourcesInPath(path, ClassUtil.getQualifiedNameFromPath(path), recursive, includeFolder, includeJar, includeHidden, result);
@@ -385,12 +392,12 @@ public class ClassUtil {
      *
      * @param path          path to scan.
      * @param basePath      path prefix
-     * @param recursive     if <code>true</code> all sub folder are also scanned.
+     * @param recursive     if <code>true</code> all subfolder are also scanned.
      * @param includeJar    if <code>true</code> all JAR files are also scanned
      * @param includeHidden if <code>true</code> all hidden files (starting by '.' character) are also scanned
      * @return list of found class.
      */
-    public static @NotNull List<String> getResourcesInPath(final String path, final String basePath, final boolean recursive, final boolean includeFolder, final boolean includeJar, final boolean includeHidden) {
+    public static @NonNull List<String> getResourcesInPath(final String path, final String basePath, final boolean recursive, final boolean includeFolder, final boolean includeJar, final boolean includeHidden) {
         final List<String> result = new ArrayList<>();
 
         getResourcesInPath(path, basePath, recursive, includeFolder, includeJar, includeHidden, result);
@@ -403,7 +410,7 @@ public class ClassUtil {
      *
      * @param path          path to scan.
      * @param basePath      path prefix
-     * @param recursive     if <code>true</code> all sub folder are also scanned.
+     * @param recursive     if <code>true</code> all subfolder are also scanned.
      * @param includeJar    if <code>true</code> all JAR files are also scanned
      * @param includeHidden if <code>true</code> all hidden files (starting by '.' character) are also scanned
      * @param result        result list
@@ -429,7 +436,7 @@ public class ClassUtil {
             findResourceInFile(file, includeJar, includeHidden, result, qualifiedPath);
     }
 
-    private static void findResourcesRecursive(final @NotNull File directory, final boolean includeFolder, final boolean includeJar, final boolean includeHidden, final List<String> result, final String basePath) {
+    private static void findResourcesRecursive(final @NonNull File directory, final boolean includeFolder, final boolean includeJar, final boolean includeHidden, final List<String> result, final String basePath) {
         for (final File childFile : Objects.requireNonNull(directory.listFiles())) {
             final String childFilename = childFile.getName();
 
@@ -442,7 +449,7 @@ public class ClassUtil {
                 if (includeFolder)
                     result.add(basePath + childFilename);
 
-                // then search in sub folder
+                // then search in subfolder
                 findResourcesRecursive(childFile, includeJar, includeFolder, includeHidden, result,
                         basePath + childFilename + '/');
             }
@@ -452,9 +459,9 @@ public class ClassUtil {
     }
 
     /**
-     * Search for all classes in specified file
+     * Search for all classes in the specified file
      */
-    public static void findResourceInFile(final @NotNull File file, final boolean includeJar, final boolean includeHidden, final List<String> result, final String basePath) {
+    public static void findResourceInFile(final @NonNull File file, final boolean includeJar, final boolean includeHidden, final List<String> result, final String basePath) {
         final String shortName = file.getName();
 
         if (!includeHidden && shortName.startsWith("."))
@@ -474,8 +481,8 @@ public class ClassUtil {
      * This method finds all classes that are located in the package identified by the given
      * <code>packageName</code>.<br>
      * <b>ATTENTION:</b><br>
-     * This is a relative expensive operation. Depending on your classpath multiple
-     * directories,JAR-, and WAR-files may need to be scanned. <br>
+     * This is a relatively expensive operation. Depending on your classpath multiple
+     * directories, JAR-, and WAR-files may need to be scanned. <br>
      *
      * @param packageName        is the name of the {@link Package} to scan.
      * @param includeSubPackages - if <code>true</code> all sub-packages of the specified {@link Package} will be
@@ -483,7 +490,7 @@ public class ClassUtil {
      * @return found classes set
      * @throws IOException if the operation failed with an I/O error.
      */
-    public static @NotNull Set<String> findClassNamesInPackage(final String packageName, final boolean includeSubPackages) throws IOException {
+    public static @NonNull Set<String> findClassNamesInPackage(final String packageName, final boolean includeSubPackages) throws IOException {
         final HashSet<String> classes = new HashSet<>();
 
         findClassNamesInPackage(packageName, includeSubPackages, classes);
@@ -495,8 +502,8 @@ public class ClassUtil {
      * This method finds all classes that are located in the package identified by the given
      * <code>packageName</code>.<br>
      * <b>ATTENTION:</b><br>
-     * This is a relative expensive operation. Depending on your classpath multiple
-     * directories,JAR-, and WAR-files may need to be scanned. <br>
+     * This is a relatively expensive operation. Depending on your classpath multiple
+     * directories, JAR-, and WAR-files may need to be scanned. <br>
      * Original code written by Jorg Hohwiller for the m-m-m project (<a href="https://m-m-m.sourceforge.net">https://m-m-m.sourceforge.net</a>)
      *
      * @param packageName        is the name of the {@link Package} to scan.
@@ -559,10 +566,10 @@ public class ClassUtil {
      * This method finds all classes that are located in the specified directory.<br>
      *
      * @param path          path to scan.
-     * @param includeSubDir if <code>true</code> all sub-directory are also scanned.
+     * @param includeSubDir if <code>true</code> all subdirectory are also scanned.
      * @return set of found class.
      */
-    public static @NotNull HashSet<String> findClassNamesInPath(final String path, final boolean includeSubDir) {
+    public static @NonNull HashSet<String> findClassNamesInPath(final String path, final boolean includeSubDir) {
         return findClassNamesInPath(path, ClassUtil.getQualifiedNameFromPath(path), includeSubDir, true);
     }
 
@@ -570,11 +577,11 @@ public class ClassUtil {
      * This method finds all classes that are located in the specified directory.<br>
      *
      * @param path          path to scan.
-     * @param includeSubDir if <code>true</code> all sub-directory are also scanned.
+     * @param includeSubDir if <code>true</code> all subdirectory are also scanned.
      * @param includeJar    if <code>true</code> all JAR files are also scanned
      * @return set of found class.
      */
-    public static @NotNull HashSet<String> findClassNamesInPath(final String path, final boolean includeSubDir, final boolean includeJar) {
+    public static @NonNull HashSet<String> findClassNamesInPath(final String path, final boolean includeSubDir, final boolean includeJar) {
         return findClassNamesInPath(path, ClassUtil.getQualifiedNameFromPath(path), includeSubDir, includeJar);
     }
 
@@ -583,10 +590,10 @@ public class ClassUtil {
      *
      * @param path          path to scan.
      * @param packageName   package name prefix
-     * @param includeSubDir if <code>true</code> all sub-directory are also scanned.
+     * @param includeSubDir if <code>true</code> all subdirectory are also scanned.
      * @return set of found class.
      */
-    public static @NotNull HashSet<String> findClassNamesInPath(final String path, final String packageName, final boolean includeSubDir) {
+    public static @NonNull HashSet<String> findClassNamesInPath(final String path, final String packageName, final boolean includeSubDir) {
         final HashSet<String> classes = new HashSet<>();
 
         findClassNamesInPath(path, packageName, includeSubDir, true, classes);
@@ -599,11 +606,11 @@ public class ClassUtil {
      *
      * @param path          path to scan.
      * @param packageName   package name prefix
-     * @param includeSubDir if <code>true</code> all sub-directory are also scanned.
+     * @param includeSubDir if <code>true</code> all subdirectory are also scanned.
      * @param includeJar    if <code>true</code> all JAR files are also scanned
      * @return set of found class.
      */
-    public static @NotNull HashSet<String> findClassNamesInPath(final String path, final String packageName, final boolean includeSubDir, final boolean includeJar) {
+    public static @NonNull HashSet<String> findClassNamesInPath(final String path, final String packageName, final boolean includeSubDir, final boolean includeJar) {
         final HashSet<String> classes = new HashSet<>();
 
         findClassNamesInPath(path, packageName, includeSubDir, includeJar, classes);
@@ -616,7 +623,7 @@ public class ClassUtil {
      *
      * @param path          path to scan.
      * @param packageName   package name prefix
-     * @param includeSubDir if <code>true</code> all sub-directory are also scanned.
+     * @param includeSubDir if <code>true</code> all subdirectory are also scanned.
      * @param classes       save found classes here
      */
     public static void findClassNamesInPath(final String path, final String packageName, final boolean includeSubDir, final Set<String> classes) {
@@ -628,7 +635,7 @@ public class ClassUtil {
      *
      * @param path          path to scan.
      * @param packageName   package name prefix
-     * @param includeSubDir if <code>true</code> all sub-directory are also scanned.
+     * @param includeSubDir if <code>true</code> all subdirectory are also scanned.
      * @param includeJar    if <code>true</code> all JAR files are also scanned
      * @param classes       save found classes here
      */
@@ -652,7 +659,7 @@ public class ClassUtil {
             findClassNameInFile(dir, classes, qualifiedName);
     }
 
-    private static void findClassNamesRecursive(final @NotNull File directory, final boolean includeJar, final Set<String> classSet, final String qualifiedName) {
+    private static void findClassNamesRecursive(final @NonNull File directory, final boolean includeJar, final Set<String> classSet, final String qualifiedName) {
         for (final File childFile : Objects.requireNonNull(directory.listFiles())) {
             final String childFilename = childFile.getName();
 
@@ -667,9 +674,9 @@ public class ClassUtil {
     }
 
     /**
-     * Search for all classes in specified file
+     * Search for all classes in the specified file
      */
-    public static void findClassNameInFile(final @NotNull File file, final boolean includeJar, final Set<String> classSet, final String qualifiedNamePrefix) {
+    public static void findClassNameInFile(final @NonNull File file, final boolean includeJar, final Set<String> classSet, final String qualifiedNamePrefix) {
         final String fileName = file.getPath();
         if (FileUtil.getFileExtension(fileName, false).equalsIgnoreCase("jar")) {
             if (includeJar)
@@ -680,14 +687,14 @@ public class ClassUtil {
     }
 
     /**
-     * Search for all classes in specified file
+     * Search for all classes in the specified file
      */
     public static void findClassNameInFile(final File file, final Set<String> classSet, final String qualifiedNamePrefix) {
         findClassNameInFile(file, true, classSet, qualifiedNamePrefix);
     }
 
     /**
-     * Search for all classes in JAR file
+     * Search for all classes in the JAR file
      */
     public static void findClassNamesInJAR(final String fileName, final Set<String> classSet) {
         final JarFile jarFile;
@@ -696,7 +703,7 @@ public class ClassUtil {
             jarFile = new JarFile(new File(fileName), true, ZipFile.OPEN_READ, Runtime.version());
         }
         catch (final IOException e) {
-            IcyLogger.error(ClassUtil.class, e, "Cannot open " + fileName + ".");
+            LOGGER.log(Level.SEVERE, "Cannot open " + fileName + ".", e);
             return;
         }
 
@@ -717,9 +724,9 @@ public class ClassUtil {
     }
 
     /**
-     * Search for all classes in JAR file
+     * Search for all classes in the JAR file
      */
-    public static @NotNull Set<String> findClassNamesInJAR(final String fileName) {
+    public static @NonNull Set<String> findClassNamesInJAR(final String fileName) {
         final HashSet<String> result = new HashSet<>();
 
         findClassNamesInJAR(fileName, result);
@@ -741,8 +748,8 @@ public class ClassUtil {
      * @return the according Java {@link Class#getName() class-name} for the given <code>fileName</code> if it is a
      * class-file that is no anonymous {@link Class}, else <code>null</code>.
      */
-    public static @Nullable String filenameToClassname(final @NotNull String fileName) {
-        // class file ?
+    public static @Nullable String filenameToClassname(final @NonNull String fileName) {
+        // class file?
         if (fileName.toLowerCase().endsWith(".class"))
             // remove ".class" extension and fix classname
             return fixClassName(fileName.substring(0, fileName.length() - 6));
@@ -758,11 +765,11 @@ public class ClassUtil {
      * @return the according Java {@link Class#getName() class-name} for the given <code>fileName</code> if it is a
      * class-file that is no anonymous {@link Class}, else <code>null</code>.
      */
-    public static @Nullable String fixClassName(final @NotNull String fileName) {
+    public static @Nullable String fixClassName(final @NonNull String fileName) {
         // replace path separator by package separator
         final String result = fileName.replace('/', '.');
 
-        // handle inner classes...
+        // handle inner classes…
         final int lastDollar = result.lastIndexOf('$');
         if (lastDollar > 0) {
             final char innerChar = result.charAt(lastDollar + 1);
@@ -778,7 +785,7 @@ public class ClassUtil {
     }
 
     /**
-     * Find the file (.jar or .class usually) that host this class.
+     * Find the file (.jar or .class usually) that hosts this class.
      *
      * @param fullClassName The class name to look for.
      * @return The File that contains this class.
@@ -806,7 +813,7 @@ public class ClassUtil {
         }
         catch (final Exception e) {
             // ignore
-            IcyLogger.warn(ClassUtil.class, e, e.getLocalizedMessage());
+            LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
         }
 
         return null;

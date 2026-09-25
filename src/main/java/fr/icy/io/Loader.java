@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -40,12 +40,13 @@ import fr.icy.model.image.ImageProvider;
 import fr.icy.model.sequence.*;
 import fr.icy.system.IcyExceptionHandler;
 import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.GeneralPreferences;
 import fr.icy.system.thread.ThreadUtil;
 import loci.formats.ome.OMEXMLMetadataImpl;
 import ome.xml.meta.OMEXMLMetadata;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.*;
 import java.io.File;
@@ -54,15 +55,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Sequence / Image loader class.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class Loader {
+    private static final Logger LOGGER = Logger.getLogger(Loader.class.getName());
+
     /**
      * XML, XLS and TXT file can be image metadata files used to open the whole image, accept it !
      */
@@ -74,18 +79,13 @@ public class Loader {
     private static final Set<String> reportedImporterPlugins = new HashSet<>();
     private static final Set<String> warnedImporterPlugins = new HashSet<>();
 
-    private static void handleImporterError(final PluginDescriptor plugin, final Throwable t) {
+    private static void handleImporterError(final @NonNull PluginDescriptor plugin, final Throwable t) {
         final String pluginId = plugin.getName() + " " + plugin.getVersion();
 
         if (t instanceof UnsupportedClassVersionError) {
             if (!warnedImporterPlugins.contains(pluginId)) {
                 // show a specific message in the output console
-                IcyLogger.warn(
-                        Loader.class,
-                        t,
-                        "Plugin '" + plugin.getName() + "' " + plugin.getVersion() + " is not compatible with java " + ((int) Math.floor(SystemUtil.getJavaVersionAsNumber())),
-                        "You need to install a newer version of java to use it."
-                );
+                LOGGER.log(Level.SEVERE, "Plugin '" + plugin.getName() + "' " + plugin.getVersion() + " is not compatible with java " + ((int) Math.floor(SystemUtil.getJavaVersionAsNumber())) + ". You need to install a newer version of java to use it.", t);
 
                 // add to the list of warned plugins
                 warnedImporterPlugins.add(pluginId);
@@ -94,7 +94,7 @@ public class Loader {
         else {
             if (!reportedImporterPlugins.contains(pluginId)) {
                 // show a message in the output console
-                IcyLogger.error(Loader.class, t, t.getLocalizedMessage());
+                LOGGER.log(Level.SEVERE, t.getLocalizedMessage(), t);
                 // and send an error report (silent as we don't want a dialog appearing here)
                 IcyExceptionHandler.report(plugin, IcyExceptionHandler.getErrorMessage(t, true));
 
@@ -107,7 +107,7 @@ public class Loader {
     /**
      * Returns all available resource importer.
      */
-    public static @NotNull List<Importer> getImporters() {
+    public static @NonNull List<Importer> getImporters() {
         final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(Importer.class);
         final List<Importer> result = new ArrayList<>();
 
@@ -127,7 +127,7 @@ public class Loader {
     /**
      * Returns all available resource (non image) importer which take file as input.
      */
-    public static @NotNull List<FileImporter> getFileImporters() {
+    public static @NonNull List<FileImporter> getFileImporters() {
         final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(FileImporter.class);
         final List<FileImporter> result = new ArrayList<>();
 
@@ -154,7 +154,7 @@ public class Loader {
      *                      otherwise a dialog appears to let the user to choose the correct importer when
      *                      severals importers match for a file.
      */
-    public static @NotNull Map<FileImporter, List<String>> getFileImporters(final @NotNull List<FileImporter> importers, final @NotNull List<String> paths, final boolean useFirstFound) {
+    public static @NonNull Map<FileImporter, List<String>> getFileImporters(final @NonNull List<FileImporter> importers, final @NonNull List<String> paths, final boolean useFirstFound) {
         final Map<FileImporter, List<String>> result = new HashMap<>(importers.size());
         final Map<String, FileImporter> extensionImporters = new HashMap<>(importers.size());
 
@@ -198,14 +198,14 @@ public class Loader {
      *                      otherwise a dialog appears to let the user to choose the correct importer when
      *                      severals importers match for a file.
      */
-    public static Map<FileImporter, List<String>> getFileImporters(final List<String> paths, final boolean useFirstFound) {
+    public static @NonNull Map<FileImporter, List<String>> getFileImporters(final List<String> paths, final boolean useFirstFound) {
         return getFileImporters(getFileImporters(), paths, useFirstFound);
     }
 
     /**
      * Returns all file importer which can open the specified file.
      */
-    public static List<FileImporter> getFileImporters(final List<FileImporter> importers, final String path) {
+    public static @NonNull List<FileImporter> getFileImporters(final @NonNull List<FileImporter> importers, final String path) {
         final List<FileImporter> result = new ArrayList<>(importers.size());
 
         for (final FileImporter importer : importers)
@@ -218,7 +218,7 @@ public class Loader {
     /**
      * Returns all file importer which can open the specified file.
      */
-    public static List<FileImporter> getFileImporters(final String path) {
+    public static @NonNull List<FileImporter> getFileImporters(final String path) {
         return getFileImporters(getFileImporters(), path);
     }
 
@@ -233,7 +233,7 @@ public class Loader {
      *                      severals importers match.
      * @see #getFileImporters(List, String)
      */
-    public static FileImporter getFileImporter(final @NotNull List<FileImporter> importers, final String path, final boolean useFirstFound) {
+    public static FileImporter getFileImporter(final @NonNull List<FileImporter> importers, final String path, final boolean useFirstFound) {
         final List<FileImporter> result = new ArrayList<>(importers.size());
 
         for (final FileImporter importer : importers) {
@@ -266,8 +266,8 @@ public class Loader {
     /**
      * Display a dialog to let the user select the appropriate file importer for the specified file.
      */
-    public static FileImporter selectFileImporter(final List<FileImporter> importers, final String path) {
-        if (importers.size() == 0)
+    public static @Nullable FileImporter selectFileImporter(final @NonNull List<FileImporter> importers, final String path) {
+        if (importers.isEmpty())
             return null;
         if (importers.size() == 1)
             return importers.get(0);
@@ -289,7 +289,7 @@ public class Loader {
     /**
      * Returns all available sequence importer (different from {@link SequenceIdImporter} or {@link SequenceFileImporter}).
      */
-    public static @NotNull List<SequenceImporter> getSequenceImporters() {
+    public static @NonNull List<SequenceImporter> getSequenceImporters() {
         final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(SequenceImporter.class);
         final List<SequenceImporter> result = new ArrayList<>();
 
@@ -312,7 +312,7 @@ public class Loader {
      *
      * @see #getSequenceFileImporters()
      */
-    public static @NotNull List<SequenceIdImporter> getSequenceIdImporters() {
+    public static @NonNull List<SequenceIdImporter> getSequenceIdImporters() {
         final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(SequenceIdImporter.class);
         final List<SequenceIdImporter> result = new ArrayList<>();
 
@@ -334,7 +334,7 @@ public class Loader {
      *
      * @see #getSequenceIdImporters()
      */
-    public static @NotNull List<SequenceFileImporter> getSequenceFileImporters() {
+    public static @NonNull List<SequenceFileImporter> getSequenceFileImporters() {
         final Set<PluginDescriptor> plugins = ExtensionLoader.getPlugins(SequenceFileImporter.class);
         final List<SequenceFileImporter> result = new ArrayList<>();
 
@@ -361,7 +361,7 @@ public class Loader {
      *                      otherwise a dialog appears to let the user to choose the correct importer when
      *                      severals importers match for a path.
      */
-    public static <T extends SequenceFileImporter> @NotNull Map<T, List<String>> getSequenceFileImporters(final @NotNull List<T> importers, final @NotNull List<String> paths, final boolean useFirstFound) {
+    public static <T extends SequenceFileImporter> @NonNull Map<T, List<String>> getSequenceFileImporters(final @NonNull List<T> importers, final @NonNull List<String> paths, final boolean useFirstFound) {
         final Map<T, List<String>> result = new HashMap<>(importers.size());
         final Map<String, T> extensionImporters = new HashMap<>(importers.size());
         T imp = null;
@@ -413,7 +413,7 @@ public class Loader {
      * @param useFirstFound if set to <code>true</code> then the first matching importer is automatically selected
      *                      otherwise a dialog appears to let the user to choose the correct importer when severals importers match for a file.
      */
-    public static Map<SequenceFileImporter, List<String>> getSequenceFileImporters(final SequenceFileImporter defaultImporter, final List<String> paths, final boolean grouped, final boolean useFirstFound) {
+    public static @NonNull Map<SequenceFileImporter, List<String>> getSequenceFileImporters(final SequenceFileImporter defaultImporter, final @NonNull List<String> paths, final boolean grouped, final boolean useFirstFound) {
         if (paths.isEmpty())
             return new HashMap<>();
 
@@ -456,14 +456,14 @@ public class Loader {
      *                      otherwise a dialog appears to let the user to choose the correct importer when
      *                      severals importers match for a file.
      */
-    public static Map<SequenceFileImporter, List<String>> getSequenceFileImporters(final List<String> paths, final boolean useFirstFound) {
+    public static @NonNull Map<SequenceFileImporter, List<String>> getSequenceFileImporters(final List<String> paths, final boolean useFirstFound) {
         return getSequenceFileImporters(getSequenceFileImporters(), paths, useFirstFound);
     }
 
     /**
      * Returns all sequence file importer which can open the specified path.
      */
-    public static <T extends SequenceFileImporter> List<T> getSequenceFileImporters(final List<T> importers, final String path) {
+    public static <T extends SequenceFileImporter> @NonNull List<T> getSequenceFileImporters(final @NonNull List<T> importers, final String path) {
         final List<T> result = new ArrayList<>(importers.size());
 
         for (final T importer : importers)
@@ -476,7 +476,7 @@ public class Loader {
     /**
      * Returns all sequence file importer which can open the specified file path.
      */
-    public static List<SequenceFileImporter> getSequenceFileImporters(final String path) {
+    public static @NonNull List<SequenceFileImporter> getSequenceFileImporters(final String path) {
         return getSequenceFileImporters(getSequenceFileImporters(), path);
     }
 
@@ -493,7 +493,7 @@ public class Loader {
      *                      severals importers match.
      * @see #getSequenceFileImporters(List, String)
      */
-    public static <T extends SequenceFileImporter> T getSequenceFileImporter(final List<T> importers, final String path, final boolean useFirstFound) {
+    public static <T extends SequenceFileImporter> T getSequenceFileImporter(final @NonNull List<T> importers, final String path, final boolean useFirstFound) {
         final List<T> result = new ArrayList<>(importers.size());
 
         for (final T importer : importers) {
@@ -529,8 +529,8 @@ public class Loader {
      * Display a dialog to let the user select the appropriate sequence file importer for the given file path.
      */
     @SuppressWarnings("unchecked")
-    public static <T extends SequenceFileImporter> T selectSequenceFileImporter(final List<T> importers, final String path) {
-        if (importers.size() == 0)
+    public static <T extends SequenceFileImporter> @Nullable T selectSequenceFileImporter(final @NonNull List<T> importers, final String path) {
+        if (importers.isEmpty())
             return null;
         if (importers.size() == 1)
             return importers.get(0);
@@ -555,6 +555,7 @@ public class Loader {
         return (T) result[0];
     }
 
+    @Contract("null -> null")
     public static <T extends SequenceFileImporter> T cloneSequenceFileImporter(final T importer) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         if (importer == null)
             return null;
@@ -600,7 +601,7 @@ public class Loader {
 
     /**
      * @return <code>true</code> if the specified path describes an image file type (from extension) which
-     * is well known to store usable metadata for image processing (image source, pixel size...)<br>
+     * is well known to store usable metadata for image processing (image source, pixel size…)<br>
      * For instance <i>jpg</i>, <i>png</i> or <i>avi</i> files doesn't not store useful metadata while <i>tif</i> does.
      */
     public static boolean hasMetadata(final String path) {
@@ -612,7 +613,7 @@ public class Loader {
     /**
      * Returns path which are supported by the specified imported for the given list of paths.
      */
-    public static List<String> getSupportedFiles(final SequenceFileImporter importer, final List<String> paths) {
+    public static @NonNull List<String> getSupportedFiles(final SequenceFileImporter importer, final @NonNull List<String> paths) {
         final List<String> result = new ArrayList<>();
 
         for (final String path : paths) {
@@ -641,7 +642,7 @@ public class Loader {
         // size of XY plane
         long sizeXY = (long) sizeX * (long) sizeY;
         // wanted resolution
-        sizeXY /= Math.pow(4, resolution);
+        sizeXY /= (long) Math.pow(4, resolution);
 
         // we can't handle that plane size
         if (sizeXY > Integer.MAX_VALUE)
@@ -672,7 +673,7 @@ public class Loader {
      * @throws UnsupportedOperationException if the XY plane size is &gt;= 2^31 pixels
      * @throws OutOfMemoryError              if there is not enough memory to open the image
      */
-    public static void checkOpening(final int resolution, final int sizeX, final int sizeY, final int sizeC, final int sizeZ, final int sizeT, final DataType dataType, final String messageSuffix) throws UnsupportedOperationException, OutOfMemoryError {
+    public static void checkOpening(final int resolution, final int sizeX, final int sizeY, final int sizeC, final int sizeZ, final int sizeT, final @NonNull DataType dataType, final String messageSuffix) throws UnsupportedOperationException, OutOfMemoryError {
         final long sizeXY = checkOpeningPlane(resolution, sizeX, sizeY, messageSuffix);
 
         // get free memory
@@ -743,7 +744,7 @@ public class Loader {
      * It can returns <code>null</code> if the specified file is not a valid or supported) image
      * file.
      */
-    public static OMEXMLMetadata getOMEXMLMetaData(final SequenceFileImporter importer, final String path) throws Exception {
+    public static @Nullable OMEXMLMetadata getOMEXMLMetaData(final @NonNull SequenceFileImporter importer, final String path) throws Exception {
         if (importer.open(path, 0)) {
             try (importer) {
                 return importer.getOMEXMLMetaData();
@@ -758,7 +759,7 @@ public class Loader {
      * It can returns <code>null</code> if the specified file is not a valid or supported) image
      * file.
      */
-    public static OMEXMLMetadata getOMEXMLMetaData(final String path) throws Exception {
+    public static @NonNull OMEXMLMetadata getOMEXMLMetaData(final String path) throws Exception {
         OMEXMLMetadata result;
         UnsupportedFormatException lastError = null;
 
@@ -786,7 +787,7 @@ public class Loader {
      * @param series   Series index we want to retrieve thumbnail from (for multi series image).<br>
      *                 Set to 0 if unsure.
      */
-    public static IcyBufferedImage loadThumbnail(final SequenceFileImporter importer, final String path, final int series) throws Exception {
+    public static @Nullable IcyBufferedImage loadThumbnail(final @NonNull SequenceFileImporter importer, final String path, final int series) throws Exception {
         if (importer.open(path, 0)) {
             try (importer) {
                 return importer.getThumbnail(series);
@@ -803,7 +804,7 @@ public class Loader {
      * @param series Series index we want to retrieve thumbnail from (for multi series image).<br>
      *               Set to 0 if unsure.
      */
-    public static IcyBufferedImage loadThumbnail(final String path, final int series) throws Exception {
+    public static @NonNull IcyBufferedImage loadThumbnail(final String path, final int series) throws Exception {
         IcyBufferedImage result;
         UnsupportedFormatException lastError = null;
 
@@ -833,6 +834,7 @@ public class Loader {
      * @param z        Z position of the image to open.
      * @param t        T position of the image to open.
      */
+    @Contract("null, _, _, _, _ -> fail")
     public static IcyBufferedImage loadImage(final SequenceFileImporter importer, final String path, final int series, final int z, final int t) throws Exception {
         if ((importer == null) || !importer.open(path, 0))
             throw new UnsupportedFormatException("Image file '" + path + "' is not supported !");
@@ -887,7 +889,7 @@ public class Loader {
      * @param addToRecent   If set to true the files list will be traced in recent opened sequence.
      * @param showProgress  Show progression of loading process.
      */
-    public static List<Sequence> loadSequences(final SequenceFileImporter importer, final List<String> paths, final int series, final boolean forceVolatile, final boolean separate, final boolean autoOrder, final boolean addToRecent, final boolean showProgress) {
+    public static @NonNull List<Sequence> loadSequences(final SequenceFileImporter importer, final @NonNull List<String> paths, final int series, final boolean forceVolatile, final boolean separate, final boolean autoOrder, final boolean addToRecent, final boolean showProgress) {
         final List<Sequence> result = new ArrayList<>();
 
         // detect if this is a complete folder load
@@ -910,13 +912,13 @@ public class Loader {
             singlePaths.removeAll(currPaths);
         }
 
-        // remove remaining XML persistence files...
+        // remove remaining XML persistence files…
         for (int i = singlePaths.size() - 1; i >= 0; i--)
             if (SequencePersistent.isValidXMLPersitence(singlePaths.get(i)))
                 singlePaths.remove(i);
 
         // remaining files ?
-        if (singlePaths.size() > 0) {
+        if (!singlePaths.isEmpty()) {
             // get first found importer for remaining files
             final Map<SequenceFileImporter, List<String>> importers = getSequenceFileImporters(singlePaths, true);
 
@@ -924,12 +926,13 @@ public class Loader {
             for (final List<String> values : importers.values())
                 singlePaths.removeAll(values);
 
-            if (singlePaths.size() > 0) {
+            if (!singlePaths.isEmpty()) {
                 // just log in console
-                final ArrayList<String> messages = new ArrayList<>();
-                messages.add("No compatible importer found for the following files:");
-                messages.addAll(singlePaths);
-                IcyLogger.error(Loader.class, messages.toArray(new String[0]));
+                final StringBuilder message = new StringBuilder();
+                message.append("No compatible importer found for the following files:");
+                for (final String path : singlePaths)
+                    message.append(path);
+                LOGGER.severe(message.toString());
             }
         }
 
@@ -956,7 +959,7 @@ public class Loader {
      * @param addToRecent  If set to true the files list will be traced in recent opened sequence.
      * @param showProgress Show progression of loading process.
      */
-    public static List<Sequence> loadSequences(final SequenceFileImporter importer, final List<String> paths, final int series, final boolean separate, final boolean autoOrder, final boolean addToRecent, final boolean showProgress) {
+    public static @NonNull List<Sequence> loadSequences(final SequenceFileImporter importer, final List<String> paths, final int series, final boolean separate, final boolean autoOrder, final boolean addToRecent, final boolean showProgress) {
         return loadSequences(importer, paths, series, false, separate, autoOrder, addToRecent, showProgress);
     }
 
@@ -977,7 +980,7 @@ public class Loader {
      * @param addToRecent  If set to true the files list will be traced in recent opened sequence.
      * @param showProgress Show progression of loading process.
      */
-    public static List<Sequence> loadSequences(final List<String> paths, final int series, final boolean separate, final boolean autoOrder, final boolean addToRecent, final boolean showProgress) {
+    public static @NonNull List<Sequence> loadSequences(final List<String> paths, final int series, final boolean separate, final boolean autoOrder, final boolean addToRecent, final boolean showProgress) {
         return loadSequences(null, paths, series, separate, autoOrder, addToRecent, showProgress);
     }
 
@@ -1018,7 +1021,7 @@ public class Loader {
         }
         catch (final Throwable t) {
             // just show the error
-            IcyLogger.error(Loader.class, t, "Failed to open file(s).");
+            LOGGER.log(Level.SEVERE, "Failed to open file(s).", t);
         }
         finally {
             if (loadingFrame != null)
@@ -1053,8 +1056,8 @@ public class Loader {
      * @param showProgress Show progression of loading process.
      */
     @SuppressWarnings("unchecked")
-    public static Sequence loadSequence(final List<?> files, final boolean showProgress) {
-        if (files.size() == 0)
+    public static @Nullable Sequence loadSequence(final @NonNull List<?> files, final boolean showProgress) {
+        if (files.isEmpty())
             return null;
 
         final List<String> paths;
@@ -1155,7 +1158,7 @@ public class Loader {
             // explode path list
             final List<String> singlePaths = explode(paths);
 
-            if (singlePaths.size() > 0) {
+            if (!singlePaths.isEmpty()) {
                 // get the file importer now for remaining file
                 final Map<FileImporter, List<String>> fileImporters;
 
@@ -1180,7 +1183,7 @@ public class Loader {
             }
 
             // remaining files ?
-            if (singlePaths.size() > 0) {
+            if (!singlePaths.isEmpty()) {
                 // get first found importer for remaining files
                 final Map<FileImporter, List<String>> importers = getFileImporters(singlePaths, true);
 
@@ -1188,12 +1191,13 @@ public class Loader {
                 for (final List<String> values : importers.values())
                     singlePaths.removeAll(values);
 
-                if (singlePaths.size() > 0) {
+                if (!singlePaths.isEmpty()) {
                     // just log in console
-                    final ArrayList<String> messages = new ArrayList<>();
-                    messages.add("No compatible importer found for the following files:");
-                    messages.addAll(singlePaths);
-                    IcyLogger.error(Loader.class, messages.toArray(new String[0]));
+                    final StringBuilder message = new StringBuilder();
+                    message.append("No compatible importer found for the following files:");
+                    for (final String path : singlePaths)
+                        message.append(path);
+                    LOGGER.severe(message.toString());
                 }
             }
         });
@@ -1241,7 +1245,7 @@ public class Loader {
         }
         catch (final Throwable t) {
             // just show the error
-            IcyLogger.error(Loader.class, t, "Failed to open file(s).");
+            LOGGER.log(Level.SEVERE, "Failed to open file(s).", t);
         }
         finally {
             if (loadingFrame != null)
@@ -1268,7 +1272,7 @@ public class Loader {
      *                      <code>image.resolution / (2^resolution)</code><br>
      *                      So for instance level 0 is the default/full image resolution while level 1 is base
      *                      image
-     *                      resolution / 2 and so on...
+     *                      resolution / 2 and so on…
      * @param region        The 2D region of the image we want to retrieve.<br>
      *                      If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ          the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -1337,7 +1341,7 @@ public class Loader {
      *                     <code>image.resolution / (2^resolution)</code><br>
      *                     So for instance level 0 is the default/full image resolution while level 1 is base
      *                     image
-     *                     resolution / 2 and so on...
+     *                     resolution / 2 and so on…
      * @param region       The 2D region of the image we want to retrieve.<br>
      *                     If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ         the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -1378,7 +1382,7 @@ public class Loader {
      *                     <code>image.resolution / (2^resolution)</code><br>
      *                     So for instance level 0 is the default/full image resolution while level 1 is base
      *                     image
-     *                     resolution / 2 and so on...
+     *                     resolution / 2 and so on…
      * @param region       The 2D region of the image we want to retrieve.<br>
      *                     If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ         the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -1432,7 +1436,7 @@ public class Loader {
             }
             catch (final Throwable t) {
                 // just show the error
-                IcyLogger.error(Loader.class, t, "Failed to open file(s).");
+                LOGGER.log(Level.SEVERE, "Failed to open file(s).", t);
             }
             finally {
                 if (loadingFrame != null)
@@ -1452,7 +1456,7 @@ public class Loader {
      *                     <code>image.resolution / (2^resolution)</code><br>
      *                     So for instance level 0 is the default/full image resolution while level 1 is base
      *                     image
-     *                     resolution / 2 and so on...
+     *                     resolution / 2 and so on…
      * @param region       The 2D region of the image we want to retrieve.<br>
      *                     If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ         the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -1488,7 +1492,7 @@ public class Loader {
      *                     <code>image.resolution / (2^resolution)</code><br>
      *                     So for instance level 0 is the default/full image resolution while level 1 is base
      *                     image
-     *                     resolution / 2 and so on...
+     *                     resolution / 2 and so on…
      * @param region       The 2D region of the image we want to retrieve.<br>
      *                     If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ         the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -1539,7 +1543,7 @@ public class Loader {
             }
             catch (final Throwable t) {
                 // just show the error
-                IcyLogger.error(Loader.class, t, "Failed to open file(s).");
+                LOGGER.log(Level.SEVERE, "Failed to open file(s).", t);
             }
             finally {
                 if (loadingFrame != null)
@@ -1618,7 +1622,7 @@ public class Loader {
                 singlePaths.removeAll(currPaths);
             }
 
-            if (singlePaths.size() > 0) {
+            if (!singlePaths.isEmpty()) {
                 // get the file importer now for remaining file
                 final Map<FileImporter, List<String>> fileImporters = getFileImporters(singlePaths, false);
 
@@ -1635,7 +1639,7 @@ public class Loader {
             }
 
             // remaining files ?
-            if (singlePaths.size() > 0) {
+            if (!singlePaths.isEmpty()) {
                 // get first found importer for remaining files
                 final Map<SequenceFileImporter, List<String>> importers = getSequenceFileImporters(singlePaths, true);
 
@@ -1643,12 +1647,13 @@ public class Loader {
                 for (final List<String> values : importers.values())
                     singlePaths.removeAll(values);
 
-                if (singlePaths.size() > 0) {
+                if (!singlePaths.isEmpty()) {
                     // just log in console
-                    final ArrayList<String> messages = new ArrayList<>();
-                    messages.add("No compatible importer found for the following files:");
-                    messages.addAll(singlePaths);
-                    IcyLogger.error(Loader.class, messages.toArray(new String[0]));
+                    final StringBuilder message = new StringBuilder();
+                    message.append("No compatible importer found for the following files:");
+                    for (final String path : singlePaths)
+                        message.append(path);
+                    LOGGER.severe(message.toString());
                 }
             }
         });
@@ -1708,7 +1713,7 @@ public class Loader {
      * @param resolution    Wanted resolution level for the image (use 0 if unsure), useful for large image<br>
      *                      The retrieved image resolution is equal to <code>image.resolution / (2^resolution)</code><br>
      *                      So for instance level 0 is the default/full image resolution while level 1 is base image resolution / 2
-     *                      and so on...
+     *                      and so on…
      * @param region        The 2D region of the image we want to retrieve (in full image resolution).<br>
      *                      If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ          the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -1725,7 +1730,7 @@ public class Loader {
      * @param addToRecent   If set to true the files list will be traced in recent opened sequence.
      * @param showProgress  Show progression in loading process
      */
-    public static Sequence loadSequence(final SequenceFileImporter importer, final String path, final int series, final int resolution, final Rectangle region, final int minZ, final int maxZ, final int minT, final int maxT, final int channel, final boolean forceVolatile, final boolean addToRecent, final boolean showProgress) {
+    public static @Nullable Sequence loadSequence(final SequenceFileImporter importer, final String path, final int series, final int resolution, final Rectangle region, final int minZ, final int maxZ, final int minT, final int maxT, final int channel, final boolean forceVolatile, final boolean addToRecent, final boolean showProgress) {
         final ApplicationMenuFile mainMenu;
         final FileFrame loadingFrame;
         final Sequence result;
@@ -1761,7 +1766,7 @@ public class Loader {
                     selectedSerie = selectSerie(cloneSequenceFileImporter(imp), path, meta, 0);
                 }
                 catch (final Throwable t) {
-                    IcyLogger.error(Loader.class, t, "Opening first series by default...");
+                    LOGGER.log(Level.SEVERE, "Opening first series by default…", t);
                     selectedSerie = 0;
                 }
 
@@ -1776,7 +1781,7 @@ public class Loader {
             result = internalLoadSingle(imp, meta, selectedSerie, resolution, region, minZ, maxZ, minT, maxT, channel, forceVolatile, loadingFrame);
 
             // Don't close importer on success ! we want to keep it inside the sequence.
-            // We will close it when finalizing the sequence...
+            // We will close it when finalizing the sequence…
             // imp.close();
 
             // add as separate item to recent file list
@@ -1800,7 +1805,7 @@ public class Loader {
             }
 
             // just show the error
-            IcyLogger.error(Loader.class, t, "Failed to open file(s).");
+            LOGGER.log(Level.SEVERE, "Failed to open file(s).", t);
 
             return null;
         }
@@ -1830,7 +1835,7 @@ public class Loader {
      * @param resolution   Wanted resolution level for the image (use 0 if unsure), useful for large image<br>
      *                     The retrieved image resolution is equal to <code>image.resolution / (2^resolution)</code><br>
      *                     So for instance level 0 is the default/full image resolution while level 1 is base image resolution / 2
-     *                     and so on...
+     *                     and so on…
      * @param region       The 2D region of the image we want to retrieve (in full image resolution).<br>
      *                     If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ         the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -1866,7 +1871,7 @@ public class Loader {
      *                      <code>image.resolution / (2^resolution)</code><br>
      *                      So for instance level 0 is the default/full image resolution while level 1 is base
      *                      image
-     *                      resolution / 2 and so on...
+     *                      resolution / 2 and so on…
      * @param region        The 2D region of the image we want to retrieve.<br>
      *                      If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ          the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -1916,7 +1921,7 @@ public class Loader {
         }
         catch (final Throwable t) {
             // just show the error
-            IcyLogger.error(Loader.class, t, "Failed to open file(s).");
+            LOGGER.log(Level.SEVERE, "Failed to open file(s).", t);
         }
         finally {
             if (loadingFrame != null)
@@ -1936,7 +1941,7 @@ public class Loader {
      *                      <code>image.resolution / (2^resolution)</code><br>
      *                      So for instance level 0 is the default/full image resolution while level 1 is base
      *                      image
-     *                      resolution / 2 and so on...
+     *                      resolution / 2 and so on…
      * @param region        The 2D region of the image we want to retrieve.<br>
      *                      If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ          the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -1974,7 +1979,7 @@ public class Loader {
      *                     <code>image.resolution / (2^resolution)</code><br>
      *                     So for instance level 0 is the default/full image resolution while level 1 is base
      *                     image
-     *                     resolution / 2 and so on...
+     *                     resolution / 2 and so on…
      * @param region       The 2D region of the image we want to retrieve.<br>
      *                     If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ         the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -2019,7 +2024,7 @@ public class Loader {
      * @param addToRecent   If set to true the files list will be traced in recent opened sequence.
      * @param showProgress  Show progression in loading process
      */
-    public static List<Sequence> loadSequences(
+    public static @NonNull List<Sequence> loadSequences(
             final SequenceFileImporter importer, final List<String> paths, final int series,
             final boolean forceVolatile, final boolean separate, final boolean autoOrder,
             final boolean directory, final boolean addToRecent, final boolean showProgress
@@ -2071,7 +2076,7 @@ public class Loader {
                         break;
                     }
 
-                    if (sequences.size() > 0) {
+                    if (!sequences.isEmpty()) {
                         // add sequences to result
                         result.addAll(sequences);
                         // remove path from remaining
@@ -2113,12 +2118,13 @@ public class Loader {
                 }
             }
 
-            if (remainingFiles.size() > 0) {
-                final ArrayList<String> messages = new ArrayList<>();
-                messages.add("Cannot open the following file(s) (format not supported):");
-                messages.addAll(remainingFiles);
+            if (!remainingFiles.isEmpty()) {
+                final StringBuilder message = new StringBuilder();
+                message.append("Cannot open the following file(s) (format not supported):");
+                for (final String path : remainingFiles)
+                    message.append(path);
 
-                IcyLogger.error(Loader.class, messages.toArray(new String[0]));
+                LOGGER.severe(message.toString());
             }
 
             // set default colormaps if none defined
@@ -2133,7 +2139,7 @@ public class Loader {
         }
         catch (final Throwable t) {
             // just show the error
-            IcyLogger.error(Loader.class, t, "Failed to open file(s).");
+            LOGGER.log(Level.SEVERE, "Failed to open file(s).", t);
         }
         finally {
             if (loadingFrame != null)
@@ -2146,6 +2152,7 @@ public class Loader {
     /**
      * Concatenate the <i>src</i> sequence to the <i>dest</i> one.
      */
+    @Contract("null, _, _, _ -> param2; !null, null, _, _ -> param1")
     static Sequence concatenateSequence(final Sequence dest, final Sequence src, final boolean onT, final boolean onZ) {
         if (dest == null)
             return src;
@@ -2186,7 +2193,7 @@ public class Loader {
     }
 
     @SuppressWarnings("unused")
-    static void addSequences(final List<Sequence> result, final TreeMap<Integer, Sequence> map) {
+    static void addSequences(final List<Sequence> result, final @NonNull TreeMap<Integer, Sequence> map) {
         if (!map.isEmpty()) {
             // get all sequence from the map orderer by channel
             final Collection<Sequence> sequencesC = map.values();
@@ -2230,7 +2237,7 @@ public class Loader {
      * @param resolution    Wanted resolution level for the image (use 0 if unsure), useful for large image<br>
      *                      The retrieved image resolution is equal to <code>image.resolution / (2^resolution)</code><br>
      *                      So for instance level 0 is the default/full image resolution while level 1 is base image resolution / 2
-     *                      and so on...
+     *                      and so on…
      * @param region        The 2D region of the image we want to retrieve (in full image resolution).<br>
      *                      If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ          the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -2338,7 +2345,7 @@ public class Loader {
                 for (int t = adjMinT; t <= adjMaxT; t++) {
                     for (int z = adjMinZ; z <= adjMaxZ; z++) {
                         if (loadingFrame != null) {
-                            // cancel requested ? --> stop loading here...
+                            // cancel requested ? --> stop loading here…
                             if (loadingFrame.isCancelRequested())
                                 return result;
 
@@ -2403,7 +2410,7 @@ public class Loader {
      * @param groupSeries   Enable series grouping into the same sequence (appended in T dimension), only meaningful if <code>series</code> = -1
      * @param loadingFrame  the loading frame used to display progress of the operation (can be null)
      */
-    public static List<Sequence> internalLoadSingle(
+    public static @Nullable List<Sequence> internalLoadSingle(
             final SequenceFileImporter importer, final String path, final int series,
             final boolean forceVolatile, final boolean groupSeries, final FileFrame loadingFrame
     ) throws Exception, OutOfMemoryError {
@@ -2443,7 +2450,7 @@ public class Loader {
                         selectedSeries = selectSeries(cloneSequenceFileImporter(importer), path, meta, 0, false);
                 }
                 catch (final Throwable t) {
-                    IcyLogger.error(Loader.class, t, "Opening first series by default...");
+                    LOGGER.log(Level.SEVERE, "Opening first series by default…", t);
                     selectedSeries = new int[]{0};
                 }
 
@@ -2469,7 +2476,7 @@ public class Loader {
                         throw e;
                     }
                     catch (final Throwable t) {
-                        IcyLogger.error(Loader.class, t, "Couln't open, ignoring this series...");
+                        LOGGER.log(Level.SEVERE, "Couldn't open, ignoring this series…", t);
                         continue;
                     }
                 }
@@ -2479,7 +2486,7 @@ public class Loader {
                 final Sequence seq = internalLoadSingle(imp, meta, s, 0, null, -1, -1, -1, -1, -1, forceVolatile, loadingFrame);
 
                 // group series together
-                if ((result.size() > 0) && groupSeries)
+                if ((!result.isEmpty()) && groupSeries)
                     concatenateSequence(result.get(0), seq, true, false);
                 else
                     // just add to list
@@ -2499,7 +2506,7 @@ public class Loader {
             }
 
             // Don't close importer on success ! we want to keep it inside the sequence.
-            // We will close it when finalizing the sequence...
+            // We will close it when finalizing the sequence…
             // importer.close();
         }
         catch (final Throwable t) {
@@ -2527,7 +2534,7 @@ public class Loader {
      * @param resolution    Wanted resolution level for the image (use 0 if unsure), useful for large image<br>
      *                      The retrieved image resolution is equal to <code>image.resolution / (2^resolution)</code><br>
      *                      So for instance level 0 is the default/full image resolution while level 1 is base image resolution / 2
-     *                      and so on...
+     *                      and so on…
      * @param region        The 2D region of the image we want to retrieve (in full image resolution).<br>
      *                      If set to <code>null</code> then the whole XY plane of the image is returned.
      * @param minZ          the minimum Z position of the image (slice) we want retrieve (inclusive).<br>
@@ -2599,7 +2606,7 @@ public class Loader {
             }
 
             // Don't close importer on success ! we want to keep it inside the sequence.
-            // We will close it when finalizing the sequence...
+            // We will close it when finalizing the sequence…
             // groupImporter.close();
         }
         catch (final Throwable t) {
@@ -2634,7 +2641,7 @@ public class Loader {
         return internalLoadGroup(group, 0, null, -1, -1, -1, -1, -1, forceVolatile, directory, mainMenu, loadingFrame);
     }
 
-    public static String getSequenceName(final Sequence sequence, final String path, final boolean multiSerie, final int series) {
+    public static String getSequenceName(final @NonNull Sequence sequence, final String path, final boolean multiSerie, final int series) {
         // default name
         String name = FileUtil.getFileName(path, false);
 
@@ -2675,7 +2682,7 @@ public class Loader {
      * @param channel    channel we want to load (-1 for all)
      */
     public static void setupSequence(
-            final Sequence sequence, final SequenceIdImporter importer, final boolean multiSerie,
+            final Sequence sequence, final @NonNull SequenceIdImporter importer, final boolean multiSerie,
             final int series, final Rectangle region, final int resolution,
             final int sizeZ, final int sizeT, final int sizeC,
             final int minZ, final int maxZ, final int minT,
@@ -2787,7 +2794,7 @@ public class Loader {
         sequence.setName(name);
         sequence.setFilename(path);
 
-        // set importer (for caching / delayed loading...)
+        // set importer (for caching / delayed loading…)
         sequence.setImageProvider(importer);
     }
 
@@ -2795,7 +2802,7 @@ public class Loader {
      * Display the Series Selection frame for the given image and returns selected series(s).<br>
      * Returns a 0 length array if user canceled series selection.
      */
-    public static int[] selectSeries(
+    public static int @NonNull [] selectSeries(
             final SequenceIdImporter importer, final String path, final OMEXMLMetadata meta,
             final int defaultSerie, final boolean singleSelection
     ) throws UnsupportedFormatException, IOException {
@@ -2851,7 +2858,7 @@ public class Loader {
     /**
      * Try to group series with similar images properties (XYZC dimension) starting from first image and return the list of grouped series index.
      */
-    public static int[] groupSeries(final OMEXMLMetadata meta) {
+    public static int @NonNull [] groupSeries(final OMEXMLMetadata meta) {
         final List<Integer> result = new ArrayList<>();
 
         final int sizeS = MetaDataUtil.getNumSeries(meta);
@@ -2891,7 +2898,7 @@ public class Loader {
      * Display the Series Selection frame for the given image and returns selected series(s).<br>
      * Returns a 0 length array if user canceled series selection.
      */
-    public static int[] selectSeries(final SequenceFileImporter importer, final String path, final OMEXMLMetadata meta, final int defaultSerie, final boolean singleSelection) throws UnsupportedFormatException, IOException {
+    public static int @NonNull [] selectSeries(final SequenceFileImporter importer, final String path, final OMEXMLMetadata meta, final int defaultSerie, final boolean singleSelection) throws UnsupportedFormatException, IOException {
         return selectSeries((SequenceIdImporter) importer, path, meta, defaultSerie, singleSelection);
     }
 
@@ -2899,7 +2906,7 @@ public class Loader {
      * Display the Series Selection frame for the given image and returns selected series(s).<br>
      * Returns a 0 length array if user canceled series selection.
      */
-    public static int[] selectSeries(final SequenceFileImporter importer, final String path, final OMEXMLMetadataImpl meta, final int defaultSerie, final boolean singleSelection) throws UnsupportedFormatException, IOException {
+    public static int @NonNull [] selectSeries(final SequenceFileImporter importer, final String path, final OMEXMLMetadataImpl meta, final int defaultSerie, final boolean singleSelection) throws UnsupportedFormatException, IOException {
         return selectSeries(importer, path, (OMEXMLMetadata) meta, defaultSerie, singleSelection);
     }
 
@@ -2916,14 +2923,14 @@ public class Loader {
         return -1;
     }
 
-    public static List<String> explode(final List<String> paths) {
+    public static @NonNull List<String> explode(final List<String> paths) {
         return FileUtil.toPaths(FileUtil.explode(FileUtil.toFiles(paths), null, true, false));
     }
 
     /**
      * Remove invalid image files from the list of files
      */
-    public static List<String> cleanNonImageFile(final List<String> paths) {
+    public static @NonNull List<String> cleanNonImageFile(final @NonNull List<String> paths) {
         final List<String> result = new ArrayList<>();
 
         // extensions based exclusion

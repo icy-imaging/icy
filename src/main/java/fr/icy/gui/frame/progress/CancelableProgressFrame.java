@@ -27,7 +27,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 
 /**
- * @author stephane
+ * @author Stéphane Dallongeville
  */
 public class CancelableProgressFrame extends ProgressFrame implements ActionListener
 {

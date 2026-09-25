@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,22 +18,22 @@
 
 package fr.icy.extension.plugin.property;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public final class BooleanProperty extends Property<Boolean> {
-    public BooleanProperty(final @NotNull String name, final @NotNull String description, final @NotNull Boolean defaultValue) {
+    public BooleanProperty(final @NonNull String name, final @NonNull String description, final @NonNull Boolean defaultValue) {
         super(name, description, defaultValue);
     }
 
-    public BooleanProperty(final @NotNull String name, final @NotNull String description) {
+    public BooleanProperty(final @NonNull String name, final @NonNull String description) {
         super(name, description, Boolean.FALSE);
     }
 
-    public BooleanProperty(final @NotNull String name, final @NotNull Boolean defaultValue) {
+    public BooleanProperty(final @NonNull String name, final @NonNull Boolean defaultValue) {
         super(name, defaultValue);
     }
 
-    public BooleanProperty(final @NotNull String name) {
+    public BooleanProperty(final @NonNull String name) {
         super(name, Boolean.FALSE);
     }
 }

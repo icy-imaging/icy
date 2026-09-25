@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -27,10 +27,11 @@ import java.util.EventListener;
 /**
  * Color button used to select a specific color.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ColorChooserButton extends JButton implements ActionListener {
+    @FunctionalInterface
     public interface ColorChangeListener extends EventListener {
         void colorChanged(ColorChooserButton source);
     }

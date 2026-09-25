@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.system.thread;
 
 import fr.icy.Icy;
 import fr.icy.system.IcyExceptionHandler;
 import fr.icy.system.SystemUtil;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ import java.util.concurrent.*;
  * Processor class.<br>
  * Allow you to queue and execute tasks on a defined set of thread.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class Processor extends ThreadPoolExecutor {
@@ -59,7 +60,7 @@ public class Processor extends ThreadPoolExecutor {
         }
 
         @Override
-        public Thread newThread(final @NotNull Runnable r) {
+        public Thread newThread(final @NonNull Runnable r) {
             final Thread result = new Thread(r, getThreadName());
 
             result.setPriority(priority);
@@ -146,15 +147,12 @@ public class Processor extends ThreadPoolExecutor {
     /**
      * Create a new Processor with specified number of maximum waiting and processing tasks.<br>
      *
-     * @param maxWaiting
-     *        The length of waiting queue.
-     * @param numThread
-     *        The maximum number of processing thread.
-     * @param priority
-     *        Processor priority<br>
-     *        <code>Processor.MIN_PRIORITY</code><br>
-     *        <code>Processor.NORM_PRIORITY</code><br>
-     *        <code>Processor.MAX_PRIORITY</code>
+     * @param maxWaiting The length of waiting queue.
+     * @param numThread  The maximum number of processing thread.
+     * @param priority   Processor priority<br>
+     *                   <code>Processor.MIN_PRIORITY</code><br>
+     *                   <code>Processor.NORM_PRIORITY</code><br>
+     *                   <code>Processor.MAX_PRIORITY</code>
      */
     public Processor(final int maxWaiting, final int numThread, final int priority) {
         super(numThread, numThread, 2L, TimeUnit.SECONDS, (maxWaiting == -1) ? new LinkedBlockingQueue<>() : new LinkedBlockingQueue<>(maxWaiting));
@@ -171,10 +169,8 @@ public class Processor extends ThreadPoolExecutor {
     /**
      * Create a new Processor with specified number of maximum waiting and processing tasks.
      *
-     * @param maxWaiting
-     *        The length of waiting queue.
-     * @param numThread
-     *        The maximum number of processing thread.
+     * @param maxWaiting The length of waiting queue.
+     * @param numThread  The maximum number of processing thread.
      */
     public Processor(final int maxWaiting, final int numThread) {
         this(maxWaiting, numThread, NORM_PRIORITY);
@@ -183,8 +179,7 @@ public class Processor extends ThreadPoolExecutor {
     /**
      * Create a new Processor with specified number of processing thread.
      *
-     * @param numThread
-     *        The maximum number of processing thread.
+     * @param numThread The maximum number of processing thread.
      */
     public Processor(final int numThread) {
         this(-1, numThread, NORM_PRIORITY);
@@ -207,40 +202,35 @@ public class Processor extends ThreadPoolExecutor {
     }
 
     /**
-     * @param handledException
-     *        if set to <code>true</code> then any occurring exception during the runnable
-     *        processing will be catch by {@link IcyExceptionHandler}.
-     * @param runnable
-     *        the runnable task being wrapped
-     * @param value
-     *        the default value for the returned future
-     * @param <T> generic Object
+     * @param handledException if set to <code>true</code> then any occurring exception during the runnable
+     *                         processing will be caught by {@link IcyExceptionHandler}.
+     * @param runnable         the runnable task being wrapped
+     * @param value            the default value for the returned future
+     * @param <T>              generic Object
      * @return a <i>RunnableFuture</i> which when run will run the underlying runnable and which,
-     *         as a <i>Future</i>, will yield the given value as its result and provide for
-     *         cancellation of the underlying task.
+     * as a <i>Future</i>, will yield the given value as its result and provide for
+     * cancellation of the underlying task.
      */
     protected <T> FutureTaskAdapter<T> newTaskFor(final boolean handledException, final Runnable runnable, final T value) {
         return new FutureTaskAdapter<>(runnable, value, handledException);
     }
 
     /**
-     * @param handledException
-     *        if set to <code>true</code> then any occurring exception during the runnable
-     *        processing will be catch by {@link IcyExceptionHandler}.
-     * @param callable
-     *        the callable task being wrapped
-     * @param <T> generic Object
+     * @param handledException if set to <code>true</code> then any occurring exception during the runnable
+     *                         processing will be caught by {@link IcyExceptionHandler}.
+     * @param callable         the callable task being wrapped
+     * @param <T>              generic Object
      * @return a <i>RunnableFuture</i> which when run will call the
-     *         underlying callable and which, as a <i>Future</i>, will yield
-     *         the callable's result as its result and provide for
-     *         cancellation of the underlying task.
+     * underlying callable and which, as a <i>Future</i>, will yield
+     * the callable's result as its result and provide for
+     * cancellation of the underlying task.
      */
     protected <T> FutureTaskAdapter<T> newTaskFor(final boolean handledException, final Callable<T> callable) {
         return new FutureTaskAdapter<>(callable, handledException);
     }
 
     @Override
-    public void execute(final @NotNull Runnable task) {
+    public void execute(final @NonNull Runnable task) {
         super.execute(task);
         // save the last executed task
         waitingExecution = task;
@@ -248,8 +238,9 @@ public class Processor extends ThreadPoolExecutor {
 
     /**
      * Submit the given task (internal use only).
+     *
      * @param task task to run
-     * @param <T> generic Object
+     * @param <T>  generic Object
      * @return Object
      */
     protected synchronized <T> FutureTask<T> submit(final FutureTaskAdapter<T> task) {
@@ -258,17 +249,17 @@ public class Processor extends ThreadPoolExecutor {
     }
 
     @Override
-    public @NotNull Future<?> submit(final @NotNull Runnable task) {
+    public @NonNull Future<?> submit(final @NonNull Runnable task) {
         return submit(newTaskFor(false, task, null));
     }
 
     @Override
-    public <T> @NotNull Future<T> submit(final @NotNull Runnable task, final T result) {
+    public <T> @NonNull Future<T> submit(final @NonNull Runnable task, final T result) {
         return submit(newTaskFor(false, task, result));
     }
 
     @Override
-    public <T> @NotNull Future<T> submit(final @NotNull Callable<T> task) {
+    public <T> @NonNull Future<T> submit(final @NonNull Callable<T> task) {
         return submit(newTaskFor(false, task));
     }
 
@@ -277,17 +268,13 @@ public class Processor extends ThreadPoolExecutor {
      * representing that task. The Future's <i>get</i> method will
      * return <i>null</i> upon <em>successful</em> completion.
      *
-     * @param handleException
-     *        if set to <code>true</code> then any occurring exception during the runnable
-     *        processing will be catch by {@link IcyExceptionHandler}.
-     * @param task
-     *        the task to submit
+     * @param handleException if set to <code>true</code> then any occurring exception during the runnable
+     *                        processing will be caught by {@link IcyExceptionHandler}.
+     * @param task            the task to submit
      * @return a Future representing pending completion of the task
-     * @throws RejectedExecutionException
-     *         if the task cannot be
-     *         scheduled for execution
-     * @throws NullPointerException
-     *         if the task is null
+     * @throws RejectedExecutionException if the task cannot be
+     *                                    scheduled for execution
+     * @throws NullPointerException       if the task is null
      */
     public Future<?> submit(final boolean handleException, final Runnable task) {
         if (task == null)
@@ -301,20 +288,15 @@ public class Processor extends ThreadPoolExecutor {
      * representing that task. The Future's <i>get</i> method will
      * return the given result upon successful completion.
      *
-     * @param handleException
-     *        if set to <code>true</code> then any occurring exception during the runnable
-     *        processing will be catch by {@link IcyExceptionHandler}.
-     * @param task
-     *        the task to submit
-     * @param result
-     *        the result to return
-     * @param <T> generic Object
+     * @param handleException if set to <code>true</code> then any occurring exception during the runnable
+     *                        processing will be caught by {@link IcyExceptionHandler}.
+     * @param task            the task to submit
+     * @param result          the result to return
+     * @param <T>             generic Object
      * @return a Future representing pending completion of the task
-     * @throws RejectedExecutionException
-     *         if the task cannot be
-     *         scheduled for execution
-     * @throws NullPointerException
-     *         if the task is null
+     * @throws RejectedExecutionException if the task cannot be
+     *                                    scheduled for execution
+     * @throws NullPointerException       if the task is null
      */
     public <T> Future<T> submit(final boolean handleException, final Runnable task, final T result) {
         if (task == null)
@@ -335,18 +317,14 @@ public class Processor extends ThreadPoolExecutor {
      * Note: The {@link Executors} class includes a set of methods that can convert some other common closure-like
      * objects, for example, {@link java.security.PrivilegedAction} to {@link Callable} form so they can be submitted.
      *
-     * @param handleException
-     *        if set to <code>true</code> then any occurring exception during the runnable
-     *        processing will be catch by {@link IcyExceptionHandler}.
-     * @param task
-     *        the task to submit
-     * @param <T> generic Object
+     * @param handleException if set to <code>true</code> then any occurring exception during the runnable
+     *                        processing will be caught by {@link IcyExceptionHandler}.
+     * @param task            the task to submit
+     * @param <T>             generic Object
      * @return a Future representing pending completion of the task
-     * @throws RejectedExecutionException
-     *         if the task cannot be
-     *         scheduled for execution
-     * @throws NullPointerException
-     *         if the task is null
+     * @throws RejectedExecutionException if the task cannot be
+     *                                    scheduled for execution
+     * @throws NullPointerException       if the task is null
      */
     public <T> Future<T> submit(final boolean handleException, final Callable<T> task) {
         if (task == null)
@@ -356,7 +334,7 @@ public class Processor extends ThreadPoolExecutor {
     }
 
     /**
-     * @return Return true if one or more process are executing or we still have waiting tasks.
+     * @return Return true if one or more process are executing, or we still have waiting tasks.
      */
     public boolean isProcessing() {
         return (getActiveCount() > 0) || hasWaitingTasks();
@@ -387,8 +365,7 @@ public class Processor extends ThreadPoolExecutor {
     }
 
     /**
-     * @param priority
-     *        the priority to set
+     * @param priority the priority to set
      */
     public void setPriority(final int priority) {
         this.priority = priority;
@@ -403,6 +380,7 @@ public class Processor extends ThreadPoolExecutor {
 
     /**
      * Set the wanted thread name.
+     *
      * @param defaultThreadName thread name
      */
     public void setThreadName(final String defaultThreadName) {
@@ -649,7 +627,7 @@ public class Processor extends ThreadPoolExecutor {
     protected void beforeExecute(final Thread t, final Runnable r) {
         super.beforeExecute(t, r);
 
-        // ok we can remove reference...
+        // ok we can remove reference…
         waitingExecution = null;
     }
 }

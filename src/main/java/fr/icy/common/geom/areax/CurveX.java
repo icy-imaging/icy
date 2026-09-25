@@ -18,13 +18,15 @@
 
 package fr.icy.common.geom.areax;
 
-import fr.icy.system.logging.IcyLogger;
-
 import java.awt.geom.IllegalPathStateException;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class CurveX {
+    private static final Logger LOGGER = Logger.getLogger(CurveX.class.getName());
+
     public static final int INCREASING = 1;
     public static final int DECREASING = -1;
 
@@ -193,7 +195,7 @@ public abstract class CurveX {
             return 0;
         if (py >= y0 && py >= yc && py >= y1)
             return 0;
-        // Note y0 could equal y1...
+        // Note y0 could equal y1…
         if (px >= x0 && px >= xc && px >= x1)
             return 0;
         if (px < x0 && px < xc && px < x1) {
@@ -245,7 +247,7 @@ public abstract class CurveX {
             return 0;
         if (py >= y0 && py >= yc0 && py >= yc1 && py >= y1)
             return 0;
-        // Note y0 could equal yc0...
+        // Note y0 could equal yc0…
         if (px >= x0 && px >= xc0 && px >= xc1 && px >= x1)
             return 0;
         if (px < x0 && px < xc0 && px < xc1 && px < x1) {
@@ -425,7 +427,7 @@ public abstract class CurveX {
             // Path may have done a complete crossing
             // Or path may have entered or exited the right-shadow
             if (y0 < y1) {
-                // y-increasing line segment...
+                // y-increasing line segment…
                 // We know that y0 < rymax and y1 > rymin
                 if (y0 <= rymin)
                     crossings++;
@@ -433,7 +435,7 @@ public abstract class CurveX {
                     crossings++;
             }
             else if (y1 < y0) {
-                // y-decreasing line segment...
+                // y-decreasing line segment…
                 // We know that y1 < rymax and y0 > rymin
                 if (y1 <= rymin)
                     crossings--;
@@ -470,7 +472,7 @@ public abstract class CurveX {
             return crossings;
         if (xi0 >= rxmax && xi1 >= rxmax) {
             if (y0 < y1) {
-                // y-increasing line segment...
+                // y-increasing line segment…
                 // We know that y0 < rymax and y1 > rymin
                 if (y0 <= rymin)
                     crossings++;
@@ -478,7 +480,7 @@ public abstract class CurveX {
                     crossings++;
             }
             else if (y1 < y0) {
-                // y-decreasing line segment...
+                // y-decreasing line segment…
                 // We know that y1 < rymax and y0 > rymin
                 if (y1 <= rymin)
                     crossings--;
@@ -514,14 +516,14 @@ public abstract class CurveX {
             // point may be causing the Y range intersection while the
             // two endpoints are entirely above or below.
             if (y0 < y1) {
-                // y-increasing line segment...
+                // y-increasing line segment…
                 if (y0 <= rymin && y1 > rymin)
                     crossings++;
                 if (y0 < rymax && y1 >= rymax)
                     crossings++;
             }
             else if (y1 < y0) {
-                // y-decreasing line segment...
+                // y-decreasing line segment…
                 if (y1 <= rymin && y0 > rymin)
                     crossings--;
                 if (y1 < rymax && y0 >= rymax)
@@ -591,14 +593,14 @@ public abstract class CurveX {
             // points may be causing the Y range intersection while the
             // two endpoints are entirely above or below.
             if (y0 < y1) {
-                // y-increasing line segment...
+                // y-increasing line segment…
                 if (y0 <= rymin && y1 > rymin)
                     crossings++;
                 if (y0 < rymax && y1 >= rymax)
                     crossings++;
             }
             else if (y1 < y0) {
-                // y-decreasing line segment...
+                // y-decreasing line segment…
                 if (y1 <= rymin && y0 > rymin)
                     crossings--;
                 if (y1 < rymax && y0 >= rymax)
@@ -830,12 +832,10 @@ public abstract class CurveX {
         double y1 = yrange[1];
         y1 = Math.min(Math.min(y1, this.getYBot()), that.getYBot());
         if (y1 <= yrange[0]) {
-            final String[] messages = new String[]{
-                    "this == " + this,
-                    "that == " + that,
-                    "target range = " + yrange[0] + "=>" + yrange[1]
-            };
-            IcyLogger.error(CurveX.class, messages);
+            final String message = "this == " + this + "\n" +
+                    "that == " + that + "\n" +
+                    "target range = " + yrange[0] + "=>" + yrange[1];
+            LOGGER.severe(message);
 
             throw new InternalError("backstepping from " + yrange[0] + " to " + y1);
         }
@@ -916,7 +916,7 @@ public abstract class CurveX {
         }
         // double ymin = y1 * 1E-14;
         if (ymin <= 0) {
-            IcyLogger.debug(CurveX.class, "ymin = " + ymin);
+            LOGGER.config("ymin = " + ymin);
         }
         /*
          * System.out.println("s range = "+s0+" to "+s1);
@@ -939,14 +939,12 @@ public abstract class CurveX {
                 }
             }
             catch (final Throwable t) {
-                final String[] messages = new String[]{
-                        "y range was " + yrange[0] + "=>" + yrange[1],
-                        "s y range is " + ys0 + "=>" + ysh,
-                        "t y range is " + yt0 + "=>" + yth,
-                        "ymin is " + ymin
-                };
+                final String message = "y range was " + yrange[0] + "=>" + yrange[1] + "\n" +
+                        "s y range is " + ys0 + "=>" + ysh + "\n" +
+                        "t y range is " + yt0 + "=>" + yth + "\n" +
+                        "ymin is " + ymin;
 
-                IcyLogger.error(CurveX.class, t, messages);
+                LOGGER.log(Level.SEVERE, message, t);
                 return 0;
             }
             if (ysh < yth) {
@@ -1023,7 +1021,7 @@ public abstract class CurveX {
             final double xs = this.XforT(s);
             final double ys = this.YforT(s);
             if (s == s0 || s == s1) {
-                IcyLogger.error(CurveX.class, "No s progress: s0 = " + s0 + "; s1 = " + s1);
+                LOGGER.severe("No s progress: s0 = " + s0 + "; s1 = " + s1);
                 throw new InternalError("no s progress!");
             }
             if (t1 - t0 > TMIN) {
@@ -1031,7 +1029,7 @@ public abstract class CurveX {
                 final double xt = that.XforT(t);
                 final double yt = that.YforT(t);
                 if (t == t0 || t == t1) {
-                    IcyLogger.error(CurveX.class, "No t progress: t0 = " + t0 + "; t1 = " + t1);
+                    LOGGER.severe("No t progress: t0 = " + t0 + "; t1 = " + t1);
                     throw new InternalError("no t progress!");
                 }
                 if (ys >= yt0 && yt >= ys0) {
@@ -1069,7 +1067,7 @@ public abstract class CurveX {
             final double xt = that.XforT(t);
             final double yt = that.YforT(t);
             if (t == t0 || t == t1) {
-                IcyLogger.error(CurveX.class, "No t progress: t0 = " + t0 + "; t1 = " + t1);
+                LOGGER.severe("No t progress: t0 = " + t0 + "; t1 = " + t1);
                 throw new InternalError("no t progress!");
             }
             if (yt >= ys0) {
@@ -1098,7 +1096,7 @@ public abstract class CurveX {
                     s = s0 + s * (s1 - s0);
                     t = t0 + t * (t1 - t0);
                     if (s < 0 || s > 1 || t < 0 || t > 1) {
-                        IcyLogger.error(CurveX.class, "Uh oh! s < 0 or s > 1 or t < 0 or t > 1");
+                        LOGGER.severe("Uh oh! s < 0 or s > 1 or t < 0 or t > 1");
                     }
                     final double y = (this.YforT(s) + that.YforT(t)) / 2;
                     if (y <= yrange[1] && y > yrange[0]) {

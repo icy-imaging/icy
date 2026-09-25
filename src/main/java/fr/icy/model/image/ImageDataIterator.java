@@ -33,7 +33,7 @@ import java.util.NoSuchElementException;
  * <b>If the image size or type is modified during iteration the iterator
  * becomes invalid and can causes exception to happen.</b>
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ImageDataIterator implements DataIterator, AutoCloseable {
@@ -232,7 +232,7 @@ public class ImageDataIterator implements DataIterator, AutoCloseable {
         if (done)
             throw new NoSuchElementException("ImageDataIterator.get() error: no more element !");
 
-        return Array1DUtil.getValue(data, imgOff, dataType);
+        return Array1DUtil.getValueAsDouble(data, imgOff, dataType);
     }
 
     @Override

@@ -25,7 +25,7 @@ import java.util.Iterator;
 /**
  * Line2D iterator (iterate over Line2D points given a wanted step).
  * 
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  */
 public class Line2DIterator implements Iterator<Point2D>
 {

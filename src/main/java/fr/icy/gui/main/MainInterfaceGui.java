@@ -65,7 +65,7 @@ import java.util.List;
  * MainInterfaceGui
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class MainInterfaceGui implements MainInterface {
@@ -725,7 +725,7 @@ public class MainInterfaceGui implements MainInterface {
 
     @Override
     public synchronized void removeCanExitListener(final AcceptListener listener) {
-        // we use weak reference so we have to find base listener...
+        // we use weak reference so we have to find base listener…
         for (final WeakAcceptListener l : listeners.getListeners(WeakAcceptListener.class))
             if (listener == l.getListener())
                 internalRemoveCanExitListener(l);
@@ -753,16 +753,6 @@ public class MainInterfaceGui implements MainInterface {
     @Override
     public synchronized void removeActiveSequenceListener(final ActiveSequenceListener listener) {
         listeners.remove(ActiveSequenceListener.class, listener);
-    }
-
-    @Override
-    public void addROIToolChangeListener(final ROIToolChangeListener listener) {
-        listeners.add(ROIToolChangeListener.class, listener);
-    }
-
-    @Override
-    public void removeROIToolChangeListener(final ROIToolChangeListener listener) {
-        listeners.remove(ROIToolChangeListener.class, listener);
     }
 
     /**
@@ -891,14 +881,6 @@ public class MainInterfaceGui implements MainInterface {
     private void fireActiveSequenceChangedEvent(final SequenceEvent event) {
         for (final ActiveSequenceListener listener : listeners.getListeners(ActiveSequenceListener.class))
             listener.activeSequenceChanged(event);
-    }
-
-    /**
-     * fire ROI tool changed event
-     */
-    private void fireROIToolChangeEvent(final Class<? extends PluginROI> pluginROI) {
-        for (final ROIToolChangeListener listener : listeners.getListeners(ROIToolChangeListener.class))
-            listener.toolChanged((pluginROI == null) ? null : pluginROI.getName());
     }
 
     @Override
@@ -1204,9 +1186,5 @@ public class MainInterfaceGui implements MainInterface {
     @Override
     public void setVirtualMode(final boolean value) {
         ImageCache.init(ApplicationPreferences.getCacheMemoryMB(), ApplicationPreferences.getCachePath());
-    }
-
-    public void changeROITool(final Class<? extends PluginROI> pluginROI) {
-        fireROIToolChangeEvent(pluginROI);
     }
 }

@@ -18,6 +18,11 @@
 
 package fr.icy.model;
 
+import fr.icy.common.string.StringUtil;
+import fr.icy.common.type.TypeUtil;
+import fr.icy.io.xml.XMLUtil;
+import fr.icy.model.sequence.MetaDataUtil;
+import fr.icy.system.SystemUtil;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceFactory;
 import loci.formats.MetadataTools;
@@ -34,21 +39,22 @@ import ome.xml.model.XMLAnnotation;
 import ome.xml.model.primitives.NonNegativeInteger;
 import ome.xml.model.primitives.PositiveFloat;
 import ome.xml.model.primitives.PositiveInteger;
-import fr.icy.common.string.StringUtil;
-import fr.icy.common.type.TypeUtil;
-import fr.icy.io.xml.XMLUtil;
-import fr.icy.model.sequence.MetaDataUtil;
-import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Document;
 
 import java.awt.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class OMEUtil {
+    private static final Logger LOGGER = Logger.getLogger(OMEUtil.class.getName());
+
     private static OMEXMLService OMEService;
 
     static {
@@ -58,11 +64,8 @@ public class OMEUtil {
             OMEService = factory.getInstance(OMEXMLService.class);
         }
         catch (final DependencyException e) {
-            final String[] messages = new String[]{
-                    "Error create OME Service:" + e.getLocalizedMessage(),
-                    "Using default service implementation..."
-            };
-            IcyLogger.error(OMEUtil.class, e, messages);
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Unable to create OME Service. Using default service implementation.", e);
 
             //factory = null;
             OMEService = new OMEXMLServiceImpl();
@@ -73,6 +76,7 @@ public class OMEUtil {
      * Safe integer evaluation from PositiveInteger object.<br>
      * Return defaultValue if specified object is null.
      */
+    @Contract("null, _ -> param2")
     public static int getValue(final PositiveInteger obj, final int defaultValue) {
         if (obj == null)
             return defaultValue;
@@ -84,6 +88,7 @@ public class OMEUtil {
      * Safe integer evaluation from NonNegativeInteger object.<br>
      * Return defaultValue if specified object is null.
      */
+    @Contract("null, _ -> param2")
     public static int getValue(final NonNegativeInteger obj, final int defaultValue) {
         if (obj == null)
             return defaultValue;
@@ -96,6 +101,7 @@ public class OMEUtil {
      * Return <code>defaultValue</code> if <code>obj</code> is null or equal to infinite with <code>allowInfinite</code>
      * set to false.
      */
+    @Contract("null, _, _ -> param2")
     public static double getValue(final PositiveFloat obj, final double defaultValue, final boolean allowInfinite) {
         if (obj == null)
             return defaultValue;
@@ -107,6 +113,7 @@ public class OMEUtil {
      * Safe float evaluation from PositiveFloat object.<br>
      * Return defaultValue if specified object is null.
      */
+    @Contract("null, _ -> param2")
     public static double getValue(final PositiveFloat obj, final double defaultValue) {
         return getValue(obj, defaultValue, true);
     }
@@ -115,6 +122,7 @@ public class OMEUtil {
      * Convert specified Length to double value in &micro;m (for backward compatibility).<br>
      * Return defaultValue if specified object is <code>null</code>.
      */
+    @Contract("null, _ -> param2")
     public static double getValue(final Length obj, final double defaultValue) {
         if (obj == null)
             return defaultValue;
@@ -130,6 +138,7 @@ public class OMEUtil {
      * Convert specified Time to double value in second (for backward compatibility).<br>
      * Return defaultValue if specified object is <code>null</code>.
      */
+    @Contract("null, _ -> param2")
     public static double getValue(final Time obj, final double defaultValue) {
         if (obj == null)
             return defaultValue;
@@ -144,41 +153,47 @@ public class OMEUtil {
     /**
      * Return a PositiveFloat object representing the specified value
      */
-    public static PositiveFloat getPositiveFloat(final double value) {
-        return new PositiveFloat(Double.valueOf(value));
+    @Contract("_ -> new")
+    public static @NonNull PositiveFloat getPositiveFloat(final double value) {
+        return new PositiveFloat(value);
     }
 
     /**
      * Return a PositiveInteger object representing the specified value
      */
-    public static PositiveInteger getPositiveInteger(final int value) {
-        return new PositiveInteger(Integer.valueOf(value));
+    @Contract("_ -> new")
+    public static @NonNull PositiveInteger getPositiveInteger(final int value) {
+        return new PositiveInteger(value);
     }
 
     /**
      * Return a NonNegativeInteger object representing the specified value
      */
-    public static NonNegativeInteger getNonNegativeInteger(final int value) {
-        return new NonNegativeInteger(Integer.valueOf(value));
+    @Contract("_ -> new")
+    public static @NonNull NonNegativeInteger getNonNegativeInteger(final int value) {
+        return new NonNegativeInteger(value);
     }
 
     /**
      * Return a Length object representing the specified value (in &micro;m)
      */
-    public static Length getLength(final double value) {
-        return new Length(Double.valueOf(value), UNITS.MICROMETER);
+    @Contract("_ -> new")
+    public static @NonNull Length getLength(final double value) {
+        return new Length(value, UNITS.MICROMETER);
     }
 
     /**
      * Return a Time object representing the specified value (in second)
      */
-    public static Time getTime(final double value) {
-        return new Time(Double.valueOf(value), UNITS.SECOND);
+    @Contract("_ -> new")
+    public static @NonNull Time getTime(final double value) {
+        return new Time(value, UNITS.SECOND);
     }
 
     /**
      * Return a java Color object from a OME Color object
      */
+    @Contract("null -> null; !null -> new")
     public static Color getJavaColor(final ome.xml.model.primitives.Color value) {
         if (value == null)
             return null;
@@ -189,19 +204,21 @@ public class OMEUtil {
     /**
      * Return a OME Color object from a java Color object
      */
-    public static ome.xml.model.primitives.Color getOMEColor(final Color value) {
+    @Contract("_ -> new")
+    public static ome.xml.model.primitives.@NonNull Color getOMEColor(final @NonNull Color value) {
         return new ome.xml.model.primitives.Color(value.getRed(), value.getGreen(), value.getBlue(), value.getAlpha());
     }
 
     /**
      * Create a new empty OME Metadata object.
      */
-    public synchronized static OMEXMLMetadata createOMEXMLMetadata() {
+    public synchronized static @Nullable OMEXMLMetadata createOMEXMLMetadata() {
         try {
             return OMEService.createOMEXMLMetadata();
         }
         catch (final Exception e) {
-            IcyLogger.error(OMEUtil.class, e, "Unable to create OME XML metada.");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Unable to create OME XML metadata.", e);
             return null;
         }
     }
@@ -209,9 +226,8 @@ public class OMEUtil {
     /**
      * Create a new OME Metadata object from the specified Metadata object.<br>
      *
-     * @param setUserName
-     *        set the experimenter user name from current User Name environment var
-     *        otherwise we preserve old user name (in case of simple image loading / duplicating / saving..)
+     * @param setUserName set the experimenter user name from current User Name environment var
+     *                    otherwise we preserve old user name (in case of simple image loading / duplicating / saving..)
      */
     public static OMEXMLMetadata createOMEXMLMetadata(final MetadataRetrieve metadata, final boolean setUserName) {
         final OMEXMLMetadata result = createOMEXMLMetadata();
@@ -254,10 +270,9 @@ public class OMEUtil {
     /**
      * Create a new single serie OME Metadata object from the specified Metadata object.
      *
-     * @param serie
-     *        Index of the serie we want to keep.
+     * @param serie Index of the serie we want to keep.
      */
-    public static OMEXMLMetadata createOMEXMLMetadata(final MetadataRetrieve metadata, final int serie) {
+    public static @NonNull OMEXMLMetadata createOMEXMLMetadata(final MetadataRetrieve metadata, final int serie) {
         // generally used on loading so preserve user name here
         final OMEXMLMetadata result = OMEUtil.createOMEXMLMetadata(metadata, false);
 
@@ -288,7 +303,8 @@ public class OMEUtil {
             return XMLUtil.createDocument(metadata.dumpXML());
         }
         catch (final Exception e) {
-            IcyLogger.error(OMEUtil.class, e, "Unable to get XML document.");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Unable to get XML document.", e);
         }
 
         // return empty document
@@ -298,9 +314,10 @@ public class OMEUtil {
     /**
      * Report and upload the specified filename to LOCI team.
      */
+    @Contract(pure = true)
     public static boolean reportLociError(final String fileName, final String errorMessage) {
         // TODO: implement this when done in LOCI
-        // final IssueReporter reporter = new IssueReporter();
+        //final IssueReporter reporter = new IssueReporter();
         // return reporter.reportBug(fileName, errorMessage);
 
         return false;

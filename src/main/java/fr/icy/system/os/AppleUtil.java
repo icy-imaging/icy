@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,27 +18,29 @@
 
 package fr.icy.system.os;
 
+import fr.icy.Icy;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.gui.dialog.LoaderDialog;
 import fr.icy.gui.frame.AboutFrame;
 import fr.icy.gui.preferences.GeneralPreferencePanel;
 import fr.icy.gui.preferences.PreferenceFrame;
 import fr.icy.system.SystemUtil;
-import fr.icy.Icy;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * OSX application compatibility class
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class AppleUtil {
+    private static final Logger LOGGER = Logger.getLogger(AppleUtil.class.getName());
+
     //static final Thread fixThread = new Thread(AppleUtil::appleFixLiveRun, "AppleFix");
 
     public static void init() {
@@ -60,14 +62,14 @@ public class AppleUtil {
 
                 final Taskbar taskbar = Taskbar.getTaskbar();
                 if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE))
-                    taskbar.setIconImage(new IcySVG(SVGResource.ICY_MACOS).getImage(256));
+                    taskbar.setIconImage(IcySVG.ICY_MACOS.getImage(256));
 
                 // set menu bar name
                 SystemUtil.setProperty("com.apple.mrj.application.apple.menu.about.name", "Icy");
                 SystemUtil.setProperty("apple.awt.application.name", "Icy");
             }
             catch (final Exception e) {
-                IcyLogger.warn(AppleUtil.class, e, "Can't install MacOS application wrapper.");
+                LOGGER.log(Level.WARNING, "Can't install MacOS application wrapper.", e);
             }
         }
 
@@ -92,7 +94,7 @@ public class AppleUtil {
             for (final PropertyChangeListener propertyChangeListener : leak)
                 toolkit.removePropertyChangeListener("apple.awt.contentScaleFactor", propertyChangeListener);
 
-            // no need more...
+            // no need more…
             ThreadUtil.sleep(500);
         }
     }

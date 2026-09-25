@@ -40,7 +40,7 @@ import fr.icy.extension.kernel.roi.roi2d.ROI2DLine;
 /**
  * ROI Helper class for ROI cutting action
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ROILineCutter extends ROI2DLine
 {
@@ -60,7 +60,7 @@ public class ROILineCutter extends ROI2DLine
                     // get sequences where we are attached first
                     final List<Sequence> sequences = getSequences();
 
-                    // remove the ROI, we don't need it anymore...
+                    // remove the ROI, we don't need it anymore…
                     ROILineCutter.this.remove(false);
 
                     try

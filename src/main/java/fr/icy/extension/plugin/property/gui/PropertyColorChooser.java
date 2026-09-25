@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,20 +19,22 @@
 package fr.icy.extension.plugin.property.gui;
 
 import fr.icy.extension.plugin.property.ColorProperty;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.colorchooser.DefaultColorSelectionModel;
 import java.awt.*;
 
 public final class PropertyColorChooser extends PropertyComponent<JColorChooser, Color> {
-    PropertyColorChooser(@NotNull final ColorProperty property) {
+    PropertyColorChooser(final @NonNull ColorProperty property) {
         super(property);
     }
 
+    @Contract(" -> new")
     @Override
-    protected @NotNull JColorChooser createComponent() {
+    protected @NonNull JColorChooser createComponent() {
         final DefaultColorSelectionModel model = new DefaultColorSelectionModel(oldValue);
         return new JColorChooser(model);
     }

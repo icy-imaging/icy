@@ -30,7 +30,7 @@ import fr.icy.extension.plugin.PluginLoader;
  * the main plugin class name so your plugin can be identified.
  * This class will also hide your plugin from the plugin list in {@link PluginLoader}.
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 @Deprecated(since = "3.0.0", forRemoval = true)

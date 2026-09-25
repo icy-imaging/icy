@@ -27,10 +27,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
+@Deprecated(forRemoval = true, since = "3.0.0-a.8")
 public class RepositoryPreferences
 {
+    @Deprecated(forRemoval = true, since = "3.0.0-a.8")
     public static class RepositoryInfo
     {
         private static final String ID_NAME = "name";

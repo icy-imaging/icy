@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Utilities for Point2D class.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Point2DUtil
 {

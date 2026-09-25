@@ -117,7 +117,7 @@ final class Order1X extends CurveX {
 		if (y >= y1) {
 			return x1;
 		}
-		// assert(y0 != y1); /* No horizontal lines... */
+		// assert(y0 != y1); /* No horizontal lines… */
 		return (x0 + (y - y0) * (x1 - x0) / (y1 - y0));
 	}
 
@@ -244,7 +244,7 @@ final class Order1X extends CurveX {
 		}
 		Order1X c1 = (Order1X) other;
 		if (yrange[1] <= yrange[0]) {
-			throw new InternalError("yrange already screwed up...");
+			throw new InternalError("yrange already screwed up…");
 		}
 		yrange[1] = Math.min(Math.min(yrange[1], y1), c1.y1);
 		if (yrange[1] <= yrange[0]) {
@@ -258,14 +258,14 @@ final class Order1X extends CurveX {
 			return 1;
 		}
 		/*
-		 * If "this" is curve A and "other" is curve B, then... xA(y) = x0A + (y
+		 * If "this" is curve A and "other" is curve B, then… xA(y) = x0A + (y
 		 * - y0A) (x1A - x0A) / (y1A - y0A) xB(y) = x0B + (y - y0B) (x1B - x0B)
 		 * / (y1B - y0B) xA(y) == xB(y) x0A + (y - y0A) (x1A - x0A) / (y1A -
 		 * y0A) == x0B + (y - y0B) (x1B - x0B) / (y1B - y0B) 0 == x0A (y1A -
 		 * y0A) (y1B - y0B) + (y - y0A) (x1A - x0A) (y1B - y0B) - x0B (y1A -
 		 * y0A) (y1B - y0B) - (y - y0B) (x1B - x0B) (y1A - y0A) 0 == (x0A - x0B)
 		 * (y1A - y0A) (y1B - y0B) + (y - y0A) (x1A - x0A) (y1B - y0B) - (y -
-		 * y0B) (x1B - x0B) (y1A - y0A) If (dxA == x1A - x0A), etc... 0 == (x0A
+		 * y0B) (x1B - x0B) (y1A - y0A) If (dxA == x1A - x0A), etc… 0 == (x0A
 		 * - x0B) * dyA * dyB + (y - y0A) * dxA * dyB - (y - y0B) * dxB * dyA 0
 		 * == (x0A - x0B) * dyA * dyB + y * dxA * dyB - y0A * dxA * dyB - y *
 		 * dxB * dyA + y0B * dxB * dyA 0 == (x0A - x0B) * dyA * dyB + y * dxA *

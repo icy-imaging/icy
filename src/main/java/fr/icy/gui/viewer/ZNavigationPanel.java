@@ -33,7 +33,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ZNavigationPanel extends JPanel
 {

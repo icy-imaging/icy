@@ -18,7 +18,7 @@
 
 package fr.icy.common.datetime;
 
-import fr.icy.system.logging.IcyLogger;
+import java.util.logging.Logger;
 
 /**
  * This class provide a simple chronometer using Calendar.getInstance().getTimeInMillis();
@@ -27,13 +27,15 @@ import fr.icy.system.logging.IcyLogger;
  * @author Thomas Musset
  */
 public class Chronometer {
+    private static final Logger LOGGER = Logger.getLogger(Chronometer.class.getName());
+
     long startTimeInNs;
     String descriptionString;
 
     public Chronometer(final String descriptionString) {
         this.descriptionString = descriptionString;
         startTimeInNs = System.nanoTime();
-        IcyLogger.info(Chronometer.class, descriptionString + ": chrono Started");
+        LOGGER.info(descriptionString + ": chrono Started");
     }
 
     public long getNanos() {
@@ -41,11 +43,11 @@ public class Chronometer {
     }
 
     public void displayMs() {
-        IcyLogger.info(Chronometer.class, descriptionString + "(ms): " + getNanos() / 1000000f);
+        LOGGER.info(descriptionString + "(ms): " + getNanos() / 1000000f);
     }
 
     public void displayInSeconds() {
-        IcyLogger.info(Chronometer.class, descriptionString + "(s): " + getNanos() / 1000000000f);
+        LOGGER.info(descriptionString + "(s): " + getNanos() / 1000000000f);
     }
 
     @Override

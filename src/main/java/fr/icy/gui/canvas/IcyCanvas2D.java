@@ -23,6 +23,7 @@ import fr.icy.gui.viewer.Viewer;
 import fr.icy.model.overlay.Overlay;
 import fr.icy.model.sequence.DimensionId;
 import fr.icy.model.sequence.Sequence;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +33,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public abstract class IcyCanvas2D extends IcyCanvas {
@@ -663,7 +664,7 @@ public abstract class IcyCanvas2D extends IcyCanvas {
     }
 
     @Override
-    public void changed(final IcyCanvasEvent event) {
+    public void changed(final @NonNull IcyCanvasEvent event) {
         super.changed(event);
 
         switch (event.getType()) {

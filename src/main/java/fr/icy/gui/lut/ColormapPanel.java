@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ import fr.icy.gui.GuiUtil;
 import fr.icy.gui.canvas.IcyCanvas3D;
 import fr.icy.gui.component.button.IcyButton;
 import fr.icy.gui.component.button.IcyToggleButton;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.renderer.ColormapComboBoxRenderer;
 import fr.icy.gui.dialog.OpenDialog;
 import fr.icy.gui.dialog.SaveDialog;
@@ -35,6 +35,7 @@ import fr.icy.model.colormap.IcyColorMapListener;
 import fr.icy.model.lut.LUT;
 import fr.icy.model.lut.LUT.LUTChannel;
 import fr.icy.model.sequence.Sequence;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,7 +43,7 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ColormapPanel extends JPanel implements IcyColorMapListener {
@@ -72,7 +73,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
 
     private boolean modifyingColormap;
 
-    public ColormapPanel(final Viewer viewer, final LUTChannel lutChannel) {
+    public ColormapPanel(final @NonNull Viewer viewer, final @NonNull LUTChannel lutChannel) {
         super();
 
         this.viewer = viewer;
@@ -85,15 +86,15 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         colormapViewer = new ColormapViewer(lutChannel);
 
         // colormap type
-        rgbBtn = new IcyToggleButton(SVGResource.RGB_IMAGE);
+        rgbBtn = new IcyToggleButton(IcySVG.RGB_IMAGE);
         rgbBtn.setToolTipText("Set colormap type to Color");
         rgbBtn.setFocusPainted(false);
         //ComponentUtil.setFixedWidth(rgbBtn, 26);
-        grayBtn = new IcyToggleButton(SVGResource.GRAYSCALE_IMAGE);
+        grayBtn = new IcyToggleButton(IcySVG.GRAYSCALE_IMAGE);
         grayBtn.setToolTipText("Set colormap type to Gray");
         grayBtn.setFocusPainted(false);
         //ComponentUtil.setFixedWidth(grayBtn, 26);
-        alphaBtn = new IcyToggleButton(SVGResource.ARGB_IMAGE);
+        alphaBtn = new IcyToggleButton(IcySVG.ARGB_IMAGE);
         alphaBtn.setToolTipText("Set colormap type to Alpha (transparency)");
         alphaBtn.setFocusPainted(false);
         //ComponentUtil.setFixedWidth(alphaBtn, 26);
@@ -169,12 +170,12 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         colormapComboBox.addActionListener(e -> setColorMap((IcyColorMap) colormapComboBox.getSelectedItem()));
 
         // load button
-        final IcyButton loadButton = new IcyButton(SVGResource.FOLDER_OPEN);
+        final IcyButton loadButton = new IcyButton(IcySVG.FOLDER_OPEN);
         loadButton.setToolTipText("Load colormap from file");
 
         // action to load colormap
         loadButton.addActionListener(e -> {
-            final String filename = OpenDialog.chooseFile("Load colormap...", DEFAULT_COLORMAP_DIR, DEFAULT_COLORMAP_NAME);
+            final String filename = OpenDialog.chooseFile("Load colormap…", DEFAULT_COLORMAP_DIR, DEFAULT_COLORMAP_NAME);
 
             if (filename != null) {
                 final IcyColorMap map = new IcyColorMap();
@@ -185,12 +186,12 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         });
 
         // save button
-        final IcyButton saveButton = new IcyButton(SVGResource.SAVE);
+        final IcyButton saveButton = new IcyButton(IcySVG.SAVE);
         saveButton.setToolTipText("Save colormap to file");
 
         // action to save colormap
         saveButton.addActionListener(e -> {
-            final String filename = SaveDialog.chooseFile("Save colormap...", DEFAULT_COLORMAP_DIR, DEFAULT_COLORMAP_NAME);
+            final String filename = SaveDialog.chooseFile("Save colormap…", DEFAULT_COLORMAP_DIR, DEFAULT_COLORMAP_NAME);
 
             if (filename != null)
                 XMLPersistentHelper.saveToXML(colormap, filename);
@@ -238,7 +239,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
     public void addNotify() {
         super.addNotify();
 
-        // listen colormap changes
+        // listen to colormap changes
         colormap.addListener(this);
     }
 
@@ -256,7 +257,7 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
         return colormapViewer;
     }
 
-    private void updateColormapType(final IcyColorMapType type) {
+    private void updateColormapType(final @NonNull IcyColorMapType type) {
         switch (type) {
             case RGB:
                 colormapTypeBtnGrp.setSelected(rgbBtn.getModel(), true);
@@ -316,10 +317,10 @@ public class ColormapPanel extends JPanel implements IcyColorMapListener {
     }
 
     @Override
-    public void colorMapChanged(final IcyColorMapEvent e) {
+    public void colorMapChanged(final @NonNull IcyColorMapEvent e) {
         switch (e.getType()) {
             case TYPE_CHANGED:
-                // colormap type has changed ? --> update combo state
+                // colormap type has changed? --> update combo state
                 updateColormapType(e.getColormap().getType());
                 break;
 

@@ -21,8 +21,7 @@ package fr.icy.extension.plugin.classloader;
 import fr.icy.extension.plugin.classloader.exception.JclException;
 import fr.icy.network.NetworkUtil;
 import fr.icy.network.URLUtil;
-import fr.icy.system.logging.IcyLogger;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -44,10 +43,12 @@ import java.util.zip.ZipInputStream;
  * JarResources reads jar files and loads the class content/bytes in a HashMap
  *
  * @author Kamran Zafar
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class JarResources {
+    private static final Logger LOGGER = Logger.getLogger(JarResources.class.getName());
+
     // <resourceName, content> map
     protected Map<String, byte[]> entryContents;
     // <resourceName, fileName> map
@@ -56,8 +57,6 @@ public class JarResources {
     protected boolean collisionAllowed;
     // keep trace of loaded resource size
     protected int loadedSize;
-
-    private static final Logger logger = Logger.getLogger(JarResources.class.getName());
 
     /**
      * Default constructor
@@ -137,12 +136,12 @@ public class JarResources {
      * Loads the jar file from a specified File.<br>
      * This method actually stores all contained URL in the specified JAR file.
      */
-    public void loadJar(final @NotNull File file) throws IOException {
+    public void loadJar(final @NonNull File file) throws IOException {
         final String filePath = file.getAbsolutePath();
         final String urlPrefix = "jar:" + file.toURI() + "!/";
 
-        if (logger.isLoggable(Level.FINEST))
-            logger.finest("Loading jar: " + filePath);
+        if (LOGGER.isLoggable(Level.FINEST))
+            LOGGER.finest("Loading jar: " + filePath);
 
         // we don't care about JAR specific information so just use ZipFile here
         final ZipFile zipFile = new ZipFile(file);
@@ -167,8 +166,8 @@ public class JarResources {
                     if (!collisionAllowed)
                         throw new JclException("Class/Resource " + name + " already loaded");
 
-                    if (logger.isLoggable(Level.FINEST))
-                        logger.finest("Class/Resource " + name + " already loaded; ignoring entry...");
+                    if (LOGGER.isLoggable(Level.FINEST))
+                        LOGGER.finest("Class/Resource " + name + " already loaded; ignoring entry…");
                     continue;
                 }
 
@@ -179,9 +178,10 @@ public class JarResources {
                     entryUrls.put(name, uri.toURL());
                 }
                 catch (final URISyntaxException e) {
-                    IcyLogger.warn(JarResources.class, e, "Cannot load resource with URI: " + name, "Trying with URL...");
+                    if (LOGGER.isLoggable(Level.WARNING))
+                        LOGGER.log(Level.WARNING, "Cannot load resource with URI: " + name + ". Trying with URL…", e);
                     // Trying with direct URL (DEPRECATED SINCE JDK 20)
-                    @SuppressWarnings("deprecation") final URL url = new URL(urlPrefix + name);
+                    final URL url = new URL(urlPrefix + name);
                     entryUrls.put(name, url);
                 }
             }
@@ -195,7 +195,8 @@ public class JarResources {
             }
             catch (final IOException e) {
                 // not important
-                IcyLogger.warn(JarResources.class, e, "JarResources.loadJar(" + filePath + ") error.");
+                if (LOGGER.isLoggable(Level.WARNING))
+                    LOGGER.log(Level.WARNING, "JarResources.loadJar(" + filePath + ") error.", e);
             }
         }
 
@@ -221,8 +222,8 @@ public class JarResources {
             return;
         }
 
-        if (logger.isLoggable(Level.FINEST))
-            logger.finest("Loading jar: " + url.toString());
+        if (LOGGER.isLoggable(Level.FINEST))
+            LOGGER.finest("Loading jar: " + url.toString());
 
         final String urlPrefix = "jar:" + url.toString() + "!/";
         BufferedInputStream bis = null;
@@ -241,8 +242,8 @@ public class JarResources {
 
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest(dump(entry));
+                if (LOGGER.isLoggable(Level.FINEST))
+                    LOGGER.finest(dump(entry));
 
                 if (entry.isDirectory())
                     continue;
@@ -257,8 +258,8 @@ public class JarResources {
                     if (!collisionAllowed)
                         throw new JclException("Class/Resource " + name + " already loaded");
 
-                    if (logger.isLoggable(Level.FINEST))
-                        logger.finest("Class/Resource " + name + " already loaded; ignoring entry...");
+                    if (LOGGER.isLoggable(Level.FINEST))
+                        LOGGER.finest("Class/Resource " + name + " already loaded; ignoring entry…");
                     continue;
                 }
 
@@ -273,7 +274,8 @@ public class JarResources {
         // logger.finest("Done loading.");
         // }
         catch (final URISyntaxException e) {
-            IcyLogger.error(JarResources.class, e, e.getLocalizedMessage());
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
         }
         finally {
             if (zis != null) {
@@ -282,7 +284,8 @@ public class JarResources {
                 }
                 catch (final IOException e) {
                     // not important
-                    IcyLogger.warn(JarResources.class, e, "JarResources.loadJar(" + url + ") error.");
+                    if (LOGGER.isLoggable(Level.WARNING))
+                        LOGGER.log(Level.WARNING, "JarResources.loadJar(" + url + ") error.", e);
                 }
             }
 
@@ -292,7 +295,8 @@ public class JarResources {
                 }
                 catch (final IOException e) {
                     // not important
-                    IcyLogger.warn(JarResources.class, e, "JarResources.loadJar(" + url + ") error.");
+                    if (LOGGER.isLoggable(Level.WARNING))
+                        LOGGER.log(Level.WARNING, "JarResources.loadJar(" + url + ") error.", e);
                 }
             }
         }
@@ -301,13 +305,13 @@ public class JarResources {
     /**
      * Load the jar contents from InputStream
      */
-    protected byte[] loadJarContent(final @NotNull URL url) throws IOException {
+    protected byte[] loadJarContent(final @NonNull URL url) throws IOException {
         final JarURLConnection uc = (JarURLConnection) url.openConnection();
         final JarEntry jarEntry = uc.getJarEntry();
 
         if (jarEntry != null) {
-            if (logger.isLoggable(Level.FINEST))
-                logger.finest(dump(jarEntry));
+            if (LOGGER.isLoggable(Level.FINEST))
+                LOGGER.finest(dump(jarEntry));
 
             return NetworkUtil.download(uc.getInputStream(), jarEntry.getSize(), null);
         }
@@ -320,13 +324,13 @@ public class JarResources {
             if (!collisionAllowed)
                 throw new JclException("Class/Resource " + name + " already loaded");
 
-            if (logger.isLoggable(Level.FINEST))
-                logger.finest("Class/Resource " + name + " already loaded; ignoring entry...");
+            if (LOGGER.isLoggable(Level.FINEST))
+                LOGGER.finest("Class/Resource " + name + " already loaded; ignoring entry…");
             return;
         }
 
-        if (logger.isLoggable(Level.FINEST))
-            logger.finest("Entry Name: " + name + ", " + "Entry Size: " + content.length);
+        if (LOGGER.isLoggable(Level.FINEST))
+            LOGGER.finest("Entry Name: " + name + ", " + "Entry Size: " + content.length);
 
         // add to internal resource HashMap
         entryContents.put(name, content);
@@ -335,7 +339,7 @@ public class JarResources {
     /**
      * For debugging
      */
-    private @NotNull String dump(final @NotNull ZipEntry ze) {
+    private @NonNull String dump(final @NonNull ZipEntry ze) {
         final StringBuilder sb = new StringBuilder();
         if (ze.isDirectory())
             sb.append("d ");

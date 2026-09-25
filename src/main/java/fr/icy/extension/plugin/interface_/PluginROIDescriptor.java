@@ -29,7 +29,8 @@ import java.util.Map;
  * Plugin interface providing the basic functionalities to compute various descriptors for regions
  * of interest (ROI)
  *
- * @author Stephane Dallongeville, Alexandre Dufour
+ * @author Stéphane Dallongeville
+ * @author Alexandre Dufour
  * @author Thomas Musset
  */
 public interface PluginROIDescriptor extends PluginNoEDTConstructor {
@@ -46,7 +47,7 @@ public interface PluginROIDescriptor extends PluginNoEDTConstructor {
      * List&lt;ROIDescriptor&gt; result = ArrayList&lt;ROIDescriptor&gt;();
      * result.add(new ROIDescriptor("area", Double.class));
      * result.add(new ROIDescriptor("volume", Double.class));
-     * result.add(new ROIDescriptor("...", Double.class));
+     * result.add(new ROIDescriptor("…", Double.class));
      * </pre>
      */
     List<ROIDescriptor<?>> getDescriptors();

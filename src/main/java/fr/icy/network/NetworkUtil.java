@@ -27,7 +27,6 @@ import fr.icy.io.FileUtil;
 import fr.icy.network.auth.AuthenticationInfo;
 import fr.icy.system.SystemUtil;
 import fr.icy.system.audit.Audit;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.NetworkPreferences;
 import fr.icy.system.thread.ThreadUtil;
 
@@ -43,12 +42,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class NetworkUtil {
+    private static final Logger LOGGER = Logger.getLogger(NetworkUtil.class.getName());
+
     /**
      * URL
      */
@@ -96,7 +99,7 @@ public class NetworkUtil {
     /**
      * Weak listener wrapper for NetworkConnectionListener.
      *
-     * @author Stephane
+     * @author Stéphane Dallongeville
      */
     public static class WeakInternetAccessListener extends WeakListener<InternetAccessListener> implements InternetAccessListener {
         public WeakInternetAccessListener(final InternetAccessListener listener) {
@@ -333,7 +336,7 @@ public class NetworkUtil {
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
         }
         catch (final Exception e) {
-            IcyLogger.error(NetworkUtil.class, e, e.getLocalizedMessage());
+            LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
         }
     }
 
@@ -585,7 +588,7 @@ public class NetworkUtil {
             return true;
         }
         catch (final Exception e) {
-            IcyLogger.error(NetworkUtil.class, e, "Error while opening system browser.");
+            LOGGER.log(Level.SEVERE, "Error while opening system browser.", e);
             return false;
         }
     }
@@ -613,7 +616,7 @@ public class NetworkUtil {
         // error while building URL ?
         if (url == null) {
             if (displayError)
-                IcyLogger.error(NetworkUtil.class, "Can't download '" + path + "', incorrect path !");
+                LOGGER.severe("Can't download '" + path + "', incorrect path !");
 
             return null;
         }
@@ -641,7 +644,7 @@ public class NetworkUtil {
             }
             catch (final URISyntaxException e) {
                 if (displayError)
-                    IcyLogger.error(NetworkUtil.class, e, "Can't download from '" + url + "', incorrect path !");
+                    LOGGER.log(Level.SEVERE, "Can't download from '" + url + "', incorrect path !", e);
 
                 return null;
             }
@@ -658,22 +661,22 @@ public class NetworkUtil {
         }
         catch (final Exception e) {
             if (displayError) {
-                IcyLogger.error(NetworkUtil.class, e, "Error while downloading '" + uc.getURL() + "'.");
+                LOGGER.log(Level.SEVERE, "Error while downloading '" + uc.getURL() + "'.", e);
             }
 
             return null;
         }
-        // ignore...
+        // ignore…
     }
 
     /**
      * Download data from File and return it as an array of byte.<br>
      * It returns <code>null</code> if an error occurred (file not found or not existing, IO
-     * error...)
+     * error…)
      */
     public static byte[] download(final File f, final ProgressListener listener, final boolean displayError) {
         if (!f.exists()) {
-            IcyLogger.error(NetworkUtil.class, "File not found: " + f.getPath());
+            LOGGER.severe("File not found: " + f.getPath());
             return null;
         }
 
@@ -682,7 +685,7 @@ public class NetworkUtil {
         }
         catch (final Exception e) {
             if (displayError) {
-                IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.download('" + f.getPath() + "',...) error.");
+                LOGGER.log(Level.SEVERE, "NetworkUtil.download('" + f.getPath() + "',…) error.", e);
             }
 
             return null;
@@ -728,7 +731,7 @@ public class NetworkUtil {
                     // download canceled ?
                     if (!listener.notifyProgress(off, len)) {
                         in.close();
-                        IcyLogger.warn(NetworkUtil.class, "Interrupted by user.");
+                        LOGGER.warning("Interrupted by user.");
                         return null;
                     }
                 }
@@ -752,25 +755,19 @@ public class NetworkUtil {
     /**
      * Returns a new {@link URLConnection} from specified URL (null if an error occurred).
      *
-     * @param url
-     *        url to connect.
-     * @param login
-     *        login if the connection requires authentication.<br>
-     *        Set it to null if no authentication needed.
-     * @param pass
-     *        login if the connection requires authentication.
-     *        Set it to null if no authentication needed.
-     * @param disableCache
-     *        Disable proxy cache if any.
-     * @param doConnect
-     *        do the connection before return the {@link URLConnection} object
-     * @param displayError
-     *        Display error message in console if something wrong happen.
+     * @param url          url to connect.
+     * @param login        login if the connection requires authentication.<br>
+     *                     Set it to null if no authentication needed.
+     * @param pass         login if the connection requires authentication.
+     *                     Set it to null if no authentication needed.
+     * @param disableCache Disable proxy cache if any.
+     * @param doConnect    do the connection before return the {@link URLConnection} object
+     * @param displayError Display error message in console if something wrong happen.
      */
     public static URLConnection openConnection(final URL url, final String login, final String pass, final boolean disableCache, final boolean doConnect, final boolean displayError) {
         if (url == null) {
             if (displayError)
-                IcyLogger.error(NetworkUtil.class, "NetworkUtil.openConnection(...) error: URL is null !");
+                LOGGER.severe("NetworkUtil.openConnection(…) error: URL is null !");
 
             return null;
         }
@@ -826,10 +823,10 @@ public class NetworkUtil {
             if (displayError) {
                 // HTTPS not supported while we have a HTTPS connection to icy web site
                 if (!isHTTPSSupported() && (uc != null) && uc.getURL().toString().toLowerCase().startsWith("https://icy")) {
-                    IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.openConnection('" + uc.getURL() + "') error: HTTPS connection not supported.");
+                    LOGGER.log(Level.SEVERE, "NetworkUtil.openConnection('" + uc.getURL() + "') error: HTTPS connection not supported.", e);
                 }
                 else {
-                    IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.openConnection('" + url + "') error.");
+                    LOGGER.log(Level.SEVERE, "NetworkUtil.openConnection('" + url + "') error.", e);
                 }
             }
 
@@ -840,18 +837,13 @@ public class NetworkUtil {
     /**
      * Returns a new {@link URLConnection} from specified URL (null if an error occurred).
      *
-     * @param url
-     *        url to connect.
-     * @param login
-     *        login if the connection requires authentication.<br>
-     *        Set it to null if no authentication needed.
-     * @param pass
-     *        login if the connection requires authentication.
-     *        Set it to null if no authentication needed.
-     * @param disableCache
-     *        Disable proxy cache if any.
-     * @param displayError
-     *        Display error message in console if something wrong happen.
+     * @param url          url to connect.
+     * @param login        login if the connection requires authentication.<br>
+     *                     Set it to null if no authentication needed.
+     * @param pass         login if the connection requires authentication.
+     *                     Set it to null if no authentication needed.
+     * @param disableCache Disable proxy cache if any.
+     * @param displayError Display error message in console if something wrong happen.
      */
     public static URLConnection openConnection(final URL url, final String login, final String pass, final boolean disableCache, final boolean displayError) {
         return openConnection(url, login, pass, disableCache, false, displayError);
@@ -860,14 +852,10 @@ public class NetworkUtil {
     /**
      * Returns a new {@link URLConnection} from specified URL (null if an error occurred).
      *
-     * @param url
-     *        url to connect.
-     * @param auth
-     *        Authentication informations.
-     * @param disableCache
-     *        Disable proxy cache if any.
-     * @param displayError
-     *        Display error message in console if something wrong happen.
+     * @param url          url to connect.
+     * @param auth         Authentication informations.
+     * @param disableCache Disable proxy cache if any.
+     * @param displayError Display error message in console if something wrong happen.
      */
     public static URLConnection openConnection(final URL url, final AuthenticationInfo auth, final boolean disableCache, final boolean displayError) {
         if ((auth != null) && auth.isEnabled())
@@ -879,12 +867,9 @@ public class NetworkUtil {
     /**
      * Returns a new {@link URLConnection} from specified URL (null if an error occurred).
      *
-     * @param url
-     *        url to connect.
-     * @param disableCache
-     *        Disable proxy cache if any.
-     * @param displayError
-     *        Display error message in console if something wrong happen.
+     * @param url          url to connect.
+     * @param disableCache Disable proxy cache if any.
+     * @param displayError Display error message in console if something wrong happen.
      */
     public static URLConnection openConnection(final URL url, final boolean disableCache, final boolean displayError) {
         return openConnection(url, null, null, disableCache, displayError);
@@ -894,12 +879,9 @@ public class NetworkUtil {
      * Returns a new {@link URLConnection} from specified path.<br>
      * Returns <code>null</code> if an error occurred.
      *
-     * @param path
-     *        path to connect.
-     * @param disableCache
-     *        Disable proxy cache if any.
-     * @param displayError
-     *        Display error message in console if something wrong happen.
+     * @param path         path to connect.
+     * @param disableCache Disable proxy cache if any.
+     * @param displayError Display error message in console if something wrong happen.
      */
     public static URLConnection openConnection(final String path, final boolean disableCache, final boolean displayError) {
         return openConnection(URLUtil.getURL(path), disableCache, displayError);
@@ -909,10 +891,8 @@ public class NetworkUtil {
      * Connect the specified {@link URLConnection}.<br>
      * Returns false if the connection failed or if response code is not ok.
      *
-     * @param uc
-     *        URLConnection to connect.
-     * @param displayError
-     *        Display error message in console if something wrong happen.
+     * @param uc           URLConnection to connect.
+     * @param displayError Display error message in console if something wrong happen.
      */
     public static boolean connect(final URLConnection uc, final boolean displayError) {
         try {
@@ -934,7 +914,7 @@ public class NetworkUtil {
                 // not ok ?
                 if (huc.getResponseCode() >= 0x400) {
                     if (displayError) {
-                        IcyLogger.error(NetworkUtil.class, "NetworkUtil.connect('" + huc.getURL() + "' error: " + huc.getResponseMessage());
+                        LOGGER.severe("NetworkUtil.connect('" + huc.getURL() + "' error: " + huc.getResponseMessage());
                     }
 
                     return false;
@@ -944,17 +924,17 @@ public class NetworkUtil {
         catch (final Exception e) {
             if (displayError) {
                 if (uc.getURL().getProtocol().equalsIgnoreCase("file"))
-                    IcyLogger.error(NetworkUtil.class, e, e.getLocalizedMessage());
+                    LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
                 else {
                     if (!hasInternetAccess())
-                        IcyLogger.error(NetworkUtil.class, "Can't connect to '" + uc.getURL() + "' (no internet connection).");
+                        LOGGER.severe("Can't connect to '" + uc.getURL() + "' (no internet connection).");
                     else {
                         // HTTPS not supported while we have a HTTPS connection to icy web site
                         if (!isHTTPSSupported() && uc.getURL().toString().toLowerCase().startsWith("https://icy")) {
-                            IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.connect('" + uc.getURL() + "') error: HTTPS connection not supported (see detail below).");
+                            LOGGER.log(Level.SEVERE, "NetworkUtil.connect('" + uc.getURL() + "') error: HTTPS connection not supported (see detail below).", e);
                         }
                         else {
-                            IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.connect('" + uc.getURL() + "' error.");
+                            LOGGER.log(Level.SEVERE, "NetworkUtil.connect('" + uc.getURL() + "' error.", e);
                         }
                     }
                 }
@@ -970,15 +950,13 @@ public class NetworkUtil {
      * Returns a new {@link InputStream} from specified {@link URLConnection} (null if an error
      * occurred).
      *
-     * @param uc
-     *        URLConnection object.
-     * @param displayError
-     *        Display error message in console if something wrong happen.
+     * @param uc           URLConnection object.
+     * @param displayError Display error message in console if something wrong happen.
      */
     public static InputStream getInputStream(final URLConnection uc, final boolean displayError) {
         if (uc == null) {
             if (displayError) {
-                IcyLogger.error(NetworkUtil.class, "NetworkUtil.getInputStream(URLConnection uc) error: URLConnection object is null !");
+                LOGGER.severe("NetworkUtil.getInputStream(URLConnection uc) error: URLConnection object is null !");
             }
 
             return null;
@@ -990,13 +968,13 @@ public class NetworkUtil {
         catch (final IOException e) {
             if (displayError) {
                 if (!hasInternetAccess())
-                    IcyLogger.error(NetworkUtil.class, "Can't connect to '" + uc.getURL() + "' (no internet connection).");
+                    LOGGER.severe("Can't connect to '" + uc.getURL() + "' (no internet connection).");
                     // HTTPS not supported while we have a HTTPS connection to icy web site
                 else if (!isHTTPSSupported() && uc.getURL().toString().toLowerCase().startsWith("https://icy")) {
-                    IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.getInputStream('" + uc.getURL() + "') error: HTTPS connection not supported !");
+                    LOGGER.log(Level.SEVERE, "NetworkUtil.getInputStream('" + uc.getURL() + "') error: HTTPS connection not supported !", e);
                 }
                 else {
-                    IcyLogger.error(NetworkUtil.class, e, "NetworkUtil.getInputStream('" + uc.getURL() + "') error.");
+                    LOGGER.log(Level.SEVERE, "NetworkUtil.getInputStream('" + uc.getURL() + "') error.", e);
                 }
             }
 
@@ -1007,18 +985,13 @@ public class NetworkUtil {
     /**
      * Returns a new {@link InputStream} from specified URL (null if an error occurred).
      *
-     * @param url
-     *        url we want to connect and retrieve the InputStream.
-     * @param login
-     *        login if the connection requires authentication.<br>
-     *        Set it to null if no authentication needed.
-     * @param pass
-     *        login if the connection requires authentication.
-     *        Set it to null if no authentication needed.
-     * @param disableCache
-     *        Disable proxy cache if any.
-     * @param displayError
-     *        Display error message in console if something wrong happen.
+     * @param url          url we want to connect and retrieve the InputStream.
+     * @param login        login if the connection requires authentication.<br>
+     *                     Set it to null if no authentication needed.
+     * @param pass         login if the connection requires authentication.
+     *                     Set it to null if no authentication needed.
+     * @param disableCache Disable proxy cache if any.
+     * @param displayError Display error message in console if something wrong happen.
      */
     public static InputStream getInputStream(final URL url, final String login, final String pass, final boolean disableCache, final boolean displayError) {
         final URLConnection uc = openConnection(url, login, pass, disableCache, true, displayError);
@@ -1032,14 +1005,10 @@ public class NetworkUtil {
     /**
      * Returns a new {@link InputStream} from specified URL (null if an error occurred).
      *
-     * @param url
-     *        url we want to connect and retrieve the InputStream.
-     * @param auth
-     *        Authentication informations.
-     * @param disableCache
-     *        Disable proxy cache if any.
-     * @param displayError
-     *        Display error message in console if something wrong happen.
+     * @param url          url we want to connect and retrieve the InputStream.
+     * @param auth         Authentication informations.
+     * @param disableCache Disable proxy cache if any.
+     * @param displayError Display error message in console if something wrong happen.
      */
     public static InputStream getInputStream(final URL url, final AuthenticationInfo auth, final boolean disableCache, final boolean displayError) {
         if ((auth != null) && (auth.isEnabled()))
@@ -1111,7 +1080,7 @@ public class NetworkUtil {
         if (login != null)
             setAuthentication(uc, login, pass);
 
-        // make server believe we are form data...
+        // make server believe we are form data…
         uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
         try (final DataOutputStream out = new DataOutputStream(uc.getOutputStream())) {

@@ -23,7 +23,7 @@ import fr.icy.Icy;
 /**
  * Weak listener wrapper for SwimmingPoolListener.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class WeakSwimmingPoolListener extends WeakListener<SwimmingPoolListener> implements SwimmingPoolListener
 {

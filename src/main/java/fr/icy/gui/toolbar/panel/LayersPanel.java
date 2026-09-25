@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,28 +18,30 @@
 
 package fr.icy.gui.toolbar.panel;
 
+import fr.icy.Icy;
+import fr.icy.common.string.StringUtil;
 import fr.icy.gui.action.CanvasActions;
 import fr.icy.gui.canvas.CanvasLayerEvent;
 import fr.icy.gui.canvas.CanvasLayerListener;
 import fr.icy.gui.canvas.IcyCanvas;
 import fr.icy.gui.canvas.Layer;
-import fr.icy.gui.component.field.IcyTextField;
-import fr.icy.gui.component.field.IcyTextField.TextChangeListener;
 import fr.icy.gui.component.button.IcyToggleButton;
 import fr.icy.gui.component.editor.VisibleCellEditor;
+import fr.icy.gui.component.field.IcyTextField;
+import fr.icy.gui.component.field.IcyTextField.TextChangeListener;
+import fr.icy.gui.component.icon.IcyIconPack;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.renderer.VisibleCellRenderer;
 import fr.icy.gui.listener.ActiveViewerListener;
 import fr.icy.gui.viewer.Viewer;
 import fr.icy.gui.viewer.ViewerEvent;
 import fr.icy.gui.viewer.ViewerEvent.ViewerEventType;
-import fr.icy.Icy;
-import fr.icy.gui.component.icon.SVGResource;
-import fr.icy.gui.component.icon.IcyIconPack;
 import fr.icy.system.thread.ThreadUtil;
-import fr.icy.common.string.StringUtil;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.ColumnControlButton;
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -52,7 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public final class LayersPanel extends ToolbarPanel implements ActiveViewerListener, CanvasLayerListener, TextChangeListener, ListSelectionListener {
@@ -145,7 +147,7 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
         gbc_nameFilter.gridy = 0;
         panelNorth.add(nameFilter, gbc_nameFilter);
 
-        tglbtnLayerVisibility = new IcyToggleButton(new IcyIconPack(SVGResource.VISIBILITY_OFF, SVGResource.VISIBILITY));
+        tglbtnLayerVisibility = new IcyToggleButton(new IcyIconPack(IcySVG.VISIBILITY_OFF, IcySVG.VISIBILITY));
         tglbtnLayerVisibility.setFocusable(false);
         tglbtnLayerVisibility.setToolTipText("Change visibility for selected layer(s)");
         final GridBagConstraints gbc_tglbtnLayerVisibility = new GridBagConstraints();
@@ -270,12 +272,12 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
             @Override
             public Class<?> getColumnClass(final int columnIndex) {
                 return switch (columnIndex) {
-                    default ->
-                        // layer name
-                            String.class;
                     case 1 ->
                         // layer visibility
                             Boolean.class;
+                    default ->
+                        // layer name
+                            String.class;
                 };
             }
         };
@@ -318,6 +320,7 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
 
     }
 
+    @Contract(mutates = "this")
     private void initVisibilityToggleListener() {
         visibilityToggleActionListener = e -> {
             final boolean visibilityValue = tglbtnLayerVisibility.isSelected();
@@ -397,7 +400,7 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
         }
     }
 
-    public ArrayList<Layer> getSelectedLayers() {
+    public @NonNull ArrayList<Layer> getSelectedLayers() {
         final ArrayList<Layer> result = new ArrayList<>();
 
         for (final int rowIndex : table.getSelectedRows()) {
@@ -429,7 +432,7 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
             table.clearSelection();
 
             if (newSelected != null) {
-                boolean allHidden = newSelected.size() > 0;
+                boolean allHidden = !newSelected.isEmpty();
                 for (final Layer layer : newSelected) {
                     final int index = getLayerTableIndex(layer);
 
@@ -454,7 +457,7 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
         tglbtnLayerVisibility.setSelected(active);
     }
 
-    List<Layer> filterList(final List<Layer> list, final String nameFilterText) {
+    @NonNull List<Layer> filterList(final List<Layer> list, final String nameFilterText) {
         final List<Layer> result = new ArrayList<>();
 
         final boolean nameEmpty = StringUtil.isEmpty(nameFilterText, true);
@@ -496,7 +499,7 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
      */
     private void selectionChanged() {
         final ArrayList<Layer> newSelected = getSelectedLayers();
-        boolean allHidden = newSelected.size() > 0;
+        boolean allHidden = !newSelected.isEmpty();
         for (final Layer layer : newSelected) {
             final int index = getLayerTableIndex(layer);
             if (index > -1) {
@@ -534,13 +537,14 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
         ThreadUtil.runSingle(canvasRefresher);
     }
 
+    @Contract(pure = true)
     @Override
     public void viewerDeactivated(final Viewer viewer) {
         // nothing here
     }
 
     @Override
-    public void activeViewerChanged(final ViewerEvent event) {
+    public void activeViewerChanged(final @NonNull ViewerEvent event) {
         if (event.getType() == ViewerEventType.CANVAS_CHANGED) {
             canvasRefresher.newCanvas = event.getSource().getCanvas();
             ThreadUtil.runSingle(canvasRefresher);
@@ -568,5 +572,4 @@ public final class LayersPanel extends ToolbarPanel implements ActiveViewerListe
                 break;
         }
     }
-
 }

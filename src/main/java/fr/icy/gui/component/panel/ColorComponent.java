@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -15,29 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package fr.icy.gui.component.panel;
 
 import fr.icy.common.color.ColorUtil;
 
-import java.awt.Color;
-import java.awt.Graphics;
-
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
+ * @author Thomas Musset
  */
-public class ColorComponent extends JPanel
-{
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 2883762420253112984L;
-
+public class ColorComponent extends JPanel {
     private Color color;
 
-    public ColorComponent(Color color)
-    {
+    public ColorComponent(final Color color) {
         super(true);
 
         this.color = color;
@@ -46,25 +39,21 @@ public class ColorComponent extends JPanel
         setVisible(true);
     }
 
-    public ColorComponent()
-    {
+    public ColorComponent() {
         this(null);
     }
 
     /**
      * @return the color
      */
-    public Color getColor()
-    {
+    public Color getColor() {
         return color;
     }
 
     /**
-     * @param color
-     *        the color to set
+     * @param color the color to set
      */
-    public void setColor(Color color)
-    {
+    public void setColor(final Color color) {
         this.color = color;
 
         if (color != null)
@@ -76,21 +65,17 @@ public class ColorComponent extends JPanel
     }
 
     /**
-     * @param rgb
-     *        the color to set
+     * @param rgb the color to set
      */
-    public void setColor(int rgb)
-    {
+    public void setColor(final int rgb) {
         setColor(new Color(rgb));
     }
 
     @Override
-    protected void paintComponent(Graphics g)
-    {
+    protected void paintComponent(final Graphics g) {
         if (color == null)
             super.paintComponent(g);
-        else
-        {
+        else {
             final int w = getWidth();
             final int h = getHeight();
 

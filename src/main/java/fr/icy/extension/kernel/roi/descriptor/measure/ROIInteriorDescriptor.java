@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,15 +22,15 @@ import fr.icy.model.roi.ROI;
 import fr.icy.model.roi.ROIDescriptor;
 import fr.icy.model.roi.ROIUtil;
 import fr.icy.model.sequence.Sequence;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Interior ROI descriptor class (see {@link ROIDescriptor})
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
-public class ROIInteriorDescriptor extends ROIDescriptor {
+public class ROIInteriorDescriptor extends ROIDescriptor<Double> {
     public static final String ID = "Interior";
 
     public ROIInteriorDescriptor() {
@@ -48,17 +48,17 @@ public class ROIInteriorDescriptor extends ROIDescriptor {
     }
 
     @Override
-    public Object compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
-        return Double.valueOf(computeInterior(roi));
+    public @NonNull Double compute(final ROI roi, final Sequence sequence) throws UnsupportedOperationException, InterruptedException {
+        return computeInterior(roi);
     }
 
     /**
-     * Returns the number of point inside the specified ROI.
+     * Returns the number of points inside the specified ROI.
      *
-     * @param roi the ROI on which we want to compute the number of contour point
-     * @return the number of point inside the ROI
+     * @param roi the ROI on which we want to compute the number of contour points
+     * @return the number of points inside the ROI
      */
-    public static double computeInterior(final @NotNull ROI roi) throws InterruptedException {
+    public static @NonNull Double computeInterior(final @NonNull ROI roi) throws InterruptedException {
         return roi.getNumberOfPoints();
     }
 
@@ -70,14 +70,14 @@ public class ROIInteriorDescriptor extends ROIDescriptor {
      * <li>computeInterior(sequence, roi, 2) return the area value</li>
      * <li>computeInterior(sequence, roi, 3) return the volume value</li>
      * </ul>
-     * It may thrown an <code>UnsupportedOperationException</code> if the operation is not supported for that ROI.
+     * It may throw an <code>UnsupportedOperationException</code> if the operation is not supported for that ROI.
      *
      * @param interiorPoints the number of interior points (override the ROI value)
      * @param roi            the ROI we want to compute the interior size
-     * @param sequence       the input sequence used to retrieve operation unit by using pixel size information.
-     * @param dim            the dimension for the interior size operation (2 = area, 3 = volume, ...)
-     * @return the number of point inside the ROI
-     * @throws UnsupportedOperationException if the interior calculation for the specified dimension is not supported by the ROI
+     * @param sequence       the input sequence used to retrieve the operation unit by using pixel size information.
+     * @param dim            the dimension for the interior size operation (2 = area, 3 = volume, …)
+     * @return the number of points inside the ROI
+     * @throws UnsupportedOperationException if the ROI does not support the interior calculation for the specified dimension
      * @see Sequence#getBestPixelSizeUnit(int, int)
      */
     public static double computeInterior(final double interiorPoints, final ROI roi, final Sequence sequence, final int dim) throws UnsupportedOperationException {

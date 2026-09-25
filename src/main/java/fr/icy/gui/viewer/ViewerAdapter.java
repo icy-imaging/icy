@@ -20,7 +20,7 @@ package fr.icy.gui.viewer;
 /**
  * Adapter for ViewerListener interface
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class ViewerAdapter implements ViewerListener
 {

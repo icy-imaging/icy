@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,25 +19,25 @@
 package fr.icy.extension.plugin.property.gui;
 
 import fr.icy.extension.plugin.property.StringProperty;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 
 public final class PropertyTextField extends PropertyComponent<JTextField, String> {
-    PropertyTextField(@NotNull final StringProperty property) {
+    PropertyTextField(final @NonNull StringProperty property) {
         super(property);
     }
 
-    @NotNull
+    @Contract(" -> new")
     @Override
-    protected JTextField createComponent() {
+    protected @NonNull JTextField createComponent() {
         return new JTextField(oldValue);
     }
 
-    @Nullable
     @Override
-    protected String getValue() {
+    protected @Nullable String getValue() {
         return component.getText();
     }
 

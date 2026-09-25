@@ -36,7 +36,7 @@ import fr.icy.model.image.IcyBufferedImage;
 /**
  * Class used to accelerate Sequence data access on first loading using data prefetching.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequencePrefetcher extends Thread
 {
@@ -113,7 +113,7 @@ public class SequencePrefetcher extends Thread
     {
         final PrefetchEntry entry = new PrefetchEntry(sequence, t, z);
 
-        // already in queue ? nothing to do...
+        // already in queue ? nothing to do…
         if (prefetchSet.contains(entry))
             return;
 
@@ -192,7 +192,7 @@ public class SequencePrefetcher extends Thread
         }
         catch (InterruptedException e)
         {
-            // stop here...
+            // stop here…
         }
     }
 }

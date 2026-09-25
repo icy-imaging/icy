@@ -33,7 +33,7 @@ import java.util.Set;
 /**
  * Base multiple ROI undoable edit.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class AbstractROIsEdit extends AbstractIcyUndoableEdit
 {

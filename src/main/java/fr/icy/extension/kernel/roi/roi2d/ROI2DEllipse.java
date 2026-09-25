@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,25 +20,29 @@ package fr.icy.extension.kernel.roi.roi2d;
 
 import fr.icy.common.geom.point.Point5D;
 import fr.icy.common.math.ArrayMath;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.model.sequence.Sequence;
-import fr.icy.system.logging.IcyLogger;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class ROI2DEllipse extends ROI2DRectShape {
+    private static final Logger LOGGER = Logger.getLogger(ROI2DEllipse.class.getName());
+
     public ROI2DEllipse(final Point2D topLeft, final Point2D bottomRight) {
         super(new Ellipse2D.Double(), topLeft, bottomRight);
 
         // set icon (default name is defined by getDefaultName()) 
-        setIcon(SVGResource.ROI_ELLIPSE);
+        setIcon(IcySVG.ROI_ELLIPSE);
     }
 
     /**
@@ -48,11 +52,11 @@ public class ROI2DEllipse extends ROI2DRectShape {
         this(new Point2D.Double(xmin, ymin), new Point2D.Double(xmax, ymax));
     }
 
-    public ROI2DEllipse(final Rectangle2D rectangle) {
+    public ROI2DEllipse(final @NonNull Rectangle2D rectangle) {
         this(rectangle.getMinX(), rectangle.getMinY(), rectangle.getMaxX(), rectangle.getMaxY());
     }
 
-    public ROI2DEllipse(final Ellipse2D ellipse) {
+    public ROI2DEllipse(final @NonNull Ellipse2D ellipse) {
         this(ellipse.getBounds2D());
     }
 
@@ -63,7 +67,7 @@ public class ROI2DEllipse extends ROI2DRectShape {
     /**
      * Generic constructor for interactive mode
      */
-    public ROI2DEllipse(final Point5D pt) {
+    public ROI2DEllipse(final @NonNull Point5D pt) {
         this(pt.toPoint2D());
     }
 
@@ -80,12 +84,12 @@ public class ROI2DEllipse extends ROI2DRectShape {
         return (Ellipse2D) shape;
     }
 
-    public void setEllipse(final Ellipse2D ellipse) {
+    public void setEllipse(final @NonNull Ellipse2D ellipse) {
         setBounds2D(ellipse.getBounds2D());
     }
 
     @Override
-    public double getLength(final Sequence sequence) throws UnsupportedOperationException {
+    public double getLength(final @NonNull Sequence sequence) throws UnsupportedOperationException {
         final Ellipse2D ellipse = getEllipse();
         return computeEllipsePerimeter(ellipse.getWidth() * 0.5d * sequence.getPixelSizeX(), ellipse.getHeight() * 0.5d * sequence.getPixelSizeY());
     }
@@ -104,6 +108,7 @@ public class ROI2DEllipse extends ROI2DRectShape {
      *
      * @since Icy 1.5.3.2
      */
+    @Contract(pure = true)
     public static double computeEllipsePerimeter(final double w, final double h) {
         double result = (w - h) / (w + h);
         result *= result;
@@ -121,10 +126,9 @@ public class ROI2DEllipse extends ROI2DRectShape {
     /**
      * Adjust the ROI to fit the specified list of coordinates with a circle
      *
-     * @param points
-     *        the list of points to fit
+     * @param points the list of points to fit
      */
-    public void setToFitCircle(final Collection<? extends Point2D> points) {
+    public void setToFitCircle(final @NonNull Collection<? extends Point2D> points) {
         int nbPoints = points.size();
 
         final double[] xCoords = new double[nbPoints];
@@ -150,12 +154,10 @@ public class ROI2DEllipse extends ROI2DRectShape {
      * href="http://www.mathworks.com/matlabcentral/fileexchange/22678">Matlab code from Nikolai
      * Chernov (2009)</a>
      *
-     * @param xCoords
-     *        the X coordinates of the points to fit
-     * @param yCoords
-     *        the Y coordinates of the points to fit
+     * @param xCoords the X coordinates of the points to fit
+     * @param yCoords the Y coordinates of the points to fit
      */
-    private void setToFitCircle(final double[] xCoords, final double[] yCoords) {
+    private void setToFitCircle(final double @NonNull [] xCoords, final double @NonNull [] yCoords) {
         final int n = xCoords.length;
 
         if (n != yCoords.length)
@@ -202,7 +204,7 @@ public class ROI2DEllipse extends ROI2DRectShape {
             yold = ynew;
             ynew = A0 + xnew * (A1 + xnew * (A2 + xnew * A3));
             if (Math.abs(ynew) > Math.abs(yold)) {
-                IcyLogger.error(ROI2DEllipse.class, "Circle fitting error: Newton-Taubin goes wrong direction: |ynew| > |yold|");
+                LOGGER.severe("Circle fitting error: Newton-Taubin goes wrong direction: |ynew| > |yold|");
                 xnew = 0;
                 break;
             }
@@ -215,13 +217,13 @@ public class ROI2DEllipse extends ROI2DRectShape {
                 break;
 
             if (iter >= IterMax) {
-                IcyLogger.error(ROI2DEllipse.class, "Circle fitting error: Newton-Taubin will not converge");
+                LOGGER.severe("Circle fitting error: Newton-Taubin will not converge");
                 xnew = 0;
             }
 
             if (xnew < 0) {
-                // TODO check if it's a warning, error or juste debug message
-                IcyLogger.warn(ROI2DEllipse.class, "Newton-Taubin negative root: x=" + xnew);
+                // TODO check if it's a warning, error or just debug message
+                LOGGER.warning("Newton-Taubin negative root: x=" + xnew);
                 xnew = 0;
             }
         }

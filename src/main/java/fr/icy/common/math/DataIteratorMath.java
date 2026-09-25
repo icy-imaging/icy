@@ -22,7 +22,7 @@ import fr.icy.common.type.DataIterator;
 /**
  * Math utilities for {@link DataIterator} classes.
  *
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class DataIteratorMath {
     /**

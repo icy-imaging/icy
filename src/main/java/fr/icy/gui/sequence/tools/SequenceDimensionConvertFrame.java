@@ -34,7 +34,7 @@ import fr.icy.system.thread.ThreadUtil;
 /**
  * Advanced conversion of Z and T dimension.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class SequenceDimensionConvertFrame extends ActionDialog
 {
@@ -65,7 +65,7 @@ public class SequenceDimensionConvertFrame extends ActionDialog
                     @Override
                     public void run()
                     {
-                        final ProgressFrame pf = new ProgressFrame("Converting Z / T dimension...");
+                        final ProgressFrame pf = new ProgressFrame("Converting Z / T dimension…");
                         final Sequence sequence = convertPanel.getSequence();
 
                         try

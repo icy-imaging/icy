@@ -23,7 +23,7 @@ import fr.icy.common.string.StringUtil;
 /**
  * Event for canvas layer.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class CanvasLayerEvent implements CollapsibleEvent
 {

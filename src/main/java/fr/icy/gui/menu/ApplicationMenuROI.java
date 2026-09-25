@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 package fr.icy.gui.menu;
 
 import fr.icy.gui.action.RoiActions;
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.component.menu.IcyMenu;
 import fr.icy.gui.component.menu.IcyMenuItem;
 
@@ -39,81 +39,81 @@ public final class ApplicationMenuROI extends AbstractApplicationMenu {
     private ApplicationMenuROI() {
         super("Region of Interest");
 
-        final IcyMenuItem itemLoadROI = new IcyMenuItem(RoiActions.loadAction, SVGResource.FILE_OPEN);
+        final IcyMenuItem itemLoadROI = new IcyMenuItem(RoiActions.loadAction, IcySVG.FILE_OPEN);
         add(itemLoadROI);
 
-        final IcyMenuItem itemSaveROI = new IcyMenuItem(RoiActions.saveAction, SVGResource.SAVE_AS);
+        final IcyMenuItem itemSaveROI = new IcyMenuItem(RoiActions.saveAction, IcySVG.SAVE_AS);
         add(itemSaveROI);
 
-        final IcyMenuItem itemExportExcelROI = new IcyMenuItem(RoiActions.xlsExportAction, SVGResource.EXPORT_NOTES);
+        final IcyMenuItem itemExportExcelROI = new IcyMenuItem(RoiActions.xlsExportAction, IcySVG.EXPORT_NOTES);
         add(itemExportExcelROI);
 
         addSeparator();
 
-        final IcyMenu menuConvertion = new IcyMenu("Convertion", SVGResource.CONVERT_SHAPE);
+        final IcyMenu menuConvertion = new IcyMenu("Convertion", IcySVG.CONVERT_SHAPE);
         add(menuConvertion);
 
-        final IcyMenuItem item2DTo3D = new IcyMenuItem(RoiActions.convertTo3DAction, SVGResource.DEPLOYED_CODE);
+        final IcyMenuItem item2DTo3D = new IcyMenuItem(RoiActions.convertTo3DAction, IcySVG.DEPLOYED_CODE);
         menuConvertion.add(item2DTo3D);
 
-        final IcyMenuItem item3DTo2D = new IcyMenuItem(RoiActions.convertTo2DAction, SVGResource.ROI_RECTANGLE);
+        final IcyMenuItem item3DTo2D = new IcyMenuItem(RoiActions.convertTo2DAction, IcySVG.ROI_RECTANGLE);
         menuConvertion.add(item3DTo2D);
 
-        final IcyMenuItem itemToEllipse = new IcyMenuItem(RoiActions.convertToEllipseAction, SVGResource.ROI_ELLIPSE);
+        final IcyMenuItem itemToEllipse = new IcyMenuItem(RoiActions.convertToEllipseAction, IcySVG.ROI_ELLIPSE);
         menuConvertion.add(itemToEllipse);
 
-        final IcyMenuItem itemToShape = new IcyMenuItem(RoiActions.convertToShapeAction, SVGResource.ROI_POLYGON);
+        final IcyMenuItem itemToShape = new IcyMenuItem(RoiActions.convertToShapeAction, IcySVG.ROI_POLYGON);
         menuConvertion.add(itemToShape);
 
-        final IcyMenuItem itemToMask = new IcyMenuItem(RoiActions.convertToMaskAction, SVGResource.GRAIN);
+        final IcyMenuItem itemToMask = new IcyMenuItem(RoiActions.convertToMaskAction, IcySVG.GRAIN);
         menuConvertion.add(itemToMask);
 
         addSeparator();
 
-        final IcyMenuItem itemSeparateComponent = new IcyMenuItem(RoiActions.separateObjectsAction, SVGResource.ROI_SPLIT);
+        final IcyMenuItem itemSeparateComponent = new IcyMenuItem(RoiActions.separateObjectsAction, IcySVG.ROI_SPLIT);
         add(itemSeparateComponent);
 
-        final IcyMenuItem itemSeparateWatershed = new IcyMenuItem(RoiActions.computeWatershedSeparation, SVGResource.IMAGE_BROKEN);
+        final IcyMenuItem itemSeparateWatershed = new IcyMenuItem(RoiActions.computeWatershedSeparation, IcySVG.IMAGE_BROKEN);
         add(itemSeparateWatershed);
 
         addSeparator();
 
-        final IcyMenuItem itemDilate = new IcyMenuItem(RoiActions.dilateObjectsAction, SVGResource.ROI_DILATE);
+        final IcyMenuItem itemDilate = new IcyMenuItem(RoiActions.dilateObjectsAction, IcySVG.ROI_DILATE);
         add(itemDilate);
 
-        final IcyMenuItem itemErode = new IcyMenuItem(RoiActions.erodeObjectsAction, SVGResource.ROI_ERODE);
+        final IcyMenuItem itemErode = new IcyMenuItem(RoiActions.erodeObjectsAction, IcySVG.ROI_ERODE);
         add(itemErode);
 
-        final IcyMenuItem itemDistanceMap = new IcyMenuItem(RoiActions.computeDistanceMapAction, SVGResource.ROI_DISTANCE_MAP);
+        final IcyMenuItem itemDistanceMap = new IcyMenuItem(RoiActions.computeDistanceMapAction, IcySVG.ROI_DISTANCE_MAP);
         add(itemDistanceMap);
 
         addSeparator();
 
-        final IcyMenu menuBoolean = new IcyMenu("Boolean Operation", SVGResource.ROI_BOOLEAN);
+        final IcyMenu menuBoolean = new IcyMenu("Boolean Operation", IcySVG.ROI_BOOLEAN);
         add(menuBoolean);
 
-        final IcyMenuItem itemOperationUnion = new IcyMenuItem(RoiActions.boolOrAction, SVGResource.ROI_BOOLEAN_OR);
+        final IcyMenuItem itemOperationUnion = new IcyMenuItem(RoiActions.boolOrAction, IcySVG.ROI_BOOLEAN_OR);
         menuBoolean.add(itemOperationUnion);
 
-        final IcyMenuItem itemOperationIntersection = new IcyMenuItem(RoiActions.boolAndAction, SVGResource.ROI_BOOLEAN_AND);
+        final IcyMenuItem itemOperationIntersection = new IcyMenuItem(RoiActions.boolAndAction, IcySVG.ROI_BOOLEAN_AND);
         menuBoolean.add(itemOperationIntersection);
 
-        final IcyMenuItem itemOperationInversion = new IcyMenuItem(RoiActions.boolNotAction, SVGResource.ROI_BOOLEAN_NOT);
+        final IcyMenuItem itemOperationInversion = new IcyMenuItem(RoiActions.boolNotAction, IcySVG.ROI_BOOLEAN_NOT);
         menuBoolean.add(itemOperationInversion);
 
-        final IcyMenuItem itemOperationExclusiveUnion = new IcyMenuItem(RoiActions.boolXorAction, SVGResource.ROI_BOOLEAN_XOR);
+        final IcyMenuItem itemOperationExclusiveUnion = new IcyMenuItem(RoiActions.boolXorAction, IcySVG.ROI_BOOLEAN_XOR);
         menuBoolean.add(itemOperationExclusiveUnion);
 
-        final IcyMenuItem itemOperationSubstraction = new IcyMenuItem(RoiActions.boolSubtractAction, SVGResource.ROI_BOOLEAN_SUBSTRACT);
+        final IcyMenuItem itemOperationSubstraction = new IcyMenuItem(RoiActions.boolSubtractAction, IcySVG.ROI_BOOLEAN_SUBSTRACT);
         menuBoolean.add(itemOperationSubstraction);
 
         addSeparator();
 
         // FIXME: 17/01/2023 change fill value
-        final IcyMenuItem itemFillInterior = new IcyMenuItem(RoiActions.fillInteriorAction, SVGResource.ROI_INTERIOR);
+        final IcyMenuItem itemFillInterior = new IcyMenuItem(RoiActions.fillInteriorAction, IcySVG.ROI_INTERIOR);
         add(itemFillInterior);
 
-        final IcyMenuItem itemFillExterior = new IcyMenuItem(RoiActions.fillExteriorAction, SVGResource.ROI_EXTERIOR);
+        final IcyMenuItem itemFillExterior = new IcyMenuItem(RoiActions.fillExteriorAction, IcySVG.ROI_EXTERIOR);
         add(itemFillExterior);
     }
 }

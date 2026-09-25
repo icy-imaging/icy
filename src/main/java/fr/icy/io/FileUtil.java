@@ -21,7 +21,6 @@ package fr.icy.io;
 import fr.icy.common.string.StringUtil;
 import fr.icy.network.NetworkUtil;
 import fr.icy.system.SystemUtil;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
 
 import java.io.*;
@@ -31,12 +30,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class FileUtil {
+    private static final Logger LOGGER = Logger.getLogger(FileUtil.class.getName());
+
     public static final char separatorChar = '/';
     public static final String separator = "/";
 
@@ -157,12 +160,12 @@ public class FileUtil {
                 if (file.createNewFile())
                     return file;
                 else {
-                    IcyLogger.error(FileUtil.class, "Can't create file '" + file.getAbsolutePath() + "'");
+                    LOGGER.severe("Can't create file '" + file.getAbsolutePath() + "'.");
                     return null;
                 }
             }
             catch (final Exception e) {
-                IcyLogger.error(FileUtil.class, e, "Can't create file '" + file.getAbsolutePath() + "'");
+                LOGGER.log(Level.SEVERE, "Can't create file '" + file.getAbsolutePath() + "'.", e);
                 return null;
             }
         }
@@ -238,7 +241,7 @@ public class FileUtil {
                 return (process.waitFor() == 0);
             }
             catch (final InterruptedException e) {
-                IcyLogger.error(FileUtil.class, e, "FileUtil.createLink(" + path + ", " + target + ") error.");
+                LOGGER.log(Level.SEVERE, "FileUtil.createLink(" + path + ", " + target + ") error.", e);
                 return false;
             }
         }
@@ -271,7 +274,7 @@ public class FileUtil {
             }
             catch (final Exception e) {
                 if (displayError)
-                    IcyLogger.error(FileUtil.class, e, "Unable to write into file: " + file.getAbsolutePath());
+                    LOGGER.log(Level.SEVERE, "Unable to write into file: " + file.getAbsolutePath() + ".", e);
                 // delete incorrect file
                 //f.delete();
                 delete(f, false);
@@ -473,13 +476,10 @@ public class FileUtil {
      * Rename the specified <code>src</code> file to <code>dst</code> file.
      * Return false if the method failed.
      *
-     * @param src
-     *        the source filename we want to rename from.
-     * @param dst
-     *        the destination filename we want to rename to.
-     * @param force
-     *        If set to <code>true</code> the destination file is overwritten if it was already
-     *        existing.
+     * @param src   the source filename we want to rename from.
+     * @param dst   the destination filename we want to rename to.
+     * @param force If set to <code>true</code> the destination file is overwritten if it was already
+     *              existing.
      * @see File#renameTo(File)
      */
     public static boolean rename(final String src, final String dst, final boolean force) {
@@ -497,23 +497,19 @@ public class FileUtil {
             if (dst.exists()) {
                 if (force) {
                     if (!delete(dst, true)) {
-                        final String[] messages = new String[]{
-                                "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
-                                "Reason: destination cannot be overwritten.",
-                                "Make sure it is not locked by another program (e.g. Eclipse)",
-                                "Also check that you have the rights to do this operation."
-                        };
-                        IcyLogger.error(FileUtil.class, messages);
+                        final String message = "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'.\r\n" +
+                                "Reason: destination cannot be overwritten.\r\n" +
+                                "Make sure it is not locked by another program (e.g. Eclipse)\r\n" +
+                                "Also check that you have the rights to do this operation.";
+                        LOGGER.severe(message);
                         return false;
                     }
                 }
                 else {
-                    final String[] messages = new String[]{
-                            "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
-                            "The destination already exists.",
-                            "Use the 'force' flag to force the operation."
-                    };
-                    IcyLogger.error(FileUtil.class, messages);
+                    final String message = "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'.\r\n" +
+                            "The destination already exists.\r\n" +
+                            "Use the 'force' flag to force the operation.";
+                    LOGGER.severe(message);
                     return false;
                 }
             }
@@ -544,11 +540,8 @@ public class FileUtil {
             }
 
             if (!done) {
-                final String[] messages = new String[]{
-                        "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
-                        "Check that the source file is not locked."
-                };
-                IcyLogger.error(FileUtil.class, messages);
+                final String message = "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'.\r\nCheck that the source file is not locked.";
+                LOGGER.severe(message);
                 return false;
             }
 
@@ -556,11 +549,8 @@ public class FileUtil {
         }
 
         // missing input file
-        final String[] messages = new String[]{
-                "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
-                "Input file '" + src.getAbsolutePath() + "' not found !"
-        };
-        IcyLogger.error(FileUtil.class, messages);
+        final String message = "Cannot rename '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'.\r\nInput file '" + src.getAbsolutePath() + "' not found !";
+        LOGGER.severe(message);
         return false;
     }
 
@@ -568,14 +558,10 @@ public class FileUtil {
      * Copy src to dst.<br>
      * Return true if file(s) successfully copied, false otherwise.
      *
-     * @param src
-     *        source file or directory
-     * @param dst
-     *        destination file or directory
-     * @param force
-     *        force copy to previous existing file
-     * @param recursive
-     *        also copy sub directory
+     * @param src       source file or directory
+     * @param dst       destination file or directory
+     * @param force     force copy to previous existing file
+     * @param recursive also copy sub directory
      * @return boolean
      */
     public static boolean copy(final String src, final String dst, final boolean force, final boolean recursive) {
@@ -589,14 +575,10 @@ public class FileUtil {
      * returned<br>
      * even if the file is not copied.
      *
-     * @param src
-     *        source file or directory
-     * @param dst
-     *        destination file or directory
-     * @param force
-     *        force copy to previous existing file
-     * @param recursive
-     *        also copy sub directory
+     * @param src       source file or directory
+     * @param dst       destination file or directory
+     * @param force     force copy to previous existing file
+     * @param recursive also copy sub directory
      * @return boolean
      */
     public static boolean copy(final File src, final File dst, final boolean force, final boolean recursive) {
@@ -635,23 +617,19 @@ public class FileUtil {
                 // copy only if force flag == true
                 if (force) {
                     if (!delete(dst, true)) {
-                        final String[] messages = new String[]{
-                                "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
-                                "Reason : destination cannot be overwritten.",
-                                "Make sure it is not locked by another program (e.g. Eclipse)",
-                                "Also check that you have the rights to do this operation."
-                        };
-                        IcyLogger.error(FileUtil.class, messages);
+                        final String message = "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'.\r\n" +
+                                "Reason : destination cannot be overwritten.\r\n" +
+                                "Make sure it is not locked by another program (e.g. Eclipse).\r\n" +
+                                "Also check that you have the rights to do this operation.";
+                        LOGGER.severe(message);
                         return false;
                     }
                 }
                 else {
-                    final String[] messages = new String[]{
-                            "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
-                            "The destination already exists.",
-                            "Use the 'force' flag to force file copy."
-                    };
-                    IcyLogger.error(FileUtil.class, messages);
+                    final String message = "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'.\r\n" +
+                            "The destination already exists.\r\n" +
+                            "Use the 'force' flag to force file copy.";
+                    LOGGER.severe(message);
                     return false;
                 }
             }
@@ -683,23 +661,23 @@ public class FileUtil {
 
                 // error while executing command
                 if ((res != 0)) {
-                    IcyLogger.error(FileUtil.class, "FileUtil.copy(...) error while creating link '" + src.getPath() + "' to '" + dst.getPath() + "'");
+                    LOGGER.severe("FileUtil.copy(…) error while creating link '" + src.getPath() + "' to '" + dst.getPath() + "'.");
 
                     if (process != null) {
                         // get error output and redirect it
                         final BufferedReader stderr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
                         try {
-                            IcyLogger.error(FileUtil.class, stderr.readLine());
+                            LOGGER.severe(stderr.readLine());
                             if (stderr.ready())
-                                IcyLogger.error(FileUtil.class, stderr.readLine());
+                                LOGGER.severe(stderr.readLine());
                         }
                         catch (final IOException e) {
                             // ignore
                         }
                     }
                     else if (res == 1)
-                        IcyLogger.error(FileUtil.class, "Process interrupted.");
+                        LOGGER.severe("Process interrupted.");
 
                     return false;
                 }
@@ -722,20 +700,14 @@ public class FileUtil {
             }
 
             // cannot load input file
-            final String[] messages = new String[]{
-                    "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
-                    "Input file '" + src.getAbsolutePath() + "' data cannot be loaded !"
-            };
-            IcyLogger.error(FileUtil.class, messages);
+            final String message = "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'.\r\nInput file '" + src.getAbsolutePath() + "' data cannot be loaded !";
+            LOGGER.severe(message);
             return false;
         }
 
         // missing input file
-        final String[] messages = new String[]{
-                "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'",
-                "Input file '" + src.getAbsolutePath() + "' not found !"
-        };
-        IcyLogger.error(FileUtil.class, messages);
+        final String message = "Cannot copy '" + src.getAbsolutePath() + "' to '" + dst.getAbsolutePath() + "'.\r\nInput file '" + src.getAbsolutePath() + "' not found !";
+        LOGGER.severe(message);
         return false;
     }
 
@@ -744,8 +716,7 @@ public class FileUtil {
      * Basically create a .bak version of the file. If the backup file already exist a postfix
      * number is automatically added.
      *
-     * @param filename
-     *        file to backup
+     * @param filename file to backup
      * @return the backup filename is the operation success else return <code>null</code>
      */
     public static String backup(final String filename) {
@@ -798,10 +769,9 @@ public class FileUtil {
     /**
      * Get file list from specified directory applying the specified parameters.
      *
-     * @param extension
-     *        the wanted extension file (without the dot character).<br>
-     *        Set it to <code>null</code> to accept all files.<br>
-     *        If you only want files without extension then use an empty String extension.
+     * @param extension the wanted extension file (without the dot character).<br>
+     *                  Set it to <code>null</code> to accept all files.<br>
+     *                  If you only want files without extension then use an empty String extension.
      */
     private static void getFiles(final File folder, final String extension, final boolean ignoreExtensionCase, final boolean recursive, final List<File> list) {
         final File[] files = folder.listFiles();
@@ -890,21 +860,16 @@ public class FileUtil {
     /**
      * Returns an array of file denoting content of specified directory and parameters.
      *
-     * @param directory
-     *        The directory we want to retrieve content.<br>
-     * @param filter
-     *        A file filter.<br>
-     *        If the given <code>filter</code> is <code>null</code> then all pathnames are accepted.
-     *        Otherwise, a pathname satisfies the filter if and only if the value <code>true</code> results when the
-     *        <code>{@link FileFilter#accept(File)}</code> method of the
-     *        filter is invoked on the pathname.
-     * @param recursive
-     *        If <code>true</code> then content from sub folder is also returned.
-     * @param wantDirectory
-     *        If <code>true</code> then directory entries are also returned.
-     * @param wantHidden
-     *        If <code>true</code> then file or directory with <code>hidden</code> attribute are
-     *        also returned.
+     * @param directory     The directory we want to retrieve content.<br>
+     * @param filter        A file filter.<br>
+     *                      If the given <code>filter</code> is <code>null</code> then all pathnames are accepted.
+     *                      Otherwise, a pathname satisfies the filter if and only if the value <code>true</code> results when the
+     *                      <code>{@link FileFilter#accept(File)}</code> method of the
+     *                      filter is invoked on the pathname.
+     * @param recursive     If <code>true</code> then content from sub folder is also returned.
+     * @param wantDirectory If <code>true</code> then directory entries are also returned.
+     * @param wantHidden    If <code>true</code> then file or directory with <code>hidden</code> attribute are
+     *                      also returned.
      * @see File#listFiles(FileFilter)
      */
     public static File[] getFiles(final File directory, final FileFilter filter, final boolean recursive, final boolean wantDirectory, final boolean wantHidden) {
@@ -919,21 +884,16 @@ public class FileUtil {
      * Returns an array of file path denoting content of specified directory and parameters
      * (String format).
      *
-     * @param directory
-     *        The directory we want to retrieve content.<br>
-     * @param filter
-     *        A file filter.<br>
-     *        If the given <code>filter</code> is <code>null</code> then all files are accepted.
-     *        Otherwise, a file satisfies the filter if and only if the value <code>true</code> results when the
-     *        <code>{@link FileFilter#accept(File)}</code> method of the
-     *        filter is invoked on the pathname.
-     * @param recursive
-     *        If <code>true</code> then content from sub folder is also returned.
-     * @param wantDirectory
-     *        If <code>true</code> then directory entries are also returned.
-     * @param wantHidden
-     *        If <code>true</code> then file or directory with <code>hidden</code> attribute are
-     *        also returned.
+     * @param directory     The directory we want to retrieve content.<br>
+     * @param filter        A file filter.<br>
+     *                      If the given <code>filter</code> is <code>null</code> then all files are accepted.
+     *                      Otherwise, a file satisfies the filter if and only if the value <code>true</code> results when the
+     *                      <code>{@link FileFilter#accept(File)}</code> method of the
+     *                      filter is invoked on the pathname.
+     * @param recursive     If <code>true</code> then content from sub folder is also returned.
+     * @param wantDirectory If <code>true</code> then directory entries are also returned.
+     * @param wantHidden    If <code>true</code> then file or directory with <code>hidden</code> attribute are
+     *                      also returned.
      */
     public static String[] getFiles(final String directory, final FileFilter filter, final boolean recursive, final boolean wantDirectory, final boolean wantHidden) {
         final File[] files = getFiles(new File(getGenericPath(directory)), filter, recursive, wantDirectory, wantHidden);
@@ -996,7 +956,7 @@ public class FileUtil {
         if (f.isDirectory()) {
             final File[] files = f.listFiles();
 
-            // can return null...
+            // can return null…
             if (files != null) {
                 // delete files
                 for (final File file : files) {
@@ -1023,7 +983,7 @@ public class FileUtil {
 
             // retry for locked file (we try for 15s max)
             while ((!result) && (System.currentTimeMillis() - start) < (10 * 1000)) {
-                // can help for file deletion...
+                // can help for file deletion…
                 System.gc();
                 ThreadUtil.sleep(1000);
 

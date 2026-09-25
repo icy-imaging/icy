@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,8 +19,8 @@
 package fr.icy.extension;
 
 import fr.icy.system.UserUtil;
-import fr.icy.system.logging.IcyLogger;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -29,15 +29,20 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class ExtensionInstaller {
+    private static final Logger LOGGER = Logger.getLogger(ExtensionInstaller.class.getName());
+
+    @Contract(pure = true)
     private ExtensionInstaller() {
         //
     }
 
-    public static boolean installExtension(final @NotNull File jar) {
+    public static boolean installExtension(final @NonNull File jar) {
         if (!jar.exists() || !jar.isFile() || !jar.getAbsolutePath().endsWith(".jar")) {
-            IcyLogger.error(ExtensionInstaller.class, "File is not a .jar file, cannot install extension");
+            LOGGER.severe("File is not a .jar file, cannot install extension.");
             return false;
         }
 
@@ -59,11 +64,12 @@ public final class ExtensionInstaller {
         return true;
     }
 
-    private static boolean appendExtension(final @NotNull ExtensionDescriptor ed) {
+    // TODO: remove binarized function
+    private static boolean appendExtension(final @NonNull ExtensionDescriptor ed) {
         final String fullPath = ed.getGroupId().replaceAll("\\.", File.separator) + File.separator + ed.getArtifactId() + ".jar";
         final File extensionConfigFile = new File(UserUtil.getIcyExtensionsDirectory(), "ext.bin");
         if (!extensionConfigFile.exists()) {
-            // Should not happen, because the config file is always created before that, but just in case...
+            // Should not happen because the config file is always created before that, but just in case…
             final List<Map<String, Object>> list = new ArrayList<>();
             list.add(Map.of("path", fullPath));
             final Yaml yaml = new Yaml();
@@ -73,7 +79,7 @@ public final class ExtensionInstaller {
                 os.write(data);
             }
             catch (final Throwable t) {
-                IcyLogger.error(ExtensionInstaller.class, t, "Unable to write bin file");
+                LOGGER.log(Level.SEVERE, "Unable to write bin file.", t);
                 return false;
             }
         }
@@ -102,7 +108,7 @@ public final class ExtensionInstaller {
                 }
             }
             catch (final Throwable t) {
-                IcyLogger.error(ExtensionInstaller.class, t, "Unable to write bin file");
+                LOGGER.log(Level.SEVERE, "Unable to write bin file.", t);
                 return false;
             }
         }
@@ -110,7 +116,7 @@ public final class ExtensionInstaller {
         return true;
     }
 
-    private static void dumpData(final @NotNull List<Map<String, Object>> list, final @NotNull File extensionsBinaryFile) throws Throwable {
+    private static void dumpData(final @NonNull List<Map<String, Object>> list, final @NonNull File extensionsBinaryFile) throws Throwable {
         final Yaml yaml = new Yaml();
         final String dump = yaml.dump(list);
         final byte[] data = Base64.getEncoder().encode(dump.getBytes(StandardCharsets.ISO_8859_1));

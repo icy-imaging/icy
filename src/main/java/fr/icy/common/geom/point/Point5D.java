@@ -22,9 +22,9 @@ import java.awt.geom.Point2D;
 
 /**
  * Point5D interface.<br>
- * Incomplete implementation (work in progress...)
+ * Incomplete implementation (work in progress…)
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public abstract class Point5D implements Cloneable
 {

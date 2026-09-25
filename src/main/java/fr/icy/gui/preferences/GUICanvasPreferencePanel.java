@@ -32,7 +32,7 @@ import fr.icy.system.preferences.CanvasPreferences;
 import fr.icy.system.preferences.GeneralPreferences;
 
 /**
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class GUICanvasPreferencePanel extends PreferencePanel
 {

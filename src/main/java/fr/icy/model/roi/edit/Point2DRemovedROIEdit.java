@@ -35,7 +35,7 @@ import fr.icy.extension.kernel.roi.roi2d.ROI2DShape;
 /**
  * 2D control point removed implementation for ROI undoable edition.
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class Point2DRemovedROIEdit extends AbstractPoint2DROIEdit
 {

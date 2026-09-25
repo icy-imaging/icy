@@ -35,7 +35,7 @@ import java.util.EventListener;
  * }
  * </pre>
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public interface AcceptListener extends EventListener
 {

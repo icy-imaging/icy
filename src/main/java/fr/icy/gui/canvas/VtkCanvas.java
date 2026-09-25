@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,7 +18,6 @@
 
 package fr.icy.gui.canvas;
 
-import fr.icy.gui.render.VtkSettingPanel;
 import fr.icy.common.collection.array.Array1DUtil;
 import fr.icy.common.color.ColorUtil;
 import fr.icy.common.exception.TooLargeArrayException;
@@ -30,9 +29,11 @@ import fr.icy.gui.canvas.CanvasLayerEvent.LayersEventType;
 import fr.icy.gui.canvas.IcyCanvasEvent.IcyCanvasEventType;
 import fr.icy.gui.component.ComponentUtil;
 import fr.icy.gui.component.button.IcyToggleButton;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.gui.component.icon.IcyIconPack;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.render.IcyVtkPanel;
+import fr.icy.gui.render.VtkSettingPanel;
+import fr.icy.gui.render.VtkSettingPanel.SettingChangeListener;
 import fr.icy.gui.viewer.Viewer;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.lut.LUT;
@@ -46,11 +47,10 @@ import fr.icy.model.roi.ROI;
 import fr.icy.model.sequence.DimensionId;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.sequence.SequenceEvent.SequenceEventType;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.preferences.CanvasPreferences;
 import fr.icy.system.preferences.XMLPreferences;
 import fr.icy.system.thread.ThreadUtil;
-import fr.icy.gui.render.VtkSettingPanel.SettingChangeListener;
+import org.jspecify.annotations.NonNull;
 import vtk.*;
 
 import javax.swing.*;
@@ -63,14 +63,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * VTK 3D canvas class.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingChangeListener {
+    private static final Logger LOGGER = Logger.getLogger(VtkCanvas.class.getName());
+
     /**
      * properties
      */
@@ -199,22 +203,22 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         updateTNav();
 
         // create toolbar buttons
-        axesButton = new IcyToggleButton(SVGResource.AXIS_3D);
+        axesButton = new IcyToggleButton(IcySVG.AXIS_3D);
         axesButton.setFocusable(false);
         axesButton.setToolTipText("Display 3D axis");
-        boundingBoxButton = new IcyToggleButton(SVGResource.BOX_BOUNDS_3D);
+        boundingBoxButton = new IcyToggleButton(IcySVG.BOX_BOUNDS_3D);
         boundingBoxButton.setFocusable(false);
         boundingBoxButton.setToolTipText("Display bounding box");
-        gridButton = new IcyToggleButton(new IcyIconPack(SVGResource.GRID_ON, SVGResource.GRID_OFF));
+        gridButton = new IcyToggleButton(new IcyIconPack(IcySVG.GRID_ON, IcySVG.GRID_OFF));
         gridButton.setFocusable(false);
         gridButton.setToolTipText("Display grid");
-        rulerButton = new IcyToggleButton(SVGResource.RULER);
+        rulerButton = new IcyToggleButton(IcySVG.RULER);
         rulerButton.setFocusable(false);
         rulerButton.setToolTipText("Display rulers");
-        rulerLabelButton = new IcyToggleButton(SVGResource.MEASURE_CENTIMETER);
+        rulerLabelButton = new IcyToggleButton(IcySVG.MEASURE_CENTIMETER);
         rulerLabelButton.setFocusable(false);
         rulerLabelButton.setToolTipText("Display rulers label");
-        volumeSlicerButton = new IcyToggleButton(SVGResource.CUBE_SLICE);
+        volumeSlicerButton = new IcyToggleButton(IcySVG.CUBE_SLICE);
         volumeSlicerButton.setFocusable(false);
         volumeSlicerButton.setToolTipText("Enable volume slicer");
 
@@ -526,7 +530,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
     }
 
     @Override
-    public void customizeToolbar(final JToolBar toolBar) {
+    public void customizeToolbar(final @NonNull JToolBar toolBar) {
         toolBar.addSeparator();
         toolBar.add(axesButton);
         toolBar.addSeparator();
@@ -679,7 +683,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
     /**
      * Set background color (internal)
      */
-    public void setBackgroundColorInternal(final Color color) {
+    public void setBackgroundColorInternal(final @NonNull Color color) {
         renderer.SetBackground(Array1DUtil.floatArrayToDoubleArray(color.getColorComponents(null)));
 
         final Color oppositeColor;
@@ -916,7 +920,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         return r.GetZ((int) (x * scale[0]), (int) (rw.GetSize()[1] - (y * scale[1])));
     }
 
-    public double getWorldZ(final Point pt) {
+    public double getWorldZ(final @NonNull Point pt) {
         return getWorldZ(pt.x, pt.y);
     }
 
@@ -1401,7 +1405,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
                 return robot.createScreenCapture(bounds);
             }
             catch (final AWTException e) {
-                IcyLogger.error(VtkCanvas.class, e, e.getLocalizedMessage());
+                LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
                 return null;
             }
 
@@ -1485,7 +1489,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         if (z != -1)
             throw new UnsupportedOperationException("Error: getRenderedImage(..) with z != -1 not supported on Canvas3D.");
         if (!canvasView)
-            IcyLogger.warn(VtkCanvas.class, "getRenderedImage(..) with canvasView = false not supported on Canvas3D.");
+            LOGGER.warning("getRenderedImage(..) with canvasView = false not supported on Canvas3D.");
 
         return getRenderedImage(t, c);
     }
@@ -1507,7 +1511,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         }
         catch (final Exception t) {
             // just ignore as this is async process
-            IcyLogger.warn(VtkCanvas.class, t, "[VTKCanvas] Warning.");
+            LOGGER.log(Level.WARNING, t.getLocalizedMessage(), t);
         }
     }
 
@@ -1521,7 +1525,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
     }
 
     @Override
-    public void changed(final IcyCanvasEvent event) {
+    public void changed(final @NonNull IcyCanvasEvent event) {
         super.changed(event);
 
         // avoid useless process during canvas initialization
@@ -1558,11 +1562,11 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         if (!initialized)
             return;
 
-        propertyChange(PROPERTY_LUT, Integer.valueOf(channel));
+        propertyChange(PROPERTY_LUT, channel);
     }
 
     @Override
-    protected void sequenceOverlayChanged(final Overlay overlay, final SequenceEventType type) {
+    protected void sequenceOverlayChanged(final Overlay overlay, final @NonNull SequenceEventType type) {
         super.sequenceOverlayChanged(overlay, type);
 
         if (!initialized)
@@ -1598,7 +1602,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
     }
 
     @Override
-    protected void layerChanged(final CanvasLayerEvent event) {
+    protected void layerChanged(final @NonNull CanvasLayerEvent event) {
         super.layerChanged(event);
 
         if (!initialized)
@@ -1633,7 +1637,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
     }
 
     @Override
-    public void actionPerformed(final ActionEvent e) {
+    public void actionPerformed(final @NonNull ActionEvent e) {
         final Object source = e.getSource();
 
         // translate button action to property change event
@@ -1667,7 +1671,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
      * Called when one of the value in setting panel has changed
      */
     @Override
-    public void settingChange(final PropertyChangeEvent evt) {
+    public void settingChange(final @NonNull PropertyChangeEvent evt) {
         propertyChange(evt.getPropertyName(), evt.getNewValue());
     }
 
@@ -1677,7 +1681,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
     }
 
     @Override
-    protected void synchronizeCanvas(final List<IcyCanvas> canvasList, final IcyCanvasEvent event, final boolean processAll) {
+    protected void synchronizeCanvas(final List<IcyCanvas> canvasList, final @NonNull IcyCanvasEvent event, final boolean processAll) {
         final IcyCanvasEventType type = event.getType();
         final DimensionId dim = event.getDim();
 
@@ -1875,7 +1879,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         /**
          * Paint layers
          */
-        protected void paintLayers(final List<Layer> sortedLayers, final Layer imageLayer, final Sequence seq) {
+        protected void paintLayers(final @NonNull List<Layer> sortedLayers, final Layer imageLayer, final Sequence seq) {
             final boolean lv = isLayersVisible();
 
             // call paint in inverse order to have first overlay "at top"
@@ -1959,7 +1963,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         }
 
         @Override
-        public void mouseMoved(final MouseEvent e) {
+        public void mouseMoved(final @NonNull MouseEvent e) {
             // update mouse position
             setMousePos(e.getPoint());
 
@@ -1977,7 +1981,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         }
 
         @Override
-        public void mouseDragged(final MouseEvent e) {
+        public void mouseDragged(final @NonNull MouseEvent e) {
             final boolean oc, nc;
 
             // update mouse position
@@ -2030,7 +2034,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
         }
 
         @Override
-        public void keyPressed(final KeyEvent e) {
+        public void keyPressed(final @NonNull KeyEvent e) {
             if (!e.isConsumed()) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_R:
@@ -2155,19 +2159,19 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
             toUpdate.add(prop);
         }
 
-        protected void updateProperty(final Property prop) throws InterruptedException {
+        protected void updateProperty(final @NonNull Property prop) throws InterruptedException {
             final String name = prop.name;
             final Object value = prop.value;
 
             if (StringUtil.equals(name, VtkSettingPanel.PROPERTY_AMBIENT)) {
-                final double d = ((Double) value).doubleValue();
+                final double d = (Double) value;
 
                 invokeOnEDT(() -> imageVolume.setAmbient(d));
 
                 preferences.putDouble(ID_AMBIENT, d);
             }
             else if (StringUtil.equals(name, VtkSettingPanel.PROPERTY_DIFFUSE)) {
-                final double d = ((Double) value).doubleValue();
+                final double d = (Double) value;
 
                 invokeOnEDT(() -> imageVolume.setDiffuse(d));
 
@@ -2175,7 +2179,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
             }
             else if (StringUtil.equals(name, VtkSettingPanel.PROPERTY_SPECULAR)) {
 
-                final double d = ((Double) value).doubleValue();
+                final double d = (Double) value;
 
                 invokeOnEDT(() -> imageVolume.setSpecular(d));
 
@@ -2189,14 +2193,14 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
                 preferences.putInt(ID_BGCOLOR, color.getRGB());
             }
             else if (StringUtil.equals(name, VtkSettingPanel.PROPERTY_INTERPOLATION)) {
-                final int i = ((Integer) value).intValue();
+                final int i = (Integer) value;
 
                 invokeOnEDT(() -> imageVolume.setInterpolationMode(i));
 
                 preferences.putInt(ID_INTERPOLATION, i);
             }
             else if (StringUtil.equals(name, VtkSettingPanel.PROPERTY_MAPPER)) {
-                final boolean gpuRendering = ((Boolean) value).booleanValue();
+                final boolean gpuRendering = (Boolean) value;
 
                 invokeOnEDT(() -> imageVolume.setGPURendering(gpuRendering));
 
@@ -2214,28 +2218,28 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
                 preferences.putInt(ID_BLENDING, getVolumeBlendingMode().ordinal());
             }
             else if (StringUtil.equals(name, VtkSettingPanel.PROPERTY_SAMPLE)) {
-                final int i = ((Integer) value).intValue();
+                final int i = (Integer) value;
 
                 invokeOnEDT(() -> imageVolume.setSampleResolution(i));
 
                 preferences.putDouble(ID_SAMPLE, i);
             }
             else if (StringUtil.equals(name, PROPERTY_AXES)) {
-                final boolean b = ((Boolean) value).booleanValue();
+                final boolean b = (Boolean) value;
 
                 invokeOnEDT(() -> panel3D.setAxisOrientationDisplayEnable(b));
 
                 preferences.putBoolean(ID_AXES, b);
             }
             else if (StringUtil.equals(name, PROPERTY_BOUNDINGBOX)) {
-                final boolean b = ((Boolean) value).booleanValue();
+                final boolean b = (Boolean) value;
 
                 invokeOnEDT(() -> boundingBox.SetVisibility(b ? 1 : 0));
 
                 preferences.putBoolean(ID_BOUNDINGBOX, b);
             }
             else if (StringUtil.equals(name, PROPERTY_BOUNDINGBOX_GRID)) {
-                final boolean b = ((Boolean) value).booleanValue();
+                final boolean b = (Boolean) value;
 
                 invokeOnEDT(() -> {
                     rulerBox.SetDrawXGridlines(b);
@@ -2246,7 +2250,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
                 preferences.putBoolean(ID_BOUNDINGBOX_GRID, b);
             }
             else if (StringUtil.equals(name, PROPERTY_BOUNDINGBOX_RULERS)) {
-                final boolean b = ((Boolean) value).booleanValue();
+                final boolean b = (Boolean) value;
 
                 invokeOnEDT(() -> {
                     rulerBox.SetXAxisVisibility(b);
@@ -2263,7 +2267,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
                 preferences.putBoolean(ID_BOUNDINGBOX_RULERS, b);
             }
             else if (StringUtil.equals(name, PROPERTY_BOUNDINGBOX_LABELS)) {
-                final boolean b = ((Boolean) value).booleanValue();
+                final boolean b = (Boolean) value;
 
                 invokeOnEDT(() -> {
                     rulerBox.SetXAxisLabelVisibility(b);
@@ -2274,7 +2278,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
                 preferences.putBoolean(ID_BOUNDINGBOX_LABELS, b);
             }
             else if (StringUtil.equals(name, PROPERTY_SLICER)) {
-                final boolean b = ((Boolean) value).booleanValue();
+                final boolean b = (Boolean) value;
 
                 invokeOnEDT(() -> {
                     panel3D.setSlicerEnable(b);
@@ -2296,7 +2300,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
                 preferences.putBoolean(ID_BOUNDINGBOX_LABELS, b);
             }
             else if (StringUtil.equals(name, VtkSettingPanel.PROPERTY_SHADING)) {
-                final boolean b = ((Boolean) value).booleanValue();
+                final boolean b = (Boolean) value;
 
                 invokeOnEDT(() -> imageVolume.setShade(b));
 
@@ -2450,7 +2454,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
             }
         }
 
-        public void addProps(final vtkProp[] props) {
+        public void addProps(final vtkProp @NonNull [] props) {
             synchronized (propToAdd) {
                 synchronized (propToRemove) {
                     for (final vtkProp prop : props) {
@@ -2461,7 +2465,7 @@ public class VtkCanvas extends IcyCanvas3D implements ActionListener, SettingCha
             }
         }
 
-        public void removeProps(final vtkProp[] props) {
+        public void removeProps(final vtkProp @NonNull [] props) {
             synchronized (propToRemove) {
                 synchronized (propToAdd) {
                     for (final vtkProp prop : props) {

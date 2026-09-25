@@ -48,7 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author fab &amp; Stephane
+ * @author Fabrice de Chaumont
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class MainFrame extends JFrame {
@@ -269,7 +270,7 @@ public class MainFrame extends JFrame {
             }
         });*/
 
-        roiBar = new ROIBar();
+        roiBar = ROIBar.getInstance();
         inspectorBar = new InspectorBar();
         statusBar = new StatusBar();
 

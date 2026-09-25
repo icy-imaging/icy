@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,10 +18,11 @@
 
 package fr.icy.model.sequence.edit;
 
-import fr.icy.gui.component.icon.SVGResource;
+import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.gui.dialog.MessageDialog;
 import fr.icy.model.sequence.Sequence;
 
+import javax.swing.*;
 import javax.swing.undo.CannotUndoException;
 
 /**
@@ -29,13 +30,13 @@ import javax.swing.undo.CannotUndoException;
  * state).<br>
  * Do not handle redo operation to not consume too much memory.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class DataSequenceEdit extends AbstractSequenceEdit {
     Sequence previous;
 
-    public DataSequenceEdit(final Sequence previous, final Sequence sequence, final String name, final SVGResource icon) {
+    public DataSequenceEdit(final Sequence previous, final Sequence sequence, final String name, final IcySVG icon) {
         super(sequence, name, icon);
 
         this.previous = previous;
@@ -45,7 +46,7 @@ public class DataSequenceEdit extends AbstractSequenceEdit {
         this(previous, sequence, name, null);
     }
 
-    public DataSequenceEdit(final Sequence previous, final Sequence sequence, final SVGResource icon) {
+    public DataSequenceEdit(final Sequence previous, final Sequence sequence, final IcySVG icon) {
         this(previous, sequence, "Sequence data changed", icon);
     }
 
@@ -62,8 +63,7 @@ public class DataSequenceEdit extends AbstractSequenceEdit {
             getSequence().copyDataFrom(previous);
         }
         catch (final InterruptedException e) {
-            MessageDialog.showDialog("Undo operation interrupted", e.getLocalizedMessage(),
-                    MessageDialog.ERROR_MESSAGE);
+            MessageDialog.showDialog("Undo operation interrupted", e.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
         }
     }
 

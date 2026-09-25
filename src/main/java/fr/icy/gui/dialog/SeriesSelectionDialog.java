@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,19 +18,18 @@
 
 package fr.icy.gui.dialog;
 
-import loci.formats.IFormatReader;
-import ome.xml.meta.OMEXMLMetadata;
 import fr.icy.Icy;
 import fr.icy.gui.component.ComponentUtil;
 import fr.icy.gui.component.button.ThumbnailComponent;
 import fr.icy.gui.component.icon.IcySVG;
-import fr.icy.gui.component.icon.SVGResource;
 import fr.icy.io.Loader;
 import fr.icy.io.SequenceFileImporter;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.image.IcyBufferedImageUtil;
 import fr.icy.model.sequence.MetaDataUtil;
 import fr.icy.model.sequence.SequenceIdImporter;
+import loci.formats.IFormatReader;
+import ome.xml.meta.OMEXMLMetadata;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,7 +43,7 @@ import java.util.TimerTask;
 /**
  * Dialog used to select which serie to open for multi serie image.
  *
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
 public class SeriesSelectionDialog extends ActionDialog implements Runnable {
@@ -140,7 +139,7 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable {
 
                     serieComponents[index] = thumb;
                     thumb.setEnabled(true);
-                    thumb.setTitle("loading...");
+                    thumb.setTitle("loading…");
                     thumb.setInfos("");
                     thumb.setInfos2("");
                     gridPanel.add(thumb);
@@ -150,7 +149,7 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable {
             }
         }
 
-        // load thumbnails...
+        // load thumbnails…
         loadingThread = new Thread(this, "Series thumbnail loading");
         loadingThread.start();
 
@@ -278,7 +277,7 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable {
 
     @Override
     public void run() {
-        // start by filling metadata only...
+        // start by filling metadata only…
         for (int i = 0; i < serieComponents.length; i++) {
             // interrupt
             if (isClosed())
@@ -299,7 +298,7 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable {
 
             try {
                 // why does this sometime fails ???
-                serieComponents[i].setImage(new IcySVG(SVGResource.IMAGE).getImage(512, serieComponents[i].getForeground()));
+                serieComponents[i].setImage(IcySVG.IMAGE.getImage(512, serieComponents[i].getForeground()));
             }
             catch (final Exception e) {
                 // ignore
@@ -323,11 +322,11 @@ public class SeriesSelectionDialog extends ActionDialog implements Runnable {
                     }
                 }
                 else
-                    serieComponents[i].setImage(new IcySVG(SVGResource.CLOSE).getImage(512, serieComponents[i].getForeground()));
+                    serieComponents[i].setImage(IcySVG.CLOSE.getImage(512, serieComponents[i].getForeground()));
             }
             catch (final OutOfMemoryError | Exception e) {
-                // error image, we just totally ignore error here...
-                serieComponents[i].setImage(new IcySVG(SVGResource.CLOSE).getImage(512, serieComponents[i].getForeground()));
+                // error image, we just totally ignore error here…
+                serieComponents[i].setImage(IcySVG.CLOSE.getImage(512, serieComponents[i].getForeground()));
             }
         }
     }

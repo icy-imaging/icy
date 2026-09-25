@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 package fr.icy.gui.toolbar.container;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 
@@ -35,13 +35,13 @@ public final class StatusPanel extends ToolbarContainer {
     }
 
     @Override
-    protected void showParent(@NotNull final JSplitPane pane) {
+    protected void showParent(@NonNull final JSplitPane pane) {
         pane.setDividerLocation(pane.getHeight() - getPreferredSize().height - 5);
         pane.setEnabled(true);
     }
 
     @Override
-    protected void closeParent(@NotNull final JSplitPane pane) {
+    protected void closeParent(@NonNull final JSplitPane pane) {
         pane.setDividerLocation(1.d);
         pane.setEnabled(false);
     }

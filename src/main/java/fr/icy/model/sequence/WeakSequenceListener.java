@@ -22,7 +22,7 @@ import fr.icy.common.listener.weak.WeakListener;
 /**
  * Weak listener wrapper for SequenceListener interface
  * 
- * @author Stephane
+ * @author Stéphane Dallongeville
  */
 public class WeakSequenceListener extends WeakListener<SequenceListener> implements SequenceListener
 {
