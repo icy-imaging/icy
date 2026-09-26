@@ -3115,7 +3115,10 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
             int dstOffset = adjDstRect.x + (adjDstRect.y * dstSizeX);
 
             for (int y = 0; y < h; y++) {
-                ArrayUtil.arrayToArray(src, srcOffset, dst, dstOffset, w, signed);
+                if (w != -1) // TODO: check if w can be -1
+                    ArrayUtil.arrayToArray(src, srcOffset, dst, dstOffset, w, signed);
+                else
+                    ArrayUtil.arrayToArray(src, srcOffset, dst, dstOffset, Array.getLength(src), signed);
                 srcOffset += srcSizeX;
                 dstOffset += dstSizeX;
             }
@@ -3572,7 +3575,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
 
         lockRaster();
         try {
-            ByteArrayConvert.byteArrayToArray(data, offset, getDataXY(c), 0, -1, little);
+            ByteArrayConvert.byteArrayToArray(data, offset, getDataXY(c), 0, Integer.MAX_VALUE, little); // TODO: check if Integer.MAX_VALUE is correct
         }
         finally {
             releaseRaster(true);
