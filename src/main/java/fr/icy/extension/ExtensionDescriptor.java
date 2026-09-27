@@ -21,6 +21,7 @@ package fr.icy.extension;
 import fr.icy.common.Version;
 import fr.icy.extension.plugin.PluginDescriptor;
 import fr.icy.gui.component.icon.IcySVG;
+import fr.icy.shared.logging.CustomLevel;
 import org.eclipse.aether.artifact.Artifact;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.jar.JarFile;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
 /**
@@ -40,6 +42,8 @@ import java.util.zip.ZipEntry;
  * @since 3.O.0
  */
 public final class ExtensionDescriptor {
+    private static final Logger LOGGER = Logger.getLogger(ExtensionDescriptor.class.getName());
+
     private final Artifact artifact;
     private final String name;
     private final Version version;
@@ -63,7 +67,7 @@ public final class ExtensionDescriptor {
         final Yaml yaml = new Yaml();
         try (final JarFile jarFile = new JarFile(jar)) {
             final ZipEntry extensionEntry = jarFile.getEntry("META-INF/extension.yaml");
-            final ZipEntry iconEntry =  jarFile.getEntry("META-INF/icon.svg");
+            final ZipEntry iconEntry =  jarFile.getEntry("META-INF/data/icon.svg");
 
             try (final InputStream is = jarFile.getInputStream(extensionEntry)) {
                 final Map<String, Object> properties = yaml.load(is);
@@ -75,14 +79,20 @@ public final class ExtensionDescriptor {
 
             if (iconEntry != null) {
                 try (final InputStream is = jarFile.getInputStream(iconEntry)) {
-                    if (is != null)
-                        svg = new IcySVG(is.readAllBytes());
-                    else
+                    if (is != null) {
+                        LOGGER.log(CustomLevel.DEBUG, "Loading icon from jar file (" + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion() + ")");
+                        svg = new IcySVG(is.readAllBytes(), false);
+                    }
+                    else {
+                        LOGGER.log(CustomLevel.WARNING, "Unable to load icon from jar file (" + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion() + ")");
                         svg = IcySVG.EXTENSION_DEFAULT;
+                    }
                 }
             }
-            else
+            else {
+                LOGGER.log(CustomLevel.WARNING, "Unable to find icon from jar file (" + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion() + ")");
                 svg = IcySVG.EXTENSION_DEFAULT;
+            }
         }
 
         //final File configFile = new File(jar.getParentFile(), "config.yaml");

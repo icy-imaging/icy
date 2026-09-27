@@ -235,13 +235,13 @@ public final class IcySVG {
     public static final IcySVG ZOOM_OUT_MAP = new IcySVG(MONO + "zoom_out_map.svg", false);
 
     // Colored icons
-    public static final IcySVG ICY_TRANSPARENT = new IcySVG(COLOR + "icy_transparent.svg", true);
-    public static final IcySVG ICY_WHITE_BG = new IcySVG(COLOR + "icy_white_bg.svg", true);
-    public static final IcySVG ICY_MACOS = new IcySVG(COLOR + "icy_macos.svg", true);
-    public static final IcySVG ARGB_IMAGE = new IcySVG(COLOR + "argb_image.svg", true);
-    public static final IcySVG GRAYSCALE_IMAGE = new IcySVG(COLOR + "grayscale_image.svg", true);
-    public static final IcySVG RGB_IMAGE = new IcySVG(COLOR + "rgb_image.svg", true);
-    public static final IcySVG EXTENSION_DEFAULT = new IcySVG(COLOR + "extension_default.svg", true);
+    public static final IcySVG ICY_TRANSPARENT = new IcySVG(COLOR + "icy_transparent.svg", false);
+    public static final IcySVG ICY_WHITE_BG = new IcySVG(COLOR + "icy_white_bg.svg", false);
+    public static final IcySVG ICY_MACOS = new IcySVG(COLOR + "icy_macos.svg", false);
+    public static final IcySVG ARGB_IMAGE = new IcySVG(COLOR + "argb_image.svg", false);
+    public static final IcySVG GRAYSCALE_IMAGE = new IcySVG(COLOR + "grayscale_image.svg", false);
+    public static final IcySVG RGB_IMAGE = new IcySVG(COLOR + "rgb_image.svg", false);
+    public static final IcySVG EXTENSION_DEFAULT = new IcySVG(COLOR + "extension_default.svg", false);
 
     private final byte @NonNull [] data;
     /**

@@ -445,6 +445,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
         }
 
         // convert initial data type in our data type
+        @SuppressWarnings("MagicConstant")
         final DataType dataType = DataType.getDataTypeFromDataBufferType(temp.getColorModel().getTransferType());
         // get number of components
         final int numComponents = temp.getRaster().getNumBands();
@@ -3308,6 +3309,7 @@ public class IcyBufferedImage extends BufferedImage implements IcyColorModelList
      * @param sourceRaster WritableRaster
      * @return <code>true</code> if the copy operation succeed, <code>false</code> otherwise
      */
+    @SuppressWarnings("MagicConstant")
     public boolean copyData(final ComponentSampleModel sampleModel, final WritableRaster sourceRaster, final int srcChannel, final int dstChannel) {
         // not compatible sample model
         if (DataType.getDataTypeFromDataBufferType(sampleModel.getDataType()) != getDataType())

@@ -29,6 +29,7 @@ import fr.icy.model.colormodel.IcyColorModel;
 
 import java.awt.color.ColorSpace;
 import java.awt.image.ColorModel;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -452,7 +453,8 @@ public class IcyColorSpace extends ColorSpace implements ChangeListener, IcyColo
             // get datatype and numComponent of source colorModel
             final Object srcElem = cm.getDataElements(0x0, null);
             final DataType srcDataType = ArrayUtil.getDataType(srcElem);
-            final int srcNumComponents = ArrayUtil.getLength(srcElem);
+            final int srcNumComponents = Array.getLength(srcElem);
+            @SuppressWarnings("MagicConstant")
             final DataType dataType = DataType.getDataTypeFromDataBufferType(cm.getTransferType());
             final int numComponents = getNumComponents();
 

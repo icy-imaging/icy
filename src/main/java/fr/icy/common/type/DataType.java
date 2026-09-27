@@ -169,21 +169,34 @@ public enum DataType {
     }
 
     /**
-     * Return a DataType from the specified string.<br>
-     * ex : <code>getDataType("byte")</code> will return <code>DataType.BYTE</code>
+     * Retrieves the corresponding {@code DataType} for the given string value.
+     * The method checks against both case-sensitive and case-insensitive matches
+     * of the {@code DataType}'s string representation.
+     *
+     * @param value the string representation of the data type to be retrieved; must not be null.
+     * @return the {@code DataType} corresponding to the specified string value.
+     * @throws NullPointerException if the {@code value} is null.
+     * @throws IllegalArgumentException if the {@code value} does not correspond to any supported {@code DataType}.
      */
-    public static @Nullable DataType getDataType(final String value) {
+    public static @NonNull DataType getDataType(final @NonNull String value) throws NullPointerException, IllegalArgumentException {
+        Objects.requireNonNull(value, "String value cannot be null.");
+
         for (final DataType dataType : DataType.values())
             if (dataType.toString(false).equalsIgnoreCase(value) || dataType.toString(true).equalsIgnoreCase(value))
                 return dataType;
 
-        return null;
+        throw new IllegalArgumentException("Unsupported data type: " + value);
     }
 
     /**
-     * Return a DataType from the specified primitive class type
+     * Determines the corresponding {@code DataType} for the provided primitive class type.
+     *
+     * @param classType the class type to evaluate; must not be null
+     * @return the corresponding {@code DataType} of the provided class type
+     * @throws NullPointerException if the provided class type is null
+     * @throws IllegalArgumentException if the provided class type is unsupported
      */
-    public static @NonNull DataType getDataType(final @NonNull Class<?> classType) throws IllegalArgumentException {
+    public static @NonNull DataType getDataType(final @NonNull Class<?> classType) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(classType, "Class type cannot be null.");
 
         if (classType.equals(Byte.TYPE))
@@ -203,11 +216,21 @@ public enum DataType {
     }
 
     /**
-     * Return a DataType from the specified VTK type.<br>
-     * ex : <code>getDataTypeFromVTKType(VtkUtil.VTK_INT)</code> will return <code>DataType.INT</code>
+     * Converts a VTK type constant to its corresponding {@code DataType}.
+     *
+     * @param vtkType the VTK type constant, which must be one of the predefined values:
+     *                {@code VtkUtil.VTK_UNSIGNED_CHAR}, {@code VtkUtil.VTK_CHAR},
+     *                {@code VtkUtil.VTK_SIGNED_CHAR}, {@code VtkUtil.VTK_UNSIGNED_SHORT},
+     *                {@code VtkUtil.VTK_SHORT}, {@code VtkUtil.VTK_UNSIGNED_INT},
+     *                {@code VtkUtil.VTK_INT}, {@code VtkUtil.VTK_FLOAT},
+     *                {@code VtkUtil.VTK_DOUBLE}, {@code VtkUtil.VTK_UNSIGNED_LONG},
+     *                or {@code VtkUtil.VTK_LONG}.
+     * @return the corresponding {@code DataType} for the provided VTK type constant.
+     * @throws IllegalArgumentException if the provided {@code vtkType} is unknown
+     *         or not one of the recognized VTK type constants.
      */
     @Contract(pure = true)
-    public static @Nullable DataType getDataTypeFromVTKType(final int vtkType) {
+    public static @NonNull DataType getDataTypeFromVTKType(final @MagicConstant(intValues = {VtkUtil.VTK_UNSIGNED_CHAR, VtkUtil.VTK_CHAR, VtkUtil.VTK_SIGNED_CHAR, VtkUtil.VTK_UNSIGNED_SHORT, VtkUtil.VTK_SHORT, VtkUtil.VTK_UNSIGNED_INT, VtkUtil.VTK_INT, VtkUtil.VTK_FLOAT, VtkUtil.VTK_DOUBLE, VtkUtil.VTK_UNSIGNED_LONG, VtkUtil.VTK_LONG}) int vtkType) throws IllegalArgumentException {
         return switch (vtkType) {
             case VtkUtil.VTK_UNSIGNED_CHAR -> UBYTE;
             case VtkUtil.VTK_CHAR, VtkUtil.VTK_SIGNED_CHAR -> BYTE;
@@ -215,20 +238,31 @@ public enum DataType {
             case VtkUtil.VTK_SHORT -> SHORT;
             case VtkUtil.VTK_UNSIGNED_INT -> UINT;
             case VtkUtil.VTK_INT -> INT;
-            case VtkUtil.VTK_FLOAT -> FLOAT;
-            case VtkUtil.VTK_DOUBLE -> DOUBLE;
             case VtkUtil.VTK_UNSIGNED_LONG -> ULONG;
             case VtkUtil.VTK_LONG -> LONG;
-            default -> null;
+            case VtkUtil.VTK_FLOAT -> FLOAT;
+            case VtkUtil.VTK_DOUBLE -> DOUBLE;
+            default -> throw new IllegalArgumentException("Unknown or unrecognized VTK type: " + vtkType);
         };
     }
 
     /**
-     * Return a DataType from the specified DataBuffer type.<br>
-     * ex : <code>getDataTypeFromDataBufferType(DataBuffer.TYPE_BYTE)</code> will return <code>DataType.UBYTE</code>
+     * Converts a given {@code DataBuffer} type constant to a corresponding {@code DataType}.
+     * Maps well-defined {@code DataBuffer} type values to their appropriate {@code DataType}.
+     * Throws an exception if the type is undefined or unrecognized.
+     *
+     * @param dataBufferType a constant value representing a {@code DataBuffer} type.
+     *                       Must be one of the following:
+     *                       {@code DataBuffer.TYPE_BYTE}, {@code DataBuffer.TYPE_SHORT},
+     *                       {@code DataBuffer.TYPE_USHORT}, {@code DataBuffer.TYPE_INT},
+     *                       {@code DataBuffer.TYPE_FLOAT}, {@code DataBuffer.TYPE_DOUBLE},
+     *                       or {@code DataBuffer.TYPE_UNDEFINED}.
+     * @return the corresponding {@code DataType} for the given {@code DataBuffer} type.
+     * @throws IllegalArgumentException if the {@code dataBufferType} value is unknown or not recognized.
+     * @throws UnsupportedOperationException if {@code dataBufferType} is {@code DataBuffer.TYPE_UNDEFINED}.
      */
     @Contract(pure = true)
-    public static @Nullable DataType getDataTypeFromDataBufferType(final int dataBufferType) {
+    public static @NonNull DataType getDataTypeFromDataBufferType(final @MagicConstant(intValues = {DataBuffer.TYPE_BYTE, DataBuffer.TYPE_SHORT, DataBuffer.TYPE_USHORT, DataBuffer.TYPE_INT, DataBuffer.TYPE_FLOAT, DataBuffer.TYPE_DOUBLE, DataBuffer.TYPE_UNDEFINED}) int dataBufferType) throws IllegalArgumentException, UnsupportedOperationException {
         return switch (dataBufferType) {
             case DataBuffer.TYPE_BYTE -> UBYTE; // consider as unsigned by default
             case DataBuffer.TYPE_SHORT -> SHORT;
@@ -236,16 +270,24 @@ public enum DataType {
             case DataBuffer.TYPE_INT -> UINT; // consider as unsigned by default
             case DataBuffer.TYPE_FLOAT -> FLOAT;
             case DataBuffer.TYPE_DOUBLE -> DOUBLE;
-            default -> null;
+            case DataBuffer.TYPE_UNDEFINED -> throw new UnsupportedOperationException("DataBuffer type undefined");
+            default -> throw new IllegalArgumentException("Unknown DataBuffer type : " + dataBufferType);
         };
     }
 
     /**
-     * Return a DataType from the specified FormatTools type.<br>
-     * ex : <code>getDataTypeFromFormatToolsType(FormatTools.UINT8)</code> will return <code>DataType.UBYTE</code>
+     * Converts a FormatTools type constant to the corresponding {@code DataType}.
+     *
+     * @param type The FormatTools type constant to be converted.
+     *             Must be one of the following values:
+     *             {@code FormatTools.INT8}, {@code FormatTools.UINT8}, {@code FormatTools.INT16},
+     *             {@code FormatTools.UINT16}, {@code FormatTools.INT32}, {@code FormatTools.UINT32},
+     *             {@code FormatTools.FLOAT}, or {@code FormatTools.DOUBLE}.
+     * @return The {@code DataType} matching the specified FormatTools type constant.
+     * @throws IllegalArgumentException If the provided type is not a recognized FormatTools type constant.
      */
     @Contract(pure = true)
-    public static @Nullable DataType getDataTypeFromFormatToolsType(final int type) {
+    public static @NonNull DataType getDataTypeFromFormatToolsType(final @MagicConstant(intValues = {FormatTools.INT8, FormatTools.UINT8, FormatTools.INT16, FormatTools.UINT16, FormatTools.INT32, FormatTools.UINT32, FormatTools.FLOAT, FormatTools.DOUBLE}) int type) throws IllegalArgumentException {
         return switch (type) {
             case FormatTools.INT8 -> BYTE;
             case FormatTools.UINT8 -> UBYTE;
@@ -255,16 +297,22 @@ public enum DataType {
             case FormatTools.UINT32 -> UINT;
             case FormatTools.FLOAT -> FLOAT;
             case FormatTools.DOUBLE -> DOUBLE;
-            default -> null;
+            default -> throw new IllegalArgumentException("Unknown FormatTools type : " + type);
         };
     }
 
     /**
-     * Return a DataType from the specified PixelType.<br>
-     * ex : <code>getDataTypeFromPixelType(FormatTools.UINT8)</code> will return <code>DataType.UBYTE</code>
+     * Converts a {@link PixelType} to its corresponding {@link DataType}.
+     *
+     * @param type the pixel type to be converted; must not be null.
+     * @return the associated data type for the provided pixel type.
+     * @throws NullPointerException if the input {@code type} is null.
+     * @throws UnsupportedOperationException if the input {@code type} does not map to a supported data type.
      */
     @Contract(pure = true)
-    public static @Nullable DataType getDataTypeFromPixelType(final @NonNull PixelType type) {
+    public static @NonNull DataType getDataTypeFromPixelType(final @NonNull PixelType type) throws NullPointerException, UnsupportedOperationException {
+        Objects.requireNonNull(type, "Pixel type cannot be null.");
+
         return switch (type) {
             case INT8 -> BYTE;
             case UINT8 -> UBYTE;
@@ -274,7 +322,7 @@ public enum DataType {
             case UINT32 -> UINT;
             case FLOAT -> FLOAT;
             case DOUBLE -> DOUBLE;
-            default -> null;
+            default -> throw new UnsupportedOperationException("Unsupported PixelType : " + type);
         };
     }
 

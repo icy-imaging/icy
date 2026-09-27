@@ -579,7 +579,7 @@ public class MetaDataUtil {
             if (resolution > 0)
                 sizeXY /= Math.pow(4d, resolution);
 
-            return sizeXY * sizeC * sizeZ * sizeT * Objects.requireNonNull(DataType.getDataTypeFromPixelType(pix.getType())).getSize();
+            return sizeXY * sizeC * sizeZ * sizeT * DataType.getDataTypeFromPixelType(pix.getType()).getSize();
         }
 
         return 0L;
