@@ -279,7 +279,7 @@ public class NonNullArrayList<E> extends ArrayList<E> {
      * @return true if this list changed as a result of the call
      * @throws NullPointerException if the specified collection is null or contains null elements
      * @throws IndexOutOfBoundsException if the index is out of range
-     *                                   (index < 0 || index > size())
+     *                                   ({@code index < 0 || index > size()})
      */
     @Override
     public boolean addAll(final @Range(from = 0, to = Integer.MAX_VALUE) int index, final @NonNull Collection<? extends @NonNull E> c) throws NullPointerException, IndexOutOfBoundsException {

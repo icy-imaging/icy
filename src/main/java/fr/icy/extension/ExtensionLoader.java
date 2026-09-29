@@ -89,7 +89,6 @@ public final class ExtensionLoader {
 
     public final static String PLUGINS_PACKAGE = "icy.plugins";
     public final static String OLD_PLUGINS_PACKAGE = "plugins"; // For legacy compatibility
-    public final static String EXTENSIONS_PATH = UserUtil.getIcyExtensionsDirectory().getAbsolutePath();
 
     @Deprecated
     public final static String KERNEL_PLUGINS_PACKAGE = PLUGINS_PACKAGE + ".kernel.";

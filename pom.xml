@@ -384,10 +384,11 @@
             <artifactId>specification</artifactId>
             <version>${org.openmicroscopy.specification.version}</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>ome</groupId>
             <artifactId>turbojpeg</artifactId>
-        </dependency>-->
+            <version>9.0.0-rc1</version> <!-- Used to prevent Javadoc from failing because of classes in default unnamed module -->
+        </dependency>
         <dependency>
             <groupId>ome</groupId>
             <artifactId>OMEZarrReader</artifactId>
