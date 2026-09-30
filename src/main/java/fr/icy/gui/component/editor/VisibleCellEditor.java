@@ -20,7 +20,9 @@ package fr.icy.gui.component.editor;
 
 import fr.icy.gui.LookAndFeelUtil;
 import fr.icy.gui.component.icon.IcySVG;
+import fr.icy.gui.component.icon.IcySVGIcon;
 import fr.icy.gui.component.renderer.VisibleCellRenderer;
+import fr.icy.gui.listener.SkinChangeListener;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
@@ -61,9 +63,9 @@ public class VisibleCellEditor extends AbstractCellEditor implements TableCellEd
         visible = (Boolean) value;
 
         if (visible)
-            label.setIcon(IcySVG.VISIBILITY.getIcon(LookAndFeelUtil.getDefaultIconSize()));
+            label.setIcon(IcySVG.VISIBILITY.getIcon(18, LookAndFeelUtil.ColorType.BUTTON_DEFAULT));
         else
-            label.setIcon(IcySVG.VISIBILITY_OFF.getIcon(LookAndFeelUtil.getDefaultIconSize()));
+            label.setIcon(IcySVG.VISIBILITY_OFF.getIcon(18, LookAndFeelUtil.ColorType.BUTTON_DEFAULT));
 
         return label;
     }
@@ -73,9 +75,9 @@ public class VisibleCellEditor extends AbstractCellEditor implements TableCellEd
         visible = (Boolean) value;
 
         if (visible)
-            label.setIcon(IcySVG.VISIBILITY.getIcon(LookAndFeelUtil.getDefaultIconSize()));
+            label.setIcon(IcySVG.VISIBILITY.getIcon(18, LookAndFeelUtil.ColorType.BUTTON_DEFAULT));
         else
-            label.setIcon(IcySVG.VISIBILITY_OFF.getIcon(LookAndFeelUtil.getDefaultIconSize()));
+            label.setIcon(IcySVG.VISIBILITY_OFF.getIcon(18, LookAndFeelUtil.ColorType.BUTTON_DEFAULT));
 
         return label;
     }

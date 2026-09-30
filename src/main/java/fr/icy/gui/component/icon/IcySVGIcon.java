@@ -118,7 +118,7 @@ public final class IcySVGIcon implements Icon {
         }
     }
 
-    private static void recolorSvg(@NonNull final SVGDocument doc, final @Nullable String oldValue, @NonNull final String newValue, final @MagicConstant(stringValues = {"fill", "stroke"}) String @NonNull ... attributes) {
+    private static void recolorSvg(@NonNull final SVGDocument doc, final @Nullable String oldValue, @NonNull final String newValue, final @MagicConstant(stringValues = {"fill", "stroke", "stop-color"}) String @NonNull ... attributes) {
         final NodeList elements = doc.getElementsByTagName("*");
         for (int i = 0; i < elements.getLength(); i++) {
             final Element el = (Element) elements.item(i);
@@ -141,7 +141,7 @@ public final class IcySVGIcon implements Icon {
             hex = "none";
         else
             hex = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
-        recolorSvg(doc, null, hex, "fill", "stroke");
+        recolorSvg(doc, null, hex, "fill", "stroke", "stop-color");
     }
 
     @Contract("_, _, _ -> new")

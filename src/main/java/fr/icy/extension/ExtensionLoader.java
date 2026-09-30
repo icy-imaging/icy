@@ -207,7 +207,8 @@ public final class ExtensionLoader {
         repositorySystem = new RepositorySystemSupplier().get();
 
         session = MavenRepositorySystemUtils.newSession();
-        session.setOffline(Icy.isNetworkDisabled());
+        //session.setOffline(Icy.isNetworkDisabled()); // TODO: enable this when loader is optimized for search offline (very fast) first then online (very slow)
+        session.setOffline(true);
         final LocalRepository localRepo = new LocalRepository(System.getProperty("user.home") + "/.m2/repository");
         session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(session, localRepo));
         session.setSystemProperties(System.getProperties());

@@ -42,9 +42,9 @@ public class VisibleCellRenderer extends JLabel implements TableCellRenderer, Tr
             final boolean b = (Boolean) value;
 
             if (b)
-                setIcon(IcySVG.VISIBILITY.getIcon(LookAndFeelUtil.getDefaultIconSize()));
+                setIcon(IcySVG.VISIBILITY.getIcon(18, LookAndFeelUtil.ColorType.BUTTON_DEFAULT));
             else
-                setIcon(IcySVG.VISIBILITY_OFF.getIcon(LookAndFeelUtil.getDefaultIconSize()));
+                setIcon(IcySVG.VISIBILITY_OFF.getIcon(18, LookAndFeelUtil.ColorType.BUTTON_DEFAULT));
         }
 
         return this;
@@ -56,9 +56,9 @@ public class VisibleCellRenderer extends JLabel implements TableCellRenderer, Tr
             final boolean b = (Boolean) value;
 
             if (b)
-                setIcon(IcySVG.VISIBILITY.getIcon(LookAndFeelUtil.getDefaultIconSize()));
+                setIcon(IcySVG.VISIBILITY.getIcon(18, LookAndFeelUtil.ColorType.BUTTON_DEFAULT));
             else
-                setIcon(IcySVG.VISIBILITY_OFF.getIcon(LookAndFeelUtil.getDefaultIconSize()));
+                setIcon(IcySVG.VISIBILITY_OFF.getIcon(18, LookAndFeelUtil.ColorType.BUTTON_DEFAULT));
         }
 
         return this;

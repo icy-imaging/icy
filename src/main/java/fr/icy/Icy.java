@@ -500,7 +500,7 @@ public final class Icy {
         }
 
         if (!Icy.getMainInterface().isHeadLess()) {
-            ToolTipFrame tooltip;
+            /*ToolTipFrame tooltip;
             String message;
 
             // TODO: 28/09/2023 Add image for each OS (Windows, macOS & Linux)
@@ -534,7 +534,7 @@ public final class Icy {
                     Objects.requireNonNull(Icy.class.getResource("/image/help/icy_prefs.png"))
             );
             tooltip = new ToolTipFrame(message, 30, "magicWand");
-            tooltip.setSize(300, 260);
+            tooltip.setSize(300, 260);*/
         }
     }
 
