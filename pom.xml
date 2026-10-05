@@ -605,4 +605,18 @@
             <classifier>natives-windows-amd64</classifier>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>central.snapshots</id>
+            <name>Maven Central - Snapshots</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
