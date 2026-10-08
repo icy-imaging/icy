@@ -41,6 +41,7 @@ import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.Exclusion;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
 import org.eclipse.aether.resolution.ArtifactDescriptorResult;
 import org.eclipse.aether.resolution.ArtifactRequest;
@@ -180,47 +181,26 @@ public final class ExtensionLoader {
         // needReload = false;
         // logError = true;
 
-        /*@SuppressWarnings("deprecation")
-        final DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
-        locator.addService(ModelProcessor.class, DefaultModelProcessor.class);
-        locator.addService(ModelBuilder.class, DefaultModelBuilder.class);
-        locator.addService(DefaultModelBuilderFactory.class, DefaultModelBuilderFactory.class);
-        locator.addService(ArtifactDescriptorReader.class, DefaultArtifactDescriptorReader.class);
-        locator.addService(VersionResolver.class, DefaultVersionResolver.class);
-        locator.addService(VersionRangeResolver.class, DefaultVersionRangeResolver.class);
-        locator.addService(MetadataResolver.class, DefaultMetadataResolver.class);
-        locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
-        locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
-        //locator.addService(TransporterFactory.class, FileTransporterFactory.class);
-        locator.addService(RepositorySystem.class, DefaultRepositorySystem.class);
-
-        @SuppressWarnings("deprecation")
-        final DefaultServiceLocator.ErrorHandler errorHandler = new DefaultServiceLocator.ErrorHandler() {
-            @Override
-            public void serviceCreationFailed(final Class<?> type, final Class<?> impl, final Throwable exception) {
-                IcyLogger.error(this.getClass(), exception, "Service creation failed for " + type + " with impl " + impl);
-            }
-        };
-        locator.setErrorHandler(errorHandler);*/
-
-        //repositorySystem = locator.getService(RepositorySystem.class);
         repositorySystem = new RepositorySystemSupplier().get();
 
         session = MavenRepositorySystemUtils.newSession();
         //session.setOffline(Icy.isNetworkDisabled()); // TODO: enable this when loader is optimized for search offline (very fast) first then online (very slow)
-        session.setOffline(true);
+        session.setOffline(false);
         final LocalRepository localRepo = new LocalRepository(System.getProperty("user.home") + "/.m2/repository");
         session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(session, localRepo));
+        session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_IGNORE);
+        session.setUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_NEVER);
         session.setSystemProperties(System.getProperties());
-        session.setDependencySelector(
+        /*session.setDependencySelector(
                 new AndDependencySelector(
                         new ExclusionDependencySelector(List.of(new Exclusion("org.bioimageanalysis", null, null, null))),
                         new OptionalDependencySelector(),
                         new ScopeDependencySelector("provided", "test")
                 )
-        );
+        );*/
 
         final RemoteRepository central = new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build();
+        final RemoteRepository central_snapshots = new RemoteRepository.Builder("central.snapshots", "default", "https://central.sonatype.com/repository/maven-snapshots/").build();
         final RemoteRepository scijava = new RemoteRepository.Builder("scijava", "default", "https://maven.scijava.org/content/groups/public/").build();
         final RemoteRepository ome = new RemoteRepository.Builder("ome", "default", "https://artifacts.openmicroscopy.org/artifactory/ome.releases/").build();
         final RemoteRepository jogamp = new RemoteRepository.Builder("jogamp", "default", "https://jogamp.org/deployment/maven/").build();
@@ -229,6 +209,7 @@ public final class ExtensionLoader {
 
         repositories = new ArrayList<>();
         repositories.add(central);
+        repositories.add(central_snapshots);
         repositories.add(scijava);
         repositories.add(ome);
         repositories.add(jogamp);
