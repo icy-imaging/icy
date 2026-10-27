@@ -36,6 +36,7 @@ import fr.icy.gui.dialog.IdConfirmDialog.Confirmer;
 import fr.icy.gui.frame.ExitFrame;
 import fr.icy.gui.frame.IcyExternalFrame;
 import fr.icy.gui.frame.NewVersionFrame;
+import fr.icy.gui.frame.SplashScreenFrame;
 import fr.icy.gui.frame.progress.AnnounceFrame;
 import fr.icy.gui.frame.progress.ProgressFrame;
 import fr.icy.gui.frame.progress.ToolTipFrame;
@@ -112,10 +113,10 @@ public final class Icy {
     static FileLock lock = null;
 
     // TODO : remove this block
-    /*
+    /**
      * private splash for initial loading
      */
-    //static SplashScreenFrame splashScreen = null;
+    static SplashScreenFrame splashScreen = null;
 
     private static boolean firstStart = false;
 
@@ -235,21 +236,25 @@ public final class Icy {
             //loci.common.DebugTools.enableLogging("ERROR");
             loci.common.DebugTools.setRootLevel("ERROR");
 
-            // TODO : remove this block
-            //if (!headless && !noSplash) {
-            // prepare splashScreen (ok to create it here as we are not yet in substance laf)
-            //splashScreen = new SplashScreenFrame();
+            if (!headless) {
+                //LookAndFeelUtil.init();
 
-            // It's important to initialize AWT now (with InvokeNow(…) for instance) to avoid
-            // the JVM deadlock bug (id: 5104239). It happen when the AWT thread is initialized
-            // while others threads load some new library with ClassLoader.loadLibrary
+                // TODO : remove this block
+                if (!headless && !noSplash) {
+                    // prepare splashScreen (ok to create it here as we are not yet in substance laf)
 
-            // display splash NOW (don't use ThreadUtil as headless is still false here)
-            //EventQueue.invokeAndWait(() -> {
-            // display splash screen
-            //splashScreen.setVisible(true);
-            //});
-            //}
+                    // It's important to initialize AWT now (with InvokeNow(…) for instance) to avoid
+                    // the JVM deadlock bug (id: 5104239). It happen when the AWT thread is initialized
+                    // while others threads load some new library with ClassLoader.loadLibrary
+
+                    // display splash NOW (don't use ThreadUtil as headless is still false here)
+                    SwingUtilities.invokeAndWait(() -> {
+                        // display splash screen
+                        splashScreen = new SplashScreenFrame();
+                        //splashScreen.setVisible(true);
+                    });
+                }
+            }
 
             // fast start
             // force image cache initialization so GUI won't wait after it (need preferences init)
@@ -259,6 +264,7 @@ public final class Icy {
             // initialize network (need preferences init)
             new Thread(NetworkUtil::init, "Initializer: Network").start();
 
+            //ExtensionLoader.reloadAsync();
             new Thread(ExtensionLoader::reloadAsync, "Initializer: Extensions").start();
 
             WorkbookFactory.addProvider(new HSSFWorkbookFactory());
@@ -309,14 +315,14 @@ public final class Icy {
 
         // TODO : remove this block
         // splash screen initialized --> hide it
-        //if (splashScreen != null) {
-        // then do less important stuff later
-        //ThreadUtil.invokeLater(() -> {
-        // we can now hide splash as we have interface
-        //splashScreen.dispose();
-        //splashScreen = null;
-        //});
-        //}
+        if (splashScreen != null) {
+            // then do less important stuff later
+            SwingUtilities.invokeLater(() -> {
+                // we can now hide splash as we have interface
+                splashScreen.dispose();
+                splashScreen = null;
+            });
+        }
 
         // initialize exception handler
         IcyExceptionHandler.init();
@@ -328,13 +334,14 @@ public final class Icy {
         LOGGER.info(String.format("System available memory: %s", UnitUtil.getBytesString(SystemUtil.getFreeMemory())));
         LOGGER.info(String.format("Max Java memory: %s", UnitUtil.getBytesString(SystemUtil.getJavaMaxMemory())));
         if (LOGGER.isLoggable(CustomLevel.DEBUG))
-            LOGGER.log(CustomLevel.DEBUG, String.format("MMJ version: %d", MMJUtil.getMMJVersion()));
+            LOGGER.log(CustomLevel.DEBUG, String.format("Multi-Release JDK version: %d", MRJUtil.getBaseJDKVersion()));
 
         if (headless)
             LOGGER.info("Headless mode");
 
         // prepare native library files (need preferences init)
-        new Thread(Icy::nativeLibrariesInit, "Initializer: VTK").start();
+        //new Thread(Icy::nativeLibrariesInit, "Initializer: VTK").start();
+        nativeLibrariesInit();
 
         // image cache disabled from command line ?
         if (isCacheDisabled())
@@ -387,15 +394,16 @@ public final class Icy {
         // update version info
         ApplicationPreferences.setVersion(Icy.VERSION);
         // set LOCI debug level
-        // loci.common.DebugTools.enableLogging("ERROR");
+        loci.common.DebugTools.enableLogging("ERROR");
         // set OGL debug level
-        //SystemUtil.setProperty("jogl.verbose", "TRUE");
-        //SystemUtil.setProperty("jogl.debug", "TRUE");
+        SystemUtil.setProperty("jogl.verbose", "FALSE");
+        SystemUtil.setProperty("jogl.debug", "FALSE");
 
-        LOGGER.info(String.format("Icy v%s started", VERSION.toShortString()));
+        if (LOGGER.isLoggable(CustomLevel.INFO))
+            LOGGER.log(CustomLevel.INFO, String.format("Icy v%s started", VERSION.toShortString()));
 
         if (ExtensionLoader.getExtensions().isEmpty()) {
-            LOGGER.severe("No extensions were found. You will not be able to use Icy properly.");
+            LOGGER.log(CustomLevel.ERROR, "No extensions were found. You will not be able to use Icy properly.");
             if (!headless)
                 JOptionPane.showMessageDialog(getMainInterface().getMainFrame(), new String[]{"No extensions were found.", "You will not be able to use Icy properly."}, "No extension found", JOptionPane.ERROR_MESSAGE);
         }
@@ -986,17 +994,17 @@ public final class Icy {
     }
 
     private static void loadVTK() {
-        LOGGER.info("Loading VTK…");
+        LOGGER.log(CustomLevel.INFO, "Loading VTK…");
 
-        try {
+        //try {
             fr.icy.shared.vtk.Loader.init();
-            vtkLibraryLoaded = true;
-            LOGGER.info("VTK library loaded.");
-        }
-        catch (final Throwable t) {
-            vtkLibraryLoaded = false;
-            LOGGER.log(Level.SEVERE, "Could not initialize VTK.", t);
-        }
+            //vtkLibraryLoaded = true;
+            //LOGGER.info("VTK library loaded.");
+        //}
+        //catch (final Throwable t) {
+            //vtkLibraryLoaded = false;
+            //LOGGER.log(CustomLevel.ERROR, "Could not initialize VTK.", t);
+        //}
     }
 
     @Deprecated(forRemoval = true)

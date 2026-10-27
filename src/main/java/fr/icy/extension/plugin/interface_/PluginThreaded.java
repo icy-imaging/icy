@@ -21,17 +21,19 @@ package fr.icy.extension.plugin.interface_;
 /**
  * Plugin Threaded interface.<br>
  * <br>
- * By default a plugin is launched on the AWT Event Dispatch Thread so GUI creation
- * can be done directly without <code>invokeLater</code> calls.<br>
- * A common problem is that long process will actually lock the EDT and make GUI not responding.<br>
- * <br>
- * A plugin implementing this interface will have both its <code>run()</code> methods called
- * in a separate thread but developer has to use <code>invokeLater</code> method
- * for GUI creation / modification. Also there is no more guarantee that plugin constructor is called
- * in the EDT (which is the case for default plugin).
+ * By default, a plugin is launched on the AWT Event Dispatch Thread, so GUI creation
+ * can be done directly without {@code invokeLater} calls.
+ * <p>
+ * A common problem is that long processes will actually lock the EDT and make GUI not respond.
+ * <p>
+ * A plugin implementing this interface will have both its {@code run()} methods called
+ * in a separate thread, but the developer has to use {@code invokeLater} method
+ * for GUI creation / modification. Also, there is no more guarantee that the plugin constructor is called
+ * in the EDT (which is the case for the default plugin).
  *
  * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
+@Deprecated(forRemoval = true)
 public interface PluginThreaded extends Runnable {
 }

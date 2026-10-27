@@ -19,10 +19,13 @@
 package fr.icy.extension.plugin.interface_;
 
 /**
- * Plugin Daemon interface.<br>
- * Daemon plugin are automatically loaded when the application is started.<br>
+ * Plugin Daemon interface.
+ * <p>
+ * Daemon plugins are automatically loaded when the application is started.
+ * <p>
  * Icy will always execute them in a separate thread for safety so the interface extends
- * PluginThreaded.<br>
+ * PluginThreaded.
+ * <p>
  * They can be enabled / disabled from the Icy preferences window.
  *
  * @author Stéphane Dallongeville

@@ -24,8 +24,9 @@ import fr.icy.gui.viewer.Viewer;
 /**
  * Plugin Canvas interface.<br>
  * Used to define a plugin representing a specific IcyCanvas.<br>
- * The plugin will appears in the Canvas list.<br>
+ * The plugin will appear in the Canvas list.<br>
  *
+ * @param <C> the type of IcyCanvas
  * @author Fabrice de Chaumont
  * @author Stéphane Dallongeville
  * @author Thomas Musset
@@ -41,8 +42,8 @@ public interface PluginCanvas<C extends IcyCanvas> extends PluginNoEDTConstructo
     /**
      * Create and return a new IcyCanvas
      *
-     * @param viewer the viewer create and will contain the Canvas
-     * @return the new created Canvas
+     * @param viewer the viewer creates and will contain the Canvas
+     * @return the newly created Canvas
      */
     C createCanvas(Viewer viewer);
 }

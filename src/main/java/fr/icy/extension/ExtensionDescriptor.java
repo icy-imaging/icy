@@ -58,8 +58,11 @@ public final class ExtensionDescriptor {
 
     public ExtensionDescriptor(final @NonNull Artifact artifact) throws IOException, IllegalArgumentException {
         this.artifact = artifact;
-        final File jar = artifact.getFile();
-        if (jar == null || !jar.exists() || !jar.isFile() || !jar.getName().endsWith(".jar"))
+        if (artifact.getPath() == null)
+            throw new IllegalArgumentException("Artifact is not resolved");
+
+        final File jar = artifact.getPath().toFile();
+        if (!jar.exists() || !jar.isFile() || !jar.getName().endsWith(".jar"))
             throw new IllegalArgumentException("Artifact is not a jar or is not resolved");
 
         plugins = new ArrayList<>();
@@ -113,7 +116,7 @@ public final class ExtensionDescriptor {
     }
 
     public @NonNull File getFile() {
-        return artifact.getFile();
+        return artifact.getPath().toFile();
     }
 
     public @NonNull String getArtifactId() {
@@ -157,7 +160,7 @@ public final class ExtensionDescriptor {
     }
 
     /**
-     * Returns SVG by its name in extension's jar (META-INF/icon/…). Can be null.
+     * Returns SVG by its name in extension's jar (META-INF/icons/…). Can be null.
      */
     @Contract("null, _ -> null")
     public @Nullable IcySVG getSVG(final @Nullable String name, final boolean monochrome) {
@@ -185,7 +188,7 @@ public final class ExtensionDescriptor {
     }
 
     public boolean isKernel() {
-        return (artifact.getGroupId().equals(ExtensionLoader.KERNEL_GROUP_ID) && ExtensionLoader.KERNEL_ARTIFACT_IDS.contains(artifact.getArtifactId()));
+        return (artifact.getGroupId().equals(ExtensionLoader.DEFAULT_GROUP_ID) && ExtensionLoader.KERNEL_ARTIFACT_IDS.contains(artifact.getArtifactId()));
     }
 
     @Override

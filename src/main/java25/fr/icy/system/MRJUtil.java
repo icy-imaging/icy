@@ -18,12 +18,12 @@
 
 package fr.icy.system;
 
-public final class MMJUtil {
-    private MMJUtil() {
+public final class MRJUtil {
+    private MRJUtil() {
         //
     }
 
-    public static int getMMJVersion() {
-        return 21;
+    public static int getBaseJDKVersion() {
+        return 25;
     }
 }

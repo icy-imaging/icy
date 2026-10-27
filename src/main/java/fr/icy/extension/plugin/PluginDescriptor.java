@@ -23,9 +23,7 @@ import fr.icy.common.reflect.ClassUtil;
 import fr.icy.extension.ExtensionDescriptor;
 import fr.icy.extension.plugin.abstract_.Plugin;
 import fr.icy.extension.plugin.abstract_.PluginActionable;
-import fr.icy.extension.plugin.annotation_.IcyPluginDescription;
-import fr.icy.extension.plugin.annotation_.IcyPluginIcon;
-import fr.icy.extension.plugin.annotation_.IcyPluginName;
+import fr.icy.extension.plugin.annotation_.*;
 import fr.icy.extension.plugin.interface_.PluginDaemon;
 import fr.icy.gui.component.icon.IcySVG;
 import fr.icy.io.FileUtil;
@@ -62,7 +60,8 @@ public final class PluginDescriptor {
     private final String name;
     private final String shortDescription;
     private final String svgPath;
-    private final String desc;
+    private final String category;
+    private final String[] tags;
 
     private boolean enabled;
     private boolean descriptorLoaded;
@@ -84,6 +83,8 @@ public final class PluginDescriptor {
         String magicDescription = "";
         String magicIcon = "";
         boolean magicIconMono = false;
+        String magicCategory = "Plugin";
+        String[] magicTags = new String[0];
 
         if (clazz.isAnnotationPresent(IcyPluginName.class)) {
             final IcyPluginName annotation = clazz.getAnnotation(IcyPluginName.class);
@@ -98,6 +99,14 @@ public final class PluginDescriptor {
             magicIcon = annotation.value();
             magicIconMono = annotation.monochrome();
         }
+        if (clazz.isAnnotationPresent(IcyPluginCategory.class)) {
+            final IcyPluginCategory annotation = clazz.getAnnotation(IcyPluginCategory.class);
+            magicCategory = annotation.value();
+        }
+        if (clazz.isAnnotationPresent(IcyPluginTags.class)) {
+            final IcyPluginTags annotation = clazz.getAnnotation(IcyPluginTags.class);
+            magicTags = annotation.value();
+        }
 
         // load icon
         if (!magicIcon.isBlank())
@@ -110,17 +119,19 @@ public final class PluginDescriptor {
         else
             name = pluginClass.getSimpleName();
 
-        desc = name + " plugin";
-
         if (!magicDescription.isBlank())
             shortDescription = magicDescription;
         else
             shortDescription = "";
 
-        // only descriptor is loaded here
-        descriptorLoaded = true;
         iconLoaded = false;
         iconMono = magicIconMono;
+
+        category = magicCategory;
+        tags = magicTags;
+
+        // only descriptor is loaded here
+        descriptorLoaded = true;
     }
 
     public boolean loadSVG() {
@@ -137,6 +148,7 @@ public final class PluginDescriptor {
     /**
      * Load descriptor and images if not already done
      */
+    @Deprecated(forRemoval = true)
     public boolean loadAll() {
         return /*loadChangeLog() &*/ loadSVG();
     }
@@ -314,9 +326,20 @@ public final class PluginDescriptor {
     /**
      * @return the short description.
      */
+    @Deprecated(forRemoval = true)
     @Contract(pure = true)
     public String getShortDescription() {
         return shortDescription;
+    }
+
+    @Contract(pure = true)
+    public String getCategory() {
+        return category;
+    }
+
+    @Contract(pure = true)
+    public String[] getTags() {
+        return tags;
     }
 
     /**
@@ -332,7 +355,7 @@ public final class PluginDescriptor {
      */
     @Contract(pure = true)
     public String getDescription() {
-        return desc;
+        return shortDescription;
     }
 
     /**

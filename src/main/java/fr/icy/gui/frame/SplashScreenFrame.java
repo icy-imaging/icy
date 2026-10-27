@@ -23,6 +23,7 @@ import fr.icy.common.reflect.ClassUtil;
 import fr.icy.io.FileUtil;
 import fr.icy.io.ResourceUtil;
 import fr.icy.model.image.ImageUtil;
+import fr.icy.shared.logging.CustomLevel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,9 +38,7 @@ import java.util.logging.Logger;
  * @author Fabrice de Chaumont
  * @author Stéphane Dallongeville
  * @author Thomas Musset
- * @deprecated Does not work anymore with FlatLaf
  */
-@Deprecated(since = "3.0.0", forRemoval = true)
 public class SplashScreenFrame extends JFrame {
     private static final Logger LOGGER = Logger.getLogger(SplashScreenFrame.class.getName());
 
@@ -51,9 +50,12 @@ public class SplashScreenFrame extends JFrame {
         private BufferedImage image;
 
         public SplashPanel() {
-            image = null;
+            super(new BorderLayout());
+            /*image = null;
 
-            String[] files = FileUtil.getFiles(SPLASH_FOLDER, null, false, false, false);
+            String[] files = FileUtil.getFiles(SplashPanel.class.getResource(SPLASH_FOLDER).getFile(), null, false, false, false);
+
+            LOGGER.log(CustomLevel.DEBUG, "Loading splashscreen image from " + SPLASH_FOLDER + ". Found " + files.length + " files.");
 
             if (files.length > 0)
                 image = ImageUtil.load(files[Random.nextInt(files.length)]);
@@ -67,27 +69,37 @@ public class SplashScreenFrame extends JFrame {
                     }
                 }
                 catch (final Exception e) {
-                    LOGGER.log(Level.WARNING, "Cannot load splashscreen image.", e);
+                    LOGGER.log(CustomLevel.WARNING, "Cannot load splashscreen image.", e);
                 }
             }
 
             if (image != null)
                 setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
             else
-                setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGTH));
+                setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGTH));*/
+
+            setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGTH));
+            JLabel root = new JLabel("Loading extensions, please wait…");
+            add(root, BorderLayout.CENTER);
+
+            /*JProgressBar pb = new JProgressBar(0, 100);
+            pb.setIndeterminate(true);
+            add(pb, BorderLayout.SOUTH);*/
         }
 
-        @Override
+        /*@Override
         public void paint(final Graphics g) {
             super.paint(g);
 
-            if (image != null)
-                g.drawImage(image, 0, 0, this);
-        }
+            //if (image != null)
+                //g.drawImage(image, 0, 0, this);
+        }*/
     }
 
     public SplashScreenFrame() {
         super("Icy");
+
+        setAlwaysOnTop(true);
 
         final SplashPanel splash = new SplashPanel();
 
@@ -97,5 +109,6 @@ public class SplashScreenFrame extends JFrame {
         pack();
 
         setLocationRelativeTo(null);
+
     }
 }

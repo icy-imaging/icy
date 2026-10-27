@@ -26,32 +26,34 @@ import fr.icy.extension.plugin.abstract_.Plugin;
 import fr.icy.extension.plugin.interface_.PluginDaemon;
 import fr.icy.io.Loader;
 import fr.icy.shared.logging.CustomLevel;
+import fr.icy.shared.task.Pipeline;
+import fr.icy.shared.task.Task;
+import fr.icy.shared.task.TaskExecutionException;
+import fr.icy.shared.task.TaskExecutor;
 import fr.icy.system.IcyExceptionHandler;
 import fr.icy.system.SystemUtil;
 import fr.icy.system.UserUtil;
 import fr.icy.system.preferences.PluginPreferences;
+import fr.icy.system.thread.Processor;
 import fr.icy.system.thread.SingleProcessor;
 import fr.icy.system.thread.ThreadUtil;
-import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
-import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.graph.Dependency;
-import org.eclipse.aether.graph.Exclusion;
+import org.eclipse.aether.graph.DependencyFilter;
+import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
-import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
-import org.eclipse.aether.resolution.ArtifactDescriptorResult;
-import org.eclipse.aether.resolution.ArtifactRequest;
-import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.resolution.*;
 import org.eclipse.aether.supplier.RepositorySystemSupplier;
 import org.eclipse.aether.util.artifact.JavaScopes;
-import org.eclipse.aether.util.graph.selector.AndDependencySelector;
-import org.eclipse.aether.util.graph.selector.ExclusionDependencySelector;
-import org.eclipse.aether.util.graph.selector.OptionalDependencySelector;
-import org.eclipse.aether.util.graph.selector.ScopeDependencySelector;
+import org.eclipse.aether.util.filter.DependencyFilterUtils;
+import org.eclipse.aether.util.repository.SimpleArtifactDescriptorPolicy;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NonNull;
@@ -63,10 +65,12 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.jar.JarFile;
-import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
 
 /**
  * Handles the loading, management, and lifecycle of plugins and extensions.
@@ -88,19 +92,22 @@ import java.util.logging.Logger;
 public final class ExtensionLoader {
     private static final Logger LOGGER = Logger.getLogger(ExtensionLoader.class.getName());
 
+    private static final Integer CURRENT_VERSION = 0;
+
     public final static String PLUGINS_PACKAGE = "icy.plugins";
     public final static String OLD_PLUGINS_PACKAGE = "plugins"; // For legacy compatibility
 
-    @Deprecated
-    public final static String KERNEL_PLUGINS_PACKAGE = PLUGINS_PACKAGE + ".kernel.";
-    @Deprecated
-    public final static String OLD_KERNEL_PLUGINS_PACKAGE = OLD_PLUGINS_PACKAGE + ".kernel.";
-
-    public final static String KERNEL_GROUP_ID = "fr.icy.ext";
+    public final static String DEFAULT_GROUP_ID = "fr.icy.extension";
     @Unmodifiable
     public static final List<String> KERNEL_ARTIFACT_IDS = List.of(
             "kernel",
             "icy2-api"
+    );
+    @Unmodifiable
+    private static final List<String> EXCLUSIONS = List.of(
+            //"fr.icy:icy",
+            "org.jetbrains:annotations",
+            "org.jspecify:jspecify"
     );
 
     private static volatile ExtensionLoader instance;
@@ -117,22 +124,16 @@ public final class ExtensionLoader {
     }
 
     private final RepositorySystem repositorySystem;
-    private final DefaultRepositorySystemSession session;
+    private final RepositorySystemSession session;
 
     private final List<RemoteRepository> repositories;
-    //private final RemoteRepository central;
-    //private final RemoteRepository scijava;
-    //private final RemoteRepository ome;
-    //private final RemoteRepository jogamp;
-    //private final RemoteRepository netbeans;
 
     /**
      * class loader
      */
     private URLClassLoader ucl;
 
-    private final Set<URL> jarURLSet;
-    private final Set<String> jarSet;
+    private final Map<Artifact, URL> jarURLList;
 
     private final Map<String, Set<String>> extensionsArtifacts;
     /**
@@ -178,26 +179,20 @@ public final class ExtensionLoader {
 
         initialized = false;
         loading = false;
-        // needReload = false;
-        // logError = true;
 
         repositorySystem = new RepositorySystemSupplier().get();
 
-        session = MavenRepositorySystemUtils.newSession();
-        //session.setOffline(Icy.isNetworkDisabled()); // TODO: enable this when loader is optimized for search offline (very fast) first then online (very slow)
-        session.setOffline(false);
-        final LocalRepository localRepo = new LocalRepository(System.getProperty("user.home") + "/.m2/repository");
-        session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(session, localRepo));
-        session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_IGNORE);
-        session.setUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_NEVER);
-        session.setSystemProperties(System.getProperties());
-        /*session.setDependencySelector(
-                new AndDependencySelector(
-                        new ExclusionDependencySelector(List.of(new Exclusion("org.bioimageanalysis", null, null, null))),
-                        new OptionalDependencySelector(),
-                        new ScopeDependencySelector("provided", "test")
-                )
-        );*/
+        final RepositorySystemSession.SessionBuilder sessionBuilder = repositorySystem.createSessionBuilder();
+        final LocalRepository localRepo = new LocalRepository(Path.of(System.getProperty("user.home") + "/.m2/repository/"));
+        sessionBuilder.withLocalRepositories(localRepo);
+        sessionBuilder.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_IGNORE);
+        sessionBuilder.setUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_NEVER);
+        sessionBuilder.setArtifactDescriptorPolicy(new SimpleArtifactDescriptorPolicy(true, true));
+        sessionBuilder.setSystemProperties(System.getProperties());
+
+        //sessionBuilder.setOffline(Icy.isNetworkDisabled());
+        sessionBuilder.setOffline(true);
+        session = sessionBuilder.build();
 
         final RemoteRepository central = new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build();
         final RemoteRepository central_snapshots = new RemoteRepository.Builder("central.snapshots", "default", "https://central.sonatype.com/repository/maven-snapshots/").build();
@@ -219,8 +214,7 @@ public final class ExtensionLoader {
         //ucl = new URLClassLoader(new URL[0], Thread.currentThread().getContextClassLoader());
         ucl = new URLClassLoader(new URL[0], SystemUtil.getSystemClassLoader());
 
-        jarURLSet = new HashSet<>();
-        jarSet = new HashSet<>();
+        jarURLList = new HashMap<>();
         extensionsArtifacts = new HashMap<>();
         extensions = new HashSet<>();
         plugins = new HashMap<>();
@@ -238,8 +232,8 @@ public final class ExtensionLoader {
     }
 
     private void reloadInternal() {
-        if (LOGGER.isLoggable(Level.INFO))
-            LOGGER.info("Reloading extensions");
+        if (LOGGER.isLoggable(CustomLevel.INFO))
+            LOGGER.info("Loading extensions…");
 
         loading = true;
 
@@ -249,139 +243,255 @@ public final class ExtensionLoader {
         if (processor.hasWaitingTasks())
             return;
 
-        jarURLSet.clear();
-        jarSet.clear();
+        jarURLList.clear();
         extensionsArtifacts.clear();
         extensions.clear();
         plugins.clear();
         actionablePlugins.clear();
         daemonPlugins.clear();
 
-        final Map<String, Artifact> artifacts = getExtensionsArtifacts();
-        if (LOGGER.isLoggable(Level.CONFIG))
-            LOGGER.config("Loading " + artifacts.size() + " artifacts from local repository");
+        //final Map<String, Artifact> artifacts = resolveExtensions();
 
-        // Stop if no Jar found
-        if (jarURLSet.isEmpty()) {
+        new Thread(() -> {
+            final Set<Artifact> coordinates = getExtensionCoordinates();
+            final boolean resolved = resolveExtensions(coordinates);
+
+            // Stop if no Jar found
+            if (jarURLList.isEmpty() || !resolved) {
+                loading = false;
+                changed();
+                return;
+            }
+
+            ucl = new URLClassLoader(jarURLList.values().toArray(new URL[0]), SystemUtil.getSystemClassLoader());
+
+            //for (final Artifact artifact : artifacts.values())
+            for (final Artifact artifact : jarURLList.keySet())
+                loadArtifact(artifact);
+
             loading = false;
+
             changed();
-            return;
-        }
-
-        ucl = new URLClassLoader(jarURLSet.toArray(URL[]::new), SystemUtil.getSystemClassLoader());
-
-        for (final Artifact artifact : artifacts.values()) {
-            if (LOGGER.isLoggable(Level.CONFIG))
-                LOGGER.config("Found artifact " + artifact);
-            loadArtifact(artifact);
-        }
-
-        loading = false;
-
-        changed();
+        }).start();
     }
 
-    @SuppressWarnings("UrlHashCode")
-    private boolean resolveArtifact(final @NonNull String groupId, final @NonNull String artifactId, final @NonNull String version, final @NonNull LinkedHashMap<String, Artifact> artifacts, final @NonNull List<RemoteRepository> repositories) {
-        if (LOGGER.isLoggable(CustomLevel.DEBUG))
-            LOGGER.log(CustomLevel.DEBUG, "Resolving artifact " + groupId + ":" + artifactId + ":jar:" + version);
+    @ApiStatus.Experimental
+    private synchronized Set<Artifact> getExtensionCoordinates() {
+        final File extensionsFile = new File(UserUtil.getIcyHomeDirectory(), "extensions.yaml");
+        if (!extensionsFile.exists() || !extensionsFile.isFile() || !extensionsFile.canRead()) {
+            LOGGER.log(CustomLevel.ERROR, "Cannot find or read extensions config file: " + extensionsFile.getAbsolutePath());
+            return Collections.emptySet();
+        }
+
+        final Map<String, Object> content;
+        try (final FileInputStream is = new FileInputStream(extensionsFile)) {
+            final Yaml yaml = new Yaml();
+            final Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+            content = yaml.loadAs(reader, Map.class);
+            reader.close();
+        }
+        catch (final Throwable t) {
+            LOGGER.log(CustomLevel.ERROR, "Failed to read extensions file", t);
+            return Collections.emptySet();
+        }
+
+        if (content.isEmpty()) {
+            LOGGER.log(CustomLevel.ERROR, "Extensions config file is empty");
+            return Collections.emptySet();
+        }
+
+        final Integer fileVersion = (Integer) content.getOrDefault("version", -1);
+        if (fileVersion < 0) {
+            LOGGER.log(CustomLevel.ERROR, "Extensions config file is invalid (no version found)");
+            return Collections.emptySet();
+        }
+
+        if (fileVersion > CURRENT_VERSION) {
+            LOGGER.log(CustomLevel.ERROR, "Extensions config file is invalid (unsupported version)");
+            return Collections.emptySet();
+        }
+
+        if (fileVersion < CURRENT_VERSION) {
+            upgradeYaml(content);
+        }
+
+        @SuppressWarnings("unchecked")
+        final SortedMap<Integer, Map<String, Object>> extensions = new TreeMap<>((Map<Integer, Map<String, Object>>) content.getOrDefault("extensions", new TreeMap<>()));
+        if (extensions.isEmpty()) {
+            LOGGER.log(CustomLevel.ERROR, "Extensions config file is invalid (no extensions found)");
+            return Collections.emptySet();
+        }
+
+        final Set<Artifact> coordinates = new LinkedHashSet<>();
+        for (final Map.Entry<Integer, Map<String, Object>> entry : extensions.entrySet()) {
+            final String groupId = entry.getValue().get("groupId").toString();
+            final String artifactId = entry.getValue().get("artifactId").toString();
+            final String classifier = entry.getValue().getOrDefault("classifier", "").toString();
+            final String version = entry.getValue().get("version").toString();
+            final Boolean enabled = (Boolean) entry.getValue().getOrDefault("enabled", Boolean.TRUE);
+
+            if (!enabled) {
+                if (LOGGER.isLoggable(CustomLevel.INFO))
+                    LOGGER.log(CustomLevel.INFO, "Extension " + groupId + ":" + artifactId + ":" + version + " is disabled.");
+                continue;
+            }
+
+            coordinates.add(new DefaultArtifact(groupId, artifactId, classifier.isBlank() ? null : classifier, "jar", version));
+        }
+
+        return Collections.unmodifiableSet(coordinates);
+    }
+
+    @ApiStatus.Experimental
+    private synchronized boolean resolveExtensions(final @NonNull Set<Artifact> coordinates) {
+        final List<Dependency> roots = coordinates.stream().map(coordinate -> new Dependency(coordinate, JavaScopes.RUNTIME)).toList();
+
+        final CollectRequest request = new CollectRequest(roots, null, repositories);
+
+        final DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
+
         try {
-            if (artifacts.containsKey(groupId + ":" + artifactId + ":jar:" + version)) {
-                if (LOGGER.isLoggable(Level.CONFIG))
-                    LOGGER.config("duplicate artifact: " + groupId + ":" + artifactId + ":jar:" + version);
-                return true;
-            }
+            final DependencyResult result = repositorySystem.resolveDependencies(session, new DependencyRequest(request, filter));
 
-            // Resolve artifact
-            final Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":jar:" + version);
-            final ArtifactRequest artifactRequest = new ArtifactRequest()
-                    .setArtifact(artifact);
-            //.setRepositories(this.repositories);
+            collect(result.getRoot(), new HashSet<>());
 
-            artifactRequest.setRepositories(this.repositories);
-
-            if (!repositories.isEmpty()) {
-                for (final RemoteRepository repository : repositories) {
-                    artifactRequest.addRepository(repository);
-                }
-            }
-
-            final ArtifactResult artifactResult = repositorySystem.resolveArtifact(session, artifactRequest);
-
-            if (!artifactResult.isResolved() || artifactResult.getArtifact() == null)
-                return false;
-            if (artifacts.containsKey(artifactResult.getArtifact().toString()))
-                return true;
-
-            // Collect dependencies
-            final ArtifactDescriptorRequest artifactDescriptorRequest = new ArtifactDescriptorRequest()
-                    .setArtifact(artifactResult.getArtifact());
-            //.setRepositories(this.repositories);
-
-            artifactDescriptorRequest.setRepositories(this.repositories);
-
-            if (!repositories.isEmpty()) {
-                for (final RemoteRepository repository : repositories) {
-                    artifactDescriptorRequest.addRepository(repository);
-                }
-            }
-
-            final ArtifactDescriptorResult artifactDescriptorResult = repositorySystem.readArtifactDescriptor(session, artifactDescriptorRequest);
-            for (final Dependency dependency : artifactDescriptorResult.getDependencies()) {
-                //IcyLogger.debug(this.getClass(), "Resolving dependency: " + dependency.getArtifact().getGroupId() + ":" + dependency.getArtifact().getArtifactId() + ":" + dependency.getScope());
-                if (!dependency.getScope().equalsIgnoreCase(JavaScopes.COMPILE) && !dependency.getScope().equalsIgnoreCase(JavaScopes.RUNTIME))
-                    continue;
-                if (dependency.isOptional())
-                    continue;
-                final Artifact dependencyArtifact = dependency.getArtifact();
-                if (!dependencyArtifact.getExtension().endsWith("jar"))
-                    continue;
-                //IcyLogger.debug(this.getClass(), "Dependency present: " + artifacts.contains(dependencyArtifact.getGroupId() + ":" + dependencyArtifact.getArtifactId() + ":" + dependencyArtifact.getVersion()));
-                if (artifacts.containsKey(dependencyArtifact.toString()))
-                    continue;
-
-                final boolean dependencyResolved = resolveArtifact(dependencyArtifact.getGroupId(), dependencyArtifact.getArtifactId(), dependencyArtifact.getVersion(), artifacts, artifactDescriptorResult.getRepositories());
-                if (!dependencyResolved)
-                    return false;
-            }
-
-            final Artifact a = artifactResult.getArtifact();
-            artifacts.put(groupId + ":" + artifactId + ":jar:" + version, a);
-            jarURLSet.add(a.getFile().toURI().toURL());
             return true;
         }
-        catch (final Error | Exception e) {
-            if (LOGGER.isLoggable(Level.SEVERE))
-                LOGGER.log(Level.SEVERE, "Failed to resolve artifact: " + groupId + ":" + artifactId + ":" + version, e);
+        catch (final Throwable t) {
+            LOGGER.log(CustomLevel.ERROR, "Failed to resolve extensions.", t);
             return false;
         }
     }
 
-    private boolean resolveArtifact(final @NonNull String groupId, final @NonNull String artifactId, final @NonNull String version, final @NonNull LinkedHashMap<String, Artifact> artifacts) {
-        return resolveArtifact(groupId, artifactId, version, artifacts, Collections.emptyList());
+    @ApiStatus.Experimental
+    private void collect(final @NonNull DependencyNode node, final Set<String> seen) throws Exception {
+        final Artifact artifact = node.getArtifact();
+        if (artifact == null) { // virtual root node when resolving several coordinates at once
+            LOGGER.log(CustomLevel.DEBUG, "Skipping virtual root node: " + node);
+            for (final DependencyNode child : node.getChildren()) {
+                collect(child, seen);
+            }
+            return;
+        }
+        // dedupe (diamonds in the graph) and guard against cycles
+        final String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion();
+        if (seen.add(key) && artifact.getPath() != null) {
+            LOGGER.log(CustomLevel.DEBUG, "Add node to URL map: " + node);
+            jarURLList.put(artifact, artifact.getPath().toUri().toURL());
+            //jars.put(key, artifact.getFile().toURI().toURL());
+            for (final DependencyNode child : node.getChildren()) {
+                collect(child, seen);
+            }
+        }
     }
 
-    private boolean loadArtifact(final @NonNull Artifact artifact) {
-        if (LOGGER.isLoggable(CustomLevel.DEBUG))
-            LOGGER.log(CustomLevel.DEBUG, "Loading artifact " + artifact);
+    @Deprecated
+    private boolean resolveArtifact(final @NonNull String groupId, final @NonNull String artifactId, final @Nullable String classifier, final @NonNull String version, final @NonNull LinkedHashMap<String, Artifact> artifacts, final @NonNull List<RemoteRepository> repositories) {
+        final String dashClassifier = classifier == null || classifier.isBlank() ? "" : "-" + classifier;
+        if (artifacts.containsKey(groupId + ":" + artifactId + dashClassifier + ":jar:" + version))
+            return true;
 
-        final File jar = artifact.getFile();
-        if (jar == null || !jar.exists() || !jar.isFile()) {
-            if (LOGGER.isLoggable(Level.SEVERE))
-                LOGGER.severe("Jar not found for artifact: " + artifact);
+        // Resolve artifact
+        final Artifact artifact = new DefaultArtifact(groupId, artifactId, classifier, "jar", version);
+        final ArtifactRequest artifactRequest = new ArtifactRequest()
+                .setArtifact(artifact)
+                .setRepositories(this.repositories);
+
+        if (!repositories.isEmpty()) {
+            for (final RemoteRepository repository : repositories) {
+                artifactRequest.addRepository(repository);
+            }
+        }
+
+        final ArtifactResult artifactResult;
+        try {
+            artifactResult = repositorySystem.resolveArtifact(session, artifactRequest);
+        }
+        catch (final Throwable t) {
+            LOGGER.log(CustomLevel.ERROR, "Failed to resolve artifact: " + groupId + ":" + artifactId + dashClassifier + ":jar:" + version + ".", t);
+            return false;
+        }
+
+        if (!artifactResult.isResolved() || artifactResult.getArtifact() == null)
+            return false;
+        if (artifacts.containsKey(artifactResult.getArtifact().toString()))
+            return true;
+
+        // Collect dependencies
+        final ArtifactDescriptorRequest artifactDescriptorRequest = new ArtifactDescriptorRequest()
+                .setArtifact(artifactResult.getArtifact())
+                .setRepositories(this.repositories);
+
+        if (!repositories.isEmpty()) {
+            for (final RemoteRepository repository : repositories) {
+                artifactDescriptorRequest.addRepository(repository);
+            }
+        }
+
+        final ArtifactDescriptorResult artifactDescriptorResult;
+        try {
+            artifactDescriptorResult = repositorySystem.readArtifactDescriptor(session, artifactDescriptorRequest);
+        }
+        catch (final Throwable t) {
+            LOGGER.log(CustomLevel.ERROR, "Failed to read artifact descriptor: " + groupId + ":" + artifactId + dashClassifier + ":jar:" + version + ".", t);
+            return false;
+        }
+
+        for (final Dependency dependency : artifactDescriptorResult.getDependencies()) {
+            if (!dependency.getScope().equalsIgnoreCase(JavaScopes.COMPILE) && !dependency.getScope().equalsIgnoreCase(JavaScopes.RUNTIME))
+                continue;
+            if (dependency.isOptional())
+                continue;
+            final Artifact dependencyArtifact = dependency.getArtifact();
+            if (!dependencyArtifact.getExtension().endsWith("jar"))
+                continue;
+            final String dependencyDashClassifier = dependencyArtifact.getClassifier() == null || dependencyArtifact.getClassifier().isBlank() ? "" : "-" + dependencyArtifact.getClassifier();
+            if (artifacts.containsKey(dependencyArtifact.getGroupId() + ":" + dependencyArtifact.getArtifactId() + dependencyDashClassifier + ":jar:" + dependencyArtifact.getVersion()))
+                continue;
+
+            if (EXCLUSIONS.contains(dependencyArtifact.getGroupId() + ":" + dependencyArtifact.getArtifactId() + dependencyDashClassifier))
+                continue;
+
+            final boolean dependencyResolved = resolveArtifact(dependencyArtifact.getGroupId(), dependencyArtifact.getArtifactId(), dependencyArtifact.getClassifier(), dependencyArtifact.getVersion(), artifacts, artifactDescriptorResult.getRepositories());
+            if (!dependencyResolved)
+                return false;
+        }
+
+        final Artifact a = artifactResult.getArtifact();
+        artifacts.put(groupId + ":" + artifactId + dashClassifier + ":jar:" + version, a);
+        try {
+            final URL url = a.getPath().toUri().toURL();
+            if (!jarURLList.containsValue(url))
+                jarURLList.put(a, url);
+        }
+        catch (final Throwable t) {
+            LOGGER.log(CustomLevel.ERROR, "Failed to add artifact to URL set: " + groupId + ":" + artifactId + ":" + version + ".", t);
+            return false;
+        }
+        return true;
+    }
+
+    @Deprecated
+    private boolean resolveArtifact(final @NonNull String groupId, final @NonNull String artifactId, final @Nullable String classifier, final @NonNull String version, final @NonNull LinkedHashMap<String, Artifact> artifacts) {
+        return resolveArtifact(groupId, artifactId, classifier, version, artifacts, Collections.emptyList());
+    }
+
+    @ApiStatus.Experimental
+    private synchronized boolean loadArtifact(final @NonNull Artifact artifact) {
+        if (artifact.getPath() == null) {
+            LOGGER.log(CustomLevel.ERROR, "Artifact doesn't have a path: " + artifact);
+            return false;
+        }
+
+        final File jar = artifact.getPath().toFile();
+        if (!jar.exists() || !jar.isFile()) {
+            LOGGER.log(CustomLevel.ERROR, "Jar not found for artifact: " + artifact);
             return false;
         }
 
         try {
-            /*ucl = new URLClassLoader(
-                    Stream.concat(
-                            Arrays.stream(ucl.getURLs()),
-                            Stream.of(jar.toURI().toURL())
-                    ).toArray(URL[]::new),
-                    ucl.getParent()
-            );*/
-
-            if (isIcyExtension(artifact)) {
+            final Map<String, Object> data = getExtensionData(artifact);
+            if (!data.isEmpty()) {
                 final Map<String, PluginDescriptor> pds = new HashMap<>();
                 final Map<String, PluginDescriptor> dpds = new HashMap<>();
                 final Map<String, PluginDescriptor> apds = new HashMap<>();
@@ -389,11 +499,8 @@ public final class ExtensionLoader {
                 final ExtensionDescriptor ed = new ExtensionDescriptor(artifact);
                 if (extensionsArtifacts.containsKey(ed.getGroupId())) {
                     final Set<String> artifactIds = extensionsArtifacts.get(ed.getGroupId());
-                    if (artifactIds.contains(ed.getArtifactId())) {
-                        if (LOGGER.isLoggable(Level.CONFIG))
-                            LOGGER.config("Extension " + ed.getName() + " already loaded, skipping it");
+                    if (artifactIds.contains(ed.getArtifactId()))
                         return true;
-                    }
                 }
 
                 final Set<String> classes = Set.copyOf(ClassUtil.findClassNamesInJAR(jar.getAbsolutePath()));
@@ -401,7 +508,6 @@ public final class ExtensionLoader {
                     if (className.startsWith(PLUGINS_PACKAGE) || className.startsWith(OLD_PLUGINS_PACKAGE)) {
                         try {
                             final Class<? extends Plugin> pluginClass = ucl.loadClass(className).asSubclass(Plugin.class);
-
                             final PluginDescriptor pd = new PluginDescriptor(pluginClass, ed);
                             if (!pd.isAbstract() && !pd.isInterface()) {
                                 ed.addPlugin(pd);
@@ -412,8 +518,8 @@ public final class ExtensionLoader {
                                     apds.put(className, pd);
 
                                 if (className.startsWith(OLD_PLUGINS_PACKAGE) && !ed.isKernel())
-                                    if (LOGGER.isLoggable(Level.WARNING))
-                                        LOGGER.warning("Old plugins package detected for " + ClassUtil.getSimpleClassName(className));
+                                    if (LOGGER.isLoggable(CustomLevel.WARNING))
+                                        LOGGER.log(CustomLevel.WARNING, "Old plugins package detected for " + className);
                             }
                         }
                         catch (final Throwable t) {
@@ -429,30 +535,41 @@ public final class ExtensionLoader {
             }
         }
         catch (final Throwable t) {
-            if (LOGGER.isLoggable(Level.SEVERE))
-                LOGGER.log(Level.SEVERE, "Failed to load artifact: " + artifact, t);
+            LOGGER.log(CustomLevel.ERROR, "Failed to load artifact: " + artifact, t);
             return false;
         }
 
         return true;
     }
 
-    private boolean isIcyExtension(final @NonNull Artifact artifact) {
-        final File jar = artifact.getFile();
-        if (jar == null || !jar.exists() || !jar.isFile()) {
-            // Shouldn't happening, but in case of…
-            return false;
+    private Map<String, Object> getExtensionData(final @NonNull Artifact artifact) {
+        final File jar = artifact.getPath().toFile();
+        if (!jar.exists() || !jar.isFile()) {
+            // Shouldn't happen, but just in case…
+            return Collections.emptyMap();
         }
 
-        final boolean result;
+        Map<String, Object> content;
+        final ZipEntry ze;
         try (final JarFile jarFile = new JarFile(jar)) {
-            result = jarFile.getEntry("META-INF/extension.yaml") != null;
+            ze = jarFile.getEntry("META-INF/extension.yaml");
+            if (ze == null)
+                return Collections.emptyMap();
+
+
+            try (final InputStream is = jarFile.getInputStream(ze)) {
+                final Yaml yaml = new Yaml();
+                content = yaml.loadAs(is, Map.class);
+            }
+            catch (final Throwable t) {
+                content = Collections.emptyMap();
+            }
         }
-        catch (final IOException e) {
-            return false;
+        catch (final Throwable t) {
+            content = Collections.emptyMap();
         }
 
-        return result;
+        return content;
     }
 
     /**
@@ -513,51 +630,77 @@ public final class ExtensionLoader {
         }
     }
 
-    private @NonNull @Unmodifiable Map<String, Artifact> getExtensionsArtifacts() {
-        final File indexFile = new File(UserUtil.getIcyHomeDirectory(), "extensions.yml");
-        if (!indexFile.exists() || !indexFile.isFile() || !indexFile.canRead()) {
-            if (LOGGER.isLoggable(Level.SEVERE))
-                LOGGER.severe("Cannot find or read extensions config file: " + indexFile.getAbsolutePath());
+    @Deprecated
+    private @NonNull @Unmodifiable Map<String, Artifact> resolveExtensions() {
+        final File extensionsFile = new File(UserUtil.getIcyHomeDirectory(), "extensions.yaml");
+        if (!extensionsFile.exists() || !extensionsFile.isFile() || !extensionsFile.canRead()) {
+            LOGGER.log(CustomLevel.ERROR, "Cannot find or read extensions config file: " + extensionsFile.getAbsolutePath());
             return Collections.emptyMap();
         }
 
-        try (final FileInputStream is = new FileInputStream(indexFile)) {
-            //final byte[] readRawData = is.readAllBytes();
-            //final byte[] readData = Base64.getDecoder().decode(readRawData);
-            //final StringBuilder sb = new StringBuilder();
-            //for (final byte readByte : readData)
-            //sb.append((char) readByte);
-
+        final Map<String, Object> content;
+        try (final FileInputStream is = new FileInputStream(extensionsFile)) {
             final Yaml yaml = new Yaml();
-            //final List<Map<String, Object>> extensionIndex = yaml.loadAs(sb.toString(), List.class);
             final Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
-            final List<Map<String, Object>> extensionIndex = yaml.loadAs(reader, List.class);
+            content = yaml.loadAs(reader, Map.class);
             reader.close();
-            if (extensionIndex.isEmpty()) {
-                if (LOGGER.isLoggable(Level.SEVERE))
-                    LOGGER.severe("Extensions config file has no extensions registered");
-                return Collections.emptyMap();
-            }
-
-            final LinkedHashMap<String, Artifact> artifacts = new LinkedHashMap<>();
-            for (final Map<String, Object> item : extensionIndex) {
-                final String groupId = item.get("groupId").toString();
-                final String artifactId = item.get("artifactId").toString();
-                final String version = item.get("version").toString();
-
-                final boolean resolved = resolveArtifact(groupId, artifactId, version, artifacts);
-                if (!resolved)
-                    if (LOGGER.isLoggable(Level.SEVERE))
-                        LOGGER.severe("Unable to resolve artifact " + groupId + ":" + artifactId + ":" + version);
-            }
-
-            return Collections.unmodifiableMap(artifacts);
         }
         catch (final Throwable t) {
-            if (LOGGER.isLoggable(Level.SEVERE))
-                LOGGER.log(Level.SEVERE, "Unable to read extensions config file", t);
+            LOGGER.log(CustomLevel.ERROR, "Failed to read extensions file", t);
             return Collections.emptyMap();
         }
+
+        if (content.isEmpty()) {
+            LOGGER.log(CustomLevel.ERROR, "Extensions config file is empty");
+            return Collections.emptyMap();
+        }
+
+        final Integer fileVersion = (Integer) content.getOrDefault("version", -1);
+        if (fileVersion < 0) {
+            LOGGER.log(CustomLevel.ERROR, "Extensions config file is invalid (no version found)");
+            return Collections.emptyMap();
+        }
+
+        if (fileVersion > CURRENT_VERSION) {
+            LOGGER.log(CustomLevel.ERROR, "Extensions config file is invalid (unsupported version)");
+            return Collections.emptyMap();
+        }
+
+        if (fileVersion < CURRENT_VERSION) {
+            upgradeYaml(content);
+        }
+
+        @SuppressWarnings("unchecked")
+        final SortedMap<Integer, Map<String, Object>> extensions = new TreeMap<>((Map<Integer, Map<String, Object>>) content.getOrDefault("extensions", new TreeMap<>()));
+        if (extensions.isEmpty()) {
+            LOGGER.log(CustomLevel.ERROR, "Extensions config file is invalid (no extensions found)");
+            return Collections.emptyMap();
+        }
+
+        final LinkedHashMap<String, Artifact> artifacts = new LinkedHashMap<>();
+        for (final Map.Entry<Integer, Map<String, Object>> entry : extensions.entrySet()) {
+            final String groupId = entry.getValue().get("groupId").toString();
+            final String artifactId = entry.getValue().get("artifactId").toString();
+            final String classifier = entry.getValue().getOrDefault("classifier", "").toString();
+            final String version = entry.getValue().get("version").toString();
+            final Boolean enabled = (Boolean) entry.getValue().getOrDefault("enabled", Boolean.TRUE);
+
+            if (!enabled) {
+                if (LOGGER.isLoggable(CustomLevel.INFO))
+                    LOGGER.log(CustomLevel.INFO, "Extension " + groupId + ":" + artifactId + ":" + version + " is disabled.");
+                continue;
+            }
+
+            final boolean resolved = resolveArtifact(groupId, artifactId, classifier.isBlank() ? null : classifier, version, artifacts);
+            if (!resolved)
+                LOGGER.log(CustomLevel.ERROR, "Unable to resolve artifact " + groupId + ":" + artifactId + (classifier.isBlank() ? "" : ":" + classifier) + ":" + version);
+        }
+
+        return Collections.unmodifiableMap(artifacts);
+    }
+
+    private void upgradeYaml(final Map<String, Object> content) {
+        // TODO: implement upgrade function when new version released
     }
 
     /* === Utilities === */
@@ -571,10 +714,47 @@ public final class ExtensionLoader {
         }
     }
 
+    public static class ReloadTask extends Task {
+        protected ReloadTask() {
+            super(1L, "Reload extension task");
+        }
+
+        @Override
+        public void execute() throws Exception {
+            LOGGER.log(CustomLevel.DEBUG, "Reloading extensions (internal)…");
+            getInstance().reloadInternal();
+        }
+    }
+
     /**
      * Reload the list of installed plugins (asynchronous version).
      */
     public static synchronized void reloadAsync() {
+        /*LOGGER.log(CustomLevel.DEBUG, "Creating pipeline");
+        final TaskExecutor executor = TaskExecutor.getInstance();
+        final Pipeline pipeline = new Pipeline("Extension reload");
+        LOGGER.log(CustomLevel.DEBUG, "Adding task");
+        pipeline.addTask(new ReloadTask());
+
+        new Thread(() -> {
+            try {
+                LOGGER.log(CustomLevel.DEBUG, "Executing pipeline");
+                executor.execute(pipeline);
+            }
+            catch (final TaskExecutionException e) {
+                e.getFailedTasks().forEach(task ->
+                        task.getError().ifPresent(err -> {
+                            if (err instanceof InterruptedException) {
+                                if (LOGGER.isLoggable(CustomLevel.WARNING))
+                                    LOGGER.log(CustomLevel.WARNING, "Extension loading interrupted");
+                            }
+                            else
+                                LOGGER.log(CustomLevel.ERROR, "Failed to load extensions", err);
+                        })
+                );
+            }
+        }).start();*/
+
         getInstance().processor.submit(getInstance().reloader);
     }
 

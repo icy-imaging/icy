@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -16,20 +16,16 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package fr.icy.extension.plugin.interface_;
+package fr.icy.extension.plugin.annotation_;
 
-import javax.script.ScriptEngineFactory;
+import org.jetbrains.annotations.ApiStatus;
 
-/**
- * Plugin interface to provide scripting language factory (see {@link ScriptEngineFactory})
- *
- * @author Stéphane Dallongeville
- * @author Thomas Musset
- */
-@Deprecated(since = "3.0.0", forRemoval = true)
-public interface PluginScriptFactory {
-    /**
-     * @return the {@link ScriptEngineFactory}
-     */
-    ScriptEngineFactory getScriptEngineFactory();
+import java.lang.annotation.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Inherited
+@ApiStatus.Experimental
+public @interface IcyPluginTags {
+    String[] value();
 }

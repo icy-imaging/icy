@@ -96,24 +96,9 @@
         <license.licenseName>GNU LGPLv3</license.licenseName>
         <license.copyrightOwners>Institut Pasteur</license.copyrightOwners>
 
-        <maven-resolver.version>1.9.27</maven-resolver.version>
-        <maven-resolver-impl.version>${maven-resolver.version}</maven-resolver-impl.version>
-        <maven-resolver-supplier.version>${maven-resolver.version}</maven-resolver-supplier.version>
-        <maven-resolver-connector-basic.version>${maven-resolver.version}</maven-resolver-connector-basic.version>
-        <maven-resolver-transport-http.version>${maven-resolver.version}</maven-resolver-transport-http.version>
-        <org.apache.maven.resolver.maven-resolver-impl.version>${maven-resolver-impl.version}</org.apache.maven.resolver.maven-resolver-impl.version>
-        <org.apache.maven.resolver.maven-resolver-supplier.version>${maven-resolver.version}</org.apache.maven.resolver.maven-resolver-supplier.version>
-        <org.apache.maven.resolver.maven-resolver-connector-basic.version>${maven-resolver.version}</org.apache.maven.resolver.maven-resolver-connector-basic.version>
-        <org.apache.maven.resolver.maven-resolver-transport-http.version>${maven-resolver.version}</org.apache.maven.resolver.maven-resolver-transport-http.version>
+        <maven-resolver.version>2.0.24</maven-resolver.version>
 
-        <maven-model-builder.version>3.9.16</maven-model-builder.version>
-        <org.apache.maven.maven-model-builder.version>${maven-model-builder.version}</org.apache.maven.maven-model-builder.version>
-
-        <plexus-utils.version>3.6.1</plexus-utils.version>
-        <org.codehaus.plexus.plexus-utils.version>${plexus-utils.version}</org.codehaus.plexus.plexus-utils.version>
-
-        <plexus-interpolation.version>1.29</plexus-interpolation.version>
-        <org.codehaus.plexusplexus-interpolation.version>${plexus-interpolation.version}</org.codehaus.plexusplexus-interpolation.version>
+        <maven-api-xml.version>4.0.0-rc-7</maven-api-xml.version>
     </properties>
 
     <build>
@@ -221,6 +206,19 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${org.jetbrains.annotations.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>${org.jspecify.jspecify.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Apache Batik -->
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
@@ -522,39 +520,14 @@
         <!-- Maven Resolver -->
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-impl</artifactId>
-            <version>${org.apache.maven.resolver.maven-resolver-impl.version}</version>
+            <artifactId>maven-resolver-supplier-mvn4</artifactId>
+            <version>${maven-resolver.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-supplier</artifactId>
-            <version>${org.apache.maven.resolver.maven-resolver-supplier.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-connector-basic</artifactId>
-            <version>${org.apache.maven.resolver.maven-resolver-connector-basic.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-transport-http</artifactId>
-            <version>${org.apache.maven.resolver.maven-resolver-transport-http.version}</version>
-        </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model-builder</artifactId>
-            <version>${org.apache.maven.maven-model-builder.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>${org.codehaus.plexus.plexus-utils.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-interpolation</artifactId>
-            <version>${org.codehaus.plexusplexus-interpolation.version}</version>
-        </dependency>
+            <artifactId>maven-api-xml</artifactId>
+            <version>${maven-api-xml.version}</version>
+        </dependency>-->
 
         <!-- SnakeYAML -->
         <dependency>

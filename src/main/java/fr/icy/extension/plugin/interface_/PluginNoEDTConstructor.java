@@ -28,5 +28,6 @@ package fr.icy.extension.plugin.interface_;
  * @author Stéphane Dallongeville
  * @author Thomas Musset
  */
+@Deprecated(forRemoval = true)
 public interface PluginNoEDTConstructor {
 }

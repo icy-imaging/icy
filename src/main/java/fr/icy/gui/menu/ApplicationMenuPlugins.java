@@ -81,7 +81,7 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
             addSeparator();
 
             if (plugins.isEmpty()) {
-                final JMenuItem noPluginsMenuItem = new JMenuItem("No plugin installed");
+                final JMenuItem noPluginsMenuItem = new JMenuItem("No extensions found");
                 noPluginsMenuItem.setEnabled(false);
                 noPluginsMenuItem.setFocusable(false);
                 add(noPluginsMenuItem);
@@ -89,13 +89,12 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
                 return;
             }
 
-            final Map<Character, List<PluginDescriptor>> characterListMap = new TreeMap<>();
+            final Map<String, List<PluginDescriptor>> categoryListMap = new TreeMap<>();
             for (final PluginDescriptor descriptor : plugins) {
-                final String className = descriptor.getName();
-                final Character firstChar = className.charAt(0);
+                final String category = descriptor.getCategory();
 
-                if (characterListMap.containsKey(firstChar)) {
-                    final List<PluginDescriptor> pluginList = characterListMap.get(firstChar);
+                if (categoryListMap.containsKey(category)) {
+                    final List<PluginDescriptor> pluginList = categoryListMap.get(category);
                     if (!pluginList.contains(descriptor))
                         pluginList.add(descriptor);
                 }
@@ -103,19 +102,19 @@ public final class ApplicationMenuPlugins extends AbstractApplicationMenu {
                     final List<PluginDescriptor> pluginList = new ArrayList<>();
                     pluginList.add(descriptor);
 
-                    characterListMap.put(firstChar, pluginList);
+                    categoryListMap.put(category, pluginList);
                 }
             }
 
-            for (final Map.Entry<Character, List<PluginDescriptor>> characterListEntry : characterListMap.entrySet()) {
-                final IcyMenu menuFirstChar = new IcyMenu(characterListEntry.getKey().toString(), IcySVG.FOLDER);
-                for (final PluginDescriptor plugin : characterListEntry.getValue()) {
+            for (final Map.Entry<String, List<PluginDescriptor>> categoryListEntry : categoryListMap.entrySet()) {
+                final IcyMenu menuCategory = new IcyMenu(categoryListEntry.getKey(), IcySVG.FOLDER);
+                for (final PluginDescriptor plugin : categoryListEntry.getValue()) {
                     final IcyPluginMenuItem itemPlugin = new IcyPluginMenuItem(plugin);
-                    if (!plugin.getShortDescription().isBlank())
-                        itemPlugin.setToolTipText("<html>" + plugin.getShortDescription() + "</html>");
-                    menuFirstChar.add(itemPlugin);
+                    if (!plugin.getDescription().isBlank())
+                        itemPlugin.setToolTipText("<html>" + plugin.getDescription() + "</html>");
+                    menuCategory.add(itemPlugin);
                 }
-                add(menuFirstChar);
+                add(menuCategory);
             }
 
             setEnabled(true);

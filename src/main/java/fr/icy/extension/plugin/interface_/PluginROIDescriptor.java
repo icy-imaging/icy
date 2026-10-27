@@ -53,18 +53,20 @@ public interface PluginROIDescriptor extends PluginNoEDTConstructor {
     List<ROIDescriptor<?>> getDescriptors();
 
     /**
-     * Computes the descriptor(s) (declared in the {@link #getDescriptors()}) on the specified ROI.<br>
-     * Depending on the type of descriptor and ROI, this method can return <code>null</code> for some of the
-     * descriptor results.<br>
-     * Note that using this method may be faster than calling the <code>compute</code> method for
-     * each descriptor separately as some descriptor can group their calculation.
+     * Computes the descriptor(s) (declared in the {@link #getDescriptors()}) on the specified ROI.
+     * <p>
+     * Depending on the type of descriptor and ROI, this method can return {@code null} for some of the
+     * descriptor results.
+     * <p>
+     * Note that using this method may be faster than calling the {@link #compute(ROI, Sequence)} method for
+     * each descriptor separately as some descriptors can group their calculation.
      *
      * @param roi      the ROI on which the descriptor(s) should be computed
-     * @param sequence an optional sequence where the pixel informations can be retrieved
-     * @return a map where each entry associates a descriptor to its value (which can be <code>null</code> if the
+     * @param sequence an optional sequence where the pixel information can be retrieved
+     * @return a map where each entry associates a descriptor to its value (which can be {@code null} if the
      * descriptor cannot be computed).
-     * @throws UnsupportedOperationException if the type of the given ROI is not supported by this descriptor or if <code>sequence</code> is
-     *                                       <code>null</code> while the calculation requires it.
+     * @throws UnsupportedOperationException if the type of the given ROI is not supported by this descriptor or if {@link Sequence} is
+     *                                       {@code null} while the calculation requires it.
      * @throws InterruptedException          if the thread was interrupted during the computation of the descriptor
      */
     Map<ROIDescriptor<?>, Object> compute(ROI roi, Sequence sequence) throws UnsupportedOperationException, InterruptedException;

@@ -23,9 +23,11 @@ import fr.icy.model.roi.ROI;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Plugin ROI interface.<br>
- * Used to define a plugin representing a specific ROI.<br>
- * The plugin will appear in the ROI list.<br>
+ * Plugin ROI interface.
+ * <p>
+ * Used to define a plugin representing a specific ROI.
+ * <p>
+ * The plugin will appear in the ROI list.
  *
  * @author Fabrice de Chaumont
  * @author Stéphane Dallongeville
@@ -40,7 +42,8 @@ public interface PluginROI extends PluginNoEDTConstructor {
     @NonNull String getROIClassName();
 
     /**
-     * Create and return a new ROI for <i>interactive</i> mode.<br>
+     * Create and return a new ROI for <i>interactive</i> mode.
+     * <p>
      * The first point will be created in a <i>selected</i> state so will support direct drag
      * operation.
      *
@@ -50,7 +53,8 @@ public interface PluginROI extends PluginNoEDTConstructor {
     ROI createROI(Point5D pt);
 
     /**
-     * Create and return a new ROI.<br>
+     * Create and return a new ROI.
+     * <p>
      * Default constructor.
      *
      * @return the newly created ROI

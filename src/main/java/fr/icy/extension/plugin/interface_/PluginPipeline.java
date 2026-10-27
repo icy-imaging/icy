@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -16,14 +16,12 @@
  * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package fr.icy.system;
+package fr.icy.extension.plugin.interface_;
 
-public final class MMJUtil {
-    private MMJUtil() {
-        //
-    }
+import fr.icy.shared.task.Pipeline;
+import org.jetbrains.annotations.ApiStatus;
 
-    public static int getMMJVersion() {
-        return 17;
-    }
+@ApiStatus.Experimental
+public interface PluginPipeline extends Plugin {
+    Pipeline pipeline();
 }
