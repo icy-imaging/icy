@@ -190,8 +190,8 @@ public final class ExtensionLoader {
         sessionBuilder.setArtifactDescriptorPolicy(new SimpleArtifactDescriptorPolicy(true, true));
         sessionBuilder.setSystemProperties(System.getProperties());
 
-        //sessionBuilder.setOffline(Icy.isNetworkDisabled());
-        sessionBuilder.setOffline(true);
+        sessionBuilder.setOffline(Icy.isNetworkDisabled());
+        //sessionBuilder.setOffline(true);
         session = sessionBuilder.build();
 
         final RemoteRepository central = new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build();
