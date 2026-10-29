@@ -264,8 +264,8 @@ public final class Icy {
             // initialize network (need preferences init)
             new Thread(NetworkUtil::init, "Initializer: Network").start();
 
-            //ExtensionLoader.reloadAsync();
-            new Thread(ExtensionLoader::reloadAsync, "Initializer: Extensions").start();
+            ExtensionLoader.reloadAsync();
+            //new Thread(ExtensionLoader::reloadAsync, "Initializer: Extensions").start();
 
             WorkbookFactory.addProvider(new HSSFWorkbookFactory());
             WorkbookFactory.addProvider(new XSSFWorkbookFactory());
