@@ -129,8 +129,8 @@ public final class ExtensionLoader {
     private final RepositorySystem repositorySystem;
     private final RepositorySystemSession session;
 
-    private static final RepositoryPolicy SNAPSHOT_POLICY = new RepositoryPolicy(false, UPDATE_POLICY_NEVER, CHECKSUM_POLICY_IGNORE);
-    private static final RepositoryPolicy RELEASE_POLICY = new RepositoryPolicy(false, UPDATE_POLICY_NEVER, CHECKSUM_POLICY_IGNORE);
+    private static final RepositoryPolicy SNAPSHOT_POLICY = new RepositoryPolicy(true, UPDATE_POLICY_NEVER, CHECKSUM_POLICY_IGNORE);
+    private static final RepositoryPolicy RELEASE_POLICY = new RepositoryPolicy(true, UPDATE_POLICY_NEVER, CHECKSUM_POLICY_IGNORE);
 
     private final List<RemoteRepository> repositories;
 
@@ -392,6 +392,8 @@ public final class ExtensionLoader {
                 if (seenRepos.add(distribution.get("url")))
                     repositories.add(new RemoteRepository.Builder(distribution.get("id"), "default", distribution.get("url")).setSnapshotPolicy(SNAPSHOT_POLICY).setReleasePolicy(RELEASE_POLICY).build());
         }
+
+        LOGGER.log(CustomLevel.DEBUG, "repositories: " + repositories);
 
         return Collections.unmodifiableSet(coordinates);
     }
