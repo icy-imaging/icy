@@ -102,10 +102,10 @@
     </properties>
 
     <build>
-        <directory>build</directory>
+        <!--<directory>build</directory>-->
 
         <plugins>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>${build-helper-maven-plugin.version}</version>
@@ -134,7 +134,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -150,7 +150,7 @@
                             <excludeGroupIds>sun.jdt,jdk.tools</excludeGroupIds>
                             <excludeArtifactIds>annotations,junit-jupiter</excludeArtifactIds>
                             <outputDirectory>${outputDirectory}/icy/lib</outputDirectory>
-                            <stripVersion>${stripVersion}</stripVersion>
+                            <stripVersion>true</stripVersion>
                             <prependGroupId>true</prependGroupId>
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <excludeTransitive>false</excludeTransitive>

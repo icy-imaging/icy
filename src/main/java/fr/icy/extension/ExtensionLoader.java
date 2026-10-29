@@ -26,15 +26,11 @@ import fr.icy.extension.plugin.abstract_.Plugin;
 import fr.icy.extension.plugin.interface_.PluginDaemon;
 import fr.icy.io.Loader;
 import fr.icy.shared.logging.CustomLevel;
-import fr.icy.shared.task.Pipeline;
 import fr.icy.shared.task.Task;
-import fr.icy.shared.task.TaskExecutionException;
-import fr.icy.shared.task.TaskExecutor;
 import fr.icy.system.IcyExceptionHandler;
 import fr.icy.system.SystemUtil;
 import fr.icy.system.UserUtil;
 import fr.icy.system.preferences.PluginPreferences;
-import fr.icy.system.thread.Processor;
 import fr.icy.system.thread.SingleProcessor;
 import fr.icy.system.thread.ThreadUtil;
 import org.eclipse.aether.RepositorySystem;
@@ -42,9 +38,13 @@ import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.collection.DependencyCollectionChecker;
+import org.eclipse.aether.collection.DependencySelector;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.graph.DependencyNode;
+import org.eclipse.aether.internal.impl.scope.OptionalDependencySelector;
+import org.eclipse.aether.internal.impl.scope.ScopeDependencySelector;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
@@ -52,6 +52,7 @@ import org.eclipse.aether.resolution.*;
 import org.eclipse.aether.supplier.RepositorySystemSupplier;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
+import org.eclipse.aether.util.graph.selector.AndDependencySelector;
 import org.eclipse.aether.util.repository.SimpleArtifactDescriptorPolicy;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
@@ -69,8 +70,10 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
+
+import static org.eclipse.aether.repository.RepositoryPolicy.*;
+import static org.eclipse.aether.util.artifact.JavaScopes.*;
 
 /**
  * Handles the loading, management, and lifecycle of plugins and extensions.
@@ -126,6 +129,9 @@ public final class ExtensionLoader {
     private final RepositorySystem repositorySystem;
     private final RepositorySystemSession session;
 
+    private static final RepositoryPolicy SNAPSHOT_POLICY = new RepositoryPolicy(false, UPDATE_POLICY_NEVER, CHECKSUM_POLICY_IGNORE);
+    private static final RepositoryPolicy RELEASE_POLICY = new RepositoryPolicy(false, UPDATE_POLICY_NEVER, CHECKSUM_POLICY_IGNORE);
+
     private final List<RemoteRepository> repositories;
 
     /**
@@ -133,7 +139,7 @@ public final class ExtensionLoader {
      */
     private URLClassLoader ucl;
 
-    private final Map<Artifact, URL> jarURLList;
+    private final Map<Artifact, URL> artifactURLMap;
 
     private final Map<String, Set<String>> extensionsArtifacts;
     /**
@@ -185,36 +191,78 @@ public final class ExtensionLoader {
         final RepositorySystemSession.SessionBuilder sessionBuilder = repositorySystem.createSessionBuilder();
         final LocalRepository localRepo = new LocalRepository(Path.of(System.getProperty("user.home") + "/.m2/repository/"));
         sessionBuilder.withLocalRepositories(localRepo);
-        sessionBuilder.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_IGNORE);
-        sessionBuilder.setUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_NEVER);
-        sessionBuilder.setArtifactDescriptorPolicy(new SimpleArtifactDescriptorPolicy(true, true));
+        sessionBuilder.setChecksumPolicy(CHECKSUM_POLICY_IGNORE); // TODO: Investigate checksum policy
+        sessionBuilder.setUpdatePolicy(UPDATE_POLICY_NEVER); // TODO: Investigate update policy
+        sessionBuilder.setArtifactDescriptorPolicy(new SimpleArtifactDescriptorPolicy(ArtifactDescriptorPolicy.IGNORE_ERRORS));
+        sessionBuilder.setConfigProperties(Map.of(
+                "aether.dependencyCollector.impl", "bf"
+        ));
         sessionBuilder.setSystemProperties(System.getProperties());
-
         sessionBuilder.setOffline(Icy.isNetworkDisabled());
-        //sessionBuilder.setOffline(true);
+
+        final DependencySelector scopeSelector = ScopeDependencySelector.fromRoot(
+                List.of(COMPILE, RUNTIME),
+                List.of(TEST, PROVIDED, SYSTEM)
+        );
+        final DependencySelector optionalSelector = OptionalDependencySelector.fromRoot();
+        sessionBuilder.setDependencySelector(AndDependencySelector.newInstance(scopeSelector, optionalSelector));
+
         session = sessionBuilder.build();
 
-        final RemoteRepository central = new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build();
-        final RemoteRepository central_snapshots = new RemoteRepository.Builder("central.snapshots", "default", "https://central.sonatype.com/repository/maven-snapshots/").build();
-        final RemoteRepository scijava = new RemoteRepository.Builder("scijava", "default", "https://maven.scijava.org/content/groups/public/").build();
-        final RemoteRepository ome = new RemoteRepository.Builder("ome", "default", "https://artifacts.openmicroscopy.org/artifactory/ome.releases/").build();
-        final RemoteRepository jogamp = new RemoteRepository.Builder("jogamp", "default", "https://jogamp.org/deployment/maven/").build();
-        final RemoteRepository netbeans = new RemoteRepository.Builder("netbeans", "default", "https://netbeans.apidesign.org/maven2/").build();
-        final RemoteRepository jboss = new RemoteRepository.Builder("jboss", "default", "https://repository.jboss.org/nexus/content/repositories/public/").build();
+        final RemoteRepository central = new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/")
+                .setSnapshotPolicy(SNAPSHOT_POLICY)
+                .setReleasePolicy(RELEASE_POLICY)
+                .build();
+        final RemoteRepository scijava_releases = new RemoteRepository.Builder("scijava.releases", "default", "https://maven.scijava.org/content/repositories/releases/")
+                .setSnapshotPolicy(SNAPSHOT_POLICY)
+                .setReleasePolicy(RELEASE_POLICY)
+                .build();
+        final RemoteRepository ome = new RemoteRepository.Builder("ome", "default", "https://artifacts.openmicroscopy.org/artifactory/ome.releases/")
+                .setSnapshotPolicy(SNAPSHOT_POLICY)
+                .setReleasePolicy(RELEASE_POLICY)
+                .build();
+        final RemoteRepository jogamp = new RemoteRepository.Builder("jogamp", "default", "https://jogamp.org/deployment/maven/")
+                .setSnapshotPolicy(SNAPSHOT_POLICY)
+                .setReleasePolicy(RELEASE_POLICY)
+                .build();
+        final RemoteRepository netbeans = new RemoteRepository.Builder("netbeans", "default", "https://netbeans.apidesign.org/maven2/")
+                .setSnapshotPolicy(SNAPSHOT_POLICY)
+                .setReleasePolicy(RELEASE_POLICY)
+                .build();
+        final RemoteRepository jboss_releases = new RemoteRepository.Builder("jboss.releases", "default", "https://repository.jboss.org/nexus/repository/releases/")
+                .setSnapshotPolicy(SNAPSHOT_POLICY)
+                .setReleasePolicy(RELEASE_POLICY)
+                .build();
 
-        repositories = new ArrayList<>();
-        repositories.add(central);
-        repositories.add(central_snapshots);
-        repositories.add(scijava);
+        final RemoteRepository central_snapshots = new RemoteRepository.Builder("central.snapshots", "default", "https://central.sonatype.com/repository/maven-snapshots/")
+                .setSnapshotPolicy(SNAPSHOT_POLICY)
+                .setReleasePolicy(RELEASE_POLICY)
+                .build();
+
+        final RemoteRepository jboss_public = new RemoteRepository.Builder("jboss.public", "default", "https://repository.jboss.org/nexus/content/repositories/public/")
+                .setSnapshotPolicy(SNAPSHOT_POLICY)
+                .setReleasePolicy(RELEASE_POLICY)
+                .build();
+        final RemoteRepository scijava_public = new RemoteRepository.Builder("scijava.public", "default", "https://maven.scijava.org/content/groups/public/")
+                .setSnapshotPolicy(SNAPSHOT_POLICY)
+                .setReleasePolicy(RELEASE_POLICY)
+                .build();
+
+        repositories = new LinkedList<>();
+        /*repositories.add(central);
+        repositories.add(scijava_releases);
         repositories.add(ome);
         repositories.add(jogamp);
         repositories.add(netbeans);
-        repositories.add(jboss);
+        repositories.add(jboss_releases);
+        repositories.add(central_snapshots);*/
+        //repositories.add(jboss_public);
+        //repositories.add(scijava_public);
 
         //ucl = new URLClassLoader(new URL[0], Thread.currentThread().getContextClassLoader());
         ucl = new URLClassLoader(new URL[0], SystemUtil.getSystemClassLoader());
 
-        jarURLList = new HashMap<>();
+        artifactURLMap = new HashMap<>();
         extensionsArtifacts = new HashMap<>();
         extensions = new HashSet<>();
         plugins = new HashMap<>();
@@ -243,36 +291,36 @@ public final class ExtensionLoader {
         if (processor.hasWaitingTasks())
             return;
 
-        jarURLList.clear();
+        artifactURLMap.clear();
         extensionsArtifacts.clear();
         extensions.clear();
         plugins.clear();
         actionablePlugins.clear();
         daemonPlugins.clear();
 
-        //final Map<String, Artifact> artifacts = resolveExtensions();
+        final Set<Artifact> coordinates = getExtensionCoordinates();
+        /*final LinkedHashMap<String, Artifact> seen = new LinkedHashMap<>();
+        for (final Artifact coordinate : coordinates) {
+            resolveArtifact(coordinate, seen);
+        }*/
 
-        new Thread(() -> {
-            final Set<Artifact> coordinates = getExtensionCoordinates();
-            final boolean resolved = resolveExtensions(coordinates);
+        final boolean resolved = resolveExtensions(coordinates);
 
-            // Stop if no Jar found
-            if (jarURLList.isEmpty() || !resolved) {
-                loading = false;
-                changed();
-                return;
-            }
-
-            ucl = new URLClassLoader(jarURLList.values().toArray(new URL[0]), SystemUtil.getSystemClassLoader());
-
-            //for (final Artifact artifact : artifacts.values())
-            for (final Artifact artifact : jarURLList.keySet())
-                loadArtifact(artifact);
-
+        // Stop if no Jar found
+        if (artifactURLMap.isEmpty() || !resolved) {
             loading = false;
-
             changed();
-        }).start();
+            return;
+        }
+
+        ucl = new URLClassLoader(artifactURLMap.values().toArray(new URL[0]), SystemUtil.getSystemClassLoader());
+
+        for (final Artifact artifact : artifactURLMap.keySet())
+            loadArtifact(artifact);
+
+        loading = false;
+
+        changed();
     }
 
     @ApiStatus.Experimental
@@ -323,11 +371,13 @@ public final class ExtensionLoader {
         }
 
         final Set<Artifact> coordinates = new LinkedHashSet<>();
+        final Set<String> seenRepos = new HashSet<>();
         for (final Map.Entry<Integer, Map<String, Object>> entry : extensions.entrySet()) {
             final String groupId = entry.getValue().get("groupId").toString();
             final String artifactId = entry.getValue().get("artifactId").toString();
-            final String classifier = entry.getValue().getOrDefault("classifier", "").toString();
             final String version = entry.getValue().get("version").toString();
+            @SuppressWarnings("unchecked")
+            final Map<String, String> distribution = (Map<String, String>) entry.getValue().getOrDefault("distribution", Collections.emptyMap());
             final Boolean enabled = (Boolean) entry.getValue().getOrDefault("enabled", Boolean.TRUE);
 
             if (!enabled) {
@@ -336,7 +386,11 @@ public final class ExtensionLoader {
                 continue;
             }
 
-            coordinates.add(new DefaultArtifact(groupId, artifactId, classifier.isBlank() ? null : classifier, "jar", version));
+            coordinates.add(new DefaultArtifact(groupId, artifactId, null, "jar", version));
+
+            if (!distribution.isEmpty() && (distribution.containsKey("id") && distribution.containsKey("url")))
+                if (seenRepos.add(distribution.get("url")))
+                    repositories.add(new RemoteRepository.Builder(distribution.get("id"), "default", distribution.get("url")).setSnapshotPolicy(SNAPSHOT_POLICY).setReleasePolicy(RELEASE_POLICY).build());
         }
 
         return Collections.unmodifiableSet(coordinates);
@@ -344,11 +398,11 @@ public final class ExtensionLoader {
 
     @ApiStatus.Experimental
     private synchronized boolean resolveExtensions(final @NonNull Set<Artifact> coordinates) {
-        final List<Dependency> roots = coordinates.stream().map(coordinate -> new Dependency(coordinate, JavaScopes.RUNTIME)).toList();
+        final List<Dependency> roots = coordinates.stream().map(coordinate -> new Dependency(coordinate, RUNTIME)).toList();
 
-        final CollectRequest request = new CollectRequest(roots, null, repositories);
+        final CollectRequest request = new CollectRequest(roots, List.of(), repositories);
 
-        final DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
+        final DependencyFilter filter = DependencyFilterUtils.classpathFilter(COMPILE, RUNTIME);
 
         try {
             final DependencyResult result = repositorySystem.resolveDependencies(session, new DependencyRequest(request, filter));
@@ -367,7 +421,7 @@ public final class ExtensionLoader {
     private void collect(final @NonNull DependencyNode node, final Set<String> seen) throws Exception {
         final Artifact artifact = node.getArtifact();
         if (artifact == null) { // virtual root node when resolving several coordinates at once
-            LOGGER.log(CustomLevel.DEBUG, "Skipping virtual root node: " + node);
+            LOGGER.log(CustomLevel.DEBUG, "Skipping virtual root node.");
             for (final DependencyNode child : node.getChildren()) {
                 collect(child, seen);
             }
@@ -376,9 +430,8 @@ public final class ExtensionLoader {
         // dedupe (diamonds in the graph) and guard against cycles
         final String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion();
         if (seen.add(key) && artifact.getPath() != null) {
-            LOGGER.log(CustomLevel.DEBUG, "Add node to URL map: " + node);
-            jarURLList.put(artifact, artifact.getPath().toUri().toURL());
-            //jars.put(key, artifact.getFile().toURI().toURL());
+            LOGGER.log(CustomLevel.DEBUG, "Node added to URL map: " + node);
+            artifactURLMap.put(artifact, artifact.getPath().toUri().toURL());
             for (final DependencyNode child : node.getChildren()) {
                 collect(child, seen);
             }
@@ -386,10 +439,12 @@ public final class ExtensionLoader {
     }
 
     @Deprecated
-    private boolean resolveArtifact(final @NonNull String groupId, final @NonNull String artifactId, final @Nullable String classifier, final @NonNull String version, final @NonNull LinkedHashMap<String, Artifact> artifacts, final @NonNull List<RemoteRepository> repositories) {
+    private boolean resolveArtifact(final @NonNull String groupId, final @NonNull String artifactId, final @Nullable String classifier, final @NonNull String version, final @NonNull LinkedHashMap<String, Artifact> seen, final @NonNull List<RemoteRepository> repositories) {
         final String dashClassifier = classifier == null || classifier.isBlank() ? "" : "-" + classifier;
-        if (artifacts.containsKey(groupId + ":" + artifactId + dashClassifier + ":jar:" + version))
+        if (seen.containsKey(groupId + ":" + artifactId + dashClassifier + ":jar:" + version))
             return true;
+
+        LOGGER.log(CustomLevel.DEBUG, "Resolving artifact: " + groupId + ":" + artifactId + dashClassifier + ":jar:" + version);
 
         // Resolve artifact
         final Artifact artifact = new DefaultArtifact(groupId, artifactId, classifier, "jar", version);
@@ -399,7 +454,8 @@ public final class ExtensionLoader {
 
         if (!repositories.isEmpty()) {
             for (final RemoteRepository repository : repositories) {
-                artifactRequest.addRepository(repository);
+                if (!this.repositories.contains(repository))
+                    artifactRequest.addRepository(repository);
             }
         }
 
@@ -414,7 +470,7 @@ public final class ExtensionLoader {
 
         if (!artifactResult.isResolved() || artifactResult.getArtifact() == null)
             return false;
-        if (artifacts.containsKey(artifactResult.getArtifact().toString()))
+        if (seen.containsKey(artifactResult.getArtifact().toString()))
             return true;
 
         // Collect dependencies
@@ -424,7 +480,8 @@ public final class ExtensionLoader {
 
         if (!repositories.isEmpty()) {
             for (final RemoteRepository repository : repositories) {
-                artifactDescriptorRequest.addRepository(repository);
+                if (!this.repositories.contains(repository))
+                    artifactDescriptorRequest.addRepository(repository);
             }
         }
 
@@ -438,7 +495,7 @@ public final class ExtensionLoader {
         }
 
         for (final Dependency dependency : artifactDescriptorResult.getDependencies()) {
-            if (!dependency.getScope().equalsIgnoreCase(JavaScopes.COMPILE) && !dependency.getScope().equalsIgnoreCase(JavaScopes.RUNTIME))
+            if (!dependency.getScope().equalsIgnoreCase(JavaScopes.COMPILE) && !dependency.getScope().equalsIgnoreCase(RUNTIME))
                 continue;
             if (dependency.isOptional())
                 continue;
@@ -446,23 +503,23 @@ public final class ExtensionLoader {
             if (!dependencyArtifact.getExtension().endsWith("jar"))
                 continue;
             final String dependencyDashClassifier = dependencyArtifact.getClassifier() == null || dependencyArtifact.getClassifier().isBlank() ? "" : "-" + dependencyArtifact.getClassifier();
-            if (artifacts.containsKey(dependencyArtifact.getGroupId() + ":" + dependencyArtifact.getArtifactId() + dependencyDashClassifier + ":jar:" + dependencyArtifact.getVersion()))
+            if (seen.containsKey(dependencyArtifact.getGroupId() + ":" + dependencyArtifact.getArtifactId() + dependencyDashClassifier + ":jar:" + dependencyArtifact.getVersion()))
                 continue;
 
             if (EXCLUSIONS.contains(dependencyArtifact.getGroupId() + ":" + dependencyArtifact.getArtifactId() + dependencyDashClassifier))
                 continue;
 
-            final boolean dependencyResolved = resolveArtifact(dependencyArtifact.getGroupId(), dependencyArtifact.getArtifactId(), dependencyArtifact.getClassifier(), dependencyArtifact.getVersion(), artifacts, artifactDescriptorResult.getRepositories());
+            final boolean dependencyResolved = resolveArtifact(dependencyArtifact.getGroupId(), dependencyArtifact.getArtifactId(), dependencyArtifact.getClassifier(), dependencyArtifact.getVersion(), seen, artifactDescriptorResult.getRepositories());
             if (!dependencyResolved)
                 return false;
         }
 
         final Artifact a = artifactResult.getArtifact();
-        artifacts.put(groupId + ":" + artifactId + dashClassifier + ":jar:" + version, a);
+        seen.put(groupId + ":" + artifactId + dashClassifier + ":jar:" + version, a);
         try {
             final URL url = a.getPath().toUri().toURL();
-            if (!jarURLList.containsValue(url))
-                jarURLList.put(a, url);
+            if (!artifactURLMap.containsValue(url))
+                artifactURLMap.put(a, url);
         }
         catch (final Throwable t) {
             LOGGER.log(CustomLevel.ERROR, "Failed to add artifact to URL set: " + groupId + ":" + artifactId + ":" + version + ".", t);
@@ -474,6 +531,11 @@ public final class ExtensionLoader {
     @Deprecated
     private boolean resolveArtifact(final @NonNull String groupId, final @NonNull String artifactId, final @Nullable String classifier, final @NonNull String version, final @NonNull LinkedHashMap<String, Artifact> artifacts) {
         return resolveArtifact(groupId, artifactId, classifier, version, artifacts, Collections.emptyList());
+    }
+
+    @Deprecated
+    private boolean resolveArtifact(final @NonNull Artifact artifact, final LinkedHashMap<String, Artifact> artifacts) {
+        return resolveArtifact(artifact.getGroupId(), artifact.getArtifactId(), artifact.getClassifier(), artifact.getVersion(), artifacts);
     }
 
     @ApiStatus.Experimental
